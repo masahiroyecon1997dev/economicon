@@ -1,0 +1,12 @@
+version: '2'
+services:
+  analysis-api-server:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
+    tty: true
+    volumes:
+      - ../AnalysisApp:/AnalysisApp
+    ports:
+      - 5000:5000
+    working_dir: /AnalysisApp

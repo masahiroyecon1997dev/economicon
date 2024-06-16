@@ -1,0 +1,14 @@
+{
+    "name": "analysis-app",
+    "dockerComposeFile": "./docker-compose.yml",
+    "service": "analysis-api-server",
+    "extensions": [
+        "ms-ceintl.vscode-language-pack-ja",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "ms-python.flake8",
+        "batisteo.vscode-django"
+    ],
+    "workspaceFolder": "/AnalysisApp"
+}

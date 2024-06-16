@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "api-server",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/ApiServer/analysisapp/manage.py",
+            "args": [
+                "runserver",
+                "80"
+            ],
+            "django": true,
+            "console": "integratedTerminal"
+        }
+    ]
+}
