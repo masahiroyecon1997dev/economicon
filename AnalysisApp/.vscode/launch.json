@@ -12,6 +12,11 @@
             ],
             "django": true,
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Launch Chrome",
+            "type": "chrome",
+            "request": "launch"
         }
     ]
 }
