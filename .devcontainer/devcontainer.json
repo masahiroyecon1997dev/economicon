@@ -2,13 +2,23 @@
     "name": "analysis-app",
     "dockerComposeFile": "./docker-compose.yml",
     "service": "analysis-api-server",
-    "extensions": [
-        "ms-ceintl.vscode-language-pack-ja",
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "ms-python.debugpy",
-        "ms-python.flake8",
-        "batisteo.vscode-django"
-    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-ceintl.vscode-language-pack-ja",
+                "esbenp.prettier-vscode",
+                "dbaeumer.vscode-eslint",
+                "ecmel.vscode-html-css",
+                "bradlc.vscode-tailwindcss",
+                "xabikos.javascriptsnippets",
+                "dsznajder.es7-react-js-snippets",
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.debugpy",
+                "ms-python.flake8",
+                "batisteo.vscode-django"
+            ]
+        }
+    },
     "workspaceFolder": "/AnalysisApp"
 }
