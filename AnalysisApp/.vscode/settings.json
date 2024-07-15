@@ -1,6 +1,6 @@
 {
   // デバッグ中に行内に変数値を表示
-  "debug.inlineValues": true,
+  "debug.inlineValues": "on",
   // デバッグコンソールの表示方法
   "debug.internalConsoleOptions": "openOnSessionStart",
   // デバッグビューの表示方法
@@ -32,12 +32,12 @@
   // 単語の区切り文字
   "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?　、。！？「」【】『』（）",
   // 行の折り返し表示
-  "editor.wordWrap": "on",
+  "editor.wordWrap": "off",
   // 名前重複時の名前付け規則
   "explorer.incrementalNaming": "smart",
   // 言語に対するファイルの関連付け
   "files.associations": {
-    // あれば記述する
+    "*.css": "tailwindcss"
   },
   // 改行コードの規定値
   "files.eol": "\n",
@@ -62,7 +62,7 @@
   // 検索ビューの検索結果に行数を併記
   "search.showLineNumbers": true,
   // アクティブなターミナルセッションがある場合、終了時に確認を行う
-  "terminal.integrated.confirmOnExit": true,
+  "terminal.integrated.confirmOnExit": "never",
   // ターミナルで選択したテキストをクリップボードにコピー
   "terminal.integrated.copyOnSelection": true,
   // エディターのタブのサイズ

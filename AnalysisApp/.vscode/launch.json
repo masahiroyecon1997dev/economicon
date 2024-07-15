@@ -16,7 +16,13 @@
         {
             "name": "Launch Chrome",
             "type": "chrome",
-            "request": "launch"
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/front-analysis-app",
+            // "sourceMaps": true,
+            // "resolveSourceMapLocations": [
+            //     "${workspaceFolder}/**",
+            // ]
         }
     ]
 }
