@@ -1,7 +1,7 @@
 import React from "react";
-import HeaderMenu from "../organisms/HeaderMenu/HeaderMenu";
+import { HeaderMenu } from "../organisms/HeaderMenu/HeaderMenu";
 
-function App() {
+export function App() {
   return (
     <div className="App">
       <HeaderMenu />
@@ -12,5 +12,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

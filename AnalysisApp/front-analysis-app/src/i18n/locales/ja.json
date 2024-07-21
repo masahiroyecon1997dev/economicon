@@ -1,5 +1,7 @@
 {
   "HeaderMenu": {
-    "File": "ファイル"
+    "File": "ファイル",
+    "FileOpen": "開く",
+    "FileSave": "保存"
   }
 }
