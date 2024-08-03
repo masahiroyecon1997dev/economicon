@@ -17,12 +17,14 @@
             "name": "Launch Chrome",
             "type": "chrome",
             "request": "launch",
+            "preLaunchTask": "yarn: start",
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}/front-analysis-app",
-            // "sourceMaps": true,
-            // "resolveSourceMapLocations": [
-            //     "${workspaceFolder}/**",
-            // ]
+            "sourceMaps": true,
+            "sourceMapPathOverrides": {
+                "webpack:///./~/*": "${webRoot}/node_modules/*",
+                "webpack://?:*/*": "${webRoot}/src/*"
+            }
         }
     ]
 }
