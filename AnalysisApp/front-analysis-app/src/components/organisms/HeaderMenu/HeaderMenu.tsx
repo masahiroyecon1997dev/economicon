@@ -7,7 +7,10 @@ import { Modal } from '../ImportFileModal/ImportFileModal';
 export function HeaderMenu() {
   const { t } = useTranslation();
   const [isFileOpenModal, setIsFileOpenModal] = useState<boolean>(false);
-  const fileDropdownListElement = [{ dropdownListName: t('HeaderMenu.File'), dropdownListFunction: openSelectFileModal }];
+  const fileDropdownListElement = [
+    { dropdownListName: t('HeaderMenu.FileOpen'), dropdownListFunction: openSelectFileModal },
+    { dropdownListName: t('HeaderMenu.FileSave'), dropdownListFunction: openSelectFileModal },
+  ];
 
   function openSelectFileModal() {
     setIsFileOpenModal(true);

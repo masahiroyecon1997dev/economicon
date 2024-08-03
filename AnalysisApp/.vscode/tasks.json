@@ -3,8 +3,9 @@
     "tasks": [
         {
             "type": "shell",
-            "command": "cd front-analysis-app && yarn start",
+            "command": "cd front-analysis-app && yarn run start",
             "label": "yarn: start",
+            "detail": "webpack-dev-server",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -13,7 +14,7 @@
             "problemMatcher": {
                 "owner": "custom",
                 "pattern": {
-                    "regexp": "ˆ$"
+                    "regexp": "^$"
                 },
                 "background": {
                     "activeOnStart": true,
