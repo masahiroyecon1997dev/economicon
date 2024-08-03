@@ -7,6 +7,6 @@ type HeaderMenuDropdownButtonProps = {
 
 export function HeaderMenuDropdownButton({children, clickEvent}: HeaderMenuDropdownButtonProps) {
   return (
-    <button className="block px-4 py-2 hover:bg-gray-200 w-full text-left" onClick={() => clickEvent()}>{children}</button>
+    <button className="block px-4 py-2 hover:bg-gray-200 w-full text-left whitespace-nowrap" onClick={() => clickEvent()}>{children}</button>
   )
 }
