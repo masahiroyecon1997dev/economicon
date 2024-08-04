@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { HeaderMenuDropdown } from '../../molecules/HeaderMenuDropdown/HeaderMenuDropdown';
-import { Modal } from '../ImportFileModal/ImportFileModal';
+import { ImportFileModal } from '../ImportFileModal/ImportFileModal';
 
 export function HeaderMenu() {
   const { t } = useTranslation();
@@ -35,7 +35,7 @@ export function HeaderMenu() {
         <button className="px-4 py-2 hover:bg-gray-200">ツール</button>
         <button className="px-4 py-2 hover:bg-gray-200">ヘルプ</button>
       </div>
-      <Modal isFileOpenModal={isFileOpenModal} closeModal={closeSelectFileModal}/>
+      <ImportFileModal isFileOpenModal={isFileOpenModal} close={closeSelectFileModal}/>
     </>
   );
 }
