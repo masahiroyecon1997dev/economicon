@@ -1,7 +1,18 @@
 {
+  "Common": {
+    "Cancel": "キャンセル"
+  },
   "HeaderMenu": {
     "File": "ファイル",
     "FileOpen": "開く",
     "FileSave": "保存"
+  },
+  "ImportFileModal": {
+    "Title": "ファイルを開く",
+    "Notation": "15MB以下のcsvファイルのみ",
+    "Information": "ファイルをここにドラッグ&ドロップしてください。もしくは、",
+    "ChooseFile": "ファイルを選ぶ",
+    "OtherChooseFile": "他のファイルを選ぶ",
+    "OpenFile": "開く"
   }
 }

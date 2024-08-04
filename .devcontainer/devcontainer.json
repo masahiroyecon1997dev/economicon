@@ -20,5 +20,6 @@
             ]
         }
     },
+    "updateRemoteUserUID": false,
     "workspaceFolder": "/AnalysisApp"
 }
