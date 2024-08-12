@@ -1,10 +1,12 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, DragEvent, Dispatch, SetStateAction } from "react";
 import { useTranslation } from 'react-i18next';
 
 import { IconContext } from "react-icons";
 import { FaFileAlt } from "react-icons/fa";
 
-import { importCsv } from "../../../functiom/restApis";
+import { TableInfosType } from "../../../types/stateTypes";
+import { importCsv, getColumnNameList } from "../../../functiom/restApis";
+import { getTableInfo } from "../../../functiom/internalFunctions";
 
 import { ModalHeader } from "../../molecules/ModalHeader/ModalHeader";
 import { ModalFooter } from "../../molecules/ModalFooter/ModalFooter";
@@ -12,23 +14,45 @@ import { ModalFooter } from "../../molecules/ModalFooter/ModalFooter";
 type ImportFileModalProps = {
   isFileOpenModal: boolean;
   close: () => void;
+  setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
 }
 
-export function ImportFileModal({ isFileOpenModal, close }: ImportFileModalProps) {
+export function ImportFileModal({ isFileOpenModal, close, setTableInfos }: ImportFileModalProps) {
   const { t } = useTranslation();
   const [file, setFile] = useState<File>();
+  const [dragActive, setDragActive] = useState(false);
 
   function changeFileInput(event: ChangeEvent<HTMLInputElement>) {
     const files = event.target.files;
     if (!files || files?.length === 0) return;
     setFile(files[0]);
-    console.log(files)
+  }
+
+  function handleDrag(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "dragenter" || event.type === "dragover") {
+      setDragActive(true);
+    } else if (event.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  function handleDropFile(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(false);
+    if (event.dataTransfer.files && event.dataTransfer.files[0]) {
+      setFile(event.dataTransfer.files[0]);
+    }
   }
 
 
   async function importFile() {
     if (!file) return;
-    await importCsv(file);
+    const resImportCsv = await importCsv(file);
+    const tableInfo = await getTableInfo(resImportCsv.tableName);
+    setTableInfos((preTableInfos) => ([...preTableInfos, tableInfo]))
     close();
   }
 
@@ -39,7 +63,11 @@ export function ImportFileModal({ isFileOpenModal, close }: ImportFileModalProps
         <div className="relative p-4 w-full max-w-2xl max-h-full">
           <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <ModalHeader close={() => close()}>{t('ImportFileModal.Title')}</ModalHeader>
-              <div className="w-full py-9 bg-gray-50 rounded-2xl border border-gray-300 gap-3 grid border-dashed">
+            <div className={`w-full py-9 bg-gray-50 rounded-2xl border border-gray-300 gap-3 grid border-dashed ${dragActive ? 'border-blue-500 bg-blue-100' : 'border-gray-300'}`}
+              onDragEnter={(event) => handleDrag(event)}
+              onDragOver={(event) => handleDrag(event)}
+              onDragLeave={(event) => handleDrag(event)}
+              onDrop={(event) => handleDropFile(event)}>
                 {(file) ?
                   <div>
                     <div className="grid gap-1">

@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { TableInfosType } from '../../../types/stateTypes';
 
 import { HeaderMenuDropdown } from '../../molecules/HeaderMenuDropdown/HeaderMenuDropdown';
 import { ImportFileModal } from '../ImportFileModal/ImportFileModal';
 
-export function HeaderMenu() {
+type HeaderMenuProps = {
+  setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
+}
+
+export function HeaderMenu({setTableInfos}: HeaderMenuProps) {
   const { t } = useTranslation();
   const [isFileOpenModal, setIsFileOpenModal] = useState<boolean>(false);
   const fileDropdownListElement = [
@@ -35,7 +41,7 @@ export function HeaderMenu() {
         <button className="px-4 py-2 hover:bg-gray-200">ツール</button>
         <button className="px-4 py-2 hover:bg-gray-200">ヘルプ</button>
       </div>
-      <ImportFileModal isFileOpenModal={isFileOpenModal} close={closeSelectFileModal}/>
+      <ImportFileModal isFileOpenModal={isFileOpenModal} close={closeSelectFileModal} setTableInfos={setTableInfos}/>
     </>
   );
 }
