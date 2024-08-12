@@ -11,4 +11,7 @@ services:
     tty: true
     volumes:
       - ../AnalysisApp:/AnalysisApp
+    ports:
+      - "127.0.0.1:3000:3000"
+      - "8000:8000"
     working_dir: /AnalysisApp
