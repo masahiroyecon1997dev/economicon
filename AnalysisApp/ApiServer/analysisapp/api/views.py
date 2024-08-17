@@ -50,10 +50,24 @@ class ImportCsv(APIView):
             csv_file = request.FILES["file"]
             decoded_file = csv_file.read().decode("utf-8")
             io_string = io.StringIO(decoded_file)
-            fileName: str = csv_file.name
-            tableName: str = fileName.split('.')[0]
-            data[tableName] = pl.read_csv(io_string, encoding='utf8')
-            result = {'code': 0, 'tableName': tableName}
+            file_name: str = csv_file.name
+            table_name: str = file_name.split('.')[0]
+            data[table_name] = pl.read_csv(io_string, encoding='utf8')
+            result = {'code': 0, 'tableName': table_name}
+            return Response(data=result, status=status.HTTP_200_OK)
+        except Exception as e:
+            result = {'code': -9999, 'message': e}
+            return Response(data=result, status=status.HTTP_200_OK)
+
+
+class OutputCsv(APIView):
+    def get(self, request):
+        try:
+            global data
+            table_name: str = request.query_params.get('tableName')
+            csv_table_data: str = data[table_name].write_csv()
+            print(csv_table_data)
+            result = {'code': 0, 'csvData': csv_table_data}
             return Response(data=result, status=status.HTTP_200_OK)
         except Exception as e:
             result = {'code': -9999, 'message': e}
