@@ -12,12 +12,12 @@ import { ModalHeader } from "../../molecules/ModalHeader/ModalHeader";
 import { ModalFooter } from "../../molecules/ModalFooter/ModalFooter";
 
 type ImportFileModalProps = {
-  isFileOpenModal: boolean;
+  isImportFileModal: boolean;
   close: () => void;
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
 }
 
-export function ImportFileModal({ isFileOpenModal, close, setTableInfos }: ImportFileModalProps) {
+export function ImportFileModal({ isImportFileModal, close, setTableInfos }: ImportFileModalProps) {
   const { t } = useTranslation();
   const [file, setFile] = useState<File>();
   const [dragActive, setDragActive] = useState(false);
@@ -57,7 +57,7 @@ export function ImportFileModal({ isFileOpenModal, close, setTableInfos }: Impor
   }
 
 
-  if (isFileOpenModal) {
+  if (isImportFileModal) {
     return (
       <div className="fixed inset-0 z-50 flex justify-center items-center overflow-y-auto overflow-x-hidden w-full md:inset-0">
         <div className="relative p-4 w-full max-w-2xl max-h-full">
