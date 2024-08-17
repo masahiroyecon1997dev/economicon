@@ -13,7 +13,21 @@ export async function importCsv(file: File): Promise<apiTypes.ResImportCsvType> 
     return response.data
   } catch (error) {
     console.log(error);
-    return {'code': -9999, 'tableName': ''}
+    return {code: -9999, tableName: ''}
+  }
+}
+
+export async function outputCsv(tableName: string): Promise<apiTypes.ResOutputCsvType> {
+  try {
+    const response = await axios.get('/output_csv', {
+      params: {
+        tableName: tableName
+      }
+    });
+    return response.data
+  } catch (err) {
+    console.log(err);
+    return {code: -9999, csvData: 'error'}
   }
 }
 
@@ -28,7 +42,7 @@ export async function fetchDataToJson(tableName: string): Promise<apiTypes.ResFe
     return response.data
   } catch (error) {
     console.log(error);
-    return {'code': -9999, 'tableName': '', data: ''}
+    return {code: -9999, tableName: '', data: ''}
   }
 }
 
@@ -38,7 +52,7 @@ export async function getTableNameList(): Promise<apiTypes.ResGetTableNameListTy
     return response.data
   } catch (error) {
     console.log(error);
-    return {'code': -9999, 'tableNameList': []}
+    return {code: -9999, tableNameList: []}
   }
 }
 
@@ -52,6 +66,6 @@ export async function getColumnNameList(tableName: string): Promise<apiTypes.Res
     return response.data
   } catch (error) {
     console.log(error);
-    return {'code': -9999, 'columnNameList': []}
+    return {code: -9999, columnNameList: []}
   }
 }

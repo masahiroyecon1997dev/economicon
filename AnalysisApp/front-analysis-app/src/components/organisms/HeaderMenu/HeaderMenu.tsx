@@ -5,6 +5,7 @@ import { TableInfosType } from '../../../types/stateTypes';
 
 import { HeaderMenuDropdown } from '../../molecules/HeaderMenuDropdown/HeaderMenuDropdown';
 import { ImportFileModal } from '../ImportFileModal/ImportFileModal';
+import { SaveFileModal } from '../SaveFileModal/SaveFileModal';
 
 type HeaderMenuProps = {
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
@@ -12,26 +13,45 @@ type HeaderMenuProps = {
 
 export function HeaderMenu({setTableInfos}: HeaderMenuProps) {
   const { t } = useTranslation();
-  const [isFileOpenModal, setIsFileOpenModal] = useState<boolean>(false);
+  const [isImportFileModal, setIsImportFileModal] = useState<boolean>(false);
+  const [isSaveFileModal, setIsSaveFileModal] = useState<boolean>(false);
+
   const fileDropdownListElement = [
     { dropdownListName: t('HeaderMenu.FileOpen'), dropdownListFunction: openSelectFileModal },
-    { dropdownListName: t('HeaderMenu.FileSave'), dropdownListFunction: openSelectFileModal },
+    { dropdownListName: t('HeaderMenu.FileSave'), dropdownListFunction: openSaveFileModal },
+  ];
+  const dataGenerationDropdownListElement = [
+    { dropdownListName: t('HeaderMenu.DataGeneration'), dropdownListFunction: openSelectFileModal },
+    { dropdownListName: t('HeaderMenu.SampleData'), dropdownListFunction: openSelectFileModal },
   ];
 
   function openSelectFileModal() {
-    setIsFileOpenModal(true);
+    setIsImportFileModal(true);
   }
 
   function closeSelectFileModal() {
-    setIsFileOpenModal(false);
+    setIsImportFileModal(false);
   }
+
+  function openSaveFileModal() {
+    setIsSaveFileModal(true);
+  }
+
+  function closeSaveFileModal() {
+    setIsSaveFileModal(false);
+  }
+
+
 
 
   return (
     <>
-      <div className="flex bg-gray-100 border-b border-gray-300 p-2 relative">
+      <div className="flex bg-gray-100 border-b border-gray-300 relative">
         <div className="relative">
           <HeaderMenuDropdown dropdownListElement={fileDropdownListElement}>{t('HeaderMenu.File')}</HeaderMenuDropdown>
+        </div>
+        <div className="relative">
+          <HeaderMenuDropdown dropdownListElement={dataGenerationDropdownListElement}>{t('HeaderMenu.Data')}</HeaderMenuDropdown>
         </div>
         <button className="px-4 py-2 hover:bg-gray-200">編集</button>
         <button className="px-4 py-2 hover:bg-gray-200">表示</button>
@@ -41,7 +61,8 @@ export function HeaderMenu({setTableInfos}: HeaderMenuProps) {
         <button className="px-4 py-2 hover:bg-gray-200">ツール</button>
         <button className="px-4 py-2 hover:bg-gray-200">ヘルプ</button>
       </div>
-      <ImportFileModal isFileOpenModal={isFileOpenModal} close={closeSelectFileModal} setTableInfos={setTableInfos}/>
+      <ImportFileModal isImportFileModal={isImportFileModal} close={closeSelectFileModal} setTableInfos={setTableInfos} />
+      <SaveFileModal isSaveFileModal={isSaveFileModal} close={closeSaveFileModal} />
     </>
   );
 }
