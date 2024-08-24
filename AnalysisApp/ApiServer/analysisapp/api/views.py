@@ -112,3 +112,14 @@ class GetColumnNameList(APIView):
         except Exception as e:
             result = {'code': -9999, 'message': e}
             return Response(data=result, status=status.HTTP_200_OK)
+
+
+class GenerateData(APIView):
+    def get(self, request):
+        try:
+            global data
+            # table_name: str = request.query_params.get('tableName')
+
+        except Exception as e:
+            result = {'code': -9999, 'message': e}
+            return Response(data=result, status=status.HTTP_200_OK)

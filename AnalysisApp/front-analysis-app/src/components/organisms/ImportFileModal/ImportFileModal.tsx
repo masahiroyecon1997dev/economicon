@@ -5,11 +5,10 @@ import { IconContext } from "react-icons";
 import { FaFileAlt } from "react-icons/fa";
 
 import { TableInfosType } from "../../../types/stateTypes";
-import { importCsv, getColumnNameList } from "../../../functiom/restApis";
+import { importCsv } from "../../../functiom/restApis";
 import { getTableInfo } from "../../../functiom/internalFunctions";
 
-import { ModalHeader } from "../../molecules/ModalHeader/ModalHeader";
-import { ModalFooter } from "../../molecules/ModalFooter/ModalFooter";
+import { Modal } from "../../molecules/Modal/Modal";
 
 type ImportFileModalProps = {
   isImportFileModal: boolean;
@@ -57,65 +56,55 @@ export function ImportFileModal({ isImportFileModal, close, setTableInfos }: Imp
   }
 
 
-  if (isImportFileModal) {
-    return (
-      <div className="fixed inset-0 z-50 flex justify-center items-center overflow-y-auto overflow-x-hidden w-full md:inset-0">
-        <div className="relative p-4 w-full max-w-2xl max-h-full">
-          <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-            <ModalHeader close={() => close()}>{t('ImportFileModal.Title')}</ModalHeader>
-            <div className={`w-full py-9 bg-gray-50 rounded-2xl border border-gray-300 gap-3 grid border-dashed ${dragActive ? 'border-blue-500 bg-blue-100' : 'border-gray-300'}`}
-              onDragEnter={(event) => handleDrag(event)}
-              onDragOver={(event) => handleDrag(event)}
-              onDragLeave={(event) => handleDrag(event)}
-              onDrop={(event) => handleDropFile(event)}>
-                {(file) ?
-                  <div>
-                    <div className="grid gap-1">
-                      <div className="mx-auto">
-                        <IconContext.Provider value={{color: "#4f46e5", size: "40px"}}>
-                          <FaFileAlt />
-                        </IconContext.Provider>
-                      </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <h4 className="text-center text-gray-900 text-sm font-medium leading-snug">{file.name}</h4>
-                      <h2 className="text-center text-gray-400 text-xs leading-4">{file.size/1000/1000}MB</h2>
-                        <div className="flex items-center justify-center">
-                          <label>
-                            <input type="file" accept=".csv" hidden onChange={(event) => changeFileInput(event)} />
-                            <div className="flex w-28 h-9 px-2 flex-col bg-indigo-600 rounded-full shadow text-white text-xs font-semibold leading-4 items-center justify-center cursor-pointer focus:outline-none">{t("ImportFileModal.OtherChooseFile")}</div>
-                          </label>
-                        </div>
-                    </div>
-                  </div>
-                :
-                  <div>
-                    <div className="grid gap-1">
-                      <div className="mx-auto">
-                        <IconContext.Provider value={{color: "#4f46e5", size: "40px"}}>
-                          <FaFileAlt />
-                        </IconContext.Provider>
-                      </div>
-                      <h2 className="text-center text-gray-400 text-xs leading-4">{t("ImportFileModal.Notation")}</h2>
-                    </div>
-                    <div className="grid gap-2">
-                      <h4 className="text-center text-gray-900 text-sm font-medium leading-snug">{t("ImportFileModal.Information")}</h4>
-                        <div className="flex items-center justify-center">
-                          <label>
-                            <input type="file" hidden onChange={(event) => changeFileInput(event)} />
-                            <div className="flex w-28 h-9 px-2 flex-col bg-indigo-600 rounded-full shadow text-white text-xs font-semibold leading-4 items-center justify-center cursor-pointer focus:outline-none">{t("ImportFileModal.ChooseFile")}</div>
-                          </label>
-                        </div>
-                    </div>
-                  </div>
-                }
+  return (
+    <Modal isOpenModal={isImportFileModal} modalTitle={t('ImportFileModal.Title')} submitButtonName={t('ImportFileModal.OpenFile')} submit={importFile} close={close}>
+      <div className={`w-full py-9 bg-gray-50 rounded-2xl border border-gray-300 gap-3 grid border-dashed ${dragActive ? 'border-blue-500 bg-blue-100' : 'border-gray-300'}`}
+        onDragEnter={(event) => handleDrag(event)}
+        onDragOver={(event) => handleDrag(event)}
+        onDragLeave={(event) => handleDrag(event)}
+        onDrop={(event) => handleDropFile(event)}>
+        {(file) ?
+          <div>
+            <div className="grid gap-1">
+              <div className="mx-auto">
+                <IconContext.Provider value={{color: "#4f46e5", size: "40px"}}>
+                  <FaFileAlt />
+                </IconContext.Provider>
               </div>
-            <ModalFooter close={() => close()} submit={() => importFile()}>{t("ImportFileModal.OpenFile")}</ModalFooter>
+            </div>
+            <div className="grid gap-2">
+              <h4 className="text-center text-gray-900 text-sm font-medium leading-snug">{file.name}</h4>
+              <h2 className="text-center text-gray-400 text-xs leading-4">{file.size/1000/1000}MB</h2>
+                <div className="flex items-center justify-center">
+                  <label>
+                    <input type="file" accept=".csv" hidden onChange={(event) => changeFileInput(event)} />
+                    <div className="flex w-28 h-9 px-2 flex-col bg-indigo-600 rounded-full shadow text-white text-xs font-semibold leading-4 items-center justify-center cursor-pointer focus:outline-none">{t("ImportFileModal.OtherChooseFile")}</div>
+                  </label>
+                </div>
+            </div>
           </div>
-        </div>
+        :
+          <div>
+            <div className="grid gap-1">
+              <div className="mx-auto">
+                <IconContext.Provider value={{color: "#4f46e5", size: "40px"}}>
+                  <FaFileAlt />
+                </IconContext.Provider>
+              </div>
+              <h2 className="text-center text-gray-400 text-xs leading-4">{t("ImportFileModal.Notation")}</h2>
+            </div>
+            <div className="grid gap-2">
+              <h4 className="text-center text-gray-900 text-sm font-medium leading-snug">{t("ImportFileModal.Information")}</h4>
+                <div className="flex items-center justify-center">
+                  <label>
+                    <input type="file" hidden onChange={(event) => changeFileInput(event)} />
+                    <div className="flex w-28 h-9 px-2 flex-col bg-indigo-600 rounded-full shadow text-white text-xs font-semibold leading-4 items-center justify-center cursor-pointer focus:outline-none">{t("ImportFileModal.ChooseFile")}</div>
+                  </label>
+                </div>
+            </div>
+          </div>
+        }
       </div>
-    );
-  } else {
-    return null;
-  }
-};
+    </Modal>
+  );
+}

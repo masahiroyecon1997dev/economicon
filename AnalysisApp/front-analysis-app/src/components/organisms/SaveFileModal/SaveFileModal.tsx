@@ -1,12 +1,11 @@
-import React, { useState, ChangeEvent, DragEvent, Dispatch, SetStateAction, useEffect } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import { saveAs } from 'file-saver';
 
 import { getTableNameList, outputCsv } from "../../../functiom/restApis";
 import { SelectListType } from "../../../types/commonTypes";
 
-import { ModalHeader } from "../../molecules/ModalHeader/ModalHeader";
-import { ModalFooter } from "../../molecules/ModalFooter/ModalFooter";
+import { Modal } from "../../molecules/Modal/Modal";
 import { Select } from "../../molecules/Select/Select";
 
 type SaveFileModalProps = {
@@ -45,22 +44,14 @@ export function SaveFileModal({ isSaveFileModal, close }: SaveFileModalProps) {
     close();
   }
 
-
-  if (isSaveFileModal) {
-    return (
-      <div className="fixed inset-0 z-50 flex justify-center items-center overflow-y-auto overflow-x-hidden w-full md:inset-0">
-        <div className="relative p-4 w-full max-w-2xl max-h-full">
-          <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-            <ModalHeader close={() => close()}>{t('ImportFileModal.Title')}</ModalHeader>
-            <div className="">
-              <Select optionList={tableList} selectFunc={(event: ChangeEvent<HTMLSelectElement>) => changeTableName(event)}></Select>
-            </div>
-            <ModalFooter close={() => close()} submit={() => saveFile()}>{t("ImportFileModal.OpenFile")}</ModalFooter>
-          </div>
+  return (
+    <Modal isOpenModal={isSaveFileModal} modalTitle={t('SaveFileModal.Title')} submitButtonName={t('SaveFileModal.Download')} submit={saveFile} close={close}>
+      <div className="grid grid-cols-3 gap-4 leading-6">
+        <div className="p-4 rounded-lg text-right text-lg content-center">{t('SaveFileModal.TableName')}</div>
+        <div className="p-4 rounded-lg col-span-2">
+          <Select optionList={tableList} selectFunc={(event: ChangeEvent<HTMLSelectElement>) => changeTableName(event)}></Select>
         </div>
       </div>
-    );
-  } else {
-    return null;
-  }
-};
+    </Modal>
+  );
+}
