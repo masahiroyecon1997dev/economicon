@@ -24,5 +24,22 @@
     "ChooseFile": "ファイルを選ぶ",
     "OtherChooseFile": "他のファイルを選ぶ",
     "OpenFile": "開く"
+  },
+  "SaveFileModal": {
+    "Title": "テーブルを保存する",
+    "TableName": "テーブル名",
+    "Download": "ダウンロード"
+  },
+  "GenerateDataModal": {
+    "Title": "データを作成する",
+    "TableName": "テーブル名",
+    "Setting": "データの設定",
+    "AddColumn": "列を追加",
+    "ColumnName": "列名",
+    "Min": "最小値",
+    "Max": "最大値",
+    "ErrorMean": "誤差項の平均",
+    "ErrorVariance": "誤差項の分散",
+    "Generate": "作成"
   }
 }
