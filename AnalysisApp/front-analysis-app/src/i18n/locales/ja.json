@@ -41,5 +41,9 @@
     "ErrorMean": "誤差項の平均",
     "ErrorVariance": "誤差項の分散",
     "Generate": "作成"
+  },
+  "Error": {
+    "required": "入力してください。",
+    "number": "数値で入力してください。"
   }
 }
