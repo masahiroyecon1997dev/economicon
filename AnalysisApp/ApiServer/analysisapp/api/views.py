@@ -1,4 +1,6 @@
 import io
+import json
+import random
 from django.shortcuts import HttpResponse
 from rest_framework import status
 from rest_framework.views import APIView
@@ -18,9 +20,9 @@ class ReadCsv(APIView):
         try:
             global data
             path: str = request.query_params.get('path')
-            tableName = path.split('/')[-1][:-4]
-            data[tableName] = pl.read_csv(path, encoding='utf8')
-            result = {'code': 0, 'tableName': tableName}
+            table_name = path.split('/')[-1][:-4]
+            data[table_name] = pl.read_csv(path, encoding='utf8')
+            result = {'code': 0, 'tableName': table_name}
             return Response(data=result, status=status.HTTP_200_OK)
         except Exception as e:
             result = {'code': -9999, 'message': e}
@@ -114,11 +116,26 @@ class GetColumnNameList(APIView):
             return Response(data=result, status=status.HTTP_200_OK)
 
 
-class GenerateData(APIView):
-    def get(self, request):
+class GenerateSimulationData(APIView):
+    def post(self, request):
         try:
             global data
-            # table_name: str = request.query_params.get('tableName')
+            requestData = json.loads(request.body)
+
+            table_name = requestData['tableName']
+            df = pl.DataFrame()
+
+            for params in requestData['dataStructure']:
+                column_name = params['columnName']
+                min_value = params['minValue']
+                max_value = params['maxValue']
+                num_samples = params['numSamples']
+
+                series = ([random.uniform(min_value, max_value)
+                           for _ in range(num_samples)]).alias(column_name)
+                df.with_columns(series)
+
+            data[table_name] = df
 
         except Exception as e:
             result = {'code': -9999, 'message': e}
