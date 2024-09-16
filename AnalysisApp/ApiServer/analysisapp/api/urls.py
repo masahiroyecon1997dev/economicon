@@ -10,4 +10,5 @@ urlpatterns = [
     path('fetch_data_to_json', views.FetchDataToJson.as_view()),
     path('get_table_name_list', views.GetTableNameList.as_view()),
     path('get_column_name_list', views.GetColumnNameList.as_view()),
+    path('generate_simulation_data', views.GenerateSimulationData.as_view()),
 ]

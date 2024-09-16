@@ -6,7 +6,7 @@ import { TableInfosType } from '../../../types/stateTypes';
 import { HeaderMenuDropdown } from '../../molecules/HeaderMenuDropdown/HeaderMenuDropdown';
 import { ImportFileModal } from '../ImportFileModal/ImportFileModal';
 import { SaveFileModal } from '../SaveFileModal/SaveFileModal';
-import { GenerateDataModal } from '../GenerateDataModal/GenerateDataModal';
+import { GenerateDataModal } from '../GenerateSimulationDataModal/GenerateSimulationDataModal';
 
 type HeaderMenuProps = {
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
@@ -16,7 +16,7 @@ export function HeaderMenu({setTableInfos}: HeaderMenuProps) {
   const { t } = useTranslation();
   const [isImportFileModal, setIsImportFileModal] = useState<boolean>(false);
   const [isSaveFileModal, setIsSaveFileModal] = useState<boolean>(false);
-  const [isGenerateDataModal, setGenerateDataModal] = useState<boolean>(false);
+  const [isGenerateSimulationDataModal, setGenerateSimulationDataModal] = useState<boolean>(false);
 
   const fileDropdownListElement = [
     { dropdownListName: t('HeaderMenu.FileOpen'), dropdownListFunction: openImportFileModal },
@@ -44,11 +44,11 @@ export function HeaderMenu({setTableInfos}: HeaderMenuProps) {
   }
 
   function openGenerateDataModal() {
-    setGenerateDataModal(true);
+    setGenerateSimulationDataModal(true);
   }
 
   function closeGenerateDataModal() {
-    setGenerateDataModal(false);
+    setGenerateSimulationDataModal(false);
   }
 
 
@@ -73,7 +73,7 @@ export function HeaderMenu({setTableInfos}: HeaderMenuProps) {
       </div>
       <ImportFileModal isImportFileModal={isImportFileModal} close={closeImportFileModal} setTableInfos={setTableInfos} />
       <SaveFileModal isSaveFileModal={isSaveFileModal} close={closeSaveFileModal} />
-      <GenerateDataModal isGenerateDataModal={isGenerateDataModal} close={closeGenerateDataModal} />
+      <GenerateDataModal isGenerateSimulationDataModal={isGenerateSimulationDataModal} close={closeGenerateDataModal} />
     </>
   );
 }
