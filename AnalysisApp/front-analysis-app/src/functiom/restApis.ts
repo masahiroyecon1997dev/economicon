@@ -1,6 +1,7 @@
 import axios from "../configs/axios";
 import type * as apiTypes from '../types/apiTypes';
 
+
 export async function importCsv(file: File): Promise<apiTypes.ResImportCsvType> {
   try {
     const formData = new FormData();
@@ -13,7 +14,7 @@ export async function importCsv(file: File): Promise<apiTypes.ResImportCsvType> 
     return response.data
   } catch (error) {
     console.log(error);
-    return {code: -9999, tableName: ''}
+    return { code: -9999, result: { tableName: '' }, message: 'エラーです' };
   }
 }
 
@@ -27,22 +28,24 @@ export async function outputCsv(tableName: string): Promise<apiTypes.ResOutputCs
     return response.data
   } catch (err) {
     console.log(err);
-    return {code: -9999, csvData: 'error'}
+    return { code: -9999, result: { csvData: 'error' }, message: 'エラーです' };
   }
 }
 
 
-export async function fetchDataToJson(tableName: string): Promise<apiTypes.ResFetchDataToJsonType> {
+export async function fetchDataToJson(tableName: string, firstRow: number = 1, lastRow: number = 100): Promise<apiTypes.ResFetchDataToJsonType> {
   try {
     const response = await axios.get('/fetch_data_to_json', {
       params: {
-        tableName: tableName
+        tableName: tableName,
+        firstRow: firstRow,
+        lastRow: lastRow
       }
     });
     return response.data
   } catch (error) {
     console.log(error);
-    return {code: -9999, tableName: '', data: ''}
+    return { code: -9999, result: { tableName: '', data: '' }, message: 'エラーです' };
   }
 }
 
@@ -52,7 +55,7 @@ export async function getTableNameList(): Promise<apiTypes.ResGetTableNameListTy
     return response.data
   } catch (error) {
     console.log(error);
-    return {code: -9999, tableNameList: []}
+    return { code: -9999, result: { tableNameList: [] }, message: 'エラーです' };
   }
 }
 
@@ -66,6 +69,16 @@ export async function getColumnNameList(tableName: string): Promise<apiTypes.Res
     return response.data
   } catch (error) {
     console.log(error);
-    return {code: -9999, columnNameList: []}
+    return { code: -9999, result: { columnNameList: [] }, message: 'エラーです' };
+  }
+}
+
+export async function generateSimulationData(requestBody: apiTypes.ReqGenerateSimulationDataType): Promise<apiTypes.ResGenerateSimulationDataType> {
+  try {
+    const response = await axios.post('/generate_simulation_data', requestBody);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return { code: -9999, result: { tableName: '' }, message: 'エラーです' };
   }
 }

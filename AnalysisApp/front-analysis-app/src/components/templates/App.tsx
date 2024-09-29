@@ -15,11 +15,18 @@ export function App() {
     async function initializeData() {
       const resGetTableNames = await getTableNameList();
       if (!ignore) {
-        if (resGetTableNames.tableNameList.length > 0) {
-          for (const tableName of resGetTableNames.tableNameList) {
+        if (resGetTableNames.result.tableNameList.length > 0) {
+          for (const tableName of resGetTableNames.result.tableNameList) {
             const data = await fetchData(tableName);
             const columnList = await getColumnNameList(tableName);
-            setTableInfos((preTableInfos) => ([...preTableInfos, {tableName: data.tableName, columnNameList: columnList.columnNameList, data: data.data}]));
+            setTableInfos((preTableInfos) => [
+              ...preTableInfos,
+              {
+                tableName: data.tableName,
+                columnNameList: columnList.result.columnNameList,
+                data: data.data,
+              },
+            ]);
           }
         }
       }
@@ -28,18 +35,18 @@ export function App() {
     return () => {
       ignore = true;
     };
-  }, [])
+  }, []);
 
   return (
     <div className="App">
       <HeaderMenu setTableInfos={setTableInfos} />
       <div className="p-4">
         <h1 className="text-2xl font-bold">Excel-like Header Menu</h1>
-        {(tableInfos[0]?.tableName) ?
+        {tableInfos[0]?.tableName ? (
           <MainTable tableInfo={tableInfos[0]}></MainTable>
-          :
+        ) : (
           <></>
-        }
+        )}
       </div>
     </div>
   );
