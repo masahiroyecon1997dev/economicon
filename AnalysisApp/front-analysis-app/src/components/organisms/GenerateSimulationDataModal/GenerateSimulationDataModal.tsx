@@ -1,119 +1,338 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 
 import { SubmitButton } from "../../atoms/SubmitButton/SubmitButton";
 import { Modal } from "../../molecules/Modal/Modal";
 import { InputTextField } from "../../molecules/InputTextField/InputTextField";
 import { InputText } from "../../atoms/InputText/InputText";
+import {
+  checkInteger,
+  checkNumber,
+  checkRequired,
+} from "../../../functiom/checkInputFunctions";
+import { generateSimulationData } from "../../../functiom/restApis";
+import { ReqGenerateSimulationDataType } from "../../../types/apiTypes";
+import { getTableInfo } from "../../../functiom/internalFunctions";
+import { TableInfosType } from "../../../types/stateTypes";
 
 type SaveFileModalProps = {
   isGenerateSimulationDataModal: boolean;
   close: () => void;
+  setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
 };
 
 export function GenerateDataModal({
   isGenerateSimulationDataModal,
   close,
+  setTableInfos,
 }: SaveFileModalProps) {
   const { t } = useTranslation();
-  const [tableName, setTableName] = useState<string>("");
-  type tableDataSettingType = {
-    columnName: string;
-    coefficient: number;
-    minValue: number;
-    maxValue: number;
-    error: string;
+  type InputValueType = {
+    tableName: string;
+    tableNameError: string;
+    numSamples: string;
+    numSamplesError: string;
+    columnData: {
+      columnName: string;
+      errorColumnName: string;
+      coefficient: string;
+      errorCoefficient: string;
+      minValue: string;
+      errorMinValue: string;
+      maxValue: string;
+      errorMaxValue: string;
+    }[];
+    errorMean: string;
+    errorMeanError: string;
+    errorVariance: string;
+    errorVarianceError: string;
   };
-  type tableDataSettingsType = tableDataSettingType[];
-  const tableDataSettingsInitial = [
-    { columnName: "col1", coefficient: 1, minValue: 0, maxValue: 1, error: "" },
-  ];
-  const [tableDataSettings, setTableDataSettings] =
-    useState<tableDataSettingsType>(tableDataSettingsInitial);
-  const [errorMean, setErrorMean] = useState<number>(0);
-  const [errorVariance, setErrorVariance] = useState<number>(1);
+
+  const inputValueInitial: InputValueType = {
+    tableName: "",
+    tableNameError: "",
+    numSamples: "1000",
+    numSamplesError: "",
+    columnData: [
+      {
+        columnName: "col_1",
+        errorColumnName: "",
+        coefficient: "1",
+        errorCoefficient: "",
+        minValue: "0",
+        errorMinValue: "",
+        maxValue: "1",
+        errorMaxValue: "",
+      },
+    ],
+    errorMean: "0",
+    errorMeanError: "",
+    errorVariance: "1",
+    errorVarianceError: "",
+  };
+
+  const [inputValue, setInputValue] =
+    useState<InputValueType>(inputValueInitial);
 
   function changeTableName(event: ChangeEvent<HTMLInputElement>) {
     const tableName = event.target.value;
-    setTableName(tableName);
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      tableName: tableName,
+    }));
+  }
+
+  function changenumSamples(event: ChangeEvent<HTMLInputElement>) {
+    const numSamples = event.target.value;
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      numSamples: numSamples,
+    }));
   }
 
   function addColumn() {
-    setTableDataSettings((preTableDataSettings) => [
-      ...preTableDataSettings,
-      {
-        columnName: "col" + (preTableDataSettings.length + 1),
-        coefficient: 1,
-        minValue: 0,
-        maxValue: 1,
-        error: "",
-      },
-    ]);
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      columnData: [
+        ...preInputValue.columnData,
+        {
+          columnName: "col" + (preInputValue.columnData.length + 1),
+          errorColumnName: "",
+          coefficient: "1",
+          errorCoefficient: "",
+          minValue: "0",
+          errorMinValue: "",
+          maxValue: "1",
+          errorMaxValue: "",
+        },
+      ],
+    }));
   }
 
   function changeColumnName(event: ChangeEvent<HTMLInputElement>, num: number) {
     const columnName = event.target.value;
-    setTableDataSettings((preTableDataSettings) =>
-      preTableDataSettings.map((tableData, i) => {
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      columnData: preInputValue.columnData.map((tableData, i) => {
         if (i === num) {
           return { ...tableData, columnName: columnName };
         } else {
           return tableData;
         }
-      })
-    );
+      }),
+    }));
+  }
+
+  function changeCoefficient(
+    event: ChangeEvent<HTMLInputElement>,
+    num: number
+  ) {
+    const coefficient = event.target.value;
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      columnData: preInputValue.columnData.map((tableData, i) => {
+        if (i === num) {
+          return { ...tableData, coefficient: coefficient };
+        } else {
+          return tableData;
+        }
+      }),
+    }));
   }
 
   function changeMinValue(event: ChangeEvent<HTMLInputElement>, num: number) {
-    const minValue = parseInt(event.target.value);
-    setTableDataSettings((preTableDataSettings) =>
-      preTableDataSettings.map((tableData, i) => {
+    const minValue = event.target.value;
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      columnData: preInputValue.columnData.map((tableData, i) => {
         if (i === num) {
           return { ...tableData, minValue: minValue };
         } else {
           return tableData;
         }
-      })
-    );
+      }),
+    }));
   }
 
   function changeMaxValue(event: ChangeEvent<HTMLInputElement>, num: number) {
-    const maxValue = parseInt(event.target.value);
-    setTableDataSettings((preTableDataSettings) =>
-      preTableDataSettings.map((tableData, i) => {
+    const maxValue = event.target.value;
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      columnData: preInputValue.columnData.map((tableData, i) => {
         if (i === num) {
           return { ...tableData, maxValue: maxValue };
         } else {
           return tableData;
         }
-      })
-    );
+      }),
+    }));
   }
 
   function changeErrorMean(event: ChangeEvent<HTMLInputElement>) {
-    const mean = parseInt(event.target.value);
-    setErrorMean(mean);
+    const errorEmean = event.target.value;
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      errorMean: errorEmean,
+    }));
   }
 
   function changeErrorVariance(event: ChangeEvent<HTMLInputElement>) {
-    const variance = parseInt(event.target.value);
-    setErrorVariance(variance);
+    const errorVariance = event.target.value;
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      errorVariance: errorVariance,
+    }));
   }
 
-  async function generateFile() {}
+  function checkInputValue(): boolean {
+    let isError = false;
+    const requiredTableName = checkRequired(inputValue.tableName);
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      tableNameError: requiredTableName.message,
+    }));
+    isError = requiredTableName.isError || isError;
+    const requirednumSamples = checkRequired(inputValue.numSamples);
+    isError = requirednumSamples.isError || isError;
+    if (!requirednumSamples.isError) {
+      const integernumSamples = checkInteger(inputValue.numSamples);
+      setInputValue((preInputValue) => ({
+        ...preInputValue,
+        numSamplesError: integernumSamples.message,
+      }));
+      isError = integernumSamples.isError || isError;
+    } else {
+      setInputValue((preInputValue) => ({
+        ...preInputValue,
+        numSamplesError: requirednumSamples.message,
+      }));
+    }
+    const requiredErrorMean = checkRequired(inputValue.errorMean);
+    isError = requiredErrorMean.isError || isError;
+    if (!requiredErrorMean.isError) {
+      const numberErrorMean = checkNumber(inputValue.errorMean);
+      setInputValue((preInputValue) => ({
+        ...preInputValue,
+        errorMeanError: numberErrorMean.message,
+      }));
+      isError = numberErrorMean.isError || isError;
+    } else {
+      setInputValue((preInputValue) => ({
+        ...preInputValue,
+        errorMeanError: requiredErrorMean.message,
+      }));
+    }
+    const requiredErrorVariance = checkRequired(inputValue.errorVariance);
+    isError = requiredErrorVariance.isError || isError;
+    if (!requiredErrorVariance.isError) {
+      const numberErrorVariance = checkNumber(inputValue.errorVariance);
+      setInputValue((preInputValue) => ({
+        ...preInputValue,
+        errorVarianceError: numberErrorVariance.message,
+      }));
+      isError = numberErrorVariance.isError || isError;
+    } else {
+      setInputValue((preInputValue) => ({
+        ...preInputValue,
+        errorVarianceError: requiredErrorVariance.message,
+      }));
+    }
+
+    setInputValue((preInputValue) => ({
+      ...preInputValue,
+      columnData: preInputValue.columnData.map((column, i) => {
+        const requiredColumnName = checkRequired(column.columnName);
+        column.errorColumnName = requiredColumnName.message;
+        isError = requiredColumnName.isError || isError;
+        const requiredCoefficient = checkRequired(column.coefficient);
+        if (!requiredCoefficient.isError) {
+          const numberCoefficient = checkNumber(column.coefficient);
+          column.errorCoefficient = numberCoefficient.message;
+          isError = numberCoefficient.isError || isError;
+        } else {
+          column.errorCoefficient = requiredCoefficient.message;
+          requiredCoefficient.isError || isError;
+        }
+        const requiredMinValue = checkRequired(column.minValue);
+        if (!requiredMinValue.isError) {
+          const numberMinValue = checkNumber(column.minValue);
+          column.errorMinValue = numberMinValue.message;
+          isError = numberMinValue.isError || isError;
+        } else {
+          column.errorMinValue = requiredMinValue.message;
+          isError = requiredMinValue.isError || isError;
+        }
+        const requiredMaxValue = checkRequired(column.maxValue);
+        if (!requiredMaxValue.isError) {
+          const numberMaxValue = checkNumber(column.maxValue);
+          column.errorMaxValue = numberMaxValue.message;
+          isError = numberMaxValue.isError || isError;
+        } else {
+          column.errorMaxValue = requiredMaxValue.message;
+          isError = requiredMaxValue.isError || isError;
+        }
+        return column;
+      }),
+    }));
+    return isError;
+  }
+
+  async function generateData() {
+    const isError = checkInputValue();
+    if (isError) {
+      return;
+    }
+    let dataStructure = [];
+    for (const column of inputValue.columnData) {
+      dataStructure.push({
+        columnName: column.columnName,
+        coefficient: Number(column.coefficient),
+        minValue: Number(column.minValue),
+        maxValue: Number(column.maxValue),
+      });
+    }
+
+    const reqGenerateSimulationData: ReqGenerateSimulationDataType = {
+      tableName: inputValue.tableName,
+      numSamples: Number(inputValue.numSamples),
+      dataStructure: dataStructure,
+      errorMean: Number(inputValue.errorMean),
+      errorVariance: Number(inputValue.errorVariance),
+    };
+    const resGenerateSimulationData = await generateSimulationData(
+      reqGenerateSimulationData
+    );
+    if (resGenerateSimulationData.code === 0) {
+      const tableInfo = await getTableInfo(
+        resGenerateSimulationData.result.tableName
+      );
+      console.log(tableInfo);
+      setTableInfos((preTableInfos) => [tableInfo, ...preTableInfos]);
+      close();
+    } else {
+      window.alert(resGenerateSimulationData.message);
+    }
+  }
 
   return (
     <Modal
       isOpenModal={isGenerateSimulationDataModal}
       modalTitle={t("GenerateDataModal.Title")}
       submitButtonName={t("GenerateDataModal.Generate")}
-      submit={() => generateFile()}
+      submit={() => generateData()}
       close={() => close()}
     >
       <InputTextField
         label={t("GenerateDataModal.TableName")}
-        value={tableName}
+        value={inputValue.tableName}
         change={(event) => changeTableName(event)}
+        error={inputValue.tableNameError}
+      />
+      <InputTextField
+        label={t("GenerateDataModal.numSamples")}
+        value={inputValue.numSamples}
+        change={(event) => changenumSamples(event)}
+        error={inputValue.numSamplesError}
       />
       <div className="p-4 overflow-hidden border-gray-300">
         <h3>{t("GenerateDataModal.Setting")}</h3>
@@ -128,6 +347,9 @@ export function GenerateDataModal({
                   {t("GenerateDataModal.ColumnName")}
                 </th>
                 <th className="p-5 text-left text-sm leading-6 font-semibold text-gray-900 capitalize">
+                  {t("GenerateDataModal.Coefficient")}
+                </th>
+                <th className="p-5 text-left text-sm leading-6 font-semibold text-gray-900 capitalize">
                   {t("GenerateDataModal.Min")}
                 </th>
                 <th className="p-5 text-left text-sm leading-6 font-semibold text-gray-900 capitalize">
@@ -136,27 +358,34 @@ export function GenerateDataModal({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-300">
-              {tableDataSettings.map((column, i) => (
+              {inputValue.columnData.map((column, i) => (
                 <tr key={i}>
                   <td className="p-5 whitespace-nowrap text-sm leading-6 font-medium text-gray-900">
                     <InputText
                       value={column.columnName}
                       change={(event) => changeColumnName(event, i)}
-                      error={t("")}
+                      error={column.errorColumnName}
                     />
                   </td>
                   <td className="p-5 whitespace-nowrap text-sm leading-6 font-medium text-gray-900">
-                    <input
-                      type="number"
+                    <InputText
+                      value={column.coefficient}
+                      change={(event) => changeCoefficient(event, i)}
+                      error={column.errorCoefficient}
+                    />
+                  </td>
+                  <td className="p-5 whitespace-nowrap text-sm leading-6 font-medium text-gray-900">
+                    <InputText
                       value={column.minValue}
-                      onChange={(event) => changeMinValue(event, i)}
+                      change={(event) => changeMinValue(event, i)}
+                      error={column.errorMinValue}
                     />
                   </td>
                   <td className="p-5 whitespace-nowrap text-sm leading-6 font-medium text-gray-900">
-                    <input
-                      type="number"
+                    <InputText
                       value={column.maxValue}
-                      onChange={(event) => changeMaxValue(event, i)}
+                      change={(event) => changeMaxValue(event, i)}
+                      error={column.errorMaxValue}
                     />
                   </td>
                 </tr>
@@ -164,33 +393,19 @@ export function GenerateDataModal({
             </tbody>
           </table>
         </div>
-        <div className="grid grid-cols-3 gap-4 leading-6">
-          <div className="p-4 rounded-lg text-right text-lg content-center">
-            {t("GenerateDataModal.ErrorMean")}
-          </div>
-          <div className="p-4 rounded-lg col-span-2">
-            <input
-              type="text"
-              className="block w-full max-w-xs pr-4 py-2 text-sm font-normal shadow-xs text-gray-900 bg-transparent border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none leading-relaxed"
-              value={errorMean}
-              onChange={(event) => changeErrorMean(event)}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-4 leading-6">
-          <div className="p-4 rounded-lg text-right text-lg content-center">
-            {t("GenerateDataModal.ErrorVariance")}
-          </div>
-          <div className="p-4 rounded-lg col-span-2">
-            <input
-              type="text"
-              className="block w-full max-w-xs pr-4 py-2 text-sm font-normal shadow-xs text-gray-900 bg-transparent border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none leading-relaxed"
-              value={errorVariance}
-              onChange={(event) => changeErrorVariance(event)}
-            />
-          </div>
-        </div>
       </div>
+      <InputTextField
+        label={t("GenerateDataModal.ErrorMean")}
+        value={inputValue.errorMean}
+        change={(event) => changeErrorMean(event)}
+        error={inputValue.errorMeanError}
+      />
+      <InputTextField
+        label={t("GenerateDataModal.ErrorVariance")}
+        value={inputValue.errorVariance}
+        change={(event) => changeErrorVariance(event)}
+        error={inputValue.errorVarianceError}
+      />
     </Modal>
   );
 }

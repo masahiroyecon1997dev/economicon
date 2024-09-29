@@ -33,9 +33,11 @@
   "GenerateDataModal": {
     "Title": "データを作成する",
     "TableName": "テーブル名",
+    "numSamples": "サンプル数",
     "Setting": "データの設定",
     "AddColumn": "列を追加",
     "ColumnName": "列名",
+    "Coefficient": "係数",
     "Min": "最小値",
     "Max": "最大値",
     "ErrorMean": "誤差項の平均",
@@ -43,7 +45,10 @@
     "Generate": "作成"
   },
   "Error": {
-    "required": "入力してください。",
-    "number": "数値で入力してください。"
+    "Required": "入力してください。",
+    "Number": "数値で入力してください。",
+    "MaxLength20": "20文字以内で入力してください。",
+    "IntegerMore0": "0以上の整数で入力してください。",
+    "Unknown": "不明なエラーです。"
   }
 }

@@ -41,18 +41,16 @@ export function Modal({
       }`}
     >
       <div
-        className={`transform ${
+        className={`relative p-4 w-full max-w-2xl max-h-full transform ${
           isOpenModal ? "animate-fade-in-down" : "animate-fade-out-up"
         }`}
       >
-        <div className="relative p-4 w-full max-w-2xl max-h-full">
-          <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-            <ModalHeader close={() => close()}>{modalTitle}</ModalHeader>
-            <div className="">{children}</div>
-            <ModalFooter close={() => close()} submit={() => submit()}>
-              {submitButtonName}
-            </ModalFooter>
-          </div>
+        <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <ModalHeader close={() => close()}>{modalTitle}</ModalHeader>
+          <div className="">{children}</div>
+          <ModalFooter close={() => close()} submit={() => submit()}>
+            {submitButtonName}
+          </ModalFooter>
         </div>
       </div>
     </div>
