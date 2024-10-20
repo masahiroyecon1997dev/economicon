@@ -1,6 +1,10 @@
 {
   "Common": {
-    "Cancel": "キャンセル"
+    "Cancel": "キャンセル",
+    "Table": "テーブル",
+    "Constant": "定数",
+    "UniformDistribution": "一様分布",
+    "NomalDistribution": "正規分布"
   },
   "HeaderMenu": {
     "File": "ファイル",
@@ -37,6 +41,7 @@
     "Setting": "データの設定",
     "AddColumn": "列を追加",
     "ColumnName": "列名",
+    "DataType": "データ形式",
     "Coefficient": "係数",
     "Min": "最小値",
     "Max": "最大値",

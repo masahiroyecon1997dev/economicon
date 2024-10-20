@@ -13,5 +13,5 @@ export async function fetchData(tableName: string): Promise<{ tableName: string,
 export async function getTableInfo(tableName: string): Promise<TableInfoType> {
   const data = await fetchData(tableName);
   const columnList = await getColumnNameList(tableName);
-  return {tableName: tableName, columnNameList: columnList.result.columnNameList, data: data.data};
+  return {tableName: tableName, columnNameList: columnList.result.columnNameList, isActive: true, data: data.data};
 }

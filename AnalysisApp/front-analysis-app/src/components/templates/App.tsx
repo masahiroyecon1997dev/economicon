@@ -1,34 +1,22 @@
 import React, { useState, useEffect } from "react";
 
-import { TableInfosType } from "../../types/stateTypes";
-import { fetchData } from "../../functiom/internalFunctions";
-import { getTableNameList, getColumnNameList } from "../../functiom/restApis";
+import { TableInfosType, TableListType } from "../../types/stateTypes";
+import { getTableNameList } from "../../functiom/restApis";
 
 import { HeaderMenu } from "../organisms/HeaderMenu/HeaderMenu";
-import { MainTable } from "../organisms/MainTable/MainTable";
+import { LeftSideMenu } from "../organisms/LeftSideMenu/LeftSideMenu";
+import { MainPanel } from "../organisms/MainPanel/MainPanel";
 
 export function App() {
   const [tableInfos, setTableInfos] = useState<TableInfosType>([]);
+  const [tableList, setTableList] = useState<TableListType>([]);
 
   useEffect(() => {
     let ignore = false;
     async function initializeData() {
       const resGetTableNames = await getTableNameList();
       if (!ignore) {
-        if (resGetTableNames.result.tableNameList.length > 0) {
-          for (const tableName of resGetTableNames.result.tableNameList) {
-            const data = await fetchData(tableName);
-            const columnList = await getColumnNameList(tableName);
-            setTableInfos((preTableInfos) => [
-              ...preTableInfos,
-              {
-                tableName: data.tableName,
-                columnNameList: columnList.result.columnNameList,
-                data: data.data,
-              },
-            ]);
-          }
-        }
+        setTableList(resGetTableNames.result.tableNameList);
       }
     }
     initializeData();
@@ -40,13 +28,13 @@ export function App() {
   return (
     <div className="App">
       <HeaderMenu setTableInfos={setTableInfos} />
-      <div className="p-4">
-        <h1 className="text-2xl font-bold">Excel-like Header Menu</h1>
-        {tableInfos[0]?.tableName ? (
-          <MainTable tableInfo={tableInfos[0]}></MainTable>
-        ) : (
-          <></>
-        )}
+      <div className="flex pt-0.5 pl-1">
+        <LeftSideMenu
+          tableInfos={tableInfos}
+          setTableInfos={setTableInfos}
+          tableList={tableList}
+        ></LeftSideMenu>
+        <MainPanel tableInfos={tableInfos}></MainPanel>
       </div>
     </div>
   );

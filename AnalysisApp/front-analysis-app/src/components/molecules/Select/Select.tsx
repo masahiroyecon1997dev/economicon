@@ -11,7 +11,7 @@ type SelectType = {
 export function Select({ optionList, selectFunc }: SelectType) {
   return (
     <select
-      className="h-12 border border-gray-300 text-gray-600 text-base rounded-lg block w-full py-2.5 px-4 focus:outline-none"
+      className="h-9 border border-gray-300 text-gray-600 text-sm rounded-lg block w-full py-1 px-4 focus:outline-none"
       onChange={(event) => selectFunc(event)}
     >
       {optionList.map((optionObj, i) => (
