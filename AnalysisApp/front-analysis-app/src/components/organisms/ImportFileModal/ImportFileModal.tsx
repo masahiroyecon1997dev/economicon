@@ -71,6 +71,7 @@ export function ImportFileModal({
       submitButtonName={t("ImportFileModal.OpenFile")}
       submit={importFile}
       close={close}
+      modalSize="max-w-2xl"
     >
       <div
         className={`w-full py-9 bg-gray-50 rounded-2xl border border-gray-300 gap-3 grid border-dashed ${
