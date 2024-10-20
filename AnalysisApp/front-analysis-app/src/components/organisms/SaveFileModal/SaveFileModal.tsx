@@ -56,6 +56,7 @@ export function SaveFileModal({ isSaveFileModal, close }: SaveFileModalProps) {
       submitButtonName={t("SaveFileModal.Download")}
       submit={saveFile}
       close={close}
+      modalSize="max-w-2xl"
     >
       <div className="grid grid-cols-3 gap-4 leading-6">
         <div className="p-4 rounded-lg text-right text-lg content-center">

@@ -12,10 +12,8 @@ export type ReqGenerateSimulationDataType = {
   numSamples: number,
   dataStructure: {
     columnName: string,
-    coefficient: number,
-    minValue: number,
-    maxValue: number
+    dataType: string,
+    value1: number,
+    value2: number
   }[];
-  errorMean: number,
-  errorVariance: number
 };

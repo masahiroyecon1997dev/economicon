@@ -11,6 +11,7 @@ type SaveFileModalProps = {
   submitButtonName: string;
   submit: () => void;
   close: () => void;
+  modalSize: string;
 };
 
 export function Modal({
@@ -20,6 +21,7 @@ export function Modal({
   submitButtonName,
   submit,
   close,
+  modalSize,
 }: SaveFileModalProps) {
   const { t } = useTranslation();
   const [isModalBlock, setIsModalblock] = useState<boolean>(false);
@@ -41,7 +43,7 @@ export function Modal({
       }`}
     >
       <div
-        className={`relative p-4 w-full max-w-2xl max-h-full transform ${
+        className={`relative p-4 w-full ${modalSize} max-h-full transform ${
           isOpenModal ? "animate-fade-in-down" : "animate-fade-out-up"
         }`}
       >
