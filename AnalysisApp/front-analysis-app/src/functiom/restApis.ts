@@ -82,3 +82,13 @@ export async function generateSimulationData(requestBody: apiTypes.ReqGenerateSi
     return { code: -9999, result: { tableName: '' }, message: 'エラーです' };
   }
 }
+
+export async function linearRegression(requestBody: apiTypes.ReqLinearRegressionType): Promise<apiTypes.ResLinearRegressionType> {
+  try {
+    const response = await axios.post('/linear_regression', requestBody);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return { code: -9999, result: { regressionResult: '' }, message: 'エラーです' };
+  }
+}
