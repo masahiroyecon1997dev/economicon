@@ -26,9 +26,11 @@ export function App() {
   }, []);
 
   return (
-    <div className="App">
-      <HeaderMenu setTableInfos={setTableInfos} />
-      <div className="flex pt-0.5 pl-1">
+    <div className="App h-full">
+      <div className={`h-[40px]`}>
+        <HeaderMenu setTableInfos={setTableInfos} setTableList={setTableList} />
+      </div>
+      <div className={`flex h-[calc(100%-40px)]`}>
         <LeftSideMenu
           tableInfos={tableInfos}
           setTableInfos={setTableInfos}

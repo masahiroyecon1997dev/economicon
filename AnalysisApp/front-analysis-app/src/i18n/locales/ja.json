@@ -15,8 +15,8 @@
     "SampleData": "サンプルデータ",
     "HypothesisTest": "仮説検定",
     "RegressionAnalysis": "回帰分析",
-    "LeastSquearesMethod": "最小二乗法",
-    "LogitAnalysis": "ロジット分析",
+    "LinearRegression": "線形回帰",
+    "LogitAnalysis": "ロジスティック分析",
     "ProbitAnalysis": "プロビット分析",
     "TobitAnalysis": "トービット分析",
     "TimeSeriesDataAnalysis": "時系列データ分析"
@@ -48,6 +48,14 @@
     "ErrorMean": "誤差項の平均",
     "ErrorVariance": "誤差項の分散",
     "Generate": "作成"
+  },
+  "LinearRegression": {
+    "Title": "線形回帰分析",
+    "TableName": "テーブル名",
+    "ColumnName": "列名",
+    "ExplanatoryVariable": "説明変数",
+    "DependentVariable": "被説明変数",
+    "Execute": "分析実行"
   },
   "Error": {
     "Required": "入力してください。",

@@ -37,15 +37,15 @@ export function LeftSideMenu({
   }
 
   return (
-    <div className="bg-white border border-indigo-600 rounded-lg shadow-md w-64 h-screen">
-      <h2 className="text-lg font-bold p-2 bg-indigo-500 rounded-lg text-white">
+    <div className="bg-white border border-indigo-600 shadow-md w-64 h-full float-left">
+      <h2 className="text-lg font-bold p-2 bg-indigo-600 text-white">
         {t("Common.Table")}
       </h2>
       <ul className="flex-col gap-1 flex">
         {tableList.map((table, index) => (
-          <li key={index} className="p-2">
+          <li key={index} className="p-1">
             <div
-              className="flex-col flex p-3 bg-white rounded-lg hover:bg-gray-200 hover:cursor-pointer"
+              className="flex-col flex p-2 bg-white rounded-lg hover:bg-gray-200 hover:cursor-pointer"
               onClick={() => clickTableName(table)}
             >
               <div className="h-5 gap-3 flex">

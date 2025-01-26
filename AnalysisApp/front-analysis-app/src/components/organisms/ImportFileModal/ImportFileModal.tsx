@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { IconContext } from "react-icons";
 import { FaFileAlt } from "react-icons/fa";
 
-import { TableInfosType } from "../../../types/stateTypes";
+import { TableInfosType, TableListType } from "../../../types/stateTypes";
 import { importCsv } from "../../../functiom/restApis";
 import { getTableInfo } from "../../../functiom/internalFunctions";
 
@@ -20,12 +20,14 @@ type ImportFileModalProps = {
   isImportFileModal: boolean;
   close: () => void;
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
+  setTableList: Dispatch<SetStateAction<TableListType>>;
 };
 
 export function ImportFileModal({
   isImportFileModal,
   close,
   setTableInfos,
+  setTableList,
 }: ImportFileModalProps) {
   const { t } = useTranslation();
   const [file, setFile] = useState<File>();
@@ -61,6 +63,7 @@ export function ImportFileModal({
     const resImportCsv = await importCsv(file);
     const tableInfo = await getTableInfo(resImportCsv.result.tableName);
     setTableInfos((preTableInfos) => [...preTableInfos, tableInfo]);
+    setTableList((preTableList) => [...preTableList, tableInfo.tableName]);
     close();
   }
 
