@@ -95,7 +95,7 @@ export function GenerateDataModal({
       columnData: [
         ...preInputValue.columnData,
         {
-          columnName: "col" + (preInputValue.columnData.length + 1),
+          columnName: "col_" + (preInputValue.columnData.length + 1),
           errorColumnName: "",
           dataType: "constant",
           errorDataType: "",
