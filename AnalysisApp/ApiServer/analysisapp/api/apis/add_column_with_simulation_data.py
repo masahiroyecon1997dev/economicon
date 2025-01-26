@@ -8,7 +8,7 @@ import json
 from .tables import tables
 
 
-class Calculate(APIView):
+class AddColumnWithSimulationData(APIView):
     def post(self, request):
         try:
             data = tables

@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import { HeaderMenuButton } from '../../atoms/HeaderMenuButton/HeaderMenuButton';
-import { HeaderMenuDropdownButton } from '../../atoms/HeaderMenuDropDownButton/HeaderMenuDropDownButton';
+import { HeaderMenuButton } from "../../atoms/HeaderMenuButton/HeaderMenuButton";
+import { HeaderMenuDropdownButton } from "../../atoms/HeaderMenuDropDownButton/HeaderMenuDropDownButton";
 
 type HeaderMenuDropdownProps = {
   children: string;
-  dropdownListElement: {dropdownListName: string, dropdownListFunction: () => void}[];
-}
+  dropdownListElement: {
+    dropdownListName: string;
+    dropdownListFunction: () => void;
+  }[];
+};
 
-export function HeaderMenuDropdown({ children, dropdownListElement }: HeaderMenuDropdownProps) {
+export function HeaderMenuDropdown({
+  children,
+  dropdownListElement,
+}: HeaderMenuDropdownProps) {
   const [openDropdown, setOpenDropdown] = useState<boolean>(false);
 
   function clickMenu() {
-    setOpenDropdown((preOpenDropdown) => (!preOpenDropdown));
+    setOpenDropdown((preOpenDropdown) => !preOpenDropdown);
   }
 
   function onMouseEvent() {
@@ -24,15 +30,25 @@ export function HeaderMenuDropdown({ children, dropdownListElement }: HeaderMenu
   }
 
   return (
-    <div onMouseEnter={() => onMouseEvent()} onMouseLeave={() => leaveMouseEvent()}>
-      <HeaderMenuButton clickEvent={() => clickMenu()}>{children}</HeaderMenuButton>
-        {openDropdown && (
-          <div className="absolute bg-white shadow-md border rounded-md">
-            {dropdownListElement.map((item, i) => (
-              <HeaderMenuDropdownButton key={i} clickEvent={item.dropdownListFunction}>{item.dropdownListName}</HeaderMenuDropdownButton>
-            ))}
-          </div>
-        )}
+    <div
+      onMouseEnter={() => onMouseEvent()}
+      onMouseLeave={() => leaveMouseEvent()}
+    >
+      <HeaderMenuButton clickEvent={() => clickMenu()}>
+        {children}
+      </HeaderMenuButton>
+      {openDropdown && (
+        <div className="absolute bg-white shadow-md border rounded-md">
+          {dropdownListElement.map((item, i) => (
+            <HeaderMenuDropdownButton
+              key={i}
+              clickEvent={item.dropdownListFunction}
+            >
+              {item.dropdownListName}
+            </HeaderMenuDropdownButton>
+          ))}
+        </div>
+      )}
     </div>
-  )
+  );
 }

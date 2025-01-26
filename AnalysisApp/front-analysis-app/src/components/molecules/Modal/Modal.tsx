@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ModalHeader } from "../../molecules/ModalHeader/ModalHeader";
 import { ModalFooter } from "../../molecules/ModalFooter/ModalFooter";
 
-type SaveFileModalProps = {
+type ModalProps = {
   isOpenModal: boolean;
   children: ReactNode;
   modalTitle: string;
@@ -22,7 +22,7 @@ export function Modal({
   submit,
   close,
   modalSize,
-}: SaveFileModalProps) {
+}: ModalProps) {
   const { t } = useTranslation();
   const [isModalBlock, setIsModalblock] = useState<boolean>(false);
 

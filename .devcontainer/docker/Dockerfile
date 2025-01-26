@@ -19,7 +19,7 @@ ENV TZ JST-9
 RUN dnf -y install python3.11 python3.11-devel python3.11-pip python3.11-setuptools python3.11-pip-wheel
 RUN rm /usr/bin/python3
 RUN ln -s /usr/bin/python3.11 /usr/bin/python3
-RUN python3.11 -m pip install matplotlib pandas polars Flask polars django django-filter djangorestframework django-cors-headers
+RUN python3.11 -m pip install matplotlib pandas polars Flask polars django django-filter djangorestframework django-cors-headers wooldridge statsmodels
 
 RUN curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
 RUN dnf install nodejs

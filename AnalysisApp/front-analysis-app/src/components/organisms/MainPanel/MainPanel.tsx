@@ -11,14 +11,14 @@ export function MainPanel({ tableInfos }: MainPanelProps) {
   function clickTabChange() {}
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="bg-gray-800">
+    <div className="flex flex-col float-right w-full min-h-full">
+      <div className={`h-[40px]`}>
         <div className="flex">
           {tableInfos.map((table, index) => (
             <button
               key={index}
               className={`px-4 py-2 text-white ${
-                table.isActive ? "bg-gray-900" : "hover:bg-gray-700"
+                table.isActive ? "bg-indigo-600" : "hover:bg-indigo-300"
               }`}
             >
               {table.tableName}
@@ -26,12 +26,10 @@ export function MainPanel({ tableInfos }: MainPanelProps) {
           ))}
         </div>
       </div>
-      <div>
-        <div className="flex-grow overflow-y-auto p-4">
-          {tableInfos.map((table, index) => (
-            <MainTable key={index} tableInfo={table}></MainTable>
-          ))}
-        </div>
+      <div className={`flex-grow overflow-y-auto h-[calc(100vh-40-40px)]`}>
+        {tableInfos.map((table, index) => (
+          <MainTable key={index} tableInfo={table}></MainTable>
+        ))}
       </div>
     </div>
   );
