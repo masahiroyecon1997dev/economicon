@@ -4,6 +4,7 @@ export type ResFetchDataToJsonType = { code: number, result: { tableName: string
 export type ResGetTableNameListType = { code: number, result: { tableNameList: string[] }, message: string };
 export type ResGetColumnNameListType = { code: number, result: { columnNameList: string[] }, message: string };
 export type ResGenerateSimulationDataType = { code: number, result: { tableName: string }, message: string };
+export type ResLinearRegressionType = { code: number, result: {regressionResult: string}, message: string };
 
 
 
@@ -17,3 +18,9 @@ export type ReqGenerateSimulationDataType = {
     value2: number
   }[];
 };
+
+export type ReqLinearRegressionType = {
+  tableName: string,
+  dependentVariable: string,
+  explanatoryVariables: string[]
+}

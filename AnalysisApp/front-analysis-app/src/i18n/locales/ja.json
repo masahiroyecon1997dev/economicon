@@ -57,6 +57,9 @@
     "DependentVariable": "被説明変数",
     "Execute": "分析実行"
   },
+  "RegressionResult": {
+    "Title": "分析結果"
+  },
   "Error": {
     "Required": "入力してください。",
     "Number": "数値で入力してください。",

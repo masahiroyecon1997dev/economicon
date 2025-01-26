@@ -8,6 +8,7 @@ from .apis import fetch_data_to_json
 from .apis import get_table_name_list
 from .apis import get_column_name_list
 from .apis import generate_simulation_data
+from .apis import linear_regression
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -22,4 +23,6 @@ urlpatterns = [
          .as_view()),
     path('generate_simulation_data', generate_simulation_data.
          GenerateSimulationData.as_view()),
+    path('linear_regression', linear_regression.
+         LinearRegression.as_view())
 ]
