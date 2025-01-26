@@ -13,8 +13,10 @@ import { Select } from "../../molecules/Select/Select";
 import {
   getColumnNameList,
   getTableNameList,
+  linearRegression,
 } from "../../../functiom/restApis";
 import { SelectListType } from "../../../types/commonTypes";
+import { ReqLinearRegressionType } from "../../../types/apiTypes";
 
 type LinearRegressionModalProps = {
   isLinearRegressionModal: boolean;
@@ -27,89 +29,160 @@ export function LinearRegressionModal({
 }: LinearRegressionModalProps) {
   const { t } = useTranslation();
   const [tableNameList, setTableNameList] = useState<SelectListType>([]);
-  const [selectedTableName, setSelectedTableName] = useState<String>("");
-  const [columnNameList, setColumnNameList] = useState<String[]>([]);
-  const [explanatoryVariables, setExplanatoryVariables] = useState<String[]>(
+  const [selectedTableName, setSelectedTableName] = useState<string>("");
+  const [columnNameList, setColumnNameList] = useState<SelectListType>([]);
+  const [dependentVariable, setDependentVariable] = useState<string>("");
+  const [explanatoryVariables, setExplanatoryVariables] = useState<string[]>(
     []
   );
+  const [isResultModal, setIsReusltModal] = useState<boolean>(false);
+  const [result, setResult] = useState<string>("");
 
   useEffect(() => {
     let ignore = false;
     async function loadData() {
       const resGetTableNameList = await getTableNameList();
-      for (const table of resGetTableNameList.result.tableNameList) {
-        setTableNameList((preTableNameList) => [
-          ...preTableNameList,
-          { value: table, name: table },
-        ]);
-      }
       const resGetColumnNameList = await getColumnNameList(
         resGetTableNameList.result.tableNameList[0]
       );
-      setColumnNameList(resGetColumnNameList.result.columnNameList);
+      if (!ignore) {
+        for (const table of resGetTableNameList.result.tableNameList) {
+          setTableNameList((preTableNameList) => [
+            ...preTableNameList,
+            { value: table, name: table },
+          ]);
+        }
+        setSelectedTableName(resGetTableNameList.result.tableNameList[0]);
+        for (const column of resGetColumnNameList.result.columnNameList) {
+          setColumnNameList((preColumnNameList) => [
+            ...preColumnNameList,
+            { value: column, name: column },
+          ]);
+        }
+        setDependentVariable(resGetColumnNameList.result.columnNameList[0]);
+      }
     }
-    loadData();
+    if (isLinearRegressionModal) {
+      loadData();
+    }
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [isLinearRegressionModal]);
 
-  function handleItemClick(item: String) {
+  function handleItemClick(item: string) {
     setExplanatoryVariables((preExplanatoryVariable) => [
       ...preExplanatoryVariable,
       item,
     ]);
   }
 
-  function changeTableName(event: ChangeEvent<HTMLSelectElement>) {}
+  function changeTableName(event: ChangeEvent<HTMLSelectElement>) {
+    setSelectedTableName(event.target.value);
+  }
 
-  function executeAnalysis() {}
+  function changeDependentVariable(event: ChangeEvent<HTMLSelectElement>) {
+    setDependentVariable(event.target.value);
+  }
+
+  async function executeAnalysis() {
+    const reqLinearRegression: ReqLinearRegressionType = {
+      tableName: selectedTableName,
+      dependentVariable: dependentVariable,
+      explanatoryVariables: explanatoryVariables,
+    };
+    console.log(reqLinearRegression);
+    const resLinearRegression = await linearRegression(reqLinearRegression);
+    console.log(resLinearRegression.result.regressionResult);
+    setResult(resLinearRegression.result.regressionResult);
+    openResultModal();
+  }
+
+  function openResultModal() {
+    setIsReusltModal(true);
+  }
+
+  function closeResultModal() {
+    setIsReusltModal(false);
+  }
 
   return (
-    <Modal
-      isOpenModal={isLinearRegressionModal}
-      modalTitle={t("LinearRegression.Title")}
-      submitButtonName={t("LinearRegression.Execute")}
-      submit={executeAnalysis}
-      close={close}
-      modalSize="max-w-2xl"
-    >
-      <div className="p-3">
-        <div className="p-4 rounded-lg text-right text-lg content-center">
-          {t("SaveFileModal.TableName")}
-        </div>
-        <Select
-          optionList={tableNameList}
-          selectFunc={(event: ChangeEvent<HTMLSelectElement>) =>
-            changeTableName(event)
-          }
-        ></Select>
-      </div>
-      <div className="w-1/3 bg-gray-100 p-4">
-        <h2 className="text-xl font-bold mb-4">候補リスト</h2>
-        <ul className="space-y-2">
-          {columnNameList.map((columnName, index) => (
-            <li
-              key={index}
-              className="cursor-pointer p-2 bg-white shadow hover:bg-blue-100 rounded"
-              onClick={() => handleItemClick(columnName)}
-            >
-              {columnName}
-            </li>
-          ))}
-        </ul>
-      </div>
-      {/* 右側の詳細表示枠 */}
-      <div className="w-2/3 bg-white p-4">
-        <h2 className="text-xl font-bold mb-4">選択された項目</h2>
-        {explanatoryVariables ? (
-          <div className="p-4 bg-blue-50 shadow rounded">
-            <p className="text-lg">{explanatoryVariables}</p>
+    <>
+      <Modal
+        isOpenModal={isLinearRegressionModal && !isResultModal}
+        modalTitle={t("LinearRegression.Title")}
+        submitButtonName={t("LinearRegression.Execute")}
+        submit={executeAnalysis}
+        close={close}
+        modalSize="max-w-2xl"
+      >
+        <div className="p-3">
+          <div className="grid grid-cols-3 gap-4 leading-6">
+            <div className="py-1 px-4 rounded-lg text-right text-lg content-center">
+              {t("LinearRegression.TableName")}
+            </div>
+            <Select
+              optionList={tableNameList}
+              selectFunc={(event: ChangeEvent<HTMLSelectElement>) =>
+                changeTableName(event)
+              }
+            ></Select>
           </div>
-        ) : (
-          <p className="text-gray-500">項目を選択してください。</p>
-        )}
-      </div>
-    </Modal>
+        </div>
+        <div className="p-3">
+          <div className="grid grid-cols-3 gap-4 leading-6">
+            <div className="py-1 px-4 rounded-lg text-right text-lg content-center">
+              {t("LinearRegression.DependentVariable")}
+            </div>
+            <Select
+              optionList={columnNameList}
+              selectFunc={(event: ChangeEvent<HTMLSelectElement>) =>
+                changeDependentVariable(event)
+              }
+            ></Select>
+          </div>
+        </div>
+        <div className="flex">
+          <div className="w-1/2 bg-gray-100 p-4">
+            <h2 className="text-xl font-bold mb-4">
+              {t("LinearRegression.ColumnName")}
+            </h2>
+            <ul className="space-y-2">
+              {columnNameList.map((columnName, index) => (
+                <li
+                  key={index}
+                  className="cursor-pointer p-2 bg-white shadow hover:bg-blue-100 rounded"
+                  onClick={() => handleItemClick(columnName.name)}
+                >
+                  {columnName.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="w-1/2 bg-white p-4">
+            <h2 className="text-xl font-bold mb-4">
+              {t("LinearRegression.ExplanatoryVariable")}
+            </h2>
+            {explanatoryVariables.map((explanatoryVariable, index) => (
+              <div key={index} className="p-2 bg-blue-50 shadow">
+                <p className="text">{explanatoryVariable}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpenModal={isResultModal}
+        modalTitle={t("RegressionResult.Title")}
+        submitButtonName=""
+        submit={executeAnalysis}
+        close={closeResultModal}
+        modalSize="max-w-3xl"
+      >
+        <pre className="whitespace-pre-wrap text-gray-800 text-center">
+          {result}
+        </pre>
+      </Modal>
+    </>
   );
 }
