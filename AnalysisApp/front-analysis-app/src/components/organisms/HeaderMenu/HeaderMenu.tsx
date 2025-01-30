@@ -130,6 +130,7 @@ export function HeaderMenu({ setTableInfos, setTableList }: HeaderMenuProps) {
         isGenerateSimulationDataModal={isGenerateSimulationDataModal}
         close={closeGenerateDataModal}
         setTableInfos={setTableInfos}
+        setTableList={setTableList}
       />
       <LinearRegressionModal
         isLinearRegressionModal={isLinearRegressionModal}

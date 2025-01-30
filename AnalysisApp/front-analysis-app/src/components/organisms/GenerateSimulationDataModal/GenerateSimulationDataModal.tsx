@@ -13,19 +13,21 @@ import {
 import { generateSimulationData } from "../../../functiom/restApis";
 import { ReqGenerateSimulationDataType } from "../../../types/apiTypes";
 import { getTableInfo } from "../../../functiom/internalFunctions";
-import { TableInfosType } from "../../../types/stateTypes";
+import { TableInfosType, TableListType } from "../../../types/stateTypes";
 import { Select } from "../../molecules/Select/Select";
 
 type SaveFileModalProps = {
   isGenerateSimulationDataModal: boolean;
   close: () => void;
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
+  setTableList: Dispatch<SetStateAction<TableListType>>;
 };
 
 export function GenerateDataModal({
   isGenerateSimulationDataModal,
   close,
   setTableInfos,
+  setTableList,
 }: SaveFileModalProps) {
   const { t } = useTranslation();
   type InputValueType = {
@@ -255,6 +257,7 @@ export function GenerateDataModal({
         resGenerateSimulationData.result.tableName
       );
       setTableInfos((preTableInfos) => [...preTableInfos, tableInfo]);
+      setTableList((preTableList) => [...preTableList, tableInfo.tableName]);
       close();
     } else {
       window.alert(resGenerateSimulationData.message);
