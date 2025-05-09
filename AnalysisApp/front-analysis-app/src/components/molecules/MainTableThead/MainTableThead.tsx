@@ -1,10 +1,10 @@
-import React from 'react';
+import React from "react";
 
-import { MainTableTh } from '../../atoms/MainTableTh/MainTableTh';
+import { MainTableTh } from "../../atoms/MainTableTh/MainTableTh";
 
 type MainTableTheadProps = {
-  columnNameList: string[]
-}
+  columnNameList: string[];
+};
 
 export function MainTableThead({ columnNameList }: MainTableTheadProps) {
   return (
@@ -15,5 +15,5 @@ export function MainTableThead({ columnNameList }: MainTableTheadProps) {
         ))}
       </tr>
     </thead>
-  )
+  );
 }

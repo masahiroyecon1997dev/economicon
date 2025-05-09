@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 
+import { HEADER_MENU_HEIGHT } from "../../common/constant";
 import { TableInfosType, TableListType } from "../../types/stateTypes";
 import { getTableNameList } from "../../functiom/restApis";
 
@@ -27,10 +28,13 @@ export function App() {
 
   return (
     <div className="App h-full">
-      <div className={`h-[40px]`}>
+      <div style={{ height: `${HEADER_MENU_HEIGHT}px` }}>
         <HeaderMenu setTableInfos={setTableInfos} setTableList={setTableList} />
       </div>
-      <div className={`flex h-[calc(100%-40px)]`}>
+      <div
+        className="flex"
+        style={{ height: `calc(100% - ${HEADER_MENU_HEIGHT}px)` }}
+      >
         <LeftSideMenu
           tableInfos={tableInfos}
           setTableInfos={setTableInfos}
