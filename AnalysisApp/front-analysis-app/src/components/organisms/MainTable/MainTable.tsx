@@ -11,8 +11,8 @@ type MainTableProps = {
 
 export function MainTable({ tableInfo }: MainTableProps) {
   return (
-    <div className="overflow-x-auto">
-      <table className="bg-white border border-gray-300">
+    <div>
+      <table className="border-separate border-spacing-0 border-l border-r bg-white border-gray-300 table-auto">
         <MainTableThead
           columnNameList={tableInfo.columnNameList}
         ></MainTableThead>

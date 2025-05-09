@@ -3,7 +3,7 @@
     "tasks": [
         {
             "type": "shell",
-            "command": "cd front-analysis-app && yarn run start",
+            "command": "cd front-analysis-app && yarn start",
             "label": "yarn: start",
             "detail": "webpack-dev-server",
             "group": {
