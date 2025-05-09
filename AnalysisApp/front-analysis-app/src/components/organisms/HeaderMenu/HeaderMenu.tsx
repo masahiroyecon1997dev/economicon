@@ -22,6 +22,7 @@ export function HeaderMenu({ setTableInfos, setTableList }: HeaderMenuProps) {
     useState<boolean>(false);
   const [isLinearRegressionModal, setIsLinearRegressionModal] =
     useState<boolean>(false);
+  const [isCalculateModal, setIsCalculateModal] = useState<boolean>(false);
 
   const fileDropdownListElement = [
     {
