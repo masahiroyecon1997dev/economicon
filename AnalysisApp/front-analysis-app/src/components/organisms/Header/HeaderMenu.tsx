@@ -1,20 +1,20 @@
-import React, { useState, Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TableInfosType, TableListType } from '../../../types/stateTypes';
+import { TableInfosType } from '../../../types/stateTypes';
 
 import { HeaderMenuDropdown } from '../../molecules/HeaderMenuDropdown/HeaderMenuDropdown';
-import { ImportFileModal } from '../Modal/ImportFileModal';
-import { SaveFileModal } from '../Modal/SaveFileModal';
+import { Calculate } from '../Modal/Calculate';
 import { GenerateDataModal } from '../Modal/GenerateSimulationDataModal';
+import { ImportFileModal } from '../Modal/ImportFileModal';
 import { LinearRegressionModal } from '../Modal/LinearRegressionModal';
+import { SaveFileModal } from '../Modal/SaveFileModal';
 
 type HeaderMenuProps = {
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
-  setTableList: Dispatch<SetStateAction<TableListType>>;
 };
 
-export function HeaderMenu({ setTableInfos, setTableList }: HeaderMenuProps) {
+export function HeaderMenu({ setTableInfos }: HeaderMenuProps) {
   const { t } = useTranslation();
   const [isImportFileModal, setIsImportFileModal] = useState<boolean>(false);
   const [isSaveFileModal, setIsSaveFileModal] = useState<boolean>(false);
@@ -42,7 +42,13 @@ export function HeaderMenu({ setTableInfos, setTableList }: HeaderMenuProps) {
       dropdownListFunction: openImportFileModal,
     },
   ];
-  const linearRegressionDropdownListElement = [
+  const addColumnDropdownListElement = [
+    {
+      dropdownListName: t('HeaderMenu.Calculate'),
+      dropdownListFunction: openCalculateModal,
+    },
+  ];
+  const modelDropdownListElement = [
     {
       dropdownListName: t('HeaderMenu.LinearRegression'),
       dropdownListFunction: openLinearRegressionModal,
@@ -85,6 +91,14 @@ export function HeaderMenu({ setTableInfos, setTableList }: HeaderMenuProps) {
     setIsLinearRegressionModal(false);
   }
 
+  function openCalculateModal() {
+    setIsCalculateModal(true);
+  }
+
+  function closeCalculateModal() {
+    setIsCalculateModal(false);
+  }
+
   return (
     <>
       <div className="flex bg-gray-100 border-b border-gray-300 relative">
@@ -99,8 +113,13 @@ export function HeaderMenu({ setTableInfos, setTableList }: HeaderMenuProps) {
           </HeaderMenuDropdown>
         </div>
         <div className="relative">
-          <HeaderMenuDropdown dropdownListElement={linearRegressionDropdownListElement}>
-            {t('HeaderMenu.RegressionAnalysis')}
+          <HeaderMenuDropdown dropdownListElement={addColumnDropdownListElement}>
+            {t('HeaderMenu.AddColumn')}
+          </HeaderMenuDropdown>
+        </div>
+        <div className="relative">
+          <HeaderMenuDropdown dropdownListElement={modelDropdownListElement}>
+            {t('HeaderMenu.Model')}
           </HeaderMenuDropdown>
         </div>
         {/* <button className="px-4 py-2 hover:bg-gray-200">編集</button>
@@ -115,15 +134,14 @@ export function HeaderMenu({ setTableInfos, setTableList }: HeaderMenuProps) {
         isImportFileModal={isImportFileModal}
         close={closeImportFileModal}
         setTableInfos={setTableInfos}
-        setTableList={setTableList}
       />
       <SaveFileModal isSaveFileModal={isSaveFileModal} close={closeSaveFileModal} />
       <GenerateDataModal
         isGenerateSimulationDataModal={isGenerateSimulationDataModal}
         close={closeGenerateDataModal}
         setTableInfos={setTableInfos}
-        setTableList={setTableList}
       />
+      <Calculate isCalculateModal={isCalculateModal} close={closeCalculateModal} />
       <LinearRegressionModal
         isLinearRegressionModal={isLinearRegressionModal}
         close={closeLinearRegressionModal}
