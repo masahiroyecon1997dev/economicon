@@ -11,10 +11,14 @@ class GetColumnNameList(APIView):
             data = tables
             table_name: str = request.query_params.get('tableName')
             column_names = data[table_name].columns
-            result = {'code': 0, 'result': {'columnNameList': column_names},
+            columns = []
+            for i, name in enumerate(column_names):
+                dictionary = {"id": i + 1, "name": name}
+                columns.append(dictionary)
+            result = {'code': 0, 'result': {'columnList': columns},
                       'message': ''}
             return Response(data=result, status=status.HTTP_200_OK)
         except Exception as e:
-            result = {'code': -9999, 'result': {'columnNameList': []},
+            result = {'code': -9999, 'result': {'columnList': []},
                       'message': e}
             return Response(data=result, status=status.HTTP_200_OK)

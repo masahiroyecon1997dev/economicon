@@ -1,8 +1,7 @@
-import React, { ReactNode, useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import React, { ReactNode, useEffect, useState } from 'react';
 
-import { ModalHeader } from "../../molecules/ModalHeader/ModalHeader";
-import { ModalFooter } from "../../molecules/ModalFooter/ModalFooter";
+import { ModalFooter } from './ModalFooter';
+import { ModalHeader } from './ModalHeader';
 
 type ModalProps = {
   isOpenModal: boolean;
@@ -23,7 +22,6 @@ export function Modal({
   close,
   modalSize,
 }: ModalProps) {
-  const { t } = useTranslation();
   const [isModalBlock, setIsModalblock] = useState<boolean>(false);
 
   useEffect(() => {
@@ -39,12 +37,12 @@ export function Modal({
   return (
     <div
       className={`fixed inset-0 z-50 justify-center items-center overflow-y-auto overflow-x-hidden w-full md:inset-0 bg-gray-900/50 ${
-        isModalBlock ? "flex" : "hidden"
+        isModalBlock ? 'flex' : 'hidden'
       }`}
     >
       <div
         className={`relative p-4 w-full ${modalSize} max-h-full transform ${
-          isOpenModal ? "animate-fade-in-down" : "animate-fade-out-up"
+          isOpenModal ? 'animate-fade-in-down' : 'animate-fade-out-up'
         }`}
       >
         <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
