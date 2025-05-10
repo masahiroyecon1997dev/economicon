@@ -16,12 +16,12 @@ ENV LANGUAGE ja_JP:ja
 ENV LC_ALL ja_JP.UTF-8
 ENV TZ JST-9
 
-RUN dnf -y install python3.11 python3.11-devel python3.11-pip python3.11-setuptools python3.11-pip-wheel
+RUN dnf -y install python3.12 python3.12-devel python3.12-pip python3.12-setuptools python3.12-pip-wheel
 RUN rm /usr/bin/python3
-RUN ln -s /usr/bin/python3.11 /usr/bin/python3
-RUN python3.11 -m pip install matplotlib pandas polars Flask polars django django-filter djangorestframework django-cors-headers wooldridge statsmodels
+RUN ln -s /usr/bin/python3.12 /usr/bin/python3
+RUN python3.12 -m pip install matplotlib pandas polars Flask polars django django-filter djangorestframework django-cors-headers wooldridge statsmodels
 
-RUN curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+RUN curl -fsSL https://rpm.nodesource.com/setup_22.x | bash -
 RUN dnf install nodejs
 RUN npm install -g yarn
 RUN npm install -g typescript
