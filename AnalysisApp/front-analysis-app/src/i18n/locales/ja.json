@@ -49,13 +49,17 @@
     "ErrorVariance": "誤差項の分散",
     "Generate": "作成"
   },
-  "LinearRegression": {
+  "LinearRegressionModal": {
     "Title": "線形回帰分析",
     "TableName": "テーブル名",
     "ColumnName": "列名",
     "ExplanatoryVariable": "説明変数",
     "DependentVariable": "被説明変数",
     "Execute": "分析実行"
+  },
+  "CalculateModal": {
+    "Title": "計算結果の列を作成する",
+    "Execute": "作成"
   },
   "RegressionResult": {
     "Title": "分析結果"

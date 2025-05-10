@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
-import { HEADER_MENU_HEIGHT } from "../../common/constant";
-import { TableInfosType, TableListType } from "../../types/stateTypes";
-import { getTableNameList } from "../../functiom/restApis";
+import { HEADER_MENU_HEIGHT } from '../../common/constant';
+import { TableInfosType, TableListType } from '../../types/stateTypes';
+import { getTableNameList } from '../../functiom/restApis';
 
-import { HeaderMenu } from "../organisms/HeaderMenu/HeaderMenu";
-import { LeftSideMenu } from "../organisms/LeftSideMenu/LeftSideMenu";
-import { MainPanel } from "../organisms/MainPanel/MainPanel";
+import { HeaderMenu } from '../organisms/Header/HeaderMenu';
+import { LeftSideMenu } from '../organisms/MainPanel/LeftSideMenu';
+import { MainPanel } from '../organisms/MainPanel/MainPanel';
 
 export function App() {
   const [tableInfos, setTableInfos] = useState<TableInfosType>([]);
@@ -31,10 +31,7 @@ export function App() {
       <div style={{ height: `${HEADER_MENU_HEIGHT}px` }}>
         <HeaderMenu setTableInfos={setTableInfos} setTableList={setTableList} />
       </div>
-      <div
-        className="flex"
-        style={{ height: `calc(100% - ${HEADER_MENU_HEIGHT}px)` }}
-      >
+      <div className="flex" style={{ height: `calc(100% - ${HEADER_MENU_HEIGHT}px)` }}>
         <LeftSideMenu
           tableInfos={tableInfos}
           setTableInfos={setTableInfos}

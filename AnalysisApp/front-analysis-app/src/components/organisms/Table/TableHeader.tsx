@@ -1,0 +1,30 @@
+import { useDroppable } from '@dnd-kit/core';
+
+import React from 'react';
+import { ColumnType } from '../../../types/commonTypes';
+import { TableHeaderCell } from '../../atoms/TableCell/TableHeaderCell';
+import { DraggableTableHeader } from '../../molecules/Table/DraggableTableHeader';
+
+type TableHeaderProps = {
+  columns: ColumnType[];
+  handleContextMenu: (event: React.MouseEvent, type: 'header', targetId: string) => void;
+};
+
+export function TableHeader({ columns, handleContextMenu }: TableHeaderProps) {
+  const { isOver, setNodeRef } = useDroppable({ id: 'column-droppable' });
+
+  return (
+    <thead ref={setNodeRef} className={isOver ? 'bg-gray-500' : ''}>
+      <tr>
+        <TableHeaderCell>#</TableHeaderCell>
+        {columns.map(column => (
+          <DraggableTableHeader
+            key={column.id}
+            column={column}
+            handleContextMenu={handleContextMenu}
+          />
+        ))}
+      </tr>
+    </thead>
+  );
+}
