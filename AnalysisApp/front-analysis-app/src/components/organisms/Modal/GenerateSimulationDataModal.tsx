@@ -5,7 +5,7 @@ import { checkInteger, checkNumber, checkRequired } from '../../../functiom/chec
 import { getTableInfo } from '../../../functiom/internalFunctions';
 import { generateSimulationData } from '../../../functiom/restApis';
 import { ReqGenerateSimulationDataType } from '../../../types/apiTypes';
-import { TableInfosType, TableListType } from '../../../types/stateTypes';
+import { TableInfosType } from '../../../types/stateTypes';
 import { SubmitButton } from '../../atoms/Button/SubmitButton';
 import { InputText } from '../../atoms/Input/InputText';
 import { InputTextField } from '../../molecules/InputField/InputTextField';
@@ -16,14 +16,12 @@ type SaveFileModalProps = {
   isGenerateSimulationDataModal: boolean;
   close: () => void;
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
-  setTableList: Dispatch<SetStateAction<TableListType>>;
 };
 
 export function GenerateDataModal({
   isGenerateSimulationDataModal,
   close,
   setTableInfos,
-  setTableList,
 }: SaveFileModalProps) {
   const { t } = useTranslation();
   type InputValueType = {
@@ -248,7 +246,6 @@ export function GenerateDataModal({
     if (resGenerateSimulationData.code === 0) {
       const tableInfo = await getTableInfo(resGenerateSimulationData.result.tableName);
       setTableInfos(preTableInfos => [...preTableInfos, tableInfo]);
-      setTableList(preTableList => [...preTableList, tableInfo.tableName]);
       close();
     } else {
       window.alert(resGenerateSimulationData.message);

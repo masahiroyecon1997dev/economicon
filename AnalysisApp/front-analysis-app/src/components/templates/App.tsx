@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { HEADER_MENU_HEIGHT } from '../../common/constant';
-import { TableInfosType, TableListType } from '../../types/stateTypes';
 import { getTableNameList } from '../../functiom/restApis';
+import { TableInfosType } from '../../types/stateTypes';
 
+import { getTableInfo } from '../../functiom/internalFunctions';
 import { HeaderMenu } from '../organisms/Header/HeaderMenu';
-import { LeftSideMenu } from '../organisms/MainPanel/LeftSideMenu';
 import { MainPanel } from '../organisms/MainPanel/MainPanel';
 
 export function App() {
   const [tableInfos, setTableInfos] = useState<TableInfosType>([]);
-  const [tableList, setTableList] = useState<TableListType>([]);
 
   useEffect(() => {
     let ignore = false;
     async function initializeData() {
       const resGetTableNames = await getTableNameList();
-      if (!ignore) {
-        setTableList(resGetTableNames.result.tableNameList);
+      for (const tableName of resGetTableNames.result.tableNameList) {
+        const tableInfo = await getTableInfo(tableName);
+        if (!ignore) {
+          console.log('aaa');
+          setTableInfos(preTableInfos => [...preTableInfos, tableInfo]);
+        }
       }
     }
     initializeData();
@@ -29,14 +32,14 @@ export function App() {
   return (
     <div className="App h-full">
       <div style={{ height: `${HEADER_MENU_HEIGHT}px` }}>
-        <HeaderMenu setTableInfos={setTableInfos} setTableList={setTableList} />
+        <HeaderMenu setTableInfos={setTableInfos} />
       </div>
       <div className="flex" style={{ height: `calc(100% - ${HEADER_MENU_HEIGHT}px)` }}>
-        <LeftSideMenu
+        {/* <LeftSideMenu
           tableInfos={tableInfos}
           setTableInfos={setTableInfos}
           tableList={tableList}
-        ></LeftSideMenu>
+        ></LeftSideMenu> */}
         <MainPanel tableInfos={tableInfos}></MainPanel>
       </div>
     </div>
