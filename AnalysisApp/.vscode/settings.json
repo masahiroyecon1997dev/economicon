@@ -34,6 +34,16 @@
   // 行の折り返し表示
   "editor.wordWrap": "off",
   // 名前重複時の名前付け規則
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // デフォルトのフォーマッターをPrettierに設定
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    // 保存時にESLintの自動修正を実行
+    "source.organizeImports": "explicit"
+    // importの自動整理
+  },
+  "files.autoSave": "onFocusChange",
+  // フォーカスが外れたときに自動保存
   "explorer.incrementalNaming": "smart",
   // 言語に対するファイルの関連付け
   "files.associations": {
@@ -93,5 +103,17 @@
     "editor.insertSpaces": false,
     // 行の折り返し表示
     "editor.wordWrap": "off"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

@@ -1,26 +1,46 @@
-export type ResImportCsvType = { code: number, result: { tableName: string }, message: string };
-export type ResOutputCsvType = { code: number, result: { csvData: string }, message: string };
-export type ResFetchDataToJsonType = { code: number, result: { tableName: string, data: string }, message: string };
-export type ResGetTableNameListType = { code: number, result: { tableNameList: string[] }, message: string };
-export type ResGetColumnNameListType = { code: number, result: { columnNameList: string[] }, message: string };
-export type ResGenerateSimulationDataType = { code: number, result: { tableName: string }, message: string };
-export type ResLinearRegressionType = { code: number, result: {regressionResult: string}, message: string };
+import { ColumnType } from './commonTypes';
 
-
+export type ResImportCsvType = { code: number; result: { tableName: string }; message: string };
+export type ResOutputCsvType = { code: number; result: { csvData: string }; message: string };
+export type ResFetchDataToJsonType = {
+  code: number;
+  result: { tableName: string; data: string };
+  message: string;
+};
+export type ResGetTableNameListType = {
+  code: number;
+  result: { tableNameList: string[] };
+  message: string;
+};
+export type ResGetColumnListType = {
+  code: number;
+  result: { columnList: ColumnType[] };
+  message: string;
+};
+export type ResGenerateSimulationDataType = {
+  code: number;
+  result: { tableName: string };
+  message: string;
+};
+export type ResLinearRegressionType = {
+  code: number;
+  result: { regressionResult: string };
+  message: string;
+};
 
 export type ReqGenerateSimulationDataType = {
-  tableName: string,
-  numSamples: number,
+  tableName: string;
+  numSamples: number;
   dataStructure: {
-    columnName: string,
-    dataType: string,
-    value1: number,
-    value2: number
+    columnName: string;
+    dataType: string;
+    value1: number;
+    value2: number;
   }[];
 };
 
 export type ReqLinearRegressionType = {
-  tableName: string,
-  dependentVariable: string,
-  explanatoryVariables: string[]
-}
+  tableName: string;
+  dependentVariable: string;
+  explanatoryVariables: string[];
+};
