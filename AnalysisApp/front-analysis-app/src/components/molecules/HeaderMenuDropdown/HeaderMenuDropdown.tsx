@@ -30,7 +30,7 @@ export function HeaderMenuDropdown({ children, dropdownListElement }: HeaderMenu
     <div onMouseEnter={() => onMouseEvent()} onMouseLeave={() => leaveMouseEvent()}>
       <HeaderMenuButton clickEvent={() => clickMenu()}>{children}</HeaderMenuButton>
       {openDropdown && (
-        <div className="absolute bg-white shadow-md rounded-md">
+        <div className="absolute bg-white shadow-md z-50">
           {dropdownListElement.map((item, i) => (
             <HeaderMenuDropdownButton key={i} clickEvent={item.dropdownListFunction}>
               {item.dropdownListName}

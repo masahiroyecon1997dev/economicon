@@ -94,8 +94,8 @@ export function LinearRegressionModal({
     <>
       <Modal
         isOpenModal={isLinearRegressionModal && !isResultModal}
-        modalTitle={t('LinearRegression.Title')}
-        submitButtonName={t('LinearRegression.Execute')}
+        modalTitle={t('LinearRegressionModal.Title')}
+        submitButtonName={t('LinearRegressionModal.Execute')}
         submit={executeAnalysis}
         close={close}
         modalSize="max-w-2xl"
@@ -103,7 +103,7 @@ export function LinearRegressionModal({
         <div className="p-3">
           <div className="grid grid-cols-3 gap-4 leading-6">
             <div className="py-1 px-4 rounded-lg text-right text-lg content-center">
-              {t('LinearRegression.TableName')}
+              {t('LinearRegressionModal.TableName')}
             </div>
             <Select
               optionList={tableNameList}
@@ -114,7 +114,7 @@ export function LinearRegressionModal({
         <div className="p-3">
           <div className="grid grid-cols-3 gap-4 leading-6">
             <div className="py-1 px-4 rounded-lg text-right text-lg content-center">
-              {t('LinearRegression.DependentVariable')}
+              {t('LinearRegressionModal.DependentVariable')}
             </div>
             <Select
               optionList={columnNameList}
@@ -124,7 +124,7 @@ export function LinearRegressionModal({
         </div>
         <div className="flex">
           <div className="w-1/2 bg-gray-100 p-4">
-            <h2 className="text-xl font-bold mb-4">{t('LinearRegression.ColumnName')}</h2>
+            <h2 className="text-xl font-bold mb-4">{t('LinearRegressionModal.ColumnName')}</h2>
             <ul className="space-y-2">
               {columnNameList.map((columnName, index) => (
                 <li
@@ -138,7 +138,9 @@ export function LinearRegressionModal({
             </ul>
           </div>
           <div className="w-1/2 bg-white p-4">
-            <h2 className="text-xl font-bold mb-4">{t('LinearRegression.ExplanatoryVariable')}</h2>
+            <h2 className="text-xl font-bold mb-4">
+              {t('LinearRegressionModal.ExplanatoryVariable')}
+            </h2>
             {explanatoryVariables.map((explanatoryVariable, index) => (
               <div key={index} className="p-2 bg-blue-50 shadow">
                 <p className="text">{explanatoryVariable}</p>

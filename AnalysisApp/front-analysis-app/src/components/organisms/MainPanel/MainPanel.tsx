@@ -13,6 +13,16 @@ export function MainPanel({ tableInfos }: MainPanelProps) {
 
   return (
     <div className="flex flex-col float-right w-full min-h-full">
+      <div
+        className="flex-grow overflow-y-auto"
+        style={{
+          height: `calc(100vh - ${HEADER_MENU_HEIGHT}px - ${TABLE_TAB_HEIGHT}px)]`,
+        }}
+      >
+        {tableInfos.map((table, index) => (
+          <MainTable key={index} tableInfo={table}></MainTable>
+        ))}
+      </div>
       <div style={{ height: `${HEADER_MENU_HEIGHT}px` }}>
         <div className="flex">
           {tableInfos.map((table, index) => (
@@ -26,16 +36,6 @@ export function MainPanel({ tableInfos }: MainPanelProps) {
             </button>
           ))}
         </div>
-      </div>
-      <div
-        className="flex-grow overflow-y-auto"
-        style={{
-          height: `calc(100vh - ${HEADER_MENU_HEIGHT}px - ${TABLE_TAB_HEIGHT}px)]`,
-        }}
-      >
-        {tableInfos.map((table, index) => (
-          <MainTable key={index} tableInfo={table}></MainTable>
-        ))}
       </div>
     </div>
   );

@@ -3,10 +3,15 @@ import React from 'react';
 type HeaderMenuButtonProps = {
   children: string;
   clickEvent: () => void;
-}
+};
 
-export function HeaderMenuButton({children, clickEvent}: HeaderMenuButtonProps) {
+export function HeaderMenuButton({ children, clickEvent }: HeaderMenuButtonProps) {
   return (
-    <button className="px-4 py-2 hover:bg-gray-200 whitespace-nowrap" onClick={() => clickEvent()}>{children}</button>
+    <button
+      className="w-24 px-4 py-2 hover:bg-gray-200 whitespace-nowrap text-left"
+      onClick={() => clickEvent()}
+    >
+      {children}
+    </button>
   );
 }
