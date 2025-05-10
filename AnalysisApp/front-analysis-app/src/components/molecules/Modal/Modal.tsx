@@ -38,7 +38,7 @@ export function Modal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 justify-center items-center overflow-y-auto overflow-x-hidden w-full md:inset-0 bg-gray-900 bg-opacity-50 ${
+      className={`fixed inset-0 z-50 justify-center items-center overflow-y-auto overflow-x-hidden w-full md:inset-0 bg-gray-900/50 ${
         isModalBlock ? "flex" : "hidden"
       }`}
     >

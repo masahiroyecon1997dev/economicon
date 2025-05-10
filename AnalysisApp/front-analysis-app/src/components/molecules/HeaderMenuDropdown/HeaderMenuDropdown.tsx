@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 import { HeaderMenuButton } from "../../atoms/HeaderMenuButton/HeaderMenuButton";
-import { HeaderMenuDropdownButton } from "../../atoms/HeaderMenuDropDownButton/HeaderMenuDropDownButton";
+import { HeaderMenuDropdownButton } from "../../atoms/HeaderMenuDropdownButton/HeaderMenuDropdownButton";
 
 type HeaderMenuDropdownProps = {
   children: string;
@@ -38,7 +38,7 @@ export function HeaderMenuDropdown({
         {children}
       </HeaderMenuButton>
       {openDropdown && (
-        <div className="absolute bg-white shadow-md border rounded-md">
+        <div className="absolute bg-white shadow-md rounded-md">
           {dropdownListElement.map((item, i) => (
             <HeaderMenuDropdownButton
               key={i}
