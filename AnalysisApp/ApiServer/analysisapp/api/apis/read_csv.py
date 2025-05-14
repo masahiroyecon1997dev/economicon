@@ -7,7 +7,7 @@ from .tables import tables
 
 
 class ReadCsv(APIView):
-    def get(self, request):
+    def post(self, request):
         try:
             data = tables
             path: str = request.query_params.get('path')
