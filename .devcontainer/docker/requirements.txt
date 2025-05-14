@@ -1,0 +1,15 @@
+pipdeptree
+pip-licenses
+mypy
+matplotlib
+numpy
+pandas
+polars
+Flask
+polars
+django
+django-filter
+djangorestframework
+django-cors-headers
+wooldridge
+statsmodels
