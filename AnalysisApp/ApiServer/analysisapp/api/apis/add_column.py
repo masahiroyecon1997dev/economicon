@@ -9,6 +9,9 @@ from .tables import tables
 
 
 class AddColumn(APIView):
+    """
+    aaa
+    """
     def post(self, request):
         try:
             data = tables
