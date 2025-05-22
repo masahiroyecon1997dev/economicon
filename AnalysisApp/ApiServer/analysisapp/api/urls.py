@@ -9,20 +9,22 @@ from .apis import get_table_name_list
 from .apis import get_column_name_list
 from .apis import generate_simulation_data
 from .apis import linear_regression
+from .apis import add_column
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('read_csv', read_csv.ReadCsv.as_view()),
-    path('write_csv', write_csv.WriteCsv.as_view()),
-    path('import_csv', import_csv.ImportCsv.as_view()),
-    path('output_csv', output_csv.OutputCsv.as_view()),
-    path('fetch_data_to_json', fetch_data_to_json.FetchDataToJson.as_view()),
-    path('get_table_name_list', get_table_name_list.GetTableNameList
+    path('read-csv', read_csv.ReadCsv.as_view()),
+    path('write-csv', write_csv.WriteCsv.as_view()),
+    path('import-csv', import_csv.ImportCsv.as_view()),
+    path('output-csv', output_csv.OutputCsv.as_view()),
+    path('fetch-data_to_json', fetch_data_to_json.FetchDataToJson.as_view()),
+    path('get-table-name-list', get_table_name_list.GetTableNameList
          .as_view()),
-    path('get_column_name_list', get_column_name_list.GetColumnNameList
+    path('get-column-name-list', get_column_name_list.GetColumnNameList
          .as_view()),
-    path('generate_simulation_data', generate_simulation_data.
+    path('generate-simulation-data', generate_simulation_data.
          GenerateSimulationData.as_view()),
-    path('linear_regression', linear_regression.
-         LinearRegression.as_view())
+    path('linear-regression', linear_regression.
+         LinearRegression.as_view()),
+    path('add-column', add_column.AddColumn.as_view)
 ]
