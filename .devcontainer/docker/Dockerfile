@@ -10,6 +10,7 @@ RUN groupadd -g $GID masahiro \
     && useradd -m -u $UID -g $GID masahiro
 
 RUN dnf -y install jq git make tar gzip wget glibc-langpack-ja curl
+RUN dnf install gettext
 
 ENV LANG ja_JP.UTF-8
 ENV LANGUAGE ja_JP:ja
