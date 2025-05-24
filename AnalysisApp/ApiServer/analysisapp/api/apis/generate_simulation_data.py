@@ -5,7 +5,7 @@ import numpy as np
 import polars as pl
 import json
 
-from .tables import tables
+from .data.tables import tables
 
 
 class GenerateSimulationData(APIView):

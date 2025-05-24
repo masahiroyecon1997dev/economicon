@@ -16,6 +16,7 @@ yarn start: フロントエンド（react）の実行
 yarn lint: ESLintチェックの実行
 yarn lint:fix: ESLint自動修正の実行
 yarn format: Prettierでフォーマット
+python3 manage.py compilemessages -l ja(en): 多言語対応コンパイルファイル作成 
 
 ## 今後の課題
 1. ジョイン・ユニオン機能の追加（キーは同じ列名のみでいい）
