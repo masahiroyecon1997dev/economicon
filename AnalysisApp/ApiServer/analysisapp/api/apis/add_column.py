@@ -5,13 +5,11 @@ import numpy as np
 import polars as pl
 import json
 
-from .tables import tables
+from .data.tables import tables
 
 
 class AddColumn(APIView):
-    """
-    aaa
-    """
+
     def post(self, request):
         try:
             data = tables

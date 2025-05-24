@@ -115,5 +115,10 @@
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "python.testing.cwd": "${workspaceFolder}/ApiServer/analysisapp",
+  "python.testing.unittestArgs": ["-v", "1", "-p", "test_*.py", "api"],
+  "python.testing.pytestEnabled": false,
+  "python.testing.unittestEnabled": true,
+  "python.envFile": "${workspaceFolder}/.env"
 }

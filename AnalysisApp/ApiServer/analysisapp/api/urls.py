@@ -2,7 +2,8 @@ from django.urls import path
 from . import views
 from .apis import read_csv
 from .apis import write_csv
-from .apis import import_csv
+from .apis import import_csv_by_file
+from .apis import import_tsv_by_file
 from .apis import output_csv
 from .apis import fetch_data_to_json
 from .apis import get_table_name_list
@@ -15,7 +16,8 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('read-csv', read_csv.ReadCsv.as_view()),
     path('write-csv', write_csv.WriteCsv.as_view()),
-    path('import-csv', import_csv.ImportCsv.as_view()),
+    path('import-csv-by-file', import_csv_by_file.ImportCsvByFile.as_view()),
+    path('import-tsv-by-file', import_tsv_by_file.ImportTsvByFile.as_view()),
     path('output-csv', output_csv.OutputCsv.as_view()),
     path('fetch-data_to_json', fetch_data_to_json.FetchDataToJson.as_view()),
     path('get-table-name-list', get_table_name_list.GetTableNameList

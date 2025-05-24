@@ -16,7 +16,9 @@
                 "ms-python.vscode-pylance",
                 "ms-python.debugpy",
                 "ms-python.flake8",
-                "batisteo.vscode-django"
+                "batisteo.vscode-django",
+                "njpwerner.autodocstring",
+                "ms-python.autopep8"
             ]
         }
     },
