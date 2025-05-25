@@ -6,6 +6,8 @@ import polars as pl
 from .utilities.create_response import create_success_response
 from .utilities.create_response import create_error_response
 from .utilities.create_log import create_log_api_request
+from .utilities.validator.file_request_validators import validate_csv_request
+from .utilities.create_table_name import create_table_name_by_file_name
 from .data.tables import tables
 
 
@@ -15,33 +17,20 @@ class ImportCsvByFile(APIView):
         try:
             # リクエスト受け取りログ
             create_log_api_request(request)
-            data = tables
-            # ファイル存在判定
-            if 'file' not in request.data:
-                message = _("No file uploaded.")
-                return create_error_response(
-                    status.HTTP_400_BAD_REQUEST,
-                    message,
-                    request
-                )
-            uploaded_file = request.FILES["file"]
-            # csvチェック
-            if not uploaded_file.name.lower().endswith('.csv'):
-                message = _("Uploaded file is not a CSV file.")
-                return create_error_response(
-                    status.HTTP_400_BAD_REQUEST,
-                    message,
-                    request
-                )
+            # バリデーション
+            validation_error = validate_csv_request(request)
+            if validation_error:
+                return validation_error
+
             # polarsデータフレーム化
-            file_name: str = uploaded_file.name
-            table_name: str = file_name.split('.')[0]
-            data[table_name] = pl.read_csv(io.BytesIO(uploaded_file.read()))
+            uploaded_file = request.FILES['file']
+            table_name = create_table_name_by_file_name(uploaded_file.name,
+                                                        tables)
+            tables[table_name] = pl.read_csv(io.BytesIO(uploaded_file.read()))
             result = {'tableName': table_name}
             return create_success_response(
                 status.HTTP_200_OK,
                 result,
-                request
             )
         except pl.NoDataError as e:
             message = _("The uploaded CSV file is "
@@ -49,15 +38,14 @@ class ImportCsvByFile(APIView):
             return create_error_response(
                 status.HTTP_400_BAD_REQUEST,
                 message,
-                request,
                 e
             )
-        except pl.PanicException as e:
-            message = _("Failed to parse CSV file.")
+        except pl.ComputeError as e:
+            message = _("Failed to parse CSV file: "
+                        "Invalid format or encoding.")
             return create_error_response(
                 status.HTTP_400_BAD_REQUEST,
                 message,
-                request,
                 e
             )
         except Exception as e:
@@ -65,6 +53,5 @@ class ImportCsvByFile(APIView):
             return create_error_response(
                 status.HTTP_400_BAD_REQUEST,
                 message,
-                request,
                 e
             )

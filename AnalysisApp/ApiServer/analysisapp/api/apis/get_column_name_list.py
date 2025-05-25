@@ -13,7 +13,7 @@ class GetColumnNameList(APIView):
             column_names = data[table_name].columns
             columns = []
             for i, name in enumerate(column_names):
-                dictionary = {"id": i + 1, "name": name}
+                dictionary = {'id': i + 1, 'name': name}
                 columns.append(dictionary)
             result = {'code': 0, 'result': {'columnList': columns},
                       'message': ''}
