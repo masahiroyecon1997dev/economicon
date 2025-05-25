@@ -5,7 +5,7 @@ from .create_log import create_log_api_exception
 
 
 def create_success_response(
-    status_code: int, response_object: object, request=None
+    status_code: int, response_object: object
 ) -> Response:
     """_summary_
 
@@ -27,7 +27,7 @@ def create_success_response(
         'code': 'OK',
         'result': response_object
     }
-    create_log_api_success(request)
+    create_log_api_success()
     return Response(
         data=result,
         status=status_code
@@ -35,7 +35,7 @@ def create_success_response(
 
 
 def create_error_response(
-    status_code: int, message: str, request=None, exception_message=None
+    status_code: int, message: str, exception_message=None
 ) -> Response:
     """_summary_
     Parameters
@@ -54,7 +54,7 @@ def create_error_response(
         'code': 'NG',
         'message': message
     }
-    create_log_api_error(request, message)
+    create_log_api_error(message)
     if (exception_message is not None):
         create_log_api_exception(exception_message)
     return Response(
