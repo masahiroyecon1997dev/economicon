@@ -1,16 +1,17 @@
 from django.urls import path
 from . import views
-from .apis import read_csv
-from .apis import write_csv
-from .apis import import_csv_by_file
-from .apis import import_tsv_by_file
-from .apis import output_csv
-from .apis import fetch_data_to_json
-from .apis import get_table_name_list
-from .apis import get_column_name_list
-from .apis import generate_simulation_data
-from .apis import linear_regression
-from .apis import add_column
+from .apis import (read_csv,
+                   write_csv,
+                   import_csv_by_file,
+                   import_tsv_by_file,
+                   import_excel_by_file,
+                   output_csv,
+                   fetch_data_to_json,
+                   get_table_name_list,
+                   get_column_name_list,
+                   generate_simulation_data,
+                   linear_regression,
+                   add_column)
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -18,6 +19,8 @@ urlpatterns = [
     path('write-csv', write_csv.WriteCsv.as_view()),
     path('import-csv-by-file', import_csv_by_file.ImportCsvByFile.as_view()),
     path('import-tsv-by-file', import_tsv_by_file.ImportTsvByFile.as_view()),
+    path('import-excel-by-file', import_excel_by_file.ImportExcelByFile
+         .as_view()),
     path('output-csv', output_csv.OutputCsv.as_view()),
     path('fetch-data_to_json', fetch_data_to_json.FetchDataToJson.as_view()),
     path('get-table-name-list', get_table_name_list.GetTableNameList
