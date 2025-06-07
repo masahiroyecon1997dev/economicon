@@ -15,7 +15,8 @@ EXCEL_VALIDATOR_CONFIG = {
     'allowed_extensions': ('.xlsx', '.xls'),
     'allowed_mime_types': [
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.ms-excel'
+        'application/vnd.ms-excel',
+        'application/CDFV2'
     ]
 }
 
@@ -23,5 +24,15 @@ EXCEL_VALIDATOR_CONFIG = {
 CSV_VALIDATOR_CONFIG = {
     'max_size': 20 * 1024 * 1024,  # 20MB
     'allowed_extensions': ('.csv',),
-    'allowed_mime_types': ['text/csv', 'application/csv']
+    'allowed_mime_types': ['text/csv', 'application/csv', 'text/plain']
+}
+
+# Parquetファイル用設定
+PARQUET_VALIDATOR_CONFIG = {
+    'max_size': 20 * 1024 * 1024,  # 20MB
+    'allowed_extensions': ('.parquet',),
+    'allowed_mime_types': [
+        'application/octet-stream',
+        'application/vnd.apache.parquet',
+    ]
 }

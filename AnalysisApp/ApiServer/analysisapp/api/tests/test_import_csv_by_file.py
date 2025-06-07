@@ -36,17 +36,19 @@ class TestApiImportCsvByFile(APITestCase):
         問題なく読み込める
         """
         compare_data = pl.read_csv(
-            '/AnalysisApp/SampleData/OnlyHeader.csv',
+            '/AnalysisApp/SampleData/OnlyHeaderComma.csv',
             encoding='utf8')
-        test_file = File(open('/AnalysisApp/SampleData/OnlyHeader.csv', 'rb'))
-        uploaded_file = SimpleUploadedFile('OnlyHeader.csv', test_file.read(),
+        test_file = File(open('/AnalysisApp/SampleData/OnlyHeaderComma.csv',
+                              'rb'))
+        uploaded_file = SimpleUploadedFile('OnlyHeaderComma.csv',
+                                           test_file.read(),
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-csv-by-file',
                                     {'file': uploaded_file})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['code'], 'OK')
-        data = tables['OnlyHeader']
+        data = tables['OnlyHeaderComma']
         self.assertEqual(True, compare_data.equals(data))
 
     def test_no_file_uploaded(self):
@@ -57,21 +59,23 @@ class TestApiImportCsvByFile(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['code'], 'NG')
-        self.assertIn(response.data['message'], 'No file uploaded.')
+        self.assertIn(response.data['message'], "No file uploaded.")
 
     def test_upload_non_csv_file(self):
         """
         CSVではないファイルをアップロードした場合のテスト (拡張子チェック)
         """
-        test_file = File(open('/AnalysisApp/SampleData/TestDataTab.txt', 'rb'))
-        uploaded_file = SimpleUploadedFile('TestDataTab.txt', test_file.read(),
+        test_file = File(open('/AnalysisApp/SampleData/TestDataTab2.txt',
+                              'rb'))
+        uploaded_file = SimpleUploadedFile('TestDataTab2.txt',
+                                           test_file.read(),
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-csv-by-file',
                                     {'file': uploaded_file})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['code'], 'NG')
-        self.assertIn('Uploaded file is not a .csv file.',
+        self.assertIn("Uploaded file is not a .csv file.",
                       response.data['message'])
 
     def test_upload_empty_csv_file(self):
@@ -87,7 +91,8 @@ class TestApiImportCsvByFile(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['code'], 'NG')
         self.assertIn(
-            'The uploaded CSV file is empty or contains no valid data.',
+            "Invalid file content type. Allowed types: text/csv, "
+            "application/csv, text/plain",
             response.data['message'])
 
     def test_upload_malformed_csv_file(self):
@@ -102,5 +107,5 @@ class TestApiImportCsvByFile(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['code'], 'NG')
-        self.assertIn('An unexpected error occurred during CSV processing',
+        self.assertIn("Failed to parse CSV file: Invalid format or encoding.",
                       response.data['message'])
