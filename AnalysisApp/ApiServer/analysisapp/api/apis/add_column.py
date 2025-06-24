@@ -1,10 +1,11 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-import numpy as np
 import polars as pl
 import json
-
+from django.utils.translation import gettext as _
+from .utilities.create_response import (create_success_response,
+                                        create_error_response)
 from .data.tables import tables
 
 
@@ -15,43 +16,32 @@ class AddColumn(APIView):
             data = tables
             requestData = json.loads(request.body)
             table_name = requestData['tableName']
+            new_column_name = requestData['columnName']
+            insert_position_column = requestData['insertPositionColumn']
+            validation_error = validate_add_column_request(request)
+            if validation_error:
+                return validation_error
+
             df = data[table_name]
-            num_rows = df.shape[0]
-            column_name = requestData['columnName']
-            data_type = requestData['dataType']
-            match data_type:
-                case 'constant':
-                    constant = requestData['value1']
-                    sample_data_series = pl.Series(
-                        name=column_name,
-                        values=np.full(num_rows, constant).tolist())
-                case 'uniform':
-                    min_value = requestData['value1']
-                    max_value = requestData['value2']
-                    sample_data_series = pl.Series(
-                        name=column_name,
-                        values=np.random.uniform(
-                            low=min_value,
-                            high=max_value,
-                            size=num_rows))
-                case 'normal':
-                    mean = requestData['value1']
-                    variance = requestData['value2']
-                    sample_data_series = pl.Series(
-                        name=column_name,
-                        values=np.random.normal(
-                            loc=mean,
-                            scale=variance**0.5,
-                            size=num_rows))
-                case '_':
-                    sample_data_series = pl.Series(
-                        name=column_name,
-                        values=np.full(num_rows, 0).tolist())
-            df = df.with_columns(sample_data_series.alias(column_name))
-            data[table_name] = df
-            result = {'code': 0, 'result': {'tableName': table_name},
-                      'message': ''}
-            return Response(data=result, status=status.HTTP_200_OK)
+            num_rows = df.height
+            new_column_data_none = [None] * num_rows
+            insert_index = df.columns.index(insert_position_column) + 1
+            df_with_new_col = df.insert_column(
+                index=insert_index,
+                column=pl.Series(name=new_column_name),
+                values=new_column_data_none)
+            # 新しい列をデータフレームに追加
+            data[table_name] = df_with_new_col
+            result = {'tableName': table_name,
+                      'columnName': new_column_name}
+            return create_success_response(
+                status.HTTP_200_OK,
+                result)
+
         except Exception as e:
-            result = {'code': -9999, 'result': {'tableName': ''}, 'message': e}
-            return Response(data=result, status=status.HTTP_200_OK)
+            message = _("An unexpected error occurred during EXCEL processing")
+            return create_error_response(
+                status.HTTP_400_BAD_REQUEST,
+                message,
+                e
+            )
