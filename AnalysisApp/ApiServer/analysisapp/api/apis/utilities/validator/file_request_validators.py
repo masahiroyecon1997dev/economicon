@@ -1,4 +1,4 @@
-from .file_validators import FileValidator
+from .file_validator import FileValidator
 from .file_validation_config import (TSV_VALIDATOR_CONFIG,
                                      EXCEL_VALIDATOR_CONFIG,
                                      CSV_VALIDATOR_CONFIG,
