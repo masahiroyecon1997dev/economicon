@@ -3,7 +3,7 @@ from rest_framework import status
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 import polars as pl
-from ..apis.data.tables import tables
+from ..apis.data.tables_info import all_tables_info
 
 
 class TestApiImportExcelByFile(APITestCase):
@@ -26,7 +26,7 @@ class TestApiImportExcelByFile(APITestCase):
         # レスポンスデータの検証
         self.assertEqual('OK', response.data['code'])
         self.assertEqual('TestDataXlsx', response.data['result']['tableName'])
-        data = tables['TestDataXlsx']
+        data = all_tables_info['TestDataXlsx'].table
         self.assertEqual(True, compare_data.equals(data))
 
     def test_upload_valid_excel_file_with_extension_xls(self):
@@ -47,7 +47,7 @@ class TestApiImportExcelByFile(APITestCase):
         # レスポンスデータの検証
         self.assertEqual('OK', response.data['code'])
         self.assertEqual('TestDataXls', response.data['result']['tableName'])
-        data = tables['TestDataXls']
+        data = all_tables_info['TestDataXls'].table
         self.assertEqual(True, compare_data.equals(data))
 
     def test_upload_excel_with_only_headers(self):
@@ -67,7 +67,7 @@ class TestApiImportExcelByFile(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['code'], 'OK')
-        data = tables['OnlyHeaderExcel']
+        data = all_tables_info['OnlyHeaderExcel'].table
         self.assertEqual(True, compare_data.equals(data))
 
     def test_no_file_uploaded(self):
@@ -126,7 +126,7 @@ class TestApiImportExcelByFile(APITestCase):
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-excel-by-file',
                                     {'file': uploaded_file})
-        print(tables['Error'])
+        print(all_tables_info['Error'])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['code'], 'NG')
         self.assertIn("Failed to parse EXCEL file: Invalid format or "

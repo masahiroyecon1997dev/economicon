@@ -5,13 +5,13 @@ import numpy as np
 import polars as pl
 import json
 
-from .data.tables import tables
+from .data.tables_info import (TableInfo, all_tables_info)
 
 
 class GenerateSimulationData(APIView):
     def post(self, request):
         try:
-            data = tables
+            data = all_tables_info
             requestData = json.loads(request.body)
             table_name = requestData['tableName']
             num_samples = requestData['numSamples']
@@ -48,7 +48,11 @@ class GenerateSimulationData(APIView):
                             name=column_name,
                             values=np.full(num_samples, 0).tolist())
                 df = df.with_columns(sample_data_series.alias(column_name))
-            data[table_name] = df
+            table_info = TableInfo(
+                table_name=table_name,
+                table=df
+            )
+            data[table_name] = table_info
             result = {'code': 0, 'result': {'tableName': table_name},
                       'message': ''}
             return Response(data=result, status=status.HTTP_200_OK)

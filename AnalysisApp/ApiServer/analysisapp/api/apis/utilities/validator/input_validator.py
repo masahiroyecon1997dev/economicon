@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 from rest_framework import status
-from ...data.tables import tables
+from ...data.tables_info import (TableInfo, all_tables_info)
 from .common_validators import (validate_required, validate_string_length,
                                 validate_invalid_chars, validate_table_exists)
 

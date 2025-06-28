@@ -3,7 +3,7 @@ from rest_framework import status
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 import polars as pl
-from ..apis.data.tables import tables
+from ..apis.data.tables_info import all_tables_info
 
 
 class TestApiImportTsvByFile(APITestCase):
@@ -27,7 +27,7 @@ class TestApiImportTsvByFile(APITestCase):
         # レスポンスデータの検証
         self.assertEqual('OK', response.data['code'])
         self.assertEqual('TestDataTab1', response.data['result']['tableName'])
-        data = tables['TestDataTab1']
+        data = all_tables_info['TestDataTab1'].table
         self.assertEqual(True, compare_data.equals(data))
 
     def test_upload_valid_tsv_file_with_txt_extension(self):
@@ -49,7 +49,7 @@ class TestApiImportTsvByFile(APITestCase):
         # レスポンスデータの検証
         self.assertEqual('OK', response.data['code'])
         self.assertEqual('TestDataTab2', response.data['result']['tableName'])
-        data = tables['TestDataTab2']
+        data = all_tables_info['TestDataTab2'].table
         self.assertEqual(True, compare_data.equals(data))
 
     def test_upload_tsv_with_only_headers(self):
@@ -70,7 +70,7 @@ class TestApiImportTsvByFile(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['code'], 'OK')
-        data = tables['OnlyHeaderTab']
+        data = all_tables_info['OnlyHeaderTab'].table
         self.assertEqual(True, compare_data.equals(data))
 
     def test_no_tsv_file_uploaded(self):

@@ -3,7 +3,7 @@ from rest_framework import status
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 import polars as pl
-from ..apis.data.tables import tables
+from ..apis.data.tables_info import all_tables_info
 
 
 class TestApiImportCsvByFile(APITestCase):
@@ -27,7 +27,7 @@ class TestApiImportCsvByFile(APITestCase):
         # レスポンスデータの検証
         self.assertEqual('OK', response.data['code'])
         self.assertEqual('TestDataComma', response.data['result']['tableName'])
-        data = tables['TestDataComma']
+        data = all_tables_info['TestDataComma'].table
         self.assertEqual(True, compare_data.equals(data))
 
     def test_upload_csv_with_only_headers(self):
@@ -48,7 +48,7 @@ class TestApiImportCsvByFile(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['code'], 'OK')
-        data = tables['OnlyHeaderComma']
+        data = all_tables_info['OnlyHeaderComma'].table
         self.assertEqual(True, compare_data.equals(data))
 
     def test_no_file_uploaded(self):

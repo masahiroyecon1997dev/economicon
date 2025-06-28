@@ -3,16 +3,20 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import polars as pl
 
-from .data.tables import tables
+from .data.tables_info import (TableInfo, all_tables_info)
 
 
 class ReadCsv(APIView):
     def post(self, request):
         try:
-            data = tables
             path: str = request.query_params.get('path')
             table_name = path.split('/')[-1][:-4]
-            data[table_name] = pl.read_csv(path, encoding='utf8')
+            df = pl.read_csv(path, encoding='utf8')
+            table_info = TableInfo(
+                table_name=table_name,
+                table=df
+            )
+            all_tables_info[table_name] = table_info
             result = {'code': 0, 'result': {'tableName': table_name},
                       'message': ''}
             return Response(data=result, status=status.HTTP_200_OK)

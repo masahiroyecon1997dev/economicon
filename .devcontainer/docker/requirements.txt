@@ -12,6 +12,7 @@ django-filter
 djangorestframework
 django-cors-headers
 wooldridge
+scipy==1.15.3
 statsmodels
 python-magic
 fastexcel

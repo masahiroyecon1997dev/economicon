@@ -19,7 +19,7 @@
                 "batisteo.vscode-django",
                 "njpwerner.autodocstring",
                 "ms-python.autopep8",
-                "sourcegraph.cody-ai"
+                "github.copilot"
             ]
         }
     },
