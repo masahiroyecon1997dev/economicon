@@ -3,7 +3,7 @@ from ..create_response import create_error_response
 from rest_framework import status
 from .input_validation_config import INPUT_VALIDATOR_CONFIG
 from .input_validator import InputValidator
-from ....apis.data.tables import tables
+from ...data.tables_info import (TableInfo, all_tables_info)
 import re
 import json
 

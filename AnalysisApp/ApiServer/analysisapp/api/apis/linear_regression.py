@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import json
 
-from .data.tables import tables
+from .data.tables_info import all_tables_info
 
 
 class LinearRegression(APIView):
@@ -14,7 +14,7 @@ class LinearRegression(APIView):
             table_name = requestData['tableName']
             dependent_variable = requestData['dependentVariable']
             explanatory_variable = requestData['explanatoryVariables']
-            data = tables[table_name]
+            data = all_tables_info[table_name].table
             Y = data[dependent_variable].to_numpy()
             X = data.select(explanatory_variable).to_numpy()
             X = sm.add_constant(X)

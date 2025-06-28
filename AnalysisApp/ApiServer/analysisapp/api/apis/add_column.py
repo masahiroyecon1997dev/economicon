@@ -6,7 +6,7 @@ import json
 from django.utils.translation import gettext as _
 from .utilities.create_response import (create_success_response,
                                         create_error_response)
-from .data.tables import tables
+from .data.tables_info import (TableInfo, all_tables_info)
 
 
 class AddColumn(APIView):

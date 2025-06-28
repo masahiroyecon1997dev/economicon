@@ -1,18 +1,17 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
-from .data.tables import tables
+from .data.tables_info import all_tables_info
 
 
 class FetchDataToJson(APIView):
     def get(self, request):
         try:
-            data = tables
             table_name: str = request.query_params.get('tableName')
             first_row: int = int(request.query_params.get('firstRow'))
             last_row: int = int(request.query_params.get('lastRow'))
-            data_to_json = (data[table_name][first_row - 1:last_row]
+            data = all_tables_info[table_name].table
+            data_to_json = (data[first_row - 1:last_row]
                             .write_json())
             result = {'code': 0, 'result': {'tableName': table_name,
                                             'data': data_to_json},

@@ -2,13 +2,13 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .data.tables import tables
+from .data.tables_info import all_tables_info
 
 
 class GetTableNameList(APIView):
     def get(self, request):
         try:
-            data = tables
+            data = all_tables_info
             table_names = data.keys()
             result = {'code': 0, 'result': {'tableNameList': table_names},
                       'message': ''}

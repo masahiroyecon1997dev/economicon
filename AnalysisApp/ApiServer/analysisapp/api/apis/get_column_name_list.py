@@ -1,15 +1,14 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
-from .data.tables import tables
+from .data.tables_info import all_tables_info
 
 
 class GetColumnNameList(APIView):
     def get(self, request):
         try:
-            data = tables
             table_name: str = request.query_params.get('tableName')
+            data = all_tables_info[table_name].table
             column_names = data[table_name].columns
             columns = []
             for i, name in enumerate(column_names):
