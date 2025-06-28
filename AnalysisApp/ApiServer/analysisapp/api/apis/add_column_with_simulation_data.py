@@ -4,17 +4,16 @@ from rest_framework.response import Response
 import numpy as np
 import polars as pl
 import json
-
-from .data.tables import tables
+from .data.tables_info import all_tables_info
 
 
 class AddColumnWithSimulationData(APIView):
     def post(self, request):
         try:
-            data = tables
+            data = all_tables_info
             requestData = json.loads(request.body)
             table_name = requestData['tableName']
-            df = data[table_name]
+            df = data[table_name].table
             num_rows = df.shape[0]
             column_name = requestData['columnName']
             data_type = requestData['dataType']

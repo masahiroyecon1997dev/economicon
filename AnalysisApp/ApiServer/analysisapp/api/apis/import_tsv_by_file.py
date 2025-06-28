@@ -8,7 +8,7 @@ from .utilities.create_response import create_error_response
 from .utilities.create_log import create_log_api_request
 from .utilities.validator.file_request_validators import validate_tsv_request
 from .utilities.create_table_name import create_table_name_by_file_name
-from .data.tables import tables
+from .data.tables_info import (TableInfo, all_tables_info)
 
 
 class ImportTsvByFile(APIView):
@@ -24,9 +24,13 @@ class ImportTsvByFile(APIView):
 
             uploaded_file = request.FILES['file']
             table_name = create_table_name_by_file_name(uploaded_file.name,
-                                                        tables)
-            tables[table_name] = pl.read_csv(io.BytesIO(uploaded_file.read()),
-                                             separator='\t')
+                                                        all_tables_info)
+            df = pl.read_csv(io.BytesIO(uploaded_file.read()), separator='\t')
+            table_info = TableInfo(
+                table_name=table_name,
+                table=df
+            )
+            all_tables_info[table_name] = table_info
             result = {'tableName': table_name}
             return create_success_response(
                 status.HTTP_200_OK,

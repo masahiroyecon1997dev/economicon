@@ -2,15 +2,15 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .data.tables import tables
+from .data.tables_info import all_tables_info
 
 
 class OutputCsv(APIView):
     def get(self, request):
         try:
-            data = tables
             table_name: str = request.query_params.get('tableName')
-            csv_table_data: str = data[table_name].write_csv()
+            data = all_tables_info[table_name].table
+            csv_table_data: str = data.write_csv()
             print(csv_table_data)
             result = {'code': 0, 'result': {'csvData': csv_table_data},
                       'message': ''}

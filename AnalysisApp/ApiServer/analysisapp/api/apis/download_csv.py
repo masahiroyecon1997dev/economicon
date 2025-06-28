@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from io import StringIO
-from .data.tables import tables
+from .data.tables_info import all_tables_info
 from django.utils.translation import gettext as _
 from .utilities.create_response import create_error_response
 
@@ -11,7 +11,7 @@ class DownloadDataFrameAsCsvView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             table_name: str = request.query_params.get('tableName')
-            data = tables[table_name]
+            data = all_tables_info[table_name].table
 
             csv_buffer = StringIO()
             data.write_csv(csv_buffer)
