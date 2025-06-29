@@ -31,5 +31,5 @@ urlpatterns = [
          GenerateSimulationData.as_view()),
     path('linear-regression', linear_regression.
          LinearRegression.as_view()),
-    path('add-column', add_column.AddColumn.as_view)
+    path('add-column', add_column.AddColumn.as_view())
 ]
