@@ -1,8 +1,14 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 from rest_framework import status
-from ...data.tables_info import (TableInfo, all_tables_info)
-from .common_validators import (validate_required, validate_string_length,
-                                validate_invalid_chars, validate_table_exists)
+from ....apis.data.tables_info import TableInfo
+from .common_validators import (CommonValidationError,
+                                validate_required,
+                                validate_string_length,
+                                validate_invalid_chars,
+                                validate_table_duplicate,
+                                validate_table_exists,
+                                validate_column_duplicate,
+                                validate_column_exists)
 
 
 class InputValidationError(Exception):
@@ -19,6 +25,11 @@ class InputValidationError(Exception):
 
 class InputValidator:
 
+    PARAM_TABLE_NAME = 'tableName'
+    PARAM_TABLE_NUM_ROWS = 'tableNumberOfRows'
+    PARAM_COLUMN_NAMES = 'columnName'
+    PARAM_NEWCOLUMN_NAME = 'newColumnName'
+
     def __init__(self,
                  invalid_chars: List[str] = None,
                  table_name_min_length: Optional[int] = None,
@@ -31,19 +42,96 @@ class InputValidator:
         self.column_name_min_length = column_name_min_length
         self.column_name_max_length = column_name_max_length
 
-    def validate_new_table_name(self, value: str) -> None:
-        """テーブル名のバリデーション"""
-        param_name = 'tableName'
-        validate_required(value, param_name)
-        validate_string_length(value,
-                               param_name,
-                               self.table_name_min_length,
-                               self.table_name_max_length)
+    def validate_new_table_name(self,
+                                table_name: str,
+                                tables_info: List[TableInfo]
+                                ) -> None:
+        # 新規テーブル名のバリデーション
+        try:
+            validate_required(table_name, self.PARAM_TABLE_NAME)
+            validate_string_length(table_name,
+                                   self.PARAM_TABLE_NAME,
+                                   self.table_name_min_length,
+                                   self.table_name_max_length)
+            validate_invalid_chars(table_name, self.PARAM_TABLE_NAME,
+                                   self.invalid_chars)
+            validate_table_duplicate(table_name,
+                                     self.PARAM_TABLE_NAME,
+                                     tables_info)
+            return None
+        except CommonValidationError as e:
+            raise InputValidationError(
+                message=e.message,
+                status_code=e.status_code
+            )
 
-    def validate_column_name(self, value: str, param_name: str) -> None:
-        """カラム名のバリデーション"""
-        validate_required(value, param_name)
-        validate_string_length(value,
-                               param_name,
-                               self.table_name_min_length,
-                               self.table_name_max_length)
+    def validate_table_num_rows(self,
+                                table_num_rows: int
+                                ) -> None:
+        # テーブルの行数のバリデーション
+        try:
+            validate_required(table_num_rows, self.PARAM_TABLE_NUM_ROWS)
+            return None
+        except CommonValidationError as e:
+            raise InputValidationError(
+                message=e.message,
+                status_code=e.status_code
+            )
+
+    def validate_new_column_name(self,
+                                 new_column_name: str,
+                                 table_info: TableInfo
+                                 ) -> None:
+        # 新しいカラム名のバリデーション
+        try:
+            validate_required(new_column_name, self.PARAM_NEWCOLUMN_NAME)
+            validate_string_length(new_column_name,
+                                   self.PARAM_COLUMN_NAMES,
+                                   self.column_name_min_length,
+                                   self.column_name_max_length)
+            validate_invalid_chars(new_column_name, self.PARAM_COLUMN_NAMES,
+                                   self.invalid_chars)
+            validate_column_duplicate(new_column_name,
+                                      self.PARAM_NEWCOLUMN_NAME,
+                                      table_info.table.columns)
+            return None
+        except CommonValidationError as e:
+            raise InputValidationError(
+                message=e.message,
+                status_code=e.status_code
+            )
+
+    def validate_existed_table_name(self,
+                                    table_name: str,
+                                    tables_info: List[TableInfo]
+                                    ) -> None:
+        # 既存のテーブル名のバリデーション
+        try:
+            validate_required(table_name, self.PARAM_TABLE_NAME)
+            validate_table_exists(table_name,
+                                  self.PARAM_TABLE_NAME,
+                                  tables_info)
+            return None
+        except CommonValidationError as e:
+            raise InputValidationError(
+                message=e.message,
+                status_code=e.status_code
+            )
+
+    def validate_existed_column_name(self,
+                                     column_name: str,
+                                     table_info: TableInfo
+                                     ) -> None:
+        # 既存のカラム名のバリデーション
+        param_insert_position_column = 'insertPositionColumn'
+        try:
+            validate_required(column_name, self.PARAM_COLUMN_NAMES)
+            validate_column_exists(column_name,
+                                   param_insert_position_column,
+                                   table_info.table.columns)
+            return None
+        except CommonValidationError as e:
+            raise InputValidationError(
+                message=e.message,
+                status_code=e.status_code
+            )

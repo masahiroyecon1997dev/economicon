@@ -1,69 +1,30 @@
-from typing import Optional, Dict, Any
-from ..create_response import create_error_response
-from rest_framework import status
-from .input_validation_config import INPUT_VALIDATOR_CONFIG
-from .input_validator import InputValidator
-from ...data.tables_info import (TableInfo, all_tables_info)
-import re
 import json
+from .input_validator import (InputValidationError, InputValidator)
+from .input_validation_config import (INPUT_VALIDATOR_CONFIG)
+from typing import Optional, Dict, Any
+from ....apis.data.tables_info import all_tables_info
+from ..create_response import create_error_response
 
 
 def validate_add_column_request(request) -> Optional[Dict[str, Any]]:
-    """
-    テーブルにカラムを追加するリクエストのバリデーション
-    """
-    validator = InputValidator(INPUT_VALIDATOR_CONFIG)
-    return validator.validate_file_name(request)
+    try:
+        validator = InputValidator(**INPUT_VALIDATOR_CONFIG)
+        request_data = json.loads(request.body)
 
-# def validate_save_file(request):
-#     """ファイル保存のバリデーション"""
-#     requestData = json.loads(request.body)
+        table_name = request_data['tableName']
+        validator.validate_existed_table_name(table_name, all_tables_info)
 
-#     validator = InputValidator()
-#     validator.validate_required(requestData.get('fileName'))
+        new_column_name = request_data['newColumnName']
+        table_info = all_tables_info[table_name]
+        validator.validate_new_column_name(new_column_name, table_info)
 
-#     # ファイル名に使用できない文字をチェック
-#     invalid_chars = r'[<>:"/\\|?*]'
-#     if re.search(invalid_chars, value):
-#         raise create_error_response(
-#             status.HTTP_400_BAD_REQUEST,
-#             f"{param_name}に無効な文字が含まれています"
-#         )
+        insert_position_column = request_data['insertPositionColumn']
+        validator.validate_existed_column_name(insert_position_column,
+                                               table_info)
 
-#     # 拡張子をチェック
-#     if allowed_extensions:
-#         if not any(value.lower().endswith(ext) for ext in allowed_extensions):
-#             raise create_error_response(
-#                 status.HTTP_400_BAD_REQUEST,
-#                 f"{param_name}は以下の拡張子のいずれかである必要があります: "
-#                 f"{allowed_extensions}"
-#             )
-
-#         # ファイル名の長さをチェック
-#         if len(value) > 255:
-#             raise create_error_response(
-#                 status.HTTP_400_BAD_REQUEST,
-#                 f"{param_name}が長すぎます"
-#             )
-
-#         return value
-
-
-# def validate_table_name(value: str, param_name: str) -> str:
-#     """テーブル名のバリデーション"""
-#     if not value:
-#         raise create_error_response(
-#             status.HTTP_400_BAD_REQUEST,
-#             f"{param_name}は必須です"
-#         )
-
-#     # テーブルが存在するかチェック
-#     if value not in tables:
-#         available_tables = list(tables.keys())
-#         raise create_error_response(
-#             status.HTTP_400_BAD_REQUEST,
-#             f"指定されたテーブル '{value}' は存在しません。"
-#             f"利用可能なテーブル: {available_tables}"
-#         )
-
-#     return value
+        return None
+    except InputValidationError as e:
+        return create_error_response(
+            e.status_code,
+            e.message
+        )

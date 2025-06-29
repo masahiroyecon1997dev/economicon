@@ -52,8 +52,7 @@ class FileValidator:
         except FileValidationError as e:
             return create_error_response(
                 e.status_code,
-                e.message,
-                request
+                e.message
             )
 
     def _validate_file_presence(self, request):

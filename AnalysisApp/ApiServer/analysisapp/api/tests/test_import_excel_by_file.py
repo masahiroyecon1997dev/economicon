@@ -128,6 +128,8 @@ class TestApiImportExcelByFile(APITestCase):
                                     {'file': uploaded_file})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['code'], 'NG')
-        self.assertIn("Invalid file content type. Allowed types: application/vnd.openxmlformats-"
-                      "officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/CDFV2",
+        self.assertIn("Invalid file content type. Allowed types: "
+                      "application/vnd.openxmlformats-officedocument."
+                      "spreadsheetml.sheet, application/vnd.ms-excel, "
+                      "application/CDFV2",
                       response.data['message'])
