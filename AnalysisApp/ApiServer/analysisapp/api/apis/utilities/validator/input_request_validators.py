@@ -1,12 +1,13 @@
 import json
+from rest_framework.response import Response
 from .input_validator import (InputValidationError, InputValidator)
 from .input_validation_config import (INPUT_VALIDATOR_CONFIG)
-from typing import Optional, Dict, Any
+from typing import Optional
 from ....apis.data.tables_info import all_tables_info
 from ..create_response import create_error_response
 
 
-def validate_add_column_request(request) -> Optional[Dict[str, Any]]:
+def validate_add_column_request(request) -> Optional[Response]:
     try:
         validator = InputValidator(**INPUT_VALIDATOR_CONFIG)
         request_data = json.loads(request.body)

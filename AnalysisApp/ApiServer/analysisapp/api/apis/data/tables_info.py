@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import polars as pl
+from typing import Dict
 
 
 @dataclass
@@ -17,4 +18,4 @@ class TableInfo:
         self.num_rows = self.table.height
 
 
-all_tables_info = {}
+all_tables_info: Dict[str, TableInfo] = {}

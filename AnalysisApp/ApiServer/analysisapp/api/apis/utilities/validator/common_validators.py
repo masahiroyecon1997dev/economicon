@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Dict
 from django.utils.translation import gettext as _
 from rest_framework import status
+from ....apis.data.tables_info import TableInfo
 
 
 class CommonValidationError(Exception):
@@ -16,7 +17,7 @@ class CommonValidationError(Exception):
         super().__init__(message)
 
 
-def validate_required(value: any, param_name: str) -> None:
+def validate_required(value: Union[str, int, float], param_name: str) -> None:
     """パラメータが空かどうかをチェック"""
     if value is None or not value:
         message = _(f"{param_name} is required.")
@@ -24,7 +25,7 @@ def validate_required(value: any, param_name: str) -> None:
     return None
 
 
-def validate_number(value: any, param_name: str) -> None:
+def validate_number(value: Union[int, float], param_name: str) -> None:
     """パラメータが数値どうかをチェック"""
     if (not isinstance(value, (int, float))):
         message = _(f"{param_name} must be a number.")
@@ -32,7 +33,7 @@ def validate_number(value: any, param_name: str) -> None:
     return None
 
 
-def validate_required_string(value: any, param_name: str) -> None:
+def validate_required_string(value: str, param_name: str) -> None:
     """パラメータが文字列どうかをチェック"""
     if (isinstance(value, str) and not value.strip()):
         message = _(f"{param_name} mustbe a string.")
@@ -40,7 +41,7 @@ def validate_required_string(value: any, param_name: str) -> None:
     return None
 
 
-def validate_string_length(value: any,
+def validate_string_length(value: str,
                            param_name: str,
                            min_length: Optional[int] = None,
                            max_length: Optional[int] = None) -> None:
@@ -82,8 +83,8 @@ def validate_numeric_range(value: Union[int, float], param_name: str,
     return None
 
 
-def validate_enum(value: any, param_name: str,
-                  allowed_values: List[any]) -> None:
+def validate_enum(value: str, param_name: str,
+                  allowed_values: List[str]) -> None:
     """列挙型の値をチェック"""
     if value not in allowed_values:
         message = _(f"{param_name} is invalid value.")
@@ -109,7 +110,9 @@ def validate_path(value: str, param_name: str) -> None:
     return None
 
 
-def validate_table_exists(value: str, param_name: str, tables: dict) -> None:
+def validate_table_exists(value: str,
+                          param_name: str,
+                          tables: Dict[str, TableInfo]) -> None:
     """テーブルが存在するかチェック"""
     if value not in tables:
         message = _(f"{param_name} '{value}' does not exist.")
@@ -119,7 +122,7 @@ def validate_table_exists(value: str, param_name: str, tables: dict) -> None:
 
 def validate_table_duplicate(value: str,
                              param_name: str,
-                             tables: dict) -> None:
+                             tables: Dict[str, TableInfo]) -> None:
     """テーブルが重複していないかチェック"""
     if value in tables:
         message = _(f"{param_name} '{value}' already exists.")
