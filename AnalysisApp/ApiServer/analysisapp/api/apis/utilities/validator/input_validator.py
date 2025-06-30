@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 from rest_framework import status
 from ....apis.data.tables_info import TableInfo
 from .common_validators import (CommonValidationError,
@@ -31,7 +31,7 @@ class InputValidator:
     PARAM_NEWCOLUMN_NAME = 'newColumnName'
 
     def __init__(self,
-                 invalid_chars: List[str] = None,
+                 invalid_chars: List[str] = [],
                  table_name_min_length: Optional[int] = None,
                  table_name_max_length: Optional[int] = None,
                  column_name_min_length: Optional[int] = None,
@@ -44,7 +44,7 @@ class InputValidator:
 
     def validate_new_table_name(self,
                                 table_name: str,
-                                tables_info: List[TableInfo]
+                                tables_info: Dict[str, TableInfo]
                                 ) -> None:
         # 新規テーブル名のバリデーション
         try:
@@ -103,7 +103,7 @@ class InputValidator:
 
     def validate_existed_table_name(self,
                                     table_name: str,
-                                    tables_info: List[TableInfo]
+                                    tables_info: Dict[str, TableInfo]
                                     ) -> None:
         # 既存のテーブル名のバリデーション
         try:
