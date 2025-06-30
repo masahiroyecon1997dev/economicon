@@ -1,7 +1,8 @@
 from rest_framework import status
 from django.utils.translation import gettext as _
+from rest_framework.response import Response
 from ..create_response import create_error_response
-from typing import Optional, Dict, Any, Tuple, List
+from typing import Tuple, List, Optional
 import magic
 import mimetypes
 
@@ -24,13 +25,13 @@ class FileValidator:
     """
     def __init__(self,
                  max_size: int = 10 * 1024 * 1024,  # 10MB
-                 allowed_extensions: Tuple[str] = None,
-                 allowed_mime_types: List[str] = None):
+                 allowed_extensions: Optional[Tuple[str]] = None,
+                 allowed_mime_types: Optional[List[str]] = None):
         self.max_size = max_size
         self.allowed_extensions = allowed_extensions or ()
         self.allowed_mime_types = allowed_mime_types or []
 
-    def validate_request(self, request) -> Optional[Dict[str, Any]]:
+    def validate_request(self, request) -> Optional[Response]:
         """
         リクエストのファイルバリデーションを実行
 
