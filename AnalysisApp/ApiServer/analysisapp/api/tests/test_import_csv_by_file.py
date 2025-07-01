@@ -23,10 +23,10 @@ class TestApiImportCsvByFile(APITestCase):
         response = self.client.post('/api/import-csv-by-file',
                                     {'file': uploaded_file})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         # レスポンスデータの検証
-        self.assertEqual('OK', response.data['code'])
-        self.assertEqual('TestDataComma', response.data['result']['tableName'])
+        self.assertEqual('OK', response.json()['code'])
+        self.assertEqual('TestDataComma',
+                         response.json()['result']['tableName'])
         data = all_tables_info['TestDataComma'].table
         self.assertEqual(True, compare_data.equals(data))
 
@@ -47,7 +47,7 @@ class TestApiImportCsvByFile(APITestCase):
                                     {'file': uploaded_file})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['code'], 'OK')
+        self.assertEqual(response.json()['code'], 'OK')
         data = all_tables_info['OnlyHeaderComma'].table
         self.assertEqual(True, compare_data.equals(data))
 
@@ -58,8 +58,8 @@ class TestApiImportCsvByFile(APITestCase):
         response = self.client.post('/api/import-csv-by-file')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
-        self.assertIn(response.data['message'], "No file uploaded.")
+        self.assertEqual(response.json()['code'], 'NG')
+        self.assertIn(response.json()['message'], "No file uploaded.")
 
     def test_upload_non_csv_file(self):
         """
@@ -74,9 +74,9 @@ class TestApiImportCsvByFile(APITestCase):
                                     {'file': uploaded_file})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
+        self.assertEqual(response.json()['code'], 'NG')
         self.assertIn("Uploaded file is not a .csv file.",
-                      response.data['message'])
+                      response.json()['message'])
 
     def test_upload_empty_csv_file(self):
         """
@@ -89,11 +89,11 @@ class TestApiImportCsvByFile(APITestCase):
                                     {'file': uploaded_file})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
+        self.assertEqual(response.json()['code'], 'NG')
         self.assertIn(
             "Invalid file content type. Allowed types: text/csv, "
             "application/csv, text/plain",
-            response.data['message'])
+            response.json()['message'])
 
     def test_upload_malformed_csv_file(self):
         """
@@ -106,6 +106,6 @@ class TestApiImportCsvByFile(APITestCase):
                                     {'file': uploaded_file})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
+        self.assertEqual(response.json()['code'], 'NG')
         self.assertIn("Failed to parse CSV file: Invalid format or encoding.",
-                      response.data['message'])
+                      response.json()['message'])
