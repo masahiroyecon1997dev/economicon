@@ -6,12 +6,13 @@ import polars as pl
 from ..apis.data.tables_info import all_tables_info
 
 
-class TestApiImportExcelByFile(APITestCase):
+class TestApiImportParquetByFile(APITestCase):
 
     def test_upload_valid_excel_file(self):
         """
         有効なExcel(xlsx)ファイルをアップロードした場合のテスト
         """
+        all_tables_info.clear()  # テスト前にテーブル情報をクリア
         compare_data = pl.read_excel(
             '/AnalysisApp/SampleData/TestDataXlsx.xlsx')
         test_file = File(open('/AnalysisApp/SampleData/TestDataXlsx.xlsx',
@@ -24,8 +25,9 @@ class TestApiImportExcelByFile(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # レスポンスデータの検証
-        self.assertEqual('OK', response.data['code'])
-        self.assertEqual('TestDataXlsx', response.data['result']['tableName'])
+        self.assertEqual('OK', response.json()['code'])
+        self.assertEqual('TestDataXlsx',
+                         response.json()['result']['tableName'])
         data = all_tables_info['TestDataXlsx'].table
         self.assertEqual(True, compare_data.equals(data))
 
@@ -45,8 +47,8 @@ class TestApiImportExcelByFile(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # レスポンスデータの検証
-        self.assertEqual('OK', response.data['code'])
-        self.assertEqual('TestDataXls', response.data['result']['tableName'])
+        self.assertEqual('OK', response.json()['code'])
+        self.assertEqual('TestDataXls', response.json()['result']['tableName'])
         data = all_tables_info['TestDataXls'].table
         self.assertEqual(True, compare_data.equals(data))
 
@@ -66,7 +68,7 @@ class TestApiImportExcelByFile(APITestCase):
                                     {'file': uploaded_file})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['code'], 'OK')
+        self.assertEqual(response.json()['code'], 'OK')
         data = all_tables_info['OnlyHeaderExcel'].table
         self.assertEqual(True, compare_data.equals(data))
 
@@ -77,8 +79,8 @@ class TestApiImportExcelByFile(APITestCase):
         response = self.client.post('/api/import-csv-by-file')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
-        self.assertIn(response.data['message'], "No file uploaded.")
+        self.assertEqual(response.json()['code'], 'NG')
+        self.assertIn(response.json()['message'], "No file uploaded.")
 
     def test_upload_non_excel_file(self):
         """
@@ -95,9 +97,9 @@ class TestApiImportExcelByFile(APITestCase):
                                     format='multipart')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
+        self.assertEqual(response.json()['code'], 'NG')
         self.assertIn("Uploaded file is not a .xlsx, .xls file.",
-                      response.data['message'])
+                      response.json()['message'])
 
     def test_upload_empty_excel_file(self):
         """
@@ -110,12 +112,12 @@ class TestApiImportExcelByFile(APITestCase):
                                     {'file': uploaded_file})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
+        self.assertEqual(response.json()['code'], 'NG')
         self.assertIn(
             "Invalid file content type. Allowed types: "
             "application/vnd.openxmlformats-officedocument.spreadsheetml."
             "sheet, application/vnd.ms-excel, application/CDFV2",
-            response.data['message'])
+            response.json()['message'])
 
     def test_upload_malformed_excel_file(self):
         """
@@ -126,9 +128,10 @@ class TestApiImportExcelByFile(APITestCase):
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-excel-by-file',
                                     {'file': uploaded_file})
-        print(all_tables_info['Error'])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
-        self.assertIn("Failed to parse EXCEL file: Invalid format or "
-                      "encoding.",
-                      response.data['message'])
+        self.assertEqual(response.json()['code'], 'NG')
+        self.assertIn("Invalid file content type. Allowed types: "
+                      "application/vnd.openxmlformats-"
+                      "officedocument.spreadsheetml."
+                      "sheet, application/vnd.ms-excel, application/CDFV2",
+                      response.json()['message'])
