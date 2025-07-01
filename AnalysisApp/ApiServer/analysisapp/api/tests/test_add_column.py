@@ -30,9 +30,8 @@ class TestApiAddColumn(APITestCase):
             data=json.dumps(payload),
             content_type='application/json'
         )
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['code'], 'OK')
+        self.assertEqual(response.json()['code'], 'OK')
         # カラムが追加されているか
         df = all_tables_info['TestTable'].table
         self.assertIn('C', df.columns)
@@ -52,8 +51,8 @@ class TestApiAddColumn(APITestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
-        print(response.data)
+        self.assertEqual(response.json()['code'], 'NG')
+        print(response.json())
 
     def test_add_column_invalid_column(self):
         # 存在しないカラム名を指定
@@ -68,5 +67,5 @@ class TestApiAddColumn(APITestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
-        print(response.data)
+        self.assertEqual(response.json()['code'], 'NG')
+        print(response.json())
