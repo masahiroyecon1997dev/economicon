@@ -24,9 +24,10 @@ class TestApiImportTsvByFile(APITestCase):
                                     {'file': uploaded_file})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        response_data = response.json()
         # レスポンスデータの検証
-        self.assertEqual('OK', response.data['code'])
-        self.assertEqual('TestDataTab1', response.data['result']['tableName'])
+        self.assertEqual('OK', response_data['code'])
+        self.assertEqual('TestDataTab1', response_data['result']['tableName'])
         data = all_tables_info['TestDataTab1'].table
         self.assertEqual(True, compare_data.equals(data))
 
@@ -46,9 +47,10 @@ class TestApiImportTsvByFile(APITestCase):
                                     {'file': uploaded_file})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        response_data = response.json()
         # レスポンスデータの検証
-        self.assertEqual('OK', response.data['code'])
-        self.assertEqual('TestDataTab2', response.data['result']['tableName'])
+        self.assertEqual('OK', response_data['code'])
+        self.assertEqual('TestDataTab2', response_data['result']['tableName'])
         data = all_tables_info['TestDataTab2'].table
         self.assertEqual(True, compare_data.equals(data))
 
@@ -68,8 +70,9 @@ class TestApiImportTsvByFile(APITestCase):
         response = self.client.post('/api/import-tsv-by-file',
                                     {'file': uploaded_file})
 
+        response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['code'], 'OK')
+        self.assertEqual(response_data['code'], 'OK')
         data = all_tables_info['OnlyHeaderTab'].table
         self.assertEqual(True, compare_data.equals(data))
 
@@ -79,9 +82,10 @@ class TestApiImportTsvByFile(APITestCase):
         """
         response = self.client.post('/api/import-tsv-by-file')
 
+        response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
-        self.assertIn(response.data['message'], "No file uploaded.")
+        self.assertEqual(response_data['code'], 'NG')
+        self.assertIn(response_data['message'], "No file uploaded.")
 
     def test_upload_non_tsv_file(self):
         """
@@ -95,10 +99,11 @@ class TestApiImportTsvByFile(APITestCase):
         response = self.client.post('/api/import-tsv-by-file',
                                     {'file': uploaded_file})
 
+        response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
+        self.assertEqual(response_data['code'], 'NG')
         self.assertIn("Uploaded file is not a .tsv, .txt file.",
-                      response.data['message'])
+                      response_data['message'])
 
     def test_upload_empty_tsv_file(self):
         """
@@ -110,12 +115,13 @@ class TestApiImportTsvByFile(APITestCase):
         response = self.client.post('/api/import-tsv-by-file',
                                     {'file': uploaded_file})
 
+        response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
+        self.assertEqual(response_data['code'], 'NG')
         self.assertIn(
             "Invalid file content type. Allowed types: "
             "text/tab-separated-values, text/plain",
-            response.data['message'])
+            response_data['message'])
 
     def test_upload_malformed_tsv_file(self):
         """
@@ -126,8 +132,10 @@ class TestApiImportTsvByFile(APITestCase):
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-tsv-by-file',
                                     {'file': uploaded_file})
+
+        response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['code'], 'NG')
+        self.assertEqual(response_data['code'], 'NG')
         self.assertIn("Invalid file content type. Allowed types: "
                       "text/tab-separated-values, text/plain",
-                      response.data['message'])
+                      response_data['message'])

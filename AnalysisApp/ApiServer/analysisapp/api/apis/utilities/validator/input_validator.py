@@ -3,6 +3,7 @@ from rest_framework import status
 from ....apis.data.tables_info import TableInfo
 from .common_validators import (CommonValidationError,
                                 validate_required,
+                                validate_number,
                                 validate_string_length,
                                 validate_invalid_chars,
                                 validate_table_duplicate,
@@ -71,6 +72,7 @@ class InputValidator:
         # テーブルの行数のバリデーション
         try:
             validate_required(table_num_rows, self.PARAM_TABLE_NUM_ROWS)
+            validate_number(table_num_rows, self.PARAM_TABLE_NUM_ROWS)
             return None
         except CommonValidationError as e:
             raise InputValidationError(
@@ -80,7 +82,7 @@ class InputValidator:
 
     def validate_new_column_name(self,
                                  new_column_name: str,
-                                 table_info: TableInfo
+                                 columns: List[str]
                                  ) -> None:
         # 新しいカラム名のバリデーション
         try:
@@ -93,7 +95,7 @@ class InputValidator:
                                    self.invalid_chars)
             validate_column_duplicate(new_column_name,
                                       self.PARAM_NEWCOLUMN_NAME,
-                                      table_info.table.columns)
+                                      columns)
             return None
         except CommonValidationError as e:
             raise InputValidationError(

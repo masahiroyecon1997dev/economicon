@@ -7,7 +7,7 @@ from .utilities.create_response import (create_success_response,
                                         create_error_response)
 from .utilities.create_log import create_log_api_request
 from .utilities.validator.input_request_validators import (
-    validate_add_column_request
+    validate_create_table_request,
 )
 from .data.tables_info import all_tables_info
 
@@ -19,9 +19,12 @@ class CreateTable(APIView):
             # リクエスト受け取りログ
             create_log_api_request(request)
             # バリデーション
-            validation_error = validate_add_column_request(request)
+            validation_error = validate_create_table_request(request)
             if validation_error:
                 return validation_error
+
+        data = {}
+        df = pl.DataFrame(data)
 
         except Exception as e:
             message = _("An unexpected error occurred during "
