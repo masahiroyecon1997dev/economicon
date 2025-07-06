@@ -18,18 +18,19 @@ class AddColumn(APIView):
         try:
             # リクエスト受け取りログ
             create_log_api_request(request)
+            # リクエストデータの取得
+            request_data = json.loads(request.body)
             # バリデーション
-            validation_error = validate_add_column_request(request)
+            validation_error = validate_add_column_request(request_data)
             if validation_error:
                 return validation_error
 
-            requestData = json.loads(request.body)
-            table_name = requestData['tableName']
-            new_column_name = requestData['newColumnName']
-            insert_position_column = requestData['insertPositionColumn']
+            table_name = request_data['tableName']
+            new_column_name = request_data['newColumnName']
+            insert_position_column = request_data['addPositionColumn']
 
             df = all_tables_info[table_name].table
-            num_rows = df.height
+            num_rows = all_tables_info[table_name].num_rows
             new_column_data_none = [None] * num_rows
             insert_index = df.columns.index(insert_position_column) + 1
             df_with_new_col = df.insert_column(
@@ -47,7 +48,7 @@ class AddColumn(APIView):
             message = _("An unexpected error occurred during "
                         "adding column processing")
             return create_error_response(
-                status.HTTP_400_BAD_REQUEST,
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message,
                 e
             )

@@ -5,5 +5,8 @@ INPUT_VALIDATOR_CONFIG = {
     'table_name_min_length': 0,
     'table_name_max_length': 100,
     'column_name_min_length': 0,
-    'column_name_max_length': 100
+    'column_name_max_length': 100,
+    'condition_candidates': ['equals', 'notEquals',
+                             'greaterThan', 'lessThan',
+                             'greaterThanOrEquals', 'lessThanOrEquals']
 }
