@@ -25,6 +25,14 @@ def validate_required(value: Union[str, int, float], param_name: str) -> None:
     return None
 
 
+def validate_boolean(value: str, param_name: str) -> None:
+    """パラメータが真偽値どうかをチェック"""
+    if value not in ['true', 'false']:
+        message = _(f"{param_name} must be 'true' or 'false'.")
+        raise CommonValidationError(message)
+    return None
+
+
 def validate_number(value: Union[int, float], param_name: str) -> None:
     """パラメータが数値どうかをチェック"""
     if (not isinstance(value, (int, float))):
@@ -33,10 +41,26 @@ def validate_number(value: Union[int, float], param_name: str) -> None:
     return None
 
 
-def validate_required_string(value: str, param_name: str) -> None:
+def validate_string(value: str, param_name: str) -> None:
     """パラメータが文字列どうかをチェック"""
     if (isinstance(value, str) and not value.strip()):
         message = _(f"{param_name} mustbe a string.")
+        raise CommonValidationError(message)
+    return None
+
+
+def validate_required_list(value: List, param_name: str) -> None:
+    """パラメータがリストどうかをチェック"""
+    if not isinstance(value, list):
+        message = _(f"{param_name} must be a list.")
+        raise CommonValidationError(message)
+    return None
+
+
+def validate_list_length(value: List, param_name: str) -> None:
+    """リストの長さをチェック"""
+    if len(value) < 1:
+        message = _(f"{param_name} must be a list with at least one item.")
         raise CommonValidationError(message)
     return None
 
@@ -74,11 +98,11 @@ def validate_numeric_range(value: Union[int, float], param_name: str,
     """数値の範囲をチェック"""
     if min_value is not None and value < min_value:
         message = _(f"{param_name} must be between {min_value} "
-                    "and {max_value}.")
+                    f"and {max_value}.")
         raise CommonValidationError(message)
     if max_value is not None and value > max_value:
         message = _(f"{param_name} must be between {min_value} "
-                    "and {max_value}.")
+                    f"and {max_value}.")
         raise CommonValidationError(message)
     return None
 
@@ -146,5 +170,15 @@ def validate_column_duplicate(value: str,
     """列が重複していないかチェック"""
     message = _(f"{param_name} '{value}' already exists.")
     if value in columns:
+        raise CommonValidationError(message)
+    return None
+
+
+def validate_condition(value: str,
+                       param_name: str,
+                       condition_candidates: List[str]) -> None:
+    """フィルタ条件のバリデーション"""
+    if value not in condition_candidates:
+        message = _(f"{param_name} '{value}' is not a valid condition.")
         raise CommonValidationError(message)
     return None

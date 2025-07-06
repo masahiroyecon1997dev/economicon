@@ -7,6 +7,7 @@ from ..apis.data.tables_info import all_tables_info, TableInfo
 
 class TestApiAddColumn(APITestCase):
     def setUp(self):
+        all_tables_info.clear()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2, 3],
@@ -15,15 +16,12 @@ class TestApiAddColumn(APITestCase):
         all_tables_info['TestTable'] = TableInfo(table_name='TestTable',
                                                  table=df)
 
-    def tearDown(self):
-        all_tables_info.clear()
-
     def test_add_column_success(self):
         # 正常にカラム追加できる
         payload = {
             'tableName': 'TestTable',
             'newColumnName': 'C',
-            'insertPositionColumn': 'A'
+            'addPositionColumn': 'A'
         }
         response = self.client.post(
             '/api/add-column',
@@ -36,7 +34,8 @@ class TestApiAddColumn(APITestCase):
         self.assertEqual(response_data['code'], 'OK')
         # カラムが追加されているか
         df = all_tables_info['TestTable'].table
-        self.assertIn('C', df.columns)
+        index_C = df.columns.index('A') + 1
+        self.assertEqual(df.columns[index_C], 'C')
         # 追加カラムはNoneで埋まっている
         self.assertTrue(df['C'].to_list() == [None, None, None])
 
@@ -45,7 +44,7 @@ class TestApiAddColumn(APITestCase):
         payload = {
             'tableName': 'NoTable',
             'newColumnName': 'C',
-            'insertPositionColumn': 'A'
+            'addPositionColumn': 'A'
         }
         response = self.client.post(
             '/api/add-column',
@@ -56,14 +55,15 @@ class TestApiAddColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        print(response.json())
+        self.assertIn(response_data['message'],
+                      "tableName 'NoTable' does not exist.")
 
     def test_add_column_invalid_column(self):
         # 存在しないカラム名を指定
         payload = {
             'tableName': 'TestTable',
             'newColumnName': 'C',
-            'insertPositionColumn': 'Z'
+            'addPositionColumn': 'Z'
         }
         response = self.client.post(
             '/api/add-column',
@@ -74,4 +74,5 @@ class TestApiAddColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        print(response.json())
+        self.assertEqual(response_data['message'],
+                         "columnName 'Z' does not exist.")
