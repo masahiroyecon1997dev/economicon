@@ -54,7 +54,7 @@ class TestApiRenameColumnName(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
         self.assertEqual(response_data['message'],
-                         "columnName 'Z' does not exist.")
+                         "oldColumnName 'Z' does not exist.")
 
     def test_rename_column_empty_old_column_name(self):
         payload = {
@@ -72,7 +72,7 @@ class TestApiRenameColumnName(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
         self.assertEqual(response_data['message'],
-                         "columnName is required.")
+                         "oldColumnName is required.")
 
     def test_rename_column_empty_new_column_name(self):
         payload = {

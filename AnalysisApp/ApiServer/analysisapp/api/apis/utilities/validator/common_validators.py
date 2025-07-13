@@ -1,3 +1,4 @@
+
 from pathlib import Path
 from typing import Optional, List, Union, Dict
 from django.utils.translation import gettext as _
@@ -5,12 +6,11 @@ from rest_framework import status
 from ....apis.data.tables_info import TableInfo
 
 
-class CommonValidationError(Exception):
+class ValidationError(Exception):
     """
-    入力バリデーション専用の例外
+    入力バリデーション専用の例外（全体で統一）
     """
-    def __init__(self,
-                 message: str,
+    def __init__(self, message: str,
                  status_code: int = status.HTTP_400_BAD_REQUEST):
         self.message = message
         self.status_code = status_code
@@ -19,9 +19,9 @@ class CommonValidationError(Exception):
 
 def validate_required(value: Union[str, int, float], param_name: str) -> None:
     """パラメータが空かどうかをチェック"""
-    if value is None or not value:
+    if value is None or (isinstance(value, str) and value.strip() == ""):
         message = _(f"{param_name} is required.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -29,7 +29,7 @@ def validate_boolean(value: str, param_name: str) -> None:
     """パラメータが真偽値どうかをチェック"""
     if value not in ['true', 'false']:
         message = _(f"{param_name} must be 'true' or 'false'.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -37,15 +37,15 @@ def validate_number(value: Union[int, float], param_name: str) -> None:
     """パラメータが数値どうかをチェック"""
     if (not isinstance(value, (int, float))):
         message = _(f"{param_name} must be a number.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
 def validate_string(value: str, param_name: str) -> None:
     """パラメータが文字列どうかをチェック"""
-    if (isinstance(value, str) and not value.strip()):
-        message = _(f"{param_name} mustbe a string.")
-        raise CommonValidationError(message)
+    if not isinstance(value, str) or not value.strip():
+        message = _(f"{param_name} must be a string.")
+        raise ValidationError(message)
     return None
 
 
@@ -53,7 +53,7 @@ def validate_required_list(value: List, param_name: str) -> None:
     """パラメータがリストどうかをチェック"""
     if not isinstance(value, list):
         message = _(f"{param_name} must be a list.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -61,7 +61,7 @@ def validate_list_length(value: List, param_name: str) -> None:
     """リストの長さをチェック"""
     if len(value) < 1:
         message = _(f"{param_name} must be a list with at least one item.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -71,13 +71,13 @@ def validate_string_length(value: str,
                            max_length: Optional[int] = None) -> None:
     """文字列の長さをチェック"""
     if min_length is not None and len(value) < min_length:
-        message = _(f"{param_name} must be at {min_length} to {max_length} "
+        message = _(f"{param_name} must be at least {min_length} "
                     f"characters long.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     if max_length is not None and len(value) > max_length:
-        message = _(f"{param_name} must be at {min_length} to {max_length} "
+        message = _(f"{param_name} must be at most {max_length} "
                     f"characters long.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -87,7 +87,7 @@ def validate_invalid_chars(value: str, param_name: str,
     message = _(f"{param_name} contains invalid characters.")
     for char in invalid_chars:
         if char in value:
-            raise CommonValidationError(message)
+            raise ValidationError(message)
     return None
 
 
@@ -99,11 +99,11 @@ def validate_numeric_range(value: Union[int, float], param_name: str,
     if min_value is not None and value < min_value:
         message = _(f"{param_name} must be between {min_value} "
                     f"and {max_value}.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     if max_value is not None and value > max_value:
         message = _(f"{param_name} must be between {min_value} "
                     f"and {max_value}.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -112,7 +112,7 @@ def validate_enum(value: str, param_name: str,
     """列挙型の値をチェック"""
     if value not in allowed_values:
         message = _(f"{param_name} is invalid value.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -120,17 +120,16 @@ def validate_path(value: str, param_name: str) -> None:
     """パスのバリデーション"""
     # 空のパスをチェック
     message = _(f"{param_name} is required.")
-    if validate_required(value, param_name):
-        raise CommonValidationError(message)
+    validate_required(value, param_name)
     # 危険な文字列をチェック
     dangerous_patterns = ['..', '~', '$', '|', ';', '&', '`']
     if any(pattern in value for pattern in dangerous_patterns):
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     # 絶対パスかどうかをチェック
     try:
         Path(value).resolve()
     except (OSError, ValueError):
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -140,7 +139,7 @@ def validate_table_exists(value: str,
     """テーブルが存在するかチェック"""
     if value not in tables:
         message = _(f"{param_name} '{value}' does not exist.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -150,7 +149,7 @@ def validate_table_duplicate(value: str,
     """テーブルが重複していないかチェック"""
     if value in tables:
         message = _(f"{param_name} '{value}' already exists.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -160,7 +159,7 @@ def validate_column_exists(value: str,
     """列が存在するかチェック"""
     if value not in columns:
         message = _(f"{param_name} '{value}' does not exist.")
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
@@ -170,15 +169,15 @@ def validate_column_duplicate(value: str,
     """列が重複していないかチェック"""
     message = _(f"{param_name} '{value}' already exists.")
     if value in columns:
-        raise CommonValidationError(message)
+        raise ValidationError(message)
     return None
 
 
-def validate_condition(value: str,
-                       param_name: str,
-                       condition_candidates: List[str]) -> None:
+def validate_candidates(value: str,
+                        param_name: str,
+                        candidate_values: List[str]) -> None:
     """フィルタ条件のバリデーション"""
-    if value not in condition_candidates:
-        message = _(f"{param_name} '{value}' is not a valid condition.")
-        raise CommonValidationError(message)
+    if value not in candidate_values:
+        message = _(f"{param_name} '{value}' is not a valid value.")
+        raise ValidationError(message)
     return None
