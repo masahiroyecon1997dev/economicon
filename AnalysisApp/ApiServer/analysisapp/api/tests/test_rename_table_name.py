@@ -50,7 +50,7 @@ class TestApiRenameTableName(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
         self.assertIn(response_data['message'],
-                      "tableName 'NotExist' does not exist.")
+                      "oldTableName 'NotExist' does not exist.")
 
     def test_rename_table_empty_old_table_name(self):
         # oldTableNameが空
@@ -67,7 +67,7 @@ class TestApiRenameTableName(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
         self.assertIn(response_data['message'],
-                      "tableName is required.")
+                      "oldTableName is required.")
 
     def test_rename_table_empty_new_table_name(self):
         # newTableNameが空
@@ -84,4 +84,4 @@ class TestApiRenameTableName(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
         self.assertIn(response_data['message'],
-                      "tableName is required.")
+                      "newTableName is required.")
