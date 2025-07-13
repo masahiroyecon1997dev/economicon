@@ -12,7 +12,7 @@ class TestApiCreateTable(APITestCase):
         payload = {
             'tableName': 'NewTable',
             'tableNumberOfRows': 3,
-            'columns': ['A', 'B']
+            'columnNames': ['A', 'B']
         }
         response = self.client.post(
             '/api/create-table',
@@ -35,7 +35,7 @@ class TestApiCreateTable(APITestCase):
         payload = {
             'tableName': '',
             'tableNumberOfRows': 2,
-            'columns': ['A', 'B']
+            'columnNames': ['A', 'B']
         }
         response = self.client.post(
             '/api/create-table',
@@ -54,7 +54,7 @@ class TestApiCreateTable(APITestCase):
         payload = {
             'tableName': 'EmptyRowTable',
             'tableNumberOfRows': 'A',
-            'columns': ['A', 'B']
+            'columnNames': ['A', 'B']
         }
         response = self.client.post(
             '/api/create-table',
@@ -73,7 +73,7 @@ class TestApiCreateTable(APITestCase):
         payload = {
             'tableName': 'EmptyColTable',
             'tableNumberOfRows': 2,
-            'columns': []
+            'columnNames': []
         }
         response = self.client.post(
             '/api/create-table',
@@ -85,4 +85,4 @@ class TestApiCreateTable(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
         self.assertIn(response_data['message'],
-                      "columnName must be a list with at least one item.")
+                      "columnNames must be a list with at least one item.")
