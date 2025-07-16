@@ -1,23 +1,21 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 import json
-from ..apis.data.tables_info import all_tables_info, TableInfo
+from ..apis.data.tables_manager import TablesManager
 import polars as pl
 
 
 class TestApiDeleteColumn(APITestCase):
     def setUp(self):
+        self.manager = TablesManager()
+        self.manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2, 3],
             'B': [4, 5, 6],
             'C': [7, 8, 9]
         })
-        all_tables_info['TestTable'] = TableInfo(table_name='TestTable',
-                                                 table=df)
-
-    def tearDown(self):
-        all_tables_info.clear()
+        self.manager.store_table('TestTable', df)
 
     def test_delete_column_success(self):
         payload = {
@@ -32,7 +30,7 @@ class TestApiDeleteColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['TestTable'].table
+        df = self.manager.get_table('TestTable').table
         self.assertNotIn('A', df.columns)
         self.assertIn('B', df.columns)
         self.assertIn('C', df.columns)

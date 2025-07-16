@@ -1,29 +1,29 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 import json
-from ..apis.data.tables_info import all_tables_info, TableInfo
+from ..apis.data.tables_manager import TablesManager
 import polars as pl
 
 
 class TestApiCreateJoinTable(APITestCase):
     def setUp(self):
+        self.manager = TablesManager()
+        self.manager.clear_tables()
+        # テーブルをクリア
+        self.manager.clear_tables()
         # 左テーブル
         left_df = pl.DataFrame({
             'id': [1, 2, 3, 4],
             'val_left': ['A', 'B', 'C', 'D']
         })
-        all_tables_info['LeftTable'] = TableInfo(table_name='LeftTable',
-                                                 table=left_df)
+        self.manager.store_table('LeftTable', left_df)
+
         # 右テーブル
         right_df = pl.DataFrame({
             'id': [3, 4, 5, 6],
             'val_right': ['X', 'Y', 'Z', 'W']
         })
-        all_tables_info['RightTable'] = TableInfo(table_name='RightTable',
-                                                  table=right_df)
-
-    def tearDown(self):
-        all_tables_info.clear()
+        self.manager.store_table('RightTable', right_df)
 
     def test_inner_join(self):
         payload = {
@@ -42,7 +42,7 @@ class TestApiCreateJoinTable(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['JoinTable'].table
+        df = self.manager.get_table('JoinTable').table
         self.assertEqual(df.shape, (2, 3))
         self.assertListEqual(df['id'].to_list(), [3, 4])
         self.assertListEqual(df['val_left'].to_list(), ['C', 'D'])
@@ -65,7 +65,7 @@ class TestApiCreateJoinTable(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['JoinTable'].table
+        df = self.manager.get_table('JoinTable').table
         self.assertEqual(df.shape, (4, 3))
         self.assertListEqual(df['id'].to_list(), [1, 2, 3, 4])
         self.assertListEqual(df['val_left'].to_list(), ['A', 'B', 'C', 'D'])
@@ -88,7 +88,7 @@ class TestApiCreateJoinTable(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['JoinTable'].table
+        df = self.manager.get_table('JoinTable').table
         self.assertEqual(df.shape, (4, 3))
         self.assertListEqual(df['id'].to_list(), [3, 4, 5, 6])
         self.assertListEqual(df['val_left'].to_list(), ['C', 'D', None, None])
@@ -111,7 +111,7 @@ class TestApiCreateJoinTable(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['JoinTable'].table
+        df = self.manager.get_table('JoinTable').table
         self.assertEqual(df.shape, (6, 3))
         self.assertListEqual(df['id'].to_list(), [1, 2, 3, 4, 5, 6])
         self.assertListEqual(df['val_left'].to_list(), ['A', 'B', 'C', 'D',

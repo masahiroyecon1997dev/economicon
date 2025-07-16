@@ -11,13 +11,20 @@ from .common_api_class import AbstractApi, ApiError
 class RenameColumnName(AbstractApi):
     """
     列名変更APIのPythonロジック
+
+    指定されたテーブルの指定された列名を新しい列名に変更します。
+    同じ列名が既に存在する場合はエラーとなります。
     """
     def __init__(self, table_name: str,
                  old_column_name: str,
                  new_column_name: str):
+        # テーブル名
         self.table_name = table_name
+        # 変更前の列名
         self.old_column_name = old_column_name
+        # 変更後の列名
         self.new_column_name = new_column_name
+        # パラメータ名のマッピング
         self.param_names = {
             'table_name': 'tableName',
             'new_column_name': 'newColumnName',
@@ -25,14 +32,18 @@ class RenameColumnName(AbstractApi):
         }
 
     def validate(self):
+        # 入力値のバリデーション
         try:
             validator = InputValidator(param_names=self.param_names,
                                        **INPUT_VALIDATOR_CONFIG)
+            # テーブル名の存在チェック
             validator.validate_existed_table_name(self.table_name,
                                                   all_tables_info)
+            # 変更前の列名の存在チェック
             table_info = all_tables_info[self.table_name]
             validator.validate_existed_column_name(self.old_column_name,
                                                    table_info)
+            # 変更後の列名の重複チェック
             validator.validate_new_column_name(self.new_column_name,
                                                table_info.table.columns)
             return None
@@ -40,12 +51,17 @@ class RenameColumnName(AbstractApi):
             return e
 
     def execute(self):
+        # 列名の変更処理
         try:
+            # テーブル情報を取得
             table_info = all_tables_info[self.table_name]
             df = table_info.table
+            # 列名を変更
             new_df = df.rename({self.old_column_name: self.new_column_name})
+            # 更新されたデータフレームを保存
             table_info.table = new_df
             all_tables_info[self.table_name] = table_info
+            # 結果を返す
             result = {'tableName': self.table_name}
             return result
         except Exception as e:

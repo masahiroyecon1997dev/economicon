@@ -4,31 +4,43 @@ from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.input_validator import InputValidator
 from ..utilities.validator.input_validation_config \
     import INPUT_VALIDATOR_CONFIG
-from ..data.tables_info import all_tables_info
+from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
 
 
 class DeleteTable(AbstractApi):
     """
     テーブル削除APIのPythonロジック
+
+    指定されたテーブルを完全に削除します。
+    削除後、テーブルは復元できません。
     """
     def __init__(self, table_name: str):
+        self.manager = TablesManager()
+        # 削除するテーブル名
         self.table_name = table_name
+        # パラメータ名のマッピング
         self.param_names = {'table_name': 'tableName'}
 
     def validate(self):
+        # 入力値のバリデーション
         try:
             validator = InputValidator(param_names=self.param_names,
                                        **INPUT_VALIDATOR_CONFIG)
+            table_name_list = self.manager.get_table_name_list()
+            # テーブル名の存在チェック
             validator.validate_existed_table_name(self.table_name,
-                                                  all_tables_info)
+                                                  table_name_list)
             return None
         except ValidationError as e:
             return e
 
     def execute(self):
+        # テーブルの削除処理
         try:
-            del all_tables_info[self.table_name]
+            # テーブル情報から削除
+            self.manager.delete_table(self.table_name)
+            # 結果を返す
             result = {'tableName': self.table_name}
             return result
         except Exception as e:

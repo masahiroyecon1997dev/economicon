@@ -2,19 +2,21 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 import polars as pl
 import json
-from ..apis.data.tables_info import all_tables_info, TableInfo
+
+from ..apis.data.tables_manager import TablesManager
 
 
 class TestApiAddColumn(APITestCase):
     def setUp(self):
-        all_tables_info.clear()
+        self.manager = TablesManager()
+        # テーブルをクリア
+        self.manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2, 3],
             'B': [4, 5, 6]
         })
-        all_tables_info['TestTable'] = TableInfo(table_name='TestTable',
-                                                 table=df)
+        self.manager.store_table('TestTable', df)
 
     def test_add_column_success(self):
         # 正常にカラム追加できる
@@ -33,7 +35,7 @@ class TestApiAddColumn(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
         # カラムが追加されているか
-        df = all_tables_info['TestTable'].table
+        df = self.manager.get_table('NewTable').table
         index_C = df.columns.index('A') + 1
         self.assertEqual(df.columns[index_C], 'C')
         # 追加カラムはNoneで埋まっている
