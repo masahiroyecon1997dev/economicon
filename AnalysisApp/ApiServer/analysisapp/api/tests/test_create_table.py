@@ -1,12 +1,12 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 import json
-from ..apis.data.tables_info import all_tables_info
+from ..apis.data.tables_manager import TablesManager
 
 
 class TestApiCreateTable(APITestCase):
     def setUp(self):
-        all_tables_info.clear()
+        self.manager = TablesManager()
 
     def test_create_table_success(self):
         payload = {
@@ -24,8 +24,8 @@ class TestApiCreateTable(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
         # テーブルが作成されているか
-        self.assertIn('NewTable', all_tables_info)
-        df = all_tables_info['NewTable'].table
+        self.assertIn('NewTable', self.manager.get_table_name_list())
+        df = self.manager.get_table('NewTable').table
         self.assertEqual(df.shape, (3, 2))
         self.assertEqual(df.columns, ['A', 'B'])
         self.assertTrue(df['A'].to_list() == [None, None, None])

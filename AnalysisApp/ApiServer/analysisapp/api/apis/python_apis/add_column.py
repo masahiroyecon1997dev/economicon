@@ -11,6 +11,10 @@ from .common_api_class import (AbstractApi, ApiError)
 
 class AddColumn(AbstractApi):
     """
+    テーブルに新しい列を追加するためのAPIクラス
+
+    指定されたテーブルの指定された位置に新しい列を挿入します。
+    新しい列は空（None）の値で初期化されます。
     """
     def __init__(self, table_name: str, new_column_name: str,
                  add_position_column: str):

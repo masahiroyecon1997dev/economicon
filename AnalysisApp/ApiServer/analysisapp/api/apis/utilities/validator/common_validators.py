@@ -1,9 +1,8 @@
 
 from pathlib import Path
-from typing import Optional, List, Union, Dict
+from typing import Optional, List, Union
 from django.utils.translation import gettext as _
 from rest_framework import status
-from ....apis.data.tables_info import TableInfo
 
 
 class ValidationError(Exception):
@@ -135,9 +134,9 @@ def validate_path(value: str, param_name: str) -> None:
 
 def validate_table_exists(value: str,
                           param_name: str,
-                          tables: Dict[str, TableInfo]) -> None:
+                          table_name_list: List[str]) -> None:
     """テーブルが存在するかチェック"""
-    if value not in tables:
+    if value not in table_name_list:
         message = _(f"{param_name} '{value}' does not exist.")
         raise ValidationError(message)
     return None
@@ -145,9 +144,9 @@ def validate_table_exists(value: str,
 
 def validate_table_duplicate(value: str,
                              param_name: str,
-                             tables: Dict[str, TableInfo]) -> None:
+                             table_name_list: List[str]) -> None:
     """テーブルが重複していないかチェック"""
-    if value in tables:
+    if value in table_name_list:
         message = _(f"{param_name} '{value}' already exists.")
         raise ValidationError(message)
     return None
@@ -155,9 +154,9 @@ def validate_table_duplicate(value: str,
 
 def validate_column_exists(value: str,
                            param_name: str,
-                           columns: List[str]) -> None:
+                           column_name_list: List[str]) -> None:
     """列が存在するかチェック"""
-    if value not in columns:
+    if value not in column_name_list:
         message = _(f"{param_name} '{value}' does not exist.")
         raise ValidationError(message)
     return None
@@ -165,10 +164,10 @@ def validate_column_exists(value: str,
 
 def validate_column_duplicate(value: str,
                               param_name: str,
-                              columns: List[str]) -> None:
+                              column_name_list: List[str]) -> None:
     """列が重複していないかチェック"""
     message = _(f"{param_name} '{value}' already exists.")
-    if value in columns:
+    if value in column_name_list:
         raise ValidationError(message)
     return None
 

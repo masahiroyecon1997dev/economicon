@@ -1,23 +1,21 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 import json
-from ..apis.data.tables_info import all_tables_info, TableInfo
+from ..apis.data.tables_manager import TablesManager
 import polars as pl
 
 
 class TestApiFilterSingleCondition(APITestCase):
     def setUp(self):
+        self.manager = TablesManager()
+        self.manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2, 3, 4, 5, 6, 7, 1, 2, 3],
             'B': [11, 12, 30, 40, 1, 2, 3, 40, 10, 2],
             'C': [1, 1, 4, 8, 4, 6, 7, 2, 3, 2]
         })
-        all_tables_info['TestTable'] = TableInfo(table_name='TestTable',
-                                                 table=df)
-
-    def tearDown(self):
-        all_tables_info.clear()
+        self.manager.store_table('TestTable', df)
 
     def test_filter_equals(self):
         payload = {
@@ -36,7 +34,7 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['FilteredTable'].table
+        df = self.manager.get_table('FilteredTable').table
         self.assertEqual(df.shape[0], 2)
         self.assertListEqual(df['A'].to_list(), [2, 2])
 
@@ -57,7 +55,7 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['FilteredTable'].table
+        df = self.manager.get_table('FilteredTable').table
         self.assertEqual(df.shape[0], 5)
         self.assertListEqual(df['B'].to_list(), [11, 12, 30, 40, 40])
 
@@ -78,7 +76,7 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['FilteredTable'].table
+        df = self.manager.get_table('FilteredTable').table
         self.assertEqual(df.shape[0], 8)
         self.assertNotIn(2, df['A'].to_list())
 
@@ -99,7 +97,7 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['FilteredTable'].table
+        df = self.manager.get_table('FilteredTable').table
         self.assertEqual(df.shape[0], 3)
         self.assertListEqual(df['B'].to_list(), [30, 40, 40])
 
@@ -120,7 +118,7 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['FilteredTable'].table
+        df = self.manager.get_table('FilteredTable').table
         self.assertEqual(df.shape[0], 4)
         self.assertListEqual(df['A'].to_list(), [1, 2, 1, 2])
 
@@ -141,7 +139,7 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['FilteredTable'].table
+        df = self.manager.get_table('FilteredTable').table
         self.assertEqual(df.shape[0], 7)
         self.assertListEqual(df['B'].to_list(), [11, 12, 1, 2, 3, 10, 2])
 
@@ -162,7 +160,7 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['FilteredTable'].table
+        df = self.manager.get_table('FilteredTable').table
         # A==Cとなる行
         self.assertEqual(df.shape[0], 3)
         self.assertListEqual(df['A'].to_list(), [1, 6, 7])
@@ -185,7 +183,7 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['FilteredTable'].table
+        df = self.manager.get_table('FilteredTable').table
         # B>Cとなる行
         self.assertEqual(df.shape[0], 3)
         self.assertListEqual(df['A'].to_list(), [2, 5, 3])
@@ -208,7 +206,7 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['FilteredTable'].table
+        df = self.manager.get_table('FilteredTable').table
         # A<=C
         self.assertEqual(df.shape[0], 7)
         self.assertListEqual(df['A'].to_list(), [1, 3, 4, 6, 7, 1, 2])

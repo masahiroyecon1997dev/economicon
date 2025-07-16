@@ -3,16 +3,19 @@ from rest_framework import status
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 import polars as pl
-from ..apis.data.tables_info import all_tables_info
+from ..apis.data.tables_manager import TablesManager
 
 
 class TestApiImportParquetByFile(APITestCase):
+
+    def setUp(self):
+        self.manager = TablesManager()
+        self.manager.clear_tables()
 
     def test_upload_valid_excel_file(self):
         """
         有効なExcel(xlsx)ファイルをアップロードした場合のテスト
         """
-        all_tables_info.clear()  # テスト前にテーブル情報をクリア
         compare_data = pl.read_excel(
             '/AnalysisApp/SampleData/TestDataXlsx.xlsx')
         test_file = File(open('/AnalysisApp/SampleData/TestDataXlsx.xlsx',
@@ -29,8 +32,8 @@ class TestApiImportParquetByFile(APITestCase):
         self.assertEqual('OK', ['code'])
         self.assertEqual('TestDataXlsx',
                          response_data['result']['tableName'])
-        data = all_tables_info['TestDataXlsx'].table
-        self.assertEqual(True, compare_data.equals(data))
+        df = self.manager.get_table('TestDataXlsx').table
+        self.assertEqual(True, compare_data.equals(df))
 
     def test_upload_valid_excel_file_with_extension_xls(self):
         """
@@ -51,8 +54,8 @@ class TestApiImportParquetByFile(APITestCase):
         # レスポンスデータの検証
         self.assertEqual('OK', response_data['code'])
         self.assertEqual('TestDataXls', response_data['result']['tableName'])
-        data = all_tables_info['TestDataXls'].table
-        self.assertEqual(True, compare_data.equals(data))
+        df = self.manager.get_table('TestDataXls').table
+        self.assertEqual(True, compare_data.equals(df))
 
     def test_upload_excel_with_only_headers(self):
         """
@@ -72,8 +75,8 @@ class TestApiImportParquetByFile(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        data = all_tables_info['OnlyHeaderExcel'].table
-        self.assertEqual(True, compare_data.equals(data))
+        df = self.manager.get_table('OnlyHeaderExcel').table
+        self.assertEqual(True, compare_data.equals(df))
 
     def test_no_file_uploaded(self):
         """

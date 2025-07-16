@@ -1,7 +1,7 @@
 import polars as pl
 from typing import Dict
 from django.utils.translation import gettext as _
-from ..data.tables_info import TableInfo, all_tables_info
+from ..data.tables_manager import TablesManager
 from ..utilities.validator.input_validator import InputValidator
 from ..utilities.validator.input_validation_config import (
     INPUT_VALIDATOR_CONFIG)
@@ -11,16 +11,28 @@ from .common_api_class import (AbstractApi, ApiError)
 
 class FilterSingleCondition(AbstractApi):
     """
+    単一条件フィルタリングAPIのPythonロジック
+
+    指定されたテーブルから指定された条件に合致する行のみを抽出し、
+    新しいテーブルを作成します。
     """
     def __init__(self, new_table_name: str, table_name: str,
                  column_name: str, condition: str,
                  is_compare_column: str, compare_value: str):
+        self.manager = TablesManager()
+        # 新しいテーブル名
         self.new_table_name = new_table_name
+        # フィルタリング対象のテーブル名
         self.table_name = table_name
+        # フィルタリング対象のカラム名
         self.column_name = column_name
+        # フィルタリング条件
         self.condition = condition
+        # 比較値がカラムかどうか
         self.is_compare_column = is_compare_column
+        # 比較値
         self.compare_value = compare_value
+        # パラメータ名のマッピング
         self.param_names = {
             'new_table_name': 'newTableName',
             'table_name': 'tableName',
@@ -31,32 +43,45 @@ class FilterSingleCondition(AbstractApi):
         }
 
     def validate(self):
+        # 入力値のバリデーション
         try:
             validator = InputValidator(param_names=self.param_names,
                                        **INPUT_VALIDATOR_CONFIG)
+            table_name_list = self.manager.get_table_name_list()
+            # 新しいテーブル名の重複チェック
             validator.validate_new_table_name(self.new_table_name,
-                                              all_tables_info)
+                                              table_name_list)
+            # 既存テーブル名の存在チェック
             validator.validate_existed_table_name(self.table_name,
-                                                  all_tables_info)
-            table_info = all_tables_info[self.table_name]
+                                                  table_name_list)
+            # カラム名の存在チェック
+            column_names = self.manager.get_column_names(self.table_name)
             validator.validate_existed_column_name(self.column_name,
-                                                   table_info)
+                                                   column_names)
+            # フィルタリング条件の妥当性チェック
             validator.validate_filter_condition(self.condition)
+            # 比較値タイプの妥当性チェック
             validator.validate_is_compare_column(self.is_compare_column)
+            # 比較値の妥当性チェック
             validator.validate_compare_value(self.compare_value)
+            # 比較値がカラムの場合の存在チェック
             if self.is_compare_column == 'true':
                 validator.validate_existed_column_name(self.compare_value,
-                                                       table_info)
+                                                       column_names)
             return None
         except ValidationError as e:
             return e
 
     def execute(self):
+        # フィルタリング処理
         try:
-            df = all_tables_info[self.table_name].table
+            # 対象テーブルのデータフレームを取得
+            df = self.manager.get_table(self.table_name).table
 
+            # 条件に応じてフィルタリング処理を実行
             match self.condition:
                 case 'equals':
+                    # 等価条件
                     filtered_df = df.filter(
                         pl.col(self.column_name) == (
                             pl.col(self.compare_value)
@@ -65,6 +90,7 @@ class FilterSingleCondition(AbstractApi):
                         )
                     )
                 case 'notEquals':
+                    # 非等価条件
                     filtered_df = df.filter(
                         pl.col(self.column_name) != (
                             pl.col(self.compare_value)
@@ -73,6 +99,7 @@ class FilterSingleCondition(AbstractApi):
                         )
                     )
                 case 'greaterThan':
+                    # より大きい条件
                     filtered_df = df.filter(
                         pl.col(self.column_name) > (
                             pl.col(self.compare_value)
@@ -81,6 +108,7 @@ class FilterSingleCondition(AbstractApi):
                         )
                     )
                 case 'greaterThanOrEquals':
+                    # 以上条件
                     filtered_df = df.filter(
                         pl.col(self.column_name) >= (
                             pl.col(self.compare_value)
@@ -89,6 +117,7 @@ class FilterSingleCondition(AbstractApi):
                         )
                     )
                 case 'lessThan':
+                    # より小さい条件
                     filtered_df = df.filter(
                         pl.col(self.column_name) < (
                             pl.col(self.compare_value)
@@ -97,6 +126,7 @@ class FilterSingleCondition(AbstractApi):
                         )
                     )
                 case 'lessThanOrEquals':
+                    # 以下条件
                     filtered_df = df.filter(
                         pl.col(self.column_name) <= (
                             pl.col(self.compare_value)
@@ -107,9 +137,12 @@ class FilterSingleCondition(AbstractApi):
                 case _:
                     raise ValidationError(_('Invalid condition specified'))
 
-            table_info = TableInfo(self.new_table_name, filtered_df)
-            all_tables_info[self.new_table_name] = table_info
-            result = {'tableName': self.new_table_name}
+            # テーブル情報を更新
+            updated_table_name = self.manager.update_table(
+                self.new_table_name, filtered_df
+            )
+            # 結果を返す
+            result = {'tableName': updated_table_name}
             return result
         except Exception as e:
             message = _("An unexpected error occurred during "
