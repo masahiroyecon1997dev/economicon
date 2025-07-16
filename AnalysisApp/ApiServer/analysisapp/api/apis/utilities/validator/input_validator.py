@@ -1,6 +1,5 @@
 
-from typing import List, Optional, Dict
-from ....apis.data.tables_info import TableInfo
+from typing import List, Optional
 from .validator_utils import remove_one_string_copy
 from .common_validators import (
     validate_required,
@@ -42,7 +41,7 @@ class InputValidator:
         self.condition_candidates = condition_candidates or []
 
     def validate_new_table_name(
-        self, table_name: str, tables_info: Dict[str, TableInfo]
+        self, table_name: str, table_name_list: List[str]
     ) -> None:
         # 新規テーブル名のバリデーション
         param = self.param_names['table_name']
@@ -52,7 +51,7 @@ class InputValidator:
             self.table_name_min_length, self.table_name_max_length
         )
         validate_invalid_chars(table_name, param, self.invalid_chars)
-        validate_table_duplicate(table_name, param, tables_info)
+        validate_table_duplicate(table_name, param, table_name_list)
         return None
 
     def validate_table_num_rows(self, table_num_rows: int) -> None:
@@ -94,20 +93,20 @@ class InputValidator:
         return None
 
     def validate_existed_table_name(
-        self, table_name: str, tables_info: Dict[str, TableInfo]
+        self, table_name: str, table_name_list: List[str]
     ) -> None:
         param = self.param_names['table_name']
         validate_required(table_name, param)
-        validate_table_exists(table_name, param, tables_info)
+        validate_table_exists(table_name, param, table_name_list)
         return None
 
     def validate_existed_column_name(
-        self, column_name: str, table_info: TableInfo
+        self, column_name: str, column_name_list: List[str]
     ) -> None:
         param = self.param_names['column_names']
         validate_required(column_name, param)
         validate_column_exists(
-            column_name, param, table_info.table.columns
+            column_name, param, column_name_list
         )
         return None
 

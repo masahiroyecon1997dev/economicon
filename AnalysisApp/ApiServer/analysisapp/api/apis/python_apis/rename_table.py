@@ -11,21 +11,30 @@ from .common_api_class import AbstractApi, ApiError
 class RenameTable(AbstractApi):
     """
     テーブル名変更APIのPythonロジック
+
+    既存のテーブルの名前を新しい名前に変更します。
+    同じテーブル名が既に存在する場合はエラーとなります。
     """
     def __init__(self, old_table_name: str, new_table_name: str):
+        # 変更前のテーブル名
         self.old_table_name = old_table_name
+        # 変更後のテーブル名
         self.new_table_name = new_table_name
+        # パラメータ名のマッピング
         self.param_names = {
             'table_name': 'oldTableName',
             'new_table_name': 'newTableName',
         }
 
     def validate(self):
+        # 入力値のバリデーション
         try:
             validator = InputValidator(param_names=self.param_names,
                                        **INPUT_VALIDATOR_CONFIG)
+            # 変更前のテーブル名の存在チェック
             validator.validate_existed_table_name(self.old_table_name,
                                                   all_tables_info)
+            # 変更後のテーブル名の重複チェック
             validator.param_names['table_name'] = 'newTableName'
             validator.validate_new_table_name(self.new_table_name,
                                               all_tables_info)
@@ -34,10 +43,15 @@ class RenameTable(AbstractApi):
             return e
 
     def execute(self):
+        # テーブル名の変更処理
         try:
+            # 変更前のテーブル情報を取得し、削除
             table_info = all_tables_info.pop(self.old_table_name)
+            # テーブル名を変更
             table_info.table_name = self.new_table_name
+            # 新しいテーブル名で保存
             all_tables_info[self.new_table_name] = table_info
+            # 結果を返す
             result = {'tableName': self.new_table_name}
             return result
         except Exception as e:

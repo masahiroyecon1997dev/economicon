@@ -1,28 +1,25 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 import json
-from ..apis.data.tables_info import all_tables_info, TableInfo
+from ..apis.data.tables_manager import TablesManager
 import polars as pl
 
 
 class TestApiDeleteTable(APITestCase):
     def setUp(self):
+        self.manager = TablesManager()
+        self.manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2],
             'B': [3, 4]
         })
-        all_tables_info['TestTable1'] = TableInfo(table_name='TestTable1',
-                                                  table=df)
+        self.manager.store_table('TestTable1', df)
         df = pl.DataFrame({
             'C': [1, 2],
             'D': [3, 4]
         })
-        all_tables_info['TestTable2'] = TableInfo(table_name='TestTable2',
-                                                  table=df)
-
-    def tearDown(self):
-        all_tables_info.clear()
+        self.manager.store_table('TestTable1', df)
 
     def test_delete_table_success(self):
         payload = {
@@ -37,8 +34,8 @@ class TestApiDeleteTable(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        self.assertNotIn('TestTable2', all_tables_info)
-        self.assertEqual(len(all_tables_info), 1)
+        self.assertNotIn('TestTable2', self.manager.get_table_name_list())
+        self.assertEqual(len(self.manager.get_table_name_list()), 1)
 
     def test_delete_table_not_found(self):
         payload = {
