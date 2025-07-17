@@ -7,7 +7,7 @@ from ..utilities.create_response import (
     create_error_response,
 )
 from ..utilities.create_log import create_log_api_request
-from ..python_apis.rename_table import rename_table
+from ..python_apis.rename_table_name import rename_table
 from ..python_apis.common_api_class import ApiError
 from ..utilities.validator.common_validators import ValidationError
 

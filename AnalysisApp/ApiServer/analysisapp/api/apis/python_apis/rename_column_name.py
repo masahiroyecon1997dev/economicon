@@ -4,7 +4,7 @@ from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.input_validator import InputValidator
 from ..utilities.validator.input_validation_config \
     import INPUT_VALIDATOR_CONFIG
-from ..data.tables_info import all_tables_info
+from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
 
 
@@ -18,6 +18,7 @@ class RenameColumnName(AbstractApi):
     def __init__(self, table_name: str,
                  old_column_name: str,
                  new_column_name: str):
+        self.tables_manager = TablesManager()
         # テーブル名
         self.table_name = table_name
         # 変更前の列名
@@ -34,18 +35,20 @@ class RenameColumnName(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
+            table_name_list = self.tables_manager.get_table_name_list()
             validator = InputValidator(param_names=self.param_names,
                                        **INPUT_VALIDATOR_CONFIG)
             # テーブル名の存在チェック
             validator.validate_existed_table_name(self.table_name,
-                                                  all_tables_info)
+                                                  table_name_list)
             # 変更前の列名の存在チェック
-            table_info = all_tables_info[self.table_name]
+            column_name_list = self.tables_manager.get_column_name_list(
+                self.table_name)
             validator.validate_existed_column_name(self.old_column_name,
-                                                   table_info)
+                                                   column_name_list)
             # 変更後の列名の重複チェック
             validator.validate_new_column_name(self.new_column_name,
-                                               table_info.table.columns)
+                                               column_name_list)
             return None
         except ValidationError as e:
             return e
