@@ -51,7 +51,7 @@ class TablesManager:
             if table_info:
                 table_info.table_name = new_table_name
                 self._tables[new_table_name] = table_info
-                return table_info.table_id
+                return table_info.table_name
             else:
                 raise KeyError(f"Table '{old_table_name}' does not exist.")
 

@@ -1,42 +1,69 @@
-from rest_framework import status
-from rest_framework.views import APIView
-import json
+from typing import Dict
 from django.utils.translation import gettext as _
-from .utilities.create_response import (create_success_response,
-                                        create_error_response)
-from .utilities.create_log import create_log_api_request
-from .utilities.validator.input_request_validators import (
-    validate_rename_table_request,
-)
-from .data.tables_info import all_tables_info
+from ..utilities.validator.common_validators import ValidationError
+from ..utilities.validator.input_validator import InputValidator
+from ..utilities.validator.input_validation_config \
+    import INPUT_VALIDATOR_CONFIG
+from ..data.tables_manager import TablesManager
+from .common_api_class import AbstractApi, ApiError
 
 
-class RenameTableName(APIView):
+class RenameTableName(AbstractApi):
+    """
+    テーブル名変更APIのPythonロジック
 
-    def post(self, request):
+    既存のテーブルの名前を新しい名前に変更します。
+    同じテーブル名が既に存在する場合はエラーとなります。
+    """
+    def __init__(self, old_table_name: str, new_table_name: str):
+        self.tables_manager = TablesManager()
+        # 変更前のテーブル名
+        self.old_table_name = old_table_name
+        # 変更後のテーブル名
+        self.new_table_name = new_table_name
+        # パラメータ名のマッピング
+        self.param_names = {
+            'table_name': 'oldTableName',
+            'new_table_name': 'newTableName',
+        }
+
+    def validate(self):
+        # 入力値のバリデーション
         try:
-            # リクエスト受け取りログ
-            create_log_api_request(request)
-            # リクエストデータの取得
-            request_data = json.loads(request.body)
-            # バリデーション
-            validation_error = validate_rename_table_request(request_data)
-            if validation_error:
-                return validation_error
+            table_name_list = self.tables_manager.get_table_name_list()
+            validator = InputValidator(param_names=self.param_names,
+                                       **INPUT_VALIDATOR_CONFIG)
+            # 変更前のテーブル名の存在チェック
+            validator.validate_existed_table_name(self.old_table_name,
+                                                  table_name_list)
+            # 変更後のテーブル名の重複チェック
+            validator.param_names['table_name'] = 'newTableName'
+            validator.validate_new_table_name(self.new_table_name,
+                                              table_name_list)
+            return None
+        except ValidationError as e:
+            return e
 
-            old_table_name = request_data['oldTableName']
-            new_table_name = request_data['newTableName']
-
-            table_info = all_tables_info.pop(old_table_name)
-            table_info.table_name = new_table_name
-            all_tables_info[new_table_name] = table_info
-
-            result = {'tableName': new_table_name}
-            return create_success_response(status.HTTP_200_OK, result)
-
+    def execute(self):
+        # テーブル名の変更処理
+        try:
+            # 変更前のテーブル情報を取得し、削除
+            renamed_table_name = self.tables_manager.rename_table(
+                self.old_table_name, self.new_table_name
+            )
+            # 結果を返す
+            result = {'tableName': renamed_table_name}
+            return result
         except Exception as e:
-            message = _("An unexpected error occurred "
-                        "during renaming table processing")
-            return create_error_response(status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                         message,
-                                         e)
+            message = _("An unexpected error occurred during "
+                        "table rename processing")
+            raise ApiError(message) from e
+
+
+def rename_table(old_table_name: str, new_table_name: str) -> Dict:
+    api = RenameTableName(old_table_name, new_table_name)
+    validation_error = api.validate()
+    if validation_error:
+        raise validation_error
+    result = api.execute()
+    return result
