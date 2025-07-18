@@ -55,7 +55,7 @@ class FilterSingleCondition(AbstractApi):
             validator.validate_existed_table_name(self.table_name,
                                                   table_name_list)
             # カラム名の存在チェック
-            column_names = self.manager.get_column_names(self.table_name)
+            column_names = self.manager.get_column_name_list(self.table_name)
             validator.validate_existed_column_name(self.column_name,
                                                    column_names)
             # フィルタリング条件の妥当性チェック
@@ -138,7 +138,7 @@ class FilterSingleCondition(AbstractApi):
                     raise ValidationError(_('Invalid condition specified'))
 
             # テーブル情報を更新
-            updated_table_name = self.manager.update_table(
+            updated_table_name = self.manager.store_table(
                 self.new_table_name, filtered_df
             )
             # 結果を返す

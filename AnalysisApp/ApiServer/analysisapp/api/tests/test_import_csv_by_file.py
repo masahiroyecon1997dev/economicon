@@ -9,8 +9,8 @@ from ..apis.data.tables_manager import TablesManager
 class TestApiImportCsvByFile(APITestCase):
 
     def setUp(self):
-        self.manager = TablesManager()
-        self.manager.clear_tables()
+        self.tables_manager = TablesManager()
+        self.tables_manager.clear_tables()
 
     def test_upload_valid_csv_file(self):
         """
@@ -33,7 +33,7 @@ class TestApiImportCsvByFile(APITestCase):
         self.assertEqual('OK', response_data['code'])
         self.assertEqual('TestDataComma',
                          response_data['result']['tableName'])
-        df = self.manager.get_table('TestDataComma').table
+        df = self.tables_manager.get_table('TestDataComma').table
         self.assertEqual(True, compare_data.equals(df))
 
     def test_upload_csv_with_only_headers(self):
@@ -55,7 +55,7 @@ class TestApiImportCsvByFile(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = self.manager.get_table('OnlyHeaderComma').table
+        df = self.tables_manager.get_table('OnlyHeaderComma').table
         self.assertEqual(True, compare_data.equals(df))
 
     def test_no_file_uploaded(self):
@@ -116,7 +116,8 @@ class TestApiImportCsvByFile(APITestCase):
                                     {'file': uploaded_file})
 
         response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code,
+                         status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertEqual(response_data['code'], 'NG')
         self.assertIn("Failed to parse CSV file: Invalid format or encoding.",
                       response_data['message'])

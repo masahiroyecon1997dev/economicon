@@ -1,9 +1,7 @@
-from dataclasses import dataclass
 import polars as pl
 import uuid
 
 
-@dataclass
 class TableInfo:
     """
     テーブル情報を保持するデータクラス

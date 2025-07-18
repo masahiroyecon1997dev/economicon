@@ -1,7 +1,7 @@
 import threading
 import polars as pl
 from typing import Dict, List
-from .tables_info import TableInfo
+from .table_info import TableInfo
 
 
 class TablesManager:
@@ -37,7 +37,7 @@ class TablesManager:
             else:
                 raise KeyError(f"Table '{table_name}' does not exist.")
 
-    def get_column_names(self, table_name: str) -> List[str]:
+    def get_column_name_list(self, table_name: str) -> List[str]:
         with self._lock:
             table_info = self._tables.get(table_name)
             if table_info:

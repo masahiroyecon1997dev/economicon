@@ -30,14 +30,14 @@ class DeleteColumn(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
             validator = InputValidator(param_names=self.param_names,
                                        **INPUT_VALIDATOR_CONFIG)
+            table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名の存在チェック
             validator.validate_existed_table_name(self.table_name,
                                                   table_name_list)
             # 列名の存在チェック
-            column_names = self.tables_manager.get_column_names(
+            column_names = self.tables_manager.get_column_name_list(
                 self.table_name)
             validator.validate_existed_column_name(self.column_name,
                                                    column_names)

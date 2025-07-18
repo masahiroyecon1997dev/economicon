@@ -1,22 +1,20 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 import json
-from ..apis.data.tables_info import all_tables_info, TableInfo
+from ..apis.data.tables_manager import TablesManager
 import polars as pl
 
 
 class TestApiRenameColumnName(APITestCase):
     def setUp(self):
+        self.tables_manager = TablesManager()
+        self.tables_manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2],
             'B': [3, 4]
         })
-        all_tables_info['TestTable'] = TableInfo(table_name='TestTable',
-                                                 table=df)
-
-    def tearDown(self):
-        all_tables_info.clear()
+        self.tables_manager.store_table('TestTable', df)
 
     def test_rename_column_success(self):
         payload = {
@@ -33,7 +31,7 @@ class TestApiRenameColumnName(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = all_tables_info['TestTable'].table
+        df = self.tables_manager.get_table('TestTable').table
         self.assertIn('C', df.columns)
         self.assertNotIn('A', df.columns)
         self.assertEqual(df['C'].to_list(), [1, 2])
