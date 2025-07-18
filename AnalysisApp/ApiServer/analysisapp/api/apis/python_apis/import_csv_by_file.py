@@ -1,61 +1,96 @@
-from rest_framework import status
-from rest_framework.views import APIView
 from django.utils.translation import gettext as _
 import io
 import polars as pl
-from .utilities.create_response import create_success_response
-from .utilities.create_response import create_error_response
-from .utilities.create_log import create_log_api_request
-from .utilities.validator.file_request_validators import validate_csv_request
-from .utilities.create_table_name import create_table_name_by_file_name
-from .data.tables_info import (TableInfo, all_tables_info)
+from typing import Dict, BinaryIO
+from ..utilities.validator.common_validators import ValidationError
+from ..utilities.create_table_name import create_table_name_by_file_name
+from ..data.tables_manager import TablesManager
+from .common_api_class import (AbstractApi, ApiError)
 
 
-class ImportCsvByFile(APIView):
+class ImportCsvByFile(AbstractApi):
+    """
+    CSVファイルからデータをインポートしてテーブルを作成するAPIクラス
 
-    def post(self, request):
+    アップロードされたCSVファイルを解析し、新しいテーブルとして登録します。
+    テーブル名はファイル名から自動生成されます。
+    """
+
+    def __init__(self, file_data: BinaryIO, file_name: str):
+        # テーブルマネージャーの初期化
+        self.tables_manager = TablesManager()
+        # ファイルデータ
+        self.file_data = file_data
+        # ファイル名
+        self.file_name = file_name
+        # 自動生成されるテーブル名
+        table_name_list = self.tables_manager.get_table_name_list()
+        self.table_name = create_table_name_by_file_name(file_name,
+                                                         table_name_list)
+        # パラメータ名のマッピング
+        self.param_names = {
+            'file': 'file',
+        }
+
+    def validate(self):
+        # 入力値のバリデーション
         try:
-            # リクエスト受け取りログ
-            create_log_api_request(request)
-            # バリデーション
-            validation_error = validate_csv_request(request)
-            if validation_error:
-                return validation_error
+            # ファイルデータの基本チェック
+            if not self.file_data or not self.file_name:
+                raise ValidationError(_("File data or file name is missing"))
 
-            # polarsデータフレーム化
-            uploaded_file = request.FILES['file']
-            table_name = create_table_name_by_file_name(uploaded_file.name,
-                                                        all_tables_info)
-            table_info = TableInfo(
-                table_name=table_name,
-                table=pl.read_csv(io.BytesIO(uploaded_file.read()))
-            )
-            all_tables_info[table_name] = table_info
-            result = {'tableName': table_name}
-            return create_success_response(
-                status.HTTP_200_OK,
-                result,
-            )
+            # CSVファイルの拡張子チェック
+            if not self.file_name.lower().endswith('.csv'):
+                raise ValidationError(_("File must be a CSV file"))
+
+            return None
+        except ValidationError as e:
+            return e
+
+    def execute(self):
+        # CSVファイルのインポート処理
+        try:
+            # CSVファイルをPolarsデータフレームに変換
+            df = pl.read_csv(io.BytesIO(self.file_data.read()))
+
+            # テーブルを作成
+            self.tables_manager.store_table(self.table_name, df)
+
+            # 結果を返す
+            result = {'tableName': self.table_name}
+            return result
+
         except pl.NoDataError as e:
             message = _("The uploaded CSV file is "
                         "empty or contains no valid data.")
-            return create_error_response(
-                status.HTTP_400_BAD_REQUEST,
-                message,
-                e
-            )
+            raise ApiError(message) from e
         except pl.ComputeError as e:
             message = _("Failed to parse CSV file: "
                         "Invalid format or encoding.")
-            return create_error_response(
-                status.HTTP_400_BAD_REQUEST,
-                message,
-                e
-            )
+            raise ApiError(message) from e
         except Exception as e:
             message = _("An unexpected error occurred during CSV processing")
-            return create_error_response(
-                status.HTTP_400_BAD_REQUEST,
-                message,
-                e
-            )
+            raise ApiError(message) from e
+
+
+def import_csv_by_file(file_data: BinaryIO, file_name: str) -> Dict:
+    """
+    CSVファイルからデータをインポートしてテーブルを作成する関数
+
+    Args:
+        file_data: CSVファイルのバイナリデータ
+        file_name: CSVファイルの名前
+
+    Returns:
+        作成されたテーブル名を含む辞書
+    """
+    api = ImportCsvByFile(file_data, file_name)
+    validation_error = api.validate()
+    if validation_error:
+        raise validation_error
+    try:
+        result = api.execute()
+    except ApiError as e:
+        # APIエラーが発生した場合はそのまま再スロー
+        raise e
+    return result

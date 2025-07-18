@@ -52,10 +52,10 @@ class CreateJoinTable(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
             validator = InputValidator(
                 param_names=self.param_names, **INPUT_VALIDATOR_CONFIG
             )
+            table_name_list = self.tables_manager.get_table_name_list()
             # 新しいテーブル名の重複チェック
             validator.validate_new_table_name(
                 self.join_table_name, table_name_list
@@ -71,7 +71,7 @@ class CreateJoinTable(AbstractApi):
                 self.right_table_name, table_name_list
             )
             # 左テーブルのキー列の存在チェック
-            left_table_column_name_list = TablesManager().get_column_names(
+            left_table_column_name_list = TablesManager().get_column_name_list(
                 self.left_table_name
             )
             for left_key_column_name in self.left_key_column_names:
@@ -80,9 +80,8 @@ class CreateJoinTable(AbstractApi):
                     left_key_column_name, left_table_column_name_list
                 )
             # 右テーブルのキー列の存在チェック
-            right_table_column_name_list = TablesManager().get_column_names(
-                self.right_table_name
-            )
+            right_table_column_name_list = \
+                TablesManager().get_column_name_list(self.right_table_name)
             for right_key_column_name in self.right_key_column_names:
                 validator.param_names['column_names'] = 'rightKeyColumnNames'
                 validator.validate_existed_column_name(

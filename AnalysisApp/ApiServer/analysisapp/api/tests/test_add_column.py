@@ -8,15 +8,15 @@ from ..apis.data.tables_manager import TablesManager
 
 class TestApiAddColumn(APITestCase):
     def setUp(self):
-        self.manager = TablesManager()
+        self.tables_manager = TablesManager()
         # テーブルをクリア
-        self.manager.clear_tables()
+        self.tables_manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2, 3],
             'B': [4, 5, 6]
         })
-        self.manager.store_table('TestTable', df)
+        self.tables_manager.store_table('TestTable', df)
 
     def test_add_column_success(self):
         # 正常にカラム追加できる
@@ -35,7 +35,7 @@ class TestApiAddColumn(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
         # カラムが追加されているか
-        df = self.manager.get_table('NewTable').table
+        df = self.tables_manager.get_table('TestTable').table
         index_C = df.columns.index('A') + 1
         self.assertEqual(df.columns[index_C], 'C')
         # 追加カラムはNoneで埋まっている

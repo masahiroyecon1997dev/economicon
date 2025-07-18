@@ -7,19 +7,19 @@ import polars as pl
 
 class TestApiDeleteTable(APITestCase):
     def setUp(self):
-        self.manager = TablesManager()
-        self.manager.clear_tables()
+        self.tables_manager = TablesManager()
+        self.tables_manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2],
             'B': [3, 4]
         })
-        self.manager.store_table('TestTable1', df)
+        self.tables_manager.store_table('TestTable1', df)
         df = pl.DataFrame({
             'C': [1, 2],
             'D': [3, 4]
         })
-        self.manager.store_table('TestTable1', df)
+        self.tables_manager.store_table('TestTable2', df)
 
     def test_delete_table_success(self):
         payload = {
@@ -34,8 +34,9 @@ class TestApiDeleteTable(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        self.assertNotIn('TestTable2', self.manager.get_table_name_list())
-        self.assertEqual(len(self.manager.get_table_name_list()), 1)
+        self.assertNotIn('TestTable2',
+                         self.tables_manager.get_table_name_list())
+        self.assertEqual(len(self.tables_manager.get_table_name_list()), 1)
 
     def test_delete_table_not_found(self):
         payload = {

@@ -35,9 +35,9 @@ class RenameColumnName(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
             validator = InputValidator(param_names=self.param_names,
                                        **INPUT_VALIDATOR_CONFIG)
+            table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名の存在チェック
             validator.validate_existed_table_name(self.table_name,
                                                   table_name_list)
@@ -57,15 +57,17 @@ class RenameColumnName(AbstractApi):
         # 列名の変更処理
         try:
             # テーブル情報を取得
-            table_info = all_tables_info[self.table_name]
+            table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
             # 列名を変更
             new_df = df.rename({self.old_column_name: self.new_column_name})
             # 更新されたデータフレームを保存
             table_info.table = new_df
-            all_tables_info[self.table_name] = table_info
+            renamed_table_name = self.tables_manager.update_table(
+                self.table_name, new_df
+            )
             # 結果を返す
-            result = {'tableName': self.table_name}
+            result = {'tableName': renamed_table_name}
             return result
         except Exception as e:
             message = _("An unexpected error occurred during "

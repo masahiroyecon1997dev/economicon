@@ -16,7 +16,7 @@ class DeleteTable(AbstractApi):
     削除後、テーブルは復元できません。
     """
     def __init__(self, table_name: str):
-        self.manager = TablesManager()
+        self.tables_manager = TablesManager()
         # 削除するテーブル名
         self.table_name = table_name
         # パラメータ名のマッピング
@@ -27,7 +27,7 @@ class DeleteTable(AbstractApi):
         try:
             validator = InputValidator(param_names=self.param_names,
                                        **INPUT_VALIDATOR_CONFIG)
-            table_name_list = self.manager.get_table_name_list()
+            table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名の存在チェック
             validator.validate_existed_table_name(self.table_name,
                                                   table_name_list)
@@ -39,7 +39,7 @@ class DeleteTable(AbstractApi):
         # テーブルの削除処理
         try:
             # テーブル情報から削除
-            self.manager.delete_table(self.table_name)
+            self.tables_manager.delete_table(self.table_name)
             # 結果を返す
             result = {'tableName': self.table_name}
             return result
