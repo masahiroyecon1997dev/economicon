@@ -7,15 +7,15 @@ import polars as pl
 
 class TestApiDeleteColumn(APITestCase):
     def setUp(self):
-        self.manager = TablesManager()
-        self.manager.clear_tables()
+        self.tables_manager = TablesManager()
+        self.tables_manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2, 3],
             'B': [4, 5, 6],
             'C': [7, 8, 9]
         })
-        self.manager.store_table('TestTable', df)
+        self.tables_manager.store_table('TestTable', df)
 
     def test_delete_column_success(self):
         payload = {
@@ -30,7 +30,7 @@ class TestApiDeleteColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = self.manager.get_table('TestTable').table
+        df = self.tables_manager.get_table('TestTable').table
         self.assertNotIn('A', df.columns)
         self.assertIn('B', df.columns)
         self.assertIn('C', df.columns)

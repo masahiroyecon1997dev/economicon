@@ -10,6 +10,7 @@ from .apis.rest_apis import (
     rest_filter_single_condition,
     rest_rename_column_name,
     rest_input_cell_data,
+    rest_import_csv_by_file,
     rest_import_excel_by_file,
 )
 
@@ -31,10 +32,10 @@ urlpatterns = [
          rest_create_join_table.CreateJoinTable.as_view()),
     path('filter-single-condition',
          rest_filter_single_condition.RestFilterSingleCondition.as_view()),
-
     path('input-cell-data',
          rest_input_cell_data.RestInputCellData.as_view()),
-
+    path('import-csv-by-file',
+         rest_import_csv_by_file.ImportCsvByFile.as_view()),
     path('import-excel-by-file',
          rest_import_excel_by_file.RestImportExcelByFile.as_view()),
 ]

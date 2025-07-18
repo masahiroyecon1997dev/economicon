@@ -9,8 +9,8 @@ from ..apis.data.tables_manager import TablesManager
 class TestApiImportTsvByFile(APITestCase):
 
     def setUp(self):
-        self.manager = TablesManager()
-        self.manager.clear_tables()
+        self.tables_manager = TablesManager()
+        self.tables_manager.clear_tables()
 
     def test_upload_valid_tsv_file(self):
         """
@@ -32,7 +32,7 @@ class TestApiImportTsvByFile(APITestCase):
         # レスポンスデータの検証
         self.assertEqual('OK', response_data['code'])
         self.assertEqual('TestDataTab1', response_data['result']['tableName'])
-        df = self.manager.get_table('TestDataTab1').table
+        df = self.tables_manager.get_table('TestDataTab1').table
         self.assertEqual(True, compare_data.equals(df))
 
     def test_upload_valid_tsv_file_with_txt_extension(self):
@@ -55,7 +55,7 @@ class TestApiImportTsvByFile(APITestCase):
         # レスポンスデータの検証
         self.assertEqual('OK', response_data['code'])
         self.assertEqual('TestDataTab2', response_data['result']['tableName'])
-        df = self.manager.get_table('TestDataTab2').table
+        df = self.tables_manager.get_table('TestDataTab2').table
         self.assertEqual(True, compare_data.equals(df))
 
     def test_upload_tsv_with_only_headers(self):
@@ -77,7 +77,7 @@ class TestApiImportTsvByFile(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        df = self.manager.get_table('OnlyHeaderTab').table
+        df = self.tables_manager.get_table('OnlyHeaderTab').table
         self.assertEqual(True, compare_data.equals(df))
 
     def test_no_tsv_file_uploaded(self):

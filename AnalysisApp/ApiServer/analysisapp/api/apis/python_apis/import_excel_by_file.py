@@ -1,32 +1,65 @@
 import io
 import polars as pl
-from typing import Dict
+from typing import Dict, BinaryIO
 from django.utils.translation import gettext as _
-from ..data.tables_info import TableInfo, all_tables_info
+from ..utilities.validator.common_validators import ValidationError
 from ..utilities.create_table_name import create_table_name_by_file_name
+from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
 
 
 class ImportExcelByFile(AbstractApi):
     """
-    EXCELファイルインポートAPIのPythonロジック
+    EXCELファイルからデータをインポートしてテーブルを作成するAPIクラス
+
+    アップロードされたExcelファイルを解析し、新しいテーブルとして登録します。
+    テーブル名はファイル名から自動生成されます。
     """
-    def __init__(self, file_name: str, file_bytes: bytes):
+
+    def __init__(self, file_data: BinaryIO, file_name: str):
+        # テーブルマネージャーの初期化
+        self.tables_manager = TablesManager()
+        # ファイルデータ
+        self.file_data = file_data
+        # ファイル名
         self.file_name = file_name
-        self.file_bytes = file_bytes
+        # 自動生成されるテーブル名
+        self.table_name = create_table_name_by_file_name(
+            file_name, self.tables_manager._tables)
+        # パラメータ名のマッピング
+        self.param_names = {
+            'file': 'file',
+        }
 
     def validate(self):
-        pass
+        # 入力値のバリデーション
+        try:
+            # ファイルデータの基本チェック
+            if not self.file_data or not self.file_name:
+                raise ValidationError(_("File data or file name is missing"))
+
+            # Excelファイルの拡張子チェック
+            if not (self.file_name.lower().endswith('.xlsx') or
+                    self.file_name.lower().endswith('.xls')):
+                raise ValidationError(_("File must be an Excel file"))
+
+            return None
+        except ValidationError as e:
+            return e
 
     def execute(self):
+        # Excelファイルのインポート処理
         try:
-            table_name = create_table_name_by_file_name(self.file_name,
-                                                        all_tables_info)
-            df = pl.read_excel(io.BytesIO(self.file_bytes))
-            table_info = TableInfo(table_name=table_name, table=df)
-            all_tables_info[table_name] = table_info
-            result = {'tableName': table_name}
+            # ExcelファイルをPolarsデータフレームに変換
+            df = pl.read_excel(io.BytesIO(self.file_data.read()))
+
+            # テーブルを作成
+            self.tables_manager.store_table(self.table_name, df)
+
+            # 結果を返す
+            result = {'tableName': self.table_name}
             return result
+
         except pl.NoDataError as e:
             message = _("The uploaded EXCEL file is empty or "
                         "contains no valid data.")
@@ -40,8 +73,18 @@ class ImportExcelByFile(AbstractApi):
             raise ApiError(message) from e
 
 
-def import_excel_by_file(file_name: str, file_bytes: bytes) -> Dict:
-    api = ImportExcelByFile(file_name, file_bytes)
+def import_excel_by_file(file_data: BinaryIO, file_name: str) -> Dict:
+    """
+    Excelファイルからデータをインポートしてテーブルを作成する関数
+
+    Args:
+        file_data: Excelファイルのバイナリデータ
+        file_name: Excelファイルの名前
+
+    Returns:
+        作成されたテーブル名を含む辞書
+    """
+    api = ImportExcelByFile(file_data, file_name)
     validation_error = api.validate()
     if validation_error:
         raise validation_error

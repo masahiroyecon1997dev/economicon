@@ -1,20 +1,20 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 import json
-from ..apis.data.tables_info import all_tables_info, TableInfo
+from ..apis.data.tables_manager import TablesManager
 import polars as pl
 
 
 class TestApiRenameTableName(APITestCase):
     def setUp(self):
-        all_tables_info.clear()
+        self.tables_manager = TablesManager()
+        self.tables_manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2],
             'B': [3, 4]
         })
-        all_tables_info['OldTable'] = TableInfo(table_name='OldTable',
-                                                table=df)
+        self.tables_manager.store_table('OldTable', df)
 
     def test_rename_table_success(self):
         payload = {
@@ -30,9 +30,10 @@ class TestApiRenameTableName(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        self.assertEqual(all_tables_info['NewTable'].table_name, 'NewTable')
-        self.assertNotIn('OldTable', all_tables_info)
-        df = all_tables_info['NewTable'].table
+        table_info = self.tables_manager.get_table('NewTable')
+        self.assertEqual(table_info.table_name, 'NewTable')
+        self.assertNotIn('OldTable', self.tables_manager.get_table_name_list())
+        df = table_info.table
         self.assertTrue(df['A'].to_list() == [1, 2])
         self.assertTrue(df['B'].to_list() == [3, 4])
 

@@ -5,7 +5,7 @@ from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.input_validator import InputValidator
 from ..utilities.validator.input_validation_config import (
     INPUT_VALIDATOR_CONFIG)
-from ..data.tables_info import all_tables_info
+from ..data.tables_manager import TablesManager
 from .common_api_class import (AbstractApi, ApiError)
 
 
@@ -18,6 +18,7 @@ class AddColumn(AbstractApi):
     """
     def __init__(self, table_name: str, new_column_name: str,
                  add_position_column: str):
+        self.tables_manager = TablesManager()
         self.table_name = table_name
         self.new_column_name = new_column_name
         self.add_position_column = add_position_column
@@ -31,28 +32,33 @@ class AddColumn(AbstractApi):
         try:
             validator = InputValidator(param_names=self.param_names,
                                        **INPUT_VALIDATOR_CONFIG)
+            table_name_list = self.tables_manager.get_table_name_list()
             validator.validate_existed_table_name(self.table_name,
-                                                  all_tables_info)
-            table_info = all_tables_info[self.table_name]
+                                                  table_name_list)
+            column_name_list = self.tables_manager.get_column_name_list(
+                self.table_name)
             validator.validate_new_column_name(self.new_column_name,
-                                               table_info.table.columns)
+                                               column_name_list)
             validator.validate_existed_column_name(self.add_position_column,
-                                                   table_info)
+                                                   column_name_list)
             return None
         except ValidationError as e:
             return e
 
     def execute(self):
         try:
-            df = all_tables_info[self.table_name].table
-            num_rows = all_tables_info[self.table_name].num_rows
+            table_info = self.tables_manager.get_table(self.table_name)
+            num_rows = table_info.num_rows
             new_column_data_none = [None] * num_rows
+            df = table_info.table
             insert_index = df.columns.index(self.add_position_column) + 1
             df_with_new_col = df.insert_column(
                 index=insert_index,
                 column=pl.Series(self.new_column_name, new_column_data_none))
             # 新しい列をデータフレームに追加
-            all_tables_info[self.table_name].table = df_with_new_col
+            self.tables_manager.update_table(
+                self.table_name, df_with_new_col)
+            # 結果を返す
             result = {'tableName': self.table_name,
                       'columnName': self.new_column_name}
             return result

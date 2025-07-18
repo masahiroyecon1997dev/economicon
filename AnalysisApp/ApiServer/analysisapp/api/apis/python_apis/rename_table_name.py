@@ -30,9 +30,9 @@ class RenameTableName(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
             validator = InputValidator(param_names=self.param_names,
                                        **INPUT_VALIDATOR_CONFIG)
+            table_name_list = self.tables_manager.get_table_name_list()
             # 変更前のテーブル名の存在チェック
             validator.validate_existed_table_name(self.old_table_name,
                                                   table_name_list)
