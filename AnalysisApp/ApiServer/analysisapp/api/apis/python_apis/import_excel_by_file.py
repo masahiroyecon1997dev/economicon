@@ -17,6 +17,7 @@ class ImportExcelByFile(AbstractApi):
     """
 
     def __init__(self, file_data: BinaryIO, file_name: str):
+        self.tables_manager = TablesManager()
         # テーブルマネージャーの初期化
         self.tables_manager = TablesManager()
         # ファイルデータ
@@ -24,8 +25,9 @@ class ImportExcelByFile(AbstractApi):
         # ファイル名
         self.file_name = file_name
         # 自動生成されるテーブル名
+        table_name_list = self.tables_manager.get_table_name_list()
         self.table_name = create_table_name_by_file_name(
-            file_name, self.tables_manager._tables)
+            file_name, table_name_list)
         # パラメータ名のマッピング
         self.param_names = {
             'file': 'file',
