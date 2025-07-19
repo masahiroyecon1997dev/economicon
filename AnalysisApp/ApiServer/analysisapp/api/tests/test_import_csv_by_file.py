@@ -17,9 +17,10 @@ class TestApiImportCsvByFile(APITestCase):
         有効なCSVファイルをアップロードした場合のテスト
         """
         compare_data = pl.read_csv(
-            '/AnalysisApp/SampleData/TestDataComma.csv',
+            '/AnalysisApp/AnalysisApp/SampleData/TestDataComma.csv',
             encoding='utf8')
-        test_file = File(open('/AnalysisApp/SampleData/TestDataComma.csv',
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/TestDataComma.csv',
                               'rb'))
         uploaded_file = SimpleUploadedFile('TestDataComma.csv',
                                            test_file.read(),
@@ -42,9 +43,10 @@ class TestApiImportCsvByFile(APITestCase):
         問題なく読み込める
         """
         compare_data = pl.read_csv(
-            '/AnalysisApp/SampleData/OnlyHeaderComma.csv',
+            '/AnalysisApp/AnalysisApp/SampleData/OnlyHeaderComma.csv',
             encoding='utf8')
-        test_file = File(open('/AnalysisApp/SampleData/OnlyHeaderComma.csv',
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/OnlyHeaderComma.csv',
                               'rb'))
         uploaded_file = SimpleUploadedFile('OnlyHeaderComma.csv',
                                            test_file.read(),
@@ -73,7 +75,8 @@ class TestApiImportCsvByFile(APITestCase):
         """
         CSVではないファイルをアップロードした場合のテスト (拡張子チェック)
         """
-        test_file = File(open('/AnalysisApp/SampleData/TestDataTab2.txt',
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/TestDataTab2.txt',
                               'rb'))
         uploaded_file = SimpleUploadedFile('TestDataTab2.txt',
                                            test_file.read(),
@@ -91,7 +94,8 @@ class TestApiImportCsvByFile(APITestCase):
         """
         空のCSVファイルをアップロードした場合のテスト (Polars NoDataError)
         """
-        test_file = File(open('/AnalysisApp/SampleData/Empty.csv', 'rb'))
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/Empty.csv', 'rb'))
         uploaded_file = SimpleUploadedFile('Empty.csv', test_file.read(),
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-csv-by-file',
@@ -109,7 +113,8 @@ class TestApiImportCsvByFile(APITestCase):
         """
         不正な形式のCSVファイルをアップロードした場合のテスト (Polars PanicExceptionを想定)
         """
-        test_file = File(open('/AnalysisApp/SampleData/Error.csv', 'rb'))
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/Error.csv', 'rb'))
         uploaded_file = SimpleUploadedFile('Error.csv', test_file.read(),
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-csv-by-file',

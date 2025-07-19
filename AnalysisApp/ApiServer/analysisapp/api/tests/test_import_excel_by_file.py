@@ -17,8 +17,9 @@ class TestApiImportExcelByFile(APITestCase):
         有効なExcel(xlsx)ファイルをアップロードした場合のテスト
         """
         compare_data = pl.read_excel(
-            '/AnalysisApp/SampleData/TestDataXlsx.xlsx')
-        test_file = File(open('/AnalysisApp/SampleData/TestDataXlsx.xlsx',
+            '/AnalysisApp/AnalysisApp/SampleData/TestDataXlsx.xlsx')
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/TestDataXlsx.xlsx',
                               'rb'))
         uploaded_file = SimpleUploadedFile('TestDataXlsx.xlsx',
                                            test_file.read(),
@@ -40,8 +41,9 @@ class TestApiImportExcelByFile(APITestCase):
         有効なExcel(xls)ファイルをアップロードした場合のテスト
         """
         compare_data = pl.read_excel(
-            '/AnalysisApp/SampleData/TestDataXls.xls')
-        test_file = File(open('/AnalysisApp/SampleData/TestDataXls.xls',
+            '/AnalysisApp/AnalysisApp/SampleData/TestDataXls.xls')
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/TestDataXls.xls',
                               'rb'))
         uploaded_file = SimpleUploadedFile('TestDataXls.xls',
                                            test_file.read(),
@@ -63,8 +65,9 @@ class TestApiImportExcelByFile(APITestCase):
         問題なく読み込める
         """
         compare_data = pl.read_excel(
-            '/AnalysisApp/SampleData/OnlyHeaderExcel.xlsx')
-        test_file = File(open('/AnalysisApp/SampleData/OnlyHeaderExcel.xlsx',
+            '/AnalysisApp/AnalysisApp/SampleData/OnlyHeaderExcel.xlsx')
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/OnlyHeaderExcel.xlsx',
                               'rb'))
         uploaded_file = SimpleUploadedFile('OnlyHeaderExcel.xlsx',
                                            test_file.read(),
@@ -93,7 +96,8 @@ class TestApiImportExcelByFile(APITestCase):
         """
         Excel以外のファイルをアップロードした場合のエラーケースをテストする。
         """
-        test_file = File(open('/AnalysisApp/SampleData/TestDataComma.csv',
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/TestDataComma.csv',
                               'rb'))
         uploaded_file = SimpleUploadedFile('TestDataComma.csv',
                                            test_file.read(),
@@ -113,7 +117,8 @@ class TestApiImportExcelByFile(APITestCase):
         """
         空のEXCELファイルをアップロードした場合のテスト (Polars NoDataError)
         """
-        test_file = File(open('/AnalysisApp/SampleData/Empty.xlsx', 'rb'))
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/Empty.xlsx', 'rb'))
         uploaded_file = SimpleUploadedFile('Empty.xlsx', test_file.read(),
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-excel-by-file',
@@ -132,7 +137,8 @@ class TestApiImportExcelByFile(APITestCase):
         """
         不正な形式のCSVファイルをアップロードした場合のテスト (Polars PanicExceptionを想定)
         """
-        test_file = File(open('/AnalysisApp/SampleData/Error.xlsx', 'rb'))
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/Error.xlsx', 'rb'))
         uploaded_file = SimpleUploadedFile('Error.xlsx', test_file.read(),
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-excel-by-file',
