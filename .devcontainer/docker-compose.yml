@@ -10,8 +10,8 @@ services:
         DEV_ENV: "development"
     tty: true
     volumes:
-      - ../AnalysisApp:/AnalysisApp
+      - ../../AnalysisApp:/AnalysisApp
     ports:
       - "127.0.0.1:3000:3000"
       - "8000:8000"
-    working_dir: /AnalysisApp
+    working_dir: /AnalysisApp/AnalysisApp
