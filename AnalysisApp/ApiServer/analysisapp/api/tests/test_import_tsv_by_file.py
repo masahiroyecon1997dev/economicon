@@ -17,9 +17,10 @@ class TestApiImportTsvByFile(APITestCase):
         有効なTSVファイルをアップロードした場合のテスト
         """
         compare_data = pl.read_csv(
-            '/AnalysisApp/SampleData/TestDataTab1.tsv',
+            '/AnalysisApp/AnalysisApp/SampleData/TestDataTab1.tsv',
             encoding='utf8', separator='\t')
-        test_file = File(open('/AnalysisApp/SampleData/TestDataTab1.tsv',
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/TestDataTab1.tsv',
                               'rb'))
         uploaded_file = SimpleUploadedFile('TestDataTab1.tsv',
                                            test_file.read(),
@@ -40,9 +41,10 @@ class TestApiImportTsvByFile(APITestCase):
         拡張子が.txtの有効なTSVファイルをアップロードした場合のテスト
         """
         compare_data = pl.read_csv(
-            '/AnalysisApp/SampleData/TestDataTab2.txt',
+            '/AnalysisApp/AnalysisApp/SampleData/TestDataTab2.txt',
             encoding='utf8', separator='\t')
-        test_file = File(open('/AnalysisApp/SampleData/TestDataTab2.txt',
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/TestDataTab2.txt',
                               'rb'))
         uploaded_file = SimpleUploadedFile('TestDataTab2.txt',
                                            test_file.read(),
@@ -64,9 +66,10 @@ class TestApiImportTsvByFile(APITestCase):
         問題なく読み込める
         """
         compare_data = pl.read_csv(
-            '/AnalysisApp/SampleData/OnlyHeaderTab.txt',
+            '/AnalysisApp/AnalysisApp/SampleData/OnlyHeaderTab.txt',
             separator='\t', has_header=True)
-        test_file = File(open('/AnalysisApp/SampleData/OnlyHeaderTab.txt',
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/OnlyHeaderTab.txt',
                               'rb'))
         uploaded_file = SimpleUploadedFile('OnlyHeaderTab.txt',
                                            test_file.read(),
@@ -95,7 +98,8 @@ class TestApiImportTsvByFile(APITestCase):
         """
         TSVではないファイルをアップロードした場合のテスト (拡張子チェック)
         """
-        test_file = File(open('/AnalysisApp/SampleData/TestDataComma.csv',
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/TestDataComma.csv',
                               'rb'))
         uploaded_file = SimpleUploadedFile('TestDataComma.csv',
                                            test_file.read(),
@@ -113,7 +117,8 @@ class TestApiImportTsvByFile(APITestCase):
         """
         空のTSVファイルをアップロードした場合のテスト (Polars NoDataError)
         """
-        test_file = File(open('/AnalysisApp/SampleData/Empty.txt', 'rb'))
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/Empty.txt', 'rb'))
         uploaded_file = SimpleUploadedFile('Empty.txt', test_file.read(),
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-tsv-by-file',
@@ -131,7 +136,8 @@ class TestApiImportTsvByFile(APITestCase):
         """
         不正な形式のTSVファイルをアップロードした場合のテスト (Polars PanicExceptionを想定)
         """
-        test_file = File(open('/AnalysisApp/SampleData/Error.txt', 'rb'))
+        test_file = File(open('/AnalysisApp/AnalysisApp'
+                              '/SampleData/Error.txt', 'rb'))
         uploaded_file = SimpleUploadedFile('Error.txt', test_file.read(),
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-tsv-by-file',
