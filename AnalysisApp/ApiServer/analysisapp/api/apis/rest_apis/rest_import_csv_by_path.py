@@ -25,7 +25,7 @@ class ImportCsvByPath(APIView):
             request: HTTPリクエストオブジェクト
                      JSON body: {
                          "filePath": "CSVファイルのパス",
-                         "tableName": "作成するテーブル名", 
+                         "tableName": "作成するテーブル名",
                          "separator": "区切り文字（オプション、デフォルト: ,）"
                      }
 
@@ -38,7 +38,7 @@ class ImportCsvByPath(APIView):
 
             # JSONデータの取得
             request_data = json.loads(request.body)
-            
+
             # パラメータの取得
             file_path = request_data.get('filePath')
             table_name = request_data.get('tableName')
@@ -56,7 +56,7 @@ class ImportCsvByPath(APIView):
                 result
             )
 
-        except json.JSONDecodeError as e:
+        except json.JSONDecodeError:
             message = _("Invalid JSON format in request body")
             return create_error_response(
                 status.HTTP_400_BAD_REQUEST,
