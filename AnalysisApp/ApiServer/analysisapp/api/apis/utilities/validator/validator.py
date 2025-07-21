@@ -14,7 +14,8 @@ from .common_validators import (
     validate_column_duplicate,
     validate_column_exists,
     validate_numeric_range,
-    validate_candidates
+    validate_candidates,
+    validate_file_path_exists
 )
 
 
@@ -39,6 +40,27 @@ class InputValidator:
         self.column_name_min_length = column_name_min_length
         self.column_name_max_length = column_name_max_length
         self.condition_candidates = condition_candidates or []
+
+    def validate_file_path(self, file_path: str) -> None:
+        # ファイルパスのバリデーション
+        param = self.param_names['file_path']
+        validate_required(file_path, param)
+        validate_file_path_exists(file_path, param)
+        return None
+
+    def validate_separator(self, separator: str) -> None:
+        # 区切り文字のバリデーション
+        param = self.param_names['separator']
+        validate_string_length(separator, param, min_length=1, max_length=5)
+        return None
+
+    def validate_sheet_name(self, sheet_name: Optional[str]) -> None:
+        # シート名のバリデーション
+        param = self.param_names['sheet_name']
+        if sheet_name is not None:
+            validate_string_length(sheet_name, param, min_length=1,
+                                   max_length=255)
+        return None
 
     def validate_new_table_name(
         self, table_name: str, table_name_list: List[str]

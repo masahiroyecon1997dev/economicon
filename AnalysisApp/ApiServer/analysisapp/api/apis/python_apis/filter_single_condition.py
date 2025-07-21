@@ -2,8 +2,8 @@ import polars as pl
 from typing import Dict
 from django.utils.translation import gettext as _
 from ..data.tables_manager import TablesManager
-from ..utilities.validator.input_validator import InputValidator
-from ..utilities.validator.input_validation_config import (
+from ..utilities.validator.validator import InputValidator
+from ..utilities.validator.validation_config import (
     INPUT_VALIDATOR_CONFIG)
 from ..utilities.validator.common_validators import ValidationError
 from .common_api_class import (AbstractApi, ApiError)

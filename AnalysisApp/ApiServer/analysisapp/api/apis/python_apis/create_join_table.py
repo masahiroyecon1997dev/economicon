@@ -2,8 +2,8 @@
 from typing import Dict, List
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.input_validator import InputValidator
-from ..utilities.validator.input_validation_config import (
+from ..utilities.validator.validator import InputValidator
+from ..utilities.validator.validation_config import (
     INPUT_VALIDATOR_CONFIG,
 )
 from ..data.tables_manager import TablesManager

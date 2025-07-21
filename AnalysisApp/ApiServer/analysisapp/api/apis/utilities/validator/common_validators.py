@@ -1,5 +1,6 @@
 
 from pathlib import Path
+import os
 from typing import Optional, List, Union
 from django.utils.translation import gettext as _
 from rest_framework import status
@@ -178,5 +179,21 @@ def validate_candidates(value: str,
     """フィルタ条件のバリデーション"""
     if value not in candidate_values:
         message = _(f"{param_name} '{value}' is not a valid value.")
+        raise ValidationError(message)
+    return None
+
+
+def validate_file_path_exists(file_path: str, param_name: str) -> None:
+    """ファイルパスのバリデーション"""
+    if not os.path.exists(file_path):
+        message = _(f"{param_name} does not exist: {file_path}")
+        raise ValidationError(message)
+    return None
+
+
+def validate_file_path_readable(file_path: str, param_name: str) -> None:
+    """ファイルパスのバリデーション"""
+    if not os.access(file_path, os.R_OK):
+        message = _(f"{param_name} is not readable: {file_path}")
         raise ValidationError(message)
     return None
