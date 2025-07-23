@@ -16,6 +16,7 @@ from .apis.rest_apis import (
     rest_import_excel_by_file,
     rest_import_parquet_by_file,
     rest_import_parquet_by_path,
+    rest_export_csv_by_path,
 )
 
 urlpatterns = [
@@ -50,4 +51,6 @@ urlpatterns = [
          rest_import_parquet_by_file.ImportParquetByFile.as_view()),
     path('import-parquet-by-path',
          rest_import_parquet_by_path.ImportParquetByPath.as_view()),
+    path('export-csv-by-path',
+         rest_export_csv_by_path.ExportCsvByPath.as_view()),
 ]
