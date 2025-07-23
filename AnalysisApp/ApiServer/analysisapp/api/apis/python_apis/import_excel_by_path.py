@@ -1,3 +1,4 @@
+from typing import Optional, Dict
 import polars as pl
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
@@ -17,7 +18,8 @@ class ImportExcelByPath(AbstractApi):
     シート名を指定できます。
     """
 
-    def __init__(self, file_path: str, table_name: str, sheet_name: Optional[str] = None):
+    def __init__(self, file_path: str, table_name: str,
+                 sheet_name: Optional[str] = None):
         # テーブルマネージャーの初期化
         self.tables_manager = TablesManager()
         # ファイルパス
@@ -80,7 +82,8 @@ class ImportExcelByPath(AbstractApi):
 
 
 def import_excel_by_path(file_path: str,
-                         table_name: str, sheet_name: str = None) -> str:
+                         table_name: str,
+                         sheet_name: Optional[str] = None) -> Dict:
     """
     EXCELファイルパスからデータをインポートしてテーブルを作成する関数
 
@@ -92,9 +95,13 @@ def import_excel_by_path(file_path: str,
     Returns:
         作成されたテーブル名を含む辞書
     """
-    if sheet_name:
-        df = pl.read_excel(file_path, sheet_name=sheet_name)
-    else:
-        df = pl.read_excel(file_path)
-    manager = TablesManager()
-    return manager.store_table(table_name, df)
+    api = ImportExcelByPath(file_path, table_name, sheet_name)
+    validation_error = api.validate()
+    if validation_error:
+        raise validation_error
+    try:
+        result = api.execute()
+    except ApiError as e:
+        # APIエラーが発生した場合はそのまま再スロー
+        raise e
+    return result
