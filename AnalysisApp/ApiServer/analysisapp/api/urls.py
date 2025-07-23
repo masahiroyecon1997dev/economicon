@@ -14,6 +14,7 @@ from .apis.rest_apis import (
     rest_import_csv_by_path,
     rest_import_tsv_by_file,
     rest_import_excel_by_file,
+    rest_export_csv_by_path,
 )
 
 urlpatterns = [
@@ -44,4 +45,6 @@ urlpatterns = [
          rest_import_tsv_by_file.ImportTsvByFile.as_view()),
     path('import-excel-by-file',
          rest_import_excel_by_file.RestImportExcelByFile.as_view()),
+    path('export-csv-by-path',
+         rest_export_csv_by_path.ExportCsvByPath.as_view()),
 ]
