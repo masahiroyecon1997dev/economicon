@@ -34,7 +34,7 @@ class TestApiExportCsvByPath(APITestCase):
         デフォルトのカンマ区切りでCSVファイルをエクスポートするテスト
         """
         output_path = os.path.join(self.test_output_dir, 'test_output.csv')
-        
+
         # APIリクエスト
         request_data = {
             'tableName': 'TestTable',
@@ -61,7 +61,7 @@ class TestApiExportCsvByPath(APITestCase):
         タブ区切りでCSVファイルをエクスポートするテスト
         """
         output_path = os.path.join(self.test_output_dir, 'test_output_tab.csv')
-        
+
         # APIリクエスト
         request_data = {
             'tableName': 'TestTable',
@@ -88,8 +88,9 @@ class TestApiExportCsvByPath(APITestCase):
         """
         セミコロン区切りでCSVファイルをエクスポートするテスト
         """
-        output_path = os.path.join(self.test_output_dir, 'test_output_semicolon.csv')
-        
+        output_path = os.path.join(self.test_output_dir,
+                                   'test_output_semicolon.csv')
+
         # APIリクエスト
         request_data = {
             'tableName': 'TestTable',
@@ -117,7 +118,7 @@ class TestApiExportCsvByPath(APITestCase):
         存在しないテーブル名を指定した場合のテスト
         """
         output_path = os.path.join(self.test_output_dir, 'test_output.csv')
-        
+
         request_data = {
             'tableName': 'NonExistentTable',
             'filePath': output_path
@@ -129,7 +130,7 @@ class TestApiExportCsvByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual('NG', response_data['code'])
-        self.assertIn("tableName 'NonExistentTable' does not exist", 
+        self.assertIn("tableName 'NonExistentTable' does not exist",
                       response_data['message'])
 
     def test_export_csv_by_path_invalid_output_directory(self):
@@ -137,7 +138,7 @@ class TestApiExportCsvByPath(APITestCase):
         存在しない出力ディレクトリを指定した場合のテスト
         """
         output_path = '/non/existent/directory/test_output.csv'
-        
+
         request_data = {
             'tableName': 'TestTable',
             'filePath': output_path
@@ -149,14 +150,15 @@ class TestApiExportCsvByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual('NG', response_data['code'])
-        self.assertIn("Output directory does not exist", response_data['message'])
+        self.assertIn("Output directory does not exist",
+                      response_data['message'])
 
     def test_export_csv_by_path_missing_table_name(self):
         """
         tableNameパラメータが未指定の場合のテスト
         """
         output_path = os.path.join(self.test_output_dir, 'test_output.csv')
-        
+
         request_data = {
             'filePath': output_path
         }
@@ -190,7 +192,7 @@ class TestApiExportCsvByPath(APITestCase):
         空の区切り文字を指定した場合のテスト
         """
         output_path = os.path.join(self.test_output_dir, 'test_output.csv')
-        
+
         request_data = {
             'tableName': 'TestTable',
             'filePath': output_path,
@@ -203,7 +205,7 @@ class TestApiExportCsvByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual('NG', response_data['code'])
-        self.assertIn("separator must be at least 1 characters long", 
+        self.assertIn("separator must be at least 1 characters long",
                       response_data['message'])
 
     def test_export_csv_by_path_invalid_json(self):
@@ -226,9 +228,9 @@ class TestApiExportCsvByPath(APITestCase):
         # 空のテーブルを作成
         empty_data = pl.DataFrame({'col1': [], 'col2': []})
         self.tables_manager.store_table('EmptyTable', empty_data)
-        
+
         output_path = os.path.join(self.test_output_dir, 'empty_output.csv')
-        
+
         request_data = {
             'tableName': 'EmptyTable',
             'filePath': output_path
@@ -260,9 +262,9 @@ class TestApiExportCsvByPath(APITestCase):
             'number': [i * 1.5 for i in range(1000)]
         })
         self.tables_manager.store_table('LargeTable', large_data)
-        
+
         output_path = os.path.join(self.test_output_dir, 'large_output.csv')
-        
+
         request_data = {
             'tableName': 'LargeTable',
             'filePath': output_path
