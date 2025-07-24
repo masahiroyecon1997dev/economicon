@@ -14,10 +14,10 @@ class TestApiImportExcelByPath(APITestCase):
         self.tables_manager.clear_tables()
 
         # テスト用のEXCELファイルパス
-        self.test_excel = '/AnalysisApp/AnalysisApp/SampleData'
-        '/TestDataXlsx.xlsx'
-        self.simple_excel = '/AnalysisApp/AnalysisApp/SampleData'
-        '/SimpleTest.xlsx'
+        self.test_excel = '/AnalysisApp/AnalysisApp/SampleData'\
+            '/TestDataXlsx.xlsx'
+        self.simple_excel = '/AnalysisApp/AnalysisApp/SampleData'\
+            '/SimpleTest.xlsx'
 
     def test_import_excel_by_path_simple(self):
         """
@@ -38,16 +38,16 @@ class TestApiImportExcelByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('OK', response_data['code'])
-        self.assertEqual('TestSimpleParquet',
+        self.assertEqual('TestSimpleExcel',
                          response_data['result']['tableName'])
 
         # データの検証
-        df = self.tables_manager.get_table('TestSimpleParquet').table
+        df = self.tables_manager.get_table('TestSimpleExcel').table
         self.assertEqual(True, expected_data.equals(df))
 
-    def test_import_parquet_by_path_large_data(self):
+    def test_import_excel_by_path_large_data(self):
         """
-        大きなPARQUETファイルをパス指定でインポートするテスト
+        大きなEXCELファイルをパス指定でインポートするテスト
         """
         # 期待データをPolarsで読み込み
         expected_data = pl.read_excel(self.test_excel)
@@ -64,16 +64,16 @@ class TestApiImportExcelByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('OK', response_data['code'])
-        self.assertEqual('TestLargeParquet',
+        self.assertEqual('TestLargeExcel',
                          response_data['result']['tableName'])
 
         # データの検証
-        df = self.tables_manager.get_table('TestLargeParquet').table
+        df = self.tables_manager.get_table('TestLargeExcel').table
         self.assertEqual(True, expected_data.equals(df))
 
-    def test_import_parquet_by_path_custom_table_name(self):
+    def test_import_excel_by_path_custom_table_name(self):
         """
-        カスタムテーブル名でPARQUETファイルをインポートするテスト
+        カスタムテーブル名でEXCELファイルをインポートするテスト
         """
         # 期待データをPolarsで読み込み
         expected_data = pl.read_excel(self.simple_excel)
@@ -90,11 +90,11 @@ class TestApiImportExcelByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('OK', response_data['code'])
-        self.assertEqual('MyCustomParquetTable',
+        self.assertEqual('MyCustomExcelTable',
                          response_data['result']['tableName'])
 
         # データの検証
-        df = self.tables_manager.get_table('MyCustomParquetTable').table
+        df = self.tables_manager.get_table('MyCustomExcelTable').table
         self.assertEqual(True, expected_data.equals(df))
 
     def test_import_parquet_by_path_file_not_exists(self):
@@ -105,7 +105,7 @@ class TestApiImportExcelByPath(APITestCase):
             'filePath': '/non/existent/file.parquet',
             'tableName': 'TestNonExistent'
         }
-        response = self.client.post('/api/import-parquet-by-path',
+        response = self.client.post('/api/import-excel-by-path',
                                     data=json.dumps(request_data),
                                     content_type='application/json')
 
@@ -115,16 +115,16 @@ class TestApiImportExcelByPath(APITestCase):
         self.assertIn("filePath does not exist: /non/existent/file.parquet",
                       response_data['message'])
 
-    def test_import_parquet_by_path_invalid_file_extension(self):
+    def test_import_excel_by_path_invalid_file_extension(self):
         """
-        PARQUET以外のファイル拡張子を指定した場合のテスト
+        EXCEL以外のファイル拡張子を指定した場合のテスト
         """
         request_data = {
-            'filePath': 'AnalysisApp/AnalysisApp/AnalysisApp'
+            'filePath': '/AnalysisApp/AnalysisApp'
             '/SampleData/TestDataComma.csv',
             'tableName': 'TestInvalidExtension'
         }
-        response = self.client.post('/api/import-parquet-by-path',
+        response = self.client.post('/api/import-excel-by-path',
                                     data=json.dumps(request_data),
                                     content_type='application/json')
 
@@ -132,11 +132,11 @@ class TestApiImportExcelByPath(APITestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertEqual('NG', response_data['code'])
-        self.assertIn("Failed to parse PARQUET file: "
+        self.assertIn("Failed to parse EXCEL file: "
                       "Invalid format or encoding.",
                       response_data['message'])
 
-    def test_import_parquet_by_path_missing_file_path(self):
+    def test_import_excel_by_path_missing_file_path(self):
         """
         filePathパラメータが未指定の場合のテスト
         """
@@ -159,7 +159,7 @@ class TestApiImportExcelByPath(APITestCase):
         request_data = {
             'filePath': self.simple_excel
         }
-        response = self.client.post('/api/import-parquet-by-path',
+        response = self.client.post('/api/import-excel-by-path',
                                     data=json.dumps(request_data),
                                     content_type='application/json')
 
@@ -177,7 +177,7 @@ class TestApiImportExcelByPath(APITestCase):
             'filePath': self.simple_excel,
             'tableName': 'DuplicateTable'
         }
-        self.client.post('/api/import-parquet-by-path',
+        self.client.post('/api/import-excel-by-path',
                          data=json.dumps(first_request_data),
                          content_type='application/json')
 
@@ -186,7 +186,7 @@ class TestApiImportExcelByPath(APITestCase):
             'filePath': self.simple_excel,
             'tableName': 'DuplicateTable'
         }
-        response = self.client.post('/api/import-parquet-by-path',
+        response = self.client.post('/api/import-excel-by-path',
                                     data=json.dumps(second_request_data),
                                     content_type='application/json')
 
@@ -199,7 +199,7 @@ class TestApiImportExcelByPath(APITestCase):
         """
         不正なJSONを送信した場合のテスト
         """
-        response = self.client.post('/api/import-parquet-by-path',
+        response = self.client.post('/api/import-excel-by-path',
                                     data='invalid json',
                                     content_type='application/json')
 
@@ -208,20 +208,20 @@ class TestApiImportExcelByPath(APITestCase):
         self.assertEqual('NG', response_data['code'])
         self.assertIn("Invalid JSON format", response_data['message'])
 
-    def test_import_parquet_by_path_with_temporary_file(self):
+    def test_import_excel_by_path_with_temporary_file(self):
         """
-        一時的なPARQUETファイルを作成してインポートするテスト
+        一時的なEXCELファイルを作成してインポートするテスト
         """
-        # 一時的なPARQUETファイルを作成
+        # 一時的なEXCELファイルを作成
         temp_data = pl.DataFrame({
             'col1': [1, 2, 3, 4, 5],
             'col2': ['A', 'B', 'C', 'D', 'E'],
             'col3': [10.1, 20.2, 30.3, 40.4, 50.5]
         })
 
-        with tempfile.NamedTemporaryFile(mode='wb', suffix='.parquet',
+        with tempfile.NamedTemporaryFile(mode='wb', suffix='.xlsx',
                                          delete=False) as f:
-            temp_data.write_parquet(f.name)
+            temp_data.write_excel(f.name)
             temp_path = f.name
 
         try:
@@ -237,11 +237,11 @@ class TestApiImportExcelByPath(APITestCase):
             response_data = response.json()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual('OK', response_data['code'])
-            self.assertEqual('TestTempParquet',
+            self.assertEqual('TestTempExcel',
                              response_data['result']['tableName'])
 
             # データの検証
-            df = self.tables_manager.get_table('TestTempParquet').table
+            df = self.tables_manager.get_table('TestTempExcel').table
             self.assertEqual(3, len(df.columns))  # 3列
             self.assertEqual(5, len(df))  # 5行
             self.assertEqual(True, temp_data.equals(df))
