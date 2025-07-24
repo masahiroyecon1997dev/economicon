@@ -28,6 +28,19 @@ yarn license-checker --json > license_confirm.json
 一覧
 pip-licenses
 
+## gitのプッシュからマージの流れ
+### 1. 作業ブランチの作成（devから派生）
+git checkout dev
+git pull origin dev
+git checkout -b feature/your-feature-name
+
+### 2. 作業完了後、devにPRを作成
+git push -u origin feature/your-feature-name
+#### GitHubでfeature/your-feature-name → dev のPRを作成
+
+### 3. devでの作業が完了したら、mainにPRを作成
+#### GitHubでdev → main のPRを作成
+
 ## 今後の課題
 1. ジョイン・ユニオン機能の追加（キーは同じ列名のみでいい）
 2. エクセルライクなグリッド機能
