@@ -1,4 +1,3 @@
-import polars as pl
 from django.utils.translation import gettext as _
 from typing import Dict
 from ..utilities.validator.common_validators import ValidationError
@@ -41,17 +40,13 @@ class ExportCsvByPath(AbstractApi):
                                        **INPUT_VALIDATOR_CONFIG)
             # テーブル名のバリデーション
             table_name_list = self.tables_manager.get_table_name_list()
-            validator.validate_existed_table_name(self.table_name, table_name_list)
-            
+            validator.validate_existed_table_name(self.table_name,
+                                                  table_name_list)
+
             # ファイルパスのバリデーション
-            from ..utilities.validator.common_validators import validate_required
-            validate_required(self.file_path, self.param_names['file_path'])
-            
-            # 出力ディレクトリの存在確認
             output_dir = os.path.dirname(self.file_path)
-            if output_dir and not os.path.exists(output_dir):
-                raise ValidationError(f"Output directory does not exist: {output_dir}")
-            
+            validator.validate_directory_path(output_dir)
+
             # 区切り文字のバリデーション
             validator.validate_separator(self.separator)
             return None
@@ -76,10 +71,12 @@ class ExportCsvByPath(AbstractApi):
             message = _("Table does not exist: {}").format(self.table_name)
             raise ApiError(message) from e
         except PermissionError as e:
-            message = _("Permission denied: Cannot write to the specified path.")
+            message = _("Permission denied: Cannot write to "
+                        "the specified path.")
             raise ApiError(message) from e
         except Exception as e:
-            message = _("An unexpected error occurred during CSV export processing")
+            message = _("An unexpected error occurred during "
+                        "CSV export processing")
             raise ApiError(message) from e
 
 

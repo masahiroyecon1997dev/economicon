@@ -191,6 +191,14 @@ def validate_file_path_exists(file_path: str, param_name: str) -> None:
     return None
 
 
+def validate_directory_path(directory: str, param_name: str) -> None:
+    """ディレクトリパスのバリデーション"""
+    if not os.path.exists(directory):
+        raise ValidationError("Directory does "
+                              f"not exist: {directory}")
+    return None
+
+
 def validate_file_path_readable(file_path: str, param_name: str) -> None:
     """ファイルパスのバリデーション"""
     if not os.access(file_path, os.R_OK):
