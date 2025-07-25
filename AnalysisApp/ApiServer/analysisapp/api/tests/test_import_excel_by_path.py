@@ -132,8 +132,8 @@ class TestApiImportExcelByPath(APITestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertEqual('NG', response_data['code'])
-        self.assertIn("Failed to parse EXCEL file: "
-                      "Invalid format or encoding.",
+        self.assertIn("An unexpected error occurred during "
+                      "EXCEL processing",
                       response_data['message'])
 
     def test_import_excel_by_path_missing_file_path(self):
