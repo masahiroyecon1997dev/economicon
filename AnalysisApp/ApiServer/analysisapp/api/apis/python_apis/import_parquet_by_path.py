@@ -65,7 +65,8 @@ class ImportParquetByPath(AbstractApi):
                         "Invalid format or encoding.")
             raise ApiError(message) from e
         except Exception as e:
-            message = _("An unexpected error occurred during PARQUET processing")
+            message = _("An unexpected error occurred during "
+                        "PARQUET processing")
             raise ApiError(message) from e
 
 
