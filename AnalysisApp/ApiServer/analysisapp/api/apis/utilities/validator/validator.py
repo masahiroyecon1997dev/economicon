@@ -15,7 +15,8 @@ from .common_validators import (
     validate_column_exists,
     validate_numeric_range,
     validate_candidates,
-    validate_file_path_exists
+    validate_file_path_exists,
+    validate_directory_path,
 )
 
 
@@ -46,6 +47,13 @@ class InputValidator:
         param = self.param_names['file_path']
         validate_required(file_path, param)
         validate_file_path_exists(file_path, param)
+        return None
+
+    def validate_directory_path(self, directory: str) -> None:
+        # ディレクトリパスのバリデーション
+        param = self.param_names['directory']
+        validate_required(directory, param)
+        validate_directory_path(directory, param)
         return None
 
     def validate_separator(self, separator: str) -> None:
