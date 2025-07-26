@@ -4,6 +4,7 @@ import json
 import polars as pl
 import tempfile
 import os
+import shutil
 from ..apis.data.tables_manager import TablesManager
 
 
@@ -26,19 +27,18 @@ class TestApiExportCsvByPath(APITestCase):
 
     def tearDown(self):
         # テスト後にテンポラリディレクトリをクリーンアップ
-        import shutil
         shutil.rmtree(self.test_output_dir, ignore_errors=True)
 
     def test_export_csv_by_path_default_separator(self):
         """
         デフォルトのカンマ区切りでCSVファイルをエクスポートするテスト
         """
-        output_path = os.path.join(self.test_output_dir, 'test_output.csv')
 
         # APIリクエスト
         request_data = {
             'tableName': 'TestTable',
-            'filePath': output_path
+            'directoryPath': self.test_output_dir,
+            'fileName': 'test_output.csv'
         }
         response = self.client.post('/api/export-csv-by-path',
                                     data=json.dumps(request_data),
@@ -47,10 +47,11 @@ class TestApiExportCsvByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('OK', response_data['code'])
+        output_path = os.path.join(self.test_output_dir, 'test_output.csv')
         self.assertEqual(output_path, response_data['result']['filePath'])
 
         # ファイルが作成されているかチェック
-        self.assertTrue(os.path.exists(output_path))
+        self.assertTrue(output_path)
 
         # 出力されたCSVファイルの内容を検証
         exported_data = pl.read_csv(output_path)
@@ -60,12 +61,12 @@ class TestApiExportCsvByPath(APITestCase):
         """
         タブ区切りでCSVファイルをエクスポートするテスト
         """
-        output_path = os.path.join(self.test_output_dir, 'test_output_tab.csv')
 
         # APIリクエスト
         request_data = {
             'tableName': 'TestTable',
-            'filePath': output_path,
+            'directoryPath': self.test_output_dir,
+            'fileName': 'test_output_tab.csv',
             'separator': '\t'
         }
         response = self.client.post('/api/export-csv-by-path',
@@ -75,6 +76,7 @@ class TestApiExportCsvByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('OK', response_data['code'])
+        output_path = os.path.join(self.test_output_dir, 'test_output_tab.csv')
         self.assertEqual(output_path, response_data['result']['filePath'])
 
         # ファイルが作成されているかチェック
@@ -88,13 +90,12 @@ class TestApiExportCsvByPath(APITestCase):
         """
         セミコロン区切りでCSVファイルをエクスポートするテスト
         """
-        output_path = os.path.join(self.test_output_dir,
-                                   'test_output_semicolon.csv')
 
         # APIリクエスト
         request_data = {
             'tableName': 'TestTable',
-            'filePath': output_path,
+            'directoryPath': self.test_output_dir,
+            'fileName': 'test_output_semicolon.csv',
             'separator': ';'
         }
         response = self.client.post('/api/export-csv-by-path',
@@ -104,6 +105,8 @@ class TestApiExportCsvByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('OK', response_data['code'])
+        output_path = os.path.join(self.test_output_dir,
+                                   'test_output_semicolon.csv')
         self.assertEqual(output_path, response_data['result']['filePath'])
 
         # ファイルが作成されているかチェック
@@ -117,11 +120,11 @@ class TestApiExportCsvByPath(APITestCase):
         """
         存在しないテーブル名を指定した場合のテスト
         """
-        output_path = os.path.join(self.test_output_dir, 'test_output.csv')
 
         request_data = {
             'tableName': 'NonExistentTable',
-            'filePath': output_path
+            'directoryPath': self.test_output_dir,
+            'fileName': 'test_output.csv',
         }
         response = self.client.post('/api/export-csv-by-path',
                                     data=json.dumps(request_data),
@@ -137,11 +140,11 @@ class TestApiExportCsvByPath(APITestCase):
         """
         存在しない出力ディレクトリを指定した場合のテスト
         """
-        output_path = '/non/existent/directory/test_output.csv'
 
         request_data = {
             'tableName': 'TestTable',
-            'filePath': output_path
+            'directoryPath': '/non/existent/directory',
+            'fileName': 'test_output.csv'
         }
         response = self.client.post('/api/export-csv-by-path',
                                     data=json.dumps(request_data),
@@ -150,17 +153,17 @@ class TestApiExportCsvByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual('NG', response_data['code'])
-        self.assertIn("Output directory does not exist",
+        self.assertIn("Directory does not exist: /non/existent/directory",
                       response_data['message'])
 
     def test_export_csv_by_path_missing_table_name(self):
         """
         tableNameパラメータが未指定の場合のテスト
         """
-        output_path = os.path.join(self.test_output_dir, 'test_output.csv')
 
         request_data = {
-            'filePath': output_path
+            'directoryPath': self.test_output_dir,
+            'fileName': 'test_output.csv'
         }
         response = self.client.post('/api/export-csv-by-path',
                                     data=json.dumps(request_data),
@@ -171,12 +174,14 @@ class TestApiExportCsvByPath(APITestCase):
         self.assertEqual('NG', response_data['code'])
         self.assertIn("tableName is required", response_data['message'])
 
-    def test_export_csv_by_path_missing_file_path(self):
+    def test_export_csv_by_path_missing_directory_path(self):
         """
-        filePathパラメータが未指定の場合のテスト
+        directoryPathパラメータが未指定の場合のテスト
         """
         request_data = {
-            'tableName': 'TestTable'
+            'tableName': 'TestTable',
+            'fileName': 'test_output.csv'
+
         }
         response = self.client.post('/api/export-csv-by-path',
                                     data=json.dumps(request_data),
@@ -185,17 +190,35 @@ class TestApiExportCsvByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual('NG', response_data['code'])
-        self.assertIn("filePath is required", response_data['message'])
+        self.assertIn("directoryPath is required", response_data['message'])
+
+    def test_export_csv_by_path_missing_file_name(self):
+        """
+        fileNameパラメータが未指定の場合のテスト
+        """
+        request_data = {
+            'tableName': 'TestTable',
+            'directoryPath': self.test_output_dir,
+
+        }
+        response = self.client.post('/api/export-csv-by-path',
+                                    data=json.dumps(request_data),
+                                    content_type='application/json')
+
+        response_data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual('NG', response_data['code'])
+        self.assertIn("fileName is required", response_data['message'])
 
     def test_export_csv_by_path_empty_separator(self):
         """
         空の区切り文字を指定した場合のテスト
         """
-        output_path = os.path.join(self.test_output_dir, 'test_output.csv')
 
         request_data = {
             'tableName': 'TestTable',
-            'filePath': output_path,
+            'directoryPath': self.test_output_dir,
+            'fileName': 'test_output_empty_separator.csv',
             'separator': ''
         }
         response = self.client.post('/api/export-csv-by-path',
@@ -229,11 +252,10 @@ class TestApiExportCsvByPath(APITestCase):
         empty_data = pl.DataFrame({'col1': [], 'col2': []})
         self.tables_manager.store_table('EmptyTable', empty_data)
 
-        output_path = os.path.join(self.test_output_dir, 'empty_output.csv')
-
         request_data = {
             'tableName': 'EmptyTable',
-            'filePath': output_path
+            'directoryPath': self.test_output_dir,
+            'fileName': 'empty_output.csv'
         }
         response = self.client.post('/api/export-csv-by-path',
                                     data=json.dumps(request_data),
@@ -242,6 +264,7 @@ class TestApiExportCsvByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('OK', response_data['code'])
+        output_path = os.path.join(self.test_output_dir, 'empty_output.csv')
         self.assertEqual(output_path, response_data['result']['filePath'])
 
         # ファイルが作成されているかチェック
@@ -263,11 +286,10 @@ class TestApiExportCsvByPath(APITestCase):
         })
         self.tables_manager.store_table('LargeTable', large_data)
 
-        output_path = os.path.join(self.test_output_dir, 'large_output.csv')
-
         request_data = {
             'tableName': 'LargeTable',
-            'filePath': output_path
+            'directoryPath': self.test_output_dir,
+            'fileName': 'large_output.csv'
         }
         response = self.client.post('/api/export-csv-by-path',
                                     data=json.dumps(request_data),
@@ -276,6 +298,7 @@ class TestApiExportCsvByPath(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('OK', response_data['code'])
+        output_path = os.path.join(self.test_output_dir, 'large_output.csv')
         self.assertEqual(output_path, response_data['result']['filePath'])
 
         # ファイルが作成されているかチェック

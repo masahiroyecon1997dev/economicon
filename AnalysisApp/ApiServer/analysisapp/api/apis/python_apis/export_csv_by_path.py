@@ -17,19 +17,23 @@ class ExportCsvByPath(AbstractApi):
     区切り文字を指定できます。
     """
 
-    def __init__(self, table_name: str, file_path: str, separator: str = ','):
+    def __init__(self, table_name: str, directory_path: str,
+                 file_name: str, separator: str = ','):
         # テーブルマネージャーの初期化
         self.tables_manager = TablesManager()
         # テーブル名
         self.table_name = table_name
-        # ファイルパス
-        self.file_path = file_path
+        # ディレクトリパス
+        self.directory_path = directory_path
+        # ファイル名
+        self.file_name = file_name
         # 区切り文字
         self.separator = separator
         # パラメータ名のマッピング
         self.param_names = {
             'table_name': 'tableName',
-            'file_path': 'filePath',
+            'directory_path': 'directoryPath',
+            'file_name': 'fileName',
             'separator': 'separator',
         }
 
@@ -43,9 +47,11 @@ class ExportCsvByPath(AbstractApi):
             validator.validate_existed_table_name(self.table_name,
                                                   table_name_list)
 
-            # ファイルパスのバリデーション
-            output_dir = os.path.dirname(self.file_path)
-            validator.validate_directory_path(output_dir)
+            # ディレクトリパスのバリデーション
+            validator.validate_directory_path(self.directory_path)
+
+            # ファイル名のバリデーション
+            validator.validate_file_name(self.file_name)
 
             # 区切り文字のバリデーション
             validator.validate_separator(self.separator)
@@ -60,11 +66,13 @@ class ExportCsvByPath(AbstractApi):
             table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
 
+            file_path = os.path.join(self.directory_path, self.file_name)
+
             # CSVファイルに書き込み
-            df.write_csv(self.file_path, separator=self.separator)
+            df.write_csv(file_path, separator=self.separator)
 
             # 結果を返す
-            result = {'filePath': self.file_path}
+            result = {'filePath': file_path}
             return result
 
         except KeyError as e:
@@ -81,7 +89,9 @@ class ExportCsvByPath(AbstractApi):
 
 
 def export_csv_by_path(table_name: str,
-                       file_path: str, separator: str = ',') -> Dict:
+                       directory_path: str,
+                       file_name: str,
+                       separator: str = ',') -> Dict:
     """
     テーブルをCSVファイルパスに出力する関数
 
@@ -93,7 +103,7 @@ def export_csv_by_path(table_name: str,
     Returns:
         出力されたファイルパスを含む辞書
     """
-    api = ExportCsvByPath(table_name, file_path, separator)
+    api = ExportCsvByPath(table_name, directory_path, file_name, separator)
     validation_error = api.validate()
     if validation_error:
         raise validation_error
