@@ -3,6 +3,7 @@ from . import views
 from .apis.rest_apis import (
     rest_create_table,
     rest_add_column,
+    rest_transform_column,
     rest_create_join_table,
     rest_delete_table,
     rest_rename_table,
@@ -30,6 +31,8 @@ urlpatterns = [
          rest_delete_table.DeleteTable.as_view()),
     path('add-column',
          rest_add_column.AddColumn.as_view()),
+    path('transform-column',
+         rest_transform_column.TransformColumn.as_view()),
     path('rename-column-name',
          rest_rename_column_name.RestRenameColumnName.as_view()),
     path('delete-column',
