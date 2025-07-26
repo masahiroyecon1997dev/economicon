@@ -25,7 +25,8 @@ class ExportCsvByPath(APIView):
             request: HTTPリクエストオブジェクト
                      JSON body: {
                          "tableName": "エクスポートするテーブル名",
-                         "filePath": "出力するCSVファイルのパス",
+                         "directoryPath": "出力するディレクトリパス",
+                         "fileName": "出力するCSVファイル名",
                          "separator": "区切り文字（オプション、デフォルト: ,）"
                      }
 
@@ -41,13 +42,15 @@ class ExportCsvByPath(APIView):
 
             # パラメータの取得
             table_name = request_data.get('tableName')
-            file_path = request_data.get('filePath')
+            directory_path = request_data.get('directoryPath')
+            file_name = request_data.get('fileName')
             separator = request_data.get('separator', ',')  # デフォルトはカンマ
 
             # Python APIを呼び出し
             result = export_csv_by_path(
                 table_name=table_name,
-                file_path=file_path,
+                directory_path=directory_path,
+                file_name=file_name,
                 separator=separator
             )
 

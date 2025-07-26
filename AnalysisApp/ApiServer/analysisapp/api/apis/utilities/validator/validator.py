@@ -51,9 +51,17 @@ class InputValidator:
 
     def validate_directory_path(self, directory: str) -> None:
         # ディレクトリパスのバリデーション
-        param = self.param_names['directory']
+        param = self.param_names['directory_path']
         validate_required(directory, param)
         validate_directory_path(directory, param)
+        return None
+
+    def validate_file_name(self, file_name: str) -> None:
+        # ファイル名のバリデーション
+        param = self.param_names['file_name']
+        validate_required(file_name, param)
+        validate_string_length(file_name, param, min_length=1, max_length=255)
+        validate_invalid_chars(file_name, param, self.invalid_chars)
         return None
 
     def validate_separator(self, separator: str) -> None:
