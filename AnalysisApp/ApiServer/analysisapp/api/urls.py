@@ -4,6 +4,9 @@ from .apis.rest_apis import (
     rest_create_table,
     rest_add_column,
     rest_calculate_column,
+    rest_duplicate_table,
+    rest_duplicate_column,
+    rest_transform_column,
     rest_create_join_table,
     rest_delete_table,
     rest_rename_table,
@@ -19,6 +22,8 @@ from .apis.rest_apis import (
     rest_import_parquet_by_file,
     rest_import_parquet_by_path,
     rest_export_csv_by_path,
+    rest_export_parquet_by_path,
+    rest_export_excel_by_path,
 )
 
 urlpatterns = [
@@ -33,6 +38,12 @@ urlpatterns = [
          rest_add_column.AddColumn.as_view()),
     path('calculate-column',
          rest_calculate_column.CalculateColumn.as_view()),
+    path('duplicate-table',
+         rest_duplicate_table.DuplicateTable.as_view()),
+    path('duplicate-column',
+         rest_duplicate_column.DuplicateColumn.as_view()),
+    path('transform-column',
+         rest_transform_column.TransformColumn.as_view()),
     path('rename-column-name',
          rest_rename_column_name.RestRenameColumnName.as_view()),
     path('delete-column',
@@ -59,4 +70,8 @@ urlpatterns = [
          rest_import_parquet_by_path.ImportParquetByPath.as_view()),
     path('export-csv-by-path',
          rest_export_csv_by_path.ExportCsvByPath.as_view()),
+    path('export-parquet-by-path',
+         rest_export_parquet_by_path.ExportParquetByPath.as_view()),
+    path('export-excel-by-path',
+         rest_export_excel_by_path.ExportExcelByPath.as_view()),
 ]
