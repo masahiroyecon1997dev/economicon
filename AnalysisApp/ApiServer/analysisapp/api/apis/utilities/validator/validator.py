@@ -18,6 +18,8 @@ from .common_validators import (
     validate_file_path_exists,
     validate_directory_path,
 )
+from ..validator.validation_config import (
+    SUPPORTED_DISTRIBUTIONS)
 
 
 class InputValidator:
@@ -178,4 +180,11 @@ class InputValidator:
         param = self.param_names['join_type']
         join_type_candidates = ['inner', 'left', 'right', 'outer']
         validate_candidates(join_type, param, join_type_candidates)
+        return None
+
+    def validate_validate_distribution_type(self,
+                                            distribution_type: str) -> None:
+        param = self.param_names['distribution_type']
+        validate_required(distribution_type, param)
+        validate_candidates(distribution_type, param, SUPPORTED_DISTRIBUTIONS)
         return None

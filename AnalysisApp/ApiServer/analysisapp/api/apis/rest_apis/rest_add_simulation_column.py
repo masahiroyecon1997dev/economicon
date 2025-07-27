@@ -13,7 +13,7 @@ from ..python_apis.common_api_class import ApiError
 class AddSimulationColumn(APIView):
     """
     シミュレーションデータの列を追加するREST API
-    
+
     POSTリクエストで以下のパラメータを受け取ります：
     - tableName: 対象テーブル名
     - newColumnName: 追加する列名
@@ -25,21 +25,21 @@ class AddSimulationColumn(APIView):
         try:
             # リクエスト受け取りログ
             create_log_api_request(request)
-            
+
             # リクエストデータの取得
             request_data = json.loads(request.body)
             table_name = request_data['tableName']
             new_column_name = request_data['newColumnName']
             distribution_type = request_data['distributionType']
             distribution_params = request_data['distributionParams']
-            
+
             result = add_simulation_column(
                 table_name=table_name,
                 new_column_name=new_column_name,
                 distribution_type=distribution_type,
                 distribution_params=distribution_params
             )
-            
+
             return create_success_response(
                 status.HTTP_200_OK,
                 result)
