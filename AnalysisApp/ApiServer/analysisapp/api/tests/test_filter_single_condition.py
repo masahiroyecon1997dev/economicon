@@ -229,6 +229,8 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
+        self.assertIn("tableName 'NoTable' does not exist.",
+                      response_data['message'])
 
     def test_filter_invalid_column(self):
         payload = {
@@ -247,3 +249,25 @@ class TestApiFilterSingleCondition(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
+        self.assertIn("columnName 'Z' does not exist.",
+                      response_data['message'])
+
+    def test_filter_invalid_condition(self):
+        payload = {
+            'tableName': 'TestTable',
+            'newTableName': 'FilteredTable',
+            'columnName': 'A',
+            'condition': 'invalid_condition',
+            'isCompareColumn': 'false',
+            'compareValue': 1
+        }
+        response = self.client.post(
+            '/api/filter-single-condition',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        response_data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_data['code'], 'NG')
+        self.assertIn("condition 'invalid_condition' is not supported.",
+                      response_data['message'])
