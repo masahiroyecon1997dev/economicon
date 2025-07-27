@@ -41,6 +41,12 @@ git push -u origin feature/your-feature-name
 ### 3. devでの作業が完了したら、mainにPRを作成
 #### GitHubでdev → main のPRを作成
 
+## テストカバレッジ調査
+### 1. テストカバレッジコード
+$ cd /AnalysisApp/AnalysisApp/ApiServer/analysisapp
+$ coverage run manage.py test
+$ coverage report -m
+
 ## 今後の課題
 1. ジョイン・ユニオン機能の追加（キーは同じ列名のみでいい）
 2. エクセルライクなグリッド機能

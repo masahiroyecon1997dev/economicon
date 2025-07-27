@@ -176,9 +176,12 @@ def validate_column_duplicate(value: str,
 def validate_candidates(value: str,
                         param_name: str,
                         candidate_values: List[str]) -> None:
-    """フィルタ条件のバリデーション"""
+    """リスト内にその値があるかのバリデーション"""
     if value not in candidate_values:
-        message = _(f"{param_name} '{value}' is not a valid value.")
+        message = _(f"{param_name} '{value}' "
+                    "is not supported. "
+                    f"Supported {param_name}: "
+                    f"{', '.join(candidate_values)}")
         raise ValidationError(message)
     return None
 

@@ -10,3 +10,10 @@ INPUT_VALIDATOR_CONFIG = {
                              'greaterThan', 'lessThan',
                              'greaterThanOrEquals', 'lessThanOrEquals']
 }
+
+# 対応する分布のリスト
+SUPPORTED_DISTRIBUTIONS = [
+    'uniform', 'exponential', 'normal', 'gamma', 'beta', 'weibull',
+    'lognormal', 'binomial', 'bernoulli', 'poisson', 'geometric',
+    'hypergeometric'
+]
