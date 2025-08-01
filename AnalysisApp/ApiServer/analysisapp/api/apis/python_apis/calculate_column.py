@@ -46,7 +46,7 @@ class CalculateColumn(AbstractApi):
             if col_name not in df.columns:
                 raise ValidationError(
                     f"Column '{col_name}' does not exist in table.")
-            
+
             col_dtype = df[col_name].dtype
             if not col_dtype.is_numeric():
                 raise ValidationError(
@@ -60,12 +60,12 @@ class CalculateColumn(AbstractApi):
         # <列名>をpl.col("列名")に置換
         polars_expr = expression
         column_names = self._extract_column_names(expression)
-        
+
         for col_name in column_names:
             # <列名>をpl.col("列名")に置換
             polars_expr = polars_expr.replace(
                 f'<{col_name}>', f'pl.col("{col_name}")')
-        
+
         return polars_expr
 
     def validate(self):
@@ -75,29 +75,30 @@ class CalculateColumn(AbstractApi):
             table_name_list = self.tables_manager.get_table_name_list()
             validator.validate_existed_table_name(self.table_name,
                                                   table_name_list)
-            
+
             # 新しい列名の検証
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
             validator.validate_new_column_name(self.new_column_name,
                                                column_name_list)
-            
+
             # 計算式が空でないことを検証
             if not self.calculation_expression.strip():
                 raise ValidationError("Calculation expression cannot be empty.")
-            
+
             # 計算式から列名を抽出して存在チェック
             df = self.tables_manager.get_table(self.table_name).table
             referenced_columns = self._extract_column_names(
                 self.calculation_expression)
-            
+
             if not referenced_columns:
                 raise ValidationError(
-                    "Calculation expression must reference at least one column.")
-            
+                    "Calculation expression must reference "
+                    "at least one column.")
+
             # 参照される列が存在し、数値型であることを検証
             self._validate_numeric_columns(referenced_columns, df)
-            
+
             return None
         except ValidationError as e:
             return e
@@ -106,28 +107,28 @@ class CalculateColumn(AbstractApi):
         try:
             table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
-            
+
             # Polarsの式を作成
             polars_expr_str = self._create_polars_expression(
                 self.calculation_expression)
-            
+
             # Polarsの式を評価
             try:
                 # 安全なeval環境でPolars式を評価
                 safe_globals = {'pl': pl}
                 polars_expr = eval(polars_expr_str, safe_globals)
-                
+
                 # 新しい列を計算して追加
                 df_with_new_col = df.with_columns(
                     polars_expr.alias(self.new_column_name))
-                
+
             except Exception as e:
                 raise ValidationError(
                     f"Invalid calculation expression: {str(e)}")
-            
+
             # テーブルを更新
             self.tables_manager.update_table(self.table_name, df_with_new_col)
-            
+
             # 結果を返す
             result = {'tableName': self.table_name,
                       'columnName': self.new_column_name}
@@ -141,8 +142,8 @@ class CalculateColumn(AbstractApi):
 
 
 def calculate_column(table_name: str,
-                    new_column_name: str,
-                    calculation_expression: str) -> Dict:
+                     new_column_name: str,
+                     calculation_expression: str) -> Dict:
     api = CalculateColumn(table_name, new_column_name, calculation_expression)
     validation_error = api.validate()
     if validation_error:
