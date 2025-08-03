@@ -25,6 +25,7 @@ from .apis.rest_apis import (
     rest_export_csv_by_path,
     rest_export_parquet_by_path,
     rest_export_excel_by_path,
+    rest_logistic_regression,
 )
 
 urlpatterns = [
@@ -77,4 +78,6 @@ urlpatterns = [
          rest_export_parquet_by_path.ExportParquetByPath.as_view()),
     path('export-excel-by-path',
          rest_export_excel_by_path.ExportExcelByPath.as_view()),
+    path('logistic-regression',
+         rest_logistic_regression.LogisticRegression.as_view()),
 ]
