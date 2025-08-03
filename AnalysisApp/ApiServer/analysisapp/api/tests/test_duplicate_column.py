@@ -37,12 +37,12 @@ class TestApiDuplicateColumn(APITestCase):
         self.assertEqual(response_data['code'], 'OK')
         self.assertEqual(response_data['result']['tableName'], 'TestTable')
         self.assertEqual(response_data['result']['columnName'], 'A_Copy')
-        
+
         # 列が複製されているか確認
         df = self.tables_manager.get_table('TestTable').table
         expected_columns = ['A', 'A_Copy', 'B', 'C']
         self.assertEqual(df.columns, expected_columns)
-        
+
         # 複製された列の値が元の列と同じか確認
         self.assertEqual(df['A'].to_list(), df['A_Copy'].to_list())
         self.assertEqual(df['A_Copy'].to_list(), [1, 2, 3])
@@ -63,12 +63,12 @@ class TestApiDuplicateColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # 列の順序が正しいか確認（B の右隣に B_Duplicate が挿入される）
         df = self.tables_manager.get_table('TestTable').table
         expected_columns = ['A', 'B', 'B_Duplicate', 'C']
         self.assertEqual(df.columns, expected_columns)
-        
+
         # 複製された列の値が元の列と同じか確認
         self.assertEqual(df['B'].to_list(), df['B_Duplicate'].to_list())
         self.assertEqual(df['B_Duplicate'].to_list(), [4, 5, 6])
@@ -88,7 +88,9 @@ class TestApiDuplicateColumn(APITestCase):
 
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+        self.assertEqual(response_data['code'], 'OK')
+        self.assertEqual(response_data['result']['tableName'], 'TestTable')
+        self.assertEqual(response_data['result']['columnName'], 'C_Clone')
         # 複製された文字列列の値が正しいか確認
         df = self.tables_manager.get_table('TestTable').table
         self.assertEqual(df['C'].to_list(), df['C_Clone'].to_list())
@@ -110,7 +112,8 @@ class TestApiDuplicateColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("tableName 'NoTable' does not exist.", response_data['message'])
+        self.assertIn("tableName 'NoTable' does not exist.",
+                      response_data['message'])
 
     def test_duplicate_column_invalid_source_column(self):
         # 存在しないソース列名を指定
