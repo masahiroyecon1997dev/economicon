@@ -3,6 +3,7 @@ from . import views
 from .apis.rest_apis import (
     rest_create_table,
     rest_add_column,
+    rest_add_lag_lead_column,
     rest_add_simulation_column,
     rest_calculate_column,
     rest_duplicate_table,
@@ -37,6 +38,8 @@ urlpatterns = [
          rest_delete_table.DeleteTable.as_view()),
     path('add-column',
          rest_add_column.AddColumn.as_view()),
+    path('add-lag-lead-column',
+         rest_add_lag_lead_column.AddLagLeadColumn.as_view()),
     path('add-simulation-column',
          rest_add_simulation_column.AddSimulationColumn.as_view()),
     path('calculate-column',
