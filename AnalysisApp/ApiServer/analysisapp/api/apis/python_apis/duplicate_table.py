@@ -1,4 +1,3 @@
-import polars as pl
 from django.utils.translation import gettext as _
 from typing import Dict
 from ..utilities.validator.common_validators import ValidationError
@@ -35,7 +34,7 @@ class DuplicateTable(AbstractApi):
             # 新しいテーブル名の重複チェック
             validator.param_names['table_name'] = 'newTableName'
             validator.validate_new_table_name(self.new_table_name,
-                                             table_name_list)
+                                              table_name_list)
             return None
         except ValidationError as e:
             return e
@@ -46,14 +45,14 @@ class DuplicateTable(AbstractApi):
             source_table_info = self.tables_manager.get_table(
                 self.source_table_name)
             source_df = source_table_info.table
-            
+
             # テーブルを複製
             duplicated_df = source_df.clone()
-            
+
             # 新しい名前でテーブルを保存
             self.tables_manager.store_table(
                 self.new_table_name, duplicated_df)
-            
+
             # 結果を返す
             result = {'tableName': self.new_table_name}
             return result
@@ -64,7 +63,7 @@ class DuplicateTable(AbstractApi):
 
 
 def duplicate_table(source_table_name: str,
-                   new_table_name: str) -> Dict:
+                    new_table_name: str) -> Dict:
     api = DuplicateTable(source_table_name, new_table_name)
     validation_error = api.validate()
     if validation_error:

@@ -1,7 +1,7 @@
 
 from pathlib import Path
 import os
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Any
 from django.utils.translation import gettext as _
 from rest_framework import status
 
@@ -41,6 +41,13 @@ def validate_number(value: Union[int, float], param_name: str) -> None:
     return None
 
 
+def validate_integer(value: Union[int, float], param_name: str) -> None:
+    """パラメータが整数どうかをチェック"""
+    if not isinstance(value, int):
+        message = _(f"{param_name} must be an integer.")
+        raise ValidationError(message)
+
+
 def validate_string(value: str, param_name: str) -> None:
     """パラメータが文字列どうかをチェック"""
     if not isinstance(value, str) or not value.strip():
@@ -57,10 +64,11 @@ def validate_required_list(value: List, param_name: str) -> None:
     return None
 
 
-def validate_list_length(value: List, param_name: str) -> None:
+def validate_list_length(value: List, param_name: str, item_name: str) -> None:
     """リストの長さをチェック"""
     if len(value) < 1:
-        message = _(f"{param_name} must be a list with at least one item.")
+        message = _(f"{param_name} must be "
+                    f"with at least one {item_name}.")
         raise ValidationError(message)
     return None
 
@@ -206,5 +214,14 @@ def validate_file_path_readable(file_path: str, param_name: str) -> None:
     """ファイルパスのバリデーション"""
     if not os.access(file_path, os.R_OK):
         message = _(f"{param_name} is not readable: {file_path}")
+        raise ValidationError(message)
+    return None
+
+
+def validate_column_is_numeric(column_name: str, param_name: str,
+                               column_type: Any) -> None:
+    """列が数値型であるかチェック"""
+    if not column_type.is_numeric():
+        message = _(f"{param_name} '{column_name}' is not numeric.")
         raise ValidationError(message)
     return None
