@@ -6,12 +6,16 @@ from ..utilities.create_response import (create_success_response,
                                          create_error_response)
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.create_log import create_log_api_request
-from ..python_apis.calculate_column import calculate_column
+from ..python_apis.fetch_data_to_json import fetch_data_to_json
 from ..python_apis.common_api_class import ApiError
 
 
-class CalculateColumn(APIView):
+class FetchDataToJson(APIView):
+    """FetchDataToJson API class
 
+    指定されたテーブルの指定された行範囲のデータをJSON形式で取得します。
+    行番号は1から始まると仮定しています。
+    """
     def post(self, request):
         try:
             # リクエスト受け取りログ
@@ -19,12 +23,12 @@ class CalculateColumn(APIView):
             # リクエストデータの取得
             request_data = json.loads(request.body)
             table_name = request_data['tableName']
-            new_column_name = request_data['newColumnName']
-            calculation_expression = request_data['calculationExpression']
-            result = calculate_column(
+            new_column_name = request_data['firstRow']
+            add_position_column = request_data['lastRow']
+            result = fetch_data_to_json(
                 table_name=table_name,
-                new_column_name=new_column_name,
-                calculation_expression=calculation_expression
+                first_row=new_column_name,
+                last_row=add_position_column
             )
             return create_success_response(
                 status.HTTP_200_OK,
@@ -42,7 +46,7 @@ class CalculateColumn(APIView):
             )
         except Exception as e:
             message = _("An unexpected error occurred during "
-                        "column calculation processing")
+                        "fetching data processing")
             return create_error_response(
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message,

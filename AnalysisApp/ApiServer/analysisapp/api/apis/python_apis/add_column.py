@@ -75,5 +75,4 @@ def add_column(table_name: str,
     validation_error = api.validate()
     if validation_error:
         raise validation_error
-    result = api.execute()
-    return result
+    return api.execute()

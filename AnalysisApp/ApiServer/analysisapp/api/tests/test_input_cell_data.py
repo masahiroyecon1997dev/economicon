@@ -33,7 +33,7 @@ class TestApiInputCellData(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
         df = self.tables_manager.get_table('TestTable').table
-        self.assertEqual(df['A'][2], 99)
+        self.assertEqual(df['A'][1], 99)
 
     def test_input_cell_data_success_with_string(self):
         payload = {
@@ -52,7 +52,7 @@ class TestApiInputCellData(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
         df = self.tables_manager.get_table('TestTable').table
-        self.assertEqual(df['A'][1], 'AAA')
+        self.assertEqual(df['A'][0], 'AAA')
 
     def test_input_cell_data_invalid_table(self):
         payload = {
@@ -109,7 +109,7 @@ class TestApiInputCellData(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
         self.assertIn(response_data['message'],
-                      "rowIndex must be between 0 and 9.")
+                      "rowIndex must be between 1 and 10.")
 
     def test_input_cell_data_invalid_row_string(self):
         payload = {

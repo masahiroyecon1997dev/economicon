@@ -14,8 +14,10 @@ class TestApiImportParquetByPath(APITestCase):
         self.tables_manager.clear_tables()
 
         # テスト用のPARQUETファイルパス
-        self.test_parquet = '/home/runner/work/AnalysisApp/AnalysisApp/AnalysisApp/SampleData/TestData.parquet'
-        self.simple_parquet = '/home/runner/work/AnalysisApp/AnalysisApp/AnalysisApp/SampleData/SimpleTest.parquet'
+        self.test_parquet = '/AnalysisApp/AnalysisApp/SampleData'\
+            '/TestData.parquet'
+        self.simple_parquet = '/AnalysisApp/AnalysisApp/SampleData/'\
+            'SimpleTest.parquet'
 
     def test_import_parquet_by_path_simple(self):
         """
@@ -118,7 +120,8 @@ class TestApiImportParquetByPath(APITestCase):
         PARQUET以外のファイル拡張子を指定した場合のテスト
         """
         request_data = {
-            'filePath': '/home/runner/work/AnalysisApp/AnalysisApp/AnalysisApp/SampleData/TestDataComma.csv',
+            'filePath': '/AnalysisApp/AnalysisApp/SampleData/'
+                        'TestDataComma.csv',
             'tableName': 'TestInvalidExtension'
         }
         response = self.client.post('/api/import-parquet-by-path',
@@ -129,7 +132,8 @@ class TestApiImportParquetByPath(APITestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertEqual('NG', response_data['code'])
-        self.assertIn("Failed to parse PARQUET file: Invalid format or encoding.",
+        self.assertIn("Failed to parse PARQUET file: "
+                      "Invalid format or encoding.",
                       response_data['message'])
 
     def test_import_parquet_by_path_missing_file_path(self):
@@ -214,7 +218,7 @@ class TestApiImportParquetByPath(APITestCase):
             'col2': ['A', 'B', 'C', 'D', 'E'],
             'col3': [10.1, 20.2, 30.3, 40.4, 50.5]
         })
-        
+
         with tempfile.NamedTemporaryFile(mode='wb', suffix='.parquet',
                                          delete=False) as f:
             temp_data.write_parquet(f.name)
