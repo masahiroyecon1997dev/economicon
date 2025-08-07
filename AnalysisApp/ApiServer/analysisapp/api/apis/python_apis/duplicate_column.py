@@ -78,6 +78,7 @@ class DuplicateColumn(AbstractApi):
 def duplicate_column(table_name: str,
                      source_column_name: str,
                      new_column_name: str) -> Dict:
+
     api = DuplicateColumn(table_name, source_column_name, new_column_name)
     validation_error = api.validate()
     if validation_error:
