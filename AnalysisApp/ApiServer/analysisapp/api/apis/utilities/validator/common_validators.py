@@ -33,17 +33,22 @@ def validate_boolean(value: str, param_name: str) -> None:
     return None
 
 
-def validate_number(value: Union[int, float], param_name: str) -> None:
+def validate_number(value: Union[str, int, float], param_name: str) -> None:
     """パラメータが数値どうかをチェック"""
-    if (not isinstance(value, (int, float))):
+    try:
+        float(value)
+        return None
+    except (ValueError, TypeError):
         message = _(f"{param_name} must be a number.")
         raise ValidationError(message)
-    return None
 
 
-def validate_integer(value: Union[int, float], param_name: str) -> None:
+def validate_integer(value: Union[str, int, float], param_name: str) -> None:
     """パラメータが整数どうかをチェック"""
-    if not isinstance(value, int):
+    try:
+        int(value)
+        return None
+    except (ValueError, TypeError):
         message = _(f"{param_name} must be an integer.")
         raise ValidationError(message)
 

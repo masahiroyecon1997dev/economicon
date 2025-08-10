@@ -2,7 +2,7 @@ import polars as pl
 from django.utils.translation import gettext as _
 from typing import Dict, List
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
+from ..utilities.validator.validator import Validator
 from ..utilities.validator.validation_config import (
     INPUT_VALIDATOR_CONFIG)
 from ..data.tables_manager import TablesManager
@@ -16,7 +16,7 @@ class DescriptiveStatistics(AbstractApi):
     指定されたテーブルの指定された列に対して、要求された記述統計を計算します。
     サポートする統計: 平均、最頻値、中央値、分散、標準偏差、範囲、四分位範囲
     """
-    
+
     # 利用可能な統計の種類を定義
     AVAILABLE_STATISTICS = {
         'mean': '平均',
@@ -27,7 +27,7 @@ class DescriptiveStatistics(AbstractApi):
         'range': '範囲',
         'iqr': '四分位範囲'
     }
-    
+
     def __init__(self, table_name: str, column_name: str, statistics: List[str]):
         self.tables_manager = TablesManager()
         self.table_name = table_name
@@ -41,8 +41,8 @@ class DescriptiveStatistics(AbstractApi):
 
     def validate(self):
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
+            validator = Validator(param_names=self.param_names,
+                                  **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
             validator.validate_existed_table_name(self.table_name,
                                                   table_name_list)
@@ -50,14 +50,14 @@ class DescriptiveStatistics(AbstractApi):
                 self.table_name)
             validator.validate_existed_column_name(self.column_name,
                                                    column_name_list)
-            
+
             # 統計の種類をバリデーション
             for stat in self.statistics:
                 if stat not in self.AVAILABLE_STATISTICS:
                     raise ValidationError(
                         f"statistics '{stat}' is not supported. "
                         f"Available: {list(self.AVAILABLE_STATISTICS.keys())}")
-            
+
             return None
         except ValidationError as e:
             return e
@@ -66,21 +66,21 @@ class DescriptiveStatistics(AbstractApi):
         try:
             table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
-            
+
             # 数値でない列の場合、一部の統計は計算できない
             numeric_only_stats = ['mean', 'variance', 'std', 'range', 'iqr']
             column_dtype = df[self.column_name].dtype
             is_numeric = column_dtype in [pl.Int8, pl.Int16, pl.Int32, pl.Int64,
                                          pl.UInt8, pl.UInt16, pl.UInt32, pl.UInt64,
                                          pl.Float32, pl.Float64]
-            
+
             results = {}
-            
+
             for stat in self.statistics:
                 if stat in numeric_only_stats and not is_numeric:
                     results[stat] = None
                     continue
-                    
+
                 if stat == 'mean':
                     result_df = df.select(pl.col(self.column_name).mean())
                     results[stat] = float(result_df.item())
@@ -120,7 +120,7 @@ class DescriptiveStatistics(AbstractApi):
                         results[stat] = float(q75 - q25)
                     else:
                         results[stat] = None
-            
+
             # 結果を返す
             result = {
                 'tableName': self.table_name,

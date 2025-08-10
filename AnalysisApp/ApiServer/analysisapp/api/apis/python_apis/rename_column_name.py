@@ -1,7 +1,7 @@
 from typing import Dict
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
+from ..utilities.validator.validator import Validator
 from ..utilities.validator.validation_config \
     import INPUT_VALIDATOR_CONFIG
 from ..data.tables_manager import TablesManager
@@ -35,8 +35,8 @@ class RenameColumnName(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
+            validator = Validator(param_names=self.param_names,
+                                  **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名の存在チェック
             validator.validate_existed_table_name(self.table_name,
