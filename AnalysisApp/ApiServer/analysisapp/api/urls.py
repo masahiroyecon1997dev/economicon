@@ -7,6 +7,7 @@ from .apis.rest_apis import (
     rest_calculate_column,
     rest_duplicate_table,
     rest_duplicate_column,
+    rest_get_column_info_list,
     rest_transform_column,
     rest_create_join_table,
     rest_delete_table,
@@ -26,6 +27,7 @@ from .apis.rest_apis import (
     rest_export_parquet_by_path,
     rest_export_excel_by_path,
     rest_fetch_data_to_json,
+    rest_get_table_name_list,
     rest_descriptive_statistics,
 )
 
@@ -81,6 +83,10 @@ urlpatterns = [
          rest_export_excel_by_path.ExportExcelByPath.as_view()),
     path('fetch-data-to-json',
          rest_fetch_data_to_json.FetchDataToJson.as_view()),
+    path('get-column-info-list',
+         rest_get_column_info_list.GetColumnInfoList.as_view()),
+    path('get-table-name-list',
+         rest_get_table_name_list.GetTableNameList.as_view()),
     path('descriptive-statistics',
          rest_descriptive_statistics.DescriptiveStatistics.as_view()),
 ]

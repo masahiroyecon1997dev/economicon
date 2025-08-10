@@ -2,7 +2,6 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from ..apis.data.tables_manager import TablesManager
 import polars as pl
-import json
 
 
 class TestApiFetchDataToJsonAPI(APITestCase):
@@ -20,14 +19,11 @@ class TestApiFetchDataToJsonAPI(APITestCase):
 
     def test_fetch_data_to_json_success(self):
         # 正常系テスト: JSONデータを取得
-        payload = {
-            "tableName": self.table_name,
-            "firstRow": 2,
-            "lastRow": 4
-        }
-        response = self.client.post(
-            '/api/fetch-data-to-json',
-            data=json.dumps(payload),
+        first_row = 2
+        last_row = 4
+        response = self.client.get(
+            f'/api/fetch-data-to-json?tableName={self.table_name}'
+            f'&firstRow={first_row}&lastRow={last_row}',
             content_type='application/json'
         )
 
@@ -42,14 +38,12 @@ class TestApiFetchDataToJsonAPI(APITestCase):
 
     def test_fetch_data_to_json_table_not_found(self):
         # 異常系テスト: 存在しないテーブル名
-        payload = {
-            "tableName": "non_existent_table",
-            "firstRow": 1,
-            "lastRow": 3
-        }
-        response = self.client.post(
-            '/api/fetch-data-to-json',
-            data=json.dumps(payload),
+        not_existent_table = "non_existent_table"
+        first_row = 1
+        last_row = 3
+        response = self.client.get(
+            f'/api/fetch-data-to-json?tableName={not_existent_table}'
+            f'&firstRow={first_row}&lastRow={last_row}',
             content_type='application/json'
         )
 
@@ -60,14 +54,11 @@ class TestApiFetchDataToJsonAPI(APITestCase):
 
     def test_fetch_data_to_json_invalid_first_row_range(self):
         # 異常系テスト: 無効な行範囲 firstRow
-        payload = {
-            "tableName": self.table_name,
-            "firstRow": 0,
-            "lastRow": 4
-        }
-        response = self.client.post(
-            '/api/fetch-data-to-json',
-            data=json.dumps(payload),
+        first_row = 0
+        last_row = 4
+        response = self.client.get(
+            f'/api/fetch-data-to-json?tableName={self.table_name}'
+            f'&firstRow={first_row}&lastRow={last_row}',
             content_type='application/json'
         )
 
@@ -78,14 +69,11 @@ class TestApiFetchDataToJsonAPI(APITestCase):
 
     def test_fetch_data_to_json_invalid_last_row_range(self):
         # 異常系テスト: 無効な行範囲 firstRow
-        payload = {
-            "tableName": self.table_name,
-            "firstRow": 1,
-            "lastRow": 6
-        }
-        response = self.client.post(
-            '/api/fetch-data-to-json',
-            data=json.dumps(payload),
+        first_row = 1
+        last_row = 6
+        response = self.client.get(
+            f'/api/fetch-data-to-json?tableName={self.table_name}'
+            f'&firstRow={first_row}&lastRow={last_row}',
             content_type='application/json'
         )
 
@@ -96,14 +84,12 @@ class TestApiFetchDataToJsonAPI(APITestCase):
 
     def test_fetch_data_to_json_missing_table_name(self):
         # 異常系テスト: 必須パラメータが不足している場合（tableName）
-        payload = {
-            "tableName": "",
-            "firstRow": 1,
-            "lastRow": 6
-        }
-        response = self.client.post(
-            '/api/fetch-data-to-json',
-            data=json.dumps(payload),
+        not_table_name = ""
+        first_row = 1
+        last_row = 6
+        response = self.client.get(
+            f'/api/fetch-data-to-json?tableName={not_table_name}'
+            f'&firstRow={first_row}&lastRow={last_row}',
             content_type='application/json'
         )
 
@@ -114,14 +100,11 @@ class TestApiFetchDataToJsonAPI(APITestCase):
 
     def test_fetch_data_to_json_missing_first_row(self):
         # 異常系テスト: 必須パラメータが不足している場合（firstRow）
-        payload = {
-            "tableName": self.table_name,
-            "firstRow": "",
-            "lastRow": 6
-        }
-        response = self.client.post(
-            '/api/fetch-data-to-json',
-            data=json.dumps(payload),
+        first_row = ""
+        last_row = 6
+        response = self.client.get(
+            f'/api/fetch-data-to-json?tableName={self.table_name}'
+            f'&firstRow={first_row}&lastRow={last_row}',
             content_type='application/json'
         )
 
@@ -132,14 +115,11 @@ class TestApiFetchDataToJsonAPI(APITestCase):
 
     def test_fetch_data_to_json_missing_last_row(self):
         # 異常系テスト: 必須パラメータが不足している場合（lastRow）
-        payload = {
-            "tableName": self.table_name,
-            "firstRow": 1,
-            "lastRow": ""
-        }
-        response = self.client.post(
-            '/api/fetch-data-to-json',
-            data=json.dumps(payload),
+        first_row = 1
+        last_row = ""
+        response = self.client.get(
+            f'/api/fetch-data-to-json?tableName={self.table_name}'
+            f'&firstRow={first_row}&lastRow={last_row}',
             content_type='application/json'
         )
 

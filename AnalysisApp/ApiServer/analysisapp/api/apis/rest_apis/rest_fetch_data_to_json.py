@@ -1,6 +1,5 @@
 from rest_framework import status
 from rest_framework.views import APIView
-import json
 from django.utils.translation import gettext as _
 from ..utilities.create_response import (create_success_response,
                                          create_error_response)
@@ -16,19 +15,18 @@ class FetchDataToJson(APIView):
     指定されたテーブルの指定された行範囲のデータをJSON形式で取得します。
     行番号は1から始まると仮定しています。
     """
-    def post(self, request):
+    def get(self, request):
         try:
             # リクエスト受け取りログ
             create_log_api_request(request)
             # リクエストデータの取得
-            request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            new_column_name = request_data['firstRow']
-            add_position_column = request_data['lastRow']
+            table_name = request.query_params.get('tableName')
+            firstRow = request.query_params.get('firstRow')
+            lastRow = request.query_params.get('lastRow')
             result = fetch_data_to_json(
                 table_name=table_name,
-                first_row=new_column_name,
-                last_row=add_position_column
+                first_row=firstRow,
+                last_row=lastRow
             )
             return create_success_response(
                 status.HTTP_200_OK,

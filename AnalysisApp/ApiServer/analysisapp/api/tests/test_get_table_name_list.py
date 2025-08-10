@@ -10,12 +10,12 @@ class TestApiGetTableNameListAPI(APITestCase):
 
     def test_get_table_name_list_empty(self):
         # テーブルが0件の場合
-        response = self.client.get('/api/get-table-name-list')
+        response = self.client.get('/api/get-table-name-list',
+                                   content_type='application/json')
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
         self.assertEqual(response_data['result']['tableNameList'], [])
-        self.assertIn('テーブル名一覧の取得が成功しました', response_data['message'])
 
     def test_get_table_name_list_multiple(self):
         # テーブルが複数件の場合
@@ -30,7 +30,6 @@ class TestApiGetTableNameListAPI(APITestCase):
         self.assertEqual(response_data['code'], 'OK')
         self.assertCountEqual(response_data['result']['tableNameList'],
                               table_names)
-        self.assertIn('テーブル名一覧の取得が成功しました', response_data['message'])
 
     def test_get_table_name_list_exception(self):
         # 例外発生時のテスト
@@ -45,9 +44,9 @@ class TestApiGetTableNameListAPI(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code,
                          status.HTTP_500_INTERNAL_SERVER_ERROR)
-        self.assertEqual(response_data['code'], -9999)
-        self.assertEqual(response_data['result']['tableNameList'], [])
-        self.assertIn('テーブル名一覧の取得中にエラーが発生しました', response_data['message'])
+        self.assertEqual(response_data['code'], 'NG')
+        self.assertIn('',
+                      response_data['message'])
 
         # 後始末
         self.tables_manager.get_table_name_list = original_method

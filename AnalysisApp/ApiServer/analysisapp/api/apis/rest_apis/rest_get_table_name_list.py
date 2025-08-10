@@ -13,7 +13,7 @@ class GetTableNameList(APIView):
 
     すべてのテーブル名を取得します。
     """
-    def post(self, request):
+    def get(self, request):
         try:
             # リクエスト受け取りログ
             create_log_api_request(request)
