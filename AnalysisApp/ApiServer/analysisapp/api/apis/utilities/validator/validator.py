@@ -6,6 +6,7 @@ from .common_validators import (
     validate_required,
     validate_boolean,
     validate_number,
+    validate_integer,
     validate_required_list,
     validate_list_length,
     validate_string_length,
@@ -24,7 +25,7 @@ from ..validator.validation_config import (
     SUPPORTED_DISTRIBUTIONS)
 
 
-class InputValidator:
+class Validator:
     def __init__(
         self,
         param_names: Optional[dict] = None,
@@ -156,9 +157,10 @@ class InputValidator:
                            param_name: str) -> None:
         param = self.param_names[param_name]
         validate_required(value, param)
-        validate_number(value, param)
+        validate_integer(value, param)
+        int_value = int(value)
         validate_numeric_range(
-            value, param, min_value=1, max_value=max_row_number
+            int_value, param, min_value=1, max_value=max_row_number
         )
         return None
 
