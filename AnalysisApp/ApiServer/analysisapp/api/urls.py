@@ -29,6 +29,7 @@ from .apis.rest_apis import (
     rest_fetch_data_to_json,
     rest_get_table_name_list,
     rest_descriptive_statistics,
+    rest_logistic_regression,
 )
 
 urlpatterns = [
@@ -89,4 +90,6 @@ urlpatterns = [
          rest_get_table_name_list.GetTableNameList.as_view()),
     path('descriptive-statistics',
          rest_descriptive_statistics.DescriptiveStatistics.as_view()),
+    path('logistic-regression',
+         rest_logistic_regression.LogisticRegression.as_view()),
 ]
