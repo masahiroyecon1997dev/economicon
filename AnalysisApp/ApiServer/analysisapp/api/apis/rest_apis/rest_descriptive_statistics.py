@@ -6,11 +6,11 @@ from ..utilities.create_response import (create_success_response,
                                          create_error_response)
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.create_log import create_log_api_request
-from ..python_apis.calculate_column import calculate_column
+from ..python_apis.descriptive_statistics import descriptive_statistics
 from ..python_apis.common_api_class import ApiError
 
 
-class CalculateColumn(APIView):
+class DescriptiveStatistics(APIView):
 
     def post(self, request):
         try:
@@ -19,12 +19,13 @@ class CalculateColumn(APIView):
             # リクエストデータの取得
             request_data = json.loads(request.body)
             table_name = request_data.get('tableName')
-            new_column_name = request_data.get('newColumnName')
-            calculation_expression = request_data.get('calculationExpression')
-            result = calculate_column(
+            column_name_list = request_data.get('columnNameList')
+            statistics = request_data.get('statistics')
+
+            result = descriptive_statistics(
                 table_name=table_name,
-                new_column_name=new_column_name,
-                calculation_expression=calculation_expression
+                column_name_list=column_name_list,
+                statistics=statistics
             )
             return create_success_response(
                 status.HTTP_200_OK,
@@ -42,7 +43,7 @@ class CalculateColumn(APIView):
             )
         except Exception as e:
             message = _("An unexpected error occurred during "
-                        "column calculation processing")
+                        "descriptive statistics processing")
             return create_error_response(
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message,

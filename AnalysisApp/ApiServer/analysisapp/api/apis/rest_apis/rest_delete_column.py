@@ -20,8 +20,8 @@ class RestDeleteColumn(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            column_name = request_data['columnName']
+            table_name = request_data.get('tableName')
+            column_name = request_data.get('columnName')
             result = delete_column(table_name, column_name)
             return create_success_response(
                 status.HTTP_200_OK,

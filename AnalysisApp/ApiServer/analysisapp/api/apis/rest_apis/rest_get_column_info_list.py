@@ -1,35 +1,30 @@
 from rest_framework import status
 from rest_framework.views import APIView
-import json
 from django.utils.translation import gettext as _
 from ..utilities.create_response import (create_success_response,
                                          create_error_response)
-from ..utilities.validator.common_validators import ValidationError
 from ..utilities.create_log import create_log_api_request
-from ..python_apis.calculate_column import calculate_column
+from ..python_apis.get_column_info_list import get_column_info_list
 from ..python_apis.common_api_class import ApiError
+from ..utilities.validator.common_validators import ValidationError
 
 
-class CalculateColumn(APIView):
-
-    def post(self, request):
+class GetColumnInfoList(APIView):
+    """
+    指定されたテーブルのカラム名リストを取得するREST API
+    """
+    def get(self, request):
         try:
             # リクエスト受け取りログ
             create_log_api_request(request)
             # リクエストデータの取得
-            request_data = json.loads(request.body)
-            table_name = request_data.get('tableName')
-            new_column_name = request_data.get('newColumnName')
-            calculation_expression = request_data.get('calculationExpression')
-            result = calculate_column(
-                table_name=table_name,
-                new_column_name=new_column_name,
-                calculation_expression=calculation_expression
-            )
+            table_name = request.query_params.get('tableName')
+            is_number_only = request.query_params.get('isNumberOnly', 'false')
+            result = get_column_info_list(table_name, is_number_only)
             return create_success_response(
                 status.HTTP_200_OK,
-                result)
-
+                result
+            )
         except ValidationError as e:
             return create_error_response(
                 status.HTTP_400_BAD_REQUEST,
@@ -42,7 +37,7 @@ class CalculateColumn(APIView):
             )
         except Exception as e:
             message = _("An unexpected error occurred during "
-                        "column calculation processing")
+                        "getting column name list processing")
             return create_error_response(
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message,
