@@ -130,6 +130,115 @@ class TestApiTransformColumn(APITestCase):
         expected_cube_values = [1, 8, 64, 512, 4096]
         self.assertEqual(cube_values, expected_cube_values)
 
+    def test_transform_column_fractional_exponent(self):
+        # 小数の指数での累乗変換
+        payload = {
+            'tableName': 'TestTable',
+            'sourceColumnName': 'A',
+            'newColumnName': 'A_sqrt',
+            'transformMethod': 'power',
+            'exponent': 0.5  # 平方根
+        }
+        response = self.client.post(
+            '/api/transform-column',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+
+        response_data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_data['code'], 'OK')
+
+        # 平方根の値が正しいか
+        df = self.tables_manager.get_table('TestTable').table
+        sqrt_values = df['A_sqrt'].to_list()
+        expected_sqrt_values = [1.0, math.sqrt(2), 2.0, math.sqrt(8), 4.0]
+        for actual, expected in zip(sqrt_values, expected_sqrt_values):
+            self.assertAlmostEqual(actual, expected, places=5)
+
+    def test_transform_column_root_square_success(self):
+        # 平方根変換のテスト
+        payload = {
+            'tableName': 'TestTable',
+            'sourceColumnName': 'A',
+            'newColumnName': 'A_sqrt',
+            'transformMethod': 'root',
+        }
+
+        response = self.client.post(
+            '/api/transform-column',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+
+        response_data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_data['code'], 'OK')
+
+        # 平方根の値が正しいか
+        df = self.tables_manager.get_table('TestTable').table
+        sqrt_values = df['A_sqrt'].to_list()
+        # sqrt(1), sqrt(2), sqrt(4), sqrt(8), sqrt(16)
+        expected_sqrt_values = [1, 1.41421, 2, 2.82843, 4]
+        for actual, expected in zip(sqrt_values, expected_sqrt_values):
+            self.assertAlmostEqual(actual, expected, places=5)
+
+    def test_transform_column_root_cubic_success(self):
+        # 立方根変換のテスト
+        payload = {
+            'tableName': 'TestTable',
+            'sourceColumnName': 'A',
+            'newColumnName': 'A_cbrt',
+            'transformMethod': 'root',
+            'rootIndex': 3
+        }
+
+        response = self.client.post(
+            '/api/transform-column',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+
+        response_data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_data['code'], 'OK')
+
+        # 立方根の値が正しいか
+        df = self.tables_manager.get_table('TestTable').table
+        cbrt_values = df['A_cbrt'].to_list()
+        # cbrt(1), cbrt(2), cbrt(4), cbrt(8), cbrt(16)
+        expected_cbrt_values = [1, 1.25992, 1.58740, 2, 2.51984]
+        for actual, expected in zip(cbrt_values, expected_cbrt_values):
+            self.assertAlmostEqual(actual, expected, places=5)
+
+    def test_transform_column_root_fractional_success(self):
+        # 二乗変換のテスト
+        payload = {
+            'tableName': 'TestTable',
+            'sourceColumnName': 'A',
+            'newColumnName': 'A_square',
+            'transformMethod': 'root',
+            'rootIndex': 0.5
+        }
+
+        response = self.client.post(
+            '/api/transform-column',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+
+        response_data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_data['code'], 'OK')
+
+        # 二乗の値が正しいか
+        df = self.tables_manager.get_table('TestTable').table
+        square_values = df['A_square'].to_list()
+        # square(1), square(2), square(4), square(8), square(16)
+        expected_square_values = [1, 4, 16, 64, 256]
+        for actual, expected in zip(square_values, expected_square_values):
+            self.assertAlmostEqual(actual, expected, places=5)
+
     def test_transform_column_invalid_table(self):
         # 存在しないテーブル名
         payload = {
@@ -251,29 +360,3 @@ class TestApiTransformColumn(APITestCase):
         self.assertEqual(response_data['code'], 'NG')
         self.assertIn("logBase must be a positive number not equal to 1",
                       response_data['message'])
-
-    def test_transform_column_fractional_exponent(self):
-        # 小数の指数での累乗変換
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_sqrt',
-            'transformMethod': 'power',
-            'exponent': 0.5  # 平方根
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
-
-        # 平方根の値が正しいか
-        df = self.tables_manager.get_table('TestTable').table
-        sqrt_values = df['A_sqrt'].to_list()
-        expected_sqrt_values = [1.0, math.sqrt(2), 2.0, math.sqrt(8), 4.0]
-        for actual, expected in zip(sqrt_values, expected_sqrt_values):
-            self.assertAlmostEqual(actual, expected, places=5)

@@ -42,12 +42,12 @@ class GetColumnInfoList(AbstractApi):
             column_list = self.tables_manager.get_column_info_list(
                 self.table_name)
             if self.is_number_only.lower() == 'true':
-                column_info_list = ([{'name': name, 'type': dtype}
+                column_info_list = ([{'name': name, 'type': str(dtype)}
                                      for name, dtype
                                      in column_list.items()
                                      if dtype.is_numeric()])
             else:
-                column_info_list = ([{'name': name, 'type': dtype}
+                column_info_list = ([{'name': name, 'type': str(dtype)}
                                      for name, dtype
                                      in column_list.items()])
             result = {
@@ -56,8 +56,8 @@ class GetColumnInfoList(AbstractApi):
             }
             return result
         except Exception as e:
-            message = _(f"An unexpected error during "
-                        f"getting column info list: {str(e)}")
+            message = _("An unexpected error during "
+                        "getting column info list.")
             raise ApiError(message) from e
 
 

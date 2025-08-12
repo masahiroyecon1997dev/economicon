@@ -26,6 +26,7 @@ class TransformColumn(APIView):
             # Optional parameters
             log_base = request_data.get('logBase')
             exponent = request_data.get('exponent')
+            root_index = request_data.get('rootIndex')
 
             result = transform_column(
                 table_name=table_name,
@@ -33,8 +34,10 @@ class TransformColumn(APIView):
                 new_column_name=new_column_name,
                 transform_method=transform_method,
                 log_base=log_base,
-                exponent=exponent
+                exponent=exponent,
+                root_index=root_index
             )
+
             return create_success_response(
                 status.HTTP_200_OK,
                 result)
