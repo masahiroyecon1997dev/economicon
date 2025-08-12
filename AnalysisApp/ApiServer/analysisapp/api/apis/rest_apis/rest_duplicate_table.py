@@ -18,8 +18,8 @@ class DuplicateTable(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            source_table_name = request_data['tableName']
-            new_table_name = request_data['newTableName']
+            source_table_name = request_data.get('tableName')
+            new_table_name = request_data.get('newTableName')
             result = duplicate_table(
                 source_table_name=source_table_name,
                 new_table_name=new_table_name
