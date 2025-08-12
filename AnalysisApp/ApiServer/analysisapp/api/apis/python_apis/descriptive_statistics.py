@@ -135,9 +135,9 @@ class DescriptiveStatistics(AbstractApi):
 
 
 def descriptive_statistics(table_name: str,
-                          column_name: str,
-                          statistics: List[str]) -> Dict:
-    api = DescriptiveStatistics(table_name, column_name, statistics)
+                           column_name_list: List[str],
+                           statistics: List[str]) -> Dict:
+    api = DescriptiveStatistics(table_name, column_name_list, statistics)
     validation_error = api.validate()
     if validation_error:
         raise validation_error

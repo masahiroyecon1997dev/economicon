@@ -45,7 +45,8 @@ class TestApiGetTableNameListAPI(APITestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn('',
+        self.assertIn('An unexpected error during '
+                      'getting table name list.',
                       response_data['message'])
 
         # 後始末
