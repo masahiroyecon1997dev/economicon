@@ -1,19 +1,40 @@
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-
-from .data.tables_info import all_tables_info
+from django.utils.translation import gettext as _
+from ..data.tables_manager import TablesManager
+from .common_api_class import (AbstractApi, ApiError)
 
 
-class GetTableNameList(APIView):
-    def get(self, request):
+class GetTableNameList(AbstractApi):
+    """
+    テーブル名のリストを取得するAPIクラス
+
+    データベースに存在するすべてのテーブル名を取得します。
+    """
+    def __init__(self):
+        self.tables_manager = TablesManager()
+        self.param_names = {
+            'table_name': 'tableName',
+        }
+
+    def validate(self):
+        pass
+
+    def execute(self):
         try:
-            data = all_tables_info
-            table_names = data.keys()
-            result = {'code': 0, 'result': {'tableNameList': table_names},
-                      'message': ''}
-            return Response(data=result, status=status.HTTP_200_OK)
+            table_name_list = self.tables_manager.get_table_name_list()
+            result = {
+                'tableNameList': table_name_list
+            }
+            return result
         except Exception as e:
-            result = {'code': -9999, 'result': {'tableNameList': []},
-                      'message': e}
-            return Response(data=result, status=status.HTTP_200_OK)
+            message = _("An unexpected error during "
+                        "getting table name list.")
+            raise ApiError(message) from e
+
+
+def get_table_name_list():
+    """
+    テーブル名のリストを取得する関数
+    :return: テーブル名のリスト
+    """
+    api = GetTableNameList()
+    return api.execute()
