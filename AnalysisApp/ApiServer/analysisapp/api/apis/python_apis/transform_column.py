@@ -16,12 +16,13 @@ class TransformColumn(AbstractApi):
 
     指定されたテーブルの指定された列の値を変換し、
     指定された列の右隣に新しい列を挿入します。
-    変換方法は対数変換または累乗変換をサポートします。
+    変換方法は対数変換、累乗変換、またはルート変換をサポートします。
     """
     def __init__(self, table_name: str, source_column_name: str,
                  new_column_name: str, transform_method: str,
                  log_base: Optional[float] = None,
-                 exponent: Optional[float] = None):
+                 exponent: Optional[float] = None,
+                 root_index: Optional[float] = None):
         self.tables_manager = TablesManager()
         self.table_name = table_name
         self.source_column_name = source_column_name
@@ -29,6 +30,7 @@ class TransformColumn(AbstractApi):
         self.transform_method = transform_method
         self.log_base = log_base
         self.exponent = exponent
+        self.root_index = root_index
         self.param_names = {
                 'table_name': 'tableName',
                 'column_names': 'sourceColumnName',
@@ -51,7 +53,7 @@ class TransformColumn(AbstractApi):
                                                    column_name_list)
 
             # Validate transform method
-            valid_methods = ['log', 'power']
+            valid_methods = ['log', 'power', 'root']
             if self.transform_method not in valid_methods:
                 raise ValidationError(
                     f"transformMethod '{self.transform_method}' is invalid. "
@@ -67,6 +69,13 @@ class TransformColumn(AbstractApi):
             if self.transform_method == 'power' and self.exponent is not None:
                 if not isinstance(self.exponent, (int, float)):
                     raise ValidationError("exponent must be a number")
+
+            # Validate root index if provided
+            if self.transform_method == 'root' and self.root_index is not None:
+                if not (isinstance(self.root_index, (int, float))
+                        or self.root_index == 0):
+                    raise ValidationError("rootIndex must be "
+                                          "a non-zero number")
 
             return None
         except ValidationError as e:
@@ -97,6 +106,13 @@ class TransformColumn(AbstractApi):
                 exponent = self.exponent if self.exponent is not None else 2.0
                 transformed_series = df.select(
                     pl.col(self.source_column_name).pow(exponent)
+                ).to_series()
+            elif self.transform_method == 'root':
+                root_index = self.root_index if (self.root_index
+                                                 is not None) else 2.0
+                # Root transformation using power with reciprocal
+                transformed_series = df.select(
+                    pl.col(self.source_column_name).pow(1.0 / root_index)
                 ).to_series()
             else:
                 raise ValidationError(
@@ -129,9 +145,10 @@ def transform_column(table_name: str,
                      new_column_name: str,
                      transform_method: str,
                      log_base: Optional[float] = None,
-                     exponent: Optional[float] = None) -> Dict:
+                     exponent: Optional[float] = None,
+                     root_index: Optional[float] = None) -> Dict:
     api = TransformColumn(table_name, source_column_name, new_column_name,
-                          transform_method, log_base, exponent)
+                          transform_method, log_base, exponent, root_index)
     validation_error = api.validate()
     if validation_error:
         raise validation_error

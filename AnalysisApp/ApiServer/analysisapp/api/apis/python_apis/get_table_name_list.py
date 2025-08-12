@@ -26,8 +26,8 @@ class GetTableNameList(AbstractApi):
             }
             return result
         except Exception as e:
-            message = _(f"An unexpected error during "
-                        f"getting table name list: {str(e)}")
+            message = _("An unexpected error during "
+                        "getting table name list.")
             raise ApiError(message) from e
 
 
