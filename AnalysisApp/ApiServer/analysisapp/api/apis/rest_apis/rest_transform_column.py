@@ -18,10 +18,10 @@ class TransformColumn(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            source_column_name = request_data['sourceColumnName']
-            new_column_name = request_data['newColumnName']
-            transform_method = request_data['transformMethod']
+            table_name = request_data.get('tableName')
+            source_column_name = request_data.get('sourceColumnName')
+            new_column_name = request_data.get('newColumnName')
+            transform_method = request_data.get('transformMethod')
 
             # Optional parameters
             log_base = request_data.get('logBase')
