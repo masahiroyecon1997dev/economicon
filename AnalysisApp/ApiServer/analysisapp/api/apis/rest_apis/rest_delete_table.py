@@ -18,7 +18,7 @@ class DeleteTable(APIView):
         try:
             create_log_api_request(request)
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
+            table_name = request_data.get('tableName')
             result = delete_table(table_name=table_name)
             return create_success_response(
                 status.HTTP_200_OK,
