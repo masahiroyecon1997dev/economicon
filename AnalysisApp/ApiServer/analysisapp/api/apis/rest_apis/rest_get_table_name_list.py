@@ -1,40 +1,27 @@
 from rest_framework import status
 from rest_framework.views import APIView
-import json
 from django.utils.translation import gettext as _
 from ..utilities.create_response import (create_success_response,
                                          create_error_response)
-from ..utilities.validator.common_validators import ValidationError
 from ..utilities.create_log import create_log_api_request
-from ..python_apis.calculate_column import calculate_column
+from ..python_apis.get_table_name_list import get_table_name_list
 from ..python_apis.common_api_class import ApiError
 
 
-class CalculateColumn(APIView):
+class GetTableNameList(APIView):
+    """GetTableNameList API class
 
-    def post(self, request):
+    すべてのテーブル名を取得します。
+    """
+    def get(self, request):
         try:
             # リクエスト受け取りログ
             create_log_api_request(request)
-            # リクエストデータの取得
-            request_data = json.loads(request.body)
-            table_name = request_data.get('tableName')
-            new_column_name = request_data.get('newColumnName')
-            calculation_expression = request_data.get('calculationExpression')
-            result = calculate_column(
-                table_name=table_name,
-                new_column_name=new_column_name,
-                calculation_expression=calculation_expression
-            )
+            result = get_table_name_list()
             return create_success_response(
                 status.HTTP_200_OK,
                 result)
 
-        except ValidationError as e:
-            return create_error_response(
-                status.HTTP_400_BAD_REQUEST,
-                e.message
-            )
         except ApiError as e:
             return create_error_response(
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -42,7 +29,7 @@ class CalculateColumn(APIView):
             )
         except Exception as e:
             message = _("An unexpected error occurred during "
-                        "column calculation processing")
+                        "getting table name list processing")
             return create_error_response(
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message,

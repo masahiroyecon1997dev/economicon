@@ -1,10 +1,12 @@
 
 from typing import List, Optional
 from .validator_utils import remove_one_string_copy
+import polars as pl
 from .common_validators import (
     validate_required,
     validate_boolean,
     validate_number,
+    validate_integer,
     validate_required_list,
     validate_list_length,
     validate_string_length,
@@ -17,12 +19,13 @@ from .common_validators import (
     validate_candidates,
     validate_file_path_exists,
     validate_directory_path,
+    validate_column_is_numeric
 )
 from ..validator.validation_config import (
     SUPPORTED_DISTRIBUTIONS)
 
 
-class InputValidator:
+class Validator:
     def __init__(
         self,
         param_names: Optional[dict] = None,
@@ -103,7 +106,7 @@ class InputValidator:
     def validate_new_columns(self, columns: List[str]) -> None:
         param = self.param_names['column_names']
         validate_required_list(columns, param)
-        validate_list_length(columns, param)
+        validate_list_length(columns, param, 'item')
         for column in columns:
             columns_removed_target_column = remove_one_string_copy(
                 columns, column
@@ -150,12 +153,14 @@ class InputValidator:
         )
         return None
 
-    def validate_row_index(self, value: int, max_row_number: int) -> None:
-        param = self.param_names['row_index']
+    def validate_row_index(self, value: int, max_row_number: int,
+                           param_name: str) -> None:
+        param = self.param_names[param_name]
         validate_required(value, param)
-        validate_number(value, param)
+        validate_integer(value, param)
+        int_value = int(value)
         validate_numeric_range(
-            value, param, min_value=0, max_value=max_row_number - 1
+            int_value, param, min_value=1, max_value=max_row_number
         )
         return None
 
@@ -187,4 +192,24 @@ class InputValidator:
         param = self.param_names['distribution_type']
         validate_required(distribution_type, param)
         validate_candidates(distribution_type, param, SUPPORTED_DISTRIBUTIONS)
+        return None
+
+    def validate_calculation_expression(self, expression: str) -> None:
+        param = self.param_names['calculation_expression']
+        validate_required(expression, param)
+        return None
+
+    def validate_existed_numeric_columns(
+        self, column_names: List[str], column_name_list: List[str],
+        df: pl.DataFrame
+    ) -> None:
+        param_expression = self.param_names['calculation_expression']
+        validate_list_length(column_names, param_expression, 'column')
+        param_col_name = self.param_names['column_names']
+        for col_name in column_names:
+            validate_required(col_name, param_col_name)
+            validate_column_exists(col_name, param_col_name, column_name_list)
+            # 数値型であることを確認
+            column_type = df[col_name].dtype
+            validate_column_is_numeric(col_name, param_col_name, column_type)
         return None

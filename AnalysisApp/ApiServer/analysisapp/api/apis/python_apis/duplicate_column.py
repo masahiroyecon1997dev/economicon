@@ -2,7 +2,7 @@ import polars as pl
 from django.utils.translation import gettext as _
 from typing import Dict
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
+from ..utilities.validator.validator import Validator
 from ..utilities.validator.validation_config import (
     INPUT_VALIDATOR_CONFIG)
 from ..data.tables_manager import TablesManager
@@ -30,8 +30,8 @@ class DuplicateColumn(AbstractApi):
 
     def validate(self):
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
+            validator = Validator(param_names=self.param_names,
+                                  **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
             validator.validate_existed_table_name(self.table_name,
                                                   table_name_list)
@@ -78,6 +78,7 @@ class DuplicateColumn(AbstractApi):
 def duplicate_column(table_name: str,
                      source_column_name: str,
                      new_column_name: str) -> Dict:
+
     api = DuplicateColumn(table_name, source_column_name, new_column_name)
     validation_error = api.validate()
     if validation_error:
