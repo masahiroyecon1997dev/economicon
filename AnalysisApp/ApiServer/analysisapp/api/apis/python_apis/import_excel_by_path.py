@@ -2,7 +2,8 @@ from typing import Optional, Dict
 import polars as pl
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import Validator
+from ..utilities.validator.tables_manager_validator \
+    import TablesManagerValidator
 from ..utilities.validator.validation_config \
     import INPUT_VALIDATOR_CONFIG
 
@@ -38,15 +39,21 @@ class ImportExcelByPath(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            validator = Validator(param_names=self.param_names,
+            tables_manager_validator = TablesManagerValidator(param_names=self.param_names,
                                   **INPUT_VALIDATOR_CONFIG)
             # ファイルパスのバリデーション
-            validator.validate_file_path(self.file_path)
+            tables_manager_validator.validate_file_path(
+                self.file_path
+                )
             table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名のバリデーション
-            validator.validate_new_table_name(self.table_name, table_name_list)
+            tables_manager_validator.validate_new_table_name(
+                self.table_name, table_name_list
+            )
             # シート名のバリデーション
-            validator.validate_sheet_name(self.sheet_name)
+            tables_manager_validator.validate_sheet_name(
+                self.sheet_name
+            )
             return None
         except ValidationError as e:
             return e

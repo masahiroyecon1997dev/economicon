@@ -3,7 +3,8 @@ import numpy as np
 from django.utils.translation import gettext as _
 from typing import Dict, Any
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import Validator
+from ..utilities.validator.tables_manager_validator \
+    import TablesManagerValidator
 from ..utilities.validator.validation_config import (
     INPUT_VALIDATOR_CONFIG)
 from ..data.tables_manager import TablesManager
@@ -127,23 +128,30 @@ class AddSimulationColumn(AbstractApi):
 
     def validate(self):
         try:
-            validator = Validator(param_names=self.param_names,
-                                  **INPUT_VALIDATOR_CONFIG)
+            tables_manager_validator = TablesManagerValidator(
+                param_names=self.param_names,
+                **INPUT_VALIDATOR_CONFIG)
 
             # テーブル名の検証
             table_name_list = self.tables_manager.get_table_name_list()
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            tables_manager_validator.validate_existed_table_name(
+                self.table_name,
+                table_name_list
+            )
 
             # 新しい列名の検証
             column_name_list = self.tables_manager.get_column_name_list(
-                self.table_name)
-            validator.validate_new_column_name(self.new_column_name,
-                                               column_name_list)
+                self.table_name
+            )
+            tables_manager_validator.validate_new_column_name(
+                self.new_column_name,
+                column_name_list
+            )
 
             # 分布タイプの検証
-            validator.validate_validate_distribution_type(
-                self.distribution_type)
+            tables_manager_validator.validate_distribution_type(
+                self.distribution_type
+            )
 
             # 分布パラメータの検証
             self._validate_distribution_params(

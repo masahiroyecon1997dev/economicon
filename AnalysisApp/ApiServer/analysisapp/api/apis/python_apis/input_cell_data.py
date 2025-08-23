@@ -2,7 +2,8 @@ import polars as pl
 from typing import Dict
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import Validator
+from ..utilities.validator.tables_manager_validator \
+    import TablesManagerValidator
 from ..utilities.validator.validation_config \
     import INPUT_VALIDATOR_CONFIG
 from ..data.tables_manager import TablesManager
@@ -40,20 +41,26 @@ class InputCellData(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            validator = Validator(param_names=self.param_names,
-                                  **INPUT_VALIDATOR_CONFIG)
+            tables_manager_validator = TablesManagerValidator(
+                param_names=self.param_names,
+                **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名の存在チェック
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            tables_manager_validator.validate_existed_table_name(
+                self.table_name,
+                table_name_list)
             column_name_list = \
                 self.tables_manager.get_column_name_list(self.table_name)
             # カラム名の存在チェック
-            validator.validate_existed_column_name(self.column_name,
-                                                   column_name_list)
+            tables_manager_validator.validate_existed_column_name(
+                self.column_name,
+                column_name_list)
             num_rows = self.tables_manager.get_table(self.table_name).num_rows
             # 行インデックスの妥当性チェック
-            validator.validate_row_index(self.row_index, num_rows, 'row_index')
+            tables_manager_validator.validate_row_index(
+                self.row_index,
+                num_rows,
+                'row_index')
             return None
         except ValidationError as e:
             return e

@@ -2,7 +2,8 @@ import polars as pl
 from django.utils.translation import gettext as _
 from typing import Dict
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import Validator
+from ..utilities.validator.tables_manager_validator \
+    import TablesManagerValidator
 from ..utilities.validator.validation_config import (
     INPUT_VALIDATOR_CONFIG)
 from ..data.tables_manager import TablesManager
@@ -30,17 +31,21 @@ class AddColumn(AbstractApi):
 
     def validate(self):
         try:
-            validator = Validator(param_names=self.param_names,
-                                  **INPUT_VALIDATOR_CONFIG)
+            tables_manager_validator = TablesManagerValidator(
+                param_names=self.param_names,
+                **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            tables_manager_validator.validate_existed_table_name(
+                self.table_name,
+                table_name_list)
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
-            validator.validate_new_column_name(self.new_column_name,
-                                               column_name_list)
-            validator.validate_existed_column_name(self.add_position_column,
-                                                   column_name_list)
+            tables_manager_validator.validate_new_column_name(
+                self.new_column_name,
+                column_name_list)
+            tables_manager_validator.validate_existed_column_name(
+                self.add_position_column,
+                column_name_list)
             return None
         except ValidationError as e:
             return e
