@@ -2,10 +2,10 @@ import statsmodels.api as sm
 from django.utils.translation import gettext as _
 from typing import Dict, List
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.tables_manager_validator \
-    import TablesManagerValidator
-from ..utilities.validator.validation_config import (
-    INPUT_VALIDATOR_CONFIG)
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name,
+    validate_existed_column_name
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import (AbstractApi, ApiError)
 
@@ -30,16 +30,12 @@ class LogisticRegression(AbstractApi):
 
     def validate(self):
         try:
-            tables_manager_validator = TablesManagerValidator(
-                param_names=self.param_names,
-                **INPUT_VALIDATOR_CONFIG
-            )
-
             # テーブル名の検証
             table_name_list = self.tables_manager.get_table_name_list()
-            tables_manager_validator.validate_existed_table_name(
+            validate_existed_table_name(
                 self.table_name,
-                table_name_list
+                table_name_list,
+                self.param_names['table_name']
             )
 
             # 列名リストの取得
@@ -48,20 +44,23 @@ class LogisticRegression(AbstractApi):
 
             # 説明変数の検証
             for var in self.explanatory_variables:
-                tables_manager_validator.validate_existed_column_name(
+                validate_existed_column_name(
                     var,
-                    column_name_list
+                    column_name_list,
+                    self.param_names['column_names']
                 )
 
             # 被説明変数の検証
-            tables_manager_validator.validate_existed_column_name(
+            validate_existed_column_name(
                 self.dependent_variable,
-                column_name_list
+                column_name_list,
+                self.param_names['column_names']
             )
 
             # 被説明変数が説明変数に含まれていないかチェック
             if self.dependent_variable in self.explanatory_variables:
-                raise ValidationError(_("Dependent variable cannot be included in explanatory variables"))
+                raise ValidationError(_("Dependent variable cannot be "
+                                        "included in explanatory variables"))
 
             return None
         except ValidationError as e:
@@ -127,8 +126,8 @@ class LogisticRegression(AbstractApi):
 
 
 def logistic_regression(table_name: str,
-                       dependent_variable: str,
-                       explanatory_variables: List[str]) -> Dict:
+                        dependent_variable: str,
+                        explanatory_variables: List[str]) -> Dict:
     """
     ロジット分析を実行する関数
 
@@ -141,7 +140,7 @@ def logistic_regression(table_name: str,
         分析結果を含む辞書
     """
     api = LogisticRegression(table_name, dependent_variable,
-                            explanatory_variables)
+                             explanatory_variables)
     validation_error = api.validate()
     if validation_error:
         raise validation_error

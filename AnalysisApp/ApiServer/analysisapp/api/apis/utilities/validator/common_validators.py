@@ -207,7 +207,7 @@ def validate_file_path_exists(file_path: str, param_name: str) -> None:
     return None
 
 
-def validate_directory_path(directory: str, param_name: str) -> None:
+def validate_directory_path_exists(directory: str, param_name: str) -> None:
     """ディレクトリパスのバリデーション"""
     if not os.path.exists(directory):
         raise ValidationError("Directory does "

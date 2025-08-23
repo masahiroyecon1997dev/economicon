@@ -2,11 +2,11 @@ from typing import Optional, Dict
 import polars as pl
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.tables_manager_validator \
-    import TablesManagerValidator
-from ..utilities.validator.validation_config \
-    import INPUT_VALIDATOR_CONFIG
-
+from ..utilities.validator.tables_manager_validator import (
+    validate_file_path,
+    validate_new_table_name,
+    validate_sheet_name
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
 
@@ -39,20 +39,22 @@ class ImportExcelByPath(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            tables_manager_validator = TablesManagerValidator(param_names=self.param_names,
-                                  **INPUT_VALIDATOR_CONFIG)
             # ファイルパスのバリデーション
-            tables_manager_validator.validate_file_path(
-                self.file_path
-                )
+            validate_file_path(
+                self.file_path,
+                self.param_names['file_path']
+            )
             table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名のバリデーション
-            tables_manager_validator.validate_new_table_name(
-                self.table_name, table_name_list
+            validate_new_table_name(
+                self.table_name,
+                table_name_list,
+                self.param_names['table_name']
             )
             # シート名のバリデーション
-            tables_manager_validator.validate_sheet_name(
-                self.sheet_name
+            validate_sheet_name(
+                self.sheet_name,
+                self.param_names['sheet_name']
             )
             return None
         except ValidationError as e:

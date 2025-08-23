@@ -1,11 +1,10 @@
 from typing import Dict, List
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.tables_manager_validator \
-    import TablesManagerValidator
-from ..utilities.validator.validation_config import (
-    INPUT_VALIDATOR_CONFIG)
 from ..utilities.validator.common_validators import validate_boolean
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import (AbstractApi, ApiError)
 
@@ -27,12 +26,10 @@ class GetColumnInfoList(AbstractApi):
 
     def validate(self):
         try:
-            tables_manager_validator = TablesManagerValidator(
-                param_names=self.param_names,
-                **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
-            tables_manager_validator.validate_existed_table_name(
-                self.table_name, table_name_list
+            validate_existed_table_name(
+                self.table_name, table_name_list,
+                self.param_names['table_name']
             )
             validate_boolean(self.is_number_only,
                              self.param_names['is_number_only'])
