@@ -1,7 +1,8 @@
 from django.utils.translation import gettext as _
 from typing import Dict
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import Validator
+from ..utilities.validator.tables_manager_validator \
+    import TablesManagerValidator
 from ..utilities.validator.validation_config \
     import INPUT_VALIDATOR_CONFIG
 from ..data.tables_manager import TablesManager
@@ -36,18 +37,26 @@ class ExportExcelByPath(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            validator = Validator(param_names=self.param_names,
-                                  **INPUT_VALIDATOR_CONFIG)
+            tables_manager_validator = TablesManagerValidator(
+                param_names=self.param_names,
+                **INPUT_VALIDATOR_CONFIG
+            )
             # テーブル名のバリデーション
             table_name_list = self.tables_manager.get_table_name_list()
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            tables_manager_validator.validate_existed_table_name(
+                self.table_name,
+                table_name_list
+            )
 
             # ディレクトリパスのバリデーション
-            validator.validate_directory_path(self.directory_path)
+            tables_manager_validator.validate_directory_path(
+                self.directory_path
+            )
 
             # ファイル名のバリデーション
-            validator.validate_file_name(self.file_name)
+            tables_manager_validator.validate_file_name(
+                self.file_name
+            )
 
             return None
         except ValidationError as e:
