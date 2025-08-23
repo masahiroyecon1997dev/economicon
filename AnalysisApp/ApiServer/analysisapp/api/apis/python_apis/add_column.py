@@ -2,10 +2,11 @@ import polars as pl
 from django.utils.translation import gettext as _
 from typing import Dict
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.tables_manager_validator \
-    import TablesManagerValidator
-from ..utilities.validator.validation_config import (
-    INPUT_VALIDATOR_CONFIG)
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name,
+    validate_new_column_name,
+    validate_existed_column_name
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import (AbstractApi, ApiError)
 
@@ -17,35 +18,42 @@ class AddColumn(AbstractApi):
     指定されたテーブルの指定された位置に新しい列を挿入します。
     新しい列は空（None）の値で初期化されます。
     """
-    def __init__(self, table_name: str, new_column_name: str,
-                 add_position_column: str):
+    def __init__(
+        self,
+        table_name: str,
+        new_column_name: str,
+        add_position_column: str
+    ):
         self.tables_manager = TablesManager()
         self.table_name = table_name
         self.new_column_name = new_column_name
         self.add_position_column = add_position_column
         self.param_names = {
-                'table_name': 'tableName',
-                'new_column_name': 'newColumnName',
-                'column_names': 'addPositionColumn',
-            }
+            'table_name': 'tableName',
+            'new_column_name': 'newColumnName',
+            'add_position_column': 'addPositionColumn',
+        }
 
     def validate(self):
         try:
-            tables_manager_validator = TablesManagerValidator(
-                param_names=self.param_names,
-                **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
-            tables_manager_validator.validate_existed_table_name(
+            validate_existed_table_name(
                 self.table_name,
-                table_name_list)
+                table_name_list,
+                self.param_names['table_name']
+            )
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
-            tables_manager_validator.validate_new_column_name(
+            validate_new_column_name(
                 self.new_column_name,
-                column_name_list)
-            tables_manager_validator.validate_existed_column_name(
+                column_name_list,
+                self.param_names['new_column_name']
+            )
+            validate_existed_column_name(
                 self.add_position_column,
-                column_name_list)
+                column_name_list,
+                self.param_names['add_position_column']
+            )
             return None
         except ValidationError as e:
             return e
@@ -59,23 +67,27 @@ class AddColumn(AbstractApi):
             insert_index = df.columns.index(self.add_position_column) + 1
             df_with_new_col = df.insert_column(
                 index=insert_index,
-                column=pl.Series(self.new_column_name, new_column_data_none))
+                column=pl.Series(self.new_column_name, new_column_data_none)
+            )
             # 新しい列をデータフレームに追加
-            self.tables_manager.update_table(
-                self.table_name, df_with_new_col)
+            self.tables_manager.update_table(self.table_name, df_with_new_col)
             # 結果を返す
-            result = {'tableName': self.table_name,
-                      'columnName': self.new_column_name}
+            result = {
+                'tableName': self.table_name,
+                'columnName': self.new_column_name
+            }
             return result
         except Exception as e:
-            message = _("An unexpected error occurred during "
-                        "adding column processing")
+            message = _("An unexpected error occurred "
+                        "during adding column processing")
             raise ApiError(message) from e
 
 
-def add_column(table_name: str,
-               new_column_name: str,
-               add_position_column: str) -> Dict:
+def add_column(
+    table_name: str,
+    new_column_name: str,
+    add_position_column: str
+) -> Dict:
     api = AddColumn(table_name, new_column_name, add_position_column)
     validation_error = api.validate()
     if validation_error:

@@ -2,10 +2,11 @@
 from typing import Dict, List
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.tables_manager_validator \
-    import TablesManagerValidator
-from ..utilities.validator.validation_config import (
-    INPUT_VALIDATOR_CONFIG,
+from ..utilities.validator.tables_manager_validator import (
+    validate_new_table_name,
+    validate_existed_table_name,
+    validate_existed_column_name,
+    validate_join_type
 )
 from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
@@ -45,52 +46,59 @@ class CreateJoinTable(AbstractApi):
             'table_name': 'joinTableName',
             'left_table_name': 'leftTableName',
             'right_table_name': 'rightTableName',
-            'column_names': 'leftKeyColumnNames',
-            'new_column_name': 'rightKeyColumnNames',
+            'left_key_column_names': 'leftKeyColumnNames',
+            'right_key_column_names': 'rightKeyColumnNames',
             'join_type': 'joinType',
         }
 
     def validate(self):
         # 入力値のバリデーション
         try:
-            tables_manager_validator = TablesManagerValidator(
-                param_names=self.param_names, **INPUT_VALIDATOR_CONFIG
-            )
             table_name_list = self.tables_manager.get_table_name_list()
             # 新しいテーブル名の重複チェック
-            tables_manager_validator.validate_new_table_name(
-                self.join_table_name, table_name_list
+            validate_new_table_name(
+                self.join_table_name,
+                table_name_list,
+                self.param_names['table_name']
             )
             # 左テーブルの存在チェック
-            tables_manager_validator.validate_existed_table_name(
-                self.left_table_name, table_name_list
+            validate_existed_table_name(
+                self.left_table_name,
+                table_name_list,
+                self.param_names['left_table_name']
             )
             # 右テーブルの存在チェック
-            tables_manager_validator.validate_existed_table_name(
-                self.right_table_name, table_name_list
+            validate_existed_table_name(
+                self.right_table_name,
+                table_name_list,
+                self.param_names['right_table_name']
             )
             # 左テーブルのキー列の存在チェック
             left_table_column_name_list = TablesManager().get_column_name_list(
                 self.left_table_name
             )
             for left_key_column_name in self.left_key_column_names:
-                tables_manager_validator.param_names['column_names'] = \
-                    'leftKeyColumnNames'
-                tables_manager_validator.validate_existed_column_name(
+                validate_existed_column_name(
                     left_key_column_name,
-                    left_table_column_name_list
+                    left_table_column_name_list,
+                    self.param_names['left_key_column_names']
                 )
             # 右テーブルのキー列の存在チェック
             right_table_column_name_list = \
-                TablesManager().get_column_name_list(self.right_table_name)
+                TablesManager().get_column_name_list(
+                    self.right_table_name
+                )
             for right_key_column_name in self.right_key_column_names:
-                tables_manager_validator.param_names['column_names'] = \
-                    'rightKeyColumnNames'
-                tables_manager_validator.validate_existed_column_name(
-                    right_key_column_name, right_table_column_name_list
+                validate_existed_column_name(
+                    right_key_column_name,
+                    right_table_column_name_list,
+                    self.param_names['right_key_column_names']
                 )
             # 結合タイプの妥当性チェック
-            tables_manager_validator.validate_join_type(self.join_type)
+            validate_join_type(
+                self.join_type,
+                self.param_names['join_type']
+            )
             return None
         except ValidationError as e:
             return e
