@@ -3,10 +3,12 @@ import re
 from django.utils.translation import gettext as _
 from typing import Dict, List
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.tables_manager_validator \
-    import TablesManagerValidator
-from ..utilities.validator.validation_config import (
-    INPUT_VALIDATOR_CONFIG)
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name,
+    validate_new_column_name,
+    validate_calculation_expression,
+    validate_existed_numeric_columns
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import (AbstractApi, ApiError)
 
@@ -28,7 +30,8 @@ class CalculateColumn(AbstractApi):
                 'table_name': 'tableName',
                 'new_column_name': 'newColumnName',
                 'calculation_expression': 'calculationExpression',
-                'column_names': 'columnName in calculationExpression'
+                'column_name_in_calculation_expression':
+                'columnName in calculationExpression'
             }
 
     def _extract_column_names(self, expression: str) -> List[str]:
@@ -42,37 +45,41 @@ class CalculateColumn(AbstractApi):
 
     def validate(self):
         try:
-            tables_manager_validator = TablesManagerValidator(
-                param_names=self.param_names,
-                **INPUT_VALIDATOR_CONFIG
-            )
             table_name_list = self.tables_manager.get_table_name_list()
-            tables_manager_validator.validate_existed_table_name(
+            validate_existed_table_name(
                 self.table_name,
-                table_name_list
+                table_name_list,
+                self.param_names['table_name']
             )
 
             # 新しい列名の検証
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
-            tables_manager_validator.validate_new_column_name(
+            validate_new_column_name(
                 self.new_column_name,
-                column_name_list
+                column_name_list,
+                self.param_names['new_column_name']
             )
 
             # 計算式が空でないことを検証
             expression = self.calculation_expression.strip()
-            tables_manager_validator.validate_calculation_expression(
-                expression
+            validate_calculation_expression(
+                expression,
+                self.param_names['calculation_expression']
             )
 
             # 計算式から列名を抽出して存在チェック
             referenced_columns = self._extract_column_names(
-                self.calculation_expression
+                self.calculation_expression,
+
             )
             df = self.tables_manager.get_table(self.table_name).table
-            tables_manager_validator.validate_existed_numeric_columns(
-                referenced_columns, column_name_list, df
+            validate_existed_numeric_columns(
+                referenced_columns,
+                column_name_list,
+                df,
+                self.param_names['calculation_expression'],
+                self.param_names['column_name_in_calc_expr']
             )
 
             return None

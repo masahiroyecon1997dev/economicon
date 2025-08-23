@@ -2,10 +2,11 @@ import polars as pl
 from django.utils.translation import gettext as _
 from typing import Dict, List
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.tables_manager_validator \
-    import TablesManagerValidator
-from ..utilities.validator.validation_config \
-    import INPUT_VALIDATOR_CONFIG
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name,
+    validate_table_num_rows,
+    validate_new_columns
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
 
@@ -37,23 +38,22 @@ class CreateTable(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            tables_manager_validator = TablesManagerValidator(
-                param_names=self.param_names,
-                **INPUT_VALIDATOR_CONFIG
-            )
             table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名の重複チェック
-            tables_manager_validator.validate_new_table_name(
+            validate_existed_table_name(
                 self.table_name,
-                table_name_list
+                table_name_list,
+                self.param_names['table_name']
             )
             # 行数の妥当性チェック
-            tables_manager_validator.validate_table_num_rows(
-                self.table_number_of_rows
+            validate_table_num_rows(
+                self.table_number_of_rows,
+                self.param_names['table_num_rows']
             )
             # カラム名の妥当性チェック
-            tables_manager_validator.validate_new_columns(
-                self.columnNames
+            validate_new_columns(
+                self.columnNames,
+                self.param_names['column_names']
             )
             return None
         except ValidationError as e:
