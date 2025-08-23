@@ -3,7 +3,8 @@ import re
 from django.utils.translation import gettext as _
 from typing import Dict, List
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import Validator
+from ..utilities.validator.tables_manager_validator \
+    import TablesManagerValidator
 from ..utilities.validator.validation_config import (
     INPUT_VALIDATOR_CONFIG)
 from ..data.tables_manager import TablesManager
@@ -41,28 +42,38 @@ class CalculateColumn(AbstractApi):
 
     def validate(self):
         try:
-            validator = Validator(param_names=self.param_names,
-                                  **INPUT_VALIDATOR_CONFIG)
+            tables_manager_validator = TablesManagerValidator(
+                param_names=self.param_names,
+                **INPUT_VALIDATOR_CONFIG
+            )
             table_name_list = self.tables_manager.get_table_name_list()
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            tables_manager_validator.validate_existed_table_name(
+                self.table_name,
+                table_name_list
+            )
 
             # 新しい列名の検証
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
-            validator.validate_new_column_name(self.new_column_name,
-                                               column_name_list)
+            tables_manager_validator.validate_new_column_name(
+                self.new_column_name,
+                column_name_list
+            )
 
             # 計算式が空でないことを検証
             expression = self.calculation_expression.strip()
-            validator.validate_calculation_expression(expression)
+            tables_manager_validator.validate_calculation_expression(
+                expression
+            )
 
             # 計算式から列名を抽出して存在チェック
             referenced_columns = self._extract_column_names(
-                self.calculation_expression)
+                self.calculation_expression
+            )
             df = self.tables_manager.get_table(self.table_name).table
-            validator.validate_existed_numeric_columns(
-                referenced_columns, column_name_list, df)
+            tables_manager_validator.validate_existed_numeric_columns(
+                referenced_columns, column_name_list, df
+            )
 
             return None
         except ValidationError as e:

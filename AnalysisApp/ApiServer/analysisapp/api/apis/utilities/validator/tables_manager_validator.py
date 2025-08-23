@@ -21,11 +21,11 @@ from .common_validators import (
     validate_directory_path,
     validate_column_is_numeric
 )
-from ..validator.validation_config import (
+from .validation_config import (
     SUPPORTED_DISTRIBUTIONS)
 
 
-class Validator:
+class TablesManagerValidator:
     def __init__(
         self,
         param_names: Optional[dict] = None,

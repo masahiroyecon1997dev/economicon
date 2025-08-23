@@ -3,7 +3,8 @@ import math
 from django.utils.translation import gettext as _
 from typing import Dict, Optional
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import Validator
+from ..utilities.validator.tables_manager_validator \
+    import TablesManagerValidator
 from ..utilities.validator.validation_config import (
     INPUT_VALIDATOR_CONFIG)
 from ..data.tables_manager import TablesManager
@@ -40,17 +41,21 @@ class TransformColumn(AbstractApi):
 
     def validate(self):
         try:
-            validator = Validator(param_names=self.param_names,
-                                  **INPUT_VALIDATOR_CONFIG)
+            tables_manager_validator = TablesManagerValidator(
+                param_names=self.param_names,
+                **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            tables_manager_validator.validate_existed_table_name(
+                self.table_name,
+                table_name_list)
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
-            validator.validate_new_column_name(self.new_column_name,
-                                               column_name_list)
-            validator.validate_existed_column_name(self.source_column_name,
-                                                   column_name_list)
+            tables_manager_validator.validate_new_column_name(
+                self.new_column_name,
+                column_name_list)
+            tables_manager_validator.validate_existed_column_name(
+                self.source_column_name,
+                column_name_list)
 
             # Validate transform method
             valid_methods = ['log', 'power', 'root']

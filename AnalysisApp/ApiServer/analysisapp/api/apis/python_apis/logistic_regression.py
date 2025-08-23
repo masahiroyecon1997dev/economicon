@@ -1,10 +1,9 @@
-import polars as pl
 import statsmodels.api as sm
-import numpy as np
 from django.utils.translation import gettext as _
 from typing import Dict, List
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
+from ..utilities.validator.tables_manager_validator \
+    import TablesManagerValidator
 from ..utilities.validator.validation_config import (
     INPUT_VALIDATOR_CONFIG)
 from ..data.tables_manager import TablesManager
@@ -31,30 +30,34 @@ class LogisticRegression(AbstractApi):
 
     def validate(self):
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
+            tables_manager_validator = TablesManagerValidator(
+                param_names=self.param_names,
+                **INPUT_VALIDATOR_CONFIG
+            )
 
             # テーブル名の検証
             table_name_list = self.tables_manager.get_table_name_list()
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            tables_manager_validator.validate_existed_table_name(
+                self.table_name,
+                table_name_list
+            )
 
             # 列名リストの取得
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
 
-            # 被説明変数の検証
-            validator.validate_existed_column_name(self.dependent_variable,
-                                                   column_name_list)
-
             # 説明変数の検証
-            if not self.explanatory_variables:
-                raise ValidationError(_("At least one explanatory variable is required"))
-
-            # 各説明変数が存在するかチェック
             for var in self.explanatory_variables:
-                if var not in column_name_list:
-                    raise ValidationError(_("explanatoryVariables '{}' does not exist.").format(var))
+                tables_manager_validator.validate_existed_column_name(
+                    var,
+                    column_name_list
+                )
+
+            # 被説明変数の検証
+            tables_manager_validator.validate_existed_column_name(
+                self.dependent_variable,
+                column_name_list
+            )
 
             # 被説明変数が説明変数に含まれていないかチェック
             if self.dependent_variable in self.explanatory_variables:
