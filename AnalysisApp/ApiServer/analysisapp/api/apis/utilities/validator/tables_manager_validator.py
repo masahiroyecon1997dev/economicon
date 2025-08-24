@@ -2,7 +2,6 @@ from typing import List, Optional
 import polars as pl
 from .validator_utils import remove_one_string_copy
 from .common_validators import (
-    ValidationError,
     validate_required,
     validate_boolean,
     validate_number,
@@ -21,8 +20,7 @@ from .common_validators import (
     validate_directory_path_exists,
     validate_column_is_numeric
 )
-from .validation_config import (SUPPORTED_DISTRIBUTIONS,
-                                TABLES_MANAGER_VALIDATOR_CONFIG,
+from .validation_config import (TABLES_MANAGER_VALIDATOR_CONFIG,
                                 FILTER_CONDITION_CANDIDATES)
 
 
@@ -235,18 +233,6 @@ def validate_join_type(
     validate_candidates(join_type, join_type_param, join_type_candidates)
 
 
-def validate_distribution_type(
-    distribution_type: str,
-    distribution_type_param: str
-) -> None:
-    validate_required(distribution_type, distribution_type_param)
-    validate_candidates(
-        distribution_type,
-        distribution_type_param,
-        SUPPORTED_DISTRIBUTIONS,
-    )
-
-
 def validate_calculation_expression(
     expression: str,
     calculation_expression_param: str
@@ -257,7 +243,7 @@ def validate_calculation_expression(
 def validate_existed_numeric_columns(
     column_names: List[str],
     column_name_list: List[str],
-    df: pl.DataFrame,
+    df_schema: pl.Schema,
     calculation_expression_param: str,
     column_names_param: str
 ) -> None:
@@ -265,96 +251,5 @@ def validate_existed_numeric_columns(
     for col_name in column_names:
         validate_required(col_name, column_names_param)
         validate_column_exists(col_name, column_names_param, column_name_list)
-        column_type = df[col_name].dtype
+        column_type = df_schema.items().mapping[col_name]
         validate_column_is_numeric(col_name, column_names_param, column_type)
-
-
-def validate_distribution_params(
-    distribution_type: str,
-    params: dict
-) -> None:
-    """分布ごとのパラメータを検証"""
-
-    match distribution_type:
-        case 'uniform':
-            validate_number(params['low'], 'low')
-            validate_number(params['high'], 'high')
-            if params['low'] >= params['high']:
-                raise ValidationError("For uniform distribution, "
-                                      "'low' must be less than 'high'")
-        case 'exponential':
-            validate_number(params['scale'], 'scale')
-            if params['scale'] <= 0:
-                raise ValidationError("For exponential distribution, "
-                                      "'scale' must be positive")
-        case 'normal':
-            validate_number(params['loc'], 'loc')
-            validate_number(params['scale'], 'scale')
-            if params['scale'] <= 0:
-                raise ValidationError("For normal distribution, "
-                                      "'scale' must be positive")
-        case 'gamma':
-            validate_number(params['shape'], 'shape')
-            validate_number(params['scale'], 'scale')
-            if params['shape'] <= 0 or params['scale'] <= 0:
-                raise ValidationError("For gamma distribution, "
-                                      "'shape' and 'scale' must be "
-                                      "positive")
-        case 'beta':
-            validate_number(params['a'], 'a')
-            validate_number(params['b'], 'b')
-            if params['a'] <= 0 or params['b'] <= 0:
-                raise ValidationError("For beta distribution, "
-                                      "'a' and 'b' must be positive")
-        case 'weibull':
-            validate_number(params['a'], 'a')
-            if params['a'] <= 0:
-                raise ValidationError("For weibull distribution, "
-                                      "'a' must be positive")
-        case 'lognormal':
-            validate_number(params['mean'], 'mean')
-            validate_number(params['sigma'], 'sigma')
-            if params['sigma'] <= 0:
-                raise ValidationError("For lognormal distribution, "
-                                      "'sigma' must be positive")
-        case 'binomial':
-            validate_integer(params['n'], 'n')
-            validate_number(params['p'], 'p')
-            if params['n'] <= 0:
-                raise ValidationError("For binomial distribution, "
-                                      "'n' must be positive")
-            if not (0 <= params['p'] <= 1):
-                raise ValidationError("For binomial distribution, "
-                                      "'p' must be between 0 and 1")
-        case 'bernoulli':
-            validate_number(params['p'], 'p')
-            if not (0 <= params['p'] <= 1):
-                raise ValidationError("For bernoulli distribution, "
-                                      "'p' must be between 0 and 1")
-        case 'poisson':
-            validate_number(params['lam'], 'lam')
-            if params['lam'] <= 0:
-                raise ValidationError("For poisson distribution, "
-                                      "'lam' must be positive")
-        case 'geometric':
-            validate_number(params['p'], 'p')
-            if not (0 < params['p'] <= 1):
-                raise ValidationError("For geometric distribution, "
-                                      "'p' must be between 0 and 1 "
-                                      "(exclusive of 0)")
-        case 'hypergeometric':
-            validate_integer(params['N'], 'N')
-            validate_integer(params['K'], 'K')
-            validate_integer(params['n'], 'n')
-            if params['N'] <= 0 or params['K'] <= 0 or params['n'] <= 0:
-                raise ValidationError("For hypergeometric "
-                                      "distribution, 'N', 'K', "
-                                      "and 'n' must be positive")
-            if params['K'] > params['N']:
-                raise ValidationError("For hypergeometric "
-                                      "distribution, 'K' "
-                                      "must not exceed 'N'")
-            if params['n'] > params['N']:
-                raise ValidationError("For hypergeometric "
-                                      "distribution, 'n' "
-                                      "must not exceed 'N'")

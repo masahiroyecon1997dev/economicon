@@ -5,7 +5,9 @@ from typing import Dict, Any
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
     validate_existed_table_name,
-    validate_new_column_name,
+    validate_new_column_name
+)
+from ..utilities.validator.statistics_validators import (
     validate_distribution_type,
     validate_distribution_params
 )
