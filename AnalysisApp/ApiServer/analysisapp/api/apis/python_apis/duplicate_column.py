@@ -27,7 +27,7 @@ class DuplicateColumn(AbstractApi):
         self.param_names = {
                 'table_name': 'tableName',
                 'new_column_name': 'newColumnName',
-                'column_names': 'sourceColumnName',
+                'source_column_name': 'sourceColumnName',
             }
 
     def validate(self):

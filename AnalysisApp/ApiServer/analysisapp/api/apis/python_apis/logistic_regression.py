@@ -3,8 +3,11 @@ from django.utils.translation import gettext as _
 from typing import Dict, List
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
-    validate_existed_table_name,
-    validate_existed_column_name
+    validate_existed_table_name
+)
+from ..utilities.validator.statistics_validators import (
+    validate_dependent_variable,
+    validate_explanatory_variables
 )
 from ..data.tables_manager import TablesManager
 from .common_api_class import (AbstractApi, ApiError)
@@ -17,15 +20,20 @@ class LogisticRegression(AbstractApi):
     指定されたテーブルの列を使用してロジスティック回帰分析を実行します。
     被説明変数（従属変数）1列と説明変数（独立変数）複数列を指定します。
     """
-    def __init__(self, table_name: str, dependent_variable: str,
-                 explanatory_variables: List[str]):
+    def __init__(
+        self,
+        table_name: str,
+        dependent_variable: str,
+        explanatory_variables: List[str]
+    ):
         self.tables_manager = TablesManager()
         self.table_name = table_name
         self.dependent_variable = dependent_variable
         self.explanatory_variables = explanatory_variables
         self.param_names = {
                 'table_name': 'tableName',
-                'column_names': 'dependentVariable',
+                'dependent_variable': 'dependentVariable',
+                'explanatory_variables': 'explanatoryVariables'
             }
 
     def validate(self):
@@ -43,24 +51,23 @@ class LogisticRegression(AbstractApi):
                 self.table_name)
 
             # 説明変数の検証
-            for var in self.explanatory_variables:
-                validate_existed_column_name(
-                    var,
-                    column_name_list,
-                    self.param_names['column_names']
-                )
-
-            # 被説明変数の検証
-            validate_existed_column_name(
-                self.dependent_variable,
+            df_schema = self.tables_manager.get_column_info_list(
+                self.table_name)
+            validate_explanatory_variables(
+                self.explanatory_variables,
                 column_name_list,
-                self.param_names['column_names']
+                df_schema,
+                self.param_names['explanatory_variables']
             )
 
-            # 被説明変数が説明変数に含まれていないかチェック
-            if self.dependent_variable in self.explanatory_variables:
-                raise ValidationError(_("Dependent variable cannot be "
-                                        "included in explanatory variables"))
+            # 被説明変数の検証
+            validate_dependent_variable(
+                self.dependent_variable,
+                column_name_list,
+                self.explanatory_variables,
+                df_schema,
+                self.param_names['dependent_variable']
+            )
 
             return None
         except ValidationError as e:

@@ -35,8 +35,8 @@ class TransformColumn(AbstractApi):
         self.root_index = root_index
         self.param_names = {
                 'table_name': 'tableName',
-                'column_names': 'sourceColumnName',
-                'new_column_name': 'newColumnName',
+                'source_column': 'sourceColumnName',
+                'new_column': 'newColumnName',
                 'transform_method': 'transformMethod',
             }
 
@@ -49,14 +49,14 @@ class TransformColumn(AbstractApi):
                 self.param_names['table_name'])
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
-            validate_new_column_name(
-                self.new_column_name,
-                column_name_list,
-                self.param_names['new_column_name'])
             validate_existed_column_name(
                 self.source_column_name,
                 column_name_list,
-                self.param_names['source_column_name'])
+                self.param_names['source_column'])
+            validate_new_column_name(
+                self.new_column_name,
+                column_name_list,
+                self.param_names['new_column'])
 
             # Validate transform method
             valid_methods = ['log', 'power', 'root']
