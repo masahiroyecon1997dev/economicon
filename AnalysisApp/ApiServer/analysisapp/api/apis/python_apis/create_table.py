@@ -3,7 +3,7 @@ from django.utils.translation import gettext as _
 from typing import Dict, List
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
-    validate_existed_table_name,
+    validate_new_table_name,
     validate_table_num_rows,
     validate_new_columns
 )
@@ -40,7 +40,7 @@ class CreateTable(AbstractApi):
         try:
             table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名の重複チェック
-            validate_existed_table_name(
+            validate_new_table_name(
                 self.table_name,
                 table_name_list,
                 self.param_names['table_name']

@@ -73,13 +73,14 @@ class CalculateColumn(AbstractApi):
                 self.calculation_expression,
 
             )
-            df = self.tables_manager.get_table(self.table_name).table
+            df_schema = self.tables_manager.get_column_info_list(
+                self.table_name)
             validate_existed_numeric_columns(
                 referenced_columns,
                 column_name_list,
-                df,
+                df_schema,
                 self.param_names['calculation_expression'],
-                self.param_names['column_name_in_calc_expr']
+                self.param_names['column_name_in_calculation_expression']
             )
 
             return None

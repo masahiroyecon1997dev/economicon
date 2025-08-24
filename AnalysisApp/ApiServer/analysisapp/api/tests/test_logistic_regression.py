@@ -12,22 +12,22 @@ class TestApiLogisticRegression(APITestCase):
         self.tables_manager = TablesManager()
         # テーブルをクリア
         self.tables_manager.clear_tables()
-        
+
         # ロジット分析用テストデータを作成
         # 二値の被説明変数（0または1）と複数の説明変数を持つテーブル
         np.random.seed(42)  # 再現可能な結果のため
         n_samples = 100
-        
+
         # 説明変数の生成
         x1 = np.random.normal(0, 1, n_samples)
         x2 = np.random.normal(0, 1, n_samples)
         x3 = np.random.uniform(0, 10, n_samples)
-        
+
         # ロジット関数を使用して被説明変数を生成
         linear_combination = -1 + 0.5 * x1 + 1.2 * x2 + 0.1 * x3
         probabilities = 1 / (1 + np.exp(-linear_combination))
         y = np.random.binomial(1, probabilities, n_samples)
-        
+
         df = pl.DataFrame({
             'y': y,
             'x1': x1,
@@ -36,7 +36,7 @@ class TestApiLogisticRegression(APITestCase):
             'id': range(n_samples)
         })
         self.tables_manager.store_table('LogitTestTable', df)
-        
+
         # 数値以外のデータを含むテーブル（エラーテスト用）
         df_with_text = pl.DataFrame({
             'y': [0, 1, 0, 1],
@@ -61,7 +61,7 @@ class TestApiLogisticRegression(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # 結果の構造をチェック
         result = response_data['result']
         self.assertIn('tableName', result)
@@ -70,19 +70,19 @@ class TestApiLogisticRegression(APITestCase):
         self.assertIn('regressionResult', result)
         self.assertIn('parameters', result)
         self.assertIn('modelStatistics', result)
-        
+
         # パラメータの構造をチェック
         parameters = result['parameters']
         self.assertIsInstance(parameters, list)
         self.assertEqual(len(parameters), 3)  # const + x1 + x2
-        
+
         # 各パラメータに必要な情報があることを確認
         for param in parameters:
             self.assertIn('variable', param)
             self.assertIn('coefficient', param)
             self.assertIn('pValue', param)
             self.assertIn('tValue', param)
-        
+
         # モデル統計情報をチェック
         stats = result['modelStatistics']
         self.assertIn('AIC', stats)
@@ -107,7 +107,7 @@ class TestApiLogisticRegression(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # パラメータ数をチェック（定数項 + 3つの説明変数）
         result = response_data['result']
         parameters = result['parameters']
@@ -129,7 +129,7 @@ class TestApiLogisticRegression(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("tableName 'NonExistentTable' does not exist", 
+        self.assertIn("tableName 'NonExistentTable' does not exist",
                       response_data['message'])
 
     def test_logistic_regression_invalid_dependent_variable(self):
@@ -148,7 +148,7 @@ class TestApiLogisticRegression(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("dependentVariable 'nonexistent_y' does not exist", 
+        self.assertIn("dependentVariable 'nonexistent_y' does not exist",
                       response_data['message'])
 
     def test_logistic_regression_invalid_explanatory_variable(self):
@@ -167,7 +167,7 @@ class TestApiLogisticRegression(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("explanatoryVariables 'nonexistent_x' does not exist", 
+        self.assertIn("explanatoryVariables 'nonexistent_x' does not exist",
                       response_data['message'])
 
     def test_logistic_regression_empty_explanatory_variables(self):
@@ -186,7 +186,8 @@ class TestApiLogisticRegression(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("At least one explanatory variable is required", 
+        self.assertIn("explanatoryVariables must be with "
+                      "at least one explanatory_variable.",
                       response_data['message'])
 
     def test_logistic_regression_dependent_in_explanatory(self):
@@ -205,7 +206,8 @@ class TestApiLogisticRegression(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("Dependent variable cannot be included in explanatory variables", 
+        self.assertIn("Dependent variable cannot be "
+                      "included in explanatory variables",
                       response_data['message'])
 
     def test_logistic_regression_missing_parameters(self):
@@ -224,7 +226,8 @@ class TestApiLogisticRegression(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("Required parameter is missing", response_data['message'])
+        self.assertIn("Required parameter is missing",
+                      response_data['message'])
 
     def test_logistic_regression_single_explanatory_variable(self):
         """単一の説明変数でもロジット分析が実行できる"""
@@ -242,7 +245,7 @@ class TestApiLogisticRegression(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # パラメータ数をチェック（定数項 + 1つの説明変数）
         result = response_data['result']
         parameters = result['parameters']
