@@ -109,8 +109,8 @@ class LinearRegression(AbstractApi):
 
             # モデル統計情報
             model_stats = {
-                'rSquared': float(model.rsquared),
-                'adjustedRSquared': float(model.rsquared_adj),
+                'R2': float(model.rsquared),
+                'adjustedR2': float(model.rsquared_adj),
                 'AIC': float(model.aic),
                 'BIC': float(model.bic),
                 'fValue': float(model.fvalue),
