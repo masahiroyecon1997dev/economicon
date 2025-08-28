@@ -6,15 +6,15 @@ from ..utilities.create_response import (create_success_response,
                                          create_error_response)
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.create_log import create_log_api_request
-from ..python_apis.logistic_regression import logistic_regression
+from ..python_apis.linear_regression import linear_regression
 from ..python_apis.common_api_class import ApiError
 
 
-class LogisticRegression(APIView):
+class LinearRegression(APIView):
     """
-    ロジット分析を行うREST APIクラス
+    線形回帰分析を行うREST APIクラス
 
-    POST /api/logistic-regression
+    POST /api/linear-regression
     {
         "tableName": "テーブル名",
         "dependentVariable": "被説明変数の列名",
@@ -33,8 +33,8 @@ class LogisticRegression(APIView):
             dependent_variable = request_data['dependentVariable']
             explanatory_variables = request_data['explanatoryVariables']
 
-            # ロジット分析の実行
-            result = logistic_regression(
+            # 線形回帰分析の実行
+            result = linear_regression(
                 table_name=table_name,
                 dependent_variable=dependent_variable,
                 explanatory_variables=explanatory_variables
@@ -62,7 +62,7 @@ class LogisticRegression(APIView):
             )
         except Exception as e:
             message = _("An unexpected error occurred during "
-                        "logistic regression processing")
+                        "linear regression processing")
             return create_error_response(
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message,
