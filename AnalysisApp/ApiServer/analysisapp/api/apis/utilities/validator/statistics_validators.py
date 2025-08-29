@@ -125,7 +125,9 @@ def validate_explanatory_variables(
     df_schema: pl.Schema,
     explanatory_variables_param: str
 ) -> None:
+    least_num_explanatory_variables = 1
     validate_list_length(explanatory_variables,
+                         least_num_explanatory_variables,
                          explanatory_variables_param,
                          'explanatory_variable')
     for col_name in explanatory_variables:

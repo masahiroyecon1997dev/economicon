@@ -1,9 +1,10 @@
 from typing import Dict, List
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
-from ..utilities.validator.validation_config import (
-    INPUT_VALIDATOR_CONFIG,
+from ..utilities.validator.tables_manager_validator import (
+    validate_new_table_name,
+    validate_existed_tables,
+    validate_new_columns
 )
 from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
@@ -32,50 +33,40 @@ class CreateUnionTable(AbstractApi):
         self.column_names = column_names
         # パラメータ名のマッピング
         self.param_names = {
-            'table_name': 'unionTableName',
-            'table_names': 'tableNames',
+            'table_name': 'tableName',
+            'new_table_name': 'tableNames',
             'column_names': 'columnNames',
         }
 
     def validate(self):
         # 入力値のバリデーション
         try:
-            validator = InputValidator(
-                param_names=self.param_names, **INPUT_VALIDATOR_CONFIG
-            )
             table_name_list = self.tables_manager.get_table_name_list()
-            
+
             # 新しいテーブル名の重複チェック
-            validator.validate_new_table_name(
-                self.union_table_name, table_name_list
+            validate_new_table_name(
+                self.union_table_name,
+                table_name_list,
+                self.param_names['table_name']
             )
-            
-            # テーブル名リストが最低2つ以上あることをチェック
-            if len(self.table_names) < 2:
-                raise ValidationError("tableNames must contain at least 2 table names.")
-            
-            # すべてのテーブルの存在チェック
-            for table_name in self.table_names:
-                validator.param_names['table_name'] = 'tableNames'
-                validator.validate_existed_table_name(
-                    table_name, table_name_list
-                )
-            
-            # 列名リストが空でないことをチェック
-            if not self.column_names:
-                raise ValidationError("columnNames cannot be empty.")
-            
+
+            validate_existed_tables(
+                self.table_names,
+                table_name_list,
+                self.param_names['table_name']
+            )
+
             # すべてのテーブルで指定された列が存在することをチェック
             for table_name in self.table_names:
-                table_column_name_list = self.tables_manager.get_column_name_list(
-                    table_name
-                )
+                table_column_name_list = \
+                    self.tables_manager.get_column_name_list(
+                        table_name
+                    )
                 for column_name in self.column_names:
-                    validator.param_names['column_names'] = 'columnNames'
                     validator.validate_existed_column_name(
                         column_name, table_column_name_list
                     )
-            
+
             return None
         except ValidationError as e:
             return e
@@ -90,15 +81,15 @@ class CreateUnionTable(AbstractApi):
                 # 指定された列のみを選択
                 selected_df = df.select(self.column_names)
                 dataframes.append(selected_df)
-            
+
             # すべてのデータフレームをユニオン（縦方向に結合）
             union_df = pl.concat(dataframes, how="vertical")
-            
+
             # 新しいテーブル情報を保存
             created_table_name = self.tables_manager.store_table(
                 self.union_table_name, union_df
             )
-            
+
             # 結果を返す
             result = {'tableName': created_table_name}
             return result

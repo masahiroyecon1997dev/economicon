@@ -69,11 +69,14 @@ def validate_required_list(value: List, param_name: str) -> None:
     return None
 
 
-def validate_list_length(value: List, param_name: str, item_name: str) -> None:
+def validate_list_length(value: List,
+                         required_num_list: int,
+                         param_name: str,
+                         item_name: str) -> None:
     """リストの長さをチェック"""
-    if len(value) < 1:
+    if len(value) < required_num_list:
         message = _(f"{param_name} must be "
-                    f"with at least one {item_name}.")
+                    f"with at least {required_num_list} {item_name}.")
         raise ValidationError(message)
     return None
 
