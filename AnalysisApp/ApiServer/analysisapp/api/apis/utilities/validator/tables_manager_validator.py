@@ -120,8 +120,10 @@ def validate_new_columns(
 ) -> None:
     if invalid_chars is None:
         invalid_chars = []
+    least_num_columns = 1
     validate_required_list(columns, column_names_param)
-    validate_list_length(columns, column_names_param, 'item')
+    validate_list_length(columns, least_num_columns,
+                         column_names_param, 'item')
     column_name_min_length = TABLES_MANAGER_VALIDATOR_CONFIG.get(
         "column_name_min_length", 1)
     column_name_max_length = TABLES_MANAGER_VALIDATOR_CONFIG.get(
@@ -172,6 +174,21 @@ def validate_existed_table_name(
 ) -> None:
     validate_required(table_name, table_name_param)
     validate_table_exists(table_name, table_name_param, table_name_list)
+
+
+def validate_existed_tables(
+    table_names: List[str],
+    table_name_list: List[str],
+    table_names_param: str
+) -> None:
+    validate_required_list(table_names, table_names_param)
+    least_num_tables = 1
+    validate_list_length(table_names, least_num_tables,
+                         table_names_param, 'tableName')
+    for table_name in table_names:
+        validate_existed_table_name(table_name,
+                                    table_name_list,
+                                    table_names_param)
 
 
 def validate_existed_column_name(
@@ -247,7 +264,9 @@ def validate_existed_numeric_columns(
     calculation_expression_param: str,
     column_names_param: str
 ) -> None:
-    validate_list_length(column_names, calculation_expression_param, 'column')
+    least_num_columns = 1
+    validate_list_length(column_names, least_num_columns,
+                         calculation_expression_param, 'column')
     for col_name in column_names:
         validate_required(col_name, column_names_param)
         validate_column_exists(col_name, column_names_param, column_name_list)
