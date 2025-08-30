@@ -137,7 +137,7 @@ class TestApiCreateUnionTable(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("tableNames must contain at least 2 table names.",
+        self.assertIn("tableNames must be with at least 2 tableName.",
                       response_data['message'])
 
     def test_nonexistent_table(self):
@@ -171,7 +171,8 @@ class TestApiCreateUnionTable(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("columnNames cannot be empty.",
+        self.assertIn("columnNames must be with "
+                      "at least 1 columnName.",
                       response_data['message'])
 
     def test_nonexistent_column_in_first_table(self):

@@ -182,7 +182,7 @@ def validate_existed_tables(
     table_names_param: str
 ) -> None:
     validate_required_list(table_names, table_names_param)
-    least_num_tables = 1
+    least_num_tables = 2
     validate_list_length(table_names, least_num_tables,
                          table_names_param, 'tableName')
     for table_name in table_names:
@@ -198,6 +198,21 @@ def validate_existed_column_name(
 ) -> None:
     validate_required(column_name, column_names_param)
     validate_column_exists(column_name, column_names_param, column_name_list)
+
+
+def validate_existed_columns(
+    column_names: List[str],
+    column_name_list: List[str],
+    column_names_param: str
+) -> None:
+    validate_required_list(column_names, column_names_param)
+    least_num_columns = 1
+    validate_list_length(column_names, least_num_columns,
+                         column_names_param, 'columnName')
+    for column_name in column_names:
+        validate_existed_column_name(column_name,
+                                     column_name_list,
+                                     column_names_param)
 
 
 def validate_row_index(

@@ -15,9 +15,9 @@ class CreateUnionTable(APIView):
         try:
             create_log_api_request(request)
             request_data = json.loads(request.body)
-            union_table_name = request_data['unionTableName']
-            table_names = request_data['tableNames']
-            column_names = request_data['columnNames']
+            union_table_name = request_data.get('unionTableName')
+            table_names = request_data.get('tableNames', [])
+            column_names = request_data.get('columnNames', [])
             result = create_union_table(
                 union_table_name=union_table_name,
                 table_names=table_names,
