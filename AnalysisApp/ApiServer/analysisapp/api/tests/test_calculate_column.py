@@ -188,8 +188,8 @@ class TestApiCalculateColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("calculationExpression must be with "
-                      "at least one column.",
+        self.assertIn("calculationExpression must be "
+                      "with at least 1 column.",
                       response_data['message'])
 
     def test_calculate_column_duplicate_column_name(self):

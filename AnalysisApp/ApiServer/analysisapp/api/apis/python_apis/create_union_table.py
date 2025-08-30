@@ -4,7 +4,7 @@ from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
     validate_new_table_name,
     validate_existed_tables,
-    validate_new_columns
+    validate_existed_columns
 )
 from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
@@ -33,8 +33,8 @@ class CreateUnionTable(AbstractApi):
         self.column_names = column_names
         # パラメータ名のマッピング
         self.param_names = {
-            'table_name': 'tableName',
-            'new_table_name': 'tableNames',
+            'union_table_name': 'unionTableName',
+            'table_names': 'tableNames',
             'column_names': 'columnNames',
         }
 
@@ -47,13 +47,13 @@ class CreateUnionTable(AbstractApi):
             validate_new_table_name(
                 self.union_table_name,
                 table_name_list,
-                self.param_names['table_name']
+                self.param_names['union_table_name']
             )
 
             validate_existed_tables(
                 self.table_names,
                 table_name_list,
-                self.param_names['table_name']
+                self.param_names['table_names']
             )
 
             # すべてのテーブルで指定された列が存在することをチェック
@@ -62,10 +62,11 @@ class CreateUnionTable(AbstractApi):
                     self.tables_manager.get_column_name_list(
                         table_name
                     )
-                for column_name in self.column_names:
-                    validator.validate_existed_column_name(
-                        column_name, table_column_name_list
-                    )
+                validate_existed_columns(
+                    self.column_names,
+                    table_column_name_list,
+                    self.param_names['column_names']
+                )
 
             return None
         except ValidationError as e:
