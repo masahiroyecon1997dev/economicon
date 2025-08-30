@@ -32,6 +32,7 @@ from .apis.rest_apis import (
     rest_descriptive_statistics,
     rest_linear_regression,
     rest_logistic_regression,
+    rest_probit_regression,
 )
 
 urlpatterns = [
@@ -98,4 +99,6 @@ urlpatterns = [
          rest_linear_regression.LinearRegression.as_view()),
     path('logistic-regression',
          rest_logistic_regression.LogisticRegression.as_view()),
+    path('probit-regression',
+         rest_probit_regression.ProbitRegression.as_view()),
 ]
