@@ -241,7 +241,7 @@ class TestApiCreateUnionTable(APITestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code,
-                         status.HTTP_500_INTERNAL_SERVER_ERROR)
+                         status.HTTP_400_BAD_REQUEST)
 
         # tableNamesが欠けている場合
         payload = {
@@ -254,7 +254,7 @@ class TestApiCreateUnionTable(APITestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code,
-                         status.HTTP_500_INTERNAL_SERVER_ERROR)
+                         status.HTTP_400_BAD_REQUEST)
 
         # columnNamesが欠けている場合
         payload = {
@@ -267,4 +267,4 @@ class TestApiCreateUnionTable(APITestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code,
-                         status.HTTP_500_INTERNAL_SERVER_ERROR)
+                         status.HTTP_400_BAD_REQUEST)

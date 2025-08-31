@@ -37,7 +37,7 @@ class TestApiAddLagLeadColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # ラグ変数が正しく追加されているか確認
         df = self.tables_manager.get_table('TestTable').table
         self.assertIn('value_lag1', df.columns)
@@ -64,7 +64,7 @@ class TestApiAddLagLeadColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # リード変数が正しく追加されているか確認
         df = self.tables_manager.get_table('TestTable').table
         self.assertIn('value_lead1', df.columns)
@@ -91,7 +91,7 @@ class TestApiAddLagLeadColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # グループ内でのラグ変数が正しく追加されているか確認
         df = self.tables_manager.get_table('TestTable').table
         self.assertIn('value_lag1_grouped', df.columns)
@@ -118,7 +118,7 @@ class TestApiAddLagLeadColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # グループ内でのリード変数が正しく追加されているか確認
         df = self.tables_manager.get_table('TestTable').table
         self.assertIn('value_lead1_grouped', df.columns)
@@ -229,7 +229,7 @@ class TestApiAddLagLeadColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # 2期間ラグが正しく追加されているか確認
         df = self.tables_manager.get_table('TestTable').table
         self.assertIn('value_lag2', df.columns)

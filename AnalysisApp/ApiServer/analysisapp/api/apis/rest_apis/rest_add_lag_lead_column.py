@@ -18,12 +18,12 @@ class AddLagLeadColumn(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            source_column = request_data['sourceColumn']
-            new_column_name = request_data['newColumnName']
-            periods = request_data['periods']
+            table_name = request_data.get('tableName')
+            source_column = request_data.get('sourceColumn')
+            new_column_name = request_data.get('newColumnName')
+            periods = request_data.get('periods')
             group_columns = request_data.get('groupColumns', [])
-            
+
             result = add_lag_lead_column(
                 table_name=table_name,
                 source_column=source_column,
