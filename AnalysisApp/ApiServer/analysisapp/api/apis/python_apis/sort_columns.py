@@ -1,10 +1,10 @@
-import polars as pl
 from django.utils.translation import gettext as _
 from typing import Dict, List
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
-from ..utilities.validator.validation_config import (
-    INPUT_VALIDATOR_CONFIG)
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name,
+    validate_existed_column_name
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import (AbstractApi, ApiError)
 
@@ -27,35 +27,29 @@ class SortColumns(AbstractApi):
 
     def validate(self):
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
-            
-            # 各ソート列の検証
-            if not self.sort_columns or len(self.sort_columns) == 0:
-                raise ValidationError("sortColumns must not be empty")
-            
-            column_name_list = self.tables_manager.get_column_name_list(
-                self.table_name)
-            
+            validate_existed_table_name(self.table_name,
+                                        table_name_list,
+                                        self.param_names['table_name'])
+
+
+
             for sort_spec in self.sort_columns:
                 if 'columnName' not in sort_spec:
                     raise ValidationError("columnName is required in sortColumns")
                 if 'ascending' not in sort_spec:
                     raise ValidationError("ascending is required in sortColumns")
-                
+
                 column_name = sort_spec['columnName']
                 ascending = sort_spec['ascending']
-                
+
                 # 列名の存在チェック
                 validator.validate_existed_column_name(column_name,
                                                        column_name_list)
                 # ascendingフィールドがbooleanかチェック
                 if not isinstance(ascending, bool):
                     raise ValidationError("ascending must be boolean")
-            
+
             return None
         except ValidationError as e:
             return e
@@ -64,20 +58,20 @@ class SortColumns(AbstractApi):
         try:
             table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
-            
+
             # ソート列とdescendingフラグを準備
             column_names = [spec['columnName'] for spec in self.sort_columns]
             descending_flags = [not spec['ascending'] for spec in self.sort_columns]
-            
+
             # polarsでソート実行
             if len(column_names) == 1:
                 sorted_df = df.sort(column_names[0], descending=descending_flags[0])
             else:
                 sorted_df = df.sort(column_names, descending=descending_flags)
-            
+
             # ソート結果でテーブルを更新
             self.tables_manager.update_table(self.table_name, sorted_df)
-            
+
             # 結果を返す
             result = {'tableName': self.table_name}
             return result

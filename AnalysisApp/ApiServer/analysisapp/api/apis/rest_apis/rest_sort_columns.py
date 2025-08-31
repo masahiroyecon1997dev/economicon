@@ -18,9 +18,9 @@ class SortColumns(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            sort_columns_data = request_data['sortColumns']
-            
+            table_name = request_data.get('tableName')
+            sort_columns_data = request_data.get('sortColumns')
+
             result = sort_columns(
                 table_name=table_name,
                 sort_columns=sort_columns_data
