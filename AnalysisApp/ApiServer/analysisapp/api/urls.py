@@ -33,6 +33,7 @@ from .apis.rest_apis import (
     rest_descriptive_statistics,
     rest_linear_regression,
     rest_logistic_regression,
+    rest_confidence_interval,
 )
 
 urlpatterns = [
@@ -101,4 +102,6 @@ urlpatterns = [
          rest_linear_regression.LinearRegression.as_view()),
     path('logistic-regression',
          rest_logistic_regression.LogisticRegression.as_view()),
+    path('confidence-interval',
+         rest_confidence_interval.ConfidenceInterval.as_view()),
 ]
