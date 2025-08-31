@@ -28,10 +28,10 @@ class AddSimulationColumn(APIView):
 
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            new_column_name = request_data['newColumnName']
-            distribution_type = request_data['distributionType']
-            distribution_params = request_data['distributionParams']
+            table_name = request_data.get('tableName')
+            new_column_name = request_data.get('newColumnName')
+            distribution_type = request_data.get('distributionType')
+            distribution_params = request_data.get('distributionParams')
 
             result = add_simulation_column(
                 table_name=table_name,

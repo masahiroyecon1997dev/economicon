@@ -2,10 +2,15 @@ import polars as pl
 from typing import Dict
 from django.utils.translation import gettext as _
 from ..data.tables_manager import TablesManager
-from ..utilities.validator.validator import InputValidator
-from ..utilities.validator.validation_config import (
-    INPUT_VALIDATOR_CONFIG)
 from ..utilities.validator.common_validators import ValidationError
+from ..utilities.validator.tables_manager_validator import (
+    validate_new_table_name,
+    validate_existed_table_name,
+    validate_existed_column_name,
+    validate_filter_condition,
+    validate_is_compare_column,
+    validate_compare_value
+)
 from .common_api_class import (AbstractApi, ApiError)
 
 
@@ -45,29 +50,48 @@ class FilterSingleCondition(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.manager.get_table_name_list()
             # 新しいテーブル名の重複チェック
-            validator.validate_new_table_name(self.new_table_name,
-                                              table_name_list)
+            validate_new_table_name(
+                self.new_table_name,
+                table_name_list,
+                self.param_names['new_table_name']
+            )
             # 既存テーブル名の存在チェック
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            validate_existed_table_name(
+                self.table_name,
+                table_name_list,
+                self.param_names['table_name']
+            )
             # カラム名の存在チェック
             column_names = self.manager.get_column_name_list(self.table_name)
-            validator.validate_existed_column_name(self.column_name,
-                                                   column_names)
+            validate_existed_column_name(
+                self.column_name,
+                column_names,
+                self.param_names['column_names']
+            )
             # フィルタリング条件の妥当性チェック
-            validator.validate_filter_condition(self.condition)
+            validate_filter_condition(
+                self.condition,
+                self.param_names['condition']
+            )
             # 比較値タイプの妥当性チェック
-            validator.validate_is_compare_column(self.is_compare_column)
+            validate_is_compare_column(
+                self.is_compare_column,
+                self.param_names['is_compare_column']
+            )
             # 比較値の妥当性チェック
-            validator.validate_compare_value(self.compare_value)
+            validate_compare_value(
+                self.compare_value,
+                self.param_names['compare_value']
+            )
             # 比較値がカラムの場合の存在チェック
             if self.is_compare_column == 'true':
-                validator.validate_existed_column_name(self.compare_value,
-                                                       column_names)
+                validate_existed_column_name(
+                    self.compare_value,
+                    column_names,
+                    self.param_names['compare_value']
+                )
             return None
         except ValidationError as e:
             return e
