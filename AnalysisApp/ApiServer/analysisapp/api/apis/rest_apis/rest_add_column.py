@@ -18,9 +18,9 @@ class AddColumn(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            new_column_name = request_data['newColumnName']
-            add_position_column = request_data['addPositionColumn']
+            table_name = request_data.get('tableName')
+            new_column_name = request_data.get('newColumnName')
+            add_position_column = request_data.get('addPositionColumn')
             result = add_column(
                 table_name=table_name,
                 new_column_name=new_column_name,

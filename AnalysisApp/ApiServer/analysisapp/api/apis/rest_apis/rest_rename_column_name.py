@@ -22,9 +22,9 @@ class RestRenameColumnName(APIView):
         try:
             create_log_api_request(request)
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            old_column_name = request_data['oldColumnName']
-            new_column_name = request_data['newColumnName']
+            table_name = request_data.get('tableName')
+            old_column_name = request_data.get('oldColumnName')
+            new_column_name = request_data.get('newColumnName')
             result = rename_column_name(
                 table_name,
                 old_column_name,

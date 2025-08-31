@@ -15,12 +15,12 @@ class CreateJoinTable(APIView):
         try:
             create_log_api_request(request)
             request_data = json.loads(request.body)
-            join_table_name = request_data['joinTableName']
-            left_table_name = request_data['leftTableName']
-            right_table_name = request_data['rightTableName']
-            left_key_column_names = request_data['leftKeyColumnNames']
-            right_key_column_names = request_data['rightKeyColumnNames']
-            join_type = request_data['joinType']
+            join_table_name = request_data.get('joinTableName')
+            left_table_name = request_data.get('leftTableName')
+            right_table_name = request_data.get('rightTableName')
+            left_key_column_names = request_data.get('leftKeyColumnNames')
+            right_key_column_names = request_data.get('rightKeyColumnNames')
+            join_type = request_data.get('joinType')
             result = create_join_table(
                 join_table_name=join_table_name,
                 left_table_name=left_table_name,
