@@ -37,7 +37,7 @@ class TestApiSortColumns(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
         self.assertEqual(response_data['result']['tableName'], 'TestTable')
-        
+
         # ソート結果を確認
         df = self.tables_manager.get_table('TestTable').table
         self.assertEqual(df['A'].to_list(), [1, 2, 3])
@@ -61,7 +61,7 @@ class TestApiSortColumns(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # ソート結果を確認
         df = self.tables_manager.get_table('TestTable').table
         self.assertEqual(df['A'].to_list(), [3, 2, 1])
@@ -77,7 +77,7 @@ class TestApiSortColumns(APITestCase):
             'C': ['d', 'c', 'b', 'a']
         })
         self.tables_manager.update_table('TestTable', df_complex)
-        
+
         payload = {
             'tableName': 'TestTable',
             'sortColumns': [
@@ -94,7 +94,7 @@ class TestApiSortColumns(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # ソート結果を確認（A昇順、B降順）
         df = self.tables_manager.get_table('TestTable').table
         self.assertEqual(df['A'].to_list(), [1, 1, 2, 2])
