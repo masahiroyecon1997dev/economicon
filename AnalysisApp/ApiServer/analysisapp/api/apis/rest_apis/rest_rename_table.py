@@ -18,8 +18,8 @@ class RenameTable(APIView):
         try:
             create_log_api_request(request)
             request_data = json.loads(request.body)
-            old_table_name = request_data['oldTableName']
-            new_table_name = request_data['newTableName']
+            old_table_name = request_data.get('oldTableName')
+            new_table_name = request_data.get('newTableName')
             result = rename_table(
                 old_table_name=old_table_name,
                 new_table_name=new_table_name,

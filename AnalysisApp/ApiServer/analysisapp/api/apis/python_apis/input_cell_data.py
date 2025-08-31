@@ -2,9 +2,11 @@ import polars as pl
 from typing import Dict
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
-from ..utilities.validator.validation_config \
-    import INPUT_VALIDATOR_CONFIG
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name,
+    validate_existed_column_name,
+    validate_row_index
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
 
@@ -15,6 +17,7 @@ class InputCellData(AbstractApi):
 
     指定されたテーブルの指定されたセルに新しい値を入力します。
     既存の値は上書きされます。
+    行番号は1から始まると仮定しています。
     """
     def __init__(self, table_name: str,
                  column_name: str,
@@ -39,20 +42,28 @@ class InputCellData(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名の存在チェック
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            validate_existed_table_name(
+                self.table_name,
+                table_name_list,
+                self.param_names['table_name']
+            )
             column_name_list = \
                 self.tables_manager.get_column_name_list(self.table_name)
             # カラム名の存在チェック
-            validator.validate_existed_column_name(self.column_name,
-                                                   column_name_list)
+            validate_existed_column_name(
+                self.column_name,
+                column_name_list,
+                self.param_names['column_names']
+            )
             num_rows = self.tables_manager.get_table(self.table_name).num_rows
             # 行インデックスの妥当性チェック
-            validator.validate_row_index(self.row_index, num_rows)
+            validate_row_index(
+                self.row_index,
+                num_rows,
+                self.param_names['row_index']
+            )
             return None
         except ValidationError as e:
             return e
@@ -65,7 +76,7 @@ class InputCellData(AbstractApi):
             # 指定列のデータを取得してコピー
             numpy_array = df.get_column(self.column_name).to_list().copy()
             # 指定行のデータを新しい値に更新
-            numpy_array[self.row_index] = self.new_value
+            numpy_array[self.row_index - 1] = self.new_value
             # 更新されたデータでSeriesを作成
             modified_series = pl.Series(name=self.column_name,
                                         values=numpy_array, strict=False)

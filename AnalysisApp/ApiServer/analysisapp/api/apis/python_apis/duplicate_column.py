@@ -2,9 +2,11 @@ import polars as pl
 from django.utils.translation import gettext as _
 from typing import Dict
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
-from ..utilities.validator.validation_config import (
-    INPUT_VALIDATOR_CONFIG)
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name,
+    validate_new_column_name,
+    validate_existed_column_name
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import (AbstractApi, ApiError)
 
@@ -25,22 +27,29 @@ class DuplicateColumn(AbstractApi):
         self.param_names = {
                 'table_name': 'tableName',
                 'new_column_name': 'newColumnName',
-                'column_names': 'sourceColumnName',
+                'source_column_name': 'sourceColumnName',
             }
 
     def validate(self):
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            validate_existed_table_name(
+                self.table_name,
+                table_name_list,
+                self.param_names['table_name']
+            )
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
-            validator.validate_new_column_name(self.new_column_name,
-                                               column_name_list)
-            validator.validate_existed_column_name(self.source_column_name,
-                                                   column_name_list)
+            validate_new_column_name(
+                self.new_column_name,
+                column_name_list,
+                self.param_names['new_column_name']
+            )
+            validate_existed_column_name(
+                self.source_column_name,
+                column_name_list,
+                self.param_names['source_column_name']
+            )
             return None
         except ValidationError as e:
             return e
@@ -78,6 +87,7 @@ class DuplicateColumn(AbstractApi):
 def duplicate_column(table_name: str,
                      source_column_name: str,
                      new_column_name: str) -> Dict:
+
     api = DuplicateColumn(table_name, source_column_name, new_column_name)
     validation_error = api.validate()
     if validation_error:

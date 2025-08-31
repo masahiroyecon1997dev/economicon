@@ -2,9 +2,11 @@ import polars as pl
 from django.utils.translation import gettext as _
 from typing import Dict
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
-from ..utilities.validator.validation_config \
-    import INPUT_VALIDATOR_CONFIG
+from ..utilities.validator.tables_manager_validator import (
+    validate_file_path,
+    validate_new_table_name,
+    validate_separator
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
 
@@ -36,15 +38,23 @@ class ImportCsvByPath(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
             # ファイルパスのバリデーション
-            validator.validate_file_path(self.file_path)
+            validate_file_path(
+                self.file_path,
+                self.param_names['file_path']
+            )
             table_name_list = self.tables_manager.get_table_name_list()
             # テーブル名のバリデーション
-            validator.validate_new_table_name(self.table_name, table_name_list)
+            validate_new_table_name(
+                self.table_name,
+                table_name_list,
+                self.param_names['table_name']
+            )
             # 区切り文字のバリデーション
-            validator.validate_separator(self.separator)
+            validate_separator(
+                self.separator,
+                self.param_names['separator']
+            )
             return None
         except ValidationError as e:
             return e

@@ -34,29 +34,30 @@ class TestApiDuplicateTable(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        self.assertEqual(response_data['result']['tableName'], 'DuplicatedTable')
-        
+        self.assertEqual(response_data['result']['tableName'],
+                         'DuplicatedTable')
+
         # 複製されたテーブルが存在することを確認
         table_list = self.tables_manager.get_table_name_list()
         self.assertIn('DuplicatedTable', table_list)
-        
+
         # 複製されたテーブルの内容が元のテーブルと同じことを確認
         original_df = self.tables_manager.get_table('TestTable').table
         duplicated_df = self.tables_manager.get_table('DuplicatedTable').table
-        
+
         # データフレームの内容が同じかチェック
         self.assertTrue(original_df.equals(duplicated_df))
-        
+
         # 列名が同じかチェック
         self.assertEqual(original_df.columns, duplicated_df.columns)
-        
+
         # データが同じかチェック
-        self.assertEqual(original_df['A'].to_list(), 
-                        duplicated_df['A'].to_list())
-        self.assertEqual(original_df['B'].to_list(), 
-                        duplicated_df['B'].to_list())
-        self.assertEqual(original_df['C'].to_list(), 
-                        duplicated_df['C'].to_list())
+        self.assertEqual(original_df['A'].to_list(),
+                         duplicated_df['A'].to_list())
+        self.assertEqual(original_df['B'].to_list(),
+                         duplicated_df['B'].to_list())
+        self.assertEqual(original_df['C'].to_list(),
+                         duplicated_df['C'].to_list())
 
     def test_duplicate_table_invalid_source_table(self):
         # 存在しないソーステーブル名
@@ -101,7 +102,7 @@ class TestApiDuplicateTable(APITestCase):
             'Col2': []
         })
         self.tables_manager.store_table('EmptyTable', empty_df)
-        
+
         payload = {
             'tableName': 'EmptyTable',
             'newTableName': 'DuplicatedEmptyTable'
@@ -115,9 +116,9 @@ class TestApiDuplicateTable(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        self.assertEqual(response_data['result']['tableName'], 
-                        'DuplicatedEmptyTable')
-        
+        self.assertEqual(response_data['result']['tableName'],
+                         'DuplicatedEmptyTable')
+
         # 空のテーブルも正しく複製されることを確認
         duplicated_df = self.tables_manager.get_table(
             'DuplicatedEmptyTable').table

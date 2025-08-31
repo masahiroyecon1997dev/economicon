@@ -22,10 +22,10 @@ class RestInputCellData(APIView):
         try:
             create_log_api_request(request)
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            column_name = request_data['columnName']
-            row_index = request_data['rowIndex']
-            new_value = request_data['newValue']
+            table_name = request_data.get('tableName')
+            column_name = request_data.get('columnName')
+            row_index = request_data.get('rowIndex')
+            new_value = request_data.get('newValue')
             result = input_cell_data(
                 table_name,
                 column_name,
