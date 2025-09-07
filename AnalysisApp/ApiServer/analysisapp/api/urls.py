@@ -3,6 +3,7 @@ from . import views
 from .apis.rest_apis import (
     rest_create_table,
     rest_add_column,
+    rest_add_dummy_column,
     rest_add_lag_lead_column,
     rest_add_simulation_column,
     rest_calculate_column,
@@ -28,12 +29,14 @@ from .apis.rest_apis import (
     rest_export_csv_by_path,
     rest_export_parquet_by_path,
     rest_export_excel_by_path,
+    rest_sort_columns,
     rest_fetch_data_to_json,
     rest_get_table_name_list,
     rest_descriptive_statistics,
     rest_linear_regression,
     rest_logistic_regression,
     rest_confidence_interval,
+    rest_list_files,
 )
 
 urlpatterns = [
@@ -46,6 +49,8 @@ urlpatterns = [
          rest_delete_table.DeleteTable.as_view()),
     path('add-column',
          rest_add_column.AddColumn.as_view()),
+    path('add-dummy-column',
+         rest_add_dummy_column.AddDummyColumn.as_view()),
     path('add-lag-lead-column',
          rest_add_lag_lead_column.AddLagLeadColumn.as_view()),
     path('add-simulation-column',
@@ -90,6 +95,8 @@ urlpatterns = [
          rest_export_parquet_by_path.ExportParquetByPath.as_view()),
     path('export-excel-by-path',
          rest_export_excel_by_path.ExportExcelByPath.as_view()),
+    path('sort-columns',
+         rest_sort_columns.SortColumns.as_view()),
     path('fetch-data-to-json',
          rest_fetch_data_to_json.FetchDataToJson.as_view()),
     path('get-column-info-list',
@@ -104,4 +111,6 @@ urlpatterns = [
          rest_logistic_regression.LogisticRegression.as_view()),
     path('confidence-interval',
          rest_confidence_interval.ConfidenceInterval.as_view()),
+    path('get-list-files',
+         rest_list_files.GetListFiles.as_view()),
 ]

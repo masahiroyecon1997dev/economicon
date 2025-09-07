@@ -2,7 +2,9 @@ from django.utils.translation import gettext as _
 from typing import Dict
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
-    validate_existed_table_name,
+    validate_existed_table_name
+)
+from ..utilities.validator.file_validators import (
     validate_directory_path,
     validate_file_name
 )
