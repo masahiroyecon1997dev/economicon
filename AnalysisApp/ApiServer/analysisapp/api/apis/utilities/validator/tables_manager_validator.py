@@ -10,76 +10,14 @@ from .common_validators import (
     validate_list_length,
     validate_string_length,
     validate_invalid_chars,
-    validate_table_duplicate,
-    validate_table_exists,
-    validate_column_duplicate,
-    validate_column_exists,
+    validate_item_exists_in_list,
+    validate_item_duplicate,
     validate_numeric_range,
     validate_candidates,
-    validate_file_path_exists,
-    validate_directory_path_exists,
     validate_column_is_numeric
 )
 from .validation_config import (TABLES_MANAGER_VALIDATOR_CONFIG,
                                 FILTER_CONDITION_CANDIDATES)
-
-
-def validate_file_path(
-    file_path: str,
-    file_path_param: str
-) -> None:
-    validate_required(file_path, file_path_param)
-    validate_file_path_exists(file_path, file_path_param)
-
-
-def validate_directory_path(
-    directory: str,
-    directory_param: str
-) -> None:
-    validate_required(directory, directory_param)
-    validate_directory_path_exists(directory, directory_param)
-
-
-def validate_file_name(
-    file_name: str,
-    file_name_param: str,
-    invalid_chars: Optional[List[str]] = None
-) -> None:
-    if invalid_chars is None:
-        invalid_chars = []
-    validate_required(file_name, file_name_param)
-    validate_string_length(
-        file_name,
-        file_name_param,
-        min_length=1,
-        max_length=255,
-    )
-    validate_invalid_chars(file_name, file_name_param, invalid_chars)
-
-
-def validate_separator(
-    separator: str,
-    separator_param: str
-) -> None:
-    validate_string_length(
-        separator,
-        separator_param,
-        min_length=1,
-        max_length=5,
-    )
-
-
-def validate_sheet_name(
-    sheet_name: Optional[str],
-    sheet_name_param: str
-) -> None:
-    if sheet_name is not None:
-        validate_string_length(
-            sheet_name,
-            sheet_name_param,
-            min_length=1,
-            max_length=255,
-        )
 
 
 def validate_new_table_name(
@@ -102,7 +40,7 @@ def validate_new_table_name(
         table_name_max_length,
     )
     validate_invalid_chars(table_name, table_name_param, invalid_chars)
-    validate_table_duplicate(table_name, table_name_param, table_name_list)
+    validate_item_duplicate(table_name, table_name_param, table_name_list)
 
 
 def validate_table_num_rows(
@@ -138,8 +76,8 @@ def validate_new_columns(
             column_name_max_length,
         )
         validate_invalid_chars(column, column_names_param, invalid_chars)
-        validate_column_duplicate(column, column_names_param,
-                                  columns_removed_target_column)
+        validate_item_duplicate(column, column_names_param,
+                                columns_removed_target_column)
 
 
 def validate_new_column_name(
@@ -164,7 +102,7 @@ def validate_new_column_name(
     validate_invalid_chars(new_column_name,
                            new_column_name_param,
                            invalid_chars)
-    validate_column_duplicate(new_column_name, new_column_name_param, columns)
+    validate_item_duplicate(new_column_name, new_column_name_param, columns)
 
 
 def validate_existed_table_name(
@@ -173,7 +111,9 @@ def validate_existed_table_name(
     table_name_param: str
 ) -> None:
     validate_required(table_name, table_name_param)
-    validate_table_exists(table_name, table_name_param, table_name_list)
+    validate_item_exists_in_list(table_name,
+                                 table_name_param,
+                                 table_name_list)
 
 
 def validate_existed_tables(
@@ -197,7 +137,9 @@ def validate_existed_column_name(
     column_names_param: str
 ) -> None:
     validate_required(column_name, column_names_param)
-    validate_column_exists(column_name, column_names_param, column_name_list)
+    validate_item_exists_in_list(column_name,
+                                 column_names_param,
+                                 column_name_list)
 
 
 def validate_existed_columns(
@@ -284,6 +226,8 @@ def validate_existed_numeric_columns(
                          calculation_expression_param, 'column')
     for col_name in column_names:
         validate_required(col_name, column_names_param)
-        validate_column_exists(col_name, column_names_param, column_name_list)
+        validate_item_exists_in_list(col_name,
+                                     column_names_param,
+                                     column_name_list)
         column_type = df_schema.items().mapping[col_name]
         validate_column_is_numeric(col_name, column_names_param, column_type)
