@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getColumnNameList, getTableNameList, linearRegression } from '../../../functiom/restApis';
+import { getColumnNameList, getTableNameList, linearRegression } from '../../../function/restApis';
 import { ReqLinearRegressionType } from '../../../types/apiTypes';
 import { SelectListType } from '../../../types/commonTypes';
 import { Select } from '../../molecules/InputField/Select';

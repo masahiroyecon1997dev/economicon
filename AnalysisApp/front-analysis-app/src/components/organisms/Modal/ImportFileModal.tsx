@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { IconContext } from 'react-icons';
 import { FaFileAlt } from 'react-icons/fa';
 
-import { getTableInfo } from '../../../functiom/internalFunctions';
-import { importCsv } from '../../../functiom/restApis';
+import { getTableInfo } from '../../../function/internalFunctions';
+import { importCsv } from '../../../function/restApis';
 import { TableInfosType } from '../../../types/stateTypes';
 
 import { Modal } from '../../molecules/Modal/Modal';

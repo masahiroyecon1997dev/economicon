@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
 import { HEADER_MENU_HEIGHT } from '../../common/constant';
-import { getTableNameList } from '../../functiom/restApis';
+import { getTableNameList } from '../../function/restApis';
 import { TableInfosType } from '../../types/stateTypes';
 
-import { getTableInfo } from '../../functiom/internalFunctions';
+import { getTableInfo } from '../../function/internalFunctions';
 import { HeaderMenu } from '../organisms/Header/HeaderMenu';
 import { MainPanel } from '../organisms/MainPanel/MainPanel';
 
