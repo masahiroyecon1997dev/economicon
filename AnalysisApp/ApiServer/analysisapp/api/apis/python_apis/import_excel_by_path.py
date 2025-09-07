@@ -3,8 +3,10 @@ import polars as pl
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
-    validate_file_path,
     validate_new_table_name,
+)
+from ..utilities.validator.file_validators import (
+    validate_file_path,
     validate_sheet_name
 )
 from ..data.tables_manager import TablesManager
