@@ -81,6 +81,17 @@ def validate_list_length(value: List,
     return None
 
 
+def validate_item_in_dict(value: dict,
+                          dictionary_name: str,
+                          param_name: str,
+                          ) -> None:
+    """辞書のキーにその値があるかのバリデーション"""
+    if dictionary_name not in value:
+        message = _(f"{param_name} '{dictionary_name}' does not exist.")
+        raise ValidationError(message)
+    return None
+
+
 def validate_string_length(value: str,
                            param_name: str,
                            min_length: Optional[int] = None,
@@ -149,42 +160,22 @@ def validate_path(value: str, param_name: str) -> None:
     return None
 
 
-def validate_table_exists(value: str,
-                          param_name: str,
-                          table_name_list: List[str]) -> None:
-    """テーブルが存在するかチェック"""
-    if value not in table_name_list:
+def validate_item_exists_in_list(value: str,
+                                 param_name: str,
+                                 item_name_list: List[str]) -> None:
+    """項目が存在するかチェック"""
+    if value not in item_name_list:
         message = _(f"{param_name} '{value}' does not exist.")
         raise ValidationError(message)
     return None
 
 
-def validate_table_duplicate(value: str,
-                             param_name: str,
-                             table_name_list: List[str]) -> None:
-    """テーブルが重複していないかチェック"""
-    if value in table_name_list:
+def validate_item_duplicate(value: str,
+                            param_name: str,
+                            item_name_list: List[str]) -> None:
+    """項目が重複していないかチェック"""
+    if value in item_name_list:
         message = _(f"{param_name} '{value}' already exists.")
-        raise ValidationError(message)
-    return None
-
-
-def validate_column_exists(value: str,
-                           param_name: str,
-                           column_name_list: List[str]) -> None:
-    """列が存在するかチェック"""
-    if value not in column_name_list:
-        message = _(f"{param_name} '{value}' does not exist.")
-        raise ValidationError(message)
-    return None
-
-
-def validate_column_duplicate(value: str,
-                              param_name: str,
-                              column_name_list: List[str]) -> None:
-    """列が重複していないかチェック"""
-    message = _(f"{param_name} '{value}' already exists.")
-    if value in column_name_list:
         raise ValidationError(message)
     return None
 
