@@ -36,8 +36,9 @@ class TestApiAddDummyColumn(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
         self.assertEqual(response_data['result']['tableName'], 'TestTable')
-        self.assertEqual(response_data['result']['dummyColumnName'], 'is_female')
-        
+        self.assertEqual(response_data['result']['dummyColumnName'],
+                         'is_female')
+
         # ダミー変数列が正しく作成されているかチェック
         df = self.tables_manager.get_table('TestTable').table
         self.assertIn('is_female', df.columns)
@@ -103,7 +104,7 @@ class TestApiAddDummyColumn(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
         self.assertIn('age', response_data['message'])
-        
+
     def test_add_dummy_column_with_numeric_target(self):
         # 数値のターゲット値でダミー変数を作成
         # 新しいテーブルを作成
@@ -112,7 +113,7 @@ class TestApiAddDummyColumn(APITestCase):
             'name': ['A', 'B', 'C', 'D', 'E']
         })
         self.tables_manager.store_table('NumericTable', df_numeric)
-        
+
         payload = {
             'tableName': 'NumericTable',
             'sourceColumnName': 'score',
@@ -128,7 +129,7 @@ class TestApiAddDummyColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
-        
+
         # ダミー変数列が正しく作成されているかチェック
         df = self.tables_manager.get_table('NumericTable').table
         expected_values = [0, 1, 0, 1, 0]  # 90の位置のみ1
