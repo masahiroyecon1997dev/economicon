@@ -243,7 +243,7 @@ export function GenerateDataModal({
       dataStructure: dataStructure,
     };
     const resGenerateSimulationData = await generateSimulationData(reqGenerateSimulationData);
-    if (resGenerateSimulationData.code === 0) {
+    if (resGenerateSimulationData.code === 'OK') {
       const tableInfo = await getTableInfo(resGenerateSimulationData.result.tableName);
       setTableInfos(preTableInfos => [...preTableInfos, tableInfo]);
       close();

@@ -5,7 +5,7 @@ export async function importCsv(file: File): Promise<apiTypes.ResImportCsvType> 
   try {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post('/import_csv', formData, {
+    const response = await axios.post('/import-csv-by-file', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -53,11 +53,11 @@ export async function fetchDataToJson(
 
 export async function getTableNameList(): Promise<apiTypes.ResGetTableNameListType> {
   try {
-    const response = await axios.get('/get_table_name_list');
+    const response = await axios.get('/get-table-name-list');
     return response.data;
   } catch (error) {
     console.log(error);
-    return { code: -9999, result: { tableNameList: [] }, message: 'エラーです' };
+    return { code: 'NG', result: { tableNameList: [] }, message: 'エラーです' };
   }
 }
 
@@ -71,7 +71,7 @@ export async function getColumnNameList(tableName: string): Promise<apiTypes.Res
     return response.data;
   } catch (error) {
     console.log(error);
-    return { code: -9999, result: { columnList: [] }, message: 'エラーです' };
+    return { code: 'NG', result: { columnList: [] }, message: 'エラーです' };
   }
 }
 
@@ -83,7 +83,7 @@ export async function generateSimulationData(
     return response.data;
   } catch (error) {
     console.log(error);
-    return { code: -9999, result: { tableName: '' }, message: 'エラーです' };
+    return { code: 'NG', result: { tableName: '' }, message: 'エラーです' };
   }
 }
 
@@ -95,6 +95,6 @@ export async function linearRegression(
     return response.data;
   } catch (error) {
     console.log(error);
-    return { code: -9999, result: { regressionResult: '' }, message: 'エラーです' };
+    return { code: 'NG', result: { regressionResult: '' }, message: 'エラーです' };
   }
 }

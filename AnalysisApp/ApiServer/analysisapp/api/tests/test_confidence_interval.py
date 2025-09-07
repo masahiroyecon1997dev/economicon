@@ -19,10 +19,10 @@ class TestApiConfidenceInterval(APITestCase):
 
         # 正規分布に従うデータ
         normal_data = np.random.normal(50, 10, n_samples)
-        
+
         # 二項データ（0または1）
         binary_data = np.random.binomial(1, 0.3, n_samples)
-        
+
         # テストテーブルの作成
         df = pl.DataFrame({
             'normal_col': normal_data,
@@ -129,12 +129,12 @@ class TestApiConfidenceInterval(APITestCase):
 
         result = response_data['result']
         self.assertEqual(result['statistic']['type'], 'proportion')
-        
+
         # 比率は0から1の間でなければならない
         proportion_value = result['statistic']['value']
         self.assertGreaterEqual(proportion_value, 0)
         self.assertLessEqual(proportion_value, 1)
-        
+
         # 信頼区間も0から1の間
         ci = result['confidence_interval']
         self.assertGreaterEqual(ci['lower'], 0)
@@ -160,7 +160,7 @@ class TestApiConfidenceInterval(APITestCase):
 
         result = response_data['result']
         self.assertEqual(result['statistic']['type'], 'variance')
-        
+
         # 分散は正の値でなければならない
         variance_value = result['statistic']['value']
         self.assertGreater(variance_value, 0)
@@ -185,7 +185,7 @@ class TestApiConfidenceInterval(APITestCase):
 
         result = response_data['result']
         self.assertEqual(result['statistic']['type'], 'std')
-        
+
         # 標準偏差は正の値でなければならない
         std_value = result['statistic']['value']
         self.assertGreater(std_value, 0)
@@ -353,7 +353,7 @@ class TestApiConfidenceInterval(APITestCase):
     def test_confidence_interval_different_levels(self):
         """異なる信頼度レベルでの計算が正常に動作する"""
         levels = [0.90, 0.95, 0.99]
-        
+
         for level in levels:
             payload = {
                 'tableName': 'ConfidenceTestTable',
@@ -370,10 +370,10 @@ class TestApiConfidenceInterval(APITestCase):
             response_data = response.json()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response_data['code'], 'OK')
-            
+
             result = response_data['result']
             self.assertEqual(result['confidence_level'], level)
-            
+
             # より高い信頼度レベルはより広い区間になるはず
             if level == 0.99:
                 ci_99 = result['confidence_interval']
@@ -381,12 +381,12 @@ class TestApiConfidenceInterval(APITestCase):
                 ci_95 = result['confidence_interval']
             elif level == 0.90:
                 ci_90 = result['confidence_interval']
-        
+
         # 信頼区間の幅が信頼度レベルと正しい関係にあることを確認
         width_90 = ci_90['upper'] - ci_90['lower']
         width_95 = ci_95['upper'] - ci_95['lower']
         width_99 = ci_99['upper'] - ci_99['lower']
-        
+
         self.assertLess(width_90, width_95)
         self.assertLess(width_95, width_99)
 
@@ -406,20 +406,20 @@ class TestApiConfidenceInterval(APITestCase):
 
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         result = response_data['result']
-        
+
         # 必須フィールドの存在確認
-        required_fields = ['tableName', 'columnName', 'statistic', 
+        required_fields = ['tableName', 'columnName', 'statistic',
                           'confidence_interval', 'confidence_level']
         for field in required_fields:
             self.assertIn(field, result)
-        
+
         # statisticの必須フィールド
         statistic = result['statistic']
         self.assertIn('type', statistic)
         self.assertIn('value', statistic)
-        
+
         # confidence_intervalの必須フィールド
         ci = result['confidence_interval']
         self.assertIn('lower', ci)
