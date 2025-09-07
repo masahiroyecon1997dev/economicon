@@ -7,7 +7,7 @@ from .common_validators import (
     validate_number,
     validate_integer,
     validate_list_length,
-    validate_column_exists,
+    validate_item_exists_in_list,
     validate_column_is_numeric,
     validate_candidates
 )
@@ -132,9 +132,9 @@ def validate_explanatory_variables(
                          'explanatory_variable')
     for col_name in explanatory_variables:
         validate_required(col_name, explanatory_variables_param)
-        validate_column_exists(col_name,
-                               explanatory_variables_param,
-                               column_name_list)
+        validate_item_exists_in_list(col_name,
+                                     explanatory_variables_param,
+                                     column_name_list)
         # 型チェックのために取得
         column_type = df_schema.items().mapping[col_name]
         validate_column_is_numeric(col_name,
@@ -150,9 +150,9 @@ def validate_dependent_variable(
     explanatory_variables_param: str
 ) -> None:
     validate_required(dependent_variable, explanatory_variables_param)
-    validate_column_exists(dependent_variable,
-                           explanatory_variables_param,
-                           column_name_list)
+    validate_item_exists_in_list(dependent_variable,
+                                 explanatory_variables_param,
+                                 column_name_list)
     # 型チェックのために取得
     column_type = df_schema.items().mapping[dependent_variable]
     validate_column_is_numeric(dependent_variable,

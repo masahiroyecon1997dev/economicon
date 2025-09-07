@@ -5,6 +5,12 @@ from ..utilities.validator.tables_manager_validator import (
     validate_existed_table_name,
     validate_existed_column_name
 )
+from ..utilities.validator.common_validators import (
+    validate_required_list,
+    validate_item_in_dict,
+    validate_list_length,
+    validate_boolean
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import (AbstractApi, ApiError)
 
@@ -16,13 +22,15 @@ class SortColumns(AbstractApi):
     指定されたテーブルを指定された列でソートします。
     複数列でのソート、昇順・降順の指定が可能です。
     """
-    def __init__(self, table_name: str, sort_columns: List[Dict[str, any]]):
+    def __init__(self, table_name: str, sort_columns: List[Dict[str, str]]):
         self.tables_manager = TablesManager()
         self.table_name = table_name
         self.sort_columns = sort_columns
         self.param_names = {
                 'table_name': 'tableName',
-                'column_names': 'columnName',
+                'sort_columns': 'sortColumns',
+                'column_name': 'columnName',
+                'ascending': 'ascending'
             }
 
     def validate(self):
@@ -32,24 +40,29 @@ class SortColumns(AbstractApi):
                                         table_name_list,
                                         self.param_names['table_name'])
 
-
-
+            validate_required_list(self.sort_columns,
+                                   self.param_names['sort_columns'])
+            validate_list_length(self.sort_columns,
+                                 1,
+                                 self.param_names['sort_columns'],
+                                 self.param_names['column_name'])
+            column_name_list = self.tables_manager.get_column_name_list(
+                    self.table_name)
             for sort_spec in self.sort_columns:
-                if 'columnName' not in sort_spec:
-                    raise ValidationError("columnName is required in sortColumns")
-                if 'ascending' not in sort_spec:
-                    raise ValidationError("ascending is required in sortColumns")
-
-                column_name = sort_spec['columnName']
-                ascending = sort_spec['ascending']
+                validate_item_in_dict(sort_spec,
+                                      'columnName',
+                                      self.param_names['column_name'])
+                validate_item_in_dict(sort_spec,
+                                      'ascending',
+                                      self.param_names['ascending'])
 
                 # 列名の存在チェック
-                validator.validate_existed_column_name(column_name,
-                                                       column_name_list)
+                validate_existed_column_name(sort_spec['columnName'],
+                                             column_name_list,
+                                             self.param_names['column_name'])
                 # ascendingフィールドがbooleanかチェック
-                if not isinstance(ascending, bool):
-                    raise ValidationError("ascending must be boolean")
-
+                validate_boolean(sort_spec['ascending'],
+                                 self.param_names['ascending'])
             return None
         except ValidationError as e:
             return e
@@ -61,11 +74,13 @@ class SortColumns(AbstractApi):
 
             # ソート列とdescendingフラグを準備
             column_names = [spec['columnName'] for spec in self.sort_columns]
-            descending_flags = [not spec['ascending'] for spec in self.sort_columns]
+            descending_flags = [(not spec['ascending'] == 'true')
+                                for spec in self.sort_columns]
 
             # polarsでソート実行
             if len(column_names) == 1:
-                sorted_df = df.sort(column_names[0], descending=descending_flags[0])
+                sorted_df = df.sort(column_names[0],
+                                    descending=descending_flags[0])
             else:
                 sorted_df = df.sort(column_names, descending=descending_flags)
 
@@ -81,7 +96,7 @@ class SortColumns(AbstractApi):
             raise ApiError(message) from e
 
 
-def sort_columns(table_name: str, sort_columns: List[Dict[str, any]]) -> Dict:
+def sort_columns(table_name: str, sort_columns: List[Dict[str, str]]) -> Dict:
     api = SortColumns(table_name, sort_columns)
     validation_error = api.validate()
     if validation_error:
