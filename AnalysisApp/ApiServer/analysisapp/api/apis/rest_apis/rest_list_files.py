@@ -6,11 +6,11 @@ from ..utilities.create_response import (create_success_response,
                                          create_error_response)
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.create_log import create_log_api_request
-from ..python_apis.list_files import list_files
+from ..python_apis.get_list_files import get_list_files
 from ..python_apis.common_api_class import ApiError
 
 
-class ListFiles(APIView):
+class GetListFiles(APIView):
 
     def post(self, request):
         try:
@@ -19,7 +19,7 @@ class ListFiles(APIView):
             # リクエストデータの取得
             request_data = json.loads(request.body)
             directory_path = request_data.get('directoryPath')
-            result = list_files(directory_path=directory_path)
+            result = get_list_files(directory_path=directory_path)
             return create_success_response(
                 status.HTTP_200_OK,
                 result)
