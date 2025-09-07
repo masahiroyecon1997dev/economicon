@@ -8,22 +8,22 @@ export type ResFetchDataToJsonType = {
   message: string;
 };
 export type ResGetTableNameListType = {
-  code: number;
+  code: string;
   result: { tableNameList: string[] };
   message: string;
 };
 export type ResGetColumnListType = {
-  code: number;
+  code: string;
   result: { columnList: ColumnType[] };
   message: string;
 };
 export type ResGenerateSimulationDataType = {
-  code: number;
+  code: string;
   result: { tableName: string };
   message: string;
 };
 export type ResLinearRegressionType = {
-  code: number;
+  code: string;
   result: { regressionResult: string };
   message: string;
 };
