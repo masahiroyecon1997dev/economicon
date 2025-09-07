@@ -18,9 +18,9 @@ class CalculateColumn(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            new_column_name = request_data['newColumnName']
-            calculation_expression = request_data['calculationExpression']
+            table_name = request_data.get('tableName')
+            new_column_name = request_data.get('newColumnName')
+            calculation_expression = request_data.get('calculationExpression')
             result = calculate_column(
                 table_name=table_name,
                 new_column_name=new_column_name,
