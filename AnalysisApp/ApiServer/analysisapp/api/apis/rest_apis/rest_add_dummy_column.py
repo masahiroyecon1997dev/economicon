@@ -18,10 +18,10 @@ class AddDummyColumn(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            source_column_name = request_data['sourceColumnName']
-            dummy_column_name = request_data['dummyColumnName']
-            target_value = request_data['targetValue']
+            table_name = request_data.get('tableName')
+            source_column_name = request_data.get('sourceColumnName')
+            dummy_column_name = request_data.get('dummyColumnName')
+            target_value = request_data.get('targetValue')
             result = add_dummy_column(
                 table_name=table_name,
                 source_column_name=source_column_name,
