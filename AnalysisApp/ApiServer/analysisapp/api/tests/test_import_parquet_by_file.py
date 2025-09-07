@@ -1,6 +1,8 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.core.files import File
+import tempfile
+import os
 from django.core.files.uploadedfile import SimpleUploadedFile
 import polars as pl
 from ..apis.data.tables_manager import TablesManager
@@ -12,137 +14,86 @@ class TestApiImportParquetByFile(APITestCase):
         self.tables_manager = TablesManager()
         self.tables_manager.clear_tables()
 
-    def test_upload_valid_excel_file(self):
+    def test_upload_valid_parquet_file(self):
         """
-        有効なExcel(xlsx)ファイルをアップロードした場合のテスト
+        有効なParquetファイルをアップロードした場合のテスト
         """
-        compare_data = pl.read_excel(
-            '/AnalysisApp/SampleData/TestDataXlsx.xlsx')
-        test_file = File(open('/AnalysisApp/SampleData/TestDataXlsx.xlsx',
+        compare_data = pl.read_parquet(
+            '/AnalysisApp/AnalysisApp/SampleData/TestData.parquet')
+        test_file = File(open('/AnalysisApp/AnalysisApp/SampleData/'
+                              'TestData.parquet',
                               'rb'))
-        uploaded_file = SimpleUploadedFile('TestDataXlsx.xlsx',
+        uploaded_file = SimpleUploadedFile('TestData.parquet',
                                            test_file.read(),
                                            content_type='multipart/form-data')
-        response = self.client.post('/api/import-excel-by-file',
-                                    {'file': uploaded_file})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        response_data = response.json()
-        # レスポンスデータの検証
-        self.assertEqual('OK', ['code'])
-        self.assertEqual('TestDataXlsx',
-                         response_data['result']['tableName'])
-        df = self.tables_manager.get_table('TestDataXlsx').table
-        self.assertEqual(True, compare_data.equals(df))
-
-    def test_upload_valid_excel_file_with_extension_xls(self):
-        """
-        有効なExcel(xls)ファイルをアップロードした場合のテスト
-        """
-        compare_data = pl.read_excel(
-            '/AnalysisApp/SampleData/TestDataXls.xls')
-        test_file = File(open('/AnalysisApp/SampleData/TestDataXls.xls',
-                              'rb'))
-        uploaded_file = SimpleUploadedFile('TestDataXls.xls',
-                                           test_file.read(),
-                                           content_type='multipart/form-data')
-        response = self.client.post('/api/import-excel-by-file',
+        response = self.client.post('/api/import-parquet-by-file',
                                     {'file': uploaded_file})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response_data = response.json()
         # レスポンスデータの検証
         self.assertEqual('OK', response_data['code'])
-        self.assertEqual('TestDataXls', response_data['result']['tableName'])
-        df = self.tables_manager.get_table('TestDataXls').table
-        self.assertEqual(True, compare_data.equals(df))
-
-    def test_upload_excel_with_only_headers(self):
-        """
-        ヘッダーのみのEXCELファイルをアップロードした場合のテスト
-        問題なく読み込める
-        """
-        compare_data = pl.read_excel(
-            '/AnalysisApp/SampleData/OnlyHeaderExcel.xlsx')
-        test_file = File(open('/AnalysisApp/SampleData/OnlyHeaderExcel.xlsx',
-                              'rb'))
-        uploaded_file = SimpleUploadedFile('OnlyHeaderExcel.xlsx',
-                                           test_file.read(),
-                                           content_type='multipart/form-data')
-        response = self.client.post('/api/import-excel-by-file',
-                                    {'file': uploaded_file})
-
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
-        df = self.tables_manager.get_table('OnlyHeaderExcel').table
+        self.assertEqual('TestData',
+                         response_data['result']['tableName'])
+        df = self.tables_manager.get_table('TestData').table
         self.assertEqual(True, compare_data.equals(df))
 
     def test_no_file_uploaded(self):
         """
         ファイルがアップロードされていない場合のテスト。
         """
-        response = self.client.post('/api/import-csv-by-file')
+        response = self.client.post('/api/import-parquet-by-file')
 
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
         self.assertIn(response_data['message'], "No file uploaded.")
 
-    def test_upload_non_excel_file(self):
+    def test_upload_non_parquet_file(self):
         """
-        Excel以外のファイルをアップロードした場合のエラーケースをテストする。
+        Parquet以外のファイルをアップロードした場合のエラーケースをテストする。
         """
-        test_file = File(open('/AnalysisApp/SampleData/TestDataComma.csv',
+        test_file = File(open('/AnalysisApp/AnalysisApp/SampleData/'
+                              'TestDataComma.csv',
                               'rb'))
         uploaded_file = SimpleUploadedFile('TestDataComma.csv',
                                            test_file.read(),
                                            content_type='multipart/form-data')
 
-        response = self.client.post('/api/import-excel-by-file',
+        response = self.client.post('/api/import-parquet-by-file',
                                     {'file': uploaded_file},
                                     format='multipart')
 
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("Uploaded file is not a .xlsx, .xls file.",
+        self.assertIn("Uploaded file is not a .parquet file.",
                       response_data['message'])
 
-    def test_upload_empty_excel_file(self):
+    def test_upload_empty_parquet_file(self):
         """
-        空のEXCELファイルをアップロードした場合のテスト (Polars NoDataError)
+        空のPARQUETファイルをアップロードした場合のテスト (Polars NoDataError)
         """
-        test_file = File(open('/AnalysisApp/SampleData/Empty.xlsx', 'rb'))
-        uploaded_file = SimpleUploadedFile('Empty.xlsx', test_file.read(),
-                                           content_type='multipart/form-data')
-        response = self.client.post('/api/import-excel-by-file',
-                                    {'file': uploaded_file})
+        # 一時的なPARQUETファイルを作成
+        temp_data = pl.DataFrame()
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertIn(
-            "Invalid file content type. Allowed types: "
-            "application/vnd.openxmlformats-officedocument.spreadsheetml."
-            "sheet, application/vnd.ms-excel, application/CDFV2",
-            response_data['message'])
+        with tempfile.NamedTemporaryFile(mode='wb', suffix='.parquet',
+                                         delete=False) as f:
+            temp_data.write_parquet(f.name)
+            temp_path = f.name
 
-    def test_upload_malformed_excel_file(self):
-        """
-        不正な形式のCSVファイルをアップロードした場合のテスト (Polars PanicExceptionを想定)
-        """
-        test_file = File(open('/AnalysisApp/SampleData/Error.xlsx', 'rb'))
-        uploaded_file = SimpleUploadedFile('Error.xlsx', test_file.read(),
-                                           content_type='multipart/form-data')
-        response = self.client.post('/api/import-excel-by-file',
-                                    {'file': uploaded_file})
+        try:
+            test_file = File(open(temp_path, 'rb'))
+            uploaded_file = SimpleUploadedFile('Empty.parquet',
+                                               test_file.read(),
+                                               content_type='multipart/'
+                                               'form-data')
+            response = self.client.post('/api/import-parquet-by-file',
+                                        {'file': uploaded_file})
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("Invalid file content type. Allowed types: "
-                      "application/vnd.openxmlformats-"
-                      "officedocument.spreadsheetml."
-                      "sheet, application/vnd.ms-excel, application/CDFV2",
-                      response_data['message'])
+            response_data = response.json()
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response_data['code'], 'OK')
+        finally:
+            # 一時ファイルを削除
+            os.unlink(temp_path)

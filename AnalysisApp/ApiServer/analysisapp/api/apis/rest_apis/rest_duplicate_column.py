@@ -18,9 +18,9 @@ class DuplicateColumn(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            source_column_name = request_data['sourceColumnName']
-            new_column_name = request_data['newColumnName']
+            table_name = request_data.get('tableName')
+            source_column_name = request_data.get('sourceColumnName')
+            new_column_name = request_data.get('newColumnName')
             result = duplicate_column(
                 table_name=table_name,
                 source_column_name=source_column_name,

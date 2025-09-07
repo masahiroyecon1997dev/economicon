@@ -1,9 +1,10 @@
 from typing import Dict
 from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
-from ..utilities.validator.validation_config \
-    import INPUT_VALIDATOR_CONFIG
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name,
+    validate_new_table_name
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
 
@@ -30,16 +31,17 @@ class RenameTableName(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
             table_name_list = self.tables_manager.get_table_name_list()
             # 変更前のテーブル名の存在チェック
-            validator.validate_existed_table_name(self.old_table_name,
-                                                  table_name_list)
+            validate_existed_table_name(
+                self.old_table_name,
+                table_name_list,
+                self.param_names['table_name'])
             # 変更後のテーブル名の重複チェック
-            validator.param_names['table_name'] = 'newTableName'
-            validator.validate_new_table_name(self.new_table_name,
-                                              table_name_list)
+            validate_new_table_name(
+                self.new_table_name,
+                table_name_list,
+                self.param_names['new_table_name'])
             return None
         except ValidationError as e:
             return e

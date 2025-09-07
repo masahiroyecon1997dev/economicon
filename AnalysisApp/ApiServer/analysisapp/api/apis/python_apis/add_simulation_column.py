@@ -3,9 +3,14 @@ import numpy as np
 from django.utils.translation import gettext as _
 from typing import Dict, Any
 from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.validator import InputValidator
-from ..utilities.validator.validation_config import (
-    INPUT_VALIDATOR_CONFIG)
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name,
+    validate_new_column_name
+)
+from ..utilities.validator.statistics_validators import (
+    validate_distribution_type,
+    validate_distribution_params
+)
 from ..data.tables_manager import TablesManager
 from .common_api_class import (AbstractApi, ApiError)
 
@@ -35,142 +40,37 @@ class AddSimulationColumn(AbstractApi):
 
     def validate(self):
         try:
-            validator = InputValidator(param_names=self.param_names,
-                                       **INPUT_VALIDATOR_CONFIG)
-
             # テーブル名の検証
             table_name_list = self.tables_manager.get_table_name_list()
-            validator.validate_existed_table_name(self.table_name,
-                                                  table_name_list)
+            validate_existed_table_name(
+                self.table_name,
+                table_name_list,
+                self.param_names['table_name']
+            )
 
             # 新しい列名の検証
             column_name_list = self.tables_manager.get_column_name_list(
-                self.table_name)
-            validator.validate_new_column_name(self.new_column_name,
-                                               column_name_list)
+                self.table_name
+            )
+            validate_new_column_name(
+                self.new_column_name,
+                column_name_list,
+                self.param_names['new_column_name']
+            )
 
             # 分布タイプの検証
-            validator.validate_validate_distribution_type(
-                self.distribution_type)
+            validate_distribution_type(
+                self.distribution_type,
+                self.param_names['distribution_type']
+            )
 
             # 分布パラメータの検証
-            self._validate_distribution_params()
+            validate_distribution_params(
+                self.distribution_type, self.distribution_params)
 
             return None
         except ValidationError as e:
             return e
-
-    def _validate_distribution_params(self):
-        """分布ごとのパラメータを検証"""
-        params = self.distribution_params
-        dist_type = self.distribution_type
-
-        try:
-            match dist_type:
-                case 'uniform':
-                    self._validate_numeric_param('low', params)
-                    self._validate_numeric_param('high', params)
-                    if params['low'] >= params['high']:
-                        raise ValidationError("For uniform distribution, "
-                                              "'low' must be less than 'high'")
-                case 'exponential':
-                    self._validate_numeric_param('scale', params)
-                    if params['scale'] <= 0:
-                        raise ValidationError("For exponential distribution, "
-                                              "'scale' must be positive")
-                case 'normal':
-                    self._validate_numeric_param('loc', params)
-                    self._validate_numeric_param('scale', params)
-                    if params['scale'] <= 0:
-                        raise ValidationError("For normal distribution, "
-                                              "'scale' must be positive")
-                case 'gamma':
-                    self._validate_numeric_param('shape', params)
-                    self._validate_numeric_param('scale', params)
-                    if params['shape'] <= 0 or params['scale'] <= 0:
-                        raise ValidationError("For gamma distribution, "
-                                              "'shape' and 'scale' must be "
-                                              "positive")
-                case 'beta':
-                    self._validate_numeric_param('a', params)
-                    self._validate_numeric_param('b', params)
-                    if params['a'] <= 0 or params['b'] <= 0:
-                        raise ValidationError("For beta distribution, "
-                                              "'a' and 'b' must be positive")
-                case 'weibull':
-                    self._validate_numeric_param('a', params)
-                    if params['a'] <= 0:
-                        raise ValidationError("For weibull distribution, "
-                                              "'a' must be positive")
-                case 'lognormal':
-                    self._validate_numeric_param('mean', params)
-                    self._validate_numeric_param('sigma', params)
-                    if params['sigma'] <= 0:
-                        raise ValidationError("For lognormal distribution, "
-                                              "'sigma' must be positive")
-                case 'binomial':
-                    self._validate_integer_param('n', params)
-                    self._validate_numeric_param('p', params)
-                    if params['n'] <= 0:
-                        raise ValidationError("For binomial distribution, "
-                                              "'n' must be positive")
-                    if not (0 <= params['p'] <= 1):
-                        raise ValidationError("For binomial distribution, "
-                                              "'p' must be between 0 and 1")
-                case 'bernoulli':
-                    self._validate_numeric_param('p', params)
-                    if not (0 <= params['p'] <= 1):
-                        raise ValidationError("For bernoulli distribution, "
-                                              "'p' must be between 0 and 1")
-                case 'poisson':
-                    self._validate_numeric_param('lam', params)
-                    if params['lam'] <= 0:
-                        raise ValidationError("For poisson distribution, "
-                                              "'lam' must be positive")
-                case 'geometric':
-                    self._validate_numeric_param('p', params)
-                    if not (0 < params['p'] <= 1):
-                        raise ValidationError("For geometric distribution, "
-                                              "'p' must be between 0 and 1 "
-                                              "(exclusive of 0)")
-                case 'hypergeometric':
-                    self._validate_integer_param('N', params)
-                    self._validate_integer_param('K', params)
-                    self._validate_integer_param('n', params)
-                    if params['N'] <= 0 or params['K'] <= 0 or params['n'] <= 0:
-                        raise ValidationError("For hypergeometric "
-                                              "distribution, 'N', 'K', "
-                                              "and 'n' must be positive")
-                    if params['K'] > params['N']:
-                        raise ValidationError("For hypergeometric "
-                                              "distribution, 'K' "
-                                              "must not exceed 'N'")
-                    if params['n'] > params['N']:
-                        raise ValidationError("For hypergeometric "
-                                              "distribution, 'n' "
-                                              "must not exceed 'N'")
-
-        except KeyError as e:
-            raise ValidationError(f"Missing required parameter "
-                                  f"for {dist_type} "
-                                  f"distribution: {str(e)}")
-
-    def _validate_numeric_param(self, param_name: str, params: Dict):
-        """数値パラメータの検証"""
-        if param_name not in params:
-            raise KeyError(param_name)
-        value = params[param_name]
-        if not isinstance(value, (int, float)):
-            raise ValidationError(f"Parameter '{param_name}' must be a number")
-
-    def _validate_integer_param(self, param_name: str, params: Dict):
-        """整数パラメータの検証"""
-        if param_name not in params:
-            raise KeyError(param_name)
-        value = params[param_name]
-        if not isinstance(value, int):
-            raise ValidationError(f"Parameter '{param_name}' "
-                                  "must be an integer")
 
     def execute(self):
         try:

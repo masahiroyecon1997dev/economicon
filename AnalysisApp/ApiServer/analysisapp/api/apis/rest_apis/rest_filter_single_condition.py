@@ -20,12 +20,12 @@ class RestFilterSingleCondition(APIView):
         try:
             create_log_api_request(request)
             request_data = json.loads(request.body)
-            new_table_name = request_data['newTableName']
-            table_name = request_data['tableName']
-            column_name = request_data['columnName']
-            condition = request_data['condition']
-            is_compare_column = request_data['isCompareColumn']
-            compare_value = request_data['compareValue']
+            new_table_name = request_data.get('newTableName')
+            table_name = request_data.get('tableName')
+            column_name = request_data.get('columnName')
+            condition = request_data.get('condition')
+            is_compare_column = request_data.get('isCompareColumn')
+            compare_value = request_data.get('compareValue')
             result = filter_single_condition(
                 new_table_name,
                 table_name,

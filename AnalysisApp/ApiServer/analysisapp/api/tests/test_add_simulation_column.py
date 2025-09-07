@@ -311,8 +311,8 @@ class TestApiAddSimulationColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("Missing required parameter for "
-                      "normal distribution: 'scale'", response_data['message'])
+        self.assertIn("Missing required parameter: 'scale'",
+                      response_data['message'])
 
     def test_invalid_param_type(self):
         """パラメータの型が不正な場合のテスト"""
@@ -334,7 +334,7 @@ class TestApiAddSimulationColumn(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("Parameter 'loc' must be a number",
+        self.assertIn("loc must be a number.",
                       response_data['message'])
 
     def test_negative_scale_normal(self):

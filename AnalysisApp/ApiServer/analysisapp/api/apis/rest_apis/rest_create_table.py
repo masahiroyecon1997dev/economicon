@@ -15,9 +15,9 @@ class CreateTable(APIView):
         try:
             create_log_api_request(request)
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            table_number_of_rows = request_data['tableNumberOfRows']
-            columnNames = request_data['columnNames']
+            table_name = request_data.get('tableName')
+            table_number_of_rows = request_data.get('tableNumberOfRows')
+            columnNames = request_data.get('columnNames')
             result = create_table(
                 table_name,
                 table_number_of_rows,
