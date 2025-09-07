@@ -45,6 +45,14 @@ class TablesManager:
             else:
                 raise KeyError(f"Table '{table_name}' does not exist.")
 
+    def get_column_info_list(self, table_name: str) -> pl.Schema:
+        with self._lock:
+            table_info = self._tables.get(table_name)
+            if table_info:
+                return table_info.table.schema
+            else:
+                raise KeyError(f"Table '{table_name}' does not exist.")
+
     def rename_table(self, old_table_name: str, new_table_name: str) -> str:
         with self._lock:
             table_info = self._tables.pop(old_table_name)

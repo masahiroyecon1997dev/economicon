@@ -18,13 +18,13 @@ class DescriptiveStatistics(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             request_data = json.loads(request.body)
-            table_name = request_data['tableName']
-            column_name = request_data['columnName']
-            statistics = request_data['statistics']  # List of statistics to compute
-            
+            table_name = request_data.get('tableName')
+            column_name_list = request_data.get('columnNameList')
+            statistics = request_data.get('statistics')
+
             result = descriptive_statistics(
                 table_name=table_name,
-                column_name=column_name,
+                column_name_list=column_name_list,
                 statistics=statistics
             )
             return create_success_response(
