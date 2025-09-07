@@ -1,6 +1,5 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
-import json
 import tempfile
 import os
 import shutil
@@ -35,12 +34,9 @@ class TestApiGetListFiles(APITestCase):
         """
         正常にファイル一覧を取得できる
         """
-        payload = {
-            'directoryPath': self.test_dir
-        }
-        response = self.client.post(
-            '/api/get-list-files',
-            data=json.dumps(payload),
+        response = self.client.get(
+            '/api/get-list-files'
+            f'?directoryPath={self.test_dir}',
             content_type='application/json'
         )
 
@@ -86,12 +82,9 @@ class TestApiGetListFiles(APITestCase):
         """
         empty_dir = tempfile.mkdtemp()
         try:
-            payload = {
-                'directoryPath': empty_dir
-            }
-            response = self.client.post(
-                '/api/get-list-files',
-                data=json.dumps(payload),
+            response = self.client.get(
+                '/api/get-list-files'
+                f'?directoryPath={empty_dir}',
                 content_type='application/json'
             )
 
@@ -109,12 +102,9 @@ class TestApiGetListFiles(APITestCase):
         """
         存在しないディレクトリを指定した場合のテスト
         """
-        payload = {
-            'directoryPath': '/non/existent/directory'
-        }
-        response = self.client.post(
-            '/api/get-list-files',
-            data=json.dumps(payload),
+        response = self.client.get(
+            '/api/get-list-files'
+            '?directoryPath=/non/existent/directory',
             content_type='application/json'
         )
 
@@ -127,10 +117,9 @@ class TestApiGetListFiles(APITestCase):
         """
         directoryPathパラメータが未指定の場合のテスト
         """
-        payload = {}
-        response = self.client.post(
-            '/api/get-list-files',
-            data=json.dumps(payload),
+        response = self.client.get(
+            '/api/get-list-files'
+            '?directoryPath=',
             content_type='application/json'
         )
 
@@ -143,12 +132,9 @@ class TestApiGetListFiles(APITestCase):
         """
         ディレクトリではなくファイルのパスを指定した場合のテスト
         """
-        payload = {
-            'directoryPath': self.test_file1
-        }
-        response = self.client.post(
-            '/api/get-list-files',
-            data=json.dumps(payload),
+        response = self.client.get(
+            '/api/get-list-files'
+            f'?directoryPath={self.test_file1}',
             content_type='application/json'
         )
 
@@ -161,12 +147,9 @@ class TestApiGetListFiles(APITestCase):
         """
         ファイルサイズが正しく取得できることを確認
         """
-        payload = {
-            'directoryPath': self.test_dir
-        }
-        response = self.client.post(
-            '/api/get-list-files',
-            data=json.dumps(payload),
+        response = self.client.get(
+            '/api/get-list-files'
+            f'?directoryPath={self.test_dir}',
             content_type='application/json'
         )
 

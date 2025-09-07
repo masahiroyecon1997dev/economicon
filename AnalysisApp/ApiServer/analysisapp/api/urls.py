@@ -10,6 +10,7 @@ from .apis.rest_apis import (
     rest_duplicate_table,
     rest_duplicate_column,
     rest_get_column_info_list,
+    rest_get_list_files,
     rest_transform_column,
     rest_create_join_table,
     rest_create_union_table,
@@ -36,7 +37,6 @@ from .apis.rest_apis import (
     rest_linear_regression,
     rest_logistic_regression,
     rest_confidence_interval,
-    rest_list_files,
 )
 
 urlpatterns = [
@@ -112,5 +112,5 @@ urlpatterns = [
     path('confidence-interval',
          rest_confidence_interval.ConfidenceInterval.as_view()),
     path('get-list-files',
-         rest_list_files.GetListFiles.as_view()),
+         rest_get_list_files.GetListFiles.as_view()),
 ]
