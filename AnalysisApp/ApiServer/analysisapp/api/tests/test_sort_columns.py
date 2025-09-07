@@ -24,7 +24,7 @@ class TestApiSortColumns(APITestCase):
         payload = {
             'tableName': 'TestTable',
             'sortColumns': [
-                {'columnName': 'A', 'ascending': True}
+                {'columnName': 'A', 'ascending': 'true'}
             ]
         }
         response = self.client.post(
@@ -49,7 +49,7 @@ class TestApiSortColumns(APITestCase):
         payload = {
             'tableName': 'TestTable',
             'sortColumns': [
-                {'columnName': 'A', 'ascending': False}
+                {'columnName': 'A', 'ascending': 'false'}
             ]
         }
         response = self.client.post(
@@ -81,8 +81,8 @@ class TestApiSortColumns(APITestCase):
         payload = {
             'tableName': 'TestTable',
             'sortColumns': [
-                {'columnName': 'A', 'ascending': True},
-                {'columnName': 'B', 'ascending': False}
+                {'columnName': 'A', 'ascending': 'true'},
+                {'columnName': 'B', 'ascending': 'false'}
             ]
         }
         response = self.client.post(
@@ -106,7 +106,7 @@ class TestApiSortColumns(APITestCase):
         payload = {
             'tableName': 'NoTable',
             'sortColumns': [
-                {'columnName': 'A', 'ascending': True}
+                {'columnName': 'A', 'ascending': 'true'}
             ]
         }
         response = self.client.post(
@@ -126,7 +126,7 @@ class TestApiSortColumns(APITestCase):
         payload = {
             'tableName': 'TestTable',
             'sortColumns': [
-                {'columnName': 'Z', 'ascending': True}
+                {'columnName': 'Z', 'ascending': 'true'}
             ]
         }
         response = self.client.post(
@@ -194,11 +194,11 @@ class TestApiSortColumns(APITestCase):
         self.assertEqual(response_data['code'], 'NG')
 
     def test_sort_invalid_ascending_type(self):
-        # ascendingがboolean以外
+        # ascendingがtrue、false以外
         payload = {
             'tableName': 'TestTable',
             'sortColumns': [
-                {'columnName': 'A', 'ascending': 'true'}
+                {'columnName': 'A', 'ascending': 'yes'}
             ]
         }
         response = self.client.post(
