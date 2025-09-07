@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getTableInfo } from '../../../functiom/internalFunctions';
+import { getTableInfo } from '../../../function/internalFunctions';
 import { TableInfosType, TableListType } from '../../../types/stateTypes';
 
 type LeftSideMenuProps = {

@@ -17,7 +17,7 @@ class ConfidenceInterval(APIView):
     POST /api/confidence_interval
     {
         "tableName": "テーブル名",
-        "columnName": "列名", 
+        "columnName": "列名",
         "confidenceLevel": 0.95,
         "statisticType": "mean"
     }

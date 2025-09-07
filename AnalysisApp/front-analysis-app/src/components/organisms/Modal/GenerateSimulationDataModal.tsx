@@ -1,9 +1,9 @@
 import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { checkInteger, checkNumber, checkRequired } from '../../../functiom/checkInputFunctions';
-import { getTableInfo } from '../../../functiom/internalFunctions';
-import { generateSimulationData } from '../../../functiom/restApis';
+import { checkInteger, checkNumber, checkRequired } from '../../../function/checkInputFunctions';
+import { getTableInfo } from '../../../function/internalFunctions';
+import { generateSimulationData } from '../../../function/restApis';
 import { ReqGenerateSimulationDataType } from '../../../types/apiTypes';
 import { TableInfosType } from '../../../types/stateTypes';
 import { SubmitButton } from '../../atoms/Button/SubmitButton';
