@@ -118,6 +118,7 @@ applyTo: "AnalysisApp/AnalysisApp/ApiServer/analysisapp/api/**"
 
 ### URL エンドポイント
 - ケバブケース形式（例：`/api/create-table`、`/api/delete-column`）
+- urls.pyでエンドポイントとRESTクラスをマッピングを行うが、アルファベット順にソートして整理
 
 ## データ処理
 
