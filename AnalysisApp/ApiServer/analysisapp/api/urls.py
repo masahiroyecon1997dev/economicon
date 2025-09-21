@@ -37,6 +37,7 @@ from .apis.rest_apis import (
     rest_rename_table,
     rest_sort_columns,
     rest_transform_column,
+    rest_variable_effects_estimation,
 )
 
 urlpatterns = [
@@ -113,4 +114,6 @@ urlpatterns = [
          rest_sort_columns.SortColumns.as_view()),
     path('transform-column',
          rest_transform_column.TransformColumn.as_view()),
+    path('variable-effects-estimation',
+         rest_variable_effects_estimation.VariableEffectsEstimation.as_view()),
 ]
