@@ -1,27 +1,27 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "type": "shell",
-            "command": "cd front-analysis-app && yarn start",
-            "label": "yarn: start",
-            "detail": "webpack-dev-server",
-            "group": {
-                "kind": "test",
-                "isDefault": true
-            },
-            "isBackground": true,
-            "problemMatcher": {
-                "owner": "custom",
-                "pattern": {
-                    "regexp": "^$"
-                },
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "Compiling...",
-                    "endsPattern": "Compiled .*"
-                }
-            }
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "command": "cd front-analysis-app && yarn run dev",
+      "label": "yarn: start",
+      "detail": "start-dev-server",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Compiling...",
+          "endsPattern": "Compiled .*"
         }
-    ]
+      }
+    }
+  ]
 }

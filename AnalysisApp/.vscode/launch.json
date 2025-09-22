@@ -11,11 +11,11 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "Launch Chrome",
+      "name": "Launch Chrome against localhost",
       "type": "chrome",
       "request": "launch",
       "preLaunchTask": "yarn: start",
-      "url": "http://localhost:3000",
+      "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}/front-analysis-app",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
