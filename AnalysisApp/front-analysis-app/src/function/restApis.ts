@@ -81,7 +81,7 @@ export async function getColumnInfoList(
     return response.data;
   } catch (error) {
     console.log(error);
-    return { code: "NG", result: { columnList: [] }, message: "エラーです" };
+    return { code: "NG", result: { tableName: "", columnInfoList: [] }, message: "エラーです" };
   }
 }
 

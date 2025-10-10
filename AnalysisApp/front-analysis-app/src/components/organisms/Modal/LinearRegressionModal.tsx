@@ -1,9 +1,10 @@
-import type { ChangeEvent, useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { getTableNameList, linearRegression } from "../../../function/restApis";
-import { ReqLinearRegressionType } from "../../../types/apiTypes";
-import { SelectListType } from "../../../types/commonTypes";
+import { getColumnInfoList, getTableNameList, linearRegression } from "../../../function/restApis";
+import type { ReqLinearRegressionType } from "../../../types/apiTypes";
+import type { SelectListType } from "../../../types/commonTypes";
 import { Select } from "../../molecules/InputField/Select";
 import { Modal } from "../../molecules/Modal/Modal";
 
@@ -31,7 +32,7 @@ export function LinearRegressionModal({
     let ignore = false;
     async function loadData() {
       const resGetTableNameList = await getTableNameList();
-      const resGetColumnNameList = await getColumnNameList(
+      const resGetColumnNameList = await getColumnInfoList(
         resGetTableNameList.result.tableNameList[0]
       );
       if (!ignore) {
@@ -42,13 +43,13 @@ export function LinearRegressionModal({
           ]);
         }
         setSelectedTableName(resGetTableNameList.result.tableNameList[0]);
-        for (const column of resGetColumnNameList.result.columnList) {
+        for (const column of resGetColumnNameList.result.columnInfoList) {
           setColumnNameList((preColumnNameList) => [
             ...preColumnNameList,
             { value: column.name, name: column.name },
           ]);
         }
-        setDependentVariable(resGetColumnNameList.result.columnList[0].name);
+        setDependentVariable(resGetColumnNameList.result.columnInfoList[0].name);
       }
     }
     if (isLinearRegressionModal) {

@@ -106,7 +106,7 @@ export function HeaderMenu({ setTableInfos }: HeaderMenuProps) {
     <>
       <div className="flex bg-brand-primary text-white relative">
         <div className="flex items-center justify-center">
-          <h3 className="text-lg font-bold italic">{t("HeaderMenu.Title")}</h3>
+          <div className="text-lg font-bold italic">{t("HeaderMenu.Title")}</div>
         </div>
         <div className="relative">
           <HeaderMenuDropdown dropdownListElement={fileDropdownListElement}>

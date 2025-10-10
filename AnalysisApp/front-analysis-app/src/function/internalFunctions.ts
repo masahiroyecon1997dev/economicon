@@ -1,5 +1,5 @@
-import { TableDataType, TableInfoType } from '../types/commonTypes';
-import { fetchDataToJson, getColumnNameList } from './restApis';
+import type { TableDataType, TableInfoType } from '../types/commonTypes';
+import { fetchDataToJson, getColumnInfoList } from './restApis';
 
 export async function fetchData(
   tableName: string
@@ -14,10 +14,10 @@ export async function fetchData(
 
 export async function getTableInfo(tableName: string): Promise<TableInfoType> {
   const data = await fetchData(tableName);
-  const columnList = await getColumnNameList(tableName);
+  const columnList = await getColumnInfoList(tableName);
   return {
     tableName: tableName,
-    columnList: columnList.result.columnList,
+    columnList: columnList.result.columnInfoList,
     isActive: true,
     data: data.data,
   };
