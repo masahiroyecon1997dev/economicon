@@ -7,6 +7,7 @@
     "NomalDistribution": "正規分布"
   },
   "HeaderMenu": {
+    "Title": "Mesatsu",
     "File": "ファイル",
     "FileOpen": "開く",
     "FileSave": "保存",

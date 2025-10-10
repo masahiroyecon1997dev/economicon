@@ -1,11 +1,11 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import type { ChangeEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { getColumnNameList, getTableNameList, linearRegression } from '../../../function/restApis';
-import { ReqLinearRegressionType } from '../../../types/apiTypes';
-import { SelectListType } from '../../../types/commonTypes';
-import { Select } from '../../molecules/InputField/Select';
-import { Modal } from '../../molecules/Modal/Modal';
+import { getTableNameList, linearRegression } from "../../../function/restApis";
+import { ReqLinearRegressionType } from "../../../types/apiTypes";
+import { SelectListType } from "../../../types/commonTypes";
+import { Select } from "../../molecules/InputField/Select";
+import { Modal } from "../../molecules/Modal/Modal";
 
 type LinearRegressionModalProps = {
   isLinearRegressionModal: boolean;
@@ -18,12 +18,14 @@ export function LinearRegressionModal({
 }: LinearRegressionModalProps) {
   const { t } = useTranslation();
   const [tableNameList, setTableNameList] = useState<SelectListType>([]);
-  const [selectedTableName, setSelectedTableName] = useState<string>('');
+  const [selectedTableName, setSelectedTableName] = useState<string>("");
   const [columnNameList, setColumnNameList] = useState<SelectListType>([]);
-  const [dependentVariable, setDependentVariable] = useState<string>('');
-  const [explanatoryVariables, setExplanatoryVariables] = useState<string[]>([]);
+  const [dependentVariable, setDependentVariable] = useState<string>("");
+  const [explanatoryVariables, setExplanatoryVariables] = useState<string[]>(
+    []
+  );
   const [isResultModal, setIsReusltModal] = useState<boolean>(false);
-  const [result, setResult] = useState<string>('');
+  const [result, setResult] = useState<string>("");
 
   useEffect(() => {
     let ignore = false;
@@ -34,14 +36,14 @@ export function LinearRegressionModal({
       );
       if (!ignore) {
         for (const table of resGetTableNameList.result.tableNameList) {
-          setTableNameList(preTableNameList => [
+          setTableNameList((preTableNameList) => [
             ...preTableNameList,
             { value: table, name: table },
           ]);
         }
         setSelectedTableName(resGetTableNameList.result.tableNameList[0]);
         for (const column of resGetColumnNameList.result.columnList) {
-          setColumnNameList(preColumnNameList => [
+          setColumnNameList((preColumnNameList) => [
             ...preColumnNameList,
             { value: column.name, name: column.name },
           ]);
@@ -58,7 +60,10 @@ export function LinearRegressionModal({
   }, [isLinearRegressionModal]);
 
   function handleItemClick(item: string) {
-    setExplanatoryVariables(preExplanatoryVariable => [...preExplanatoryVariable, item]);
+    setExplanatoryVariables((preExplanatoryVariable) => [
+      ...preExplanatoryVariable,
+      item,
+    ]);
   }
 
   function changeTableName(event: ChangeEvent<HTMLSelectElement>) {
@@ -94,8 +99,8 @@ export function LinearRegressionModal({
     <>
       <Modal
         isOpenModal={isLinearRegressionModal && !isResultModal}
-        modalTitle={t('LinearRegressionModal.Title')}
-        submitButtonName={t('LinearRegressionModal.Execute')}
+        modalTitle={t("LinearRegressionModal.Title")}
+        submitButtonName={t("LinearRegressionModal.Execute")}
         submit={executeAnalysis}
         close={close}
         modalSize="max-w-2xl"
@@ -103,28 +108,34 @@ export function LinearRegressionModal({
         <div className="p-3">
           <div className="grid grid-cols-3 gap-4 leading-6">
             <div className="py-1 px-4 rounded-lg text-right text-lg content-center">
-              {t('LinearRegressionModal.TableName')}
+              {t("LinearRegressionModal.TableName")}
             </div>
             <Select
               optionList={tableNameList}
-              selectFunc={(event: ChangeEvent<HTMLSelectElement>) => changeTableName(event)}
+              selectFunc={(event: ChangeEvent<HTMLSelectElement>) =>
+                changeTableName(event)
+              }
             ></Select>
           </div>
         </div>
         <div className="p-3">
           <div className="grid grid-cols-3 gap-4 leading-6">
             <div className="py-1 px-4 rounded-lg text-right text-lg content-center">
-              {t('LinearRegressionModal.DependentVariable')}
+              {t("LinearRegressionModal.DependentVariable")}
             </div>
             <Select
               optionList={columnNameList}
-              selectFunc={(event: ChangeEvent<HTMLSelectElement>) => changeDependentVariable(event)}
+              selectFunc={(event: ChangeEvent<HTMLSelectElement>) =>
+                changeDependentVariable(event)
+              }
             ></Select>
           </div>
         </div>
         <div className="flex">
           <div className="w-1/2 bg-gray-100 p-4">
-            <h2 className="text-xl font-bold mb-4">{t('LinearRegressionModal.ColumnName')}</h2>
+            <h2 className="text-xl font-bold mb-4">
+              {t("LinearRegressionModal.ColumnName")}
+            </h2>
             <ul className="space-y-2">
               {columnNameList.map((columnName, index) => (
                 <li
@@ -139,7 +150,7 @@ export function LinearRegressionModal({
           </div>
           <div className="w-1/2 bg-white p-4">
             <h2 className="text-xl font-bold mb-4">
-              {t('LinearRegressionModal.ExplanatoryVariable')}
+              {t("LinearRegressionModal.ExplanatoryVariable")}
             </h2>
             {explanatoryVariables.map((explanatoryVariable, index) => (
               <div key={index} className="p-2 bg-blue-50 shadow">
@@ -151,13 +162,15 @@ export function LinearRegressionModal({
       </Modal>
       <Modal
         isOpenModal={isResultModal}
-        modalTitle={t('LinearRegressionModal.Title')}
+        modalTitle={t("LinearRegressionModal.Title")}
         submitButtonName=""
         submit={executeAnalysis}
         close={closeResultModal}
         modalSize="max-w-3xl"
       >
-        <pre className="whitespace-pre-wrap text-gray-800 text-center">{result}</pre>
+        <pre className="whitespace-pre-wrap text-gray-800 text-center">
+          {result}
+        </pre>
       </Modal>
     </>
   );

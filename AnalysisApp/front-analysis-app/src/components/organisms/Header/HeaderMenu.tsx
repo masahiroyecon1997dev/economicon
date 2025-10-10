@@ -1,14 +1,15 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import type { Dispatch, SetStateAction } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { TableInfosType } from '../../../types/stateTypes';
+import type { TableInfosType } from "../../../types/stateTypes";
 
-import { HeaderMenuDropdown } from '../../molecules/HeaderMenuDropdown/HeaderMenuDropdown';
-import { Calculate } from '../Modal/Calculate';
-import { GenerateDataModal } from '../Modal/GenerateSimulationDataModal';
-import { ImportFileModal } from '../Modal/ImportFileModal';
-import { LinearRegressionModal } from '../Modal/LinearRegressionModal';
-import { SaveFileModal } from '../Modal/SaveFileModal';
+import { HeaderMenuDropdown } from "../../molecules/HeaderMenuDropdown/HeaderMenuDropdown";
+import { Calculate } from "../Modal/Calculate";
+import { GenerateDataModal } from "../Modal/GenerateSimulationDataModal";
+import { ImportFileModal } from "../Modal/ImportFileModal";
+import { LinearRegressionModal } from "../Modal/LinearRegressionModal";
+import { SaveFileModal } from "../Modal/SaveFileModal";
 
 type HeaderMenuProps = {
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
@@ -18,39 +19,41 @@ export function HeaderMenu({ setTableInfos }: HeaderMenuProps) {
   const { t } = useTranslation();
   const [isImportFileModal, setIsImportFileModal] = useState<boolean>(false);
   const [isSaveFileModal, setIsSaveFileModal] = useState<boolean>(false);
-  const [isGenerateSimulationDataModal, setGenerateSimulationDataModal] = useState<boolean>(false);
-  const [isLinearRegressionModal, setIsLinearRegressionModal] = useState<boolean>(false);
+  const [isGenerateSimulationDataModal, setGenerateSimulationDataModal] =
+    useState<boolean>(false);
+  const [isLinearRegressionModal, setIsLinearRegressionModal] =
+    useState<boolean>(false);
   const [isCalculateModal, setIsCalculateModal] = useState<boolean>(false);
 
   const fileDropdownListElement = [
     {
-      dropdownListName: t('HeaderMenu.FileOpen'),
+      dropdownListName: t("HeaderMenu.FileOpen"),
       dropdownListFunction: openImportFileModal,
     },
     {
-      dropdownListName: t('HeaderMenu.FileSave'),
+      dropdownListName: t("HeaderMenu.FileSave"),
       dropdownListFunction: openSaveFileModal,
     },
   ];
   const dataGenerationDropdownListElement = [
     {
-      dropdownListName: t('HeaderMenu.DataGeneration'),
+      dropdownListName: t("HeaderMenu.DataGeneration"),
       dropdownListFunction: openGenerateDataModal,
     },
     {
-      dropdownListName: t('HeaderMenu.SampleData'),
+      dropdownListName: t("HeaderMenu.SampleData"),
       dropdownListFunction: openImportFileModal,
     },
   ];
   const addColumnDropdownListElement = [
     {
-      dropdownListName: t('HeaderMenu.Calculate'),
+      dropdownListName: t("HeaderMenu.Calculate"),
       dropdownListFunction: openCalculateModal,
     },
   ];
   const modelDropdownListElement = [
     {
-      dropdownListName: t('HeaderMenu.LinearRegression'),
+      dropdownListName: t("HeaderMenu.LinearRegression"),
       dropdownListFunction: openLinearRegressionModal,
     },
     // {
@@ -101,25 +104,32 @@ export function HeaderMenu({ setTableInfos }: HeaderMenuProps) {
 
   return (
     <>
-      <div className="flex bg-gray-100 border-b border-gray-300 relative">
+      <div className="flex bg-brand-primary text-white relative">
+        <div className="flex items-center justify-center">
+          <h3 className="text-lg font-bold italic">{t("HeaderMenu.Title")}</h3>
+        </div>
         <div className="relative">
           <HeaderMenuDropdown dropdownListElement={fileDropdownListElement}>
-            {t('HeaderMenu.File')}
+            {t("HeaderMenu.File")}
           </HeaderMenuDropdown>
         </div>
         <div className="relative">
-          <HeaderMenuDropdown dropdownListElement={dataGenerationDropdownListElement}>
-            {t('HeaderMenu.Data')}
+          <HeaderMenuDropdown
+            dropdownListElement={dataGenerationDropdownListElement}
+          >
+            {t("HeaderMenu.Data")}
           </HeaderMenuDropdown>
         </div>
         <div className="relative">
-          <HeaderMenuDropdown dropdownListElement={addColumnDropdownListElement}>
-            {t('HeaderMenu.AddColumn')}
+          <HeaderMenuDropdown
+            dropdownListElement={addColumnDropdownListElement}
+          >
+            {t("HeaderMenu.AddColumn")}
           </HeaderMenuDropdown>
         </div>
         <div className="relative">
           <HeaderMenuDropdown dropdownListElement={modelDropdownListElement}>
-            {t('HeaderMenu.Model')}
+            {t("HeaderMenu.Model")}
           </HeaderMenuDropdown>
         </div>
         {/* <button className="px-4 py-2 hover:bg-gray-200">編集</button>
@@ -135,13 +145,19 @@ export function HeaderMenu({ setTableInfos }: HeaderMenuProps) {
         close={closeImportFileModal}
         setTableInfos={setTableInfos}
       />
-      <SaveFileModal isSaveFileModal={isSaveFileModal} close={closeSaveFileModal} />
+      <SaveFileModal
+        isSaveFileModal={isSaveFileModal}
+        close={closeSaveFileModal}
+      />
       <GenerateDataModal
         isGenerateSimulationDataModal={isGenerateSimulationDataModal}
         close={closeGenerateDataModal}
         setTableInfos={setTableInfos}
       />
-      <Calculate isCalculateModal={isCalculateModal} close={closeCalculateModal} />
+      <Calculate
+        isCalculateModal={isCalculateModal}
+        close={closeCalculateModal}
+      />
       <LinearRegressionModal
         isLinearRegressionModal={isLinearRegressionModal}
         close={closeLinearRegressionModal}
