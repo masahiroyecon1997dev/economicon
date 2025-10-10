@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+@theme {
+  /* メインのカラー */
+  --color-brand-primary: #2c3e50;
+  /* アクセント */
+  --color-brand-accent: #3498db;
+  /* メインカラーの薄い色（ホバー時） */
+  --color-brand-primary-light: #34495e;
+  /* メインカラーの濃い色（ホバー時） */
+  --color-brand-primary-dark: #223344;
+  /* メインのボーダーの色 */
+  --color-brand-border-color: #e5e7eb;
+}
+
 @layer utilities {
   @keyframes fade-in-down {
     0% {

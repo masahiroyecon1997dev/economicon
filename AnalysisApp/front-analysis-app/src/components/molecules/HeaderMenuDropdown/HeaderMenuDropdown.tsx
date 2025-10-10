@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 
-import { HeaderMenuButton } from '../../atoms/Button/HeaderMenuButton';
-import { HeaderMenuDropdownButton } from '../../atoms/Button/HeaderMenuDropdownButton';
+import { HeaderMenuButton } from "../../atoms/Button/HeaderMenuButton";
+import { HeaderMenuDropdownButton } from "../../atoms/Button/HeaderMenuDropdownButton";
 
 type HeaderMenuDropdownProps = {
   children: string;
@@ -11,11 +11,14 @@ type HeaderMenuDropdownProps = {
   }[];
 };
 
-export function HeaderMenuDropdown({ children, dropdownListElement }: HeaderMenuDropdownProps) {
+export function HeaderMenuDropdown({
+  children,
+  dropdownListElement,
+}: HeaderMenuDropdownProps) {
   const [openDropdown, setOpenDropdown] = useState<boolean>(false);
 
   function clickMenu() {
-    setOpenDropdown(preOpenDropdown => !preOpenDropdown);
+    setOpenDropdown((preOpenDropdown) => !preOpenDropdown);
   }
 
   function onMouseEvent() {
@@ -27,12 +30,20 @@ export function HeaderMenuDropdown({ children, dropdownListElement }: HeaderMenu
   }
 
   return (
-    <div onMouseEnter={() => onMouseEvent()} onMouseLeave={() => leaveMouseEvent()}>
-      <HeaderMenuButton clickEvent={() => clickMenu()}>{children}</HeaderMenuButton>
+    <div
+      onMouseEnter={() => onMouseEvent()}
+      onMouseLeave={() => leaveMouseEvent()}
+    >
+      <HeaderMenuButton clickEvent={() => clickMenu()}>
+        {children}
+      </HeaderMenuButton>
       {openDropdown && (
-        <div className="absolute bg-white shadow-md z-50">
+        <div className="absolute bg-brand-primary shadow-md z-50">
           {dropdownListElement.map((item, i) => (
-            <HeaderMenuDropdownButton key={i} clickEvent={item.dropdownListFunction}>
+            <HeaderMenuDropdownButton
+              key={i}
+              clickEvent={item.dropdownListFunction}
+            >
               {item.dropdownListName}
             </HeaderMenuDropdownButton>
           ))}

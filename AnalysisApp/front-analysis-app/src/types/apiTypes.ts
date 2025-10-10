@@ -1,7 +1,15 @@
-import { ColumnType } from './commonTypes';
+import type { ColumnType } from "./commonTypes";
 
-export type ResImportCsvType = { code: number; result: { tableName: string }; message: string };
-export type ResOutputCsvType = { code: number; result: { csvData: string }; message: string };
+export type ResImportCsvType = {
+  code: number;
+  result: { tableName: string };
+  message: string;
+};
+export type ResOutputCsvType = {
+  code: number;
+  result: { csvData: string };
+  message: string;
+};
 export type ResFetchDataToJsonType = {
   code: number;
   result: { tableName: string; data: string };
@@ -12,7 +20,7 @@ export type ResGetTableNameListType = {
   result: { tableNameList: string[] };
   message: string;
 };
-export type ResGetColumnListType = {
+export type ResGetColumnInfoType = {
   code: string;
   result: { columnList: ColumnType[] };
   message: string;
