@@ -49,6 +49,9 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
+  // Tailwind CSSの設定ファイルのパスが無効な場合に警告を無視
+  "tailwindCSS.lint.invalidConfigPath": "ignore",
+  "files.encoding": "utf8",
   // 改行コードの規定値
   "files.eol": "\n",
   // 非表示にするファイル・ディレクトリのパスのパターン

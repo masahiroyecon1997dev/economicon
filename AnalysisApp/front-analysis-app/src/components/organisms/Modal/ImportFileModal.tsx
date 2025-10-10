@@ -1,14 +1,15 @@
-import React, { ChangeEvent, Dispatch, DragEvent, SetStateAction, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import type { ChangeEvent, Dispatch, DragEvent, SetStateAction } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { IconContext } from 'react-icons';
-import { FaFileAlt } from 'react-icons/fa';
+import { IconContext } from "react-icons";
+import { FaFileAlt } from "react-icons/fa";
 
-import { getTableInfo } from '../../../function/internalFunctions';
-import { importCsv } from '../../../function/restApis';
-import { TableInfosType } from '../../../types/stateTypes';
+import { getTableInfo } from "../../../function/internalFunctions";
+import { importCsv } from "../../../function/restApis";
+import type { TableInfosType } from "../../../types/stateTypes";
 
-import { Modal } from '../../molecules/Modal/Modal';
+import { Modal } from "../../molecules/Modal/Modal";
 
 type ImportFileModalProps = {
   isImportFileModal: boolean;
@@ -16,7 +17,11 @@ type ImportFileModalProps = {
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
 };
 
-export function ImportFileModal({ isImportFileModal, close, setTableInfos }: ImportFileModalProps) {
+export function ImportFileModal({
+  isImportFileModal,
+  close,
+  setTableInfos,
+}: ImportFileModalProps) {
   const { t } = useTranslation();
   const [file, setFile] = useState<File>();
   const [dragActive, setDragActive] = useState(false);
@@ -30,9 +35,9 @@ export function ImportFileModal({ isImportFileModal, close, setTableInfos }: Imp
   function handleDrag(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     event.stopPropagation();
-    if (event.type === 'dragenter' || event.type === 'dragover') {
+    if (event.type === "dragenter" || event.type === "dragover") {
       setDragActive(true);
-    } else if (event.type === 'dragleave') {
+    } else if (event.type === "dragleave") {
       setDragActive(false);
     }
   }
@@ -49,34 +54,37 @@ export function ImportFileModal({ isImportFileModal, close, setTableInfos }: Imp
   async function importFile() {
     if (!file) return;
     const resImportCsv = await importCsv(file);
+    console.log(resImportCsv);
     const tableInfo = await getTableInfo(resImportCsv.result.tableName);
-    setTableInfos(preTableInfos => [...preTableInfos, tableInfo]);
+    setTableInfos((preTableInfos) => [...preTableInfos, tableInfo]);
     close();
   }
 
   return (
     <Modal
       isOpenModal={isImportFileModal}
-      modalTitle={t('ImportFileModal.Title')}
-      submitButtonName={t('ImportFileModal.OpenFile')}
+      modalTitle={t("ImportFileModal.Title")}
+      submitButtonName={t("ImportFileModal.OpenFile")}
       submit={importFile}
       close={close}
       modalSize="max-w-2xl"
     >
       <div
         className={`w-full py-9 bg-gray-50 rounded-2xl border border-gray-300 gap-3 grid border-dashed ${
-          dragActive ? 'border-blue-500 bg-blue-100' : 'border-gray-300'
+          dragActive ? "border-blue-500 bg-blue-100" : "border-gray-300"
         }`}
-        onDragEnter={event => handleDrag(event)}
-        onDragOver={event => handleDrag(event)}
-        onDragLeave={event => handleDrag(event)}
-        onDrop={event => handleDropFile(event)}
+        onDragEnter={(event) => handleDrag(event)}
+        onDragOver={(event) => handleDrag(event)}
+        onDragLeave={(event) => handleDrag(event)}
+        onDrop={(event) => handleDropFile(event)}
       >
         {file ? (
           <div>
             <div className="grid gap-1">
               <div className="mx-auto">
-                <IconContext.Provider value={{ color: '#4f46e5', size: '40px' }}>
+                <IconContext.Provider
+                  value={{ color: "#4f46e5", size: "40px" }}
+                >
                   <FaFileAlt />
                 </IconContext.Provider>
               </div>
@@ -94,10 +102,10 @@ export function ImportFileModal({ isImportFileModal, close, setTableInfos }: Imp
                     type="file"
                     accept=".csv"
                     hidden
-                    onChange={event => changeFileInput(event)}
+                    onChange={(event) => changeFileInput(event)}
                   />
                   <div className="flex w-28 h-9 px-2 flex-col bg-indigo-600 rounded-full shadow text-white text-xs font-semibold leading-4 items-center justify-center cursor-pointer focus:outline-none">
-                    {t('ImportFileModal.OtherChooseFile')}
+                    {t("ImportFileModal.OtherChooseFile")}
                   </div>
                 </label>
               </div>
@@ -107,23 +115,29 @@ export function ImportFileModal({ isImportFileModal, close, setTableInfos }: Imp
           <div>
             <div className="grid gap-1">
               <div className="mx-auto">
-                <IconContext.Provider value={{ color: '#4f46e5', size: '40px' }}>
+                <IconContext.Provider
+                  value={{ color: "#4f46e5", size: "40px" }}
+                >
                   <FaFileAlt />
                 </IconContext.Provider>
               </div>
               <h2 className="text-center text-gray-400 text-xs leading-4">
-                {t('ImportFileModal.Notation')}
+                {t("ImportFileModal.Notation")}
               </h2>
             </div>
             <div className="grid gap-2">
               <h4 className="text-center text-gray-900 text-sm font-medium leading-snug">
-                {t('ImportFileModal.Information')}
+                {t("ImportFileModal.Information")}
               </h4>
               <div className="flex items-center justify-center">
                 <label>
-                  <input type="file" hidden onChange={event => changeFileInput(event)} />
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(event) => changeFileInput(event)}
+                  />
                   <div className="flex w-28 h-9 px-2 flex-col bg-indigo-600 rounded-full shadow text-white text-xs font-semibold leading-4 items-center justify-center cursor-pointer focus:outline-none">
-                    {t('ImportFileModal.ChooseFile')}
+                    {t("ImportFileModal.ChooseFile")}
                   </div>
                 </label>
               </div>

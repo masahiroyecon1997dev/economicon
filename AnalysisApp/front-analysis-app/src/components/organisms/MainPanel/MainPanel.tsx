@@ -1,8 +1,6 @@
-import React from 'react';
-
-import { HEADER_MENU_HEIGHT, TABLE_TAB_HEIGHT } from '../../../common/constant';
-import { TableInfosType } from '../../../types/stateTypes';
-import { MainTable } from '../Table/MainTable';
+import { HEADER_MENU_HEIGHT, TABLE_TAB_HEIGHT } from "../../../common/constant";
+import type { TableInfosType } from "../../../types/stateTypes";
+import { MainTable } from "../Table/MainTable";
 
 type MainPanelProps = {
   tableInfos: TableInfosType;
@@ -29,7 +27,7 @@ export function MainPanel({ tableInfos }: MainPanelProps) {
             <button
               key={index}
               className={`px-4 py-2 text-white ${
-                table.isActive ? 'bg-indigo-600' : 'hover:bg-indigo-300'
+                table.isActive ? "bg-indigo-600" : "hover:bg-indigo-300"
               }`}
             >
               {table.tableName}
