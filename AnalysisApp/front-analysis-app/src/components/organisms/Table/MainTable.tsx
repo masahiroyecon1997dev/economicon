@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { TableInfoType } from '../../../types/commonTypes';
+import type { TableInfoType } from '../../../types/commonTypes';
 
 import { TableBody } from './TableBody';
 import { TableHeader } from './TableHeader';

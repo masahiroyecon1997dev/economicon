@@ -1,18 +1,18 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import { getTableInfo } from "../../../function/internalFunctions";
-import type { TableInfosType, TableListType } from "../../../types/stateTypes";
+import type { TableInfosType } from "../../../types/stateTypes";
+import { SectionHeading } from "../../atoms/List/SectionHeading";
+import { TableNav } from "../../molecules/List/TableNav";
 
 type LeftSideMenuProps = {
   tableInfos: TableInfosType;
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
-  tableList: TableListType;
 };
 
 export function LeftSideMenu({
   tableInfos,
-  setTableInfos,
-  tableList,
+  setTableInfos
 }: LeftSideMenuProps) {
   const { t } = useTranslation();
 
@@ -49,38 +49,12 @@ export function LeftSideMenu({
   return (
     <div className="flex flex-1 overflow-hidden">
       <aside className="w-64 shrink-0 border-r border-brand-border-color bg-gray-50 p-4">
-        <h2 className="text-lg font-semibold mb-4 text-brand-primary">
-          {t("Common.Table")}
-        </h2>
-        <nav className="flex flex-col gap-1">
-          {tableList.map((table, index) => (
-            <a
-              key={index}
-              className={`flex items-center justify-between rounded-md px-3 py-2 transition-colors cursor-pointer ${
-                activeTableName === table
-                  ? "bg-gray-200 text-gray-900 font-medium"
-                  : "hover:bg-gray-100 text-gray-600 hover:text-gray-900"
-              }`}
-              onClick={() => clickTableName(table)}
-            >
-              <span>{table}</span>
-              <svg
-                className="size-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9 5l7 7-7 7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                />
-              </svg>
-            </a>
-          ))}
-        </nav>
+        <SectionHeading title={t("Common.Table")} />
+        <TableNav
+          tableInfos={tableInfos}
+          activeTableName={activeTableName}
+          onTableClick={clickTableName}
+        />
       </aside>
     </div>
   );

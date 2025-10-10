@@ -1,5 +1,5 @@
 import React from 'react';
-import { TableDataType } from '../../../types/commonTypes';
+import type { TableDataType } from '../../../types/commonTypes';
 import { TableRow } from '../../molecules/Table/TableRow';
 
 type TableBodyProps = {

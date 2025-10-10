@@ -5,7 +5,7 @@ import { getTableNameList } from "./function/restApis";
 import type { TableInfosType } from "./types/stateTypes";
 
 import { HeaderMenu } from "./components/organisms/Header/HeaderMenu";
-import { MainPanel } from "./components/organisms/MainPanel/MainPanel";
+import { LeftSideMenu } from "./components/organisms/MainPanel/LeftSideMenu";
 import { getTableInfo } from "./function/internalFunctions";
 
 export function App() {
@@ -17,8 +17,8 @@ export function App() {
       const resGetTableNames = await getTableNameList();
       for (const tableName of resGetTableNames.result.tableNameList) {
         const tableInfo = await getTableInfo(tableName);
+        console.log(tableInfo);
         if (!ignore) {
-          console.log("aaa");
           setTableInfos((preTableInfos) => [...preTableInfos, tableInfo]);
         }
       }
@@ -30,7 +30,7 @@ export function App() {
   }, []);
 
   return (
-    <div className="App h-full">
+    <div className="App h-screen">
       <div style={{ height: `${HEADER_MENU_HEIGHT}px` }}>
         <HeaderMenu setTableInfos={setTableInfos} />
       </div>
@@ -38,12 +38,11 @@ export function App() {
         className="flex"
         style={{ height: `calc(100% - ${HEADER_MENU_HEIGHT}px)` }}
       >
-        {/* <LeftSideMenu
+        <LeftSideMenu
           tableInfos={tableInfos}
           setTableInfos={setTableInfos}
-          tableList={tableList}
-        ></LeftSideMenu> */}
-        <MainPanel tableInfos={tableInfos}></MainPanel>
+        ></LeftSideMenu>
+        {/* <MainPanel tableInfos={tableInfos}></MainPanel> */}
       </div>
     </div>
   );

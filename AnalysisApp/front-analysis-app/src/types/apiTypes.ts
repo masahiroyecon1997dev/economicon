@@ -22,7 +22,7 @@ export type ResGetTableNameListType = {
 };
 export type ResGetColumnInfoType = {
   code: string;
-  result: { columnList: ColumnType[] };
+  result: { tableName: string; columnInfoList: ColumnType[] };
   message: string;
 };
 export type ResGenerateSimulationDataType = {
