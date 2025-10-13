@@ -1,5 +1,4 @@
-import { TableInfoType } from "./commonTypes"
+import type { TableInfoType } from "./commonTypes";
 
-export type TableInfosType = TableInfoType[]
-
-export type TableListType = string[];
+export type TableNameListType = string[];
+export type TableInfosType = TableInfoType[];

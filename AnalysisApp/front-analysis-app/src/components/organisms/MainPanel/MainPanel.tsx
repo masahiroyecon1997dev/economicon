@@ -7,34 +7,19 @@ type MainPanelProps = {
 };
 
 export function MainPanel({ tableInfos }: MainPanelProps) {
-  // function clickTabChange() {}
 
   return (
-    <div className="flex flex-col float-right w-full min-h-full">
+    <main className="flex-1 overflow-y-auto bg-brand-secondary p-8">
       <div
-        className="flex-grow overflow-y-auto"
+        className="max-w-full mx-auto"
         style={{
-          height: `calc(100vh - ${HEADER_MENU_HEIGHT}px - ${TABLE_TAB_HEIGHT}px)]`,
+          height: `calc(100vh - ${HEADER_MENU_HEIGHT}px - ${TABLE_TAB_HEIGHT}px)`,
         }}
       >
         {tableInfos.map((table, index) => (
           <MainTable key={index} tableInfo={table}></MainTable>
         ))}
       </div>
-      <div style={{ height: `${HEADER_MENU_HEIGHT}px` }}>
-        <div className="flex">
-          {tableInfos.map((table, index) => (
-            <button
-              key={index}
-              className={`px-4 py-2 text-white ${
-                table.isActive ? "bg-indigo-600" : "hover:bg-indigo-300"
-              }`}
-            >
-              {table.tableName}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+    </main>
   );
 }

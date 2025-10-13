@@ -38,15 +38,19 @@ export function HeaderMenuDropdown({
         {children}
       </HeaderMenuButton>
       {openDropdown && (
-        <div className="absolute bg-brand-primary shadow-md z-50">
-          {dropdownListElement.map((item, i) => (
-            <HeaderMenuDropdownButton
-              key={i}
-              clickEvent={item.dropdownListFunction}
-            >
-              {item.dropdownListName}
-            </HeaderMenuDropdownButton>
-          ))}
+        <div className="absolute left-0 mt-0 w-48 origin-top-left rounded-md bg-white shadow-lg focus:outline-none z-10">
+          <div className="py-0">
+            {dropdownListElement.map((item, i) => (
+              <HeaderMenuDropdownButton
+                key={i}
+                isTop={i === 0}
+                isBottom={i === dropdownListElement.length - 1}
+                clickEvent={item.dropdownListFunction}
+              >
+                {item.dropdownListName}
+              </HeaderMenuDropdownButton>
+            ))}
+          </div>
         </div>
       )}
     </div>

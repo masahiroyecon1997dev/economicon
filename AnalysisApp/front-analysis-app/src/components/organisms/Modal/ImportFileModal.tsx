@@ -7,19 +7,21 @@ import { FaFileAlt } from "react-icons/fa";
 
 import { getTableInfo } from "../../../function/internalFunctions";
 import { importCsv } from "../../../function/restApis";
-import type { TableInfosType } from "../../../types/stateTypes";
+import type { TableInfosType, TableNameListType } from "../../../types/stateTypes";
 
 import { Modal } from "../../molecules/Modal/Modal";
 
 type ImportFileModalProps = {
   isImportFileModal: boolean;
   close: () => void;
+  setTableNameList: Dispatch<SetStateAction<TableNameListType>>;
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
 };
 
 export function ImportFileModal({
   isImportFileModal,
   close,
+  setTableNameList,
   setTableInfos,
 }: ImportFileModalProps) {
   const { t } = useTranslation();
@@ -56,6 +58,7 @@ export function ImportFileModal({
     const resImportCsv = await importCsv(file);
     console.log(resImportCsv);
     const tableInfo = await getTableInfo(resImportCsv.result.tableName);
+    setTableNameList((preTableNameList) => [...preTableNameList, resImportCsv.result.tableName]);
     setTableInfos((preTableInfos) => [...preTableInfos, tableInfo]);
     close();
   }

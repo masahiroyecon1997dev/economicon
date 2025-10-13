@@ -3,6 +3,8 @@
 @theme {
   /* メインのカラー */
   --color-brand-primary: #2c3e50;
+  /* セカンドメインのカラー */
+  --color-brand-secondary: #f8f9fa;
   /* アクセント */
   --color-brand-accent: #3498db;
   /* メインカラーの薄い色（ホバー時） */
