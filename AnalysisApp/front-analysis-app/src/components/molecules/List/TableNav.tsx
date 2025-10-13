@@ -1,20 +1,20 @@
-import type { TableInfosType } from "../../../types/stateTypes";
+import type { TableNameListType } from "../../../types/stateTypes";
 import { TableNavItem } from "../../atoms/List/TableNavItem";
 
 type TableNavProps = {
-  tableInfos: TableInfosType;
+  tableNameList: TableNameListType;
   activeTableName: string | null;
   onTableClick: (tableName: string) => void;
 };
 
-export function TableNav({ tableInfos, activeTableName, onTableClick }: TableNavProps) {
+export function TableNav({ tableNameList, activeTableName, onTableClick }: TableNavProps) {
   return (
     <nav className="flex flex-col gap-1">
-      {tableInfos.map((info, index) => (
+      {tableNameList.map((tableName, index) => (
         <TableNavItem
           key={index}
-          tableName={info.tableName}
-          isActive={activeTableName === info.tableName}
+          tableName={tableName}
+          isActive={activeTableName === tableName}
           onClick={onTableClick}
         />
       ))}

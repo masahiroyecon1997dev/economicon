@@ -1,26 +1,22 @@
 import { useEffect, useState } from "react";
 
-import { HEADER_MENU_HEIGHT } from "./common/constant";
 import { getTableNameList } from "./function/restApis";
-import type { TableInfosType } from "./types/stateTypes";
+import type { TableInfosType, TableNameListType } from "./types/stateTypes";
 
 import { HeaderMenu } from "./components/organisms/Header/HeaderMenu";
 import { LeftSideMenu } from "./components/organisms/MainPanel/LeftSideMenu";
-import { getTableInfo } from "./function/internalFunctions";
+import { MainPanel } from "./components/organisms/MainPanel/MainPanel";
 
 export function App() {
+  const [tableNameList, setTableNameList] = useState<TableNameListType>([]);
   const [tableInfos, setTableInfos] = useState<TableInfosType>([]);
 
   useEffect(() => {
     let ignore = false;
     async function initializeData() {
       const resGetTableNames = await getTableNameList();
-      for (const tableName of resGetTableNames.result.tableNameList) {
-        const tableInfo = await getTableInfo(tableName);
-        console.log(tableInfo);
-        if (!ignore) {
-          setTableInfos((preTableInfos) => [...preTableInfos, tableInfo]);
-        }
+      if (!ignore) {
+        setTableNameList(resGetTableNames.result.tableNameList);
       }
     }
     initializeData();
@@ -30,19 +26,17 @@ export function App() {
   }, []);
 
   return (
-    <div className="App h-screen">
-      <div style={{ height: `${HEADER_MENU_HEIGHT}px` }}>
-        <HeaderMenu setTableInfos={setTableInfos} />
-      </div>
+    <div className="flex h-screen flex-col overflow-hidden bg-white">
+      <HeaderMenu setTableNameList={setTableNameList} setTableInfos={setTableInfos} />
       <div
-        className="flex"
-        style={{ height: `calc(100% - ${HEADER_MENU_HEIGHT}px)` }}
+        className="flex flex-1 overflow-hidden"
       >
         <LeftSideMenu
+          tableNameList={tableNameList}
           tableInfos={tableInfos}
           setTableInfos={setTableInfos}
         ></LeftSideMenu>
-        {/* <MainPanel tableInfos={tableInfos}></MainPanel> */}
+        <MainPanel tableInfos={tableInfos}></MainPanel>
       </div>
     </div>
   );
