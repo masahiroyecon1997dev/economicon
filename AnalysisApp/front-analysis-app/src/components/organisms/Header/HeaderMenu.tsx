@@ -1,8 +1,11 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { IconContext } from "react-icons";
+import { AiOutlineQuestionCircle } from "react-icons/ai";
+import { LuLayers3 } from "react-icons/lu";
 
-import type { TableInfosType } from "../../../types/stateTypes";
+import type { TableInfosType, TableNameListType } from "../../../types/stateTypes";
 
 import { HeaderMenuDropdown } from "../../molecules/HeaderMenuDropdown/HeaderMenuDropdown";
 import { Calculate } from "../Modal/Calculate";
@@ -12,10 +15,11 @@ import { LinearRegressionModal } from "../Modal/LinearRegressionModal";
 import { SaveFileModal } from "../Modal/SaveFileModal";
 
 type HeaderMenuProps = {
+  setTableNameList: Dispatch<SetStateAction<TableNameListType>>;
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
 };
 
-export function HeaderMenu({ setTableInfos }: HeaderMenuProps) {
+export function HeaderMenu({ setTableNameList, setTableInfos }: HeaderMenuProps) {
   const { t } = useTranslation();
   const [isImportFileModal, setIsImportFileModal] = useState<boolean>(false);
   const [isSaveFileModal, setIsSaveFileModal] = useState<boolean>(false);
@@ -104,45 +108,58 @@ export function HeaderMenu({ setTableInfos }: HeaderMenuProps) {
 
   return (
     <>
-      <div className="flex bg-brand-primary text-white relative">
-        <div className="flex items-center justify-center">
-          <div className="text-lg font-bold italic">{t("HeaderMenu.Title")}</div>
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-brand-border-color bg-brand-primary px-6 text-white">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className="size-6 text-white">
+              <IconContext.Provider value={{ size: '1.5rem'}}>
+                <LuLayers3 />
+              </IconContext.Provider>
+            </div>
+            <h1 className="text-xl font-bold italic">{t("HeaderMenu.Title")}</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative group">
+              <HeaderMenuDropdown dropdownListElement={fileDropdownListElement}>
+                {t("HeaderMenu.File")}
+              </HeaderMenuDropdown>
+            </div>
+            <div className="relative group">
+              <HeaderMenuDropdown
+                dropdownListElement={dataGenerationDropdownListElement}
+              >
+                {t("HeaderMenu.Data")}
+              </HeaderMenuDropdown>
+            </div>
+            <div className="relative group">
+              <HeaderMenuDropdown
+                dropdownListElement={addColumnDropdownListElement}
+              >
+                {t("HeaderMenu.AddColumn")}
+              </HeaderMenuDropdown>
+            </div>
+            <div className="relative group">
+              <HeaderMenuDropdown dropdownListElement={modelDropdownListElement}>
+                {t("HeaderMenu.Model")}
+              </HeaderMenuDropdown>
+            </div>
+          </div>
         </div>
-        <div className="relative">
-          <HeaderMenuDropdown dropdownListElement={fileDropdownListElement}>
-            {t("HeaderMenu.File")}
-          </HeaderMenuDropdown>
+        <div className="flex items-center gap-4">
+          <button className="rounded-full p-2 hover:bg-white/10 transition-colors">
+            <div className="text-white">
+              <IconContext.Provider value={{ size: '1.5rem' }}>
+                <AiOutlineQuestionCircle />
+              </IconContext.Provider>
+            </div>
+          </button>
+          <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"></div>
         </div>
-        <div className="relative">
-          <HeaderMenuDropdown
-            dropdownListElement={dataGenerationDropdownListElement}
-          >
-            {t("HeaderMenu.Data")}
-          </HeaderMenuDropdown>
-        </div>
-        <div className="relative">
-          <HeaderMenuDropdown
-            dropdownListElement={addColumnDropdownListElement}
-          >
-            {t("HeaderMenu.AddColumn")}
-          </HeaderMenuDropdown>
-        </div>
-        <div className="relative">
-          <HeaderMenuDropdown dropdownListElement={modelDropdownListElement}>
-            {t("HeaderMenu.Model")}
-          </HeaderMenuDropdown>
-        </div>
-        {/* <button className="px-4 py-2 hover:bg-gray-200">編集</button>
-        <button className="px-4 py-2 hover:bg-gray-200">表示</button>
-        <button className="px-4 py-2 hover:bg-gray-200">挿入</button>
-        <button className="px-4 py-2 hover:bg-gray-200">書式</button>
-        <button className="px-4 py-2 hover:bg-gray-200">データ</button>
-        <button className="px-4 py-2 hover:bg-gray-200">ツール</button>
-        <button className="px-4 py-2 hover:bg-gray-200">ヘルプ</button> */}
-      </div>
+      </header>
       <ImportFileModal
         isImportFileModal={isImportFileModal}
         close={closeImportFileModal}
+        setTableNameList={setTableNameList}
         setTableInfos={setTableInfos}
       />
       <SaveFileModal

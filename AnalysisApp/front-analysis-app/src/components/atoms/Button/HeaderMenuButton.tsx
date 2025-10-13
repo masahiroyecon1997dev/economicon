@@ -1,3 +1,5 @@
+import { FiChevronDown } from "react-icons/fi";
+
 type HeaderMenuButtonProps = {
   children: string;
   clickEvent: () => void;
@@ -9,10 +11,11 @@ export function HeaderMenuButton({
 }: HeaderMenuButtonProps) {
   return (
     <button
-      className="w-24 px-4 py-2 hover:bg-brand-primary-light whitespace-nowrap text-left"
+      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-white/10 transition-colors"
       onClick={() => clickEvent()}
     >
-      {children}
+      <span>{children}</span>
+      <FiChevronDown />
     </button>
   );
 }

@@ -1,16 +1,18 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import { getTableInfo } from "../../../function/internalFunctions";
-import type { TableInfosType } from "../../../types/stateTypes";
+import type { TableInfosType, TableNameListType } from "../../../types/stateTypes";
 import { SectionHeading } from "../../atoms/List/SectionHeading";
 import { TableNav } from "../../molecules/List/TableNav";
 
 type LeftSideMenuProps = {
+  tableNameList: TableNameListType;
   tableInfos: TableInfosType;
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
 };
 
 export function LeftSideMenu({
+  tableNameList,
   tableInfos,
   setTableInfos
 }: LeftSideMenuProps) {
@@ -47,15 +49,13 @@ export function LeftSideMenu({
   const activeTableName = getActiveTableName();
 
   return (
-    <div className="flex flex-1 overflow-hidden">
-      <aside className="w-64 shrink-0 border-r border-brand-border-color bg-gray-50 p-4">
-        <SectionHeading title={t("Common.Table")} />
-        <TableNav
-          tableInfos={tableInfos}
-          activeTableName={activeTableName}
-          onTableClick={clickTableName}
-        />
-      </aside>
-    </div>
+    <aside className="w-64 shrink-0 border-r border-brand-border-color bg-gray-50 p-4">
+      <SectionHeading title={t("Common.Table")} />
+      <TableNav
+        tableNameList={tableNameList}
+        activeTableName={activeTableName}
+        onTableClick={clickTableName}
+      />
+    </aside>
   );
 }
