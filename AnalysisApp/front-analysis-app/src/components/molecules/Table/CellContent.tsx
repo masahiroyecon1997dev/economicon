@@ -1,5 +1,4 @@
-import React from 'react';
-import { TableDataCellType } from '../../../types/commonTypes';
+import type { TableDataCellType } from '../../../types/commonTypes';
 
 interface CellContentProps {
   value: TableDataCellType;

@@ -1,5 +1,5 @@
-import React, { ChangeEvent } from 'react';
-import { TableDataCellType } from '../../../types/commonTypes';
+import type { ChangeEvent } from 'react';
+import type { TableDataCellType } from '../../../types/commonTypes';
 
 type TableInputTextProps = {
   value: TableDataCellType;

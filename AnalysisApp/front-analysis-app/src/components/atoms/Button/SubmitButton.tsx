@@ -1,5 +1,3 @@
-import React from 'react';
-
 type SubmitButtonProps = {
   children: string;
   submit: () => void;

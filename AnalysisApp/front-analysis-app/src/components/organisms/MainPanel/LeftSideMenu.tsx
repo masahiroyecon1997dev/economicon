@@ -49,7 +49,7 @@ export function LeftSideMenu({
   const activeTableName = getActiveTableName();
 
   return (
-    <aside className="w-64 shrink-0 border-r border-brand-border-color bg-gray-50 p-4">
+    <aside className="w-64 shrink-0 border-r border-brand-border bg-brand-primary p-4 text-white">
       <SectionHeading title={t("Common.Table")} />
       <TableNav
         tableNameList={tableNameList}

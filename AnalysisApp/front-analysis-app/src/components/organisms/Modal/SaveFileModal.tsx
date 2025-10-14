@@ -1,9 +1,10 @@
 import { saveAs } from 'file-saver';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getTableNameList, outputCsv } from '../../../function/restApis';
-import { SelectListType } from '../../../types/commonTypes';
+import type { SelectListType } from '../../../types/commonTypes';
 
 import { Select } from '../../molecules/InputField/Select';
 import { Modal } from '../../molecules/Modal/Modal';

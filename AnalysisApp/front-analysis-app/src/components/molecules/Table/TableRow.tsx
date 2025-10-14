@@ -1,5 +1,6 @@
 import React from 'react';
-import { TalbeDataRowType } from '../../../types/commonTypes';
+
+import type { TalbeDataRowType } from '../../../types/commonTypes';
 import { TableRowHeaderCell } from '../../atoms/TableCell/TableRowHeaderCell';
 import { EditableTableCell } from './EditableTableCell';
 
