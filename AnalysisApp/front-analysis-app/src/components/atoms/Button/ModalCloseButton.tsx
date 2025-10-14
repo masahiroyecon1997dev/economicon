@@ -1,7 +1,5 @@
-import React from "react";
-
-import { IconContext } from "react-icons";
-import { MdClose } from "react-icons/md";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 type ModalCloseButtonProps = {
   close: () => void;
@@ -10,7 +8,7 @@ type ModalCloseButtonProps = {
 export function ModalCloseButton ({ close }: ModalCloseButtonProps) {
   return (
     <button className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => close()}>
-      <IconContext.Provider value={{ size: '2rem'}}><MdClose/></IconContext.Provider>
+      <FontAwesomeIcon icon={faXmark} className="text-2xl" />
     </button>
   )
 }

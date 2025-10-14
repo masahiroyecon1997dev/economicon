@@ -1,9 +1,8 @@
+import { faFileLines } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ChangeEvent, Dispatch, DragEvent, SetStateAction } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { IconContext } from "react-icons";
-import { FaFileAlt } from "react-icons/fa";
 
 import { getTableInfo } from "../../../function/internalFunctions";
 import { importCsv } from "../../../function/restApis";
@@ -85,11 +84,7 @@ export function ImportFileModal({
           <div>
             <div className="grid gap-1">
               <div className="mx-auto">
-                <IconContext.Provider
-                  value={{ color: "#4f46e5", size: "40px" }}
-                >
-                  <FaFileAlt />
-                </IconContext.Provider>
+                <FontAwesomeIcon icon={faFileLines} className="text-[40px] text-indigo-600" />
               </div>
             </div>
             <div className="grid gap-2">
@@ -118,11 +113,7 @@ export function ImportFileModal({
           <div>
             <div className="grid gap-1">
               <div className="mx-auto">
-                <IconContext.Provider
-                  value={{ color: "#4f46e5", size: "40px" }}
-                >
-                  <FaFileAlt />
-                </IconContext.Provider>
+                <FontAwesomeIcon icon={faFileLines} className="text-[40px] text-indigo-600" />
               </div>
               <h2 className="text-center text-gray-400 text-xs leading-4">
                 {t("ImportFileModal.Notation")}

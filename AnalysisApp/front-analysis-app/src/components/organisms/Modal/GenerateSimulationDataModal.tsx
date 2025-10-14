@@ -1,11 +1,12 @@
-import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
+import type { ChangeEvent, Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { checkInteger, checkNumber, checkRequired } from '../../../function/checkInputFunctions';
 import { getTableInfo } from '../../../function/internalFunctions';
 import { generateSimulationData } from '../../../function/restApis';
-import { ReqGenerateSimulationDataType } from '../../../types/apiTypes';
-import { TableInfosType } from '../../../types/stateTypes';
+import type { ReqGenerateSimulationDataType } from '../../../types/apiTypes';
+import type { TableInfosType } from '../../../types/stateTypes';
 import { SubmitButton } from '../../atoms/Button/SubmitButton';
 import { InputText } from '../../atoms/Input/InputText';
 import { InputTextField } from '../../molecules/InputField/InputTextField';

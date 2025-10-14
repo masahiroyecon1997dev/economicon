@@ -1,7 +1,5 @@
-import React from 'react';
-
-import { ModalHeaderTitle } from '../../atoms/Modal/ModalHeaderTitle';
 import { ModalCloseButton } from '../../atoms/Button/ModalCloseButton';
+import { ModalHeaderTitle } from '../../atoms/Modal/ModalHeaderTitle';
 
 type ModalHeaderProps = {
   children: string;

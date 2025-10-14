@@ -1,7 +1,7 @@
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 
+import type { SelectListType } from '../../../types/commonTypes';
 import { SelectOption } from '../../atoms/Input/SelectOption';
-import { SelectListType } from '../../../types/commonTypes';
 
 type SelectType = {
   optionList: SelectListType;
