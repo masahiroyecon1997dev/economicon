@@ -1,4 +1,5 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ModalFooter } from './ModalFooter';
 import { ModalHeader } from './ModalHeader';

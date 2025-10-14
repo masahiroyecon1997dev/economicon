@@ -1,4 +1,4 @@
-import { checkInputType } from "../types/commonTypes";
+import type { checkInputType } from "../types/commonTypes";
 
 export function checkRequired(value: string): checkInputType {
   if (value === "") {

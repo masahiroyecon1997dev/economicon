@@ -1,11 +1,10 @@
 type SectionHeadingProps = {
   title: string;
-  className?: string;
 };
 
-export function SectionHeading({ title, className = "" }: SectionHeadingProps) {
+export function SectionHeading({ title }: SectionHeadingProps) {
   return (
-    <h2 className={`text-lg font-semibold mb-4 text-brand-primary ${className}`}>
+    <h2 className="text-lg font-semibold mb-4">
       {title}
     </h2>
   );

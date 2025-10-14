@@ -1,5 +1,3 @@
-import React from 'react';
-
 type TableContextMenuProps = {
   contextMenu: {
     x: number;

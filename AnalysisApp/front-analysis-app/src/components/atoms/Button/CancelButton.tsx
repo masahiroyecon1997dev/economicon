@@ -1,5 +1,3 @@
-import React from 'react';
-
 type CancelButtonProps = {
   children: string;
   cancel: () => void;

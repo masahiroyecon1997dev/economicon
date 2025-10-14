@@ -1,4 +1,5 @@
-import { FiChevronDown } from "react-icons/fi";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 type HeaderMenuButtonProps = {
   children: string;
@@ -15,7 +16,7 @@ export function HeaderMenuButton({
       onClick={() => clickEvent()}
     >
       <span>{children}</span>
-      <FiChevronDown />
+      <FontAwesomeIcon icon={faChevronDown} />
     </button>
   );
 }
