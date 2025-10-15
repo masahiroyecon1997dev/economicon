@@ -12,7 +12,7 @@ type TableRowProps = {
 
 export function TableRow({ row, index, handleContextMenu }: TableRowProps) {
   return (
-    <tr className="hover:bg-gray-50">
+    <tr className="bg-white border-b">
       <TableRowHeaderCell onContextMenu={e => handleContextMenu(e, 'row', index.toString())}>
         {index + 1}
       </TableRowHeaderCell>

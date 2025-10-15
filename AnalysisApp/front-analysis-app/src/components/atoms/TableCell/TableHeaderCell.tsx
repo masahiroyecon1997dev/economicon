@@ -9,7 +9,7 @@ type TableHeaderCellProps = {
 export function TableHeaderCell({ children, onContextMenu }: TableHeaderCellProps) {
   return (
     <th
-      className="px-4 py-2 bg-gray-200 border-b border-r text-left cursor-grab sticky top-0 z-10"
+      className="px-6 py-3"
       onContextMenu={onContextMenu}
     >
       {children}

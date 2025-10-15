@@ -9,7 +9,7 @@ type DraggableTableHeaderProps = {
 export function DraggableTableHeader({ column }: DraggableTableHeaderProps) {
   return (
     <th
-      className="px-4 py-2 bg-gray-200 border-b border-r text-left cursor-grab sticky top-0 z-10"
+      className="px-6 py-3"
       // onContextMenu={e => handleContextMenu(e, 'header', column.name)}
     >
       {column.name}

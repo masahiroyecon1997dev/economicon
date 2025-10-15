@@ -15,8 +15,8 @@ export function MainTable({ tableInfo }: MainTableProps) {
   }
 
   return (
-    <div>
-      <table className="border-separate border-spacing-0 border-l border-r bg-white border-gray-300 table-auto">
+    <div className="overflow-x-auto rounded-lg border border-brand-border bg-white shadow-sm mt-6">
+      <table className="w-full text-sm text-left text-gray-500">
         <TableHeader
           columns={tableInfo.columnList}
           handleContextMenu={handleContextMenu}
