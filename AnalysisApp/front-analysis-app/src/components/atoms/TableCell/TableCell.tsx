@@ -8,7 +8,7 @@ type MainTableCellProps = {
 
 export function TableCell({ children, onContextMenu }: MainTableCellProps) {
   return (
-    <td className="px-4 py-2 border-b text-sm text-gray-700" onContextMenu={onContextMenu}>
+    <td className="px-6 py-4" onContextMenu={onContextMenu}>
       {children}
     </td>
   );
