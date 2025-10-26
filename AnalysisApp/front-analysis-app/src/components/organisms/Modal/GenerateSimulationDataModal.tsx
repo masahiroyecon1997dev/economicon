@@ -1,5 +1,4 @@
-import type { ChangeEvent, Dispatch, SetStateAction } from 'react';
-import { useState } from 'react';
+import { useState, type ChangeEvent, type Dispatch, type SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { checkInteger, checkNumber, checkRequired } from '../../../function/checkInputFunctions';
