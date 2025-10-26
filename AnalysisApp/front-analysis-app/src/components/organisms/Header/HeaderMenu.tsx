@@ -1,11 +1,10 @@
 import { faCircleQuestion } from "@fortawesome/free-regular-svg-icons";
 import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { Dispatch, SetStateAction } from "react";
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { TableInfosType, TableNameListType } from "../../../types/stateTypes";
+import type { CurrentViewType, TableInfosType, TableNameListType } from "../../../types/stateTypes";
 
 import { HeaderMenuDropdown } from "../../molecules/HeaderMenuDropdown/HeaderMenuDropdown";
 import { Calculate } from "../Modal/Calculate";
@@ -17,11 +16,12 @@ import { SaveFileModal } from "../Modal/SaveFileModal";
 type HeaderMenuProps = {
   setTableNameList: Dispatch<SetStateAction<TableNameListType>>;
   setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
+  setCurrentView: Dispatch<SetStateAction<CurrentViewType>>;
 };
 
-export function HeaderMenu({ setTableNameList, setTableInfos }: HeaderMenuProps) {
+export function HeaderMenu({ setTableNameList, setTableInfos, setCurrentView }: HeaderMenuProps) {
   const { t } = useTranslation();
-  const [isImportFileModal, setIsImportFileModal] = useState<boolean>(false);
+  const [isImportFileByUploadModal, setIsImportFileByUploadModal] = useState<boolean>(false);
   const [isSaveFileModal, setIsSaveFileModal] = useState<boolean>(false);
   const [isGenerateSimulationDataModal, setGenerateSimulationDataModal] =
     useState<boolean>(false);
@@ -29,49 +29,16 @@ export function HeaderMenu({ setTableNameList, setTableInfos }: HeaderMenuProps)
     useState<boolean>(false);
   const [isCalculateModal, setIsCalculateModal] = useState<boolean>(false);
 
-  const fileDropdownListElement = [
-    {
-      dropdownListName: t("HeaderMenu.FileOpen"),
-      dropdownListFunction: openImportFileModal,
-    },
-    {
-      dropdownListName: t("HeaderMenu.FileSave"),
-      dropdownListFunction: openSaveFileModal,
-    },
-  ];
-  const dataGenerationDropdownListElement = [
-    {
-      dropdownListName: t("HeaderMenu.DataGeneration"),
-      dropdownListFunction: openGenerateDataModal,
-    },
-    {
-      dropdownListName: t("HeaderMenu.SampleData"),
-      dropdownListFunction: openImportFileModal,
-    },
-  ];
-  const addColumnDropdownListElement = [
-    {
-      dropdownListName: t("HeaderMenu.Calculate"),
-      dropdownListFunction: openCalculateModal,
-    },
-  ];
-  const modelDropdownListElement = [
-    {
-      dropdownListName: t("HeaderMenu.LinearRegression"),
-      dropdownListFunction: openLinearRegressionModal,
-    },
-    // {
-    //   dropdownListName: t("HeaderMenu.LogitAnalysis"),
-    //   dropdownListFunction:
-    // },
-  ];
-
-  function openImportFileModal() {
-    setIsImportFileModal(true);
+  function showImportFileByPathView() {
+    setCurrentView("importFileByPath");
   }
 
-  function closeImportFileModal() {
-    setIsImportFileModal(false);
+  function openImportFileByUploadModal() {
+    setIsImportFileByUploadModal(true);
+  }
+
+  function closeImportFileByUploadModal() {
+    setIsImportFileByUploadModal(false);
   }
 
   function openSaveFileModal() {
@@ -105,6 +72,39 @@ export function HeaderMenu({ setTableNameList, setTableInfos }: HeaderMenuProps)
   function closeCalculateModal() {
     setIsCalculateModal(false);
   }
+
+  const fileDropdownListElement = [
+    {
+      dropdownListName: t("HeaderMenu.FileOpen"),
+      dropdownListFunction: showImportFileByPathView,
+    },
+    {
+      dropdownListName: t("HeaderMenu.UploadFile"),
+      dropdownListFunction: openImportFileByUploadModal,
+    },
+    {
+      dropdownListName: t("HeaderMenu.FileSave"),
+      dropdownListFunction: openSaveFileModal,
+    },
+  ];
+  const dataGenerationDropdownListElement = [
+    {
+      dropdownListName: t("HeaderMenu.DataGeneration"),
+      dropdownListFunction: openGenerateDataModal,
+    },
+  ];
+  const addColumnDropdownListElement = [
+    {
+      dropdownListName: t("HeaderMenu.Calculate"),
+      dropdownListFunction: openCalculateModal,
+    },
+  ];
+  const modelDropdownListElement = [
+    {
+      dropdownListName: t("HeaderMenu.LinearRegression"),
+      dropdownListFunction: openLinearRegressionModal,
+    }
+  ];
 
   return (
     <>
@@ -153,8 +153,8 @@ export function HeaderMenu({ setTableNameList, setTableInfos }: HeaderMenuProps)
         </div>
       </header>
       <ImportFileModal
-        isImportFileModal={isImportFileModal}
-        close={closeImportFileModal}
+        isImportFileModal={isImportFileByUploadModal}
+        close={closeImportFileByUploadModal}
         setTableNameList={setTableNameList}
         setTableInfos={setTableInfos}
       />
