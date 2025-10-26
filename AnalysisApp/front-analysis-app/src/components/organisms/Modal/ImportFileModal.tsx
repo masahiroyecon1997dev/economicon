@@ -1,7 +1,6 @@
 import { faFileLines } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ChangeEvent, Dispatch, DragEvent, SetStateAction } from "react";
-import { useState } from "react";
+import { useState, type ChangeEvent, type Dispatch, type DragEvent, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 
 import { getTableInfo } from "../../../function/internalFunctions";

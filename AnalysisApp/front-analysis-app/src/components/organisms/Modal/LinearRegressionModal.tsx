@@ -1,5 +1,4 @@
-import type { ChangeEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import { getColumnInfoList, getTableNameList, linearRegression } from "../../../function/restApis";

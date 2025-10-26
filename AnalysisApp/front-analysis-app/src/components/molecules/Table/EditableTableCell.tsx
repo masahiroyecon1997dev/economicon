@@ -1,5 +1,4 @@
-import type { ChangeEvent } from 'react';
-import React, { useState } from 'react';
+import React, { useState, type ChangeEvent } from 'react';
 
 import type { TableDataCellType } from '../../../types/commonTypes';
 import { TableInputText } from '../../atoms/Input/TableInputText';

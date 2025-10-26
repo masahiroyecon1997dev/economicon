@@ -1,6 +1,5 @@
 import { saveAs } from 'file-saver';
-import type { ChangeEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getTableNameList, outputCsv } from '../../../function/restApis';
