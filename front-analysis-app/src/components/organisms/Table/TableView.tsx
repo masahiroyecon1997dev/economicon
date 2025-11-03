@@ -1,12 +1,10 @@
-import type { TableInfosType } from "../../../types/stateTypes";
+import useTableInfosStore from "../../../stores/useTableInfosStore";
 import { MainTable } from "./MainTable";
 import { TableFooter } from "./TableFooter";
 
-type TablePanelProps = {
-  tableInfos: TableInfosType;
-};
 
-export function TablePanel({ tableInfos }: TablePanelProps) {
+export function TableView() {
+  const tableInfos = useTableInfosStore((state) => state.tableInfos);
 
   return (
     <div className="max-w-full mx-auto">

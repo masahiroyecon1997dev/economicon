@@ -1,26 +1,29 @@
 import { useEffect, useState } from "react";
-
-import { getTableNameList } from "./function/restApis";
-import type { CurrentViewType, TableInfosType, TableNameListType } from "./types/stateTypes";
+import { getSettings, getTableNameList } from "./function/restApis";
+import useSettingsStore from "./stores/useSettingsStore";
+import useTableListStore from "./stores/useTableListStore";
+import type { CurrentViewType } from "./types/stateTypes";
 
 import { HeaderMenu } from "./components/organisms/Header/HeaderMenu";
-import { LeftSideMenu } from "./components/organisms/MainPanel/LeftSideMenu";
-import { MainPanel } from "./components/organisms/MainPanel/MainPanel";
+import { LeftSideMenu } from "./components/organisms/MainView/LeftSideMenu";
+import { MainView } from "./components/organisms/MainView/MainView";
 
 export function App() {
-  const [tableNameList, setTableNameList] = useState<TableNameListType>([]);
-  const [tableInfos, setTableInfos] = useState<TableInfosType>([]);
-  const [currentView, setCurrentView] = useState<CurrentViewType>("importFileByPath");
+  const setSettings = useSettingsStore((state) => state.setSettings);
+  const setTableList = useTableListStore((state) => state.setTableList);
+  const [currentView, setCurrentView] = useState<CurrentViewType>("selectFile");
 
   useEffect(() => {
     let ignore = false;
-    async function initializeData() {
+    async function initialize() {
+      const resGetSettings = await getSettings();
       const resGetTableNames = await getTableNameList();
       if (!ignore) {
-        setTableNameList(resGetTableNames.result.tableNameList);
+        setSettings(resGetSettings.result);
+        setTableList(resGetTableNames.result.tableNameList);
       }
     }
-    initializeData();
+    initialize();
     return () => {
       ignore = true;
     };
@@ -29,21 +32,15 @@ export function App() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-white">
       <HeaderMenu
-        setTableNameList={setTableNameList}
-        setTableInfos={setTableInfos}
         setCurrentView={setCurrentView}
       />
       <div
         className="flex flex-1 overflow-hidden"
       >
-        <LeftSideMenu
-          tableNameList={tableNameList}
-          tableInfos={tableInfos}
-          setTableInfos={setTableInfos}
-        ></LeftSideMenu>
-        <MainPanel
-          tableInfos={tableInfos}
-        ></MainPanel>
+        <LeftSideMenu/>
+        <MainView
+          currentView={currentView}
+        ></MainView>
       </div>
     </div>
   );

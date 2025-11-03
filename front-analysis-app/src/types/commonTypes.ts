@@ -2,7 +2,7 @@ export type TableDataCellType = string | number | boolean | null;
 export type TalbeDataRowType = { [key: string]: TableDataCellType };
 export type TableDataType = TalbeDataRowType[] | null;
 export type ColumnType = { name: string; type: string };
-export type TableInfoType = {
+export interface TableInfoType {
   tableName: string;
   columnList: ColumnType[];
   isActive: boolean;

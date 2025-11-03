@@ -1,16 +1,15 @@
-import numpy as np
-from scipy import stats
-from django.utils.translation import gettext as _
 from typing import Dict
-from ..utilities.validator.common_validators import (
-    ValidationError, validate_candidates
-)
-from ..utilities.validator.tables_manager_validator import (
-    validate_existed_table_name,
-    validate_existed_column_name
-)
+
+import numpy as np
+from django.utils.translation import gettext as _
+from scipy import stats
+
 from ..data.tables_manager import TablesManager
-from .common_api_class import (AbstractApi, ApiError)
+from ..utilities.validator.common_validators import (ValidationError,
+                                                     validate_candidates)
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_column_name, validate_existed_table_name)
+from .common_api_class import AbstractApi, ApiError
 
 
 class ConfidenceInterval(AbstractApi):
@@ -75,7 +74,8 @@ class ConfidenceInterval(AbstractApi):
                 raise ValidationError("confidenceLevel must be a number")
 
             if not (0 < self.confidence_level < 1):
-                raise ValidationError("confidenceLevel must be between 0 and 1")
+                raise ValidationError("confidenceLevel must be "
+                                      "between 0 and 1")
 
             return None
         except ValidationError as e:
@@ -96,21 +96,24 @@ class ConfidenceInterval(AbstractApi):
             data_array = column_data.to_numpy()
 
             # 統計量と信頼区間を計算
-            if self.statistic_type == 'mean':
-                statistic_value, ci_lower, ci_upper = \
-                    self._calculate_mean_ci(data_array)
-            elif self.statistic_type == 'median':
-                statistic_value, ci_lower, ci_upper = \
-                    self._calculate_median_ci(data_array)
-            elif self.statistic_type == 'proportion':
-                statistic_value, ci_lower, ci_upper = \
-                    self._calculate_proportion_ci(data_array)
-            elif self.statistic_type == 'variance':
-                statistic_value, ci_lower, ci_upper = \
-                    self._calculate_variance_ci(data_array)
-            elif self.statistic_type == 'std':
-                statistic_value, ci_lower, ci_upper = \
-                    self._calculate_std_ci(data_array)
+            match self.statistic_type:
+                case 'mean':
+                    statistic_value, ci_lower, ci_upper = \
+                        self._calculate_mean_ci(data_array)
+                case 'median':
+                    statistic_value, ci_lower, ci_upper = \
+                        self._calculate_median_ci(data_array)
+                case 'proportion':
+                    statistic_value, ci_lower, ci_upper = \
+                        self._calculate_proportion_ci(data_array)
+                case 'variance':
+                    statistic_value, ci_lower, ci_upper = \
+                        self._calculate_variance_ci(data_array)
+                case 'std':
+                    statistic_value, ci_lower, ci_upper = \
+                        self._calculate_std_ci(data_array)
+                case _:
+                    raise ValidationError("Unsupported statistic type")
 
             # 結果を返す
             result = {
@@ -158,7 +161,7 @@ class ConfidenceInterval(AbstractApi):
         bootstrap_medians = []
         np.random.seed(42)  # 再現性のため
 
-        for _ in range(1000):
+        for _index in range(1000):
             bootstrap_sample = np.random.choice(data, size=n, replace=True)
             bootstrap_medians.append(np.median(bootstrap_sample))
 
@@ -172,8 +175,11 @@ class ConfidenceInterval(AbstractApi):
         """比率の信頼区間を計算（二項分布）"""
         # データを0または1の二項データとして扱う
         unique_vals = np.unique(data)
-        if not (len(unique_vals) <= 2 and all(v in [0, 1] for v in unique_vals)):
-            raise ValidationError("For proportion confidence interval, data must contain only 0 and 1 values")
+        if not (
+            len(unique_vals) <= 2 and all(v in [0, 1] for v in unique_vals)
+        ):
+            raise ValidationError("For proportion confidence interval, "
+                                  "data must contain only 0 and 1 values")
 
         n = len(data)
         successes = np.sum(data)
@@ -183,7 +189,9 @@ class ConfidenceInterval(AbstractApi):
         z = stats.norm.ppf((1 + self.confidence_level) / 2)
         denominator = 1 + z**2 / n
         center = (proportion + z**2 / (2 * n)) / denominator
-        margin = z * np.sqrt((proportion * (1 - proportion) + z**2 / (4 * n)) / n) / denominator
+        margin = z * np.sqrt(
+            (proportion * (1 - proportion) + z**2 / (4 * n)) / n
+        ) / denominator
 
         ci_lower = max(0, center - margin)
         ci_upper = min(1, center + margin)
@@ -208,7 +216,9 @@ class ConfidenceInterval(AbstractApi):
     def _calculate_std_ci(self, data):
         """標準偏差の信頼区間を計算"""
         # 分散の信頼区間を求めて平方根を取る
-        variance_val, var_ci_lower, var_ci_upper = self._calculate_variance_ci(data)
+        variance_val, var_ci_lower, var_ci_upper = self._calculate_variance_ci(
+            data
+        )
         std_val = np.sqrt(variance_val)
 
         ci_lower = np.sqrt(var_ci_lower)
@@ -218,9 +228,12 @@ class ConfidenceInterval(AbstractApi):
 
 
 def confidence_interval(table_name: str, column_name: str,
-                       confidence_level: float, statistic_type: str) -> Dict:
+                        confidence_level: float, statistic_type: str) -> Dict:
     """信頼区間計算の関数インターフェース"""
-    api = ConfidenceInterval(table_name, column_name, confidence_level, statistic_type)
+    api = ConfidenceInterval(table_name,
+                             column_name,
+                             confidence_level,
+                             statistic_type)
     validation_error = api.validate()
     if validation_error:
         raise validation_error
