@@ -1,13 +1,15 @@
+import json
+
+from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.views import APIView
-import json
-from django.utils.translation import gettext as _
-from ..utilities.create_response import (create_success_response,
-                                         create_error_response)
-from ..utilities.validator.common_validators import ValidationError
-from ..utilities.create_log import create_log_api_request
-from ..python_apis.confidence_interval import confidence_interval
+
 from ..python_apis.common_api_class import ApiError
+from ..python_apis.confidence_interval import confidence_interval
+from ..utilities.create_log import create_log_api_request
+from ..utilities.create_response import (create_error_response,
+                                         create_success_response)
+from ..utilities.validator.common_validators import ValidationError
 
 
 class ConfidenceInterval(APIView):

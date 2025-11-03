@@ -1,43 +1,25 @@
-import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import { getTableInfo } from "../../../function/internalFunctions";
-import type { TableInfosType, TableNameListType } from "../../../types/stateTypes";
+import addTableInfosStore from "../../../stores/useTableInfosStore";
 import { SectionHeading } from "../../atoms/List/SectionHeading";
 import { TableNav } from "../../molecules/List/TableNav";
 
-type LeftSideMenuProps = {
-  tableNameList: TableNameListType;
-  tableInfos: TableInfosType;
-  setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
-};
-
-export function LeftSideMenu({
-  tableNameList,
-  tableInfos,
-  setTableInfos
-}: LeftSideMenuProps) {
+export function LeftSideMenu() {
   const { t } = useTranslation();
+  const addTableInfos = addTableInfosStore((state) => state.addTableInfo);
+  const activateTableInfos = addTableInfosStore((state) => state.activateTableInfo);
+  const tableInfos = addTableInfosStore((state) => state.tableInfos);
+
 
   async function clickTableName(tableName: string) {
     const sameTableNameInfos = tableInfos.filter(
       (tableInfo) => tableInfo.tableName === tableName
     );
     if (sameTableNameInfos.length > 0) {
-      setTableInfos((preTableInfos) =>
-        preTableInfos.map((tableInfo) => {
-          if (tableInfo.tableName === tableName) {
-            return { ...tableInfo, isActive: true };
-          } else {
-            return { ...tableInfo, isActive: false };
-          }
-        })
-      );
+      activateTableInfos(tableName);
     } else {
       const tableInfo = await getTableInfo(tableName);
-      setTableInfos((preTableInfos) => [
-        ...preTableInfos.map((info) => ({ ...info, isActive: false })),
-        tableInfo,
-      ]);
+      addTableInfos(tableInfo);
     }
   }
 
@@ -52,7 +34,6 @@ export function LeftSideMenu({
     <aside className="w-64 shrink-0 border-r border-brand-border bg-brand-primary p-4 text-white">
       <SectionHeading title={t("Common.Table")} />
       <TableNav
-        tableNameList={tableNameList}
         activeTableName={activeTableName}
         onTableClick={clickTableName}
       />

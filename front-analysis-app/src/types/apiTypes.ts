@@ -1,4 +1,11 @@
 import type { ColumnType } from "./commonTypes";
+import type { SettingsType } from "./stateTypes";
+
+export type ResGetSettingsType = {
+  code: string;
+  result: SettingsType;
+  message: string;
+}
 
 export type ResImportCsvType = {
   code: number;
