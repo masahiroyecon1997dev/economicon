@@ -1,28 +1,28 @@
 import { faFileLines } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState, type ChangeEvent, type Dispatch, type DragEvent, type SetStateAction } from "react";
+import { useState, type ChangeEvent, type DragEvent } from "react";
 import { useTranslation } from "react-i18next";
+
+import useTableInfosStore from "../../../stores/useTableInfosStore";
+import useTableListStore from "../../../stores/useTableListStore";
 
 import { getTableInfo } from "../../../function/internalFunctions";
 import { importCsv } from "../../../function/restApis";
-import type { TableInfosType, TableNameListType } from "../../../types/stateTypes";
 
 import { Modal } from "../../molecules/Modal/Modal";
 
 type ImportFileModalProps = {
   isImportFileModal: boolean;
   close: () => void;
-  setTableNameList: Dispatch<SetStateAction<TableNameListType>>;
-  setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
 };
 
 export function ImportFileModal({
   isImportFileModal,
   close,
-  setTableNameList,
-  setTableInfos,
 }: ImportFileModalProps) {
   const { t } = useTranslation();
+  const addTableName = useTableListStore((state) => state.addTableName);
+  const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
   const [file, setFile] = useState<File>();
   const [dragActive, setDragActive] = useState(false);
 
@@ -56,8 +56,9 @@ export function ImportFileModal({
     const resImportCsv = await importCsv(file);
     console.log(resImportCsv);
     const tableInfo = await getTableInfo(resImportCsv.result.tableName);
-    setTableNameList((preTableNameList) => [...preTableNameList, resImportCsv.result.tableName]);
-    setTableInfos((preTableInfos) => [...preTableInfos, tableInfo]);
+
+    addTableName(resImportCsv.result.tableName);
+    addTableInfo(tableInfo);
     close();
   }
 

@@ -25,6 +25,11 @@
     "TobitAnalysis": "トービット分析",
     "TimeSeriesDataAnalysis": "時系列データ分析"
   },
+  "SelectFileView": {
+    "SelectFile": "ファイルを選択",
+    "Description": "ファイルを選択してデータをインポートしてください。",
+    "SearchPlaceholder": "ファイル名で検索"
+  },
   "ImportFileModal": {
     "Title": "ファイルを開く",
     "Notation": "15MB以下のcsvファイルのみ",

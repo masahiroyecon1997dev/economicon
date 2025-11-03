@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { CurrentViewType, TableInfosType, TableNameListType } from "../../../types/stateTypes";
+import type { CurrentViewType } from "../../../types/stateTypes";
 
 import { HeaderMenuDropdown } from "../../molecules/HeaderMenuDropdown/HeaderMenuDropdown";
 import { Calculate } from "../Modal/Calculate";
@@ -14,12 +14,10 @@ import { LinearRegressionModal } from "../Modal/LinearRegressionModal";
 import { SaveFileModal } from "../Modal/SaveFileModal";
 
 type HeaderMenuProps = {
-  setTableNameList: Dispatch<SetStateAction<TableNameListType>>;
-  setTableInfos: Dispatch<SetStateAction<TableInfosType>>;
   setCurrentView: Dispatch<SetStateAction<CurrentViewType>>;
 };
 
-export function HeaderMenu({ setTableNameList, setTableInfos, setCurrentView }: HeaderMenuProps) {
+export function HeaderMenu({ setCurrentView }: HeaderMenuProps) {
   const { t } = useTranslation();
   const [isImportFileByUploadModal, setIsImportFileByUploadModal] = useState<boolean>(false);
   const [isSaveFileModal, setIsSaveFileModal] = useState<boolean>(false);
@@ -155,8 +153,6 @@ export function HeaderMenu({ setTableNameList, setTableInfos, setCurrentView }: 
       <ImportFileModal
         isImportFileModal={isImportFileByUploadModal}
         close={closeImportFileByUploadModal}
-        setTableNameList={setTableNameList}
-        setTableInfos={setTableInfos}
       />
       <SaveFileModal
         isSaveFileModal={isSaveFileModal}
@@ -165,7 +161,6 @@ export function HeaderMenu({ setTableNameList, setTableInfos, setCurrentView }: 
       <GenerateDataModal
         isGenerateSimulationDataModal={isGenerateSimulationDataModal}
         close={closeGenerateDataModal}
-        setTableInfos={setTableInfos}
       />
       <Calculate
         isCalculateModal={isCalculateModal}

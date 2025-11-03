@@ -1,6 +1,17 @@
 import axios from "../configs/axios";
 import type * as apiTypes from "../types/apiTypes";
 
+export async function getSettings(
+): Promise<apiTypes.ResGetSettingsType> {
+  try {
+    const response = await axios.get("/get-settings");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return { code: "NG", result: { defaultFolderPath: "", displayRows: 0, appLanguage: "" }, message: "エラーです" };
+  }
+}
+
 export async function importCsv(
   file: File
 ): Promise<apiTypes.ResImportCsvType> {

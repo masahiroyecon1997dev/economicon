@@ -1,38 +1,47 @@
-import type { TableInfosType } from "../../../types/stateTypes";
+import useSettingsStore from "../../../stores/useSettingsStore";
 
-type TablePanelProps = {
-  tableInfos: TableInfosType;
-};
+import { faArrowUp, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useTranslation } from "react-i18next";
 
-export function TablePanel({ tableInfos }: TablePanelProps) {
+export function SelectFileView() {
+  const { t } = useTranslation();
+  const settings = useSettingsStore((state) => state.settings);
+
+
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-10xl">
       <div className="flex flex-col gap-8">
         <header>
-          <h1 className="text-3xl font-bold text-black dark:text-white">Select a File</h1>
-          <p className="mt-2 text-base text-black/60 dark:text-white/60">Choose a file to begin your regression analysis
-            or data shaping.</p>
+          <h1 className="text-3xl font-bold text-black dark:text-white">{t("SelectFileView.Title")}</h1>
+          <p className="mt-2 text-base text-black/60 dark:text-white/60">{t("SelectFileView.Description")}</p>
         </header>
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
-            <div className="relative flex-grow">
-              <span
-                className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-black/40 dark:text-white/40">search</span>
-              <input
-                className="w-full rounded-lg border-primary/20 bg-transparent py-2 pl-10 pr-4 text-black dark:text-white placeholder:text-black/40 dark:placeholder:text-white/40 focus:border-primary focus:ring-primary/50"
-                placeholder="Search files by name" type="text" />
-            </div>
             <div className="flex items-center gap-2">
               <button
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 dark:bg-primary/20 text-primary hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">
-                <span className="material-symbols-outlined text-xl">arrow_upward</span>
+                <span className="material-symbols-outlined text-xl">
+                  <FontAwesomeIcon icon={faArrowUp} />
+                </span>
               </button>
               <nav className="flex items-center gap-2 text-sm font-medium text-black/60 dark:text-white/60">
                 <a className="hover:text-primary dark:hover:text-primary" href="#">Projects</a>
                 <span className="material-symbols-outlined text-base">chevron_right</span>
                 <a className="hover:text-primary dark:hover:text-primary" href="#">Analysis Q4</a>
               </nav>
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-4 w-2xl">
+            <div className="relative flex-grow border-brand-border">
+              <span
+                className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-black/40 dark:text-white/40">
+                  <FontAwesomeIcon icon={faMagnifyingGlass} />
+                </span>
+              <input
+                className="w-full rounded-lg border border-solid bg-transparent py-2 pl-10 pr-4 text-black dark:text-white placeholder:text-black/40 dark:placeholder:text-white/40 focus:ring-primary/50"
+                placeholder={t("SelectFileView.SearchPlaceholder")} type="text" />
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
