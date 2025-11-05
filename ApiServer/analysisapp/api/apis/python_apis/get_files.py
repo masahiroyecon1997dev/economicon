@@ -1,16 +1,16 @@
 import os
 from datetime import datetime
-from django.utils.translation import gettext as _
 from typing import Dict
+
+from django.utils.translation import gettext as _
+
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.file_validators import (
-    validate_directory_path,
-    validate_directory_path_is_directory
-)
-from .common_api_class import (AbstractApi, ApiError)
+    validate_directory_path, validate_directory_path_is_directory)
+from .common_api_class import AbstractApi, ApiError
 
 
-class GetListFiles(AbstractApi):
+class GetFiles(AbstractApi):
     """
     指定されたディレクトリ内のファイルとフォルダ一覧を取得するAPIクラス
 
@@ -40,7 +40,7 @@ class GetListFiles(AbstractApi):
 
     def execute(self):
         try:
-            items = []
+            files = []
 
             # ディレクトリ内のアイテムを取得
             for item_name in os.listdir(self.directory_path):
@@ -59,14 +59,14 @@ class GetListFiles(AbstractApi):
                     'size': file_size,
                     'modifiedTime': modified_time
                 }
-                items.append(item_info)
+                files.append(item_info)
 
             # 名前順でソート
-            items.sort(key=lambda x: x['name'])
+            files.sort(key=lambda x: x['name'])
 
             result = {
                 'directoryPath': self.directory_path,
-                'items': items
+                'files': files
             }
             return result
 
@@ -76,8 +76,8 @@ class GetListFiles(AbstractApi):
             raise ApiError(message) from e
 
 
-def get_list_files(directory_path: str) -> Dict:
-    api = GetListFiles(directory_path)
+def get_files(directory_path: str) -> Dict:
+    api = GetFiles(directory_path)
     validation_error = api.validate()
     if validation_error:
         raise validation_error
