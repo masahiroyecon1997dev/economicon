@@ -3,31 +3,30 @@ import type * as apiTypes from "../types/apiTypes";
 
 export async function getSettings(
 ): Promise<apiTypes.ResGetSettingsType> {
-  try {
-    const response = await axios.get("/get-settings");
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    return { code: "NG", result: { defaultFolderPath: "", displayRows: 0, appLanguage: "" }, message: "エラーです" };
-  }
+  const response = await axios.get("/get-settings");
+  return response.data;
+}
+
+export async function getFiles(path: string): Promise<apiTypes.ResGetFilesType> {
+  const response = await axios.get("/get-files", {
+    params: {
+      path: path,
+    },
+  });
+  return response.data;
 }
 
 export async function importCsv(
   file: File
 ): Promise<apiTypes.ResImportCsvType> {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    const response = await axios.post("/import-csv-by-file", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    return { code: -9999, result: { tableName: "" }, message: "エラーです" };
-  }
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await axios.post("/import-csv-by-file", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
 }
 
 export async function outputCsv(

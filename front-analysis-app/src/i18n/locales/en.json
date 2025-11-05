@@ -1,4 +1,12 @@
 {
+  "Common": {
+    "Cancel": "Cancel",
+    "OK": "OK",
+    "Table": "Table",
+    "Constant": "Constant",
+    "UniformDistribution": "Uniform Distribution",
+    "NomalDistribution": "Normal Distribution"
+  },
   "HeaderMenu": {
     "File": "File"
   }

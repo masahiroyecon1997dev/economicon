@@ -11,9 +11,11 @@ const useSettingsStore = create<SettingsStore>((set) => ({
   settings: {
     defaultFolderPath: "",
     displayRows: 0,
-    appLanguage: ""
+    appLanguage: "",
+    encoding: "",
+    pathSeparator: "",
   },
-  setSettings: (settings) => set(() => ({ ...settings }))
+  setSettings: (settings) => set(() => (settings))
 }));
 
 export default useSettingsStore;

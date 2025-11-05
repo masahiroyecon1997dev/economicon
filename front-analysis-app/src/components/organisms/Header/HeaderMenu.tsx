@@ -1,11 +1,11 @@
 import { faCircleQuestion } from "@fortawesome/free-regular-svg-icons";
 import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { CurrentViewType } from "../../../types/stateTypes";
 
+import useCurrentViewStore from "../../../stores/useCurrentViewStore";
 import { HeaderMenuDropdown } from "../../molecules/HeaderMenuDropdown/HeaderMenuDropdown";
 import { Calculate } from "../Modal/Calculate";
 import { GenerateDataModal } from "../Modal/GenerateSimulationDataModal";
@@ -13,12 +13,9 @@ import { ImportFileModal } from "../Modal/ImportFileModal";
 import { LinearRegressionModal } from "../Modal/LinearRegressionModal";
 import { SaveFileModal } from "../Modal/SaveFileModal";
 
-type HeaderMenuProps = {
-  setCurrentView: Dispatch<SetStateAction<CurrentViewType>>;
-};
-
-export function HeaderMenu({ setCurrentView }: HeaderMenuProps) {
+export function HeaderMenu() {
   const { t } = useTranslation();
+  const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
   const [isImportFileByUploadModal, setIsImportFileByUploadModal] = useState<boolean>(false);
   const [isSaveFileModal, setIsSaveFileModal] = useState<boolean>(false);
   const [isGenerateSimulationDataModal, setGenerateSimulationDataModal] =
@@ -28,7 +25,7 @@ export function HeaderMenu({ setCurrentView }: HeaderMenuProps) {
   const [isCalculateModal, setIsCalculateModal] = useState<boolean>(false);
 
   function showImportFileByPathView() {
-    setCurrentView("importFileByPath");
+    setCurrentView({ currentView: "importFileByPath" });
   }
 
   function openImportFileByUploadModal() {

@@ -19,7 +19,9 @@ class GetSettings(AbstractApi):
     DEFAULT_SETTINGS = {
         'default_folder_path': str(Path.home()),
         'display_rows': 100,
-        'app_language': 'ja'
+        'app_language': 'ja',
+        'encoding': 'utf-8',
+        'path_separator': '/'
     }
 
     SETTINGS_FILE_NAME = 'analysis_app_settings.json'
@@ -50,7 +52,9 @@ class GetSettings(AbstractApi):
             result = {
                 'defaultFolderPath': settings.get('default_folder_path'),
                 'displayRows': settings.get('display_rows'),
-                'appLanguage': settings.get('app_language')
+                'appLanguage': settings.get('app_language'),
+                'encoding': settings.get('encoding'),
+                'pathSeparator': settings.get('path_separator')
             }
             return result
 
@@ -62,7 +66,11 @@ class GetSettings(AbstractApi):
                 'displayRows':
                     self.DEFAULT_SETTINGS['display_rows'],
                 'appLanguage':
-                    self.DEFAULT_SETTINGS['app_language']
+                    self.DEFAULT_SETTINGS['app_language'],
+                'encoding':
+                    self.DEFAULT_SETTINGS['encoding'],
+                'pathSeparator':
+                    self.DEFAULT_SETTINGS['path_separator']
             }
             return result
 

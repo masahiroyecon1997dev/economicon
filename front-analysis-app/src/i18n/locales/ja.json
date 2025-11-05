@@ -1,6 +1,9 @@
 {
   "Common": {
     "Cancel": "キャンセル",
+    "OK": "OK",
+    "Error": "エラー",
+    "UnexpectedError": "予期せぬエラーが発生しました。",
     "Table": "テーブル",
     "Constant": "定数",
     "UniformDistribution": "一様分布",
