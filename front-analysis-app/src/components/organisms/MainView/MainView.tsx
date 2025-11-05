@@ -1,12 +1,9 @@
-import type { CurrentViewType } from "../../../types/stateTypes";
+import useCurrentViewStore from "../../../stores/useCurrentViewStore";
 import { SelectFileView } from "../SelectFile/SelectFileView";
 import { TableView } from "../Table/TableView";
 
-type MainViewProps = {
-  currentView: CurrentViewType;
-};
-
-export function MainView({ currentView }: MainViewProps) {
+export function MainView() {
+  const currentView = useCurrentViewStore((state) => state.currentView);
 
   function renderContent() {
     switch (currentView) {
