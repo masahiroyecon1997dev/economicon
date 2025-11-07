@@ -1,5 +1,4 @@
-import type { ColumnType } from "./commonTypes";
-import type { FilesType, SettingsType } from "./stateTypes";
+import type { ColumnType, FilesType, SettingsType } from "./commonTypes";
 
 export type ResGetSettingsType = {
   code: string;

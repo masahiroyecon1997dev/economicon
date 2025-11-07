@@ -1,13 +1,14 @@
 import { create } from "zustand";
-import type { SettingsType } from "../types/stateTypes";
+import type { SettingsType } from "../types/commonTypes";
+
+export type SettingsStateType = { settings: SettingsType }
 
 export type SettingsActions = {
-  setSettings: (settings: SettingsType) => void;
+  setSettings: (settings: SettingsStateType) => void;
 }
+type SettingsStore = SettingsStateType & SettingsActions;
 
-type SettingsStore = SettingsType & SettingsActions;
-
-const useSettingsStore = create<SettingsStore>((set) => ({
+export const useSettingsStore = create<SettingsStore>((set) => ({
   settings: {
     defaultFolderPath: "",
     displayRows: 0,
@@ -17,5 +18,3 @@ const useSettingsStore = create<SettingsStore>((set) => ({
   },
   setSettings: (settings) => set(() => (settings))
 }));
-
-export default useSettingsStore;

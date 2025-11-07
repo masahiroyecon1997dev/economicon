@@ -1,4 +1,4 @@
-import useCurrentViewStore from "../../../stores/useCurrentViewStore";
+import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { SelectFileView } from "../SelectFile/SelectFileView";
 import { TableView } from "../Table/TableView";
 

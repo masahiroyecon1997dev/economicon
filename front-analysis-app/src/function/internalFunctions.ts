@@ -1,9 +1,9 @@
 import type { TableDataType, TableInfoType } from '../types/commonTypes';
 import { fetchDataToJson, getColumnInfoList } from './restApis';
 
-export async function fetchData(
+export const fetchData = async (
   tableName: string
-): Promise<{ tableName: string; data: TableDataType }> {
+): Promise<{ tableName: string; data: TableDataType }> => {
   const resFetchDataToJson = await fetchDataToJson(tableName);
   if (resFetchDataToJson.code === 0) {
     const data = JSON.parse(resFetchDataToJson.result.data);
@@ -12,7 +12,7 @@ export async function fetchData(
   return { tableName: '', data: null };
 }
 
-export async function getTableInfo(tableName: string): Promise<TableInfoType> {
+export const getTableInfo = async (tableName: string): Promise<TableInfoType> => {
   const data = await fetchData(tableName);
   const columnList = await getColumnInfoList(tableName);
   return {
@@ -21,4 +21,4 @@ export async function getTableInfo(tableName: string): Promise<TableInfoType> {
     isActive: true,
     data: data.data,
   };
-}
+};

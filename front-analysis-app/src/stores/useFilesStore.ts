@@ -1,15 +1,20 @@
 import { create } from "zustand";
-import type { FilesType } from "../types/stateTypes";
+import type { FilesType } from "../types/commonTypes";
+
+export type FilesStateType = {
+  files: FilesType;
+};
 
 export type FilesActions = {
-  setFiles: (files: FilesType) => void;
+  setFiles: (files: FilesStateType) => void;
 }
 
-type FilesStore = FilesType & FilesActions;
+type FilesStore = FilesStateType & FilesActions;
 
-const useFilesStore = create<FilesStore>((set) => ({
-  files: { files: [], directoryPath: "" },
+export const useFilesStore = create<FilesStore>((set) => ({
+  files: {
+    files: [],
+    directoryPath: "",
+  },
   setFiles: (files) => set(() => (files)),
 }));
-
-export default useFilesStore;

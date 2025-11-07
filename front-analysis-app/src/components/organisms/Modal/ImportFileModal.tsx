@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, type ChangeEvent, type DragEvent } from "react";
 import { useTranslation } from "react-i18next";
 
-import useTableInfosStore from "../../../stores/useTableInfosStore";
-import useTableListStore from "../../../stores/useTableListStore";
+import { useTableInfosStore } from "../../../stores/useTableInfosStore";
+import { useTableListStore } from "../../../stores/useTableListStore";
 
 import { getTableInfo } from "../../../function/internalFunctions";
 import { importCsv } from "../../../function/restApis";

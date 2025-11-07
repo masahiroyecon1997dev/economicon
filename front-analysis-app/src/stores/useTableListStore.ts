@@ -9,7 +9,7 @@ export type TableListActions = {
 
 type TableListStore = TableListType & TableListActions;
 
-const useTableListStore = create<TableListStore>((set) => ({
+export const useTableListStore = create<TableListStore>((set) => ({
   tableList: [],
   setTableList: (tableList) => set(() => ({ tableList })),
   addTableName: (tableName) => set((state) => ({
@@ -19,5 +19,3 @@ const useTableListStore = create<TableListStore>((set) => ({
     tableList: state.tableList.filter(name => name !== tableName)
   }))
 }));
-
-export default useTableListStore;

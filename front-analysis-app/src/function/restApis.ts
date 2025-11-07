@@ -1,24 +1,24 @@
 import axios from "../configs/axios";
 import type * as apiTypes from "../types/apiTypes";
 
-export async function getSettings(
-): Promise<apiTypes.ResGetSettingsType> {
+export const getSettings = async (
+): Promise<apiTypes.ResGetSettingsType> => {
   const response = await axios.get("/get-settings");
   return response.data;
 }
 
-export async function getFiles(path: string): Promise<apiTypes.ResGetFilesType> {
+export const getFiles = async (path: string): Promise<apiTypes.ResGetFilesType> => {
   const response = await axios.get("/get-files", {
     params: {
-      path: path,
+      directoryPath: path,
     },
   });
   return response.data;
 }
 
-export async function importCsv(
+export const importCsv = async (
   file: File
-): Promise<apiTypes.ResImportCsvType> {
+): Promise<apiTypes.ResImportCsvType> => {
   const formData = new FormData();
   formData.append("file", file);
   const response = await axios.post("/import-csv-by-file", formData, {
@@ -29,9 +29,9 @@ export async function importCsv(
   return response.data;
 }
 
-export async function outputCsv(
+export const outputCsv = async (
   tableName: string
-): Promise<apiTypes.ResOutputCsvType> {
+): Promise<apiTypes.ResOutputCsvType> => {
   try {
     const response = await axios.get("/output_csv", {
       params: {
@@ -45,11 +45,11 @@ export async function outputCsv(
   }
 }
 
-export async function fetchDataToJson(
+export const fetchDataToJson = async (
   tableName: string,
   firstRow: number = 1,
   lastRow: number = 100
-): Promise<apiTypes.ResFetchDataToJsonType> {
+): Promise<apiTypes.ResFetchDataToJsonType> => {
   try {
     const response = await axios.get("/fetch-data-to-json", {
       params: {
@@ -69,7 +69,7 @@ export async function fetchDataToJson(
   }
 }
 
-export async function getTableNameList(): Promise<apiTypes.ResGetTableNameListType> {
+export const getTableNameList = async (): Promise<apiTypes.ResGetTableNameListType> => {
   try {
     const response = await axios.get("/get-table-name-list");
     return response.data;
@@ -79,9 +79,9 @@ export async function getTableNameList(): Promise<apiTypes.ResGetTableNameListTy
   }
 }
 
-export async function getColumnInfoList(
+export const getColumnInfoList = async (
   tableName: string
-): Promise<apiTypes.ResGetColumnInfoType> {
+): Promise<apiTypes.ResGetColumnInfoType> => {
   try {
     const response = await axios.get("/get-column-info-list", {
       params: {
@@ -95,9 +95,9 @@ export async function getColumnInfoList(
   }
 }
 
-export async function generateSimulationData(
+export const generateSimulationData = async (
   requestBody: apiTypes.ReqGenerateSimulationDataType
-): Promise<apiTypes.ResGenerateSimulationDataType> {
+): Promise<apiTypes.ResGenerateSimulationDataType> => {
   try {
     const response = await axios.post("/generate_simulation_data", requestBody);
     return response.data;
@@ -107,9 +107,9 @@ export async function generateSimulationData(
   }
 }
 
-export async function linearRegression(
+export const linearRegression = async (
   requestBody: apiTypes.ReqLinearRegressionType
-): Promise<apiTypes.ResLinearRegressionType> {
+): Promise<apiTypes.ResLinearRegressionType> => {
   try {
     const response = await axios.post("/linear_regression", requestBody);
     return response.data;
