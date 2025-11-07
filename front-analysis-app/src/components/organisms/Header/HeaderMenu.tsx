@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 
-import useCurrentViewStore from "../../../stores/useCurrentViewStore";
+import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { HeaderMenuDropdown } from "../../molecules/HeaderMenuDropdown/HeaderMenuDropdown";
 import { Calculate } from "../Modal/Calculate";
 import { GenerateDataModal } from "../Modal/GenerateSimulationDataModal";

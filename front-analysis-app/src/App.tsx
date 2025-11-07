@@ -2,17 +2,17 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { showErrorDialog } from './function/errorDialog';
 import { getFiles, getSettings, getTableNameList } from "./function/restApis";
-import useCurrentViewStore from "./stores/useCurrentViewStore";
-import useSettingsStore from "./stores/useSettingsStore";
-import useTableListStore from "./stores/useTableListStore";
+import { useCurrentViewStore } from "./stores/useCurrentViewStore";
+import { useSettingsStore } from "./stores/useSettingsStore";
+import { useTableListStore } from "./stores/useTableListStore";
 
 import { ErrorDialog } from "./components/molecules/Modal/ErrorDialog";
 import { HeaderMenu } from "./components/organisms/Header/HeaderMenu";
 import { LeftSideMenu } from "./components/organisms/MainView/LeftSideMenu";
 import { MainView } from "./components/organisms/MainView/MainView";
-import useFilesStore from "./stores/useFilesStore";
+import { useFilesStore } from "./stores/useFilesStore";
 
-export function App() {
+export const App = () => {
   const { t } = useTranslation();
   const setSettings = useSettingsStore((state) => state.setSettings);
   const setTableList = useTableListStore((state) => state.setTableList);
@@ -20,39 +20,58 @@ export function App() {
   const setFiles = useFilesStore((state) => state.setFiles);
 
   useEffect(() => {
-    let ignore = false;
+    // Strict Mode対応: 初期化が既に実行されている場合はスキップ
+    // if (initialized.current) return;
+
+    let isMounted = true;
+
     async function initialize() {
       try {
+        // 設定を取得
         const resGetSettings = await getSettings();
-        if (resGetSettings.code !== "OK") {
-          showErrorDialog(t('Common.Error'), resGetSettings.message);
+        if (resGetSettings.code === "OK") {
+          if (isMounted) {
+            await showErrorDialog(t('Common.Error'), resGetSettings.message);
+          }
           return;
         }
-        const resGetFiles = await getFiles(resGetSettings.result.settings.defaultFolderPath);
+        // ファイル一覧を取得
+        const resGetFiles = await getFiles(resGetSettings.result.defaultFolderPath);
         if (resGetFiles.code !== "OK") {
-          showErrorDialog(t('Common.Error'), resGetFiles.message);
+          if (isMounted) {
+            await showErrorDialog(t('Common.Error'), resGetFiles.message);
+          }
           return;
         }
+        // テーブル名一覧を取得
         const resGetTableNames = await getTableNameList();
         if (resGetTableNames.code !== "OK") {
-          showErrorDialog(t('Common.Error'), resGetTableNames.message);
+          if (isMounted) {
+            await showErrorDialog(t('Common.Error'), resGetTableNames.message);
+          }
           return;
         }
-        if (!ignore) {
-          setSettings(resGetSettings.result);
+        // 全て成功した場合のみストアを更新
+        if (isMounted) {
+          setSettings({settings: resGetSettings.result});
           setCurrentView({ currentView: "selectFile" });
           setTableList(resGetTableNames.result.tableNameList);
-          setFiles(resGetFiles.result);
+          setFiles({files: resGetFiles.result});
         }
       } catch (error) {
-        showErrorDialog(t('Common.Error'), t('Common.UnexpectedError'));
+        console.error('App initialization error:', error);
+        if (isMounted) {
+          await showErrorDialog(t('Common.Error'), t('Common.UnexpectedError'));
+        }
       }
     }
+
     initialize();
+
     return () => {
-      ignore = true;
+      isMounted = false;
     };
-  }, []);
+  }, [t, setSettings, setCurrentView, setTableList, setFiles]);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-white">
@@ -60,6 +79,7 @@ export function App() {
       <div
         className="flex flex-1 overflow-hidden"
       >
+        <p>{ }</p>
         <LeftSideMenu/>
         <MainView/>
       </div>

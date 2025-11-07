@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { checkInteger, checkNumber, checkRequired } from '../../../function/checkInputFunctions';
 import { getTableInfo } from '../../../function/internalFunctions';
 import { generateSimulationData } from '../../../function/restApis';
-import useTableInfosStore from '../../../stores/useTableInfosStore';
+import { useTableInfosStore } from '../../../stores/useTableInfosStore';
 import type { ReqGenerateSimulationDataType } from '../../../types/apiTypes';
 import { SubmitButton } from '../../atoms/Button/SubmitButton';
 import { InputText } from '../../atoms/Input/InputText';

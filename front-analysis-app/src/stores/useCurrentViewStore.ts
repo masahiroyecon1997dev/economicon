@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { CurrentViewType } from "../types/stateTypes";
 
+export type CurrentViewType = { currentView: string };
 
 export type CurrentViewActions = {
   setCurrentView: (view: CurrentViewType) => void;
@@ -8,9 +8,7 @@ export type CurrentViewActions = {
 
 type CurrentViewStore = CurrentViewType & CurrentViewActions;
 
-const useCurrentViewStore = create<CurrentViewStore>((set) => ({
+export const useCurrentViewStore = create<CurrentViewStore>((set) => ({
   currentView: "selectFile",
   setCurrentView: (view) => set(() => (view)),
 }));
-
-export default useCurrentViewStore;

@@ -2,6 +2,8 @@
   "Common": {
     "Cancel": "Cancel",
     "OK": "OK",
+    "Error": "Error",
+    "UnexpectedError": "An unexpected error occurred.",
     "Table": "Table",
     "Constant": "Constant",
     "UniformDistribution": "Uniform Distribution",

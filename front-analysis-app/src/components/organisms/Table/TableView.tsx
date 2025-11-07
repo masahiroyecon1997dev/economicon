@@ -1,4 +1,4 @@
-import useTableInfosStore from "../../../stores/useTableInfosStore";
+import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { MainTable } from "./MainTable";
 import { TableFooter } from "./TableFooter";
 

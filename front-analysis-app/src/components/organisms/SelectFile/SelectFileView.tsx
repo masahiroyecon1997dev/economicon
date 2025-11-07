@@ -1,4 +1,4 @@
-import useSettingsStore from "../../../stores/useSettingsStore";
+import { useFilesStore } from "../../../stores/useFilesStore";
 
 import { faArrowUp, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,7 +6,9 @@ import { useTranslation } from "react-i18next";
 
 export function SelectFileView() {
   const { t } = useTranslation();
-  const settings = useSettingsStore((state) => state.settings);
+  const files = useFilesStore((state) => state.files);
+  const setFiles = useFilesStore((state) => state.setFiles);
+
 
 
 
@@ -76,6 +78,19 @@ export function SelectFileView() {
               </tr>
             </thead>
             <tbody className="divide-y divide-primary/20 bg-background-light dark:bg-background-dark">
+              {files.files.map((file) => (
+                <tr className="hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-black dark:text-white">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary">
+                        {file.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-black/60 dark:text-white/60">{file.isFile && <span>{file.size}</span>}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-black/60 dark:text-white/60">{file.isFile && <span>{file.modifiedTime}</span>}</td>
+                </tr>
+              ))}
               <tr className="hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-black dark:text-white">
                   <div className="flex items-center gap-2"><span

@@ -1,4 +1,4 @@
-import useTableListStore from "../../../stores/useTableListStore";
+import { useTableListStore } from "../../../stores/useTableListStore";
 import { TableNavItem } from "../../atoms/List/TableNavItem";
 
 type TableNavProps = {
