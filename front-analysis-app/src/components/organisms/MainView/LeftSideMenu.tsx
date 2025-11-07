@@ -1,14 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { getTableInfo } from "../../../function/internalFunctions";
-import addTableInfosStore from "../../../stores/useTableInfosStore";
+import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { SectionHeading } from "../../atoms/List/SectionHeading";
 import { TableNav } from "../../molecules/List/TableNav";
 
 export function LeftSideMenu() {
   const { t } = useTranslation();
-  const addTableInfos = addTableInfosStore((state) => state.addTableInfo);
-  const activateTableInfos = addTableInfosStore((state) => state.activateTableInfo);
-  const tableInfos = addTableInfosStore((state) => state.tableInfos);
+  const addTableInfos = useTableInfosStore((state) => state.addTableInfo);
+  const activateTableInfos = useTableInfosStore((state) => state.activateTableInfo);
+  const tableInfos = useTableInfosStore((state) => state.tableInfos);
 
 
   async function clickTableName(tableName: string) {

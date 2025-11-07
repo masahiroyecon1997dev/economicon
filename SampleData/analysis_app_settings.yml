@@ -1,0 +1,17 @@
+# アプリケーション設定ファイル
+# ホームディレクトリに「analysis_app_settings.yml」として保存してください
+
+# ファイル読み込みをするフォルダパスの初期値
+default_folder_path: "C:/Users/YourName/Documents"
+
+# テーブルに表示する行数
+display_rows: 100
+
+# アプリケーションの表示言語 (ja: 日本語, en: 英語)
+app_language: "ja"
+
+# ファイルエンコーディング
+encoding: "utf-8"
+
+# パス区切り文字（自動設定されますが、明示的に指定も可能）
+# path_separator: "/"

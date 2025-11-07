@@ -11,7 +11,7 @@ export type TableInfosActions = {
 
 type TableInfosStore = TableInfosType & TableInfosActions;
 
-const useTableInfosStore = create<TableInfosStore>((set) => ({
+export const useTableInfosStore = create<TableInfosStore>((set) => ({
   tableInfos: [],
   addTableInfo: (tableInfo) => set((state) => ({
     tableInfos: [...state.tableInfos, tableInfo].map(info => info.tableName === tableInfo.tableName ? { ...info, isActive: true } : { ...info, isActive: false })
@@ -26,5 +26,3 @@ const useTableInfosStore = create<TableInfosStore>((set) => ({
     tableInfos: state.tableInfos.map(info => info.tableName === tableName ? { ...info, isActive: true } : { ...info, isActive: false })
   })),
 }));
-
-export default useTableInfosStore;

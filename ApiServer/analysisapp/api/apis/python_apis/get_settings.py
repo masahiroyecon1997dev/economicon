@@ -1,7 +1,8 @@
-import json
+import os
 from pathlib import Path
 from typing import Dict
 
+import yaml
 from django.utils.translation import gettext as _
 
 from .common_api_class import AbstractApi, ApiError
@@ -24,7 +25,7 @@ class GetSettings(AbstractApi):
         'path_separator': '/'
     }
 
-    SETTINGS_FILE_NAME = 'analysis_app_settings.json'
+    SETTINGS_FILE_NAME = 'analysis_app_settings.yml'
 
     def __init__(self):
         self.settings_file_path = Path.home() / self.SETTINGS_FILE_NAME
@@ -39,7 +40,7 @@ class GetSettings(AbstractApi):
             if self.settings_file_path.exists():
                 # 設定ファイルが存在する場合は読み込み
                 with open(self.settings_file_path, 'r', encoding='utf-8') as f:
-                    user_settings = json.load(f)
+                    user_settings = yaml.safe_load(f)
 
                 # デフォルト設定とマージ（ユーザー設定を優先）
                 settings = self.DEFAULT_SETTINGS.copy()
@@ -47,6 +48,7 @@ class GetSettings(AbstractApi):
             else:
                 # 設定ファイルが存在しない場合はデフォルト設定を使用
                 settings = self.DEFAULT_SETTINGS.copy()
+                settings['path_separator'] = os.sep
 
             # 結果を返す
             result = {
@@ -58,8 +60,8 @@ class GetSettings(AbstractApi):
             }
             return result
 
-        except json.JSONDecodeError:
-            # JSONの解析エラーの場合はデフォルト設定を返す
+        except yaml.YAMLError:
+            # YAMLの解析エラーの場合はデフォルト設定を返す
             result = {
                 'defaultFolderPath':
                     self.DEFAULT_SETTINGS['default_folder_path'],

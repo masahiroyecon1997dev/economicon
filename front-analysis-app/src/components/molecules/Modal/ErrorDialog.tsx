@@ -10,11 +10,15 @@ export function ErrorDialog() {
 
   useEffect(() => {
     if (isOpen) {
-      setIsModalBlock(isOpen);
+      // モーダルを即座に表示
+      setIsModalBlock(true);
     } else {
-      setTimeout(() => {
-        setIsModalBlock(isOpen);
-      }, 400);
+      // フェードアウトアニメーション用の遅延
+      const timeout = setTimeout(() => {
+        setIsModalBlock(false);
+      }, 300); // アニメーション時間を短縮
+
+      return () => clearTimeout(timeout);
     }
   }, [isOpen]);
 
@@ -26,6 +30,11 @@ export function ErrorDialog() {
     closeErrorDialog();
   };
 
+  // モーダルが開いていない かつ ブロック状態でもない場合は何も表示しない
+  if (!isOpen && !isModalBlock) {
+    return null;
+  }
+
   return (
     <div
       className={`fixed inset-0 z-50 justify-center items-center overflow-y-auto overflow-x-hidden w-full md:inset-0 bg-gray-900/50 ${
@@ -33,8 +42,8 @@ export function ErrorDialog() {
       }`}
     >
       <div
-        className={`relative p-4 w-full max-w-md max-h-full transform ${
-          isOpen ? 'animate-fade-in-down' : 'animate-fade-out-up'
+        className={`relative p-4 w-full max-w-md max-h-full transform transition-all duration-300 ${
+          isOpen ? 'animate-fade-in-down opacity-100' : 'animate-fade-out-up opacity-0'
         }`}
       >
         <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
