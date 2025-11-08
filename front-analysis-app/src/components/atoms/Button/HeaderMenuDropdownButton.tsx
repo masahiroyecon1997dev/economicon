@@ -5,17 +5,16 @@ type HeaderMenuDropdownButtonProps = {
   clickEvent: () => void;
 };
 
-export function HeaderMenuDropdownButton({
+export const HeaderMenuDropdownButton = ({
   children,
   isTop,
   isBottom,
   clickEvent,
-}: HeaderMenuDropdownButtonProps) {
+}: HeaderMenuDropdownButtonProps) => {
   return (
     <button
-      className={`block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors ${
-        isTop ? "rounded-t-md" : ""
-      } ${isBottom ? "rounded-b-md" : ""}`}
+      className={`block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors ${isTop ? "rounded-t-md" : ""
+        } ${isBottom ? "rounded-b-md" : ""}`}
       onClick={() => clickEvent()}
     >
       {children}

@@ -29,9 +29,17 @@
     "TimeSeriesDataAnalysis": "時系列データ分析"
   },
   "SelectFileView": {
+    "Title": "ファイルを選択",
     "SelectFile": "ファイルを選択",
     "Description": "ファイルを選択してデータをインポートしてください。",
-    "SearchPlaceholder": "ファイル名で検索"
+    "SearchPlaceholder": "ファイル名で検索",
+    "GoUpDirectory": "上位ディレクトリへ移動",
+    "AllFiles": "すべてのファイル",
+    "CsvFiles": "CSVファイル",
+    "ExcelFiles": "Excelファイル",
+    "FileNameHeader": "ファイル名",
+    "SizeHeader": "サイズ",
+    "LastModifiedHeader": "最終更新日"
   },
   "ImportFileModal": {
     "Title": "ファイルを開く",

@@ -6,7 +6,7 @@ type TableHeaderCellProps = {
   onContextMenu?: (event: React.MouseEvent) => void;
 };
 
-export function TableHeaderCell({ children, onContextMenu }: TableHeaderCellProps) {
+export const TableHeaderCell = ({ children, onContextMenu }: TableHeaderCellProps) => {
   return (
     <th
       className="px-6 py-3"

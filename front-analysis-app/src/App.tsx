@@ -29,7 +29,7 @@ export const App = () => {
       try {
         // 設定を取得
         const resGetSettings = await getSettings();
-        if (resGetSettings.code === "OK") {
+        if (resGetSettings.code !== "OK") {
           if (isMounted) {
             await showErrorDialog(t('Common.Error'), resGetSettings.message);
           }

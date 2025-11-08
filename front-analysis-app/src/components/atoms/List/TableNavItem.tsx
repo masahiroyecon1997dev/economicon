@@ -8,14 +8,13 @@ type TableNavItemProps = {
   onClick: (tableName: string) => void;
 };
 
-export function TableNavItem({ tableName, isActive, onClick }: TableNavItemProps) {
+export const TableNavItem = ({ tableName, isActive, onClick }: TableNavItemProps) => {
   return (
     <a
-      className={`flex items-center justify-between rounded-md px-3 py-2 bg-white/20 text-white font-medium cursor-pointer ${
-        isActive
+      className={`flex items-center justify-between rounded-md px-3 py-2 bg-white/20 text-white font-medium cursor-pointer ${isActive
           ? "bg-white/10 font-medium"
           : "hover:bg-white/10"
-      }`}
+        }`}
       onClick={() => onClick(tableName)}
     >
       <span>{tableName}</span>

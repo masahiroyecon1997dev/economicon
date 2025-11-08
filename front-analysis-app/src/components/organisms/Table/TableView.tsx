@@ -3,7 +3,7 @@ import { MainTable } from "./MainTable";
 import { TableFooter } from "./TableFooter";
 
 
-export function TableView() {
+export const TableView = () => {
   const tableInfos = useTableInfosStore((state) => state.tableInfos);
 
   return (

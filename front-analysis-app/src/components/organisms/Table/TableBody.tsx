@@ -7,7 +7,7 @@ type TableBodyProps = {
   handleContextMenu: (event: React.MouseEvent, type: 'row' | 'cell', targetId: string) => void;
 };
 
-export function TableBody({ tableData, handleContextMenu }: TableBodyProps) {
+export const TableBody = ({ tableData, handleContextMenu }: TableBodyProps) => {
   return (
     <tbody>
       {tableData?.map((row, index) => (

@@ -16,10 +16,10 @@ type SaveFileModalProps = {
   close: () => void;
 };
 
-export function GenerateDataModal({
+export const GenerateDataModal = ({
   isGenerateSimulationDataModal,
   close,
-}: SaveFileModalProps) {
+}: SaveFileModalProps) => {
   const { t } = useTranslation();
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
   type InputValueType = {
@@ -66,7 +66,7 @@ export function GenerateDataModal({
 
   const [inputValue, setInputValue] = useState<InputValueType>(inputValueInitial);
 
-  function changeTableName(event: ChangeEvent<HTMLInputElement>) {
+  const changeTableName = (event: ChangeEvent<HTMLInputElement>) => {
     const tableName = event.target.value;
     setInputValue(preInputValue => ({
       ...preInputValue,
@@ -74,7 +74,7 @@ export function GenerateDataModal({
     }));
   }
 
-  function changenumSamples(event: ChangeEvent<HTMLInputElement>) {
+  const changeNumSamples = (event: ChangeEvent<HTMLInputElement>) => {
     const numSamples = event.target.value;
     setInputValue(preInputValue => ({
       ...preInputValue,
@@ -82,7 +82,7 @@ export function GenerateDataModal({
     }));
   }
 
-  function addColumn() {
+  const addColumn = () => {
     setInputValue(preInputValue => ({
       ...preInputValue,
       columnData: [
@@ -101,7 +101,7 @@ export function GenerateDataModal({
     }));
   }
 
-  function changeColumnName(event: ChangeEvent<HTMLInputElement>, num: number) {
+  const changeColumnName = (event: ChangeEvent<HTMLInputElement>, num: number) => {
     const columnName = event.target.value;
     setInputValue(preInputValue => ({
       ...preInputValue,
@@ -115,7 +115,7 @@ export function GenerateDataModal({
     }));
   }
 
-  function changeDataType(event: ChangeEvent<HTMLSelectElement>, num: number) {
+  const changeDataType = (event: ChangeEvent<HTMLSelectElement>, num: number) => {
     const dataType = event.target.value;
     setInputValue(preInputValue => ({
       ...preInputValue,
@@ -129,7 +129,7 @@ export function GenerateDataModal({
     }));
   }
 
-  function changeValue1(event: ChangeEvent<HTMLInputElement>, num: number) {
+  const changeValue1 = (event: ChangeEvent<HTMLInputElement>, num: number) => {
     const value1 = event.target.value;
     setInputValue(preInputValue => ({
       ...preInputValue,
@@ -143,7 +143,7 @@ export function GenerateDataModal({
     }));
   }
 
-  function changeValue2(event: ChangeEvent<HTMLInputElement>, num: number) {
+  const changeValue2 = (event: ChangeEvent<HTMLInputElement>, num: number) => {
     const value2 = event.target.value;
     setInputValue(preInputValue => ({
       ...preInputValue,
@@ -157,7 +157,7 @@ export function GenerateDataModal({
     }));
   }
 
-  function checkInputValue(): boolean {
+  const checkInputValue = (): boolean => {
     let isError = false;
     const requiredTableName = checkRequired(inputValue.tableName);
     setInputValue(preInputValue => ({
@@ -220,7 +220,7 @@ export function GenerateDataModal({
     return isError;
   }
 
-  async function generateData() {
+  const generateData = async () => {
     const isError = checkInputValue();
     if (isError) {
       return;
@@ -268,7 +268,7 @@ export function GenerateDataModal({
       <InputTextField
         label={t('GenerateDataModal.numSamples')}
         value={inputValue.numSamples}
-        change={event => changenumSamples(event)}
+        change={event => changeNumSamples(event)}
         error={inputValue.numSamplesError}
       />
       <div className="p-4 overflow-hidden border-gray-300">
