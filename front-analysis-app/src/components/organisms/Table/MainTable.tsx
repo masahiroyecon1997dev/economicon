@@ -9,10 +9,10 @@ type MainTableProps = {
   tableInfo: TableInfoType;
 };
 
-export function MainTable({ tableInfo }: MainTableProps) {
-  function handleContextMenu(event: React.MouseEvent, type: string, targetId: string) {
+export const MainTable = ({ tableInfo }: MainTableProps) => {
+  const handleContextMenu = (event: React.MouseEvent, type: string, targetId: string) => {
     console.log(event, type, targetId);
-  }
+  };
 
   return (
     <div className="overflow-x-auto rounded-lg border border-brand-border bg-white shadow-sm mt-6">

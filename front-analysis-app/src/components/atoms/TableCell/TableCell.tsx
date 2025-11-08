@@ -6,7 +6,7 @@ type MainTableCellProps = {
   onContextMenu?: (event: React.MouseEvent) => void;
 };
 
-export function TableCell({ children, onContextMenu }: MainTableCellProps) {
+export const TableCell = ({ children, onContextMenu }: MainTableCellProps) => {
   return (
     <td className="px-6 py-4" onContextMenu={onContextMenu}>
       {children}

@@ -3,7 +3,7 @@ type SelectOptionType = {
   children: string;
 }
 
-export function SelectOption({ value, children }: SelectOptionType) {
+export const SelectOption = ({ value, children }: SelectOptionType) => {
   return (
     <option value={value}>{children}</option>
   )

@@ -7,7 +7,7 @@ type TableInputTextProps = {
   onBlur: () => void;
 };
 
-export function TableInputText({ value, onChange, onBlur }: TableInputTextProps) {
+export const TableInputText = ({ value, onChange, onBlur }: TableInputTextProps) => {
   return (
     <input
       type="text"

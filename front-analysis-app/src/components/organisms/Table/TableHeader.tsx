@@ -10,7 +10,7 @@ type TableHeaderProps = {
   handleContextMenu: (event: React.MouseEvent, type: 'header', targetId: string) => void;
 };
 
-export function TableHeader({ columns, handleContextMenu }: TableHeaderProps) {
+export const TableHeader = ({ columns, handleContextMenu }: TableHeaderProps) => {
   const { isOver, setNodeRef } = useDroppable({ id: 'column-droppable' });
 
   return (

@@ -13,7 +13,7 @@ import { ImportFileModal } from "../Modal/ImportFileModal";
 import { LinearRegressionModal } from "../Modal/LinearRegressionModal";
 import { SaveFileModal } from "../Modal/SaveFileModal";
 
-export function HeaderMenu() {
+export const HeaderMenu = () => {
   const { t } = useTranslation();
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
   const [isImportFileByUploadModal, setIsImportFileByUploadModal] = useState<boolean>(false);
@@ -24,47 +24,47 @@ export function HeaderMenu() {
     useState<boolean>(false);
   const [isCalculateModal, setIsCalculateModal] = useState<boolean>(false);
 
-  function showImportFileByPathView() {
+  const showImportFileByPathView = () => {
     setCurrentView({ currentView: "importFileByPath" });
   }
 
-  function openImportFileByUploadModal() {
+  const openImportFileByUploadModal = () => {
     setIsImportFileByUploadModal(true);
   }
 
-  function closeImportFileByUploadModal() {
+  const closeImportFileByUploadModal = () => {
     setIsImportFileByUploadModal(false);
   }
 
-  function openSaveFileModal() {
+  const openSaveFileModal = () => {
     setIsSaveFileModal(true);
   }
 
-  function closeSaveFileModal() {
+  const closeSaveFileModal = () => {
     setIsSaveFileModal(false);
   }
 
-  function openGenerateDataModal() {
+  const openGenerateDataModal = () => {
     setGenerateSimulationDataModal(true);
   }
 
-  function closeGenerateDataModal() {
+  const closeGenerateDataModal = () => {
     setGenerateSimulationDataModal(false);
   }
 
-  function openLinearRegressionModal() {
+  const openLinearRegressionModal = () => {
     setIsLinearRegressionModal(true);
   }
 
-  function closeLinearRegressionModal() {
+  const closeLinearRegressionModal = () => {
     setIsLinearRegressionModal(false);
   }
 
-  function openCalculateModal() {
+  const openCalculateModal = () => {
     setIsCalculateModal(true);
   }
 
-  function closeCalculateModal() {
+  const closeCalculateModal = () => {
     setIsCalculateModal(false);
   }
 

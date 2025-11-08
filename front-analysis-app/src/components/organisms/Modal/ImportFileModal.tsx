@@ -16,23 +16,23 @@ type ImportFileModalProps = {
   close: () => void;
 };
 
-export function ImportFileModal({
+export const ImportFileModal = ({
   isImportFileModal,
   close,
-}: ImportFileModalProps) {
+}: ImportFileModalProps) => {
   const { t } = useTranslation();
   const addTableName = useTableListStore((state) => state.addTableName);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
   const [file, setFile] = useState<File>();
   const [dragActive, setDragActive] = useState(false);
 
-  function changeFileInput(event: ChangeEvent<HTMLInputElement>) {
+  const changeFileInput = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files?.length === 0) return;
     setFile(files[0]);
-  }
+  };
 
-  function handleDrag(event: DragEvent<HTMLDivElement>) {
+  const handleDrag = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
     if (event.type === "dragenter" || event.type === "dragover") {
@@ -40,18 +40,18 @@ export function ImportFileModal({
     } else if (event.type === "dragleave") {
       setDragActive(false);
     }
-  }
+  };
 
-  function handleDropFile(event: DragEvent<HTMLDivElement>) {
+  const handleDropFile = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
     setDragActive(false);
     if (event.dataTransfer.files && event.dataTransfer.files[0]) {
       setFile(event.dataTransfer.files[0]);
     }
-  }
+  };
 
-  async function importFile() {
+  const importFile = async () => {
     if (!file) return;
     const resImportCsv = await importCsv(file);
     console.log(resImportCsv);
@@ -60,7 +60,7 @@ export function ImportFileModal({
     addTableName(resImportCsv.result.tableName);
     addTableInfo(tableInfo);
     close();
-  }
+  };
 
   return (
     <Modal
@@ -72,9 +72,8 @@ export function ImportFileModal({
       modalSize="max-w-2xl"
     >
       <div
-        className={`w-full py-9 bg-gray-50 rounded-2xl border border-gray-300 gap-3 grid border-dashed ${
-          dragActive ? "border-blue-500 bg-blue-100" : "border-gray-300"
-        }`}
+        className={`w-full py-9 bg-gray-50 rounded-2xl border border-gray-300 gap-3 grid border-dashed ${dragActive ? "border-blue-500 bg-blue-100" : "border-gray-300"
+          }`}
         onDragEnter={(event) => handleDrag(event)}
         onDragOver={(event) => handleDrag(event)}
         onDragLeave={(event) => handleDrag(event)}
