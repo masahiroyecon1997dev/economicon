@@ -7,10 +7,10 @@ type CalculateProps = {
   close: () => void;
 };
 
-export function Calculate({ isCalculateModal, close }: CalculateProps) {
+export const Calculate = ({ isCalculateModal, close }: CalculateProps) => {
   const { t } = useTranslation();
 
-  function calculate() {}
+  const calculate = () => { };
 
   return (
     <Modal

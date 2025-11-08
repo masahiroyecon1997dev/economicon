@@ -13,30 +13,30 @@ type SaveFileModalProps = {
   close: () => void;
 };
 
-export function SaveFileModal({ isSaveFileModal, close }: SaveFileModalProps) {
+export const SaveFileModal = ({ isSaveFileModal, close }: SaveFileModalProps) => {
   const { t } = useTranslation();
   const [tableList, setTableList] = useState<SelectListType>([]);
   const [selectedTableName, setSelectedTableName] = useState<string>('');
 
   useEffect(() => {
     if (isSaveFileModal) {
-      async function initializeTableList() {
+      const initializeTableList = async () => {
         const resTableNameList = await getTableNameList();
         for (const table of resTableNameList.result.tableNameList) {
           setTableList(preTableList => [...preTableList, { value: table, name: table }]);
         }
         setSelectedTableName(resTableNameList.result.tableNameList[0]);
-      }
+      };
       initializeTableList();
     }
   }, [isSaveFileModal]);
 
-  function changeTableName(event: ChangeEvent<HTMLSelectElement>) {
+  const changeTableName = (event: ChangeEvent<HTMLSelectElement>) => {
     const tableName = event.target.value;
     setSelectedTableName(tableName);
-  }
+  };
 
-  async function saveFile() {
+  const saveFile = async () => {
     const resOutputCsv = await outputCsv(selectedTableName);
     console.log(resOutputCsv);
     const csvData = new Blob([resOutputCsv.result.csvData], {
@@ -44,7 +44,7 @@ export function SaveFileModal({ isSaveFileModal, close }: SaveFileModalProps) {
     });
     saveAs(csvData, selectedTableName + '.csv');
     close();
-  }
+  };
 
   return (
     <Modal

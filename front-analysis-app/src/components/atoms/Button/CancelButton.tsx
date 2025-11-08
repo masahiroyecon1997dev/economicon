@@ -3,7 +3,7 @@ type CancelButtonProps = {
   cancel: () => void;
 };
 
-export function CancelButton({ children, cancel }: CancelButtonProps) {
+export const CancelButton = ({ children, cancel }: CancelButtonProps) => {
   return (
     <button
       className="w-28 h-9 px-5 py-2.5 ms-3

@@ -8,7 +8,7 @@ type TableContextMenuProps = {
   handleCloseContextMenu: () => void;
 };
 
-export function TableContextMenu({ contextMenu, handleCloseContextMenu }: TableContextMenuProps) {
+export const TableContextMenu = ({ contextMenu, handleCloseContextMenu }: TableContextMenuProps) => {
   if (!contextMenu) return null;
 
   return (

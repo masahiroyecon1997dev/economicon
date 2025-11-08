@@ -2,10 +2,10 @@ import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { SelectFileView } from "../SelectFile/SelectFileView";
 import { TableView } from "../Table/TableView";
 
-export function MainView() {
+export const MainView = () => {
   const currentView = useCurrentViewStore((state) => state.currentView);
 
-  function renderContent() {
+  const renderContent = () => {
     switch (currentView) {
       case "selectFile":
         return <SelectFileView />;

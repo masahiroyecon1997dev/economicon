@@ -12,10 +12,10 @@ type LinearRegressionModalProps = {
   close: () => void;
 };
 
-export function LinearRegressionModal({
+export const LinearRegressionModal = ({
   isLinearRegressionModal,
   close,
-}: LinearRegressionModalProps) {
+}: LinearRegressionModalProps) => {
   const { t } = useTranslation();
   const [tableNameList, setTableNameList] = useState<SelectListType>([]);
   const [selectedTableName, setSelectedTableName] = useState<string>("");
@@ -59,22 +59,22 @@ export function LinearRegressionModal({
     };
   }, [isLinearRegressionModal]);
 
-  function handleItemClick(item: string) {
+  const handleItemClick = (item: string) => {
     setExplanatoryVariables((preExplanatoryVariable) => [
       ...preExplanatoryVariable,
       item,
     ]);
-  }
+  };
 
-  function changeTableName(event: ChangeEvent<HTMLSelectElement>) {
+  const changeTableName = (event: ChangeEvent<HTMLSelectElement>) => {
     setSelectedTableName(event.target.value);
-  }
+  };
 
-  function changeDependentVariable(event: ChangeEvent<HTMLSelectElement>) {
+  const changeDependentVariable = (event: ChangeEvent<HTMLSelectElement>) => {
     setDependentVariable(event.target.value);
-  }
+  };
 
-  async function executeAnalysis() {
+  const executeAnalysis = async () => {
     const reqLinearRegression: ReqLinearRegressionType = {
       tableName: selectedTableName,
       dependentVariable: dependentVariable,
@@ -85,15 +85,15 @@ export function LinearRegressionModal({
     console.log(resLinearRegression.result.regressionResult);
     setResult(resLinearRegression.result.regressionResult);
     openResultModal();
-  }
+  };
 
-  function openResultModal() {
+  const openResultModal = () => {
     setIsReusltModal(true);
-  }
+  };
 
-  function closeResultModal() {
+  const closeResultModal = () => {
     setIsReusltModal(false);
-  }
+  };
 
   return (
     <>

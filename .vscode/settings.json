@@ -117,7 +117,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "python.testing.cwd": "${workspaceFolder}/ApiServer/analysisapp",
   "python.testing.unittestArgs": ["-v", "1", "-p", "test_*.py", "api"],

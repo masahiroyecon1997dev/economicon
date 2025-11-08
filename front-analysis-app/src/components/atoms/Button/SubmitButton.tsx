@@ -3,7 +3,7 @@ type SubmitButtonProps = {
   submit: () => void;
 };
 
-export function SubmitButton({ children, submit }: SubmitButtonProps) {
+export const SubmitButton = ({ children, submit }: SubmitButtonProps) => {
   return (
     <button
       className="w-28 h-9 px-5 py-2.5 ms-3
