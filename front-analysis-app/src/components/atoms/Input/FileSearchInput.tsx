@@ -9,13 +9,13 @@ type FileSearchInputProps = {
 
 export const FileSearchInput = ({ placeholder, value, onChange }: FileSearchInputProps) => {
   return (
-    <div className="relative flex-grow border-brand-border">
+    <div className="w-2xl relative flex-grow border-brand-border ml-auto">
       <FontAwesomeIcon
         icon={faMagnifyingGlass}
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-black/40 dark:text-white/40"
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-black/40"
       />
       <input
-        className="w-full rounded-lg border border-solid bg-transparent py-2 pl-10 pr-4 text-black dark:text-white placeholder:text-black/40 dark:placeholder:text-white/40 focus:ring-primary/50"
+        className="w-full rounded-lg border border-solid bg-transparent py-2 pl-10 pr-4 text-black placeholder:text-black/40 focus:ring-primary/50"
         placeholder={placeholder}
         type="text"
         value={value}

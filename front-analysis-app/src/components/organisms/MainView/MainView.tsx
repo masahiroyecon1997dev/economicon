@@ -15,7 +15,7 @@ export const MainView = () => {
   }
 
   return (
-    <main className="flex-1 overflow-y-auto bg-brand-secondary p-8">
+    <main className="flex-1 bg-brand-secondary p-8">
       {renderContent()}
     </main>
   );

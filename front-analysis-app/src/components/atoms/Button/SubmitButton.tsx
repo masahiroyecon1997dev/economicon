@@ -11,8 +11,7 @@ export const SubmitButton = ({ children, submit }: SubmitButtonProps) => {
             rounded-full focus:ring-4 focus:outline-none border
             bg-indigo-600 border-indigo-700
             hover:bg-indigo-800
-            focus:ring-blue-300
-            dark:bg-indigo-600 dark:hover:bg-indigo-600 dark:focus:ring-indigo-800"
+            focus:ring-blue-300"
       onClick={() => submit()}
     >
       {children}
