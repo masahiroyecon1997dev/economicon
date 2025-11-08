@@ -6,7 +6,7 @@ import { useSettingsStore } from "../../../stores/useSettingsStore";
 import type { FileType } from "../../../types/commonTypes";
 
 import { useTranslation } from "react-i18next";
-import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
+import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
 import { FileFilterBar } from "../../molecules/Filter/FileFilterBar";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
@@ -80,8 +80,8 @@ export const SelectFileView = () => {
     await changeDirectory(targetPath);
   };
 
-  // ファイル/ディレクトリのダブルクリックハンドラー
-  const handleFileDoubleClick = async (file: FileType) => {
+  // ファイル/ディレクトリのクリックハンドラー
+  const handleFileClick = async (file: FileType) => {
     if (!file.isFile) {
       // ディレクトリの場合は移動
       const separator = settings.pathSeparator || '/';
@@ -89,6 +89,11 @@ export const SelectFileView = () => {
         ? separator + file.name
         : files.directoryPath + separator + file.name;
       await changeDirectory(newPath);
+    } else {
+      if (file.name.toLowerCase().endsWith('.csv')) {
+        // CSVファイルの場合の処理
+
+      }
     }
   };
 
@@ -134,13 +139,8 @@ export const SelectFileView = () => {
     <div className="mx-auto max-w-10xl">
       <div className="flex flex-col gap-8">
         <header>
-          <h1 className="text-3xl font-bold text-black dark:text-white">{t("SelectFileView.Title")}</h1>
-          <p className="mt-2 text-base text-black/60 dark:text-white/60">{t("SelectFileView.Description")}</p>
-          {files.directoryPath && (
-            <p className="mt-1 text-sm text-primary font-mono">
-              {files.directoryPath}
-            </p>
-          )}
+          <h1 className="text-3xl font-bold text-black">{t("SelectFileView.Title")}</h1>
+          <p className="mt-2 text-base text-black/60">{t("SelectFileView.Description")}</p>
         </header>
 
         <div className="flex flex-col gap-4">
@@ -153,7 +153,6 @@ export const SelectFileView = () => {
             onBreadcrumbClick={handleBreadcrumbClick}
             onSearchChange={setSearchValue}
           />
-
           <FileFilterBar
             filters={filterOptions}
             onFilterClick={setActiveFilter}
@@ -162,18 +161,15 @@ export const SelectFileView = () => {
 
         <FileListTable
           files={filteredFiles}
-          onFileDoubleClick={handleFileDoubleClick}
+          onFileClick={handleFileClick}
           fileNameHeader={t('SelectFileView.FileNameHeader')}
           sizeHeader={t('SelectFileView.SizeHeader')}
           lastModifiedHeader={t('SelectFileView.LastModifiedHeader')}
           maxHeight="500px"
         />
-
-        <ActionButtonBar
+        <CancelButtonBar
           cancelText={t('Common.Cancel')}
-          selectText={t('SelectFileView.SelectFile')}
           onCancel={handleCancel}
-          onSelect={handleSelect}
         />
       </div>
     </div>

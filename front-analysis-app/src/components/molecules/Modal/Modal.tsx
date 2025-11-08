@@ -37,16 +37,14 @@ export function Modal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 justify-center items-center overflow-y-auto overflow-x-hidden w-full md:inset-0 bg-gray-900/50 ${
-        isModalBlock ? 'flex' : 'hidden'
-      }`}
+      className={`fixed inset-0 z-50 justify-center items-center overflow-y-auto overflow-x-hidden w-full md:inset-0 bg-gray-900/50 ${isModalBlock ? 'flex' : 'hidden'
+        }`}
     >
       <div
-        className={`relative p-4 w-full ${modalSize} max-h-full transform ${
-          isOpenModal ? 'animate-fade-in-down' : 'animate-fade-out-up'
-        }`}
+        className={`relative p-4 w-full ${modalSize} max-h-full transform ${isOpenModal ? 'animate-fade-in-down' : 'animate-fade-out-up'
+          }`}
       >
-        <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <div className="relative bg-white rounded-lg shadow">
           <ModalHeader close={() => close()}>{modalTitle}</ModalHeader>
           <div className="">{children}</div>
           <ModalFooter close={() => close()} submit={() => submit()}>
