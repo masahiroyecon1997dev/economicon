@@ -10,7 +10,7 @@ export const UpDirectoryButton = ({ onClick, title }: UpDirectoryButtonProps) =>
   return (
     <button
       onClick={onClick}
-      className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 dark:bg-primary/20 text-primary hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors"
+      className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
       title={title}
     >
       <FontAwesomeIcon icon={faArrowUp} className="text-xl" />

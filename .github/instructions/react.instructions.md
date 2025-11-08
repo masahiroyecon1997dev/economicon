@@ -16,7 +16,6 @@ applyTo: "AnalysisApp/AnalysisApp/front-analysis-app/src/components/**/**/**/*.t
 - Tailwind CSSを使用してスタイリングを行う
 - インラインスタイルは定数値の場合のみ使用（例：`height: ${HEADER_MENU_HEIGHT}px`）
 - クラス名は動的な条件分岐を含む場合、テンプレートリテラルを使用
-- ダークモード対応のクラス（`dark:`プレフィックス）を適切に使用
 
 ### JSXルール
 - JSX内では複雑なロジックを避け、必要に応じて関数に切り出す
@@ -132,7 +131,7 @@ import { useTranslation } from 'react-i18next';
 
 export function Component() {
   const { t } = useTranslation();
-  
+
   return (
     <div>
       {error !== '' ? <p className="text-red-500 text-xs mt-1">{t(error)}</p> : null}
