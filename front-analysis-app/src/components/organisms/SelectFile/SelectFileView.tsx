@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { showErrorDialog } from "../../../function/errorDialog";
-import { getFiles } from "../../../function/restApis";
+import { getTableInfo } from "../../../function/internalFunctions";
+import { getFiles, importCsvByPath } from "../../../function/restApis";
 import { useFilesStore } from "../../../stores/useFilesStore";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
+import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import type { FileType } from "../../../types/commonTypes";
+import type { SortDirection, SortField } from "../../../types/stateTypes";
 
 import { useTranslation } from "react-i18next";
 import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
@@ -16,10 +19,13 @@ export const SelectFileView = () => {
   const files = useFilesStore((state) => state.files);
   const setFiles = useFilesStore((state) => state.setFiles);
   const settings = useSettingsStore((state) => state.settings);
+  const addTableInfos = useTableInfosStore((state) => state.addTableInfo);
 
   // ローカル状態
   const [searchValue, setSearchValue] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   // 現在のディレクトリパスを配列に分割してパンくずリストを作成
   const getPathSegments = () => {
@@ -88,11 +94,33 @@ export const SelectFileView = () => {
       const newPath = files.directoryPath === separator
         ? separator + file.name
         : files.directoryPath + separator + file.name;
-      await changeDirectory(newPath);
+      try {
+        const response = await getFiles(newPath);
+        if (response.code === "OK") {
+          setFiles({ files: response.result });
+        } else {
+          await showErrorDialog(t('Common.Error'), response.message);
+          return;
+        }
+      } catch (error) {
+        await showErrorDialog(t('Common.Error'), t('Common.UnexpectedError'));
+        return;
+      }
+
     } else {
       if (file.name.toLowerCase().endsWith('.csv')) {
         // CSVファイルの場合の処理
-
+        const response = await importCsvByPath({
+          filePath: files.directoryPath + '/' + file.name,
+          tableName: file.name.replace('.csv', ''),
+          separator: ',',
+        });
+        if (response.code !== "OK") {
+          await showErrorDialog(t('Common.Error'), response.message);
+          return;
+        }
+        const tableInfo = await getTableInfo(response.result.tableName);
+        addTableInfos(tableInfo);
       }
     }
   };
@@ -115,6 +143,61 @@ export const SelectFileView = () => {
 
     return matchesSearch && matchesFileType;
   });
+
+  // ソート処理
+  const sortedFiles = [...filteredFiles].sort((a, b) => {
+    if (!sortField || !sortDirection) return 0;
+
+    // ディレクトリを常に上に表示
+    if (a.isFile !== b.isFile) {
+      return a.isFile ? 1 : -1;
+    }
+
+    let aValue: string | number = '';
+    let bValue: string | number = '';
+
+    switch (sortField) {
+      case 'name':
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+        break;
+      case 'size':
+        aValue = a.isFile ? (a.size || 0) : 0;
+        bValue = b.isFile ? (b.size || 0) : 0;
+        break;
+      case 'modifiedTime':
+        aValue = a.isFile ? new Date(a.modifiedTime).getTime() : 0;
+        bValue = b.isFile ? new Date(b.modifiedTime).getTime() : 0;
+        break;
+    }
+
+    if (aValue < bValue) {
+      return sortDirection === 'asc' ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return sortDirection === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
+  // ソートハンドラー
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // 同じフィールドの場合は方向を切り替え
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortField(null);
+        setSortDirection(null);
+      } else {
+        setSortDirection('asc');
+      }
+    } else {
+      // 異なるフィールドの場合は昇順で開始
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
 
   // フィルターオプション
   const filterOptions = [
@@ -160,12 +243,15 @@ export const SelectFileView = () => {
         </div>
 
         <FileListTable
-          files={filteredFiles}
+          files={sortedFiles}
           onFileClick={handleFileClick}
           fileNameHeader={t('SelectFileView.FileNameHeader')}
           sizeHeader={t('SelectFileView.SizeHeader')}
           lastModifiedHeader={t('SelectFileView.LastModifiedHeader')}
           maxHeight="500px"
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
         />
         <CancelButtonBar
           cancelText={t('Common.Cancel')}
