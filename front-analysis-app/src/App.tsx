@@ -53,15 +53,15 @@ export const App = () => {
         }
         // 全て成功した場合のみストアを更新
         if (isMounted) {
-          setSettings({settings: resGetSettings.result});
+          setSettings({ settings: resGetSettings.result });
           setCurrentView({ currentView: "selectFile" });
           setTableList(resGetTableNames.result.tableNameList);
-          setFiles({files: resGetFiles.result});
+          setFiles({ files: resGetFiles.result });
         }
       } catch (error) {
         console.error('App initialization error:', error);
         if (isMounted) {
-          await showErrorDialog(t('Common.Error'), t('Common.UnexpectedError'));
+          await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
         }
       }
     }
@@ -80,8 +80,8 @@ export const App = () => {
         className="flex flex-1 overflow-hidden"
       >
         <p>{ }</p>
-        <LeftSideMenu/>
-        <MainView/>
+        <LeftSideMenu />
+        <MainView />
       </div>
       <ErrorDialog />
     </div>
