@@ -24,7 +24,8 @@ from .apis.rest_apis import (rest_add_column, rest_add_dummy_column,
                              rest_import_tsv_by_file, rest_input_cell_data,
                              rest_linear_regression, rest_logistic_regression,
                              rest_rename_column_name, rest_rename_table,
-                             rest_sort_columns, rest_transform_column)
+                             rest_sort_columns, rest_transform_column,
+                             rest_variable_effects_estimation)
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -102,4 +103,6 @@ urlpatterns = [
          rest_sort_columns.SortColumns.as_view()),
     path('transform-column',
          rest_transform_column.TransformColumn.as_view()),
+    path('variable-effects-estimation',
+         rest_variable_effects_estimation.VariableEffectsEstimation.as_view()),
 ]
