@@ -68,7 +68,7 @@ export const SelectFileView = () => {
         await showErrorDialog(t('Common.Error'), response.message);
       }
     } catch (error) {
-      await showErrorDialog(t('Common.Error'), t('Common.UnexpectedError'));
+      await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
     }
   };
 
@@ -104,7 +104,7 @@ export const SelectFileView = () => {
           return;
         }
       } catch (error) {
-        await showErrorDialog(t('Common.Error'), t('Common.UnexpectedError'));
+        await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
         return;
       }
     } else {

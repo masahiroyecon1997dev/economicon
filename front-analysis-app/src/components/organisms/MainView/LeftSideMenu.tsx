@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
+import { showErrorDialog } from "../../../function/errorDialog";
 import { getTableInfo } from "../../../function/internalFunctions";
+import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { SectionHeading } from "../../atoms/List/SectionHeading";
 import { TableNav } from "../../molecules/List/TableNav";
@@ -9,17 +11,25 @@ export function LeftSideMenu() {
   const addTableInfos = useTableInfosStore((state) => state.addTableInfo);
   const activateTableInfos = useTableInfosStore((state) => state.activateTableInfo);
   const tableInfos = useTableInfosStore((state) => state.tableInfos);
+  const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
 
 
   async function clickTableName(tableName: string) {
-    const sameTableNameInfos = tableInfos.filter(
-      (tableInfo) => tableInfo.tableName === tableName
-    );
-    if (sameTableNameInfos.length > 0) {
-      activateTableInfos(tableName);
-    } else {
-      const tableInfo = await getTableInfo(tableName);
-      addTableInfos(tableInfo);
+    try {
+      const sameTableNameInfos = tableInfos.filter(
+        (tableInfo) => tableInfo.tableName === tableName
+      );
+      if (sameTableNameInfos.length > 0) {
+        activateTableInfos(tableName);
+      } else {
+        const tableInfo = await getTableInfo(tableName);
+        addTableInfos(tableInfo);
+
+      }
+      setCurrentView({ currentView: "dataPreview" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('Error.UnexpectedError');
+      await showErrorDialog(t("Error.Error"), message);
     }
   }
 

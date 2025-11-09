@@ -37,6 +37,33 @@ export const importParquetByPath = async (
   return response.data;
 }
 
+export const getColumnInfoList = async (
+  tableName: string
+): Promise<apiTypes.ResGetColumnInfoType> => {
+  const response = await axios.get("/get-column-info-list", {
+    params: {
+      tableName: tableName,
+    },
+  });
+  return response.data;
+}
+
+export const fetchDataToJson = async (
+  tableName: string,
+  firstRow: number = 1,
+  lastRow: number = 100
+): Promise<apiTypes.ResFetchDataToJsonType> => {
+
+  const response = await axios.get("/fetch-data-to-json", {
+    params: {
+      tableName: tableName,
+      firstRow: firstRow,
+      lastRow: lastRow,
+    },
+  });
+  return response.data;
+}
+
 export const importCsv = async (
   file: File
 ): Promise<apiTypes.ResImportCsvType> => {
@@ -66,30 +93,6 @@ export const outputCsv = async (
   }
 }
 
-export const fetchDataToJson = async (
-  tableName: string,
-  firstRow: number = 1,
-  lastRow: number = 100
-): Promise<apiTypes.ResFetchDataToJsonType> => {
-  try {
-    const response = await axios.get("/fetch-data-to-json", {
-      params: {
-        tableName: tableName,
-        firstRow: firstRow,
-        lastRow: lastRow,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    return {
-      code: -9999,
-      result: { tableName: "", data: "" },
-      message: "エラーです",
-    };
-  }
-}
-
 export const getTableNameList = async (): Promise<apiTypes.ResGetTableNameListType> => {
   try {
     const response = await axios.get("/get-table-name-list");
@@ -97,22 +100,6 @@ export const getTableNameList = async (): Promise<apiTypes.ResGetTableNameListTy
   } catch (error) {
     console.log(error);
     return { code: "NG", result: { tableNameList: [] }, message: "エラーです" };
-  }
-}
-
-export const getColumnInfoList = async (
-  tableName: string
-): Promise<apiTypes.ResGetColumnInfoType> => {
-  try {
-    const response = await axios.get("/get-column-info-list", {
-      params: {
-        tableName: tableName,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    return { code: "NG", result: { tableName: "", columnInfoList: [] }, message: "エラーです" };
   }
 }
 

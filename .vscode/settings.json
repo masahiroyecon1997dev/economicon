@@ -124,5 +124,8 @@
   "python.testing.pytestEnabled": false,
   "python.testing.unittestEnabled": true,
   "python.envFile": "${workspaceFolder}/.env",
-  "python.analysis.typeCheckingMode": "standard"
+  "python.analysis.typeCheckingMode": "standard",
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  }
 }

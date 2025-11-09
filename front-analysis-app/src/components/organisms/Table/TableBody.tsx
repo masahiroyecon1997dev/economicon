@@ -8,6 +8,7 @@ type TableBodyProps = {
 };
 
 export const TableBody = ({ tableData, handleContextMenu }: TableBodyProps) => {
+
   return (
     <tbody>
       {tableData?.map((row, index) => (
