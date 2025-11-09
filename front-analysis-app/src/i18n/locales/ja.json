@@ -1,0 +1,94 @@
+{
+  "Common": {
+    "Cancel": "キャンセル",
+    "OK": "OK",
+    "Error": "エラー",
+    "UnexpectedError": "予期せぬエラーが発生しました。",
+    "Table": "テーブル",
+    "Constant": "定数",
+    "UniformDistribution": "一様分布",
+    "NomalDistribution": "正規分布"
+  },
+  "HeaderMenu": {
+    "Title": "Mesatsu",
+    "File": "ファイル",
+    "FileOpen": "開く",
+    "UploadFile": "アップロード",
+    "FileSave": "保存",
+    "Data": "データ",
+    "DataGeneration": "データ生成",
+    "SampleData": "サンプルデータ",
+    "AddColumn": "追加",
+    "Calculate": "計算",
+    "HypothesisTest": "仮説検定",
+    "Model": "モデル",
+    "LinearRegression": "線形回帰",
+    "LogitAnalysis": "ロジスティック分析",
+    "ProbitAnalysis": "プロビット分析",
+    "TobitAnalysis": "トービット分析",
+    "TimeSeriesDataAnalysis": "時系列データ分析"
+  },
+  "SelectFileView": {
+    "Title": "ファイルを選択",
+    "SelectFile": "ファイルを選択",
+    "Description": "ファイルを選択してデータをインポートしてください。",
+    "SearchPlaceholder": "ファイル名で検索",
+    "GoUpDirectory": "上位ディレクトリへ移動",
+    "AllFiles": "すべてのファイル",
+    "CsvFiles": "CSVファイル",
+    "ExcelFiles": "Excelファイル",
+    "FileNameHeader": "ファイル名",
+    "SizeHeader": "サイズ",
+    "LastModifiedHeader": "最終更新日"
+  },
+  "ImportFileModal": {
+    "Title": "ファイルを開く",
+    "Notation": "15MB以下のcsvファイルのみ",
+    "Information": "ファイルをここにドラッグ&ドロップしてください。もしくは、",
+    "ChooseFile": "ファイルを選ぶ",
+    "OtherChooseFile": "他のファイルを選ぶ",
+    "OpenFile": "開く"
+  },
+  "SaveFileModal": {
+    "Title": "テーブルを保存する",
+    "TableName": "テーブル名",
+    "Download": "ダウンロード"
+  },
+  "GenerateDataModal": {
+    "Title": "データを作成する",
+    "TableName": "テーブル名",
+    "numSamples": "サンプル数",
+    "Setting": "データの設定",
+    "AddColumn": "列を追加",
+    "ColumnName": "列名",
+    "DataType": "データ形式",
+    "Coefficient": "係数",
+    "Min": "最小値",
+    "Max": "最大値",
+    "ErrorMean": "誤差項の平均",
+    "ErrorVariance": "誤差項の分散",
+    "Generate": "作成"
+  },
+  "LinearRegressionModal": {
+    "Title": "線形回帰分析",
+    "TableName": "テーブル名",
+    "ColumnName": "列名",
+    "ExplanatoryVariable": "説明変数",
+    "DependentVariable": "被説明変数",
+    "Execute": "分析実行"
+  },
+  "CalculateModal": {
+    "Title": "計算結果の列を作成する",
+    "Execute": "作成"
+  },
+  "RegressionResult": {
+    "Title": "分析結果"
+  },
+  "Error": {
+    "Required": "入力してください。",
+    "Number": "数値で入力してください。",
+    "MaxLength20": "20文字以内で入力してください。",
+    "IntegerMore0": "0以上の整数で入力してください。",
+    "Unknown": "不明なエラーです。"
+  }
+}

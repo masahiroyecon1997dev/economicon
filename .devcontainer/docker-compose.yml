@@ -10,7 +10,16 @@ services:
         DEV_ENV: "development"
     tty: true
     volumes:
-      - ../../AnalysisApp:/AnalysisApp
+      - ../.devcontainer:/AnalysisApp/.devcontainer
+      - ../.github:/AnalysisApp/.github
+      - ../.vscode:/AnalysisApp/AnalysisApp/.vscode
+      - ../ApiServer:/AnalysisApp/AnalysisApp/ApiServer
+      - ../ForWindows:/AnalysisApp/AnalysisApp/ForWindows
+      - ../front-analysis-app:/AnalysisApp/AnalysisApp/front-analysis-app
+      - ../SampleData:/AnalysisApp/AnalysisApp/SampleData
+      - ../.env:/AnalysisApp/AnalysisApp/.env
+      - ../.gitignore:/AnalysisApp/AnalysisApp/.gitignore
+      - ../README.md:/AnalysisApp/README.md
     ports:
       - "127.0.0.1:3000:3000"
       - "8000:8000"

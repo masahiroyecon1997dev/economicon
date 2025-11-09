@@ -1,0 +1,28 @@
+{
+  "Common": {
+    "Cancel": "Cancel",
+    "OK": "OK",
+    "Error": "Error",
+    "UnexpectedError": "An unexpected error occurred.",
+    "Table": "Table",
+    "Constant": "Constant",
+    "UniformDistribution": "Uniform Distribution",
+    "NomalDistribution": "Normal Distribution"
+  },
+  "HeaderMenu": {
+    "File": "File"
+  },
+  "SelectFileView": {
+    "Title": "Select File",
+    "SelectFile": "Select File",
+    "Description": "Please select a file to import data.",
+    "SearchPlaceholder": "Search by file name",
+    "GoUpDirectory": "Go up directory",
+    "AllFiles": "All Files",
+    "CsvFiles": "CSV Files",
+    "ExcelFiles": "Excel Files",
+    "FileNameHeader": "File Name",
+    "SizeHeader": "Size",
+    "LastModifiedHeader": "Last Modified"
+  }
+}
