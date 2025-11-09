@@ -2,8 +2,6 @@
   "Common": {
     "Cancel": "キャンセル",
     "OK": "OK",
-    "Error": "エラー",
-    "UnexpectedError": "予期せぬエラーが発生しました。",
     "Table": "テーブル",
     "Constant": "定数",
     "UniformDistribution": "一様分布",
@@ -89,6 +87,8 @@
     "Number": "数値で入力してください。",
     "MaxLength20": "20文字以内で入力してください。",
     "IntegerMore0": "0以上の整数で入力してください。",
+    "Error": "エラー",
+    "UnexpectedError": "予期せぬエラーが発生しました。",
     "Unknown": "不明なエラーです。"
   }
 }

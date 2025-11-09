@@ -47,6 +47,18 @@ export type ResImportParquetByPathType = {
   message: string;
 };
 
+export type ResGetColumnInfoType = {
+  code: string;
+  result: { tableName: string; columnInfoList: ColumnType[] };
+  message: string;
+};
+
+export type ResFetchDataToJsonType = {
+  code: string;
+  result: { tableName: string; data: string };
+  message: string;
+};
+
 export type ResImportCsvType = {
   code: number;
   result: { tableName: string };
@@ -57,19 +69,10 @@ export type ResOutputCsvType = {
   result: { csvData: string };
   message: string;
 };
-export type ResFetchDataToJsonType = {
-  code: number;
-  result: { tableName: string; data: string };
-  message: string;
-};
+
 export type ResGetTableNameListType = {
   code: string;
   result: { tableNameList: string[] };
-  message: string;
-};
-export type ResGetColumnInfoType = {
-  code: string;
-  result: { tableName: string; columnInfoList: ColumnType[] };
   message: string;
 };
 export type ResGenerateSimulationDataType = {
