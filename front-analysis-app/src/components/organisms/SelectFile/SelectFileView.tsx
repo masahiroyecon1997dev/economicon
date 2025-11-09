@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { showErrorDialog } from "../../../function/errorDialog";
 import { getTableInfo } from "../../../function/internalFunctions";
-import { getFiles, importCsvByPath } from "../../../function/restApis";
+import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../../function/restApis";
 import { useFilesStore } from "../../../stores/useFilesStore";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
@@ -9,8 +9,8 @@ import type { FileType } from "../../../types/commonTypes";
 import type { SortDirection, SortField } from "../../../types/stateTypes";
 
 import { useTranslation } from "react-i18next";
+import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
-import { FileFilterBar } from "../../molecules/Filter/FileFilterBar";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
 
@@ -20,6 +20,7 @@ export const SelectFileView = () => {
   const setFiles = useFilesStore((state) => state.setFiles);
   const settings = useSettingsStore((state) => state.settings);
   const addTableInfos = useTableInfosStore((state) => state.addTableInfo);
+  const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
 
   // ローカル状態
   const [searchValue, setSearchValue] = useState("");
@@ -106,8 +107,8 @@ export const SelectFileView = () => {
         await showErrorDialog(t('Common.Error'), t('Common.UnexpectedError'));
         return;
       }
-
     } else {
+      let loadTableName = '';
       if (file.name.toLowerCase().endsWith('.csv')) {
         // CSVファイルの場合の処理
         const response = await importCsvByPath({
@@ -119,10 +120,35 @@ export const SelectFileView = () => {
           await showErrorDialog(t('Common.Error'), response.message);
           return;
         }
-        const tableInfo = await getTableInfo(response.result.tableName);
-        addTableInfos(tableInfo);
+        loadTableName = response.result.tableName;
+      } else if (file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
+        // Excelファイルの場合の処理
+        const response = await importExcelByPath({
+          filePath: files.directoryPath + '/' + file.name,
+          tableName: file.name.replace(/\.(xlsx|xls)$/, ''),
+          sheetName: '',
+        });
+        if (response.code !== "OK") {
+          await showErrorDialog(t('Common.Error'), response.message);
+          return;
+        }
+        loadTableName = response.result.tableName;
+      } else if (file.name.toLowerCase().endsWith('.parquet')) {
+        // Parquetファイルの場合の処理
+        const response = await importParquetByPath({
+          filePath: files.directoryPath + '/' + file.name,
+          tableName: file.name.replace('.parquet', ''),
+        });
+        if (response.code !== "OK") {
+          await showErrorDialog(t('Common.Error'), response.message);
+          return;
+        }
+        loadTableName = response.result.tableName;
       }
-    }
+      const resTableInfo = await getTableInfo(loadTableName);
+      addTableInfos(resTableInfo);
+      setCurrentView({ currentView: "dataPreview" });
+    };
   };
 
   // 検索とフィルターを適用したファイル一覧
@@ -206,17 +232,9 @@ export const SelectFileView = () => {
     { label: t('SelectFileView.ExcelFiles'), value: "excel", isActive: activeFilter === "excel" }
   ];
 
-  // イベントハンドラー
   const handleCancel = () => {
-    // キャンセル処理
+    setCurrentView({ currentView: "dataPreview" });
   };
-
-  const handleSelect = () => {
-    // 選択処理
-  };
-
-
-
 
   return (
     <div className="mx-auto max-w-10xl">
@@ -236,10 +254,10 @@ export const SelectFileView = () => {
             onBreadcrumbClick={handleBreadcrumbClick}
             onSearchChange={setSearchValue}
           />
-          <FileFilterBar
+          {/* <FileFilterBar
             filters={filterOptions}
             onFilterClick={setActiveFilter}
-          />
+          /> */}
         </div>
 
         <FileListTable

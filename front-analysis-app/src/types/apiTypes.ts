@@ -22,7 +22,30 @@ export type ResImportCsvByPathType = {
   code: string;
   result: { tableName: string };
   message: string;
-}
+};
+
+export type ReqImportExcelByPathType = {
+  filePath: string;
+  tableName: string;
+  sheetName: string;
+};
+
+export type ResImportExcelByPathType = {
+  code: string;
+  result: { tableName: string };
+  message: string;
+};
+
+export type ReqImportParquetByPathType = {
+  filePath: string;
+  tableName: string;
+};
+
+export type ResImportParquetByPathType = {
+  code: string;
+  result: { tableName: string };
+  message: string;
+};
 
 export type ResImportCsvType = {
   code: number;

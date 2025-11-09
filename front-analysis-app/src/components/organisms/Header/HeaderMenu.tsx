@@ -25,7 +25,7 @@ export const HeaderMenu = () => {
   const [isCalculateModal, setIsCalculateModal] = useState<boolean>(false);
 
   const showImportFileByPathView = () => {
-    setCurrentView({ currentView: "importFileByPath" });
+    setCurrentView({ currentView: "selectFile" });
   }
 
   const openImportFileByUploadModal = () => {
