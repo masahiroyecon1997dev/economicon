@@ -23,8 +23,9 @@ from .apis.rest_apis import (rest_add_column, rest_add_dummy_column,
                              rest_import_parquet_by_path,
                              rest_import_tsv_by_file, rest_input_cell_data,
                              rest_linear_regression, rest_logistic_regression,
-                             rest_rename_column_name, rest_rename_table,
-                             rest_sort_columns, rest_transform_column,
+                             rest_probit_regression, rest_rename_column_name,
+                             rest_rename_table, rest_sort_columns,
+                             rest_transform_column,
                              rest_variable_effects_estimation)
 
 urlpatterns = [
@@ -105,4 +106,6 @@ urlpatterns = [
          rest_transform_column.TransformColumn.as_view()),
     path('variable-effects-estimation',
          rest_variable_effects_estimation.VariableEffectsEstimation.as_view()),
+    path('probit-regression',
+         rest_probit_regression.ProbitRegression.as_view()),
 ]
