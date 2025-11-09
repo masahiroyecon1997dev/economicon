@@ -16,6 +16,13 @@ export const getFiles = async (path: string): Promise<apiTypes.ResGetFilesType> 
   return response.data;
 }
 
+export const importCsvByPath = async (
+  requestBody: apiTypes.ReqImportCsvByPathType
+): Promise<apiTypes.ResImportCsvByPathType> => {
+  const response = await axios.post("/import-csv-by-path", requestBody);
+  return response.data;
+}
+
 export const importCsv = async (
   file: File
 ): Promise<apiTypes.ResImportCsvType> => {

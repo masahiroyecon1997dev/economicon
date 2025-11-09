@@ -12,6 +12,18 @@ export type ResGetFilesType = {
   message: string;
 };
 
+export type ReqImportCsvByPathType = {
+  filePath: string;
+  tableName: string;
+  separator: string;
+};
+
+export type ResImportCsvByPathType = {
+  code: string;
+  result: { tableName: string };
+  message: string;
+}
+
 export type ResImportCsvType = {
   code: number;
   result: { tableName: string };
