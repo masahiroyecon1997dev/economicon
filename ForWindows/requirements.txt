@@ -9,7 +9,7 @@ django-cors-headers==4.7.0
 wooldridge==0.4.5
 scipy==1.15.3
 statsmodels==0.14.4
-python-magic==0.4.27
+python-magic-bin==0.4.14
 fastexcel==0.14.0
 xlsxwriter==3.2.5
 coverage==7.10.0
