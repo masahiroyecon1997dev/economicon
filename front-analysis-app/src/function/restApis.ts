@@ -23,6 +23,20 @@ export const importCsvByPath = async (
   return response.data;
 }
 
+export const importExcelByPath = async (
+  requestBody: apiTypes.ReqImportExcelByPathType
+): Promise<apiTypes.ResImportExcelByPathType> => {
+  const response = await axios.post("/import-excel-by-path", requestBody);
+  return response.data;
+}
+
+export const importParquetByPath = async (
+  requestBody: apiTypes.ReqImportParquetByPathType
+): Promise<apiTypes.ResImportParquetByPathType> => {
+  const response = await axios.post("/import-parquet-by-path", requestBody);
+  return response.data;
+}
+
 export const importCsv = async (
   file: File
 ): Promise<apiTypes.ResImportCsvType> => {

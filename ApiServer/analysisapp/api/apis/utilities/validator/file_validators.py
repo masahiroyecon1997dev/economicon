@@ -1,14 +1,13 @@
 import os
 from typing import List, Optional
+
 from django.utils.translation import gettext as _
-from .common_validators import (
-    ValidationError,
-    validate_required,
-    validate_string_length,
-    validate_invalid_chars,
-    validate_file_path_exists,
-    validate_directory_path_exists
-)
+
+from .common_validators import (ValidationError,
+                                validate_directory_path_exists,
+                                validate_file_path_exists,
+                                validate_invalid_chars, validate_required,
+                                validate_string_length)
 
 
 def validate_file_path(
@@ -72,6 +71,6 @@ def validate_sheet_name(
         validate_string_length(
             sheet_name,
             sheet_name_param,
-            min_length=1,
+            min_length=0,
             max_length=255,
         )
