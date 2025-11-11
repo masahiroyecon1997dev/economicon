@@ -3,6 +3,7 @@ import { showErrorDialog } from "../../../function/errorDialog";
 import { getTableInfo } from "../../../function/internalFunctions";
 import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../../function/restApis";
 import { useFilesStore } from "../../../stores/useFilesStore";
+import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import type { FileType } from "../../../types/commonTypes";
@@ -22,9 +23,11 @@ export const SelectFileView = () => {
   const addTableInfos = useTableInfosStore((state) => state.addTableInfo);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
 
+  // ローディング状態
+  const { setLoading, clearLoading } = useLoadingStore();
+
   // ローカル状態
   const [searchValue, setSearchValue] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all");
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
@@ -58,8 +61,9 @@ export const SelectFileView = () => {
     return path;
   };
 
-  // ディレクトリを変更する関数
+  // ディレクトリ変更関数
   const changeDirectory = async (newPath: string) => {
+    setLoading(true, t("Loading.Loading"));
     try {
       const response = await getFiles(newPath);
       if (response.code === "OK") {
@@ -69,10 +73,10 @@ export const SelectFileView = () => {
       }
     } catch (error) {
       await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
+    } finally {
+      clearLoading();
     }
-  };
-
-  // 上位ディレクトリに移動
+  };  // 上位ディレクトリに移動
   const goUpDirectory = async () => {
     const segments = getPathSegments();
     if (segments.length > 0) {
@@ -83,10 +87,6 @@ export const SelectFileView = () => {
 
   // パンくずリストのクリックハンドラー
   const handleBreadcrumbClick = async (index: number) => {
-    console.log('start')
-    await new Promise(resolve => setTimeout(resolve, 30000));
-    console.log('end')
-
     const targetPath = buildPathUpToIndex(index);
     await changeDirectory(targetPath);
   };
@@ -99,6 +99,8 @@ export const SelectFileView = () => {
       const newPath = files.directoryPath === separator
         ? separator + file.name
         : files.directoryPath + separator + file.name;
+
+      setLoading(true, t("Loading.Loading"));
       try {
         const response = await getFiles(newPath);
         if (response.code === "OK") {
@@ -110,71 +112,67 @@ export const SelectFileView = () => {
       } catch (error) {
         await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
         return;
+      } finally {
+        clearLoading();
       }
     } else {
-      let loadTableName = '';
-      if (file.name.toLowerCase().endsWith('.csv')) {
-        // CSVファイルの場合の処理
-        const response = await importCsvByPath({
-          filePath: files.directoryPath + '/' + file.name,
-          tableName: file.name.replace('.csv', ''),
-          separator: ',',
-        });
-        if (response.code !== "OK") {
-          await showErrorDialog(t('Common.Error'), response.message);
-          return;
+      // ファイルの場合はインポート処理
+      setLoading(true, t("Loading.Loading"));
+      try {
+        let loadTableName = '';
+        if (file.name.toLowerCase().endsWith('.csv')) {
+          // CSVファイルの場合の処理
+          const response = await importCsvByPath({
+            filePath: files.directoryPath + '/' + file.name,
+            tableName: file.name.replace('.csv', ''),
+            separator: ',',
+          });
+          if (response.code !== "OK") {
+            await showErrorDialog(t('Common.Error'), response.message);
+            return;
+          }
+          loadTableName = response.result.tableName;
+        } else if (file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
+          // Excelファイルの場合の処理
+          const response = await importExcelByPath({
+            filePath: files.directoryPath + '/' + file.name,
+            tableName: file.name.replace(/\.(xlsx|xls)$/, ''),
+            sheetName: '',
+          });
+          if (response.code !== "OK") {
+            await showErrorDialog(t('Common.Error'), response.message);
+            return;
+          }
+          loadTableName = response.result.tableName;
+        } else if (file.name.toLowerCase().endsWith('.parquet')) {
+          // Parquetファイルの場合の処理
+          const response = await importParquetByPath({
+            filePath: files.directoryPath + '/' + file.name,
+            tableName: file.name.replace('.parquet', ''),
+          });
+          if (response.code !== "OK") {
+            await showErrorDialog(t('Common.Error'), response.message);
+            return;
+          }
+          loadTableName = response.result.tableName;
         }
-        loadTableName = response.result.tableName;
-      } else if (file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
-        // Excelファイルの場合の処理
-        const response = await importExcelByPath({
-          filePath: files.directoryPath + '/' + file.name,
-          tableName: file.name.replace(/\.(xlsx|xls)$/, ''),
-          sheetName: '',
-        });
-        if (response.code !== "OK") {
-          await showErrorDialog(t('Common.Error'), response.message);
-          return;
-        }
-        loadTableName = response.result.tableName;
-      } else if (file.name.toLowerCase().endsWith('.parquet')) {
-        // Parquetファイルの場合の処理
-        const response = await importParquetByPath({
-          filePath: files.directoryPath + '/' + file.name,
-          tableName: file.name.replace('.parquet', ''),
-        });
-        if (response.code !== "OK") {
-          await showErrorDialog(t('Common.Error'), response.message);
-          return;
-        }
-        loadTableName = response.result.tableName;
+        const resTableInfo = await getTableInfo(loadTableName);
+        addTableInfos(resTableInfo);
+        setCurrentView({ currentView: "dataPreview" });
+      } catch (error) {
+        await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
+      } finally {
+        clearLoading();
       }
-      const resTableInfo = await getTableInfo(loadTableName);
-      addTableInfos(resTableInfo);
-      setCurrentView({ currentView: "dataPreview" });
-    };
+    }
   };
 
   // 検索とフィルターを適用したファイル一覧
   const filteredFiles = files.files.filter(file => {
     // 検索フィルター
     const matchesSearch = file.name.toLowerCase().includes(searchValue.toLowerCase());
-
-    // ファイルタイプフィルター
-    let matchesFileType = true;
-    if (activeFilter === "csv") {
-      matchesFileType = file.isFile && file.name.toLowerCase().endsWith('.csv');
-    } else if (activeFilter === "excel") {
-      matchesFileType = file.isFile && (
-        file.name.toLowerCase().endsWith('.xlsx') ||
-        file.name.toLowerCase().endsWith('.xls')
-      );
-    }
-
-    return matchesSearch && matchesFileType;
-  });
-
-  // ソート処理
+    return matchesSearch;
+  });  // ソート処理
   const sortedFiles = [...filteredFiles].sort((a, b) => {
     if (!sortField || !sortDirection) return 0;
 
@@ -228,13 +226,6 @@ export const SelectFileView = () => {
       setSortDirection('asc');
     }
   };
-
-  // フィルターオプション
-  const filterOptions = [
-    { label: t('SelectFileView.AllFiles'), value: "all", isActive: activeFilter === "all" },
-    { label: t('SelectFileView.CsvFiles'), value: "csv", isActive: activeFilter === "csv" },
-    { label: t('SelectFileView.ExcelFiles'), value: "excel", isActive: activeFilter === "excel" }
-  ];
 
   const handleCancel = () => {
     setCurrentView({ currentView: "dataPreview" });
