@@ -1,4 +1,5 @@
 export type SettingsType = {
+  osName: string;
   defaultFolderPath: string;
   displayRows: number;
   appLanguage: string;
