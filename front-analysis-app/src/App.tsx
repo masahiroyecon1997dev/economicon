@@ -3,9 +3,11 @@ import { useTranslation } from "react-i18next";
 import { showErrorDialog } from './function/errorDialog';
 import { getFiles, getSettings, getTableNameList } from "./function/restApis";
 import { useCurrentViewStore } from "./stores/useCurrentViewStore";
+import { useLoadingStore } from "./stores/useLoadingStore";
 import { useSettingsStore } from "./stores/useSettingsStore";
 import { useTableListStore } from "./stores/useTableListStore";
 
+import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
 import { ErrorDialog } from "./components/molecules/Modal/ErrorDialog";
 import { HeaderMenu } from "./components/organisms/Header/HeaderMenu";
 import { LeftSideMenu } from "./components/organisms/MainView/LeftSideMenu";
@@ -18,6 +20,7 @@ export const App = () => {
   const setTableList = useTableListStore((state) => state.setTableList);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
   const setFiles = useFilesStore((state) => state.setFiles);
+  const { isLoading, loadingMessage } = useLoadingStore();
 
   useEffect(() => {
     // Strict Mode対応: 初期化が既に実行されている場合はスキップ
@@ -74,16 +77,22 @@ export const App = () => {
   }, [t, setSettings, setCurrentView, setTableList, setFiles]);
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-white">
-      <HeaderMenu />
-      <div
-        className="flex flex-1 overflow-hidden"
-      >
-        <p>{ }</p>
-        <LeftSideMenu />
-        <MainView />
+    <>
+      <div className="flex h-screen flex-col overflow-hidden bg-white">
+        <HeaderMenu />
+        <div
+          className="flex flex-1 overflow-hidden"
+        >
+          <p>{ }</p>
+          <LeftSideMenu />
+          <MainView />
+        </div>
+        <ErrorDialog />
       </div>
-      <ErrorDialog />
-    </div>
+      <LoadingOverlay
+        isVisible={isLoading}
+        message={loadingMessage}
+      />
+    </>
   );
 }
