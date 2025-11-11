@@ -1,4 +1,5 @@
 import os
+import platform
 from pathlib import Path
 from typing import Dict
 
@@ -16,9 +17,22 @@ class GetSettings(AbstractApi):
     設定ファイルが存在しない場合はデフォルト設定を返します。
     """
 
+    os_system = platform.system()
+    os_name = "Windows"
+
+    if os_system == "Windows":
+        os_name = "Windows"
+    elif os_system == "Darwin" or os_system == "MacOs":
+        os_name = "macOS"
+    elif os_system == "Linux":
+        os_name = "Linux"
+    else:
+        print(f"その他のOSです: {os_system}")
+
     # デフォルト設定値
     DEFAULT_SETTINGS = {
-        'default_folder_path': str(Path.home()),
+        'os_name': os_name,
+        'default_folder_path': str(Path.home()).replace(os.sep, '/'),
         'display_rows': 100,
         'app_language': 'ja',
         'encoding': 'utf-8',
@@ -48,10 +62,10 @@ class GetSettings(AbstractApi):
             else:
                 # 設定ファイルが存在しない場合はデフォルト設定を使用
                 settings = self.DEFAULT_SETTINGS.copy()
-                settings['path_separator'] = os.sep
 
             # 結果を返す
             result = {
+                'osName': settings.get('os_name'),
                 'defaultFolderPath': settings.get('default_folder_path'),
                 'displayRows': settings.get('display_rows'),
                 'appLanguage': settings.get('app_language'),
@@ -63,6 +77,8 @@ class GetSettings(AbstractApi):
         except yaml.YAMLError:
             # YAMLの解析エラーの場合はデフォルト設定を返す
             result = {
+                'osName':
+                    self.DEFAULT_SETTINGS['os_name'],
                 'defaultFolderPath':
                     self.DEFAULT_SETTINGS['default_folder_path'],
                 'displayRows':
@@ -88,9 +104,12 @@ def get_setting() -> Dict:
 
     Returns:
         Dict: 設定情報を含む辞書
+            - osName: クライアントOSの名前
             - defaultFolderPath: ファイル読み込みをするフォルダパスの初期値
             - displayRows: テーブルに表示する行数
             - appLanguage: アプリケーションの表示言語
+            - encoding: ファイル読み込み時のデフォルトエンコーディング
+            - pathSeparator: パス区切り文字
     """
     api = GetSettings()
     validation_error = api.validate()

@@ -49,7 +49,7 @@ export const SelectFileView = () => {
     let path = selectedSegments.join(separator);
 
     // Windowsの場合のドライブレター対応
-    if (separator === '\\' && selectedSegments.length === 1) {
+    if (settings.osName === 'Windows') {
       path += separator;
     } else if (separator === '/') {
       path = '/' + path;
@@ -83,6 +83,10 @@ export const SelectFileView = () => {
 
   // パンくずリストのクリックハンドラー
   const handleBreadcrumbClick = async (index: number) => {
+    console.log('start')
+    await new Promise(resolve => setTimeout(resolve, 30000));
+    console.log('end')
+
     const targetPath = buildPathUpToIndex(index);
     await changeDirectory(targetPath);
   };

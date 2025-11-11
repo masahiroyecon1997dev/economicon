@@ -10,6 +10,7 @@ type SettingsStore = SettingsStateType & SettingsActions;
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
   settings: {
+    osName: "",
     defaultFolderPath: "",
     displayRows: 0,
     appLanguage: "",
