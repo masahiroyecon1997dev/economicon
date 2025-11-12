@@ -56,10 +56,10 @@ export const App = () => {
         }
         // 全て成功した場合のみストアを更新
         if (isMounted) {
-          setSettings({ settings: resGetSettings.result });
-          setCurrentView({ currentView: "selectFile" });
+          setSettings(resGetSettings.result);
+          setCurrentView("selectFile");
           setTableList(resGetTableNames.result.tableNameList);
-          setFiles({ files: resGetFiles.result });
+          setFiles(resGetFiles.result);
         }
       } catch (error) {
         console.error('App initialization error:', error);

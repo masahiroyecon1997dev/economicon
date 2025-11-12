@@ -9,20 +9,27 @@ export type TableInfosActions = {
   activateTableInfo: (tableName: string) => void;
 }
 
-type TableInfosStore = TableInfosType & TableInfosActions;
+type TableInfosStore = {
+    tableInfos: TableInfosType;
+} & TableInfosActions;
 
-export const useTableInfosStore = create<TableInfosStore>((set) => ({
+export const useTableInfosStore = create<TableInfosStore>((set, get) => ({
   tableInfos: [],
-  addTableInfo: (tableInfo) => set((state) => ({
-    tableInfos: [...state.tableInfos, tableInfo].map(info => info.tableName === tableInfo.tableName ? { ...info, isActive: true } : { ...info, isActive: false })
-  })),
-  removeTableInfo: (tableName) => set((state) => ({
-    tableInfos: state.tableInfos.filter(info => info.tableName !== tableName)
-  })),
-  updateTableInfo: (tableName, tableInfo) => set((state) => ({
-    tableInfos: state.tableInfos.map(info => info.tableName === tableName ? tableInfo : info)
-  })),
-  activateTableInfo: (tableName) => set((state) => ({
-    tableInfos: state.tableInfos.map(info => info.tableName === tableName ? { ...info, isActive: true } : { ...info, isActive: false })
-  })),
+  addTableInfo: (tableInfo) => set(() => {
+    const deactivatedInfos = get().tableInfos.map(info => ({ ...info, isActive: false }));
+    const newInfo = { ...tableInfo, isActive: true};
+    return { tableInfos: [...deactivatedInfos, newInfo] };
+  }),
+
+  removeTableInfo: (tableName) => set(state => {
+    return { tableInfos: state.tableInfos.filter(info => info.tableName !== tableName) }
+  }),
+
+  updateTableInfo: (tableName, tableInfo) => set(state => {
+    return { tableInfos: state.tableInfos.map(info => info.tableName === tableName ? tableInfo : info) }
+  }),
+
+  activateTableInfo: (tableName) => set(state => {
+    return { tableInfos: state.tableInfos.map(info => ({...info, isActive: info.tableName === tableName })) }
+  }),
 }));
