@@ -1,21 +1,19 @@
 import { create } from "zustand";
 import type { SettingsType } from "../types/commonTypes";
 
-export type SettingsStateType = { settings: SettingsType }
-
 export type SettingsActions = {
-  setSettings: (settings: SettingsStateType) => void;
+  setSettings: (newSettings: SettingsType) => void;
 }
-type SettingsStore = SettingsStateType & SettingsActions;
+type SettingsStore = SettingsType & SettingsActions;
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
-  settings: {
-    osName: "",
-    defaultFolderPath: "",
-    displayRows: 0,
-    appLanguage: "",
-    encoding: "",
-    pathSeparator: "",
+  osName: "",
+  defaultFolderPath: "",
+  displayRows: 0,
+  appLanguage: "",
+  encoding: "",
+  pathSeparator: "",
+  setSettings: (newSettings) => {
+    set(newSettings);
   },
-  setSettings: (settings) => set(() => (settings))
 }));

@@ -17,9 +17,15 @@ import { FileListTable } from "../../molecules/Table/FileListTable";
 
 export const SelectFileView = () => {
   const { t } = useTranslation();
-  const files = useFilesStore((state) => state.files);
-  const setFiles = useFilesStore((state) => state.setFiles);
-  const settings = useSettingsStore((state) => state.settings);
+  const { files, directoryPath, setFiles } = useFilesStore((state) => ({
+    files: state.files,
+    directoryPath: state.directoryPath,
+    setFiles: state.setFiles
+  }));
+  const { osName, pathSeparator } = useSettingsStore((state) => ({
+    osName: state.osName,
+    pathSeparator: state.pathSeparator
+  }));
   const addTableInfos = useTableInfosStore((state) => state.addTableInfo);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
 
@@ -33,15 +39,15 @@ export const SelectFileView = () => {
 
   // 現在のディレクトリパスを配列に分割してパンくずリストを作成
   const getPathSegments = () => {
-    if (!files.directoryPath) return [];
-    const separator = settings.pathSeparator || '/';
-    return files.directoryPath.split(separator).filter(segment => segment.length > 0);
+    if (!directoryPath) return [];
+    const separator = pathSeparator || '/';
+    return directoryPath.split(separator).filter(segment => segment.length > 0);
   };
 
   // 指定したインデックスまでのパスを構築
   const buildPathUpToIndex = (index: number) => {
     const segments = getPathSegments();
-    const separator = settings.pathSeparator || '/';
+    const separator = pathSeparator || '/';
 
     if (index < 0) {
       // ルートディレクトリの場合
@@ -52,7 +58,7 @@ export const SelectFileView = () => {
     let path = selectedSegments.join(separator);
 
     // Windowsの場合のドライブレター対応
-    if (settings.osName === 'Windows') {
+    if (osName === 'Windows') {
       path += separator;
     } else if (separator === '/') {
       path = '/' + path;
@@ -67,7 +73,7 @@ export const SelectFileView = () => {
     try {
       const response = await getFiles(newPath);
       if (response.code === "OK") {
-        setFiles({ files: response.result });
+        setFiles(response.result);
       } else {
         await showErrorDialog(t('Common.Error'), response.message);
       }
@@ -95,16 +101,16 @@ export const SelectFileView = () => {
   const handleFileClick = async (file: FileType) => {
     if (!file.isFile) {
       // ディレクトリの場合は移動
-      const separator = settings.pathSeparator || '/';
-      const newPath = files.directoryPath === separator
+      const separator = pathSeparator || '/';
+      const newPath = directoryPath === separator
         ? separator + file.name
-        : files.directoryPath + separator + file.name;
+        : directoryPath + separator + file.name;
 
       setLoading(true, t("Loading.Loading"));
       try {
         const response = await getFiles(newPath);
         if (response.code === "OK") {
-          setFiles({ files: response.result });
+          setFiles(response.result);
         } else {
           await showErrorDialog(t('Common.Error'), response.message);
           return;
@@ -123,7 +129,7 @@ export const SelectFileView = () => {
         if (file.name.toLowerCase().endsWith('.csv')) {
           // CSVファイルの場合の処理
           const response = await importCsvByPath({
-            filePath: files.directoryPath + '/' + file.name,
+            filePath: directoryPath + '/' + file.name,
             tableName: file.name.replace('.csv', ''),
             separator: ',',
           });
@@ -135,7 +141,7 @@ export const SelectFileView = () => {
         } else if (file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
           // Excelファイルの場合の処理
           const response = await importExcelByPath({
-            filePath: files.directoryPath + '/' + file.name,
+            filePath: directoryPath + '/' + file.name,
             tableName: file.name.replace(/\.(xlsx|xls)$/, ''),
             sheetName: '',
           });
@@ -147,7 +153,7 @@ export const SelectFileView = () => {
         } else if (file.name.toLowerCase().endsWith('.parquet')) {
           // Parquetファイルの場合の処理
           const response = await importParquetByPath({
-            filePath: files.directoryPath + '/' + file.name,
+            filePath: directoryPath + '/' + file.name,
             tableName: file.name.replace('.parquet', ''),
           });
           if (response.code !== "OK") {
@@ -158,7 +164,7 @@ export const SelectFileView = () => {
         }
         const resTableInfo = await getTableInfo(loadTableName);
         addTableInfos(resTableInfo);
-        setCurrentView({ currentView: "dataPreview" });
+        setCurrentView("dataPreview");
       } catch (error) {
         await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
       } finally {
@@ -168,7 +174,7 @@ export const SelectFileView = () => {
   };
 
   // 検索とフィルターを適用したファイル一覧
-  const filteredFiles = files.files.filter(file => {
+  const filteredFiles = files.filter(file => {
     // 検索フィルター
     const matchesSearch = file.name.toLowerCase().includes(searchValue.toLowerCase());
     return matchesSearch;
@@ -228,7 +234,7 @@ export const SelectFileView = () => {
   };
 
   const handleCancel = () => {
-    setCurrentView({ currentView: "dataPreview" });
+    setCurrentView("dataPreview");
   };
 
   return (

@@ -8,9 +8,11 @@ import { TableNav } from "../../molecules/List/TableNav";
 
 export function LeftSideMenu() {
   const { t } = useTranslation();
-  const addTableInfos = useTableInfosStore((state) => state.addTableInfo);
-  const activateTableInfos = useTableInfosStore((state) => state.activateTableInfo);
-  const tableInfos = useTableInfosStore((state) => state.tableInfos);
+  const { tableInfos, addTableInfos, activateTableInfos } = useTableInfosStore((state) => ({
+    tableInfos: state.tableInfos,
+    addTableInfos: state.addTableInfo,
+    activateTableInfos: state.activateTableInfo,
+  }));
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
 
 
@@ -26,7 +28,7 @@ export function LeftSideMenu() {
         addTableInfos(tableInfo);
 
       }
-      setCurrentView({ currentView: "dataPreview" });
+      setCurrentView("dataPreview");
     } catch (error) {
       const message = error instanceof Error ? error.message : t('Error.UnexpectedError');
       await showErrorDialog(t("Error.Error"), message);
