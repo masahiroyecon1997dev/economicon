@@ -1,19 +1,19 @@
 import { create } from "zustand";
 
-export type CurrentViewType = {
-  currentView:
+export type CurrentViewValue =
   "selectFile" |
   "RegressionForm" |
-  "dataPreview"
-};
+  "dataPreview";
 
 export type CurrentViewActions = {
-  setCurrentView: (view: CurrentViewType) => void;
+  setCurrentView: (view: CurrentViewValue) => void;
 }
 
-type CurrentViewStore = CurrentViewType & CurrentViewActions;
+type CurrentViewStore = {
+    currentView: CurrentViewValue;
+} & CurrentViewActions;
 
 export const useCurrentViewStore = create<CurrentViewStore>((set) => ({
   currentView: "selectFile",
-  setCurrentView: (view) => set(() => (view)),
+  setCurrentView: (view) => set({ currentView: view }),
 }));
