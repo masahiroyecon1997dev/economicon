@@ -6,8 +6,7 @@ import { useFilesStore } from "../../../stores/useFilesStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
-import type { FileType } from "../../../types/commonTypes";
-import type { SortDirection, SortField } from "../../../types/stateTypes";
+import type { FileType, SortDirection, SortField } from "../../../types/commonTypes";
 
 import { useTranslation } from "react-i18next";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
@@ -17,16 +16,12 @@ import { FileListTable } from "../../molecules/Table/FileListTable";
 
 export const SelectFileView = () => {
   const { t } = useTranslation();
-  const { files, directoryPath, setFiles } = useFilesStore((state) => ({
-    files: state.files,
-    directoryPath: state.directoryPath,
-    setFiles: state.setFiles
-  }));
-  const { osName, pathSeparator } = useSettingsStore((state) => ({
-    osName: state.osName,
-    pathSeparator: state.pathSeparator
-  }));
-  const addTableInfos = useTableInfosStore((state) => state.addTableInfo);
+  const files = useFilesStore((state) => state.files);
+  const directoryPath = useFilesStore((state) => state.directoryPath);
+  const setFiles = useFilesStore((state) => state.setFiles);
+  const osName = useSettingsStore((state) => state.osName);
+  const pathSeparator = useSettingsStore((state) => state.pathSeparator);
+  const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
 
   // ローディング状態
@@ -163,7 +158,7 @@ export const SelectFileView = () => {
           loadTableName = response.result.tableName;
         }
         const resTableInfo = await getTableInfo(loadTableName);
-        addTableInfos(resTableInfo);
+        addTableInfo(resTableInfo);
         setCurrentView("dataPreview");
       } catch (error) {
         await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));

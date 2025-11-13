@@ -1,15 +1,16 @@
+from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.views import APIView
-from django.utils.translation import gettext as _
-from ..utilities.create_response import (create_success_response,
-                                         create_error_response)
-from ..utilities.create_log import create_log_api_request
-from ..python_apis.get_table_name_list import get_table_name_list
+
 from ..python_apis.common_api_class import ApiError
+from ..python_apis.get_table_list import get_table_list
+from ..utilities.create_log import create_log_api_request
+from ..utilities.create_response import (create_error_response,
+                                         create_success_response)
 
 
-class GetTableNameList(APIView):
-    """GetTableNameList API class
+class GetTableList(APIView):
+    """GetTableList API class
 
     すべてのテーブル名を取得します。
     """
@@ -17,7 +18,7 @@ class GetTableNameList(APIView):
         try:
             # リクエスト受け取りログ
             create_log_api_request(request)
-            result = get_table_name_list()
+            result = get_table_list()
             return create_success_response(
                 status.HTTP_200_OK,
                 result)
