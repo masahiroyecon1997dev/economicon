@@ -6,26 +6,25 @@ import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { SectionHeading } from "../../atoms/List/SectionHeading";
 import { TableNav } from "../../molecules/List/TableNav";
 
-export function LeftSideMenu() {
+export const LeftSideMenu = () => {
   const { t } = useTranslation();
-  const { tableInfos, addTableInfos, activateTableInfos } = useTableInfosStore((state) => ({
-    tableInfos: state.tableInfos,
-    addTableInfos: state.addTableInfo,
-    activateTableInfos: state.activateTableInfo,
-  }));
+  const tableInfos = useTableInfosStore((state) => state.tableInfos);
+  const activeTableName = useTableInfosStore((state) => state.activeTableName);
+  const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
+  const activateTableInfo = useTableInfosStore((state) => state.activateTableInfo);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
 
 
-  async function clickTableName(tableName: string) {
+  const clickTableName = async (tableName: string) => {
     try {
       const sameTableNameInfos = tableInfos.filter(
         (tableInfo) => tableInfo.tableName === tableName
       );
       if (sameTableNameInfos.length > 0) {
-        activateTableInfos(tableName);
+        activateTableInfo(tableName);
       } else {
         const tableInfo = await getTableInfo(tableName);
-        addTableInfos(tableInfo);
+        addTableInfo(tableInfo);
 
       }
       setCurrentView("dataPreview");
@@ -34,13 +33,6 @@ export function LeftSideMenu() {
       await showErrorDialog(t("Error.Error"), message);
     }
   }
-
-  const getActiveTableName = () => {
-    const activeTable = tableInfos.find((tableInfo) => tableInfo.isActive);
-    return activeTable?.tableName || null;
-  };
-
-  const activeTableName = getActiveTableName();
 
   return (
     <aside className="w-64 shrink-0 border-r border-brand-border bg-brand-primary p-4 text-white">

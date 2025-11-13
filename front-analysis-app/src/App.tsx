@@ -74,7 +74,7 @@ export const App = () => {
     return () => {
       isMounted = false;
     };
-  }, [t, setSettings, setCurrentView, setTableList, setFiles]);
+  }, []);
 
   return (
     <>
@@ -83,7 +83,6 @@ export const App = () => {
         <div
           className="flex flex-1 overflow-hidden"
         >
-          <p>{ }</p>
           <LeftSideMenu />
           <MainView />
         </div>

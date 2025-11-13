@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 export type CurrentViewValue =
   "selectFile" |
-  "RegressionForm" |
+  "LinearRegressionForm" |
   "dataPreview";
 
 export type CurrentViewActions = {

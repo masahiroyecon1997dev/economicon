@@ -1,17 +1,17 @@
 import { create } from "zustand";
-import type { TableListType } from "../types/stateTypes";
+import type { TableListType } from "../types/commonTypes";
 
 export type TableListActions = {
-  setTableList: (tableList: string[]) => void;
+  setTableList: (tableList: TableListType) => void;
   addTableName: (tableName: string) => void;
   removeTableName: (tableName: string) => void;
 }
 
-type TableListStore = TableListType & TableListActions;
+type TableListStore = { tableList: TableListType } & TableListActions;
 
 export const useTableListStore = create<TableListStore>((set) => ({
   tableList: [],
-  setTableList: (tableList) => set(() => ({ tableList })),
+  setTableList: (tableList) => set({ tableList }),
   addTableName: (tableName) => set((state) => ({
     tableList: [...state.tableList, tableName]
   })),

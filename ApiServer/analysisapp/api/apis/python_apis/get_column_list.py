@@ -1,15 +1,16 @@
 from typing import Dict, List
+
 from django.utils.translation import gettext as _
-from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.common_validators import validate_boolean
-from ..utilities.validator.tables_manager_validator import (
-    validate_existed_table_name
-)
+
 from ..data.tables_manager import TablesManager
-from .common_api_class import (AbstractApi, ApiError)
+from ..utilities.validator.common_validators import (ValidationError,
+                                                     validate_boolean)
+from ..utilities.validator.tables_manager_validator import \
+    validate_existed_table_name
+from .common_api_class import AbstractApi, ApiError
 
 
-class GetColumnInfoList(AbstractApi):
+class GetColumnList(AbstractApi):
     """
     カラムの情報のリストを取得するAPIクラス
 
@@ -61,15 +62,15 @@ class GetColumnInfoList(AbstractApi):
             raise ApiError(message) from e
 
 
-def get_column_info_list(table_name: str,
-                         is_number_only: str
-                         ) -> Dict[str, List[Dict[str, str]]]:
+def get_column_list(table_name: str,
+                    is_number_only: str
+                    ) -> Dict[str, List[Dict[str, str]]]:
     """
     指定されたテーブルのカラム名のリストを取得する関数
     :param table_name: テーブル名
     :return: カラム名のリスト
     """
-    api = GetColumnInfoList(table_name, is_number_only)
+    api = GetColumnList(table_name, is_number_only)
     validation_error = api.validate()
     if validation_error:
         raise validation_error

@@ -7,6 +7,16 @@ export const getSettings = async (
   return response.data;
 }
 
+export const getTableNameList = async (): Promise<apiTypes.ResGetTableNameListType> => {
+  try {
+    const response = await axios.get("/get-table-list");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return { code: "NG", result: { tableNameList: [] }, message: "エラーです" };
+  }
+}
+
 export const getFiles = async (path: string): Promise<apiTypes.ResGetFilesType> => {
   const response = await axios.get("/get-files", {
     params: {
@@ -40,7 +50,7 @@ export const importParquetByPath = async (
 export const getColumnInfoList = async (
   tableName: string
 ): Promise<apiTypes.ResGetColumnInfoType> => {
-  const response = await axios.get("/get-column-info-list", {
+  const response = await axios.get("/get-column-list", {
     params: {
       tableName: tableName,
     },
@@ -90,16 +100,6 @@ export const outputCsv = async (
   } catch (err) {
     console.log(err);
     return { code: -9999, result: { csvData: "error" }, message: "エラーです" };
-  }
-}
-
-export const getTableNameList = async (): Promise<apiTypes.ResGetTableNameListType> => {
-  try {
-    const response = await axios.get("/get-table-name-list");
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    return { code: "NG", result: { tableNameList: [] }, message: "エラーです" };
   }
 }
 

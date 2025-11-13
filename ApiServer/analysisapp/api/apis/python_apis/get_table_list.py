@@ -1,9 +1,10 @@
 from django.utils.translation import gettext as _
+
 from ..data.tables_manager import TablesManager
 from .common_api_class import AbstractApi, ApiError
 
 
-class GetTableNameList(AbstractApi):
+class GetTableList(AbstractApi):
     """
     テーブル名のリストを取得するAPIクラス
 
@@ -34,9 +35,9 @@ class GetTableNameList(AbstractApi):
             raise ApiError(message) from e
 
 
-def get_table_name_list(
+def get_table_list(
 ) -> dict:
-    api = GetTableNameList()
+    api = GetTableList()
     validation_error = api.validate()
     if validation_error:
         raise validation_error

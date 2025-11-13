@@ -1,15 +1,16 @@
+from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.views import APIView
-from django.utils.translation import gettext as _
-from ..utilities.create_response import (create_success_response,
-                                         create_error_response)
-from ..utilities.create_log import create_log_api_request
-from ..python_apis.get_column_info_list import get_column_info_list
+
 from ..python_apis.common_api_class import ApiError
+from ..python_apis.get_column_list import get_column_list
+from ..utilities.create_log import create_log_api_request
+from ..utilities.create_response import (create_error_response,
+                                         create_success_response)
 from ..utilities.validator.common_validators import ValidationError
 
 
-class GetColumnInfoList(APIView):
+class GetColumnList(APIView):
     """
     指定されたテーブルのカラム名リストを取得するREST API
     """
@@ -20,7 +21,7 @@ class GetColumnInfoList(APIView):
             # リクエストデータの取得
             table_name = request.query_params.get('tableName')
             is_number_only = request.query_params.get('isNumberOnly', 'false')
-            result = get_column_info_list(table_name, is_number_only)
+            result = get_column_list(table_name, is_number_only)
             return create_success_response(
                 status.HTTP_200_OK,
                 result

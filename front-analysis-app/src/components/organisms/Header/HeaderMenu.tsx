@@ -25,7 +25,11 @@ export const HeaderMenu = () => {
   const [isCalculateModal, setIsCalculateModal] = useState<boolean>(false);
 
   const showImportFileByPathView = () => {
-    setCurrentView({ currentView: "selectFile" });
+    setCurrentView("selectFile");
+  }
+
+  const showLinearRegressionModal = () => {
+    setCurrentView("LinearRegressionForm");
   }
 
   const openImportFileByUploadModal = () => {
@@ -55,6 +59,8 @@ export const HeaderMenu = () => {
   const openLinearRegressionModal = () => {
     setIsLinearRegressionModal(true);
   }
+
+
 
   const closeLinearRegressionModal = () => {
     setIsLinearRegressionModal(false);
@@ -98,6 +104,10 @@ export const HeaderMenu = () => {
     {
       dropdownListName: t("HeaderMenu.LinearRegression"),
       dropdownListFunction: openLinearRegressionModal,
+    },
+    {
+      dropdownListName: t("HeaderMenu.LinearRegression"),
+      dropdownListFunction: showLinearRegressionModal,
     }
   ];
 
