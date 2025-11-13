@@ -32,6 +32,12 @@ export type TableInfoType = {
   // pageIndex: number;
 };
 
+export type TableListType = string[];
+export type TableInfosType = TableInfoType[];
+
+export type SortDirection = 'asc' | 'desc' | null;
+export type SortField = 'name' | 'size' | 'modifiedTime';
+
 
 export type SelectListType = { value: string; name: string }[];
 

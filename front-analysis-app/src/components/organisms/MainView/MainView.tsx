@@ -1,6 +1,6 @@
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { TableView } from "../Table/TableView";
-import { RegressionFormView } from "./RegressionFormView";
+import { LinearRegressionFormView } from "./LinearRegressionFormView";
 import { SelectFileView } from "./SelectFileView";
 
 export const MainView = () => {
@@ -10,8 +10,8 @@ export const MainView = () => {
     switch (currentView) {
       case "selectFile":
         return <SelectFileView />;
-      case "RegressionForm":
-        return <RegressionFormView />;
+      case "LinearRegressionForm":
+        return <LinearRegressionFormView />;
       default:
         return <TableView />;
     }

@@ -1,6 +1,8 @@
 import threading
-import polars as pl
 from typing import Dict, List
+
+import polars as pl
+
 from .table_info import TableInfo
 
 
