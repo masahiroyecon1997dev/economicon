@@ -36,7 +36,8 @@ class TestApiImportExcelByFile(APITestCase):
             f'{self.test_dir}/TestDataXlsx.xlsx')
         test_file = File(open(f'{self.test_dir}/TestDataXlsx.xlsx',
                               'rb'))
-        uploaded_file = SimpleUploadedFile(f'{self.test_dir}/TestDataXlsx.xlsx',
+        uploaded_file = SimpleUploadedFile(f'{self.test_dir}/'
+                                           'TestDataXlsx.xlsx',
                                            test_file.read(),
                                            content_type='multipart/form-data')
         response = self.client.post('/api/import-excel-by-file',
@@ -62,8 +63,6 @@ class TestApiImportExcelByFile(APITestCase):
             'col_3': ['A', 'B', 'C']
         })
         test_data.write_excel(
-            f'{self.test_dir}/TestDataXls.xls')
-        compare_data = pl.read_excel(
             f'{self.test_dir}/TestDataXls.xls')
         test_file = File(open(f'{self.test_dir}/TestDataXls.xls',
                               'rb'))
