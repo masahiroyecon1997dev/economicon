@@ -1,16 +1,17 @@
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
+
 from ..apis.data.tables_manager import TablesManager
 
 
-class TestApiGetTableNameListAPI(APITestCase):
+class TestApiGetTableListAPI(APITestCase):
     def setUp(self):
         self.tables_manager = TablesManager()
         self.tables_manager.clear_tables()
 
     def test_get_table_name_list_empty(self):
         # テーブルが0件の場合
-        response = self.client.get('/api/get-table-name-list',
+        response = self.client.get('/api/get-table-list',
                                    content_type='application/json')
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -24,7 +25,7 @@ class TestApiGetTableNameListAPI(APITestCase):
         for name in table_names:
             df = pl.DataFrame({'col': [1, 2, 3]})
             self.tables_manager.store_table(name, df)
-        response = self.client.get('/api/get-table-name-list')
+        response = self.client.get('/api/get-table-list')
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_data['code'], 'OK')
@@ -40,7 +41,7 @@ class TestApiGetTableNameListAPI(APITestCase):
             raise Exception("DB error")
         self.tables_manager.get_table_name_list = raise_exception
 
-        response = self.client.get('/api/get-table-name-list')
+        response = self.client.get('/api/get-table-list')
         response_data = response.json()
         self.assertEqual(response.status_code,
                          status.HTTP_500_INTERNAL_SERVER_ERROR)

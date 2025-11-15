@@ -1,12 +1,12 @@
 import polars as pl
-from rest_framework.test import APITestCase
-from rest_framework import status
 from django.utils.translation import gettext as _
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 from ..apis.data.tables_manager import TablesManager
 
 
-class TestApiGetColumnInfoListAPI(APITestCase):
+class TestApiGetColumnListAPI(APITestCase):
     def setUp(self):
         self.tables_manager = TablesManager()
         self.tables_manager.clear_tables()
@@ -21,7 +21,7 @@ class TestApiGetColumnInfoListAPI(APITestCase):
 
     def test_get_column_info_list_success(self):
         # 正常系テスト：テーブルが存在する場合
-        response = self.client.get(f'/api/get-column-info-list'
+        response = self.client.get(f'/api/get-column-list'
                                    f'?tableName={self.table_name}',
                                    content_type='application/json')
         response_data = response.json()
@@ -37,7 +37,7 @@ class TestApiGetColumnInfoListAPI(APITestCase):
 
     def test_get_column_info_list_number_success(self):
         # 正常系テスト：テーブルが存在する場合（数値型の列のみ）
-        response = self.client.get(f'/api/get-column-info-list'
+        response = self.client.get(f'/api/get-column-list'
                                    f'?tableName={self.table_name}'
                                    f'&isNumberOnly=true',
                                    content_type='application/json')
@@ -56,7 +56,7 @@ class TestApiGetColumnInfoListAPI(APITestCase):
     def test_get_column_info_list_table_not_found(self):
         # 異常系テスト：存在しないテーブル名の場合
         non_existent_table_name = "non_existent_table"
-        response = self.client.get('/api/get-column-info-list'
+        response = self.client.get('/api/get-column-list'
                                    f'?tableName={non_existent_table_name}',
                                    content_type='application/json')
         response_data = response.json()
@@ -74,7 +74,7 @@ class TestApiGetColumnInfoListAPI(APITestCase):
             raise Exception("DB error")
         self.tables_manager.get_column_info_list = raise_exception
 
-        response = self.client.get(f'/api/get-column-info-list'
+        response = self.client.get(f'/api/get-column-list'
                                    f'?tableName={self.table_name}',
                                    content_type='application/json')
         response_data = response.json()

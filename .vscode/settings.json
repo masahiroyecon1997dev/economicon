@@ -120,7 +120,8 @@
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "python.testing.cwd": "${workspaceFolder}/ApiServer/analysisapp",
-  "python.testing.unittestArgs": ["-v", "1", "-p", "test_*.py", "api"],
+  "python.testing.unittestArgs": ["-v", "1", "-p", "test_*.py"],
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
   "python.testing.pytestEnabled": false,
   "python.testing.unittestEnabled": true,
   "python.envFile": "${workspaceFolder}/.env",

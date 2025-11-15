@@ -1,12 +1,13 @@
-from rest_framework.test import APITestCase
-from rest_framework import status
-import tempfile
 import os
 import shutil
+import tempfile
 from datetime import datetime
 
+from rest_framework import status
+from rest_framework.test import APITestCase
 
-class TestApiGetListFiles(APITestCase):
+
+class TestApiGetFiles(APITestCase):
     def setUp(self):
         # テスト用の一時ディレクトリを作成
         self.test_dir = tempfile.mkdtemp()
@@ -35,7 +36,7 @@ class TestApiGetListFiles(APITestCase):
         正常にファイル一覧を取得できる
         """
         response = self.client.get(
-            '/api/get-list-files'
+            '/api/get-files'
             f'?directoryPath={self.test_dir}',
             content_type='application/json'
         )
@@ -46,17 +47,17 @@ class TestApiGetListFiles(APITestCase):
 
         result = response_data['result']
         self.assertEqual(result['directoryPath'], self.test_dir)
-        self.assertIn('items', result)
+        self.assertIn('files', result)
 
-        items = result['items']
-        self.assertEqual(len(items), 3)  # 2 files + 1 directory
+        files = result['files']
+        self.assertEqual(len(files), 3)  # 2 files + 1 directory
 
         # アイテムが名前順でソートされているか確認
-        item_names = [item['name'] for item in items]
+        item_names = [item['name'] for item in files]
         self.assertEqual(item_names, ['subdir', 'test1.txt', 'test2.txt'])
 
         # 各アイテムの情報を確認
-        for item in items:
+        for item in files:
             self.assertIn('name', item)
             self.assertIn('isFile', item)
             self.assertIn('size', item)
@@ -83,7 +84,7 @@ class TestApiGetListFiles(APITestCase):
         empty_dir = tempfile.mkdtemp()
         try:
             response = self.client.get(
-                '/api/get-list-files'
+                '/api/get-files'
                 f'?directoryPath={empty_dir}',
                 content_type='application/json'
             )
@@ -94,7 +95,7 @@ class TestApiGetListFiles(APITestCase):
 
             result = response_data['result']
             self.assertEqual(result['directoryPath'], empty_dir)
-            self.assertEqual(len(result['items']), 0)
+            self.assertEqual(len(result['files']), 0)
         finally:
             shutil.rmtree(empty_dir)
 
@@ -103,7 +104,7 @@ class TestApiGetListFiles(APITestCase):
         存在しないディレクトリを指定した場合のテスト
         """
         response = self.client.get(
-            '/api/get-list-files'
+            '/api/get-files'
             '?directoryPath=/non/existent/directory',
             content_type='application/json'
         )
@@ -118,7 +119,7 @@ class TestApiGetListFiles(APITestCase):
         directoryPathパラメータが未指定の場合のテスト
         """
         response = self.client.get(
-            '/api/get-list-files'
+            '/api/get-files'
             '?directoryPath=',
             content_type='application/json'
         )
@@ -133,7 +134,7 @@ class TestApiGetListFiles(APITestCase):
         ディレクトリではなくファイルのパスを指定した場合のテスト
         """
         response = self.client.get(
-            '/api/get-list-files'
+            '/api/get-files'
             f'?directoryPath={self.test_file1}',
             content_type='application/json'
         )
@@ -148,7 +149,7 @@ class TestApiGetListFiles(APITestCase):
         ファイルサイズが正しく取得できることを確認
         """
         response = self.client.get(
-            '/api/get-list-files'
+            '/api/get-files'
             f'?directoryPath={self.test_dir}',
             content_type='application/json'
         )
@@ -156,23 +157,23 @@ class TestApiGetListFiles(APITestCase):
         response_data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        items = response_data['result']['items']
+        files = response_data['result']['files']
 
         # test1.txtのサイズ確認
         test1_item = next(
-            item for item in items if item['name'] == 'test1.txt'
+            item for item in files if item['name'] == 'test1.txt'
         )
         self.assertEqual(test1_item['size'], len('test content 1'))
 
         # test2.txtのサイズ確認
         test2_item = next(
-            item for item in items if item['name'] == 'test2.txt'
+            item for item in files if item['name'] == 'test2.txt'
         )
         self.assertEqual(test2_item['size'],
                          len('test content 2 with more data'))
 
         # サブディレクトリのサイズ確認
         subdir_item = next(
-            item for item in items if item['name'] == 'subdir'
+            item for item in files if item['name'] == 'subdir'
         )
         self.assertEqual(subdir_item['size'], 0)

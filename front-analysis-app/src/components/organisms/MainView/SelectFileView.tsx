@@ -70,10 +70,10 @@ export const SelectFileView = () => {
       if (response.code === "OK") {
         setFiles(response.result);
       } else {
-        await showErrorDialog(t('Common.Error'), response.message);
+        await showErrorDialog(t('Error.Error'), response.message);
       }
     } catch (error) {
-      await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
+      await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
     } finally {
       clearLoading();
     }
@@ -107,11 +107,11 @@ export const SelectFileView = () => {
         if (response.code === "OK") {
           setFiles(response.result);
         } else {
-          await showErrorDialog(t('Common.Error'), response.message);
+          await showErrorDialog(t('Error.Error'), response.message);
           return;
         }
       } catch (error) {
-        await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
+        await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
         return;
       } finally {
         clearLoading();
@@ -129,7 +129,7 @@ export const SelectFileView = () => {
             separator: ',',
           });
           if (response.code !== "OK") {
-            await showErrorDialog(t('Common.Error'), response.message);
+            await showErrorDialog(t('Error.Error'), response.message);
             return;
           }
           loadTableName = response.result.tableName;
@@ -141,7 +141,7 @@ export const SelectFileView = () => {
             sheetName: '',
           });
           if (response.code !== "OK") {
-            await showErrorDialog(t('Common.Error'), response.message);
+            await showErrorDialog(t('Error.Error'), response.message);
             return;
           }
           loadTableName = response.result.tableName;
@@ -152,7 +152,7 @@ export const SelectFileView = () => {
             tableName: file.name.replace('.parquet', ''),
           });
           if (response.code !== "OK") {
-            await showErrorDialog(t('Common.Error'), response.message);
+            await showErrorDialog(t('Error.Error'), response.message);
             return;
           }
           loadTableName = response.result.tableName;
@@ -161,7 +161,7 @@ export const SelectFileView = () => {
         addTableInfo(resTableInfo);
         setCurrentView("dataPreview");
       } catch (error) {
-        await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
+        await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
       } finally {
         clearLoading();
       }
