@@ -1,13 +1,23 @@
 import { useState } from "react";
-import { useColumnListStore } from "../../../stores/useCulomnListStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
 
 export const LinearRegressionFormView = () => {
   const tableList = useTableListStore((state) => state.tableList);
-  const columnList = useColumnListStore((state) => state.columnList);
-  const setColumnList = useColumnListStore((state) => state.setColumnList);
+  const [columnList, setColumnList] = useState<string[]>([]);
+  const [selectedTableName, setSelectedTableName] = useState<string>("");
   const [dependentVariable, setDependentVariable] = useState<string>("");
   const [independentVariables, setIndependentVariables] = useState<string[]>([]);
+
+
+
+  const handleTableChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedTable = event.target.value;
+    setSelectedTableName(selectedTable);
+    const resColumnList
+
+  };
+
+
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -23,8 +33,8 @@ export const LinearRegressionFormView = () => {
           <div>
             <label className="mb-2 block text-sm font-medium text-text-main" htmlFor="data-table">Data Table</label>
             <div className="relative">
-              <span
-                className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-main/50">table</span>
+              {/* <span
+                className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-main/50">table</span> */}
               <select
                 className="w-full rounded-lg border-border-color py-2.5 pl-10 pr-4 text-text-main shadow-sm focus:border-accent focus:ring-accent"
                 id="data-table">
