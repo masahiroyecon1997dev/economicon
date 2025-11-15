@@ -47,7 +47,7 @@ export const importParquetByPath = async (
   return response.data;
 }
 
-export const getColumnInfoList = async (
+export const getColumnList = async (
   tableName: string
 ): Promise<apiTypes.ResGetColumnInfoType> => {
   const response = await axios.get("/get-column-list", {

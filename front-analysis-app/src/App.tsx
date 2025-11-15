@@ -34,7 +34,7 @@ export const App = () => {
         const resGetSettings = await getSettings();
         if (resGetSettings.code !== "OK") {
           if (isMounted) {
-            await showErrorDialog(t('Common.Error'), resGetSettings.message);
+            await showErrorDialog(t('Error.Error'), resGetSettings.message);
           }
           return;
         }
@@ -42,7 +42,7 @@ export const App = () => {
         const resGetFiles = await getFiles(resGetSettings.result.defaultFolderPath);
         if (resGetFiles.code !== "OK") {
           if (isMounted) {
-            await showErrorDialog(t('Common.Error'), resGetFiles.message);
+            await showErrorDialog(t('Error.Error'), resGetFiles.message);
           }
           return;
         }
@@ -50,7 +50,7 @@ export const App = () => {
         const resGetTableNames = await getTableNameList();
         if (resGetTableNames.code !== "OK") {
           if (isMounted) {
-            await showErrorDialog(t('Common.Error'), resGetTableNames.message);
+            await showErrorDialog(t('Error.Error'), resGetTableNames.message);
           }
           return;
         }
@@ -64,7 +64,7 @@ export const App = () => {
       } catch (error) {
         console.error('App initialization error:', error);
         if (isMounted) {
-          await showErrorDialog(t('Common.Error'), t('Error.UnexpectedError'));
+          await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
         }
       }
     }
