@@ -1,9 +1,13 @@
-from rest_framework.test import APITestCase
-from rest_framework import status
 import json
-import polars as pl
-import tempfile
 import os
+import shutil
+import tempfile
+
+import numpy as np
+import polars as pl
+from rest_framework import status
+from rest_framework.test import APITestCase
+
 from ..apis.data.tables_manager import TablesManager
 
 
@@ -12,23 +16,27 @@ class TestApiImportExcelByPath(APITestCase):
     def setUp(self):
         self.tables_manager = TablesManager()
         self.tables_manager.clear_tables()
+        self.test_dir = tempfile.mkdtemp()
 
-        # テスト用のEXCELファイルパス
-        self.test_excel = '/AnalysisApp/AnalysisApp/SampleData'\
-            '/TestDataXlsx.xlsx'
-        self.simple_excel = '/AnalysisApp/AnalysisApp/SampleData'\
-            '/SimpleTest.xlsx'
+    def tearDown(self):
+        # テスト後にテンポラリディレクトリをクリーンアップ
+        shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_import_excel_by_path_simple(self):
         """
         シンプルなEXCELファイルをパス指定でインポートするテスト
         """
-        # 期待データをPolarsで読み込み
-        expected_data = pl.read_excel(self.simple_excel)
+        test_data = pl.DataFrame({
+            'col_1': [1, 2, 3],
+            'col_2': [10.1, 20.2, 30.3],
+            'col_3': ['A', 'B', 'C']
+        })
+        test_data.write_excel(
+            f'{self.test_dir}/SimpleTest.xlsx')
 
         # APIリクエスト
         request_data = {
-            'filePath': self.simple_excel,
+            'filePath': f'{self.test_dir}/SimpleTest.xlsx',
             'tableName': 'TestSimpleExcel'
         }
         response = self.client.post('/api/import-excel-by-path',
@@ -43,18 +51,27 @@ class TestApiImportExcelByPath(APITestCase):
 
         # データの検証
         df = self.tables_manager.get_table('TestSimpleExcel').table
-        self.assertEqual(True, expected_data.equals(df))
+        self.assertEqual(True, test_data.equals(df))
 
     def test_import_excel_by_path_large_data(self):
         """
         大きなEXCELファイルをパス指定でインポートするテスト
         """
-        # 期待データをPolarsで読み込み
-        expected_data = pl.read_excel(self.test_excel)
+        N_ROWS = 5000
+        N_COLS = 500
+        rng = np.random.default_rng(42)
+        data = rng.integers(0, 100, size=(N_ROWS, N_COLS), dtype=np.int32)
+        column_names = [f"col_{i}" for i in range(N_COLS)]
+        df_sample = pl.DataFrame(
+            data,
+            schema=column_names
+        )
+        df_sample.write_excel(
+            f'{self.test_dir}/TestDataXlsx.xlsx')
 
         # APIリクエスト
         request_data = {
-            'filePath': self.test_excel,
+            'filePath': f'{self.test_dir}/TestDataXlsx.xlsx',
             'tableName': 'TestLargeExcel'
         }
         response = self.client.post('/api/import-excel-by-path',
@@ -69,18 +86,23 @@ class TestApiImportExcelByPath(APITestCase):
 
         # データの検証
         df = self.tables_manager.get_table('TestLargeExcel').table
-        self.assertEqual(True, expected_data.equals(df))
+        self.assertEqual(True, df_sample.equals(df))
 
     def test_import_excel_by_path_custom_table_name(self):
         """
         カスタムテーブル名でEXCELファイルをインポートするテスト
         """
-        # 期待データをPolarsで読み込み
-        expected_data = pl.read_excel(self.simple_excel)
+        test_data = pl.DataFrame({
+            'col_1': [1, 2, 3],
+            'col_2': [10.1, 20.2, 30.3],
+            'col_3': ['A', 'B', 'C']
+        })
+        test_data.write_excel(
+            f'{self.test_dir}/SimpleTest.xlsx')
 
         # APIリクエスト
         request_data = {
-            'filePath': self.simple_excel,
+            'filePath': f'{self.test_dir}/SimpleTest.xlsx',
             'tableName': 'MyCustomExcelTable'
         }
         response = self.client.post('/api/import-excel-by-path',
@@ -95,9 +117,9 @@ class TestApiImportExcelByPath(APITestCase):
 
         # データの検証
         df = self.tables_manager.get_table('MyCustomExcelTable').table
-        self.assertEqual(True, expected_data.equals(df))
+        self.assertEqual(True, test_data.equals(df))
 
-    def test_import_parquet_by_path_file_not_exists(self):
+    def test_import_excel_by_path_file_not_exists(self):
         """
         存在しないファイルパスを指定した場合のテスト
         """
@@ -119,9 +141,15 @@ class TestApiImportExcelByPath(APITestCase):
         """
         EXCEL以外のファイル拡張子を指定した場合のテスト
         """
+        test_data = pl.DataFrame({
+            'col_1': [1, 2, 3],
+            'col_2': [10.1, 20.2, 30.3],
+            'col_3': ['A', 'B', 'C']
+        })
+        test_data.write_csv(
+            f'{self.test_dir}/TestDataComma.csv', separator=',')
         request_data = {
-            'filePath': '/AnalysisApp/AnalysisApp'
-            '/SampleData/TestDataComma.csv',
+            'filePath': f'{self.test_dir}/TestDataComma.csv',
             'tableName': 'TestInvalidExtension'
         }
         response = self.client.post('/api/import-excel-by-path',
@@ -152,12 +180,19 @@ class TestApiImportExcelByPath(APITestCase):
         self.assertEqual('NG', response_data['code'])
         self.assertIn("filePath is required", response_data['message'])
 
-    def test_import_parquet_by_path_missing_table_name(self):
+    def test_import_excel_by_path_missing_table_name(self):
         """
         tableNameパラメータが未指定の場合のテスト
         """
+        test_data = pl.DataFrame({
+            'col_1': [1, 2, 3],
+            'col_2': [10.1, 20.2, 30.3],
+            'col_3': ['A', 'B', 'C']
+        })
+        test_data.write_csv(
+            f'{self.test_dir}/TestDataComma.csv', separator=',')
         request_data = {
-            'filePath': self.simple_excel
+            'filePath': f'{self.test_dir}/TestDataComma.csv'
         }
         response = self.client.post('/api/import-excel-by-path',
                                     data=json.dumps(request_data),
@@ -168,13 +203,20 @@ class TestApiImportExcelByPath(APITestCase):
         self.assertEqual('NG', response_data['code'])
         self.assertIn("tableName is required.", response_data['message'])
 
-    def test_import_parquet_by_path_duplicate_table_name(self):
+    def test_import_excel_by_path_duplicate_table_name(self):
         """
         既存のテーブル名と重複する場合のテスト
         """
+        test_data = pl.DataFrame({
+            'col_1': [1, 2, 3],
+            'col_2': [10.1, 20.2, 30.3],
+            'col_3': ['A', 'B', 'C']
+        })
+        test_data.write_excel(
+            f'{self.test_dir}/TestDataComma.xlsx')
         # 先にテーブルを作成
         first_request_data = {
-            'filePath': self.simple_excel,
+            'filePath': f'{self.test_dir}/TestDataComma.xlsx',
             'tableName': 'DuplicateTable'
         }
         self.client.post('/api/import-excel-by-path',
@@ -183,7 +225,7 @@ class TestApiImportExcelByPath(APITestCase):
 
         # 同じテーブル名で再度作成を試行
         second_request_data = {
-            'filePath': self.simple_excel,
+            'filePath': f'{self.test_dir}/TestDataComma.xlsx',
             'tableName': 'DuplicateTable'
         }
         response = self.client.post('/api/import-excel-by-path',
@@ -195,7 +237,7 @@ class TestApiImportExcelByPath(APITestCase):
         self.assertEqual('NG', response_data['code'])
         # テーブル名重複エラーメッセージを確認
 
-    def test_import_parquet_by_path_invalid_json(self):
+    def test_import_excel_by_path_invalid_json(self):
         """
         不正なJSONを送信した場合のテスト
         """
