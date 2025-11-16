@@ -28,6 +28,10 @@ export const HeaderMenu = () => {
     setCurrentView("selectFile");
   }
 
+  const showCreateSimulationDataTableView = () => {
+    setCurrentView("CreateSimulationDataTable");
+  }
+
   const showLinearRegressionModal = () => {
     setCurrentView("LinearRegressionForm");
   }
@@ -91,7 +95,7 @@ export const HeaderMenu = () => {
   const dataGenerationDropdownListElement = [
     {
       dropdownListName: t("HeaderMenu.DataGeneration"),
-      dropdownListFunction: openGenerateDataModal,
+      dropdownListFunction: showCreateSimulationDataTableView,
     },
   ];
   const addColumnDropdownListElement = [

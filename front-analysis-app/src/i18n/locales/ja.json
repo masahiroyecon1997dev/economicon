@@ -5,7 +5,17 @@
     "Table": "テーブル",
     "Constant": "定数",
     "UniformDistribution": "一様分布",
-    "NomalDistribution": "正規分布"
+    "NomalDistribution": "正規分布",
+    "ExponentialDistribution": "指数分布",
+    "GammaDistribution": "ガンマ分布",
+    "BetaDistribution": "ベータ分布",
+    "WeibullDistribution": "ワイブル分布",
+    "LognormalDistribution": "対数正規分布",
+    "BinomialDistribution": "二項分布",
+    "BernoulliDistribution": "ベルヌーイ分布",
+    "PoissonDistribution": "ポアソン分布",
+    "GeometricDistribution": "幾何分布",
+    "HypergeometricDistribution": "超幾何分布"
   },
   "HeaderMenu": {
     "Title": "Mesatsu",
@@ -38,6 +48,17 @@
     "FileNameHeader": "ファイル名",
     "SizeHeader": "サイズ",
     "LastModifiedHeader": "最終更新日"
+  },
+  "CreateSimulationDataTableView": {
+    "CreateNewDataTable": "新しいデータテーブルを作成",
+    "DefineYourTableNameAndRows": "テーブル名と行数を定義し、列を追加および設定してデータセットを生成します。",
+    "TableSettings": "テーブル設定",
+    "TableName": "テーブル名",
+    "TableNamePlaceholder": "テーブル名を入力してください。",
+    "NumberOfRows": "行数",
+    "NumberOfRowsPlaceholder": "1000",
+    "Columns": "列の設定",
+    "AddColumn": "列を追加"
   },
   "ImportFileModal": {
     "Title": "ファイルを開く",
