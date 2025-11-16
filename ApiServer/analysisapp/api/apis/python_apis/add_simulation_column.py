@@ -1,18 +1,16 @@
+from typing import Any, Dict
+
 import polars as pl
-import numpy as np
 from django.utils.translation import gettext as _
-from typing import Dict, Any
-from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.tables_manager_validator import (
-    validate_existed_table_name,
-    validate_new_column_name
-)
-from ..utilities.validator.statistics_validators import (
-    validate_distribution_type,
-    validate_distribution_params
-)
+
 from ..data.tables_manager import TablesManager
-from .common_api_class import (AbstractApi, ApiError)
+from ..utilities.algorithm.simulation import generate_simulation_data
+from ..utilities.validator.common_validators import ValidationError
+from ..utilities.validator.statistics_validators import (
+    validate_distribution_params, validate_distribution_type)
+from ..utilities.validator.tables_manager_validator import (
+    validate_existed_table_name, validate_new_column_name)
+from .common_api_class import AbstractApi, ApiError
 
 
 class AddSimulationColumn(AbstractApi):
@@ -78,7 +76,8 @@ class AddSimulationColumn(AbstractApi):
             num_rows = table_info.num_rows
 
             # 分布に従ってデータを生成
-            simulation_data = self._generate_simulation_data(num_rows)
+            simulation_data = generate_simulation_data(
+                self.distribution_type, self.distribution_params, num_rows)
 
             # 新しい列をデータフレームに追加
             df = table_info.table
@@ -100,54 +99,6 @@ class AddSimulationColumn(AbstractApi):
             message = _("An unexpected error occurred during "
                         "adding simulation column processing")
             raise ApiError(message) from e
-
-    def _generate_simulation_data(self, num_rows: int):
-        """指定された分布に従ってシミュレーションデータを生成"""
-        dist_type = self.distribution_type
-        params = self.distribution_params
-
-        # NumPyのランダムジェネレータを使用
-        rng = np.random.default_rng()
-
-        if dist_type == 'uniform':
-            return rng.uniform(params['low'], params['high'], num_rows)
-
-        elif dist_type == 'exponential':
-            return rng.exponential(params['scale'], num_rows)
-
-        elif dist_type == 'normal':
-            return rng.normal(params['loc'], params['scale'], num_rows)
-
-        elif dist_type == 'gamma':
-            return rng.gamma(params['shape'], params['scale'], num_rows)
-
-        elif dist_type == 'beta':
-            return rng.beta(params['a'], params['b'], num_rows)
-
-        elif dist_type == 'weibull':
-            return rng.weibull(params['a'], num_rows)
-
-        elif dist_type == 'lognormal':
-            return rng.lognormal(params['mean'], params['sigma'], num_rows)
-
-        elif dist_type == 'binomial':
-            return rng.binomial(params['n'], params['p'], num_rows)
-
-        elif dist_type == 'bernoulli':
-            return rng.binomial(1, params['p'], num_rows)
-
-        elif dist_type == 'poisson':
-            return rng.poisson(params['lam'], num_rows)
-
-        elif dist_type == 'geometric':
-            return rng.geometric(params['p'], num_rows)
-
-        elif dist_type == 'hypergeometric':
-            return rng.hypergeometric(params['K'], params['N'] - params['K'],
-                                      params['n'], num_rows)
-
-        else:
-            raise ValueError(f"Unsupported distribution type: {dist_type}")
 
 
 def add_simulation_column(table_name: str,
