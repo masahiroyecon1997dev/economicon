@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 
-import { getColumnInfoList, getTableNameList, linearRegression } from "../../../function/restApis";
+import { getColumnList, getTableNameList, linearRegression } from "../../../function/restApis";
 import type { ReqLinearRegressionType } from "../../../types/apiTypes";
 import type { SelectListType } from "../../../types/commonTypes";
 import { Select } from "../../molecules/InputField/Select";
@@ -31,7 +31,7 @@ export const LinearRegressionModal = ({
     let ignore = false;
     async function loadData() {
       const resGetTableNameList = await getTableNameList();
-      const resGetColumnNameList = await getColumnInfoList(
+      const resGetColumnNameList = await getColumnList(
         resGetTableNameList.result.tableNameList[0]
       );
       if (!ignore) {
