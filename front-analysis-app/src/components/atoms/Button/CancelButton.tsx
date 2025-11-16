@@ -6,13 +6,8 @@ type CancelButtonProps = {
 export const CancelButton = ({ children, cancel }: CancelButtonProps) => {
   return (
     <button
-      className="w-28 h-9 px-5 py-2.5 ms-3
-            text-center text-xs text-gray-900 font-medium
-            rounded-full focus:ring-4 focus:outline-none border
-            bg-white border-gray-200
-            hover:bg-gray-100 hover:text-blue-700
-            focus:ring-gray-100"
-      onClick={() => cancel()}
+      onClick={cancel}
+      className="rounded-md px-6 py-2.5 text-sm font-semibold text-main dark:text-gray-300 bg-white dark:bg-gray-700 border border-border-color dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
     >
       {children}
     </button>

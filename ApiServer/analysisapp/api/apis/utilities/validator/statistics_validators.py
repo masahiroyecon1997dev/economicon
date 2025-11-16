@@ -76,13 +76,17 @@ def validate_distribution_params(
                 raise ValidationError("For beta distribution, "
                                       "'a' and 'b' must be positive")
         case 'weibull':
-            if 'a' not in params:
+            if 'a' not in params or 'scale' not in params:
                 raise ValidationError("Weibull distribution requires 'a' "
-                                      "parameter")
+                                      "and 'scale' parameters")
             validate_number(params['a'], 'a')
             if params['a'] <= 0:
                 raise ValidationError("For weibull distribution, "
                                       "'a' must be positive")
+            validate_number(params['scale'], 'scale')
+            if params['scale'] > 0:
+                raise ValidationError("For weibull distribution, "
+                                      "'scale' must be positive")
         case 'lognormal':
             if 'mean' not in params or 'sigma' not in params:
                 raise ValidationError("Lognormal distribution requires "
