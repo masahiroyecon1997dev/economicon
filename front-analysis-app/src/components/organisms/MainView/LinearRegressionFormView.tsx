@@ -1,20 +1,22 @@
 import { useState } from "react";
+import { getColumnList } from "../../../function/restApis";
 import { useTableListStore } from "../../../stores/useTableListStore";
+import type { ColumnType } from "../../../types/commonTypes";
 
 export const LinearRegressionFormView = () => {
   const tableList = useTableListStore((state) => state.tableList);
-  const [columnList, setColumnList] = useState<string[]>([]);
+  const [columnList, setColumnList] = useState<ColumnType[]>([]);
   const [selectedTableName, setSelectedTableName] = useState<string>("");
   const [dependentVariable, setDependentVariable] = useState<string>("");
   const [independentVariables, setIndependentVariables] = useState<string[]>([]);
 
 
 
-  const handleTableChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleTableChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedTable = event.target.value;
     setSelectedTableName(selectedTable);
-    const resColumnList
-
+    const resColumnList = await getColumnList(selectedTable);
+    setColumnList(resColumnList.result.columnInfoList);
   };
 
 
@@ -37,7 +39,11 @@ export const LinearRegressionFormView = () => {
                 className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-main/50">table</span> */}
               <select
                 className="w-full rounded-lg border-border-color py-2.5 pl-10 pr-4 text-text-main shadow-sm focus:border-accent focus:ring-accent"
-                id="data-table">
+                id="data-table"
+                value={selectedTableName}
+                onChange={handleTableChange}
+              >
+                <option value="" disabled>Select a table</option>
                 {tableList.map((table, index) => (
                   <option key={index} value={table}>{table}</option>
                 ))}

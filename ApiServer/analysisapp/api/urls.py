@@ -4,8 +4,9 @@ from . import views
 from .apis.rest_apis import (rest_add_column, rest_add_dummy_column,
                              rest_add_lag_lead_column,
                              rest_add_simulation_column, rest_calculate_column,
-                             rest_clear_tables,
-                             rest_confidence_interval, rest_create_join_table,
+                             rest_clear_tables, rest_confidence_interval,
+                             rest_create_join_table,
+                             rest_create_simulation_data_table,
                              rest_create_table, rest_create_union_table,
                              rest_delete_column, rest_delete_table,
                              rest_descriptive_statistics,
@@ -114,4 +115,8 @@ urlpatterns = [
          rest_variable_effects_estimation.VariableEffectsEstimation.as_view()),
     path('probit-regression',
          rest_probit_regression.ProbitRegression.as_view()),
+    path('create-simulation-data-table',
+         rest_create_simulation_data_table.CreateSimulationDataTable.as_view()
+         ),
+
 ]
