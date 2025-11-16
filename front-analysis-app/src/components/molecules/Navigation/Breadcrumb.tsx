@@ -8,24 +8,27 @@ type BreadcrumbProps = {
 
 export function Breadcrumb({ segments, onSegmentClick }: BreadcrumbProps) {
   return (
-    <nav className="flex px-5 py-3 text-gray-700 border border-gray-200 rounded-lg bg-gray-50" aria-label="Breadcrumb">
-      <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-        {segments.map((segment, index) => (
-          <li key={index} className="inline-flex items-center">
-            <button
-              className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-950 transition-colors cursor-pointer"
-              onClick={() => onSegmentClick(index)}
-            >
-              {segment}
-            </button>
-            {index < segments.length - 1 && (
-              <div className="flex items-center ml-2">
-                <FontAwesomeIcon icon={faAngleRight} className="text-gray-400" />
-              </div>
-            )}
-          </li>
-        ))}
-      </ol>
+    <nav className="flex px-2 sm:px-3 md:px-5 py-2 sm:py-3 text-gray-700 border border-gray-200 rounded-lg bg-gray-50 min-w-0 max-w-full overflow-hidden" aria-label="Breadcrumb">
+      <div className="overflow-x-auto scrollbar-hide w-full">
+        <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse whitespace-nowrap">
+          {segments.map((segment, index) => (
+            <li key={index} className="inline-flex items-center flex-shrink-0">
+              <button
+                className="inline-flex items-center text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-950 transition-colors cursor-pointer max-w-16 sm:max-w-24 md:max-w-32 lg:max-w-none truncate"
+                onClick={() => onSegmentClick(index)}
+                title={segment}
+              >
+                <span className="truncate">{segment}</span>
+              </button>
+              {index < segments.length - 1 && (
+                <div className="flex items-center ml-2 flex-shrink-0">
+                  <FontAwesomeIcon icon={faAngleRight} className="text-gray-400" />
+                </div>
+              )}
+            </li>
+          ))}
+        </ol>
+      </div>
     </nav>
   );
 }

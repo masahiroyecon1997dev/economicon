@@ -233,7 +233,7 @@ export const SelectFileView = () => {
   };
 
   return (
-    <div className="mx-auto max-w-10xl">
+    <div className="mx-auto w-full max-w-none px-4">
       <div className="flex flex-col gap-8">
         <header>
           <h1 className="text-3xl font-bold text-black">{t("SelectFileView.Title")}</h1>
