@@ -44,7 +44,9 @@ def generate_simulation_data(
         )
 
     elif distribution_type == 'weibull':
-        return rng.weibull(distribution_params['a'], num_rows)
+        return rng.weibull(
+            distribution_params['a'], num_rows
+            ) * distribution_params['scale']
 
     elif distribution_type == 'lognormal':
         return rng.lognormal(

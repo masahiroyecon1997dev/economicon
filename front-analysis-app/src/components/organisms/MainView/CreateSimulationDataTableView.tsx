@@ -1,9 +1,16 @@
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import axios from "../../../configs/axios";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useErrorDialogStore } from "../../../stores/useErrorDialogStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
+import { CancelButton } from "../../atoms/Button/CancelButton";
+import { SubmitButton } from "../../atoms/Button/SubmitButton";
+import { InputText } from "../../atoms/Input/InputText";
+import { FormField } from "../../molecules/Form/FormField";
+import { ColumnConfig } from "../Form/ColumnConfig";
 
 type DistributionType = 'uniform' | 'exponential' | 'normal' | 'gamma' | 'beta' | 'weibull' | 'lognormal' | 'binomial' | 'bernoulli' | 'poisson' | 'geometric' | 'hypergeometric';
 
@@ -220,28 +227,30 @@ export const CreateSimulationDataTableView = () => {
         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-lg border border-border-color dark:border-gray-700">
           <h2 className="text-main dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] mb-6">{t("CreateSimulationDataTableView.TableSettings")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="table-name">{t("CreateSimulationDataTableView.TableName")}</label>
-              <input
-                className="w-full rounded-md text-4xl border-border-color dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-accent focus:ring-accent"
+            <FormField
+              label={t("CreateSimulationDataTableView.TableName")}
+              htmlFor="table-name"
+            >
+              <InputText
                 id="table-name"
-                placeholder={t("CreateSimulationDataTableView.TableNamePlaceholder")}
-                type="text"
                 value={tableName}
-                onChange={(e) => setTableName(e.target.value)}
+                change={(e) => setTableName(e.target.value)}
+                placeholder={t("CreateSimulationDataTableView.TableNamePlaceholder")}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" htmlFor="row-count">{t("CreateSimulationDataTableView.NumberOfRows")}</label>
-              <input
-                className="w-full rounded-md border-border-color dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-accent focus:ring-accent"
+            </FormField>
+
+            <FormField
+              label={t("CreateSimulationDataTableView.NumberOfRows")}
+              htmlFor="row-count"
+            >
+              <InputText
                 id="row-count"
-                placeholder="1000"
                 type="number"
-                value={numRows}
-                onChange={(e) => setNumRows(parseInt(e.target.value) || 0)}
+                value={numRows.toString()}
+                change={(e) => setNumRows(parseInt(e.target.value) || 0)}
+                placeholder="1000"
               />
-            </div>
+            </FormField>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-lg border border-border-color dark:border-gray-700">
@@ -249,129 +258,40 @@ export const CreateSimulationDataTableView = () => {
             <h2 className="text-main dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">列の設定</h2>
             <button
               onClick={addColumn}
-              className="flex items-center gap-2 rounded-md bg-main text-white px-4 py-2 text-sm font-medium hover:bg-hover-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-main"
+              className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-4 py-2 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-main"
             >
-              <span className="material-symbols-outlined text-lg">add</span>
+              <span className="material-symbols-outlined text-lg"><FontAwesomeIcon icon={faPlus} /></span>
               列を追加
             </button>
           </div>
           <div className="space-y-4">
-            {columns.map((column, index) => {
-              const distOption = column.distribution_type ? DISTRIBUTION_OPTIONS.find(d => d.value === column.distribution_type) : null;
-
-              return (
-                <div key={column.id} className="border border-border-color dark:border-gray-700 rounded-lg p-4 bg-secondary-main dark:bg-gray-900/30">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                    <div className="md:col-span-2 flex justify-between items-center">
-                      <p className="font-bold text-main dark:text-white">列 {index + 1}</p>
-                      <button
-                        onClick={() => removeColumn(column.id)}
-                        className="text-gray-400 hover:text-red-500"
-                        disabled={columns.length === 1}
-                      >
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">列名</label>
-                      <input
-                        className="w-full rounded-md border-border-color dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-accent focus:ring-accent"
-                        type="text"
-                        value={column.column_name}
-                        onChange={(e) => updateColumn(column.id, { column_name: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">データタイプ</label>
-                      <select
-                        className="w-full rounded-md border-border-color dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-accent focus:ring-accent"
-                        value={column.data_type}
-                        onChange={(e) => handleDataTypeChange(column.id, e.target.value as 'distribution' | 'fixed')}
-                      >
-                        <option value="fixed">固定値</option>
-                        <option value="distribution">確率分布</option>
-                      </select>
-                    </div>
-
-                    {column.data_type === 'distribution' && (
-                      <>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">分布タイプ</label>
-                          <select
-                            className="w-full rounded-md border-border-color dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-accent focus:ring-accent"
-                            value={column.distribution_type || ''}
-                            onChange={(e) => handleDistributionTypeChange(column.id, e.target.value as DistributionType)}
-                          >
-                            {DISTRIBUTION_OPTIONS.map(option => (
-                              <option key={option.value} value={option.value}>{option.label}</option>
-                            ))}
-                          </select>
-                        </div>
-                        {distOption && (
-                          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                            {distOption.params.map(param => (
-                              <div key={param}>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  {param === 'low' ? '最小値' :
-                                    param === 'high' ? '最大値' :
-                                      param === 'loc' ? '平均' :
-                                        param === 'scale' ? '標準偏差' :
-                                          param === 'mean' ? '平均' :
-                                            param === 'sigma' ? '標準偏差' :
-                                              param === 'shape' ? '形状' :
-                                                param === 'a' ? 'パラメータa' :
-                                                  param === 'b' ? 'パラメータb' :
-                                                    param === 'n' ? '試行回数' :
-                                                      param === 'p' ? '確率' :
-                                                        param === 'lam' ? 'λ' :
-                                                          param === 'K' ? 'K' :
-                                                            param === 'N' ? 'N' : param}
-                                </label>
-                                <input
-                                  className="w-full rounded-md border-border-color dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-accent focus:ring-accent"
-                                  type="number"
-                                  step="0.01"
-                                  value={column.distribution_params?.[param] || ''}
-                                  onChange={(e) => handleDistributionParamChange(column.id, param, parseFloat(e.target.value) || 0)}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {column.data_type === 'fixed' && (
-                      <div className="md:col-span-2 pt-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">固定値</label>
-                        <input
-                          className="w-full rounded-md border-border-color dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-accent focus:ring-accent"
-                          type="text"
-                          value={column.fixed_value || ''}
-                          onChange={(e) => updateColumn(column.id, { fixed_value: e.target.value })}
-                          placeholder="固定値を入力"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {columns.map((column, index) => (
+              <ColumnConfig
+                key={column.id}
+                column={column}
+                index={index}
+                distributionOptions={DISTRIBUTION_OPTIONS}
+                onUpdate={updateColumn}
+                onDataTypeChange={handleDataTypeChange}
+                onDistributionTypeChange={handleDistributionTypeChange}
+                onDistributionParamChange={handleDistributionParamChange}
+                onRemove={removeColumn}
+                canRemove={columns.length > 1}
+              />
+            ))}
           </div>
         </div>
         <div className="flex justify-end items-center gap-4 pt-4">
-          <button
-            onClick={handleCancel}
-            className="rounded-md px-6 py-2.5 text-sm font-semibold text-main dark:text-gray-300 bg-white dark:bg-gray-700 border border-border-color dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+          <CancelButton
+            cancel={handleCancel}
           >
-            キャンセル
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="rounded-md bg-accent px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-accent/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            {t("Common.Cancel")}
+          </CancelButton>
+          <SubmitButton
+            submit={handleSubmit}
           >
-            テーブル作成
-          </button>
+            {t("CreateSimulationDataTableView.Submit")}
+          </SubmitButton>
         </div>
       </div>
     </div>
