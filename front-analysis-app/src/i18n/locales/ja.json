@@ -77,6 +77,7 @@
     "Columns": "列の設定",
     "AddColumn": "列を追加",
     "ColumnName": "列名",
+    "InputColumnName": "列名を入力してください。",
     "DataType": "データ形式",
     "DistributionType": "分布の種類",
     "FixedValue": "固定値",

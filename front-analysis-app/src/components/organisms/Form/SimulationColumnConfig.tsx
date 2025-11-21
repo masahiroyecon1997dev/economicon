@@ -1,33 +1,27 @@
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTranslation } from 'react-i18next';
+import type { DistributionType, SimulationColumnSetting } from '../../../types/commonTypes';
 import { InputText } from '../../atoms/Input/InputText';
 import { Select } from '../../atoms/Input/Select';
 import { SelectOption } from '../../atoms/Input/SelectOption';
 import { FormField } from '../../molecules/Form/FormField';
 
-type DistributionType = 'uniform' | 'exponential' | 'normal' | 'gamma' | 'beta' | 'weibull' | 'lognormal' | 'binomial' | 'bernoulli' | 'poisson' | 'geometric' | 'hypergeometric';
 
-type ColumnSetting = {
-  id: string;
-  column_name: string;
-  data_type: 'distribution' | 'fixed';
-  distribution_type?: DistributionType;
-  distribution_params?: Record<string, number>;
-  fixed_value?: string | number;
-};
-
-type ColumnConfigProps = {
-  column: ColumnSetting;
+type SimulationColumnConfigProps = {
+  column: SimulationColumnSetting;
   index: number;
   distributionOptions: Array<{ value: DistributionType; label: string; params: string[] }>;
-  onUpdate: (id: string, updates: Partial<ColumnSetting>) => void;
+  onUpdate: (id: string, updates: Partial<SimulationColumnSetting>) => void;
   onDataTypeChange: (id: string, dataType: 'distribution' | 'fixed') => void;
   onDistributionTypeChange: (id: string, distributionType: DistributionType) => void;
   onDistributionParamChange: (id: string, param: string, value: number) => void;
   onRemove: (id: string) => void;
   canRemove: boolean;
+  error: { columnName: string | undefined; distributionParams: Record<string, string> | undefined; fixedValue: string | undefined };
 };
 
-export const ColumnConfig = ({
+export const SimulationColumnConfig = ({
   column,
   index,
   distributionOptions,
@@ -36,8 +30,9 @@ export const ColumnConfig = ({
   onDistributionTypeChange,
   onDistributionParamChange,
   onRemove,
-  canRemove
-}: ColumnConfigProps) => {
+  canRemove,
+  error,
+}: SimulationColumnConfigProps) => {
   const { t } = useTranslation();
   const distOption = column.distribution_type ? distributionOptions.find(d => d.value === column.distribution_type) : null;
 
@@ -64,16 +59,18 @@ export const ColumnConfig = ({
   };
 
   return (
-    <div className="border border-border-color dark:border-gray-700 rounded-lg p-4 bg-secondary-main dark:bg-gray-900/30">
+    <div className="border border-border-color dark:border-gray-700 rounded-lg p-4 bg-secondary-main dark:bg-gray-900/30 overflow-y-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
         <div className="md:col-span-2 flex justify-between items-center">
           <p className="font-bold text-main dark:text-white">列 {index + 1}</p>
           <button
             onClick={() => onRemove(column.id)}
-            className="text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             disabled={!canRemove}
           >
-            <span className="material-symbols-outlined">delete</span>
+            <span className="material-symbols-outlined">
+              <FontAwesomeIcon icon={faXmark} />
+            </span>
           </button>
         </div>
 
@@ -82,7 +79,8 @@ export const ColumnConfig = ({
             id={`column-name-${column.id}`}
             value={column.column_name}
             change={(e) => onUpdate(column.id, { column_name: e.target.value })}
-            placeholder="列名を入力"
+            placeholder={t('CreateSimulationDataTableView.InputColumnName')}
+            error={error.columnName}
           />
         </FormField>
 
@@ -130,6 +128,7 @@ export const ColumnConfig = ({
                       value={column.distribution_params?.[param]?.toString() || ''}
                       change={(e) => onDistributionParamChange(column.id, param, parseFloat(e.target.value) || 0)}
                       placeholder={`${getParamLabel(param)}${t('CreateSimulationDataTableView.InputDistributionParameters')}`}
+                      error={error.distributionParams ? error.distributionParams[param] : undefined}
                     />
                   </FormField>
                 ))}
@@ -146,6 +145,7 @@ export const ColumnConfig = ({
                 value={column.fixed_value?.toString() || ''}
                 change={(e) => onUpdate(column.id, { fixed_value: e.target.value })}
                 placeholder={t('CreateSimulationDataTableView.InputFixedValue')}
+                error={error.fixedValue}
               />
             </FormField>
           </div>
