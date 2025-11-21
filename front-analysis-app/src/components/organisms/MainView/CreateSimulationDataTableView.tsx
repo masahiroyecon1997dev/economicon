@@ -2,26 +2,17 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { DISTRIBUTION_OPTIONS } from "../../../common/constant";
 import axios from "../../../configs/axios";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useErrorDialogStore } from "../../../stores/useErrorDialogStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
+import type { DistributionType, SimulationColumnSetting } from "../../../types/commonTypes";
 import { CancelButton } from "../../atoms/Button/CancelButton";
 import { SubmitButton } from "../../atoms/Button/SubmitButton";
 import { InputText } from "../../atoms/Input/InputText";
 import { FormField } from "../../molecules/Form/FormField";
-import { ColumnConfig } from "../Form/ColumnConfig";
-
-type DistributionType = 'uniform' | 'exponential' | 'normal' | 'gamma' | 'beta' | 'weibull' | 'lognormal' | 'binomial' | 'bernoulli' | 'poisson' | 'geometric' | 'hypergeometric';
-
-type ColumnSetting = {
-  id: string;
-  column_name: string;
-  data_type: 'distribution' | 'fixed';
-  distribution_type?: DistributionType;
-  distribution_params?: Record<string, number>;
-  fixed_value?: string | number;
-};
+import { SimulationColumnConfig } from "../Form/SimulationColumnConfig";
 
 export const CreateSimulationDataTableView = () => {
   const { t } = useTranslation();
@@ -29,37 +20,29 @@ export const CreateSimulationDataTableView = () => {
   const { showErrorDialog } = useErrorDialogStore();
   const { setLoading, clearLoading } = useLoadingStore();
 
-  const DISTRIBUTION_OPTIONS: Array<{ value: DistributionType; label: string; params: string[] }> = [
-    { value: 'uniform', label: t('Common.UniformDistribution'), params: ['low', 'high'] },
-    { value: 'normal', label: t('Common.NomalDistribution'), params: ['loc', 'scale'] },
-    { value: 'exponential', label: t('Common.ExponentialDistribution'), params: ['scale'] },
-    { value: 'gamma', label: t('Common.GammaDistribution'), params: ['shape', 'scale'] },
-    { value: 'beta', label: t('Common.BetaDistribution'), params: ['a', 'b'] },
-    { value: 'weibull', label: t('Common.WeibullDistribution'), params: ['a'] },
-    { value: 'lognormal', label: t('Common.LognormalDistribution'), params: ['mean', 'sigma'] },
-    { value: 'binomial', label: t('Common.BinomialDistribution'), params: ['n', 'p'] },
-    { value: 'bernoulli', label: t('Common.BernoulliDistribution'), params: ['p'] },
-    { value: 'poisson', label: t('Common.PoissonDistribution'), params: ['lam'] },
-    { value: 'geometric', label: t('Common.GeometricDistribution'), params: ['p'] },
-    { value: 'hypergeometric', label: t('Common.HypergeometricDistribution'), params: ['K', 'N', 'n'] }
-  ];
-
   const [tableName, setTableName] = useState('');
   const [numRows, setNumRows] = useState<number>(1000);
-  const [columns, setColumns] = useState<ColumnSetting[]>([
+  const [columns, setColumns] = useState<SimulationColumnSetting[]>([
     {
       id: '1',
-      column_name: 'user_id',
-      data_type: 'fixed',
-      fixed_value: 1001
+      column_name: '',
+      data_type: 'distribution',
+      distribution_type: 'uniform',
+      distribution_params: { low: 0, high: 10 }
     }
   ]);
+  const [errorMessage, setErrorMessage] = useState<
+    {
+      tableName: string | null,
+      numRows: string | null,
+    }>();
   const addColumn = () => {
-    const newColumn: ColumnSetting = {
+    const newColumn: SimulationColumnSetting = {
       id: Date.now().toString(),
-      column_name: `column_${columns.length + 1}`,
-      data_type: 'fixed',
-      fixed_value: ''
+      column_name: '',
+      data_type: 'distribution',
+      distribution_type: 'uniform',
+      distribution_params: { low: 0, high: 10 }
     };
     setColumns([...columns, newColumn]);
   };
@@ -68,14 +51,14 @@ export const CreateSimulationDataTableView = () => {
     setColumns(columns.filter(col => col.id !== id));
   };
 
-  const updateColumn = (id: string, updates: Partial<ColumnSetting>) => {
+  const updateColumn = (id: string, updates: Partial<SimulationColumnSetting>) => {
     setColumns(columns.map(col =>
       col.id === id ? { ...col, ...updates } : col
     ));
   };
 
   const handleDataTypeChange = (id: string, dataType: 'distribution' | 'fixed') => {
-    const updates: Partial<ColumnSetting> = {
+    const updates: Partial<SimulationColumnSetting> = {
       data_type: dataType,
     };
 
@@ -216,7 +199,7 @@ export const CreateSimulationDataTableView = () => {
     setCurrentView('selectFile');
   };
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-6xl overflow-y-auto max-h-full">
       <div className="flex flex-wrap justify-between gap-3 items-center mb-2">
         <h1 className="text-main dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">{t("CreateSimulationDataTableView.CreateNewDataTable")}</h1>
       </div>
@@ -258,15 +241,15 @@ export const CreateSimulationDataTableView = () => {
             <h2 className="text-main dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">列の設定</h2>
             <button
               onClick={addColumn}
-              className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-4 py-2 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-main"
+              className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-4 py-2 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary cursor-pointer"
             >
-              <span className="material-symbols-outlined text-lg"><FontAwesomeIcon icon={faPlus} /></span>
+              <span className="material-symbols-outlined text-base"><FontAwesomeIcon icon={faPlus} /></span>
               列を追加
             </button>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto max-h-64">
             {columns.map((column, index) => (
-              <ColumnConfig
+              <SimulationColumnConfig
                 key={column.id}
                 column={column}
                 index={index}
