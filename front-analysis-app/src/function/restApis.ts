@@ -1,51 +1,48 @@
 import axios from "../configs/axios";
 import type * as apiTypes from "../types/apiTypes";
 
-export const getSettings = async (
-): Promise<apiTypes.ResGetSettingsType> => {
+export const getSettings = async (): Promise<apiTypes.ResGetSettingsType> => {
   const response = await axios.get("/get-settings");
   return response.data;
-}
+};
 
-export const getTableNameList = async (): Promise<apiTypes.ResGetTableNameListType> => {
-  try {
+export const getTableNameList =
+  async (): Promise<apiTypes.ResGetTableNameListType> => {
     const response = await axios.get("/get-table-list");
     return response.data;
-  } catch (error) {
-    console.log(error);
-    return { code: "NG", result: { tableNameList: [] }, message: "エラーです" };
-  }
-}
+  };
 
-export const getFiles = async (path: string): Promise<apiTypes.ResGetFilesType> => {
+export const getFiles = async (
+  path: string
+): Promise<apiTypes.ResGetFilesType> => {
   const response = await axios.get("/get-files", {
     params: {
       directoryPath: path,
     },
   });
   return response.data;
-}
+};
 
 export const importCsvByPath = async (
   requestBody: apiTypes.ReqImportCsvByPathType
 ): Promise<apiTypes.ResImportCsvByPathType> => {
   const response = await axios.post("/import-csv-by-path", requestBody);
   return response.data;
-}
+};
 
 export const importExcelByPath = async (
   requestBody: apiTypes.ReqImportExcelByPathType
 ): Promise<apiTypes.ResImportExcelByPathType> => {
   const response = await axios.post("/import-excel-by-path", requestBody);
   return response.data;
-}
+};
 
 export const importParquetByPath = async (
   requestBody: apiTypes.ReqImportParquetByPathType
 ): Promise<apiTypes.ResImportParquetByPathType> => {
   const response = await axios.post("/import-parquet-by-path", requestBody);
   return response.data;
-}
+};
 
 export const getColumnList = async (
   tableName: string
@@ -56,14 +53,13 @@ export const getColumnList = async (
     },
   });
   return response.data;
-}
+};
 
 export const fetchDataToJson = async (
   tableName: string,
   firstRow: number = 1,
   lastRow: number = 100
 ): Promise<apiTypes.ResFetchDataToJsonType> => {
-
   const response = await axios.get("/fetch-data-to-json", {
     params: {
       tableName: tableName,
@@ -72,7 +68,17 @@ export const fetchDataToJson = async (
     },
   });
   return response.data;
-}
+};
+
+export const createSimulationDataTable = async (
+  requestBody: apiTypes.ReqCreateSimulationDataTableType
+): Promise<apiTypes.ResCreateSimulationDataTableType> => {
+  const response = await axios.post(
+    "/create-simulation-data-table",
+    requestBody
+  );
+  return response.data;
+};
 
 export const importCsv = async (
   file: File
@@ -85,7 +91,7 @@ export const importCsv = async (
     },
   });
   return response.data;
-}
+};
 
 export const outputCsv = async (
   tableName: string
@@ -101,7 +107,7 @@ export const outputCsv = async (
     console.log(err);
     return { code: -9999, result: { csvData: "error" }, message: "エラーです" };
   }
-}
+};
 
 export const generateSimulationData = async (
   requestBody: apiTypes.ReqGenerateSimulationDataType
@@ -113,7 +119,7 @@ export const generateSimulationData = async (
     console.log(error);
     return { code: "NG", result: { tableName: "" }, message: "エラーです" };
   }
-}
+};
 
 export const linearRegression = async (
   requestBody: apiTypes.ReqLinearRegressionType
@@ -129,4 +135,4 @@ export const linearRegression = async (
       message: "エラーです",
     };
   }
-}
+};

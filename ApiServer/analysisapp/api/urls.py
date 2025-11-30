@@ -1,6 +1,5 @@
 from django.urls import path
 
-from . import views
 from .apis.rest_apis import (rest_add_column, rest_add_dummy_column,
                              rest_add_lag_lead_column,
                              rest_add_simulation_column, rest_calculate_column,
@@ -32,7 +31,6 @@ from .apis.rest_apis import (rest_add_column, rest_add_dummy_column,
                              rest_variable_effects_estimation)
 
 urlpatterns = [
-    path('', views.index, name='index'),
     path('add-column',
          rest_add_column.AddColumn.as_view()),
     path('add-dummy-column',
