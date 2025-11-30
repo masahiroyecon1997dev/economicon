@@ -58,9 +58,14 @@ export type DistributionType =
 
 export type SimulationColumnSetting = {
   id: string;
-  column_name: string;
-  data_type: "distribution" | "fixed";
-  distribution_type?: DistributionType;
-  distribution_params?: Record<string, number>;
-  fixed_value?: string | number;
+  columnName: string;
+  dataType: "distribution" | "fixed";
+  distributionType: DistributionType;
+  distributionParams: Record<string, number>;
+  fixedValue: string | number;
+  errorMessage: {
+    columnName: string | undefined;
+    distributionParams: Record<string, string> | undefined;
+    fixedValue: string | undefined;
+  };
 };

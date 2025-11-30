@@ -83,12 +83,12 @@ class CreateSimulationDataTable(AbstractApi):
         """個別の列設定を検証"""
 
         # 列名の検証
-        if 'column_name' not in column_setting:
+        if 'columnName' not in column_setting:
             raise ValidationError(
                 _("Column name is required.")
             )
 
-        column_name = column_setting['column_name']
+        column_name = column_setting['columnName']
         validate_new_column_name(
             column_name,
             existing_column_names,
@@ -97,12 +97,12 @@ class CreateSimulationDataTable(AbstractApi):
         existing_column_names.append(column_name)
 
         # データタイプの検証
-        if 'data_type' not in column_setting:
+        if 'dataType' not in column_setting:
             raise ValidationError(
                 _("Data type is required.")
             )
 
-        data_type = column_setting['data_type']
+        data_type = column_setting['dataType']
         if data_type not in ['distribution', 'fixed']:
             raise ValidationError(
                 _("Data type must be 'distribution' or 'fixed'.")
@@ -110,31 +110,31 @@ class CreateSimulationDataTable(AbstractApi):
 
         # 分布データの場合の検証
         if data_type == 'distribution':
-            if 'distribution_type' not in column_setting:
+            if 'distributionType' not in column_setting:
                 raise ValidationError(
                     _("Distribution type is required for distribution data.")
                 )
 
-            distribution_type = column_setting['distribution_type']
+            distribution_type = column_setting['distributionType']
             validate_distribution_type(
                 distribution_type,
                 f"{param_prefix}.distributionType"
             )
 
-            if 'distribution_params' not in column_setting:
+            if 'distributionParams' not in column_setting:
                 raise ValidationError(
                     _("Distribution parameters are required for "
                       "distribution data.")
                 )
 
-            distribution_params = column_setting['distribution_params']
+            distribution_params = column_setting['distributionParams']
             validate_distribution_params(
                 distribution_type, distribution_params
             )
 
         # 固定値データの場合の検証
         elif data_type == 'fixed':
-            if 'fixed_value' not in column_setting:
+            if 'fixedValue' not in column_setting:
                 raise ValidationError(
                     _("Fixed value is required for fixed data.")
                 )
@@ -146,14 +146,14 @@ class CreateSimulationDataTable(AbstractApi):
 
             # 各列設定に従ってデータを生成
             for column_setting in self.column_settings:
-                column_name = column_setting['column_name']
-                data_type = column_setting['data_type']
+                column_name = column_setting['columnName']
+                data_type = column_setting['dataType']
                 column_data = []  # 初期化
 
                 if data_type == 'distribution':
                     # 分布に従ってデータを生成
-                    distribution_type = column_setting['distribution_type']
-                    distribution_params = column_setting['distribution_params']
+                    distribution_type = column_setting['distributionType']
+                    distribution_params = column_setting['distributionParams']
                     column_data = generate_simulation_data(
                         distribution_type,
                         distribution_params,
@@ -161,7 +161,7 @@ class CreateSimulationDataTable(AbstractApi):
                     )
                 elif data_type == 'fixed':
                     # 固定値でデータを生成
-                    fixed_value = column_setting['fixed_value']
+                    fixed_value = column_setting['fixedValue']
                     column_data = [fixed_value] * self.table_number_of_rows
 
                 # 列をデータフレームに追加

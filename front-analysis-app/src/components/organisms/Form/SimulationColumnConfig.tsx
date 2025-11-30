@@ -18,7 +18,7 @@ type SimulationColumnConfigProps = {
   onDistributionParamChange: (id: string, param: string, value: number) => void;
   onRemove: (id: string) => void;
   canRemove: boolean;
-  error: { columnName: string | undefined; distributionParams: Record<string, string> | undefined; fixedValue: string | undefined };
+  error: { columnName: string | undefined; distributionParams: Record<string, string | undefined> | undefined; fixedValue: string | undefined };
 };
 
 export const SimulationColumnConfig = ({
@@ -34,7 +34,7 @@ export const SimulationColumnConfig = ({
   error,
 }: SimulationColumnConfigProps) => {
   const { t } = useTranslation();
-  const distOption = column.distribution_type ? distributionOptions.find(d => d.value === column.distribution_type) : null;
+  const distOption = column.distributionType ? distributionOptions.find(d => d.value === column.distributionType) : null;
 
   const getParamLabel = (param: string): string => {
     const paramLabels: Record<string, string> = {
@@ -77,8 +77,8 @@ export const SimulationColumnConfig = ({
         <FormField label={t('CreateSimulationDataTableView.ColumnName')} htmlFor={`column-name-${column.id}`}>
           <InputText
             id={`column-name-${column.id}`}
-            value={column.column_name}
-            change={(e) => onUpdate(column.id, { column_name: e.target.value })}
+            value={column.columnName}
+            change={(e) => onUpdate(column.id, { columnName: e.target.value })}
             placeholder={t('CreateSimulationDataTableView.InputColumnName')}
             error={error.columnName}
           />
@@ -87,7 +87,7 @@ export const SimulationColumnConfig = ({
         <FormField label={t('CreateSimulationDataTableView.DataType')} htmlFor={`data-type-${column.id}`}>
           <Select
             id={`data-type-${column.id}`}
-            value={column.data_type}
+            value={column.dataType}
             onChange={(e) => onDataTypeChange(column.id, e.target.value as 'distribution' | 'fixed')}
           >
             <SelectOption value="fixed">{t('Common.Constant')}</SelectOption>
@@ -95,18 +95,18 @@ export const SimulationColumnConfig = ({
           </Select>
         </FormField>
 
-        {column.data_type === 'distribution' && (
+        {column.dataType === 'distribution' && (
           <>
             <div className="md:col-span-2">
               <FormField label={t('CreateSimulationDataTableView.DistributionType')} htmlFor={`distribution-type-${column.id}`}>
                 <Select
                   id={`distribution-type-${column.id}`}
-                  value={column.distribution_type || ''}
+                  value={column.distributionType || ''}
                   onChange={(e) => onDistributionTypeChange(column.id, e.target.value as DistributionType)}
                 >
                   {distributionOptions.map(option => (
                     <SelectOption key={option.value} value={option.value}>
-                      {option.label}
+                      {t(option.label)}
                     </SelectOption>
                   ))}
                 </Select>
@@ -125,7 +125,7 @@ export const SimulationColumnConfig = ({
                       id={`param-${param}-${column.id}`}
                       type="number"
                       step="0.01"
-                      value={column.distribution_params?.[param]?.toString() || ''}
+                      value={column.distributionParams?.[param]?.toString() || ''}
                       change={(e) => onDistributionParamChange(column.id, param, parseFloat(e.target.value) || 0)}
                       placeholder={`${getParamLabel(param)}${t('CreateSimulationDataTableView.InputDistributionParameters')}`}
                       error={error.distributionParams ? error.distributionParams[param] : undefined}
@@ -137,13 +137,13 @@ export const SimulationColumnConfig = ({
           </>
         )}
 
-        {column.data_type === 'fixed' && (
+        {column.dataType === 'fixed' && (
           <div className="md:col-span-2 pt-2">
             <FormField label={t('CreateSimulationDataTableView.FixedValue')} htmlFor={`fixed-value-${column.id}`}>
               <InputText
                 id={`fixed-value-${column.id}`}
-                value={column.fixed_value?.toString() || ''}
-                change={(e) => onUpdate(column.id, { fixed_value: e.target.value })}
+                value={column.fixedValue?.toString() || ''}
+                change={(e) => onUpdate(column.id, { fixedValue: e.target.value })}
                 placeholder={t('CreateSimulationDataTableView.InputFixedValue')}
                 error={error.fixedValue}
               />

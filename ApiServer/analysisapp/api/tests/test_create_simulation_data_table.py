@@ -20,16 +20,16 @@ class TestCreateSimulationDataTable(APITestCase):
         # テスト用の列設定
         column_settings = [
             {
-                'column_name': 'normal_col',
-                'data_type': 'distribution',
-                'distribution_type': 'normal',
-                'distribution_params': {'loc': 0, 'scale': 1}
+                'columnName': 'normal_col',
+                'dataType': 'distribution',
+                'distributionType': 'normal',
+                'distributionParams': {'loc': 0, 'scale': 1}
             },
             {
-                'column_name': 'uniform_col',
-                'data_type': 'distribution',
-                'distribution_type': 'uniform',
-                'distribution_params': {'low': 0, 'high': 10}
+                'columnName': 'uniform_col',
+                'dataType': 'distribution',
+                'distributionType': 'uniform',
+                'distributionParams': {'low': 0, 'high': 10}
             }
         ]
         payload = {
@@ -63,14 +63,14 @@ class TestCreateSimulationDataTable(APITestCase):
         # テスト用の列設定
         column_settings = [
             {
-                'column_name': 'fixed_col_1',
-                'data_type': 'fixed',
-                'fixed_value': 42
+                'columnName': 'fixed_col_1',
+                'dataType': 'fixed',
+                'fixedValue': 42
             },
             {
-                'column_name': 'fixed_col_2',
-                'data_type': 'fixed',
-                'fixed_value': 'constant_string'
+                'columnName': 'fixed_col_2',
+                'dataType': 'fixed',
+                'fixedValue': 'constant_string'
             }
         ]
 
@@ -109,15 +109,15 @@ class TestCreateSimulationDataTable(APITestCase):
         # テスト用の列設定
         column_settings = [
             {
-                'column_name': 'exponential_col',
-                'data_type': 'distribution',
-                'distribution_type': 'exponential',
-                'distribution_params': {'scale': 2.0}
+                'columnName': 'exponential_col',
+                'dataType': 'distribution',
+                'distributionType': 'exponential',
+                'distributionParams': {'scale': 2.0}
             },
             {
-                'column_name': 'fixed_id',
-                'data_type': 'fixed',
-                'fixed_value': 1
+                'columnName': 'fixed_id',
+                'dataType': 'fixed',
+                'fixedValue': 1
             }
         ]
 
@@ -158,9 +158,9 @@ class TestCreateSimulationDataTable(APITestCase):
             'tableName': 'existing_table',
             'tableNumberOfRows': 10,
             'columnSettings': [{
-                'column_name': 'test_col',
-                'data_type': 'fixed',
-                'fixed_value': 1
+                'columnName': 'test_col',
+                'dataType': 'fixed',
+                'fixedValue': 1
             }]
         }
         self.client.post(
@@ -174,9 +174,9 @@ class TestCreateSimulationDataTable(APITestCase):
             'tableName': 'existing_table',
             'tableNumberOfRows': 10,
             'columnSettings': [{
-                'column_name': 'test_col2',
-                'data_type': 'fixed',
-                'fixed_value': 2
+                'columnName': 'test_col2',
+                'dataType': 'fixed',
+                'fixedValue': 2
             }]
         }
 
@@ -195,9 +195,9 @@ class TestCreateSimulationDataTable(APITestCase):
             'tableName': 'test_table',
             'tableNumberOfRows': 0,  # 無効な行数
             'columnSettings': [{
-                'column_name': 'test_col',
-                'data_type': 'fixed',
-                'fixed_value': 1
+                'columnName': 'test_col',
+                'dataType': 'fixed',
+                'fixedValue': 1
             }]
         }
 
@@ -233,9 +233,9 @@ class TestCreateSimulationDataTable(APITestCase):
             'tableName': 'test_table',
             'tableNumberOfRows': 10,
             'columnSettings': [{
-                'data_type': 'fixed',
-                'fixed_value': 1
-                # 'column_name' が不足
+                'dataType': 'fixed',
+                'fixedValue': 1
+                # 'columnName' が不足
             }]
         }
 
@@ -254,9 +254,9 @@ class TestCreateSimulationDataTable(APITestCase):
             'tableName': 'test_table',
             'tableNumberOfRows': 10,
             'columnSettings': [{
-                'column_name': 'test_col',
-                'data_type': 'invalid_type',  # 無効なデータタイプ
-                'fixed_value': 1
+                'columnName': 'test_col',
+                'dataType': 'invalid_type',  # 無効なデータタイプ
+                'fixedValue': 1
             }]
         }
 
@@ -275,10 +275,10 @@ class TestCreateSimulationDataTable(APITestCase):
             'tableName': 'test_table',
             'tableNumberOfRows': 10,
             'columnSettings': [{
-                'column_name': 'test_col',
-                'data_type': 'distribution',
-                'distribution_type': 'normal'
-                # 'distribution_params' が不足
+                'columnName': 'test_col',
+                'dataType': 'distribution',
+                'distributionType': 'normal'
+                # 'distributionParams' が不足
             }]
         }
 
@@ -297,9 +297,9 @@ class TestCreateSimulationDataTable(APITestCase):
             'tableName': 'test_table',
             'tableNumberOfRows': 10,
             'columnSettings': [{
-                'column_name': 'test_col',
-                'data_type': 'fixed'
-                # 'fixed_value' が不足
+                'columnName': 'test_col',
+                'dataType': 'fixed'
+                # 'fixedValue' が不足
             }]
         }
 
@@ -318,10 +318,10 @@ class TestCreateSimulationDataTable(APITestCase):
             'tableName': 'test_table',
             'tableNumberOfRows': 10,
             'columnSettings': [{
-                'column_name': 'test_col',
-                'data_type': 'distribution',
-                'distribution_type': 'invalid_distribution',  # 無効な分布タイプ
-                'distribution_params': {'param1': 1}
+                'columnName': 'test_col',
+                'dataType': 'distribution',
+                'distributionType': 'invalid_distribution',  # 無効な分布タイプ
+                'distributionParams': {'param1': 1}
             }]
         }
 
@@ -340,10 +340,10 @@ class TestCreateSimulationDataTable(APITestCase):
             'tableName': 'test_table',
             'tableNumberOfRows': 10,
             'columnSettings': [{
-                'column_name': 'test_col',
-                'data_type': 'distribution',
-                'distribution_type': 'normal',
-                'distribution_params': {'invalid_param': 1}  # 無効なパラメータ
+                'columnName': 'test_col',
+                'dataType': 'distribution',
+                'distributionType': 'normal',
+                'distributionParams': {'invalidParam': 1}  # 無効なパラメータ
             }]
         }
 

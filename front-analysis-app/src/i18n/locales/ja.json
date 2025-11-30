@@ -85,6 +85,7 @@
     "Distribution": "確率分布",
     "InputDistributionParameters": "を入力してください。",
     "Parameters": "パラメータ",
+    "CreatingTable": "シミュレーションデータテーブルを作成",
     "Submit": "テーブルを作成"
   },
   "ImportFileModal": {
@@ -141,5 +142,30 @@
     "IntegerMore0": "0以上の整数で入力してください。",
     "UnexpectedError": "予期せぬエラーが発生しました。",
     "Unknown": "不明なエラーです。"
+  },
+  "ValidationMessages": {
+    "TableNameRequired": "テーブル名を入力してください。",
+    "NumRowsRequired": "行数を入力してください。",
+    "NumRowsInteger": "行数は整数で入力してください。",
+    "NumRowsMoreThan0": "行数は0以上の整数で入力してください。",
+    "AtLeastOneColumn": "少なくとも1つの列を追加してください。",
+    "ColumnNameRequired": "列名を入力してください。",
+    "FixedValueRequired": "固定値を入力してください。",
+    "FixedValueNumber": "固定値は数値で入力してください。",
+    "UniformParamLowHigh": "一様分布の最小値は最大値より小さくなければなりません。",
+    "ExponentialParamRate": "レートパラメータは正の数でなければなりません。",
+    "NormalParamStdDev": "標準偏差は正の数でなければなりません。",
+    "GammaParamShape": "形状パラメータは正の数でなければなりません。",
+    "GammaParamScale": "尺度パラメータは正の数でなければなりません。",
+    "BetaParamAlpha": "αパラメータは正の数でなければなりません。",
+    "BetaParamBeta": "βパラメータは正の数でなければなりません。",
+    "WeibullParamShape": "形状パラメータは正の数でなければなりません。",
+    "WeibullParamScale": "尺度パラメータは正の数でなければなりません。",
+    "LognormalParamLogStdDev": "対数標準偏差は正の数でなければなりません。",
+    "BinomialParamTrials": "試行回数は0以上の整数でなければなりません。",
+    "BinomialParamProbability": "成功確率は0から1の間の数でなければなりません。",
+    "HypergeometricParamPopulationSize": "母集団サイズは0以上の整数でなければなりません。",
+    "HypergeometricParamNumberOfSuccesses": "成功数は0以上の整数でなければなりません。",
+    "HypergeometricParamSampleSize": "標本サイズは0以上の整数でなければなりません。"
   }
 }
