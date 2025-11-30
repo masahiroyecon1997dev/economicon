@@ -4,7 +4,7 @@ export type ResGetSettingsType = {
   code: string;
   result: SettingsType;
   message: string;
-}
+};
 
 export type ResGetFilesType = {
   code: string;
@@ -56,6 +56,24 @@ export type ResGetColumnInfoType = {
 export type ResFetchDataToJsonType = {
   code: string;
   result: { tableName: string; data: string };
+  message: string;
+};
+
+export type ReqCreateSimulationDataTableType = {
+  tableName: string;
+  tableNumberOfRows: number;
+  columnSettings: Array<{
+    columnName: string;
+    dataType: "fixed" | "distribution";
+    fixedValue?: string | number;
+    distributionType?: string;
+    distributionParams?: Record<string, number>;
+  }>;
+};
+
+export type ResCreateSimulationDataTableType = {
+  code: string;
+  result: { tableName: string };
   message: string;
 };
 

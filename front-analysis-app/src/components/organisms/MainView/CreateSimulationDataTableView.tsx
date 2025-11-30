@@ -3,7 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DISTRIBUTION_OPTIONS } from "../../../common/constant";
-import axios from "../../../configs/axios";
+import { createSimulationDataTable } from "../../../function/restApis";
+import { validateColumnName, validateDistributionParam, validateNumRows, validateTableName } from "../../../function/validationFunctions";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useErrorDialogStore } from "../../../stores/useErrorDialogStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
@@ -19,30 +20,34 @@ export const CreateSimulationDataTableView = () => {
   const { setCurrentView } = useCurrentViewStore();
   const { showErrorDialog } = useErrorDialogStore();
   const { setLoading, clearLoading } = useLoadingStore();
-
+  const COLUMN_SETTINGS_DEFAULT: SimulationColumnSetting = {
+    id: '1',
+    columnName: '',
+    dataType: 'distribution',
+    distributionType: 'uniform',
+    distributionParams: { low: 0, high: 10 },
+    fixedValue: '',
+    errorMessage: { columnName: undefined, distributionParams: undefined, fixedValue: undefined },
+  };
+  const errorMessageInitial = {
+    tableName: undefined,
+    numRows: undefined,
+  }
   const [tableName, setTableName] = useState('');
   const [numRows, setNumRows] = useState<number>(1000);
   const [columns, setColumns] = useState<SimulationColumnSetting[]>([
-    {
-      id: '1',
-      column_name: '',
-      data_type: 'distribution',
-      distribution_type: 'uniform',
-      distribution_params: { low: 0, high: 10 }
-    }
+    COLUMN_SETTINGS_DEFAULT
   ]);
   const [errorMessage, setErrorMessage] = useState<
     {
-      tableName: string | null,
-      numRows: string | null,
-    }>();
+      tableName: string | undefined,
+      numRows: string | undefined,
+    }>(errorMessageInitial);
+
   const addColumn = () => {
     const newColumn: SimulationColumnSetting = {
+      ...COLUMN_SETTINGS_DEFAULT,
       id: Date.now().toString(),
-      column_name: '',
-      data_type: 'distribution',
-      distribution_type: 'uniform',
-      distribution_params: { low: 0, high: 10 }
     };
     setColumns([...columns, newColumn]);
   };
@@ -59,17 +64,17 @@ export const CreateSimulationDataTableView = () => {
 
   const handleDataTypeChange = (id: string, dataType: 'distribution' | 'fixed') => {
     const updates: Partial<SimulationColumnSetting> = {
-      data_type: dataType,
+      dataType: dataType,
     };
 
     if (dataType === 'distribution') {
-      updates.distribution_type = 'uniform';
-      updates.distribution_params = { low: 0, high: 10 };
-      delete updates.fixed_value;
+      updates.distributionType = 'uniform';
+      updates.distributionParams = { low: 0, high: 10 };
+      delete updates.fixedValue;
     } else {
-      updates.fixed_value = '';
-      delete updates.distribution_type;
-      delete updates.distribution_params;
+      updates.fixedValue = '';
+      delete updates.distributionType;
+      delete updates.distributionParams;
     }
 
     updateColumn(id, updates);
@@ -84,108 +89,130 @@ export const CreateSimulationDataTableView = () => {
       switch (param) {
         case 'low': defaultParams[param] = 0; break;
         case 'high': defaultParams[param] = 10; break;
-        case 'loc': defaultParams[param] = 0; break;
-        case 'scale': defaultParams[param] = 1; break;
         case 'mean': defaultParams[param] = 0; break;
-        case 'sigma': defaultParams[param] = 1; break;
-        case 'shape': defaultParams[param] = 2; break;
-        case 'a': defaultParams[param] = 1; break;
-        case 'b': defaultParams[param] = 1; break;
-        case 'n': defaultParams[param] = 10; break;
-        case 'p': defaultParams[param] = 0.5; break;
-        case 'lam': defaultParams[param] = 1; break;
-        case 'K': defaultParams[param] = 5; break;
-        case 'N': defaultParams[param] = 20; break;
+        case 'deviation': defaultParams[param] = 1; break;
+        case 'rate': defaultParams[param] = 1; break;
+        case 'scale': defaultParams[param] = 1; break;
+        case 'alpha': defaultParams[param] = 2; break;
+        case 'beta': defaultParams[param] = 2; break;
+        case 'logMean': defaultParams[param] = 0; break;
+        case 'logSD': defaultParams[param] = 1; break;
+        case 'trials': defaultParams[param] = 10; break;
+        case 'probability': defaultParams[param] = 0.5; break;
+        case 'populationSize': defaultParams[param] = 20; break;
+        case 'numberOfSuccesses': defaultParams[param] = 5; break;
+        case 'sampleSize': defaultParams[param] = 10; break;
         default: defaultParams[param] = 1;
       }
     });
 
     updateColumn(id, {
-      distribution_type: distributionType,
-      distribution_params: defaultParams
+      distributionType: distributionType,
+      distributionParams: defaultParams
     });
   };
 
   const handleDistributionParamChange = (id: string, param: string, value: number) => {
     const column = columns.find(col => col.id === id);
-    if (!column?.distribution_params) return;
+    if (!column?.distributionParams) return;
 
     updateColumn(id, {
-      distribution_params: {
-        ...column.distribution_params,
+      distributionParams: {
+        ...column.distributionParams,
         [param]: value
       }
     });
   };
 
-  const validateForm = (): string | null => {
-    if (!tableName.trim()) {
-      return 'テーブル名を入力してください。';
-    }
-
-    if (numRows <= 0) {
-      return '行数は1以上の整数を入力してください。';
-    }
-
-    if (columns.length === 0) {
-      return '少なくとも1つの列を追加してください。';
-    }
-
-    for (const column of columns) {
-      if (!column.column_name.trim()) {
-        return 'すべての列に名前を入力してください。';
+  const validateInput = (): boolean => {
+    let newValidateError = {
+      tableName: validateTableName(tableName),
+      numRows: validateNumRows(numRows),
+    };
+    setErrorMessage(newValidateError);
+    let newColumns = structuredClone(columns);
+    let columnErrorsExist = false;
+    newColumns.map(col => {
+      const columnError = validateColumnName(col.columnName);
+      const paramsError = validateDistributionParam(col.distributionType, col.distributionParams);
+      if (columnError !== undefined || paramsError !== undefined) {
+        columnErrorsExist = true;
       }
-
-      if (column.data_type === 'fixed' && (column.fixed_value === '' || column.fixed_value === undefined)) {
-        return `列「${column.column_name}」の固定値を入力してください。`;
-      }
-
-      if (column.data_type === 'distribution' && !column.distribution_params) {
-        return `列「${column.column_name}」の分布パラメータを設定してください。`;
-      }
+      return {
+        ...col,
+        errorMessage: {
+          columnName: columnError,
+          distributionParams: paramsError,
+          fixedValue: undefined,
+        }
+      };
+    });
+    setColumns(newColumns);
+    const topLevelErrorExists = Object.values(newValidateError).some(error => error !== undefined);
+    // 一つでもエラーがあれば false を返す
+    if (topLevelErrorExists || columnErrorsExist) {
+      return false;
     }
-
-    // 列名の重複チェック
-    const columnNames = columns.map(col => col.column_name.trim());
-    const duplicateNames = columnNames.filter((name, index) => columnNames.indexOf(name) !== index);
-    if (duplicateNames.length > 0) {
-      return `列名が重複しています: ${duplicateNames.join(', ')}`;
-    }
-
-    return null;
+    // エラーが一つもなければ true を返す
+    return true;
   };
 
   const handleSubmit = async () => {
-    const validationError = validateForm();
-    if (validationError) {
-      await showErrorDialog('入力エラー', validationError);
+    if (!validateInput()) {
+      await showErrorDialog(t('Error.Error'), t('CreateSimulationDataTableView.FixValidationErrors'));
       return;
     }
-
-    setLoading(true, 'シミュレーションデータテーブルを作成中...');
+    setLoading(true, t('CreateSimulationDataTableView.CreatingTable'));
 
     try {
-      const columnSettings = columns.map(col => ({
-        column_name: col.column_name.trim(),
-        data_type: col.data_type,
-        ...(col.data_type === 'distribution' ? {
-          distribution_type: col.distribution_type,
-          distribution_params: col.distribution_params
-        } : {
-          fixed_value: col.fixed_value
-        })
-      }));
-
-      const response = await axios.post('/create-simulation-data-table', {
-        tableName: tableName.trim(),
-        tableNumberOfRows: numRows,
-        columnSettings
+      const columnSettings = columns.map(col => {
+        if (col.dataType === 'distribution') {
+          const distributionParams: Record<string, number> = {};
+          switch (col.distributionType) {
+            case 'uniform':
+              distributionParams['low'] = col.distributionParams?.low;
+              distributionParams['high'] = col.distributionParams?.high;
+              break;
+            case 'normal':
+              distributionParams['loc'] = col.distributionParams?.mean;
+              distributionParams['scale'] = col.distributionParams?.deviation;
+              break;
+            case 'exponential':
+            case 'lognormal':
+            case 'poisson':
+            case 'binomial':
+            case 'hypergeometric':
+            case 'negativeBinomial':
+              break;
+            default:
+          }
+          return {
+            columnName: col.columnName.trim(),
+            dataType: col.dataType,
+            distributionType: col.distributionType,
+            distributionParams: col.distributionParams,
+          }
+        } else {
+          return {
+            columnName: col.columnName.trim(),
+            dataType: col.dataType,
+            fixedValue: col.fixedValue,
+          }
+        }
       });
 
-      if (response.data.code === 'OK') {
+      const requestBody = {
+        tableName: tableName.trim(),
+        tableNumberOfRows: numRows,
+        columnSettings: columnSettings
+      };
+
+      const response = await createSimulationDataTable(requestBody);
+
+      if (response.code === 'OK') {
         setCurrentView('dataPreview');
       } else {
-        await showErrorDialog('エラー', response.data.message || 'テーブルの作成に失敗しました。');
+        await showErrorDialog('エラー', response.message || 'テーブルの作成に失敗しました。');
       }
     } catch (error) {
       console.error('Table creation error:', error);
@@ -219,6 +246,7 @@ export const CreateSimulationDataTableView = () => {
                 value={tableName}
                 change={(e) => setTableName(e.target.value)}
                 placeholder={t("CreateSimulationDataTableView.TableNamePlaceholder")}
+                error={errorMessage.tableName}
               />
             </FormField>
 
@@ -232,6 +260,7 @@ export const CreateSimulationDataTableView = () => {
                 value={numRows.toString()}
                 change={(e) => setNumRows(parseInt(e.target.value) || 0)}
                 placeholder="1000"
+                error={errorMessage.numRows}
               />
             </FormField>
           </div>
@@ -244,7 +273,7 @@ export const CreateSimulationDataTableView = () => {
               className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-4 py-2 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary cursor-pointer"
             >
               <span className="material-symbols-outlined text-base"><FontAwesomeIcon icon={faPlus} /></span>
-              列を追加
+              {t("CreateSimulationDataTableView.AddColumn")}
             </button>
           </div>
           <div className="space-y-4 overflow-y-auto max-h-64">
@@ -260,6 +289,7 @@ export const CreateSimulationDataTableView = () => {
                 onDistributionParamChange={handleDistributionParamChange}
                 onRemove={removeColumn}
                 canRemove={columns.length > 1}
+                error={column.errorMessage}
               />
             ))}
           </div>
