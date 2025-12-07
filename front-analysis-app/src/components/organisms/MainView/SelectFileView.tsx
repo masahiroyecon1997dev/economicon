@@ -156,11 +156,14 @@ export const SelectFileView = () => {
             return;
           }
           loadTableName = response.result.tableName;
+        } else {
+          await showErrorDialog(t('Error.Error'), t('SelectFileView.UnsupportedFileType'));
         }
         const resTableInfo = await getTableInfo(loadTableName);
         addTableInfo(resTableInfo);
         setCurrentView("dataPreview");
       } catch (error) {
+        clearLoading();
         await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
       } finally {
         clearLoading();
