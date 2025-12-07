@@ -141,7 +141,8 @@
     "MaxLength20": "20文字以内で入力してください。",
     "IntegerMore0": "0以上の整数で入力してください。",
     "UnexpectedError": "予期せぬエラーが発生しました。",
-    "Unknown": "不明なエラーです。"
+    "Unknown": "不明なエラーです。",
+    "UnsupportedFileType": "サポートされていないファイル形式です。"
   },
   "ValidationMessages": {
     "TableNameRequired": "テーブル名を入力してください。",

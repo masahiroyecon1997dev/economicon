@@ -3,11 +3,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DISTRIBUTION_OPTIONS } from "../../../common/constant";
+import { getTableInfo } from "../../../function/internalFunctions";
 import { createSimulationDataTable } from "../../../function/restApis";
 import { validateColumnName, validateDistributionParam, validateNumRows, validateTableName } from "../../../function/validationFunctions";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useErrorDialogStore } from "../../../stores/useErrorDialogStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
+import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import type { DistributionType, SimulationColumnSetting } from "../../../types/commonTypes";
 import { CancelButton } from "../../atoms/Button/CancelButton";
 import { SubmitButton } from "../../atoms/Button/SubmitButton";
@@ -17,9 +19,10 @@ import { SimulationColumnConfig } from "../Form/SimulationColumnConfig";
 
 export const CreateSimulationDataTableView = () => {
   const { t } = useTranslation();
-  const { setCurrentView } = useCurrentViewStore();
-  const { showErrorDialog } = useErrorDialogStore();
-  const { setLoading, clearLoading } = useLoadingStore();
+  const setCurrentView = useCurrentViewStore(state => state.setCurrentView);
+  const showErrorDialog = useErrorDialogStore(state => state.showErrorDialog);
+  const { setLoading, clearLoading } = useLoadingStore(state => ({ setLoading: state.setLoading, clearLoading: state.clearLoading }));
+  const addTableInfo = useTableInfosStore(state => state.addTableInfo);
   const COLUMN_SETTINGS_DEFAULT: SimulationColumnSetting = {
     id: '1',
     columnName: '',
@@ -173,24 +176,55 @@ export const CreateSimulationDataTableView = () => {
               distributionParams['low'] = col.distributionParams?.low;
               distributionParams['high'] = col.distributionParams?.high;
               break;
+            case 'exponential':
+              distributionParams['scale'] = col.distributionParams?.rate;
+              break;
             case 'normal':
               distributionParams['loc'] = col.distributionParams?.mean;
               distributionParams['scale'] = col.distributionParams?.deviation;
               break;
-            case 'exponential':
+            case 'gamma':
+              distributionParams['shape'] = col.distributionParams?.shape;
+              distributionParams['scale'] = col.distributionParams?.scale;
+              break;
+            case 'beta':
+              distributionParams['a'] = col.distributionParams?.alpha;
+              distributionParams['b'] = col.distributionParams?.beta;
+              break;
+            case 'weibull':
+              distributionParams['a'] = col.distributionParams?.shape;
+              distributionParams['scale'] = col.distributionParams?.scale;
+              break;
             case 'lognormal':
-            case 'poisson':
+              distributionParams['mean'] = col.distributionParams?.logMean;
+              distributionParams['sigma'] = col.distributionParams?.logSD;
+              break;
             case 'binomial':
+              distributionParams['n'] = col.distributionParams?.trials;
+              distributionParams['p'] = col.distributionParams?.probability;
+              break;
+            case 'bernoulli':
+              distributionParams['p'] = col.distributionParams?.probability;
+              break;
+            case 'poisson':
+              distributionParams['lam'] = col.distributionParams?.lambda;
+              break;
+            case 'geometric':
+              distributionParams['p'] = col.distributionParams?.probability;
+              break;
             case 'hypergeometric':
-            case 'negativeBinomial':
+              distributionParams['N'] = col.distributionParams?.populationSize;
+              distributionParams['K'] = col.distributionParams?.numberOfSuccesses;
+              distributionParams['n'] = col.distributionParams?.sampleSize;
               break;
             default:
+              break;
           }
           return {
             columnName: col.columnName.trim(),
             dataType: col.dataType,
             distributionType: col.distributionType,
-            distributionParams: col.distributionParams,
+            distributionParams: distributionParams,
           }
         } else {
           return {
@@ -210,13 +244,15 @@ export const CreateSimulationDataTableView = () => {
       const response = await createSimulationDataTable(requestBody);
 
       if (response.code === 'OK') {
+        const resTableInfo = await getTableInfo(response.result.tableName);
         setCurrentView('dataPreview');
+        addTableInfo(resTableInfo);
       } else {
-        await showErrorDialog('エラー', response.message || 'テーブルの作成に失敗しました。');
+        await showErrorDialog(t('Error.Error'), response.message || t('CreateSimulationDataTableView.TableCreationFailed'));
       }
     } catch (error) {
       console.error('Table creation error:', error);
-      await showErrorDialog('エラー', 'テーブルの作成中にエラーが発生しました。');
+      await showErrorDialog(t('Error.Error'), t('CreateSimulationDataTableView.TableCreationError'));
     } finally {
       clearLoading();
     }

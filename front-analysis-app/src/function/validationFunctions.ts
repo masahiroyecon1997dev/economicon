@@ -33,7 +33,7 @@ export const validateDistributionParam = (
   params: Record<string, number>
 ): Record<string, string | undefined> | undefined => {
   switch (distributionType) {
-    case "Uniform":
+    case "uniform":
       if (params["low"] >= params["high"]) {
         return {
           low: "ValidationMessages.UniformParamLowHigh",
@@ -41,17 +41,17 @@ export const validateDistributionParam = (
         };
       }
       return undefined;
-    case "Exponential":
+    case "exponential":
       if (Number(params["rate"]) <= 0) {
         return { rate: "ValidationMessages.ExponentialParamRate" };
       }
       return undefined;
-    case "Normal":
+    case "normal":
       if (params["deviation"] <= 0) {
         return { deviation: "ValidationMessages.NormalParamStdDeviation" };
       }
       return undefined;
-    case "Gamma":
+    case "gamma":
       let gammaResult = undefined as
         | Record<string, string | undefined>
         | undefined;
@@ -68,7 +68,7 @@ export const validateDistributionParam = (
         };
       }
       return gammaResult;
-    case "Beta":
+    case "beta":
       let betaResult = undefined as
         | Record<string, string | undefined>
         | undefined;
@@ -102,7 +102,7 @@ export const validateDistributionParam = (
         };
       }
       return weibullResult;
-    case "Lognormal":
+    case "lognormal":
       if (params["logSD"] <= 0) {
         return { logSD: "ValidationMessages.LognormalParamLogStdDeviation" };
       }
@@ -124,6 +124,11 @@ export const validateDistributionParam = (
         };
       }
       return binomialErrors;
+    case "bernoulli":
+      if (params["probability"] < 0 || params["probability"] > 1) {
+        return { probability: "ValidationMessages.BernoulliParamProbability" };
+      }
+      return undefined;
     case "poisson":
       if (params["lambda"] <= 0) {
         return { lambda: "ValidationMessages.PoissonParamLambda" };

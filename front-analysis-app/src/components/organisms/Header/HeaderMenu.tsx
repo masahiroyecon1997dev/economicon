@@ -52,10 +52,6 @@ export const HeaderMenu = () => {
     setIsSaveFileModal(false);
   }
 
-  const openGenerateDataModal = () => {
-    setGenerateSimulationDataModal(true);
-  }
-
   const closeGenerateDataModal = () => {
     setGenerateSimulationDataModal(false);
   }
