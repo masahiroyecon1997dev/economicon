@@ -14,3 +14,4 @@ fastexcel==0.14.0
 xlsxwriter==3.2.5
 coverage==7.10.0
 PyYAML==6.0.3
+pyinstaller==6.17.0

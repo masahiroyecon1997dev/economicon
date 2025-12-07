@@ -7,8 +7,6 @@ export const LinearRegressionFormView = () => {
   const tableList = useTableListStore((state) => state.tableList);
   const [columnList, setColumnList] = useState<ColumnType[]>([]);
   const [selectedTableName, setSelectedTableName] = useState<string>("");
-  const [dependentVariable, setDependentVariable] = useState<string>("");
-  const [independentVariables, setIndependentVariables] = useState<string[]>([]);
 
 
 
@@ -92,19 +90,6 @@ export const LinearRegressionFormView = () => {
           <div className="mt-6">
             <label className="mb-2 block text-sm font-medium text-text-main">Selected Independent Variables:</label>
             <div className="flex flex-wrap gap-2 rounded-lg border border-border-color bg-secondary p-3 min-h-[44px]">
-              {independentVariables.map((variable, index) => (
-                <span
-                  className="flex items-center gap-1.5 rounded-full bg-accent/20 px-3 py-1 text-sm font-medium text-accent">
-                  {variable}
-                  <button
-                    className="text-accent/70 hover:text-accent">
-                    <span
-                      className="material-symbols-outlined !text-base">
-                      close
-                    </span>
-                  </button>
-                </span>
-              ))}
             </div>
           </div>
         </div>

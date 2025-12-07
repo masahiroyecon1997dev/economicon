@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from pathlib import Path
+import mimetypes
 import os
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -219,3 +220,7 @@ LOGGING = {
         'level': 'WARNING',
     }
 }
+
+# JavaScriptファイルのMIMEタイプを設定（既存の設定に追加）
+# 'application/javascript' が推奨されていますが、環境によっては 'text/javascript' が必要な場合もあります。
+mimetypes.add_type("application/javascript", ".js", True)
