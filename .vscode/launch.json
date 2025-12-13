@@ -14,7 +14,7 @@
       "name": "Launch Chrome against localhost",
       "type": "chrome",
       "request": "launch",
-      "preLaunchTask": "yarn: start",
+      "preLaunchTask": "pnpm: start",
       "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}/front-analysis-app",
       "sourceMaps": true,
