@@ -3,8 +3,8 @@
   "tasks": [
     {
       "type": "shell",
-      "command": "cd front-analysis-app && yarn run dev",
-      "label": "yarn: start",
+      "command": "cd front-analysis-app && pnpm run dev",
+      "label": "pnpm: start",
       "detail": "start-dev-server",
       "group": {
         "kind": "test",
