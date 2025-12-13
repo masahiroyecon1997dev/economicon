@@ -26,7 +26,7 @@ Write-Host "--- 1. Reactのビルドを開始 ---" -ForegroundColor Cyan
 try {
     # Reactプロジェクトディレクトリに移動し、ビルドを実行
     Set-Location $ReactRootDir
-    yarn build
+    pnpm build
     Set-Location $PSScriptRoot # スクリプト実行ディレクトリに戻る
 } catch {
     Write-Host "❌ ビルド中にエラーが発生しました。" -ForegroundColor Red
