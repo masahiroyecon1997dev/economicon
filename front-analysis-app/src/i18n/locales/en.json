@@ -5,6 +5,8 @@
     "Error": "Error",
     "UnexpectedError": "An unexpected error occurred.",
     "Table": "Table",
+    "OpenSideMenu": "Open Side Menu",
+    "CloseSideMenu": "Close Side Menu",
     "Constant": "Constant",
     "UniformDistribution": "Uniform Distribution",
     "NomalDistribution": "Normal Distribution"
@@ -24,5 +26,18 @@
     "FileNameHeader": "File Name",
     "SizeHeader": "Size",
     "LastModifiedHeader": "Last Modified"
+  },
+  "SaveDataView": {
+    "Title": "Save Data",
+    "Description": "Save table '{{tableName}}'.",
+    "FileSettings": "File Settings",
+    "FileName": "File Name",
+    "FileNamePlaceholder": "Enter file name",
+    "FileFormat": "File Format",
+    "SelectDirectory": "Select Save Directory",
+    "Save": "Save",
+    "SavingFile": "Saving file...",
+    "SaveSuccess": "File saved successfully: {{path}}",
+    "NoActiveTable": "No active table selected to save."
   }
 }

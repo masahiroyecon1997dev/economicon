@@ -10,6 +10,7 @@ import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useErrorDialogStore } from "../../../stores/useErrorDialogStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
+import { useTableListStore } from "../../../stores/useTableListStore";
 import type { DistributionType, SimulationColumnSetting } from "../../../types/commonTypes";
 import { CancelButton } from "../../atoms/Button/CancelButton";
 import { SubmitButton } from "../../atoms/Button/SubmitButton";
@@ -21,7 +22,9 @@ export const CreateSimulationDataTableView = () => {
   const { t } = useTranslation();
   const setCurrentView = useCurrentViewStore(state => state.setCurrentView);
   const showErrorDialog = useErrorDialogStore(state => state.showErrorDialog);
-  const { setLoading, clearLoading } = useLoadingStore(state => ({ setLoading: state.setLoading, clearLoading: state.clearLoading }));
+  const setLoading = useLoadingStore(state => state.setLoading);
+  const clearLoading = useLoadingStore(state => state.clearLoading);
+  const addTableName = useTableListStore(state => state.addTableName);
   const addTableInfo = useTableInfosStore(state => state.addTableInfo);
   const COLUMN_SETTINGS_DEFAULT: SimulationColumnSetting = {
     id: '1',
@@ -133,9 +136,8 @@ export const CreateSimulationDataTableView = () => {
       numRows: validateNumRows(numRows),
     };
     setErrorMessage(newValidateError);
-    let newColumns = structuredClone(columns);
     let columnErrorsExist = false;
-    newColumns.map(col => {
+    const newColumns = columns.map(col => {
       const columnError = validateColumnName(col.columnName);
       const paramsError = validateDistributionParam(col.distributionType, col.distributionParams);
       if (columnError !== undefined || paramsError !== undefined) {
@@ -162,7 +164,7 @@ export const CreateSimulationDataTableView = () => {
 
   const handleSubmit = async () => {
     if (!validateInput()) {
-      await showErrorDialog(t('Error.Error'), t('CreateSimulationDataTableView.FixValidationErrors'));
+      await showErrorDialog(t('Error.Error'), t('ValidationMessages.FixValidationErrors'));
       return;
     }
     setLoading(true, t('CreateSimulationDataTableView.CreatingTable'));
@@ -245,13 +247,13 @@ export const CreateSimulationDataTableView = () => {
 
       if (response.code === 'OK') {
         const resTableInfo = await getTableInfo(response.result.tableName);
-        setCurrentView('dataPreview');
+        setCurrentView('DataPreview');
+        addTableName(response.result.tableName);
         addTableInfo(resTableInfo);
       } else {
         await showErrorDialog(t('Error.Error'), response.message || t('CreateSimulationDataTableView.TableCreationFailed'));
       }
     } catch (error) {
-      console.error('Table creation error:', error);
       await showErrorDialog(t('Error.Error'), t('CreateSimulationDataTableView.TableCreationError'));
     } finally {
       clearLoading();
@@ -259,88 +261,90 @@ export const CreateSimulationDataTableView = () => {
   };
 
   const handleCancel = () => {
-    setCurrentView('selectFile');
+    setCurrentView('SelectFile');
   };
   return (
-    <div className="mx-auto max-w-6xl overflow-y-auto max-h-full">
-      <div className="flex flex-wrap justify-between gap-3 items-center mb-2">
-        <h1 className="text-main dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">{t("CreateSimulationDataTableView.CreateNewDataTable")}</h1>
-      </div>
-      <p className="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal mb-8">
-        {t("CreateSimulationDataTableView.DefineYourTableNameAndRows")}
-      </p>
-      <div className="space-y-8">
-        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-lg border border-border-color dark:border-gray-700">
-          <h2 className="text-main dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] mb-6">{t("CreateSimulationDataTableView.TableSettings")}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              label={t("CreateSimulationDataTableView.TableName")}
-              htmlFor="table-name"
-            >
-              <InputText
-                id="table-name"
-                value={tableName}
-                change={(e) => setTableName(e.target.value)}
-                placeholder={t("CreateSimulationDataTableView.TableNamePlaceholder")}
-                error={errorMessage.tableName}
-              />
-            </FormField>
+    <div className="overflow-y-auto w-full max-h-full">
+      <div className="mx-auto max-w-6xl">
+        <div className="flex flex-wrap justify-between gap-3 items-center mb-2">
+          <h1 className="text-main dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">{t("CreateSimulationDataTableView.CreateNewDataTable")}</h1>
+        </div>
+        <p className="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal mb-8">
+          {t("CreateSimulationDataTableView.DefineYourTableNameAndRows")}
+        </p>
+        <div className="space-y-8">
+          <div className="bg-white dark:bg-gray-800/50 p-6 rounded-lg border border-border-color dark:border-gray-700">
+            <h2 className="text-main dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] mb-6">{t("CreateSimulationDataTableView.TableSettings")}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                label={t("CreateSimulationDataTableView.TableName")}
+                htmlFor="table-name"
+              >
+                <InputText
+                  id="table-name"
+                  value={tableName}
+                  change={(e) => setTableName(e.target.value)}
+                  placeholder={t("CreateSimulationDataTableView.TableNamePlaceholder")}
+                  error={errorMessage.tableName}
+                />
+              </FormField>
 
-            <FormField
-              label={t("CreateSimulationDataTableView.NumberOfRows")}
-              htmlFor="row-count"
+              <FormField
+                label={t("CreateSimulationDataTableView.NumberOfRows")}
+                htmlFor="row-count"
+              >
+                <InputText
+                  id="row-count"
+                  type="number"
+                  value={numRows.toString()}
+                  change={(e) => setNumRows(parseInt(e.target.value) || 0)}
+                  placeholder="1000"
+                  error={errorMessage.numRows}
+                />
+              </FormField>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800/50 p-6 rounded-lg border border-border-color dark:border-gray-700">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-main dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">列の設定</h2>
+              <button
+                onClick={addColumn}
+                className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-4 py-2 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base"><FontAwesomeIcon icon={faPlus} /></span>
+                {t("CreateSimulationDataTableView.AddColumn")}
+              </button>
+            </div>
+            <div className="space-y-4 overflow-y-auto max-h-64">
+              {columns.map((column, index) => (
+                <SimulationColumnConfig
+                  key={column.id}
+                  column={column}
+                  index={index}
+                  distributionOptions={DISTRIBUTION_OPTIONS}
+                  onUpdate={updateColumn}
+                  onDataTypeChange={handleDataTypeChange}
+                  onDistributionTypeChange={handleDistributionTypeChange}
+                  onDistributionParamChange={handleDistributionParamChange}
+                  onRemove={removeColumn}
+                  canRemove={columns.length > 1}
+                  error={column.errorMessage}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end items-center gap-4 pt-4">
+            <CancelButton
+              cancel={handleCancel}
             >
-              <InputText
-                id="row-count"
-                type="number"
-                value={numRows.toString()}
-                change={(e) => setNumRows(parseInt(e.target.value) || 0)}
-                placeholder="1000"
-                error={errorMessage.numRows}
-              />
-            </FormField>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-lg border border-border-color dark:border-gray-700">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-main dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">列の設定</h2>
-            <button
-              onClick={addColumn}
-              className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-4 py-2 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary cursor-pointer"
+              {t("Common.Cancel")}
+            </CancelButton>
+            <SubmitButton
+              submit={handleSubmit}
             >
-              <span className="material-symbols-outlined text-base"><FontAwesomeIcon icon={faPlus} /></span>
-              {t("CreateSimulationDataTableView.AddColumn")}
-            </button>
+              {t("CreateSimulationDataTableView.Submit")}
+            </SubmitButton>
           </div>
-          <div className="space-y-4 overflow-y-auto max-h-64">
-            {columns.map((column, index) => (
-              <SimulationColumnConfig
-                key={column.id}
-                column={column}
-                index={index}
-                distributionOptions={DISTRIBUTION_OPTIONS}
-                onUpdate={updateColumn}
-                onDataTypeChange={handleDataTypeChange}
-                onDistributionTypeChange={handleDistributionTypeChange}
-                onDistributionParamChange={handleDistributionParamChange}
-                onRemove={removeColumn}
-                canRemove={columns.length > 1}
-                error={column.errorMessage}
-              />
-            ))}
-          </div>
-        </div>
-        <div className="flex justify-end items-center gap-4 pt-4">
-          <CancelButton
-            cancel={handleCancel}
-          >
-            {t("Common.Cancel")}
-          </CancelButton>
-          <SubmitButton
-            submit={handleSubmit}
-          >
-            {t("CreateSimulationDataTableView.Submit")}
-          </SubmitButton>
         </div>
       </div>
     </div>

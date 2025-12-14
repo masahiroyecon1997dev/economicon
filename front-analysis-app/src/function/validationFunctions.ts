@@ -2,28 +2,28 @@ type ValidationResult = string | undefined;
 
 export const validateTableName = (tableName: string): ValidationResult => {
   if (!tableName.trim()) {
-    return "ValidationMessages.tableNameRequired";
+    return "ValidationMessages.TableNameRequired";
   }
   return undefined;
 };
 
 export const validateNumRows = (numRows: number): ValidationResult => {
   if (numRows < 1) {
-    return "ValidationMessages.numRowsMoreThan0";
+    return "ValidationMessages.NumRowsMoreThan0";
   }
   return undefined;
 };
 
 export const validateNumColumns = (numColumns: number): ValidationResult => {
   if (numColumns < 1) {
-    return "ValidationMessages.atLeastOneColumn";
+    return "ValidationMessages.AtLeastOneColumn";
   }
   return undefined;
 };
 
 export const validateColumnName = (columnName: string): ValidationResult => {
   if (!columnName.trim()) {
-    return "ValidationMessages.columnNameRequired";
+    return "ValidationMessages.ColumnNameRequired";
   }
   return undefined;
 };
@@ -114,13 +114,13 @@ export const validateDistributionParam = (
       if (params["trials"] <= 0) {
         binomialErrors = {
           ...binomialErrors,
-          trials: "ValidationMessages.BinomialParamTrialsProbability",
+          trials: "ValidationMessages.BinomialParamTrials",
         };
       }
       if (params["probability"] < 0 || params["probability"] > 1) {
         binomialErrors = {
           ...binomialErrors,
-          probability: "ValidationMessages.BinomialParamTrialsProbability",
+          probability: "ValidationMessages.BinomialParamProbability",
         };
       }
       return binomialErrors;

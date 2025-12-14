@@ -1,13 +1,18 @@
+import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTranslation } from "react-i18next";
 import { showErrorDialog } from "../../../function/errorDialog";
 import { getTableInfo } from "../../../function/internalFunctions";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
+import { useSideMenuStore } from "../../../stores/useSideMenuStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { SectionHeading } from "../../atoms/List/SectionHeading";
 import { TableNav } from "../../molecules/List/TableNav";
 
 export const LeftSideMenu = () => {
   const { t } = useTranslation();
+  const isOpen = useSideMenuStore((state) => state.isOpen);
+  const toggleSideMenu = useSideMenuStore((state) => state.toggleSideMenu);
   const tableInfos = useTableInfosStore((state) => state.tableInfos);
   const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
@@ -27,7 +32,7 @@ export const LeftSideMenu = () => {
         addTableInfo(tableInfo);
 
       }
-      setCurrentView("dataPreview");
+      setCurrentView("DataPreview");
     } catch (error) {
       const message = error instanceof Error ? error.message : t('Error.UnexpectedError');
       await showErrorDialog(t("Error.Error"), message);
@@ -35,12 +40,27 @@ export const LeftSideMenu = () => {
   }
 
   return (
-    <aside className="w-64 shrink-0 border-r border-brand-border bg-brand-primary p-4 text-white">
-      <SectionHeading title={t("Common.Table")} />
-      <TableNav
-        activeTableName={activeTableName}
-        onTableClick={clickTableName}
-      />
+    <aside className={`shrink-0 border-r border-brand-border bg-brand-primary text-white transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`}>
+      <div className="flex items-center p-4">
+        <button
+          onClick={toggleSideMenu}
+          className={`p-2 rounded-md hover:bg-white/10 transition-colors ${isOpen ? '' : 'mx-auto'}`}
+          aria-label={isOpen ? t("Common.CloseSideMenu") : t("Common.OpenSideMenu")}
+        >
+          <FontAwesomeIcon icon={faBars} className="text-xl" />
+        </button>
+      </div>
+      {isOpen && (
+        <>
+          <SectionHeading title={t("Common.Table")} />
+          <div className="px-4 pb-4">
+            <TableNav
+              activeTableName={activeTableName}
+              onTableClick={clickTableName}
+            />
+          </div>
+        </>
+      )}
     </aside>
   );
 }
