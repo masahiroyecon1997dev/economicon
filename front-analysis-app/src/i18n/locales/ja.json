@@ -70,8 +70,9 @@
   },
   "SaveDataView": {
     "Title": "データを保存",
-    "Description": "テーブル '{{tableName}}' を保存します。",
+    "Description": "保存するテーブルとファイル形式を選択してください。",
     "FileSettings": "ファイル設定",
+    "TableName": "保存するテーブル",
     "FileName": "ファイル名",
     "FileNamePlaceholder": "ファイル名を入力",
     "FileFormat": "ファイル形式",
@@ -79,7 +80,8 @@
     "Save": "保存",
     "SavingFile": "ファイルを保存中...",
     "SaveSuccess": "ファイルを保存しました: {{path}}",
-    "NoActiveTable": "保存するテーブルが選択されていません。"
+    "NoActiveTable": "保存するテーブルが選択されていません。",
+    "NoTablesImported": "テーブルが取り込まれていません。"
   },
   "CreateSimulationDataTableView": {
     "CreateNewDataTable": "新しいデータテーブルを作成",
