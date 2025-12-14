@@ -29,8 +29,9 @@
   },
   "SaveDataView": {
     "Title": "Save Data",
-    "Description": "Save table '{{tableName}}'.",
+    "Description": "Select the table and file format to save.",
     "FileSettings": "File Settings",
+    "TableName": "Table to Save",
     "FileName": "File Name",
     "FileNamePlaceholder": "Enter file name",
     "FileFormat": "File Format",
@@ -38,6 +39,7 @@
     "Save": "Save",
     "SavingFile": "Saving file...",
     "SaveSuccess": "File saved successfully: {{path}}",
-    "NoActiveTable": "No active table selected to save."
+    "NoActiveTable": "No active table selected to save.",
+    "NoTablesImported": "No tables have been imported."
   }
 }

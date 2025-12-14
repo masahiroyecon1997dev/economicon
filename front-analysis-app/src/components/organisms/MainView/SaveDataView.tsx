@@ -7,10 +7,13 @@ import { useFilesStore } from "../../../stores/useFilesStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
+import { useTableListStore } from "../../../stores/useTableListStore";
 import type { FileType, SortDirection, SortField } from "../../../types/commonTypes";
 import { InputText } from "../../atoms/Input/InputText";
 import { Select } from "../../atoms/Input/Select";
 import { SelectOption } from "../../atoms/Input/SelectOption";
+import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
+import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
 import { FormField } from "../../molecules/Form/FormField";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
@@ -25,16 +28,18 @@ export const SaveDataView = () => {
   const osName = useSettingsStore((state) => state.osName);
   const pathSeparator = useSettingsStore((state) => state.pathSeparator);
   const activeTableName = useTableInfosStore((state) => state.activeTableName);
+  const tableNameList = useTableListStore((state) => state.tableList);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
 
   const { setLoading, clearLoading } = useLoadingStore();
 
+  const [selectedTableName, setSelectedTableName] = useState(activeTableName || '');
   const [fileName, setFileName] = useState(activeTableName || '');
   const [fileFormat, setFileFormat] = useState<FileFormat>('csv');
   const [searchValue, setSearchValue] = useState("");
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-  const [errorMessage, setErrorMessage] = useState<{ fileName?: string }>({});
+  const [errorMessage, setErrorMessage] = useState<{ tableName?: string; fileName?: string }>({});
 
   const fileFormatOptions = [
     { value: 'csv', label: 'CSV (.csv)' },
@@ -121,7 +126,11 @@ export const SaveDataView = () => {
   };
 
   const validateInput = (): boolean => {
-    const errors: { fileName?: string } = {};
+    const errors: { tableName?: string; fileName?: string } = {};
+
+    if (!selectedTableName || selectedTableName.trim() === '') {
+      errors.tableName = t('ValidationMessages.TableNameRequired');
+    }
 
     if (!fileName || fileName.trim() === '') {
       errors.fileName = t('ValidationMessages.FileNameRequired');
@@ -149,7 +158,7 @@ export const SaveDataView = () => {
       return;
     }
 
-    if (!activeTableName) {
+    if (!selectedTableName) {
       await showErrorDialog(t('Error.Error'), t('SaveDataView.NoActiveTable'));
       return;
     }
@@ -166,7 +175,7 @@ export const SaveDataView = () => {
       switch (fileFormat) {
         case 'csv':
           response = await exportCsvByPath({
-            tableName: activeTableName,
+            tableName: selectedTableName,
             directoryPath: directoryPath,
             fileName: fullFileName,
             separator: ',',
@@ -174,7 +183,7 @@ export const SaveDataView = () => {
           break;
         case 'excel':
           response = await exportExcelByPath({
-            tableName: activeTableName,
+            tableName: selectedTableName,
             directoryPath: directoryPath,
             fileName: fullFileName,
             sheetName: 'Sheet1',
@@ -182,7 +191,7 @@ export const SaveDataView = () => {
           break;
         case 'parquet':
           response = await exportParquetByPath({
-            tableName: activeTableName,
+            tableName: selectedTableName,
             directoryPath: directoryPath,
             fileName: fullFileName,
           });
@@ -200,6 +209,10 @@ export const SaveDataView = () => {
     } finally {
       clearLoading();
     }
+  };
+
+  const hadleCancelNoTables = async () => {
+    setCurrentView('SelectFile');
   };
 
   const handleCancel = () => {
@@ -263,89 +276,118 @@ export const SaveDataView = () => {
 
   return (
     <div className="mx-auto w-full max-w-none px-4">
-      <div className="flex flex-col gap-8">
-        <header>
-          <h1 className="text-3xl font-bold text-black">{t("SaveDataView.Title")}</h1>
-          <p className="mt-2 text-base text-black/60">
-            {t("SaveDataView.Description", { tableName: activeTableName || '' })}
-          </p>
-        </header>
-
-        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-lg border border-border-color dark:border-gray-700">
-          <h2 className="text-main dark:text-white text-xl font-bold mb-4">{t("SaveDataView.FileSettings")}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              label={t("SaveDataView.FileName")}
-              htmlFor="file-name"
-            >
-              <InputText
-                id="file-name"
-                value={fileName}
-                change={(e) => setFileName(e.target.value)}
-                placeholder={t("SaveDataView.FileNamePlaceholder")}
-                error={errorMessage.fileName}
-              />
-            </FormField>
-
-            <FormField
-              label={t("SaveDataView.FileFormat")}
-              htmlFor="file-format"
-            >
-              <Select
-                id="file-format"
-                value={fileFormat}
-                onChange={(e) => setFileFormat(e.target.value as FileFormat)}
-              >
-                {fileFormatOptions.map(option => (
-                  <SelectOption key={option.value} value={option.value}>
-                    {t(`SaveDataView.${option.label.replace(/[^a-zA-Z]/g, '')}`)}
-                  </SelectOption>
-                ))}
-              </Select>
-            </FormField>
+      {tableNameList.length === 0 ? (
+        <div className="flex flex-col justify-center h-full gap-6">
+          <div className="text-left">
+            <h1 className="text-3xl font-bold text-black mb-4">{t("SaveDataView.Title")}</h1>
+            <p className="text-lg text-black/60">{t("SaveDataView.NoTablesImported")}</p>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <h2 className="text-xl font-bold text-black">{t("SaveDataView.SelectDirectory")}</h2>
-          <NavigationSearchBar
-            pathSegments={getPathSegments()}
-            searchValue={searchValue}
-            searchPlaceholder={t("SelectFileView.SearchPlaceholder")}
-            upDirectoryTitle={t('SelectFileView.GoUpDirectory')}
-            onUpDirectory={goUpDirectory}
-            onBreadcrumbClick={handleBreadcrumbClick}
-            onSearchChange={setSearchValue}
+          <CancelButtonBar
+            cancelText={t('Common.Cancel')}
+            onCancel={hadleCancelNoTables}
           />
         </div>
+      ) : (
+        <div className="flex flex-col gap-8">
+          <header>
+            <h1 className="text-3xl font-bold text-black">{t("SaveDataView.Title")}</h1>
+            <p className="mt-2 text-base text-black/60">{t("SaveDataView.Description")}</p>
+          </header>
 
-        <FileListTable
-          files={sortedFiles}
-          onFileClick={handleFileClick}
-          fileNameHeader={t('SelectFileView.FileNameHeader')}
-          sizeHeader={t('SelectFileView.SizeHeader')}
-          lastModifiedHeader={t('SelectFileView.LastModifiedHeader')}
-          maxHeight="400px"
-          sortField={sortField}
-          sortDirection={sortDirection}
-          onSort={handleSort}
-        />
+          <div className="flex flex-col gap-4 flex-1 min-h-0 overflow-y-auto">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-bold text-black">{t("SaveDataView.SelectDirectory")}</h2>
+              <NavigationSearchBar
+                pathSegments={getPathSegments()}
+                searchValue={searchValue}
+                searchPlaceholder={t("SelectFileView.SearchPlaceholder")}
+                upDirectoryTitle={t('SelectFileView.GoUpDirectory')}
+                onUpDirectory={goUpDirectory}
+                onBreadcrumbClick={handleBreadcrumbClick}
+                onSearchChange={setSearchValue}
+              />
+            </div>
 
-        <div className="flex justify-end items-center gap-4 pt-4">
-          <button
-            onClick={handleCancel}
-            className="rounded-md bg-gray-200 dark:bg-gray-700 px-6 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-          >
-            {t('Common.Cancel')}
-          </button>
-          <button
-            onClick={handleSave}
-            className="rounded-md bg-brand-primary px-6 py-2 text-sm font-medium text-white hover:bg-brand-primary-light transition-colors"
-          >
-            {t('SaveDataView.Save')}
-          </button>
+            <div className="flex-1 min-h-0">
+              <FileListTable
+                files={sortedFiles}
+                onFileClick={handleFileClick}
+                fileNameHeader={t('SelectFileView.FileNameHeader')}
+                sizeHeader={t('SelectFileView.SizeHeader')}
+                lastModifiedHeader={t('SelectFileView.LastModifiedHeader')}
+                maxHeight="200px"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+            </div>
+
+            <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700 flex-shrink-0">
+              <h2 className="text-main dark:text-white text-lg font-bold mb-3">{t("SaveDataView.FileSettings")}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  label={t("SaveDataView.TableName")}
+                  htmlFor="table-name"
+                >
+                  <Select
+                    id="table-name"
+                    value={selectedTableName}
+                    onChange={(e) => {
+                      setSelectedTableName(e.target.value);
+                      setFileName(e.target.value);
+                    }}
+                  >
+                    {tableNameList.map(tableName => (
+                      <SelectOption key={tableName} value={tableName}>
+                        {tableName}
+                      </SelectOption>
+                    ))}
+                  </Select>
+                </FormField>
+
+                <FormField
+                  label={t("SaveDataView.FileName")}
+                  htmlFor="file-name"
+                >
+                  <InputText
+                    id="file-name"
+                    value={fileName}
+                    change={(e) => setFileName(e.target.value)}
+                    placeholder={t("SaveDataView.FileNamePlaceholder")}
+                    error={errorMessage.fileName}
+                  />
+                </FormField>
+
+                <FormField
+                  label={t("SaveDataView.FileFormat")}
+                  htmlFor="file-format"
+                >
+                  <Select
+                    id="file-format"
+                    value={fileFormat}
+                    onChange={(e) => setFileFormat(e.target.value as FileFormat)}
+                  >
+                    {fileFormatOptions.map(option => (
+                      <SelectOption key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectOption>
+                    ))}
+                  </Select>
+                </FormField>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
+            <ActionButtonBar
+              cancelText={t('Common.Cancel')}
+              selectText={t('SaveDataView.Save')}
+              onCancel={handleCancel}
+              onSelect={handleSave}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
