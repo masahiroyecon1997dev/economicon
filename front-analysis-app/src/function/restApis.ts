@@ -80,6 +80,27 @@ export const createSimulationDataTable = async (
   return response.data;
 };
 
+export const exportCsvByPath = async (
+  requestBody: apiTypes.ReqExportCsvByPathType
+): Promise<apiTypes.ResExportCsvByPathType> => {
+  const response = await axios.post("/export-csv-by-path", requestBody);
+  return response.data;
+};
+
+export const exportExcelByPath = async (
+  requestBody: apiTypes.ReqExportExcelByPathType
+): Promise<apiTypes.ResExportExcelByPathType> => {
+  const response = await axios.post("/export-excel-by-path", requestBody);
+  return response.data;
+};
+
+export const exportParquetByPath = async (
+  requestBody: apiTypes.ReqExportParquetByPathType
+): Promise<apiTypes.ResExportParquetByPathType> => {
+  const response = await axios.post("/export-parquet-by-path", requestBody);
+  return response.data;
+};
+
 export const importCsv = async (
   file: File
 ): Promise<apiTypes.ResImportCsvType> => {
@@ -96,17 +117,12 @@ export const importCsv = async (
 export const outputCsv = async (
   tableName: string
 ): Promise<apiTypes.ResOutputCsvType> => {
-  try {
-    const response = await axios.get("/output_csv", {
-      params: {
-        tableName: tableName,
-      },
-    });
-    return response.data;
-  } catch (err) {
-    console.log(err);
-    return { code: -9999, result: { csvData: "error" }, message: "エラーです" };
-  }
+  const response = await axios.get("/output_csv", {
+    params: {
+      tableName: tableName,
+    },
+  });
+  return response.data;
 };
 
 export const generateSimulationData = async (

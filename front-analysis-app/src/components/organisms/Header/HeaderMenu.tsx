@@ -25,7 +25,11 @@ export const HeaderMenu = () => {
   const [isCalculateModal, setIsCalculateModal] = useState<boolean>(false);
 
   const showImportFileByPathView = () => {
-    setCurrentView("selectFile");
+    setCurrentView("SelectFile");
+  }
+
+  const showExportFileByPathView = () => {
+    setCurrentView("SaveData");
   }
 
   const showCreateSimulationDataTableView = () => {
@@ -42,10 +46,6 @@ export const HeaderMenu = () => {
 
   const closeImportFileByUploadModal = () => {
     setIsImportFileByUploadModal(false);
-  }
-
-  const openSaveFileModal = () => {
-    setIsSaveFileModal(true);
   }
 
   const closeSaveFileModal = () => {
@@ -85,7 +85,7 @@ export const HeaderMenu = () => {
     },
     {
       dropdownListName: t("HeaderMenu.FileSave"),
-      dropdownListFunction: openSaveFileModal,
+      dropdownListFunction: showExportFileByPathView,
     },
   ];
   const dataGenerationDropdownListElement = [

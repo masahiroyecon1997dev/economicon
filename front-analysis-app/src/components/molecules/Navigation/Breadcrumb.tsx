@@ -8,8 +8,8 @@ type BreadcrumbProps = {
 
 export function Breadcrumb({ segments, onSegmentClick }: BreadcrumbProps) {
   return (
-    <nav className="flex px-2 sm:px-3 md:px-5 py-2 sm:py-3 text-gray-700 border border-gray-200 rounded-lg bg-gray-50 min-w-0 max-w-full overflow-hidden" aria-label="Breadcrumb">
-      <div className="overflow-x-auto scrollbar-hide w-full">
+    <nav className="flex h-[42px] px-2 sm:px-3 md:px-5 text-gray-700 border border-gray-200 rounded-lg bg-gray-50 min-w-0 max-w-full overflow-hidden" aria-label="Breadcrumb">
+      <div className="overflow-x-auto scrollbar-hide w-full flex items-center">
         <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse whitespace-nowrap">
           {segments.map((segment, index) => (
             <li key={index} className="inline-flex items-center flex-shrink-0">

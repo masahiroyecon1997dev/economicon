@@ -1,58 +1,64 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { showErrorDialog } from "../../../function/errorDialog";
-import { getTableInfo } from "../../../function/internalFunctions";
-import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../../function/restApis";
+import { exportCsvByPath, exportExcelByPath, exportParquetByPath, getFiles } from "../../../function/restApis";
+import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useFilesStore } from "../../../stores/useFilesStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import type { FileType, SortDirection, SortField } from "../../../types/commonTypes";
-
-import { useTranslation } from "react-i18next";
-import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
+import { InputText } from "../../atoms/Input/InputText";
+import { Select } from "../../atoms/Input/Select";
+import { SelectOption } from "../../atoms/Input/SelectOption";
+import { FormField } from "../../molecules/Form/FormField";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
 
-export const SelectFileView = () => {
+type FileFormat = 'csv' | 'excel' | 'parquet';
+
+export const SaveDataView = () => {
   const { t } = useTranslation();
   const files = useFilesStore((state) => state.files);
   const directoryPath = useFilesStore((state) => state.directoryPath);
   const setFiles = useFilesStore((state) => state.setFiles);
   const osName = useSettingsStore((state) => state.osName);
   const pathSeparator = useSettingsStore((state) => state.pathSeparator);
-  const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
+  const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
 
-  // ローディング状態
   const { setLoading, clearLoading } = useLoadingStore();
 
-  // ローカル状態
+  const [fileName, setFileName] = useState(activeTableName || '');
+  const [fileFormat, setFileFormat] = useState<FileFormat>('csv');
   const [searchValue, setSearchValue] = useState("");
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [errorMessage, setErrorMessage] = useState<{ fileName?: string }>({});
 
-  // 現在のディレクトリパスを配列に分割してパンくずリストを作成
+  const fileFormatOptions = [
+    { value: 'csv', label: 'CSV (.csv)' },
+    { value: 'excel', label: 'Excel (.xlsx)' },
+    { value: 'parquet', label: 'Parquet (.parquet)' },
+  ];
+
   const getPathSegments = () => {
     if (!directoryPath) return [];
     const separator = pathSeparator || '/';
     return directoryPath.split(separator).filter(segment => segment.length > 0);
   };
 
-  // 指定したインデックスまでのパスを構築
   const buildPathUpToIndex = (index: number) => {
     const segments = getPathSegments();
     const separator = pathSeparator || '/';
 
     if (index < 0) {
-      // ルートディレクトリの場合
       return separator;
     }
 
     const selectedSegments = segments.slice(0, index + 1);
     let path = selectedSegments.join(separator);
 
-    // Windowsの場合のドライブレター対応
     if (osName === 'Windows') {
       path += separator;
     } else if (separator === '/') {
@@ -62,7 +68,6 @@ export const SelectFileView = () => {
     return path;
   };
 
-  // ディレクトリ変更関数
   const changeDirectory = async (newPath: string) => {
     setLoading(true, t("Loading.Loading"));
     try {
@@ -77,7 +82,8 @@ export const SelectFileView = () => {
     } finally {
       clearLoading();
     }
-  };  // 上位ディレクトリに移動
+  };
+
   const goUpDirectory = async () => {
     const segments = getPathSegments();
     if (segments.length > 0) {
@@ -86,16 +92,13 @@ export const SelectFileView = () => {
     }
   };
 
-  // パンくずリストのクリックハンドラー
   const handleBreadcrumbClick = async (index: number) => {
     const targetPath = buildPathUpToIndex(index);
     await changeDirectory(targetPath);
   };
 
-  // ファイル/ディレクトリのクリックハンドラー
   const handleFileClick = async (file: FileType) => {
     if (!file.isFile) {
-      // ディレクトリの場合は移動
       const separator = pathSeparator || '/';
       const newPath = directoryPath === separator
         ? separator + file.name
@@ -108,62 +111,8 @@ export const SelectFileView = () => {
           setFiles(response.result);
         } else {
           await showErrorDialog(t('Error.Error'), response.message);
-          return;
         }
       } catch (error) {
-        await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
-        return;
-      } finally {
-        clearLoading();
-      }
-    } else {
-      // ファイルの場合はインポート処理
-      setLoading(true, t("Loading.Loading"));
-      try {
-        let loadTableName = '';
-        if (file.name.toLowerCase().endsWith('.csv')) {
-          // CSVファイルの場合の処理
-          const response = await importCsvByPath({
-            filePath: directoryPath + '/' + file.name,
-            tableName: file.name.replace('.csv', ''),
-            separator: ',',
-          });
-          if (response.code !== "OK") {
-            await showErrorDialog(t('Error.Error'), response.message);
-            return;
-          }
-          loadTableName = response.result.tableName;
-        } else if (file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
-          // Excelファイルの場合の処理
-          const response = await importExcelByPath({
-            filePath: directoryPath + '/' + file.name,
-            tableName: file.name.replace(/\.(xlsx|xls)$/, ''),
-            sheetName: '',
-          });
-          if (response.code !== "OK") {
-            await showErrorDialog(t('Error.Error'), response.message);
-            return;
-          }
-          loadTableName = response.result.tableName;
-        } else if (file.name.toLowerCase().endsWith('.parquet')) {
-          // Parquetファイルの場合の処理
-          const response = await importParquetByPath({
-            filePath: directoryPath + '/' + file.name,
-            tableName: file.name.replace('.parquet', ''),
-          });
-          if (response.code !== "OK") {
-            await showErrorDialog(t('Error.Error'), response.message);
-            return;
-          }
-          loadTableName = response.result.tableName;
-        } else {
-          await showErrorDialog(t('Error.Error'), t('SelectFileView.UnsupportedFileType'));
-        }
-        const resTableInfo = await getTableInfo(loadTableName);
-        addTableInfo(resTableInfo);
-        setCurrentView("DataPreview");
-      } catch (error) {
-        clearLoading();
         await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
       } finally {
         clearLoading();
@@ -171,16 +120,100 @@ export const SelectFileView = () => {
     }
   };
 
-  // 検索とフィルターを適用したファイル一覧
+  const validateInput = (): boolean => {
+    const errors: { fileName?: string } = {};
+
+    if (!fileName || fileName.trim() === '') {
+      errors.fileName = t('ValidationMessages.FileNameRequired');
+    }
+
+    setErrorMessage(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const getFileExtension = (): string => {
+    switch (fileFormat) {
+      case 'csv':
+        return '.csv';
+      case 'excel':
+        return '.xlsx';
+      case 'parquet':
+        return '.parquet';
+      default:
+        return '';
+    }
+  };
+
+  const handleSave = async () => {
+    if (!validateInput()) {
+      return;
+    }
+
+    if (!activeTableName) {
+      await showErrorDialog(t('Error.Error'), t('SaveDataView.NoActiveTable'));
+      return;
+    }
+
+    setLoading(true, t('SaveDataView.SavingFile'));
+
+    try {
+      const fullFileName = fileName.endsWith(getFileExtension())
+        ? fileName
+        : fileName + getFileExtension();
+
+      let response;
+
+      switch (fileFormat) {
+        case 'csv':
+          response = await exportCsvByPath({
+            tableName: activeTableName,
+            directoryPath: directoryPath,
+            fileName: fullFileName,
+            separator: ',',
+          });
+          break;
+        case 'excel':
+          response = await exportExcelByPath({
+            tableName: activeTableName,
+            directoryPath: directoryPath,
+            fileName: fullFileName,
+            sheetName: 'Sheet1',
+          });
+          break;
+        case 'parquet':
+          response = await exportParquetByPath({
+            tableName: activeTableName,
+            directoryPath: directoryPath,
+            fileName: fullFileName,
+          });
+          break;
+      }
+
+      if (response.code === 'OK') {
+        await showErrorDialog(t('Common.OK'), t('SaveDataView.SaveSuccess', { path: response.result.filePath }));
+        setCurrentView('DataPreview');
+      } else {
+        await showErrorDialog(t('Error.Error'), response.message);
+      }
+    } catch (error) {
+      await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
+    } finally {
+      clearLoading();
+    }
+  };
+
+  const handleCancel = () => {
+    setCurrentView('DataPreview');
+  };
+
   const filteredFiles = files.filter(file => {
-    // 検索フィルター
     const matchesSearch = file.name.toLowerCase().includes(searchValue.toLowerCase());
     return matchesSearch;
-  });  // ソート処理
+  });
+
   const sortedFiles = [...filteredFiles].sort((a, b) => {
     if (!sortField || !sortDirection) return 0;
 
-    // ディレクトリを常に上に表示
     if (a.isFile !== b.isFile) {
       return a.isFile ? 1 : -1;
     }
@@ -212,10 +245,8 @@ export const SelectFileView = () => {
     return 0;
   });
 
-  // ソートハンドラー
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      // 同じフィールドの場合は方向を切り替え
       if (sortDirection === 'asc') {
         setSortDirection('desc');
       } else if (sortDirection === 'desc') {
@@ -225,25 +256,58 @@ export const SelectFileView = () => {
         setSortDirection('asc');
       }
     } else {
-      // 異なるフィールドの場合は昇順で開始
       setSortField(field);
       setSortDirection('asc');
     }
-  };
-
-  const handleCancel = () => {
-    setCurrentView("DataPreview");
   };
 
   return (
     <div className="mx-auto w-full max-w-none px-4">
       <div className="flex flex-col gap-8">
         <header>
-          <h1 className="text-3xl font-bold text-black">{t("SelectFileView.Title")}</h1>
-          <p className="mt-2 text-base text-black/60">{t("SelectFileView.Description")}</p>
+          <h1 className="text-3xl font-bold text-black">{t("SaveDataView.Title")}</h1>
+          <p className="mt-2 text-base text-black/60">
+            {t("SaveDataView.Description", { tableName: activeTableName || '' })}
+          </p>
         </header>
 
+        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-lg border border-border-color dark:border-gray-700">
+          <h2 className="text-main dark:text-white text-xl font-bold mb-4">{t("SaveDataView.FileSettings")}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              label={t("SaveDataView.FileName")}
+              htmlFor="file-name"
+            >
+              <InputText
+                id="file-name"
+                value={fileName}
+                change={(e) => setFileName(e.target.value)}
+                placeholder={t("SaveDataView.FileNamePlaceholder")}
+                error={errorMessage.fileName}
+              />
+            </FormField>
+
+            <FormField
+              label={t("SaveDataView.FileFormat")}
+              htmlFor="file-format"
+            >
+              <Select
+                id="file-format"
+                value={fileFormat}
+                onChange={(e) => setFileFormat(e.target.value as FileFormat)}
+              >
+                {fileFormatOptions.map(option => (
+                  <SelectOption key={option.value} value={option.value}>
+                    {t(`SaveDataView.${option.label.replace(/[^a-zA-Z]/g, '')}`)}
+                  </SelectOption>
+                ))}
+              </Select>
+            </FormField>
+          </div>
+        </div>
+
         <div className="flex flex-col gap-4">
+          <h2 className="text-xl font-bold text-black">{t("SaveDataView.SelectDirectory")}</h2>
           <NavigationSearchBar
             pathSegments={getPathSegments()}
             searchValue={searchValue}
@@ -253,10 +317,6 @@ export const SelectFileView = () => {
             onBreadcrumbClick={handleBreadcrumbClick}
             onSearchChange={setSearchValue}
           />
-          {/* <FileFilterBar
-            filters={filterOptions}
-            onFilterClick={setActiveFilter}
-          /> */}
         </div>
 
         <FileListTable
@@ -265,16 +325,27 @@ export const SelectFileView = () => {
           fileNameHeader={t('SelectFileView.FileNameHeader')}
           sizeHeader={t('SelectFileView.SizeHeader')}
           lastModifiedHeader={t('SelectFileView.LastModifiedHeader')}
-          maxHeight="500px"
+          maxHeight="400px"
           sortField={sortField}
           sortDirection={sortDirection}
           onSort={handleSort}
         />
-        <CancelButtonBar
-          cancelText={t('Common.Cancel')}
-          onCancel={handleCancel}
-        />
+
+        <div className="flex justify-end items-center gap-4 pt-4">
+          <button
+            onClick={handleCancel}
+            className="rounded-md bg-gray-200 dark:bg-gray-700 px-6 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            {t('Common.Cancel')}
+          </button>
+          <button
+            onClick={handleSave}
+            className="rounded-md bg-brand-primary px-6 py-2 text-sm font-medium text-white hover:bg-brand-primary-light transition-colors"
+          >
+            {t('SaveDataView.Save')}
+          </button>
+        </div>
       </div>
     </div>
   );
-}
+};
