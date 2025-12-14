@@ -126,7 +126,7 @@ export const SimulationColumnConfig = ({
                       type="number"
                       step="0.01"
                       value={column.distributionParams?.[param]?.toString() || ''}
-                      change={(e) => onDistributionParamChange(column.id, param, parseFloat(e.target.value) || 0)}
+                      change={(e) => onDistributionParamChange(column.id, param, parseFloat(e.target.value))}
                       placeholder={`${getParamLabel(param)}${t('CreateSimulationDataTableView.InputDistributionParameters')}`}
                       error={error.distributionParams ? error.distributionParams[param] : undefined}
                     />

@@ -65,7 +65,7 @@ export type SimulationColumnSetting = {
   fixedValue: string | number;
   errorMessage: {
     columnName: string | undefined;
-    distributionParams: Record<string, string> | undefined;
+    distributionParams: Record<string, string | undefined> | undefined;
     fixedValue: string | undefined;
   };
 };

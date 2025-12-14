@@ -2,6 +2,7 @@ import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { TableView } from "../Table/TableView";
 import { CreateSimulationDataTableView } from "./CreateSimulationDataTableView";
 import { LinearRegressionFormView } from "./LinearRegressionFormView";
+import { SaveDataView } from "./SaveDataView";
 import { SelectFileView } from "./SelectFileView";
 
 export const MainView = () => {
@@ -9,12 +10,14 @@ export const MainView = () => {
 
   const renderContent = () => {
     switch (currentView) {
-      case "selectFile":
+      case "SelectFile":
         return <SelectFileView />;
       case "LinearRegressionForm":
         return <LinearRegressionFormView />;
       case "CreateSimulationDataTable":
         return <CreateSimulationDataTableView />;
+      case "SaveData":
+        return <SaveDataView />;
       default:
         return <TableView />;
     }

@@ -1,15 +1,16 @@
 import type { ColumnType, FilesType, SettingsType } from "./commonTypes";
 
-export type ResGetSettingsType = {
+export type BaseResponseType = {
   code: string;
-  result: SettingsType;
   message: string;
 };
 
-export type ResGetFilesType = {
-  code: string;
+export type ResGetSettingsType = BaseResponseType & {
+  result: SettingsType;
+};
+
+export type ResGetFilesType = BaseResponseType & {
   result: FilesType;
-  message: string;
 };
 
 export type ReqImportCsvByPathType = {
@@ -18,10 +19,8 @@ export type ReqImportCsvByPathType = {
   separator: string;
 };
 
-export type ResImportCsvByPathType = {
-  code: string;
+export type ResImportCsvByPathType = BaseResponseType & {
   result: { tableName: string };
-  message: string;
 };
 
 export type ReqImportExcelByPathType = {
@@ -30,10 +29,8 @@ export type ReqImportExcelByPathType = {
   sheetName: string;
 };
 
-export type ResImportExcelByPathType = {
-  code: string;
+export type ResImportExcelByPathType = BaseResponseType & {
   result: { tableName: string };
-  message: string;
 };
 
 export type ReqImportParquetByPathType = {
@@ -41,22 +38,16 @@ export type ReqImportParquetByPathType = {
   tableName: string;
 };
 
-export type ResImportParquetByPathType = {
-  code: string;
+export type ResImportParquetByPathType = BaseResponseType & {
   result: { tableName: string };
-  message: string;
 };
 
-export type ResGetColumnInfoType = {
-  code: string;
+export type ResGetColumnInfoType = BaseResponseType & {
   result: { tableName: string; columnInfoList: ColumnType[] };
-  message: string;
 };
 
-export type ResFetchDataToJsonType = {
-  code: string;
+export type ResFetchDataToJsonType = BaseResponseType & {
   result: { tableName: string; data: string };
-  message: string;
 };
 
 export type ReqCreateSimulationDataTableType = {
@@ -71,37 +62,60 @@ export type ReqCreateSimulationDataTableType = {
   }>;
 };
 
-export type ResCreateSimulationDataTableType = {
-  code: string;
+export type ResCreateSimulationDataTableType = BaseResponseType & {
   result: { tableName: string };
-  message: string;
 };
 
-export type ResImportCsvType = {
-  code: number;
+export type ResImportCsvType = BaseResponseType & {
   result: { tableName: string };
-  message: string;
 };
-export type ResOutputCsvType = {
-  code: number;
+
+export type ResOutputCsvType = BaseResponseType & {
   result: { csvData: string };
-  message: string;
 };
 
-export type ResGetTableNameListType = {
-  code: string;
+export type ResGetTableNameListType = BaseResponseType & {
   result: { tableNameList: string[] };
-  message: string;
 };
-export type ResGenerateSimulationDataType = {
-  code: string;
+
+export type ReqExportCsvByPathType = {
+  tableName: string;
+  directoryPath: string;
+  fileName: string;
+  separator?: string;
+};
+
+export type ResExportCsvByPathType = BaseResponseType & {
+  result: { filePath: string };
+};
+
+export type ReqExportExcelByPathType = {
+  tableName: string;
+  directoryPath: string;
+  fileName: string;
+  sheetName?: string;
+};
+
+export type ResExportExcelByPathType = BaseResponseType & {
+  result: { filePath: string };
+};
+
+export type ReqExportParquetByPathType = {
+  tableName: string;
+  directoryPath: string;
+  fileName: string;
+};
+
+export type ResExportParquetByPathType = BaseResponseType & {
+  result: { filePath: string };
+};
+
+export type ResGenerateSimulationDataType = BaseResponseType & {
   result: { tableName: string };
-  message: string;
 };
-export type ResLinearRegressionType = {
-  code: string;
+
+export type ResLinearRegressionType = BaseResponseType & {
   result: { regressionResult: string };
-  message: string;
 };
 
 export type ReqGenerateSimulationDataType = {

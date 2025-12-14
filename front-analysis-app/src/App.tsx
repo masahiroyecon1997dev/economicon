@@ -57,7 +57,7 @@ export const App = () => {
         // 全て成功した場合のみストアを更新
         if (isMounted) {
           setSettings(resGetSettings.result);
-          setCurrentView("selectFile");
+          setCurrentView("SelectFile");
           setTableList(resGetTableNames.result.tableNameList);
           setFiles(resGetFiles.result);
         }
