@@ -5,7 +5,7 @@ from ..utilities.create_response import (create_success_response,
                                          create_error_response)
 from ..utilities.create_log import create_log_api_request
 from ..python_apis.clear_tables import clear_tables
-from ..python_apis.common_api_class import ApiError
+from ..python_apis.abstract_api import ApiError
 
 
 class ClearTables(APIView):

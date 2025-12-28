@@ -15,7 +15,7 @@ export const Tooltip = ({
   content,
   position = 'top',
   children,
-  delay = 200,
+  delay = 500,
   maxWidth = 300
 }: TooltipProps) => {
   return (

@@ -7,7 +7,7 @@ from ..utilities.validator.tables_manager_validator import (
     validate_existed_column_name
 )
 from ..data.tables_manager import TablesManager
-from .common_api_class import AbstractApi, ApiError
+from .abstract_api import AbstractApi, ApiError
 
 
 class RenameColumnName(AbstractApi):

@@ -15,7 +15,7 @@ export const MainTable = ({ tableInfo }: MainTableProps) => {
   };
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-brand-border bg-white shadow-sm mt-6">
+    <div className="overflow-auto rounded-lg border border-brand-border bg-white shadow-sm mt-6 max-h-[calc(100vh-280px)]">
       <table className="w-full text-sm text-left text-gray-500">
         <TableHeader
           columns={tableInfo.columnList}

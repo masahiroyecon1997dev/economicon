@@ -9,7 +9,7 @@ from ..utilities.validator.common_validators import (ValidationError,
                                                      validate_candidates)
 from ..utilities.validator.tables_manager_validator import (
     validate_existed_column_name, validate_existed_table_name)
-from .common_api_class import AbstractApi, ApiError
+from .abstract_api import AbstractApi, ApiError
 
 
 class ConfidenceInterval(AbstractApi):

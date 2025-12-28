@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { showErrorDialog } from "../../../function/errorDialog";
+import { showMessageDialog } from "../../../function/messageDialog";
 import { getTableInfo } from "../../../function/internalFunctions";
 import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../../function/restApis";
 import { useFilesStore } from "../../../stores/useFilesStore";
@@ -70,10 +70,10 @@ export const SelectFileView = () => {
       if (response.code === "OK") {
         setFiles(response.result);
       } else {
-        await showErrorDialog(t('Error.Error'), response.message);
+        await showMessageDialog(t('Error.Error'), response.message);
       }
     } catch (error) {
-      await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
+      await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
     } finally {
       clearLoading();
     }
@@ -107,11 +107,11 @@ export const SelectFileView = () => {
         if (response.code === "OK") {
           setFiles(response.result);
         } else {
-          await showErrorDialog(t('Error.Error'), response.message);
+          await showMessageDialog(t('Error.Error'), response.message);
           return;
         }
       } catch (error) {
-        await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
+        await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
         return;
       } finally {
         clearLoading();
@@ -129,7 +129,7 @@ export const SelectFileView = () => {
             separator: ',',
           });
           if (response.code !== "OK") {
-            await showErrorDialog(t('Error.Error'), response.message);
+            await showMessageDialog(t('Error.Error'), response.message);
             return;
           }
           loadTableName = response.result.tableName;
@@ -141,7 +141,7 @@ export const SelectFileView = () => {
             sheetName: '',
           });
           if (response.code !== "OK") {
-            await showErrorDialog(t('Error.Error'), response.message);
+            await showMessageDialog(t('Error.Error'), response.message);
             return;
           }
           loadTableName = response.result.tableName;
@@ -152,19 +152,19 @@ export const SelectFileView = () => {
             tableName: file.name.replace('.parquet', ''),
           });
           if (response.code !== "OK") {
-            await showErrorDialog(t('Error.Error'), response.message);
+            await showMessageDialog(t('Error.Error'), response.message);
             return;
           }
           loadTableName = response.result.tableName;
         } else {
-          await showErrorDialog(t('Error.Error'), t('SelectFileView.UnsupportedFileType'));
+          await showMessageDialog(t('Error.Error'), t('SelectFileView.UnsupportedFileType'));
         }
         const resTableInfo = await getTableInfo(loadTableName);
         addTableInfo(resTableInfo);
         setCurrentView("DataPreview");
       } catch (error) {
         clearLoading();
-        await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
+        await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
       } finally {
         clearLoading();
       }
@@ -278,3 +278,4 @@ export const SelectFileView = () => {
     </div>
   );
 }
+

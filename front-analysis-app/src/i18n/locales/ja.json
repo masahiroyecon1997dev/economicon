@@ -2,6 +2,7 @@
   "Common": {
     "Cancel": "キャンセル",
     "OK": "OK",
+    "Delete": "削除",
     "Table": "テーブル",
     "OpenSideMenu": "サイドメニューを開く",
     "CloseSideMenu": "サイドメニューを閉じる",
@@ -54,6 +55,12 @@
     "ProbitAnalysis": "プロビット分析",
     "TobitAnalysis": "トービット分析",
     "TimeSeriesDataAnalysis": "時系列データ分析"
+  },
+  "LeftSideMenu": {
+    "Tables": "テーブル一覧",
+    "NoTablesImported": "取り込まれたテーブルはありません。",
+    "MenuDuplicateTable": "テーブルを複製",
+    "MenuDeleteTable": "テーブルを削除"
   },
   "SelectFileView": {
     "Title": "ファイルを選択",
@@ -190,5 +197,11 @@
     "HypergeometricParamPopulationSize": "母集団サイズは0以上の整数でなければなりません。",
     "HypergeometricParamNumberOfSuccesses": "成功数は0以上の整数でなければなりません。",
     "HypergeometricParamSampleSize": "標本サイズは0以上の整数でなければなりません。"
+  },
+  "AreaLabels": {
+    "Header": "ヘッダー",
+    "SideMenu": "サイドメニュー",
+    "MainContent": "メインコンテンツ",
+    "TableMenu": "テーブルメニュー"
   }
 }

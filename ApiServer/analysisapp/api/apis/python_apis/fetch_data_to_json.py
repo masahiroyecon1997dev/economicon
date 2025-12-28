@@ -1,11 +1,10 @@
 from django.utils.translation import gettext as _
+
+from ..data.tables_manager import TablesManager
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
-    validate_existed_table_name,
-    validate_row_index
-)
-from ..data.tables_manager import TablesManager
-from .common_api_class import (AbstractApi, ApiError)
+    validate_existed_table_name, validate_row_index)
+from .abstract_api import AbstractApi, ApiError
 
 
 class FetchDataToJson(AbstractApi):

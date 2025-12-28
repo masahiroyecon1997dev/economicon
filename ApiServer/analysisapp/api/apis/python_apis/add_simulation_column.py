@@ -10,7 +10,7 @@ from ..utilities.validator.statistics_validators import (
     validate_distribution_params, validate_distribution_type)
 from ..utilities.validator.tables_manager_validator import (
     validate_existed_table_name, validate_new_column_name)
-from .common_api_class import AbstractApi, ApiError
+from .abstract_api import AbstractApi, ApiError
 
 
 class AddSimulationColumn(AbstractApi):

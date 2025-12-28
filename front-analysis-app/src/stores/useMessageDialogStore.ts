@@ -1,26 +1,26 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-type ErrorDialogState = {
+type MessageDialogState = {
   isOpen: boolean;
   title: string;
   message: string;
   resolver: ((value: void) => void) | null;
 };
 
-type ErrorDialogActions = {
-  showErrorDialog: (title: string, message: string) => Promise<void>;
-  closeErrorDialog: () => void;
+type MessageDialogActions = {
+  showMessageDialog: (title: string, message: string) => Promise<void>;
+  closeMessageDialog: () => void;
 };
 
-type ErrorDialogStore = ErrorDialogState & ErrorDialogActions;
+type MessageDialogStore = MessageDialogState & MessageDialogActions;
 
-export const useErrorDialogStore = create<ErrorDialogStore>((set, get) => ({
+export const useMessageDialogStore = create<MessageDialogStore>((set, get) => ({
   isOpen: false,
-  title: '',
-  message: '',
+  title: "",
+  message: "",
   resolver: null,
 
-  showErrorDialog: (title: string, message: string) => {
+  showMessageDialog: (title: string, message: string) => {
     return new Promise<void>((resolve) => {
       // 既に開いている場合は前のダイアログを先にクローズ
       const currentState = get();
@@ -37,14 +37,14 @@ export const useErrorDialogStore = create<ErrorDialogStore>((set, get) => ({
     });
   },
 
-  closeErrorDialog: () => {
+  closeMessageDialog: () => {
     const { resolver } = get();
 
     // まず状態をクリア
     set({
       isOpen: false,
-      title: '',
-      message: '',
+      title: "",
+      message: "",
       resolver: null,
     });
 

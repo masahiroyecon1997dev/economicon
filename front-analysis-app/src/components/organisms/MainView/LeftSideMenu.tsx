@@ -1,8 +1,8 @@
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTranslation } from "react-i18next";
-import { showErrorDialog } from "../../../function/errorDialog";
 import { getTableInfo } from "../../../function/internalFunctions";
+import { showMessageDialog } from "../../../function/messageDialog";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useSideMenuStore } from "../../../stores/useSideMenuStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
@@ -35,7 +35,7 @@ export const LeftSideMenu = () => {
       setCurrentView("DataPreview");
     } catch (error) {
       const message = error instanceof Error ? error.message : t('Error.UnexpectedError');
-      await showErrorDialog(t("Error.Error"), message);
+      await showMessageDialog(t("Error.Error"), message);
     }
   }
 
@@ -52,7 +52,7 @@ export const LeftSideMenu = () => {
       </div>
       {isOpen && (
         <>
-          <SectionHeading title={t("Common.Table")} />
+          <SectionHeading title={t("LeftSideMenu.Tables")} />
           <div className="px-4 pb-4">
             <TableNav
               activeTableName={activeTableName}

@@ -1,15 +1,14 @@
 
 from typing import Dict, List
+
 from django.utils.translation import gettext as _
+
+from ..data.tables_manager import TablesManager
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
-    validate_new_table_name,
-    validate_existed_table_name,
-    validate_existed_column_name,
-    validate_join_type
-)
-from ..data.tables_manager import TablesManager
-from .common_api_class import AbstractApi, ApiError
+    validate_existed_column_name, validate_existed_table_name,
+    validate_join_type, validate_new_table_name)
+from .abstract_api import AbstractApi, ApiError
 
 
 class CreateJoinTable(AbstractApi):
