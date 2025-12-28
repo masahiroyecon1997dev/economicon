@@ -7,7 +7,7 @@ import { getTableInfo } from "../../../function/internalFunctions";
 import { createSimulationDataTable } from "../../../function/restApis";
 import { validateColumnName, validateDistributionParam, validateNumRows, validateTableName } from "../../../function/validationFunctions";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { useErrorDialogStore } from "../../../stores/useErrorDialogStore";
+import { useMessageDialogStore } from "../../../stores/useMessageDialogStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
@@ -21,7 +21,7 @@ import { SimulationColumnConfig } from "../Form/SimulationColumnConfig";
 export const CreateSimulationDataTableView = () => {
   const { t } = useTranslation();
   const setCurrentView = useCurrentViewStore(state => state.setCurrentView);
-  const showErrorDialog = useErrorDialogStore(state => state.showErrorDialog);
+  const showMessageDialog = useMessageDialogStore(state => state.showMessageDialog);
   const setLoading = useLoadingStore(state => state.setLoading);
   const clearLoading = useLoadingStore(state => state.clearLoading);
   const addTableName = useTableListStore(state => state.addTableName);
@@ -164,7 +164,7 @@ export const CreateSimulationDataTableView = () => {
 
   const handleSubmit = async () => {
     if (!validateInput()) {
-      await showErrorDialog(t('Error.Error'), t('ValidationMessages.FixValidationErrors'));
+      await showMessageDialog(t('Error.Error'), t('ValidationMessages.FixValidationErrors'));
       return;
     }
     setLoading(true, t('CreateSimulationDataTableView.CreatingTable'));
@@ -251,10 +251,10 @@ export const CreateSimulationDataTableView = () => {
         addTableName(response.result.tableName);
         addTableInfo(resTableInfo);
       } else {
-        await showErrorDialog(t('Error.Error'), response.message || t('CreateSimulationDataTableView.TableCreationFailed'));
+        await showMessageDialog(t('Error.Error'), response.message || t('CreateSimulationDataTableView.TableCreationFailed'));
       }
     } catch (error) {
-      await showErrorDialog(t('Error.Error'), t('CreateSimulationDataTableView.TableCreationError'));
+      await showMessageDialog(t('Error.Error'), t('CreateSimulationDataTableView.TableCreationError'));
     } finally {
       clearLoading();
     }
@@ -350,3 +350,4 @@ export const CreateSimulationDataTableView = () => {
     </div>
   );
 }
+

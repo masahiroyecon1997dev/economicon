@@ -12,7 +12,7 @@ from ..utilities.validator.statistics_validators import (
     validate_dependent_variable, validate_explanatory_variables)
 from ..utilities.validator.tables_manager_validator import (
     validate_existed_column_name, validate_existed_table_name)
-from .common_api_class import AbstractApi, ApiError
+from .abstract_api import AbstractApi, ApiError
 
 # 標準誤差計算方法の候補
 STANDARD_ERROR_METHODS = ['normal', 'clustered', 'robust', 'hac']

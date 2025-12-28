@@ -8,7 +8,7 @@ from ..utilities.create_log import create_log_api_request
 from ..utilities.validator.file_request_validators import (
     validate_parquet_request)
 from ..python_apis.import_parquet_by_file import import_parquet_by_file
-from ..python_apis.common_api_class import ApiError
+from ..python_apis.abstract_api import ApiError
 
 
 class ImportParquetByFile(APIView):

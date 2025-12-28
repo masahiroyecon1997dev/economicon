@@ -4,7 +4,7 @@ from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.views import APIView
 
-from ..python_apis.common_api_class import ApiError
+from ..python_apis.abstract_api import ApiError
 from ..python_apis.create_simulation_data_table import \
     create_simulation_data_table
 from ..utilities.create_log import create_log_api_request

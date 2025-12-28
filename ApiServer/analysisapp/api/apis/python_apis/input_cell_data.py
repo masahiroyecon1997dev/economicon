@@ -8,7 +8,7 @@ from ..utilities.validator.tables_manager_validator import (
     validate_row_index
 )
 from ..data.tables_manager import TablesManager
-from .common_api_class import AbstractApi, ApiError
+from .abstract_api import AbstractApi, ApiError
 
 
 class InputCellData(AbstractApi):

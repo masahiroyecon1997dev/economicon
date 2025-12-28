@@ -1,17 +1,15 @@
-import polars as pl
 from typing import Dict
+
+import polars as pl
 from django.utils.translation import gettext as _
+
 from ..data.tables_manager import TablesManager
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
-    validate_new_table_name,
-    validate_existed_table_name,
-    validate_existed_column_name,
-    validate_filter_condition,
-    validate_is_compare_column,
-    validate_compare_value
-)
-from .common_api_class import (AbstractApi, ApiError)
+    validate_compare_value, validate_existed_column_name,
+    validate_existed_table_name, validate_filter_condition,
+    validate_is_compare_column, validate_new_table_name)
+from .abstract_api import AbstractApi, ApiError
 
 
 class FilterSingleCondition(AbstractApi):

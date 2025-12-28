@@ -1,13 +1,13 @@
+from typing import Dict, List
+
 import polars as pl
 from django.utils.translation import gettext as _
-from typing import Dict, List
+
+from ..data.tables_manager import TablesManager
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
-    validate_existed_table_name,
-    validate_existed_column_name
-)
-from ..data.tables_manager import TablesManager
-from .common_api_class import (AbstractApi, ApiError)
+    validate_existed_column_name, validate_existed_table_name)
+from .abstract_api import AbstractApi, ApiError
 
 
 class DescriptiveStatistics(AbstractApi):

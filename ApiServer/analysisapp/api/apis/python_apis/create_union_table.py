@@ -1,14 +1,13 @@
 from typing import Dict, List
+
+import polars as pl
 from django.utils.translation import gettext as _
+
+from ..data.tables_manager import TablesManager
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.tables_manager_validator import (
-    validate_new_table_name,
-    validate_existed_tables,
-    validate_existed_columns
-)
-from ..data.tables_manager import TablesManager
-from .common_api_class import AbstractApi, ApiError
-import polars as pl
+    validate_existed_columns, validate_existed_tables, validate_new_table_name)
+from .abstract_api import AbstractApi, ApiError
 
 
 class CreateUnionTable(AbstractApi):

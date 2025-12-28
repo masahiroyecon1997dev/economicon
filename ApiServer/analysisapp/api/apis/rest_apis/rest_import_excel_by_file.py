@@ -10,7 +10,7 @@ from ..utilities.validator.file_request_validators \
     import validate_excel_request
 from ..utilities.validator.common_validators import ValidationError
 from ..python_apis.import_excel_by_file import import_excel_by_file
-from ..python_apis.common_api_class import ApiError
+from ..python_apis.abstract_api import ApiError
 
 
 class RestImportExcelByFile(APIView):

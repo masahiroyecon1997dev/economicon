@@ -1,67 +1,52 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
+import type { ReactNode } from 'react';
 
 type DropdownMenuProps = {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
   position?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
+  triggerElement: ReactNode;
 };
 
 export const DropdownMenu = ({
-  isOpen,
-  onClose,
   children,
-  position = 'bottom-right'
+  position = 'bottom-right',
+  triggerElement
 }: DropdownMenuProps) => {
-  const menuRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
-  const getPositionClasses = (): string => {
+  const getSideAndAlign = (): { side: 'top' | 'bottom'; align: 'start' | 'end' } => {
     switch (position) {
       case 'bottom-left':
-        return 'top-full left-0 mt-1';
+        return { side: 'bottom', align: 'end' };
       case 'bottom-right':
-        return 'top-full right-0 mt-1';
+        return { side: 'bottom', align: 'start' };
       case 'top-left':
-        return 'bottom-full left-0 mb-1';
+        return { side: 'top', align: 'end' };
       case 'top-right':
-        return 'bottom-full right-0 mb-1';
+        return { side: 'top', align: 'start' };
       default:
-        return 'top-full right-0 mt-1';
+        return { side: 'bottom', align: 'start' };
     }
   };
 
+  const { side, align } = getSideAndAlign();
+
   return (
-    <div
-      ref={menuRef}
-      className={`absolute z-50 min-w-[160px] rounded-md bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 py-1 ${getPositionClasses()}`}
-    >
-      {children}
-    </div>
+    <RadixDropdownMenu.Root>
+      <RadixDropdownMenu.Trigger asChild>
+        {triggerElement}
+      </RadixDropdownMenu.Trigger>
+
+      <RadixDropdownMenu.Portal>
+        <RadixDropdownMenu.Content
+          side={side}
+          align={align}
+          sideOffset={4}
+          className="z-50 min-w-[160px] rounded-md bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 py-1 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out"
+        >
+          {children}
+        </RadixDropdownMenu.Content>
+      </RadixDropdownMenu.Portal>
+    </RadixDropdownMenu.Root>
   );
 };

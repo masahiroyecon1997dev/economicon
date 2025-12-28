@@ -1,7 +1,9 @@
-from django.utils.translation import gettext as _
 from typing import Dict
+
+from django.utils.translation import gettext as _
+
 from ..data.tables_manager import TablesManager
-from .common_api_class import (AbstractApi, ApiError)
+from .abstract_api import AbstractApi, ApiError
 
 
 class ClearTables(AbstractApi):
