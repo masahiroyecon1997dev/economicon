@@ -1,11 +1,12 @@
 from typing import Dict
+
 from django.utils.translation import gettext as _
-from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.tables_manager_validator import (
-    validate_existed_table_name
-)
+
 from ..data.tables_manager import TablesManager
-from .common_api_class import AbstractApi, ApiError
+from ..utilities.validator.common_validators import ValidationError
+from ..utilities.validator.tables_manager_validator import \
+    validate_existed_table_name
+from .abstract_api import AbstractApi, ApiError
 
 
 class DeleteTable(AbstractApi):

@@ -7,7 +7,7 @@ from ..utilities.create_response import (create_success_response,
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.create_log import create_log_api_request
 from ..python_apis.duplicate_column import duplicate_column
-from ..python_apis.common_api_class import ApiError
+from ..python_apis.abstract_api import ApiError
 
 
 class DuplicateColumn(APIView):

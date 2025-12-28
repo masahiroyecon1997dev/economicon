@@ -11,7 +11,7 @@ from ..utilities.validator.statistics_validators import (
     validate_distribution_params, validate_distribution_type)
 from ..utilities.validator.tables_manager_validator import (
     validate_new_column_name, validate_new_table_name)
-from .common_api_class import AbstractApi, ApiError
+from .abstract_api import AbstractApi, ApiError
 
 
 class CreateSimulationDataTable(AbstractApi):

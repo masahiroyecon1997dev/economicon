@@ -6,7 +6,7 @@ from ..utilities.create_response import (create_success_response,
                                          create_error_response)
 from ..utilities.create_log import create_log_api_request
 from ..python_apis.create_table import create_table
-from ..python_apis.common_api_class import ApiError
+from ..python_apis.abstract_api import ApiError
 from ..utilities.validator.common_validators import ValidationError
 
 

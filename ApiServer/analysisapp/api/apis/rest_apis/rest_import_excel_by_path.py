@@ -9,7 +9,7 @@ from ..utilities.create_response import (
 )
 from ..utilities.validator.common_validators import ValidationError
 from ..python_apis.import_excel_by_path import import_excel_by_path
-from ..python_apis.common_api_class import ApiError
+from ..python_apis.abstract_api import ApiError
 
 
 class RestImportExcelByPath(APIView):

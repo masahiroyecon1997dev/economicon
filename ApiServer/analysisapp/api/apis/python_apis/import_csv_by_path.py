@@ -1,16 +1,15 @@
+from typing import Dict
+
 import polars as pl
 from django.utils.translation import gettext as _
-from typing import Dict
-from ..utilities.validator.common_validators import ValidationError
-from ..utilities.validator.tables_manager_validator import (
-    validate_new_table_name,
-)
-from ..utilities.validator.file_validators import (
-    validate_file_path,
-    validate_separator
-)
+
 from ..data.tables_manager import TablesManager
-from .common_api_class import AbstractApi, ApiError
+from ..utilities.validator.common_validators import ValidationError
+from ..utilities.validator.file_validators import (validate_file_path,
+                                                   validate_separator)
+from ..utilities.validator.tables_manager_validator import \
+    validate_new_table_name
+from .abstract_api import AbstractApi, ApiError
 
 
 class ImportCsvByPath(AbstractApi):
@@ -76,10 +75,10 @@ class ImportCsvByPath(AbstractApi):
             result = {'tableName': created_table_name}
             return result
 
-        except pl.NoDataError as e:
+        except pl.exceptions.NoDataError as e:
             message = _("The CSV file is empty or contains no valid data.")
             raise ApiError(message) from e
-        except pl.ComputeError as e:
+        except pl.exceptions.ComputeError as e:
             message = _("Failed to parse CSV file: "
                         "Invalid format or encoding.")
             raise ApiError(message) from e

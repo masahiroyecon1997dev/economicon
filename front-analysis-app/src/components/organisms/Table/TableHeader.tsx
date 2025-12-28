@@ -14,7 +14,7 @@ export const TableHeader = ({ columns, handleContextMenu }: TableHeaderProps) =>
   const { isOver, setNodeRef } = useDroppable({ id: 'column-droppable' });
 
   return (
-    <thead ref={setNodeRef} className={"text-xs text-gray-700 uppercase bg-gray-50 " + (isOver ? 'bg-gray-500' : '')}>
+    <thead ref={setNodeRef} className={"sticky top-0 z-10 text-xs text-gray-700 uppercase bg-gray-50 " + (isOver ? 'bg-gray-500' : '')}>
       <tr>
         <TableHeaderCell>#</TableHeaderCell>
         {columns.map((column, i) => (

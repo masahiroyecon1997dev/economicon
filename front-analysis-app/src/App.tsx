@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { showErrorDialog } from './function/errorDialog';
+import { showMessageDialog } from './function/messageDialog';
 import { getFiles, getSettings, getTableNameList } from "./function/restApis";
 import { useCurrentViewStore } from "./stores/useCurrentViewStore";
 import { useLoadingStore } from "./stores/useLoadingStore";
@@ -8,7 +8,7 @@ import { useSettingsStore } from "./stores/useSettingsStore";
 import { useTableListStore } from "./stores/useTableListStore";
 
 import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
-import { ErrorDialog } from "./components/molecules/Modal/ErrorDialog";
+import { MessageDialog } from "./components/molecules/Modal/MessageDialog";
 import { HeaderMenu } from "./components/organisms/Header/HeaderMenu";
 import { LeftSideMenu } from "./components/organisms/MainView/LeftSideMenu";
 import { MainView } from "./components/organisms/MainView/MainView";
@@ -34,7 +34,7 @@ export const App = () => {
         const resGetSettings = await getSettings();
         if (resGetSettings.code !== "OK") {
           if (isMounted) {
-            await showErrorDialog(t('Error.Error'), resGetSettings.message);
+            await showMessageDialog(t('Error.Error'), resGetSettings.message);
           }
           return;
         }
@@ -42,7 +42,7 @@ export const App = () => {
         const resGetFiles = await getFiles(resGetSettings.result.defaultFolderPath);
         if (resGetFiles.code !== "OK") {
           if (isMounted) {
-            await showErrorDialog(t('Error.Error'), resGetFiles.message);
+            await showMessageDialog(t('Error.Error'), resGetFiles.message);
           }
           return;
         }
@@ -50,7 +50,7 @@ export const App = () => {
         const resGetTableNames = await getTableNameList();
         if (resGetTableNames.code !== "OK") {
           if (isMounted) {
-            await showErrorDialog(t('Error.Error'), resGetTableNames.message);
+            await showMessageDialog(t('Error.Error'), resGetTableNames.message);
           }
           return;
         }
@@ -64,7 +64,7 @@ export const App = () => {
       } catch (error) {
         console.error('App initialization error:', error);
         if (isMounted) {
-          await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
+          await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
         }
       }
     }
@@ -86,7 +86,7 @@ export const App = () => {
           <LeftSideMenu />
           <MainView />
         </div>
-        <ErrorDialog />
+        <MessageDialog />
       </div>
       <LoadingOverlay
         isVisible={isLoading}

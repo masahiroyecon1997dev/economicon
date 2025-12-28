@@ -7,7 +7,7 @@ from ..utilities.validator.common_validators import ValidationError
 from ..utilities.create_log import create_log_api_request
 from ..utilities.validator.file_request_validators import validate_tsv_request
 from ..python_apis.import_tsv_by_file import import_tsv_by_file
-from ..python_apis.common_api_class import ApiError
+from ..python_apis.abstract_api import ApiError
 
 
 class ImportTsvByFile(APIView):

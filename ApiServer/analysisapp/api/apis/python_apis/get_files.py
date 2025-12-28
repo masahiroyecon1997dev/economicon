@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 from ..utilities.validator.common_validators import ValidationError
 from ..utilities.validator.file_validators import (
     validate_directory_path, validate_directory_path_is_directory)
-from .common_api_class import AbstractApi, ApiError
+from .abstract_api import AbstractApi, ApiError
 
 
 class GetFiles(AbstractApi):

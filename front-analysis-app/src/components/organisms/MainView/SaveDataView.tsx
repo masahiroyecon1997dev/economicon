@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { showErrorDialog } from "../../../function/errorDialog";
+import { showMessageDialog } from "../../../function/messageDialog";
 import { exportCsvByPath, exportExcelByPath, exportParquetByPath, getFiles } from "../../../function/restApis";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useFilesStore } from "../../../stores/useFilesStore";
@@ -80,10 +80,10 @@ export const SaveDataView = () => {
       if (response.code === "OK") {
         setFiles(response.result);
       } else {
-        await showErrorDialog(t('Error.Error'), response.message);
+        await showMessageDialog(t('Error.Error'), response.message);
       }
     } catch (error) {
-      await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
+      await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
     } finally {
       clearLoading();
     }
@@ -115,10 +115,10 @@ export const SaveDataView = () => {
         if (response.code === "OK") {
           setFiles(response.result);
         } else {
-          await showErrorDialog(t('Error.Error'), response.message);
+          await showMessageDialog(t('Error.Error'), response.message);
         }
       } catch (error) {
-        await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
+        await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
       } finally {
         clearLoading();
       }
@@ -158,11 +158,6 @@ export const SaveDataView = () => {
       return;
     }
 
-    if (!selectedTableName) {
-      await showErrorDialog(t('Error.Error'), t('SaveDataView.NoActiveTable'));
-      return;
-    }
-
     setLoading(true, t('SaveDataView.SavingFile'));
 
     try {
@@ -199,13 +194,14 @@ export const SaveDataView = () => {
       }
 
       if (response.code === 'OK') {
-        await showErrorDialog(t('Common.OK'), t('SaveDataView.SaveSuccess', { path: response.result.filePath }));
+        await showMessageDialog(t('Common.OK'), t('SaveDataView.SaveSuccess', { path: response.result.filePath }));
         setCurrentView('DataPreview');
+        clearLoading();
       } else {
-        await showErrorDialog(t('Error.Error'), response.message);
+        await showMessageDialog(t('Error.Error'), response.message);
       }
     } catch (error) {
-      await showErrorDialog(t('Error.Error'), t('Error.UnexpectedError'));
+      await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
     } finally {
       clearLoading();
     }
