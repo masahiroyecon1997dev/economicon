@@ -57,14 +57,14 @@ export const getColumnList = async (
 
 export const fetchDataToJson = async (
   tableName: string,
-  firstRow: number = 1,
-  lastRow: number = 100
+  startRow: number = 1,
+  fetchRows: number = 100
 ): Promise<apiTypes.ResFetchDataToJsonType> => {
   const response = await axios.get("/fetch-data-to-json", {
     params: {
       tableName: tableName,
-      firstRow: firstRow,
-      lastRow: lastRow,
+      startRow: startRow,
+      fetchRows: fetchRows,
     },
   });
   return response.data;

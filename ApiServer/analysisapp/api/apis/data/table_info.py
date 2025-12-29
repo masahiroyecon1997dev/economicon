@@ -1,5 +1,6 @@
-import polars as pl
 import uuid
+
+import polars as pl
 
 
 class TableInfo:

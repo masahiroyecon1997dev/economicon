@@ -1,7 +1,8 @@
 
-from pathlib import Path
 import os
-from typing import Optional, List, Union, Any
+from pathlib import Path
+from typing import Any, List, Optional, Union
+
 from django.utils.translation import gettext as _
 from rest_framework import status
 
@@ -50,6 +51,20 @@ def validate_integer(value: Union[str, int, float], param_name: str) -> None:
         return None
     except (ValueError, TypeError):
         message = _(f"{param_name} must be an integer.")
+        raise ValidationError(message)
+
+
+def validate_integer_positive(value: Union[str, int, float],
+                              param_name: str) -> None:
+    """パラメータが正の整数どうかをチェック"""
+    try:
+        int_value = int(value)
+        if int_value <= 0:
+            message = _(f"{param_name} must be a positive integer.")
+            raise ValidationError(message)
+        return None
+    except (ValueError, TypeError):
+        message = _(f"{param_name} must be a positive integer.")
         raise ValidationError(message)
 
 

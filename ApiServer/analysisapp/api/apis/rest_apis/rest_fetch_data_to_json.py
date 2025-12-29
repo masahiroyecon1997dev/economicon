@@ -1,19 +1,21 @@
+from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.views import APIView
-from django.utils.translation import gettext as _
-from ..utilities.create_response import (create_success_response,
-                                         create_error_response)
-from ..utilities.validator.common_validators import ValidationError
-from ..utilities.create_log import create_log_api_request
-from ..python_apis.fetch_data_to_json import fetch_data_to_json
+
 from ..python_apis.abstract_api import ApiError
+from ..python_apis.fetch_data_to_json import fetch_data_to_json
+from ..utilities.create_log import create_log_api_request
+from ..utilities.create_response import (create_error_response,
+                                         create_success_response)
+from ..utilities.validator.common_validators import ValidationError
 
 
 class FetchDataToJson(APIView):
     """FetchDataToJson API class
 
-    指定されたテーブルの指定された行範囲のデータをJSON形式で取得します。
+    指定されたテーブルの指定された開始行から指定された行数のデータをJSON形式で取得します。
     行番号は1から始まると仮定しています。
+    取得行数がテーブルの行数を超える場合は、テーブルの最後まで取得します。
     """
     def get(self, request):
         try:
@@ -21,12 +23,13 @@ class FetchDataToJson(APIView):
             create_log_api_request(request)
             # リクエストデータの取得
             table_name = request.query_params.get('tableName')
-            firstRow = request.query_params.get('firstRow')
-            lastRow = request.query_params.get('lastRow')
+            start_row = request.query_params.get('startRow')
+            fetch_rows = request.query_params.get('fetchRows')
+
             result = fetch_data_to_json(
                 table_name=table_name,
-                first_row=firstRow,
-                last_row=lastRow
+                start_row=start_row,
+                fetch_rows=fetch_rows
             )
             return create_success_response(
                 status.HTTP_200_OK,
