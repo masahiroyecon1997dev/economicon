@@ -47,7 +47,13 @@ export type ResGetColumnInfoType = BaseResponseType & {
 };
 
 export type ResFetchDataToJsonType = BaseResponseType & {
-  result: { tableName: string; data: string };
+  result: {
+    tableName: string;
+    data: string;
+    totalRows: number;
+    startRow: number;
+    endRow: number;
+  };
 };
 
 export type ReqCreateSimulationDataTableType = {
