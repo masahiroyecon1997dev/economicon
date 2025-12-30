@@ -53,6 +53,8 @@ python manage.py runserver
 #### 2. React フロントエンド
 
 ```powershell
+# pnpmインストール
+npm install -g pnpm@latest-10
 # 依存関係のインストール
 cd front-analysis-app
 pnpm install
