@@ -1,3 +1,5 @@
+import { getTableInfo } from "../../../function/internalFunctions";
+import { useSettingsStore } from "../../../stores/useSettingsStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { MainTable } from "./MainTable";
 import { TableFooter } from "./TableFooter";
@@ -5,6 +7,18 @@ import { TableFooter } from "./TableFooter";
 
 export const TableView = () => {
   const tableInfos = useTableInfosStore((state) => state.tableInfos);
+  const updateTableInfo = useTableInfosStore((state) => state.updateTableInfo);
+  const displayRows = useSettingsStore((state) => state.displayRows);
+
+
+  const handlePageChange = async (tableName: string, page: number) => {
+    const resTableInfo = await getTableInfo(
+      tableName,
+      (page - 1) * displayRows + 1,
+      displayRows
+    );
+    updateTableInfo(tableName, resTableInfo);
+  };
 
   return (
     <div className="max-w-full mx-auto">
@@ -16,9 +30,11 @@ export const TableView = () => {
         </nav>
       </div>
       {tableInfos.map((table, index) => (
-        <MainTable key={index} tableInfo={table}></MainTable>
+        <>
+          <MainTable key={index} tableInfo={table}></MainTable>
+          <TableFooter tableInfo={table} onPageChange={handlePageChange} />
+        </>
       ))}
-      <TableFooter />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { showMessageDialog } from "../../../function/messageDialog";
 import { getTableInfo } from "../../../function/internalFunctions";
+import { showMessageDialog } from "../../../function/messageDialog";
 import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../../function/restApis";
 import { useFilesStore } from "../../../stores/useFilesStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
@@ -10,6 +10,7 @@ import type { FileType, SortDirection, SortField } from "../../../types/commonTy
 
 import { useTranslation } from "react-i18next";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
+import { useTableListStore } from "../../../stores/useTableListStore";
 import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
@@ -22,6 +23,7 @@ export const SelectFileView = () => {
   const osName = useSettingsStore((state) => state.osName);
   const pathSeparator = useSettingsStore((state) => state.pathSeparator);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
+  const addTableList = useTableListStore((state) => state.addTableName);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
 
   // ローディング状態
@@ -160,6 +162,7 @@ export const SelectFileView = () => {
           await showMessageDialog(t('Error.Error'), t('SelectFileView.UnsupportedFileType'));
         }
         const resTableInfo = await getTableInfo(loadTableName);
+        addTableList(loadTableName);
         addTableInfo(resTableInfo);
         setCurrentView("DataPreview");
       } catch (error) {
@@ -278,4 +281,3 @@ export const SelectFileView = () => {
     </div>
   );
 }
-

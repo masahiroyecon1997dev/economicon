@@ -80,7 +80,7 @@ export type ResOutputCsvType = BaseResponseType & {
   result: { csvData: string };
 };
 
-export type ResGetTableNameListType = BaseResponseType & {
+export type ResgetTableListType = BaseResponseType & {
   result: { tableNameList: string[] };
 };
 
