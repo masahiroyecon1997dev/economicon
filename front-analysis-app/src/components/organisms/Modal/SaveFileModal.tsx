@@ -2,7 +2,7 @@ import { saveAs } from 'file-saver';
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getTableNameList, outputCsv } from '../../../function/restApis';
+import { getTableList, outputCsv } from '../../../function/restApis';
 import type { SelectListType } from '../../../types/commonTypes';
 
 import { Select } from '../../molecules/InputField/Select';
@@ -21,7 +21,7 @@ export const SaveFileModal = ({ isSaveFileModal, close }: SaveFileModalProps) =>
   useEffect(() => {
     if (isSaveFileModal) {
       const initializeTableList = async () => {
-        const resTableNameList = await getTableNameList();
+        const resTableNameList = await getTableList();
         for (const table of resTableNameList.result.tableNameList) {
           setTableList(preTableList => [...preTableList, { value: table, name: table }]);
         }

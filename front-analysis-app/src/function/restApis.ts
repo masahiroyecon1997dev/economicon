@@ -6,11 +6,10 @@ export const getSettings = async (): Promise<apiTypes.ResGetSettingsType> => {
   return response.data;
 };
 
-export const getTableNameList =
-  async (): Promise<apiTypes.ResGetTableNameListType> => {
-    const response = await axios.get("/get-table-list");
-    return response.data;
-  };
+export const getTableList = async (): Promise<apiTypes.ResgetTableListType> => {
+  const response = await axios.get("/get-table-list");
+  return response.data;
+};
 
 export const getFiles = async (
   path: string

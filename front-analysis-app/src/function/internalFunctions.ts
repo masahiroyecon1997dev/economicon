@@ -20,11 +20,24 @@ export const getTableInfo = async (
     if (resColumnList.code !== "OK") {
       throw new Error(resColumnList.message);
     }
+    const {
+      totalRows,
+      startRow: resStartRow,
+      endRow,
+    } = resFetchDataToJson.result;
+    const totalPages = Math.ceil(totalRows / fetchRows);
+    const pageIndex = Math.floor((resStartRow - 1) / fetchRows) + 1;
+
     return {
       tableName: tableName,
       columnList: resColumnList.result.columnInfoList,
       isActive: true,
       data: data,
+      startRow: resStartRow,
+      endRow: endRow,
+      pageIndex: pageIndex,
+      totalRows: totalRows,
+      totalPages: totalPages,
     };
   } catch (error) {
     console.log(error);

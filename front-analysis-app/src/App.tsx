@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { showMessageDialog } from './function/messageDialog';
-import { getFiles, getSettings, getTableNameList } from "./function/restApis";
+import { getFiles, getSettings, getTableList } from "./function/restApis";
 import { useCurrentViewStore } from "./stores/useCurrentViewStore";
 import { useLoadingStore } from "./stores/useLoadingStore";
 import { useSettingsStore } from "./stores/useSettingsStore";
@@ -47,7 +47,7 @@ export const App = () => {
           return;
         }
         // テーブル名一覧を取得
-        const resGetTableNames = await getTableNameList();
+        const resGetTableNames = await getTableList();
         if (resGetTableNames.code !== "OK") {
           if (isMounted) {
             await showMessageDialog(t('Error.Error'), resGetTableNames.message);
