@@ -39,10 +39,9 @@
 pip install uv
 
 # 仮想環境の作成と依存関係のインストール
-cd ApiServer\analysisapp
 uv venv
 .venv\Scripts\Activate.ps1  # Windows
-uv pip install -r ..\..\ForWindows\requirements.txt
+uv pip install -r .\ForWindows\requirements.txt
 
 # データベースのマイグレーション
 python manage.py migrate
