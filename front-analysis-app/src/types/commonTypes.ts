@@ -28,8 +28,10 @@ export type TableInfoType = {
   columnList: ColumnType[];
   isActive: boolean;
   data: TableDataType;
+  startRow: number;
+  endRow: number;
   pageIndex: number;
-  numRows: number;
+  totalRows: number;
   totalPages: number;
 };
 

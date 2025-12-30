@@ -11,6 +11,10 @@
   --color-brand-primary-light: #34495e;
   /* メインカラーの濃い色（ホバー時） */
   --color-brand-primary-dark: #223344;
+  /* アクセントの薄い色（ホバー時） */
+  --color-brand-accent-light: #459ad3ff;
+  /* アクセントの濃い色（ホバー時） */
+  --color-brand-accent-dark: #2292ddff;
   /* メインのボーダーの色 */
   --color-brand-border: #e5e7eb;
 }
