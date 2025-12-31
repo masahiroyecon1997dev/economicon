@@ -7,8 +7,8 @@ import { getTableInfo } from "../../../function/internalFunctions";
 import { createSimulationDataTable } from "../../../function/restApis";
 import { validateColumnName, validateDistributionParam, validateNumRows, validateTableName } from "../../../function/validationFunctions";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { useMessageDialogStore } from "../../../stores/useMessageDialogStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
+import { useMessageDialogStore } from "../../../stores/useMessageDialogStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
 import type { DistributionType, SimulationColumnSetting } from "../../../types/commonTypes";
@@ -131,7 +131,7 @@ export const CreateSimulationDataTableView = () => {
   };
 
   const validateInput = (): boolean => {
-    let newValidateError = {
+    const newValidateError = {
       tableName: validateTableName(tableName),
       numRows: validateNumRows(numRows),
     };
@@ -253,7 +253,7 @@ export const CreateSimulationDataTableView = () => {
       } else {
         await showMessageDialog(t('Error.Error'), response.message || t('CreateSimulationDataTableView.TableCreationFailed'));
       }
-    } catch (error) {
+    } catch {
       await showMessageDialog(t('Error.Error'), t('CreateSimulationDataTableView.TableCreationError'));
     } finally {
       clearLoading();
@@ -350,4 +350,3 @@ export const CreateSimulationDataTableView = () => {
     </div>
   );
 }
-

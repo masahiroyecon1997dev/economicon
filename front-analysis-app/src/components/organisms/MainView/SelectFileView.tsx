@@ -74,7 +74,7 @@ export const SelectFileView = () => {
       } else {
         await showMessageDialog(t('Error.Error'), response.message);
       }
-    } catch (error) {
+    } catch {
       await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
     } finally {
       clearLoading();
@@ -112,7 +112,7 @@ export const SelectFileView = () => {
           await showMessageDialog(t('Error.Error'), response.message);
           return;
         }
-      } catch (error) {
+      } catch {
         await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
         return;
       } finally {
@@ -165,7 +165,7 @@ export const SelectFileView = () => {
         addTableList(loadTableName);
         addTableInfo(resTableInfo);
         setCurrentView("DataPreview");
-      } catch (error) {
+      } catch {
         clearLoading();
         await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
       } finally {
@@ -239,14 +239,14 @@ export const SelectFileView = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-none px-4">
-      <div className="flex flex-col gap-8">
-        <header>
-          <h1 className="text-3xl font-bold text-black">{t("SelectFileView.Title")}</h1>
-          <p className="mt-2 text-base text-black/60">{t("SelectFileView.Description")}</p>
+    <div className="mx-auto w-full max-w-none px-4 h-full">
+      <div className="flex flex-col gap-4 md:gap-8">
+        <header className="shrink-0">
+          <h1 className="text-2xl md:text-3xl font-bold text-black">{t("SelectFileView.Title")}</h1>
+          <p className="mt-1 md:mt-2 text-sm md:text-base text-black/60">{t("SelectFileView.Description")}</p>
         </header>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2 md:gap-4 shrink-0">
           <NavigationSearchBar
             pathSegments={getPathSegments()}
             searchValue={searchValue}
@@ -268,7 +268,7 @@ export const SelectFileView = () => {
           fileNameHeader={t('SelectFileView.FileNameHeader')}
           sizeHeader={t('SelectFileView.SizeHeader')}
           lastModifiedHeader={t('SelectFileView.LastModifiedHeader')}
-          maxHeight="500px"
+          maxHeight="max(200px, calc(100vh - 280px))"
           sortField={sortField}
           sortDirection={sortDirection}
           onSort={handleSort}

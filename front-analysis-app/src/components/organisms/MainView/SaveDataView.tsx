@@ -82,7 +82,7 @@ export const SaveDataView = () => {
       } else {
         await showMessageDialog(t('Error.Error'), response.message);
       }
-    } catch (error) {
+    } catch {
       await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
     } finally {
       clearLoading();
@@ -117,7 +117,7 @@ export const SaveDataView = () => {
         } else {
           await showMessageDialog(t('Error.Error'), response.message);
         }
-      } catch (error) {
+      } catch {
         await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
       } finally {
         clearLoading();
@@ -200,7 +200,7 @@ export const SaveDataView = () => {
       } else {
         await showMessageDialog(t('Error.Error'), response.message);
       }
-    } catch (error) {
+    } catch {
       await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
     } finally {
       clearLoading();
@@ -318,7 +318,7 @@ export const SaveDataView = () => {
               />
             </div>
 
-            <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700 flex-shrink-0">
+            <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700 shrink-0">
               <h2 className="text-main dark:text-white text-lg font-bold mb-3">{t("SaveDataView.FileSettings")}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
@@ -374,7 +374,7 @@ export const SaveDataView = () => {
             </div>
           </div>
 
-          <div className="pt-2 flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
+          <div className="pt-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
             <ActionButtonBar
               cancelText={t('Common.Cancel')}
               selectText={t('SaveDataView.Save')}
