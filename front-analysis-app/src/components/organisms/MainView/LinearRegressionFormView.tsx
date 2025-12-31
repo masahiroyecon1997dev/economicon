@@ -89,7 +89,7 @@ export const LinearRegressionFormView = () => {
           </div>
           <div className="mt-6">
             <label className="mb-2 block text-sm font-medium text-text-main">Selected Independent Variables:</label>
-            <div className="flex flex-wrap gap-2 rounded-lg border border-border-color bg-secondary p-3 min-h-[44px]">
+            <div className="flex flex-wrap gap-2 rounded-lg border border-border-color bg-secondary p-3 min-h-11">
             </div>
           </div>
         </div>
