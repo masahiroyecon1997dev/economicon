@@ -28,7 +28,7 @@ export const Tooltip = ({
           <RadixTooltip.Content
             side={position}
             sideOffset={8}
-            className="z-50 bg-gray-900 text-white text-xs rounded px-3 py-1.5 shadow-lg break-words"
+            className="z-50 bg-gray-900 text-white text-xs rounded px-3 py-1.5 shadow-lg wrap-break-words"
             style={{ maxWidth: `${maxWidth}px` }}
           >
             {content}
