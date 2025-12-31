@@ -20,6 +20,7 @@
 - **UI コンポーネント**: Radix UI Primitives
 - **状態管理**: Zustand
 - **国際化**: react-i18next
+- **テスト**: Vitest (ユニットテスト), Playwright (E2E テスト)
 
 ## 開発環境のセットアップ
 
@@ -87,6 +88,13 @@ pnpm dev              # 開発サーバーの起動 (Vite)
 pnpm build            # プロダクションビルド
 pnpm lint             # ESLint チェックの実行
 pnpm preview          # ビルド結果のプレビュー
+pnpm test             # ユニットテストの実行 (Vitest)
+pnpm test:ui          # ユニットテストのUIモード
+pnpm test:coverage    # カバレッジ付きテスト
+pnpm test:e2e         # E2Eテストの実行 (Playwright)
+pnpm test:e2e:ui      # E2EテストのUIモード
+pnpm test:e2e:headed  # ブラウザを表示してE2E実行
+pnpm test:e2e:debug   # E2Eテストのデバッグモード
 ```
 
 ### バックエンド (Python/Django)
@@ -169,7 +177,47 @@ coverage html                # HTMLレポート生成
 
 ### フロントエンドテスト
 
-現在、フロントエンドのテストフレームワークは未実装です。
+#### ユニットテスト (Vitest)
+
+```powershell
+# 全テストの実行
+cd front-analysis-app
+pnpm test
+
+# UIモードでテスト実行
+pnpm test:ui
+
+# カバレッジ付きテスト
+pnpm test:coverage
+
+# 特定のテストファイルを実行
+pnpm test -- Tooltip.test.tsx
+```
+
+#### E2E テスト (Playwright)
+
+```powershell
+# 全E2Eテストの実行
+cd front-analysis-app
+pnpm test:e2e
+
+# UIモードで実行（テスト結果をブラウザで確認）
+pnpm test:e2e:ui
+
+# ブラウザを表示して実行
+pnpm test:e2e:headed
+
+# デバッグモードで実行
+pnpm test:e2e:debug
+
+# 特定のブラウザでテスト実行
+pnpm test:e2e --project=chromium
+pnpm test:e2e --project=firefox
+pnpm test:e2e --project=webkit
+
+# テストレポートの表示
+pnpm test:e2e:report
+```
 
 ## プロジェクト構造
 
@@ -254,8 +302,7 @@ python manage.py migrate
 
 ### 技術的改善
 
-1. フロントエンドのユニットテスト実装（Vitest 導入検討）
-2. E2E テスト実装（Playwright 導入検討）
-3. CI/CD パイプラインの構築
-4. API ドキュメントの自動生成（Swagger/OpenAPI）
-5. パフォーマンス最適化
+1. CI/CD パイプラインの構築 (GitHub Actions 導入済み)
+2. API ドキュメントの自動生成（Swagger/OpenAPI）
+3. パフォーマンス最適化
+4. テストカバレッジの向上

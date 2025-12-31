@@ -20,7 +20,7 @@ export const TableNavItem = ({ tableName, isActive, onClick }: TableNavItemProps
 
   const triggerButton = (
     <button
-      className="flex-shrink-0 p-1 rounded hover:bg-white/20 transition-colors"
+      className="shrink-0 p-1 rounded hover:bg-white/20 transition-colors"
       aria-label={t("AreaLabels.TableMenu")}
     >
       <FontAwesomeIcon icon={faEllipsisVertical} />
@@ -37,7 +37,7 @@ export const TableNavItem = ({ tableName, isActive, onClick }: TableNavItemProps
     >
       <Tooltip content={tableName} position="right" maxWidth={200}>
         <div className="flex-1 min-w-0">
-          <span className="block truncate">{tableName}</span>
+          <span className="block truncate text-sm">{tableName}</span>
         </div>
       </Tooltip>
       <DropdownMenu

@@ -1,4 +1,4 @@
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faFileImport, faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTranslation } from "react-i18next";
 import { getTableInfo } from "../../../function/internalFunctions";
@@ -39,6 +39,14 @@ export const LeftSideMenu = () => {
     }
   }
 
+  const showImportFileView = () => {
+    setCurrentView("SelectFile");
+  }
+
+  const showSaveFileView = () => {
+    setCurrentView("SaveData");
+  }
+
   return (
     <aside className={`shrink-0 border-r border-brand-border bg-brand-primary text-white transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`}>
       <div className="flex items-center p-4">
@@ -52,6 +60,22 @@ export const LeftSideMenu = () => {
       </div>
       {isOpen && (
         <>
+          <div className="px-4 pb-2 space-y-2">
+            <button
+              onClick={showImportFileView}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-left hover:cursor-pointer"
+            >
+              <FontAwesomeIcon icon={faFileImport} className="text-lg" />
+              <span className="font-medium">{t("LeftSideMenu.ImportData")}</span>
+            </button>
+            <button
+              onClick={showSaveFileView}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-left hover:cursor-pointer"
+            >
+              <FontAwesomeIcon icon={faFloppyDisk} className="text-lg" />
+              <span className="font-medium">{t("LeftSideMenu.SaveData")}</span>
+            </button>
+          </div>
           <SectionHeading title={t("LeftSideMenu.Tables")} />
           <div className="px-4 pb-4">
             <TableNav

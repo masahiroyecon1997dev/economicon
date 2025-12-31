@@ -15,6 +15,11 @@
   "HeaderMenu": {
     "File": "File"
   },
+  "LeftSideMenu": {
+    "ImportData": "Import Data",
+    "SaveData": "Save Data",
+    "Tables": "Tables"
+  },
   "SelectFileView": {
     "Title": "Select File",
     "SelectFile": "Select File",
