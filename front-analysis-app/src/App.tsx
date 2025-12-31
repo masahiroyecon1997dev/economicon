@@ -74,7 +74,7 @@ export const App = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [setCurrentView, setFiles, setSettings, setTableList, t]);
 
   return (
     <>

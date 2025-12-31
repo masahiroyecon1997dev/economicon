@@ -4,7 +4,7 @@ type SectionHeadingProps = {
 
 export const SectionHeading = ({ title }: SectionHeadingProps) => {
   return (
-    <h2 className="px-4 pb-4 text-lg font-semibold">
+    <h2 className="px-4 pb-4 font-semibold">
       {title}
     </h2>
   );

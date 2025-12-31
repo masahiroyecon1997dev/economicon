@@ -24,24 +24,12 @@ export const HeaderMenu = () => {
     useState<boolean>(false);
   const [isCalculateModal, setIsCalculateModal] = useState<boolean>(false);
 
-  const showImportFileByPathView = () => {
-    setCurrentView("SelectFile");
-  }
-
-  const showExportFileByPathView = () => {
-    setCurrentView("SaveData");
-  }
-
   const showCreateSimulationDataTableView = () => {
     setCurrentView("CreateSimulationDataTable");
   }
 
   const showLinearRegressionModal = () => {
     setCurrentView("LinearRegressionForm");
-  }
-
-  const openImportFileByUploadModal = () => {
-    setIsImportFileByUploadModal(true);
   }
 
   const closeImportFileByUploadModal = () => {
@@ -74,20 +62,6 @@ export const HeaderMenu = () => {
     setIsCalculateModal(false);
   }
 
-  const fileDropdownListElement = [
-    {
-      dropdownListName: t("HeaderMenu.FileOpen"),
-      dropdownListFunction: showImportFileByPathView,
-    },
-    {
-      dropdownListName: t("HeaderMenu.UploadFile"),
-      dropdownListFunction: openImportFileByUploadModal,
-    },
-    {
-      dropdownListName: t("HeaderMenu.FileSave"),
-      dropdownListFunction: showExportFileByPathView,
-    },
-  ];
   const dataGenerationDropdownListElement = [
     {
       dropdownListName: t("HeaderMenu.DataGeneration"),
@@ -122,11 +96,6 @@ export const HeaderMenu = () => {
             <h1 className="text-xl font-bold">Data Analysis Tool</h1>
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative group">
-              <HeaderMenuDropdown dropdownListElement={fileDropdownListElement}>
-                {t("HeaderMenu.File")}
-              </HeaderMenuDropdown>
-            </div>
             <div className="relative group">
               <HeaderMenuDropdown
                 dropdownListElement={dataGenerationDropdownListElement}
