@@ -54,7 +54,7 @@ export function FileListTable({
           <thead className="bg-brand-primary-light sticky top-0">
             <tr>
               <th
-                className={`px-2 sm:px-3 md:px-6 py-3 text-left text-xs text-white font-medium uppercase tracking-wider text-black/60 min-w-0 ${onSort ? 'cursor-pointer hover:bg-brand-primary-light/80 transition-colors' : ''
+                className={`px-2 sm:px-3 md:px-6 py-3 text-left text-xs text-white font-medium uppercase tracking-wider min-w-0 ${onSort ? 'cursor-pointer hover:bg-brand-primary-light/80 transition-colors' : ''
                   }`}
                 onClick={() => handleHeaderClick('name')}
                 style={{ width: '50%', minWidth: '120px' }}
@@ -65,7 +65,7 @@ export function FileListTable({
                 </div>
               </th>
               <th
-                className={`px-2 sm:px-3 md:px-6 py-3 text-left text-xs text-white font-medium uppercase tracking-wider text-black/60 min-w-0 hidden sm:table-cell ${onSort ? 'cursor-pointer hover:bg-brand-primary-light/80 transition-colors' : ''
+                className={`px-2 sm:px-3 md:px-6 py-3 text-left text-xs text-white font-medium uppercase tracking-wider min-w-0 hidden sm:table-cell ${onSort ? 'cursor-pointer hover:bg-brand-primary-light/80 transition-colors' : ''
                   }`}
                 onClick={() => handleHeaderClick('size')}
                 style={{ width: '25%', minWidth: '80px' }}
@@ -76,7 +76,7 @@ export function FileListTable({
                 </div>
               </th>
               <th
-                className={`px-2 sm:px-3 md:px-6 py-3 text-left text-xs text-white font-medium uppercase tracking-wider text-black/60 min-w-0 ${onSort ? 'cursor-pointer hover:bg-brand-primary-light/80 transition-colors' : ''
+                className={`px-2 sm:px-3 md:px-6 py-3 text-left text-xs text-white font-medium uppercase tracking-wider min-w-0 ${onSort ? 'cursor-pointer hover:bg-brand-primary-light/80 transition-colors' : ''
                   }`}
                 onClick={() => handleHeaderClick('modifiedTime')}
                 style={{ width: '25%', minWidth: '100px' }}
@@ -97,13 +97,16 @@ export function FileListTable({
               >
                 <td className="px-2 sm:px-3 md:px-6 py-4 text-sm font-medium text-black min-w-0" style={{ width: '50%', minWidth: '120px' }}>
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="flex-shrink-0">
+                    <span className="shrink-0">
                       <FontAwesomeIcon
                         icon={file.isFile ? faFileLines : faFolder}
                         className={file.isFile ? 'text-blue-500' : 'text-yellow-500'}
                       />
                     </span>
-                    <span className={`truncate block min-w-0 ${file.isFile ? '' : 'font-semibold'}`}>
+                    <span
+                      className={`truncate block min-w-0 ${file.isFile ? '' : 'font-semibold'}`}
+                      style={{ maxWidth: 'min(400px, calc(50vw - 100px))' }}
+                    >
                       {file.name}
                     </span>
                   </div>
