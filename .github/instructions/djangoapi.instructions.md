@@ -9,16 +9,16 @@ applyTo: "AnalysisApp/AnalysisApp/ApiServer/analysisapp/api/**"
 ### パッケージマネージャー
 
 - このプロジェクトでは **uv** をパッケージマネージャーとして使用
-- 依存関係は `ForWindows/requirements.txt` で管理
+- 依存関係は windows なら `python-requirements/windows-requirements.txt`、ubuntu なら `python-requirements/ubuntu-requirements.txt`、 で管理
 
 ### 仮想環境
 
 - `.venv` ディレクトリをプロジェクトルートに作成
-- 新しいパッケージを追加する場合は `requirements.txt` を更新
+- 新しいパッケージを追加する場合は `windows-requirements.txt` を更新
 
 ```powershell
 # 依存関係のインストール
-uv pip install -r ForWindows/requirements.txt
+uv pip install -r python-requirements/windows-requirements.txt
 
 # 新しいパッケージの追加
 uv pip install <package-name>
