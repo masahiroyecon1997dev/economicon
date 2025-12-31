@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 services:
   analysis-api-server:
     build:
@@ -14,7 +14,7 @@ services:
       - ../.github:/AnalysisApp/.github
       - ../.vscode:/AnalysisApp/AnalysisApp/.vscode
       - ../ApiServer:/AnalysisApp/AnalysisApp/ApiServer
-      - ../ForWindows:/AnalysisApp/AnalysisApp/ForWindows
+      - ../python-requirements:/AnalysisApp/AnalysisApp/python-requirements
       - ../front-analysis-app:/AnalysisApp/AnalysisApp/front-analysis-app
       - ../SampleData:/AnalysisApp/AnalysisApp/SampleData
       - ../.env:/AnalysisApp/AnalysisApp/.env
