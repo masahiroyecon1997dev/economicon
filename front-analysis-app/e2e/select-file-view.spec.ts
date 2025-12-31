@@ -12,7 +12,7 @@ test.describe("SelectFileView - ファイル選択画面", () => {
 
   test("ページタイトルと説明が表示される", async ({ page }) => {
     // ページにタイトルが表示されることを確認
-    const title = page.locator("h1");
+    const title = page.getByRole("heading", { name: "ファイルを選択" });
     await expect(title).toBeVisible();
 
     // 説明文が表示されることを確認

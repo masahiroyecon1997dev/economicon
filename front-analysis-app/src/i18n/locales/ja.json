@@ -57,6 +57,8 @@
     "TimeSeriesDataAnalysis": "時系列データ分析"
   },
   "LeftSideMenu": {
+    "ImportData": "データ取り込み",
+    "SaveData": "保存",
     "Tables": "テーブル一覧",
     "NoTablesImported": "取り込まれたテーブルはありません。",
     "MenuDuplicateTable": "テーブルを複製",
