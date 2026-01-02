@@ -44,7 +44,7 @@ class TestCreateSimulationDataTable(APITestCase):
         )
 
         response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK
         self.assertEqual(response_data['code'], 'OK')
         self.assertEqual(response_data['result']['tableName'], 'test_table')
 
@@ -87,7 +87,7 @@ class TestCreateSimulationDataTable(APITestCase):
         )
 
         response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK
         self.assertEqual(response_data['code'], 'OK')
         self.assertEqual(response_data['result']['tableName'], 'fixed_table')
 
@@ -134,7 +134,7 @@ class TestCreateSimulationDataTable(APITestCase):
         )
 
         response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK
         self.assertEqual(response_data['code'], 'OK')
         self.assertEqual(response_data['result']['tableName'], 'mixed_table')
 
@@ -186,7 +186,7 @@ class TestCreateSimulationDataTable(APITestCase):
             content_type='application/json'
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST
 
     def test_validation_error_invalid_num_rows(self):
         """無効な行数のバリデーションエラーテスト"""
@@ -207,7 +207,7 @@ class TestCreateSimulationDataTable(APITestCase):
             content_type='application/json'
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST
 
     def test_validation_error_empty_column_settings(self):
         """空の列設定のバリデーションエラーテスト"""
@@ -224,7 +224,7 @@ class TestCreateSimulationDataTable(APITestCase):
             content_type='application/json'
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST
 
     def test_validation_error_missing_column_name(self):
         """列名が不足している場合のバリデーションエラーテスト"""
@@ -245,7 +245,7 @@ class TestCreateSimulationDataTable(APITestCase):
             content_type='application/json'
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST
 
     def test_validation_error_invalid_data_type(self):
         """無効なデータタイプのバリデーションエラーテスト"""
@@ -266,7 +266,7 @@ class TestCreateSimulationDataTable(APITestCase):
             content_type='application/json'
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST
 
     def test_validation_error_missing_distribution_params(self):
         """分布パラメータが不足している場合のバリデーションエラーテスト"""
@@ -288,7 +288,7 @@ class TestCreateSimulationDataTable(APITestCase):
             content_type='application/json'
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST
 
     def test_validation_error_missing_fixed_value(self):
         """固定値が不足している場合のバリデーションエラーテスト"""
@@ -309,7 +309,7 @@ class TestCreateSimulationDataTable(APITestCase):
             content_type='application/json'
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST
 
     def test_validation_error_invalid_distribution_type(self):
         """無効な分布タイプのバリデーションエラーテスト"""
@@ -331,7 +331,7 @@ class TestCreateSimulationDataTable(APITestCase):
             content_type='application/json'
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST
 
     def test_validation_error_invalid_distribution_params(self):
         """無効な分布パラメータのバリデーションエラーテスト"""
@@ -353,4 +353,4 @@ class TestCreateSimulationDataTable(APITestCase):
             content_type='application/json'
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST
