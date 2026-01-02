@@ -10,7 +10,7 @@ from .data.tables_manager import TablesManager
 from .abstract_api import AbstractApi, ApiError
 
 
-class RenameColumnName(AbstractApi):
+class RenameColumn(AbstractApi):
     """
     列名変更APIのPythonロジック
 
@@ -84,10 +84,10 @@ class RenameColumnName(AbstractApi):
             raise ApiError(message) from e
 
 
-def rename_column_name(table_name: str,
+def rename_column(table_name: str,
                        old_column_name: str,
                        new_column_name: str) -> Dict:
-    api = RenameColumnName(table_name, old_column_name, new_column_name)
+    api = RenameColumn(table_name, old_column_name, new_column_name)
     validation_error = api.validate()
     if validation_error:
         raise validation_error
