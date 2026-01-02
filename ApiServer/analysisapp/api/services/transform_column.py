@@ -1,0 +1,159 @@
+﻿import polars as pl
+import math
+from .django_compat import gettext as _
+from typing import Dict, Optional
+from ..utils.validator.common_validators import ValidationError
+from ..utils.validator.tables_manager_validator import (
+    validate_existed_table_name,
+    validate_new_column_name,
+    validate_existed_column_name
+)
+from .data.tables_manager import TablesManager
+from .abstract_api import (AbstractApi, ApiError)
+
+
+class TransformColumn(AbstractApi):
+    """
+    繝・・繝悶Ν縺ｮ蛻励・蛟､繧貞､画鋤縺励※譁ｰ縺励＞蛻励ｒ霑ｽ蜉縺吶ｋ縺溘ａ縺ｮAPI繧ｯ繝ｩ繧ｹ
+
+    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ謖・ｮ壹＆繧後◆蛻励・蛟､繧貞､画鋤縺励・    謖・ｮ壹＆繧後◆蛻励・蜿ｳ髫｣縺ｫ譁ｰ縺励＞蛻励ｒ謖ｿ蜈･縺励∪縺吶・    螟画鋤譁ｹ豕輔・蟇ｾ謨ｰ螟画鋤縲∫ｴｯ荵怜､画鋤縲√∪縺溘・繝ｫ繝ｼ繝亥､画鋤繧偵し繝昴・繝医＠縺ｾ縺吶・    """
+    def __init__(self, table_name: str, source_column_name: str,
+                 new_column_name: str, transform_method: str,
+                 log_base: Optional[float] = None,
+                 exponent: Optional[float] = None,
+                 root_index: Optional[float] = None):
+        self.tables_manager = TablesManager()
+        self.table_name = table_name
+        self.source_column_name = source_column_name
+        self.new_column_name = new_column_name
+        self.transform_method = transform_method
+        self.log_base = log_base
+        self.exponent = exponent
+        self.root_index = root_index
+        self.param_names = {
+                'table_name': 'tableName',
+                'source_column': 'sourceColumnName',
+                'new_column': 'newColumnName',
+                'transform_method': 'transformMethod',
+            }
+
+    def validate(self):
+        try:
+            table_name_list = self.tables_manager.get_table_name_list()
+            validate_existed_table_name(
+                self.table_name,
+                table_name_list,
+                self.param_names['table_name'])
+            column_name_list = self.tables_manager.get_column_name_list(
+                self.table_name)
+            validate_existed_column_name(
+                self.source_column_name,
+                column_name_list,
+                self.param_names['source_column'])
+            validate_new_column_name(
+                self.new_column_name,
+                column_name_list,
+                self.param_names['new_column'])
+
+            # Validate transform method
+            valid_methods = ['log', 'power', 'root']
+            if self.transform_method not in valid_methods:
+                raise ValidationError(
+                    f"transformMethod '{self.transform_method}' is invalid. "
+                    f"Valid methods are: {', '.join(valid_methods)}")
+
+            # Validate log base if provided
+            if self.transform_method == 'log' and self.log_base is not None:
+                if self.log_base <= 0 or self.log_base == 1:
+                    raise ValidationError(
+                        "logBase must be a positive number not equal to 1")
+
+            # Validate exponent if provided
+            if self.transform_method == 'power' and self.exponent is not None:
+                if not isinstance(self.exponent, (int, float)):
+                    raise ValidationError("exponent must be a number")
+
+            # Validate root index if provided
+            if self.transform_method == 'root' and self.root_index is not None:
+                if not (isinstance(self.root_index, (int, float))
+                        or self.root_index == 0):
+                    raise ValidationError("rootIndex must be "
+                                          "a non-zero number")
+
+            return None
+        except ValidationError as e:
+            return e
+
+    def execute(self):
+        try:
+            table_info = self.tables_manager.get_table(self.table_name)
+            df = table_info.table
+
+            # Find the insert position (right of source column)
+            insert_index = df.columns.index(self.source_column_name) + 1
+
+            # Apply transformation based on method
+            if self.transform_method == 'log':
+                if self.log_base is None:
+                    # Natural logarithm
+                    transformed_series = df.select(
+                        pl.col(self.source_column_name).log()
+                    ).to_series()
+                else:
+                    # Custom base logarithm using change of base formula
+                    transformed_series = df.select(
+                        pl.col(self.source_column_name
+                               ).log() / math.log(self.log_base)
+                    ).to_series()
+            elif self.transform_method == 'power':
+                exponent = self.exponent if self.exponent is not None else 2.0
+                transformed_series = df.select(
+                    pl.col(self.source_column_name).pow(exponent)
+                ).to_series()
+            elif self.transform_method == 'root':
+                root_index = self.root_index if (self.root_index
+                                                 is not None) else 2.0
+                # Root transformation using power with reciprocal
+                transformed_series = df.select(
+                    pl.col(self.source_column_name).pow(1.0 / root_index)
+                ).to_series()
+            else:
+                raise ValidationError(
+                    f"Unsupported transform method: {self.transform_method}")
+
+            # Rename the transformed series
+            transformed_series = transformed_series.alias(self.new_column_name)
+
+            # Insert the new column
+            df_with_new_col = df.insert_column(
+                index=insert_index,
+                column=transformed_series)
+
+            # Update the table
+            self.tables_manager.update_table(
+                self.table_name, df_with_new_col)
+
+            # Return result
+            result = {'tableName': self.table_name,
+                      'columnName': self.new_column_name}
+            return result
+        except Exception as e:
+            message = _("An unexpected error occurred during "
+                        "column transformation processing")
+            raise ApiError(message) from e
+
+
+def transform_column(table_name: str,
+                     source_column_name: str,
+                     new_column_name: str,
+                     transform_method: str,
+                     log_base: Optional[float] = None,
+                     exponent: Optional[float] = None,
+                     root_index: Optional[float] = None) -> Dict:
+    api = TransformColumn(table_name, source_column_name, new_column_name,
+                          transform_method, log_base, exponent, root_index)
+    validation_error = api.validate()
+    if validation_error:
+        raise validation_error
+    result = api.execute()
+    return result
