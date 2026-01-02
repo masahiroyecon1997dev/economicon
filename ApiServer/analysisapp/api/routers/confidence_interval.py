@@ -3,23 +3,22 @@ from fastapi import APIRouter, Request, status as http_status
 from ..i18n import _
 from ..utils import create_success_response, create_error_response, create_log_api_request
 from ..utils.validator import ValidationError
-from ..services.add_column import add_column
+from ..services.confidence_interval import confidence_interval
 from ..services import ApiError
-from ..schemas import AddColumnRequest
+from ..schemas import ConfidenceIntervalRequest
 
-# ルーターの作成
 router = APIRouter()
 
 
-@router.post("/add-column")
-async def add_column_endpoint(request: Request, body: AddColumnRequest):
-    """カラムを追加するエンドポイント
+@router.post("/confidence-interval")
+async def confidence_interval_endpoint(request: Request, body: ConfidenceIntervalRequest):
+    """信頼区間計算を行うエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : AddColumnRequest
+    body : ConfidenceIntervalRequest
         リクエストボディ
 
     Returns
@@ -31,11 +30,12 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
         # リクエスト受け取りログ
         create_log_api_request(request)
 
-        # ビジネスロジックの実行（既存のpython_apisをそのまま使用）
-        result = add_column(
+        # ビジネスロジックの実行
+        result = confidence_interval(
             table_name=body.tableName,
-            new_column_name=body.newColumnName,
-            add_position_column=body.addPositionColumn
+            column_name=body.columnName,
+            confidence_level=body.confidenceLevel,
+            statistic_type=body.statisticType
         )
 
         return create_success_response(
@@ -55,8 +55,15 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
             e.message
         )
 
+    except KeyError as e:
+        message = _("Required parameter is missing: {}").format(str(e))
+        return create_error_response(
+            http_status.HTTP_400_BAD_REQUEST,
+            message
+        )
+
     except Exception as e:
-        message = _("An unexpected error occurred during adding column processing")
+        message = _("An unexpected error occurred during confidence interval processing")
         return create_error_response(
             http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             message,

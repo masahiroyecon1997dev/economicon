@@ -3,39 +3,40 @@ from fastapi import APIRouter, Request, status as http_status
 from ..i18n import _
 from ..utils import create_success_response, create_error_response, create_log_api_request
 from ..utils.validator import ValidationError
-from ..services.add_column import add_column
+from ..services.probit_regression import probit_regression
 from ..services import ApiError
-from ..schemas import AddColumnRequest
+from ..schemas import ProbitRegressionRequest
 
-# ルーターの作成
 router = APIRouter()
 
 
-@router.post("/add-column")
-async def add_column_endpoint(request: Request, body: AddColumnRequest):
-    """カラムを追加するエンドポイント
+@router.post("/probit-regression")
+async def probit_regression_endpoint(request: Request, body: ProbitRegressionRequest):
+    """
+    プロビット分析を実行するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : AddColumnRequest
+    body : ProbitRegressionRequest
         リクエストボディ
+        - tableName: テーブル名
+        - dependentVariable: 被説明変数の列名
+        - explanatoryVariables: 説明変数の列名リスト
 
     Returns
     -------
     JSONResponse
-        処理結果
+        プロビット分析の結果
     """
     try:
-        # リクエスト受け取りログ
         create_log_api_request(request)
 
-        # ビジネスロジックの実行（既存のpython_apisをそのまま使用）
-        result = add_column(
+        result = probit_regression(
             table_name=body.tableName,
-            new_column_name=body.newColumnName,
-            add_position_column=body.addPositionColumn
+            dependent_variable=body.dependentVariable,
+            explanatory_variables=body.explanatoryVariables
         )
 
         return create_success_response(
@@ -56,7 +57,7 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
         )
 
     except Exception as e:
-        message = _("An unexpected error occurred during adding column processing")
+        message = _("An unexpected error occurred during probit regression processing")
         return create_error_response(
             http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             message,

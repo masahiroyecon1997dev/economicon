@@ -3,24 +3,27 @@ from fastapi import APIRouter, Request, status as http_status
 from ..i18n import _
 from ..utils import create_success_response, create_error_response, create_log_api_request
 from ..utils.validator import ValidationError
-from ..services.add_column import add_column
+from ..services.rename_column import rename_column
 from ..services import ApiError
-from ..schemas import AddColumnRequest
+from ..schemas import RenameColumnRequest
 
-# ルーターの作成
 router = APIRouter()
 
 
-@router.post("/add-column")
-async def add_column_endpoint(request: Request, body: AddColumnRequest):
-    """カラムを追加するエンドポイント
+@router.post("/rename-column-name")
+async def rename_column_name_endpoint(request: Request, body: RenameColumnRequest):
+    """
+    列名変更エンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : AddColumnRequest
+    body : RenameColumnNameRequest
         リクエストボディ
+        - tableName: テーブル名
+        - oldColumnName: 旧列名
+        - newColumnName: 新列名
 
     Returns
     -------
@@ -28,14 +31,12 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
         処理結果
     """
     try:
-        # リクエスト受け取りログ
         create_log_api_request(request)
 
-        # ビジネスロジックの実行（既存のpython_apisをそのまま使用）
-        result = add_column(
-            table_name=body.tableName,
-            new_column_name=body.newColumnName,
-            add_position_column=body.addPositionColumn
+        result = rename_column(
+            body.tableName,
+            body.oldColumnName,
+            body.newColumnName
         )
 
         return create_success_response(
@@ -56,7 +57,7 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
         )
 
     except Exception as e:
-        message = _("An unexpected error occurred during adding column processing")
+        message = _("An unexpected error occurred during renaming column processing")
         return create_error_response(
             http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             message,

@@ -18,7 +18,7 @@ class ImportExcelByFile(AbstractApi):
     テーブル名はファイル名から自動生成されます。
     """
 
-    def __init__(self, file_data: BinaryIO, file_name: str):
+    def __init__(self, file_data: BinaryIO | None, file_name: str | None):
         self.tables_manager = TablesManager()
         # テーブルマネージャーの初期化
         self.tables_manager = TablesManager()
@@ -26,10 +26,6 @@ class ImportExcelByFile(AbstractApi):
         self.file_data = file_data
         # ファイル名
         self.file_name = file_name
-        # 自動生成されるテーブル名
-        table_name_list = self.tables_manager.get_table_name_list()
-        self.table_name = create_table_name_by_file_name(
-            file_name, table_name_list)
         # パラメータ名のマッピング
         self.param_names = {
             'file': 'file',
@@ -41,10 +37,13 @@ class ImportExcelByFile(AbstractApi):
             # ファイルデータの基本チェック
             if not self.file_data or not self.file_name:
                 raise ValidationError(_("File data or file name is missing"))
+            else:
+                self.validated_file_data: BinaryIO = self.file_data
+                self.validated_file_name: str = self.file_name
 
             # Excelファイルの拡張子チェック
-            if not (self.file_name.lower().endswith('.xlsx') or
-                    self.file_name.lower().endswith('.xls')):
+            if not (self.validated_file_name.lower().endswith('.xlsx') or
+                    self.validated_file_name.lower().endswith('.xls')):
                 raise ValidationError(_("File must be an Excel file"))
 
             return None
@@ -55,7 +54,12 @@ class ImportExcelByFile(AbstractApi):
         # Excelファイルのインポート処理
         try:
             # ExcelファイルをPolarsデータフレームに変換
-            df = pl.read_excel(io.BytesIO(self.file_data.read()))
+            df = pl.read_excel(io.BytesIO(self.validated_file_data.read()))
+
+            # 自動生成されるテーブル名
+            table_name_list = self.tables_manager.get_table_name_list()
+            self.table_name = create_table_name_by_file_name(
+                self.validated_file_name, table_name_list)
 
             # テーブルを作成
             self.tables_manager.store_table(self.table_name, df)
@@ -77,7 +81,7 @@ class ImportExcelByFile(AbstractApi):
             raise ApiError(message) from e
 
 
-def import_excel_by_file(file_data: BinaryIO, file_name: str) -> Dict:
+def import_excel_by_file(file_data: BinaryIO | None, file_name: str | None) -> Dict:
     """
     Excelファイルからデータをインポートしてテーブルを作成する関数
 

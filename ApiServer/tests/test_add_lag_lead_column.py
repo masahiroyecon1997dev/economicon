@@ -17,15 +17,15 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        # テーブルをクリア
-        manager.clear_tables()
-        # テスト用テーブルをセット
-        df = pl.DataFrame({
-            'group': ['A', 'A', 'A', 'B', 'B', 'B'],
-            'time': [1, 2, 3, 1, 2, 3],
-            'value': [10, 20, 30, 40, 50, 60]
-        })
-        manager.store_table('TestTable', df)
+    # テーブルをクリア
+    manager.clear_tables()
+    # テスト用テーブルをセット
+    df = pl.DataFrame({
+        'group': ['A', 'A', 'A', 'B', 'B', 'B'],
+        'time': [1, 2, 3, 1, 2, 3],
+        'value': [10, 20, 30, 40, 50, 60]
+    })
+    manager.store_table('TestTable', df)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()

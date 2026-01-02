@@ -3,23 +3,23 @@ from fastapi import APIRouter, Request, status as http_status
 from ..i18n import _
 from ..utils import create_success_response, create_error_response, create_log_api_request
 from ..utils.validator import ValidationError
-from ..services.add_column import add_column
+from ..services.add_lag_lead_column import add_lag_lead_column
 from ..services import ApiError
-from ..schemas import AddColumnRequest
+from ..schemas import AddLagLeadColumnRequest
 
 # ルーターの作成
 router = APIRouter()
 
 
-@router.post("/add-column")
-async def add_column_endpoint(request: Request, body: AddColumnRequest):
-    """カラムを追加するエンドポイント
+@router.post("/add-lag-lead-column")
+async def add_lag_lead_column_endpoint(request: Request, body: AddLagLeadColumnRequest):
+    """ラグ・リードカラムを追加するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : AddColumnRequest
+    body : AddLagLeadColumnRequest
         リクエストボディ
 
     Returns
@@ -31,11 +31,13 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
         # リクエスト受け取りログ
         create_log_api_request(request)
 
-        # ビジネスロジックの実行（既存のpython_apisをそのまま使用）
-        result = add_column(
+        # ビジネスロジックの実行
+        result = add_lag_lead_column(
             table_name=body.tableName,
+            source_column=body.sourceColumn,
             new_column_name=body.newColumnName,
-            add_position_column=body.addPositionColumn
+            periods=body.periods,
+            group_columns=body.groupColumns
         )
 
         return create_success_response(
@@ -56,7 +58,7 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
         )
 
     except Exception as e:
-        message = _("An unexpected error occurred during adding column processing")
+        message = _("An unexpected error occurred during adding lag/lead column processing")
         return create_error_response(
             http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             message,
