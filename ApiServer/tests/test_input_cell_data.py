@@ -1,131 +1,134 @@
-from rest_framework.test import APITestCase
-from rest_framework import status
-import json
-from ..apis.data.tables_manager import TablesManager
+import pytest
+from fastapi.testclient import TestClient
+from fastapi import status
 import polars as pl
 
+from main import app
+from analysisapp.api.services.data.tables_manager import TablesManager
 
-class TestApiInputCellData(APITestCase):
-    def setUp(self):
-        self.tables_manager = TablesManager()
-        self.tables_manager.clear_tables()
+
+@pytest.fixture
+def client():
+    """TestClientのフィクスチャ"""
+    return TestClient(app)
+
+
+@pytest.fixture
+def tables_manager():
+    """TablesManagerのフィクスチャ"""
+    manager = TablesManager()
+        manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2, 3, 4, 5, 6, 7, 1, 2, 3],
             'B': [4, 5, 6, 7, 8, 9, 10, 4, 5, 6]
         })
-        self.tables_manager.store_table('TestTable', df)
+        manager.store_table('TestTable', df)
+    yield manager
+    # テスト後のクリーンアップ
+    manager.clear_tables()
 
-    def test_input_cell_data_success(self):
-        payload = {
-            'tableName': 'TestTable',
-            'columnName': 'A',
-            'rowIndex': 2,
-            'newValue': 99
-        }
-        response = self.client.post(
-            '/api/input-cell-data',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
-        df = self.tables_manager.get_table('TestTable').table
-        self.assertEqual(df['A'][1], 99)
 
-    def test_input_cell_data_success_with_string(self):
-        payload = {
-            'tableName': 'TestTable',
-            'columnName': 'A',
-            'rowIndex': 1,
-            'newValue': 'AAA'
-        }
-        response = self.client.post(
-            '/api/input-cell-data',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
+def test_input_cell_data_success(client, tables_manager):
+    payload = {
+        'tableName': 'TestTable',
+        'columnName': 'A',
+        'rowIndex': 2,
+        'newValue': 99
+    }
+    response = client.post(
+        '/api/input-cell-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data['code'] == 'OK'
+    df = tables_manager.get_table('TestTable').table
+    assert df['A'][1] == 99
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
-        df = self.tables_manager.get_table('TestTable').table
-        self.assertEqual(df['A'][0], 'AAA')
 
-    def test_input_cell_data_invalid_table(self):
-        payload = {
-            'tableName': 'NoTable',
-            'columnName': 'A',
-            'rowIndex': 0,
-            'newValue': 10
-        }
-        response = self.client.post(
-            '/api/input-cell-data',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
+def test_input_cell_data_success_with_string(client, tables_manager):
+    payload = {
+        'tableName': 'TestTable',
+        'columnName': 'A',
+        'rowIndex': 1,
+        'newValue': 'AAA'
+    }
+    response = client.post(
+        '/api/input-cell-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data['code'] == 'OK'
+    df = tables_manager.get_table('TestTable').table
+    assert df['A'][0] == 'AAA'
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertIn(response_data['message'],
-                      "tableName 'NoTable' does not exist.")
 
-    def test_input_cell_data_invalid_column(self):
-        payload = {
-            'tableName': 'TestTable',
-            'columnName': 'Z',
-            'rowIndex': 0,
-            'newValue': 10
-        }
-        response = self.client.post(
-            '/api/input-cell-data',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
+def test_input_cell_data_invalid_table(client, tables_manager):
+    payload = {
+        'tableName': 'NoTable',
+        'columnName': 'A',
+        'rowIndex': 0,
+        'newValue': 10
+    }
+    response = client.post(
+        '/api/input-cell-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "tableName 'NoTable' does not exist." in response_data['message']
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertIn(response_data['message'],
-                      "columnName 'Z' does not exist.")
 
-    def test_input_cell_data_invalid_row_over(self):
-        payload = {
-            'tableName': 'TestTable',
-            'columnName': 'A',
-            'rowIndex': 100,
-            'newValue': 10
-        }
-        response = self.client.post(
-            '/api/input-cell-data',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
+def test_input_cell_data_invalid_column(client, tables_manager):
+    payload = {
+        'tableName': 'TestTable',
+        'columnName': 'Z',
+        'rowIndex': 0,
+        'newValue': 10
+    }
+    response = client.post(
+        '/api/input-cell-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "columnName 'Z' does not exist." in response_data['message']
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertIn(response_data['message'],
-                      "rowIndex must be between 1 and 10.")
 
-    def test_input_cell_data_invalid_row_string(self):
-        payload = {
-            'tableName': 'TestTable',
-            'columnName': 'A',
-            'rowIndex': 'String',
-            'newValue': 10
-        }
-        response = self.client.post(
-            '/api/input-cell-data',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
+def test_input_cell_data_invalid_row_over(client, tables_manager):
+    payload = {
+        'tableName': 'TestTable',
+        'columnName': 'A',
+        'rowIndex': 100,
+        'newValue': 10
+    }
+    response = client.post(
+        '/api/input-cell-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "rowIndex must be between 1 and 10." in response_data['message']
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertIn(response_data['message'],
-                      "rowIndex must be an integer.")
+
+def test_input_cell_data_invalid_row_string(client, tables_manager):
+    payload = {
+        'tableName': 'TestTable',
+        'columnName': 'A',
+        'rowIndex': 'String',
+        'newValue': 10
+    }
+    response = client.post(
+        '/api/input-cell-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "rowIndex must be an integer." in response_data['message']
