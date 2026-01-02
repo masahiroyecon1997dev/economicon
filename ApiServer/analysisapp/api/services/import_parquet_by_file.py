@@ -18,17 +18,13 @@ class ImportParquetByFile(AbstractApi):
     テーブル名はファイル名から自動生成されます。
     """
 
-    def __init__(self, file_data: BinaryIO, file_name: str):
+    def __init__(self, file_data: BinaryIO | None, file_name: str | None):
         # テーブルマネージャーの初期化
         self.tables_manager = TablesManager()
         # ファイルデータ
         self.file_data = file_data
         # ファイル名
         self.file_name = file_name
-        # 自動生成されるテーブル名
-        table_name_list = self.tables_manager.get_table_name_list()
-        self.table_name = create_table_name_by_file_name(
-            file_name, table_name_list)
         # パラメータ名のマッピング
         self.param_names = {
             'file': 'file',
@@ -40,9 +36,12 @@ class ImportParquetByFile(AbstractApi):
             # ファイルデータの基本チェック
             if not self.file_data or not self.file_name:
                 raise ValidationError(_("File data or file name is missing"))
+            else:
+                self.validated_file_data: BinaryIO = self.file_data
+                self.validated_file_name: str = self.file_name
 
             # Parquetファイルの拡張子チェック
-            if not self.file_name.lower().endswith('.parquet'):
+            if not self.validated_file_name.lower().endswith('.parquet'):
                 raise ValidationError(_("File must be a Parquet file"))
 
             return None
@@ -53,7 +52,12 @@ class ImportParquetByFile(AbstractApi):
         # Parquetファイルのインポート処理
         try:
             # ParquetファイルをPolarsデータフレームに変換
-            df = pl.read_parquet(io.BytesIO(self.file_data.read()))
+            df = pl.read_parquet(io.BytesIO(self.validated_file_data.read()))
+
+            # 自動生成されるテーブル名
+            table_name_list = self.tables_manager.get_table_name_list()
+            self.table_name = create_table_name_by_file_name(
+                self.validated_file_name, table_name_list)
 
             # テーブルを作成
             self.tables_manager.store_table(self.table_name, df)
@@ -76,7 +80,7 @@ class ImportParquetByFile(AbstractApi):
             raise ApiError(message) from e
 
 
-def import_parquet_by_file(file_data: BinaryIO, file_name: str) -> Dict:
+def import_parquet_by_file(file_data: BinaryIO | None, file_name: str | None) -> Dict:
     """
     Parquetファイルからデータをインポートしてテーブルを作成する関数
 

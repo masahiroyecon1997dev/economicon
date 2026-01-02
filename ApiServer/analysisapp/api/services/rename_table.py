@@ -9,7 +9,7 @@ from .data.tables_manager import TablesManager
 from .abstract_api import AbstractApi, ApiError
 
 
-class RenameTableName(AbstractApi):
+class RenameTable(AbstractApi):
     """
     テーブル名変更APIのPythonロジック
 
@@ -63,7 +63,7 @@ class RenameTableName(AbstractApi):
 
 
 def rename_table(old_table_name: str, new_table_name: str) -> Dict:
-    api = RenameTableName(old_table_name, new_table_name)
+    api = RenameTable(old_table_name, new_table_name)
     validation_error = api.validate()
     if validation_error:
         raise validation_error

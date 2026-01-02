@@ -17,14 +17,14 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        # テーブルをクリア
-        manager.clear_tables()
-        # テスト用テーブルをセット
-        df = pl.DataFrame({
-            'gender': ['male', 'female', 'female', 'male', 'other'],
-            'age': [25, 30, 35, 40, 28]
-        })
-        manager.store_table('TestTable', df)
+    # テーブルをクリア
+    manager.clear_tables()
+    # テスト用テーブルをセット
+    df = pl.DataFrame({
+        'gender': ['male', 'female', 'female', 'male', 'other'],
+        'age': [25, 30, 35, 40, 28]
+    })
+    manager.store_table('TestTable', df)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -46,9 +46,8 @@ def test_add_dummy_column_success(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    assert response_data['result']['tableName'], 'TestTable')
-    assert response_data['result']['dummyColumnName'],
-                     'is_female')
+    assert response_data['result']['tableName'] == 'TestTable'
+    assert response_data['result']['dummyColumnName'] == 'is_female'
     # ダミー変数列が正しく作成されているかチェック
     df = tables_manager.get_table('TestTable').table
     assert 'is_female' in df.columns
@@ -73,7 +72,7 @@ def test_add_dummy_column_invalid_table(client, tables_manager):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
     assert 'NoTable' in response_data['message']
-    assert 'does not exist', response_data['message'])
+    assert 'does not exist' in response_data['message']
 
 
 def test_add_dummy_column_invalid_source_column(client, tables_manager):
@@ -92,7 +91,7 @@ def test_add_dummy_column_invalid_source_column(client, tables_manager):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
     assert 'invalid_column' in response_data['message']
-    assert 'does not exist', response_data['message'])
+    assert 'does not exist' in response_data['message']
 
 
 def test_add_dummy_column_duplicate_column_name(client, tables_manager):

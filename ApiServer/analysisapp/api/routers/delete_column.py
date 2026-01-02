@@ -3,23 +3,22 @@ from fastapi import APIRouter, Request, status as http_status
 from ..i18n import _
 from ..utils import create_success_response, create_error_response, create_log_api_request
 from ..utils.validator import ValidationError
-from ..services.add_column import add_column
+from ..services.delete_column import delete_column
 from ..services import ApiError
-from ..schemas import AddColumnRequest
+from ..schemas import DeleteColumnRequest
 
-# ルーターの作成
 router = APIRouter()
 
 
-@router.post("/add-column")
-async def add_column_endpoint(request: Request, body: AddColumnRequest):
-    """カラムを追加するエンドポイント
+@router.post("/delete-column")
+async def delete_column_endpoint(request: Request, body: DeleteColumnRequest):
+    """カラムを削除するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : AddColumnRequest
+    body : DeleteColumnRequest
         リクエストボディ
 
     Returns
@@ -31,11 +30,10 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
         # リクエスト受け取りログ
         create_log_api_request(request)
 
-        # ビジネスロジックの実行（既存のpython_apisをそのまま使用）
-        result = add_column(
+        # ビジネスロジックの実行
+        result = delete_column(
             table_name=body.tableName,
-            new_column_name=body.newColumnName,
-            add_position_column=body.addPositionColumn
+            column_name=body.columnName
         )
 
         return create_success_response(
@@ -56,7 +54,7 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
         )
 
     except Exception as e:
-        message = _("An unexpected error occurred during adding column processing")
+        message = _("An unexpected error occurred during column deletion processing")
         return create_error_response(
             http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             message,
