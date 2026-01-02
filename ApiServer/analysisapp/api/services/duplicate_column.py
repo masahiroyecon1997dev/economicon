@@ -1,4 +1,4 @@
-﻿from typing import Dict
+from typing import Dict
 
 import polars as pl
 from .django_compat import gettext as _
@@ -13,9 +13,11 @@ from .abstract_api import AbstractApi, ApiError
 
 class DuplicateColumn(AbstractApi):
     """
-    繝・・繝悶Ν縺ｮ譌｢蟄倥・蛻励ｒ隍・｣ｽ縺励※譁ｰ縺励＞蛻励→縺励※霑ｽ蜉縺吶ｋ縺溘ａ縺ｮAPI繧ｯ繝ｩ繧ｹ
+    テーブルの既存の列を複製して新しい列として追加するためのAPIクラス
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ謖・ｮ壹＆繧後◆蛻励ｒ隍・｣ｽ縺励∝・縺ｮ蛻励・蜿ｳ髫｣縺ｫ譁ｰ縺励＞蛻励→縺励※謖ｿ蜈･縺励∪縺吶・    譁ｰ縺励＞蛻励・蜈・・蛻励→蜷後§蛟､縺ｧ蛻晄悄蛹悶＆繧後∪縺吶・    """
+    指定されたテーブルの指定された列を複製し、元の列の右隣に新しい列として挿入します。
+    新しい列は元の列と同じ値で初期化されます。
+    """
     def __init__(self, table_name: str, source_column_name: str,
                  new_column_name: str):
         self.tables_manager = TablesManager()
@@ -57,20 +59,22 @@ class DuplicateColumn(AbstractApi):
             table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
 
-            # 蜈・・蛻励・繝・・繧ｿ繧貞叙蠕・            source_column_data = df[self.source_column_name].to_list()
+            # 元の列のデータを取得
+            source_column_data = df[self.source_column_name].to_list()
 
-            # 謖ｿ蜈･菴咲ｽｮ繧定ｨ育ｮ暦ｼ亥・縺ｮ蛻励・蜿ｳ髫｣・・            insert_index = df.columns.index(self.source_column_name) + 1
+            # 挿入位置を計算（元の列の右隣）
+            insert_index = df.columns.index(self.source_column_name) + 1
 
-            # 譁ｰ縺励＞蛻励ｒ蜈・・蛻励・繝・・繧ｿ縺ｧ菴懈・縺励√ョ繝ｼ繧ｿ繝輔Ξ繝ｼ繝縺ｫ謖ｿ蜈･
+            # 新しい列を元の列のデータで作成し、データフレームに挿入
             df_with_duplicated_col = df.insert_column(
                 index=insert_index,
                 column=pl.Series(self.new_column_name, source_column_data))
 
-            # 繝・・繝悶Ν繧呈峩譁ｰ
+            # テーブルを更新
             self.tables_manager.update_table(
                 self.table_name, df_with_duplicated_col)
 
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {'tableName': self.table_name,
                       'columnName': self.new_column_name}
             return result

@@ -1,4 +1,4 @@
-﻿from typing import Dict
+from typing import Dict
 
 import polars as pl
 from .django_compat import gettext as _
@@ -14,9 +14,11 @@ from .abstract_api import AbstractApi, ApiError
 
 class AddDummyColumn(AbstractApi):
     """
-    繝・・繝悶Ν縺ｮ謖・ｮ壼・縺九ｉ繝繝溘・螟画焚蛻励ｒ菴懈・縺吶ｋ縺溘ａ縺ｮAPI繧ｯ繝ｩ繧ｹ
+    テーブルの指定列からダミー変数列を作成するためのAPIクラス
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ謖・ｮ壹＆繧後◆蛻励・蛟､縺ｫ蝓ｺ縺･縺・※縲√ム繝溘・螟画焚蛻励ｒ菴懈・縺励∪縺吶・    謖・ｮ壹＆繧後◆蛟､縺・縺ｫ縺ｪ繧翫√◎繧御ｻ･螟悶・蛟､縺ｯ0縺ｫ縺ｪ繧翫∪縺吶・    """
+    指定されたテーブルの指定された列の値に基づいて、ダミー変数列を作成します。
+    指定された値が1になり、それ以外の値は0になります。
+    """
     def __init__(self, table_name: str, source_column_name: str,
                  dummy_column_name: str, target_value: str):
         self.tables_manager = TablesManager()
@@ -58,19 +60,20 @@ class AddDummyColumn(AbstractApi):
             table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
 
-            # 繝繝溘・螟画焚蛻励ｒ菴懈・・域欠螳壹＆繧後◆蛟､縺ｪ繧・縲√◎繧御ｻ･螟悶・0・・            dummy_values = (
+            # ダミー変数列を作成（指定された値なら1、それ以外は0）
+            dummy_values = (
                 df[self.source_column_name] == self.target_value).cast(
                     pl.Int32)
             dummy_column = pl.Series(self.dummy_column_name, dummy_values)
 
-            # 譁ｰ縺励＞蛻励ｒ繝・・繧ｿ繝輔Ξ繝ｼ繝縺ｫ霑ｽ蜉
+            # 新しい列をデータフレームに追加
             df_with_dummy = df.with_columns(dummy_column)
 
-            # 繝・・繝悶Ν繧呈峩譁ｰ
+            # テーブルを更新
             self.tables_manager.update_table(
                 self.table_name, df_with_dummy)
 
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {'tableName': self.table_name,
                       'dummyColumnName': self.dummy_column_name}
             return result

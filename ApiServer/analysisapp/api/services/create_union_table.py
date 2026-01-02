@@ -1,4 +1,4 @@
-﻿from typing import Dict, List
+from typing import Dict, List
 
 import polars as pl
 from .django_compat import gettext as _
@@ -12,9 +12,11 @@ from .abstract_api import AbstractApi, ApiError
 
 class CreateUnionTable(AbstractApi):
     """
-    繝ｦ繝九が繝ｳ繝・・繝悶Ν菴懈・API縺ｮPython繝ｭ繧ｸ繝・け
+    ユニオンテーブル作成APIのPythonロジック
 
-    隍・焚縺ｮ繝・・繝悶Ν繧呈欠螳壹＆繧後◆蛻励〒繝ｦ繝九が繝ｳ・育ｵ仙粋・峨＠縲∵眠縺励＞繝・・繝悶Ν繧剃ｽ懈・縺励∪縺吶・    縺吶∋縺ｦ縺ｮ繝・・繝悶Ν縺ｫ蜈ｱ騾壹☆繧句・蜷阪ｒ謖・ｮ壹＠縺ｦ縲√◎繧後ｉ縺ｮ陦後ｒ邨仙粋縺励∪縺吶・    """
+    複数のテーブルを指定された列でユニオン（結合）し、新しいテーブルを作成します。
+    すべてのテーブルに共通する列名を指定して、それらの行を結合します。
+    """
     def __init__(
         self,
         union_table_name: str,
@@ -22,10 +24,13 @@ class CreateUnionTable(AbstractApi):
         column_names: List[str],
     ):
         self.tables_manager = TablesManager()
-        # 繝ｦ繝九が繝ｳ蠕後・繝・・繝悶Ν蜷・        self.union_table_name = union_table_name
-        # 繝ｦ繝九が繝ｳ縺吶ｋ繝・・繝悶Ν蜷阪Μ繧ｹ繝・        self.table_names = table_names
-        # 繝ｦ繝九が繝ｳ縺吶ｋ蛻怜錐繝ｪ繧ｹ繝・        self.column_names = column_names
-        # 繝代Λ繝｡繝ｼ繧ｿ蜷阪・繝槭ャ繝斐Φ繧ｰ
+        # ユニオン後のテーブル名
+        self.union_table_name = union_table_name
+        # ユニオンするテーブル名リスト
+        self.table_names = table_names
+        # ユニオンする列名リスト
+        self.column_names = column_names
+        # パラメータ名のマッピング
         self.param_names = {
             'union_table_name': 'unionTableName',
             'table_names': 'tableNames',
@@ -33,11 +38,11 @@ class CreateUnionTable(AbstractApi):
         }
 
     def validate(self):
-        # 蜈･蜉帛､縺ｮ繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+        # 入力値のバリデーション
         try:
             table_name_list = self.tables_manager.get_table_name_list()
 
-            # 譁ｰ縺励＞繝・・繝悶Ν蜷阪・驥崎､・メ繧ｧ繝・け
+            # 新しいテーブル名の重複チェック
             validate_new_table_name(
                 self.union_table_name,
                 table_name_list,
@@ -50,7 +55,7 @@ class CreateUnionTable(AbstractApi):
                 self.param_names['table_names']
             )
 
-            # 縺吶∋縺ｦ縺ｮ繝・・繝悶Ν縺ｧ謖・ｮ壹＆繧後◆蛻励′蟄伜惠縺吶ｋ縺薙→繧偵メ繧ｧ繝・け
+            # すべてのテーブルで指定された列が存在することをチェック
             for table_name in self.table_names:
                 table_column_name_list = \
                     self.tables_manager.get_column_name_list(
@@ -67,21 +72,25 @@ class CreateUnionTable(AbstractApi):
             return e
 
     def execute(self):
-        # 繝・・繝悶Ν繝ｦ繝九が繝ｳ蜃ｦ逅・        try:
-            # 蜷・ユ繝ｼ繝悶Ν縺九ｉ謖・ｮ壹＆繧後◆蛻励・縺ｿ繧帝∈謚槭＠縺ｦ繝・・繧ｿ繝輔Ξ繝ｼ繝縺ｮ繝ｪ繧ｹ繝医ｒ菴懈・
+        # テーブルユニオン処理
+        try:
+            # 各テーブルから指定された列のみを選択してデータフレームのリストを作成
             dataframes = []
             for table_name in self.table_names:
                 df = self.tables_manager.get_table(table_name).table
-                # 謖・ｮ壹＆繧後◆蛻励・縺ｿ繧帝∈謚・                selected_df = df.select(self.column_names)
+                # 指定された列のみを選択
+                selected_df = df.select(self.column_names)
                 dataframes.append(selected_df)
 
-            # 縺吶∋縺ｦ縺ｮ繝・・繧ｿ繝輔Ξ繝ｼ繝繧偵Θ繝九が繝ｳ・育ｸｦ譁ｹ蜷代↓邨仙粋・・            union_df = pl.concat(dataframes, how="vertical")
+            # すべてのデータフレームをユニオン（縦方向に結合）
+            union_df = pl.concat(dataframes, how="vertical")
 
-            # 譁ｰ縺励＞繝・・繝悶Ν諠・ｱ繧剃ｿ晏ｭ・            created_table_name = self.tables_manager.store_table(
+            # 新しいテーブル情報を保存
+            created_table_name = self.tables_manager.store_table(
                 self.union_table_name, union_df
             )
 
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {'tableName': created_table_name}
             return result
         except Exception as e:

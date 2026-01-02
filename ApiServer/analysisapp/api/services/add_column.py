@@ -1,4 +1,4 @@
-﻿from typing import Dict
+from typing import Dict
 
 import polars as pl
 from .django_compat import gettext as _
@@ -13,9 +13,11 @@ from .abstract_api import AbstractApi, ApiError
 
 class AddColumn(AbstractApi):
     """
-    繝・・繝悶Ν縺ｫ譁ｰ縺励＞蛻励ｒ霑ｽ蜉縺吶ｋ縺溘ａ縺ｮAPI繧ｯ繝ｩ繧ｹ
+    テーブルに新しい列を追加するためのAPIクラス
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ謖・ｮ壹＆繧後◆菴咲ｽｮ縺ｫ譁ｰ縺励＞蛻励ｒ謖ｿ蜈･縺励∪縺吶・    譁ｰ縺励＞蛻励・遨ｺ・・one・峨・蛟､縺ｧ蛻晄悄蛹悶＆繧後∪縺吶・    """
+    指定されたテーブルの指定された位置に新しい列を挿入します。
+    新しい列は空（None）の値で初期化されます。
+    """
     def __init__(
         self,
         table_name: str,
@@ -67,9 +69,9 @@ class AddColumn(AbstractApi):
                 index=insert_index,
                 column=pl.Series(self.new_column_name, new_column_data_none)
             )
-            # 譁ｰ縺励＞蛻励ｒ繝・・繧ｿ繝輔Ξ繝ｼ繝縺ｫ霑ｽ蜉
+            # 新しい列をデータフレームに追加
             self.tables_manager.update_table(self.table_name, df_with_new_col)
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {
                 'tableName': self.table_name,
                 'columnName': self.new_column_name

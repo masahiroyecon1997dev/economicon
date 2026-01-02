@@ -1,4 +1,4 @@
-﻿from typing import Dict
+from typing import Dict
 
 from .django_compat import gettext as _
 
@@ -8,21 +8,24 @@ from .abstract_api import AbstractApi, ApiError
 
 class GetSettings(AbstractApi):
     """
-    繧｢繝励Μ繧ｱ繝ｼ繧ｷ繝ｧ繝ｳ險ｭ螳壹ｒ蜿門ｾ励☆繧九◆繧√・API繧ｯ繝ｩ繧ｹ
+    アプリケーション設定を取得するためのAPIクラス
 
-    SettingsManager縺九ｉ險ｭ螳壽ュ蝣ｱ繧貞叙蠕励＠縺ｦ霑斐＠縺ｾ縺吶・    """
+    SettingsManagerから設定情報を取得して返します。
+    """
 
     def __init__(self):
         self.settings_manager = SettingsManager()
 
     def validate(self):
-        # 險ｭ螳壼叙蠕励↓縺ｯ繝舌Μ繝・・繧ｷ繝ｧ繝ｳ縺ｯ荳崎ｦ・        return None
+        # 設定取得にはバリデーションは不要
+        return None
 
     def execute(self):
         try:
-            # SettingsManager縺九ｉ險ｭ螳壹ｒ蜿門ｾ・            settings_info = self.settings_manager.get_settings()
+            # SettingsManagerから設定を取得
+            settings_info = self.settings_manager.get_settings()
 
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             return settings_info.to_dict()
 
         except Exception as e:
@@ -33,15 +36,17 @@ class GetSettings(AbstractApi):
 
 def get_setting() -> Dict:
     """
-    繧｢繝励Μ繧ｱ繝ｼ繧ｷ繝ｧ繝ｳ險ｭ螳壹ｒ蜿門ｾ励☆繧矩未謨ｰ
+    アプリケーション設定を取得する関数
 
     Returns:
-        Dict: 險ｭ螳壽ュ蝣ｱ繧貞性繧霎樊嶌
-            - osName: 繧ｯ繝ｩ繧､繧｢繝ｳ繝・S縺ｮ蜷榊燕
-            - defaultFolderPath: 繝輔ぃ繧､繝ｫ隱ｭ縺ｿ霎ｼ縺ｿ繧偵☆繧九ヵ繧ｩ繝ｫ繝繝代せ縺ｮ蛻晄悄蛟､
-            - displayRows: 繝・・繝悶Ν縺ｫ陦ｨ遉ｺ縺吶ｋ陦梧焚
-            - appLanguage: 繧｢繝励Μ繧ｱ繝ｼ繧ｷ繝ｧ繝ｳ縺ｮ陦ｨ遉ｺ險隱・            - encoding: 繝輔ぃ繧､繝ｫ隱ｭ縺ｿ霎ｼ縺ｿ譎ゅ・繝・ヵ繧ｩ繝ｫ繝医お繝ｳ繧ｳ繝ｼ繝・ぅ繝ｳ繧ｰ
-            - pathSeparator: 繝代せ蛹ｺ蛻・ｊ譁・ｭ・    """
+        Dict: 設定情報を含む辞書
+            - osName: クライアントOSの名前
+            - defaultFolderPath: ファイル読み込みをするフォルダパスの初期値
+            - displayRows: テーブルに表示する行数
+            - appLanguage: アプリケーションの表示言語
+            - encoding: ファイル読み込み時のデフォルトエンコーディング
+            - pathSeparator: パス区切り文字
+    """
     api = GetSettings()
     validation_error = api.validate()
     if validation_error:

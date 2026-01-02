@@ -1,5 +1,5 @@
 ---
-applyTo: "AnalysisApp/AnalysisApp/front-analysis-app/src/components/**/**/**/*.tsx"
+applyTo: "front-analysis-app/src/components/**/**/**/*.tsx"
 ---
 
 # React TypeScript + Tailwind CSS 開発規約

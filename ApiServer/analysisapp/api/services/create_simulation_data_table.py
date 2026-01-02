@@ -1,4 +1,4 @@
-﻿from typing import Any, Dict, List
+from typing import Any, Dict, List
 
 import polars as pl
 from .django_compat import gettext as _
@@ -16,10 +16,12 @@ from .abstract_api import AbstractApi, ApiError
 
 class CreateSimulationDataTable(AbstractApi):
     """
-    繧ｷ繝溘Η繝ｬ繝ｼ繧ｷ繝ｧ繝ｳ繝・・繧ｿ繝・・繝悶Ν繧剃ｽ懈・縺吶ｋ縺溘ａ縺ｮAPI繧ｯ繝ｩ繧ｹ
+    シミュレーションデータテーブルを作成するためのAPIクラス
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν蜷阪〒譁ｰ縺励＞繝・・繝悶Ν繧剃ｽ懈・縺励∵欠螳壹＆繧後◆蛻苓ｨｭ螳壹↓蠕薙▲縺ｦ
-    繧ｷ繝溘Η繝ｬ繝ｼ繧ｷ繝ｧ繝ｳ繝・・繧ｿ蛻励ｒ霑ｽ蜉縺励∪縺吶・    蜷・・縺ｯ蛻・ｸ・↓蠕薙≧繝ｩ繝ｳ繝繝繝・・繧ｿ縺ｾ縺溘・蝗ｺ螳壼､繧呈戟縺､縺薙→縺後〒縺阪∪縺吶・    """
+    指定されたテーブル名で新しいテーブルを作成し、指定された列設定に従って
+    シミュレーションデータ列を追加します。
+    各列は分布に従うランダムデータまたは固定値を持つことができます。
+    """
 
     def __init__(self, table_name: str, table_number_of_rows: int,
                  column_settings: List[Dict[str, Any]]):
@@ -35,7 +37,7 @@ class CreateSimulationDataTable(AbstractApi):
 
     def validate(self):
         try:
-            # 繝・・繝悶Ν蜷阪・讀懆ｨｼ
+            # テーブル名の検証
             table_name_list = self.tables_manager.get_table_name_list()
             validate_new_table_name(
                 self.table_name,
@@ -43,7 +45,7 @@ class CreateSimulationDataTable(AbstractApi):
                 self.param_names['table_name']
             )
 
-            # 陦梧焚縺ｮ讀懆ｨｼ
+            # 行数の検証
             validate_integer(self.table_number_of_rows,
                              self.param_names['table_number_of_rows'])
             if self.table_number_of_rows <= 0:
@@ -51,7 +53,7 @@ class CreateSimulationDataTable(AbstractApi):
                     _("The number of rows must be a positive integer.")
                 )
 
-            # 蛻苓ｨｭ螳壹・讀懆ｨｼ
+            # 列設定の検証
             if not isinstance(self.column_settings, list):
                 raise ValidationError(
                     _("Column settings must be a list.")
@@ -62,7 +64,7 @@ class CreateSimulationDataTable(AbstractApi):
                     _("At least one column setting is required.")
                 )
 
-            # 蜷・・險ｭ螳壹・隧ｳ邏ｰ讀懆ｨｼ
+            # 各列設定の詳細検証
             column_names = []
             for i, column_setting in enumerate(self.column_settings):
                 param_prefix = f"{self.param_names['column_settings']}[{i}]"
@@ -78,9 +80,9 @@ class CreateSimulationDataTable(AbstractApi):
             self, column_setting: Dict[str, Any],
             existing_column_names: List[str], param_prefix: str
     ):
-        """蛟句挨縺ｮ蛻苓ｨｭ螳壹ｒ讀懆ｨｼ"""
+        """個別の列設定を検証"""
 
-        # 蛻怜錐縺ｮ讀懆ｨｼ
+        # 列名の検証
         if 'columnName' not in column_setting:
             raise ValidationError(
                 _("Column name is required.")
@@ -94,7 +96,7 @@ class CreateSimulationDataTable(AbstractApi):
         )
         existing_column_names.append(column_name)
 
-        # 繝・・繧ｿ繧ｿ繧､繝励・讀懆ｨｼ
+        # データタイプの検証
         if 'dataType' not in column_setting:
             raise ValidationError(
                 _("Data type is required.")
@@ -106,7 +108,7 @@ class CreateSimulationDataTable(AbstractApi):
                 _("Data type must be 'distribution' or 'fixed'.")
             )
 
-        # 蛻・ｸ・ョ繝ｼ繧ｿ縺ｮ蝣ｴ蜷医・讀懆ｨｼ
+        # 分布データの場合の検証
         if data_type == 'distribution':
             if 'distributionType' not in column_setting:
                 raise ValidationError(
@@ -130,7 +132,7 @@ class CreateSimulationDataTable(AbstractApi):
                 distribution_type, distribution_params
             )
 
-        # 蝗ｺ螳壼､繝・・繧ｿ縺ｮ蝣ｴ蜷医・讀懆ｨｼ
+        # 固定値データの場合の検証
         elif data_type == 'fixed':
             if 'fixedValue' not in column_setting:
                 raise ValidationError(
@@ -139,15 +141,18 @@ class CreateSimulationDataTable(AbstractApi):
 
     def execute(self):
         try:
-            # 遨ｺ縺ｮ繝・・繝悶Ν繧剃ｽ懈・
+            # 空のテーブルを作成
             df = pl.DataFrame()
 
-            # 蜷・・險ｭ螳壹↓蠕薙▲縺ｦ繝・・繧ｿ繧堤函謌・            for column_setting in self.column_settings:
+            # 各列設定に従ってデータを生成
+            for column_setting in self.column_settings:
                 column_name = column_setting['columnName']
                 data_type = column_setting['dataType']
-                column_data = []  # 蛻晄悄蛹・
+                column_data = []  # 初期化
+
                 if data_type == 'distribution':
-                    # 蛻・ｸ・↓蠕薙▲縺ｦ繝・・繧ｿ繧堤函謌・                    distribution_type = column_setting['distributionType']
+                    # 分布に従ってデータを生成
+                    distribution_type = column_setting['distributionType']
                     distribution_params = column_setting['distributionParams']
                     column_data = generate_simulation_data(
                         distribution_type,
@@ -155,19 +160,20 @@ class CreateSimulationDataTable(AbstractApi):
                         self.table_number_of_rows
                     )
                 elif data_type == 'fixed':
-                    # 蝗ｺ螳壼､縺ｧ繝・・繧ｿ繧堤函謌・                    fixed_value = column_setting['fixedValue']
+                    # 固定値でデータを生成
+                    fixed_value = column_setting['fixedValue']
                     column_data = [fixed_value] * self.table_number_of_rows
 
-                # 蛻励ｒ繝・・繧ｿ繝輔Ξ繝ｼ繝縺ｫ霑ｽ蜉
+                # 列をデータフレームに追加
                 if df.is_empty():
                     df = pl.DataFrame({column_name: column_data})
                 else:
                     df = df.with_columns(pl.Series(column_name, column_data))
 
-            # 繝・・繝悶Ν繧堤匳骭ｲ
+            # テーブルを登録
             self.tables_manager.store_table(self.table_name, df)
 
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {
                 'tableName': self.table_name
             }
@@ -184,7 +190,7 @@ def create_simulation_data_table(
         num_rows: int,
         column_settings: List[Dict[str, Any]]
 ) -> Dict:
-    """繧ｷ繝溘Η繝ｬ繝ｼ繧ｷ繝ｧ繝ｳ繝・・繧ｿ繝・・繝悶Ν菴懈・縺ｮ繧ｨ繝ｳ繝医Μ繝ｼ繝昴う繝ｳ繝・""
+    """シミュレーションデータテーブル作成のエントリーポイント"""
     api = CreateSimulationDataTable(table_name, num_rows, column_settings)
     validation_error = api.validate()
     if validation_error:

@@ -1,4 +1,4 @@
-﻿from typing import Dict
+from typing import Dict
 
 import numpy as np
 from .django_compat import gettext as _
@@ -14,12 +14,13 @@ from .abstract_api import AbstractApi, ApiError
 
 class ConfidenceInterval(AbstractApi):
     """
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ蛻励・菫｡鬆ｼ蛹ｺ髢薙ｒ險育ｮ励☆繧九◆繧√・API繧ｯ繝ｩ繧ｹ
+    指定されたテーブルの列の信頼区間を計算するためのAPIクラス
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ謖・ｮ壹＆繧後◆蛻励↓蟇ｾ縺励※縲∵欠螳壹＆繧後◆邨ｱ險医・菫｡鬆ｼ蛹ｺ髢薙ｒ險育ｮ励＠縺ｾ縺吶・    繧ｵ繝昴・繝医☆繧狗ｵｱ險・ 蟷ｳ蝮・∽ｸｭ螟ｮ蛟､縲∵ｯ皮紫縲∝・謨｣縲∵ｨ呎ｺ門￥蟾ｮ
+    指定されたテーブルの指定された列に対して、指定された統計の信頼区間を計算します。
+    サポートする統計: 平均、中央値、比率、分散、標準偏差
     """
 
-    # 蛻ｩ逕ｨ蜿ｯ閭ｽ縺ｪ邨ｱ險医・遞ｮ鬘槭ｒ螳夂ｾｩ
+    # 利用可能な統計の種類を定義
     AVAILABLE_STATISTICS = {
         'mean': 'Mean',
         'median': 'Median',
@@ -44,7 +45,7 @@ class ConfidenceInterval(AbstractApi):
 
     def validate(self):
         try:
-            # 繝・・繝悶Ν蜷阪・讀懆ｨｼ
+            # テーブル名の検証
             table_name_list = self.tables_manager.get_table_name_list()
             validate_existed_table_name(
                 self.table_name,
@@ -52,7 +53,7 @@ class ConfidenceInterval(AbstractApi):
                 self.param_names['table_name']
             )
 
-            # 蛻怜錐縺ｮ讀懆ｨｼ
+            # 列名の検証
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
             validate_existed_column_name(
@@ -61,14 +62,14 @@ class ConfidenceInterval(AbstractApi):
                 self.param_names['column_name']
             )
 
-            # 邨ｱ險医ち繧､繝励・讀懆ｨｼ
+            # 統計タイプの検証
             validate_candidates(
                 self.statistic_type,
                 self.param_names['statistic_type'],
                 list(self.AVAILABLE_STATISTICS.keys())
             )
 
-            # 菫｡鬆ｼ蠎ｦ繝ｬ繝吶Ν縺ｮ讀懆ｨｼ
+            # 信頼度レベルの検証
             if not isinstance(self.confidence_level, (int, float)):
                 raise ValidationError("confidenceLevel must be a number")
 
@@ -85,15 +86,17 @@ class ConfidenceInterval(AbstractApi):
             table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
 
-            # 蛻励・繝・・繧ｿ繧貞叙蠕・            column_data = df[self.column_name].drop_nulls()
+            # 列のデータを取得
+            column_data = df[self.column_name].drop_nulls()
 
             if column_data.len() == 0:
                 raise ValidationError("Column contains no valid data")
 
-            # 繝・・繧ｿ繧・numpy array 縺ｫ螟画鋤
+            # データを numpy array に変換
             data_array = column_data.to_numpy()
 
-            # 邨ｱ險磯㍼縺ｨ菫｡鬆ｼ蛹ｺ髢薙ｒ險育ｮ・            match self.statistic_type:
+            # 統計量と信頼区間を計算
+            match self.statistic_type:
                 case 'mean':
                     statistic_value, ci_lower, ci_upper = \
                         self._calculate_mean_ci(data_array)
@@ -112,7 +115,7 @@ class ConfidenceInterval(AbstractApi):
                 case _:
                     raise ValidationError("Unsupported statistic type")
 
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {
                 'tableName': self.table_name,
                 'columnName': self.column_name,
@@ -129,7 +132,7 @@ class ConfidenceInterval(AbstractApi):
             return result
 
         except ValidationError:
-            # ValidationError縺ｯ蜀咲匱逕溘＆縺帙ｋ
+            # ValidationErrorは再発生させる
             raise
         except Exception as e:
             message = _("An unexpected error occurred during "
@@ -137,9 +140,9 @@ class ConfidenceInterval(AbstractApi):
             raise ApiError(message) from e
 
     def _calculate_mean_ci(self, data):
-        """蟷ｳ蝮・､縺ｮ菫｡鬆ｼ蛹ｺ髢薙ｒ險育ｮ・""
+        """平均値の信頼区間を計算"""
         mean_val = np.mean(data)
-        sem = stats.sem(data)  # 讓呎ｺ冶ｪ､蟾ｮ
+        sem = stats.sem(data)  # 標準誤差
         n = len(data)
         t_val = stats.t.ppf((1 + self.confidence_level) / 2, df=n-1)
         margin_of_error = t_val * sem
@@ -150,12 +153,13 @@ class ConfidenceInterval(AbstractApi):
             float(mean_val + margin_of_error)
 
     def _calculate_median_ci(self, data):
-        """荳ｭ螟ｮ蛟､縺ｮ菫｡鬆ｼ蛹ｺ髢薙ｒ險育ｮ暦ｼ・ootstrap豕包ｼ・""
+        """中央値の信頼区間を計算（Bootstrap法）"""
         n = len(data)
         median_val = np.median(data)
 
-        # Bootstrap豕輔〒菫｡鬆ｼ蛹ｺ髢薙ｒ險育ｮ・        bootstrap_medians = []
-        np.random.seed(42)  # 蜀咲樟諤ｧ縺ｮ縺溘ａ
+        # Bootstrap法で信頼区間を計算
+        bootstrap_medians = []
+        np.random.seed(42)  # 再現性のため
 
         for _index in range(1000):
             bootstrap_sample = np.random.choice(data, size=n, replace=True)
@@ -168,8 +172,9 @@ class ConfidenceInterval(AbstractApi):
         return float(median_val), float(ci_lower), float(ci_upper)
 
     def _calculate_proportion_ci(self, data):
-        """豈皮紫縺ｮ菫｡鬆ｼ蛹ｺ髢薙ｒ險育ｮ暦ｼ井ｺ碁・・蟶・ｼ・""
-        # 繝・・繧ｿ繧・縺ｾ縺溘・1縺ｮ莠碁・ョ繝ｼ繧ｿ縺ｨ縺励※謇ｱ縺・        unique_vals = np.unique(data)
+        """比率の信頼区間を計算（二項分布）"""
+        # データを0または1の二項データとして扱う
+        unique_vals = np.unique(data)
         if not (
             len(unique_vals) <= 2 and all(v in [0, 1] for v in unique_vals)
         ):
@@ -180,7 +185,8 @@ class ConfidenceInterval(AbstractApi):
         successes = np.sum(data)
         proportion = successes / n
 
-        # Wilson score interval・域ｭ｣遒ｺ縺ｪ菫｡鬆ｼ蛹ｺ髢難ｼ・        z = stats.norm.ppf((1 + self.confidence_level) / 2)
+        # Wilson score interval（正確な信頼区間）
+        z = stats.norm.ppf((1 + self.confidence_level) / 2)
         denominator = 1 + z**2 / n
         center = (proportion + z**2 / (2 * n)) / denominator
         margin = z * np.sqrt(
@@ -193,11 +199,11 @@ class ConfidenceInterval(AbstractApi):
         return float(proportion), float(ci_lower), float(ci_upper)
 
     def _calculate_variance_ci(self, data):
-        """蛻・淵縺ｮ菫｡鬆ｼ蛹ｺ髢薙ｒ險育ｮ暦ｼ医き繧､莠御ｹ怜・蟶・ｼ・""
+        """分散の信頼区間を計算（カイ二乗分布）"""
         n = len(data)
-        variance_val = np.var(data, ddof=1)  # 荳榊￥蛻・淵
+        variance_val = np.var(data, ddof=1)  # 不偏分散
 
-        # 繧ｫ繧､莠御ｹ怜・蟶・ｒ菴ｿ逕ｨ
+        # カイ二乗分布を使用
         alpha = 1 - self.confidence_level
         chi2_lower = stats.chi2.ppf(alpha/2, df=n-1)
         chi2_upper = stats.chi2.ppf(1-alpha/2, df=n-1)
@@ -208,8 +214,9 @@ class ConfidenceInterval(AbstractApi):
         return float(variance_val), float(ci_lower), float(ci_upper)
 
     def _calculate_std_ci(self, data):
-        """讓呎ｺ門￥蟾ｮ縺ｮ菫｡鬆ｼ蛹ｺ髢薙ｒ險育ｮ・""
-        # 蛻・淵縺ｮ菫｡鬆ｼ蛹ｺ髢薙ｒ豎ゅａ縺ｦ蟷ｳ譁ｹ譬ｹ繧貞叙繧・        variance_val, var_ci_lower, var_ci_upper = self._calculate_variance_ci(
+        """標準偏差の信頼区間を計算"""
+        # 分散の信頼区間を求めて平方根を取る
+        variance_val, var_ci_lower, var_ci_upper = self._calculate_variance_ci(
             data
         )
         std_val = np.sqrt(variance_val)
@@ -222,7 +229,7 @@ class ConfidenceInterval(AbstractApi):
 
 def confidence_interval(table_name: str, column_name: str,
                         confidence_level: float, statistic_type: str) -> Dict:
-    """菫｡鬆ｼ蛹ｺ髢楢ｨ育ｮ励・髢｢謨ｰ繧､繝ｳ繧ｿ繝ｼ繝輔ぉ繝ｼ繧ｹ"""
+    """信頼区間計算の関数インターフェース"""
     api = ConfidenceInterval(table_name,
                              column_name,
                              confidence_level,

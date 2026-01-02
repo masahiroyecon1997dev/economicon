@@ -1,4 +1,4 @@
-﻿import os
+import os
 from typing import Dict
 
 from .django_compat import gettext as _
@@ -15,19 +15,25 @@ from .abstract_api import AbstractApi, ApiError
 
 class ExportCsvByPath(AbstractApi):
     """
-    繝・・繝悶Ν繧辰SV繝輔ぃ繧､繝ｫ繝代せ謖・ｮ壹〒繧ｨ繧ｯ繧ｹ繝昴・繝医☆繧帰PI繧ｯ繝ｩ繧ｹ
+    テーブルをCSVファイルパス指定でエクスポートするAPIクラス
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν蜷阪・繝・・繧ｿ繧呈欠螳壹＆繧後◆繝代せ縺ｫCSV繝輔ぃ繧､繝ｫ縺ｨ縺励※蜃ｺ蜉帙＠縺ｾ縺吶・    蛹ｺ蛻・ｊ譁・ｭ励ｒ謖・ｮ壹〒縺阪∪縺吶・    """
+    指定されたテーブル名のデータを指定されたパスにCSVファイルとして出力します。
+    区切り文字を指定できます。
+    """
 
     def __init__(self, table_name: str, directory_path: str,
                  file_name: str, separator: str = ','):
-        # 繝・・繝悶Ν繝槭ロ繝ｼ繧ｸ繝｣繝ｼ縺ｮ蛻晄悄蛹・        self.tables_manager = TablesManager()
-        # 繝・・繝悶Ν蜷・        self.table_name = table_name
-        # 繝・ぅ繝ｬ繧ｯ繝医Μ繝代せ
+        # テーブルマネージャーの初期化
+        self.tables_manager = TablesManager()
+        # テーブル名
+        self.table_name = table_name
+        # ディレクトリパス
         self.directory_path = directory_path
-        # 繝輔ぃ繧､繝ｫ蜷・        self.file_name = file_name
-        # 蛹ｺ蛻・ｊ譁・ｭ・        self.separator = separator
-        # 繝代Λ繝｡繝ｼ繧ｿ蜷阪・繝槭ャ繝斐Φ繧ｰ
+        # ファイル名
+        self.file_name = file_name
+        # 区切り文字
+        self.separator = separator
+        # パラメータ名のマッピング
         self.param_names = {
             'table_name': 'tableName',
             'directory_path': 'directoryPath',
@@ -36,9 +42,9 @@ class ExportCsvByPath(AbstractApi):
         }
 
     def validate(self):
-        # 蜈･蜉帛､縺ｮ繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+        # 入力値のバリデーション
         try:
-            # 繝・・繝悶Ν蜷阪・繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+            # テーブル名のバリデーション
             table_name_list = self.tables_manager.get_table_name_list()
             validate_existed_table_name(
                 self.table_name,
@@ -46,19 +52,19 @@ class ExportCsvByPath(AbstractApi):
                 self.param_names['table_name']
             )
 
-            # 繝・ぅ繝ｬ繧ｯ繝医Μ繝代せ縺ｮ繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+            # ディレクトリパスのバリデーション
             validate_directory_path(
                 self.directory_path,
                 self.param_names['directory_path']
             )
 
-            # 繝輔ぃ繧､繝ｫ蜷阪・繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+            # ファイル名のバリデーション
             validate_file_name(
                 self.file_name,
                 self.param_names['file_name']
             )
 
-            # 蛹ｺ蛻・ｊ譁・ｭ励・繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+            # 区切り文字のバリデーション
             validate_separator(
                 self.separator,
                 self.param_names['separator']
@@ -68,16 +74,18 @@ class ExportCsvByPath(AbstractApi):
             return e
 
     def execute(self):
-        # CSV繝輔ぃ繧､繝ｫ縺ｮ繧ｨ繧ｯ繧ｹ繝昴・繝亥・逅・        try:
-            # 繝・・繝悶Ν繧貞叙蠕・            table_info = self.tables_manager.get_table(self.table_name)
+        # CSVファイルのエクスポート処理
+        try:
+            # テーブルを取得
+            table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
 
             file_path = os.path.join(self.directory_path, self.file_name)
 
-            # CSV繝輔ぃ繧､繝ｫ縺ｫ譖ｸ縺崎ｾｼ縺ｿ
+            # CSVファイルに書き込み
             df.write_csv(file_path, separator=self.separator)
 
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {'filePath': file_path}
             return result
 
@@ -99,13 +107,15 @@ def export_csv_by_path(table_name: str,
                        file_name: str,
                        separator: str = ',') -> Dict:
     """
-    繝・・繝悶Ν繧辰SV繝輔ぃ繧､繝ｫ繝代せ縺ｫ蜃ｺ蜉帙☆繧矩未謨ｰ
+    テーブルをCSVファイルパスに出力する関数
 
     Args:
-        table_name: 繧ｨ繧ｯ繧ｹ繝昴・繝医☆繧九ユ繝ｼ繝悶Ν蜷・        file_path: 蜃ｺ蜉帙☆繧気SV繝輔ぃ繧､繝ｫ縺ｮ繝代せ
-        separator: CSV縺ｮ蛹ｺ蛻・ｊ譁・ｭ暦ｼ医ョ繝輔か繝ｫ繝・ 繧ｫ繝ｳ繝橸ｼ・
+        table_name: エクスポートするテーブル名
+        file_path: 出力するCSVファイルのパス
+        separator: CSVの区切り文字（デフォルト: カンマ）
+
     Returns:
-        蜃ｺ蜉帙＆繧後◆繝輔ぃ繧､繝ｫ繝代せ繧貞性繧霎樊嶌
+        出力されたファイルパスを含む辞書
     """
     api = ExportCsvByPath(table_name, directory_path, file_name, separator)
     validation_error = api.validate()
@@ -114,6 +124,6 @@ def export_csv_by_path(table_name: str,
     try:
         result = api.execute()
     except ApiError as e:
-        # API繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺溷ｴ蜷医・縺昴・縺ｾ縺ｾ蜀阪せ繝ｭ繝ｼ
+        # APIエラーが発生した場合はそのまま再スロー
         raise e
     return result
