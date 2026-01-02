@@ -1,4 +1,4 @@
-﻿from typing import Dict, List
+from typing import Dict, List
 
 from .django_compat import gettext as _
 
@@ -12,9 +12,10 @@ from .abstract_api import AbstractApi, ApiError
 
 class GetColumnList(AbstractApi):
     """
-    繧ｫ繝ｩ繝縺ｮ諠・ｱ縺ｮ繝ｪ繧ｹ繝医ｒ蜿門ｾ励☆繧帰PI繧ｯ繝ｩ繧ｹ
+    カラムの情報のリストを取得するAPIクラス
 
-    繝・・繧ｿ繝吶・繧ｹ縺ｮ謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｫ蟄伜惠縺吶ｋ縺吶∋縺ｦ縺ｮ繧ｫ繝ｩ繝蜷阪ｒ蜿門ｾ励＠縺ｾ縺吶・    """
+    データベースの指定されたテーブルに存在するすべてのカラム名を取得します。
+    """
     def __init__(self, table_name: str, is_number_only: str):
         self.tables_manager = TablesManager()
         self.table_name = table_name
@@ -65,8 +66,10 @@ def get_column_list(table_name: str,
                     is_number_only: str
                     ) -> Dict[str, List[Dict[str, str]]]:
     """
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ繧ｫ繝ｩ繝蜷阪・繝ｪ繧ｹ繝医ｒ蜿門ｾ励☆繧矩未謨ｰ
-    :param table_name: 繝・・繝悶Ν蜷・    :return: 繧ｫ繝ｩ繝蜷阪・繝ｪ繧ｹ繝・    """
+    指定されたテーブルのカラム名のリストを取得する関数
+    :param table_name: テーブル名
+    :return: カラム名のリスト
+    """
     api = GetColumnList(table_name, is_number_only)
     validation_error = api.validate()
     if validation_error:

@@ -1,4 +1,4 @@
-﻿from typing import Dict, List
+from typing import Dict, List
 
 import polars as pl
 from .django_compat import gettext as _
@@ -12,18 +12,22 @@ from .abstract_api import AbstractApi, ApiError
 
 class CreateTable(AbstractApi):
     """
-    繝・・繝悶Ν菴懈・API縺ｮPython繝ｭ繧ｸ繝・け
+    テーブル作成APIのPythonロジック
 
-    謖・ｮ壹＠縺溷錐蜑阪→繧ｫ繝ｩ繝謨ｰ縺ｧ繝・・繝悶Ν繧剃ｽ懈・縺励∪縺吶・    蜷・き繝ｩ繝縺ｯ遨ｺ・・one・峨・蛟､縺ｧ蛻晄悄蛹悶＆繧後∪縺吶・    """
+    指定した名前とカラム数でテーブルを作成します。
+    各カラムは空（None）の値で初期化されます。
+    """
     def __init__(self, table_name: str,
                  table_number_of_rows: int,
                  columnNames: List[str]):
         self.tables_manager = TablesManager()
-        # 繝・・繝悶Ν蜷・        self.table_name = table_name
-        # 繝・・繝悶Ν縺ｮ陦梧焚
+        # テーブル名
+        self.table_name = table_name
+        # テーブルの行数
         self.table_number_of_rows = table_number_of_rows
-        # 繧ｫ繝ｩ繝蜷阪・繝ｪ繧ｹ繝・        self.columnNames = columnNames
-        # 繝代Λ繝｡繝ｼ繧ｿ蜷阪・繝槭ャ繝斐Φ繧ｰ
+        # カラム名のリスト
+        self.columnNames = columnNames
+        # パラメータ名のマッピング
         self.param_names = {
             'table_name': 'tableName',
             'table_num_rows': 'tableNumberOfRows',
@@ -31,21 +35,21 @@ class CreateTable(AbstractApi):
         }
 
     def validate(self):
-        # 蜈･蜉帛､縺ｮ繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+        # 入力値のバリデーション
         try:
             table_name_list = self.tables_manager.get_table_name_list()
-            # 繝・・繝悶Ν蜷阪・驥崎､・メ繧ｧ繝・け
+            # テーブル名の重複チェック
             validate_new_table_name(
                 self.table_name,
                 table_name_list,
                 self.param_names['table_name']
             )
-            # 陦梧焚縺ｮ螯･蠖捺ｧ繝√ぉ繝・け
+            # 行数の妥当性チェック
             validate_table_num_rows(
                 self.table_number_of_rows,
                 self.param_names['table_num_rows']
             )
-            # 繧ｫ繝ｩ繝蜷阪・螯･蠖捺ｧ繝√ぉ繝・け
+            # カラム名の妥当性チェック
             validate_new_columns(
                 self.columnNames,
                 self.param_names['column_names']
@@ -55,15 +59,18 @@ class CreateTable(AbstractApi):
             return e
 
     def execute(self):
-        # 繝・・繝悶Ν縺ｮ菴懈・蜃ｦ逅・        try:
-            # 遨ｺ縺ｮ繝・・繧ｿ繧剃ｽ懈・
+        # テーブルの作成処理
+        try:
+            # 空のデータを作成
             new_column_data_none = [None] * self.table_number_of_rows
-            # 蜷・き繝ｩ繝縺ｫ遨ｺ縺ｮ繝・・繧ｿ繧定ｨｭ螳・            data = {col: new_column_data_none for col in self.columnNames}
-            # DataFrame繧剃ｽ懈・
+            # 各カラムに空のデータを設定
+            data = {col: new_column_data_none for col in self.columnNames}
+            # DataFrameを作成
             df = pl.DataFrame(data)
-            # 繝・・繝悶Ν諠・ｱ繧剃ｿ晏ｭ・            created_table_name = self.tables_manager.store_table(
+            # テーブル情報を保存
+            created_table_name = self.tables_manager.store_table(
                 self.table_name, df)
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {'tableName': created_table_name}
             return result
         except Exception as e:

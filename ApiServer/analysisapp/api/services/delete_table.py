@@ -1,4 +1,4 @@
-﻿from typing import Dict
+from typing import Dict
 
 from .django_compat import gettext as _
 
@@ -11,20 +11,23 @@ from .abstract_api import AbstractApi, ApiError
 
 class DeleteTable(AbstractApi):
     """
-    繝・・繝悶Ν蜑企勁API縺ｮPython繝ｭ繧ｸ繝・け
+    テーブル削除APIのPythonロジック
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν繧貞ｮ悟・縺ｫ蜑企勁縺励∪縺吶・    蜑企勁蠕後√ユ繝ｼ繝悶Ν縺ｯ蠕ｩ蜈・〒縺阪∪縺帙ｓ縲・    """
+    指定されたテーブルを完全に削除します。
+    削除後、テーブルは復元できません。
+    """
     def __init__(self, table_name: str):
         self.tables_manager = TablesManager()
-        # 蜑企勁縺吶ｋ繝・・繝悶Ν蜷・        self.table_name = table_name
-        # 繝代Λ繝｡繝ｼ繧ｿ蜷阪・繝槭ャ繝斐Φ繧ｰ
+        # 削除するテーブル名
+        self.table_name = table_name
+        # パラメータ名のマッピング
         self.param_names = {'table_name': 'tableName'}
 
     def validate(self):
-        # 蜈･蜉帛､縺ｮ繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+        # 入力値のバリデーション
         try:
             table_name_list = self.tables_manager.get_table_name_list()
-            # 繝・・繝悶Ν蜷阪・蟄伜惠繝√ぉ繝・け
+            # テーブル名の存在チェック
             validate_existed_table_name(
                 self.table_name,
                 table_name_list,
@@ -35,10 +38,11 @@ class DeleteTable(AbstractApi):
             return e
 
     def execute(self):
-        # 繝・・繝悶Ν縺ｮ蜑企勁蜃ｦ逅・        try:
-            # 繝・・繝悶Ν諠・ｱ縺九ｉ蜑企勁
+        # テーブルの削除処理
+        try:
+            # テーブル情報から削除
             self.tables_manager.delete_table(self.table_name)
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {'tableName': self.table_name}
             return result
         except Exception as e:

@@ -1,4 +1,4 @@
-﻿from typing import Dict, List
+from typing import Dict, List
 
 import statsmodels.api as sm
 from .django_compat import gettext as _
@@ -14,9 +14,11 @@ from .abstract_api import AbstractApi, ApiError
 
 class ProbitRegression(AbstractApi):
     """
-    繝励Ο繝薙ャ繝亥・譫舌ｒ陦後≧縺溘ａ縺ｮAPI繧ｯ繝ｩ繧ｹ
+    プロビット分析を行うためのAPIクラス
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ蛻励ｒ菴ｿ逕ｨ縺励※繝励Ο繝薙ャ繝亥屓蟶ｰ蛻・梵繧貞ｮ溯｡後＠縺ｾ縺吶・    陲ｫ隱ｬ譏主､画焚・亥ｾ灘ｱ槫､画焚・・蛻励→隱ｬ譏主､画焚・育峡遶句､画焚・芽､・焚蛻励ｒ謖・ｮ壹＠縺ｾ縺吶・    """
+    指定されたテーブルの列を使用してプロビット回帰分析を実行します。
+    被説明変数（従属変数）1列と説明変数（独立変数）複数列を指定します。
+    """
     def __init__(
         self,
         table_name: str,
@@ -35,7 +37,7 @@ class ProbitRegression(AbstractApi):
 
     def validate(self):
         try:
-            # 繝・・繝悶Ν蜷阪・讀懆ｨｼ
+            # テーブル名の検証
             table_name_list = self.tables_manager.get_table_name_list()
             validate_existed_table_name(
                 self.table_name,
@@ -43,10 +45,11 @@ class ProbitRegression(AbstractApi):
                 self.param_names['table_name']
             )
 
-            # 蛻怜錐繝ｪ繧ｹ繝医・蜿門ｾ・            column_name_list = self.tables_manager.get_column_name_list(
+            # 列名リストの取得
+            column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
 
-            # 隱ｬ譏主､画焚縺ｮ讀懆ｨｼ
+            # 説明変数の検証
             df_schema = self.tables_manager.get_column_info_list(
                 self.table_name)
             validate_explanatory_variables(
@@ -56,7 +59,7 @@ class ProbitRegression(AbstractApi):
                 self.param_names['explanatory_variables']
             )
 
-            # 陲ｫ隱ｬ譏主､画焚縺ｮ讀懆ｨｼ
+            # 被説明変数の検証
             validate_dependent_variable(
                 self.dependent_variable,
                 column_name_list,
@@ -71,22 +74,27 @@ class ProbitRegression(AbstractApi):
 
     def execute(self):
         try:
-            # 繝・・繝悶Ν縺ｮ蜿門ｾ・            table_info = self.tables_manager.get_table(self.table_name)
+            # テーブルの取得
+            table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
 
-            # 繝・・繧ｿ縺ｮ貅門ｙ
-            # 陲ｫ隱ｬ譏主､画焚縺ｮ繝・・繧ｿ繧貞叙蠕・            y_data = df[self.dependent_variable].to_numpy()
+            # データの準備
+            # 被説明変数のデータを取得
+            y_data = df[self.dependent_variable].to_numpy()
 
-            # 隱ｬ譏主､画焚縺ｮ繝・・繧ｿ繧貞叙蠕・            x_data = df.select(self.explanatory_variables).to_numpy()
+            # 説明変数のデータを取得
+            x_data = df.select(self.explanatory_variables).to_numpy()
 
-            # 螳壽焚鬆・ｒ霑ｽ蜉
+            # 定数項を追加
             x_data_with_const = sm.add_constant(x_data)
 
-            # 繝励Ο繝薙ャ繝亥屓蟶ｰ縺ｮ螳溯｡・            model = sm.Probit(y_data, x_data_with_const).fit()
+            # プロビット回帰の実行
+            model = sm.Probit(y_data, x_data_with_const).fit()
 
-            # 邨先棡縺ｮ謨ｴ逅・            summary_text = model.summary().as_text()
+            # 結果の整理
+            summary_text = model.summary().as_text()
 
-            # 繝代Λ繝｡繝ｼ繧ｿ縺ｮ隧ｳ邏ｰ諠・ｱ
+            # パラメータの詳細情報
             param_names = ['const'] + self.explanatory_variables
             params_info = []
             for i, name in enumerate(param_names):
@@ -97,7 +105,7 @@ class ProbitRegression(AbstractApi):
                     'tValue': float(model.tvalues[i])
                 })
 
-            # 繝｢繝・Ν邨ｱ險域ュ蝣ｱ
+            # モデル統計情報
             model_stats = {
                 'AIC': float(model.aic),
                 'BIC': float(model.bic),
@@ -106,7 +114,7 @@ class ProbitRegression(AbstractApi):
                 'nObservations': int(model.nobs)
             }
 
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {
                 'tableName': self.table_name,
                 'dependentVariable': self.dependent_variable,
@@ -127,13 +135,15 @@ def probit_regression(table_name: str,
                       dependent_variable: str,
                       explanatory_variables: List[str]) -> Dict:
     """
-    繝励Ο繝薙ャ繝亥・譫舌ｒ螳溯｡後☆繧矩未謨ｰ
+    プロビット分析を実行する関数
 
     Args:
-        table_name: 繝・・繝悶Ν蜷・        dependent_variable: 陲ｫ隱ｬ譏主､画焚縺ｮ蛻怜錐
-        explanatory_variables: 隱ｬ譏主､画焚縺ｮ蛻怜錐繝ｪ繧ｹ繝・
+        table_name: テーブル名
+        dependent_variable: 被説明変数の列名
+        explanatory_variables: 説明変数の列名リスト
+
     Returns:
-        蛻・梵邨先棡繧貞性繧霎樊嶌
+        分析結果を含む辞書
     """
     api = ProbitRegression(table_name, dependent_variable,
                            explanatory_variables)

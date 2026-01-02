@@ -1,4 +1,4 @@
-﻿from typing import Dict, List
+from typing import Dict, List
 
 import polars as pl
 from .django_compat import gettext as _
@@ -12,12 +12,13 @@ from .abstract_api import AbstractApi, ApiError
 
 class DescriptiveStatistics(AbstractApi):
     """
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ蛻励・險倩ｿｰ邨ｱ險医ｒ險育ｮ励☆繧九◆繧√・API繧ｯ繝ｩ繧ｹ
+    指定されたテーブルの列の記述統計を計算するためのAPIクラス
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ謖・ｮ壹＆繧後◆蛻励↓蟇ｾ縺励※縲∬ｦ∵ｱゅ＆繧後◆險倩ｿｰ邨ｱ險医ｒ險育ｮ励＠縺ｾ縺吶・    繧ｵ繝昴・繝医☆繧狗ｵｱ險・ 蟷ｳ蝮・∵怙鬆ｻ蛟､縲∽ｸｭ螟ｮ蛟､縲∝・謨｣縲∵ｨ呎ｺ門￥蟾ｮ縲∫ｯ・峇縲∝屁蛻・ｽ咲ｯ・峇
+    指定されたテーブルの指定された列に対して、要求された記述統計を計算します。
+    サポートする統計: 平均、最頻値、中央値、分散、標準偏差、範囲、四分位範囲
     """
 
-    # 蛻ｩ逕ｨ蜿ｯ閭ｽ縺ｪ邨ｱ險医・遞ｮ鬘槭ｒ螳夂ｾｩ
+    # 利用可能な統計の種類を定義
     AVAILABLE_STATISTICS = {
         'mean': 'Mean',
         'mode': 'Mode',
@@ -57,7 +58,7 @@ class DescriptiveStatistics(AbstractApi):
                     self.param_names['column_names']
                 )
 
-            # 邨ｱ險医・遞ｮ鬘槭ｒ繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+            # 統計の種類をバリデーション
             if not self.statistics:
                 raise ValidationError(
                     "statistics is required")
@@ -76,7 +77,8 @@ class DescriptiveStatistics(AbstractApi):
             table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
 
-            # 謨ｰ蛟､縺ｧ縺ｪ縺・・縺ｮ蝣ｴ蜷医∽ｸ驛ｨ縺ｮ邨ｱ險医・險育ｮ励〒縺阪↑縺・            numeric_only_stats = ['mean', 'variance', 'std', 'range', 'iqr']
+            # 数値でない列の場合、一部の統計は計算できない
+            numeric_only_stats = ['mean', 'variance', 'std', 'range', 'iqr']
 
             result = {}
 
@@ -135,7 +137,7 @@ class DescriptiveStatistics(AbstractApi):
 
                 result[column_name] = col_stats
 
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {
                 'tableName': self.table_name,
                 'statistics': result

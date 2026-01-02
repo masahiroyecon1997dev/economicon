@@ -1,5 +1,5 @@
 ---
-applyTo: "AnalysisApp/AnalysisApp/ApiServer/analysisapp/api/**"
+applyTo: "ApiServer/analysisapp/api/**"
 ---
 
 # FastAPI API 開発規約

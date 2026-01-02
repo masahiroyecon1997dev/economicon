@@ -119,12 +119,11 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
-  "python.testing.cwd": "${workspaceFolder}/ApiServer/analysisapp",
-  "python.testing.unittestArgs": ["-v", "1", "-p", "test_*.py"],
+  "python.testing.cwd": "${workspaceFolder}/ApiServer",
+  "python.testing.pytestArgs": ["tests"],
   "python.testing.autoTestDiscoverOnSaveEnabled": true,
-  "python.testing.pytestEnabled": false,
-  "python.testing.unittestEnabled": true,
-  "python.envFile": "${workspaceFolder}/.env",
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
   "python.defaultInterpreterPath": "${workspaceFolder}/ApiServer/.venv/Scripts/python.exe",
   "python.analysis.typeCheckingMode": "standard",
   "[html]": {
