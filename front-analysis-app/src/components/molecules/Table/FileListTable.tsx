@@ -1,5 +1,6 @@
 import { faFileLines, faFolder, faSort, faSortDown, faSortUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useTranslation } from "react-i18next";
 import type { FileType, SortDirection, SortField } from "../../../types/commonTypes";
 
 type FileListTableProps = {
@@ -25,6 +26,7 @@ export function FileListTable({
   sortDirection = null,
   onSort
 }: FileListTableProps) {
+  const { t } = useTranslation();
 
   // ソートアイコンを返す関数
   const getSortIcon = (field: SortField) => {
@@ -50,7 +52,7 @@ export function FileListTable({
   return (
     <div className="overflow-hidden rounded-xl border border-brand-primary/20 w-full">
       <div className="overflow-y-auto overflow-x-auto" style={{ maxHeight }}>
-        <table className="w-full min-w-96">
+        <table className="w-full min-w-96" title={t('SelectFileView.FileListTableTitle')}>
           <thead className="bg-brand-primary-light sticky top-0">
             <tr>
               <th

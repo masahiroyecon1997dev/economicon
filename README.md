@@ -306,3 +306,4 @@ python manage.py migrate
 2. API ドキュメントの自動生成（Swagger/OpenAPI）
 3. パフォーマンス最適化
 4. テストカバレッジの向上
+5. Django を Fast API に移行

@@ -73,6 +73,7 @@
     "AllFiles": "すべてのファイル",
     "CsvFiles": "CSVファイル",
     "ExcelFiles": "Excelファイル",
+    "FileListTableTitle": "ファイル一覧",
     "FileNameHeader": "ファイル名",
     "SizeHeader": "サイズ",
     "LastModifiedHeader": "最終更新日"
