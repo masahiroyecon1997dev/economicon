@@ -1,4 +1,4 @@
-﻿import polars as pl
+import polars as pl
 from typing import Dict
 from .django_compat import gettext as _
 from ..utils.validator.common_validators import ValidationError
@@ -13,21 +13,26 @@ from .abstract_api import AbstractApi, ApiError
 
 class InputCellData(AbstractApi):
     """
-    繧ｻ繝ｫ繝・・繧ｿ蜈･蜉妁PI縺ｮPython繝ｭ繧ｸ繝・け
+    セルデータ入力APIのPythonロジック
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ謖・ｮ壹＆繧後◆繧ｻ繝ｫ縺ｫ譁ｰ縺励＞蛟､繧貞・蜉帙＠縺ｾ縺吶・    譌｢蟄倥・蛟､縺ｯ荳頑嶌縺阪＆繧後∪縺吶・    陦檎分蜿ｷ縺ｯ1縺九ｉ蟋九∪繧九→莉ｮ螳壹＠縺ｦ縺・∪縺吶・    """
+    指定されたテーブルの指定されたセルに新しい値を入力します。
+    既存の値は上書きされます。
+    行番号は1から始まると仮定しています。
+    """
     def __init__(self, table_name: str,
                  column_name: str,
                  row_index: int,
                  new_value):
         self.tables_manager = TablesManager()
-        # 繝・・繝悶Ν蜷・        self.table_name = table_name
-        # 繧ｫ繝ｩ繝蜷・        self.column_name = column_name
-        # 陦後う繝ｳ繝・ャ繧ｯ繧ｹ
+        # テーブル名
+        self.table_name = table_name
+        # カラム名
+        self.column_name = column_name
+        # 行インデックス
         self.row_index = row_index
-        # 譁ｰ縺励＞蛟､
+        # 新しい値
         self.new_value = new_value
-        # 繝代Λ繝｡繝ｼ繧ｿ蜷阪・繝槭ャ繝斐Φ繧ｰ
+        # パラメータ名のマッピング
         self.param_names = {
             'table_name': 'tableName',
             'column_names': 'columnName',
@@ -35,10 +40,10 @@ class InputCellData(AbstractApi):
         }
 
     def validate(self):
-        # 蜈･蜉帛､縺ｮ繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+        # 入力値のバリデーション
         try:
             table_name_list = self.tables_manager.get_table_name_list()
-            # 繝・・繝悶Ν蜷阪・蟄伜惠繝√ぉ繝・け
+            # テーブル名の存在チェック
             validate_existed_table_name(
                 self.table_name,
                 table_name_list,
@@ -46,14 +51,14 @@ class InputCellData(AbstractApi):
             )
             column_name_list = \
                 self.tables_manager.get_column_name_list(self.table_name)
-            # 繧ｫ繝ｩ繝蜷阪・蟄伜惠繝√ぉ繝・け
+            # カラム名の存在チェック
             validate_existed_column_name(
                 self.column_name,
                 column_name_list,
                 self.param_names['column_names']
             )
             num_rows = self.tables_manager.get_table(self.table_name).num_rows
-            # 陦後う繝ｳ繝・ャ繧ｯ繧ｹ縺ｮ螯･蠖捺ｧ繝√ぉ繝・け
+            # 行インデックスの妥当性チェック
             validate_row_index(
                 self.row_index,
                 num_rows,
@@ -64,20 +69,23 @@ class InputCellData(AbstractApi):
             return e
 
     def execute(self):
-        # 繧ｻ繝ｫ繝・・繧ｿ縺ｮ蜈･蜉帛・逅・        try:
-            # 蟇ｾ雎｡繝・・繝悶Ν縺ｮ繝・・繧ｿ繝輔Ξ繝ｼ繝繧貞叙蠕・            df = self.tables_manager.get_table(self.table_name).table
-            # 謖・ｮ壼・縺ｮ繝・・繧ｿ繧貞叙蠕励＠縺ｦ繧ｳ繝斐・
+        # セルデータの入力処理
+        try:
+            # 対象テーブルのデータフレームを取得
+            df = self.tables_manager.get_table(self.table_name).table
+            # 指定列のデータを取得してコピー
             numpy_array = df.get_column(self.column_name).to_list().copy()
-            # 謖・ｮ夊｡後・繝・・繧ｿ繧呈眠縺励＞蛟､縺ｫ譖ｴ譁ｰ
+            # 指定行のデータを新しい値に更新
             numpy_array[self.row_index - 1] = self.new_value
-            # 譖ｴ譁ｰ縺輔ｌ縺溘ョ繝ｼ繧ｿ縺ｧSeries繧剃ｽ懈・
+            # 更新されたデータでSeriesを作成
             modified_series = pl.Series(name=self.column_name,
                                         values=numpy_array, strict=False)
-            # 繝・・繧ｿ繝輔Ξ繝ｼ繝繧呈峩譁ｰ
+            # データフレームを更新
             new_df = df.with_columns(modified_series)
-            # 譖ｴ譁ｰ縺輔ｌ縺溘ョ繝ｼ繧ｿ繝輔Ξ繝ｼ繝繧剃ｿ晏ｭ・            updated_table_name = \
+            # 更新されたデータフレームを保存
+            updated_table_name = \
                 self.tables_manager.update_table(self.table_name, new_df)
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {'tableName': updated_table_name}
             return result
         except Exception as e:

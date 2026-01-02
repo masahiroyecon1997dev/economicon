@@ -1,4 +1,4 @@
-﻿import polars as pl
+import polars as pl
 import math
 from .django_compat import gettext as _
 from typing import Dict, Optional
@@ -14,9 +14,12 @@ from .abstract_api import (AbstractApi, ApiError)
 
 class TransformColumn(AbstractApi):
     """
-    繝・・繝悶Ν縺ｮ蛻励・蛟､繧貞､画鋤縺励※譁ｰ縺励＞蛻励ｒ霑ｽ蜉縺吶ｋ縺溘ａ縺ｮAPI繧ｯ繝ｩ繧ｹ
+    テーブルの列の値を変換して新しい列を追加するためのAPIクラス
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ謖・ｮ壹＆繧後◆蛻励・蛟､繧貞､画鋤縺励・    謖・ｮ壹＆繧後◆蛻励・蜿ｳ髫｣縺ｫ譁ｰ縺励＞蛻励ｒ謖ｿ蜈･縺励∪縺吶・    螟画鋤譁ｹ豕輔・蟇ｾ謨ｰ螟画鋤縲∫ｴｯ荵怜､画鋤縲√∪縺溘・繝ｫ繝ｼ繝亥､画鋤繧偵し繝昴・繝医＠縺ｾ縺吶・    """
+    指定されたテーブルの指定された列の値を変換し、
+    指定された列の右隣に新しい列を挿入します。
+    変換方法は対数変換、累乗変換、またはルート変換をサポートします。
+    """
     def __init__(self, table_name: str, source_column_name: str,
                  new_column_name: str, transform_method: str,
                  log_base: Optional[float] = None,

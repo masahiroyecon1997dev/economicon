@@ -1,4 +1,4 @@
-﻿from typing import Dict
+from typing import Dict
 from .django_compat import gettext as _
 from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.tables_manager_validator import (
@@ -12,19 +12,22 @@ from .abstract_api import AbstractApi, ApiError
 
 class RenameColumnName(AbstractApi):
     """
-    蛻怜錐螟画峩API縺ｮPython繝ｭ繧ｸ繝・け
+    列名変更APIのPythonロジック
 
-    謖・ｮ壹＆繧後◆繝・・繝悶Ν縺ｮ謖・ｮ壹＆繧後◆蛻怜錐繧呈眠縺励＞蛻怜錐縺ｫ螟画峩縺励∪縺吶・    蜷後§蛻怜錐縺梧里縺ｫ蟄伜惠縺吶ｋ蝣ｴ蜷医・繧ｨ繝ｩ繝ｼ縺ｨ縺ｪ繧翫∪縺吶・    """
+    指定されたテーブルの指定された列名を新しい列名に変更します。
+    同じ列名が既に存在する場合はエラーとなります。
+    """
     def __init__(self, table_name: str,
                  old_column_name: str,
                  new_column_name: str):
         self.tables_manager = TablesManager()
-        # 繝・・繝悶Ν蜷・        self.table_name = table_name
-        # 螟画峩蜑阪・蛻怜錐
+        # テーブル名
+        self.table_name = table_name
+        # 変更前の列名
         self.old_column_name = old_column_name
-        # 螟画峩蠕後・蛻怜錐
+        # 変更後の列名
         self.new_column_name = new_column_name
-        # 繝代Λ繝｡繝ｼ繧ｿ蜷阪・繝槭ャ繝斐Φ繧ｰ
+        # パラメータ名のマッピング
         self.param_names = {
             'table_name': 'tableName',
             'new_column_name': 'newColumnName',
@@ -32,16 +35,16 @@ class RenameColumnName(AbstractApi):
         }
 
     def validate(self):
-        # 蜈･蜉帛､縺ｮ繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+        # 入力値のバリデーション
         try:
             table_name_list = self.tables_manager.get_table_name_list()
-            # 繝・・繝悶Ν蜷阪・蟄伜惠繝√ぉ繝・け
+            # テーブル名の存在チェック
             validate_existed_table_name(
                 self.table_name,
                 table_name_list,
                 table_name_param=self.param_names['table_name']
             )
-            # 螟画峩蜑阪・蛻怜錐縺ｮ蟄伜惠繝√ぉ繝・け
+            # 変更前の列名の存在チェック
             column_name_list = self.tables_manager.get_column_name_list(
                 self.table_name)
             validate_existed_column_name(
@@ -49,7 +52,7 @@ class RenameColumnName(AbstractApi):
                 column_name_list,
                 self.param_names['old_column_name']
             )
-            # 螟画峩蠕後・蛻怜錐縺ｮ驥崎､・メ繧ｧ繝・け
+            # 変更後の列名の重複チェック
             validate_new_column_name(
                 self.new_column_name,
                 column_name_list,
@@ -60,16 +63,19 @@ class RenameColumnName(AbstractApi):
             return e
 
     def execute(self):
-        # 蛻怜錐縺ｮ螟画峩蜃ｦ逅・        try:
-            # 繝・・繝悶Ν諠・ｱ繧貞叙蠕・            table_info = self.tables_manager.get_table(self.table_name)
+        # 列名の変更処理
+        try:
+            # テーブル情報を取得
+            table_info = self.tables_manager.get_table(self.table_name)
             df = table_info.table
-            # 蛻怜錐繧貞､画峩
+            # 列名を変更
             new_df = df.rename({self.old_column_name: self.new_column_name})
-            # 譖ｴ譁ｰ縺輔ｌ縺溘ョ繝ｼ繧ｿ繝輔Ξ繝ｼ繝繧剃ｿ晏ｭ・            table_info.table = new_df
+            # 更新されたデータフレームを保存
+            table_info.table = new_df
             renamed_table_name = self.tables_manager.update_table(
                 self.table_name, new_df
             )
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {'tableName': renamed_table_name}
             return result
         except Exception as e:

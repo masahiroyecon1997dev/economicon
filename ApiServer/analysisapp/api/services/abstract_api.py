@@ -1,11 +1,12 @@
-﻿from abc import abstractmethod, ABC
+from abc import abstractmethod, ABC
 from typing import Optional, Dict
 from ..utils.validator.common_validators import ValidationError
 
 
 class AbstractApi(ABC):
     """
-    Python API縺ｮ謚ｽ雎｡繧ｯ繝ｩ繧ｹ縲・    """
+    Python APIの抽象クラス。
+    """
 
     @abstractmethod
     def __init__(self):
@@ -22,7 +23,8 @@ class AbstractApi(ABC):
 
 class ApiError(Exception):
     """
-    API螳溯｡梧凾縺ｮ繧ｨ繝ｩ繝ｼ繧定｡ｨ縺吩ｾ句､悶・    """
+    API実行時のエラーを表す例外。
+    """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)

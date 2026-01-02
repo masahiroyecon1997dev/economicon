@@ -1,4 +1,4 @@
-﻿
+
 from typing import Dict, List
 
 from .django_compat import gettext as _
@@ -13,9 +13,11 @@ from .abstract_api import AbstractApi, ApiError
 
 class CreateJoinTable(AbstractApi):
     """
-    邨仙粋繝・・繝悶Ν菴懈・API縺ｮPython繝ｭ繧ｸ繝・け
+    結合テーブル作成APIのPythonロジック
 
-    莠後▽縺ｮ繝・・繝悶Ν繧呈欠螳壹＆繧後◆繧ｭ繝ｼ縺ｧ邨仙粋縺励∵眠縺励＞繝・・繝悶Ν繧剃ｽ懈・縺励∪縺吶・    蜀・Κ邨仙粋縲∝ｷｦ邨仙粋縲∝承邨仙粋縲∝ｮ悟・螟夜Κ邨仙粋縺ｫ蟇ｾ蠢懊＠縺ｦ縺・∪縺吶・    """
+    二つのテーブルを指定されたキーで結合し、新しいテーブルを作成します。
+    内部結合、左結合、右結合、完全外部結合に対応しています。
+    """
     def __init__(
         self,
         join_table_name: str,
@@ -26,13 +28,19 @@ class CreateJoinTable(AbstractApi):
         join_type: str,
     ):
         self.tables_manager = TablesManager()
-        # 邨仙粋蠕後・繝・・繝悶Ν蜷・        self.join_table_name = join_table_name
-        # 蟾ｦ繝・・繝悶Ν蜷・        self.left_table_name = left_table_name
-        # 蜿ｳ繝・・繝悶Ν蜷・        self.right_table_name = right_table_name
-        # 蟾ｦ繝・・繝悶Ν縺ｮ繧ｭ繝ｼ蛻怜錐繝ｪ繧ｹ繝・        self.left_key_column_names = left_key_column_names
-        # 蜿ｳ繝・・繝悶Ν縺ｮ繧ｭ繝ｼ蛻怜錐繝ｪ繧ｹ繝・        self.right_key_column_names = right_key_column_names
-        # 邨仙粋繧ｿ繧､繝暦ｼ・nner, left, right, outer・・        self.join_type = join_type
-        # 繝代Λ繝｡繝ｼ繧ｿ蜷阪・繝槭ャ繝斐Φ繧ｰ
+        # 結合後のテーブル名
+        self.join_table_name = join_table_name
+        # 左テーブル名
+        self.left_table_name = left_table_name
+        # 右テーブル名
+        self.right_table_name = right_table_name
+        # 左テーブルのキー列名リスト
+        self.left_key_column_names = left_key_column_names
+        # 右テーブルのキー列名リスト
+        self.right_key_column_names = right_key_column_names
+        # 結合タイプ（inner, left, right, outer）
+        self.join_type = join_type
+        # パラメータ名のマッピング
         self.param_names = {
             'table_name': 'joinTableName',
             'left_table_name': 'leftTableName',
@@ -43,28 +51,28 @@ class CreateJoinTable(AbstractApi):
         }
 
     def validate(self):
-        # 蜈･蜉帛､縺ｮ繝舌Μ繝・・繧ｷ繝ｧ繝ｳ
+        # 入力値のバリデーション
         try:
             table_name_list = self.tables_manager.get_table_name_list()
-            # 譁ｰ縺励＞繝・・繝悶Ν蜷阪・驥崎､・メ繧ｧ繝・け
+            # 新しいテーブル名の重複チェック
             validate_new_table_name(
                 self.join_table_name,
                 table_name_list,
                 self.param_names['table_name']
             )
-            # 蟾ｦ繝・・繝悶Ν縺ｮ蟄伜惠繝√ぉ繝・け
+            # 左テーブルの存在チェック
             validate_existed_table_name(
                 self.left_table_name,
                 table_name_list,
                 self.param_names['left_table_name']
             )
-            # 蜿ｳ繝・・繝悶Ν縺ｮ蟄伜惠繝√ぉ繝・け
+            # 右テーブルの存在チェック
             validate_existed_table_name(
                 self.right_table_name,
                 table_name_list,
                 self.param_names['right_table_name']
             )
-            # 蟾ｦ繝・・繝悶Ν縺ｮ繧ｭ繝ｼ蛻励・蟄伜惠繝√ぉ繝・け
+            # 左テーブルのキー列の存在チェック
             left_table_column_name_list = TablesManager().get_column_name_list(
                 self.left_table_name
             )
@@ -74,7 +82,7 @@ class CreateJoinTable(AbstractApi):
                     left_table_column_name_list,
                     self.param_names['left_key_column_names']
                 )
-            # 蜿ｳ繝・・繝悶Ν縺ｮ繧ｭ繝ｼ蛻励・蟄伜惠繝√ぉ繝・け
+            # 右テーブルのキー列の存在チェック
             right_table_column_name_list = \
                 TablesManager().get_column_name_list(
                     self.right_table_name
@@ -85,7 +93,7 @@ class CreateJoinTable(AbstractApi):
                     right_table_column_name_list,
                     self.param_names['right_key_column_names']
                 )
-            # 邨仙粋繧ｿ繧､繝励・螯･蠖捺ｧ繝√ぉ繝・け
+            # 結合タイプの妥当性チェック
             validate_join_type(
                 self.join_type,
                 self.param_names['join_type']
@@ -95,14 +103,18 @@ class CreateJoinTable(AbstractApi):
             return e
 
     def execute(self):
-        # 繝・・繝悶Ν邨仙粋蜃ｦ逅・        try:
-            # 蟾ｦ繝・・繝悶Ν縺ｮ繝・・繧ｿ繝輔Ξ繝ｼ繝繧貞叙蠕・            left_df = self.tables_manager.get_table(
+        # テーブル結合処理
+        try:
+            # 左テーブルのデータフレームを取得
+            left_df = self.tables_manager.get_table(
                 self.left_table_name).table
-            # 蜿ｳ繝・・繝悶Ν縺ｮ繝・・繧ｿ繝輔Ξ繝ｼ繝繧貞叙蠕・            right_df = self.tables_manager.get_table(
+            # 右テーブルのデータフレームを取得
+            right_df = self.tables_manager.get_table(
                 self.right_table_name).table
-            # 邨仙粋繧ｿ繧､繝励↓蠢懊§縺ｦ邨仙粋蜃ｦ逅・ｒ螳溯｡・            match self.join_type:
+            # 結合タイプに応じて結合処理を実行
+            match self.join_type:
                 case 'inner':
-                    # 蜀・Κ邨仙粋
+                    # 内部結合
                     df = left_df.join(
                         right_df,
                         left_on=self.left_key_column_names,
@@ -110,7 +122,7 @@ class CreateJoinTable(AbstractApi):
                         how='inner',
                     )
                 case 'left':
-                    # 蟾ｦ邨仙粋
+                    # 左結合
                     df = left_df.join(
                         right_df,
                         left_on=self.left_key_column_names,
@@ -118,7 +130,7 @@ class CreateJoinTable(AbstractApi):
                         how='left',
                     )
                 case 'right':
-                    # 蜿ｳ邨仙粋
+                    # 右結合
                     df = left_df.join(
                         right_df,
                         left_on=self.left_key_column_names,
@@ -126,7 +138,7 @@ class CreateJoinTable(AbstractApi):
                         how='right',
                     )
                 case 'outer':
-                    # 螳悟・螟夜Κ邨仙粋
+                    # 完全外部結合
                     df = left_df.join(
                         right_df,
                         left_on=self.left_key_column_names,
@@ -137,10 +149,11 @@ class CreateJoinTable(AbstractApi):
                     )
                 case _:
                     raise ApiError("Invalid join type specified.")
-            # 譁ｰ縺励＞繝・・繝悶Ν諠・ｱ繧剃ｿ晏ｭ・            created_table_name = self.tables_manager.store_table(
+            # 新しいテーブル情報を保存
+            created_table_name = self.tables_manager.store_table(
                 self.join_table_name, df
             )
-            # 邨先棡繧定ｿ斐☆
+            # 結果を返す
             result = {'tableName': created_table_name}
             return result
         except Exception as e:

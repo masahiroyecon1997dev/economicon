@@ -1,4 +1,4 @@
-name: Django CI
+name: FastAPI CI
 
 on:
   workflow_dispatch:
@@ -48,17 +48,15 @@ jobs:
 
       # テストとカバレッジの実行
       - name: Run tests with coverage
-        working-directory: ./ApiServer/analysisapp
+        working-directory: ./ApiServer
         run: |
-          uv run coverage run --source='api' manage.py test api.tests
-          uv run coverage report -m
-          uv run coverage xml
+          uv run pytest tests --cov=analysisapp/api --cov-report=xml --cov-report=term
 
       # カバレッジレポートのアップロード
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          file: ./ApiServer/analysisapp/coverage.xml
+          file: ./ApiServer/coverage.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
