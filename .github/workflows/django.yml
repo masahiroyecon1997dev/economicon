@@ -17,38 +17,43 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: "pip"
-          cache-dependency-path: "python-requirements/ubuntu-requirements.txt"
-      # システム依存関係のインストール（Linuxのlibmagic）
+          enable-cache: true
+          cache-dependency-glob: "python-requirements/ubuntu-requirements.txt"
+      # Python のインストール
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      # システム依存関係のインストール
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libmagic1
-      # 依存関係のインストール
+
+      # 依存関係のインストール (uv pip を使用)
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r python-requirements/ubuntu-requirements.txt
-          pip install flake8 pylint
+          uv pip install -r python-requirements/ubuntu-requirements.txt
+          uv pip install flake8 pylint coverage
+
       # Linterの実行
       - name: Lint with flake8
         working-directory: ./ApiServer/analysisapp
         run: |
-          # Pythonの構文エラーと未定義名をチェック
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # 複雑度やその他のスタイルチェック（警告のみ）
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          # uv run を使うことで仮想環境を意識せずに実行可能
+          uv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          uv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
       # テストとカバレッジの実行
       - name: Run tests with coverage
         working-directory: ./ApiServer/analysisapp
         run: |
-          coverage run --source='api' manage.py test api.tests
-          coverage report -m
-          coverage xml
+          uv run coverage run --source='api' manage.py test api.tests
+          uv run coverage report -m
+          uv run coverage xml
+
       # カバレッジレポートのアップロード
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -57,3 +62,4 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }} # v4以降はトークン推奨

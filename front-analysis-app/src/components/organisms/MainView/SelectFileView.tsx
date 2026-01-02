@@ -242,15 +242,15 @@ export const SelectFileView = () => {
     <div className="mx-auto w-full max-w-none px-4 h-full">
       <div className="flex flex-col gap-4 md:gap-8">
         <header className="shrink-0">
-          <h1 className="text-2xl md:text-3xl font-bold text-black">{t("SelectFileView.Title")}</h1>
-          <p className="mt-1 md:mt-2 text-sm md:text-base text-black/60">{t("SelectFileView.Description")}</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-black">{t('SelectFileView.Title')}</h1>
+          <p className="mt-1 md:mt-2 text-sm md:text-base text-black/60">{t('SelectFileView.Description')}</p>
         </header>
 
         <div className="flex flex-col gap-2 md:gap-4 shrink-0">
           <NavigationSearchBar
             pathSegments={getPathSegments()}
             searchValue={searchValue}
-            searchPlaceholder={t("SelectFileView.SearchPlaceholder")}
+            searchPlaceholder={t('SelectFileView.SearchPlaceholder')}
             upDirectoryTitle={t('SelectFileView.GoUpDirectory')}
             onUpDirectory={goUpDirectory}
             onBreadcrumbClick={handleBreadcrumbClick}
