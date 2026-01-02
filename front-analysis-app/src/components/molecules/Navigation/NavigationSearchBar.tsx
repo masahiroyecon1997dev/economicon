@@ -26,7 +26,7 @@ export function NavigationSearchBar({
       {/* 幅が十分にある場合（768px以上）は横並び */}
       <div className="hidden md:flex items-center gap-4 w-full">
         <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <UpDirectoryButton
               onClick={onUpDirectory}
               title={upDirectoryTitle}
@@ -39,7 +39,7 @@ export function NavigationSearchBar({
             />
           </div>
         </div>
-        <div className="flex-shrink-0 w-64 lg:w-80">
+        <div className="shrink-0 w-64 lg:w-80">
           <FileSearchInput
             placeholder={searchPlaceholder}
             value={searchValue}
@@ -51,7 +51,7 @@ export function NavigationSearchBar({
       {/* 幅が狭い場合（768px未満）は縦積み */}
       <div className="flex flex-col gap-3 md:hidden">
         <div className="flex items-center gap-2 min-w-0 w-full">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <UpDirectoryButton
               onClick={onUpDirectory}
               title={upDirectoryTitle}

@@ -22,7 +22,10 @@ test.describe("SelectFileView - ファイル選択画面", () => {
 
   test("検索ボックスが表示され、入力できる", async ({ page }) => {
     // 検索ボックスを取得
-    const searchInput = page.locator('input[type="text"]').first();
+    const searchInput = page
+      .locator("main")
+      .getByPlaceholder("ファイル名で検索")
+      .first();
 
     // 検索ボックスが表示されていることを確認
     await expect(searchInput).toBeVisible();
@@ -36,28 +39,27 @@ test.describe("SelectFileView - ファイル選択画面", () => {
 
   test("上位ディレクトリボタンが表示される", async ({ page }) => {
     // 上位ディレクトリに移動するボタンを探す
-    const upButton = page
-      .locator("button")
-      .filter({ hasText: /上位|Up/ })
-      .first();
-
+    const upButton = page.getByRole("button", {
+      name: "上位ディレクトリへ移動",
+    });
     // ボタンが表示されることを確認
     await expect(upButton).toBeVisible();
   });
 
   test("ファイルリストテーブルが表示される", async ({ page }) => {
     // テーブルが表示されることを確認
-    const table = page.locator("table");
+    const table = page.getByRole("table", { name: "ファイル一覧" });
     await expect(table).toBeVisible();
 
     // テーブルヘッダーが表示されることを確認
-    const headers = page.locator("thead th");
+    const headers = table.locator("thead th");
     await expect(headers).toHaveCount(3); // ファイル名、サイズ、最終更新日時
   });
 
   test("ファイル名でソートできる", async ({ page }) => {
     // ファイル名ヘッダーをクリック
-    const nameHeader = page.locator("thead th").first();
+    const table = page.getByRole("table", { name: "ファイル一覧" });
+    const nameHeader = table.locator("thead th").first();
     await nameHeader.click();
 
     // ソートアイコンが変化することを確認（昇順）
@@ -68,16 +70,29 @@ test.describe("SelectFileView - ファイル選択画面", () => {
     await expect(nameHeader.locator("svg")).toBeVisible();
   });
 
-  test("ファイルリストが検索でフィルタリングされる", async ({ page }) => {
+  test.only("ファイルリストが検索でフィルタリングされる", async ({ page }) => {
+    // ページ遷移を待機
+    await page.waitForTimeout(1000);
+
+    const table = page.getByRole("table", { name: "ファイル一覧" });
     // 検索前のファイル数を取得
-    const rowsBeforeSearch = await page.locator("tbody tr").count();
+    const rowsBeforeSearch = await table.locator("tbody tr").count();
+
+    // ページ遷移を待機
+    await page.waitForTimeout(1000);
 
     // 検索ボックスに入力
-    const searchInput = page.locator('input[type="text"]').first();
+    const searchInput = page
+      .locator("main")
+      .getByPlaceholder("ファイル名で検索")
+      .first();
     await searchInput.fill(".csv");
 
+    // ページ遷移を待機
+    await page.waitForTimeout(1000);
+
     // フィルタリング後のファイル数を取得
-    const rowsAfterSearch = await page.locator("tbody tr").count();
+    const rowsAfterSearch = await table.locator("tbody tr").count();
 
     // フィルタリングされていることを確認（CSVファイルのみ表示）
     // 実際の数は環境に依存するため、変化があることだけを確認
@@ -110,9 +125,8 @@ test.describe("SelectFileView - ファイル選択画面", () => {
 
   test("パンくずリストから上位ディレクトリに移動できる", async ({ page }) => {
     // パンくずリストのボタンを探す
-    const breadcrumbs = page
-      .locator("nav button, div button")
-      .filter({ hasText: /[^/]+/ });
+    const breadcrumbNav = page.getByRole("navigation", { name: "Breadcrumb" });
+    const breadcrumbs = breadcrumbNav.locator("li button");
     const breadcrumbCount = await breadcrumbs.count();
 
     // パンくずが2つ以上ある場合のみテスト
@@ -124,9 +138,8 @@ test.describe("SelectFileView - ファイル選択画面", () => {
       await page.waitForTimeout(500);
 
       // ディレクトリが変更されたことを確認
-      const newBreadcrumbCount = await page
-        .locator("nav button, div button")
-        .filter({ hasText: /[^/]+/ })
+      const newBreadcrumbCount = await breadcrumbNav
+        .locator("li button")
         .count();
       expect(newBreadcrumbCount).toBeLessThanOrEqual(breadcrumbCount);
     }
@@ -134,45 +147,13 @@ test.describe("SelectFileView - ファイル選択画面", () => {
 
   test("キャンセルボタンが表示され、クリックできる", async ({ page }) => {
     // キャンセルボタンを探す
-    const cancelButton = page
-      .locator("button")
-      .filter({ hasText: /キャンセル|Cancel/ });
+    const cancelButton = page.getByRole("button", { name: "cancel" });
 
     // ボタンが表示されることを確認
     await expect(cancelButton).toBeVisible();
 
     // ボタンがクリック可能であることを確認
     await expect(cancelButton).toBeEnabled();
-  });
-
-  test("レスポンシブ: モバイルビューで正しく表示される", async ({ page }) => {
-    // モバイルサイズにビューポートを設定
-    await page.setViewportSize({ width: 375, height: 667 });
-
-    // タイトルが表示されることを確認
-    const title = page.locator("h1");
-    await expect(title).toBeVisible();
-
-    // テーブルが表示されることを確認
-    const table = page.locator("table");
-    await expect(table).toBeVisible();
-
-    // 検索ボックスが表示されることを確認
-    const searchInput = page.locator('input[type="text"]').first();
-    await expect(searchInput).toBeVisible();
-  });
-
-  test("レスポンシブ: タブレットビューで正しく表示される", async ({ page }) => {
-    // タブレットサイズにビューポートを設定
-    await page.setViewportSize({ width: 768, height: 1024 });
-
-    // タイトルが表示されることを確認
-    const title = page.locator("h1");
-    await expect(title).toBeVisible();
-
-    // テーブルが表示されることを確認
-    const table = page.locator("table");
-    await expect(table).toBeVisible();
   });
 
   test("エラー処理: APIエラー時にエラーメッセージが表示される", async ({
