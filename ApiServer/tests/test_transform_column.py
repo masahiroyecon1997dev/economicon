@@ -1,362 +1,345 @@
-from rest_framework.test import APITestCase
-from rest_framework import status
+import pytest
+from fastapi.testclient import TestClient
+from fastapi import status
 import polars as pl
-import json
-import math
 
-from ..apis.data.tables_manager import TablesManager
+from main import app
+from analysisapp.api.services.data.tables_manager import TablesManager
 
 
-class TestApiTransformColumn(APITestCase):
-    def setUp(self):
-        self.tables_manager = TablesManager()
+@pytest.fixture
+def client():
+    """TestClientのフィクスチャ"""
+    return TestClient(app)
+
+
+@pytest.fixture
+def tables_manager():
+    """TablesManagerのフィクスチャ"""
+    manager = TablesManager()
         # テーブルをクリア
-        self.tables_manager.clear_tables()
+        manager.clear_tables()
         # テスト用テーブルをセット
         df = pl.DataFrame({
             'A': [1, 2, 4, 8, 16],
             'B': [10, 20, 30, 40, 50],
             'C': [0.5, 1.0, 1.5, 2.0, 2.5]
         })
-        self.tables_manager.store_table('TestTable', df)
+        manager.store_table('TestTable', df)
+    yield manager
+    # テスト後のクリーンアップ
+    manager.clear_tables()
 
-    def test_transform_column_log_natural_success(self):
-        # 自然対数変換のテスト
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_ln',
-            'transformMethod': 'log'
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
-        self.assertEqual(response_data['result']['tableName'], 'TestTable')
-        self.assertEqual(response_data['result']['columnName'], 'A_ln')
 
-        # カラムが正しい位置に追加されているか
-        df = self.tables_manager.get_table('TestTable').table
-        expected_columns = ['A', 'A_ln', 'B', 'C']
-        self.assertEqual(df.columns, expected_columns)
+def test_transform_column_log_natural_success(client, tables_manager):
+    # 自然対数変換のテスト
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_ln',
+        'transformMethod': 'log'
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data['code'] == 'OK'
+    assert response_data['result']['tableName'], 'TestTable')
+    assert response_data['result']['columnName'], 'A_ln')
+    # カラムが正しい位置に追加されているか
+    df = tables_manager.get_table('TestTable').table
+    expected_columns = ['A', 'A_ln', 'B', 'C']
+    assert df.columns == expected_columns
+    # 自然対数の値が正しいか（近似値でチェック）
+    ln_values = df['A_ln'].to_list()
+    expected_ln_values = [math.log(1), math.log(2), math.log(4),
+                          math.log(8), math.log(16)]
+    for actual, expected in zip(ln_values, expected_ln_values):
+        self.assertAlmostEqual(actual, expected, places=5)
 
-        # 自然対数の値が正しいか（近似値でチェック）
-        ln_values = df['A_ln'].to_list()
-        expected_ln_values = [math.log(1), math.log(2), math.log(4),
-                              math.log(8), math.log(16)]
-        for actual, expected in zip(ln_values, expected_ln_values):
-            self.assertAlmostEqual(actual, expected, places=5)
 
-    def test_transform_column_log_base2_success(self):
-        # 底2の対数変換のテスト
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_log2',
-            'transformMethod': 'log',
-            'logBase': 2
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
+def test_transform_column_log_base2_success(client, tables_manager):
+    # 底2の対数変換のテスト
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_log2',
+        'transformMethod': 'log',
+        'logBase': 2
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data['code'] == 'OK'
+    # 底2の対数の値が正しいか
+    df = tables_manager.get_table('TestTable').table
+    log2_values = df['A_log2'].to_list()
+    # log2(1), log2(2), log2(4), log2(8), log2(16)
+    expected_log2_values = [0, 1, 2, 3, 4]
+    for actual, expected in zip(log2_values, expected_log2_values):
+        self.assertAlmostEqual(actual, expected, places=5)
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
 
-        # 底2の対数の値が正しいか
-        df = self.tables_manager.get_table('TestTable').table
-        log2_values = df['A_log2'].to_list()
-        # log2(1), log2(2), log2(4), log2(8), log2(16)
-        expected_log2_values = [0, 1, 2, 3, 4]
-        for actual, expected in zip(log2_values, expected_log2_values):
-            self.assertAlmostEqual(actual, expected, places=5)
+def test_transform_column_power_square_success(client, tables_manager):
+    # 二乗変換のテスト（デフォルト）
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_square',
+        'transformMethod': 'power'
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data['code'] == 'OK'
+    # 二乗の値が正しいか
+    df = tables_manager.get_table('TestTable').table
+    square_values = df['A_square'].to_list()
+    # 1^2, 2^2, 4^2, 8^2, 16^2
+    expected_square_values = [1, 4, 16, 64, 256]
+    assert square_values == expected_square_values
 
-    def test_transform_column_power_square_success(self):
-        # 二乗変換のテスト（デフォルト）
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_square',
-            'transformMethod': 'power'
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
+def test_transform_column_power_cube_success(client, tables_manager):
+    # 三乗変換のテスト
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_cube',
+        'transformMethod': 'power',
+        'exponent': 3
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data['code'] == 'OK'
+    # 三乗の値が正しいか
+    df = tables_manager.get_table('TestTable').table
+    cube_values = df['A_cube'].to_list()
+    # 1^3, 2^3, 4^3, 8^3, 16^3
+    expected_cube_values = [1, 8, 64, 512, 4096]
+    assert cube_values == expected_cube_values
 
-        # 二乗の値が正しいか
-        df = self.tables_manager.get_table('TestTable').table
-        square_values = df['A_square'].to_list()
-        # 1^2, 2^2, 4^2, 8^2, 16^2
-        expected_square_values = [1, 4, 16, 64, 256]
-        self.assertEqual(square_values, expected_square_values)
 
-    def test_transform_column_power_cube_success(self):
-        # 三乗変換のテスト
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_cube',
-            'transformMethod': 'power',
-            'exponent': 3
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
+def test_transform_column_fractional_exponent(client, tables_manager):
+    # 小数の指数での累乗変換
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_sqrt',
+        'transformMethod': 'power',
+        'exponent': 0.5  # 平方根
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data['code'] == 'OK'
+    # 平方根の値が正しいか
+    df = tables_manager.get_table('TestTable').table
+    sqrt_values = df['A_sqrt'].to_list()
+    expected_sqrt_values = [1.0, math.sqrt(2), 2.0, math.sqrt(8), 4.0]
+    for actual, expected in zip(sqrt_values, expected_sqrt_values):
+        self.assertAlmostEqual(actual, expected, places=5)
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
 
-        # 三乗の値が正しいか
-        df = self.tables_manager.get_table('TestTable').table
-        cube_values = df['A_cube'].to_list()
-        # 1^3, 2^3, 4^3, 8^3, 16^3
-        expected_cube_values = [1, 8, 64, 512, 4096]
-        self.assertEqual(cube_values, expected_cube_values)
+def test_transform_column_root_square_success(client, tables_manager):
+    # 平方根変換のテスト
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_sqrt',
+        'transformMethod': 'root',
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data['code'] == 'OK'
+    # 平方根の値が正しいか
+    df = tables_manager.get_table('TestTable').table
+    sqrt_values = df['A_sqrt'].to_list()
+    # sqrt(1), sqrt(2), sqrt(4), sqrt(8), sqrt(16)
+    expected_sqrt_values = [1, 1.41421, 2, 2.82843, 4]
+    for actual, expected in zip(sqrt_values, expected_sqrt_values):
+        self.assertAlmostEqual(actual, expected, places=5)
 
-    def test_transform_column_fractional_exponent(self):
-        # 小数の指数での累乗変換
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_sqrt',
-            'transformMethod': 'power',
-            'exponent': 0.5  # 平方根
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
+def test_transform_column_root_cubic_success(client, tables_manager):
+    # 立方根変換のテスト
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_cbrt',
+        'transformMethod': 'root',
+        'rootIndex': 3
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data['code'] == 'OK'
+    # 立方根の値が正しいか
+    df = tables_manager.get_table('TestTable').table
+    cbrt_values = df['A_cbrt'].to_list()
+    # cbrt(1), cbrt(2), cbrt(4), cbrt(8), cbrt(16)
+    expected_cbrt_values = [1, 1.25992, 1.58740, 2, 2.51984]
+    for actual, expected in zip(cbrt_values, expected_cbrt_values):
+        self.assertAlmostEqual(actual, expected, places=5)
 
-        # 平方根の値が正しいか
-        df = self.tables_manager.get_table('TestTable').table
-        sqrt_values = df['A_sqrt'].to_list()
-        expected_sqrt_values = [1.0, math.sqrt(2), 2.0, math.sqrt(8), 4.0]
-        for actual, expected in zip(sqrt_values, expected_sqrt_values):
-            self.assertAlmostEqual(actual, expected, places=5)
 
-    def test_transform_column_root_square_success(self):
-        # 平方根変換のテスト
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_sqrt',
-            'transformMethod': 'root',
-        }
+def test_transform_column_root_fractional_success(client, tables_manager):
+    # 二乗変換のテスト
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_square',
+        'transformMethod': 'root',
+        'rootIndex': 0.5
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data['code'] == 'OK'
+    # 二乗の値が正しいか
+    df = tables_manager.get_table('TestTable').table
+    square_values = df['A_square'].to_list()
+    # square(1), square(2), square(4), square(8), square(16)
+    expected_square_values = [1, 4, 16, 64, 256]
+    for actual, expected in zip(square_values, expected_square_values):
+        self.assertAlmostEqual(actual, expected, places=5)
 
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
+def test_transform_column_invalid_table(client, tables_manager):
+    # 存在しないテーブル名
+    payload = {
+        'tableName': 'NoTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_ln',
+        'transformMethod': 'log'
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "tableName 'NoTable' does not exist",
+                  response_data['message'])
 
-        # 平方根の値が正しいか
-        df = self.tables_manager.get_table('TestTable').table
-        sqrt_values = df['A_sqrt'].to_list()
-        # sqrt(1), sqrt(2), sqrt(4), sqrt(8), sqrt(16)
-        expected_sqrt_values = [1, 1.41421, 2, 2.82843, 4]
-        for actual, expected in zip(sqrt_values, expected_sqrt_values):
-            self.assertAlmostEqual(actual, expected, places=5)
 
-    def test_transform_column_root_cubic_success(self):
-        # 立方根変換のテスト
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_cbrt',
-            'transformMethod': 'root',
-            'rootIndex': 3
-        }
+def test_transform_column_invalid_source_column(client, tables_manager):
+    # 存在しないソースカラム名
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'Z',
+        'newColumnName': 'Z_ln',
+        'transformMethod': 'log'
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "sourceColumnName 'Z' does not exist." in response_data['message']
 
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
+def test_transform_column_duplicate_column_name(client, tables_manager):
+    # 既存のカラム名と重複
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'B',  # 既存のカラム名
+        'transformMethod': 'log'
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "newColumnName 'B' already exists." in response_data['message']
 
-        # 立方根の値が正しいか
-        df = self.tables_manager.get_table('TestTable').table
-        cbrt_values = df['A_cbrt'].to_list()
-        # cbrt(1), cbrt(2), cbrt(4), cbrt(8), cbrt(16)
-        expected_cbrt_values = [1, 1.25992, 1.58740, 2, 2.51984]
-        for actual, expected in zip(cbrt_values, expected_cbrt_values):
-            self.assertAlmostEqual(actual, expected, places=5)
 
-    def test_transform_column_root_fractional_success(self):
-        # 二乗変換のテスト
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_square',
-            'transformMethod': 'root',
-            'rootIndex': 0.5
-        }
+def test_transform_column_invalid_method(client, tables_manager):
+    # 無効な変換方法
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_invalid',
+        'transformMethod': 'invalid'
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "transformMethod 'invalid' is invalid",
+                  response_data['message'])
 
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
 
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data['code'], 'OK')
+def test_transform_column_invalid_log_base(client, tables_manager):
+    # 無効な対数の底
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_log',
+        'transformMethod': 'log',
+        'logBase': 1  # 無効：底が1
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "logBase must be a positive number not equal to 1",
+                  response_data['message'])
 
-        # 二乗の値が正しいか
-        df = self.tables_manager.get_table('TestTable').table
-        square_values = df['A_square'].to_list()
-        # square(1), square(2), square(4), square(8), square(16)
-        expected_square_values = [1, 4, 16, 64, 256]
-        for actual, expected in zip(square_values, expected_square_values):
-            self.assertAlmostEqual(actual, expected, places=5)
 
-    def test_transform_column_invalid_table(self):
-        # 存在しないテーブル名
-        payload = {
-            'tableName': 'NoTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_ln',
-            'transformMethod': 'log'
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("tableName 'NoTable' does not exist",
-                      response_data['message'])
-
-    def test_transform_column_invalid_source_column(self):
-        # 存在しないソースカラム名
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'Z',
-            'newColumnName': 'Z_ln',
-            'transformMethod': 'log'
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertEqual(response_data['message'],
-                         "sourceColumnName 'Z' does not exist.")
-
-    def test_transform_column_duplicate_column_name(self):
-        # 既存のカラム名と重複
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'B',  # 既存のカラム名
-            'transformMethod': 'log'
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertEqual(response_data['message'],
-                         "newColumnName 'B' already exists.")
-
-    def test_transform_column_invalid_method(self):
-        # 無効な変換方法
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_invalid',
-            'transformMethod': 'invalid'
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("transformMethod 'invalid' is invalid",
-                      response_data['message'])
-
-    def test_transform_column_invalid_log_base(self):
-        # 無効な対数の底
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_log',
-            'transformMethod': 'log',
-            'logBase': 1  # 無効：底が1
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("logBase must be a positive number not equal to 1",
-                      response_data['message'])
-
-    def test_transform_column_negative_log_base(self):
-        # 負の対数の底
-        payload = {
-            'tableName': 'TestTable',
-            'sourceColumnName': 'A',
-            'newColumnName': 'A_log',
-            'transformMethod': 'log',
-            'logBase': -2  # 無効：負の値
-        }
-        response = self.client.post(
-            '/api/transform-column',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-
-        response_data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data['code'], 'NG')
-        self.assertIn("logBase must be a positive number not equal to 1",
-                      response_data['message'])
+def test_transform_column_negative_log_base(client, tables_manager):
+    # 負の対数の底
+    payload = {
+        'tableName': 'TestTable',
+        'sourceColumnName': 'A',
+        'newColumnName': 'A_log',
+        'transformMethod': 'log',
+        'logBase': -2  # 無効：負の値
+    }
+    response = client.post(
+        '/api/transform-column',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "logBase must be a positive number not equal to 1",
+                  response_data['message'])
