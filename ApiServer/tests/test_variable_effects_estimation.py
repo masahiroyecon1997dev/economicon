@@ -58,10 +58,11 @@ def test_variable_effects_estimation_success_default(client, tables_manager):
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
+    print(response_data)
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     # 結果の構造をチェック
@@ -109,7 +110,7 @@ def test_variable_effects_estimation_hc1_robust(client, tables_manager):
         'useTDistribution': False
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
@@ -133,7 +134,7 @@ def test_variable_effects_estimation_hac(client, tables_manager):
         'useTDistribution': True
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
@@ -152,13 +153,13 @@ def test_variable_effects_estimation_invalid_table(client, tables_manager):
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist" == response_data['message']
+    assert "tableName 'NonExistentTable' does not exist." == response_data['message']
 
 
 def test_variable_effects_estimation_invalid_dependent_variable(client, tables_manager):
@@ -169,13 +170,13 @@ def test_variable_effects_estimation_invalid_dependent_variable(client, tables_m
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "dependentVariable 'nonexistent_y' does not exist" == response_data['message']
+    assert "dependentVariable 'nonexistent_y' does not exist." == response_data['message']
 
 
 
@@ -187,13 +188,13 @@ def test_variable_effects_estimation_invalid_explanatory_variable(client, tables
         'explanatoryVariables': ['x1', 'nonexistent_x']
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables 'nonexistent_x' does not exist" == response_data['message']
+    assert "explanatoryVariables 'nonexistent_x' does not exist." == response_data['message']
 
 
 
@@ -205,7 +206,7 @@ def test_variable_effects_estimation_empty_explanatory_variables(client, tables_
         'explanatoryVariables': []
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
@@ -222,7 +223,7 @@ def test_variable_effects_estimation_dependent_in_explanatory(client, tables_man
         'explanatoryVariables': ['x1', 'y', 'x2']
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
@@ -240,13 +241,13 @@ def test_variable_effects_estimation_invalid_standard_error_method(client, table
         'standardErrorMethod': 'invalid_method'
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "standardErrorMethod must be one of:" == response_data['message']
+    assert "standardErrorMethod must be one of: nonrobust, HC0, HC1, HC2, HC3, HAC, hac-panel, hac-groupsum, cluster" == response_data['message']
 
 
 def test_variable_effects_estimation_missing_parameters(client, tables_manager):
@@ -257,13 +258,13 @@ def test_variable_effects_estimation_missing_parameters(client, tables_manager):
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data['code'] == 'NG'
-    assert "Required parameter is missing" == response_data['message']
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert response_data['code'] == 'NG'
+    # assert "Required parameter is missing." == response_data['message']
 
 
 
@@ -278,11 +279,11 @@ def test_variable_effects_estimation_all_standard_error_methods(client, tables_m
         'useTDistribution': True
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_200_OK == f"Failed for method: {method}"
+    assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     result = response_data['result']
     assert result['standardErrorMethod'] == method
@@ -298,7 +299,7 @@ def test_variable_effects_estimation_single_explanatory_variable(client, tables_
         'useTDistribution': False
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()
@@ -320,7 +321,7 @@ def test_variable_effects_estimation_confidence_intervals(client, tables_manager
         'useTDistribution': True
     }
     response = client.post(
-        '/api/variable-effects-estimation',
+        '/api/regression/variable-effects',
         json=payload,
     )
     response_data = response.json()

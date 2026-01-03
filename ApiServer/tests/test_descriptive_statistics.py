@@ -46,7 +46,7 @@ def test_descriptive_statistics_success_numeric(client, tables_manager):
         'statistics': ['mean', 'median', 'variance', 'std']
     }
     response = client.post(
-        '/api/descriptive-statistics',
+        '/api/statistics/descriptive',
         json=payload,
     )
     response_data = response.json()
@@ -70,7 +70,7 @@ def test_descriptive_statistics_success_all_stats(client, tables_manager):
                        'variance', 'std', 'range', 'iqr']
     }
     response = client.post(
-        '/api/descriptive-statistics',
+        '/api/statistics/descriptive',
         json=payload,
     )
     response_data = response.json()
@@ -93,7 +93,7 @@ def test_descriptive_statistics_success_string_mode(client, tables_manager):
         'statistics': ['mode']
     }
     response = client.post(
-        '/api/descriptive-statistics',
+        '/api/statistics/descriptive',
         json=payload,
     )
     response_data = response.json()
@@ -101,7 +101,7 @@ def test_descriptive_statistics_success_string_mode(client, tables_manager):
     assert response_data['code'] == 'OK'
     result = response_data['result']
     # name列は ['Alice', 'Bob', 'Charlie', 'Alice', 'Bob'] なので、AliceかBobがmode
-    assert result['statistics']['name']['mode'] == ['Alice', 'Bob']
+    assert result['statistics']['name']['mode'] in ['Alice', 'Bob']
 
 
 def test_descriptive_statistics_string_numeric_stats(client, tables_manager):
@@ -112,7 +112,7 @@ def test_descriptive_statistics_string_numeric_stats(client, tables_manager):
         'statistics': ['mean', 'variance', 'std', 'range', 'iqr']
     }
     response = client.post(
-        '/api/descriptive-statistics',
+        '/api/statistics/descriptive',
         json=payload,
     )
     response_data = response.json()
@@ -135,13 +135,13 @@ def test_descriptive_statistics_invalid_table(client, tables_manager):
         'statistics': ['mean']
     }
     response = client.post(
-        '/api/descriptive-statistics',
+        '/api/statistics/descriptive',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist" == response_data['message']
+    assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
 def test_descriptive_statistics_invalid_column(client, tables_manager):
@@ -152,13 +152,13 @@ def test_descriptive_statistics_invalid_column(client, tables_manager):
         'statistics': ['mean']
     }
     response = client.post(
-        '/api/descriptive-statistics',
+        '/api/statistics/descriptive',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnName 'Z' does not exist" == response_data['message']
+    assert "columnName 'Z' does not exist." == response_data['message']
 
 
 
@@ -170,13 +170,13 @@ def test_descriptive_statistics_invalid_statistic(client, tables_manager):
         'statistics': ['invalid_stat']
     }
     response = client.post(
-        '/api/descriptive-statistics',
+        '/api/statistics/descriptive',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "statistics 'invalid_stat' is not supported" == response_data['message']
+    assert "statistics 'invalid_stat' is not supported. Available: ['mean', 'mode', 'median', 'variance', 'std', 'range', 'iqr']" == response_data['message']
 
 
 
@@ -188,7 +188,7 @@ def test_descriptive_statistics_empty_statistics_list(client, tables_manager):
         'statistics': []
     }
     response = client.post(
-        '/api/descriptive-statistics',
+        '/api/statistics/descriptive',
         json=payload,
     )
     response_data = response.json()

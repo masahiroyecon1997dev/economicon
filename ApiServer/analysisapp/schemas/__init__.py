@@ -6,18 +6,18 @@ from .common import (
     TableRequest,
     ColumnRequest
 )
-from .column import (
+from .columns import (
     AddColumnRequest,
     DeleteColumnRequest,
     RenameColumnRequest,
     DuplicateColumnRequest,
     CalculateColumnRequest,
-    TransformColumnRequest,
-    SortColumnsRequest,
-    GetColumnListRequest,
     AddDummyColumnRequest,
     AddLagLeadColumnRequest,
     AddSimulationColumnRequest,
+    SortColumnsRequest,
+    TransformColumnRequest,
+    GetColumnListRequest
 )
 from .tables import (
     CreateTableRequest,
@@ -25,41 +25,36 @@ from .tables import (
     CreateSimulationDataTableRequest,
     CreateJoinTableRequest,
     CreateUnionTableRequest,
-    ClearTablesRequest
+    ClearTablesRequest,
+    DuplicateTableRequest,
+    DeleteTableRequest,
+    FetchDataToJsonRequest
 )
 from .statistics import (
     ConfidenceIntervalRequest,
-    CalculateColumnRequest as StatisticsCalculateColumnRequest
-)
-from .data_operations import (
-    DeleteTableRequest,
-    DuplicateTableRequest,
-    DuplicateColumnRequest as DataDuplicateColumnRequest,
-    DescriptiveStatisticsRequest,
-    FilterSingleConditionRequest,
-    FixedEffectsEstimationRequest
+    DescriptiveStatisticsRequest
 )
 from .files import (
+    GetFilesRequest
+)
+from .data_io import (
+    ImportCsvByPathRequest,
+    ImportExcelByPathRequest,
+    ImportParquetByPathRequest,
     ExportCsvByPathRequest,
     ExportExcelByPathRequest,
     ExportParquetByPathRequest,
-    GetFilesRequest,
-    FetchDataToJsonRequest,
-    GetColumnListRequest as FilesGetColumnListRequest
 )
-from .imports import (
-    ImportCsvByPathRequest,
-    ImportExcelByPathRequest,
-    ImportParquetByPathRequest
-)
-from .regression import (
+from .regressions import (
     LinearRegressionRequest,
     LogisticRegressionRequest,
     ProbitRegressionRequest,
-    VariableEffectsEstimationRequest
+    VariableEffectsEstimationRequest,
+    FixedEffectsEstimationRequest
 )
 from .operations import (
-    InputCellDataRequest
+    InputCellDataRequest,
+    FilterSingleConditionRequest
 )
 
 __all__ = [
@@ -75,44 +70,41 @@ __all__ = [
     'RenameColumnRequest',
     'DuplicateColumnRequest',
     'CalculateColumnRequest',
-    'TransformColumnRequest',
-    'SortColumnsRequest',
-    'GetColumnListRequest',
     'AddDummyColumnRequest',
     'AddLagLeadColumnRequest',
     'AddSimulationColumnRequest',
+    'SortColumnsRequest',
+    'TransformColumnRequest',
+    'GetColumnListRequest',
     # Table operations
     'CreateTableRequest',
+    'RenameTableRequest',
     'CreateSimulationDataTableRequest',
     'CreateJoinTableRequest',
     'CreateUnionTableRequest',
     'ClearTablesRequest',
+    'DuplicateTableRequest',
+    'DeleteTableRequest',
+    'FetchDataToJsonRequest',
     # Statistics
     'ConfidenceIntervalRequest',
-    'StatisticsCalculateColumnRequest',
-    # Data operations
-    'DeleteTableRequest',
-    'DuplicateTableRequest',
-    'DataDuplicateColumnRequest',
     'DescriptiveStatisticsRequest',
-    'FilterSingleConditionRequest',
-    'FixedEffectsEstimationRequest',
     # Files
-    'ExportCsvByPathRequest',
-    'ExportExcelByPathRequest',
-    'ExportParquetByPathRequest',
     'GetFilesRequest',
-    'FetchDataToJsonRequest',
-    'FilesGetColumnListRequest',
-    # Imports
+    # Data I/O
     'ImportCsvByPathRequest',
     'ImportExcelByPathRequest',
     'ImportParquetByPathRequest',
+    'ExportCsvByPathRequest',
+    'ExportExcelByPathRequest',
+    'ExportParquetByPathRequest',
     # Regression
     'LinearRegressionRequest',
     'LogisticRegressionRequest',
     'ProbitRegressionRequest',
     'VariableEffectsEstimationRequest',
+    'FixedEffectsEstimationRequest',
     # Operations
     'InputCellDataRequest',
+    'FilterSingleConditionRequest'
 ]

@@ -1,6 +1,7 @@
 """統計解析関連のスキーマ定義"""
 from pydantic import BaseModel, Field
 from .common import TableRequest
+from typing import List
 
 
 class ConfidenceIntervalRequest(TableRequest):
@@ -10,7 +11,7 @@ class ConfidenceIntervalRequest(TableRequest):
     statisticType: str = Field(..., description="統計量のタイプ (mean, median, etc.)")
 
 
-class CalculateColumnRequest(TableRequest):
-    """カラム計算リクエスト"""
-    newColumnName: str = Field(..., description="新しいカラム名")
-    calculationExpression: str = Field(..., description="計算式")
+class DescriptiveStatisticsRequest(TableRequest):
+    """記述統計リクエスト"""
+    columnNameList: List[str] = Field(..., description="対象カラム名のリスト")
+    statistics: List[str] = Field(..., description="統計量のリスト")

@@ -11,8 +11,8 @@ from ..schemas import (
     RenameColumnRequest,
     AddLagLeadColumnRequest,
     AddSimulationColumnRequest,
-    StatisticsCalculateColumnRequest,
-    DataDuplicateColumnRequest,
+    CalculateColumnRequest,
+    DuplicateColumnRequest,
     TransformColumnRequest,
     SortColumnsRequest
 )
@@ -212,7 +212,7 @@ async def add_simulation_column_endpoint(request: Request, body: AddSimulationCo
     )
 
 @router.post("/calculate")
-async def calculate_column_endpoint(request: Request, body: StatisticsCalculateColumnRequest):
+async def calculate_column_endpoint(request: Request, body: CalculateColumnRequest):
     """カラム計算を実行するエンドポイント
 
     Parameters
@@ -243,7 +243,7 @@ async def calculate_column_endpoint(request: Request, body: StatisticsCalculateC
     )
 
 @router.post("/duplicate")
-async def duplicate_column_endpoint(request: Request, body: DataDuplicateColumnRequest):
+async def duplicate_column_endpoint(request: Request, body: DuplicateColumnRequest):
     """カラムを複製するエンドポイント
 
     Parameters
