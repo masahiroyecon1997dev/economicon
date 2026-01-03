@@ -1,5 +1,5 @@
 """回帰分析関連のスキーマ定義"""
-from pydantic import BaseModel, Field
+from pydantic import Field
 from typing import List
 from .common import TableRequest
 
@@ -24,6 +24,14 @@ class ProbitRegressionRequest(TableRequest):
 
 class VariableEffectsEstimationRequest(TableRequest):
     """変量効果推定リクエスト"""
+    dependentVariable: str = Field(..., description="被説明変数の列名")
+    explanatoryVariables: List[str] = Field(..., description="説明変数の列名リスト")
+    standardErrorMethod: str = Field(default="nonrobust", description="標準誤差計算方法")
+    useTDistribution: bool = Field(default=True, description="t分布を使用するか")
+
+
+class FixedEffectsEstimationRequest(TableRequest):
+    """固定効果推定リクエスト"""
     dependentVariable: str = Field(..., description="被説明変数の列名")
     explanatoryVariables: List[str] = Field(..., description="説明変数の列名リスト")
     entityIdColumn: str = Field(..., description="個体ID列名")

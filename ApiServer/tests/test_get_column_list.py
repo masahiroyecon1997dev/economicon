@@ -35,7 +35,7 @@ def tables_manager():
 
 def test_get_column_info_list_success(client, tables_manager):
     # 正常系テスト：テーブルが存在する場合
-    response = client.get(f'/api/get-column-list'
+    response = client.get(f'/api/column/list'
                                f'?tableName={table_name}',
                                )
     response_data = response.json()
@@ -52,7 +52,7 @@ def test_get_column_info_list_success(client, tables_manager):
 
 def test_get_column_info_list_number_success(client, tables_manager):
     # 正常系テスト：テーブルが存在する場合（数値型の列のみ）
-    response = client.get(f'/api/get-column-list'
+    response = client.get(f'/api/column/list'
                                f'?tableName={table_name}'
                                f'&isNumberOnly=true',
                                )
@@ -72,13 +72,13 @@ def test_get_column_info_list_number_success(client, tables_manager):
 def test_get_column_info_list_table_not_found(client, tables_manager):
     # 異常系テスト：存在しないテーブル名の場合
     non_existent_table_name = "non_existent_table"
-    response = client.get('/api/get-column-list'
+    response = client.get('/api/column/list'
                                f'?tableName={non_existent_table_name}',
                                )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     # エラーメッセージにテーブル名が存在しない旨が含まれることを確認
-    assert "tableName 'non_existent_table' does not exist" == response_data['message']
+    assert "tableName 'non_existent_table' does not exist." == response_data['message']
 
 
 def test_get_column_info_list_exception(client, tables_manager):
@@ -88,7 +88,7 @@ def test_get_column_info_list_exception(client, tables_manager):
     def raise_exception(table_name: str) -> pl.Schema:
         raise Exception("DB error")
     tables_manager.get_column_info_list = raise_exception
-    response = client.get(f'/api/get-column-list'
+    response = client.get(f'/api/column/list'
                                f'?tableName={table_name}',
                                )
     response_data = response.json()
