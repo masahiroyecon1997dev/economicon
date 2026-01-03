@@ -4,7 +4,7 @@ from fastapi import status
 import polars as pl
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ def test_add_lag_column_success_no_group(client, tables_manager):
         'groupColumns': []
     }
     response = client.post(
-        '/api/add-lag-lead-column',
+        '/api/column/add-lag-lead',
         json=payload,
     )
     response_data = response.json()
@@ -67,7 +67,7 @@ def test_add_lead_column_success_no_group(client, tables_manager):
         'groupColumns': []
     }
     response = client.post(
-        '/api/add-lag-lead-column',
+        '/api/column/add-lag-lead',
         json=payload,
     )
     response_data = response.json()
@@ -92,7 +92,7 @@ def test_add_lag_column_success_with_group(client, tables_manager):
         'groupColumns': ['group']
     }
     response = client.post(
-        '/api/add-lag-lead-column',
+        '/api/column/add-lag-lead',
         json=payload,
     )
     response_data = response.json()
@@ -117,7 +117,7 @@ def test_add_lead_column_success_with_group(client, tables_manager):
         'groupColumns': ['group']
     }
     response = client.post(
-        '/api/add-lag-lead-column',
+        '/api/column/add-lag-lead',
         json=payload,
     )
     response_data = response.json()
@@ -142,14 +142,13 @@ def test_add_lag_lead_column_invalid_table(client, tables_manager):
         'groupColumns': []
     }
     response = client.post(
-        '/api/add-lag-lead-column',
+        '/api/column/add-lag-lead',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist.",
-                  response_data['message'])
+    assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
 def test_add_lag_lead_column_invalid_source_column(client, tables_manager):
@@ -162,14 +161,13 @@ def test_add_lag_lead_column_invalid_source_column(client, tables_manager):
         'groupColumns': []
     }
     response = client.post(
-        '/api/add-lag-lead-column',
+        '/api/column/add-lag-lead',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "sourceColumn 'nonexistent' does not exist.",
-                  response_data['message'])
+    assert "sourceColumn 'nonexistent' does not exist." == response_data['message']
 
 
 def test_add_lag_lead_column_invalid_group_column(client, tables_manager):
@@ -182,14 +180,13 @@ def test_add_lag_lead_column_invalid_group_column(client, tables_manager):
         'groupColumns': ['nonexistent']
     }
     response = client.post(
-        '/api/add-lag-lead-column',
+        '/api/column/add-lag-lead',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "groupColumns 'nonexistent' does not exist.",
-                  response_data['message'])
+    assert "groupColumns 'nonexistent' does not exist." == response_data['message']
 
 
 def test_add_lag_lead_column_existing_column_name(client, tables_manager):
@@ -202,14 +199,14 @@ def test_add_lag_lead_column_existing_column_name(client, tables_manager):
         'groupColumns': []
     }
     response = client.post(
-        '/api/add-lag-lead-column',
+        '/api/column/add-lag-lead',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newColumnName 'group' already exists.",
-                  response_data['message'])
+    assert "newColumnName 'group' already exists." == response_data['message']
+
 
 
 def test_add_lag_lead_column_multiple_periods(client, tables_manager):
@@ -222,7 +219,7 @@ def test_add_lag_lead_column_multiple_periods(client, tables_manager):
         'groupColumns': []
     }
     response = client.post(
-        '/api/add-lag-lead-column',
+        '/api/column/add-lag-lead',
         json=payload,
     )
     response_data = response.json()

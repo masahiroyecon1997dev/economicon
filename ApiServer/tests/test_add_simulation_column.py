@@ -4,7 +4,7 @@ from fastapi import status
 import polars as pl
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -17,14 +17,14 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        # テーブルをクリア
-        manager.clear_tables()
-        # テスト用テーブルをセット
-        df = pl.DataFrame({
-            'A': [1, 2, 3, 4, 5],
-            'B': [10, 20, 30, 40, 50]
-        })
-        manager.store_table('TestTable', df)
+    # テーブルをクリア
+    manager.clear_tables()
+    # テスト用テーブルをセット
+    df = pl.DataFrame({
+        'A': [1, 2, 3, 4, 5],
+        'B': [10, 20, 30, 40, 50]
+    })
+    manager.store_table('TestTable', df)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -49,10 +49,9 @@ def test_add_uniform_column_success(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    assert response_data['result']['tableName'], 'TestTable')
-    assert response_data['result']['columnName'], 'UniformCol')
-    assert response_data['result']['distributionType'],
-                     'uniform')
+    assert response_data['result']['tableName'] == 'TestTable'
+    assert response_data['result']['columnName'] == 'UniformCol'
+    assert response_data['result']['distributionType'] == 'uniform'
     # データが追加されているか確認
     df = tables_manager.get_table('TestTable').table
     assert 'UniformCol' in df.columns
@@ -219,8 +218,7 @@ def test_invalid_table_name(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist",
-                  response_data['message'])
+    assert "tableName 'NoTable' does not exist" == response_data['message']
 
 
 def test_duplicate_column_name(client, tables_manager):
@@ -241,8 +239,7 @@ def test_duplicate_column_name(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newColumnName 'A' already exists",
-                  response_data['message'])
+    assert "newColumnName 'A' already exists." == response_data['message']
 
 
 def test_unsupported_distribution(client, tables_manager):

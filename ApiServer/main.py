@@ -3,11 +3,12 @@
 """
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-import os
 from pathlib import Path
+from analysisapp.exception_handlers import init_exception_handlers
+from analysisapp.routers import api_router
 
 # i18n サポート
-from analysisapp.api.i18n import set_locale, get_locale
+from analysisapp.i18n import set_locale, get_locale
 
 # ベースディレクトリ
 BASE_DIR = Path(__file__).resolve().parent
@@ -57,7 +58,8 @@ async def health_check():
     return {"status": "ok"}
 
 
-# ルーターのインポートと登録
-from analysisapp.api.routers import add_column
+# 1. ルーターの登録
+app.include_router(api_router, prefix="/api")
 
-app.include_router(add_column.router, prefix="/api", tags=["column"])
+# 2. エンドポイントより「後」にハンドラを初期化・登録
+init_exception_handlers(app)

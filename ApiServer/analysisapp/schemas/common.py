@@ -27,4 +27,5 @@ class TableRequest(BaseModel):
 
 class ColumnRequest(TableRequest):
     """テーブル名とカラム名を含むリクエストの基底クラス"""
+    tableName: str = Field(..., description="テーブル名")
     columnName: str = Field(..., description="カラム名")

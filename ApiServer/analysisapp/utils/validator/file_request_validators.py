@@ -1,5 +1,5 @@
-from typing import Union
-from rest_framework.response import Response
+from typing import Union, Optional
+from fastapi import UploadFile
 from .file_validator import FileValidator
 from .file_validation_config import (TSV_VALIDATOR_CONFIG,
                                      EXCEL_VALIDATOR_CONFIG,
@@ -7,33 +7,33 @@ from .file_validation_config import (TSV_VALIDATOR_CONFIG,
                                      PARQUET_VALIDATOR_CONFIG)
 
 
-def validate_tsv_request(request) -> Union[Response, None]:
+async def validate_tsv_request(file: UploadFile) -> Optional[Exception]:
     """
     TSVファイルアップロードリクエストのバリデーション
     """
     validator = FileValidator(**TSV_VALIDATOR_CONFIG)
-    return validator.validate_request(request)
+    return await validator.validate_file(file)
 
 
-def validate_excel_request(request) -> Union[Response, None]:
+async def validate_excel_request(file: UploadFile) -> Optional[Exception]:
     """
     Excelファイルアップロードリクエストのバリデーション
     """
     validator = FileValidator(**EXCEL_VALIDATOR_CONFIG)
-    return validator.validate_request(request)
+    return await validator.validate_file(file)
 
 
-def validate_csv_request(request) -> Union[Response, None]:
+async def validate_csv_request(file: UploadFile) -> Optional[Exception]:
     """
     CSVファイルアップロードリクエストのバリデーション
     """
     validator = FileValidator(**CSV_VALIDATOR_CONFIG)
-    return validator.validate_request(request)
+    return await validator.validate_file(file)
 
 
-def validate_parquet_request(request) -> Union[Response, None]:
+async def validate_parquet_request(file: UploadFile) -> Optional[Exception]:
     """
     Parquetファイルアップロードリクエストのバリデーション
     """
     validator = FileValidator(**PARQUET_VALIDATOR_CONFIG)
-    return validator.validate_request(request)
+    return await validator.validate_file(file)

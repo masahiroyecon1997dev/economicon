@@ -1,5 +1,5 @@
 ---
-applyTo: "AnalysisApp/AnalysisApp/ApiServer/analysisapp/api/**"
+applyTo: "AnalysisApp/analysisappServer/analysisapp/**"
 ---
 
 # FastAPI API 開発規約
@@ -9,7 +9,7 @@ applyTo: "AnalysisApp/AnalysisApp/ApiServer/analysisapp/api/**"
 ### パッケージマネージャー
 
 - このプロジェクトでは **uv** をパッケージマネージャーとして使用
-- 依存関係は windows なら `python-requirements/windows-requirements.txt`、ubuntu なら `python-requirements/ubuntu-requirements.txt`、 で管理
+- 依存関係は windows なら `ApiServer/python-requirements/windows-requirements.txt`、ubuntu なら `ApiServer/python-requirements/ubuntu-requirements.txt`、 で管理
 
 ### 仮想環境
 
@@ -17,11 +17,12 @@ applyTo: "AnalysisApp/AnalysisApp/ApiServer/analysisapp/api/**"
 - 新しいパッケージを追加する場合は `windows-requirements.txt` を更新
 
 ```powershell
+cd ApiServer
 # 依存関係のインストール
-uv pip install -r python-requirements/windows-requirements.txt
+uv add -r python-requirements/windows-requirements.txt
 
 # 新しいパッケージの追加
-uv pip install <package-name>
+uv add <package-name>
 # requirements.txtに追記すること
 ```
 
@@ -58,7 +59,7 @@ flake8 api/apis/python_apis/your_file.py
 
 ### 国際化対応
 
-- 全てのユーザー向けメッセージは`analysisapp.api.i18n.translation.gettext_lazy as _`を使用
+- 全てのユーザー向けメッセージは`analysisapp.i18n.translation.gettext_lazy as _`を使用
 - エラーメッセージは必ず翻訳可能な形式で記述
 - ContextVar ベースの言語設定を使用（スレッドセーフ）
 

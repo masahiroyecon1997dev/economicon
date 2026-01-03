@@ -4,7 +4,7 @@ from fastapi import status
 import polars as pl
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def test_add_dummy_column_success(client, tables_manager):
         'targetValue': 'female'
     }
     response = client.post(
-        '/api/add-dummy-column',
+        '/api/column/add-dummy',
         json=payload,
     )
     response_data = response.json()
@@ -65,14 +65,13 @@ def test_add_dummy_column_invalid_table(client, tables_manager):
         'targetValue': 'female'
     }
     response = client.post(
-        '/api/add-dummy-column',
+        '/api/column/add-dummy',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert 'NoTable' in response_data['message']
-    assert 'does not exist' in response_data['message']
+    assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
 def test_add_dummy_column_invalid_source_column(client, tables_manager):
@@ -84,14 +83,13 @@ def test_add_dummy_column_invalid_source_column(client, tables_manager):
         'targetValue': 'female'
     }
     response = client.post(
-        '/api/add-dummy-column',
+        '/api/column/add-dummy',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert 'invalid_column' in response_data['message']
-    assert 'does not exist' in response_data['message']
+    assert "sourceColumnName 'invalid_column' does not exist." == response_data['message']
 
 
 def test_add_dummy_column_duplicate_column_name(client, tables_manager):
@@ -103,13 +101,13 @@ def test_add_dummy_column_duplicate_column_name(client, tables_manager):
         'targetValue': 'female'
     }
     response = client.post(
-        '/api/add-dummy-column',
+        '/api/column/add-dummy',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert 'age' in response_data['message']
+    assert "dummyColumnName 'age' already exists." == response_data['message']
 
 
 def test_add_dummy_column_with_numeric_target(client, tables_manager):
@@ -127,7 +125,7 @@ def test_add_dummy_column_with_numeric_target(client, tables_manager):
         'targetValue': '90'
     }
     response = client.post(
-        '/api/add-dummy-column',
+        '/api/column/add-dummy',
         json=payload,
     )
     response_data = response.json()

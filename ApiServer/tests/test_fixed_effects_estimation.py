@@ -2,9 +2,10 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 import polars as pl
+import numpy as np
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -17,50 +18,50 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        # テーブルをクリア
-        manager.clear_tables()
-        # 固定効果分析用テストデータを作成
-        # パネルデータ（個体×時点の構造）
-        np.random.seed(42)  # 再現可能な結果のため
-        n_entities = 10  # 個体数
-        n_periods = 5    # 時点数
-        n_total = n_entities * n_periods
-        # 個体ID
-        entity_ids = np.repeat(range(1, n_entities + 1), n_periods)
-        # 時点ID
-        time_ids = np.tile(range(1, n_periods + 1), n_entities)
-        # 個体固有効果（時間不変）
-        entity_effects = np.random.normal(0, 2, n_entities)
-        entity_effects_expanded = np.repeat(entity_effects, n_periods)
-        # 説明変数
-        x1 = np.random.normal(0, 1, n_total)
-        x2 = np.random.normal(0, 1, n_total)
-        # 被説明変数（個体固有効果を含む）
-        error = np.random.normal(0, 1, n_total)
-        y = 2.0 + 1.5 * x1 + -0.8 * x2 + entity_effects_expanded + error
-        df_panel = pl.DataFrame({
-            'entity_id': entity_ids,
-            'time_id': time_ids,
-            'y': y,
-            'x1': x1,
-            'x2': x2
-        })
-        manager.store_table('PanelData', df_panel)
-        # 単一時点のデータ（エラーテスト用）
-        df_single = pl.DataFrame({
-            'entity_id': [1, 2, 3],
-            'y': [1.0, 2.0, 3.0],
-            'x1': [1.0, 2.0, 3.0]
-        })
-        manager.store_table('SinglePeriod', df_single)
-        # 数値以外のデータを含むテーブル（エラーテスト用）
-        df_with_text = pl.DataFrame({
-            'entity_id': [1, 1, 2, 2],
-            'y': [1.0, 2.0, 3.0, 4.0],
-            'x1': [1.0, 2.0, 3.0, 4.0],
-            'text_col': ['a', 'b', 'c', 'd']
-        })
-        manager.store_table('TextTable', df_with_text)
+    # テーブルをクリア
+    manager.clear_tables()
+    # 固定効果分析用テストデータを作成
+    # パネルデータ（個体×時点の構造）
+    np.random.seed(42)  # 再現可能な結果のため
+    n_entities = 10  # 個体数
+    n_periods = 5    # 時点数
+    n_total = n_entities * n_periods
+    # 個体ID
+    entity_ids = np.repeat(range(1, n_entities + 1), n_periods)
+    # 時点ID
+    time_ids = np.tile(range(1, n_periods + 1), n_entities)
+    # 個体固有効果（時間不変）
+    entity_effects = np.random.normal(0, 2, n_entities)
+    entity_effects_expanded = np.repeat(entity_effects, n_periods)
+    # 説明変数
+    x1 = np.random.normal(0, 1, n_total)
+    x2 = np.random.normal(0, 1, n_total)
+    # 被説明変数（個体固有効果を含む）
+    error = np.random.normal(0, 1, n_total)
+    y = 2.0 + 1.5 * x1 + -0.8 * x2 + entity_effects_expanded + error
+    df_panel = pl.DataFrame({
+        'entity_id': entity_ids,
+        'time_id': time_ids,
+        'y': y,
+        'x1': x1,
+        'x2': x2
+    })
+    manager.store_table('PanelData', df_panel)
+    # 単一時点のデータ（エラーテスト用）
+    df_single = pl.DataFrame({
+        'entity_id': [1, 2, 3],
+        'y': [1.0, 2.0, 3.0],
+        'x1': [1.0, 2.0, 3.0]
+    })
+    manager.store_table('SinglePeriod', df_single)
+    # 数値以外のデータを含むテーブル（エラーテスト用）
+    df_with_text = pl.DataFrame({
+        'entity_id': [1, 1, 2, 2],
+        'y': [1.0, 2.0, 3.0, 4.0],
+        'x1': [1.0, 2.0, 3.0, 4.0],
+        'text_col': ['a', 'b', 'c', 'd']
+    })
+    manager.store_table('TextTable', df_with_text)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -96,7 +97,7 @@ def test_fixed_effects_estimation_success(client, tables_manager):
     assert 'modelStatistics' in result
     # パラメータの構造をチェック
     parameters = result['parameters']
-    self.assertIsInstance(parameters, list)
+    assert isinstance(parameters, list)
     assert len(parameters) == 2
     # 各パラメータに必要な情報があることを確認
     for param in parameters:
@@ -119,8 +120,8 @@ def test_fixed_effects_estimation_success(client, tables_manager):
     x2_coeff = next(
         p['coefficient'] for p in parameters if p['variable'] == 'x2')
     # 真の係数: x1=1.5, x2=-0.8 に対する許容範囲
-    self.assertAlmostEqual(x1_coeff, 1.5, delta=0.5)
-    self.assertAlmostEqual(x2_coeff, -0.8, delta=0.5)
+    assert x1_coeff == pytest.approx(1.5, abs=0.5)
+    assert x2_coeff == pytest.approx(-0.8, abs=0.5)
 
 
 def test_fixed_effects_estimation_robust_standard_errors(client, tables_manager):
@@ -141,8 +142,7 @@ def test_fixed_effects_estimation_robust_standard_errors(client, tables_manager)
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     result = response_data['result']
-    self.assertEqual(result['modelStatistics']['standardErrorMethod'],
-                     'robust')
+    assert result['modelStatistics']['standardErrorMethod'] == 'robust'
     assert result['modelStatistics']['useTDistribution'] == False
 
 
@@ -164,8 +164,7 @@ def test_fixed_effects_estimation_clustered_standard_errors(client, tables_manag
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     result = response_data['result']
-    self.assertEqual(result['modelStatistics']['standardErrorMethod'],
-                     'clustered')
+    assert result['modelStatistics']['standardErrorMethod'] == 'clustered'
 
 
 def test_fixed_effects_estimation_hac_standard_errors(client, tables_manager):
@@ -186,8 +185,7 @@ def test_fixed_effects_estimation_hac_standard_errors(client, tables_manager):
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     result = response_data['result']
-    self.assertEqual(result['modelStatistics']['standardErrorMethod'],
-                     'hac')
+    assert result['modelStatistics']['standardErrorMethod'] == 'hac'
 
 
 def test_fixed_effects_estimation_invalid_table(client, tables_manager):
@@ -205,8 +203,8 @@ def test_fixed_effects_estimation_invalid_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist",
-                  response_data['message'])
+    assert "tableName 'NonExistentTable' does not exist" == response_data['message']
+
 
 
 def test_fixed_effects_estimation_invalid_dependent_variable(client, tables_manager):
@@ -224,8 +222,7 @@ def test_fixed_effects_estimation_invalid_dependent_variable(client, tables_mana
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "dependentVariable 'nonexistent_y' does not exist",
-                  response_data['message'])
+    assert "dependentVariable 'nonexistent_y' does not exist" == response_data['message']
 
 
 def test_fixed_effects_estimation_invalid_explanatory_variable(client, tables_manager):
@@ -243,8 +240,7 @@ def test_fixed_effects_estimation_invalid_explanatory_variable(client, tables_ma
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables 'nonexistent_x' does not exist",
-                  response_data['message'])
+    assert "explanatoryVariables 'nonexistent_x' does not exist" == response_data['message']
 
 
 def test_fixed_effects_estimation_invalid_entity_id_column(client, tables_manager):
@@ -262,8 +258,7 @@ def test_fixed_effects_estimation_invalid_entity_id_column(client, tables_manage
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "entityIdColumn 'nonexistent_id' does not exist",
-                  response_data['message'])
+    assert "entityIdColumn 'nonexistent_id' does not exist" == response_data['message']
 
 
 def test_fixed_effects_estimation_entity_id_same_as_dependent(client, tables_manager):
@@ -281,9 +276,7 @@ def test_fixed_effects_estimation_entity_id_same_as_dependent(client, tables_man
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Entity ID column cannot be "
-                  "the same as dependent variable",
-                  response_data['message'])
+    assert "Entity ID column cannot be the same as dependent variable" == response_data['message']
 
 
 def test_fixed_effects_estimation_entity_id_in_explanatory(client, tables_manager):
@@ -301,9 +294,7 @@ def test_fixed_effects_estimation_entity_id_in_explanatory(client, tables_manage
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Entity ID column cannot be included in explanatory "
-                  "variables",
-                  response_data['message'])
+    assert "Entity ID column cannot be included in explanatory variables" == response_data['message']
 
 
 def test_fixed_effects_estimation_invalid_standard_error_method(client, tables_manager):
@@ -322,8 +313,7 @@ def test_fixed_effects_estimation_invalid_standard_error_method(client, tables_m
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "is not supported. Supported standardErrorMethod:",
-                  response_data['message'])
+    assert "is not supported. Supported standardErrorMethod:" == response_data['message']
 
 
 def test_fixed_effects_estimation_single_period_data(client, tables_manager):
@@ -339,12 +329,9 @@ def test_fixed_effects_estimation_single_period_data(client, tables_manager):
         json=payload,
     )
     response_data = response.json()
-    self.assertEqual(response.status_code,
-                     status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
-    assert "No entities with multiple observations found",
-                  response_data['message'])
-
+    assert "No entities with multiple observations found" == response_data['message']
 
 def test_fixed_effects_estimation_empty_explanatory_variables(client, tables_manager):
     """説明変数が空の場合エラーが返される"""
@@ -361,9 +348,7 @@ def test_fixed_effects_estimation_empty_explanatory_variables(client, tables_man
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables must be with "
-                  "at least 1 explanatory_variable.",
-                  response_data['message'])
+    assert "explanatoryVariables must be with at least 1 explanatory_variable." == response_data['message']
 
 
 def test_fixed_effects_estimation_dependent_in_explanatory(client, tables_manager):
@@ -381,9 +366,7 @@ def test_fixed_effects_estimation_dependent_in_explanatory(client, tables_manage
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Dependent variable cannot be "
-                  "included in explanatory variables",
-                  response_data['message'])
+    assert "Dependent variable cannot be included in explanatory variables" == response_data['message']
 
 
 def test_fixed_effects_estimation_missing_required_parameters(client, tables_manager):
@@ -401,8 +384,7 @@ def test_fixed_effects_estimation_missing_required_parameters(client, tables_man
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Required parameter is missing",
-                  response_data['message'])
+    assert "Required parameter is missing" == response_data['message']
 
 
 def test_fixed_effects_estimation_single_explanatory_variable(client, tables_manager):

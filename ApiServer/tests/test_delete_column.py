@@ -4,7 +4,7 @@ from fastapi import status
 import polars as pl
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def test_delete_column_success(client, tables_manager):
         'columnName': 'A'
     }
     response = client.post(
-        '/api/delete-column',
+        '/api/column/delete',
         json=payload,
     )
     response_data = response.json()
@@ -55,7 +55,7 @@ def test_delete_column_not_found(client, tables_manager):
         'columnName': 'Z'
     }
     response = client.post(
-        '/api/delete-column',
+        '/api/column/delete',
         json=payload,
     )
     response_data = response.json()
@@ -70,7 +70,7 @@ def test_delete_column_table_not_found(client, tables_manager):
         'columnName': 'A'
     }
     response = client.post(
-        '/api/delete-column',
+        '/api/column/delete',
         json=payload,
     )
     response_data = response.json()
@@ -85,7 +85,7 @@ def test_delete_column_empty_table_name(client, tables_manager):
         'columnName': 'A'
     }
     response = client.post(
-        '/api/delete-column',
+        '/api/column/delete',
         json=payload,
     )
     response_data = response.json()
@@ -100,7 +100,7 @@ def test_delete_column_empty_column_name(client, tables_manager):
         'columnName': ''
     }
     response = client.post(
-        '/api/delete-column',
+        '/api/column/delete',
         json=payload,
     )
     response_data = response.json()

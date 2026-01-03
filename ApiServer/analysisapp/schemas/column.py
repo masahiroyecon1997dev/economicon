@@ -1,5 +1,5 @@
 """カラム操作関連のスキーマ定義"""
-from pydantic import BaseModel, Field
+from pydantic import Field
 from typing import Optional, List, Dict
 from .common import TableRequest, ColumnRequest
 
@@ -15,7 +15,7 @@ class DeleteColumnRequest(ColumnRequest):
     pass
 
 
-class RenameColumnRequest(ColumnRequest):
+class RenameColumnRequest(TableRequest):
     """カラム名変更リクエスト"""
     oldColumnName: str = Field(..., description="元のカラム名")
     newColumnName: str = Field(..., description="新しいカラム名")

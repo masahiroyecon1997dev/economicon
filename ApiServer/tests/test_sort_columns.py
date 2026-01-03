@@ -4,7 +4,7 @@ from fastapi import status
 import polars as pl
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -17,15 +17,15 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        # テーブルをクリア
-        manager.clear_tables()
-        # テスト用テーブルをセット
-        df = pl.DataFrame({
-            'A': [3, 1, 2],
-            'B': [6, 4, 5],
-            'C': ['c', 'a', 'b']
-        })
-        manager.store_table('TestTable', df)
+    # テーブルをクリア
+    manager.clear_tables()
+    # テスト用テーブルをセット
+    df = pl.DataFrame({
+        'A': [3, 1, 2],
+        'B': [6, 4, 5],
+        'C': ['c', 'a', 'b']
+    })
+    manager.store_table('TestTable', df)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -47,7 +47,7 @@ def test_sort_single_column_ascending(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    assert response_data['result']['tableName'], 'TestTable')
+    assert response_data['result']['tableName'] == 'TestTable'
     # ソート結果を確認
     df = tables_manager.get_table('TestTable').table
     assert df['A'].to_list() == [1, 2, 3]
@@ -122,7 +122,7 @@ def test_sort_invalid_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist." in response_data['message']
+    assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
 def test_sort_invalid_column(client, tables_manager):
@@ -140,7 +140,7 @@ def test_sort_invalid_column(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnName 'Z' does not exist." in response_data['message']
+    assert "columnName 'Z' does not exist." == response_data['message']
 
 
 def test_sort_empty_columns(client, tables_manager):

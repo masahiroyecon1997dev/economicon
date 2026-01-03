@@ -1,7 +1,7 @@
 from typing import List
 
 import polars as pl
-from django.utils.translation import gettext as _
+from analysisapp.i18n.translation import gettext_lazy as _
 
 from .common_validators import (ValidationError, validate_candidates,
                                 validate_column_is_numeric, validate_integer,

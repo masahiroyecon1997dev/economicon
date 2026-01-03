@@ -4,7 +4,7 @@ from fastapi import status
 import polars as pl
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -38,7 +38,7 @@ def test_add_column_success(client, tables_manager):
         'addPositionColumn': 'A'
     }
     response = client.post(
-        '/api/add-column',
+        '/api/column/add',
         json=payload
     )
 
@@ -63,13 +63,14 @@ def test_add_column_invalid_table(client, tables_manager):
         'addPositionColumn': 'A'
     }
     response = client.post(
-        '/api/add-column',
+        '/api/column/add',
         json=payload
     )
 
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
+    assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
 def test_add_column_duplicate_name(client, tables_manager):
@@ -80,10 +81,28 @@ def test_add_column_duplicate_name(client, tables_manager):
         'addPositionColumn': 'A'
     }
     response = client.post(
-        '/api/add-column',
+        '/api/column/add',
         json=payload
     )
 
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
+    assert "newColumnName 'A' already exists." == response_data['message']
+
+def test_add_column_invalid_position_column(client, tables_manager):
+    """追加位置指定カラムが存在しない"""
+    payload = {
+        'tableName': 'TestTable',
+        'newColumnName': 'C',
+        'addPositionColumn': 'Z'  # 存在しないカラム名
+    }
+    response = client.post(
+        '/api/column/add',
+        json=payload
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data['code'] == 'NG'
+    assert "addPositionColumn 'Z' does not exist." == response_data['message']
