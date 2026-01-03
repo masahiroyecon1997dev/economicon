@@ -44,7 +44,7 @@ pip install uv
 cd ApiServer
 uv venv
 .venv\Scripts\Activate.ps1  # Windows
-uv pip install -r ..\python-requirements\windows-requirements.txt
+uv add -r python-requirements\windows-requirements.txt
 
 # 開発サーバーの起動
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
@@ -104,7 +104,7 @@ cd ApiServer
 uvicorn main:app --reload                     # 開発サーバーの起動
 pytest tests                                  # テストの実行
 pytest tests -v                               # 詳細表示でテスト実行
-pytest tests --cov=analysisapp/api            # カバレッジ付きテスト
+pytest tests --cov=analysisapp            # カバレッジ付きテスト
 ```
 
 ### ビルドとデプロイ
@@ -173,7 +173,7 @@ pytest tests -v
 pytest tests/test_create_table.py
 
 # カバレッジ付きテスト
-pytest tests --cov=analysisapp/api --cov-report=html
+pytest tests --cov=analysisapp --cov-report=html
 coverage report -m           # ターミナルにレポート表示
 ```
 
@@ -264,7 +264,7 @@ AnalysisApp/
 pip install --upgrade uv
 
 # キャッシュをクリアして再インストール
-uv pip install --reinstall -r python-requirements\windows-requirements.txt
+uv add --reinstall -r python-requirements\windows-requirements.txt
 ```
 
 ### フロントエンドのビルドエラー

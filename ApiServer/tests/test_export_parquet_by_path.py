@@ -2,10 +2,21 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 import polars as pl
-
+import shutil
+import tempfile
+import json
+import os
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
+# テスト用のテーブルデータを作成
+test_data = pl.DataFrame({
+    'col_1': [1, 2, 3],
+    'col_2': [10.1, 20.2, 30.3],
+    'col_3': ['A', 'B', 'C']
+})
+# テスト用の出力ディレクトリ
+test_output_dir = tempfile.mkdtemp()
 
 @pytest.fixture
 def client():
@@ -17,22 +28,13 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        manager.clear_tables()
-        # テスト用のテーブルデータを作成
-        self.test_data = pl.DataFrame({
-            'col_1': [1, 2, 3],
-            'col_2': [10.1, 20.2, 30.3],
-            'col_3': ['A', 'B', 'C']
-        })
-        manager.store_table('TestTable', self.test_data)
-        # テスト用の出力ディレクトリ
-        self.test_output_dir = tempfile.mkdtemp()
-    def tearDown(self):
-        # テスト後にテンポラリディレクトリをクリーンアップ
-        shutil.rmtree(self.test_output_dir, ignore_errors=True)
+    manager.clear_tables()
+    manager.store_table('TestTable', test_data)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
+    # テスト後にテンポラリディレクトリをクリーンアップ
+    shutil.rmtree(test_output_dir, ignore_errors=True)
 
 
 
@@ -43,7 +45,7 @@ def test_export_parquet_by_path_success(client, tables_manager):
     # APIリクエスト
     request_data = {
         'tableName': 'TestTable',
-        'directoryPath': self.test_output_dir,
+        'directoryPath': test_output_dir,
         'fileName': 'test_output.parquet'
     }
     response = client.post('/api/export-parquet-by-path',
@@ -52,13 +54,13 @@ def test_export_parquet_by_path_success(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
-    output_path = os.path.join(self.test_output_dir, 'test_output.parquet')
+    output_path = os.path.join(test_output_dir, 'test_output.parquet')
     assert output_path == response_data['result']['filePath']
     # ファイルが作成されているかチェック
     assert os.path.exists(output_path)
     # 出力されたPARQUETファイルの内容を検証
     exported_data = pl.read_parquet(output_path)
-    assert True == self.test_data.equals(exported_data
+    assert test_data.equals(exported_data)
 
 
 def test_export_parquet_by_path_table_not_exists(client, tables_manager):
@@ -67,7 +69,7 @@ def test_export_parquet_by_path_table_not_exists(client, tables_manager):
     """
     request_data = {
         'tableName': 'NonExistentTable',
-        'directoryPath': self.test_output_dir,
+        'directoryPath': test_output_dir,
         'fileName': 'test_output.parquet',
     }
     response = client.post('/api/export-parquet-by-path',
@@ -76,8 +78,7 @@ def test_export_parquet_by_path_table_not_exists(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "tableName 'NonExistentTable' does not exist",
-                  response_data['message'])
+    assert "tableName 'NonExistentTable' does not exist" == response_data['message']
 
 
 def test_export_parquet_by_path_invalid_output_directory(client, tables_manager):
@@ -95,8 +96,7 @@ def test_export_parquet_by_path_invalid_output_directory(client, tables_manager)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "Directory does not exist: /non/existent/directory",
-                  response_data['message'])
+    assert "Directory does not exist: /non/existent/directory" == response_data['message']
 
 
 def test_export_parquet_by_path_missing_table_name(client, tables_manager):
@@ -104,7 +104,7 @@ def test_export_parquet_by_path_missing_table_name(client, tables_manager):
     tableNameパラメータが未指定の場合のテスト
     """
     request_data = {
-        'directoryPath': self.test_output_dir,
+        'directoryPath': test_output_dir,
         'fileName': 'test_output.parquet'
     }
     response = client.post('/api/export-parquet-by-path',
@@ -113,7 +113,7 @@ def test_export_parquet_by_path_missing_table_name(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "tableName is required", response_data['message'])
+    assert "tableName is required" == response_data['message']
 
 
 def test_export_parquet_by_path_missing_directory_path(client, tables_manager):
@@ -130,7 +130,7 @@ def test_export_parquet_by_path_missing_directory_path(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "directoryPath is required", response_data['message'])
+    assert "directoryPath is required" == response_data['message']
 
 
 def test_export_parquet_by_path_missing_file_name(client, tables_manager):
@@ -139,7 +139,7 @@ def test_export_parquet_by_path_missing_file_name(client, tables_manager):
     """
     request_data = {
         'tableName': 'TestTable',
-        'directoryPath': self.test_output_dir,
+        'directoryPath': test_output_dir,
     }
     response = client.post('/api/export-parquet-by-path',
                                 data=json.dumps(request_data),
@@ -147,7 +147,7 @@ def test_export_parquet_by_path_missing_file_name(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "fileName is required", response_data['message'])
+    assert "fileName is required" == response_data['message']
 
 
 def test_export_parquet_by_path_invalid_json(client, tables_manager):
@@ -160,7 +160,7 @@ def test_export_parquet_by_path_invalid_json(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "Invalid JSON format", response_data['message'])
+    assert "Invalid JSON format" == response_data['message']
 
 
 def test_export_parquet_by_path_empty_table(client, tables_manager):
@@ -172,7 +172,7 @@ def test_export_parquet_by_path_empty_table(client, tables_manager):
     tables_manager.store_table('EmptyTable', empty_data)
     request_data = {
         'tableName': 'EmptyTable',
-        'directoryPath': self.test_output_dir,
+        'directoryPath': test_output_dir,
         'fileName': 'empty_output.parquet'
     }
     response = client.post('/api/export-parquet-by-path',
@@ -181,13 +181,13 @@ def test_export_parquet_by_path_empty_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
-    output_path = os.path.join(self.test_output_dir, 'empty_output.parquet')
+    output_path = os.path.join(test_output_dir, 'empty_output.parquet')
     assert output_path == response_data['result']['filePath']
     # ファイルが作成されているかチェック
     assert os.path.exists(output_path)
     # 出力されたPARQUETファイルの内容を検証（空のデータ）
     exported_data = pl.read_parquet(output_path)
-    assert True == empty_data.equals(exported_data
+    assert empty_data.equals(exported_data)
 
 
 def test_export_parquet_by_path_large_table(client, tables_manager):
@@ -203,7 +203,7 @@ def test_export_parquet_by_path_large_table(client, tables_manager):
     tables_manager.store_table('LargeTable', large_data)
     request_data = {
         'tableName': 'LargeTable',
-        'directoryPath': self.test_output_dir,
+        'directoryPath': test_output_dir,
         'fileName': 'large_output.parquet'
     }
     response = client.post('/api/export-parquet-by-path',
@@ -212,14 +212,14 @@ def test_export_parquet_by_path_large_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
-    output_path = os.path.join(self.test_output_dir, 'large_output.parquet')
+    output_path = os.path.join(test_output_dir, 'large_output.parquet')
     assert output_path == response_data['result']['filePath']
     # ファイルが作成されているかチェック
     assert os.path.exists(output_path)
     # 出力されたPARQUETファイルの内容を検証
     exported_data = pl.read_parquet(output_path)
-    assert True == large_data.equals(exported_data
-    assert 1000 == len(exported_data
+    assert large_data.equals(exported_data)
+    assert 1000 == len(exported_data)
 
 
 def test_export_parquet_by_path_special_characters(client, tables_manager):
@@ -235,7 +235,7 @@ def test_export_parquet_by_path_special_characters(client, tables_manager):
     tables_manager.store_table('SpecialTable', special_data)
     request_data = {
         'tableName': 'SpecialTable',
-        'directoryPath': self.test_output_dir,
+        'directoryPath': test_output_dir,
         'fileName': 'special_output.parquet'
     }
     response = client.post('/api/export-parquet-by-path',
@@ -244,13 +244,13 @@ def test_export_parquet_by_path_special_characters(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
-    output_path = os.path.join(self.test_output_dir, 'special_output.parquet')
+    output_path = os.path.join(test_output_dir, 'special_output.parquet')
     assert output_path == response_data['result']['filePath']
     # ファイルが作成されているかチェック
     assert os.path.exists(output_path)
     # 出力されたPARQUETファイルの内容を検証
     exported_data = pl.read_parquet(output_path)
-    assert True == special_data.equals(exported_data
+    assert special_data.equals(exported_data)
 
 
 def test_export_parquet_by_path_different_data_types(client, tables_manager):
@@ -267,7 +267,7 @@ def test_export_parquet_by_path_different_data_types(client, tables_manager):
     tables_manager.store_table('MixedTable', mixed_data)
     request_data = {
         'tableName': 'MixedTable',
-        'directoryPath': self.test_output_dir,
+        'directoryPath': test_output_dir,
         'fileName': 'mixed_output.parquet'
     }
     response = client.post('/api/export-parquet-by-path',
@@ -276,10 +276,10 @@ def test_export_parquet_by_path_different_data_types(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
-    output_path = os.path.join(self.test_output_dir, 'mixed_output.parquet')
+    output_path = os.path.join(test_output_dir, 'mixed_output.parquet')
     assert output_path == response_data['result']['filePath']
     # ファイルが作成されているかチェック
     assert os.path.exists(output_path)
     # 出力されたPARQUETファイルの内容を検証
     exported_data = pl.read_parquet(output_path)
-    assert True == mixed_data.equals(exported_data
+    assert mixed_data.equals(exported_data)

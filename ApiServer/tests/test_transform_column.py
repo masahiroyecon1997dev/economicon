@@ -2,9 +2,10 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 import polars as pl
+import math
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -17,15 +18,15 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        # テーブルをクリア
-        manager.clear_tables()
-        # テスト用テーブルをセット
-        df = pl.DataFrame({
-            'A': [1, 2, 4, 8, 16],
-            'B': [10, 20, 30, 40, 50],
-            'C': [0.5, 1.0, 1.5, 2.0, 2.5]
-        })
-        manager.store_table('TestTable', df)
+    # テーブルをクリア
+    manager.clear_tables()
+    # テスト用テーブルをセット
+    df = pl.DataFrame({
+        'A': [1, 2, 4, 8, 16],
+        'B': [10, 20, 30, 40, 50],
+        'C': [0.5, 1.0, 1.5, 2.0, 2.5]
+    })
+    manager.store_table('TestTable', df)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -47,8 +48,8 @@ def test_transform_column_log_natural_success(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    assert response_data['result']['tableName'], 'TestTable')
-    assert response_data['result']['columnName'], 'A_ln')
+    assert response_data['result']['tableName'] == 'TestTable'
+    assert response_data['result']['columnName'] == 'A_ln'
     # カラムが正しい位置に追加されているか
     df = tables_manager.get_table('TestTable').table
     expected_columns = ['A', 'A_ln', 'B', 'C']
@@ -58,7 +59,7 @@ def test_transform_column_log_natural_success(client, tables_manager):
     expected_ln_values = [math.log(1), math.log(2), math.log(4),
                           math.log(8), math.log(16)]
     for actual, expected in zip(ln_values, expected_ln_values):
-        self.assertAlmostEqual(actual, expected, places=5)
+        assert actual == pytest.approx(expected, abs=1e-5)
 
 
 def test_transform_column_log_base2_success(client, tables_manager):
@@ -83,7 +84,7 @@ def test_transform_column_log_base2_success(client, tables_manager):
     # log2(1), log2(2), log2(4), log2(8), log2(16)
     expected_log2_values = [0, 1, 2, 3, 4]
     for actual, expected in zip(log2_values, expected_log2_values):
-        self.assertAlmostEqual(actual, expected, places=5)
+        assert actual == pytest.approx(expected, abs=1e-5)
 
 
 def test_transform_column_power_square_success(client, tables_manager):
@@ -154,7 +155,7 @@ def test_transform_column_fractional_exponent(client, tables_manager):
     sqrt_values = df['A_sqrt'].to_list()
     expected_sqrt_values = [1.0, math.sqrt(2), 2.0, math.sqrt(8), 4.0]
     for actual, expected in zip(sqrt_values, expected_sqrt_values):
-        self.assertAlmostEqual(actual, expected, places=5)
+        assert actual == pytest.approx(expected, abs=1e-5)
 
 
 def test_transform_column_root_square_success(client, tables_manager):
@@ -178,7 +179,7 @@ def test_transform_column_root_square_success(client, tables_manager):
     # sqrt(1), sqrt(2), sqrt(4), sqrt(8), sqrt(16)
     expected_sqrt_values = [1, 1.41421, 2, 2.82843, 4]
     for actual, expected in zip(sqrt_values, expected_sqrt_values):
-        self.assertAlmostEqual(actual, expected, places=5)
+        assert actual == pytest.approx(expected, abs=1e-5)
 
 
 def test_transform_column_root_cubic_success(client, tables_manager):
@@ -203,7 +204,7 @@ def test_transform_column_root_cubic_success(client, tables_manager):
     # cbrt(1), cbrt(2), cbrt(4), cbrt(8), cbrt(16)
     expected_cbrt_values = [1, 1.25992, 1.58740, 2, 2.51984]
     for actual, expected in zip(cbrt_values, expected_cbrt_values):
-        self.assertAlmostEqual(actual, expected, places=5)
+        assert actual == pytest.approx(expected, abs=1e-5)
 
 
 def test_transform_column_root_fractional_success(client, tables_manager):
@@ -228,7 +229,7 @@ def test_transform_column_root_fractional_success(client, tables_manager):
     # square(1), square(2), square(4), square(8), square(16)
     expected_square_values = [1, 4, 16, 64, 256]
     for actual, expected in zip(square_values, expected_square_values):
-        self.assertAlmostEqual(actual, expected, places=5)
+        assert actual == pytest.approx(expected, abs=1e-5)
 
 
 def test_transform_column_invalid_table(client, tables_manager):
@@ -246,8 +247,8 @@ def test_transform_column_invalid_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist",
-                  response_data['message'])
+    assert "tableName 'NoTable' does not exist" == response_data['message']
+
 
 
 def test_transform_column_invalid_source_column(client, tables_manager):
@@ -301,8 +302,7 @@ def test_transform_column_invalid_method(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "transformMethod 'invalid' is invalid",
-                  response_data['message'])
+    assert "transformMethod 'invalid' is invalid" == response_data['message']
 
 
 def test_transform_column_invalid_log_base(client, tables_manager):
@@ -321,8 +321,8 @@ def test_transform_column_invalid_log_base(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "logBase must be a positive number not equal to 1",
-                  response_data['message'])
+    assert "logBase must be a positive number not equal to 1" == response_data['message']
+
 
 
 def test_transform_column_negative_log_base(client, tables_manager):
@@ -341,5 +341,4 @@ def test_transform_column_negative_log_base(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "logBase must be a positive number not equal to 1",
-                  response_data['message'])
+    assert "logBase must be a positive number not equal to 1" == response_data['message']

@@ -2,9 +2,10 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 import polars as pl
+import numpy as np
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -17,35 +18,35 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        # テーブルをクリア
-        manager.clear_tables()
-        # ロジット分析用テストデータを作成
-        # 二値の被説明変数（0または1）と複数の説明変数を持つテーブル
-        np.random.seed(42)  # 再現可能な結果のため
-        n_samples = 100
-        # 説明変数の生成
-        x1 = np.random.normal(0, 1, n_samples)
-        x2 = np.random.normal(0, 1, n_samples)
-        x3 = np.random.uniform(0, 10, n_samples)
-        # ロジット関数を使用して被説明変数を生成
-        linear_combination = -1 + 0.5 * x1 + 1.2 * x2 + 0.1 * x3
-        probabilities = 1 / (1 + np.exp(-linear_combination))
-        y = np.random.binomial(1, probabilities, n_samples)
-        df = pl.DataFrame({
-            'y': y,
-            'x1': x1,
-            'x2': x2,
-            'x3': x3,
-            'id': range(n_samples)
-        })
-        manager.store_table('LogitTestTable', df)
-        # 数値以外のデータを含むテーブル（エラーテスト用）
-        df_with_text = pl.DataFrame({
-            'y': [0, 1, 0, 1],
-            'x1': [1.0, 2.0, 3.0, 4.0],
-            'text_col': ['a', 'b', 'c', 'd']
-        })
-        manager.store_table('TextTable', df_with_text)
+    # テーブルをクリア
+    manager.clear_tables()
+    # ロジット分析用テストデータを作成
+    # 二値の被説明変数（0または1）と複数の説明変数を持つテーブル
+    np.random.seed(42)  # 再現可能な結果のため
+    n_samples = 100
+    # 説明変数の生成
+    x1 = np.random.normal(0, 1, n_samples)
+    x2 = np.random.normal(0, 1, n_samples)
+    x3 = np.random.uniform(0, 10, n_samples)
+    # ロジット関数を使用して被説明変数を生成
+    linear_combination = -1 + 0.5 * x1 + 1.2 * x2 + 0.1 * x3
+    probabilities = 1 / (1 + np.exp(-linear_combination))
+    y = np.random.binomial(1, probabilities, n_samples)
+    df = pl.DataFrame({
+        'y': y,
+        'x1': x1,
+        'x2': x2,
+        'x3': x3,
+        'id': range(n_samples)
+    })
+    manager.store_table('LogitTestTable', df)
+    # 数値以外のデータを含むテーブル（エラーテスト用）
+    df_with_text = pl.DataFrame({
+        'y': [0, 1, 0, 1],
+        'x1': [1.0, 2.0, 3.0, 4.0],
+        'text_col': ['a', 'b', 'c', 'd']
+    })
+    manager.store_table('TextTable', df_with_text)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -76,7 +77,7 @@ def test_logistic_regression_success(client, tables_manager):
     assert 'modelStatistics' in result
     # パラメータの構造をチェック
     parameters = result['parameters']
-    self.assertIsInstance(parameters, list)
+    assert isinstance(parameters, list)
     assert len(parameters) == 3
     # 各パラメータに必要な情報があることを確認
     for param in parameters:
@@ -127,8 +128,7 @@ def test_logistic_regression_invalid_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist",
-                  response_data['message'])
+    assert "tableName 'NonExistentTable' does not exist" == response_data['message']
 
 
 def test_logistic_regression_invalid_dependent_variable(client, tables_manager):
@@ -145,8 +145,8 @@ def test_logistic_regression_invalid_dependent_variable(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "dependentVariable 'nonexistent_y' does not exist",
-                  response_data['message'])
+    assert "dependentVariable 'nonexistent_y' does not exist" == response_data['message']
+
 
 
 def test_logistic_regression_invalid_explanatory_variable(client, tables_manager):
@@ -163,8 +163,7 @@ def test_logistic_regression_invalid_explanatory_variable(client, tables_manager
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables 'nonexistent_x' does not exist",
-                  response_data['message'])
+    assert "explanatoryVariables 'nonexistent_x' does not exist" == response_data['message']
 
 
 def test_logistic_regression_empty_explanatory_variables(client, tables_manager):
@@ -181,9 +180,7 @@ def test_logistic_regression_empty_explanatory_variables(client, tables_manager)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables must be with "
-                  "at least 1 explanatory_variable.",
-                  response_data['message'])
+    assert "explanatoryVariables must be with at least 1 explanatory_variable." == response_data['message']
 
 
 def test_logistic_regression_dependent_in_explanatory(client, tables_manager):
@@ -200,9 +197,7 @@ def test_logistic_regression_dependent_in_explanatory(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Dependent variable cannot be "
-                  "included in explanatory variables",
-                  response_data['message'])
+    assert "Dependent variable cannot be included in explanatory variables" == response_data['message']
 
 
 def test_logistic_regression_missing_parameters(client, tables_manager):
@@ -219,8 +214,8 @@ def test_logistic_regression_missing_parameters(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Required parameter is missing",
-                  response_data['message'])
+    assert "Required parameter is missing" == response_data['message']
+
 
 
 def test_logistic_regression_single_explanatory_variable(client, tables_manager):

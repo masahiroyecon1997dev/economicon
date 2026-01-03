@@ -4,7 +4,7 @@ from fastapi import status
 import polars as pl
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -17,13 +17,13 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        manager.clear_tables()
-        # テスト用テーブルをセット
-        df = pl.DataFrame({
-            'A': [1, 2, 3, 4, 5, 6, 7, 1, 2, 3],
-            'B': [4, 5, 6, 7, 8, 9, 10, 4, 5, 6]
-        })
-        manager.store_table('TestTable', df)
+    manager.clear_tables()
+    # テスト用テーブルをセット
+    df = pl.DataFrame({
+        'A': [1, 2, 3, 4, 5, 6, 7, 1, 2, 3],
+        'B': [4, 5, 6, 7, 8, 9, 10, 4, 5, 6]
+    })
+    manager.store_table('TestTable', df)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -80,7 +80,7 @@ def test_input_cell_data_invalid_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist." in response_data['message']
+    assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
 def test_input_cell_data_invalid_column(client, tables_manager):
@@ -114,7 +114,7 @@ def test_input_cell_data_invalid_row_over(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "rowIndex must be between 1 and 10." in response_data['message']
+    assert "rowIndex must be between 1 and 10." == response_data['message']
 
 
 def test_input_cell_data_invalid_row_string(client, tables_manager):
@@ -131,4 +131,4 @@ def test_input_cell_data_invalid_row_string(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "rowIndex must be an integer." in response_data['message']
+    assert "rowIndex must be an integer." == response_data['message']

@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from fastapi import status
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture

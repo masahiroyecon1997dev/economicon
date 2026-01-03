@@ -4,7 +4,7 @@ from fastapi import status
 import polars as pl
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -17,13 +17,13 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        manager.clear_tables()
-        # テスト用テーブルをセット
-        df = pl.DataFrame({
-            'A': [1, 2],
-            'B': [3, 4]
-        })
-        manager.store_table('TestTable', df)
+    manager.clear_tables()
+    # テスト用テーブルをセット
+    df = pl.DataFrame({
+        'A': [1, 2],
+        'B': [3, 4]
+    })
+    manager.store_table('TestTable', df)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -37,10 +37,11 @@ def test_rename_column_success(client, tables_manager):
         'newColumnName': 'C'
     }
     response = client.post(
-        '/api/rename-column-name',
+        '/api/column/rename',
         json=payload,
     )
     response_data = response.json()
+    print(response_data)
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     df = tables_manager.get_table('TestTable').table
@@ -56,7 +57,7 @@ def test_rename_column_not_found(client, tables_manager):
         'newColumnName': 'C'
     }
     response = client.post(
-        '/api/rename-column-name',
+        '/api/column/rename',
         json=payload,
     )
     response_data = response.json()
@@ -72,7 +73,7 @@ def test_rename_column_empty_old_column_name(client, tables_manager):
         'newColumnName': 'C'
     }
     response = client.post(
-        '/api/rename-column-name',
+        '/api/column/rename',
         json=payload,
     )
     response_data = response.json()
@@ -88,7 +89,7 @@ def test_rename_column_empty_new_column_name(client, tables_manager):
         'newColumnName': ''
     }
     response = client.post(
-        '/api/rename-column-name',
+        '/api/column/rename',
         json=payload,
     )
     response_data = response.json()
@@ -105,7 +106,7 @@ def test_rename_column_table_not_found(client, tables_manager):
         'newColumnName': 'C'
     }
     response = client.post(
-        '/api/rename-column-name',
+        '/api/column/rename',
         json=payload,
     )
     response_data = response.json()

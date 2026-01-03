@@ -2,10 +2,9 @@ pipdeptree
 pip-licenses
 numpy
 polars
-django
-django-filter
-djangorestframework
-django-cors-headers
+fastapi
+uvicorn[standard]
+python-multipart
 wooldridge
 scipy
 statsmodels

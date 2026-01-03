@@ -2,10 +2,17 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 import polars as pl
+import tempfile
+import shutil
+import json
+import numpy as np
+import os
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
+# テスト用の出力ディレクトリ
+test_dir = tempfile.mkdtemp()
 
 @pytest.fixture
 def client():
@@ -17,12 +24,9 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        manager.clear_tables()
-        # テスト用の出力ディレクトリ
-        self.test_dir = tempfile.mkdtemp()
-    def tearDown(self):
-        # テスト後にテンポラリディレクトリをクリーンアップ
-        shutil.rmtree(self.test_dir, ignore_errors=True)
+    manager.clear_tables()
+    # テスト後にテンポラリディレクトリをクリーンアップ
+    shutil.rmtree(test_dir, ignore_errors=True)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -39,23 +43,22 @@ def test_import_parquet_by_path_simple(client, tables_manager):
         'col_3': ['A', 'B', 'C']
     })
     test_data.write_parquet(
-        f'{self.test_dir}/TestData.parquet')
+        f'{test_dir}/TestData.parquet')
     # APIリクエスト
     request_data = {
-        'filePath': f'{self.test_dir}/TestData.parquet',
+        'filePath': f'{test_dir}/TestData.parquet',
         'tableName': 'TestSimpleParquet'
     }
     response = client.post('/api/import-parquet-by-path',
-                                data=json.dumps(request_data),
-                                )
+                            data=json.dumps(request_data)
+                            )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
-    self.assertEqual('TestSimpleParquet',
-                     response_data['result']['tableName'])
+    assert 'TestSimpleParquet' == response_data['result']['tableName']
     # データの検証
     df = tables_manager.get_table('TestSimpleParquet').table
-    assert True == test_data.equals(df
+    assert df == test_data
 
 
 def test_import_parquet_by_path_large_data(client, tables_manager):
@@ -72,10 +75,10 @@ def test_import_parquet_by_path_large_data(client, tables_manager):
         schema=column_names
     )
     df_sample.write_parquet(
-        f'{self.test_dir}/TestData.parquet')
+        f'{test_dir}/TestData.parquet')
     # APIリクエスト
     request_data = {
-        'filePath': f'{self.test_dir}/TestData.parquet',
+        'filePath': f'{test_dir}/TestData.parquet',
         'tableName': 'TestLargeParquet'
     }
     response = client.post('/api/import-parquet-by-path',
@@ -84,11 +87,10 @@ def test_import_parquet_by_path_large_data(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
-    self.assertEqual('TestLargeParquet',
-                     response_data['result']['tableName'])
+    assert 'TestLargeParquet' == response_data['result']['tableName']
     # データの検証
     df = tables_manager.get_table('TestLargeParquet').table
-    assert True == df_sample.equals(df
+    assert df_sample.equals(df)
 
 
 def test_import_parquet_by_path_custom_table_name(client, tables_manager):
@@ -101,10 +103,10 @@ def test_import_parquet_by_path_custom_table_name(client, tables_manager):
         'col_3': ['A', 'B', 'C']
     })
     test_data.write_parquet(
-        f'{self.test_dir}/Simple.parquet')
+        f'{test_dir}/Simple.parquet')
     # APIリクエスト
     request_data = {
-        'filePath': f'{self.test_dir}/Simple.parquet',
+        'filePath': f'{test_dir}/Simple.parquet',
         'tableName': 'MyCustomParquetTable'
     }
     response = client.post('/api/import-parquet-by-path',
@@ -113,11 +115,10 @@ def test_import_parquet_by_path_custom_table_name(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
-    self.assertEqual('MyCustomParquetTable',
-                     response_data['result']['tableName'])
+    assert 'MyCustomParquetTable' == response_data['result']['tableName']
     # データの検証
     df = tables_manager.get_table('MyCustomParquetTable').table
-    assert True == test_data.equals(df
+    assert df.equals(test_data)
 
 
 def test_import_parquet_by_path_file_not_exists(client, tables_manager):
@@ -134,8 +135,7 @@ def test_import_parquet_by_path_file_not_exists(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "filePath does not exist: /non/existent/file.parquet",
-                  response_data['message'])
+    assert "filePath does not exist: /non/existent/file.parquet" == response_data['message']
 
 
 def test_import_parquet_by_path_invalid_file_extension(client, tables_manager):
@@ -148,21 +148,18 @@ def test_import_parquet_by_path_invalid_file_extension(client, tables_manager):
         'col_3': ['A', 'B', 'C']
     })
     test_data.write_csv(
-        f'{self.test_dir}/TestDataComma.csv')
+        f'{test_dir}/TestDataComma.csv')
     request_data = {
-        'filePath': f'{self.test_dir}/TestDataComma.csv',
+        'filePath': f'{test_dir}/TestDataComma.csv',
         'tableName': 'TestInvalidExtension'
     }
     response = client.post('/api/import-parquet-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
-    self.assertEqual(response.status_code,
-                     status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert 'NG' == response_data['code']
-    assert "Failed to parse PARQUET file: "
-                  "Invalid format or encoding.",
-                  response_data['message'])
+    assert "Failed to parse PARQUET file: Invalid format or encoding." == response_data['message']
 
 
 def test_import_parquet_by_path_missing_file_path(client, tables_manager):
@@ -178,7 +175,7 @@ def test_import_parquet_by_path_missing_file_path(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "filePath is required", response_data['message'])
+    assert "filePath is required" == response_data['message']
 
 
 def test_import_parquet_by_path_missing_table_name(client, tables_manager):
@@ -191,9 +188,9 @@ def test_import_parquet_by_path_missing_table_name(client, tables_manager):
         'col_3': ['A', 'B', 'C']
     })
     test_data.write_parquet(
-        f'{self.test_dir}/Simple.parquet')
+        f'{test_dir}/Simple.parquet')
     request_data = {
-        'filePath': f'{self.test_dir}/Simple.parquet'
+        'filePath': f'{test_dir}/Simple.parquet'
     }
     response = client.post('/api/import-parquet-by-path',
                                 data=json.dumps(request_data),
@@ -201,7 +198,7 @@ def test_import_parquet_by_path_missing_table_name(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "tableName is required.", response_data['message'])
+    assert "tableName is required." == response_data['message']
 
 
 def test_import_parquet_by_path_duplicate_table_name(client, tables_manager):
@@ -214,10 +211,10 @@ def test_import_parquet_by_path_duplicate_table_name(client, tables_manager):
         'col_3': ['A', 'B', 'C']
     })
     test_data.write_parquet(
-        f'{self.test_dir}/Simple.parquet')
+        f'{test_dir}/Simple.parquet')
     # 先にテーブルを作成
     first_request_data = {
-        'filePath': f'{self.test_dir}/Simple.parquet',
+        'filePath': f'{test_dir}/Simple.parquet',
         'tableName': 'DuplicateTable'
     }
     client.post('/api/import-parquet-by-path',
@@ -225,7 +222,7 @@ def test_import_parquet_by_path_duplicate_table_name(client, tables_manager):
                      )
     # 同じテーブル名で再度作成を試行
     second_request_data = {
-        'filePath': f'{self.test_dir}/Simple.parquet',
+        'filePath': f'{test_dir}/Simple.parquet',
         'tableName': 'DuplicateTable'
     }
     response = client.post('/api/import-parquet-by-path',
@@ -235,6 +232,7 @@ def test_import_parquet_by_path_duplicate_table_name(client, tables_manager):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
     # テーブル名重複エラーメッセージを確認
+    assert "Table name 'DuplicateTable' already exists." == response_data['message']
 
 
 def test_import_parquet_by_path_invalid_json(client, tables_manager):
@@ -247,7 +245,7 @@ def test_import_parquet_by_path_invalid_json(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "Invalid JSON format", response_data['message'])
+    assert "Invalid JSON format" == response_data['message']
 
 
 def test_import_parquet_by_path_with_temporary_file(client, tables_manager):
@@ -276,13 +274,12 @@ def test_import_parquet_by_path_with_temporary_file(client, tables_manager):
         response_data = response.json()
         assert response.status_code == status.HTTP_200_OK
         assert 'OK' == response_data['code']
-        self.assertEqual('TestTempParquet',
-                         response_data['result']['tableName'])
+        assert 'TestTempParquet' == response_data['result']['tableName']
         # データの検証
         df = tables_manager.get_table('TestTempParquet').table
-        assert 3 == len(df.columns
-        assert 5 == len(df
-        assert True == temp_data.equals(df
+        assert 3 == len(df.columns)
+        assert 5 == len(df)
+        assert temp_data.equals(df)
     finally:
         # 一時ファイルを削除
         os.unlink(temp_path)

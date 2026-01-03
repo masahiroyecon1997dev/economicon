@@ -4,7 +4,7 @@ from fastapi import status
 import polars as pl
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        manager.clear_tables()
+    manager.clear_tables()
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -31,7 +31,7 @@ def test_get_table_name_list_empty(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    assert response_data['result']['tableNameList'], [])
+    assert response_data['result']['tableNameList'] == []
 
 
 def test_get_table_name_list_multiple(client, tables_manager):
@@ -45,8 +45,7 @@ def test_get_table_name_list_multiple(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    self.assertCountEqual(response_data['result']['tableNameList'],
-                          table_names)
+    assert set(response_data['result']['tableNameList']) == set(table_names)
 
 
 def test_get_table_name_list_exception(client, tables_manager):
@@ -58,11 +57,8 @@ def test_get_table_name_list_exception(client, tables_manager):
     tables_manager.get_table_name_list = raise_exception
     response = client.get('/api/get-table-list')
     response_data = response.json()
-    self.assertEqual(response.status_code,
-                     status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
-    assert 'An unexpected error during '
-                  'getting table name list.',
-                  response_data['message'])
+    assert 'An unexpected error during getting table name list.' == response_data['message']
     # 後始末
     tables_manager.get_table_name_list = original_method
