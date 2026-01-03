@@ -22,3 +22,6 @@ dependencies = [
     "wooldridge>=0.5.0",
     "xlsxwriter>=3.2.9",
 ]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
