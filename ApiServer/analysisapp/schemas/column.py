@@ -65,10 +65,9 @@ class SortColumnsRequest(TableRequest):
     sortColumns: List[Dict[str, str]] = Field(..., description="ソート設定のリスト")
 
 
-class TransformColumnRequest(ColumnRequest):
+class TransformColumnRequest(TableRequest):
     """カラム変換リクエスト"""
     tableName: str = Field(..., description="テーブル名")
-    columnName: str = Field(..., description="カラム名")
     sourceColumnName: str = Field(..., description="元となるカラム名")
     newColumnName: str = Field(..., description="新しい列名")
     transformMethod: str = Field(..., description="変換メソッド")

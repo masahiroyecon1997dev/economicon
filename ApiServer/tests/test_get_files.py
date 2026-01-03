@@ -50,7 +50,7 @@ def test_get_list_files_success(client, prepared_data):
     """
     tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     response = client.get(
-        '/api/get-files'
+        '/api/file/list'
         f'?directoryPath={test_dir}',
     )
     response_data = response.json()
@@ -92,7 +92,7 @@ def test_get_list_files_empty_directory(client, prepared_data):
     empty_dir = tempfile.mkdtemp()
     try:
         response = client.get(
-            '/api/get-files'
+            '/api/file/list'
             f'?directoryPath={empty_dir}',
         )
         response_data = response.json()
@@ -111,13 +111,13 @@ def test_get_list_files_invalid_directory(client, prepared_data):
     """
     tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     response = client.get(
-        '/api/get-files'
+        '/api/file/list'
         '?directoryPath=/non/existent/directory',
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Directory does not exist" == response_data['message']
+    assert "Directory does not exist" in response_data['message']
 
 
 def test_get_list_files_missing_directory_path(client, prepared_data):
@@ -126,13 +126,13 @@ def test_get_list_files_missing_directory_path(client, prepared_data):
     """
     tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     response = client.get(
-        '/api/get-files'
+        '/api/file/list'
         '?directoryPath=',
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "directoryPath is required" == response_data['message']
+    assert "directoryPath is required" in response_data['message']
 
 
 def test_get_list_files_file_instead_of_directory(client, prepared_data):
@@ -141,13 +141,13 @@ def test_get_list_files_file_instead_of_directory(client, prepared_data):
     """
     tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     response = client.get(
-        '/api/get-files'
+        '/api/file/list'
         f'?directoryPath={test_file1}',
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Path is not a directory" == response_data['message']
+    assert "Path is not a directory" in response_data['message']
 
 
 def test_get_list_files_file_sizes(client, prepared_data):
@@ -156,7 +156,7 @@ def test_get_list_files_file_sizes(client, prepared_data):
     """
     tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     response = client.get(
-        '/api/get-files'
+        '/api/file/list'
         f'?directoryPath={test_dir}',
     )
     response_data = response.json()

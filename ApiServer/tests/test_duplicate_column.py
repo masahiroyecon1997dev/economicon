@@ -41,7 +41,7 @@ def test_duplicate_column_success(client, prepared_data):
         'newColumnName': 'A_Copy'
     }
     response = client.post(
-        '/api/duplicate-column',
+        '/api/column/duplicate',
         json=payload,
     )
     response_data = response.json()
@@ -67,7 +67,7 @@ def test_duplicate_column_success_middle_column(client, prepared_data):
         'newColumnName': 'B_Duplicate'
     }
     response = client.post(
-        '/api/duplicate-column',
+        '/api/column/duplicate',
         json=payload,
     )
     response_data = response.json()
@@ -91,7 +91,7 @@ def test_duplicate_column_success_string_column(client, prepared_data):
         'newColumnName': 'C_Clone'
     }
     response = client.post(
-        '/api/duplicate-column',
+        '/api/column/duplicate',
         json=payload,
     )
     response_data = response.json()
@@ -114,7 +114,7 @@ def test_duplicate_column_invalid_table(client, prepared_data):
         'newColumnName': 'A_Copy'
     }
     response = client.post(
-        '/api/duplicate-column',
+        '/api/column/duplicate',
         json=payload,
     )
     response_data = response.json()
@@ -132,7 +132,7 @@ def test_duplicate_column_invalid_source_column(client, prepared_data):
         'newColumnName': 'Z_Copy'
     }
     response = client.post(
-        '/api/duplicate-column',
+        '/api/column/duplicate',
         json=payload,
     )
     response_data = response.json()
@@ -150,11 +150,11 @@ def test_duplicate_column_duplicate_new_column_name(client, prepared_data):
         'newColumnName': 'B'  # 既存の列名
     }
     response = client.post(
-        '/api/duplicate-column',
+        '/api/column/duplicate',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newColumnName 'B'" == response_data['message']
-    assert "already exists" == response_data['message']
+    print(response_data['message'])
+    assert "newColumnName 'B' already exists." == response_data['message']
