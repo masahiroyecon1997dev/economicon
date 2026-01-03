@@ -43,7 +43,7 @@ def test_clear_tables_success(client, tables_manager):
     assert 'TestTable1' in table_names
     assert 'TestTable2' in table_names
     # テーブルをクリア
-    response = client.delete('/api/clear-tables')
+    response = client.delete('/api/table/clear-all')
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
@@ -59,7 +59,7 @@ def test_clear_tables_empty(client, tables_manager):
     table_names = tables_manager.get_table_name_list()
     assert len(table_names) == 0
     # 空の状態でクリアを実行
-    response = client.delete('/api/clear-tables')
+    response = client.delete('/api/table/clear-all')
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'

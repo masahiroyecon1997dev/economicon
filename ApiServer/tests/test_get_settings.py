@@ -21,10 +21,10 @@ def tables_manager():
 
 
 
-def test_get_settings_success(client, settings_manager):
+def test_get_settings_success(client, tables_manager):
     # 正常系テスト: 設定情報を取得
     response = client.get(
-        '/api/get-settings',
+        '/api/setting/get',
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
@@ -51,9 +51,9 @@ def test_settings_manager_singleton(client, tables_manager):
     assert manager1 is manager2
 
 
-def test_settings_info_properties(client, settings_manager):
+def test_settings_info_properties(client, tables_manager):
     # 設定情報のプロパティアクセステスト
-    settings_info = settings_manager.get_settings()
+    settings_info = tables_manager.get_settings()
     # プロパティが正しく取得できることを確認
     assert settings_info.os_name is not None
     assert settings_info.default_folder_path is not None
@@ -63,9 +63,9 @@ def test_settings_info_properties(client, settings_manager):
     assert settings_info.path_separator == '/'
 
 
-def test_settings_info_to_dict(client, settings_manager):
+def test_settings_info_to_dict(client, tables_manager):
     # to_dict()メソッドのテスト
-    settings_info = settings_manager.get_settings()
+    settings_info = tables_manager.get_settings()
     settings_dict = settings_info.to_dict()
     # キャメルケースのキーが存在することを確認
     assert 'osName' in settings_dict

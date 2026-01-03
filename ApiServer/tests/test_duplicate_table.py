@@ -40,7 +40,7 @@ def test_duplicate_table_success(client, prepared_data):
         'newTableName': 'DuplicatedTable'
     }
     response = client.post(
-        '/api/duplicate-table',
+        '/api/table/duplicate',
         json=payload,
     )
     response_data = response.json()
@@ -72,13 +72,13 @@ def test_duplicate_table_invalid_source_table(client, prepared_data):
         'newTableName': 'DuplicatedTable'
     }
     response = client.post(
-        '/api/duplicate-table',
+        '/api/table/duplicate',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist" == response_data['message']
+    assert "tableName 'NonExistentTable' does not exist." == response_data['message']
 
 
 
@@ -90,13 +90,13 @@ def test_duplicate_table_existing_destination_table(client, prepared_data):
         'newTableName': 'TestTable'  # 既に存在するテーブル名
     }
     response = client.post(
-        '/api/duplicate-table',
+        '/api/table/duplicate',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newTableName 'TestTable' already exists" == response_data['message']
+    assert "newTableName 'TestTable' already exists." == response_data['message']
 
 
 def test_duplicate_table_empty_table(client, prepared_data):
@@ -112,7 +112,7 @@ def test_duplicate_table_empty_table(client, prepared_data):
         'newTableName': 'DuplicatedEmptyTable'
     }
     response = client.post(
-        '/api/duplicate-table',
+        '/api/table/duplicate',
         json=payload,
     )
     response_data = response.json()
