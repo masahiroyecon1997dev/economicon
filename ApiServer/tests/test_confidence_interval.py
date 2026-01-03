@@ -60,7 +60,7 @@ def test_confidence_interval_mean_success(client, tables_manager):
         'statisticType': 'mean'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -98,7 +98,7 @@ def test_confidence_interval_median_success(client, tables_manager):
         'statisticType': 'median'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -118,7 +118,7 @@ def test_confidence_interval_proportion_success(client, tables_manager):
         'statisticType': 'proportion'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -145,7 +145,7 @@ def test_confidence_interval_variance_success(client, tables_manager):
         'statisticType': 'variance'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -167,7 +167,7 @@ def test_confidence_interval_std_success(client, tables_manager):
         'statisticType': 'std'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -189,7 +189,7 @@ def test_confidence_interval_invalid_table(client, tables_manager):
         'statisticType': 'mean'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -207,7 +207,7 @@ def test_confidence_interval_invalid_column(client, tables_manager):
         'statisticType': 'mean'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -225,7 +225,7 @@ def test_confidence_interval_invalid_statistic_type(client, tables_manager):
         'statisticType': 'invalid_stat'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -243,7 +243,7 @@ def test_confidence_interval_invalid_confidence_level_high(client, tables_manage
         'statisticType': 'mean'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -261,7 +261,7 @@ def test_confidence_interval_invalid_confidence_level_low(client, tables_manager
         'statisticType': 'mean'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -279,7 +279,7 @@ def test_confidence_interval_proportion_invalid_data(client, tables_manager):
         'statisticType': 'proportion'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -297,7 +297,7 @@ def test_confidence_interval_empty_data(client, tables_manager):
         'statisticType': 'mean'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -315,7 +315,7 @@ def test_confidence_interval_missing_parameters(client, tables_manager):
         'statisticType': 'mean'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()
@@ -336,7 +336,7 @@ def test_confidence_interval_different_levels(client, tables_manager):
             'statisticType': 'mean'
         }
         response = client.post(
-            '/api/confidence-interval',
+            '/api/statistics/confidence-interval',
             json=payload,
         )
         response_data = response.json()
@@ -370,7 +370,7 @@ def test_confidence_interval_json_structure_validation(client, tables_manager):
         'statisticType': 'std'
     }
     response = client.post(
-        '/api/confidence-interval',
+        '/api/statistics/confidence-interval',
         json=payload,
     )
     response_data = response.json()

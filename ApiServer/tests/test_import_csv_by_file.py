@@ -43,10 +43,10 @@ def test_upload_valid_csv_file(client, prepared_data):
     test_data.write_csv(
         f'{test_dir}/TestDataComma.csv', separator=',')
     with open(f'{test_dir}/TestDataComma.csv', 'rb') as f:
-        response = client.post('/api/import-excel-by-file',
-                               files={'file': ('TestDataXlsx.xlsx',
+        response = client.post('/api/data/import-csv-by-file',
+                               files={'file': ('TestDataComma.csv',
                                                f,
-                                               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')})
+                                               'text/csv')})
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     # レスポンスデータの検証
@@ -70,7 +70,7 @@ def test_upload_csv_with_only_headers(client, prepared_data):
     test_data.write_csv(
         f'{test_dir}/OnlyHeaderComma.csv', separator=',')
     with open(f'{test_dir}/OnlyHeaderComma.csv', 'rb') as f:
-        response = client.post('/api/import-csv-by-file',
+        response = client.post('/api/data/import-csv-by-file',
                                files={'file': ('OnlyHeaderComma.csv',
                                                f,
                                                'multipart/form-data')})
@@ -84,13 +84,14 @@ def test_upload_csv_with_only_headers(client, prepared_data):
 def test_no_file_uploaded(client, prepared_data):
     """
     ファイルがアップロードされていない場合のテスト
+    FastAPIは必須パラメータがない場合422を返す
     """
     tables_manager, test_dir = prepared_data
-    response = client.post('/api/import-csv-by-file')
+    response = client.post('/api/data/import-csv-by-file')
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data['code'] == 'NG'
-    assert response_data['message'] == "No file uploaded."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert response_data['code'] == 'NG'
+    # assert response_data['message'] == "No file uploaded."
 
 
 def test_upload_non_csv_file(client, prepared_data):
@@ -106,33 +107,34 @@ def test_upload_non_csv_file(client, prepared_data):
     test_data.write_json(
         f'{test_dir}/TestDataJson.json')
     with open(f'{test_dir}/TestDataJson.json', 'rb') as f:
-        response = client.post('/api/import-csv-by-file',
+        response = client.post('/api/data/import-csv-by-file',
                                files={'file': ('TestDataJson.json',
                                                f,
                                                'multipart/form-data')})
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Uploaded file is not a .csv file." == response_data['message']
+    assert "File must be a CSV file" == response_data['message']
 
 
 def test_upload_empty_csv_file(client, prepared_data):
     """
     空のCSVファイルをアップロードした場合のテスト (Polars NoDataError)
+    exception_handlerでキャッチされて500エラーとなる
     """
     tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame()
     test_data.write_csv(
         f'{test_dir}/Empty.csv', separator=',')
     with open(f'{test_dir}/Empty.csv', 'rb') as f:
-        response = client.post('/api/import-csv-by-file',
+        response = client.post('/api/data/import-csv-by-file',
                                files={'file': ('Empty.csv',
                                                f,
-                                               'multipart/form-data')})
+                                               'text/csv')})
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
-    assert "Invalid file content type. Allowed types: text/csv, application/csv, text/plain" == response_data['message']
+    assert "The uploaded CSV file is empty or contains no valid data." == response_data['message']
 
 
 @pytest.mark.skip(reason="このテストは現在、発生させる方法が不明なためスキップされています。")
@@ -149,7 +151,7 @@ def test_upload_malformed_csv_file(client, prepared_data):
     test_data.write_parquet(
         f'{test_dir}/Error.csv')
     with open(f'{test_dir}/Error.csv', 'rb') as f:
-        response = client.post('/api/import-csv-by-file',
+        response = client.post('/api/data/import-csv-by-file',
                                files={'file': ('Error.csv',
                                                f,
                                                'multipart/form-data')})

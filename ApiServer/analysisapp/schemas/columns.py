@@ -1,7 +1,7 @@
 """カラム操作関連のスキーマ定義"""
 from pydantic import Field
 from typing import Optional, List, Dict
-from .common import TableRequest, ColumnRequest
+from .common import BaseModel, TableRequest, ColumnRequest
 
 
 class AddColumnRequest(TableRequest):
@@ -21,21 +21,16 @@ class RenameColumnRequest(TableRequest):
     newColumnName: str = Field(..., description="新しいカラム名")
 
 
-class DuplicateColumnRequest(ColumnRequest):
+class DuplicateColumnRequest(TableRequest):
     """カラム複製リクエスト"""
+    sourceColumnName: str = Field(..., description="元のカラム名")
     newColumnName: str = Field(..., description="新しいカラム名")
-    addPositionColumn: str = Field(..., description="追加位置の基準となるカラム名")
 
 
 class CalculateColumnRequest(TableRequest):
     """カラム計算リクエスト"""
-    formula: str = Field(..., description="計算式")
-    newColumnName: str = Field(..., description="結果を格納するカラム名")
-
-
-class GetColumnListRequest(TableRequest):
-    """カラムリスト取得リクエスト"""
-    pass
+    newColumnName: str = Field(..., description="新しいカラム名")
+    calculationExpression: str = Field(..., description="計算式")
 
 
 class AddDummyColumnRequest(TableRequest):
@@ -74,3 +69,9 @@ class TransformColumnRequest(TableRequest):
     logBase: Optional[float] = Field(None, description="対数の底（オプション）")
     exponent: Optional[float] = Field(None, description="指数（オプション）")
     rootIndex: Optional[float] = Field(None, description="累乗根の次数（オプション）")
+
+
+class GetColumnListRequest(BaseModel):
+    """カラムリスト取得リクエスト（GETクエリパラメータ用）"""
+    tableName: str = Field(..., description="対象テーブル名")
+    isNumberOnly: str = Field(default="false", description="数値カラムのみ取得")

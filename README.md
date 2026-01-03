@@ -300,3 +300,4 @@ pnpm install
 3. パフォーマンス最適化
 4. テストカバレッジの向上
 5. 非同期処理の活用
+6. FastAPI の HTTP_422_UNPROCESSABLE_CONTENT でメッセージを出す。Any をなくす

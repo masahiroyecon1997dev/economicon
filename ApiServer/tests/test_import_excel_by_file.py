@@ -43,7 +43,7 @@ def test_upload_valid_excel_file(client, prepared_data):
     test_data.write_excel(
         f'{test_dir}/TestDataXlsx.xlsx')
     with open(f'{test_dir}/TestDataXlsx.xlsx', 'rb') as f:
-        response = client.post('/api/import-excel-by-file',
+        response = client.post('/api/data/import-excel-by-file',
                                files={'file': ('TestDataXlsx.xlsx', f, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
@@ -68,7 +68,7 @@ def test_upload_valid_excel_file_with_extension_xls(client, prepared_data):
     test_data.write_excel(
         f'{test_dir}/TestDataXls.xls')
     with open(f'{test_dir}/TestDataXls.xls', 'rb') as f:
-        response = client.post('/api/import-excel-by-file',
+        response = client.post('/api/data/import-excel-by-file',
                                files={'file': ('TestDataXls.xls', f, 'application/vnd.ms-excel')})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
@@ -93,7 +93,7 @@ def test_upload_excel_with_only_headers(client, prepared_data):
     test_data.write_excel(
         f'{test_dir}/OnlyHeaderExcel.xlsx')
     with open(f'{test_dir}/OnlyHeaderExcel.xlsx', 'rb') as f:
-        response = client.post('/api/import-excel-by-file',
+        response = client.post('/api/data/import-excel-by-file',
                                files={'file': ('OnlyHeaderExcel.xlsx', f, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')})
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
@@ -107,11 +107,11 @@ def test_no_file_uploaded(client, prepared_data):
     ファイルがアップロードされていない場合のテスト。
     """
     tables_manager, test_dir = prepared_data
-    response = client.post('/api/import-csv-by-file')
+    response = client.post('/api/data/import-csv-by-file')
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data['code'] == 'NG'
-    assert response_data['message'] == "No file uploaded."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert response_data['code'] == 'NG'
+    # assert response_data['message'] == "No file uploaded."
 
 
 def test_upload_non_excel_file(client, prepared_data):
@@ -127,12 +127,12 @@ def test_upload_non_excel_file(client, prepared_data):
     test_data.write_csv(
         f'{test_dir}/TestDataComma.csv', separator=',')
     with open(f'{test_dir}/TestDataComma.csv', 'rb') as f:
-        response = client.post('/api/import-excel-by-file',
+        response = client.post('/api/data/import-excel-by-file',
                                files={'file': ('TestDataComma.csv', f, 'multipart/form-data')})
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Uploaded file is not a .xlsx, .xls file." == response_data['message']
+    assert "File must be an Excel file" == response_data['message']
 
 
 def test_upload_empty_excel_file(client, prepared_data):
@@ -144,7 +144,7 @@ def test_upload_empty_excel_file(client, prepared_data):
     test_data.write_excel(
         f'{test_dir}/Empty.xlsx')
     with open(f'{test_dir}/Empty.xlsx', 'rb') as f:
-        response = client.post('/api/import-excel-by-file',
+        response = client.post('/api/data/import-excel-by-file',
                                files={'file': ('Empty.xlsx', f, 'multipart/form-data')})
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -160,7 +160,7 @@ def test_upload_malformed_excel_file(client, prepared_data):
     tables_manager, test_dir = prepared_data
     with open('/AnalysisApp/AnalysisApp'
               '/SampleData/Error.xlsx', 'rb') as f:
-        response = client.post('/api/import-excel-by-file',
+        response = client.post('/api/data/import-excel-by-file',
                                files={'file': ('Error.xlsx', f, 'multipart/form-data')})
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST

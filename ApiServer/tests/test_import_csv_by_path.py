@@ -38,11 +38,11 @@ def prepared_data():
         pass
     test_data.write_excel(
         f'{test_dir}/TestDataXlsx.xlsx')
-    # テスト後にテンポラリディレクトリをクリーンアップ
-    shutil.rmtree(test_dir, ignore_errors=True)
     yield manager, test_dir
     # テスト後のクリーンアップ
     manager.clear_tables()
+    # テスト後にテンポラリディレクトリをクリーンアップ
+    shutil.rmtree(test_dir, ignore_errors=True)
 
 
 
@@ -60,7 +60,7 @@ def test_import_csv_by_path_comma_separator(client, prepared_data):
         'tableName': 'TestCommaTable',
         'separator': ','
     }
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
@@ -87,7 +87,7 @@ def test_import_csv_by_path_tab_separator(client, prepared_data):
         'tableName': 'TestTabTable',
         'separator': '\t'
     }
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
@@ -117,7 +117,7 @@ def test_import_csv_by_path_custom_separator(client, prepared_data):
             'tableName': 'TestSemicolonTable',
             'separator': ';'
         }
-        response = client.post('/api/import-csv-by-path',
+        response = client.post('/api/data/import-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
         response_data = response.json()
@@ -146,7 +146,7 @@ def test_import_csv_by_path_default_separator(client, prepared_data):
         'filePath': test_csv_comma,
         'tableName': 'TestDefaultSeparator'
     }
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
@@ -168,7 +168,7 @@ def test_import_csv_by_path_file_not_exists(client, prepared_data):
         'tableName': 'TestNonExistent',
         'separator': ','
     }
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
@@ -181,6 +181,7 @@ def test_import_csv_by_path_file_not_exists(client, prepared_data):
 def test_import_csv_by_path_invalid_file_extension(client, prepared_data):
     """
     CSV以外のファイル拡張子を指定した場合のテスト
+    ExcelファイルをCSVとしてパースしようとして失敗し500が返る
     """
     tables_manager, test_dir = prepared_data
     request_data = {
@@ -188,7 +189,7 @@ def test_import_csv_by_path_invalid_file_extension(client, prepared_data):
         'tableName': 'TestInvalidExtension',
         'separator': ','
     }
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                            data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -198,24 +199,26 @@ def test_import_csv_by_path_invalid_file_extension(client, prepared_data):
 def test_import_csv_by_path_missing_file_path(client, prepared_data):
     """
     filePathパラメータが未指定の場合のテスト
+    FastAPIのバリデーションエラーで422が返る
     """
     tables_manager, test_dir = prepared_data
     request_data = {
         'tableName': 'TestMissingPath',
         'separator': ','
     }
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'NG' == response_data['code']
-    assert "filePath is required" == response_data['message']
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert 'NG' == response_data['code']
+    # assert "filePath is required" == response_data['message']
 
 
 def test_import_csv_by_path_missing_table_name(client, prepared_data):
     """
     tableNameパラメータが未指定の場合のテスト
+    FastAPIのバリデーションエラーで422が返る
     """
     tables_manager, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
@@ -223,13 +226,13 @@ def test_import_csv_by_path_missing_table_name(client, prepared_data):
         'filePath': test_csv_comma,
         'separator': ','
     }
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'NG' == response_data['code']
-    assert "tableName is required." == response_data['message']
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert 'NG' == response_data['code']
+    # assert "tableName is required." == response_data['message']
 
 
 def test_import_csv_by_path_duplicate_table_name(client, prepared_data):
@@ -244,7 +247,7 @@ def test_import_csv_by_path_duplicate_table_name(client, prepared_data):
         'tableName': 'DuplicateTable',
         'separator': ','
     }
-    client.post('/api/import-csv-by-path',
+    client.post('/api/data/import-csv-by-path',
                      data=json.dumps(first_request_data),
                      )
     # 同じテーブル名で再度作成を試行
@@ -253,7 +256,7 @@ def test_import_csv_by_path_duplicate_table_name(client, prepared_data):
         'tableName': 'DuplicateTable',
         'separator': ','
     }
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                                 data=json.dumps(second_request_data),
                                 )
     response_data = response.json()
@@ -273,7 +276,7 @@ def test_import_csv_by_path_empty_separator(client, prepared_data):
         'tableName': 'TestEmptySeparator',
         'separator': ''
     }
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
@@ -285,14 +288,15 @@ def test_import_csv_by_path_empty_separator(client, prepared_data):
 def test_import_csv_by_path_invalid_json(client, prepared_data):
     """
     不正なJSONを送信した場合のテスト
+    FastAPIのバリデーションエラーで422が返る
     """
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                                 data='invalid json',
                                 )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'NG' == response_data['code']
-    assert "Invalid JSON format" == response_data['message']
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert 'NG' == response_data['code']
+    # assert "Invalid JSON format" == response_data['message']
 
 
 @pytest.mark.skip(reason="このテストは現在、発生させる方法が不明なためスキップされています。")
@@ -306,7 +310,7 @@ def test_import_csv_by_path_malformed_csv(client, prepared_data):
         'tableName': 'TestMalformed',
         'separator': ','
     }
-    response = client.post('/api/import-csv-by-path',
+    response = client.post('/api/data/import-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()

@@ -41,7 +41,7 @@ def test_filter_equals(client, tables_manager):
         'compareValue': 2
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -62,7 +62,7 @@ def test_filter_greater_than(client, tables_manager):
         'compareValue': 10
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -83,7 +83,7 @@ def test_filter_not_equals(client, tables_manager):
         'compareValue': 2
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -104,7 +104,7 @@ def test_filter_greater_than_or_equals(client, tables_manager):
         'compareValue': 30
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -125,7 +125,7 @@ def test_filter_less_than(client, tables_manager):
         'compareValue': 3
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -146,7 +146,7 @@ def test_filter_less_than_or_equals(client, tables_manager):
         'compareValue': 12
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -167,7 +167,7 @@ def test_filter_equals_compare_column(client, tables_manager):
         'compareValue': 'C'
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -190,7 +190,7 @@ def test_filter_greater_than_compare_column(client, tables_manager):
         'compareValue': 'C'
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -213,7 +213,7 @@ def test_filter_less_than_or_equals_compare_column(client, tables_manager):
         'compareValue': 'C'
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -236,7 +236,7 @@ def test_filter_invalid_table(client, tables_manager):
         'compareValue': 1
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -255,7 +255,7 @@ def test_filter_invalid_column(client, tables_manager):
         'compareValue': 1
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
@@ -274,10 +274,10 @@ def test_filter_invalid_condition(client, tables_manager):
         'compareValue': 1
     }
     response = client.post(
-        '/api/filter-single-condition',
+        '/api/operation/filter-single-condition',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "condition 'invalid_condition' is not supported." == response_data['message']
+    assert "condition 'invalid_condition' is not supported. Supported condition: equals, notEquals, greaterThan, lessThan, greaterThanOrEquals, lessThanOrEquals" == response_data['message']

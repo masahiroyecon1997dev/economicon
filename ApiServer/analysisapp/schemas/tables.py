@@ -42,3 +42,21 @@ class CreateUnionTableRequest(BaseModel):
 class ClearTablesRequest(BaseModel):
     """テーブルクリアリクエスト（パラメータなし）"""
     pass
+
+
+class DuplicateTableRequest(BaseModel):
+    """テーブル複製リクエスト"""
+    tableName: str = Field(..., description="元のテーブル名")
+    newTableName: str = Field(..., description="新しいテーブル名")
+
+
+class DeleteTableRequest(TableRequest):
+    """テーブル削除リクエスト"""
+    pass
+
+
+class FetchDataToJsonRequest(BaseModel):
+    """データJSON取得リクエスト（GETクエリパラメータ用）"""
+    tableName: str = Field(..., description="対象テーブル名")
+    startRow: int = Field(..., description="開始行番号")
+    fetchRows: int = Field(..., description="取得行数")

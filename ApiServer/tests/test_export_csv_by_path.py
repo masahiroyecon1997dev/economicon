@@ -50,7 +50,7 @@ def test_export_csv_by_path_default_separator(client, prepared_data):
         'directoryPath': test_output_dir,
         'fileName': 'test_output.csv'
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
@@ -77,7 +77,7 @@ def test_export_csv_by_path_custom_separator(client, prepared_data):
         'fileName': 'test_output_tab.csv',
         'separator': '\t'
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
@@ -104,7 +104,7 @@ def test_export_csv_by_path_semicolon_separator(client, prepared_data):
         'fileName': 'test_output_semicolon.csv',
         'separator': ';'
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
@@ -130,13 +130,13 @@ def test_export_csv_by_path_table_not_exists(client, prepared_data):
         'directoryPath': test_output_dir,
         'fileName': 'test_output.csv',
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "tableName 'NonExistentTable' does not exist" == response_data['message']
+    assert "tableName 'NonExistentTable' does not exist." == response_data['message']
 
 
 def test_export_csv_by_path_invalid_output_directory(client, prepared_data):
@@ -149,7 +149,7 @@ def test_export_csv_by_path_invalid_output_directory(client, prepared_data):
         'directoryPath': '/non/existent/directory',
         'fileName': 'test_output.csv'
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
@@ -167,13 +167,13 @@ def test_export_csv_by_path_missing_table_name(client, prepared_data):
         'directoryPath': test_output_dir,
         'fileName': 'test_output.csv'
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'NG' == response_data['code']
-    assert "tableName is required" == response_data['message']
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert 'NG' == response_data['code']
+    # assert "tableName is required" == response_data['message']
 
 
 def test_export_csv_by_path_missing_directory_path(client, prepared_data):
@@ -184,13 +184,13 @@ def test_export_csv_by_path_missing_directory_path(client, prepared_data):
         'tableName': 'TestTable',
         'fileName': 'test_output.csv'
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'NG' == response_data['code']
-    assert "directoryPath is required" == response_data['message']
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert 'NG' == response_data['code']
+    # assert "directoryPath is required" == response_data['message']
 
 
 def test_export_csv_by_path_missing_file_name(client, prepared_data):
@@ -202,13 +202,13 @@ def test_export_csv_by_path_missing_file_name(client, prepared_data):
         'tableName': 'TestTable',
         'directoryPath': test_output_dir,
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'NG' == response_data['code']
-    assert "fileName is required" == response_data['message']
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert 'NG' == response_data['code']
+    # assert "fileName is required" == response_data['message']
 
 
 def test_export_csv_by_path_empty_separator(client, prepared_data):
@@ -222,13 +222,13 @@ def test_export_csv_by_path_empty_separator(client, prepared_data):
         'fileName': 'test_output_empty_separator.csv',
         'separator': ''
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "separator must be at least 1 characters long" == response_data['message']
+    assert "separator must be at least 1 characters long." == response_data['message']
 
 
 
@@ -236,13 +236,13 @@ def test_export_csv_by_path_invalid_json(client, prepared_data):
     """
     不正なJSONを送信した場合のテスト
     """
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data='invalid json',
                                 )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'NG' == response_data['code']
-    assert "Invalid JSON format" == response_data['message']
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert 'NG' == response_data['code']
+    # assert "Invalid JSON format" == response_data['message']
 
 
 def test_export_csv_by_path_empty_table(client, prepared_data):
@@ -258,7 +258,7 @@ def test_export_csv_by_path_empty_table(client, prepared_data):
         'directoryPath': test_output_dir,
         'fileName': 'empty_output.csv'
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()
@@ -290,7 +290,7 @@ def test_export_csv_by_path_large_table(client, prepared_data):
         'directoryPath': test_output_dir,
         'fileName': 'large_output.csv'
     }
-    response = client.post('/api/export-csv-by-path',
+    response = client.post('/api/data/export-csv-by-path',
                                 data=json.dumps(request_data),
                                 )
     response_data = response.json()

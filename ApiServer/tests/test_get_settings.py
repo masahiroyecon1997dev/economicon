@@ -13,15 +13,16 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
+def settings_manager():
+    """SettingsManagerのフィクスチャ"""
     # 設定マネージャーが初期化されていることを確認
     settings_manager = SettingsManager()
+    settings_manager.load_settings()
     yield settings_manager
 
 
 
-def test_get_settings_success(client, tables_manager):
+def test_get_settings_success(client, settings_manager):
     # 正常系テスト: 設定情報を取得
     response = client.get(
         '/api/setting/get',
@@ -44,16 +45,16 @@ def test_get_settings_success(client, tables_manager):
     assert result['pathSeparator'] == '/'
 
 
-def test_settings_manager_singleton(client, tables_manager):
+def test_settings_manager_singleton(client, settings_manager):
     # シングルトンパターンのテスト
     manager1 = SettingsManager()
     manager2 = SettingsManager()
     assert manager1 is manager2
 
 
-def test_settings_info_properties(client, tables_manager):
+def test_settings_info_properties(client, settings_manager):
     # 設定情報のプロパティアクセステスト
-    settings_info = tables_manager.get_settings()
+    settings_info = settings_manager.get_settings()
     # プロパティが正しく取得できることを確認
     assert settings_info.os_name is not None
     assert settings_info.default_folder_path is not None
@@ -63,9 +64,9 @@ def test_settings_info_properties(client, tables_manager):
     assert settings_info.path_separator == '/'
 
 
-def test_settings_info_to_dict(client, tables_manager):
+def test_settings_info_to_dict(client, settings_manager):
     # to_dict()メソッドのテスト
-    settings_info = tables_manager.get_settings()
+    settings_info = settings_manager.get_settings()
     settings_dict = settings_info.to_dict()
     # キャメルケースのキーが存在することを確認
     assert 'osName' in settings_dict
