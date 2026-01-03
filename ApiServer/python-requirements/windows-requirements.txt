@@ -1,0 +1,16 @@
+pipdeptree
+pip-licenses
+numpy
+polars
+fastapi
+uvicorn[standard]
+python-multipart
+wooldridge
+scipy
+statsmodels
+python-magic-bin
+fastexcel
+xlsxwriter
+coverage
+PyYAML
+pyinstaller
