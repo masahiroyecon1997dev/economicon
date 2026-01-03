@@ -36,7 +36,7 @@ def test_rename_table_success(client, tables_manager):
         'newTableName': 'NewTable'
     }
     response = client.post(
-        '/api/rename-table-name',
+        '/api/table/rename',
         json=payload,
     )
     response_data = response.json()
@@ -56,7 +56,7 @@ def test_rename_table_not_found(client, tables_manager):
         'newTableName': 'AnyName'
     }
     response = client.post(
-        '/api/rename-table-name',
+        '/api/table/rename',
         json=payload,
     )
     response_data = response.json()
@@ -72,7 +72,7 @@ def test_rename_table_empty_old_table_name(client, tables_manager):
         'newTableName': 'NewTable'
     }
     response = client.post(
-        '/api/rename-table-name',
+        '/api/table/rename',
         json=payload,
     )
     response_data = response.json()
@@ -88,7 +88,7 @@ def test_rename_table_empty_new_table_name(client, tables_manager):
         'newTableName': ''
     }
     response = client.post(
-        '/api/rename-table-name',
+        '/api/table/rename',
         json=payload,
     )
     response_data = response.json()

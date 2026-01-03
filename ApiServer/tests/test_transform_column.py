@@ -42,7 +42,7 @@ def test_transform_column_log_natural_success(client, tables_manager):
         'transformMethod': 'log'
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -72,7 +72,7 @@ def test_transform_column_log_base2_success(client, tables_manager):
         'logBase': 2
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -96,7 +96,7 @@ def test_transform_column_power_square_success(client, tables_manager):
         'transformMethod': 'power'
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -120,7 +120,7 @@ def test_transform_column_power_cube_success(client, tables_manager):
         'exponent': 3
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -144,7 +144,7 @@ def test_transform_column_fractional_exponent(client, tables_manager):
         'exponent': 0.5  # 平方根
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -167,7 +167,7 @@ def test_transform_column_root_square_success(client, tables_manager):
         'transformMethod': 'root',
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -192,7 +192,7 @@ def test_transform_column_root_cubic_success(client, tables_manager):
         'rootIndex': 3
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -217,7 +217,7 @@ def test_transform_column_root_fractional_success(client, tables_manager):
         'rootIndex': 0.5
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -241,13 +241,13 @@ def test_transform_column_invalid_table(client, tables_manager):
         'transformMethod': 'log'
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist" == response_data['message']
+    assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
 
@@ -260,7 +260,7 @@ def test_transform_column_invalid_source_column(client, tables_manager):
         'transformMethod': 'log'
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -278,7 +278,7 @@ def test_transform_column_duplicate_column_name(client, tables_manager):
         'transformMethod': 'log'
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -296,13 +296,13 @@ def test_transform_column_invalid_method(client, tables_manager):
         'transformMethod': 'invalid'
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "transformMethod 'invalid' is invalid" == response_data['message']
+    assert "transformMethod 'invalid' is invalid. Valid methods are: log, power, root" == response_data['message']
 
 
 def test_transform_column_invalid_log_base(client, tables_manager):
@@ -315,7 +315,7 @@ def test_transform_column_invalid_log_base(client, tables_manager):
         'logBase': 1  # 無効：底が1
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()
@@ -335,7 +335,7 @@ def test_transform_column_negative_log_base(client, tables_manager):
         'logBase': -2  # 無効：負の値
     }
     response = client.post(
-        '/api/transform-column',
+        '/api/column/transform',
         json=payload,
     )
     response_data = response.json()

@@ -62,7 +62,7 @@ def test_union_two_tables_all_columns(client, tables_manager):
         'columnNames': ['id', 'name', 'age', 'city']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     response_data = response.json()
@@ -84,7 +84,7 @@ def test_union_three_tables_selected_columns(client, tables_manager):
         'columnNames': ['id', 'name']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     response_data = response.json()
@@ -105,7 +105,7 @@ def test_union_table_name_empty(client, tables_manager):
         'columnNames': ['id', 'name']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     response_data = response.json()
@@ -121,7 +121,7 @@ def test_union_table_name_already_exists(client, tables_manager):
         'columnNames': ['id', 'name']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     response_data = response.json()
@@ -137,7 +137,7 @@ def test_single_table_in_list(client, tables_manager):
         'columnNames': ['id', 'name']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     response_data = response.json()
@@ -153,7 +153,7 @@ def test_nonexistent_table(client, tables_manager):
         'columnNames': ['id', 'name']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     response_data = response.json()
@@ -169,7 +169,7 @@ def test_empty_column_names(client, tables_manager):
         'columnNames': []  # 空の列名リスト
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     response_data = response.json()
@@ -185,7 +185,7 @@ def test_nonexistent_column_in_first_table(client, tables_manager):
         'columnNames': ['id', 'nonexistent_column']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     response_data = response.json()
@@ -202,7 +202,7 @@ def test_column_missing_in_one_table(client, tables_manager):
         'columnNames': ['id', 'name']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     response_data = response.json()
@@ -218,7 +218,7 @@ def test_union_preserves_column_order(client, tables_manager):
         'columnNames': ['name', 'id', 'age']  # 元の順序と異なる
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     response_data = response.json()
@@ -236,27 +236,27 @@ def test_missing_request_fields(client, tables_manager):
         'columnNames': ['id', 'name']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    # tableNamesが欠けている場合
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # # tableNamesが欠けている場合
     payload = {
         'unionTableName': 'UnionTable',
         'columnNames': ['id', 'name']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    # columnNamesが欠けている場合
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # # columnNamesが欠けている場合
     payload = {
         'unionTableName': 'UnionTable',
         'tableNames': ['Table1', 'Table2']
     }
     response = client.post(
-        '/api/create-union-table',
+        '/api/table/create-union',
         json=payload,
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST

@@ -40,7 +40,7 @@ def test_delete_table_success(client, tables_manager):
         'tableName': 'TestTable2'
     }
     response = client.post(
-        '/api/delete-table',
+        '/api/table/delete',
         json=payload,
     )
     response_data = response.json()
@@ -55,7 +55,7 @@ def test_delete_table_not_found(client, tables_manager):
         'tableName': 'NotExistTable'
     }
     response = client.post(
-        '/api/delete-table',
+        '/api/table/delete',
         json=payload,
     )
     response_data = response.json()
@@ -69,7 +69,7 @@ def test_delete_table_empty_table_name(client, tables_manager):
         'tableName': ''
     }
     response = client.post(
-        '/api/delete-table',
+        '/api/table/delete',
         json=payload,
     )
     response_data = response.json()

@@ -41,7 +41,7 @@ def test_sort_single_column_ascending(client, tables_manager):
         ]
     }
     response = client.post(
-        '/api/sort-columns',
+        '/api/column/sort',
         json=payload,
     )
     response_data = response.json()
@@ -64,7 +64,7 @@ def test_sort_single_column_descending(client, tables_manager):
         ]
     }
     response = client.post(
-        '/api/sort-columns',
+        '/api/column/sort',
         json=payload,
     )
     response_data = response.json()
@@ -94,7 +94,7 @@ def test_sort_multiple_columns(client, tables_manager):
         ]
     }
     response = client.post(
-        '/api/sort-columns',
+        '/api/column/sort',
         json=payload,
     )
     response_data = response.json()
@@ -116,7 +116,7 @@ def test_sort_invalid_table(client, tables_manager):
         ]
     }
     response = client.post(
-        '/api/sort-columns',
+        '/api/column/sort',
         json=payload,
     )
     response_data = response.json()
@@ -134,7 +134,7 @@ def test_sort_invalid_column(client, tables_manager):
         ]
     }
     response = client.post(
-        '/api/sort-columns',
+        '/api/column/sort',
         json=payload,
     )
     response_data = response.json()
@@ -150,7 +150,7 @@ def test_sort_empty_columns(client, tables_manager):
         'sortColumns': []
     }
     response = client.post(
-        '/api/sort-columns',
+        '/api/column/sort',
         json=payload,
     )
     response_data = response.json()
@@ -167,12 +167,12 @@ def test_sort_missing_column_name(client, tables_manager):
         ]
     }
     response = client.post(
-        '/api/sort-columns',
+        '/api/column/sort',
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data['code'] == 'NG'
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert response_data['code'] == 'NG'
 
 
 def test_sort_missing_ascending(client, tables_manager):
@@ -184,7 +184,7 @@ def test_sort_missing_ascending(client, tables_manager):
         ]
     }
     response = client.post(
-        '/api/sort-columns',
+        '/api/column/sort',
         json=payload,
     )
     response_data = response.json()
@@ -201,7 +201,7 @@ def test_sort_invalid_ascending_type(client, tables_manager):
         ]
     }
     response = client.post(
-        '/api/sort-columns',
+        '/api/column/sort',
         json=payload,
     )
     response_data = response.json()

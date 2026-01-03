@@ -48,7 +48,7 @@ def test_inner_join(client, tables_manager):
         'joinType': 'inner'
     }
     response = client.post(
-        '/api/create-join-table',
+        '/api/table/create-join',
         json=payload,
     )
     response_data = response.json()
@@ -71,7 +71,7 @@ def test_left_join(client, tables_manager):
         'joinType': 'left'
     }
     response = client.post(
-        '/api/create-join-table',
+        '/api/table/create-join',
         json=payload,
     )
     response_data = response.json()
@@ -94,7 +94,7 @@ def test_right_join(client, tables_manager):
         'joinType': 'right'
     }
     response = client.post(
-        '/api/create-join-table',
+        '/api/table/create-join',
         json=payload,
     )
     response_data = response.json()
@@ -117,7 +117,7 @@ def test_outer_join(client, tables_manager):
         'joinType': 'outer'
     }
     response = client.post(
-        '/api/create-join-table',
+        '/api/table/create-join',
         json=payload,
     )
     response_data = response.json()
@@ -142,7 +142,7 @@ def test_join_table_name_empty(client, tables_manager):
         'joinType': 'inner'
     }
     response = client.post(
-        '/api/create-join-table',
+        '/api/table/create-join',
         json=payload,
     )
     response_data = response.json()
@@ -161,7 +161,7 @@ def test_left_table_not_found(client, tables_manager):
         'joinType': 'inner'
     }
     response = client.post(
-        '/api/create-join-table',
+        '/api/table/create-join',
         json=payload,
     )
     response_data = response.json()
@@ -180,7 +180,7 @@ def test_right_table_not_found(client, tables_manager):
         'joinType': 'inner'
     }
     response = client.post(
-        '/api/create-join-table',
+        '/api/table/create-join',
         json=payload,
     )
     response_data = response.json()
@@ -199,7 +199,7 @@ def test_left_key_column_not_found(client, tables_manager):
         'joinType': 'inner'
     }
     response = client.post(
-        '/api/create-join-table',
+        '/api/table/create-join',
         json=payload,
     )
     response_data = response.json()
@@ -218,7 +218,7 @@ def test_right_key_column_not_found(client, tables_manager):
         'joinType': 'inner'
     }
     response = client.post(
-        '/api/create-join-table',
+        '/api/table/create-join',
         json=payload,
     )
     response_data = response.json()
@@ -237,10 +237,10 @@ def test_invalid_join_type(client, tables_manager):
         'joinType': 'invalid_type'
     }
     response = client.post(
-        '/api/create-join-table',
+        '/api/table/create-join',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "joinType 'invalid_type' is not supported. " == response_data['message']
+    assert "joinType 'invalid_type' is not supported. Supported joinType: inner, left, right, outer" == response_data['message']

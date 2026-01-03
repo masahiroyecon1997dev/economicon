@@ -13,7 +13,8 @@ from ..schemas import (
     AddSimulationColumnRequest,
     StatisticsCalculateColumnRequest,
     DataDuplicateColumnRequest,
-    TransformColumnRequest
+    TransformColumnRequest,
+    SortColumnsRequest
 )
 # 各ビジネスロジック（既存のpython_apis）
 from ..services.add_column import add_column
@@ -25,6 +26,8 @@ from ..services.add_simulation_column import add_simulation_column
 from ..services.calculate_column import calculate_column
 from ..services.duplicate_column import duplicate_column
 from ..services.transform_column import transform_column
+from ..services.get_column_list import get_column_list
+from ..services.sort_columns import sort_columns
 
 # ルーターの定義（ここで共通のprefixとtagをつけておくと便利！）
 router = APIRouter(prefix="/column", tags=["column"])
@@ -277,15 +280,8 @@ async def transform_column_endpoint(request: Request, body: TransformColumnReque
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : OperationsTransformColumnRequest
+    body : TransformColumnRequest
         リクエストボディ
-        - tableName: テーブル名
-        - sourceColumnName: 変換元の列名
-        - newColumnName: 新しい列名
-        - transformMethod: 変換メソッド
-        - logBase: 対数の底（オプション）
-        - exponent: 指数（オプション）
-        - rootIndex: 累乗根の次数（オプション）
 
     Returns
     -------
@@ -304,6 +300,66 @@ async def transform_column_endpoint(request: Request, body: TransformColumnReque
         exponent=body.exponent,
         root_index=body.rootIndex
     )
+    return create_success_response(
+        http_status.HTTP_200_OK,
+        result
+    )
+
+
+@router.get("/list")
+async def get_column_list_endpoint(request: Request, tableName: str, isNumberOnly: str = "false"):
+    """カラムリストを取得するエンドポイント
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    tableName : str
+        テーブル名
+    isNumberOnly : str
+        数値カラムのみ取得するか
+
+    Returns
+    -------
+    JSONResponse
+        処理結果
+    """
+    create_log_api_request(request)
+
+    result = get_column_list(tableName, isNumberOnly)
+
+    return create_success_response(
+        http_status.HTTP_200_OK,
+        result
+    )
+
+
+@router.post("/sort")
+async def sort_columns_endpoint(request: Request, body: SortColumnsRequest):
+    """
+    列のソート処理エンドポイント
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    body : SortColumnsRequest
+        リクエストボディ
+        - tableName: テーブル名
+        - sortColumns: ソート列情報
+
+    Returns
+    -------
+    JSONResponse
+        処理結果
+    """
+    create_log_api_request(request)
+
+    result = sort_columns(
+        table_name=body.tableName,
+        sort_columns=body.sortColumns
+    )
+
     return create_success_response(
         http_status.HTTP_200_OK,
         result
