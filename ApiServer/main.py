@@ -3,9 +3,13 @@
 """
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from pathlib import Path
 from analysisapp.exception_handlers import init_exception_handlers
 from analysisapp.routers import api_router
+from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.settings_manager import SettingsManager
+
 
 # i18n サポート
 from analysisapp.i18n import set_locale, get_locale
@@ -13,10 +17,30 @@ from analysisapp.i18n import set_locale, get_locale
 # ベースディレクトリ
 BASE_DIR = Path(__file__).resolve().parent
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # --- 起動時の処理 ---
+    # シングルトンのインスタンスを取得し、初期化を行う
+    settings_manager = SettingsManager()
+    settings_manager.load_settings()
+    print("SettingsManager has been initialized at startup.")
+    tables_manager = TablesManager()
+    print("TablesManager has been initialized at startup.")
+
+    yield  # ここでアプリがリクエストを待ち受ける
+
+    # --- 終了時の処理 ---
+    # 必要に応じてクリーンアップ
+
+    tables_manager.clear_tables()
+    print("Cleanup TablesManager.")
+
+
 app = FastAPI(
     title="Analysis App API",
     description="データ分析アプリケーションのAPI",
-    version="2.0.0"
+    version="2.0.0",
+    lifespan=lifespan
 )
 
 # CORS設定
