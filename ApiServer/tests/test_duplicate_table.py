@@ -14,25 +14,26 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
+def prepared_data():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        # テーブルをクリア
-        manager.clear_tables()
-        # テスト用テーブルをセット
-        df = pl.DataFrame({
-            'A': [1, 2, 3],
-            'B': [4, 5, 6],
-            'C': ['x', 'y', 'z']
-        })
-        manager.store_table('TestTable', df)
-    yield manager
+    # テーブルをクリア
+    manager.clear_tables()
+    # テスト用テーブルをセット
+    df = pl.DataFrame({
+        'A': [1, 2, 3],
+        'B': [4, 5, 6],
+        'C': ['x', 'y', 'z']
+    })
+    manager.store_table('TestTable', df)
+    yield manager, df
     # テスト後のクリーンアップ
     manager.clear_tables()
 
 
 
-def test_duplicate_table_success(client, tables_manager):
+def test_duplicate_table_success(client, prepared_data):
+    tables_manager, df = prepared_data
     # 正常にテーブル複製できる
     payload = {
         'tableName': 'TestTable',
@@ -45,8 +46,7 @@ def test_duplicate_table_success(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    assert response_data['result']['tableName'],
-                     'DuplicatedTable')
+    assert response_data['result']['tableName'] == 'DuplicatedTable'
     # 複製されたテーブルが存在することを確認
     table_list = tables_manager.get_table_name_list()
     assert 'DuplicatedTable' in table_list
@@ -58,15 +58,14 @@ def test_duplicate_table_success(client, tables_manager):
     # 列名が同じかチェック
     assert original_df.columns == duplicated_df.columns
     # データが同じかチェック
-    self.assertEqual(original_df['A'].to_list(),
-                     duplicated_df['A'].to_list()
-    self.assertEqual(original_df['B'].to_list(),
-                     duplicated_df['B'].to_list()
-    self.assertEqual(original_df['C'].to_list(),
-                     duplicated_df['C'].to_list()
+    assert original_df['A'].to_list() == duplicated_df['A'].to_list()
+    assert original_df['B'].to_list() == duplicated_df['B'].to_list()
+    assert original_df['C'].to_list() == duplicated_df['C'].to_list()
 
 
-def test_duplicate_table_invalid_source_table(client, tables_manager):
+
+def test_duplicate_table_invalid_source_table(client, prepared_data):
+    tables_manager, df = prepared_data
     # 存在しないソーステーブル名
     payload = {
         'tableName': 'NonExistentTable',
@@ -79,11 +78,12 @@ def test_duplicate_table_invalid_source_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist",
-                  response_data['message'])
+    assert "tableName 'NonExistentTable' does not exist" == response_data['message']
 
 
-def test_duplicate_table_existing_destination_table(client, tables_manager):
+
+def test_duplicate_table_existing_destination_table(client, prepared_data):
+    tables_manager, df = prepared_data
     # 既に存在するテーブル名を新しいテーブル名として指定
     payload = {
         'tableName': 'TestTable',
@@ -96,11 +96,11 @@ def test_duplicate_table_existing_destination_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newTableName 'TestTable' already exists",
-                  response_data['message'])
+    assert "newTableName 'TestTable' already exists" == response_data['message']
 
 
-def test_duplicate_table_empty_table(client, tables_manager):
+def test_duplicate_table_empty_table(client, prepared_data):
+    tables_manager, df = prepared_data
     # 空のテーブルを複製
     empty_df = pl.DataFrame({
         'Col1': [],
@@ -118,8 +118,7 @@ def test_duplicate_table_empty_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    assert response_data['result']['tableName'],
-                     'DuplicatedEmptyTable')
+    assert response_data['result']['tableName'] == 'DuplicatedEmptyTable'
     # 空のテーブルも正しく複製されることを確認
     duplicated_df = tables_manager.get_table(
         'DuplicatedEmptyTable').table

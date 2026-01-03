@@ -10,12 +10,7 @@ from main import app
 from analysisapp.services.data.tables_manager import TablesManager
 
 # テスト用の一時ディレクトリを作成
-test_dir = tempfile.mkdtemp()
-# テスト用のファイルとディレクトリを作成
-test_file1 = os.path.join(test_dir, 'test1.txt')
-test_file2 = os.path.join(test_dir, 'test2.txt')
-test_subdir = os.path.join(test_dir, 'subdir')
-
+test_dir = ''
 
 @pytest.fixture
 def client():
@@ -24,9 +19,15 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
+def prepared_data():
     """TablesManagerのフィクスチャ"""
     tables_manager = TablesManager()
+    # テスト用の一時ディレクトリを作成
+    test_dir = tempfile.mkdtemp()
+    # テスト用のファイルとディレクトリを作成
+    test_file1 = os.path.join(test_dir, 'test1.txt')
+    test_file2 = os.path.join(test_dir, 'test2.txt')
+    test_subdir = os.path.join(test_dir, 'subdir')
     # ファイルを作成
     with open(test_file1, 'w') as f:
         f.write('test content 1')
@@ -34,7 +35,7 @@ def tables_manager():
         f.write('test content 2 with more data')
     # サブディレクトリを作成
     os.makedirs(test_subdir)
-    yield tables_manager
+    yield tables_manager, test_dir, test_file1, test_file2, test_subdir
     # テスト後にクリーンアップ
     if os.path.exists(test_dir):
         shutil.rmtree(test_dir)
@@ -43,10 +44,11 @@ def tables_manager():
 
 
 
-def test_get_list_files_success(client, tables_manager):
+def test_get_list_files_success(client, prepared_data):
     """
     正常にファイル一覧を取得できる
     """
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     response = client.get(
         '/api/get-files'
         f'?directoryPath={test_dir}',
@@ -82,10 +84,11 @@ def test_get_list_files_success(client, tables_manager):
             assert False, f"Invalid datetime format: {item['modifiedTime']}"
 
 
-def test_get_list_files_empty_directory(client, tables_manager):
+def test_get_list_files_empty_directory(client, prepared_data):
     """
     空のディレクトリの場合
     """
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     empty_dir = tempfile.mkdtemp()
     try:
         response = client.get(
@@ -102,10 +105,11 @@ def test_get_list_files_empty_directory(client, tables_manager):
         shutil.rmtree(empty_dir)
 
 
-def test_get_list_files_invalid_directory(client, tables_manager):
+def test_get_list_files_invalid_directory(client, prepared_data):
     """
     存在しないディレクトリを指定した場合のテスト
     """
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     response = client.get(
         '/api/get-files'
         '?directoryPath=/non/existent/directory',
@@ -116,10 +120,11 @@ def test_get_list_files_invalid_directory(client, tables_manager):
     assert "Directory does not exist" == response_data['message']
 
 
-def test_get_list_files_missing_directory_path(client, tables_manager):
+def test_get_list_files_missing_directory_path(client, prepared_data):
     """
     directoryPathパラメータが未指定の場合のテスト
     """
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     response = client.get(
         '/api/get-files'
         '?directoryPath=',
@@ -130,10 +135,11 @@ def test_get_list_files_missing_directory_path(client, tables_manager):
     assert "directoryPath is required" == response_data['message']
 
 
-def test_get_list_files_file_instead_of_directory(client, tables_manager):
+def test_get_list_files_file_instead_of_directory(client, prepared_data):
     """
     ディレクトリではなくファイルのパスを指定した場合のテスト
     """
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     response = client.get(
         '/api/get-files'
         f'?directoryPath={test_file1}',
@@ -144,10 +150,11 @@ def test_get_list_files_file_instead_of_directory(client, tables_manager):
     assert "Path is not a directory" == response_data['message']
 
 
-def test_get_list_files_file_sizes(client, tables_manager):
+def test_get_list_files_file_sizes(client, prepared_data):
     """
     ファイルサイズが正しく取得できることを確認
     """
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
     response = client.get(
         '/api/get-files'
         f'?directoryPath={test_dir}',
