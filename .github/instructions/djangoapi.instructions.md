@@ -1,15 +1,15 @@
 ---
-applyTo: "AnalysisApp/AnalysisApp/ApiServer/analysisapp/api/**"
+applyTo: "AnalysisApp/analysisappServer/analysisapp/**"
 ---
 
-# Django API 開発規約
+# FastAPI API 開発規約
 
 ## Python 環境管理
 
 ### パッケージマネージャー
 
 - このプロジェクトでは **uv** をパッケージマネージャーとして使用
-- 依存関係は windows なら `python-requirements/windows-requirements.txt`、ubuntu なら `python-requirements/ubuntu-requirements.txt`、 で管理
+- 依存関係は windows なら `ApiServer/python-requirements/windows-requirements.txt`、ubuntu なら `ApiServer/python-requirements/ubuntu-requirements.txt`、 で管理
 
 ### 仮想環境
 
@@ -17,11 +17,12 @@ applyTo: "AnalysisApp/AnalysisApp/ApiServer/analysisapp/api/**"
 - 新しいパッケージを追加する場合は `windows-requirements.txt` を更新
 
 ```powershell
+cd ApiServer
 # 依存関係のインストール
-uv pip install -r python-requirements/windows-requirements.txt
+uv add -r python-requirements/windows-requirements.txt
 
 # 新しいパッケージの追加
-uv pip install <package-name>
+uv add <package-name>
 # requirements.txtに追記すること
 ```
 
@@ -51,17 +52,18 @@ flake8 api/apis/python_apis/your_file.py
 
 ### インポート規約
 
-- Django 関連のインポートは上部にまとめる
-- サードパーティライブラリ（polars、rest_framework など）のインポート
+- FastAPI 関連のインポートは上部にまとめる（fastapi, pydantic など）
+- サードパーティライブラリ（polars など）のインポート
 - 相対インポートは`..`を使用して親ディレクトリから参照
 - 型ヒント用のインポート（typing）を適切に使用
 
 ### 国際化対応
 
-- 全てのユーザー向けメッセージは`django.utils.translation.gettext as _`を使用
+- 全てのユーザー向けメッセージは`analysisapp.i18n.translation.gettext_lazy as _`を使用
 - エラーメッセージは必ず翻訳可能な形式で記述
+- ContextVar ベースの言語設定を使用（スレッドセーフ）
 
-## Python API（python_apis）の規約
+## Services API（services）の規約
 
 ### クラス設計
 
@@ -100,56 +102,54 @@ flake8 api/apis/python_apis/your_file.py
 - 関数内で API クラスのインスタンスを作成し、`validate()`と`execute()`を順次実行
 - バリデーションエラーがある場合は例外として再発生
 
-## REST API（rest_apis）の規約
+## FastAPI Routers（routers）の規約
 
-### クラス設計
+### ルーター設計
 
-- 全ての REST クラスは`APIView`を継承
-- クラス名は機能名に応じて命名（例：`CreateTable`、`RestDeleteColumn`）
+- FastAPI の`APIRouter`を使用してエンドポイントを定義
+- 各ルーターファイルは機能ごとに分割（例：`add_column.py`、`create_table.py`）
 - docstring で API の目的を簡潔に説明
 
-### HTTP メソッド実装
+### エンドポイント実装
 
-- 主に`post`メソッドを実装
+- 主に`@router.post`デコレーターを使用
 - リクエスト処理の標準的な流れ：
-  1. `create_log_api_request(request)`でリクエストログ記録
-  2. `json.loads(request.body)`で JSON データ取得
-  3. 対応する Python API 関数を呼び出し
-  4. 成功時は`create_success_response`、エラー時は`create_error_response`を返す
+  1. Pydantic モデルで自動的にリクエストデータを検証
+  2. 対応する Services 関数を呼び出し
+  3. 成功時は`create_success_response`、エラー時は`create_error_response`を返す
+  4. async/await を適切に使用（I/O 処理がある場合）
 
 ### エラーハンドリング階層
 
-1. `ValidationError` → `HTTP_400_BAD_REQUEST`
-2. `ApiError` → `HTTP_500_INTERNAL_SERVER_ERROR`
-3. `Exception` → `HTTP_500_INTERNAL_SERVER_ERROR`（予期しないエラー用メッセージ付き）
+1. `ValidationError` → `status.HTTP_400_BAD_REQUEST`
+2. `ApiError` → `status.HTTP_500_INTERNAL_SERVER_ERROR`
+3. `Exception` → `status.HTTP_500_INTERNAL_SERVER_ERROR`（予期しないエラー用メッセージ付き）
 
 ### レスポンス形式
 
 - 成功レスポンス：`create_success_response(status.HTTP_200_OK, result)`
 - エラーレスポンス：`create_error_response(ステータスコード, メッセージ, 例外オブジェクト)`
+- FastAPI の`JSONResponse`を使用
 
 ## テスト（tests）の規約
 
-### テストクラス設計
+### テスト関数設計
 
-- `APITestCase`を継承
-- クラス名は`TestApi + 機能名`の形式（例：`TestApiCreateTable`）
+- pytest 形式でテスト関数を記述
+- 関数名は`test_ + 機能名 + _ + シナリオ`の形式（例：`test_create_table_success`）
 
-### setUp メソッド
+### フィクスチャ
 
-- `TablesManager()`のインスタンスを作成し、テスト用データの準備
-
-### テストメソッド命名
-
-- `test_` + `機能名` + `_` + `テストシナリオ`
-- 例：`test_create_table_success`、`test_create_table_invalid_table_name`
+- `@pytest.fixture`を使用してテスト用データを準備
+- `client`フィクスチャで FastAPI の`TestClient`を提供
+- `tables_manager`フィクスチャで`TablesManager()`インスタンスを提供
 
 ### テスト構造
 
 1. **正常系テスト**
 
    - 有効なペイロードを作成
-   - API エンドポイントに対象 API のメソッドでリクエスト
+   - `client.post()`で API エンドポイントにリクエスト
    - レスポンスステータスとデータの検証
    - 実際のデータ変更の確認
 
@@ -160,17 +160,18 @@ flake8 api/apis/python_apis/your_file.py
 
 ### アサーション規約
 
-- `self.assertEqual(response.status_code, 期待するステータス)`
-- `self.assertEqual(response_data['code'], 'OK'/'NG')`
-- `self.assertIn(response_data['message'], 期待するメッセージ)`
-- 実際のデータ変更確認（`self.assertIn`、shape 確認など）
+- `assert response.status_code == 期待するステータス`
+- `assert response_data['code'] == 'OK'/'NG'`
+- `assert 期待するメッセージ in response_data['message']`
+- 実際のデータ変更確認（`assert ... in ...`、shape 確認など）
 
 ## 命名規約
 
 ### ファイル命名
 
-- Python API：機能名をスネークケース（例：`create_table.py`）
-- REST API：`rest_` + 機能名をスネークケース（例：`rest_create_table.py`）
+- Services API：機能名をスネークケース（例：`create_table.py`）
+- Routers：機能名をスネークケース（例：`create_table.py`）
+- Schemas：機能分野をスネークケース（例：`column.py`、`table.py`、`common.py`）
 - テスト：`test_` + 機能名をスネークケース（例：`test_create_table.py`）
 
 ### 変数・パラメータ命名
@@ -182,7 +183,8 @@ flake8 api/apis/python_apis/your_file.py
 ### URL エンドポイント
 
 - ケバブケース形式（例：`/api/create-table`、`/api/delete-column`）
-- urls.py でエンドポイントと REST クラスをマッピングを行うが、アルファベット順にソートして整理
+- main.py でルーターを登録（`app.include_router(router, prefix="/api")`）
+- ルーター内で`@router.post("/endpoint-name")`のようにパスを定義
 
 ## データ処理
 

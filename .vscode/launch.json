@@ -5,9 +5,9 @@
       "name": "api-server",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/ApiServer/analysisapp/manage.py",
-      "args": ["runserver", "0.0.0.0:8000"],
-      "django": true,
+      "module": "uvicorn",
+      "args": ["main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"],
+      "cwd": "${workspaceFolder}/ApiServer",
       "console": "integratedTerminal"
     },
     {
@@ -24,15 +24,14 @@
       }
     },
     {
-      "name": "Django test",
+      "name": "pytest",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/ApiServer/analysisapp/manage.py",
-      "args": ["test"],
+      "module": "pytest",
+      "args": ["tests", "-v"],
       "purpose": ["debug-test"],
-      "django": true,
       "justMyCode": true,
-      "cwd": "${workspaceFolder}/ApiServer/analysisapp"
+      "cwd": "${workspaceFolder}/ApiServer"
     }
   ]
 }
