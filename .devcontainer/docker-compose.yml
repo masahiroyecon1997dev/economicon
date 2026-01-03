@@ -13,8 +13,7 @@ services:
       - ../.devcontainer:/AnalysisApp/.devcontainer
       - ../.github:/AnalysisApp/.github
       - ../.vscode:/AnalysisApp/AnalysisApp/.vscode
-      - ../ApiServer:/AnalysisApp/AnalysisApp/ApiServer
-      - ../python-requirements:/AnalysisApp/AnalysisApp/python-requirements
+      - ../ApiServer:/AnalysisApp/analysisappServer
       - ../front-analysis-app:/AnalysisApp/AnalysisApp/front-analysis-app
       - ../SampleData:/AnalysisApp/AnalysisApp/SampleData
       - ../.env:/AnalysisApp/AnalysisApp/.env

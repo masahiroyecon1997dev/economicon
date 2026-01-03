@@ -1,8 +1,6 @@
-from rest_framework import status
-from django.utils.translation import gettext as _
-from rest_framework.response import Response
-from ..create_response import create_error_response
+from analysisapp.i18n.translation import gettext_lazy as _
 from typing import Tuple, List, Optional
+from fastapi import UploadFile, HTTPException
 import magic
 import mimetypes
 
@@ -13,7 +11,7 @@ class FileValidationError(Exception):
     """
     def __init__(self,
                  message: str,
-                 status_code: int = status.HTTP_400_BAD_REQUEST):
+                 status_code: int = 400):
         self.message = message
         self.status_code = status_code
         super().__init__(message)
@@ -31,83 +29,73 @@ class FileValidator:
         self.allowed_extensions = allowed_extensions or ()
         self.allowed_mime_types = allowed_mime_types or []
 
-    def validate_request(self, request) -> Optional[Response]:
+    async def validate_file(self, uploaded_file: UploadFile) -> Optional[Exception]:
         """
-        リクエストのファイルバリデーションを実行
+        ファイルバリデーションを実行
 
         Args:
-            request: DRFのリクエストオブジェクト
+            uploaded_file: FastAPIのUploadFileオブジェクト
 
         Returns:
             None: バリデーション成功
-            Dict: エラーレスポンス（バリデーション失敗時）
+            HTTPException: バリデーション失敗時
         """
         try:
-            self._validate_file_presence(request)
-            uploaded_file = request.FILES['file']
+            if uploaded_file is None:
+                message = _("No file uploaded.")
+                return HTTPException(status_code=400, detail=message)
             self._validate_file_size(uploaded_file)
             self._validate_file_extension(uploaded_file)
-            self._validate_file_mime_type(uploaded_file)
+            await self._validate_file_mime_type(uploaded_file)
             return None
 
         except FileValidationError as e:
-            return create_error_response(
-                e.status_code,
-                e.message
+            return HTTPException(
+                status_code=e.status_code,
+                detail=e.message
             )
 
-    def _validate_file_presence(self, request):
-        """
-        ファイルの存在チェック
-        """
-        if 'file' not in request.data:
-            message = _("No file uploaded.")
-            raise FileValidationError(
-                message,
-                status.HTTP_400_BAD_REQUEST
-            )
-
-    def _validate_file_size(self, uploaded_file):
+    def _validate_file_size(self, uploaded_file: UploadFile):
         """
         ファイルサイズのチェック
         """
-        if uploaded_file.size > self.max_size:
+        if uploaded_file.size and uploaded_file.size > self.max_size:
             size_mb = self.max_size / (1024 * 1024)
             message = _(
                 f"File size exceeds maximum limit of {size_mb}MB."
                 )
             raise FileValidationError(
                 message,
-                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                413,
             )
 
-    def _validate_file_extension(self, uploaded_file):
+    def _validate_file_extension(self, uploaded_file: UploadFile):
         """
         ファイル拡張子のチェック
         """
-        if not uploaded_file.name.lower().endswith(self.allowed_extensions):
+        if not uploaded_file.filename.lower().endswith(self.allowed_extensions):
             extensions = ', '.join(self.allowed_extensions)
             message = _(
                 f"Uploaded file is not a {extensions} file.")
             raise FileValidationError(
                 message,
-                status.HTTP_400_BAD_REQUEST
+                400
             )
 
-    def _validate_file_mime_type(self, uploaded_file):
+    async def _validate_file_mime_type(self, uploaded_file: UploadFile):
         """
         MIMEタイプのチェック
         """
         # ファイル内容からMIMEタイプを判定
-        uploaded_file.seek(0)
-        file_content = uploaded_file.read(1024)  # 最初の1KBを読み取り
-        uploaded_file.seek(0)  # ファイルポインタをリセット
+        await uploaded_file.seek(0)
+        file_content = await uploaded_file.read(1024)  # 最初の1KBを読み取り
+        await uploaded_file.seek(0)  # ファイルポインタをリセット
 
         try:
             detected_mime = magic.from_buffer(file_content, mime=True)
         except Exception:
             # python-magicが利用できない場合はファイル名から推測
-            detected_mime, _encoding = mimetypes.guess_type(uploaded_file.name)
+            detected_mime, _encoding = mimetypes.guess_type(uploaded_file.filename)
 
         if detected_mime not in self.allowed_mime_types:
             mime_types = ', '.join(self.allowed_mime_types)

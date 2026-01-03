@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional
 
-from django.utils.translation import gettext as _
+from analysisapp.i18n.translation import gettext_lazy as _
 
 from .common_validators import (ValidationError,
                                 validate_directory_path_exists,

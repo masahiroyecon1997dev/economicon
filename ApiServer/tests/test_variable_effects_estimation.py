@@ -2,9 +2,9 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 import polars as pl
-
+import numpy as np
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
 
 @pytest.fixture
@@ -17,33 +17,33 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        # テーブルをクリア
-        manager.clear_tables()
-        # 変量効果推定分析用テストデータを作成
-        np.random.seed(42)  # 再現可能な結果のため
-        n_samples = 100
-        # 説明変数の生成
-        x1 = np.random.normal(0, 1, n_samples)
-        x2 = np.random.normal(0, 1, n_samples)
-        x3 = np.random.uniform(0, 10, n_samples)
-        # 被説明変数の生成（線形関係）
-        y = 2.0 + 1.5 * x1 + 0.8 * x2 + 0.2 * x3 + np.random.normal(0, 0.5,
-                                                                    n_samples)
-        df = pl.DataFrame({
-            'y': y,
-            'x1': x1,
-            'x2': x2,
-            'x3': x3,
-            'id': range(n_samples)
-        })
-        manager.store_table('VEETestTable', df)
-        # 数値以外のデータを含むテーブル（エラーテスト用）
-        df_with_text = pl.DataFrame({
-            'y': [1.0, 2.0, 3.0, 4.0],
-            'x1': [1.0, 2.0, 3.0, 4.0],
-            'text_col': ['a', 'b', 'c', 'd']
-        })
-        manager.store_table('TextTable', df_with_text)
+    # テーブルをクリア
+    manager.clear_tables()
+    # 変量効果推定分析用テストデータを作成
+    np.random.seed(42)  # 再現可能な結果のため
+    n_samples = 100
+    # 説明変数の生成
+    x1 = np.random.normal(0, 1, n_samples)
+    x2 = np.random.normal(0, 1, n_samples)
+    x3 = np.random.uniform(0, 10, n_samples)
+    # 被説明変数の生成（線形関係）
+    y = 2.0 + 1.5 * x1 + 0.8 * x2 + 0.2 * x3 + np.random.normal(0, 0.5,
+                                                                n_samples)
+    df = pl.DataFrame({
+        'y': y,
+        'x1': x1,
+        'x2': x2,
+        'x3': x3,
+        'id': range(n_samples)
+    })
+    manager.store_table('VEETestTable', df)
+    # 数値以外のデータを含むテーブル（エラーテスト用）
+    df_with_text = pl.DataFrame({
+        'y': [1.0, 2.0, 3.0, 4.0],
+        'x1': [1.0, 2.0, 3.0, 4.0],
+        'text_col': ['a', 'b', 'c', 'd']
+    })
+    manager.store_table('TextTable', df_with_text)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -79,7 +79,7 @@ def test_variable_effects_estimation_success_default(client, tables_manager):
     assert result['useTDistribution'] == True
     # パラメータの構造をチェック
     parameters = result['parameters']
-    self.assertIsInstance(parameters, list)
+    assert isinstance(parameters, list)
     assert len(parameters) == 3
     # 各パラメータに必要な情報があることを確認
     for param in parameters:
@@ -158,8 +158,7 @@ def test_variable_effects_estimation_invalid_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist",
-                  response_data['message'])
+    assert "tableName 'NonExistentTable' does not exist" == response_data['message']
 
 
 def test_variable_effects_estimation_invalid_dependent_variable(client, tables_manager):
@@ -176,8 +175,8 @@ def test_variable_effects_estimation_invalid_dependent_variable(client, tables_m
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "dependentVariable 'nonexistent_y' does not exist",
-                  response_data['message'])
+    assert "dependentVariable 'nonexistent_y' does not exist" == response_data['message']
+
 
 
 def test_variable_effects_estimation_invalid_explanatory_variable(client, tables_manager):
@@ -194,8 +193,8 @@ def test_variable_effects_estimation_invalid_explanatory_variable(client, tables
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables 'nonexistent_x' does not exist",
-                  response_data['message'])
+    assert "explanatoryVariables 'nonexistent_x' does not exist" == response_data['message']
+
 
 
 def test_variable_effects_estimation_empty_explanatory_variables(client, tables_manager):
@@ -212,9 +211,7 @@ def test_variable_effects_estimation_empty_explanatory_variables(client, tables_
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables must be with "
-                  "at least 1 explanatory_variable.",
-                  response_data['message'])
+    assert "explanatoryVariables must be with at least 1 explanatory_variable." == response_data['message']
 
 
 def test_variable_effects_estimation_dependent_in_explanatory(client, tables_manager):
@@ -231,9 +228,7 @@ def test_variable_effects_estimation_dependent_in_explanatory(client, tables_man
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Dependent variable cannot be "
-                  "included in explanatory variables",
-                  response_data['message'])
+    assert "Dependent variable cannot be included in explanatory variables" == response_data['message']
 
 
 def test_variable_effects_estimation_invalid_standard_error_method(client, tables_manager):
@@ -251,8 +246,7 @@ def test_variable_effects_estimation_invalid_standard_error_method(client, table
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "standardErrorMethod must be one of:",
-                  response_data['message'])
+    assert "standardErrorMethod must be one of:" == response_data['message']
 
 
 def test_variable_effects_estimation_missing_parameters(client, tables_manager):
@@ -269,32 +263,29 @@ def test_variable_effects_estimation_missing_parameters(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Required parameter is missing",
-                  response_data['message'])
+    assert "Required parameter is missing" == response_data['message']
 
 
-def test_variable_effects_estimation_all_standard_error_methods(client, tables_manager):
+
+@pytest.mark.parametrize("method", ['nonrobust', 'HC0', 'HC1', 'HC2', 'HC3', 'HAC'])
+def test_variable_effects_estimation_all_standard_error_methods(client, tables_manager, method):
     """全ての標準誤差計算方法が正常に動作する"""
-    supported_methods = ['nonrobust', 'HC0', 'HC1', 'HC2', 'HC3', 'HAC']
-    for method in supported_methods:
-        with self.subTest(method=method):
-            payload = {
-                'tableName': 'VEETestTable',
-                'dependentVariable': 'y',
-                'explanatoryVariables': ['x1'],
-                'standardErrorMethod': method,
-                'useTDistribution': True
-            }
-            response = client.post(
-                '/api/variable-effects-estimation',
-                json=payload,
-            )
-            response_data = response.json()
-            assert response.status_code == status.HTTP_200_OK,
-                             f"Failed for method: {method}")
-            assert response_data['code'] == 'OK'
-            result = response_data['result']
-            assert result['standardErrorMethod'] == method
+    payload = {
+        'tableName': 'VEETestTable',
+        'dependentVariable': 'y',
+        'explanatoryVariables': ['x1'],
+        'standardErrorMethod': method,
+        'useTDistribution': True
+    }
+    response = client.post(
+        '/api/variable-effects-estimation',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK == f"Failed for method: {method}"
+    assert response_data['code'] == 'OK'
+    result = response_data['result']
+    assert result['standardErrorMethod'] == method
 
 
 def test_variable_effects_estimation_single_explanatory_variable(client, tables_manager):
@@ -342,7 +333,7 @@ def test_variable_effects_estimation_confidence_intervals(client, tables_manager
         upper = param['confidenceIntervalUpper']
         coefficient = param['coefficient']
         # 信頼区間の論理的な順序をチェック
-        self.assertLess(lower, upper)
+        assert lower <= upper
         # 係数は信頼区間内にある（通常95%信頼区間）
-        self.assertLessEqual(lower, coefficient)
-        self.assertLessEqual(coefficient, upper)
+        assert lower <= coefficient
+        assert coefficient <= upper

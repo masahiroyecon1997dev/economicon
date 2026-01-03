@@ -2,10 +2,14 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 import polars as pl
+import tempfile
+import shutil
 
 from main import app
-from analysisapp.api.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_manager import TablesManager
 
+# テスト用の出力ディレクトリ
+test_dir = tempfile.mkdtemp()
 
 @pytest.fixture
 def client():
@@ -17,12 +21,9 @@ def client():
 def tables_manager():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
-        manager.clear_tables()
-        # テスト用の出力ディレクトリ
-        self.test_dir = tempfile.mkdtemp()
-    def tearDown(self):
-        # テスト後にテンポラリディレクトリをクリーンアップ
-        shutil.rmtree(self.test_dir, ignore_errors=True)
+    manager.clear_tables()
+    # テスト後にテンポラリディレクトリをクリーンアップ
+    shutil.rmtree(test_dir, ignore_errors=True)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
@@ -39,22 +40,17 @@ def test_upload_valid_parquet_file(client, tables_manager):
         'col_3': ['A', 'B', 'C']
     })
     test_data.write_parquet(
-        f'{self.test_dir}/TestData.parquet')
-    test_file = File(open(f'{self.test_dir}/TestData.parquet',
-                          'rb')
-    uploaded_file = SimpleUploadedFile('TestData.parquet',
-                                       test_file.read(),
-                                       content_type='multipart/form-data')
-    response = client.post('/api/import-parquet-by-file',
-                                {'file': uploaded_file})
+        f'{test_dir}/TestData.parquet')
+    with open(f'{test_dir}/TestData.parquet', 'rb') as f:
+        response = client.post('/api/import-parquet-by-file',
+                               files={'file': ('TestData.parquet', f, 'application/octet-stream')})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     # レスポンスデータの検証
     assert 'OK' == response_data['code']
-    self.assertEqual('TestData',
-                     response_data['result']['tableName'])
+    assert 'TestData' == response_data['result']['tableName']
     df = tables_manager.get_table('TestData').table
-    assert True == test_data.equals(df
+    assert test_data.equals(df)
 
 
 def test_no_file_uploaded(client, tables_manager):
@@ -65,7 +61,7 @@ def test_no_file_uploaded(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert response_data['message'], "No file uploaded.")
+    assert "No file uploaded." == response_data['message']
 
 
 def test_upload_non_parquet_file(client, tables_manager):
@@ -78,20 +74,16 @@ def test_upload_non_parquet_file(client, tables_manager):
         'col_3': ['A', 'B', 'C']
     })
     test_data.write_csv(
-        f'{self.test_dir}/TestDataComma.csv', separator=',')
-    uploaded_file = SimpleUploadedFile('TestDataComma.csv',
-                                       open(f'{self.test_dir}/'
-                                            'TestDataComma.csv', 'rb'
-                                            ).read(),
-                                       content_type='multipart/form-data')
-    response = client.post('/api/import-parquet-by-file',
-                                {'file': uploaded_file},
+        f'{test_dir}/TestDataComma.csv', separator=',')
+    with open(f'{test_dir}/TestDataComma.csv', 'rb') as f:
+        response = client.post('/api/import-parquet-by-file',
+                                files={'file': ('TestDataComma.csv', f, 'application/octet-stream')},
                                 format='multipart')
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Uploaded file is not a .parquet file.",
-                  response_data['message'])
+    assert "Uploaded file is not a .parquet file." == response_data['message']
+
 
 
 def test_upload_empty_parquet_file(client, tables_manager):
@@ -101,14 +93,10 @@ def test_upload_empty_parquet_file(client, tables_manager):
     # 一時的なPARQUETファイルを作成
     temp_data = pl.DataFrame()
     temp_data.write_parquet(
-        f'{self.test_dir}/Empty.parquet')
-    test_file = File(open(f'{self.test_dir}/Empty.parquet', 'rb')
-    uploaded_file = SimpleUploadedFile('Empty.parquet',
-                                       test_file.read(),
-                                       content_type='multipart/'
-                                       'form-data')
-    response = client.post('/api/import-parquet-by-file',
-                                {'file': uploaded_file})
+        f'{test_dir}/Empty.parquet')
+    with open(f'{test_dir}/Empty.parquet', 'rb') as f:
+        response = client.post('/api/import-parquet-by-file',
+                               files={'file': ('Empty.parquet', f, 'application/octet-stream')})
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'

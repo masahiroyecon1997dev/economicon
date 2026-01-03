@@ -18,8 +18,6 @@ from .column import (
     AddDummyColumnRequest,
     AddLagLeadColumnRequest,
     AddSimulationColumnRequest,
-    TransformColumnRequest as OperationsTransformColumnRequest,
-    SortColumnsRequest as OperationsSortColumnsRequest
 )
 from .tables import (
     CreateTableRequest,
@@ -116,9 +114,5 @@ __all__ = [
     'ProbitRegressionRequest',
     'VariableEffectsEstimationRequest',
     # Operations
-    'RenameTableRequest',
-    'RenameColumnRequest',
-    'OperationsSortColumnsRequest',
-    'OperationsTransformColumnRequest',
     'InputCellDataRequest',
 ]
