@@ -11,8 +11,6 @@ import os
 from main import app
 from analysisapp.services.data.tables_manager import TablesManager
 
-# テスト用の出力ディレクトリ
-test_dir = tempfile.mkdtemp()
 
 @pytest.fixture
 def client():
@@ -21,22 +19,25 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
+def prepared_data():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
     manager.clear_tables()
-    # テスト後にテンポラリディレクトリをクリーンアップ
-    shutil.rmtree(test_dir, ignore_errors=True)
-    yield manager
+    # テスト用の出力ディレクトリ
+    test_dir = tempfile.mkdtemp()
+    yield manager, test_dir
     # テスト後のクリーンアップ
     manager.clear_tables()
+    # テスト後にテンポラリディレクトリをクリーンアップ
+    shutil.rmtree(test_dir, ignore_errors=True)
 
 
 
-def test_import_parquet_by_path_simple(client, tables_manager):
+def test_import_parquet_by_path_simple(client, prepared_data):
     """
     シンプルなPARQUETファイルをパス指定でインポートするテスト
     """
+    tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -61,10 +62,11 @@ def test_import_parquet_by_path_simple(client, tables_manager):
     assert df == test_data
 
 
-def test_import_parquet_by_path_large_data(client, tables_manager):
+def test_import_parquet_by_path_large_data(client, prepared_data):
     """
     大きなPARQUETファイルをパス指定でインポートするテスト
     """
+    tables_manager, test_dir = prepared_data
     N_ROWS = 5000
     N_COLS = 500
     rng = np.random.default_rng(42)
@@ -93,10 +95,11 @@ def test_import_parquet_by_path_large_data(client, tables_manager):
     assert df_sample.equals(df)
 
 
-def test_import_parquet_by_path_custom_table_name(client, tables_manager):
+def test_import_parquet_by_path_custom_table_name(client, prepared_data):
     """
     カスタムテーブル名でPARQUETファイルをインポートするテスト
     """
+    tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -121,10 +124,11 @@ def test_import_parquet_by_path_custom_table_name(client, tables_manager):
     assert df.equals(test_data)
 
 
-def test_import_parquet_by_path_file_not_exists(client, tables_manager):
+def test_import_parquet_by_path_file_not_exists(client, prepared_data):
     """
     存在しないファイルパスを指定した場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     request_data = {
         'filePath': '/non/existent/file.parquet',
         'tableName': 'TestNonExistent'
@@ -138,10 +142,11 @@ def test_import_parquet_by_path_file_not_exists(client, tables_manager):
     assert "filePath does not exist: /non/existent/file.parquet" == response_data['message']
 
 
-def test_import_parquet_by_path_invalid_file_extension(client, tables_manager):
+def test_import_parquet_by_path_invalid_file_extension(client, prepared_data):
     """
     PARQUET以外のファイル拡張子を指定した場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -162,10 +167,11 @@ def test_import_parquet_by_path_invalid_file_extension(client, tables_manager):
     assert "Failed to parse PARQUET file: Invalid format or encoding." == response_data['message']
 
 
-def test_import_parquet_by_path_missing_file_path(client, tables_manager):
+def test_import_parquet_by_path_missing_file_path(client, prepared_data):
     """
     filePathパラメータが未指定の場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     request_data = {
         'tableName': 'TestMissingPath'
     }
@@ -178,10 +184,11 @@ def test_import_parquet_by_path_missing_file_path(client, tables_manager):
     assert "filePath is required" == response_data['message']
 
 
-def test_import_parquet_by_path_missing_table_name(client, tables_manager):
+def test_import_parquet_by_path_missing_table_name(client, prepared_data):
     """
     tableNameパラメータが未指定の場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -201,10 +208,11 @@ def test_import_parquet_by_path_missing_table_name(client, tables_manager):
     assert "tableName is required." == response_data['message']
 
 
-def test_import_parquet_by_path_duplicate_table_name(client, tables_manager):
+def test_import_parquet_by_path_duplicate_table_name(client, prepared_data):
     """
     既存のテーブル名と重複する場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -235,10 +243,11 @@ def test_import_parquet_by_path_duplicate_table_name(client, tables_manager):
     assert "Table name 'DuplicateTable' already exists." == response_data['message']
 
 
-def test_import_parquet_by_path_invalid_json(client, tables_manager):
+def test_import_parquet_by_path_invalid_json(client, prepared_data):
     """
     不正なJSONを送信した場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     response = client.post('/api/import-parquet-by-path',
                                 data='invalid json',
                                 )
@@ -248,10 +257,11 @@ def test_import_parquet_by_path_invalid_json(client, tables_manager):
     assert "Invalid JSON format" == response_data['message']
 
 
-def test_import_parquet_by_path_with_temporary_file(client, tables_manager):
+def test_import_parquet_by_path_with_temporary_file(client, prepared_data):
     """
     一時的なPARQUETファイルを作成してインポートするテスト
     """
+    tables_manager, test_dir = prepared_data
     # 一時的なPARQUETファイルを作成
     temp_data = pl.DataFrame({
         'col1': [1, 2, 3, 4, 5],

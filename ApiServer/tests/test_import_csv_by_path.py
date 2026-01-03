@@ -10,8 +10,6 @@ import json
 from main import app
 from analysisapp.services.data.tables_manager import TablesManager
 
-# テスト用の出力ディレクトリ
-test_dir = tempfile.mkdtemp()
 
 @pytest.fixture
 def client():
@@ -20,7 +18,7 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
+def prepared_data():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
     manager.clear_tables()
@@ -30,6 +28,8 @@ def tables_manager():
         'col_2': [10.1, 20.2, 30.3],
         'col_3': ['A', 'B', 'C']
     })
+    # テスト用の出力ディレクトリ
+    test_dir = tempfile.mkdtemp()
     test_data.write_csv(
         f'{test_dir}/TestDataComma.csv', separator=',')
     test_data.write_csv(
@@ -40,16 +40,17 @@ def tables_manager():
         f'{test_dir}/TestDataXlsx.xlsx')
     # テスト後にテンポラリディレクトリをクリーンアップ
     shutil.rmtree(test_dir, ignore_errors=True)
-    yield manager
+    yield manager, test_dir
     # テスト後のクリーンアップ
     manager.clear_tables()
 
 
 
-def test_import_csv_by_path_comma_separator(client, tables_manager):
+def test_import_csv_by_path_comma_separator(client, prepared_data):
     """
     カンマ区切りのCSVファイルをパス指定でインポートするテスト
     """
+    tables_manager, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
     # 期待データをPolarsで読み込み
     expected_data = pl.read_csv(test_csv_comma, encoding='utf8')
@@ -71,10 +72,11 @@ def test_import_csv_by_path_comma_separator(client, tables_manager):
     assert expected_data.equals(df)
 
 
-def test_import_csv_by_path_tab_separator(client, tables_manager):
+def test_import_csv_by_path_tab_separator(client, prepared_data):
     """
     タブ区切りのファイルをCSVとしてパス指定でインポートするテスト
     """
+    tables_manager, test_dir = prepared_data
     test_csv_tab = f'{test_dir}/TestDataTab1.tsv'
     # 期待データをPolarsで読み込み
     expected_data = pl.read_csv(test_csv_tab, separator='\t',
@@ -97,10 +99,11 @@ def test_import_csv_by_path_tab_separator(client, tables_manager):
     assert expected_data.equals(df)
 
 
-def test_import_csv_by_path_custom_separator(client, tables_manager):
+def test_import_csv_by_path_custom_separator(client, prepared_data):
     """
     セミコロン区切りのCSVファイルのテスト（テストファイルを作成）
     """
+    tables_manager, test_dir = prepared_data
     # 一時的なセミコロン区切りファイルを作成
     temp_data = "col1;col2;col3\n1;2;3\n4;5;6\n"
     with tempfile.NamedTemporaryFile(mode='w', suffix='.csv',
@@ -130,10 +133,11 @@ def test_import_csv_by_path_custom_separator(client, tables_manager):
         os.unlink(temp_path)
 
 
-def test_import_csv_by_path_default_separator(client, tables_manager):
+def test_import_csv_by_path_default_separator(client, prepared_data):
     """
     separatorパラメータを省略した場合のテスト（デフォルトはカンマ）
     """
+    tables_manager, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
     # 期待データをPolarsで読み込み
     expected_data = pl.read_csv(test_csv_comma, encoding='utf8')
@@ -154,10 +158,11 @@ def test_import_csv_by_path_default_separator(client, tables_manager):
     assert expected_data.equals(df)
 
 
-def test_import_csv_by_path_file_not_exists(client, tables_manager):
+def test_import_csv_by_path_file_not_exists(client, prepared_data):
     """
     存在しないファイルパスを指定した場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     request_data = {
         'filePath': '/non/existent/file.csv',
         'tableName': 'TestNonExistent',
@@ -173,10 +178,11 @@ def test_import_csv_by_path_file_not_exists(client, tables_manager):
 
 
 
-def test_import_csv_by_path_invalid_file_extension(client, tables_manager):
+def test_import_csv_by_path_invalid_file_extension(client, prepared_data):
     """
     CSV以外のファイル拡張子を指定した場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     request_data = {
         'filePath': f'{test_dir}/TestDataXlsx.xlsx',
         'tableName': 'TestInvalidExtension',
@@ -189,10 +195,11 @@ def test_import_csv_by_path_invalid_file_extension(client, tables_manager):
     assert 'NG' == response_data['code']
     assert "Failed to parse CSV file: Invalid format or encoding." == response_data['message']
 
-def test_import_csv_by_path_missing_file_path(client, tables_manager):
+def test_import_csv_by_path_missing_file_path(client, prepared_data):
     """
     filePathパラメータが未指定の場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     request_data = {
         'tableName': 'TestMissingPath',
         'separator': ','
@@ -206,10 +213,11 @@ def test_import_csv_by_path_missing_file_path(client, tables_manager):
     assert "filePath is required" == response_data['message']
 
 
-def test_import_csv_by_path_missing_table_name(client, tables_manager):
+def test_import_csv_by_path_missing_table_name(client, prepared_data):
     """
     tableNameパラメータが未指定の場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
     request_data = {
         'filePath': test_csv_comma,
@@ -224,10 +232,11 @@ def test_import_csv_by_path_missing_table_name(client, tables_manager):
     assert "tableName is required." == response_data['message']
 
 
-def test_import_csv_by_path_duplicate_table_name(client, tables_manager):
+def test_import_csv_by_path_duplicate_table_name(client, prepared_data):
     """
     既存のテーブル名と重複する場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
     # 先にテーブルを作成
     first_request_data = {
@@ -253,10 +262,11 @@ def test_import_csv_by_path_duplicate_table_name(client, tables_manager):
     # テーブル名重複エラーメッセージを確認
 
 
-def test_import_csv_by_path_empty_separator(client, tables_manager):
+def test_import_csv_by_path_empty_separator(client, prepared_data):
     """
     空の区切り文字を指定した場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
     request_data = {
         'filePath': test_csv_comma,
@@ -272,7 +282,7 @@ def test_import_csv_by_path_empty_separator(client, tables_manager):
     assert "separator must be at least 1 characters long." == response_data['message']
 
 
-def test_import_csv_by_path_invalid_json(client, tables_manager):
+def test_import_csv_by_path_invalid_json(client, prepared_data):
     """
     不正なJSONを送信した場合のテスト
     """
@@ -286,7 +296,7 @@ def test_import_csv_by_path_invalid_json(client, tables_manager):
 
 
 @pytest.mark.skip(reason="このテストは現在、発生させる方法が不明なためスキップされています。")
-def test_import_csv_by_path_malformed_csv(client, tables_manager):
+def test_import_csv_by_path_malformed_csv(client, prepared_data):
     """
     不正な形式のCSVファイルを指定した場合のテスト
     """

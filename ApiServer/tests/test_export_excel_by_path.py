@@ -10,14 +10,16 @@ import json
 from main import app
 from analysisapp.services.data.tables_manager import TablesManager
 
-# テスト用の出力ディレクトリ
-test_output_dir = tempfile.mkdtemp()
 # テスト用のテーブルデータを作成
 test_data = pl.DataFrame({
     'col_1': [1, 2, 3],
     'col_2': [10.1, 20.2, 30.3],
     'col_3': ['A', 'B', 'C']
 })
+# テスト用の出力ディレクトリ
+test_output_dir = ''
+
+
 @pytest.fixture
 def client():
     """TestClientのフィクスチャ"""
@@ -30,6 +32,8 @@ def tables_manager():
     manager = TablesManager()
     manager.clear_tables()
     manager.store_table('TestTable', test_data)
+    # テスト用の出力ディレクトリ
+    test_output_dir = tempfile.mkdtemp()
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()

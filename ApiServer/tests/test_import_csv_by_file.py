@@ -8,8 +8,6 @@ import shutil
 from main import app
 from analysisapp.services.data.tables_manager import TablesManager
 
-# テスト用の出力ディレクトリ
-test_dir = tempfile.mkdtemp()
 
 @pytest.fixture
 def client():
@@ -18,22 +16,25 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
+def prepared_data():
     """TablesManagerのフィクスチャ"""
     manager = TablesManager()
     manager.clear_tables()
-    # テスト後にテンポラリディレクトリをクリーンアップ
-    shutil.rmtree(test_dir, ignore_errors=True)
-    yield manager
+    # テスト用の出力ディレクトリ
+    test_dir = tempfile.mkdtemp()
+    yield manager, test_dir
     # テスト後のクリーンアップ
     manager.clear_tables()
+    # テスト後にテンポラリディレクトリをクリーンアップ
+    shutil.rmtree(test_dir, ignore_errors=True)
 
 
 
-def test_upload_valid_csv_file(client, tables_manager):
+def test_upload_valid_csv_file(client, prepared_data):
     """
     有効なCSVファイルをアップロードした場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -55,11 +56,12 @@ def test_upload_valid_csv_file(client, tables_manager):
     assert test_data.equals(df)
 
 
-def test_upload_csv_with_only_headers(client, tables_manager):
+def test_upload_csv_with_only_headers(client, prepared_data):
     """
     ヘッダーのみのCSVファイルをアップロードした場合のテスト
     問題なく読み込める
     """
+    tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [],
         'col_2': [],
@@ -79,10 +81,11 @@ def test_upload_csv_with_only_headers(client, tables_manager):
     assert test_data.equals(df)
 
 
-def test_no_file_uploaded(client, tables_manager):
+def test_no_file_uploaded(client, prepared_data):
     """
     ファイルがアップロードされていない場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     response = client.post('/api/import-csv-by-file')
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -90,10 +93,11 @@ def test_no_file_uploaded(client, tables_manager):
     assert response_data['message'] == "No file uploaded."
 
 
-def test_upload_non_csv_file(client, tables_manager):
+def test_upload_non_csv_file(client, prepared_data):
     """
     CSVではないファイルをアップロードした場合のテスト (拡張子チェック)
     """
+    tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -112,10 +116,11 @@ def test_upload_non_csv_file(client, tables_manager):
     assert "Uploaded file is not a .csv file." == response_data['message']
 
 
-def test_upload_empty_csv_file(client, tables_manager):
+def test_upload_empty_csv_file(client, prepared_data):
     """
     空のCSVファイルをアップロードした場合のテスト (Polars NoDataError)
     """
+    tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame()
     test_data.write_csv(
         f'{test_dir}/Empty.csv', separator=',')
@@ -131,10 +136,11 @@ def test_upload_empty_csv_file(client, tables_manager):
 
 
 @pytest.mark.skip(reason="このテストは現在、発生させる方法が不明なためスキップされています。")
-def test_upload_malformed_csv_file(client, tables_manager):
+def test_upload_malformed_csv_file(client, prepared_data):
     """
     不正な形式のCSVファイルをアップロードした場合のテスト
     """
+    tables_manager, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],

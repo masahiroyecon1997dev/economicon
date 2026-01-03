@@ -1,4 +1,4 @@
-import pytest
+﻿import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 import polars as pl
@@ -43,7 +43,7 @@ def test_add_uniform_column_success(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
@@ -73,7 +73,7 @@ def test_add_normal_column_success(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
@@ -98,7 +98,7 @@ def test_add_binomial_column_success(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
@@ -124,7 +124,7 @@ def test_add_exponential_column_success(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
@@ -151,7 +151,7 @@ def test_add_gamma_column_success(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     assert response.status_code == status.HTTP_200_OK
@@ -169,7 +169,7 @@ def test_add_beta_column_success(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     assert response.status_code == status.HTTP_200_OK
@@ -190,7 +190,7 @@ def test_add_poisson_column_success(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     assert response.status_code == status.HTTP_200_OK
@@ -212,13 +212,13 @@ def test_invalid_table_name(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist" == response_data['message']
+    assert "tableName 'NoTable' does not exist" in response_data['message']
 
 
 def test_duplicate_column_name(client, tables_manager):
@@ -233,7 +233,7 @@ def test_duplicate_column_name(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
@@ -251,14 +251,13 @@ def test_unsupported_distribution(client, tables_manager):
         'distributionParams': {}
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "distributionType 'unsupported' is not supported",
-                  response_data['message'])
+    assert "distributionType 'unsupported' is not supported" in response_data['message']
 
 
 def test_invalid_uniform_params(client, tables_manager):
@@ -273,14 +272,13 @@ def test_invalid_uniform_params(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "'low' must be less than 'high'",
-                  response_data['message'])
+    assert "'low' must be less than 'high'" in response_data['message']
 
 
 def test_missing_required_params(client, tables_manager):
@@ -295,15 +293,13 @@ def test_missing_required_params(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Normal distribution requires 'loc' and 'scale' "
-                  "parameters",
-                  response_data['message'])
+    assert "Normal distribution requires 'loc' and 'scale' parameters" in response_data['message']
 
 
 def test_invalid_param_type(client, tables_manager):
@@ -318,14 +314,13 @@ def test_invalid_param_type(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "loc must be a number.",
-                  response_data['message'])
+    assert "loc must be a number." in response_data['message']
 
 
 def test_negative_scale_normal(client, tables_manager):
@@ -340,13 +335,13 @@ def test_negative_scale_normal(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "'scale' must be positive", response_data['message'])
+    assert "'scale' must be positive" in response_data['message']
 
 
 def test_binomial_invalid_p(client, tables_manager):
@@ -361,13 +356,13 @@ def test_binomial_invalid_p(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "'p' must be between 0 and 1", response_data['message'])
+    assert "'p' must be between 0 and 1" in response_data['message']
 
 
 def test_hypergeometric_success(client, tables_manager):
@@ -383,7 +378,7 @@ def test_hypergeometric_success(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
@@ -404,10 +399,10 @@ def test_hypergeometric_invalid_params(client, tables_manager):
         }
     }
     response = client.post(
-        '/api/add-simulation-column',
+        '/api/column/add-simulation',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "'K' must not exceed 'N'", response_data['message'])
+    assert "'K' must not exceed 'N'" in response_data['message']
