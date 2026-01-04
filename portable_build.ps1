@@ -1,7 +1,7 @@
 # ==============================================================================
 # ? 設定項目
 # ==============================================================================
-$PYTHON_VERSION = "3.13.1" # 使用したいPythonバージョン
+$PYTHON_VERSION = "3.14.2" # 使用したいPythonバージョン
 $PACKAGE_NAME = "AnalysisApp_Portable"
 $PYTHON_DIST = "python_dist"
 $DL_URL = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"

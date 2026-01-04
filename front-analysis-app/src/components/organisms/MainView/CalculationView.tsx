@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { showMessageDialog } from "../../../function/messageDialog";
-import { calculateColumn, getColumnList } from "../../../function/restApis";
+import { calculateColumn } from "../../../function/restApis";
+import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
-import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
-import type { ColumnType } from "../../../types/commonTypes";
 import { InputText } from "../../atoms/Input/InputText";
 import { Select } from "../../atoms/Input/Select";
 import { SelectOption } from "../../atoms/Input/SelectOption";
@@ -17,14 +16,16 @@ import { MainViewLayout } from "../../templates/MainViewLayout";
 export const CalculationView = () => {
   const { t } = useTranslation();
   const tableList = useTableListStore((state) => state.tableList);
-  const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
   const { setLoading, clearLoading } = useLoadingStore();
 
-  const [selectedTableName, setSelectedTableName] = useState<string>(activeTableName || "");
+  const { selectedTableName, setSelectedTableName, columnList } = useTableColumnLoader({
+    numericOnly: true,
+    autoLoadOnMount: true,
+  });
+
   const [newColumnName, setNewColumnName] = useState<string>("");
   const [calculationExpression, setCalculationExpression] = useState<string>("");
-  const [columnList, setColumnList] = useState<ColumnType[]>([]);
   const [filterValue, setFilterValue] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<{
     tableName?: string;
@@ -33,29 +34,6 @@ export const CalculationView = () => {
   }>({});
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (selectedTableName) {
-      loadColumnList(selectedTableName);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTableName]);
-
-  const loadColumnList = async (tableName: string) => {
-    setLoading(true, t("Loading.Loading"));
-    try {
-      const response = await getColumnList(tableName, "true");
-      if (response.code === "OK") {
-        setColumnList(response.result.columnInfoList);
-      } else {
-        await showMessageDialog(t("Error.Error"), response.message);
-      }
-    } catch {
-      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
-    } finally {
-      clearLoading();
-    }
-  };
 
   const handleTableChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const tableName = event.target.value;
