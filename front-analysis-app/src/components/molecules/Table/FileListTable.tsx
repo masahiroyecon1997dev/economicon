@@ -97,7 +97,7 @@ export function FileListTable({
                 className="hover:bg-brand-primary/5 transition-colors cursor-pointer"
                 onClick={() => onFileClick(file)}
               >
-                <td className="px-2 sm:px-3 md:px-6 py-4 text-sm font-medium text-black min-w-0" style={{ width: '50%', minWidth: '120px' }}>
+                <td className="px-2 sm:px-3 md:px-6 py-2.5 text-sm font-medium text-black min-w-0" style={{ width: '50%', minWidth: '120px' }}>
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="shrink-0">
                       <FontAwesomeIcon
@@ -113,10 +113,10 @@ export function FileListTable({
                     </span>
                   </div>
                 </td>
-                <td className="px-2 sm:px-3 md:px-6 py-4 text-sm text-black/60 min-w-0 hidden sm:table-cell" style={{ width: '25%', minWidth: '80px' }}>
+                <td className="px-2 sm:px-3 md:px-6 py-2.5 text-sm text-black/60 min-w-0 hidden sm:table-cell" style={{ width: '25%', minWidth: '80px' }}>
                   {file.isFile && <span className="truncate block">{file.size}</span>}
                 </td>
-                <td className="px-2 sm:px-3 md:px-6 py-4 text-sm text-black/60 min-w-0" style={{ width: '25%', minWidth: '100px' }}>
+                <td className="px-2 sm:px-3 md:px-6 py-2.5 text-sm text-black/60 min-w-0" style={{ width: '25%', minWidth: '100px' }}>
                   {file.isFile && <span className="truncate block">{file.modifiedTime}</span>}
                 </td>
               </tr>
