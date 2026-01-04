@@ -1,28 +1,15 @@
 import { faCircleQuestion } from "@fortawesome/free-regular-svg-icons";
 import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { HeaderMenuDropdown } from "../../molecules/HeaderMenuDropdown/HeaderMenuDropdown";
-import { Calculate } from "../Modal/Calculate";
-import { GenerateDataModal } from "../Modal/GenerateSimulationDataModal";
-import { ImportFileModal } from "../Modal/ImportFileModal";
-import { LinearRegressionModal } from "../Modal/LinearRegressionModal";
-import { SaveFileModal } from "../Modal/SaveFileModal";
 
 export const HeaderMenu = () => {
   const { t } = useTranslation();
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
-  const [isImportFileByUploadModal, setIsImportFileByUploadModal] = useState<boolean>(false);
-  const [isSaveFileModal, setIsSaveFileModal] = useState<boolean>(false);
-  const [isGenerateSimulationDataModal, setGenerateSimulationDataModal] =
-    useState<boolean>(false);
-  const [isLinearRegressionModal, setIsLinearRegressionModal] =
-    useState<boolean>(false);
-  const [isCalculateModal, setIsCalculateModal] = useState<boolean>(false);
 
   const showCreateSimulationDataTableView = () => {
     setCurrentView("CreateSimulationDataTable");
@@ -32,34 +19,8 @@ export const HeaderMenu = () => {
     setCurrentView("LinearRegressionForm");
   }
 
-  const closeImportFileByUploadModal = () => {
-    setIsImportFileByUploadModal(false);
-  }
-
-  const closeSaveFileModal = () => {
-    setIsSaveFileModal(false);
-  }
-
-  const closeGenerateDataModal = () => {
-    setGenerateSimulationDataModal(false);
-  }
-
-  const openLinearRegressionModal = () => {
-    setIsLinearRegressionModal(true);
-  }
-
-
-
-  const closeLinearRegressionModal = () => {
-    setIsLinearRegressionModal(false);
-  }
-
-  const openCalculateModal = () => {
-    setIsCalculateModal(true);
-  }
-
-  const closeCalculateModal = () => {
-    setIsCalculateModal(false);
+  const showCalculationView = () => {
+    setCurrentView("CalculationView");
   }
 
   const dataGenerationDropdownListElement = [
@@ -67,18 +28,18 @@ export const HeaderMenu = () => {
       dropdownListName: t("HeaderMenu.DataGeneration"),
       dropdownListFunction: showCreateSimulationDataTableView,
     },
+    {
+      dropdownListName: t("HeaderMenu.Calculate"),
+      dropdownListFunction: showCalculationView,
+    },
   ];
   const addColumnDropdownListElement = [
     {
       dropdownListName: t("HeaderMenu.Calculate"),
-      dropdownListFunction: openCalculateModal,
+      dropdownListFunction: showCalculationView,
     },
   ];
   const modelDropdownListElement = [
-    {
-      dropdownListName: t("HeaderMenu.LinearRegression"),
-      dropdownListFunction: openLinearRegressionModal,
-    },
     {
       dropdownListName: t("HeaderMenu.LinearRegression"),
       dropdownListFunction: showLinearRegressionModal,
@@ -126,26 +87,6 @@ export const HeaderMenu = () => {
           <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"></div>
         </div>
       </header>
-      <ImportFileModal
-        isImportFileModal={isImportFileByUploadModal}
-        close={closeImportFileByUploadModal}
-      />
-      <SaveFileModal
-        isSaveFileModal={isSaveFileModal}
-        close={closeSaveFileModal}
-      />
-      <GenerateDataModal
-        isGenerateSimulationDataModal={isGenerateSimulationDataModal}
-        close={closeGenerateDataModal}
-      />
-      <Calculate
-        isCalculateModal={isCalculateModal}
-        close={closeCalculateModal}
-      />
-      <LinearRegressionModal
-        isLinearRegressionModal={isLinearRegressionModal}
-        close={closeLinearRegressionModal}
-      />
     </>
   );
 }
