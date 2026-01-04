@@ -12,9 +12,9 @@ import { useTranslation } from "react-i18next";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
 import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
-import { ViewHeader } from "../../molecules/Header/ViewHeader";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
+import { MainViewLayout } from "../../templates/MainViewLayout";
 
 export const SelectFileView = () => {
   const { t } = useTranslation();
@@ -240,47 +240,44 @@ export const SelectFileView = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-none px-3 h-full">
-      <div className="flex flex-col gap-3 md:gap-6">
-        <ViewHeader
-          title={t('SelectFileView.Title')}
-          description={t('SelectFileView.Description')}
+    <MainViewLayout
+      includeHeight={true}
+      title={t('SelectFileView.Title')}
+      description={t('SelectFileView.Description')}
+    >
+      <div className="flex flex-col gap-1.5 md:gap-3 shrink-0">
+        <NavigationSearchBar
+          pathSegments={getPathSegments()}
+          searchValue={searchValue}
+          searchPlaceholder={t('SelectFileView.SearchPlaceholder')}
+          upDirectoryTitle={t('SelectFileView.GoUpDirectory')}
+          onUpDirectory={goUpDirectory}
+          onBreadcrumbClick={handleBreadcrumbClick}
+          onSearchChange={setSearchValue}
         />
-
-        <div className="flex flex-col gap-1.5 md:gap-3 shrink-0">
-          <NavigationSearchBar
-            pathSegments={getPathSegments()}
-            searchValue={searchValue}
-            searchPlaceholder={t('SelectFileView.SearchPlaceholder')}
-            upDirectoryTitle={t('SelectFileView.GoUpDirectory')}
-            onUpDirectory={goUpDirectory}
-            onBreadcrumbClick={handleBreadcrumbClick}
-            onSearchChange={setSearchValue}
-          />
-          {/* <FileFilterBar
+        {/* <FileFilterBar
             filters={filterOptions}
             onFilterClick={setActiveFilter}
           /> */}
-        </div>
-
-        <FileListTable
-          files={sortedFiles}
-          onFileClick={handleFileClick}
-          fileNameHeader={t('SelectFileView.FileNameHeader')}
-          sizeHeader={t('SelectFileView.SizeHeader')}
-          lastModifiedHeader={t('SelectFileView.LastModifiedHeader')}
-          maxHeight="max(200px, calc(100vh - 280px))"
-          sortField={sortField}
-          sortDirection={sortDirection}
-          onSort={handleSort}
-        />
-        <div className="pt-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
-          <CancelButtonBar
-            cancelText={t('Common.Cancel')}
-            onCancel={handleCancel}
-          />
-        </div>
       </div>
-    </div>
+
+      <FileListTable
+        files={sortedFiles}
+        onFileClick={handleFileClick}
+        fileNameHeader={t('SelectFileView.FileNameHeader')}
+        sizeHeader={t('SelectFileView.SizeHeader')}
+        lastModifiedHeader={t('SelectFileView.LastModifiedHeader')}
+        maxHeight="max(200px, calc(100vh - 280px))"
+        sortField={sortField}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+      />
+      <div className="pt-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
+        <CancelButtonBar
+          cancelText={t('Common.Cancel')}
+          onCancel={handleCancel}
+        />
+      </div>
+    </MainViewLayout>
   );
 }
