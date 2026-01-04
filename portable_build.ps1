@@ -1,5 +1,5 @@
 # ==============================================================================
-# ? 設定項目
+# 設定項目
 # ==============================================================================
 $PYTHON_VERSION = "3.14.2" # 使用したいPythonバージョン
 $PACKAGE_NAME = "AnalysisApp_Portable"
@@ -9,11 +9,11 @@ $DL_URL = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERS
 # パス設定
 $REQUIREMENTS_FILE = "ApiServer\python-requirements\windows-requirements.txt"
 $API_SERVER_DIR = "ApiServer"
-$REACT_BUILD_SCRIPT = ".\app_build.ps1"
+$REACT_BUILD_SCRIPT = ".\react_build.ps1"
 $LAUNCH_BAT = "app_launch.bat"
 
 # ==============================================================================
-# ?? 処理の実行
+# 処理の実行
 # ==============================================================================
 
 Write-Host "========================================" -ForegroundColor Cyan
@@ -122,9 +122,9 @@ Write-Host "? アプリケーションファイルのコピーが完了しました。" -ForegroundColor
 Write-Host ""
 
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "  ? ポータブル環境の構築が完了！" -ForegroundColor Green
+Write-Host "  ポータブル環境の構築が完了！" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "? パッケージ: $PACKAGE_NAME" -ForegroundColor Cyan
-Write-Host "? 起動方法: $PACKAGE_NAME フォルダ内の $LAUNCH_BAT をダブルクリック" -ForegroundColor Cyan
+Write-Host " パッケージ: $PACKAGE_NAME" -ForegroundColor Cyan
+Write-Host " 起動方法: $PACKAGE_NAME フォルダ内の $LAUNCH_BAT をダブルクリック" -ForegroundColor Cyan
 Write-Host ""
