@@ -4,6 +4,7 @@ export type CurrentViewValue =
   | "SelectFile"
   | "LinearRegressionForm"
   | "CreateSimulationDataTable"
+  | "CalculationView"
   | "SaveData"
   | "DataPreview";
 
