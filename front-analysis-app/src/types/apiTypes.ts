@@ -140,3 +140,13 @@ export type ReqLinearRegressionType = {
   dependentVariable: string;
   explanatoryVariables: string[];
 };
+
+export type ReqCalculateColumnType = {
+  tableName: string;
+  newColumnName: string;
+  calculationExpression: string;
+};
+
+export type ResCalculateColumnType = BaseResponseType & {
+  result: { tableName: string; columnName: string };
+};

@@ -5,6 +5,11 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from pathlib import Path
+import webbrowser
+import os
+import logging
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
 from analysisapp.exception_handlers import init_exception_handlers
 from analysisapp.routers import api_router
 from analysisapp.services.data.tables_manager import TablesManager
@@ -13,6 +18,10 @@ from analysisapp.services.data.settings_manager import SettingsManager
 
 # i18n サポート
 from analysisapp.i18n import set_locale, get_locale
+
+# ロガーのセットアップ
+# "uvicorn.error" を使うと、Uvicornの標準ログと同じ形式で出力されます
+logger = logging.getLogger("uvicorn.error")
 
 # ベースディレクトリ
 BASE_DIR = Path(__file__).resolve().parent
@@ -23,17 +32,20 @@ async def lifespan(app: FastAPI):
     # シングルトンのインスタンスを取得し、初期化を行う
     settings_manager = SettingsManager()
     settings_manager.load_settings()
-    print("SettingsManager has been initialized at startup.")
+    logger.info("SettingsManager has been initialized at startup.")
     tables_manager = TablesManager()
-    print("TablesManager has been initialized at startup.")
+    logger.info("TablesManager has been initialized at startup.")
 
+    # ブラウザでアプリを自動的に開く
+    url = 'http://127.0.0.1:8000'
+    dev_run = os.environ.get("ANALYSISAPP_DEV_RUN", "false").lower()
+    if dev_run == "false":
+        webbrowser.open(url)
     yield  # ここでアプリがリクエストを待ち受ける
-
     # --- 終了時の処理 ---
     # 必要に応じてクリーンアップ
-
     tables_manager.clear_tables()
-    print("Cleanup TablesManager.")
+    logger.info("Cleanup TablesManager.")
 
 
 app = FastAPI(
@@ -73,7 +85,12 @@ async def i18n_middleware(request: Request, call_next):
 @app.get("/")
 async def root():
     """ルートエンドポイント"""
-    return {"message": "Analysis App API", "version": "2.0.0", "locale": get_locale()}
+    index_path = "static/index.html"
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    else:
+        # ファイルがない場合はJSONメッセージなどを返す
+        return JSONResponse(content={"message": "No index.html found in static folder."})
 
 
 @app.get("/health")
@@ -87,3 +104,12 @@ app.include_router(api_router, prefix="/api")
 
 # 2. エンドポイントより「後」にハンドラを初期化・登録
 init_exception_handlers(app)
+
+# フォルダが存在するかチェック
+static_dir = "static"
+# 存在すればフロントリソースをマウント
+if os.path.exists(static_dir):
+    app.mount("/", StaticFiles(directory=static_dir), name="static")
+    logger.info(f"'{static_dir}' directory found. Mounted at /static")
+else:
+    logger.info(f"'{static_dir}' directory not found. Skipping mount.")
