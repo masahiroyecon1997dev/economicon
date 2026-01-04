@@ -25,6 +25,8 @@ logger = logging.getLogger("uvicorn.error")
 
 # ベースディレクトリ
 BASE_DIR = Path(__file__).resolve().parent
+# 静的ファイルのディレクトリ
+STATIC_DIR = BASE_DIR / "static"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -85,7 +87,7 @@ async def i18n_middleware(request: Request, call_next):
 @app.get("/")
 async def root():
     """ルートエンドポイント"""
-    index_path = "static/index.html"
+    index_path = STATIC_DIR / "index.html"
     if os.path.exists(index_path):
         return FileResponse(index_path)
     else:
@@ -105,11 +107,13 @@ app.include_router(api_router, prefix="/api")
 # 2. エンドポイントより「後」にハンドラを初期化・登録
 init_exception_handlers(app)
 
-static_dir = os.path.join(BASE_DIR, "static")
 # フォルダが存在するかチェック
 # 存在すればフロントリソースをマウント
-if os.path.exists(static_dir):
-    app.mount("/", StaticFiles(directory=static_dir), name="static")
-    logger.info(f"'{static_dir}' directory found. Mounted at /static")
+if os.path.exists(STATIC_DIR):
+    app.mount("/", StaticFiles(directory=STATIC_DIR), name="static")
+    logger.info(f"'{STATIC_DIR}' directory found. Mounted at /static")
 else:
-    logger.info(f"'{static_dir}' directory not found. Skipping mount.")
+    logger.info(f"'{STATIC_DIR}' directory not found. Skipping mount.")
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
