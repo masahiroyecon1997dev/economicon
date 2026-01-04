@@ -2,6 +2,7 @@ import { useState } from "react";
 import { getColumnList } from "../../../function/restApis";
 import { useTableListStore } from "../../../stores/useTableListStore";
 import type { ColumnType } from "../../../types/commonTypes";
+import { MainViewLayout } from "../../templates/MainViewLayout";
 
 export const LinearRegressionFormView = () => {
   const tableList = useTableListStore((state) => state.tableList);
@@ -20,16 +21,10 @@ export const LinearRegressionFormView = () => {
 
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-3xl font-bold text-text-heading">Create New Regression Analysis</p>
-          <p className="text-base font-normal text-text-main/80">Select the table and variables for the analysis.</p>
-        </div>
-      </div>
-      <div className="flex flex-col gap-8">
-        <div className="rounded-xl border border-border-color bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-bold leading-tight text-text-heading">1. Select Data Table</h2>
+    <MainViewLayout maxWidth="4xl">
+      <div className="flex flex-col gap-6">
+        <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
+          <h2 className="mb-3 text-base font-bold leading-tight text-text-heading">1. Select Data Table</h2>
           <div>
             <label className="mb-2 block text-sm font-medium text-text-main" htmlFor="data-table">Data Table</label>
             <div className="relative">
@@ -49,9 +44,9 @@ export const LinearRegressionFormView = () => {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-border-color bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-bold leading-tight text-text-heading">2. Select Variables</h2>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
+          <h2 className="mb-3 text-base font-bold leading-tight text-text-heading">2. Select Variables</h2>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
               <label className="mb-2 block text-sm font-medium text-text-main">Dependent Variable (Y)</label>
               <p className="mb-3 text-sm text-text-main/60">Select one variable you want to predict.</p>
@@ -101,6 +96,6 @@ export const LinearRegressionFormView = () => {
           </button>
         </div>
       </div>
-    </div>
+    </MainViewLayout>
   );
 }

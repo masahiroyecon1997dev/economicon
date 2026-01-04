@@ -17,6 +17,7 @@ import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
 import { FormField } from "../../molecules/Form/FormField";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
+import { MainViewLayout } from "../../templates/MainViewLayout";
 
 type FileFormat = 'csv' | 'excel' | 'parquet';
 
@@ -271,27 +272,21 @@ export const SaveDataView = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-none px-4">
+    <MainViewLayout
+      title={t("SaveDataView.Title")}
+      description={tableNameList.length === 0 ? t("SaveDataView.NoTablesImported") : t("SaveDataView.Description")}
+    >
       {tableNameList.length === 0 ? (
-        <div className="flex flex-col justify-center h-full gap-6">
-          <div className="text-left">
-            <h1 className="text-3xl font-bold text-black mb-4">{t("SaveDataView.Title")}</h1>
-            <p className="text-lg text-black/60">{t("SaveDataView.NoTablesImported")}</p>
-          </div>
+        <div className="flex flex-col justify-center h-full gap-4">
           <CancelButtonBar
             cancelText={t('Common.Cancel')}
             onCancel={hadleCancelNoTables}
           />
         </div>
       ) : (
-        <div className="flex flex-col gap-8">
-          <header>
-            <h1 className="text-3xl font-bold text-black">{t("SaveDataView.Title")}</h1>
-            <p className="mt-2 text-base text-black/60">{t("SaveDataView.Description")}</p>
-          </header>
-
-          <div className="flex flex-col gap-4 flex-1 min-h-0 overflow-y-auto">
-            <div className="flex flex-col gap-4">
+        <>
+          <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto">
+            <div className="flex flex-col gap-3">
               <h2 className="text-lg font-bold text-black">{t("SaveDataView.SelectDirectory")}</h2>
               <NavigationSearchBar
                 pathSegments={getPathSegments()}
@@ -318,9 +313,9 @@ export const SaveDataView = () => {
               />
             </div>
 
-            <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700 shrink-0">
-              <h2 className="text-main dark:text-white text-lg font-bold mb-3">{t("SaveDataView.FileSettings")}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-gray-800/50 p-3 rounded-lg border border-border-color dark:border-gray-700 shrink-0">
+              <h2 className="text-main dark:text-white text-base font-bold mb-2">{t("SaveDataView.FileSettings")}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <FormField
                   label={t("SaveDataView.TableName")}
                   htmlFor="table-name"
@@ -373,7 +368,6 @@ export const SaveDataView = () => {
               </div>
             </div>
           </div>
-
           <div className="pt-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
             <ActionButtonBar
               cancelText={t('Common.Cancel')}
@@ -382,8 +376,9 @@ export const SaveDataView = () => {
               onSelect={handleSave}
             />
           </div>
-        </div>
+        </>
+
       )}
-    </div>
+    </MainViewLayout>
   );
 };
