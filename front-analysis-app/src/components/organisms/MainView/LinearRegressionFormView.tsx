@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { showMessageDialog } from "../../../function/messageDialog";
-import { getColumnList, linearRegression } from "../../../function/restApis";
+import { linearRegression } from "../../../function/restApis";
+import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
-import type { ColumnType } from "../../../types/commonTypes";
 import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
 import { MainViewLayout } from "../../templates/MainViewLayout";
 
@@ -15,8 +15,11 @@ export const LinearRegressionFormView = () => {
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
   const { setLoading, clearLoading } = useLoadingStore();
 
-  const [columnList, setColumnList] = useState<ColumnType[]>([]);
-  const [selectedTableName, setSelectedTableName] = useState<string>("");
+  const { selectedTableName, setSelectedTableName, columnList, setColumnList } = useTableColumnLoader({
+    numericOnly: false,
+    autoLoadOnMount: true,
+  });
+
   const [dependentVariable, setDependentVariable] = useState<string>("");
   const [explanatoryVariables, setExplanatoryVariables] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState<{
@@ -32,17 +35,7 @@ export const LinearRegressionFormView = () => {
     setExplanatoryVariables([]);
     setErrorMessage({});
 
-    if (selectedTable) {
-      setLoading(true, t("Loading.Loading"));
-      try {
-        const resColumnList = await getColumnList(selectedTable);
-        setColumnList(resColumnList.result.columnInfoList);
-      } catch {
-        await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
-      } finally {
-        clearLoading();
-      }
-    } else {
+    if (!selectedTable) {
       setColumnList([]);
     }
   };
