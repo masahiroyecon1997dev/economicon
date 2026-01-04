@@ -368,14 +368,12 @@ export const SaveDataView = () => {
               </div>
             </div>
           </div>
-          <div className="pt-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
-            <ActionButtonBar
-              cancelText={t('Common.Cancel')}
-              selectText={t('SaveDataView.Save')}
-              onCancel={handleCancel}
-              onSelect={handleSave}
-            />
-          </div>
+          <ActionButtonBar
+            cancelText={t('Common.Cancel')}
+            selectText={t('SaveDataView.Save')}
+            onCancel={handleCancel}
+            onSelect={handleSave}
+          />
         </>
 
       )}

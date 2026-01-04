@@ -1,6 +1,7 @@
 import axios from "../configs/axios";
 import type * as apiTypes from "../types/apiTypes";
 import {
+  API_COLUMN_CALCULATE,
   API_COLUMN_LIST,
   API_DATA_EXPORT_CSV_BY_PATH,
   API_DATA_EXPORT_EXCEL_BY_PATH,
@@ -177,4 +178,11 @@ export const linearRegression = async (
       message: "エラーです",
     };
   }
+};
+
+export const calculateColumn = async (
+  requestBody: apiTypes.ReqCalculateColumnType
+): Promise<apiTypes.ResCalculateColumnType> => {
+  const response = await axios.post(API_COLUMN_CALCULATE, requestBody);
+  return response.data;
 };
