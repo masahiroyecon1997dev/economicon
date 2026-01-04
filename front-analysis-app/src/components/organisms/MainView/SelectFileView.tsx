@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
 import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
+import { ViewHeader } from "../../molecules/Header/ViewHeader";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
 
@@ -239,14 +240,14 @@ export const SelectFileView = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-none px-4 h-full">
-      <div className="flex flex-col gap-4 md:gap-8">
-        <header className="shrink-0">
-          <h1 className="text-2xl md:text-3xl font-bold text-black">{t('SelectFileView.Title')}</h1>
-          <p className="mt-1 md:mt-2 text-sm md:text-base text-black/60">{t('SelectFileView.Description')}</p>
-        </header>
+    <div className="mx-auto w-full max-w-none px-3 h-full">
+      <div className="flex flex-col gap-3 md:gap-6">
+        <ViewHeader
+          title={t('SelectFileView.Title')}
+          description={t('SelectFileView.Description')}
+        />
 
-        <div className="flex flex-col gap-2 md:gap-4 shrink-0">
+        <div className="flex flex-col gap-1.5 md:gap-3 shrink-0">
           <NavigationSearchBar
             pathSegments={getPathSegments()}
             searchValue={searchValue}
@@ -273,10 +274,12 @@ export const SelectFileView = () => {
           sortDirection={sortDirection}
           onSort={handleSort}
         />
-        <CancelButtonBar
-          cancelText={t('Common.Cancel')}
-          onCancel={handleCancel}
-        />
+        <div className="pt-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
+          <CancelButtonBar
+            cancelText={t('Common.Cancel')}
+            onCancel={handleCancel}
+          />
+        </div>
       </div>
     </div>
   );
