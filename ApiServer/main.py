@@ -105,8 +105,8 @@ app.include_router(api_router, prefix="/api")
 # 2. エンドポイントより「後」にハンドラを初期化・登録
 init_exception_handlers(app)
 
+static_dir = os.path.join(BASE_DIR, "static")
 # フォルダが存在するかチェック
-static_dir = "static"
 # 存在すればフロントリソースをマウント
 if os.path.exists(static_dir):
     app.mount("/", StaticFiles(directory=static_dir), name="static")
