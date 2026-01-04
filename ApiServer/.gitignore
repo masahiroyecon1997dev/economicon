@@ -1,5 +1,4 @@
-analysisapp/static/
-analysisapp/templates/
+/static/
 .venv/
 __pycache__/
 *.pyc

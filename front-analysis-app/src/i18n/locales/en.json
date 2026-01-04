@@ -47,5 +47,61 @@
     "SaveSuccess": "File saved successfully: {{path}}",
     "NoActiveTable": "No active table selected to save.",
     "NoTablesImported": "No tables have been imported."
+  },
+  "LinearRegressionFormView": {
+    "Title": "Create New Regression Analysis",
+    "Description": "Select the table and variables for the analysis.",
+    "SelectDataTable": "1. Select Data Table",
+    "DataTable": "Data Table",
+    "SelectATable": "Select a table",
+    "SelectVariables": "2. Select Variables",
+    "DependentVariable": "Dependent Variable (Y)",
+    "DependentVariableDescription": "Select one variable you want to predict.",
+    "ExplanatoryVariables": "Explanatory Variables (X)",
+    "ExplanatoryVariablesDescription": "Select one or more variables to use for prediction.",
+    "SelectedExplanatoryVariables": "Selected Explanatory Variables:",
+    "RunAnalysis": "Run Analysis",
+    "RunningAnalysis": "Running analysis...",
+    "AnalysisSuccess": "Analysis completed successfully.",
+    "Validation": {
+      "TableNameRequired": "Please select a table.",
+      "DependentVariableRequired": "Please select a dependent variable.",
+      "ExplanatoryVariablesRequired": "Please select at least one explanatory variable."
+    }
+  },
+  "CalculationView": {
+    "Title": "Add Column with Calculation",
+    "Description": "Select a table and create a new column using a calculation formula.",
+    "TargetTable": "Target Table",
+    "SelectTable": "Select a table",
+    "NewColumnName": "New Column Name",
+    "NewColumnNamePlaceholder": "e.g., total_revenue",
+    "Operators": "Operators",
+    "Addition": "Addition",
+    "Subtraction": "Subtraction",
+    "Multiplication": "Multiplication",
+    "Division": "Division",
+    "OpenParenthesis": "Open Parenthesis",
+    "CloseParenthesis": "Close Parenthesis",
+    "ClearAll": "Clear All",
+    "FormulaPlaceholder": "Enter your formula here\nExample: pl.col(\"price\") * pl.col(\"quantity\") - pl.col(\"discount\")",
+    "FormulaHelp": "Supports standard Polars expression syntax. Click columns on the right to insert.",
+    "AvailableColumns": "Available Columns",
+    "FilterColumns": "Filter columns...",
+    "ExecuteCalculation": "Execute Calculation",
+    "ExecutingCalculation": "Executing calculation...",
+    "CalculationSuccess": "Calculation completed successfully.",
+    "Validation": {
+      "TableNameRequired": "Please select a table.",
+      "NewColumnNameRequired": "Please enter a new column name.",
+      "CalculationExpressionRequired": "Please enter a calculation expression."
+    }
+  },
+  "Loading": {
+    "Loading": "Loading..."
+  },
+  "Error": {
+    "Error": "Error",
+    "UnexpectedError": "An unexpected error occurred."
   }
 }

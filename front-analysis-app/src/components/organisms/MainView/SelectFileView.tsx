@@ -272,12 +272,10 @@ export const SelectFileView = () => {
         sortDirection={sortDirection}
         onSort={handleSort}
       />
-      <div className="pt-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
-        <CancelButtonBar
-          cancelText={t('Common.Cancel')}
-          onCancel={handleCancel}
-        />
-      </div>
+      <CancelButtonBar
+        cancelText={t('Common.Cancel')}
+        onCancel={handleCancel}
+      />
     </MainViewLayout>
   );
 }

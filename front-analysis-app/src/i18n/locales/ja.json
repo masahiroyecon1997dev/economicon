@@ -93,6 +93,27 @@
     "NoActiveTable": "保存するテーブルが選択されていません。",
     "NoTablesImported": "テーブルが取り込まれていません。"
   },
+  "LinearRegressionFormView": {
+    "Title": "線形回帰分析を作成",
+    "Description": "分析するテーブルと変数を選択してください。",
+    "SelectDataTable": "1. データテーブルを選択",
+    "DataTable": "データテーブル",
+    "SelectATable": "テーブルを選択してください",
+    "SelectVariables": "2. 変数を選択",
+    "DependentVariable": "被説明変数 (Y)",
+    "DependentVariableDescription": "予測したい変数を1つ選択してください。",
+    "ExplanatoryVariables": "説明変数 (X)",
+    "ExplanatoryVariablesDescription": "予測に使用する変数を1つ以上選択してください。",
+    "SelectedExplanatoryVariables": "選択された説明変数:",
+    "RunAnalysis": "分析を実行",
+    "RunningAnalysis": "分析を実行中...",
+    "AnalysisSuccess": "分析が成功しました。",
+    "Validation": {
+      "TableNameRequired": "テーブル名を選択してください。",
+      "DependentVariableRequired": "被説明変数を選択してください。",
+      "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください。"
+    }
+  },
   "CreateSimulationDataTableView": {
     "CreateNewDataTable": "新しいデータテーブルを作成",
     "DefineYourTableNameAndRows": "テーブル名と行数を定義し、列を追加および設定してデータセットを生成します。",
@@ -200,6 +221,34 @@
     "HypergeometricParamPopulationSize": "母集団サイズは0以上の整数でなければなりません。",
     "HypergeometricParamNumberOfSuccesses": "成功数は0以上の整数でなければなりません。",
     "HypergeometricParamSampleSize": "標本サイズは0以上の整数でなければなりません。"
+  },
+  "CalculationView": {
+    "Title": "計算式でカラムを追加",
+    "Description": "テーブルを選択し、計算式を使って新しいカラムを作成します。",
+    "TargetTable": "対象テーブル",
+    "SelectTable": "テーブルを選択",
+    "NewColumnName": "新しいカラム名",
+    "NewColumnNamePlaceholder": "例: total_revenue",
+    "Operators": "演算子",
+    "Addition": "加算",
+    "Subtraction": "減算",
+    "Multiplication": "乗算",
+    "Division": "除算",
+    "OpenParenthesis": "開きカッコ",
+    "CloseParenthesis": "閉じカッコ",
+    "ClearAll": "すべてクリア",
+    "FormulaPlaceholder": "計算式を入力してください\n例: pl.col(\"price\") * pl.col(\"quantity\") - pl.col(\"discount\")",
+    "FormulaHelp": "Polars式構文をサポートしています。右側のカラムをクリックして挿入できます。",
+    "AvailableColumns": "利用可能なカラム",
+    "FilterColumns": "カラムを絞り込み...",
+    "ExecuteCalculation": "計算を実行",
+    "ExecutingCalculation": "計算を実行中...",
+    "CalculationSuccess": "計算が正常に完了しました。",
+    "Validation": {
+      "TableNameRequired": "テーブルを選択してください。",
+      "NewColumnNameRequired": "新しいカラム名を入力してください。",
+      "CalculationExpressionRequired": "計算式を入力してください。"
+    }
   },
   "AreaLabels": {
     "Header": "ヘッダー",

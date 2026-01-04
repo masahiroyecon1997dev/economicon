@@ -1,3 +1,4 @@
+import { Fragment } from "react/jsx-runtime";
 import { getTableInfo } from "../../../function/internalFunctions";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
@@ -30,10 +31,10 @@ export const TableView = () => {
         </nav>
       </div>
       {tableInfos.map((table, index) => (
-        <>
-          <MainTable key={index} tableInfo={table}></MainTable>
+        <Fragment key={index}>
+          <MainTable tableInfo={table}></MainTable>
           <TableFooter tableInfo={table} onPageChange={handlePageChange} />
-        </>
+        </Fragment>
       ))}
     </div>
   );
