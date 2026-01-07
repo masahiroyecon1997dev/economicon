@@ -1,6 +1,4 @@
-import { faCircleQuestion } from "@fortawesome/free-regular-svg-icons";
-import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { HelpCircle, Layers } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 
@@ -52,7 +50,7 @@ export const HeaderMenu = () => {
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4">
             <div className="size-6 text-white">
-              <FontAwesomeIcon icon={faLayerGroup} />
+              <Layers size={24} />
             </div>
             <h1 className="text-xl font-bold">Data Analysis Tool</h1>
           </div>
@@ -81,7 +79,7 @@ export const HeaderMenu = () => {
         <div className="flex items-center gap-4">
           <button className="rounded-full p-2 hover:bg-white/10 transition-colors">
             <div className="text-white">
-              <FontAwesomeIcon icon={faCircleQuestion} />
+              <HelpCircle size={20} />
             </div>
           </button>
           <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"></div>

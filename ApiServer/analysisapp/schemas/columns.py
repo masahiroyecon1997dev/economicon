@@ -1,7 +1,9 @@
 """カラム操作関連のスキーマ定義"""
+from typing import Dict, List, Optional
+
 from pydantic import Field
-from typing import Optional, List, Dict
-from .common import BaseModel, TableRequest, ColumnRequest
+
+from .common import BaseModel, ColumnRequest, TableRequest
 
 
 class AddColumnRequest(TableRequest):
@@ -45,7 +47,8 @@ class AddLagLeadColumnRequest(TableRequest):
     sourceColumn: str = Field(..., description="元となるカラム名")
     newColumnName: str = Field(..., description="新しいカラム名")
     periods: int = Field(..., description="ラグ・リード期間")
-    groupColumns: List[str] = Field(default_factory=list, description="グループ化するカラムのリスト")
+    groupColumns: List[str] = Field(default_factory=list,
+                                    description="グループ化するカラムのリスト")
 
 
 class AddSimulationColumnRequest(TableRequest):
@@ -73,5 +76,7 @@ class TransformColumnRequest(TableRequest):
 
 class GetColumnListRequest(BaseModel):
     """カラムリスト取得リクエスト（GETクエリパラメータ用）"""
+    tableName: str = Field(..., description="対象テーブル名")
+    isNumberOnly: str = Field(default="false", description="数値カラムのみ取得")
     tableName: str = Field(..., description="対象テーブル名")
     isNumberOnly: str = Field(default="false", description="数値カラムのみ取得")

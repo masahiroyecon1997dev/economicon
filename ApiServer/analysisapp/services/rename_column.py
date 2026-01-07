@@ -1,13 +1,12 @@
 from typing import Dict
-from .django_compat import gettext as _
+
 from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.tables_manager_validator import (
-    validate_existed_table_name,
-    validate_new_column_name,
-    validate_existed_column_name
-)
-from .data.tables_manager import TablesManager
+    validate_existed_column_name, validate_existed_table_name,
+    validate_new_column_name)
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_manager import TablesManager
+from .django_compat import gettext as _
 
 
 class RenameColumn(AbstractApi):
@@ -85,8 +84,8 @@ class RenameColumn(AbstractApi):
 
 
 def rename_column(table_name: str,
-                       old_column_name: str,
-                       new_column_name: str) -> Dict:
+                  old_column_name: str,
+                  new_column_name: str) -> Dict:
     api = RenameColumn(table_name, old_column_name, new_column_name)
     validation_error = api.validate()
     if validation_error:

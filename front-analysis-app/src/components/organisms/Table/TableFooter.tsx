@@ -1,5 +1,4 @@
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { TableInfoType } from '../../../types/commonTypes';
 
 type TableFooterProps = {
@@ -117,7 +116,7 @@ export function TableFooter({ tableInfo, onPageChange }: TableFooterProps) {
           aria-label="Previous page"
         >
           <span className="sr-only">Previous</span>
-          <FontAwesomeIcon icon={faChevronLeft} className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
         </button>
         {renderPageNumbers()}
         <button
@@ -127,7 +126,7 @@ export function TableFooter({ tableInfo, onPageChange }: TableFooterProps) {
           aria-label="Next page"
         >
           <span className="sr-only">Next</span>
-          <FontAwesomeIcon icon={faChevronRight} className="h-5 w-5" />
+          <ChevronRight className="h-5 w-5" />
         </button>
       </nav>
     </div>

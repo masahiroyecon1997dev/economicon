@@ -2,12 +2,12 @@ import io
 from typing import BinaryIO, Dict
 
 import polars as pl
-from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
 from ..utils.create_table_name import create_table_name_by_file_name
 from ..utils.validator.common_validators import ValidationError
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_manager import TablesManager
+from .django_compat import gettext as _
 
 
 class ImportTsvByFile(AbstractApi):
@@ -40,7 +40,6 @@ class ImportTsvByFile(AbstractApi):
                 self.validated_file_data: BinaryIO = self.file_data
                 self.validated_file_name: str = self.file_name
 
-
             # TSVファイルの拡張子チェック
             if not (self.validated_file_name.lower().endswith('.tsv') or
                     self.validated_file_name.lower().endswith('.txt')):
@@ -54,7 +53,8 @@ class ImportTsvByFile(AbstractApi):
         # TSVファイルのインポート処理
         try:
             # TSVファイルをPolarsデータフレームに変換（タブ区切り）
-            df = pl.read_csv(io.BytesIO(self.validated_file_data.read()), separator='\t')
+            df = pl.read_csv(io.BytesIO(self.validated_file_data.read()),
+                             separator='\t')
 
             # テーブル名リスト取得
             table_name_list = self.tables_manager.get_table_name_list()
@@ -82,7 +82,8 @@ class ImportTsvByFile(AbstractApi):
             raise ApiError(message) from e
 
 
-def import_tsv_by_file(file_data: BinaryIO | None, file_name: str | None) -> Dict:
+def import_tsv_by_file(file_data: BinaryIO | None,
+                       file_name: str | None) -> Dict:
     """
     TSVファイルからデータをインポートしてテーブルを作成する関数
 

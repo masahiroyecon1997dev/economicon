@@ -1,13 +1,12 @@
 from typing import Dict, List
 
-from .django_compat import gettext as _
-
-from .data.tables_manager import TablesManager
 from ..utils.validator.common_validators import (ValidationError,
-                                                     validate_boolean)
+                                                 validate_boolean)
 from ..utils.validator.tables_manager_validator import \
     validate_existed_table_name
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_manager import TablesManager
+from .django_compat import gettext as _
 
 
 class GetColumnList(AbstractApi):
