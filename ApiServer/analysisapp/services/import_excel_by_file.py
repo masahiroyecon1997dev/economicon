@@ -2,12 +2,12 @@ import io
 from typing import BinaryIO, Dict
 
 import polars as pl
-from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
 from ..utils.create_table_name import create_table_name_by_file_name
 from ..utils.validator.common_validators import ValidationError
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_manager import TablesManager
+from .django_compat import gettext as _
 
 
 class ImportExcelByFile(AbstractApi):
@@ -81,7 +81,8 @@ class ImportExcelByFile(AbstractApi):
             raise ApiError(message) from e
 
 
-def import_excel_by_file(file_data: BinaryIO | None, file_name: str | None) -> Dict:
+def import_excel_by_file(file_data: BinaryIO | None,
+                         file_name: str | None) -> Dict:
     """
     Excelファイルからデータをインポートしてテーブルを作成する関数
 

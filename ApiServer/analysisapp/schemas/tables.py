@@ -1,6 +1,8 @@
 """テーブル操作関連のスキーマ定義"""
+from typing import Any, Dict, List
+
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+
 from .common import TableRequest
 
 
@@ -36,7 +38,8 @@ class CreateUnionTableRequest(BaseModel):
     """ユニオンテーブル作成リクエスト"""
     unionTableName: str = Field(..., description="ユニオン後のテーブル名")
     tableNames: List[str] = Field(..., description="結合するテーブル名のリスト")
-    columnNames: List[str] = Field(default_factory=list, description="対象カラム名のリスト")
+    columnNames: List[str] = Field(default_factory=list,
+                                   description="対象カラム名のリスト")
 
 
 class ClearTablesRequest(BaseModel):
@@ -58,5 +61,7 @@ class DeleteTableRequest(TableRequest):
 class FetchDataToJsonRequest(BaseModel):
     """データJSON取得リクエスト（GETクエリパラメータ用）"""
     tableName: str = Field(..., description="対象テーブル名")
+    startRow: int = Field(..., description="開始行番号")
+    fetchRows: int = Field(..., description="取得行数")
     startRow: int = Field(..., description="開始行番号")
     fetchRows: int = Field(..., description="取得行数")

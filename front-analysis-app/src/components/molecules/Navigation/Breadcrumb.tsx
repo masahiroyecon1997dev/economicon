@@ -1,5 +1,4 @@
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChevronRight } from "lucide-react";
 
 type BreadcrumbProps = {
   segments: string[];
@@ -22,7 +21,7 @@ export function Breadcrumb({ segments, onSegmentClick }: BreadcrumbProps) {
               </button>
               {index < segments.length - 1 && (
                 <div className="flex items-center ml-1.5 shrink-0">
-                  <FontAwesomeIcon icon={faAngleRight} className="text-gray-400" />
+                  <ChevronRight className="text-gray-400" size={14} />
                 </div>
               )}
             </li>

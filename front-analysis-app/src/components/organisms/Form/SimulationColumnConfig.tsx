@@ -1,5 +1,4 @@
-import { faXmark } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DistributionType, SimulationColumnSetting } from '../../../types/commonTypes';
 import { InputText } from '../../atoms/Input/InputText';
@@ -68,9 +67,7 @@ export const SimulationColumnConfig = ({
             className="text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             disabled={!canRemove}
           >
-            <span className="material-symbols-outlined">
-              <FontAwesomeIcon icon={faXmark} />
-            </span>
+            <X size={20} />
           </button>
         </div>
 

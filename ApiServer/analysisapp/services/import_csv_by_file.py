@@ -2,12 +2,12 @@ import io
 from typing import BinaryIO, Dict
 
 import polars as pl
-from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
 from ..utils.create_table_name import create_table_name_by_file_name
 from ..utils.validator.common_validators import ValidationError
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_manager import TablesManager
+from .django_compat import gettext as _
 
 
 class ImportCsvByFile(AbstractApi):
@@ -56,8 +56,9 @@ class ImportCsvByFile(AbstractApi):
 
             # 自動生成されるテーブル名
             table_name_list = self.tables_manager.get_table_name_list()
-            self.table_name = create_table_name_by_file_name(self.validated_file_name,
-                                                            table_name_list)
+            self.table_name = create_table_name_by_file_name(
+                self.validated_file_name,
+                table_name_list)
 
             # テーブルを作成
             self.tables_manager.store_table(self.table_name, df)
@@ -79,7 +80,8 @@ class ImportCsvByFile(AbstractApi):
             raise ApiError(message) from e
 
 
-def import_csv_by_file(file_data: BinaryIO | None, file_name: str | None) -> Dict:
+def import_csv_by_file(file_data: BinaryIO | None,
+                       file_name: str | None) -> Dict:
     """
     CSVファイルからデータをインポートしてテーブルを作成する関数
 
