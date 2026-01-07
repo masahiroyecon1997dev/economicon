@@ -1,17 +1,17 @@
 from typing import Any, Dict, List
 
 import polars as pl
-from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
 from ..utils.algorithm.simulation import generate_simulation_data
 from ..utils.validator.common_validators import (ValidationError,
-                                                     validate_integer)
+                                                 validate_integer)
 from ..utils.validator.statistics_validators import (
     validate_distribution_params, validate_distribution_type)
 from ..utils.validator.tables_manager_validator import (
     validate_new_column_name, validate_new_table_name)
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_manager import TablesManager
+from .django_compat import gettext as _
 
 
 class CreateSimulationDataTable(AbstractApi):

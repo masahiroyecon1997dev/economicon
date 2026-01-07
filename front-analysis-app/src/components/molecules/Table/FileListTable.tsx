@@ -1,5 +1,4 @@
-import { faFileLines, faFolder, faSort, faSortDown, faSortUp } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ArrowDown, ArrowUp, ArrowUpDown, FileText, Folder } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { FileType, SortDirection, SortField } from "../../../types/commonTypes";
 
@@ -31,15 +30,15 @@ export function FileListTable({
   // ソートアイコンを返す関数
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) {
-      return <FontAwesomeIcon icon={faSort} className="ml-1 text-gray-400" />;
+      return <ArrowUpDown className="ml-1 text-gray-400" size={14} />;
     }
     if (sortDirection === 'asc') {
-      return <FontAwesomeIcon icon={faSortUp} className="ml-1 text-blue-500" />;
+      return <ArrowUp className="ml-1 text-blue-500" size={14} />;
     }
     if (sortDirection === 'desc') {
-      return <FontAwesomeIcon icon={faSortDown} className="ml-1 text-blue-500" />;
+      return <ArrowDown className="ml-1 text-blue-500" size={14} />;
     }
-    return <FontAwesomeIcon icon={faSort} className="ml-1 text-gray-400" />;
+    return <ArrowUpDown className="ml-1 text-gray-400" size={14} />;
   };
 
   // ヘッダークリックハンドラー
@@ -100,10 +99,11 @@ export function FileListTable({
                 <td className="px-2 sm:px-3 md:px-6 py-2.5 text-sm font-medium text-black min-w-0" style={{ width: '50%', minWidth: '120px' }}>
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="shrink-0">
-                      <FontAwesomeIcon
-                        icon={file.isFile ? faFileLines : faFolder}
-                        className={file.isFile ? 'text-blue-500' : 'text-yellow-500'}
-                      />
+                      {file.isFile ? (
+                        <FileText className="text-blue-500" size={16} />
+                      ) : (
+                        <Folder className="text-yellow-500" size={16} />
+                      )}
                     </span>
                     <span
                       className={`truncate block min-w-0 ${file.isFile ? '' : 'font-semibold'}`}

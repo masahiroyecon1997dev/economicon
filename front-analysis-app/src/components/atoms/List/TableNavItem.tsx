@@ -1,6 +1,5 @@
 
-import { faEllipsisVertical } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { MoreVertical } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DropdownMenu } from "../../molecules/Menu/DropdownMenu";
@@ -23,7 +22,7 @@ export const TableNavItem = ({ tableName, isActive, onClick }: TableNavItemProps
       className="shrink-0 p-1 rounded hover:bg-white/20 transition-colors"
       aria-label={t("AreaLabels.TableMenu")}
     >
-      <FontAwesomeIcon icon={faEllipsisVertical} />
+      <MoreVertical size={16} />
     </button>
   );
 

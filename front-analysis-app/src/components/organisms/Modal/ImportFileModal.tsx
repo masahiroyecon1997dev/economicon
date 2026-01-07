@@ -1,5 +1,4 @@
-import { faFileLines } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FileText } from "lucide-react";
 import { useState, type ChangeEvent, type DragEvent } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -83,7 +82,7 @@ export const ImportFileModal = ({
           <div>
             <div className="grid gap-1">
               <div className="mx-auto">
-                <FontAwesomeIcon icon={faFileLines} className="text-[40px] text-indigo-600" />
+                <FileText className="text-[40px] text-indigo-600" size={40} />
               </div>
             </div>
             <div className="grid gap-2">
@@ -112,7 +111,7 @@ export const ImportFileModal = ({
           <div>
             <div className="grid gap-1">
               <div className="mx-auto">
-                <FontAwesomeIcon icon={faFileLines} className="text-[40px] text-indigo-600" />
+                <FileText className="text-[40px] text-indigo-600" size={40} />
               </div>
               <h2 className="text-center text-gray-400 text-xs leading-4">
                 {t("ImportFileModal.Notation")}

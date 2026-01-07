@@ -1,5 +1,4 @@
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DISTRIBUTION_OPTIONS } from "../../../common/constant";
@@ -308,7 +307,7 @@ export const CreateSimulationDataTableView = () => {
               onClick={addColumn}
               className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-3 py-1.5 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary cursor-pointer"
             >
-              <span className="material-symbols-outlined text-base"><FontAwesomeIcon icon={faPlus} /></span>
+              <Plus size={16} />
               {t("CreateSimulationDataTableView.AddColumn")}
             </button>
           </div>

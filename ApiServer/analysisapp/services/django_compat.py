@@ -15,7 +15,8 @@ def gettext(message: str) -> str:
         翻訳後の文字列
     Note
     ----
-    This is a dummy implementation. For actual translation, refer to ../i18n directory.
+    This is a dummy implementation.
+    For actual translation, refer to ../i18n directory.
     """
     return message
 

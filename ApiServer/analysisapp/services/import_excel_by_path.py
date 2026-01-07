@@ -1,15 +1,14 @@
 from typing import Dict, Optional
 
 import polars as pl
-from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
 from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.file_validators import (validate_file_path,
-                                                   validate_sheet_name)
-from ..utils.validator.tables_manager_validator import \
-    validate_new_table_name
+                                               validate_sheet_name)
+from ..utils.validator.tables_manager_validator import validate_new_table_name
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_manager import TablesManager
+from .django_compat import gettext as _
 
 
 class ImportExcelByPath(AbstractApi):
