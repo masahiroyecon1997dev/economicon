@@ -13,7 +13,8 @@ dependencies = [
     "pipdeptree>=2.30.0",
     "polars>=1.36.1",
     "pyinstaller>=6.17.0",
-    "python-magic-bin>=0.4.14",
+    "python-magic; sys_platform != 'win32'",      # Linux/macOS用
+    "python-magic-bin; sys_platform == 'win32'",  # Windows用
     "python-multipart>=0.0.21",
     "pyyaml>=6.0.3",
     "scipy>=1.16.3",
