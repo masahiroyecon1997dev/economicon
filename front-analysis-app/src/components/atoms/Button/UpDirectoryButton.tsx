@@ -1,5 +1,4 @@
-import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ArrowUp } from "lucide-react";
 
 type UpDirectoryButtonProps = {
   onClick: () => void;
@@ -13,7 +12,7 @@ export const UpDirectoryButton = ({ onClick, title }: UpDirectoryButtonProps) =>
       className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
       title={title}
     >
-      <FontAwesomeIcon icon={faArrowUp} className="text-base" />
+      <ArrowUp size={16} />
     </button>
   );
 }

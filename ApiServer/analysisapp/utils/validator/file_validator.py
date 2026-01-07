@@ -1,8 +1,9 @@
-from analysisapp.i18n.translation import gettext_lazy as _
-from typing import Tuple, List, Optional
-from fastapi import UploadFile, HTTPException
-import magic
 import mimetypes
+from typing import List, Optional, Tuple
+
+import magic
+from analysisapp.i18n.translation import gettext_lazy as _
+from fastapi import HTTPException, UploadFile
 
 
 class FileValidationError(Exception):
@@ -29,7 +30,8 @@ class FileValidator:
         self.allowed_extensions = allowed_extensions or ()
         self.allowed_mime_types = allowed_mime_types or []
 
-    async def validate_file(self, uploaded_file: UploadFile) -> Optional[Exception]:
+    async def validate_file(self,
+                            uploaded_file: UploadFile) -> Optional[Exception]:
         """
         ファイルバリデーションを実行
 
@@ -101,4 +103,5 @@ class FileValidator:
             mime_types = ', '.join(self.allowed_mime_types)
             raise FileValidationError(
                 _(f"Invalid file content type. Allowed types: {mime_types}")
+            )
             )

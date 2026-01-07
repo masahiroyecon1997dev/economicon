@@ -1,9 +1,12 @@
 # analysisapp/api/exception_handlers.py
-from fastapi import FastAPI, Request, status as http_status
+from fastapi import FastAPI, Request
+from fastapi import status as http_status
+
+from .i18n import _
+from .services import ApiError
 from .utils import create_error_response
 from .utils.validator import ValidationError
-from .services import ApiError
-from .i18n import _
+
 
 def init_exception_handlers(app: FastAPI):
     """
@@ -11,7 +14,8 @@ def init_exception_handlers(app: FastAPI):
     """
 
     @app.exception_handler(ValidationError)
-    async def validation_exception_handler(request: Request, exc: ValidationError):
+    async def validation_exception_handler(request: Request,
+                                           exc: ValidationError):
         return create_error_response(
             http_status.HTTP_400_BAD_REQUEST,
             exc.message
