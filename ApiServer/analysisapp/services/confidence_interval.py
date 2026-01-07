@@ -1,15 +1,15 @@
 from typing import Dict
 
 import numpy as np
-from .django_compat import gettext as _
 from scipy import stats
 
-from .data.tables_manager import TablesManager
 from ..utils.validator.common_validators import (ValidationError,
-                                                     validate_candidates)
+                                                 validate_candidates)
 from ..utils.validator.tables_manager_validator import (
     validate_existed_column_name, validate_existed_table_name)
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_manager import TablesManager
+from .django_compat import gettext as _
 
 
 class ConfidenceInterval(AbstractApi):

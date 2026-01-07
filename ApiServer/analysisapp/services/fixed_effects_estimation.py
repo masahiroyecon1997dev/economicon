@@ -3,16 +3,16 @@ from typing import Dict, List
 import numpy as np
 import polars as pl
 import statsmodels.api as sm
-from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
 from ..utils.validator.common_validators import (ValidationError,
-                                                     validate_candidates)
+                                                 validate_candidates)
 from ..utils.validator.statistics_validators import (
     validate_dependent_variable, validate_explanatory_variables)
 from ..utils.validator.tables_manager_validator import (
     validate_existed_column_name, validate_existed_table_name)
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_manager import TablesManager
+from .django_compat import gettext as _
 
 # 標準誤差計算方法の候補
 STANDARD_ERROR_METHODS = ['normal', 'clustered', 'robust', 'hac']

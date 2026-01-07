@@ -1,5 +1,4 @@
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChevronDown } from "lucide-react";
 
 type HeaderMenuButtonProps = {
   children: string;
@@ -16,7 +15,7 @@ export const HeaderMenuButton = ({
       onClick={() => clickEvent()}
     >
       <span>{children}</span>
-      <FontAwesomeIcon icon={faChevronDown} />
+      <ChevronDown size={16} />
     </button>
   );
 }

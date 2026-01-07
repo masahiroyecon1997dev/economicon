@@ -1,12 +1,11 @@
-from .django_compat import gettext as _
-
-from .data.tables_manager import TablesManager
 from ..utils.validator.common_validators import (ValidationError,
-                                                     validate_integer_positive,
-                                                     validate_required)
+                                                 validate_integer_positive,
+                                                 validate_required)
 from ..utils.validator.tables_manager_validator import (
     validate_existed_table_name, validate_row_index)
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_manager import TablesManager
+from .django_compat import gettext as _
 
 
 class FetchDataToJson(AbstractApi):

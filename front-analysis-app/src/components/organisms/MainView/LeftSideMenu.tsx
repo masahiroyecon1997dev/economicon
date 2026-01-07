@@ -1,5 +1,4 @@
-import { faBars, faFileImport, faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FileUp, Menu, Save } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getTableInfo } from "../../../function/internalFunctions";
 import { showMessageDialog } from "../../../function/messageDialog";
@@ -55,7 +54,7 @@ export const LeftSideMenu = () => {
           className={`p-2 rounded-md hover:bg-white/10 transition-colors ${isOpen ? '' : 'mx-auto'}`}
           aria-label={isOpen ? t("Common.CloseSideMenu") : t("Common.OpenSideMenu")}
         >
-          <FontAwesomeIcon icon={faBars} className="text-xl" />
+          <Menu className="text-xl" size={20} />
         </button>
       </div>
       {isOpen && (
@@ -65,14 +64,14 @@ export const LeftSideMenu = () => {
               onClick={showImportFileView}
               className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-left hover:cursor-pointer"
             >
-              <FontAwesomeIcon icon={faFileImport} className="text-lg" />
+              <FileUp className="text-lg" size={18} />
               <span className="font-medium">{t("LeftSideMenu.ImportData")}</span>
             </button>
             <button
               onClick={showSaveFileView}
               className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-left hover:cursor-pointer"
             >
-              <FontAwesomeIcon icon={faFloppyDisk} className="text-lg" />
+              <Save className="text-lg" size={18} />
               <span className="font-medium">{t("LeftSideMenu.SaveData")}</span>
             </button>
           </div>
