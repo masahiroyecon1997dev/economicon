@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
-import { ModalFooter } from './ModalFooter';
-import { ModalHeader } from './ModalHeader';
+import { ModalFooter } from './modal-footer';
+import { ModalHeader } from './modal-header';
 
 type ModalProps = {
   isOpenModal: boolean;
