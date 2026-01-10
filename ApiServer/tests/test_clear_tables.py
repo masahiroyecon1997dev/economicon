@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -33,7 +32,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_clear_tables_success(client, tables_manager):

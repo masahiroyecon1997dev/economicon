@@ -3,11 +3,10 @@ from typing import Any, Dict, List
 
 from pydantic import BaseModel, Field
 
-from .common import TableRequest
 
-
-class CreateTableRequest(TableRequest):
+class CreateTableRequest(BaseModel):
     """テーブル作成リクエスト"""
+    tableName: str = Field(..., description="テーブル名")
     tableNumberOfRows: int = Field(..., description="テーブルの行数")
     columnNames: List[str] = Field(..., description="カラム名のリスト")
 
@@ -18,10 +17,14 @@ class RenameTableRequest(BaseModel):
     newTableName: str = Field(..., description="新しいテーブル名")
 
 
-class CreateSimulationDataTableRequest(TableRequest):
+class CreateSimulationDataTableRequest(BaseModel):
     """シミュレーションデータテーブル作成リクエスト"""
+    tableName: str = Field(..., description="テーブル名")
     tableNumberOfRows: int = Field(..., description="テーブルの行数")
-    columnSettings: List[Dict[str, Any]] = Field(..., description="カラム設定のリスト")
+    columnSettings: List[Dict[str, Any]] = Field(
+        ...,
+        description="カラム設定のリスト"
+    )
 
 
 class CreateJoinTableRequest(BaseModel):
@@ -29,17 +32,28 @@ class CreateJoinTableRequest(BaseModel):
     joinTableName: str = Field(..., description="結合後のテーブル名")
     leftTableName: str = Field(..., description="左側のテーブル名")
     rightTableName: str = Field(..., description="右側のテーブル名")
-    leftKeyColumnNames: List[str] = Field(..., description="左側の結合キーカラム名のリスト")
-    rightKeyColumnNames: List[str] = Field(..., description="右側の結合キーカラム名のリスト")
-    joinType: str = Field(..., description="結合タイプ (inner, left, right, outer)")
+    leftKeyColumnNames: List[str] = Field(
+        ...,
+        description="左側の結合キーカラム名のリスト"
+    )
+    rightKeyColumnNames: List[str] = Field(
+        ...,
+        description="右側の結合キーカラム名のリスト"
+    )
+    joinType: str = Field(
+        ...,
+        description="結合タイプ (inner, left, right, outer)"
+    )
 
 
 class CreateUnionTableRequest(BaseModel):
     """ユニオンテーブル作成リクエスト"""
     unionTableName: str = Field(..., description="ユニオン後のテーブル名")
     tableNames: List[str] = Field(..., description="結合するテーブル名のリスト")
-    columnNames: List[str] = Field(default_factory=list,
-                                   description="対象カラム名のリスト")
+    columnNames: List[str] = Field(
+        default_factory=list,
+        description="対象カラム名のリスト"
+    )
 
 
 class ClearTablesRequest(BaseModel):
@@ -53,15 +67,13 @@ class DuplicateTableRequest(BaseModel):
     newTableName: str = Field(..., description="新しいテーブル名")
 
 
-class DeleteTableRequest(TableRequest):
+class DeleteTableRequest(BaseModel):
     """テーブル削除リクエスト"""
-    pass
+    tableName: str = Field(..., description="テーブル名")
 
 
 class FetchDataToJsonRequest(BaseModel):
     """データJSON取得リクエスト（GETクエリパラメータ用）"""
     tableName: str = Field(..., description="対象テーブル名")
-    startRow: int = Field(..., description="開始行番号")
-    fetchRows: int = Field(..., description="取得行数")
     startRow: int = Field(..., description="開始行番号")
     fetchRows: int = Field(..., description="取得行数")

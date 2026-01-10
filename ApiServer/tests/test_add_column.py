@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -89,6 +88,7 @@ def test_add_column_duplicate_name(client, tables_manager):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
     assert "newColumnName 'A' already exists." == response_data['message']
+
 
 def test_add_column_invalid_position_column(client, tables_manager):
     """追加位置指定カラムが存在しない"""

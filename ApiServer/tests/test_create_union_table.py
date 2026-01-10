@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -54,7 +53,6 @@ def tables_manager():
     manager.clear_tables()
 
 
-
 def test_union_two_tables_all_columns(client, tables_manager):
     payload = {
         'unionTableName': 'UnionTable',
@@ -98,6 +96,7 @@ def test_union_three_tables_selected_columns(client, tables_manager):
         'David', 'Eve', 'Frank', 'Grace', 'Henry'
     ]
 
+
 def test_union_table_name_empty(client, tables_manager):
     payload = {
         'unionTableName': '',
@@ -127,7 +126,8 @@ def test_union_table_name_already_exists(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "unionTableName 'Table1' already exists." == response_data['message']
+    message = "unionTableName 'Table1' already exists."
+    assert message == response_data['message']
 
 
 def test_single_table_in_list(client, tables_manager):
@@ -143,7 +143,8 @@ def test_single_table_in_list(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableNames must be with at least 2 tableName." == response_data['message']
+    message = "tableNames must be with at least 2 tableName."
+    assert message == response_data['message']
 
 
 def test_nonexistent_table(client, tables_manager):
@@ -159,7 +160,8 @@ def test_nonexistent_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableNames 'NonExistentTable' does not exist." == response_data['message']
+    message = "tableNames 'NonExistentTable' does not exist."
+    assert message == response_data['message']
 
 
 def test_empty_column_names(client, tables_manager):
@@ -175,7 +177,8 @@ def test_empty_column_names(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnNames must be with at least 1 columnName." == response_data['message']
+    message = "columnNames must be with at least 1 columnName."
+    assert message == response_data['message']
 
 
 def test_nonexistent_column_in_first_table(client, tables_manager):
@@ -191,7 +194,8 @@ def test_nonexistent_column_in_first_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnNames 'nonexistent_column' does not exist." == response_data['message']
+    message = "columnNames 'nonexistent_column' does not exist."
+    assert message == response_data['message']
 
 
 def test_column_missing_in_one_table(client, tables_manager):

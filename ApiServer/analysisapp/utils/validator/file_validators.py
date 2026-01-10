@@ -1,8 +1,6 @@
 import os
 from typing import List, Optional
 
-from analysisapp.i18n.translation import gettext_lazy as _
-
 from .common_validators import (ValidationError,
                                 validate_directory_path_exists,
                                 validate_file_path_exists,
@@ -30,7 +28,7 @@ def validate_directory_path_is_directory(
     directory: str
 ) -> None:
     if not os.path.isdir(directory):
-        message = _(f"Path is not a directory: {directory}")
+        message = f"Path is not a directory: {directory}"
         raise ValidationError(message)
 
 

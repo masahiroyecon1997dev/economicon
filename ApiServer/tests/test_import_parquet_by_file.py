@@ -1,13 +1,12 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-import polars as pl
-import tempfile
 import shutil
+import tempfile
 
-from main import app
+import polars as pl
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
-
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -30,7 +29,6 @@ def prepared_data():
     shutil.rmtree(test_dir, ignore_errors=True)
 
 
-
 def test_upload_valid_parquet_file(client, prepared_data):
     """
     有効なParquetファイルをアップロードした場合のテスト
@@ -45,7 +43,9 @@ def test_upload_valid_parquet_file(client, prepared_data):
         f'{test_dir}/TestData.parquet')
     with open(f'{test_dir}/TestData.parquet', 'rb') as f:
         response = client.post('/api/data/import-parquet-by-file',
-                               files={'file': ('TestData.parquet', f, 'application/octet-stream')})
+                               files={'file': ('TestData.parquet',
+                                               f,
+                                               'application/octet-stream')})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     # レスポンスデータの検証
@@ -61,7 +61,7 @@ def test_no_file_uploaded(client, prepared_data):
     """
     tables_manager, test_dir = prepared_data
     response = client.post('/api/data/import-parquet-by-file')
-    response_data = response.json()
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert response_data['code'] == 'NG'
     # assert "No file uploaded." == response_data['message']
@@ -81,7 +81,9 @@ def test_upload_non_parquet_file(client, prepared_data):
         f'{test_dir}/TestDataComma.csv', separator=',')
     with open(f'{test_dir}/TestDataComma.csv', 'rb') as f:
         response = client.post('/api/data/import-parquet-by-file',
-                                files={'file': ('TestDataComma.csv', f, 'application/octet-stream')})
+                               files={'file': ('TestDataComma.csv',
+                                               f,
+                                               'application/octet-stream')})
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
@@ -99,7 +101,9 @@ def test_upload_empty_parquet_file(client, prepared_data):
         f'{test_dir}/Empty.parquet')
     with open(f'{test_dir}/Empty.parquet', 'rb') as f:
         response = client.post('/api/data/import-parquet-by-file',
-                               files={'file': ('Empty.parquet', f, 'application/octet-stream')})
+                               files={'file': ('Empty.parquet',
+                                               f,
+                                               'application/octet-stream')})
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
