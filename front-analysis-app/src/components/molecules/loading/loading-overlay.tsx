@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "../../atoms/Loading/loading-spinner";
+import { LoadingSpinner } from "../../atoms/Loading/LoadingSpinner";
 
 type LoadingOverlayProps = {
   isVisible: boolean;
