@@ -24,7 +24,7 @@ def tables_manager():
 
 def test_get_table_list_empty(client, tables_manager):
     """テーブルが0件の場合"""
-    response = client.get('/api/table/list')
+    response = client.get('/api/table/get-list')
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
@@ -37,7 +37,7 @@ def test_get_table_list_multiple(client, tables_manager):
     for name in table_names:
         df = pl.DataFrame({'col': [1, 2, 3]})
         tables_manager.store_table(name, df)
-    response = client.get('/api/table/list')
+    response = client.get('/api/table/get-list')
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
@@ -52,7 +52,7 @@ def test_get_table_list_exception(client, tables_manager):
         raise Exception("DB error")
 
     tables_manager.get_table_name_list = raise_exception
-    response = client.get('/api/table/list')
+    response = client.get('/api/table/get-list')
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'

@@ -1,69 +1,33 @@
 """スキーマパッケージ初期化"""
-from .common import (
-    BaseResponse,
-    SuccessResponse,
-    ErrorResponse,
-    TableRequest,
-    ColumnRequest
-)
-from .columns import (
-    AddColumnRequest,
-    DeleteColumnRequest,
-    RenameColumnRequest,
-    DuplicateColumnRequest,
-    CalculateColumnRequest,
-    AddDummyColumnRequest,
-    AddLagLeadColumnRequest,
-    AddSimulationColumnRequest,
-    SortColumnsRequest,
-    TransformColumnRequest,
-    GetColumnListRequest
-)
-from .tables import (
-    CreateTableRequest,
-    RenameTableRequest,
-    CreateSimulationDataTableRequest,
-    CreateJoinTableRequest,
-    CreateUnionTableRequest,
-    ClearTablesRequest,
-    DuplicateTableRequest,
-    DeleteTableRequest,
-    FetchDataToJsonRequest
-)
-from .statistics import (
-    ConfidenceIntervalRequest,
-    DescriptiveStatisticsRequest
-)
-from .files import (
-    GetFilesRequest
-)
-from .data_io import (
-    ImportCsvByPathRequest,
-    ImportExcelByPathRequest,
-    ImportParquetByPathRequest,
-    ExportCsvByPathRequest,
-    ExportExcelByPathRequest,
-    ExportParquetByPathRequest,
-)
-from .regressions import (
-    LinearRegressionRequest,
-    LogisticRegressionRequest,
-    ProbitRegressionRequest,
-    VariableEffectsEstimationRequest,
-    FixedEffectsEstimationRequest
-)
-from .operations import (
-    InputCellDataRequest,
-    FilterSingleConditionRequest
-)
+from .columns import (AddColumnRequest, AddDummyColumnRequest,
+                      AddLagLeadColumnRequest, AddSimulationColumnRequest,
+                      CalculateColumnRequest, DeleteColumnRequest,
+                      DuplicateColumnRequest, GetColumnListRequest,
+                      RenameColumnRequest, SortColumnsRequest,
+                      TransformColumnRequest)
+from .common import BaseResponse, ErrorResponse, SuccessResponse
+from .data_io import (ExportCsvByPathRequest, ExportExcelByPathRequest,
+                      ExportParquetByPathRequest, ImportCsvByPathRequest,
+                      ImportExcelByPathRequest, ImportParquetByPathRequest)
+from .files import GetFilesRequest
+from .operations import FilterSingleConditionRequest, InputCellDataRequest
+from .regressions import (FixedEffectsEstimationRequest,
+                          LinearRegressionRequest, LogisticRegressionRequest,
+                          ProbitRegressionRequest,
+                          VariableEffectsEstimationRequest)
+from .settings import GetSettingsRequest
+from .statistics import ConfidenceIntervalRequest, DescriptiveStatisticsRequest
+from .tables import (ClearTablesRequest, CreateJoinTableRequest,
+                     CreateSimulationDataTableRequest, CreateTableRequest,
+                     CreateUnionTableRequest, DeleteTableRequest,
+                     DuplicateTableRequest, FetchDataToJsonRequest,
+                     GetTableListRequest, RenameTableRequest)
 
 __all__ = [
     # Common
     'BaseResponse',
     'SuccessResponse',
     'ErrorResponse',
-    'TableRequest',
-    'ColumnRequest',
     # Column operations
     'AddColumnRequest',
     'DeleteColumnRequest',
@@ -86,9 +50,12 @@ __all__ = [
     'DuplicateTableRequest',
     'DeleteTableRequest',
     'FetchDataToJsonRequest',
+    'GetTableListRequest',
     # Statistics
     'ConfidenceIntervalRequest',
     'DescriptiveStatisticsRequest',
+    # Settings
+    'GetSettingsRequest',
     # Files
     'GetFilesRequest',
     # Data I/O

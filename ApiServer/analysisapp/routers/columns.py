@@ -4,8 +4,9 @@ from fastapi import status as http_status
 from ..schemas import (AddColumnRequest, AddDummyColumnRequest,
                        AddLagLeadColumnRequest, AddSimulationColumnRequest,
                        CalculateColumnRequest, DeleteColumnRequest,
-                       DuplicateColumnRequest, RenameColumnRequest,
-                       SortColumnsRequest, TransformColumnRequest)
+                       DuplicateColumnRequest, GetColumnListRequest,
+                       RenameColumnRequest, SortColumnsRequest,
+                       TransformColumnRequest)
 # 各ビジネスロジック（既存のpython_apis）
 from ..services.add_column import add_column
 from ..services.add_dummy_column import add_dummy_column
@@ -311,20 +312,17 @@ async def transform_column_endpoint(request: Request,
     )
 
 
-@router.get("/list")
+@router.post("/get-list")
 async def get_column_list_endpoint(request: Request,
-                                   tableName: str,
-                                   isNumberOnly: str = "false"):
+                                   body: GetColumnListRequest):
     """カラムリストを取得するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    tableName : str
-        テーブル名
-    isNumberOnly : str
-        数値カラムのみ取得するか
+    body : GetColumnListRequest
+        リクエストボディ
 
     Returns
     -------
@@ -333,7 +331,7 @@ async def get_column_list_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = get_column_list(tableName, isNumberOnly)
+    result = get_column_list(body.tableName, body.isNumberOnly)
 
     return create_success_response(
         http_status.HTTP_200_OK,

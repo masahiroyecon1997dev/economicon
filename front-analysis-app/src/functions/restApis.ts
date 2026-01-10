@@ -1,5 +1,4 @@
 import axios from "../configs/axios";
-import type * as apiTypes from "../types/apiTypes";
 import {
   API_COLUMN_CALCULATE,
   API_COLUMN_LIST,
@@ -16,7 +15,8 @@ import {
   API_TABLE_CREATE_SIMULATION_DATA,
   API_TABLE_FETCH_DATA,
   API_TABLE_LIST,
-} from "./requests";
+} from "../constants/requests";
+import type * as apiTypes from "../types/apiTypes";
 
 export const getSettings = async (): Promise<apiTypes.ResGetSettingsType> => {
   const response = await axios.get(API_SETTINGS_GET);
@@ -31,10 +31,8 @@ export const getTableList = async (): Promise<apiTypes.ResgetTableListType> => {
 export const getFiles = async (
   path: string
 ): Promise<apiTypes.ResGetFilesType> => {
-  const response = await axios.get(API_FILE_LIST, {
-    params: {
-      directoryPath: path,
-    },
+  const response = await axios.post(API_FILE_LIST, {
+    directoryPath: path,
   });
   return response.data;
 };
@@ -67,11 +65,9 @@ export const getColumnList = async (
   tableName: string,
   isNumberOnly: string = "false"
 ): Promise<apiTypes.ResGetColumnInfoType> => {
-  const response = await axios.get(API_COLUMN_LIST, {
-    params: {
-      tableName: tableName,
-      isNumberOnly: isNumberOnly,
-    },
+  const response = await axios.post(API_COLUMN_LIST, {
+    tableName: tableName,
+    isNumberOnly: isNumberOnly,
   });
   return response.data;
 };
@@ -81,12 +77,10 @@ export const fetchDataToJson = async (
   startRow: number = 1,
   fetchRows: number = 100
 ): Promise<apiTypes.ResFetchDataToJsonType> => {
-  const response = await axios.get(API_TABLE_FETCH_DATA, {
-    params: {
-      tableName: tableName,
-      startRow: startRow,
-      fetchRows: fetchRows,
-    },
+  const response = await axios.post(API_TABLE_FETCH_DATA, {
+    tableName: tableName,
+    startRow: startRow,
+    fetchRows: fetchRows,
   });
   return response.data;
 };

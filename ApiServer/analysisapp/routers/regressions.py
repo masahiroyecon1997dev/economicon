@@ -1,24 +1,22 @@
-from fastapi import APIRouter, Request, status as http_status
+from fastapi import APIRouter, Request
+from fastapi import status as http_status
 
-from ..utils import create_success_response, create_log_api_request
-from ..schemas import (
-    LinearRegressionRequest,
-    LogisticRegressionRequest,
-    ProbitRegressionRequest,
-    VariableEffectsEstimationRequest,
-    FixedEffectsEstimationRequest
-)
+from ..schemas import (FixedEffectsEstimationRequest, LinearRegressionRequest,
+                       LogisticRegressionRequest, ProbitRegressionRequest,
+                       VariableEffectsEstimationRequest)
+from ..services.fixed_effects_estimation import fixed_effects_estimation
 from ..services.linear_regression import linear_regression
 from ..services.logistic_regression import logistic_regression
 from ..services.probit_regression import probit_regression
 from ..services.variable_effects_estimation import variable_effects_estimation
-from ..services.fixed_effects_estimation import fixed_effects_estimation
+from ..utils import create_log_api_request, create_success_response
 
 router = APIRouter(prefix="/regression", tags=["regression"])
 
 
 @router.post("/linear")
-async def linear_regression_endpoint(request: Request, body: LinearRegressionRequest):
+async def linear_regression_endpoint(request: Request,
+                                     body: LinearRegressionRequest):
     """線形回帰分析を実行するエンドポイント
 
     Parameters
@@ -51,7 +49,8 @@ async def linear_regression_endpoint(request: Request, body: LinearRegressionReq
 
 
 @router.post("/logistic")
-async def logistic_regression_endpoint(request: Request, body: LogisticRegressionRequest):
+async def logistic_regression_endpoint(request: Request,
+                                       body: LogisticRegressionRequest):
     """ロジット分析を実行するエンドポイント
 
     Parameters
@@ -84,7 +83,8 @@ async def logistic_regression_endpoint(request: Request, body: LogisticRegressio
 
 
 @router.post("/probit")
-async def probit_regression_endpoint(request: Request, body: ProbitRegressionRequest):
+async def probit_regression_endpoint(request: Request,
+                                     body: ProbitRegressionRequest):
     """プロビット分析を実行するエンドポイント
 
     Parameters
@@ -117,7 +117,8 @@ async def probit_regression_endpoint(request: Request, body: ProbitRegressionReq
 
 
 @router.post("/variable-effects")
-async def variable_effects_estimation_endpoint(request: Request, body: VariableEffectsEstimationRequest):
+async def variable_effects_estimation_endpoint(
+        request: Request, body: VariableEffectsEstimationRequest):
     """変量効果推定分析を実行するエンドポイント
 
     Parameters
@@ -154,7 +155,8 @@ async def variable_effects_estimation_endpoint(request: Request, body: VariableE
 
 
 @router.post("/fixed-effects")
-async def fixed_effects_estimation_endpoint(request: Request, body: FixedEffectsEstimationRequest):
+async def fixed_effects_estimation_endpoint(
+        request: Request, body: FixedEffectsEstimationRequest):
     """固定効果推定を実行するエンドポイント
 
     Parameters

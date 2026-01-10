@@ -1,18 +1,17 @@
-from fastapi import APIRouter, Request, status as http_status
+from fastapi import APIRouter, Request
+from fastapi import status as http_status
 
-from ..utils import create_success_response, create_log_api_request
-from ..schemas import (
-    InputCellDataRequest,
-    FilterSingleConditionRequest
-)
-from ..services.input_cell_data import input_cell_data
+from ..schemas import FilterSingleConditionRequest, InputCellDataRequest
 from ..services.filter_single_condition import filter_single_condition
+from ..services.input_cell_data import input_cell_data
+from ..utils import create_log_api_request, create_success_response
 
 router = APIRouter(prefix="/operation", tags=["operation"])
 
 
 @router.post("/input-cell-data")
-async def input_cell_data_endpoint(request: Request, body: InputCellDataRequest):
+async def input_cell_data_endpoint(request: Request,
+                                   body: InputCellDataRequest):
     """セルデータ入力エンドポイント
 
     Parameters
@@ -47,7 +46,8 @@ async def input_cell_data_endpoint(request: Request, body: InputCellDataRequest)
 
 
 @router.post("/filter-single-condition")
-async def filter_single_condition_endpoint(request: Request, body: FilterSingleConditionRequest):
+async def filter_single_condition_endpoint(request: Request,
+                                           body: FilterSingleConditionRequest):
     """単一条件フィルタリングを実行するエンドポイント
 
     Parameters

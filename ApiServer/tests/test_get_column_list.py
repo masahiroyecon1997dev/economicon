@@ -33,7 +33,10 @@ def tables_manager():
 
 def test_get_column_info_list_success(client, tables_manager):
     """正常系テスト：テーブルが存在する場合"""
-    response = client.get(f'/api/column/list?tableName={table_name}')
+    response = client.post(
+        '/api/column/get-list',
+        json={'tableName': table_name}
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
@@ -49,8 +52,9 @@ def test_get_column_info_list_success(client, tables_manager):
 
 def test_get_column_info_list_number_success(client, tables_manager):
     """正常系テスト：テーブルが存在する場合（数値型の列のみ）"""
-    response = client.get(
-        f'/api/column/list?tableName={table_name}&isNumberOnly=true'
+    response = client.post(
+        '/api/column/get-list',
+        json={'tableName': table_name, 'isNumberOnly': 'true'}
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
@@ -69,8 +73,9 @@ def test_get_column_info_list_number_success(client, tables_manager):
 def test_get_column_info_list_table_not_found(client, tables_manager):
     """異常系テスト：存在しないテーブル名の場合"""
     non_existent_table_name = "non_existent_table"
-    response = client.get(
-        f'/api/column/list?tableName={non_existent_table_name}'
+    response = client.post(
+        '/api/column/get-list',
+        json={'tableName': non_existent_table_name}
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -87,7 +92,10 @@ def test_get_column_info_list_exception(client, tables_manager):
         raise Exception("DB error")
 
     tables_manager.get_column_info_list = raise_exception
-    response = client.get(f'/api/column/list?tableName={table_name}')
+    response = client.post(
+        '/api/column/get-list',
+        json={'tableName': table_name}
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
