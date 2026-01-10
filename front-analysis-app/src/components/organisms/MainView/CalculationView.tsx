@@ -7,6 +7,7 @@ import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
 import { InputText } from "../../atoms/Input/InputText";
+import { SearchInput } from "../../atoms/Input/SearchInput";
 import { Select } from "../../atoms/Input/Select";
 import { SelectOption } from "../../atoms/Input/SelectOption";
 import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
@@ -276,17 +277,12 @@ export const CalculationView = () => {
                   <span className="material-symbols-outlined text-[18px] text-primary">view_column</span>
                   {t("CalculationView.AvailableColumns")}
                 </h3>
-                <div className="mt-2 relative">
-                  <input
-                    className="w-full text-xs rounded border border-neutral-300 dark:border-neutral-600 px-2 py-1.5 bg-white dark:bg-neutral-800 focus:border-accent focus:ring-1 focus:ring-accent"
+                <div className="mt-2">
+                  <SearchInput
                     placeholder={t("CalculationView.FilterColumns")}
-                    type="text"
                     value={filterValue}
-                    onChange={(e) => setFilterValue(e.target.value)}
+                    onChange={setFilterValue}
                   />
-                  <span className="material-symbols-outlined absolute right-2 top-1.5 text-neutral-400 text-[16px]">
-                    search
-                  </span>
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto p-2 space-y-1">

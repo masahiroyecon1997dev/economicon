@@ -2,9 +2,9 @@
 import { MoreVertical } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DropdownMenu } from "../../molecules/Menu/DropdownMenu";
-import { MenuItem } from "../Menu/MenuItem";
-import { Tooltip } from "../Tooltip/Tooltip";
+import { MenuItem } from "../../atoms/Menu/MenuItem";
+import { Tooltip } from "../../atoms/Tooltip/Tooltip";
+import { DropdownMenu } from "../Menu/DropdownMenu";
 
 type TableNavItemProps = {
   tableName: string;
