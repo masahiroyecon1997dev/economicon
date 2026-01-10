@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 # test用テーブル名とデータ
 table_name = "test_table"
@@ -12,6 +11,7 @@ test_data = pl.DataFrame({
     "column1": [1, 2, 3, 4, 5],
     "column2": ["a", "b", "c", "d", "e"]
 })
+
 
 @pytest.fixture
 def client():
@@ -22,7 +22,7 @@ def client():
 @pytest.fixture
 def tables_manager():
     """TablesManagerのフィクスチャ"""
-        # テスト用のテーブルをセットアップ
+    # テスト用のテーブルをセットアップ
     manager = TablesManager()
     # テーブルをクリア
     manager.clear_tables()
@@ -30,7 +30,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_fetch_data_to_json_success(client, tables_manager):
@@ -66,7 +65,8 @@ def test_fetch_data_to_json_table_not_found(client, tables_manager):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "tableName 'non_existent_table' does not exist." == response_data['message']
+    message = "tableName 'non_existent_table' does not exist."
+    assert message == response_data['message']
 
 
 def test_fetch_data_to_json_invalid_start_row_range(client, tables_manager):
@@ -117,7 +117,7 @@ def test_fetch_data_to_json_missing_start_row(client, tables_manager):
         f'/api/table/fetch-data?tableName={table_name}'
         f'&startRow={start_row}&fetchRows={fetch_rows}',
     )
-    response_data = response.json()
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert "startRow is required." == response_data['message']
 
@@ -130,7 +130,7 @@ def test_fetch_data_to_json_missing_fetch_rows(client, tables_manager):
         f'/api/table/fetch-data?tableName={table_name}'
         f'&startRow={start_row}&fetchRows={fetch_rows}',
     )
-    response_data = response.json()
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert "fetchRows is required." == response_data['message']
 

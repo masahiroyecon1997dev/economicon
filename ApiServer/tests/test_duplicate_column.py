@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -29,7 +28,6 @@ def prepared_data():
     yield manager, df
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_duplicate_column_success(client, prepared_data):

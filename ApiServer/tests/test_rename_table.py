@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -27,7 +26,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_rename_table_success(client, tables_manager):
@@ -62,7 +60,8 @@ def test_rename_table_not_found(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "oldTableName 'NotExist' does not exist." == response_data['message']
+    message = "oldTableName 'NotExist' does not exist."
+    assert message == response_data['message']
 
 
 def test_rename_table_empty_old_table_name(client, tables_manager):

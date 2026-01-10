@@ -1,12 +1,12 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-import polars as pl
-import tempfile
 import shutil
+import tempfile
 
-from main import app
+import polars as pl
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -29,7 +29,6 @@ def prepared_data():
     shutil.rmtree(test_dir, ignore_errors=True)
 
 
-
 def test_upload_valid_excel_file(client, prepared_data):
     """
     有効なExcel(xlsx)ファイルをアップロードした場合のテスト
@@ -44,7 +43,12 @@ def test_upload_valid_excel_file(client, prepared_data):
         f'{test_dir}/TestDataXlsx.xlsx')
     with open(f'{test_dir}/TestDataXlsx.xlsx', 'rb') as f:
         response = client.post('/api/data/import-excel-by-file',
-                               files={'file': ('TestDataXlsx.xlsx', f, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')})
+                               files={'file': ('TestDataXlsx.xlsx',
+                                               f,
+                                               ('application/'
+                                                'vnd.openxmlformats'
+                                                '-officedocument.spreadsheetml'
+                                                '.sheet'))})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     # レスポンスデータの検証
@@ -69,7 +73,9 @@ def test_upload_valid_excel_file_with_extension_xls(client, prepared_data):
         f'{test_dir}/TestDataXls.xls')
     with open(f'{test_dir}/TestDataXls.xls', 'rb') as f:
         response = client.post('/api/data/import-excel-by-file',
-                               files={'file': ('TestDataXls.xls', f, 'application/vnd.ms-excel')})
+                               files={'file': ('TestDataXls.xls',
+                                               f,
+                                               'application/vnd.ms-excel')})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     # レスポンスデータの検証
@@ -94,7 +100,12 @@ def test_upload_excel_with_only_headers(client, prepared_data):
         f'{test_dir}/OnlyHeaderExcel.xlsx')
     with open(f'{test_dir}/OnlyHeaderExcel.xlsx', 'rb') as f:
         response = client.post('/api/data/import-excel-by-file',
-                               files={'file': ('OnlyHeaderExcel.xlsx', f, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')})
+                               files={'file': ('OnlyHeaderExcel.xlsx',
+                                               f,
+                                               ('application/vnd'
+                                                '.openxmlformats'
+                                                '-officedocument.spreadsheetml'
+                                                '.sheet'))})
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
@@ -108,7 +119,7 @@ def test_no_file_uploaded(client, prepared_data):
     """
     tables_manager, test_dir = prepared_data
     response = client.post('/api/data/import-csv-by-file')
-    response_data = response.json()
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert response_data['code'] == 'NG'
     # assert response_data['message'] == "No file uploaded."
@@ -128,7 +139,9 @@ def test_upload_non_excel_file(client, prepared_data):
         f'{test_dir}/TestDataComma.csv', separator=',')
     with open(f'{test_dir}/TestDataComma.csv', 'rb') as f:
         response = client.post('/api/data/import-excel-by-file',
-                               files={'file': ('TestDataComma.csv', f, 'multipart/form-data')})
+                               files={'file': ('TestDataComma.csv',
+                                               f,
+                                               'multipart/form-data')})
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
@@ -145,11 +158,14 @@ def test_upload_empty_excel_file(client, prepared_data):
         f'{test_dir}/Empty.xlsx')
     with open(f'{test_dir}/Empty.xlsx', 'rb') as f:
         response = client.post('/api/data/import-excel-by-file',
-                               files={'file': ('Empty.xlsx', f, 'multipart/form-data')})
+                               files={'file': ('Empty.xlsx',
+                                               f,
+                                               'multipart/form-data')})
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
-    assert "The uploaded EXCEL file is empty or contains no valid data." == response_data['message']
+    message = "The uploaded EXCEL file is empty or contains no valid data."
+    assert message == response_data['message']
 
 
 @pytest.mark.skip(reason="このテストは現在、発生させる方法が不明なためスキップされています。")
@@ -161,8 +177,13 @@ def test_upload_malformed_excel_file(client, prepared_data):
     with open('/AnalysisApp/AnalysisApp'
               '/SampleData/Error.xlsx', 'rb') as f:
         response = client.post('/api/data/import-excel-by-file',
-                               files={'file': ('Error.xlsx', f, 'multipart/form-data')})
+                               files={'file': ('Error.xlsx',
+                                               f,
+                                               'multipart/form-data')})
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Invalid file content type. Allowed types: pplication/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/CDFV2" == response_data['message']
+    message = ("Invalid file content type. Allowed types: "
+               "pplication/vnd.openxmlformats-officedocument.spreadsheetml"
+               ".sheet, application/vnd.ms-excel, application/CDFV2")
+    assert message == response_data['message']

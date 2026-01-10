@@ -9,10 +9,7 @@ dependencies = [
     "fastapi>=0.128.0",
     "fastexcel>=0.18.0",
     "numpy>=2.4.0",
-    "pip-licenses>=5.5.0",
-    "pipdeptree>=2.30.0",
     "polars>=1.36.1",
-    "pyinstaller>=6.17.0",
     "python-magic; sys_platform != 'win32'",      # Linux/macOS用
     "python-magic-bin; sys_platform == 'win32'",  # Windows用
     "python-multipart>=0.0.21",
@@ -20,9 +17,19 @@ dependencies = [
     "scipy>=1.16.3",
     "statsmodels>=0.14.6",
     "uvicorn[standard]>=0.40.0",
-    "wooldridge>=0.5.0",
     "xlsxwriter>=3.2.9",
+    "fastapi-babel>=1.0.0",
 ]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pip-licenses>=5.5.0",
+    "pipdeptree>=2.30.0",
+    "pyinstaller>=6.17.0",
+    "pytest>=9.0.2",
+    "wooldridge>=0.5.0",
+]

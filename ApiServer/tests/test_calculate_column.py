@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -31,7 +30,6 @@ def tables_manager():
     yield manager
     # テスト後にクリーンアップ
     manager.clear_tables()
-
 
 
 def test_calculate_column_simple_addition(client, tables_manager):
@@ -132,7 +130,8 @@ def test_calculate_column_invalid_column(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnName in calculationExpression 'Z' does not exist." in response_data['message']
+    message = "columnName in calculationExpression 'Z' does not exist."
+    assert message == response_data['message']
 
 
 def test_calculate_column_non_numeric_column(client, tables_manager):
@@ -149,7 +148,8 @@ def test_calculate_column_non_numeric_column(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnName in calculationExpression 'text_col' is not numeric" in response_data['message']
+    message = "columnName in calculationExpression 'text_col' is not numeric."
+    assert message == response_data['message']
 
 
 def test_calculate_column_empty_expression(client, tables_manager):
@@ -183,7 +183,8 @@ def test_calculate_column_no_column_reference(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "calculationExpression must be with at least 1 column." in response_data['message']
+    message = "calculationExpression must be with at least 1 column."
+    assert message == response_data['message']
 
 
 def test_calculate_column_duplicate_column_name(client, tables_manager):
