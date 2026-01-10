@@ -32,7 +32,6 @@
       "request": "launch",
       "module": "pytest",
       "args": ["tests", "-v"],
-      "purpose": ["debug-test"],
       "justMyCode": true,
       "cwd": "${workspaceFolder}/ApiServer"
     }

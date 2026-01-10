@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -34,7 +33,6 @@ def tables_manager():
     manager.clear_tables()
 
 
-
 def test_delete_table_success(client, tables_manager):
     payload = {
         'tableName': 'TestTable2'
@@ -61,7 +59,8 @@ def test_delete_table_not_found(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NotExistTable' does not exist." in response_data['message']
+    message = "tableName 'NotExistTable' does not exist."
+    assert message == response_data['message']
 
 
 def test_delete_table_empty_table_name(client, tables_manager):

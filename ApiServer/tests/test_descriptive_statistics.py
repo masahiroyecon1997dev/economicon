@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -37,7 +36,6 @@ def tables_manager():
     manager.clear_tables()
 
 
-
 def test_descriptive_statistics_success_numeric(client, tables_manager):
     # 数値データに対する記述統計の計算が正常に動作する
     payload = {
@@ -57,8 +55,11 @@ def test_descriptive_statistics_success_numeric(client, tables_manager):
     assert result['tableName'] == 'TestTableNumeric'
     assert result['statistics']['A']['mean'] == pytest.approx(3.0, abs=1e-5)
     assert result['statistics']['A']['median'] == pytest.approx(3.0, abs=1e-5)
-    assert result['statistics']['A']['variance'] == pytest.approx(2.5, abs=1e-5)
-    assert result['statistics']['A']['std'] == pytest.approx(1.5811388300841898, abs=1e-5)
+    assert result['statistics']['A']['variance'] == pytest.approx(2.5,
+                                                                  abs=1e-5)
+    assert result['statistics']['A']['std'] == pytest.approx(
+        1.5811388300841898,
+        abs=1e-5)
 
 
 def test_descriptive_statistics_success_all_stats(client, tables_manager):
@@ -82,7 +83,6 @@ def test_descriptive_statistics_success_all_stats(client, tables_manager):
     assert result['statistics']['B']['median'] == pytest.approx(30.0, abs=1e-5)
     assert result['statistics']['B']['range'] == pytest.approx(40.0, abs=1e-5)
     assert result['statistics']['B']['iqr'] == pytest.approx(20.0, abs=1e-5)
-
 
 
 def test_descriptive_statistics_success_string_mode(client, tables_manager):
@@ -161,7 +161,6 @@ def test_descriptive_statistics_invalid_column(client, tables_manager):
     assert "columnName 'Z' does not exist." == response_data['message']
 
 
-
 def test_descriptive_statistics_invalid_statistic(client, tables_manager):
     # サポートされていない統計を指定
     payload = {
@@ -176,8 +175,10 @@ def test_descriptive_statistics_invalid_statistic(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "statistics 'invalid_stat' is not supported. Available: ['mean', 'mode', 'median', 'variance', 'std', 'range', 'iqr']" == response_data['message']
-
+    message = ("statistics 'invalid_stat' is not supported. "
+               "Available: ['mean', 'mode', 'median', "
+               "'variance', 'std', 'range', 'iqr']")
+    assert message == response_data['message']
 
 
 def test_descriptive_statistics_empty_statistics_list(client, tables_manager):

@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -35,7 +34,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_inner_join(client, tables_manager):
@@ -127,7 +125,7 @@ def test_outer_join(client, tables_manager):
     assert df.shape == (6, 3)
     assert df['id'].to_list() == [1, 2, 3, 4, 5, 6]
     assert df['val_left'].to_list() == ['A', 'B', 'C', 'D',
-                                                    None, None]
+                                        None, None]
     assert df['val_right'].to_list() == [None, None, 'X', 'Y',
                                                      'Z', 'W']
 
@@ -167,7 +165,8 @@ def test_left_table_not_found(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "leftTableName 'NotExist' does not exist." == response_data['message']
+    message = "leftTableName 'NotExist' does not exist."
+    assert message == response_data['message']
 
 
 def test_right_table_not_found(client, tables_manager):
@@ -186,7 +185,8 @@ def test_right_table_not_found(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "rightTableName 'NotExist' does not exist." == response_data['message']
+    message = "rightTableName 'NotExist' does not exist."
+    assert message == response_data['message']
 
 
 def test_left_key_column_not_found(client, tables_manager):
@@ -205,7 +205,8 @@ def test_left_key_column_not_found(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "leftKeyColumnNames 'not_exist_col' does not exist." == response_data['message']
+    message = "leftKeyColumnNames 'not_exist_col' does not exist."
+    assert message == response_data['message']
 
 
 def test_right_key_column_not_found(client, tables_manager):
@@ -224,7 +225,8 @@ def test_right_key_column_not_found(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "rightKeyColumnNames 'not_exist_col' does not exist." == response_data['message']
+    message = "rightKeyColumnNames 'not_exist_col' does not exist."
+    assert message == response_data['message']
 
 
 def test_invalid_join_type(client, tables_manager):
@@ -243,4 +245,6 @@ def test_invalid_join_type(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "joinType 'invalid_type' is not supported. Supported joinType: inner, left, right, outer" == response_data['message']
+    message = ("joinType 'invalid_type' is not supported. "
+               "Supported joinType: inner, left, right, outer")
+    assert message == response_data['message']

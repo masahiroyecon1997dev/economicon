@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -28,7 +27,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_filter_equals(client, tables_manager):
@@ -280,4 +278,7 @@ def test_filter_invalid_condition(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "condition 'invalid_condition' is not supported. Supported condition: equals, notEquals, greaterThan, lessThan, greaterThanOrEquals, lessThanOrEquals" == response_data['message']
+    message = ("condition 'invalid_condition' is not supported. "
+               "Supported condition: equals, notEquals, greaterThan, "
+               "lessThan, greaterThanOrEquals, lessThanOrEquals")
+    assert message == response_data['message']

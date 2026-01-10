@@ -1,11 +1,10 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-import polars as pl
 import numpy as np
-
-from main import app
+import polars as pl
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -67,7 +66,6 @@ def tables_manager():
     manager.clear_tables()
 
 
-
 def test_fixed_effects_estimation_success(client, tables_manager):
     """正常に固定効果推定が実行できる"""
     payload = {
@@ -124,7 +122,8 @@ def test_fixed_effects_estimation_success(client, tables_manager):
     assert x2_coeff == pytest.approx(-0.8, abs=0.5)
 
 
-def test_fixed_effects_estimation_robust_standard_errors(client, tables_manager):
+def test_fixed_effects_estimation_robust_standard_errors(client,
+                                                         tables_manager):
     """頑健な標準誤差で固定効果推定が実行できる"""
     payload = {
         'tableName': 'PanelData',
@@ -143,10 +142,11 @@ def test_fixed_effects_estimation_robust_standard_errors(client, tables_manager)
     assert response_data['code'] == 'OK'
     result = response_data['result']
     assert result['modelStatistics']['standardErrorMethod'] == 'robust'
-    assert result['modelStatistics']['useTDistribution'] == False
+    assert result['modelStatistics']['useTDistribution'] is False
 
 
-def test_fixed_effects_estimation_clustered_standard_errors(client, tables_manager):
+def test_fixed_effects_estimation_clustered_standard_errors(client,
+                                                            tables_manager):
     """クラスター標準誤差で固定効果推定が実行できる"""
     payload = {
         'tableName': 'PanelData',
@@ -203,11 +203,12 @@ def test_fixed_effects_estimation_invalid_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist." == response_data['message']
+    message = "tableName 'NonExistentTable' does not exist."
+    assert message == response_data['message']
 
 
-
-def test_fixed_effects_estimation_invalid_dependent_variable(client, tables_manager):
+def test_fixed_effects_estimation_invalid_dependent_variable(client,
+                                                             tables_manager):
     """存在しない被説明変数でエラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -222,10 +223,12 @@ def test_fixed_effects_estimation_invalid_dependent_variable(client, tables_mana
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "dependentVariable 'nonexistent_y' does not exist." == response_data['message']
+    message = "dependentVariable 'nonexistent_y' does not exist."
+    assert message == response_data['message']
 
 
-def test_fixed_effects_estimation_invalid_explanatory_variable(client, tables_manager):
+def test_fixed_effects_estimation_invalid_explanatory_variable(client,
+                                                               tables_manager):
     """存在しない説明変数でエラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -240,10 +243,12 @@ def test_fixed_effects_estimation_invalid_explanatory_variable(client, tables_ma
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables 'nonexistent_x' does not exist." == response_data['message']
+    message = "explanatoryVariables 'nonexistent_x' does not exist."
+    assert message == response_data['message']
 
 
-def test_fixed_effects_estimation_invalid_entity_id_column(client, tables_manager):
+def test_fixed_effects_estimation_invalid_entity_id_column(client,
+                                                           tables_manager):
     """存在しない個体ID列でエラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -258,10 +263,12 @@ def test_fixed_effects_estimation_invalid_entity_id_column(client, tables_manage
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "entityIdColumn 'nonexistent_id' does not exist." == response_data['message']
+    message = "entityIdColumn 'nonexistent_id' does not exist."
+    assert message == response_data['message']
 
 
-def test_fixed_effects_estimation_entity_id_same_as_dependent(client, tables_manager):
+def test_fixed_effects_estimation_entity_id_same_as_dependent(client,
+                                                              tables_manager):
     """個体ID列が被説明変数と同じ場合エラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -276,10 +283,12 @@ def test_fixed_effects_estimation_entity_id_same_as_dependent(client, tables_man
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Entity ID column cannot be the same as dependent variable" == response_data['message']
+    message = "Entity ID column cannot be the same as dependent variable"
+    assert message == response_data['message']
 
 
-def test_fixed_effects_estimation_entity_id_in_explanatory(client, tables_manager):
+def test_fixed_effects_estimation_entity_id_in_explanatory(client,
+                                                           tables_manager):
     """個体ID列が説明変数に含まれている場合エラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -294,10 +303,13 @@ def test_fixed_effects_estimation_entity_id_in_explanatory(client, tables_manage
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Entity ID column cannot be included in explanatory variables" == response_data['message']
+    message = "Entity ID column cannot be included in explanatory variables"
+    assert message == response_data['message']
 
 
-def test_fixed_effects_estimation_invalid_standard_error_method(client, tables_manager):
+def test_fixed_effects_estimation_invalid_standard_error_method(client,
+                                                                tables_manager
+                                                                ):
     """無効な標準誤差計算方法でエラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -313,7 +325,9 @@ def test_fixed_effects_estimation_invalid_standard_error_method(client, tables_m
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "standardErrorMethod 'invalid_method' is not supported. Supported standardErrorMethod: normal, clustered, robust, hac" == response_data['message']
+    message = ("standardErrorMethod 'invalid_method' is not supported. "
+               "Supported standardErrorMethod: normal, clustered, robust, hac")
+    assert message == response_data['message']
 
 
 def test_fixed_effects_estimation_single_period_data(client, tables_manager):
@@ -331,9 +345,13 @@ def test_fixed_effects_estimation_single_period_data(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
-    assert "No entities with multiple observations found. Fixed effects requires multiple time periods per entity." == response_data['message']
+    message = ("No entities with multiple observations found. "
+               "Fixed effects requires multiple time periods per entity.")
+    assert message == response_data['message']
 
-def test_fixed_effects_estimation_empty_explanatory_variables(client, tables_manager):
+
+def test_fixed_effects_estimation_empty_explanatory_variables(client,
+                                                              tables_manager):
     """説明変数が空の場合エラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -348,10 +366,13 @@ def test_fixed_effects_estimation_empty_explanatory_variables(client, tables_man
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables must be with at least 1 explanatory_variable." == response_data['message']
+    message = ("explanatoryVariables must be with at least 1 "
+               "explanatory_variable.")
+    assert message == response_data['message']
 
 
-def test_fixed_effects_estimation_dependent_in_explanatory(client, tables_manager):
+def test_fixed_effects_estimation_dependent_in_explanatory(client,
+                                                           tables_manager):
     """被説明変数が説明変数に含まれている場合エラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -366,10 +387,12 @@ def test_fixed_effects_estimation_dependent_in_explanatory(client, tables_manage
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Dependent variable cannot be included in explanatory variables" == response_data['message']
+    message = "Dependent variable cannot be included in explanatory variables"
+    assert message == response_data['message']
 
 
-def test_fixed_effects_estimation_missing_required_parameters(client, tables_manager):
+def test_fixed_effects_estimation_missing_required_parameters(client,
+                                                              tables_manager):
     """必須パラメータが不足している場合エラーが返される"""
     # entityIdColumn がない場合
     payload = {
@@ -381,13 +404,14 @@ def test_fixed_effects_estimation_missing_required_parameters(client, tables_man
         '/api/regression/fixed-effects',
         json=payload,
     )
-    response_data = response.json()
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert response_data['code'] == 'NG'
     # assert "Required parameter is missing" == response_data['message']
 
 
-def test_fixed_effects_estimation_single_explanatory_variable(client, tables_manager):
+def test_fixed_effects_estimation_single_explanatory_variable(client,
+                                                              tables_manager):
     """単一の説明変数でも固定効果推定が実行できる"""
     payload = {
         'tableName': 'PanelData',
@@ -409,7 +433,8 @@ def test_fixed_effects_estimation_single_explanatory_variable(client, tables_man
     assert parameters[0]['variable'] == 'x1'
 
 
-def test_fixed_effects_estimation_with_default_parameters(client, tables_manager):
+def test_fixed_effects_estimation_with_default_parameters(client,
+                                                          tables_manager):
     """デフォルトパラメータで固定効果推定が実行できる"""
     payload = {
         'tableName': 'PanelData',
@@ -428,4 +453,4 @@ def test_fixed_effects_estimation_with_default_parameters(client, tables_manager
     stats = result['modelStatistics']
     # デフォルト値の確認
     assert stats['standardErrorMethod'] == 'normal'
-    assert stats['useTDistribution'] == True
+    assert stats['useTDistribution'] is True

@@ -1,10 +1,9 @@
-﻿import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-import polars as pl
-
-from main import app
+﻿import polars as pl
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -28,7 +27,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_add_uniform_column_success(client, tables_manager):
@@ -257,7 +255,11 @@ def test_unsupported_distribution(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "distributionType 'unsupported' is not supported" in response_data['message']
+    message = ("distributionType 'unsupported' is not supported. "
+               "Supported distributionType: uniform, exponential, normal, "
+               "gamma, beta, weibull, lognormal, binomial, bernoulli, "
+               "poisson, geometric, hypergeometric")
+    assert message == response_data['message']
 
 
 def test_invalid_uniform_params(client, tables_manager):
@@ -299,7 +301,8 @@ def test_missing_required_params(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Normal distribution requires 'loc' and 'scale' parameters" in response_data['message']
+    message = "Normal distribution requires 'loc' and 'scale' parameters"
+    assert message == response_data['message']
 
 
 def test_invalid_param_type(client, tables_manager):
