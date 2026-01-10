@@ -1,7 +1,6 @@
 from typing import List
 
 import polars as pl
-from analysisapp.i18n.translation import gettext_lazy as _
 
 from .common_validators import (ValidationError, validate_candidates,
                                 validate_column_is_numeric, validate_integer,
@@ -195,5 +194,5 @@ def validate_dependent_variable(
                                column_type)
     # 被説明変数が説明変数に含まれていないかチェック
     if dependent_variable in explanatory_variables:
-        raise ValidationError(_("Dependent variable cannot be "
-                                "included in explanatory variables"))
+        raise ValidationError("Dependent variable cannot be "
+                              "included in explanatory variables")

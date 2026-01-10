@@ -1,23 +1,21 @@
 """FastAPI メインアプリケーション
 
 """
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+import logging
+import os
+import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
-import webbrowser
-import os
-import logging
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+
 from analysisapp.exception_handlers import init_exception_handlers
 from analysisapp.routers import api_router
-from analysisapp.services.data.tables_manager import TablesManager
 from analysisapp.services.data.settings_manager import SettingsManager
-
-
-# i18n サポート
-from analysisapp.i18n import set_locale, get_locale
+from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi_babel import Babel, BabelConfigs
 
 # ロガーのセットアップ
 # "uvicorn.error" を使うと、Uvicornの標準ログと同じ形式で出力されます
@@ -27,6 +25,14 @@ logger = logging.getLogger("uvicorn.error")
 BASE_DIR = Path(__file__).resolve().parent
 # 静的ファイルのディレクトリ
 STATIC_DIR = BASE_DIR / "static"
+
+# Babel設定
+configs = BabelConfigs(
+    ROOT_DIR=str(BASE_DIR),
+    BABEL_DEFAULT_LOCALE="ja",
+    BABEL_TRANSLATION_DIRECTORY="analysisapp/locales",
+)
+babel = Babel(configs=configs)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -67,18 +73,21 @@ app.add_middleware(
 )
 
 
-# i18nミドルウェア
+# i18nミドルウェア（fastapi-babelが自動的に処理）
+# リクエストのAccept-Languageヘッダーから言語が自動検出されます
 @app.middleware("http")
-async def i18n_middleware(request: Request, call_next):
-    """リクエストごとに言語を設定するミドルウェア"""
+async def babel_middleware(request: Request, call_next):
+    """リクエストごとにBabelのロケールを設定"""
     # Accept-Languageヘッダーから言語を取得
     accept_language = request.headers.get("Accept-Language", "ja")
-    # 最初の言語コードを取得（例: "ja-JP,ja;q=0.9,en;q=0.8" -> "ja"）
     locale = accept_language.split(",")[0].split("-")[0].split(";")[0]
-    # サポートされている言語のみ設定（デフォルトは日本語）
+
+    # サポートされている言語のみ設定
     if locale not in ['ja', 'en']:
         locale = 'ja'
-    set_locale(locale)
+
+    # Babelのロケールを設定
+    babel.locale = locale
 
     response = await call_next(request)
     return response
@@ -92,7 +101,8 @@ async def root():
         return FileResponse(index_path)
     else:
         # ファイルがない場合はJSONメッセージなどを返す
-        return JSONResponse(content={"message": "No index.html found in static folder."})
+        return JSONResponse(content={"message": ("No index.html "
+                                                 "found in static folder.")})
 
 
 @app.get("/health")

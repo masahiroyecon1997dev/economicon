@@ -1,9 +1,8 @@
 import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-
-from main import app
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -19,7 +18,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_create_table_success(client, tables_manager):
@@ -71,7 +69,7 @@ def test_create_table_invalid_number_of_rows(client, tables_manager):
         '/api/table/create',
         json=payload,
     )
-    response_data = response.json()
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert response_data['code'] == 'NG'
     # assert "tableNumberOfRows must be a number." == response_data['message']
@@ -91,4 +89,5 @@ def test_create_table_invalid_columns(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnNames must be with at least 1 item." == response_data['message']
+    message = "columnNames must be with at least 1 item."
+    assert message == response_data['message']

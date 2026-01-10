@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -27,7 +26,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_input_cell_data_success(client, tables_manager):
@@ -128,7 +126,7 @@ def test_input_cell_data_invalid_row_string(client, tables_manager):
         '/api/operation/input-cell-data',
         json=payload,
     )
-    response_data = response.json()
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert response_data['code'] == 'NG'
     # assert "rowIndex must be an integer." == response_data['message']

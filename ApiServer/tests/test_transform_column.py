@@ -1,11 +1,11 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-import polars as pl
 import math
 
-from main import app
+import polars as pl
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -30,7 +30,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_transform_column_log_natural_success(client, tables_manager):
@@ -250,7 +249,6 @@ def test_transform_column_invalid_table(client, tables_manager):
     assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
-
 def test_transform_column_invalid_source_column(client, tables_manager):
     # 存在しないソースカラム名
     payload = {
@@ -302,7 +300,9 @@ def test_transform_column_invalid_method(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "transformMethod 'invalid' is invalid. Valid methods are: log, power, root" == response_data['message']
+    assert ("transformMethod 'invalid' is invalid. Valid methods are: "
+            "log, power, root") == response_data[
+        'message']
 
 
 def test_transform_column_invalid_log_base(client, tables_manager):
@@ -321,8 +321,8 @@ def test_transform_column_invalid_log_base(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "logBase must be a positive number not equal to 1" == response_data['message']
-
+    assert "logBase must be a positive number not equal to 1" \
+        == response_data['message']
 
 
 def test_transform_column_negative_log_base(client, tables_manager):
@@ -341,4 +341,5 @@ def test_transform_column_negative_log_base(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "logBase must be a positive number not equal to 1" == response_data['message']
+    assert "logBase must be a positive number not equal to 1" \
+        == response_data['message']

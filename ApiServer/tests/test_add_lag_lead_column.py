@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -29,7 +28,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_add_lag_column_success_no_group(client, tables_manager):
@@ -167,7 +165,8 @@ def test_add_lag_lead_column_invalid_source_column(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "sourceColumn 'nonexistent' does not exist." == response_data['message']
+    message = "sourceColumn 'nonexistent' does not exist."
+    assert message == response_data['message']
 
 
 def test_add_lag_lead_column_invalid_group_column(client, tables_manager):
@@ -186,7 +185,8 @@ def test_add_lag_lead_column_invalid_group_column(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "groupColumns 'nonexistent' does not exist." == response_data['message']
+    message = "groupColumns 'nonexistent' does not exist."
+    assert message == response_data['message']
 
 
 def test_add_lag_lead_column_existing_column_name(client, tables_manager):
@@ -206,7 +206,6 @@ def test_add_lag_lead_column_existing_column_name(client, tables_manager):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
     assert "newColumnName 'group' already exists." == response_data['message']
-
 
 
 def test_add_lag_lead_column_multiple_periods(client, tables_manager):

@@ -1,14 +1,14 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-import polars as pl
-import os
-import tempfile
-import shutil
 import json
+import os
+import shutil
+import tempfile
 
-from main import app
+import polars as pl
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -50,8 +50,7 @@ def test_export_excel_by_path_success(client, prepared_data):
         'fileName': 'test_output.xlsx'
     }
     response = client.post('/api/data/export-excel-by-path',
-                                data=json.dumps(request_data),
-                                )
+                           data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
@@ -77,8 +76,7 @@ def test_export_excel_by_path_with_xls_extension(client, prepared_data):
         'fileName': 'test_output.xls'
     }
     response = client.post('/api/data/export-excel-by-path',
-                                data=json.dumps(request_data),
-                                )
+                           data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
@@ -115,12 +113,12 @@ def test_export_excel_by_path_table_not_exists(client, prepared_data):
         'fileName': 'test_output.xlsx',
     }
     response = client.post('/api/data/export-excel-by-path',
-                                data=json.dumps(request_data),
-                                )
+                           data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "tableName 'NonExistentTable' does not exist." == response_data['message']
+    message = "tableName 'NonExistentTable' does not exist."
+    assert message == response_data['message']
 
 
 def test_export_excel_by_path_invalid_output_directory(client, prepared_data):
@@ -134,13 +132,12 @@ def test_export_excel_by_path_invalid_output_directory(client, prepared_data):
         'fileName': 'test_output.xlsx'
     }
     response = client.post('/api/data/export-excel-by-path',
-                                data=json.dumps(request_data),
-                                )
+                           data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    assert "Directory does not exist: /non/existent/directory" == response_data['message']
-
+    message = "Directory does not exist: /non/existent/directory"
+    assert message == response_data['message']
 
 
 def test_export_excel_by_path_missing_table_name(client, prepared_data):
@@ -153,9 +150,8 @@ def test_export_excel_by_path_missing_table_name(client, prepared_data):
         'fileName': 'test_output.xlsx'
     }
     response = client.post('/api/data/export-excel-by-path',
-                                data=json.dumps(request_data),
-                                )
-    response_data = response.json()
+                           data=json.dumps(request_data))
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert 'NG' == response_data['code']
     # assert "tableName is required" == response_data['message']
@@ -171,9 +167,8 @@ def test_export_excel_by_path_missing_directory_path(client, prepared_data):
         'fileName': 'test_output.xlsx'
     }
     response = client.post('/api/data/export-excel-by-path',
-                                data=json.dumps(request_data),
-                                )
-    response_data = response.json()
+                           data=json.dumps(request_data))
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert 'NG' == response_data['code']
     # assert "directoryPath is required" == response_data['message']
@@ -189,9 +184,8 @@ def test_export_excel_by_path_missing_file_name(client, prepared_data):
         'directoryPath': test_dir,
     }
     response = client.post('/api/data/export-excel-by-path',
-                                data=json.dumps(request_data),
-                                )
-    response_data = response.json()
+                           data=json.dumps(request_data))
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert 'NG' == response_data['code']
     # assert "fileName is required" == response_data['message']
@@ -203,9 +197,8 @@ def test_export_excel_by_path_invalid_json(client, prepared_data):
     """
     tables_manager, test_dir, test_data = prepared_data
     response = client.post('/api/data/export-excel-by-path',
-                                data='invalid json',
-                                )
-    response_data = response.json()
+                           data='invalid json')
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert 'NG' == response_data['code']
     # assert "Invalid JSON format" == response_data['message']
@@ -225,8 +218,7 @@ def test_export_excel_by_path_empty_table(client, prepared_data):
         'fileName': 'empty_output.xlsx'
     }
     response = client.post('/api/data/export-excel-by-path',
-                                data=json.dumps(request_data),
-                                )
+                           data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
@@ -257,8 +249,7 @@ def test_export_excel_by_path_large_table(client, prepared_data):
         'fileName': 'large_output.xlsx'
     }
     response = client.post('/api/data/export-excel-by-path',
-                                data=json.dumps(request_data),
-                                )
+                           data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
@@ -272,7 +263,8 @@ def test_export_excel_by_path_large_table(client, prepared_data):
     assert 1000 == len(exported_data)
 
 
-def test_export_excel_by_path_special_characters_in_data(client, prepared_data):
+def test_export_excel_by_path_special_characters_in_data(client,
+                                                         prepared_data):
     """
     特殊文字を含むデータをエクスポートする場合のテスト
     """
@@ -290,8 +282,7 @@ def test_export_excel_by_path_special_characters_in_data(client, prepared_data):
         'fileName': 'special_output.xlsx'
     }
     response = client.post('/api/data/export-excel-by-path',
-                                data=json.dumps(request_data),
-                                )
+                           data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert 'OK' == response_data['code']
