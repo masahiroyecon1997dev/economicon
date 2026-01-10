@@ -1,5 +1,4 @@
-import { CancelButton } from "../../atoms/Button/CancelButton";
-import { SubmitButton } from "../../atoms/Button/SubmitButton";
+import { Button } from "../../atoms/Button/Button";
 
 type ActionButtonBarProps = {
   cancelText: string;
@@ -12,12 +11,12 @@ export function ActionButtonBar({ cancelText, selectText, onCancel, onSelect }: 
   return (
     <div className="pt-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
       <div className="flex justify-end gap-3">
-        <CancelButton cancel={onCancel}>
+        <Button onClick={onCancel} variant="outline">
           {cancelText}
-        </CancelButton>
-        <SubmitButton submit={onSelect}>
+        </Button>
+        <Button onClick={onSelect} variant="primary">
           {selectText}
-        </SubmitButton>
+        </Button>
       </div>
     </div>
   );

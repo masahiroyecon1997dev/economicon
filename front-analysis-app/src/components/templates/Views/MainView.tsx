@@ -1,10 +1,10 @@
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { TableView } from "../Table/TableView";
 import { CalculationView } from "./CalculationView";
 import { CreateSimulationDataTableView } from "./CreateSimulationDataTableView";
 import { LinearRegressionFormView } from "./LinearRegressionFormView";
 import { SaveDataView } from "./SaveDataView";
 import { SelectFileView } from "./SelectFileView";
+import { TableView } from "./TableView";
 
 export const MainView = () => {
   const currentView = useCurrentViewStore((state) => state.currentView);

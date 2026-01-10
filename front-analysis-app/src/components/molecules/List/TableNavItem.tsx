@@ -16,6 +16,19 @@ export const TableNavItem = ({ tableName, isActive, onClick }: TableNavItemProps
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const menuItems = [
+    {
+      id: 'duplicate',
+      label: t("LeftSideMenu.MenuDuplicateTable"),
+      handleSelect: () => console.log("Duplicate logic")
+    },
+    {
+      id: 'delete',
+      label: t("LeftSideMenu.MenuDeleteTable"),
+      handleSelect: () => console.log("Delete logic")
+    },
+  ];
+
 
   const triggerButton = (
     <button
@@ -45,14 +58,16 @@ export const TableNavItem = ({ tableName, isActive, onClick }: TableNavItemProps
         position="bottom-right"
         triggerElement={triggerButton}
       >
-        <MenuItem
-          label={t("LeftSideMenu.MenuDuplicateTable")}
-          variant="default"
-        />
-        <MenuItem
-          label={t("LeftSideMenu.MenuDeleteTable")}
-          variant="default"
-        />
+        {menuItems.map((item, index) => (
+          <MenuItem
+            key={index}
+            label={item.label}
+            variant="default"
+            isFirst={index === 0}
+            isLast={index === menuItems.length - 1}
+            handleSelect={() => item.handleSelect()}
+          />
+        ))}
       </DropdownMenu>
     </div>
   );

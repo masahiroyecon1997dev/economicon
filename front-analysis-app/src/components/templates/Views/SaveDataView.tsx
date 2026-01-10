@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { showMessageDialog } from "../../../function/messageDialog";
-import { exportCsvByPath, exportExcelByPath, exportParquetByPath, getFiles } from "../../../function/restApis";
+import { showMessageDialog } from "../../../functions/messageDialog";
+import { exportCsvByPath, exportExcelByPath, exportParquetByPath, getFiles } from "../../../functions/restApis";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useFilesStore } from "../../../stores/useFilesStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
@@ -10,14 +10,13 @@ import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
 import type { FileType, SortDirection, SortField } from "../../../types/commonTypes";
 import { InputText } from "../../atoms/Input/InputText";
-import { Select } from "../../atoms/Input/Select";
-import { SelectOption } from "../../atoms/Input/SelectOption";
+import { Select, SelectItem } from "../../atoms/Input/Select";
 import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
 import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
 import { FormField } from "../../molecules/Form/FormField";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
-import { MainViewLayout } from "../../templates/MainViewLayout";
+import { MainViewLayout } from "../Layouts/MainViewLayout";
 
 type FileFormat = 'csv' | 'excel' | 'parquet';
 
@@ -323,15 +322,15 @@ export const SaveDataView = () => {
                   <Select
                     id="table-name"
                     value={selectedTableName}
-                    onChange={(e) => {
-                      setSelectedTableName(e.target.value);
-                      setFileName(e.target.value);
+                    onValueChange={(value) => {
+                      setSelectedTableName(value);
+                      setFileName(value);
                     }}
                   >
                     {tableNameList.map(tableName => (
-                      <SelectOption key={tableName} value={tableName}>
+                      <SelectItem key={tableName} value={tableName}>
                         {tableName}
-                      </SelectOption>
+                      </SelectItem>
                     ))}
                   </Select>
                 </FormField>
@@ -356,12 +355,12 @@ export const SaveDataView = () => {
                   <Select
                     id="file-format"
                     value={fileFormat}
-                    onChange={(e) => setFileFormat(e.target.value as FileFormat)}
+                    onValueChange={(value) => setFileFormat(value as FileFormat)}
                   >
                     {fileFormatOptions.map(option => (
-                      <SelectOption key={option.value} value={option.value}>
+                      <SelectItem key={option.value} value={option.value}>
                         {option.label}
-                      </SelectOption>
+                      </SelectItem>
                     ))}
                   </Select>
                 </FormField>

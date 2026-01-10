@@ -1,5 +1,4 @@
 import { type ReactNode } from "react";
-import { ViewHeader } from "../molecules/Header/ViewHeader";
 
 interface MainViewLayoutProps {
   children: ReactNode;
@@ -28,7 +27,10 @@ export const MainViewLayout = ({
     <div className={`mx-auto w-full ${maxWidthClass} px-3 ${heightClass}`}>
       {title && description ? (
         <div className="flex flex-col gap-3 md:gap-6">
-          <ViewHeader title={title} description={description} />
+          <header className="shrink-0">
+            <h1 className="text-xl md:text-2xl font-bold text-black">{title}</h1>
+            <p className="mt-1 md:mt-2 text-xs md:text-sm text-black/60">{description}</p>
+          </header>
           {children}
         </div>
       ) : (

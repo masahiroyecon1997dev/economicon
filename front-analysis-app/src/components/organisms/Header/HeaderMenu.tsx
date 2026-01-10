@@ -1,48 +1,45 @@
-import { HelpCircle, Layers } from "lucide-react";
+import { ChevronDown, HelpCircle, Layers } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 
+import { useState } from "react";
+import { cn } from "../../../functions/utils";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { HeaderMenuDropdown } from "../../molecules/HeaderMenuDropdown/HeaderMenuDropdown";
+import type { DropmenuPositionType } from "../../../types/commonTypes";
+import { MenuItem } from "../../atoms/Menu/MenuItem";
+import { DropdownMenu } from "../../molecules/Menu/DropdownMenu";
+
+const menuPosition: DropmenuPositionType = 'bottom';
 
 export const HeaderMenu = () => {
   const { t } = useTranslation();
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
+  const [isDataMenuOpen, setIsDataMenuOpen] = useState(false);
+  const [isRegressionMenuOpen, setIsRegressionMenuOpen] = useState(false);
 
-  const showCreateSimulationDataTableView = () => {
-    setCurrentView("CreateSimulationDataTable");
-  }
-
-  const showLinearRegressionModal = () => {
-    setCurrentView("LinearRegressionForm");
-  }
-
-  const showCalculationView = () => {
-    setCurrentView("CalculationView");
-  }
-
-  const dataGenerationDropdownListElement = [
+  const dataMenuItems = [
     {
-      dropdownListName: t("HeaderMenu.DataGeneration"),
-      dropdownListFunction: showCreateSimulationDataTableView,
+      id: 'data-generation',
+      label: t("HeaderMenu.DataGeneration"),
+      handleSelect: () => setCurrentView("CreateSimulationDataTable"),
     },
     {
-      dropdownListName: t("HeaderMenu.Calculate"),
-      dropdownListFunction: showCalculationView,
+      id: 'calculate',
+      label: t("HeaderMenu.Calculate"),
+      handleSelect: () => setCurrentView("CalculationView"),
     },
   ];
-  const addColumnDropdownListElement = [
+  const regressionMenuItems = [
     {
-      dropdownListName: t("HeaderMenu.Calculate"),
-      dropdownListFunction: showCalculationView,
-    },
-  ];
-  const modelDropdownListElement = [
-    {
-      dropdownListName: t("HeaderMenu.LinearRegression"),
-      dropdownListFunction: showLinearRegressionModal,
+      id: 'linear-regression',
+      label: t("HeaderMenu.LinearRegression"),
+      handleSelect: () => setCurrentView("LinearRegressionForm"),
     }
   ];
+  const menus = [
+    { menuName: t('HeaderMenu.Data'), isOpen: isDataMenuOpen, onClose: () => setIsDataMenuOpen(false), position: menuPosition, items: dataMenuItems },
+    { menuName: t('HeaderMenu.Model'), isOpen: isRegressionMenuOpen, onClose: () => setIsRegressionMenuOpen(false), position: menuPosition, items: regressionMenuItems },
+  ]
 
   return (
     <>
@@ -55,25 +52,36 @@ export const HeaderMenu = () => {
             <h1 className="text-xl font-bold">Data Analysis Tool</h1>
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative group">
-              <HeaderMenuDropdown
-                dropdownListElement={dataGenerationDropdownListElement}
-              >
-                {t("HeaderMenu.Data")}
-              </HeaderMenuDropdown>
-            </div>
-            <div className="relative group">
-              <HeaderMenuDropdown
-                dropdownListElement={addColumnDropdownListElement}
-              >
-                {t("HeaderMenu.AddColumn")}
-              </HeaderMenuDropdown>
-            </div>
-            <div className="relative group">
-              <HeaderMenuDropdown dropdownListElement={modelDropdownListElement}>
-                {t("HeaderMenu.Model")}
-              </HeaderMenuDropdown>
-            </div>
+            {menus.map((menu, index) => (
+              <div key={index} className="relative group">
+                <DropdownMenu
+                  isOpen={menu.isOpen}
+                  onClose={menu.onClose}
+                  position={menu.position}
+                  triggerElement={
+                    <button
+                      className={cn(
+                        "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium",
+                        "hover:bg-white/10 transition-colors"
+                      )}
+                    >
+                      <span>{menu.menuName}</span>
+                      <ChevronDown size={16} />
+                    </button>
+                  }
+                >
+                  {menu.items.map((item, itemIndex) => (
+                    <MenuItem
+                      key={itemIndex}
+                      label={item.label}
+                      variant="default"
+                      isFirst={itemIndex === 0}
+                      isLast={itemIndex === menu.items.length - 1}
+                      handleSelect={item.handleSelect} />
+                  ))}
+                </DropdownMenu>
+              </div>
+            ))}
           </div>
         </div>
         <div className="flex items-center gap-4">

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { SubmitButton } from '../../atoms/Button/SubmitButton';
+import { Button } from '../../atoms/Button/Button';
 
 type ErrorModalFooterProps = {
   onOk: () => void;
@@ -11,7 +11,7 @@ export function ErrorModalFooter({ onOk }: ErrorModalFooterProps) {
 
   return (
     <div className="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b">
-      <SubmitButton submit={onOk}>{t('Common.OK')}</SubmitButton>
+      <Button onClick={onOk} variant="primary">{t('Common.OK')}</Button>
     </div>
   );
 }

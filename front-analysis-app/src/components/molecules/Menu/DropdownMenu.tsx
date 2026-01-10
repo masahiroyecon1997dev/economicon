@@ -1,11 +1,12 @@
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
 import type { ReactNode } from 'react';
+import type { DropmenuPositionType } from '../../../types/commonTypes';
 
 type DropdownMenuProps = {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
-  position?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
+  position?: DropmenuPositionType;
   triggerElement: ReactNode;
 };
 
@@ -14,8 +15,12 @@ export const DropdownMenu = ({
   position = 'bottom-right',
   triggerElement
 }: DropdownMenuProps) => {
-  const getSideAndAlign = (): { side: 'top' | 'bottom'; align: 'start' | 'end' } => {
+  const getSideAndAlign = (): { side: 'top' | 'bottom'; align: 'start' | 'center' | 'end' } => {
     switch (position) {
+      case 'top':
+        return { side: 'top', align: 'center' };
+      case 'bottom':
+        return { side: 'bottom', align: 'center' };
       case 'bottom-left':
         return { side: 'bottom', align: 'end' };
       case 'bottom-right':
@@ -42,7 +47,7 @@ export const DropdownMenu = ({
           side={side}
           align={align}
           sideOffset={4}
-          className="z-50 min-w-[160px] rounded-md bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 py-1 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out"
+          className="z-50 min-w-[160px] rounded-md bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out"
         >
           {children}
         </RadixDropdownMenu.Content>

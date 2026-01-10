@@ -2,8 +2,7 @@ import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DistributionType, SimulationColumnSetting } from '../../../types/commonTypes';
 import { InputText } from '../../atoms/Input/InputText';
-import { Select } from '../../atoms/Input/Select';
-import { SelectOption } from '../../atoms/Input/SelectOption';
+import { Select, SelectItem } from '../../atoms/Input/Select';
 import { FormField } from '../../molecules/Form/FormField';
 
 
@@ -85,10 +84,10 @@ export const SimulationColumnConfig = ({
           <Select
             id={`data-type-${column.id}`}
             value={column.dataType}
-            onChange={(e) => onDataTypeChange(column.id, e.target.value as 'distribution' | 'fixed')}
+            onValueChange={(value) => onDataTypeChange(column.id, value as 'distribution' | 'fixed')}
           >
-            <SelectOption value="fixed">{t('Common.Constant')}</SelectOption>
-            <SelectOption value="distribution">{t('Common.Distribution')}</SelectOption>
+            <SelectItem value="fixed">{t('Common.Constant')}</SelectItem>
+            <SelectItem value="distribution">{t('Common.Distribution')}</SelectItem>
           </Select>
         </FormField>
 
@@ -99,12 +98,12 @@ export const SimulationColumnConfig = ({
                 <Select
                   id={`distribution-type-${column.id}`}
                   value={column.distributionType || ''}
-                  onChange={(e) => onDistributionTypeChange(column.id, e.target.value as DistributionType)}
+                  onValueChange={(value) => onDistributionTypeChange(column.id, value as DistributionType)}
                 >
                   {distributionOptions.map(option => (
-                    <SelectOption key={option.value} value={option.value}>
+                    <SelectItem key={option.value} value={option.value}>
                       {t(option.label)}
-                    </SelectOption>
+                    </SelectItem>
                   ))}
                 </Select>
               </FormField>
