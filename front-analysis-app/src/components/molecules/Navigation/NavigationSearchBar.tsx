@@ -1,5 +1,5 @@
 import { UpDirectoryButton } from "../../atoms/Button/UpDirectoryButton";
-import { FileSearchInput } from "../../atoms/Input/FileSearchInput";
+import { SearchInput } from "../../atoms/Input/SearchInput";
 import { Breadcrumb } from "./Breadcrumb";
 
 type NavigationSearchBarProps = {
@@ -40,7 +40,7 @@ export function NavigationSearchBar({
           </div>
         </div>
         <div className="shrink-0 w-64 lg:w-80">
-          <FileSearchInput
+          <SearchInput
             placeholder={searchPlaceholder}
             value={searchValue}
             onChange={onSearchChange}
@@ -65,7 +65,7 @@ export function NavigationSearchBar({
           </div>
         </div>
         <div className="w-full">
-          <FileSearchInput
+          <SearchInput
             placeholder={searchPlaceholder}
             value={searchValue}
             onChange={onSearchChange}
