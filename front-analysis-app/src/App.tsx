@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { showMessageDialog } from './function/messageDialog';
-import { getFiles, getSettings, getTableList } from "./function/restApis";
+import { showMessageDialog } from './functions/messageDialog';
+import { getFiles, getSettings, getTableList } from "./functions/restApis";
 import { useCurrentViewStore } from "./stores/useCurrentViewStore";
 import { useLoadingStore } from "./stores/useLoadingStore";
 import { useSettingsStore } from "./stores/useSettingsStore";

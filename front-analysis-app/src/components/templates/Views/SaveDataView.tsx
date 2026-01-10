@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { showMessageDialog } from "../../../function/messageDialog";
-import { exportCsvByPath, exportExcelByPath, exportParquetByPath, getFiles } from "../../../function/restApis";
+import { showMessageDialog } from "../../../functions/messageDialog";
+import { exportCsvByPath, exportExcelByPath, exportParquetByPath, getFiles } from "../../../functions/restApis";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useFilesStore } from "../../../stores/useFilesStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";

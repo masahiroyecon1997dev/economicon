@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { showMessageDialog } from "../../../function/messageDialog";
-import { calculateColumn } from "../../../function/restApis";
+import { showMessageDialog } from "../../../functions/messageDialog";
+import { calculateColumn } from "../../../functions/restApis";
 import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";

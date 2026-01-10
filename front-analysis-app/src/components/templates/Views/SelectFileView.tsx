@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { getTableInfo } from "../../../function/internalFunctions";
-import { showMessageDialog } from "../../../function/messageDialog";
-import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../../function/restApis";
+import { getTableInfo } from "../../../functions/internalFunctions";
+import { showMessageDialog } from "../../../functions/messageDialog";
+import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../../functions/restApis";
 import { useFilesStore } from "../../../stores/useFilesStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useSettingsStore } from "../../../stores/useSettingsStore";

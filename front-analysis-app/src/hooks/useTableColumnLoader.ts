@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { showMessageDialog } from "../function/messageDialog";
-import { getColumnList } from "../function/restApis";
+import { showMessageDialog } from "../functions/messageDialog";
+import { getColumnList } from "../functions/restApis";
 import { useLoadingStore } from "../stores/useLoadingStore";
 import { useTableInfosStore } from "../stores/useTableInfosStore";
 import type { ColumnType } from "../types/commonTypes";
