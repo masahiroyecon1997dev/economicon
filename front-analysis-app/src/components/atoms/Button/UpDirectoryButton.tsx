@@ -1,15 +1,21 @@
 import { ArrowUp } from "lucide-react";
+import { cn } from "../../../common/utils";
 
 type UpDirectoryButtonProps = {
   onClick: () => void;
   title: string;
+  className?: string;
 };
 
-export const UpDirectoryButton = ({ onClick, title }: UpDirectoryButtonProps) => {
+export const UpDirectoryButton = ({ onClick, title, className }: UpDirectoryButtonProps) => {
   return (
     <button
       onClick={onClick}
-      className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+      className={cn(
+        "flex h-8 w-8 items-center justify-center rounded-full",
+        "bg-primary/10 text-primary hover:bg-primary/20 transition-colors",
+        className
+      )}
       title={title}
     >
       <ArrowUp size={16} />
