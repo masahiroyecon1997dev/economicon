@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Request, status as http_status
+from fastapi import APIRouter, Request
+from fastapi import status as http_status
 
-from ..utils import create_success_response, create_log_api_request
 from ..services.get_settings import get_setting
+from ..utils import create_log_api_request, create_success_response
 
 router = APIRouter(prefix="/setting", tags=["setting"])
 
 
-@router.get("/get")
+@router.get("/get-settings")
 async def get_settings_endpoint(request: Request):
     """アプリケーション設定を取得するエンドポイント
 

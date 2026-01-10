@@ -3,5 +3,5 @@ from pydantic import BaseModel, Field
 
 
 class GetFilesRequest(BaseModel):
-    """ファイル一覧取得リクエスト（GETクエリパラメータ用）"""
+    """ファイル一覧取得リクエスト"""
     directoryPath: str = Field(..., description="対象ディレクトリパス")

@@ -1,21 +1,23 @@
-from fastapi import APIRouter, Request, status as http_status
+from fastapi import APIRouter, Request
+from fastapi import status as http_status
 
-from ..utils import create_success_response, create_log_api_request
+from ..schemas import GetFilesRequest
 from ..services.get_files import get_files
+from ..utils import create_log_api_request, create_success_response
 
 router = APIRouter(prefix="/file", tags=["file"])
 
 
-@router.get("/list")
-async def get_files_endpoint(request: Request, directoryPath: str):
+@router.post("/get-list")
+async def get_files_endpoint(request: Request, body: GetFilesRequest):
     """ファイル一覧を取得するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    directoryPath : str
-        ディレクトリパス
+    body : GetFilesRequest
+        リクエストボディ
 
     Returns
     -------
@@ -24,7 +26,7 @@ async def get_files_endpoint(request: Request, directoryPath: str):
     """
     create_log_api_request(request)
 
-    result = get_files(directory_path=directoryPath)
+    result = get_files(directory_path=body.directoryPath)
 
     return create_success_response(
         http_status.HTTP_200_OK,

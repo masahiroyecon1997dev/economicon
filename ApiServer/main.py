@@ -34,6 +34,7 @@ configs = BabelConfigs(
 )
 babel = Babel(configs=configs)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- 起動時の処理 ---

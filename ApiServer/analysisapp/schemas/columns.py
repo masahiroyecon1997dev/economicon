@@ -92,6 +92,6 @@ class TransformColumnRequest(BaseModel):
 
 
 class GetColumnListRequest(BaseModel):
-    """カラムリスト取得リクエスト（GETクエリパラメータ用）"""
+    """カラムリスト取得リクエスト"""
     tableName: str = Field(..., description="対象テーブル名")
     isNumberOnly: str = Field(default="false", description="数値カラムのみ取得")

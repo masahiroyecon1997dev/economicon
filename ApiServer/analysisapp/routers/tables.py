@@ -1,25 +1,23 @@
-from fastapi import APIRouter, Request, status as http_status
+from fastapi import APIRouter, Request
+from fastapi import status as http_status
 
-from ..utils import create_success_response, create_log_api_request
-from ..schemas import (
-    CreateTableRequest,
-    CreateJoinTableRequest,
-    CreateUnionTableRequest,
-    CreateSimulationDataTableRequest,
-    DeleteTableRequest,
-    DuplicateTableRequest,
-    RenameTableRequest
-)
-from ..services.create_table import create_table
+from ..schemas import (CreateJoinTableRequest,
+                       CreateSimulationDataTableRequest, CreateTableRequest,
+                       CreateUnionTableRequest, DeleteTableRequest,
+                       DuplicateTableRequest, FetchDataToJsonRequest,
+                       RenameTableRequest)
+from ..services.clear_tables import clear_tables
 from ..services.create_join_table import create_join_table
+from ..services.create_simulation_data_table import \
+    create_simulation_data_table
+from ..services.create_table import create_table
 from ..services.create_union_table import create_union_table
-from ..services.create_simulation_data_table import create_simulation_data_table
 from ..services.delete_table import delete_table
 from ..services.duplicate_table import duplicate_table
+from ..services.fetch_data_to_json import fetch_data_to_json
 from ..services.get_table_list import get_table_list
 from ..services.rename_table import rename_table
-from ..services.clear_tables import clear_tables
-from ..services.fetch_data_to_json import fetch_data_to_json
+from ..utils import create_log_api_request, create_success_response
 
 router = APIRouter(prefix="/table", tags=["table"])
 
@@ -57,7 +55,8 @@ async def create_table_endpoint(request: Request, body: CreateTableRequest):
 
 
 @router.post("/create-join")
-async def create_join_table_endpoint(request: Request, body: CreateJoinTableRequest):
+async def create_join_table_endpoint(request: Request,
+                                     body: CreateJoinTableRequest):
     """結合テーブルを作成するエンドポイント
 
     Parameters
@@ -92,7 +91,8 @@ async def create_join_table_endpoint(request: Request, body: CreateJoinTableRequ
 
 
 @router.post("/create-union")
-async def create_union_table_endpoint(request: Request, body: CreateUnionTableRequest):
+async def create_union_table_endpoint(request: Request,
+                                      body: CreateUnionTableRequest):
     """ユニオンテーブルを作成するエンドポイント
 
     Parameters
@@ -124,7 +124,8 @@ async def create_union_table_endpoint(request: Request, body: CreateUnionTableRe
 
 
 @router.post("/create-simulation-data")
-async def create_simulation_data_table_endpoint(request: Request, body: CreateSimulationDataTableRequest):
+async def create_simulation_data_table_endpoint(
+        request: Request, body: CreateSimulationDataTableRequest):
     """シミュレーションデータテーブルを作成するエンドポイント
 
     Parameters
@@ -156,7 +157,8 @@ async def create_simulation_data_table_endpoint(request: Request, body: CreateSi
 
 
 @router.post("/delete")
-async def delete_table_endpoint(request: Request, body: DeleteTableRequest):
+async def delete_table_endpoint(request: Request,
+                                body: DeleteTableRequest):
     """テーブルを削除するエンドポイント
 
     Parameters
@@ -182,7 +184,8 @@ async def delete_table_endpoint(request: Request, body: DeleteTableRequest):
 
 
 @router.post("/duplicate")
-async def duplicate_table_endpoint(request: Request, body: DuplicateTableRequest):
+async def duplicate_table_endpoint(request: Request,
+                                   body: DuplicateTableRequest):
     """テーブルを複製するエンドポイント
 
     Parameters
@@ -211,7 +214,8 @@ async def duplicate_table_endpoint(request: Request, body: DuplicateTableRequest
 
 
 @router.post("/rename")
-async def rename_table_endpoint(request: Request, body: RenameTableRequest):
+async def rename_table_endpoint(request: Request,
+                                body: RenameTableRequest):
     """
     テーブル名変更エンドポイント
 
@@ -242,7 +246,7 @@ async def rename_table_endpoint(request: Request, body: RenameTableRequest):
     )
 
 
-@router.get("/list")
+@router.get("/get-list")
 async def get_table_list_endpoint(request: Request):
     """テーブルリストを取得するエンドポイント
 
@@ -292,20 +296,17 @@ async def clear_tables_endpoint(request: Request):
     )
 
 
-@router.get("/fetch-data")
-async def fetch_data_to_json_endpoint(request: Request, tableName: str, startRow: int, fetchRows: int):
+@router.post("/fetch-data")
+async def fetch_data_to_json_endpoint(request: Request,
+                                      body: FetchDataToJsonRequest):
     """データをJSON形式で取得するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    tableName : str
-        テーブル名
-    startRow : int
-        開始行番号
-    fetchRows : int
-        取得行数
+    body : FetchDataToJsonRequest
+        リクエストボディ
 
     Returns
     -------
@@ -315,9 +316,9 @@ async def fetch_data_to_json_endpoint(request: Request, tableName: str, startRow
     create_log_api_request(request)
 
     result = fetch_data_to_json(
-        table_name=tableName,
-        start_row=startRow,
-        fetch_rows=fetchRows
+        table_name=body.tableName,
+        start_row=body.startRow,
+        fetch_rows=body.fetchRows
     )
 
     return create_success_response(
