@@ -292,11 +292,6 @@ useEffect(() => {
 - 検証結果は`checkInputType`型で統一
 - エラーメッセージは国際化キーを返す
 
-### 検証関数の命名
-
-- `check` + 検証内容（例：`checkRequired`、`checkNumber`、`checkInteger`）
-- 戻り値は`{isError: boolean, message: string}`形式
-
 ## 定数管理
 
 ### 定数の配置

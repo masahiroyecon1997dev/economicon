@@ -3,7 +3,7 @@ import type { SettingsType } from "../types/commonTypes";
 
 export type SettingsActions = {
   setSettings: (newSettings: SettingsType) => void;
-}
+};
 type SettingsStore = SettingsType & SettingsActions;
 
 export const useSettingsStore = create<SettingsStore>((set) => ({

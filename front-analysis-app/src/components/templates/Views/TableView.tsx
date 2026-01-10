@@ -1,9 +1,9 @@
 import { Fragment } from "react/jsx-runtime";
-import { getTableInfo } from "../../../function/internalFunctions";
+import { getTableInfo } from "../../../functions/internalFunctions";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
-import { MainTable } from "./MainTable";
-import { TableFooter } from "./TableFooter";
+import { MainTable } from "../../organisms/Table/MainTable";
+import { TableFooter } from "../../organisms/Table/TableFooter";
 
 
 export const TableView = () => {

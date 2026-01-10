@@ -1,17 +1,17 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { showMessageDialog } from './function/messageDialog';
-import { getFiles, getSettings, getTableList } from "./function/restApis";
+import { showMessageDialog } from './functions/messageDialog';
+import { getFiles, getSettings, getTableList } from "./functions/restApis";
 import { useCurrentViewStore } from "./stores/useCurrentViewStore";
 import { useLoadingStore } from "./stores/useLoadingStore";
 import { useSettingsStore } from "./stores/useSettingsStore";
 import { useTableListStore } from "./stores/useTableListStore";
 
-import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
+import { LoadingOverlay } from "./components/molecules/Loading/loading-overlay";
 import { MessageDialog } from "./components/molecules/Modal/MessageDialog";
 import { HeaderMenu } from "./components/organisms/Header/HeaderMenu";
-import { LeftSideMenu } from "./components/organisms/MainView/LeftSideMenu";
-import { MainView } from "./components/organisms/MainView/MainView";
+import { LeftSideMenu } from "./components/templates/Views/LeftSideMenu";
+import { MainView } from "./components/templates/Views/MainView";
 import { useFilesStore } from "./stores/useFilesStore";
 
 export const App = () => {

@@ -1,7 +1,7 @@
 import { FileUp, Menu, Save } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { getTableInfo } from "../../../function/internalFunctions";
-import { showMessageDialog } from "../../../function/messageDialog";
+import { getTableInfo } from "../../../functions/internalFunctions";
+import { showMessageDialog } from "../../../functions/messageDialog";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useSideMenuStore } from "../../../stores/useSideMenuStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
