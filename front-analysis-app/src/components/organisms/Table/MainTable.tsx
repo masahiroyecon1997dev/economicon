@@ -1,7 +1,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import React, { useState, type ChangeEvent } from 'react';
 
-import { cn } from '../../../common/utils';
+import { cn } from '../../../functions/utils';
 import type { ColumnType, TableDataCellType, TableInfoType, TalbeDataRowType } from '../../../types/commonTypes';
 
 type MainTableProps = {

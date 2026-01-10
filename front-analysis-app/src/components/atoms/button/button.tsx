@@ -1,6 +1,6 @@
 // src/components/atoms/button/button.tsx
 import { type ComponentPropsWithoutRef } from "react";
-import { cn } from "../../../common/utils";
+import { cn } from "../../../functions/utils";
 
 // スタイル定義を外に出して整理
 const variants = {

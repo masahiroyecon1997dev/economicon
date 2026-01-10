@@ -1,5 +1,5 @@
 import { Fragment } from "react/jsx-runtime";
-import { getTableInfo } from "../../../function/internalFunctions";
+import { getTableInfo } from "../../../functions/internalFunctions";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { MainTable } from "../../organisms/Table/MainTable";

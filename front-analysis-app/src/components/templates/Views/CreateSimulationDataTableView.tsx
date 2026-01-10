@@ -1,10 +1,10 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DISTRIBUTION_OPTIONS } from "../../../common/constant";
-import { getTableInfo } from "../../../function/internalFunctions";
-import { createSimulationDataTable } from "../../../function/restApis";
-import { validateColumnName, validateDistributionParam, validateNumRows, validateTableName } from "../../../function/validationFunctions";
+import { DISTRIBUTION_OPTIONS } from "../../../constants/constant";
+import { getTableInfo } from "../../../functions/internalFunctions";
+import { createSimulationDataTable } from "../../../functions/restApis";
+import { validateColumnName, validateDistributionParam, validateNumRows, validateTableName } from "../../../functions/validations";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useMessageDialogStore } from "../../../stores/useMessageDialogStore";

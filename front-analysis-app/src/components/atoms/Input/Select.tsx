@@ -1,7 +1,7 @@
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown } from "lucide-react";
 import { type ReactNode } from "react";
-import { cn } from "../../../common/utils";
+import { cn } from "../../../functions/utils";
 
 type SelectProps = {
   value: string;
@@ -49,7 +49,8 @@ export const Select = ({
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
             "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",
-            "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+            "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+            "min-w-[var(--radix-select-trigger-width)]"
           )}
           position="popper"
           sideOffset={4}

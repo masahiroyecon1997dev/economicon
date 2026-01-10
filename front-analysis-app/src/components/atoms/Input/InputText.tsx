@@ -1,6 +1,6 @@
 import { type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cn } from "../../../common/utils";
+import { cn } from "../../../functions/utils";
 
 type InputTextProps = {
   value: string;
