@@ -1,18 +1,17 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { showMessageDialog } from "../../../function/messageDialog";
-import { calculateColumn } from "../../../function/restApis";
+import { showMessageDialog } from "../../../functions/messageDialog";
+import { calculateColumn } from "../../../functions/restApis";
 import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
 import { InputText } from "../../atoms/Input/InputText";
 import { SearchInput } from "../../atoms/Input/SearchInput";
-import { Select } from "../../atoms/Input/Select";
-import { SelectOption } from "../../atoms/Input/SelectOption";
+import { Select, SelectItem } from "../../atoms/Input/Select";
 import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
 import { FormField } from "../../molecules/Form/FormField";
-import { MainViewLayout } from "../../templates/MainViewLayout";
+import { MainViewLayout } from "../Layouts/MainViewLayout";
 
 export const CalculationView = () => {
   const { t } = useTranslation();
@@ -36,9 +35,8 @@ export const CalculationView = () => {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleTableChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const tableName = event.target.value;
-    setSelectedTableName(tableName);
+  const handleTableChange = (value: string) => {
+    setSelectedTableName(value);
     setNewColumnName("");
     setCalculationExpression("");
     setErrorMessage({});
@@ -167,16 +165,14 @@ export const CalculationView = () => {
               <Select
                 id="target-table"
                 value={selectedTableName}
-                onChange={handleTableChange}
+                onValueChange={handleTableChange}
                 error={errorMessage.tableName}
+                placeholder={t("CalculationView.SelectTable")}
               >
-                <option value="" disabled>
-                  {t("CalculationView.SelectTable")}
-                </option>
                 {tableList.map((table, index) => (
-                  <SelectOption key={index} value={table}>
+                  <SelectItem key={index} value={table}>
                     {table}
-                  </SelectOption>
+                  </SelectItem>
                 ))}
               </Select>
             </FormField>

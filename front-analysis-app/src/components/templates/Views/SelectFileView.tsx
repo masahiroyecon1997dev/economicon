@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { getTableInfo } from "../../../function/internalFunctions";
-import { showMessageDialog } from "../../../function/messageDialog";
-import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../../function/restApis";
+import { getTableInfo } from "../../../functions/internalFunctions";
+import { showMessageDialog } from "../../../functions/messageDialog";
+import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../../functions/restApis";
 import { useFilesStore } from "../../../stores/useFilesStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
@@ -14,7 +14,7 @@ import { useTableListStore } from "../../../stores/useTableListStore";
 import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
-import { MainViewLayout } from "../../templates/MainViewLayout";
+import { MainViewLayout } from "../Layouts/MainViewLayout";
 
 export const SelectFileView = () => {
   const { t } = useTranslation();
@@ -255,10 +255,6 @@ export const SelectFileView = () => {
           onBreadcrumbClick={handleBreadcrumbClick}
           onSearchChange={setSearchValue}
         />
-        {/* <FileFilterBar
-            filters={filterOptions}
-            onFilterClick={setActiveFilter}
-          /> */}
       </div>
 
       <FileListTable
