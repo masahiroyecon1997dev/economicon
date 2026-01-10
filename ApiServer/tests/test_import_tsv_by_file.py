@@ -1,11 +1,12 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-import polars as pl
-import tempfile
 import shutil
-from main import app
+import tempfile
+
+import polars as pl
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -26,7 +27,6 @@ def prepared_data():
     manager.clear_tables()
     # テスト後にテンポラリディレクトリをクリーンアップ
     shutil.rmtree(test_dir, ignore_errors=True)
-
 
 
 def test_upload_valid_tsv_file(client, prepared_data):
@@ -113,7 +113,7 @@ def test_no_tsv_file_uploaded(client, prepared_data):
     """
     tables_manager, test_dir = prepared_data
     response = client.post('/api/data/import-tsv-by-file')
-    response_data = response.json()
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert response_data['code'] == 'NG'
     # assert response_data['message'] == "No file uploaded."
@@ -142,7 +142,6 @@ def test_upload_non_tsv_file(client, prepared_data):
     assert "File must be a TSV file" == response_data['message']
 
 
-
 def test_upload_empty_tsv_file(client, prepared_data):
     """
     空のTSVファイルをアップロードした場合のテスト (Polars NoDataError)
@@ -159,7 +158,6 @@ def test_upload_empty_tsv_file(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
-    # assert "Invalid file content type. Allowed types: text/tab-separated-values, text/plain" == response_data['message']
 
 
 @pytest.mark.skip(reason="このテストは現在、発生させる方法が不明なためスキップされています。")
@@ -170,8 +168,12 @@ def test_upload_malformed_tsv_file(client, prepared_data):
     tables_manager, test_dir = prepared_data
     with open(f'{test_dir}/Error.txt', 'rb') as f:
         response = client.post('/api/data/import-tsv-by-file',
-                               files={'Error.txt', f, 'text/tab-separated-values'})
+                               files={'Error.txt',
+                                      f,
+                                      'text/tab-separated-values'})
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Invalid file content type. Allowed types: text/tab-separated-values, text/plain" == response_data['message']
+    message = ("Invalid file content type. "
+               "Allowed types: text/tab-separated-values, text/plain")
+    assert message == response_data['message']

@@ -1,9 +1,8 @@
 import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-
-from main import app
 from analysisapp.services.data.settings_manager import SettingsManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -21,12 +20,9 @@ def settings_manager():
     yield settings_manager
 
 
-
 def test_get_settings_success(client, settings_manager):
-    # 正常系テスト: 設定情報を取得
-    response = client.get(
-        '/api/setting/get',
-    )
+    """正常系テスト: 設定情報を取得"""
+    response = client.get('/api/setting/get')
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
@@ -46,14 +42,14 @@ def test_get_settings_success(client, settings_manager):
 
 
 def test_settings_manager_singleton(client, settings_manager):
-    # シングルトンパターンのテスト
+    """シングルトンパターンのテスト"""
     manager1 = SettingsManager()
     manager2 = SettingsManager()
     assert manager1 is manager2
 
 
 def test_settings_info_properties(client, settings_manager):
-    # 設定情報のプロパティアクセステスト
+    """設定情報のプロパティアクセステスト"""
     settings_info = settings_manager.get_settings()
     # プロパティが正しく取得できることを確認
     assert settings_info.os_name is not None
@@ -65,7 +61,7 @@ def test_settings_info_properties(client, settings_manager):
 
 
 def test_settings_info_to_dict(client, settings_manager):
-    # to_dict()メソッドのテスト
+    """to_dict()メソッドのテスト"""
     settings_info = settings_manager.get_settings()
     settings_dict = settings_info.to_dict()
     # キャメルケースのキーが存在することを確認

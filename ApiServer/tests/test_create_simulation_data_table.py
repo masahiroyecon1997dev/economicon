@@ -1,9 +1,8 @@
 import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-
-from main import app
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -65,6 +64,7 @@ def test_create_table_with_distribution_columns(client, tables_manager):
     assert len(columns) == 2
     assert len(df) == 100
 
+
 def test_create_table_with_fixed_columns(client, tables_manager):
     """固定値列を持つテーブル作成のテスト"""
 
@@ -109,6 +109,7 @@ def test_create_table_with_fixed_columns(client, tables_manager):
     # 固定値の確認
     assert (df['fixed_col_1'] == 42).all()
     assert (df['fixed_col_2'] == 'constant_string').all()
+
 
 def test_create_table_with_mixed_columns(client, tables_manager):
     """分布データ列と固定値列の混合テーブル作成のテスト"""
@@ -156,6 +157,7 @@ def test_create_table_with_mixed_columns(client, tables_manager):
     # 固定値の確認
     assert (df['fixed_id'] == 1).all()
 
+
 def test_validation_error_duplicate_table_name(client, tables_manager):
     """重複するテーブル名のバリデーションエラーテスト"""
 
@@ -192,6 +194,7 @@ def test_validation_error_duplicate_table_name(client, tables_manager):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
+
 def test_validation_error_invalid_num_rows(client, tables_manager):
     """無効な行数のバリデーションエラーテスト"""
 
@@ -212,6 +215,7 @@ def test_validation_error_invalid_num_rows(client, tables_manager):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
+
 def test_validation_error_empty_column_settings(client, tables_manager):
     """空の列設定のバリデーションエラーテスト"""
 
@@ -227,6 +231,7 @@ def test_validation_error_empty_column_settings(client, tables_manager):
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
 
 def test_validation_error_missing_column_name(client, tables_manager):
     """列名が不足している場合のバリデーションエラーテスト"""
@@ -248,6 +253,7 @@ def test_validation_error_missing_column_name(client, tables_manager):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
+
 def test_validation_error_invalid_data_type(client, tables_manager):
     """無効なデータタイプのバリデーションエラーテスト"""
 
@@ -267,6 +273,7 @@ def test_validation_error_invalid_data_type(client, tables_manager):
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
 
 def test_validation_error_missing_distribution_params(client, tables_manager):
     """分布パラメータが不足している場合のバリデーションエラーテスト"""
@@ -289,6 +296,7 @@ def test_validation_error_missing_distribution_params(client, tables_manager):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
+
 def test_validation_error_missing_fixed_value(client, tables_manager):
     """固定値が不足している場合のバリデーションエラーテスト"""
 
@@ -308,6 +316,7 @@ def test_validation_error_missing_fixed_value(client, tables_manager):
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
 
 def test_validation_error_invalid_distribution_type(client, tables_manager):
     """無効な分布タイプのバリデーションエラーテスト"""
@@ -329,6 +338,7 @@ def test_validation_error_invalid_distribution_type(client, tables_manager):
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
 
 def test_validation_error_invalid_distribution_params(client, tables_manager):
     """無効な分布パラメータのバリデーションエラーテスト"""
