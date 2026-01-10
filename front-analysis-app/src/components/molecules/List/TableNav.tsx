@@ -1,5 +1,5 @@
 import { useTableListStore } from "../../../stores/useTableListStore";
-import { TableNavItem } from "../../atoms/List/TableNavItem";
+import { TableNavItem } from "./TableNavItem";
 
 type TableNavProps = {
   activeTableName: string | null;
