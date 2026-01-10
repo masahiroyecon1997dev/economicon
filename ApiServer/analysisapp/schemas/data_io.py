@@ -1,7 +1,7 @@
 """インポート関連のスキーマ定義"""
-from pydantic import BaseModel, Field
 from typing import Optional
-from .common import TableRequest
+
+from pydantic import BaseModel, Field
 
 
 class ImportCsvByPathRequest(BaseModel):
@@ -24,20 +24,23 @@ class ImportParquetByPathRequest(BaseModel):
     tableName: str = Field(..., description="作成するテーブル名")
 
 
-class ExportCsvByPathRequest(TableRequest):
+class ExportCsvByPathRequest(BaseModel):
     """CSVファイルパス指定エクスポートリクエスト"""
+    tableName: str = Field(..., description="テーブル名")
     directoryPath: str = Field(..., description="出力するディレクトリパス")
     fileName: str = Field(..., description="出力するCSVファイル名")
     separator: str = Field(default=",", description="区切り文字")
 
 
-class ExportExcelByPathRequest(TableRequest):
+class ExportExcelByPathRequest(BaseModel):
     """Excelファイルパス指定エクスポートリクエスト"""
+    tableName: str = Field(..., description="テーブル名")
     directoryPath: str = Field(..., description="出力するディレクトリパス")
     fileName: str = Field(..., description="出力するExcelファイル名")
 
 
-class ExportParquetByPathRequest(TableRequest):
+class ExportParquetByPathRequest(BaseModel):
     """Parquetファイルパス指定エクスポートリクエスト"""
+    tableName: str = Field(..., description="テーブル名")
     directoryPath: str = Field(..., description="出力するディレクトリパス")
     fileName: str = Field(..., description="出力するParquetファイル名")

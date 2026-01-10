@@ -1,10 +1,10 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-import polars as pl
 import numpy as np
-from main import app
+import polars as pl
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -49,7 +49,6 @@ def tables_manager():
     manager.clear_tables()
 
 
-
 def test_variable_effects_estimation_success_default(client, tables_manager):
     """デフォルト設定で正常に変量効果推定分析が実行できる"""
     payload = {
@@ -77,7 +76,7 @@ def test_variable_effects_estimation_success_default(client, tables_manager):
     assert 'modelStatistics' in result
     # デフォルト値をチェック
     assert result['standardErrorMethod'] == 'nonrobust'
-    assert result['useTDistribution'] == True
+    assert result['useTDistribution']
     # パラメータの構造をチェック
     parameters = result['parameters']
     assert isinstance(parameters, list)
@@ -118,7 +117,7 @@ def test_variable_effects_estimation_hc1_robust(client, tables_manager):
     assert response_data['code'] == 'OK'
     result = response_data['result']
     assert result['standardErrorMethod'] == 'HC1'
-    assert result['useTDistribution'] == False
+    assert not result['useTDistribution']
     # パラメータ数をチェック（定数項 + 3つの説明変数）
     parameters = result['parameters']
     assert len(parameters) == 4
@@ -142,7 +141,7 @@ def test_variable_effects_estimation_hac(client, tables_manager):
     assert response_data['code'] == 'OK'
     result = response_data['result']
     assert result['standardErrorMethod'] == 'HAC'
-    assert result['useTDistribution'] == True
+    assert result['useTDistribution']
 
 
 def test_variable_effects_estimation_invalid_table(client, tables_manager):
@@ -159,10 +158,13 @@ def test_variable_effects_estimation_invalid_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist." == response_data['message']
+    assert "tableName 'NonExistentTable' does not exist." \
+        == response_data['message']
 
 
-def test_variable_effects_estimation_invalid_dependent_variable(client, tables_manager):
+def test_variable_effects_estimation_invalid_dependent_variable(client,
+                                                                tables_manager
+                                                                ):
     """存在しない被説明変数でエラーが返される"""
     payload = {
         'tableName': 'VEETestTable',
@@ -176,8 +178,8 @@ def test_variable_effects_estimation_invalid_dependent_variable(client, tables_m
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "dependentVariable 'nonexistent_y' does not exist." == response_data['message']
-
+    assert "dependentVariable 'nonexistent_y' does not exist." \
+        == response_data['message']
 
 
 def test_variable_effects_estimation_invalid_explanatory_variable(client, tables_manager):
@@ -194,8 +196,8 @@ def test_variable_effects_estimation_invalid_explanatory_variable(client, tables
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables 'nonexistent_x' does not exist." == response_data['message']
-
+    assert "explanatoryVariables 'nonexistent_x' does not exist." \
+        == response_data['message']
 
 
 def test_variable_effects_estimation_empty_explanatory_variables(client, tables_manager):
@@ -212,7 +214,9 @@ def test_variable_effects_estimation_empty_explanatory_variables(client, tables_
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables must be with at least 1 explanatory_variable." == response_data['message']
+    assert ("explanatoryVariables must be with "
+            "at least 1 explanatory_variable.") \
+        == response_data['message']
 
 
 def test_variable_effects_estimation_dependent_in_explanatory(client, tables_manager):
@@ -229,7 +233,8 @@ def test_variable_effects_estimation_dependent_in_explanatory(client, tables_man
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Dependent variable cannot be included in explanatory variables" == response_data['message']
+    assert "Dependent variable cannot be included in explanatory variables" \
+        == response_data['message']
 
 
 def test_variable_effects_estimation_invalid_standard_error_method(client, tables_manager):
@@ -247,7 +252,9 @@ def test_variable_effects_estimation_invalid_standard_error_method(client, table
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "standardErrorMethod must be one of: nonrobust, HC0, HC1, HC2, HC3, HAC, hac-panel, hac-groupsum, cluster" == response_data['message']
+    assert ("standardErrorMethod must be one of: ""nonrobust, HC0, HC1, "
+            "HC2, HC3, HAC, hac-panel, hac-groupsum, cluster") \
+        == response_data['message']
 
 
 def test_variable_effects_estimation_missing_parameters(client, tables_manager):
@@ -261,15 +268,17 @@ def test_variable_effects_estimation_missing_parameters(client, tables_manager):
         '/api/regression/variable-effects',
         json=payload,
     )
-    response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # response_data = response.json()
     # assert response_data['code'] == 'NG'
     # assert "Required parameter is missing." == response_data['message']
 
 
-
-@pytest.mark.parametrize("method", ['nonrobust', 'HC0', 'HC1', 'HC2', 'HC3', 'HAC'])
-def test_variable_effects_estimation_all_standard_error_methods(client, tables_manager, method):
+@pytest.mark.parametrize("method", ['nonrobust', 'HC0', 'HC1',
+                                    'HC2', 'HC3', 'HAC'])
+def test_variable_effects_estimation_all_standard_error_methods(client,
+                                                                tables_manager,
+                                                                method):
     """全ての標準誤差計算方法が正常に動作する"""
     payload = {
         'tableName': 'VEETestTable',
@@ -289,7 +298,8 @@ def test_variable_effects_estimation_all_standard_error_methods(client, tables_m
     assert result['standardErrorMethod'] == method
 
 
-def test_variable_effects_estimation_single_explanatory_variable(client, tables_manager):
+def test_variable_effects_estimation_single_explanatory_variable(client,
+                                                                 tables_manager):
     """単一の説明変数でも変量効果推定分析が実行できる"""
     payload = {
         'tableName': 'VEETestTable',

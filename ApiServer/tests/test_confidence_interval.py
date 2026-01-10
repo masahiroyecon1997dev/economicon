@@ -1,11 +1,10 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-import polars as pl
 import numpy as np
-
-from main import app
+import polars as pl
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -48,7 +47,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_confidence_interval_mean_success(client, tables_manager):
@@ -195,7 +193,8 @@ def test_confidence_interval_invalid_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist" in response_data['message']
+    message = "tableName 'NonExistentTable' does not exist."
+    assert message == response_data['message']
 
 
 def test_confidence_interval_invalid_column(client, tables_manager):
@@ -213,7 +212,8 @@ def test_confidence_interval_invalid_column(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnName 'nonexistent_column' does not exist" in response_data['message']
+    message = "columnName 'nonexistent_column' does not exist."
+    assert message == response_data['message']
 
 
 def test_confidence_interval_invalid_statistic_type(client, tables_manager):
@@ -231,10 +231,14 @@ def test_confidence_interval_invalid_statistic_type(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "statisticType 'invalid_stat' is not supported" in response_data['message']
+    message = ("statisticType 'invalid_stat' is not supported. "
+               "Supported statisticType: mean, median, proportion, "
+               "variance, std")
+    assert message == response_data['message']
 
 
-def test_confidence_interval_invalid_confidence_level_high(client, tables_manager):
+def test_confidence_interval_invalid_confidence_level_high(client,
+                                                           tables_manager):
     """信頼度レベルが1以上の場合エラーが返される"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -249,10 +253,12 @@ def test_confidence_interval_invalid_confidence_level_high(client, tables_manage
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "confidenceLevel must be between 0 and 1" in response_data['message']
+    message = "confidenceLevel must be between 0 and 1"
+    assert message == response_data['message']
 
 
-def test_confidence_interval_invalid_confidence_level_low(client, tables_manager):
+def test_confidence_interval_invalid_confidence_level_low(client,
+                                                          tables_manager):
     """信頼度レベルが0以下の場合エラーが返される"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -267,7 +273,8 @@ def test_confidence_interval_invalid_confidence_level_low(client, tables_manager
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "confidenceLevel must be between 0 and 1" in response_data['message']
+    message = "confidenceLevel must be between 0 and 1"
+    assert message == response_data['message']
 
 
 def test_confidence_interval_proportion_invalid_data(client, tables_manager):
@@ -378,7 +385,7 @@ def test_confidence_interval_json_structure_validation(client, tables_manager):
     result = response_data['result']
     # 必須フィールドの存在確認
     required_fields = ['tableName', 'columnName', 'statistic',
-                      'confidence_interval', 'confidence_level']
+                       'confidence_interval', 'confidence_level']
     for field in required_fields:
         assert field in result
     # statisticの必須フィールド

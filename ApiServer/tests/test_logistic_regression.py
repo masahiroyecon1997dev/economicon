@@ -1,11 +1,10 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-import polars as pl
 import numpy as np
-
-from main import app
+import polars as pl
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -50,7 +49,6 @@ def tables_manager():
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_logistic_regression_success(client, tables_manager):
@@ -128,10 +126,12 @@ def test_logistic_regression_invalid_table(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist." == response_data['message']
+    message = "tableName 'NonExistentTable' does not exist."
+    assert message == response_data['message']
 
 
-def test_logistic_regression_invalid_dependent_variable(client, tables_manager):
+def test_logistic_regression_invalid_dependent_variable(client,
+                                                        tables_manager):
     """存在しない被説明変数でエラーが返される"""
     payload = {
         'tableName': 'LogitTestTable',
@@ -145,11 +145,12 @@ def test_logistic_regression_invalid_dependent_variable(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "dependentVariable 'nonexistent_y' does not exist." == response_data['message']
+    message = "dependentVariable 'nonexistent_y' does not exist."
+    assert message == response_data['message']
 
 
-
-def test_logistic_regression_invalid_explanatory_variable(client, tables_manager):
+def test_logistic_regression_invalid_explanatory_variable(client,
+                                                          tables_manager):
     """存在しない説明変数でエラーが返される"""
     payload = {
         'tableName': 'LogitTestTable',
@@ -163,10 +164,12 @@ def test_logistic_regression_invalid_explanatory_variable(client, tables_manager
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables 'nonexistent_x' does not exist." == response_data['message']
+    message = "explanatoryVariables 'nonexistent_x' does not exist."
+    assert message == response_data['message']
 
 
-def test_logistic_regression_empty_explanatory_variables(client, tables_manager):
+def test_logistic_regression_empty_explanatory_variables(client,
+                                                         tables_manager):
     """説明変数が空の場合エラーが返される"""
     payload = {
         'tableName': 'LogitTestTable',
@@ -180,7 +183,9 @@ def test_logistic_regression_empty_explanatory_variables(client, tables_manager)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables must be with at least 1 explanatory_variable." == response_data['message']
+    message = ("explanatoryVariables must be with "
+               "at least 1 explanatory_variable.")
+    assert message == response_data['message']
 
 
 def test_logistic_regression_dependent_in_explanatory(client, tables_manager):
@@ -197,7 +202,8 @@ def test_logistic_regression_dependent_in_explanatory(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Dependent variable cannot be included in explanatory variables" == response_data['message']
+    message = "Dependent variable cannot be included in explanatory variables"
+    assert message == response_data['message']
 
 
 def test_logistic_regression_missing_parameters(client, tables_manager):
@@ -211,14 +217,14 @@ def test_logistic_regression_missing_parameters(client, tables_manager):
         '/api/regression/logistic',
         json=payload,
     )
-    response_data = response.json()
+    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert response_data['code'] == 'NG'
     # assert "Required parameter is missing" == response_data['message']
 
 
-
-def test_logistic_regression_single_explanatory_variable(client, tables_manager):
+def test_logistic_regression_single_explanatory_variable(client,
+                                                         tables_manager):
     """単一の説明変数でもロジット分析が実行できる"""
     payload = {
         'tableName': 'LogitTestTable',

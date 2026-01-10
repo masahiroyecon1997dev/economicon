@@ -1,10 +1,9 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import polars as pl
-
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
 
 @pytest.fixture
@@ -29,7 +28,6 @@ def prepared_data():
     yield manager, df
     # テスト後のクリーンアップ
     manager.clear_tables()
-
 
 
 def test_duplicate_table_success(client, prepared_data):
@@ -63,7 +61,6 @@ def test_duplicate_table_success(client, prepared_data):
     assert original_df['C'].to_list() == duplicated_df['C'].to_list()
 
 
-
 def test_duplicate_table_invalid_source_table(client, prepared_data):
     tables_manager, df = prepared_data
     # 存在しないソーステーブル名
@@ -78,8 +75,8 @@ def test_duplicate_table_invalid_source_table(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist." == response_data['message']
-
+    message = "tableName 'NonExistentTable' does not exist."
+    assert message == response_data['message']
 
 
 def test_duplicate_table_existing_destination_table(client, prepared_data):
@@ -96,7 +93,8 @@ def test_duplicate_table_existing_destination_table(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newTableName 'TestTable' already exists." == response_data['message']
+    message = "newTableName 'TestTable' already exists."
+    assert message == response_data['message']
 
 
 def test_duplicate_table_empty_table(client, prepared_data):

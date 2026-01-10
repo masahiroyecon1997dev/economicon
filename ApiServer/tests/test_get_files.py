@@ -1,16 +1,14 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
 import os
-import tempfile
 import shutil
+import tempfile
 from datetime import datetime
 
-from main import app
+import pytest
 from analysisapp.services.data.tables_manager import TablesManager
+from fastapi import status
+from fastapi.testclient import TestClient
+from main import app
 
-# テスト用の一時ディレクトリを作成
-test_dir = ''
 
 @pytest.fixture
 def client():
@@ -43,16 +41,12 @@ def prepared_data():
     tables_manager.clear_tables()
 
 
-
 def test_get_list_files_success(client, prepared_data):
-    """
-    正常にファイル一覧を取得できる
-    """
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
-    response = client.get(
-        '/api/file/list'
-        f'?directoryPath={test_dir}',
+    """正常にファイル一覧を取得できる"""
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+        prepared_data
     )
+    response = client.get(f'/api/file/list?directoryPath={test_dir}')
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
@@ -85,15 +79,14 @@ def test_get_list_files_success(client, prepared_data):
 
 
 def test_get_list_files_empty_directory(client, prepared_data):
-    """
-    空のディレクトリの場合
-    """
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
+    """空のディレクトリの場合"""
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+        prepared_data
+    )
     empty_dir = tempfile.mkdtemp()
     try:
         response = client.get(
-            '/api/file/list'
-            f'?directoryPath={empty_dir}',
+            f'/api/file/list?directoryPath={empty_dir}'
         )
         response_data = response.json()
         assert response.status_code == status.HTTP_200_OK
@@ -106,13 +99,12 @@ def test_get_list_files_empty_directory(client, prepared_data):
 
 
 def test_get_list_files_invalid_directory(client, prepared_data):
-    """
-    存在しないディレクトリを指定した場合のテスト
-    """
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
+    """存在しないディレクトリを指定した場合のテスト"""
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+        prepared_data
+    )
     response = client.get(
-        '/api/file/list'
-        '?directoryPath=/non/existent/directory',
+        '/api/file/list?directoryPath=/non/existent/directory'
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -121,14 +113,11 @@ def test_get_list_files_invalid_directory(client, prepared_data):
 
 
 def test_get_list_files_missing_directory_path(client, prepared_data):
-    """
-    directoryPathパラメータが未指定の場合のテスト
-    """
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
-    response = client.get(
-        '/api/file/list'
-        '?directoryPath=',
+    """directoryPathパラメータが未指定の場合のテスト"""
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+        prepared_data
     )
+    response = client.get('/api/file/list?directoryPath=')
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
@@ -136,14 +125,11 @@ def test_get_list_files_missing_directory_path(client, prepared_data):
 
 
 def test_get_list_files_file_instead_of_directory(client, prepared_data):
-    """
-    ディレクトリではなくファイルのパスを指定した場合のテスト
-    """
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
-    response = client.get(
-        '/api/file/list'
-        f'?directoryPath={test_file1}',
+    """ディレクトリではなくファイルのパスを指定した場合のテスト"""
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+        prepared_data
     )
+    response = client.get(f'/api/file/list?directoryPath={test_file1}')
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
@@ -151,14 +137,11 @@ def test_get_list_files_file_instead_of_directory(client, prepared_data):
 
 
 def test_get_list_files_file_sizes(client, prepared_data):
-    """
-    ファイルサイズが正しく取得できることを確認
-    """
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = prepared_data
-    response = client.get(
-        '/api/file/list'
-        f'?directoryPath={test_dir}',
+    """ファイルサイズが正しく取得できることを確認"""
+    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+        prepared_data
     )
+    response = client.get(f'/api/file/list?directoryPath={test_dir}')
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     files = response_data['result']['files']
