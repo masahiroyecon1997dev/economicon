@@ -8,10 +8,10 @@ import { useSettingsStore } from "./stores/useSettingsStore";
 import { useTableListStore } from "./stores/useTableListStore";
 
 import { LoadingOverlay } from "./components/molecules/Loading/loading-overlay";
-import { MessageDialog } from "./components/molecules/Modal/message-dialog";
-import { HeaderMenu } from "./components/organisms/Header/header-menu";
-import { LeftSideMenu } from "./components/organisms/main-view/left-side-menu";
-import { MainView } from "./components/organisms/main-view/main-view";
+import { MessageDialog } from "./components/molecules/Modal/MessageDialog";
+import { HeaderMenu } from "./components/organisms/Header/HeaderMenu";
+import { LeftSideMenu } from "./components/templates/Views/LeftSideMenu";
+import { MainView } from "./components/templates/Views/MainView";
 import { useFilesStore } from "./stores/useFilesStore";
 
 export const App = () => {
