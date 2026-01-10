@@ -19,15 +19,3 @@ class ErrorResponse(BaseResponse):
     """エラーレスポンスモデル"""
     code: str = Field(default="NG", description="レスポンスコード")
     message: str = Field(..., description="エラーメッセージ")
-
-
-class TableRequest(BaseModel):
-    """テーブル名を含むリクエストの基底クラス"""
-    tableName: str = Field(..., description="テーブル名")
-
-
-class ColumnRequest(TableRequest):
-    """テーブル名とカラム名を含むリクエストの基底クラス"""
-    tableName: str = Field(..., description="テーブル名")
-    columnName: str = Field(..., description="カラム名")
-    columnName: str = Field(..., description="カラム名")

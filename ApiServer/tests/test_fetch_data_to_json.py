@@ -36,9 +36,13 @@ def test_fetch_data_to_json_success(client, tables_manager):
     # 正常系テスト: JSONデータを取得
     start_row = 2
     fetch_rows = 2
-    response = client.get(
-        f'/api/table/fetch-data?tableName={table_name}'
-        f'&startRow={start_row}&fetchRows={fetch_rows}',
+    response = client.post(
+        '/api/table/fetch-data',
+        json={
+            'tableName': table_name,
+            'startRow': start_row,
+            'fetchRows': fetch_rows
+        }
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
@@ -59,9 +63,13 @@ def test_fetch_data_to_json_table_not_found(client, tables_manager):
     not_existent_table = "non_existent_table"
     start_row = 1
     fetch_rows = 3
-    response = client.get(
-        f'/api/table/fetch-data?tableName={not_existent_table}'
-        f'&startRow={start_row}&fetchRows={fetch_rows}',
+    response = client.post(
+        '/api/table/fetch-data',
+        json={
+            'tableName': not_existent_table,
+            'startRow': start_row,
+            'fetchRows': fetch_rows
+        }
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -73,9 +81,13 @@ def test_fetch_data_to_json_invalid_start_row_range(client, tables_manager):
     # 異常系テスト: 無効な行範囲 startRow
     start_row = 0
     fetch_rows = 4
-    response = client.get(
-        f'/api/table/fetch-data?tableName={table_name}'
-        f'&startRow={start_row}&fetchRows={fetch_rows}',
+    response = client.post(
+        '/api/table/fetch-data',
+        json={
+            'tableName': table_name,
+            'startRow': start_row,
+            'fetchRows': fetch_rows
+        }
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -86,9 +98,13 @@ def test_fetch_data_to_json_invalid_fetch_rows(client, tables_manager):
     # 異常系テスト: 無効な取得行数 fetchRows
     start_row = 1
     fetch_rows = 0
-    response = client.get(
-        f'/api/table/fetch-data?tableName={table_name}'
-        f'&startRow={start_row}&fetchRows={fetch_rows}',
+    response = client.post(
+        '/api/table/fetch-data',
+        json={
+            'tableName': table_name,
+            'startRow': start_row,
+            'fetchRows': fetch_rows
+        }
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -100,9 +116,13 @@ def test_fetch_data_to_json_missing_table_name(client, tables_manager):
     not_table_name = ""
     start_row = 1
     fetch_rows = 6
-    response = client.get(
-        f'/api/table/fetch-data?tableName={not_table_name}'
-        f'&startRow={start_row}&fetchRows={fetch_rows}',
+    response = client.post(
+        '/api/table/fetch-data',
+        json={
+            'tableName': not_table_name,
+            'startRow': start_row,
+            'fetchRows': fetch_rows
+        }
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -113,9 +133,13 @@ def test_fetch_data_to_json_missing_start_row(client, tables_manager):
     # 異常系テスト: 必須パラメータが不足している場合（startRow）
     start_row = ""
     fetch_rows = 6
-    response = client.get(
-        f'/api/table/fetch-data?tableName={table_name}'
-        f'&startRow={start_row}&fetchRows={fetch_rows}',
+    response = client.post(
+        '/api/table/fetch-data',
+        json={
+            'tableName': table_name,
+            'startRow': start_row,
+            'fetchRows': fetch_rows
+        }
     )
     # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -126,9 +150,13 @@ def test_fetch_data_to_json_missing_fetch_rows(client, tables_manager):
     # 異常系テスト: 必須パラメータが不足している場合（fetchRows）
     start_row = 1
     fetch_rows = ""
-    response = client.get(
-        f'/api/table/fetch-data?tableName={table_name}'
-        f'&startRow={start_row}&fetchRows={fetch_rows}',
+    response = client.post(
+        '/api/table/fetch-data',
+        json={
+            'tableName': table_name,
+            'startRow': start_row,
+            'fetchRows': fetch_rows
+        }
     )
     # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -139,9 +167,13 @@ def test_fetch_data_to_json_fetch_beyond_table(client, tables_manager):
     # 正常系テスト: テーブルの行数を超える取得行数
     start_row = 3
     fetch_rows = 10  # テーブルは5行なので3行目から最後までの3行を取得
-    response = client.get(
-        f'/api/table/fetch-data?tableName={table_name}'
-        f'&startRow={start_row}&fetchRows={fetch_rows}',
+    response = client.post(
+        '/api/table/fetch-data',
+        json={
+            'tableName': table_name,
+            'startRow': start_row,
+            'fetchRows': fetch_rows
+        }
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK

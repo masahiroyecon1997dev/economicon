@@ -73,7 +73,12 @@ class DeleteTableRequest(BaseModel):
 
 
 class FetchDataToJsonRequest(BaseModel):
-    """データJSON取得リクエスト（GETクエリパラメータ用）"""
+    """データJSON取得リクエスト"""
     tableName: str = Field(..., description="対象テーブル名")
     startRow: int = Field(..., description="開始行番号")
     fetchRows: int = Field(..., description="取得行数")
+
+
+class GetTableListRequest(BaseModel):
+    """テーブルリスト取得リクエスト（パラメータなし）"""
+    pass
