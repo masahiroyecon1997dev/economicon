@@ -72,3 +72,11 @@ export type SimulationColumnSetting = {
     fixedValue: string | undefined;
   };
 };
+
+export type DropmenuPositionType =
+  | "top"
+  | "bottom"
+  | "bottom-left"
+  | "bottom-right"
+  | "top-left"
+  | "top-right";
