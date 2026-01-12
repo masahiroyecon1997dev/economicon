@@ -5,34 +5,11 @@ import { linearRegression } from "../../../functions/restApis";
 import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
+import type { LinearRegressionResultType } from "../../../types/commonTypes";
 import { Select, SelectItem } from "../../atoms/Input/Select";
 import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
 import { FormField } from "../../molecules/Form/FormField";
 import { MainViewLayout } from "../Layouts/MainViewLayout";
-
-type LinearRegressionResult = {
-  tableName: string;
-  dependentVariable: string;
-  explanatoryVariables: string[];
-  regressionResult: string;
-  parameters: Array<{
-    variable: string;
-    coefficient: number;
-    standardError: number;
-    pValue: number;
-    tValue: number;
-  }>;
-  modelStatistics: {
-    R2: number;
-    adjustedR2: number;
-    AIC: number;
-    BIC: number;
-    fValue: number;
-    fProbability: number;
-    logLikelihood: number;
-    nObservations: number;
-  };
-};
 
 type FormState = {
   errors?: {
@@ -41,7 +18,7 @@ type FormState = {
     explanatoryVariables?: string;
   };
   success?: boolean;
-  result?: LinearRegressionResult;
+  result?: LinearRegressionResultType;
 };
 
 export const LinearRegressionFormView2 = () => {
@@ -59,7 +36,7 @@ export const LinearRegressionFormView2 = () => {
 
   // アクション関数: フォーム送信時の処理
   async function submitLinearRegressionAction(
-    prevState: FormState,
+    _prevState: FormState,
     formData: FormData
   ): Promise<FormState> {
     const tableName = formData.get("tableName") as string;
@@ -98,7 +75,7 @@ export const LinearRegressionFormView2 = () => {
       });
 
       if (response.code === "OK") {
-        return { success: true, result: response.data as LinearRegressionResult };
+
       } else {
         await showMessageDialog(t("Error.Error"), response.message || t("Error.UnexpectedError"));
         return { errors: { tableName: response.message || t("Error.UnexpectedError") } };
@@ -224,7 +201,7 @@ export const LinearRegressionFormView2 = () => {
                   ))}
                 </Select>
               </FormField>
-              <label className="mb-2 block text-sm font-medium text-text-main" htmlFor="data-table">
+              {/* <label className="mb-2 block text-sm font-medium text-text-main" htmlFor="data-table">
                 {t("LinearRegressionFormView.DataTable")}
               </label>
               <select
@@ -246,7 +223,7 @@ export const LinearRegressionFormView2 = () => {
               </select>
               {state.errors?.tableName && (
                 <p className="mt-1 text-xs text-red-600">{state.errors.tableName}</p>
-              )}
+              )} */}
             </div>
           </div>
           <div className="rounded-xl border border-border-color bg-white p-3 shadow-sm">
