@@ -10,7 +10,9 @@ type SelectProps = {
   error?: string;
   className?: string;
   id?: string;
+  name?: string;
   placeholder?: string;
+  disabled?: boolean;
 };
 
 export const Select = ({
@@ -20,12 +22,15 @@ export const Select = ({
   error = "",
   className,
   id,
+  name,
   placeholder,
+  disabled = false,
 }: SelectProps) => {
   return (
-    <SelectPrimitive.Root value={value} onValueChange={onValueChange}>
+    <SelectPrimitive.Root name={name} value={value} onValueChange={onValueChange} disabled={disabled}>
       <SelectPrimitive.Trigger
         id={id}
+        name={name}
         className={cn(
           "flex w-full items-center justify-between px-2.5 py-1.5 text-sm font-normal text-gray-900 bg-white border rounded-md shadow-sm",
           "focus:outline-none focus:ring-2 focus:ring-offset-1 transition-colors duration-200 cursor-pointer",
@@ -68,12 +73,14 @@ type SelectItemProps = {
   value: string;
   children: string;
   className?: string;
+  disabled?: boolean;
 };
 
 export const SelectItem = ({
   value,
   children,
   className,
+  disabled = false,
 }: SelectItemProps) => {
   return (
     <SelectPrimitive.Item

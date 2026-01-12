@@ -1,5 +1,5 @@
 import { UpDirectoryButton } from "../../atoms/Button/UpDirectoryButton";
-import { SearchInput } from "../../atoms/Input/SearchInput";
+import { SearchInput } from "../Form/SearchInput";
 import { Breadcrumb } from "./Breadcrumb";
 
 type NavigationSearchBarProps = {
