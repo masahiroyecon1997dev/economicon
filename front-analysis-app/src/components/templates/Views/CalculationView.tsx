@@ -7,10 +7,10 @@ import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
 import { InputText } from "../../atoms/Input/InputText";
-import { SearchInput } from "../../atoms/Input/SearchInput";
 import { Select, SelectItem } from "../../atoms/Input/Select";
 import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
 import { FormField } from "../../molecules/Form/FormField";
+import { SearchInput } from "../../molecules/Form/SearchInput";
 import { MainViewLayout } from "../Layouts/MainViewLayout";
 
 export const CalculationView = () => {

@@ -18,7 +18,7 @@ export const useTableColumnLoader = (
   const { t } = useTranslation();
   const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const { setLoading, clearLoading } = useLoadingStore();
-
+  // TODO : アクティブなテーブルがなければ、テーブルリストの最初のテーブルをセットする処理を追加する
   const [selectedTableName, setSelectedTableName] = useState<string>(
     activeTableName || ""
   );
