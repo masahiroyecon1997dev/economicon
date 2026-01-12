@@ -80,3 +80,27 @@ export type DropmenuPositionType =
   | "bottom-right"
   | "top-left"
   | "top-right";
+
+export type LinearRegressionResultType = {
+  tableName: string;
+  dependentVariable: string;
+  explanatoryVariables: string[];
+  regressionResult: string;
+  parameters: Array<{
+    variable: string;
+    coefficient: number;
+    standardError: number;
+    pValue: number;
+    tValue: number;
+  }>;
+  modelStatistics: {
+    R2: number;
+    adjustedR2: number;
+    AIC: number;
+    BIC: number;
+    fValue: number;
+    fProbability: number;
+    logLikelihood: number;
+    nObservations: number;
+  };
+};

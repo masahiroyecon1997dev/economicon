@@ -1,4 +1,9 @@
-import type { ColumnType, FilesType, SettingsType } from "./commonTypes";
+import type {
+  ColumnType,
+  FilesType,
+  LinearRegressionResultType,
+  SettingsType,
+} from "./commonTypes";
 
 export type BaseResponseType = {
   code: string;
@@ -120,10 +125,6 @@ export type ResGenerateSimulationDataType = BaseResponseType & {
   result: { tableName: string };
 };
 
-export type ResLinearRegressionType = BaseResponseType & {
-  result: { regressionResult: string };
-};
-
 export type ReqGenerateSimulationDataType = {
   tableName: string;
   numSamples: number;
@@ -139,6 +140,10 @@ export type ReqLinearRegressionType = {
   tableName: string;
   dependentVariable: string;
   explanatoryVariables: string[];
+};
+
+export type ResLinearRegressionType = BaseResponseType & {
+  result: LinearRegressionResultType;
 };
 
 export type ReqCalculateColumnType = {
