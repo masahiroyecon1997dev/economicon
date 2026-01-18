@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -25,7 +25,7 @@ type LinearRegressionFormProps = {
   selectedTableName: string;
   columns: ColumnType[];
   onTableChange: (tableName: string) => void;
-  onSubmit: (data: RegressionFormData) => void;
+  action: (payload: FormData) => void;
   onCancel: () => void;
   isPending?: boolean;
 };
@@ -35,11 +35,12 @@ export const LinearRegressionForm = ({
   selectedTableName,
   columns,
   onTableChange,
-  onSubmit,
+  action,
   onCancel,
   isPending = false,
 }: LinearRegressionFormProps) => {
   const { t } = useTranslation();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const {
     register,
@@ -78,7 +79,25 @@ export const LinearRegressionForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form
+      ref={formRef}
+      action={action}
+      onSubmit={handleSubmit((_data, event) => {
+        if (event?.target instanceof HTMLFormElement) {
+          event.target.requestSubmit();
+        }
+      })}
+      className="flex flex-col gap-4"
+    >
+      {/* Hidden fields for FormData */}
+      <input type="hidden" name="tableName" value={selectedTableName} />
+      <input type="hidden" name="dependentVariable" value={dependentVariable} />
+      <input
+        type="hidden"
+        name="explanatoryVariables"
+        value={explanatoryVariables.join(",")}
+      />
+
       {/* テーブル選択セクション */}
       <div className="rounded-xl border border-border-color bg-white p-3 shadow-sm">
         <h2 className="mb-2 text-sm font-bold leading-tight text-text-heading">
@@ -133,19 +152,19 @@ export const LinearRegressionForm = ({
           />
         </div>
         <div className="mt-4">
-          <label className="mb-1.5 block text-xs font-medium text-text-main">
+          <label className="mb-1.5 block text-xs font-medium text-brand-text-main">
             {t("LinearRegressionForm.SelectedExplanatoryVariables")}
           </label>
           <div className="flex min-h-11 flex-wrap gap-2 rounded-lg border border-border-color bg-secondary p-2">
             {explanatoryVariables.length === 0 ? (
-              <span className="text-xs text-text-main/60">
+              <span className="text-xs text-brand-text-main/60">
                 {t("LinearRegressionForm.NoVariablesSelected")}
               </span>
             ) : (
               explanatoryVariables.map((variable, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center rounded-md bg-accent px-2 py-1 text-xs text-white"
+                  className="inline-flex items-center rounded-md bg-brand-accent px-2 py-1 text-xs text-white"
                 >
                   {variable}
                 </span>
@@ -164,6 +183,7 @@ export const LinearRegressionForm = ({
         }
         onCancel={onCancel}
         onSelect={() => { }}
+        onSelectType="submit"
       />
     </form>
   );

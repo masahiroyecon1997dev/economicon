@@ -20,7 +20,7 @@ export const ExpressionHelperButton = ({
         "h-8 px-3 flex items-center justify-center rounded",
         "bg-white dark:bg-neutral-700",
         "border border-border-color",
-        "text-text-main dark:text-neutral-200",
+        "text-brand-text-main dark:text-neutral-200",
         "hover:bg-neutral-100 hover:border-accent",
         "transition-colors shadow-sm",
         "font-mono text-xs font-medium",

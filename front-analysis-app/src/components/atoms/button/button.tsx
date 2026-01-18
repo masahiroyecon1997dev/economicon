@@ -10,7 +10,7 @@ const variants = {
   ),
   // 元の cancel
   outline: cn(
-    "bg-white text-main border border-border-color hover:bg-gray-50",
+    "bg-white text-brand-text-main border border-border-color hover:bg-gray-50",
     "dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
   ),
   // 他にも必要になったらここに追加しやすい（ghost など）
