@@ -20,9 +20,9 @@ import { MainViewLayout } from "../Layouts/MainViewLayout";
 
 const createCalculationSchema = (t: (key: string) => string) =>
   z.object({
-    tableName: z.string().min(1, t("CalculationView.Validation.TableNameRequired")),
-    newColumnName: z.string().min(1, t("CalculationView.Validation.NewColumnNameRequired")),
-    calculationExpression: z.string().min(1, t("CalculationView.Validation.CalculationExpressionRequired")),
+    tableName: z.string().min(1, t("ValidationMessages.TableNameSelect")),
+    newColumnName: z.string().min(1, t("ValidationMessages.NewColumnNameRequired")),
+    calculationExpression: z.string().min(1, t("ValidationMessages.CalculationExpressionRequired")),
   });
 
 type CalculationFormData = z.infer<ReturnType<typeof createCalculationSchema>>;

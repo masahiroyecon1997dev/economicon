@@ -94,27 +94,6 @@
     "NoActiveTable": "保存するテーブルが選択されていません。",
     "NoTablesImported": "テーブルが取り込まれていません。"
   },
-  "LinearRegressionFormView": {
-    "Title": "線形回帰分析を作成",
-    "Description": "分析するテーブルと変数を選択してください。",
-    "SelectDataTable": "1. データテーブルを選択",
-    "DataTable": "データテーブル",
-    "SelectATable": "テーブルを選択してください",
-    "SelectVariables": "2. 変数を選択",
-    "DependentVariable": "被説明変数 (Y)",
-    "DependentVariableDescription": "予測したい変数を1つ選択してください。",
-    "ExplanatoryVariables": "説明変数 (X)",
-    "ExplanatoryVariablesDescription": "予測に使用する変数を1つ以上選択してください。",
-    "SelectedExplanatoryVariables": "選択された説明変数:",
-    "RunAnalysis": "分析を実行",
-    "RunningAnalysis": "分析を実行中...",
-    "AnalysisSuccess": "分析が成功しました。",
-    "Validation": {
-      "TableNameRequired": "テーブル名を選択してください。",
-      "DependentVariableRequired": "被説明変数を選択してください。",
-      "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください。"
-    }
-  },
   "LinearRegressionForm": {
     "SelectDataTable": "データテーブルの選択",
     "DataTable": "データテーブル",
@@ -127,12 +106,7 @@
     "SelectedExplanatoryVariables": "選択済み説明変数",
     "NoVariablesSelected": "未選択",
     "Processing": "処理中...",
-    "RunAnalysis": "分析実行",
-    "Validation": {
-      "TableNameRequired": "テーブル名を選択してください",
-      "DependentVariableRequired": "目的変数を選択してください",
-      "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください"
-    }
+    "RunAnalysis": "分析実行"
   },
   "RegressionResult": {
     "AnalysisSummary": "分析概要",
@@ -237,6 +211,7 @@
     "FixValidationErrors": "入力エラーがあります。修正してください。",
     "FileNameRequired": "ファイル名を入力してください。",
     "TableNameRequired": "テーブル名を入力してください。",
+    "TableNameSelect": "テーブル名を選択してください",
     "NumRowsRequired": "行数を入力してください。",
     "NumRowsInteger": "行数は整数で入力してください。",
     "NumRowsMoreThan0": "行数は0以上の整数で入力してください。",
@@ -261,7 +236,11 @@
     "GeometricParamProbability": "成功確率は0から1の間の数でなければなりません。",
     "HypergeometricParamPopulationSize": "母集団サイズは0以上の整数でなければなりません。",
     "HypergeometricParamNumberOfSuccesses": "成功数は0以上の整数でなければなりません。",
-    "HypergeometricParamSampleSize": "標本サイズは0以上の整数でなければなりません。"
+    "HypergeometricParamSampleSize": "標本サイズは0以上の整数でなければなりません。",
+    "DependentVariableRequired": "目的変数を選択してください",
+    "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください",
+    "NewColumnNameRequired": "新しいカラム名を入力してください。",
+    "CalculationExpressionRequired": "計算式を入力してください。"
   },
   "CalculationView": {
     "Title": "計算式でカラムを追加",
@@ -284,12 +263,7 @@
     "FilterColumns": "カラムを絞り込み...",
     "ExecuteCalculation": "計算を実行",
     "ExecutingCalculation": "計算を実行中...",
-    "CalculationSuccess": "計算が正常に完了しました。",
-    "Validation": {
-      "TableNameRequired": "テーブルを選択してください。",
-      "NewColumnNameRequired": "新しいカラム名を入力してください。",
-      "CalculationExpressionRequired": "計算式を入力してください。"
-    }
+    "CalculationSuccess": "計算が正常に完了しました。"
   },
   "AreaLabels": {
     "Header": "ヘッダー",
