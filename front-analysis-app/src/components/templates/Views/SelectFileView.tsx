@@ -241,7 +241,6 @@ export const SelectFileView = () => {
 
   return (
     <MainViewLayout
-      includeHeight={true}
       title={t('SelectFileView.Title')}
       description={t('SelectFileView.Description')}
     >
