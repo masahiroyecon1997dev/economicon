@@ -1,11 +1,14 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
-import { useRef, useState } from "react";
+import { startTransition, useActionState, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 import { showMessageDialog } from "../../../functions/messageDialog";
 import { calculateColumn } from "../../../functions/restApis";
 import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
 import { ExpressionHelperButton } from "../../atoms/Button/ExpressionHelperButton";
 import { InputText } from "../../atoms/Input/InputText";
@@ -15,33 +18,95 @@ import { FormField } from "../../molecules/Form/FormField";
 import { SearchInput } from "../../molecules/Form/SearchInput";
 import { MainViewLayout } from "../Layouts/MainViewLayout";
 
+const createCalculationSchema = (t: (key: string) => string) =>
+  z.object({
+    tableName: z.string().min(1, t("CalculationView.Validation.TableNameRequired")),
+    newColumnName: z.string().min(1, t("CalculationView.Validation.NewColumnNameRequired")),
+    calculationExpression: z.string().min(1, t("CalculationView.Validation.CalculationExpressionRequired")),
+  });
+
+type CalculationFormData = z.infer<ReturnType<typeof createCalculationSchema>>;
+
 export const CalculationView = () => {
   const { t } = useTranslation();
   const tableList = useTableListStore((state) => state.tableList);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
-  const { setLoading, clearLoading } = useLoadingStore();
 
   const { selectedTableName, setSelectedTableName, columnList } = useTableColumnLoader({
     numericOnly: true,
     autoLoadOnMount: true,
   });
 
-  const [newColumnName, setNewColumnName] = useState<string>("");
-  const [calculationExpression, setCalculationExpression] = useState<string>("");
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<CalculationFormData>({
+    resolver: zodResolver(createCalculationSchema(t)),
+    defaultValues: {
+      tableName: selectedTableName,
+      newColumnName: "",
+      calculationExpression: "",
+    },
+  });
+
+  const newColumnName = watch("newColumnName");
+  const calculationExpression = watch("calculationExpression");
   const [filterValue, setFilterValue] = useState<string>("");
-  const [errorMessage, setErrorMessage] = useState<{
-    tableName?: string;
-    newColumnName?: string;
-    calculationExpression?: string;
-  }>({});
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  type ActionState = {
+    success: boolean;
+  };
+
+  const handleCalculationAction = async (
+    _prevState: ActionState,
+    formData: FormData
+  ): Promise<ActionState> => {
+    const tableName = formData.get("tableName") as string;
+    const newColumnName = formData.get("newColumnName") as string;
+    const calculationExpression = formData.get("calculationExpression") as string;
+
+    try {
+      const response = await calculateColumn({
+        tableName,
+        newColumnName,
+        calculationExpression,
+      });
+
+      if (response.code === "OK") {
+        await showMessageDialog(t("Common.OK"), t("CalculationView.CalculationSuccess"));
+        setCurrentView("DataPreview");
+        return { success: true };
+      } else {
+        await showMessageDialog(t("Error.Error"), response.message);
+        return { success: false };
+      }
+    } catch (error) {
+      let errorMessage = t("Error.UnexpectedError");
+      if (axios.isAxiosError(error)) {
+        const serverMessage = error.response?.data?.message;
+        if (serverMessage) {
+          errorMessage = serverMessage;
+        }
+      }
+      await showMessageDialog(t("Error.Error"), errorMessage);
+      return { success: false };
+    }
+  };
+
+  const [, submitAction, isPending] = useActionState(handleCalculationAction, {
+    success: false,
+  });
+
   const handleTableChange = (value: string) => {
     setSelectedTableName(value);
-    setNewColumnName("");
-    setCalculationExpression("");
-    setErrorMessage({});
+    setValue("tableName", value, { shouldValidate: true });
+    setValue("newColumnName", "");
+    setValue("calculationExpression", "");
   };
 
   const insertAtCursor = (text: string) => {
@@ -51,7 +116,7 @@ export const CalculationView = () => {
       const before = calculationExpression.substring(0, start);
       const after = calculationExpression.substring(end);
       const newText = before + text + after;
-      setCalculationExpression(newText);
+      setValue("calculationExpression", newText, { shouldValidate: true });
 
       setTimeout(() => {
         if (textareaRef.current) {
@@ -73,64 +138,24 @@ export const CalculationView = () => {
   };
 
   const handleClearClick = () => {
-    setCalculationExpression("");
+    setValue("calculationExpression", "", { shouldValidate: true });
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
   };
 
-  const validateInput = (): boolean => {
-    const errors: {
-      tableName?: string;
-      newColumnName?: string;
-      calculationExpression?: string;
-    } = {};
-
-    if (!selectedTableName || selectedTableName.trim() === "") {
-      errors.tableName = t("CalculationView.Validation.TableNameRequired");
-    }
-
-    if (!newColumnName || newColumnName.trim() === "") {
-      errors.newColumnName = t("CalculationView.Validation.NewColumnNameRequired");
-    }
-
-    if (!calculationExpression || calculationExpression.trim() === "") {
-      errors.calculationExpression = t("CalculationView.Validation.CalculationExpressionRequired");
-    }
-
-    setErrorMessage(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async () => {
-    if (!validateInput()) {
-      return;
-    }
-
-    setLoading(true, t("CalculationView.ExecutingCalculation"));
-
-    try {
-      const response = await calculateColumn({
-        tableName: selectedTableName,
-        newColumnName: newColumnName,
-        calculationExpression: calculationExpression,
-      });
-
-      if (response.code === "OK") {
-        await showMessageDialog(t("Common.OK"), t("CalculationView.CalculationSuccess"));
-        setCurrentView("DataPreview");
-      } else {
-        await showMessageDialog(t("Error.Error"), response.message);
-      }
-    } catch {
-      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
-    } finally {
-      clearLoading();
-    }
-  };
-
   const handleCancel = () => {
     setCurrentView("DataPreview");
+  };
+
+  const onSubmit = (data: CalculationFormData) => {
+    const formData = new FormData();
+    formData.append("tableName", data.tableName);
+    formData.append("newColumnName", data.newColumnName);
+    formData.append("calculationExpression", data.calculationExpression);
+    startTransition(() => {
+      submitAction(formData);
+    });
   };
 
   const filteredColumns = columnList.filter((column) =>
@@ -156,7 +181,12 @@ export const CalculationView = () => {
       title={t("CalculationView.Title")}
       description={t("CalculationView.Description")}
     >
-      <div className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Hidden fields for FormData */}
+        <input type="hidden" {...register("tableName")} value={selectedTableName} />
+        <input type="hidden" {...register("newColumnName")} value={newColumnName} />
+        <input type="hidden" {...register("calculationExpression")} value={calculationExpression} />
+
         <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-color overflow-hidden">
           <div className="p-4 border-b border-border-color grid grid-cols-1 md:grid-cols-2 gap-4 bg-neutral-50/50 dark:bg-neutral-800/30">
             <FormField
@@ -167,8 +197,9 @@ export const CalculationView = () => {
                 id="target-table"
                 value={selectedTableName}
                 onValueChange={handleTableChange}
-                error={errorMessage.tableName}
+                error={errors.tableName?.message}
                 placeholder={t("CalculationView.SelectTable")}
+                disabled={isPending}
               >
                 {tableList.map((table, index) => (
                   <SelectItem key={index} value={table}>
@@ -184,9 +215,10 @@ export const CalculationView = () => {
               <InputText
                 id="new-column-name"
                 value={newColumnName}
-                change={(e) => setNewColumnName(e.target.value)}
+                change={(e) => setValue("newColumnName", e.target.value, { shouldValidate: true })}
                 placeholder={t("CalculationView.NewColumnNamePlaceholder")}
-                error={errorMessage.newColumnName}
+                error={errors.newColumnName?.message}
+                disabled={isPending}
               />
             </FormField>
           </div>
@@ -200,6 +232,7 @@ export const CalculationView = () => {
                   onClick={() => handleOperatorClick("+")}
                   className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Addition")}
+                  disabled={isPending}
                 >
                   +
                 </ExpressionHelperButton>
@@ -207,6 +240,7 @@ export const CalculationView = () => {
                   onClick={() => handleOperatorClick("-")}
                   className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Subtraction")}
+                  disabled={isPending}
                 >
                   -
                 </ExpressionHelperButton>
@@ -214,6 +248,7 @@ export const CalculationView = () => {
                   onClick={() => handleOperatorClick("*")}
                   className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Multiplication")}
+                  disabled={isPending}
                 >
                   *
                 </ExpressionHelperButton>
@@ -221,6 +256,7 @@ export const CalculationView = () => {
                   onClick={() => handleOperatorClick("/")}
                   className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Division")}
+                  disabled={isPending}
                 >
                   /
                 </ExpressionHelperButton>
@@ -228,20 +264,24 @@ export const CalculationView = () => {
                 <ExpressionHelperButton
                   onClick={() => handleOperatorClick("(")}
                   title={t("CalculationView.OpenParenthesis")}
+                  disabled={isPending}
                 >
                   (
                 </ExpressionHelperButton>
                 <ExpressionHelperButton
                   onClick={() => handleOperatorClick(")")}
                   title={t("CalculationView.CloseParenthesis")}
+                  disabled={isPending}
                 >
                   )
                 </ExpressionHelperButton>
                 <div className="ml-auto flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={handleClearClick}
                     className="text-neutral-400 hover:text-accent transition-colors"
                     title={t("CalculationView.ClearAll")}
+                    disabled={isPending}
                   >
                     <span className="material-symbols-outlined text-[20px]"><Eraser /></span>
                   </button>
@@ -253,11 +293,12 @@ export const CalculationView = () => {
                   className="w-full h-full p-4 font-mono text-sm text-text-main dark:text-neutral-300 bg-transparent border-none resize-none focus:ring-0 leading-relaxed"
                   placeholder={t("CalculationView.FormulaPlaceholder")}
                   value={calculationExpression}
-                  onChange={(e) => setCalculationExpression(e.target.value)}
+                  onChange={(e) => setValue("calculationExpression", e.target.value, { shouldValidate: true })}
+                  disabled={isPending}
                 ></textarea>
-                {errorMessage.calculationExpression && (
+                {errors.calculationExpression?.message && (
                   <p className="absolute bottom-12 left-4 text-xs text-red-600">
-                    {errorMessage.calculationExpression}
+                    {errors.calculationExpression.message}
                   </p>
                 )}
                 <div className="absolute bottom-0 right-0 left-0 px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-t border-border-color text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2">
@@ -286,8 +327,10 @@ export const CalculationView = () => {
                   return (
                     <button
                       key={index}
+                      type="button"
                       onClick={() => handleColumnClick(column.name)}
                       className="w-full flex items-center justify-between group p-2 rounded hover:bg-white dark:hover:bg-neutral-800 hover:shadow-sm border border-transparent hover:border-border-color transition-all text-left"
+                      disabled={isPending}
                     >
                       <div className="flex items-center gap-2 overflow-hidden">
                         <span className={`px-1.5 py-0.5 rounded ${typeColor.bg} text-[10px] font-bold ${typeColor.text} font-mono`}>
@@ -309,11 +352,16 @@ export const CalculationView = () => {
         </div>
         <ActionButtonBar
           cancelText={t("Common.Cancel")}
-          selectText={t("CalculationView.ExecuteCalculation")}
+          selectText={
+            isPending
+              ? t("CalculationView.ExecutingCalculation")
+              : t("CalculationView.ExecuteCalculation")
+          }
           onCancel={handleCancel}
-          onSelect={handleSubmit}
+          onSelect={() => { }}
+          onSelectType="submit"
         />
-      </div>
+      </form>
     </MainViewLayout>
   );
 };

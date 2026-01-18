@@ -5,6 +5,7 @@ type ExpressionHelperButtonProps = {
   children: React.ReactNode;
   title?: string;
   className?: string;
+  disabled?: boolean;
 };
 
 export const ExpressionHelperButton = ({
@@ -12,6 +13,7 @@ export const ExpressionHelperButton = ({
   children,
   title,
   className,
+  disabled,
 }: ExpressionHelperButtonProps) => {
   return (
     <button
@@ -27,6 +29,7 @@ export const ExpressionHelperButton = ({
         className
       )}
       title={title}
+      disabled={disabled}
     >
       {children}
     </button>
