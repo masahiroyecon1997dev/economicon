@@ -1,4 +1,9 @@
 """i18nパッケージ初期化"""
-from .translation import _, gettext_lazy, set_locale, get_locale
+from .translation import _, get_locale_from_settings, gettext, gettext_lazy
 
-__all__ = ['_', 'gettext_lazy', 'set_locale', 'get_locale']
+__all__ = [
+    '_',
+    'gettext',
+    'gettext_lazy',
+    'get_locale_from_settings'
+]
