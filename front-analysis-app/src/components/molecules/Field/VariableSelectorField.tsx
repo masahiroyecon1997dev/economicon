@@ -53,11 +53,11 @@ export const VariableSelectorField = ({
 
   return (
     <div className={cn("flex flex-col", className)}>
-      <label className="mb-1.5 block text-xs font-medium text-text-main">
+      <label className="mb-1.5 block text-xs font-medium text-brand-text-main">
         {label}
       </label>
       {description && (
-        <p className="mb-2 text-xs text-text-main/60">{description}</p>
+        <p className="mb-2 text-xs text-brand-text-main/60">{description}</p>
       )}
       <div
         className={cn(
@@ -68,7 +68,7 @@ export const VariableSelectorField = ({
         )}
       >
         {columns.length === 0 ? (
-          <p className="p-2 text-xs text-text-main/60">
+          <p className="p-2 text-xs text-brand-text-main/60">
             {t("Common.NoColumnsAvailable")}
           </p>
         ) : (

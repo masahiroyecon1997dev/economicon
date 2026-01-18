@@ -23,15 +23,15 @@ export const RegressionResult = ({ result, className }: RegressionResultProps) =
         </h3>
         <div className="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
           <div className="flex justify-between">
-            <span className="font-medium text-text-main">{t("RegressionResult.TableName")}:</span>
-            <span className="text-text-main">{result.tableName}</span>
+            <span className="font-medium text-brand-text-main">{t("RegressionResult.TableName")}:</span>
+            <span className="text-brand-text-main">{result.tableName}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-medium text-text-main">{t("RegressionResult.DependentVariable")}:</span>
-            <span className="text-text-main">{result.dependentVariable}</span>
+            <span className="font-medium text-brand-text-main">{t("RegressionResult.DependentVariable")}:</span>
+            <span className="text-brand-text-main">{result.dependentVariable}</span>
           </div>
           <div className="col-span-1 md:col-span-2">
-            <span className="font-medium text-text-main">{t("RegressionResult.ExplanatoryVariables")}:</span>
+            <span className="font-medium text-brand-text-main">{t("RegressionResult.ExplanatoryVariables")}:</span>
             <div className="mt-1 flex flex-wrap gap-1">
               {result.explanatoryVariables.map((variable, index) => (
                 <span
@@ -53,50 +53,50 @@ export const RegressionResult = ({ result, className }: RegressionResultProps) =
         </h3>
         <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
           <div className="flex flex-col">
-            <span className="text-xs text-text-main/60">R²</span>
-            <span className="font-semibold text-text-main">
+            <span className="text-xs text-brand-text-main/60">R²</span>
+            <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.R2)}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-text-main/60">{t("RegressionResult.AdjustedR2")}</span>
-            <span className="font-semibold text-text-main">
+            <span className="text-xs text-brand-text-main/60">{t("RegressionResult.AdjustedR2")}</span>
+            <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.adjustedR2)}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-text-main/60">AIC</span>
-            <span className="font-semibold text-text-main">
+            <span className="text-xs text-brand-text-main/60">AIC</span>
+            <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.AIC)}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-text-main/60">BIC</span>
-            <span className="font-semibold text-text-main">
+            <span className="text-xs text-brand-text-main/60">BIC</span>
+            <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.BIC)}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-text-main/60">{t("RegressionResult.FValue")}</span>
-            <span className="font-semibold text-text-main">
+            <span className="text-xs text-brand-text-main/60">{t("RegressionResult.FValue")}</span>
+            <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.fValue)}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-text-main/60">{t("RegressionResult.FProbability")}</span>
-            <span className="font-semibold text-text-main">
+            <span className="text-xs text-brand-text-main/60">{t("RegressionResult.FProbability")}</span>
+            <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.fProbability)}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-text-main/60">{t("RegressionResult.LogLikelihood")}</span>
-            <span className="font-semibold text-text-main">
+            <span className="text-xs text-brand-text-main/60">{t("RegressionResult.LogLikelihood")}</span>
+            <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.logLikelihood)}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-text-main/60">{t("RegressionResult.Observations")}</span>
-            <span className="font-semibold text-text-main">
+            <span className="text-xs text-brand-text-main/60">{t("RegressionResult.Observations")}</span>
+            <span className="font-semibold text-brand-text-main">
               {result.modelStatistics.nObservations}
             </span>
           </div>
@@ -135,16 +135,16 @@ export const RegressionResult = ({ result, className }: RegressionResultProps) =
                   key={index}
                   className="border-b border-border-color hover:bg-secondary/50"
                 >
-                  <td className="px-3 py-2 font-medium text-text-main">
+                  <td className="px-3 py-2 font-medium text-brand-text-main">
                     {param.variable}
                   </td>
-                  <td className="px-3 py-2 text-right text-text-main">
+                  <td className="px-3 py-2 text-right text-brand-text-main">
                     {formatNumber(param.coefficient)}
                   </td>
-                  <td className="px-3 py-2 text-right text-text-main">
+                  <td className="px-3 py-2 text-right text-brand-text-main">
                     {formatNumber(param.standardError)}
                   </td>
-                  <td className="px-3 py-2 text-right text-text-main">
+                  <td className="px-3 py-2 text-right text-brand-text-main">
                     {formatNumber(param.tValue)}
                   </td>
                   <td
@@ -156,7 +156,7 @@ export const RegressionResult = ({ result, className }: RegressionResultProps) =
                           ? "text-green-500"
                           : param.pValue < 0.05
                             ? "text-yellow-600"
-                            : "text-text-main"
+                            : "text-brand-text-main"
                     )}
                   >
                     {formatNumber(param.pValue)}
@@ -174,7 +174,7 @@ export const RegressionResult = ({ result, className }: RegressionResultProps) =
           <h3 className="mb-3 text-base font-bold text-text-heading">
             {t("RegressionResult.RegressionDetails")}
           </h3>
-          <pre className="overflow-x-auto rounded bg-secondary p-3 text-xs text-text-main">
+          <pre className="overflow-x-auto rounded bg-secondary p-3 text-xs text-brand-text-main">
             {result.regressionResult}
           </pre>
         </div>
