@@ -30,7 +30,7 @@ export const validateColumnName = (columnName: string): ValidationResult => {
 
 export const validateDistributionParam = (
   distributionType: string,
-  params: Record<string, number>
+  params: Record<string, number>,
 ): Record<string, string | undefined> | undefined => {
   switch (distributionType) {
     case "uniform":
@@ -51,7 +51,7 @@ export const validateDistributionParam = (
         return { deviation: "ValidationMessages.NormalParamStdDeviation" };
       }
       return undefined;
-    case "gamma":
+    case "gamma": {
       let gammaResult = undefined as
         | Record<string, string | undefined>
         | undefined;
@@ -68,7 +68,8 @@ export const validateDistributionParam = (
         };
       }
       return gammaResult;
-    case "beta":
+    }
+    case "beta": {
       let betaResult = undefined as
         | Record<string, string | undefined>
         | undefined;
@@ -85,7 +86,8 @@ export const validateDistributionParam = (
         };
       }
       return betaResult;
-    case "weibull":
+    }
+    case "weibull": {
       let weibullResult = { shape: undefined, scale: undefined } as
         | Record<string, string | undefined>
         | undefined;
@@ -102,12 +104,13 @@ export const validateDistributionParam = (
         };
       }
       return weibullResult;
+    }
     case "lognormal":
       if (params["logSD"] <= 0) {
         return { logSD: "ValidationMessages.LognormalParamLogStdDeviation" };
       }
       return undefined;
-    case "binomial":
+    case "binomial": {
       let binomialErrors = undefined as
         | Record<string, string | undefined>
         | undefined;
@@ -124,11 +127,13 @@ export const validateDistributionParam = (
         };
       }
       return binomialErrors;
-    case "bernoulli":
+    }
+    case "bernoulli": {
       if (params["probability"] < 0 || params["probability"] > 1) {
         return { probability: "ValidationMessages.BernoulliParamProbability" };
       }
       return undefined;
+    }
     case "poisson":
       if (params["lambda"] <= 0) {
         return { lambda: "ValidationMessages.PoissonParamLambda" };
@@ -139,7 +144,7 @@ export const validateDistributionParam = (
         return { probability: "ValidationMessages.GeometricParamProbability" };
       }
       return undefined;
-    case "hypergeometric":
+    case "hypergeometric": {
       let hypergeomErrors = undefined as
         | Record<string, string | undefined>
         | undefined;
@@ -168,6 +173,7 @@ export const validateDistributionParam = (
         };
       }
       return hypergeomErrors;
+    }
     default:
       return undefined;
   }

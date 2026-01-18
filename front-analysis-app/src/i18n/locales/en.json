@@ -49,27 +49,6 @@
     "NoActiveTable": "No active table selected to save.",
     "NoTablesImported": "No tables have been imported."
   },
-  "LinearRegressionFormView": {
-    "Title": "Create New Regression Analysis",
-    "Description": "Select the table and variables for the analysis.",
-    "SelectDataTable": "1. Select Data Table",
-    "DataTable": "Data Table",
-    "SelectATable": "Select a table",
-    "SelectVariables": "2. Select Variables",
-    "DependentVariable": "Dependent Variable (Y)",
-    "DependentVariableDescription": "Select one variable you want to predict.",
-    "ExplanatoryVariables": "Explanatory Variables (X)",
-    "ExplanatoryVariablesDescription": "Select one or more variables to use for prediction.",
-    "SelectedExplanatoryVariables": "Selected Explanatory Variables:",
-    "RunAnalysis": "Run Analysis",
-    "RunningAnalysis": "Running analysis...",
-    "AnalysisSuccess": "Analysis completed successfully.",
-    "Validation": {
-      "TableNameRequired": "Please select a table.",
-      "DependentVariableRequired": "Please select a dependent variable.",
-      "ExplanatoryVariablesRequired": "Please select at least one explanatory variable."
-    }
-  },
   "LinearRegressionForm": {
     "SelectDataTable": "Select Data Table",
     "DataTable": "Data Table",

@@ -16,11 +16,11 @@ import { FormField } from "../../molecules/Form/FormField";
 
 const createRegressionSchema = (t: (key: string) => string) =>
   z.object({
-    tableName: z.string().min(1, t("LinearRegressionForm.Validation.TableNameRequired")),
-    dependentVariable: z.string().min(1, t("LinearRegressionForm.Validation.DependentVariableRequired")),
+    tableName: z.string().min(1, t("ValidationMessages.TableNameSelect")),
+    dependentVariable: z.string().min(1, t("ValidationMessages.DependentVariableRequired")),
     explanatoryVariables: z
       .array(z.string())
-      .min(1, t("LinearRegressionForm.Validation.ExplanatoryVariablesRequired")),
+      .min(1, t("ValidationMessages.ExplanatoryVariablesRequired")),
   });
 
 type RegressionFormData = z.infer<ReturnType<typeof createRegressionSchema>>;

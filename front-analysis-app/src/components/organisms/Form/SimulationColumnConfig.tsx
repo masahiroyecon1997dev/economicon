@@ -17,6 +17,7 @@ type SimulationColumnConfigProps = {
   onRemove: (id: string) => void;
   canRemove: boolean;
   error: { columnName: string | undefined; distributionParams: Record<string, string | undefined> | undefined; fixedValue: string | undefined };
+  disabled?: boolean;
 };
 
 export const SimulationColumnConfig = ({
@@ -30,6 +31,7 @@ export const SimulationColumnConfig = ({
   onRemove,
   canRemove,
   error,
+  disabled = false,
 }: SimulationColumnConfigProps) => {
   const { t } = useTranslation();
   const distOption = column.distributionType ? distributionOptions.find(d => d.value === column.distributionType) : null;
@@ -62,9 +64,10 @@ export const SimulationColumnConfig = ({
         <div className="md:col-span-2 flex justify-between items-center">
           <p className="font-bold brand-text-main dark:text-white">列 {index + 1}</p>
           <button
+            type="button"
             onClick={() => onRemove(column.id)}
             className="text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            disabled={!canRemove}
+            disabled={!canRemove || disabled}
           >
             <X size={20} />
           </button>
@@ -77,6 +80,7 @@ export const SimulationColumnConfig = ({
             change={(e) => onUpdate(column.id, { columnName: e.target.value })}
             placeholder={t('CreateSimulationDataTableView.InputColumnName')}
             error={error.columnName}
+            disabled={disabled}
           />
         </FormField>
 
@@ -85,6 +89,7 @@ export const SimulationColumnConfig = ({
             id={`data-type-${column.id}`}
             value={column.dataType}
             onValueChange={(value) => onDataTypeChange(column.id, value as 'distribution' | 'fixed')}
+            disabled={disabled}
           >
             <SelectItem value="fixed">{t('Common.Constant')}</SelectItem>
             <SelectItem value="distribution">{t('Common.Distribution')}</SelectItem>
@@ -99,6 +104,7 @@ export const SimulationColumnConfig = ({
                   id={`distribution-type-${column.id}`}
                   value={column.distributionType || ''}
                   onValueChange={(value) => onDistributionTypeChange(column.id, value as DistributionType)}
+                  disabled={disabled}
                 >
                   {distributionOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
@@ -125,6 +131,7 @@ export const SimulationColumnConfig = ({
                       change={(e) => onDistributionParamChange(column.id, param, parseFloat(e.target.value))}
                       placeholder={`${getParamLabel(param)}${t('CreateSimulationDataTableView.InputDistributionParameters')}`}
                       error={error.distributionParams ? error.distributionParams[param] : undefined}
+                      disabled={disabled}
                     />
                   </FormField>
                 ))}
@@ -142,6 +149,7 @@ export const SimulationColumnConfig = ({
                 change={(e) => onUpdate(column.id, { fixedValue: e.target.value })}
                 placeholder={t('CreateSimulationDataTableView.InputFixedValue')}
                 error={error.fixedValue}
+                disabled={disabled}
               />
             </FormField>
           </div>
