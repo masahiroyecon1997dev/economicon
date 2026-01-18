@@ -4,6 +4,7 @@
     "OK": "OK",
     "Delete": "削除",
     "Table": "テーブル",
+    "NoColumnsAvailable": "利用可能なカラムがありません",
     "OpenSideMenu": "サイドメニューを開く",
     "CloseSideMenu": "サイドメニューを閉じる",
     "Constant": "定数",
@@ -114,6 +115,49 @@
       "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください。"
     }
   },
+  "LinearRegressionForm": {
+    "SelectDataTable": "データテーブルの選択",
+    "DataTable": "データテーブル",
+    "SelectATable": "テーブルを選択してください",
+    "SelectVariables": "変数の選択",
+    "DependentVariable": "目的変数",
+    "DependentVariableDescription": "分析対象となる変数を1つ選択",
+    "ExplanatoryVariables": "説明変数",
+    "ExplanatoryVariablesDescription": "予測に使用する変数を複数選択可能",
+    "SelectedExplanatoryVariables": "選択済み説明変数",
+    "NoVariablesSelected": "未選択",
+    "Processing": "処理中...",
+    "RunAnalysis": "分析実行",
+    "Validation": {
+      "TableNameRequired": "テーブル名を選択してください",
+      "DependentVariableRequired": "目的変数を選択してください",
+      "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください"
+    }
+  },
+  "RegressionResult": {
+    "AnalysisSummary": "分析概要",
+    "TableName": "テーブル名",
+    "DependentVariable": "目的変数",
+    "ExplanatoryVariables": "説明変数",
+    "ModelStatistics": "モデル統計量",
+    "AdjustedR2": "調整済みR²",
+    "FValue": "F値",
+    "FProbability": "F確率",
+    "LogLikelihood": "対数尤度",
+    "Observations": "観測数",
+    "Coefficients": "係数",
+    "Variable": "変数",
+    "Coefficient": "係数",
+    "StandardError": "標準誤差",
+    "TValue": "t値",
+    "PValue": "p値",
+    "RegressionDetails": "回帰結果詳細"
+  },
+  "RegressionTab": {
+    "FormTab": "分析設定",
+    "NoResultsAvailable": "分析結果がありません",
+    "ResultLabel": "結果 {{number}}"
+  },
   "CreateSimulationDataTableView": {
     "CreateNewDataTable": "新しいデータテーブルを作成",
     "DefineYourTableNameAndRows": "テーブル名と行数を定義し、列を追加および設定してデータセットを生成します。",
@@ -175,9 +219,6 @@
   "CalculateModal": {
     "Title": "計算結果の列を作成する",
     "Execute": "作成"
-  },
-  "RegressionResult": {
-    "Title": "分析結果"
   },
   "Loading": {
     "Loading": "読み込み中..."
