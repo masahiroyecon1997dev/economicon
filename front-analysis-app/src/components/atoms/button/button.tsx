@@ -1,4 +1,3 @@
-// src/components/atoms/button/button.tsx
 import { type ComponentPropsWithoutRef } from "react";
 import { cn } from "../../../functions/utils";
 

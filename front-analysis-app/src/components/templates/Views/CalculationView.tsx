@@ -1,3 +1,4 @@
+import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { showMessageDialog } from "../../../functions/messageDialog";
@@ -6,6 +7,7 @@ import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
+import { ExpressionHelperButton } from "../../atoms/Button/ExpressionHelperButton";
 import { InputText } from "../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../atoms/Input/Select";
 import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
@@ -195,56 +197,54 @@ export const CalculationView = () => {
                 <span className="text-xs font-semibold text-neutral-500 uppercase mr-2 tracking-wider">
                   {t("CalculationView.Operators")}
                 </span>
-                <button
+                <ExpressionHelperButton
                   onClick={() => handleOperatorClick("+")}
-                  className="h-8 min-w-8 px-2 flex items-center justify-center rounded bg-white dark:bg-neutral-700 border border-border-color text-text-main dark:text-neutral-200 hover:bg-neutral-100 hover:border-accent transition-colors shadow-sm font-mono text-sm"
+                  className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Addition")}
                 >
                   +
-                </button>
-                <button
+                </ExpressionHelperButton>
+                <ExpressionHelperButton
                   onClick={() => handleOperatorClick("-")}
-                  className="h-8 min-w-8 px-2 flex items-center justify-center rounded bg-white dark:bg-neutral-700 border border-border-color text-text-main dark:text-neutral-200 hover:bg-neutral-100 hover:border-accent transition-colors shadow-sm font-mono text-sm"
+                  className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Subtraction")}
                 >
                   -
-                </button>
-                <button
+                </ExpressionHelperButton>
+                <ExpressionHelperButton
                   onClick={() => handleOperatorClick("*")}
-                  className="h-8 min-w-8 px-2 flex items-center justify-center rounded bg-white dark:bg-neutral-700 border border-border-color text-text-main dark:text-neutral-200 hover:bg-neutral-100 hover:border-accent transition-colors shadow-sm font-mono text-sm"
+                  className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Multiplication")}
                 >
                   *
-                </button>
-                <button
+                </ExpressionHelperButton>
+                <ExpressionHelperButton
                   onClick={() => handleOperatorClick("/")}
-                  className="h-8 min-w-8 px-2 flex items-center justify-center rounded bg-white dark:bg-neutral-700 border border-border-color text-text-main dark:text-neutral-200 hover:bg-neutral-100 hover:border-accent transition-colors shadow-sm font-mono text-sm"
+                  className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Division")}
                 >
                   /
-                </button>
+                </ExpressionHelperButton>
                 <div className="w-px h-6 bg-border-color mx-1"></div>
-                <button
+                <ExpressionHelperButton
                   onClick={() => handleOperatorClick("(")}
-                  className="h-8 px-3 flex items-center justify-center rounded bg-white dark:bg-neutral-700 border border-border-color text-text-main dark:text-neutral-200 hover:bg-neutral-100 hover:border-accent transition-colors shadow-sm font-mono text-xs font-medium"
                   title={t("CalculationView.OpenParenthesis")}
                 >
                   (
-                </button>
-                <button
+                </ExpressionHelperButton>
+                <ExpressionHelperButton
                   onClick={() => handleOperatorClick(")")}
-                  className="h-8 px-3 flex items-center justify-center rounded bg-white dark:bg-neutral-700 border border-border-color text-text-main dark:text-neutral-200 hover:bg-neutral-100 hover:border-accent transition-colors shadow-sm font-mono text-xs font-medium"
                   title={t("CalculationView.CloseParenthesis")}
                 >
                   )
-                </button>
+                </ExpressionHelperButton>
                 <div className="ml-auto flex items-center gap-2">
                   <button
                     onClick={handleClearClick}
                     className="text-neutral-400 hover:text-accent transition-colors"
                     title={t("CalculationView.ClearAll")}
                   >
-                    <span className="material-symbols-outlined text-[20px]">delete_sweep</span>
+                    <span className="material-symbols-outlined text-[20px]"><Eraser /></span>
                   </button>
                 </div>
               </div>
@@ -262,15 +262,15 @@ export const CalculationView = () => {
                   </p>
                 )}
                 <div className="absolute bottom-0 right-0 left-0 px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-t border-border-color text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px]">info</span>
+                  <span className="material-symbols-outlined text-[16px]"><Info /></span>
                   <span>{t("CalculationView.FormulaHelp")}</span>
                 </div>
               </div>
             </div>
             <div className="w-full lg:w-72 flex flex-col bg-neutral-50 dark:bg-surface-dark">
               <div className="p-3 border-b border-border-color">
-                <h3 className="text-sm font-semibold text-text-main dark:text-white flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px] text-primary">view_column</span>
+                <h3 className="text-sm text-gray-700 font-semibold dark:text-white flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px] text-primary"><Columns3 size={18} strokeWidth={1.2} /></span>
                   {t("CalculationView.AvailableColumns")}
                 </h3>
                 <div className="mt-2">
@@ -299,7 +299,7 @@ export const CalculationView = () => {
                         </span>
                       </div>
                       <span className="material-symbols-outlined text-[16px] text-neutral-400 opacity-0 group-hover:opacity-100">
-                        add_circle
+                        <CirclePlus size={16} strokeWidth={1.5} />
                       </span>
                     </button>
                   );
