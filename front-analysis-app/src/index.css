@@ -17,6 +17,8 @@
   --color-brand-accent-dark: #2292ddff;
   /* メインのボーダーの色 */
   --color-brand-border: #e5e7eb;
+  /* テキストのメインカラー */
+  --color-brand-text-main: "#2c3e50";
 }
 
 @layer utilities {

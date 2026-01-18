@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { showMessageDialog } from "../../../functions/messageDialog";
 import { linearRegression } from "../../../functions/restApis";
@@ -16,10 +16,12 @@ type RegressionViewProps = {
   className?: string;
 };
 
+type ActionState = {
+  results: LinearRegressionResultType[];
+};
 
 export const RegressionView = ({ className }: RegressionViewProps) => {
   const { t } = useTranslation();
-  const [results, setResults] = useState<LinearRegressionResultType[]>([]);
   const [activeTab, setActiveTab] = useState<string>("analysis-settings");
   const tableList = useTableListStore((state) => state.tableList);
   const { selectedTableName, setSelectedTableName, columnList, setColumnList } =
@@ -28,8 +30,6 @@ export const RegressionView = ({ className }: RegressionViewProps) => {
       autoLoadOnMount: true,
     });
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
-
-  const [isPending, setIsPending] = useState(false);
 
   const handleTableChange = async (value: string) => {
     setSelectedTableName(value);
@@ -42,38 +42,46 @@ export const RegressionView = ({ className }: RegressionViewProps) => {
     setCurrentView("DataPreview"); // または適切なビューへ遷移
   };
 
-  const handleFormSubmit = async (data: {
-    tableName: string;
-    dependentVariable: string;
-    explanatoryVariables: string[];
-  }) => {
-    setIsPending(true);
-
+  const handleRegressionAction = async (
+    prevState: ActionState,
+    formData: FormData
+  ): Promise<ActionState> => {
+    const tableName = formData.get("tableName") as string;
+    const dependentVariable = formData.get("dependentVariable") as string;
+    const explanatoryVariablesStr = formData.get("explanatoryVariables") as string;
+    const explanatoryVariables = explanatoryVariablesStr
+      ? explanatoryVariablesStr.split(",")
+      : [];
+    console.log(tableName, dependentVariable, explanatoryVariables);
     try {
       const response = await linearRegression({
-        tableName: data.tableName,
-        dependentVariable: data.dependentVariable,
-        explanatoryVariables: data.explanatoryVariables,
+        tableName,
+        dependentVariable,
+        explanatoryVariables,
       });
 
       if (response.code === "OK" && response.result) {
         // 新しい結果を配列の末尾に追加
-        setResults((prev) => [...prev, response.result]);
-        // 最新の結果タブ（results初期長=0ならindex0 -> result-0）
-        // 追加後の配列長-1 が新しいインデックス
-        setActiveTab(`result-${results.length}`);
+        const newResults = [...prevState.results, response.result];
+        // 最新の結果タブに切り替え
+        setActiveTab(`result-${newResults.length - 1}`);
+        return { results: newResults };
       } else {
         await showMessageDialog(
           t("Error.Error"),
           response.message || t("Error.UnexpectedError")
         );
+        return prevState;
       }
     } catch {
       await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
-    } finally {
-      setIsPending(false);
+      return prevState;
     }
   };
+
+  const [state, submitAction, isPending] = useActionState(handleRegressionAction, {
+    results: [],
+  });
 
   return (
     <MainViewLayout>
@@ -89,7 +97,7 @@ export const RegressionView = ({ className }: RegressionViewProps) => {
           </TabsTrigger>
 
           {/* 結果タブ */}
-          {results.map((_, index) => (
+          {state.results.map((_, index) => (
             <TabsTrigger key={`result-${index}`} value={`result-${index}`}>
               {t("RegressionTab.ResultLabel", { number: index + 1 })}
             </TabsTrigger>
@@ -104,7 +112,7 @@ export const RegressionView = ({ className }: RegressionViewProps) => {
               selectedTableName={selectedTableName}
               columns={columnList}
               onTableChange={handleTableChange}
-              onSubmit={handleFormSubmit}
+              action={submitAction}
               onCancel={handleCancel}
               isPending={isPending}
             />
@@ -112,7 +120,7 @@ export const RegressionView = ({ className }: RegressionViewProps) => {
         </TabsContent>
 
         {/* 結果タブコンテンツ */}
-        {results.map((result, index) => (
+        {state.results.map((result, index) => (
           <TabsContent key={`result-${index}`} value={`result-${index}`}>
             <div className="mx-auto max-w-6xl pt-6">
               <RegressionResult result={result} />
