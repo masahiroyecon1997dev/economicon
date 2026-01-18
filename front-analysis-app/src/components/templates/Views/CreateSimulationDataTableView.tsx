@@ -264,7 +264,6 @@ export const CreateSimulationDataTableView = () => {
   };
   return (
     <MainViewLayout
-      maxWidth="6xl"
       title={t("CreateSimulationDataTableView.CreateNewDataTable")}
       description={t("CreateSimulationDataTableView.DefineYourTableNameAndRows")}
     >

@@ -1,30 +1,22 @@
 import { type ReactNode } from "react";
+import { cn } from "../../../functions/utils";
 
 interface MainViewLayoutProps {
   children: ReactNode;
-  maxWidth?: "none" | "4xl" | "6xl";
-  includeHeight?: boolean;
   title?: string;
   description?: string;
+  className?: string;
 }
 
 export const MainViewLayout = ({
   children,
-  maxWidth = "none",
-  includeHeight = false,
   title,
-  description
+  description,
+  className,
 }: MainViewLayoutProps) => {
-  const maxWidthClass = maxWidth === "none"
-    ? "max-w-none"
-    : maxWidth === "4xl"
-      ? "max-w-4xl"
-      : "max-w-6xl";
-
-  const heightClass = includeHeight ? "h-full" : "";
 
   return (
-    <div className={`mx-auto w-full ${maxWidthClass} px-3 ${heightClass}`}>
+    <div className={cn("w-full h-full px-3", className)}>
       {title && description ? (
         <div className="flex flex-col gap-3 md:gap-6">
           <header className="shrink-0">
