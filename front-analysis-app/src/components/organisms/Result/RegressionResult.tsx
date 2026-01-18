@@ -10,6 +10,14 @@ type RegressionResultProps = {
 export const RegressionResult = ({ result, className }: RegressionResultProps) => {
   const { t } = useTranslation();
 
+  if (!result) {
+    return (
+      <div className={cn("flex items-center justify-center p-8", className)}>
+        <p className="text-brand-text-main/60">{t("RegressionResult.NoData")}</p>
+      </div>
+    );
+  }
+
   const formatNumber = (num: number, decimals: number = 4): string => {
     return num.toFixed(decimals);
   };

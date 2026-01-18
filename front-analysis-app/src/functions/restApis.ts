@@ -13,7 +13,7 @@ export const getTableList = async (): Promise<apiTypes.ResgetTableListType> => {
 };
 
 export const getFiles = async (
-  path: string
+  path: string,
 ): Promise<apiTypes.ResGetFilesType> => {
   const response = await axios.post(API_ENDPOINTS.FILE.GET_LIST, {
     directoryPath: path,
@@ -22,38 +22,38 @@ export const getFiles = async (
 };
 
 export const importCsvByPath = async (
-  requestBody: apiTypes.ReqImportCsvByPathType
+  requestBody: apiTypes.ReqImportCsvByPathType,
 ): Promise<apiTypes.ResImportCsvByPathType> => {
   const response = await axios.post(
     API_ENDPOINTS.DATA.IMPORT_CSV_BY_PATH,
-    requestBody
+    requestBody,
   );
   return response.data;
 };
 
 export const importExcelByPath = async (
-  requestBody: apiTypes.ReqImportExcelByPathType
+  requestBody: apiTypes.ReqImportExcelByPathType,
 ): Promise<apiTypes.ResImportExcelByPathType> => {
   const response = await axios.post(
     API_ENDPOINTS.DATA.IMPORT_EXCEL_BY_PATH,
-    requestBody
+    requestBody,
   );
   return response.data;
 };
 
 export const importParquetByPath = async (
-  requestBody: apiTypes.ReqImportParquetByPathType
+  requestBody: apiTypes.ReqImportParquetByPathType,
 ): Promise<apiTypes.ResImportParquetByPathType> => {
   const response = await axios.post(
     API_ENDPOINTS.DATA.IMPORT_PARQUET_BY_PATH,
-    requestBody
+    requestBody,
   );
   return response.data;
 };
 
 export const getColumnList = async (
   tableName: string,
-  isNumberOnly: string = "false"
+  isNumberOnly: string = "false",
 ): Promise<apiTypes.ResGetColumnInfoType> => {
   const response = await axios.post(API_ENDPOINTS.COLUMN.GET_LIST, {
     tableName: tableName,
@@ -65,7 +65,7 @@ export const getColumnList = async (
 export const fetchDataToJson = async (
   tableName: string,
   startRow: number = 1,
-  fetchRows: number = 100
+  fetchRows: number = 100,
 ): Promise<apiTypes.ResFetchDataToJsonType> => {
   const response = await axios.post(API_ENDPOINTS.TABLE.FETCH_DATA, {
     tableName: tableName,
@@ -76,47 +76,47 @@ export const fetchDataToJson = async (
 };
 
 export const createSimulationDataTable = async (
-  requestBody: apiTypes.ReqCreateSimulationDataTableType
+  requestBody: apiTypes.ReqCreateSimulationDataTableType,
 ): Promise<apiTypes.ResCreateSimulationDataTableType> => {
   const response = await axios.post(
     API_ENDPOINTS.TABLE.CREATE_SIMULATION_DATA,
-    requestBody
+    requestBody,
   );
   return response.data;
 };
 
 export const exportCsvByPath = async (
-  requestBody: apiTypes.ReqExportCsvByPathType
+  requestBody: apiTypes.ReqExportCsvByPathType,
 ): Promise<apiTypes.ResExportCsvByPathType> => {
   const response = await axios.post(
     API_ENDPOINTS.DATA.EXPORT_CSV_BY_PATH,
-    requestBody
+    requestBody,
   );
   return response.data;
 };
 
 export const exportExcelByPath = async (
-  requestBody: apiTypes.ReqExportExcelByPathType
+  requestBody: apiTypes.ReqExportExcelByPathType,
 ): Promise<apiTypes.ResExportExcelByPathType> => {
   const response = await axios.post(
     API_ENDPOINTS.DATA.EXPORT_EXCEL_BY_PATH,
-    requestBody
+    requestBody,
   );
   return response.data;
 };
 
 export const exportParquetByPath = async (
-  requestBody: apiTypes.ReqExportParquetByPathType
+  requestBody: apiTypes.ReqExportParquetByPathType,
 ): Promise<apiTypes.ResExportParquetByPathType> => {
   const response = await axios.post(
     API_ENDPOINTS.DATA.EXPORT_PARQUET_BY_PATH,
-    requestBody
+    requestBody,
   );
   return response.data;
 };
 
 export const importCsv = async (
-  file: File
+  file: File,
 ): Promise<apiTypes.ResImportCsvType> => {
   const formData = new FormData();
   formData.append("file", file);
@@ -127,7 +127,7 @@ export const importCsv = async (
       headers: {
         "Content-Type": "multipart/form-data",
       },
-    }
+    },
   );
   return response.data;
 };
@@ -136,7 +136,7 @@ export const importCsv = async (
 // 新しいAPIには対応するエンドポイントが存在しない可能性があります
 
 export const outputCsv = async (
-  tableName: string
+  tableName: string,
 ): Promise<apiTypes.ResOutputCsvType> => {
   const response = await axios.get("/output_csv", {
     params: {
@@ -147,7 +147,7 @@ export const outputCsv = async (
 };
 
 export const generateSimulationData = async (
-  requestBody: apiTypes.ReqGenerateSimulationDataType
+  requestBody: apiTypes.ReqGenerateSimulationDataType,
 ): Promise<apiTypes.ResGenerateSimulationDataType> => {
   try {
     const response = await axios.post("/generate_simulation_data", requestBody);
@@ -159,30 +159,21 @@ export const generateSimulationData = async (
 };
 
 export const linearRegression = async (
-  requestBody: apiTypes.ReqLinearRegressionType
+  requestBody: apiTypes.ReqLinearRegressionType,
 ): Promise<apiTypes.ResLinearRegressionType> => {
-  try {
-    const response = await axios.post(
-      API_ENDPOINTS.REGRESSION.LINEAR,
-      requestBody
-    );
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    return {
-      code: "NG",
-      result: { regressionResult: "" },
-      message: "エラーです",
-    };
-  }
+  const response = await axios.post(
+    API_ENDPOINTS.REGRESSION.LINEAR,
+    requestBody,
+  );
+  return response.data;
 };
 
 export const calculateColumn = async (
-  requestBody: apiTypes.ReqCalculateColumnType
+  requestBody: apiTypes.ReqCalculateColumnType,
 ): Promise<apiTypes.ResCalculateColumnType> => {
   const response = await axios.post(
     API_ENDPOINTS.COLUMN.CALCULATE,
-    requestBody
+    requestBody,
   );
   return response.data;
 };
