@@ -1,9 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef, useState } from "react";
+import axios from "axios";
+import { startTransition, useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import type { ColumnType } from "../../../types/commonTypes";
+import { showMessageDialog } from "../../../functions/messageDialog";
+import { linearRegression } from "../../../functions/restApis";
+import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
+import { useRegressionResultsStore } from "../../../stores/useRegressionResultsStore";
+import { useTableListStore } from "../../../stores/useTableListStore";
 import { Select, SelectItem } from "../../atoms/Input/Select";
 import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
 import { VariableSelectorField } from "../../molecules/Field/VariableSelectorField";
@@ -21,26 +26,30 @@ const createRegressionSchema = (t: (key: string) => string) =>
 type RegressionFormData = z.infer<ReturnType<typeof createRegressionSchema>>;
 
 type LinearRegressionFormProps = {
-  tableList: string[];
-  selectedTableName: string;
-  columns: ColumnType[];
-  onTableChange: (tableName: string) => void;
-  action: (payload: FormData) => void;
   onCancel: () => void;
-  isPending?: boolean;
+  onAnalysisComplete?: (resultIndex: number) => void;
 };
 
 export const LinearRegressionForm = ({
-  tableList,
-  selectedTableName,
-  columns,
-  onTableChange,
-  action,
   onCancel,
-  isPending = false,
+  onAnalysisComplete,
 }: LinearRegressionFormProps) => {
   const { t } = useTranslation();
-  const formRef = useRef<HTMLFormElement>(null);
+  const tableList = useTableListStore((state) => state.tableList);
+  const { selectedTableName, setSelectedTableName, columnList, setColumnList } =
+    useTableColumnLoader({
+      numericOnly: false,
+      autoLoadOnMount: true,
+    });
+  const addResult = useRegressionResultsStore((state) => state.addResult);
+  const resultsCount = useRegressionResultsStore((state) => state.results.length);
+
+  const handleTableChange = async (value: string) => {
+    setSelectedTableName(value);
+    if (!value) {
+      setColumnList([]);
+    }
+  };
 
   const {
     register,
@@ -59,6 +68,57 @@ export const LinearRegressionForm = ({
   const [dependentVariable, setDependentVariable] = useState("");
   const [explanatoryVariables, setExplanatoryVariables] = useState<string[]>([]);
 
+  type ActionState = {
+    success: boolean;
+  };
+
+  const handleRegressionAction = async (
+    _prevState: ActionState,
+    formData: FormData
+  ): Promise<ActionState> => {
+    const tableName = formData.get("tableName") as string;
+    const dependentVariable = formData.get("dependentVariable") as string;
+    const explanatoryVariablesStr = formData.get("explanatoryVariables") as string;
+    const explanatoryVariables = explanatoryVariablesStr
+      ? explanatoryVariablesStr.split(",")
+      : [];
+
+    try {
+      const response = await linearRegression({
+        tableName,
+        dependentVariable,
+        explanatoryVariables,
+      });
+
+      if (response.code === "OK" && response.result) {
+        addResult(response.result);
+        const newResultIndex = resultsCount;
+        onAnalysisComplete?.(newResultIndex);
+        return { success: true };
+      } else {
+        await showMessageDialog(
+          t("Error.Error"),
+          response.message || t("Error.UnexpectedError")
+        );
+        return { success: false };
+      }
+    } catch (error) {
+      let errorMessage = t("Error.UnexpectedError");
+      if (axios.isAxiosError(error)) {
+        const serverMessage = error.response?.data?.message;
+        if (serverMessage) {
+          errorMessage = serverMessage;
+        }
+      }
+      await showMessageDialog(t("Error.Error"), errorMessage);
+      return { success: false };
+    }
+  };
+
+  const [, submitAction, isPending] = useActionState(handleRegressionAction, {
+    success: false,
+  });
+
   const handleDependentChange = (value: string) => {
     setDependentVariable(value);
     setValue("dependentVariable", value, { shouldValidate: true });
@@ -75,18 +135,23 @@ export const LinearRegressionForm = ({
     setValue("tableName", value, { shouldValidate: true });
     setValue("dependentVariable", "");
     setValue("explanatoryVariables", []);
-    onTableChange(value);
+    handleTableChange(value);
+  };
+
+  const onSubmit = (data: RegressionFormData) => {
+    const formData = new FormData();
+    formData.append("tableName", data.tableName);
+    formData.append("dependentVariable", data.dependentVariable);
+    data.explanatoryVariables.forEach(v => formData.append("explanatoryVariables", v));
+    // ここで直接 action を叩く
+    startTransition(() => {
+      submitAction(formData);
+    });
   };
 
   return (
     <form
-      ref={formRef}
-      action={action}
-      onSubmit={handleSubmit((_data, event) => {
-        if (event?.target instanceof HTMLFormElement) {
-          event.target.requestSubmit();
-        }
-      })}
+      onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-4"
     >
       {/* Hidden fields for FormData */}
@@ -132,7 +197,7 @@ export const LinearRegressionForm = ({
             label={t("LinearRegressionForm.DependentVariable")}
             description={t("LinearRegressionForm.DependentVariableDescription")}
             mode="single"
-            columns={columns}
+            columns={columnList}
             selectedValue={dependentVariable}
             onSingleChange={handleDependentChange}
             error={errors.dependentVariable?.message}
@@ -143,7 +208,7 @@ export const LinearRegressionForm = ({
             label={t("LinearRegressionForm.ExplanatoryVariables")}
             description={t("LinearRegressionForm.ExplanatoryVariablesDescription")}
             mode="multiple"
-            columns={columns}
+            columns={columnList}
             selectedValues={explanatoryVariables}
             onMultipleChange={handleExplanatoryChange}
             error={errors.explanatoryVariables?.message}
