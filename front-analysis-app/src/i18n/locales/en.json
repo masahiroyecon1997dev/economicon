@@ -6,6 +6,7 @@
     "Error": "Error",
     "UnexpectedError": "An unexpected error occurred.",
     "Table": "Table",
+    "NoColumnsAvailable": "No columns available",
     "OpenSideMenu": "Open Side Menu",
     "CloseSideMenu": "Close Side Menu",
     "Constant": "Constant",
@@ -68,6 +69,49 @@
       "DependentVariableRequired": "Please select a dependent variable.",
       "ExplanatoryVariablesRequired": "Please select at least one explanatory variable."
     }
+  },
+  "LinearRegressionForm": {
+    "SelectDataTable": "Select Data Table",
+    "DataTable": "Data Table",
+    "SelectATable": "Select a table",
+    "SelectVariables": "Select Variables",
+    "DependentVariable": "Dependent Variable",
+    "DependentVariableDescription": "Select one target variable for analysis",
+    "ExplanatoryVariables": "Explanatory Variables",
+    "ExplanatoryVariablesDescription": "Select multiple variables for prediction",
+    "SelectedExplanatoryVariables": "Selected Explanatory Variables",
+    "NoVariablesSelected": "None selected",
+    "Processing": "Processing...",
+    "RunAnalysis": "Run Analysis",
+    "Validation": {
+      "TableNameRequired": "Please select a table",
+      "DependentVariableRequired": "Please select a dependent variable",
+      "ExplanatoryVariablesRequired": "Please select at least one explanatory variable"
+    }
+  },
+  "RegressionResult": {
+    "AnalysisSummary": "Analysis Summary",
+    "TableName": "Table Name",
+    "DependentVariable": "Dependent Variable",
+    "ExplanatoryVariables": "Explanatory Variables",
+    "ModelStatistics": "Model Statistics",
+    "AdjustedR2": "Adjusted R²",
+    "FValue": "F-value",
+    "FProbability": "F-probability",
+    "LogLikelihood": "Log Likelihood",
+    "Observations": "Observations",
+    "Coefficients": "Coefficients",
+    "Variable": "Variable",
+    "Coefficient": "Coefficient",
+    "StandardError": "Standard Error",
+    "TValue": "t-value",
+    "PValue": "p-value",
+    "RegressionDetails": "Regression Details"
+  },
+  "RegressionTab": {
+    "FormTab": "Analysis Settings",
+    "NoResultsAvailable": "No results available",
+    "ResultLabel": "Result {{number}}"
   },
   "CalculationView": {
     "Title": "Add Column with Calculation",
