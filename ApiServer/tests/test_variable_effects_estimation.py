@@ -182,7 +182,8 @@ def test_variable_effects_estimation_invalid_dependent_variable(client,
         == response_data['message']
 
 
-def test_variable_effects_estimation_invalid_explanatory_variable(client, tables_manager):
+def test_variable_effects_estimation_invalid_explanatory_variable(
+        client, tables_manager):
     """存在しない説明変数でエラーが返される"""
     payload = {
         'tableName': 'VEETestTable',
@@ -200,7 +201,8 @@ def test_variable_effects_estimation_invalid_explanatory_variable(client, tables
         == response_data['message']
 
 
-def test_variable_effects_estimation_empty_explanatory_variables(client, tables_manager):
+def test_variable_effects_estimation_empty_explanatory_variables(
+        client, tables_manager):
     """説明変数が空の場合エラーが返される"""
     payload = {
         'tableName': 'VEETestTable',
@@ -219,7 +221,8 @@ def test_variable_effects_estimation_empty_explanatory_variables(client, tables_
         == response_data['message']
 
 
-def test_variable_effects_estimation_dependent_in_explanatory(client, tables_manager):
+def test_variable_effects_estimation_dependent_in_explanatory(
+        client, tables_manager):
     """被説明変数が説明変数に含まれている場合エラーが返される"""
     payload = {
         'tableName': 'VEETestTable',
@@ -237,7 +240,8 @@ def test_variable_effects_estimation_dependent_in_explanatory(client, tables_man
         == response_data['message']
 
 
-def test_variable_effects_estimation_invalid_standard_error_method(client, tables_manager):
+def test_variable_effects_estimation_invalid_standard_error_method(
+        client, tables_manager):
     """不正な標準誤差計算方法でエラーが返される"""
     payload = {
         'tableName': 'VEETestTable',
@@ -257,7 +261,8 @@ def test_variable_effects_estimation_invalid_standard_error_method(client, table
         == response_data['message']
 
 
-def test_variable_effects_estimation_missing_parameters(client, tables_manager):
+def test_variable_effects_estimation_missing_parameters(
+        client, tables_manager):
     """必須パラメータが不足している場合エラーが返される"""
     # tableName がない場合
     payload = {
@@ -298,8 +303,8 @@ def test_variable_effects_estimation_all_standard_error_methods(client,
     assert result['standardErrorMethod'] == method
 
 
-def test_variable_effects_estimation_single_explanatory_variable(client,
-                                                                 tables_manager):
+def test_variable_effects_estimation_single_explanatory_variable(
+        client, tables_manager):
     """単一の説明変数でも変量効果推定分析が実行できる"""
     payload = {
         'tableName': 'VEETestTable',
@@ -321,7 +326,8 @@ def test_variable_effects_estimation_single_explanatory_variable(client,
     assert len(parameters) == 2
 
 
-def test_variable_effects_estimation_confidence_intervals(client, tables_manager):
+def test_variable_effects_estimation_confidence_intervals(
+        client, tables_manager):
     """信頼区間が正しく計算される"""
     payload = {
         'tableName': 'VEETestTable',
