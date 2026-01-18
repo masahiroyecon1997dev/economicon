@@ -7,7 +7,7 @@ import { useLoadingStore } from "./stores/useLoadingStore";
 import { useSettingsStore } from "./stores/useSettingsStore";
 import { useTableListStore } from "./stores/useTableListStore";
 
-import { LoadingOverlay } from "./components/molecules/Loading/loading-overlay";
+import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
 import { MessageDialog } from "./components/molecules/Modal/MessageDialog";
 import { HeaderMenu } from "./components/organisms/Header/HeaderMenu";
 import { LeftSideMenu } from "./components/templates/Views/LeftSideMenu";
