@@ -153,7 +153,6 @@ export const CalculationView = () => {
 
   return (
     <MainViewLayout
-      maxWidth="6xl"
       title={t("CalculationView.Title")}
       description={t("CalculationView.Description")}
     >
