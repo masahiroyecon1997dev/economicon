@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '../../atoms/Button/Button';
+import { Button } from '../../atoms/Button/button';
 
 type ErrorModalFooterProps = {
   onOk: () => void;
