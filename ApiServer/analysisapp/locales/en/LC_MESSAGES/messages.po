@@ -1,0 +1,94 @@
+# English translations for AnalysisApp.
+# Copyright (C) 2026
+# This file is distributed under the same license as the AnalysisApp project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-18 12:00+0900\n"
+"PO-Revision-Date: 2026-01-18 12:00+0900\n"
+"Last-Translator: \n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.14.0\n"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} is required."
+msgstr "{} is required."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be 'true' or 'false'."
+msgstr "{} must be 'true' or 'false'."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be a number."
+msgstr "{} must be a number."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be an integer."
+msgstr "{} must be an integer."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be a positive integer."
+msgstr "{} must be a positive integer."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be a string."
+msgstr "{} must be a string."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be a list."
+msgstr "{} must be a list."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be with at least {} {}."
+msgstr "{} must be with at least {} {}."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} '{}' does not exist."
+msgstr "{} '{}' does not exist."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be at least {} characters long."
+msgstr "{} must be at least {} characters long."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be at most {} characters long."
+msgstr "{} must be at most {} characters long."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} contains invalid characters."
+msgstr "{} contains invalid characters."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be between {} and {}."
+msgstr "{} must be between {} and {}."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} is invalid value."
+msgstr "{} is invalid value."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} '{}' already exists."
+msgstr "{} '{}' already exists."
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} '{}' is not supported. Supported {}: {}"
+msgstr "{} '{}' is not supported. Supported {}: {}"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} does not exist: {}"
+msgstr "{} does not exist: {}"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} is not readable: {}"
+msgstr "{} is not readable: {}"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} '{}' is not numeric."
+msgstr "{} '{}' is not numeric."

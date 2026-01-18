@@ -1,0 +1,94 @@
+# Japanese translations for AnalysisApp.
+# Copyright (C) 2026
+# This file is distributed under the same license as the AnalysisApp project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-18 12:00+0900\n"
+"PO-Revision-Date: 2026-01-18 12:00+0900\n"
+"Last-Translator: \n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.14.0\n"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} is required."
+msgstr "{}は必須です。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be 'true' or 'false'."
+msgstr "{}は'true'または'false'である必要があります。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be a number."
+msgstr "{}は数値である必要があります。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be an integer."
+msgstr "{}は整数である必要があります。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be a positive integer."
+msgstr "{}は正の整数である必要があります。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be a string."
+msgstr "{}は文字列である必要があります。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be a list."
+msgstr "{}はリストである必要があります。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be with at least {} {}."
+msgstr "{}は少なくとも{}個の{}が必要です。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} '{}' does not exist."
+msgstr "{}'{}' は存在しません。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be at least {} characters long."
+msgstr "{}は少なくとも{}文字である必要があります。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be at most {} characters long."
+msgstr "{}は最大{}文字である必要があります。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} contains invalid characters."
+msgstr "{}に無効な文字が含まれています。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} must be between {} and {}."
+msgstr "{}は{}から{}の間である必要があります。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} is invalid value."
+msgstr "{}は無効な値です。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} '{}' already exists."
+msgstr "{}'{}' はすでに存在します。"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} '{}' is not supported. Supported {}: {}"
+msgstr "{}'{}' はサポートされていません。サポートされている{}: {}"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} does not exist: {}"
+msgstr "{}が存在しません: {}"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} is not readable: {}"
+msgstr "{}は読み取れません: {}"
+
+#: analysisapp/utils/validator/common_validators.py
+msgid "{} '{}' is not numeric."
+msgstr "{}'{}' は数値ではありません。"

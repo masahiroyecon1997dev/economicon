@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from analysisapp.exception_handlers import init_exception_handlers
+from analysisapp.i18n.translation import get_locale_from_settings
 from analysisapp.routers import api_router
 from analysisapp.services.data.settings_manager import SettingsManager
 from analysisapp.services.data.tables_manager import TablesManager
@@ -26,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent
 # 静的ファイルのディレクトリ
 STATIC_DIR = BASE_DIR / "static"
 
-# Babel設定
+# Babel設定 - SettingsManagerからロケールを取得する関数を設定
 configs = BabelConfigs(
     ROOT_DIR=str(BASE_DIR),
     BABEL_DEFAULT_LOCALE="ja",
@@ -78,10 +79,8 @@ app.add_middleware(
 # リクエストのAccept-Languageヘッダーから言語が自動検出されます
 @app.middleware("http")
 async def babel_middleware(request: Request, call_next):
-    """リクエストごとにBabelのロケールを設定"""
-    # Accept-Languageヘッダーから言語を取得
-    accept_language = request.headers.get("Accept-Language", "ja")
-    locale = accept_language.split(",")[0].split("-")[0].split(";")[0]
+    """settingsManagerのロケールを設定"""
+    locale = get_locale_from_settings()
 
     # サポートされている言語のみ設定
     if locale not in ['ja', 'en']:
