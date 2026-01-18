@@ -11,6 +11,7 @@ type InputTextProps = {
   step?: string;
   id?: string;
   className?: string;
+  disabled?: boolean;
 };
 
 export const InputText = ({
@@ -21,7 +22,8 @@ export const InputText = ({
   type = 'text',
   step,
   id,
-  className
+  className,
+  disabled = false,
 }: InputTextProps) => {
   const { t } = useTranslation();
 
@@ -42,6 +44,7 @@ export const InputText = ({
         value={value}
         onChange={event => change(event)}
         placeholder={placeholder}
+        disabled={disabled}
       />
       <div className="h-4 mt-0.5">
         {error && (
