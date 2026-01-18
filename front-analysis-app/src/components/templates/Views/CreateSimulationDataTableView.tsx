@@ -1,13 +1,16 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { startTransition, useActionState, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 import { DISTRIBUTION_OPTIONS } from "../../../constants/constant";
 import { getTableInfo } from "../../../functions/internalFunctions";
+import { showMessageDialog } from "../../../functions/messageDialog";
 import { createSimulationDataTable } from "../../../functions/restApis";
-import { validateColumnName, validateDistributionParam, validateNumRows, validateTableName } from "../../../functions/validations";
+import { validateDistributionParam } from "../../../functions/validations";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { useLoadingStore } from "../../../stores/useLoadingStore";
-import { useMessageDialogStore } from "../../../stores/useMessageDialogStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
 import type { DistributionType, SimulationColumnSetting } from "../../../types/commonTypes";
@@ -17,14 +20,37 @@ import { FormField } from "../../molecules/Form/FormField";
 import { SimulationColumnConfig } from "../../organisms/Form/SimulationColumnConfig";
 import { MainViewLayout } from "../Layouts/MainViewLayout";
 
+const createSimulationSchema = (t: (key: string) => string) =>
+  z.object({
+    tableName: z.string().min(1, t("ValidationMessages.TableNameRequired")),
+    numRows: z.number().min(1, t("ValidationMessages.NumRowsMoreThan0")),
+  });
+
+type SimulationFormData = z.infer<ReturnType<typeof createSimulationSchema>>;
+
 export const CreateSimulationDataTableView = () => {
   const { t } = useTranslation();
   const setCurrentView = useCurrentViewStore(state => state.setCurrentView);
-  const showMessageDialog = useMessageDialogStore(state => state.showMessageDialog);
-  const setLoading = useLoadingStore(state => state.setLoading);
-  const clearLoading = useLoadingStore(state => state.clearLoading);
   const addTableName = useTableListStore(state => state.addTableName);
   const addTableInfo = useTableInfosStore(state => state.addTableInfo);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<SimulationFormData>({
+    resolver: zodResolver(createSimulationSchema(t)),
+    defaultValues: {
+      tableName: "",
+      numRows: 1000,
+    },
+  });
+
+  const tableName = watch("tableName");
+  const numRows = watch("numRows");
+
   const COLUMN_SETTINGS_DEFAULT: SimulationColumnSetting = {
     id: '1',
     columnName: '',
@@ -34,20 +60,159 @@ export const CreateSimulationDataTableView = () => {
     fixedValue: '',
     errorMessage: { columnName: undefined, distributionParams: undefined, fixedValue: undefined },
   };
-  const errorMessageInitial = {
-    tableName: undefined,
-    numRows: undefined,
-  }
-  const [tableName, setTableName] = useState('');
-  const [numRows, setNumRows] = useState<number>(1000);
+
   const [columns, setColumns] = useState<SimulationColumnSetting[]>([
     COLUMN_SETTINGS_DEFAULT
   ]);
-  const [errorMessage, setErrorMessage] = useState<
-    {
-      tableName: string | undefined,
-      numRows: string | undefined,
-    }>(errorMessageInitial);
+
+  type ActionState = {
+    success: boolean;
+  };
+
+  const handleSimulationAction = async (
+    _prevState: ActionState,
+    formData: FormData
+  ): Promise<ActionState> => {
+    const tableName = formData.get("tableName") as string;
+    const numRows = parseInt(formData.get("numRows") as string);
+    const columnsJson = formData.get("columns") as string;
+    const columns: SimulationColumnSetting[] = JSON.parse(columnsJson);
+
+    // カラムのバリデーション
+    let hasError = false;
+    const validatedColumns = columns.map(col => {
+      const errors: {
+        columnName: string | undefined;
+        distributionParams: Record<string, string | undefined> | undefined;
+        fixedValue: string | undefined;
+      } = {
+        columnName: undefined,
+        distributionParams: undefined,
+        fixedValue: undefined,
+      };
+
+      if (!col.columnName || col.columnName.trim() === "") {
+        errors.columnName = t("ValidationMessages.ColumnNameRequired");
+        hasError = true;
+      }
+
+      if (col.dataType === "distribution") {
+        const paramsError = validateDistributionParam(col.distributionType, col.distributionParams);
+        if (paramsError !== undefined) {
+          hasError = true;
+        }
+      }
+      return { ...col, errorMessage: errors };
+    });
+
+    if (hasError) {
+      setColumns(validatedColumns);
+      await showMessageDialog(t("Error.Error"), t("ValidationMessages.FixValidationErrors"));
+      return { success: false };
+    }
+
+    try {
+      const columnSettings = columns.map(col => {
+        if (col.dataType === 'distribution') {
+          const distributionParams: Record<string, number> = {};
+          switch (col.distributionType) {
+            case 'uniform':
+              distributionParams['low'] = col.distributionParams?.low;
+              distributionParams['high'] = col.distributionParams?.high;
+              break;
+            case 'exponential':
+              distributionParams['scale'] = col.distributionParams?.rate;
+              break;
+            case 'normal':
+              distributionParams['loc'] = col.distributionParams?.mean;
+              distributionParams['scale'] = col.distributionParams?.deviation;
+              break;
+            case 'gamma':
+              distributionParams['shape'] = col.distributionParams?.shape;
+              distributionParams['scale'] = col.distributionParams?.scale;
+              break;
+            case 'beta':
+              distributionParams['a'] = col.distributionParams?.alpha;
+              distributionParams['b'] = col.distributionParams?.beta;
+              break;
+            case 'weibull':
+              distributionParams['a'] = col.distributionParams?.shape;
+              distributionParams['scale'] = col.distributionParams?.scale;
+              break;
+            case 'lognormal':
+              distributionParams['mean'] = col.distributionParams?.logMean;
+              distributionParams['sigma'] = col.distributionParams?.logSD;
+              break;
+            case 'binomial':
+              distributionParams['n'] = col.distributionParams?.trials;
+              distributionParams['p'] = col.distributionParams?.probability;
+              break;
+            case 'bernoulli':
+              distributionParams['p'] = col.distributionParams?.probability;
+              break;
+            case 'poisson':
+              distributionParams['lam'] = col.distributionParams?.lambda;
+              break;
+            case 'geometric':
+              distributionParams['p'] = col.distributionParams?.probability;
+              break;
+            case 'hypergeometric':
+              distributionParams['N'] = col.distributionParams?.populationSize;
+              distributionParams['K'] = col.distributionParams?.numberOfSuccesses;
+              distributionParams['n'] = col.distributionParams?.sampleSize;
+              break;
+            default:
+              break;
+          }
+          return {
+            columnName: col.columnName.trim(),
+            dataType: col.dataType,
+            distributionType: col.distributionType,
+            distributionParams: distributionParams,
+          }
+        } else {
+          return {
+            columnName: col.columnName.trim(),
+            dataType: col.dataType,
+            fixedValue: col.fixedValue,
+          }
+        }
+      });
+
+      const requestBody = {
+        tableName: tableName.trim(),
+        tableNumberOfRows: numRows,
+        columnSettings: columnSettings
+      };
+
+      const response = await createSimulationDataTable(requestBody);
+
+      if (response.code === 'OK') {
+        const resTableInfo = await getTableInfo(response.result.tableName);
+        addTableName(response.result.tableName);
+        addTableInfo(resTableInfo);
+        setCurrentView('DataPreview');
+        return { success: true };
+      } else {
+        await showMessageDialog(t('Error.Error'), response.message || t('CreateSimulationDataTableView.TableCreationFailed'));
+        return { success: false };
+      }
+    } catch (error) {
+      let errorMessage = t('CreateSimulationDataTableView.TableCreationError');
+      if (axios.isAxiosError(error)) {
+        const serverMessage = error.response?.data?.message;
+        if (serverMessage) {
+          errorMessage = serverMessage;
+        }
+      }
+      await showMessageDialog(t('Error.Error'), errorMessage);
+      return { success: false };
+    }
+  };
+
+  const [, submitAction, isPending] = useActionState(handleSimulationAction, {
+    success: false,
+  });
 
   const addColumn = () => {
     const newColumn: SimulationColumnSetting = {
@@ -129,134 +294,14 @@ export const CreateSimulationDataTableView = () => {
     });
   };
 
-  const validateInput = (): boolean => {
-    const newValidateError = {
-      tableName: validateTableName(tableName),
-      numRows: validateNumRows(numRows),
-    };
-    setErrorMessage(newValidateError);
-    let columnErrorsExist = false;
-    const newColumns = columns.map(col => {
-      const columnError = validateColumnName(col.columnName);
-      const paramsError = validateDistributionParam(col.distributionType, col.distributionParams);
-      if (columnError !== undefined || paramsError !== undefined) {
-        columnErrorsExist = true;
-      }
-      return {
-        ...col,
-        errorMessage: {
-          columnName: columnError,
-          distributionParams: paramsError,
-          fixedValue: undefined,
-        }
-      };
+  const onSubmit = (data: SimulationFormData) => {
+    const formData = new FormData();
+    formData.append("tableName", data.tableName);
+    formData.append("numRows", data.numRows.toString());
+    formData.append("columns", JSON.stringify(columns));
+    startTransition(() => {
+      submitAction(formData);
     });
-    setColumns(newColumns);
-    const topLevelErrorExists = Object.values(newValidateError).some(error => error !== undefined);
-    // 一つでもエラーがあれば false を返す
-    if (topLevelErrorExists || columnErrorsExist) {
-      return false;
-    }
-    // エラーが一つもなければ true を返す
-    return true;
-  };
-
-  const handleSubmit = async () => {
-    if (!validateInput()) {
-      await showMessageDialog(t('Error.Error'), t('ValidationMessages.FixValidationErrors'));
-      return;
-    }
-    setLoading(true, t('CreateSimulationDataTableView.CreatingTable'));
-
-    try {
-      const columnSettings = columns.map(col => {
-        if (col.dataType === 'distribution') {
-          const distributionParams: Record<string, number> = {};
-          switch (col.distributionType) {
-            case 'uniform':
-              distributionParams['low'] = col.distributionParams?.low;
-              distributionParams['high'] = col.distributionParams?.high;
-              break;
-            case 'exponential':
-              distributionParams['scale'] = col.distributionParams?.rate;
-              break;
-            case 'normal':
-              distributionParams['loc'] = col.distributionParams?.mean;
-              distributionParams['scale'] = col.distributionParams?.deviation;
-              break;
-            case 'gamma':
-              distributionParams['shape'] = col.distributionParams?.shape;
-              distributionParams['scale'] = col.distributionParams?.scale;
-              break;
-            case 'beta':
-              distributionParams['a'] = col.distributionParams?.alpha;
-              distributionParams['b'] = col.distributionParams?.beta;
-              break;
-            case 'weibull':
-              distributionParams['a'] = col.distributionParams?.shape;
-              distributionParams['scale'] = col.distributionParams?.scale;
-              break;
-            case 'lognormal':
-              distributionParams['mean'] = col.distributionParams?.logMean;
-              distributionParams['sigma'] = col.distributionParams?.logSD;
-              break;
-            case 'binomial':
-              distributionParams['n'] = col.distributionParams?.trials;
-              distributionParams['p'] = col.distributionParams?.probability;
-              break;
-            case 'bernoulli':
-              distributionParams['p'] = col.distributionParams?.probability;
-              break;
-            case 'poisson':
-              distributionParams['lam'] = col.distributionParams?.lambda;
-              break;
-            case 'geometric':
-              distributionParams['p'] = col.distributionParams?.probability;
-              break;
-            case 'hypergeometric':
-              distributionParams['N'] = col.distributionParams?.populationSize;
-              distributionParams['K'] = col.distributionParams?.numberOfSuccesses;
-              distributionParams['n'] = col.distributionParams?.sampleSize;
-              break;
-            default:
-              break;
-          }
-          return {
-            columnName: col.columnName.trim(),
-            dataType: col.dataType,
-            distributionType: col.distributionType,
-            distributionParams: distributionParams,
-          }
-        } else {
-          return {
-            columnName: col.columnName.trim(),
-            dataType: col.dataType,
-            fixedValue: col.fixedValue,
-          }
-        }
-      });
-
-      const requestBody = {
-        tableName: tableName.trim(),
-        tableNumberOfRows: numRows,
-        columnSettings: columnSettings
-      };
-
-      const response = await createSimulationDataTable(requestBody);
-
-      if (response.code === 'OK') {
-        const resTableInfo = await getTableInfo(response.result.tableName);
-        setCurrentView('DataPreview');
-        addTableName(response.result.tableName);
-        addTableInfo(resTableInfo);
-      } else {
-        await showMessageDialog(t('Error.Error'), response.message || t('CreateSimulationDataTableView.TableCreationFailed'));
-      }
-    } catch {
-      await showMessageDialog(t('Error.Error'), t('CreateSimulationDataTableView.TableCreationError'));
-    } finally {
-      clearLoading();
-    }
   };
 
   const handleCancel = () => {
@@ -267,7 +312,7 @@ export const CreateSimulationDataTableView = () => {
       title={t("CreateSimulationDataTableView.CreateNewDataTable")}
       description={t("CreateSimulationDataTableView.DefineYourTableNameAndRows")}
     >
-      <div className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700">
           <h2 className="text-main dark:text-white text-base font-bold leading-tight mb-4">{t("CreateSimulationDataTableView.TableSettings")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -278,9 +323,11 @@ export const CreateSimulationDataTableView = () => {
               <InputText
                 id="table-name"
                 value={tableName}
-                change={(e) => setTableName(e.target.value)}
+                change={(e) => setValue("tableName", e.target.value, { shouldValidate: true })}
                 placeholder={t("CreateSimulationDataTableView.TableNamePlaceholder")}
-                error={errorMessage.tableName}
+                error={errors.tableName?.message}
+                disabled={isPending}
+                {...register("tableName")}
               />
             </FormField>
 
@@ -292,9 +339,11 @@ export const CreateSimulationDataTableView = () => {
                 id="row-count"
                 type="number"
                 value={numRows.toString()}
-                change={(e) => setNumRows(parseInt(e.target.value) || 0)}
+                change={(e) => setValue("numRows", parseInt(e.target.value) || 0, { shouldValidate: true })}
                 placeholder="1000"
-                error={errorMessage.numRows}
+                error={errors.numRows?.message}
+                disabled={isPending}
+                {...register("numRows")}
               />
             </FormField>
           </div>
@@ -303,8 +352,10 @@ export const CreateSimulationDataTableView = () => {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-main dark:text-white text-base font-bold leading-tight">列の設定</h2>
             <button
+              type="button"
               onClick={addColumn}
-              className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-3 py-1.5 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary cursor-pointer"
+              className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-3 py-1.5 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isPending}
             >
               <Plus size={16} />
               {t("CreateSimulationDataTableView.AddColumn")}
@@ -324,17 +375,23 @@ export const CreateSimulationDataTableView = () => {
                 onRemove={removeColumn}
                 canRemove={columns.length > 1}
                 error={column.errorMessage}
+                disabled={isPending}
               />
             ))}
           </div>
         </div>
         <ActionButtonBar
           cancelText={t('Common.Cancel')}
-          selectText={t('CreateSimulationDataTableView.Submit')}
+          selectText={
+            isPending
+              ? t('CreateSimulationDataTableView.CreatingTable')
+              : t('CreateSimulationDataTableView.Submit')
+          }
           onCancel={handleCancel}
-          onSelect={handleSubmit}
+          onSelect={() => { }}
+          onSelectType="submit"
         />
-      </div>
+      </form>
     </MainViewLayout>
   );
 }
