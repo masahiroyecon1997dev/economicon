@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -13,9 +13,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """テーブルTablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """テーブルTablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # テスト用テーブルをセット
     df = pl.DataFrame({
@@ -29,7 +29,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_delete_column_success(client, tables_manager):
+def test_delete_column_success(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'columnName': 'A'
@@ -41,13 +41,13 @@ def test_delete_column_success(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     assert 'A' not in df.columns
     assert 'B' in df.columns
     assert 'C' in df.columns
 
 
-def test_delete_column_not_found(client, tables_manager):
+def test_delete_column_not_found(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'columnName': 'Z'
@@ -62,7 +62,7 @@ def test_delete_column_not_found(client, tables_manager):
     assert "columnName 'Z' does not exist." in response_data['message']
 
 
-def test_delete_column_table_not_found(client, tables_manager):
+def test_delete_column_table_not_found(client, tables_store):
     payload = {
         'tableName': 'NotExistTable',
         'columnName': 'A'
@@ -78,7 +78,7 @@ def test_delete_column_table_not_found(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_delete_column_empty_table_name(client, tables_manager):
+def test_delete_column_empty_table_name(client, tables_store):
     payload = {
         'tableName': '',
         'columnName': 'A'
@@ -93,7 +93,7 @@ def test_delete_column_empty_table_name(client, tables_manager):
     assert "tableName is required." in response_data['message']
 
 
-def test_delete_column_empty_column_name(client, tables_manager):
+def test_delete_column_empty_column_name(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'columnName': ''

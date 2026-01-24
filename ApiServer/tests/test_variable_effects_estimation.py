@@ -1,7 +1,7 @@
 import numpy as np
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -14,9 +14,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     # テーブルをクリア
     manager.clear_tables()
     # 変量効果推定分析用テストデータを作成
@@ -49,7 +49,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_variable_effects_estimation_success_default(client, tables_manager):
+def test_variable_effects_estimation_success_default(client, tables_store):
     """デフォルト設定で正常に変量効果推定分析が実行できる"""
     payload = {
         'tableName': 'VEETestTable',
@@ -99,7 +99,7 @@ def test_variable_effects_estimation_success_default(client, tables_manager):
         assert stat in stats
 
 
-def test_variable_effects_estimation_hc1_robust(client, tables_manager):
+def test_variable_effects_estimation_hc1_robust(client, tables_store):
     """HC1標準誤差で変量効果推定分析が実行できる"""
     payload = {
         'tableName': 'VEETestTable',
@@ -123,7 +123,7 @@ def test_variable_effects_estimation_hc1_robust(client, tables_manager):
     assert len(parameters) == 4
 
 
-def test_variable_effects_estimation_hac(client, tables_manager):
+def test_variable_effects_estimation_hac(client, tables_store):
     """HAC標準誤差で変量効果推定分析が実行できる"""
     payload = {
         'tableName': 'VEETestTable',
@@ -144,7 +144,7 @@ def test_variable_effects_estimation_hac(client, tables_manager):
     assert result['useTDistribution']
 
 
-def test_variable_effects_estimation_invalid_table(client, tables_manager):
+def test_variable_effects_estimation_invalid_table(client, tables_store):
     """存在しないテーブル名でエラーが返される"""
     payload = {
         'tableName': 'NonExistentTable',
@@ -163,7 +163,7 @@ def test_variable_effects_estimation_invalid_table(client, tables_manager):
 
 
 def test_variable_effects_estimation_invalid_dependent_variable(client,
-                                                                tables_manager
+                                                                tables_store
                                                                 ):
     """存在しない被説明変数でエラーが返される"""
     payload = {
@@ -183,7 +183,7 @@ def test_variable_effects_estimation_invalid_dependent_variable(client,
 
 
 def test_variable_effects_estimation_invalid_explanatory_variable(
-        client, tables_manager):
+        client, tables_store):
     """存在しない説明変数でエラーが返される"""
     payload = {
         'tableName': 'VEETestTable',
@@ -202,7 +202,7 @@ def test_variable_effects_estimation_invalid_explanatory_variable(
 
 
 def test_variable_effects_estimation_empty_explanatory_variables(
-        client, tables_manager):
+        client, tables_store):
     """説明変数が空の場合エラーが返される"""
     payload = {
         'tableName': 'VEETestTable',
@@ -222,7 +222,7 @@ def test_variable_effects_estimation_empty_explanatory_variables(
 
 
 def test_variable_effects_estimation_dependent_in_explanatory(
-        client, tables_manager):
+        client, tables_store):
     """被説明変数が説明変数に含まれている場合エラーが返される"""
     payload = {
         'tableName': 'VEETestTable',
@@ -241,7 +241,7 @@ def test_variable_effects_estimation_dependent_in_explanatory(
 
 
 def test_variable_effects_estimation_invalid_standard_error_method(
-        client, tables_manager):
+        client, tables_store):
     """不正な標準誤差計算方法でエラーが返される"""
     payload = {
         'tableName': 'VEETestTable',
@@ -262,7 +262,7 @@ def test_variable_effects_estimation_invalid_standard_error_method(
 
 
 def test_variable_effects_estimation_missing_parameters(
-        client, tables_manager):
+        client, tables_store):
     """必須パラメータが不足している場合エラーが返される"""
     # tableName がない場合
     payload = {
@@ -282,7 +282,7 @@ def test_variable_effects_estimation_missing_parameters(
 @pytest.mark.parametrize("method", ['nonrobust', 'HC0', 'HC1',
                                     'HC2', 'HC3', 'HAC'])
 def test_variable_effects_estimation_all_standard_error_methods(client,
-                                                                tables_manager,
+                                                                tables_store,
                                                                 method):
     """全ての標準誤差計算方法が正常に動作する"""
     payload = {
@@ -304,7 +304,7 @@ def test_variable_effects_estimation_all_standard_error_methods(client,
 
 
 def test_variable_effects_estimation_single_explanatory_variable(
-        client, tables_manager):
+        client, tables_store):
     """単一の説明変数でも変量効果推定分析が実行できる"""
     payload = {
         'tableName': 'VEETestTable',
@@ -327,7 +327,7 @@ def test_variable_effects_estimation_single_explanatory_variable(
 
 
 def test_variable_effects_estimation_confidence_intervals(
-        client, tables_manager):
+        client, tables_store):
     """信頼区間が正しく計算される"""
     payload = {
         'tableName': 'VEETestTable',

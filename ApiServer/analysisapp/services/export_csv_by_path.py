@@ -5,10 +5,10 @@ from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.file_validators import (validate_directory_path,
                                                validate_file_name,
                                                validate_separator)
-from ..utils.validator.tables_manager_validator import \
+from ..utils.validator.tables_store_validator import \
     validate_existed_table_name
 from .abstract_api import AbstractApi, ApiError
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .django_compat import gettext as _
 
 
@@ -23,7 +23,7 @@ class ExportCsvByPath(AbstractApi):
     def __init__(self, table_name: str, directory_path: str,
                  file_name: str, separator: str = ','):
         # テーブルマネージャーの初期化
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         # テーブル名
         self.table_name = table_name
         # ディレクトリパス
@@ -44,7 +44,7 @@ class ExportCsvByPath(AbstractApi):
         # 入力値のバリデーション
         try:
             # テーブル名のバリデーション
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             validate_existed_table_name(
                 self.table_name,
                 table_name_list,
@@ -76,7 +76,7 @@ class ExportCsvByPath(AbstractApi):
         # CSVファイルのエクスポート処理
         try:
             # テーブルを取得
-            table_info = self.tables_manager.get_table(self.table_name)
+            table_info = self.tables_store.get_table(self.table_name)
             df = table_info.table
 
             file_path = os.path.join(self.directory_path, self.file_name)

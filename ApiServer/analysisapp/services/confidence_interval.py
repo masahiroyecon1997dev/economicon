@@ -5,10 +5,10 @@ from scipy import stats
 
 from ..utils.validator.common_validators import (ValidationError,
                                                  validate_candidates)
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_column_name, validate_existed_table_name)
 from .abstract_api import AbstractApi, ApiError
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .django_compat import gettext as _
 
 
@@ -31,7 +31,7 @@ class ConfidenceInterval(AbstractApi):
 
     def __init__(self, table_name: str, column_name: str,
                  confidence_level: float, statistic_type: str):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.table_name = table_name
         self.column_name = column_name
         self.confidence_level = confidence_level
@@ -46,7 +46,7 @@ class ConfidenceInterval(AbstractApi):
     def validate(self):
         try:
             # テーブル名の検証
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             validate_existed_table_name(
                 self.table_name,
                 table_name_list,
@@ -54,7 +54,7 @@ class ConfidenceInterval(AbstractApi):
             )
 
             # 列名の検証
-            column_name_list = self.tables_manager.get_column_name_list(
+            column_name_list = self.tables_store.get_column_name_list(
                 self.table_name)
             validate_existed_column_name(
                 self.column_name,
@@ -83,7 +83,7 @@ class ConfidenceInterval(AbstractApi):
 
     def execute(self):
         try:
-            table_info = self.tables_manager.get_table(self.table_name)
+            table_info = self.tables_store.get_table(self.table_name)
             df = table_info.table
 
             # 列のデータを取得

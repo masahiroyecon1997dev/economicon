@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -13,9 +13,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     # テーブルをクリア
     manager.clear_tables()
     # テスト用テーブルをセット
@@ -29,7 +29,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_add_column_success(client, tables_manager):
+def test_add_column_success(client, tables_store):
     """正常にカラム追加できる"""
     payload = {
         'tableName': 'TestTable',
@@ -46,7 +46,7 @@ def test_add_column_success(client, tables_manager):
     assert response_data['code'] == 'OK'
 
     # カラムが追加されているか
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     index_C = df.columns.index('A') + 1
     assert df.columns[index_C] == 'C'
 
@@ -54,7 +54,7 @@ def test_add_column_success(client, tables_manager):
     assert df['C'].to_list() == [None, None, None]
 
 
-def test_add_column_invalid_table(client, tables_manager):
+def test_add_column_invalid_table(client, tables_store):
     """存在しないテーブル名"""
     payload = {
         'tableName': 'NoTable',
@@ -72,7 +72,7 @@ def test_add_column_invalid_table(client, tables_manager):
     assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
-def test_add_column_duplicate_name(client, tables_manager):
+def test_add_column_duplicate_name(client, tables_store):
     """既存のカラム名と重複"""
     payload = {
         'tableName': 'TestTable',
@@ -90,7 +90,7 @@ def test_add_column_duplicate_name(client, tables_manager):
     assert "newColumnName 'A' already exists." == response_data['message']
 
 
-def test_add_column_invalid_position_column(client, tables_manager):
+def test_add_column_invalid_position_column(client, tables_store):
     """追加位置指定カラムが存在しない"""
     payload = {
         'tableName': 'TestTable',

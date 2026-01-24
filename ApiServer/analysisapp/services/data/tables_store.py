@@ -6,7 +6,7 @@ import polars as pl
 from .table_info import TableInfo
 
 
-class TablesManager:
+class TablesStore:
 
     _instance = None
     _lock: threading.RLock = threading.RLock()

@@ -2,9 +2,9 @@ from typing import Dict
 
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_table_name, validate_new_table_name)
 from .abstract_api import AbstractApi, ApiError
 
@@ -16,7 +16,7 @@ class DuplicateTable(AbstractApi):
     指定されたテーブルを複製して、新しい名前で追加します。
     """
     def __init__(self, source_table_name: str, new_table_name: str):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.source_table_name = source_table_name
         self.new_table_name = new_table_name
         self.param_names = {
@@ -26,7 +26,7 @@ class DuplicateTable(AbstractApi):
 
     def validate(self):
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             # ソーステーブルの存在チェック
             validate_existed_table_name(
                 self.source_table_name,
@@ -46,7 +46,7 @@ class DuplicateTable(AbstractApi):
     def execute(self):
         try:
             # ソーステーブルを取得
-            source_table_info = self.tables_manager.get_table(
+            source_table_info = self.tables_store.get_table(
                 self.source_table_name)
             source_df = source_table_info.table
 
@@ -54,7 +54,7 @@ class DuplicateTable(AbstractApi):
             duplicated_df = source_df.clone()
 
             # 新しい名前でテーブルを保存
-            self.tables_manager.store_table(
+            self.tables_store.store_table(
                 self.new_table_name, duplicated_df)
 
             # 結果を返す

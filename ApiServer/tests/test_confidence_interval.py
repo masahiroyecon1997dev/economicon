@@ -1,7 +1,7 @@
 import numpy as np
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -14,9 +14,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     # テーブルをクリア
     manager.clear_tables()
     # 信頼区間計算用テストデータを作成
@@ -49,7 +49,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_confidence_interval_mean_success(client, tables_manager):
+def test_confidence_interval_mean_success(client, tables_store):
     """平均値の信頼区間計算が正常に動作する"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -87,7 +87,7 @@ def test_confidence_interval_mean_success(client, tables_manager):
     assert result['columnName'] == 'normal_col'
 
 
-def test_confidence_interval_median_success(client, tables_manager):
+def test_confidence_interval_median_success(client, tables_store):
     """中央値の信頼区間計算が正常に動作する"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -107,7 +107,7 @@ def test_confidence_interval_median_success(client, tables_manager):
     assert result['confidence_level'] == 0.90
 
 
-def test_confidence_interval_proportion_success(client, tables_manager):
+def test_confidence_interval_proportion_success(client, tables_store):
     """比率の信頼区間計算が正常に動作する"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -134,7 +134,7 @@ def test_confidence_interval_proportion_success(client, tables_manager):
     assert ci['upper'] <= 1
 
 
-def test_confidence_interval_variance_success(client, tables_manager):
+def test_confidence_interval_variance_success(client, tables_store):
     """分散の信頼区間計算が正常に動作する"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -156,7 +156,7 @@ def test_confidence_interval_variance_success(client, tables_manager):
     assert variance_value > 0
 
 
-def test_confidence_interval_std_success(client, tables_manager):
+def test_confidence_interval_std_success(client, tables_store):
     """標準偏差の信頼区間計算が正常に動作する"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -178,7 +178,7 @@ def test_confidence_interval_std_success(client, tables_manager):
     assert std_value > 0
 
 
-def test_confidence_interval_invalid_table(client, tables_manager):
+def test_confidence_interval_invalid_table(client, tables_store):
     """存在しないテーブル名でエラーが返される"""
     payload = {
         'tableName': 'NonExistentTable',
@@ -197,7 +197,7 @@ def test_confidence_interval_invalid_table(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_confidence_interval_invalid_column(client, tables_manager):
+def test_confidence_interval_invalid_column(client, tables_store):
     """存在しない列名でエラーが返される"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -216,7 +216,7 @@ def test_confidence_interval_invalid_column(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_confidence_interval_invalid_statistic_type(client, tables_manager):
+def test_confidence_interval_invalid_statistic_type(client, tables_store):
     """サポートされていない統計タイプでエラーが返される"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -238,7 +238,7 @@ def test_confidence_interval_invalid_statistic_type(client, tables_manager):
 
 
 def test_confidence_interval_invalid_confidence_level_high(client,
-                                                           tables_manager):
+                                                           tables_store):
     """信頼度レベルが1以上の場合エラーが返される"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -258,7 +258,7 @@ def test_confidence_interval_invalid_confidence_level_high(client,
 
 
 def test_confidence_interval_invalid_confidence_level_low(client,
-                                                          tables_manager):
+                                                          tables_store):
     """信頼度レベルが0以下の場合エラーが返される"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -277,7 +277,7 @@ def test_confidence_interval_invalid_confidence_level_low(client,
     assert message == response_data['message']
 
 
-def test_confidence_interval_proportion_invalid_data(client, tables_manager):
+def test_confidence_interval_proportion_invalid_data(client, tables_store):
     """比率計算で0,1以外のデータがある場合エラーが返される"""
     payload = {
         'tableName': 'ConfidenceTestTable',
@@ -295,7 +295,7 @@ def test_confidence_interval_proportion_invalid_data(client, tables_manager):
     assert "data must contain only 0 and 1 values" in response_data['message']
 
 
-def test_confidence_interval_empty_data(client, tables_manager):
+def test_confidence_interval_empty_data(client, tables_store):
     """空データの場合エラーが返される"""
     payload = {
         'tableName': 'EmptyTable',
@@ -313,7 +313,7 @@ def test_confidence_interval_empty_data(client, tables_manager):
     assert "Column contains no valid data" in response_data['message']
 
 
-def test_confidence_interval_missing_parameters(client, tables_manager):
+def test_confidence_interval_missing_parameters(client, tables_store):
     """必須パラメータが不足している場合エラーが返される"""
     # tableName がない場合
     payload = {
@@ -330,7 +330,7 @@ def test_confidence_interval_missing_parameters(client, tables_manager):
     assert response_data['detail'] is not None
 
 
-def test_confidence_interval_different_levels(client, tables_manager):
+def test_confidence_interval_different_levels(client, tables_store):
     """異なる信頼度レベルでの計算が正常に動作する"""
     # 初期化しておく
     width_90 = width_95 = width_99 = None
@@ -368,7 +368,7 @@ def test_confidence_interval_different_levels(client, tables_manager):
         assert width_90 < width_95 < width_99
 
 
-def test_confidence_interval_json_structure_validation(client, tables_manager):
+def test_confidence_interval_json_structure_validation(client, tables_store):
     """レスポンスのJSON構造が仕様通りである"""
     payload = {
         'tableName': 'ConfidenceTestTable',

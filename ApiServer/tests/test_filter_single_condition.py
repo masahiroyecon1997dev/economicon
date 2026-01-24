@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -13,9 +13,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # テスト用テーブルをセット
     df = pl.DataFrame({
@@ -29,7 +29,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_filter_equals(client, tables_manager):
+def test_filter_equals(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',
@@ -45,12 +45,12 @@ def test_filter_equals(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('FilteredTable').table
+    df = tables_store.get_table('FilteredTable').table
     assert df.shape[0] == 2
     assert df['A'].to_list() == [2, 2]
 
 
-def test_filter_greater_than(client, tables_manager):
+def test_filter_greater_than(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',
@@ -66,12 +66,12 @@ def test_filter_greater_than(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('FilteredTable').table
+    df = tables_store.get_table('FilteredTable').table
     assert df.shape[0] == 5
     assert df['B'].to_list() == [11, 12, 30, 40, 40]
 
 
-def test_filter_not_equals(client, tables_manager):
+def test_filter_not_equals(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',
@@ -87,12 +87,12 @@ def test_filter_not_equals(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('FilteredTable').table
+    df = tables_store.get_table('FilteredTable').table
     assert df.shape[0] == 8
     assert 2 not in df['A'].to_list()
 
 
-def test_filter_greater_than_or_equals(client, tables_manager):
+def test_filter_greater_than_or_equals(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',
@@ -108,12 +108,12 @@ def test_filter_greater_than_or_equals(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('FilteredTable').table
+    df = tables_store.get_table('FilteredTable').table
     assert df.shape[0] == 3
     assert df['B'].to_list() == [30, 40, 40]
 
 
-def test_filter_less_than(client, tables_manager):
+def test_filter_less_than(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',
@@ -129,12 +129,12 @@ def test_filter_less_than(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('FilteredTable').table
+    df = tables_store.get_table('FilteredTable').table
     assert df.shape[0] == 4
     assert df['A'].to_list() == [1, 2, 1, 2]
 
 
-def test_filter_less_than_or_equals(client, tables_manager):
+def test_filter_less_than_or_equals(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',
@@ -150,12 +150,12 @@ def test_filter_less_than_or_equals(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('FilteredTable').table
+    df = tables_store.get_table('FilteredTable').table
     assert df.shape[0] == 7
     assert df['B'].to_list() == [11, 12, 1, 2, 3, 10, 2]
 
 
-def test_filter_equals_compare_column(client, tables_manager):
+def test_filter_equals_compare_column(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',
@@ -171,14 +171,14 @@ def test_filter_equals_compare_column(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('FilteredTable').table
+    df = tables_store.get_table('FilteredTable').table
     # A==Cとなる行
     assert df.shape[0] == 3
     assert df['A'].to_list() == [1, 6, 7]
     assert df['C'].to_list() == [1, 6, 7]
 
 
-def test_filter_greater_than_compare_column(client, tables_manager):
+def test_filter_greater_than_compare_column(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',
@@ -194,14 +194,14 @@ def test_filter_greater_than_compare_column(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('FilteredTable').table
+    df = tables_store.get_table('FilteredTable').table
     # B>Cとなる行
     assert df.shape[0] == 3
     assert df['A'].to_list() == [2, 5, 3]
     assert df['C'].to_list() == [1, 4, 2]
 
 
-def test_filter_less_than_or_equals_compare_column(client, tables_manager):
+def test_filter_less_than_or_equals_compare_column(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',
@@ -217,14 +217,14 @@ def test_filter_less_than_or_equals_compare_column(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('FilteredTable').table
+    df = tables_store.get_table('FilteredTable').table
     # A<=C
     assert df.shape[0] == 7
     assert df['A'].to_list() == [1, 3, 4, 6, 7, 1, 2]
     assert df['C'].to_list() == [1, 4, 8, 6, 7, 2, 3]
 
 
-def test_filter_invalid_table(client, tables_manager):
+def test_filter_invalid_table(client, tables_store):
     payload = {
         'tableName': 'NoTable',
         'newTableName': 'FilteredTable',
@@ -243,7 +243,7 @@ def test_filter_invalid_table(client, tables_manager):
     assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
-def test_filter_invalid_column(client, tables_manager):
+def test_filter_invalid_column(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',
@@ -262,7 +262,7 @@ def test_filter_invalid_column(client, tables_manager):
     assert "columnName 'Z' does not exist." == response_data['message']
 
 
-def test_filter_invalid_condition(client, tables_manager):
+def test_filter_invalid_condition(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'newTableName': 'FilteredTable',

@@ -4,7 +4,7 @@ import tempfile
 from datetime import datetime
 
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -18,8 +18,8 @@ def client():
 
 @pytest.fixture
 def prepared_data():
-    """TablesManagerのフィクスチャ"""
-    tables_manager = TablesManager()
+    """TablesStoreのフィクスチャ"""
+    tables_store = TablesStore()
     # テスト用の一時ディレクトリを作成
     test_dir = tempfile.mkdtemp()
     # テスト用のファイルとディレクトリを作成
@@ -33,17 +33,17 @@ def prepared_data():
         f.write('test content 2 with more data')
     # サブディレクトリを作成
     os.makedirs(test_subdir)
-    yield tables_manager, test_dir, test_file1, test_file2, test_subdir
+    yield tables_store, test_dir, test_file1, test_file2, test_subdir
     # テスト後にクリーンアップ
     if os.path.exists(test_dir):
         shutil.rmtree(test_dir)
     # テスト後のクリーンアップ
-    tables_manager.clear_tables()
+    tables_store.clear_tables()
 
 
 def test_get_list_files_success(client, prepared_data):
     """正常にファイル一覧を取得できる"""
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+    tables_store, test_dir, test_file1, test_file2, test_subdir = (
         prepared_data
     )
     response = client.post(
@@ -83,7 +83,7 @@ def test_get_list_files_success(client, prepared_data):
 
 def test_get_list_files_empty_directory(client, prepared_data):
     """空のディレクトリの場合"""
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+    tables_store, test_dir, test_file1, test_file2, test_subdir = (
         prepared_data
     )
     empty_dir = tempfile.mkdtemp()
@@ -104,7 +104,7 @@ def test_get_list_files_empty_directory(client, prepared_data):
 
 def test_get_list_files_invalid_directory(client, prepared_data):
     """存在しないディレクトリを指定した場合のテスト"""
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+    tables_store, test_dir, test_file1, test_file2, test_subdir = (
         prepared_data
     )
     response = client.post(
@@ -119,7 +119,7 @@ def test_get_list_files_invalid_directory(client, prepared_data):
 
 def test_get_list_files_missing_directory_path(client, prepared_data):
     """directoryPathパラメータが未指定の場合のテスト"""
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+    tables_store, test_dir, test_file1, test_file2, test_subdir = (
         prepared_data
     )
     response = client.post(
@@ -134,7 +134,7 @@ def test_get_list_files_missing_directory_path(client, prepared_data):
 
 def test_get_list_files_file_instead_of_directory(client, prepared_data):
     """ディレクトリではなくファイルのパスを指定した場合のテスト"""
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+    tables_store, test_dir, test_file1, test_file2, test_subdir = (
         prepared_data
     )
     response = client.post(
@@ -149,7 +149,7 @@ def test_get_list_files_file_instead_of_directory(client, prepared_data):
 
 def test_get_list_files_file_sizes(client, prepared_data):
     """ファイルサイズが正しく取得できることを確認"""
-    tables_manager, test_dir, test_file1, test_file2, test_subdir = (
+    tables_store, test_dir, test_file1, test_file2, test_subdir = (
         prepared_data
     )
     response = client.post(

@@ -4,11 +4,11 @@ import polars as pl
 
 from ..utils.validator.common_validators import (ValidationError,
                                                  validate_required)
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_column_name, validate_existed_table_name,
     validate_new_column_name)
 from .abstract_api import AbstractApi, ApiError
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .django_compat import gettext as _
 
 
@@ -21,7 +21,7 @@ class AddDummyColumn(AbstractApi):
     """
     def __init__(self, table_name: str, source_column_name: str,
                  dummy_column_name: str, target_value: str):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.table_name = table_name
         self.source_column_name = source_column_name
         self.dummy_column_name = dummy_column_name
@@ -35,11 +35,11 @@ class AddDummyColumn(AbstractApi):
 
     def validate(self):
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             validate_existed_table_name(self.table_name,
                                         table_name_list,
                                         self.param_names['table_name'])
-            column_name_list = self.tables_manager.get_column_name_list(
+            column_name_list = self.tables_store.get_column_name_list(
                 self.table_name)
             validate_existed_column_name(
                 self.source_column_name,
@@ -57,7 +57,7 @@ class AddDummyColumn(AbstractApi):
 
     def execute(self):
         try:
-            table_info = self.tables_manager.get_table(self.table_name)
+            table_info = self.tables_store.get_table(self.table_name)
             df = table_info.table
 
             # ダミー変数列を作成（指定された値なら1、それ以外は0）
@@ -70,7 +70,7 @@ class AddDummyColumn(AbstractApi):
             df_with_dummy = df.with_columns(dummy_column)
 
             # テーブルを更新
-            self.tables_manager.update_table(
+            self.tables_store.update_table(
                 self.table_name, df_with_dummy)
 
             # 結果を返す

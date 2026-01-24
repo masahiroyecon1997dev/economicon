@@ -3,9 +3,9 @@ from typing import Dict, List, Optional
 import polars as pl
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_column_name, validate_existed_columns,
     validate_existed_table_name, validate_new_column_name)
 from .abstract_api import AbstractApi, ApiError
@@ -22,7 +22,7 @@ class AddLagLeadColumn(AbstractApi):
     def __init__(self, table_name: str, source_column: str,
                  new_column_name: str, periods: int,
                  group_columns: Optional[List[str]] = None):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.table_name = table_name
         self.source_column = source_column
         self.new_column_name = new_column_name
@@ -38,11 +38,11 @@ class AddLagLeadColumn(AbstractApi):
 
     def validate(self):
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             validate_existed_table_name(self.table_name,
                                         table_name_list,
                                         self.param_names['table_name'])
-            column_name_list = self.tables_manager.get_column_name_list(
+            column_name_list = self.tables_store.get_column_name_list(
                 self.table_name)
             validate_existed_column_name(self.source_column,
                                          column_name_list,
@@ -68,7 +68,7 @@ class AddLagLeadColumn(AbstractApi):
 
     def execute(self):
         try:
-            table_info = self.tables_manager.get_table(self.table_name)
+            table_info = self.tables_store.get_table(self.table_name)
             df = table_info.table
 
             # shift操作を実行
@@ -95,7 +95,7 @@ class AddLagLeadColumn(AbstractApi):
                 )
 
             # 新しい列をデータフレームに追加
-            self.tables_manager.update_table(
+            self.tables_store.update_table(
                 self.table_name, df_with_lag_lead)
 
             # 結果を返す

@@ -6,7 +6,7 @@ import polars as pl
 from ..utils.create_table_name import create_table_name_by_file_name
 from ..utils.validator.common_validators import ValidationError
 from .abstract_api import AbstractApi, ApiError
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .django_compat import gettext as _
 
 
@@ -20,7 +20,7 @@ class ImportCsvByFile(AbstractApi):
 
     def __init__(self, file_data: BinaryIO | None, file_name: str | None):
         # テーブルマネージャーの初期化
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         # ファイルデータ
         self.file_data = file_data
         # ファイル名
@@ -55,13 +55,13 @@ class ImportCsvByFile(AbstractApi):
             df = pl.read_csv(io.BytesIO(self.validated_file_data.read()))
 
             # 自動生成されるテーブル名
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             self.table_name = create_table_name_by_file_name(
                 self.validated_file_name,
                 table_name_list)
 
             # テーブルを作成
-            self.tables_manager.store_table(self.table_name, df)
+            self.tables_store.store_table(self.table_name, df)
 
             # 結果を返す
             result = {'tableName': self.table_name}

@@ -3,9 +3,9 @@ from typing import Dict, List
 import polars as pl
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_columns, validate_existed_tables, validate_new_table_name)
 from .abstract_api import AbstractApi, ApiError
 
@@ -23,7 +23,7 @@ class CreateUnionTable(AbstractApi):
         table_names: List[str],
         column_names: List[str],
     ):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         # ユニオン後のテーブル名
         self.union_table_name = union_table_name
         # ユニオンするテーブル名リスト
@@ -40,7 +40,7 @@ class CreateUnionTable(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
 
             # 新しいテーブル名の重複チェック
             validate_new_table_name(
@@ -58,7 +58,7 @@ class CreateUnionTable(AbstractApi):
             # すべてのテーブルで指定された列が存在することをチェック
             for table_name in self.table_names:
                 table_column_name_list = \
-                    self.tables_manager.get_column_name_list(
+                    self.tables_store.get_column_name_list(
                         table_name
                     )
                 validate_existed_columns(
@@ -77,7 +77,7 @@ class CreateUnionTable(AbstractApi):
             # 各テーブルから指定された列のみを選択してデータフレームのリストを作成
             dataframes = []
             for table_name in self.table_names:
-                df = self.tables_manager.get_table(table_name).table
+                df = self.tables_store.get_table(table_name).table
                 # 指定された列のみを選択
                 selected_df = df.select(self.column_names)
                 dataframes.append(selected_df)
@@ -86,7 +86,7 @@ class CreateUnionTable(AbstractApi):
             union_df = pl.concat(dataframes, how="vertical")
 
             # 新しいテーブル情報を保存
-            created_table_name = self.tables_manager.store_table(
+            created_table_name = self.tables_store.store_table(
                 self.union_table_name, union_df
             )
 

@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -21,9 +21,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     manager.store_table(table_name, test_data)
     yield manager
@@ -31,7 +31,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_get_column_info_list_success(client, tables_manager):
+def test_get_column_info_list_success(client, tables_store):
     """正常系テスト：テーブルが存在する場合"""
     response = client.post(
         '/api/column/get-list',
@@ -50,7 +50,7 @@ def test_get_column_info_list_success(client, tables_manager):
     assert result['columnInfoList'] == expected_columns
 
 
-def test_get_column_info_list_number_success(client, tables_manager):
+def test_get_column_info_list_number_success(client, tables_store):
     """正常系テスト：テーブルが存在する場合（数値型の列のみ）"""
     response = client.post(
         '/api/column/get-list',
@@ -70,7 +70,7 @@ def test_get_column_info_list_number_success(client, tables_manager):
     assert result['columnInfoList'] == expected_columns
 
 
-def test_get_column_info_list_table_not_found(client, tables_manager):
+def test_get_column_info_list_table_not_found(client, tables_store):
     """異常系テスト：存在しないテーブル名の場合"""
     non_existent_table_name = "non_existent_table"
     response = client.post(
@@ -84,14 +84,14 @@ def test_get_column_info_list_table_not_found(client, tables_manager):
     assert expected_message == response_data['message']
 
 
-def test_get_column_info_list_exception(client, tables_manager):
+def test_get_column_info_list_exception(client, tables_store):
     """例外発生時のテスト"""
-    original_method = tables_manager.get_column_info_list
+    original_method = tables_store.get_column_info_list
 
     def raise_exception(table_name: str) -> pl.Schema:
         raise Exception("DB error")
 
-    tables_manager.get_column_info_list = raise_exception
+    tables_store.get_column_info_list = raise_exception
     response = client.post(
         '/api/column/get-list',
         json={'tableName': table_name}
@@ -102,4 +102,4 @@ def test_get_column_info_list_exception(client, tables_manager):
     expected_message = "An unexpected error during getting column info list."
     assert expected_message == response_data['message']
     # 後始末
-    tables_manager.get_column_info_list = original_method
+    tables_store.get_column_info_list = original_method

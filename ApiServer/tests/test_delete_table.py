@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -13,9 +13,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # テスト用テーブルをセット
     df = pl.DataFrame({
@@ -33,7 +33,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_delete_table_success(client, tables_manager):
+def test_delete_table_success(client, tables_store):
     payload = {
         'tableName': 'TestTable2'
     }
@@ -44,11 +44,11 @@ def test_delete_table_success(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    assert 'TestTable2' not in tables_manager.get_table_name_list()
-    assert len(tables_manager.get_table_name_list()) == 1
+    assert 'TestTable2' not in tables_store.get_table_name_list()
+    assert len(tables_store.get_table_name_list()) == 1
 
 
-def test_delete_table_not_found(client, tables_manager):
+def test_delete_table_not_found(client, tables_store):
     payload = {
         'tableName': 'NotExistTable'
     }
@@ -63,7 +63,7 @@ def test_delete_table_not_found(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_delete_table_empty_table_name(client, tables_manager):
+def test_delete_table_empty_table_name(client, tables_store):
     payload = {
         'tableName': ''
     }
