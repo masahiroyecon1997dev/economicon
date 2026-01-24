@@ -155,4 +155,4 @@ def test_duplicate_column_duplicate_new_column_name(client, prepared_data):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
     print(response_data['message'])
-    assert "newColumnName 'B' は既に存在します。" == response_data['message']
+    assert "newColumnName 'B'は既に存在します。" == response_data['message']

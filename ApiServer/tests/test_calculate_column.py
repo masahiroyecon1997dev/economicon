@@ -130,7 +130,7 @@ def test_calculate_column_invalid_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "columnName in calculationExpression 'Z' は存在しません。"
+    message = "columnName in calculationExpression 'Z'は存在しません。"
     assert message == response_data['message']
 
 
@@ -148,7 +148,7 @@ def test_calculate_column_non_numeric_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "columnName in calculationExpression 'text_col' は数値ではありません。"
+    message = "columnName in calculationExpression 'text_col'は数値ではありません。"
     assert message == response_data['message']
 
 

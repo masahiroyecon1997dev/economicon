@@ -80,7 +80,7 @@ def test_get_column_info_list_table_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     # エラーメッセージにテーブル名が存在しない旨が含まれることを確認
-    expected_message = "tableName 'non_existent_table' は存在しません。"
+    expected_message = "tableName 'non_existent_table'は存在しません。"
     assert expected_message == response_data['message']
 
 

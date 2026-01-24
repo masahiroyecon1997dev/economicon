@@ -73,7 +73,7 @@ def test_fetch_data_to_json_table_not_found(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    message = "tableName 'non_existent_table' は存在しません。"
+    message = "tableName 'non_existent_table'は存在しません。"
     assert message == response_data['message']
 
 
