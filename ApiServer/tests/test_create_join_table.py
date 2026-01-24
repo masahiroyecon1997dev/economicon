@@ -205,7 +205,7 @@ def test_left_key_column_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "leftKeyColumnNames 'not_exist_col' は存在しません。"
+    message = "leftKeyColumnNames 'not_exist_col'は存在しません。"
     assert message == response_data['message']
 
 
@@ -225,7 +225,7 @@ def test_right_key_column_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "rightKeyColumnNames 'not_exist_col' は存在しません。"
+    message = "rightKeyColumnNames 'not_exist_col'は存在しません。"
     assert message == response_data['message']
 
 

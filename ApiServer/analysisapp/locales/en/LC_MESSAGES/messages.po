@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-24 21:19+0900\n"
+"POT-Creation-Date: 2026-01-24 23:35+0900\n"
 "PO-Revision-Date: 2026-01-18 12:00+0900\n"
 "Last-Translator: \n"
 "Language: en\n"
@@ -41,6 +41,11 @@ msgstr ""
 
 #: analysisapp/services/add_simulation_column.py:99
 msgid "An unexpected error occurred during adding simulation column processing"
+msgstr ""
+
+#: analysisapp/services/calculate_column.py:107
+#, python-brace-format
+msgid "Invalid calculation expression: {}"
 msgstr ""
 
 #: analysisapp/services/calculate_column.py:119

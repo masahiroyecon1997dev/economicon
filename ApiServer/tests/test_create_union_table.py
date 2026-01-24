@@ -160,7 +160,7 @@ def test_nonexistent_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "tableNames 'NonExistentTable' は存在しません。"
+    message = "tableNames 'NonExistentTable'は存在しません。"
     assert message == response_data['message']
 
 
@@ -194,7 +194,7 @@ def test_nonexistent_column_in_first_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "columnNames 'nonexistent_column' は存在しません。"
+    message = "columnNames 'nonexistent_column'は存在しません。"
     assert message == response_data['message']
 
 
@@ -212,7 +212,7 @@ def test_column_missing_in_one_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnNames 'name' は存在しません。" == response_data['message']
+    assert "columnNames 'name'は存在しません。" == response_data['message']
 
 
 def test_union_preserves_column_order(client, tables_store):

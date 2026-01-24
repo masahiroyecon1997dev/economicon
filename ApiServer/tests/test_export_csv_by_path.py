@@ -131,7 +131,7 @@ def test_export_csv_by_path_table_not_exists(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    message = "tableName 'NonExistentTable' は存在しません。"
+    message = "tableName 'NonExistentTable'は存在しません。"
     assert message == response_data['message']
 
 
@@ -220,7 +220,7 @@ def test_export_csv_by_path_empty_separator(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    message = "separator must be at least 1 characters long."
+    message = "separatorは少なくとも1文字である必要があります。"
     assert message == response_data['message']
 
 

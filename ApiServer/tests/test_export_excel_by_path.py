@@ -117,7 +117,7 @@ def test_export_excel_by_path_table_not_exists(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    message = "tableName 'NonExistentTable' は存在しません。"
+    message = "tableName 'NonExistentTable'は存在しません。"
     assert message == response_data['message']
 
 

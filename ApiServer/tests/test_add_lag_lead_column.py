@@ -165,7 +165,7 @@ def test_add_lag_lead_column_invalid_source_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "sourceColumn 'nonexistent' は存在しません。"
+    message = "sourceColumn 'nonexistent'は存在しません。"
     assert message == response_data['message']
 
 
@@ -185,7 +185,7 @@ def test_add_lag_lead_column_invalid_group_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "groupColumns 'nonexistent' は存在しません。"
+    message = "groupColumns 'nonexistent'は存在しません。"
     assert message == response_data['message']
 
 
