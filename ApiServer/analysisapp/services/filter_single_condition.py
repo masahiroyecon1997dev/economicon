@@ -3,9 +3,9 @@ from typing import Dict
 import polars as pl
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_compare_value, validate_existed_column_name,
     validate_existed_table_name, validate_filter_condition,
     validate_is_compare_column, validate_new_table_name)
@@ -22,7 +22,7 @@ class FilterSingleCondition(AbstractApi):
     def __init__(self, new_table_name: str, table_name: str,
                  column_name: str, condition: str,
                  is_compare_column: str, compare_value: str):
-        self.manager = TablesManager()
+        self.manager = TablesStore()
         # 新しいテーブル名
         self.new_table_name = new_table_name
         # フィルタリング対象のテーブル名

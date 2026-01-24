@@ -1,7 +1,7 @@
 import numpy as np
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -14,9 +14,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     # テーブルをクリア
     manager.clear_tables()
     # ロジット分析用テストデータを作成
@@ -51,7 +51,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_logistic_regression_success(client, tables_manager):
+def test_logistic_regression_success(client, tables_store):
     """正常にロジット分析が実行できる"""
     payload = {
         'tableName': 'LogitTestTable',
@@ -92,7 +92,7 @@ def test_logistic_regression_success(client, tables_manager):
     assert 'nObservations' in stats
 
 
-def test_logistic_regression_multiple_variables(client, tables_manager):
+def test_logistic_regression_multiple_variables(client, tables_store):
     """複数の説明変数でロジット分析が実行できる"""
     payload = {
         'tableName': 'LogitTestTable',
@@ -112,7 +112,7 @@ def test_logistic_regression_multiple_variables(client, tables_manager):
     assert len(parameters) == 4
 
 
-def test_logistic_regression_invalid_table(client, tables_manager):
+def test_logistic_regression_invalid_table(client, tables_store):
     """存在しないテーブル名でエラーが返される"""
     payload = {
         'tableName': 'NonExistentTable',
@@ -131,7 +131,7 @@ def test_logistic_regression_invalid_table(client, tables_manager):
 
 
 def test_logistic_regression_invalid_dependent_variable(client,
-                                                        tables_manager):
+                                                        tables_store):
     """存在しない被説明変数でエラーが返される"""
     payload = {
         'tableName': 'LogitTestTable',
@@ -150,7 +150,7 @@ def test_logistic_regression_invalid_dependent_variable(client,
 
 
 def test_logistic_regression_invalid_explanatory_variable(client,
-                                                          tables_manager):
+                                                          tables_store):
     """存在しない説明変数でエラーが返される"""
     payload = {
         'tableName': 'LogitTestTable',
@@ -169,7 +169,7 @@ def test_logistic_regression_invalid_explanatory_variable(client,
 
 
 def test_logistic_regression_empty_explanatory_variables(client,
-                                                         tables_manager):
+                                                         tables_store):
     """説明変数が空の場合エラーが返される"""
     payload = {
         'tableName': 'LogitTestTable',
@@ -188,7 +188,7 @@ def test_logistic_regression_empty_explanatory_variables(client,
     assert message == response_data['message']
 
 
-def test_logistic_regression_dependent_in_explanatory(client, tables_manager):
+def test_logistic_regression_dependent_in_explanatory(client, tables_store):
     """被説明変数が説明変数に含まれている場合エラーが返される"""
     payload = {
         'tableName': 'LogitTestTable',
@@ -206,7 +206,7 @@ def test_logistic_regression_dependent_in_explanatory(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_logistic_regression_missing_parameters(client, tables_manager):
+def test_logistic_regression_missing_parameters(client, tables_store):
     """必須パラメータが不足している場合エラーが返される"""
     # tableName がない場合
     payload = {
@@ -224,7 +224,7 @@ def test_logistic_regression_missing_parameters(client, tables_manager):
 
 
 def test_logistic_regression_single_explanatory_variable(client,
-                                                         tables_manager):
+                                                         tables_store):
     """単一の説明変数でもロジット分析が実行できる"""
     payload = {
         'tableName': 'LogitTestTable',

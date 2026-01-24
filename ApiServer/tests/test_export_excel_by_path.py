@@ -5,7 +5,7 @@ import tempfile
 
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -19,8 +19,8 @@ def client():
 
 @pytest.fixture
 def prepared_data():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # テスト用のテーブルデータを作成
     test_data = pl.DataFrame({
@@ -42,7 +42,7 @@ def test_export_excel_by_path_success(client, prepared_data):
     """
     EXCELファイルをエクスポートするテスト
     """
-    tables_manager, test_dir, test_data = prepared_data
+    tables_store, test_dir, test_data = prepared_data
     # APIリクエスト
     request_data = {
         'tableName': 'TestTable',
@@ -68,7 +68,7 @@ def test_export_excel_by_path_with_xls_extension(client, prepared_data):
     .xls拡張子でEXCELファイルをエクスポートするテスト
     注意: Polarsは常にXLSX形式で出力するため、拡張子に関わらずXLSX形式のファイルが作成される
     """
-    tables_manager, test_dir, test_data = prepared_data
+    tables_store, test_dir, test_data = prepared_data
     # APIリクエスト
     request_data = {
         'tableName': 'TestTable',
@@ -106,7 +106,7 @@ def test_export_excel_by_path_table_not_exists(client, prepared_data):
     """
     存在しないテーブル名を指定した場合のテスト
     """
-    tables_manager, test_dir, _ = prepared_data
+    tables_store, test_dir, _ = prepared_data
     request_data = {
         'tableName': 'NonExistentTable',
         'directoryPath': test_dir,
@@ -125,7 +125,7 @@ def test_export_excel_by_path_invalid_output_directory(client, prepared_data):
     """
     存在しない出力ディレクトリを指定した場合のテスト
     """
-    tables_manager, test_output_dir, _ = prepared_data
+    tables_store, test_output_dir, _ = prepared_data
     request_data = {
         'tableName': 'TestTable',
         'directoryPath': '/non/existent/directory',
@@ -144,7 +144,7 @@ def test_export_excel_by_path_missing_table_name(client, prepared_data):
     """
     tableNameパラメータが未指定の場合のテスト
     """
-    tables_manager, test_dir, test_data = prepared_data
+    tables_store, test_dir, test_data = prepared_data
     request_data = {
         'directoryPath': test_dir,
         'fileName': 'test_output.xlsx'
@@ -161,7 +161,7 @@ def test_export_excel_by_path_missing_directory_path(client, prepared_data):
     """
     directoryPathパラメータが未指定の場合のテスト
     """
-    tables_manager, test_dir, test_data = prepared_data
+    tables_store, test_dir, test_data = prepared_data
     request_data = {
         'tableName': 'TestTable',
         'fileName': 'test_output.xlsx'
@@ -178,7 +178,7 @@ def test_export_excel_by_path_missing_file_name(client, prepared_data):
     """
     fileNameパラメータが未指定の場合のテスト
     """
-    tables_manager, test_dir, test_data = prepared_data
+    tables_store, test_dir, test_data = prepared_data
     request_data = {
         'tableName': 'TestTable',
         'directoryPath': test_dir,
@@ -195,7 +195,7 @@ def test_export_excel_by_path_invalid_json(client, prepared_data):
     """
     不正なJSONを送信した場合のテスト
     """
-    tables_manager, test_dir, test_data = prepared_data
+    tables_store, test_dir, test_data = prepared_data
     response = client.post('/api/data/export-excel-by-path',
                            data='invalid json')
     # response_data = response.json()
@@ -208,10 +208,10 @@ def test_export_excel_by_path_empty_table(client, prepared_data):
     """
     空のテーブルをエクスポートする場合のテスト
     """
-    tables_manager, test_dir, _ = prepared_data
+    tables_store, test_dir, _ = prepared_data
     # 空のテーブルを作成
     empty_data = pl.DataFrame({'col1': [], 'col2': []})
-    tables_manager.store_table('EmptyTable', empty_data)
+    tables_store.store_table('EmptyTable', empty_data)
     request_data = {
         'tableName': 'EmptyTable',
         'directoryPath': test_dir,
@@ -235,14 +235,14 @@ def test_export_excel_by_path_large_table(client, prepared_data):
     """
     大きなテーブルをエクスポートする場合のテスト
     """
-    tables_manager, test_dir, _ = prepared_data
+    tables_store, test_dir, _ = prepared_data
     # 大きなテーブルを作成
     large_data = pl.DataFrame({
         'id': list(range(1000)),
         'value': [f'value_{i}' for i in range(1000)],
         'number': [i * 1.5 for i in range(1000)]
     })
-    tables_manager.store_table('LargeTable', large_data)
+    tables_store.store_table('LargeTable', large_data)
     request_data = {
         'tableName': 'LargeTable',
         'directoryPath': test_dir,
@@ -268,14 +268,14 @@ def test_export_excel_by_path_special_characters_in_data(client,
     """
     特殊文字を含むデータをエクスポートする場合のテスト
     """
-    tables_manager, test_output_dir, _ = prepared_data
+    tables_store, test_output_dir, _ = prepared_data
     # 特殊文字を含むテーブルを作成
     special_data = pl.DataFrame({
         'text': ['日本語', 'English', '中文', '한국어'],
         'special': ['@#$%', '&*()[]', '{}|\\', '\'";:'],
         'numbers': [1.23, -4.56, 0.0, 999.999]
     })
-    tables_manager.store_table('SpecialTable', special_data)
+    tables_store.store_table('SpecialTable', special_data)
     request_data = {
         'tableName': 'SpecialTable',
         'directoryPath': test_output_dir,

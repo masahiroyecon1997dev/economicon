@@ -2,10 +2,10 @@ from typing import Dict, List
 
 from ..utils.validator.common_validators import (ValidationError,
                                                  validate_boolean)
-from ..utils.validator.tables_manager_validator import \
+from ..utils.validator.tables_store_validator import \
     validate_existed_table_name
 from .abstract_api import AbstractApi, ApiError
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .django_compat import gettext as _
 
 
@@ -16,7 +16,7 @@ class GetColumnList(AbstractApi):
     データベースの指定されたテーブルに存在するすべてのカラム名を取得します。
     """
     def __init__(self, table_name: str, is_number_only: str):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.table_name = table_name
         self.is_number_only = is_number_only
         self.param_names = {
@@ -26,7 +26,7 @@ class GetColumnList(AbstractApi):
 
     def validate(self):
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             validate_existed_table_name(
                 self.table_name, table_name_list,
                 self.param_names['table_name']
@@ -39,7 +39,7 @@ class GetColumnList(AbstractApi):
 
     def execute(self):
         try:
-            column_list = self.tables_manager.get_column_info_list(
+            column_list = self.tables_store.get_column_info_list(
                 self.table_name)
             if self.is_number_only.lower() == 'true':
                 column_info_list = ([{'name': name, 'type': str(dtype)}

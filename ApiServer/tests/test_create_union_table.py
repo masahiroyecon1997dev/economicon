@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -13,9 +13,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # 第1テーブル
     table1_df = pl.DataFrame({
@@ -53,7 +53,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_union_two_tables_all_columns(client, tables_manager):
+def test_union_two_tables_all_columns(client, tables_store):
     payload = {
         'unionTableName': 'UnionTable',
         'tableNames': ['Table1', 'Table2'],
@@ -66,7 +66,7 @@ def test_union_two_tables_all_columns(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('UnionTable').table
+    df = tables_store.get_table('UnionTable').table
     assert df.shape == (6, 4)
     assert df['id'].to_list() == [1, 2, 3, 4, 5, 6]
     assert df['name'].to_list() == [
@@ -75,7 +75,7 @@ def test_union_two_tables_all_columns(client, tables_manager):
     ]
 
 
-def test_union_three_tables_selected_columns(client, tables_manager):
+def test_union_three_tables_selected_columns(client, tables_store):
     payload = {
         'unionTableName': 'UnionTable',
         'tableNames': ['Table1', 'Table2', 'Table3'],
@@ -88,7 +88,7 @@ def test_union_three_tables_selected_columns(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('UnionTable').table
+    df = tables_store.get_table('UnionTable').table
     assert df.shape == (8, 2)
     assert df['id'].to_list() == [1, 2, 3, 4, 5, 6, 7, 8]
     assert df['name'].to_list() == [
@@ -97,7 +97,7 @@ def test_union_three_tables_selected_columns(client, tables_manager):
     ]
 
 
-def test_union_table_name_empty(client, tables_manager):
+def test_union_table_name_empty(client, tables_store):
     payload = {
         'unionTableName': '',
         'tableNames': ['Table1', 'Table2'],
@@ -113,7 +113,7 @@ def test_union_table_name_empty(client, tables_manager):
     assert "unionTableName is required." == response_data['message']
 
 
-def test_union_table_name_already_exists(client, tables_manager):
+def test_union_table_name_already_exists(client, tables_store):
     payload = {
         'unionTableName': 'Table1',  # 既存のテーブル名
         'tableNames': ['Table2', 'Table3'],
@@ -130,7 +130,7 @@ def test_union_table_name_already_exists(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_single_table_in_list(client, tables_manager):
+def test_single_table_in_list(client, tables_store):
     payload = {
         'unionTableName': 'UnionTable',
         'tableNames': ['Table1'],  # 1つのテーブルのみ
@@ -147,7 +147,7 @@ def test_single_table_in_list(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_nonexistent_table(client, tables_manager):
+def test_nonexistent_table(client, tables_store):
     payload = {
         'unionTableName': 'UnionTable',
         'tableNames': ['Table1', 'NonExistentTable'],
@@ -164,7 +164,7 @@ def test_nonexistent_table(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_empty_column_names(client, tables_manager):
+def test_empty_column_names(client, tables_store):
     payload = {
         'unionTableName': 'UnionTable',
         'tableNames': ['Table1', 'Table2'],
@@ -181,7 +181,7 @@ def test_empty_column_names(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_nonexistent_column_in_first_table(client, tables_manager):
+def test_nonexistent_column_in_first_table(client, tables_store):
     payload = {
         'unionTableName': 'UnionTable',
         'tableNames': ['Table1', 'Table2'],
@@ -198,7 +198,7 @@ def test_nonexistent_column_in_first_table(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_column_missing_in_one_table(client, tables_manager):
+def test_column_missing_in_one_table(client, tables_store):
     payload = {
         'unionTableName': 'UnionTable',
         # DifferentTableには'name'列がない
@@ -215,7 +215,7 @@ def test_column_missing_in_one_table(client, tables_manager):
     assert "columnNames 'name' does not exist." == response_data['message']
 
 
-def test_union_preserves_column_order(client, tables_manager):
+def test_union_preserves_column_order(client, tables_store):
     payload = {
         'unionTableName': 'UnionTable',
         'tableNames': ['Table1', 'Table2'],
@@ -228,12 +228,12 @@ def test_union_preserves_column_order(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('UnionTable').table
+    df = tables_store.get_table('UnionTable').table
     # 指定された順序で列が並んでいることを確認
     assert list(df.columns) == ['name', 'id', 'age']
 
 
-def test_missing_request_fields(client, tables_manager):
+def test_missing_request_fields(client, tables_store):
     # unionTableNameが欠けている場合
     payload = {
         'tableNames': ['Table1', 'Table2'],

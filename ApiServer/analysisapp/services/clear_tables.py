@@ -2,7 +2,7 @@ from typing import Dict
 
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .abstract_api import AbstractApi, ApiError
 
 
@@ -10,10 +10,10 @@ class ClearTables(AbstractApi):
     """
     全てのテーブル情報をクリアするためのAPIクラス
 
-    TablesManagerに保存されている全てのテーブルを削除します。
+    TablesStoreに保存されている全てのテーブルを削除します。
     """
     def __init__(self):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.param_names = {}
 
     def validate(self):
@@ -22,7 +22,7 @@ class ClearTables(AbstractApi):
 
     def execute(self):
         try:
-            self.tables_manager.clear_tables()
+            self.tables_store.clear_tables()
             # 結果を返す（空の辞書）
             result = {}
             return result

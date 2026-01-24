@@ -1,6 +1,6 @@
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .abstract_api import AbstractApi, ApiError
 
 
@@ -13,7 +13,7 @@ class GetTableList(AbstractApi):
     def __init__(
         self,
     ):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
 
     def validate(
         self,
@@ -25,7 +25,7 @@ class GetTableList(AbstractApi):
         self,
     ):
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             result = {
                 'tableNameList': table_name_list
             }

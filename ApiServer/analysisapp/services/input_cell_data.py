@@ -2,12 +2,12 @@ import polars as pl
 from typing import Dict
 from .django_compat import gettext as _
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_table_name,
     validate_existed_column_name,
     validate_row_index
 )
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .abstract_api import AbstractApi, ApiError
 
 
@@ -23,7 +23,7 @@ class InputCellData(AbstractApi):
                  column_name: str,
                  row_index: int,
                  new_value):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         # テーブル名
         self.table_name = table_name
         # カラム名
@@ -42,7 +42,7 @@ class InputCellData(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の存在チェック
             validate_existed_table_name(
                 self.table_name,
@@ -50,14 +50,14 @@ class InputCellData(AbstractApi):
                 self.param_names['table_name']
             )
             column_name_list = \
-                self.tables_manager.get_column_name_list(self.table_name)
+                self.tables_store.get_column_name_list(self.table_name)
             # カラム名の存在チェック
             validate_existed_column_name(
                 self.column_name,
                 column_name_list,
                 self.param_names['column_names']
             )
-            num_rows = self.tables_manager.get_table(self.table_name).num_rows
+            num_rows = self.tables_store.get_table(self.table_name).num_rows
             # 行インデックスの妥当性チェック
             validate_row_index(
                 self.row_index,
@@ -72,7 +72,7 @@ class InputCellData(AbstractApi):
         # セルデータの入力処理
         try:
             # 対象テーブルのデータフレームを取得
-            df = self.tables_manager.get_table(self.table_name).table
+            df = self.tables_store.get_table(self.table_name).table
             # 指定列のデータを取得してコピー
             numpy_array = df.get_column(self.column_name).to_list().copy()
             # 指定行のデータを新しい値に更新
@@ -84,7 +84,7 @@ class InputCellData(AbstractApi):
             new_df = df.with_columns(modified_series)
             # 更新されたデータフレームを保存
             updated_table_name = \
-                self.tables_manager.update_table(self.table_name, new_df)
+                self.tables_store.update_table(self.table_name, new_df)
             # 結果を返す
             result = {'tableName': updated_table_name}
             return result

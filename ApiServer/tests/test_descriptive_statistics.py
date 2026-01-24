@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -13,9 +13,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     # テーブルをクリア
     manager.clear_tables()
     # テスト用テーブルをセット (数値データ)
@@ -36,7 +36,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_descriptive_statistics_success_numeric(client, tables_manager):
+def test_descriptive_statistics_success_numeric(client, tables_store):
     # 数値データに対する記述統計の計算が正常に動作する
     payload = {
         'tableName': 'TestTableNumeric',
@@ -62,7 +62,7 @@ def test_descriptive_statistics_success_numeric(client, tables_manager):
         abs=1e-5)
 
 
-def test_descriptive_statistics_success_all_stats(client, tables_manager):
+def test_descriptive_statistics_success_all_stats(client, tables_store):
     # 全ての統計を計算する
     payload = {
         'tableName': 'TestTableNumeric',
@@ -85,7 +85,7 @@ def test_descriptive_statistics_success_all_stats(client, tables_manager):
     assert result['statistics']['B']['iqr'] == pytest.approx(20.0, abs=1e-5)
 
 
-def test_descriptive_statistics_success_string_mode(client, tables_manager):
+def test_descriptive_statistics_success_string_mode(client, tables_store):
     # 文字列データに対するmode計算
     payload = {
         'tableName': 'TestTableString',
@@ -104,7 +104,7 @@ def test_descriptive_statistics_success_string_mode(client, tables_manager):
     assert result['statistics']['name']['mode'] in ['Alice', 'Bob']
 
 
-def test_descriptive_statistics_string_numeric_stats(client, tables_manager):
+def test_descriptive_statistics_string_numeric_stats(client, tables_store):
     # 文字列データに対して数値専用統計を要求した場合はNoneが返される
     payload = {
         'tableName': 'TestTableString',
@@ -127,7 +127,7 @@ def test_descriptive_statistics_string_numeric_stats(client, tables_manager):
     assert result['statistics']['name']['iqr'] is None
 
 
-def test_descriptive_statistics_invalid_table(client, tables_manager):
+def test_descriptive_statistics_invalid_table(client, tables_store):
     # 存在しないテーブル名
     payload = {
         'tableName': 'NoTable',
@@ -144,7 +144,7 @@ def test_descriptive_statistics_invalid_table(client, tables_manager):
     assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
-def test_descriptive_statistics_invalid_column(client, tables_manager):
+def test_descriptive_statistics_invalid_column(client, tables_store):
     # 存在しないカラム名を指定
     payload = {
         'tableName': 'TestTableNumeric',
@@ -161,7 +161,7 @@ def test_descriptive_statistics_invalid_column(client, tables_manager):
     assert "columnName 'Z' does not exist." == response_data['message']
 
 
-def test_descriptive_statistics_invalid_statistic(client, tables_manager):
+def test_descriptive_statistics_invalid_statistic(client, tables_store):
     # サポートされていない統計を指定
     payload = {
         'tableName': 'TestTableNumeric',
@@ -181,7 +181,7 @@ def test_descriptive_statistics_invalid_statistic(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_descriptive_statistics_empty_statistics_list(client, tables_manager):
+def test_descriptive_statistics_empty_statistics_list(client, tables_store):
     # 空の統計リストを指定
     payload = {
         'tableName': 'TestTableNumeric',

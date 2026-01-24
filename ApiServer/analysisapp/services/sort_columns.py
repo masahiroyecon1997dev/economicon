@@ -1,7 +1,7 @@
 from .django_compat import gettext as _
 from typing import Dict, List
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_table_name,
     validate_existed_column_name
 )
@@ -11,7 +11,7 @@ from ..utils.validator.common_validators import (
     validate_list_length,
     validate_boolean
 )
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .abstract_api import (AbstractApi, ApiError)
 
 
@@ -23,7 +23,7 @@ class SortColumns(AbstractApi):
     複数列でのソート、昇順・降順の指定が可能です。
     """
     def __init__(self, table_name: str, sort_columns: List[Dict[str, str]]):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.table_name = table_name
         self.sort_columns = sort_columns
         self.param_names = {
@@ -35,7 +35,7 @@ class SortColumns(AbstractApi):
 
     def validate(self):
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             validate_existed_table_name(self.table_name,
                                         table_name_list,
                                         self.param_names['table_name'])
@@ -46,7 +46,7 @@ class SortColumns(AbstractApi):
                                  1,
                                  self.param_names['sort_columns'],
                                  self.param_names['column_name'])
-            column_name_list = self.tables_manager.get_column_name_list(
+            column_name_list = self.tables_store.get_column_name_list(
                     self.table_name)
             for sort_spec in self.sort_columns:
                 validate_item_in_dict(sort_spec,
@@ -69,7 +69,7 @@ class SortColumns(AbstractApi):
 
     def execute(self):
         try:
-            table_info = self.tables_manager.get_table(self.table_name)
+            table_info = self.tables_store.get_table(self.table_name)
             df = table_info.table
 
             # ソート列とdescendingフラグを準備
@@ -85,7 +85,7 @@ class SortColumns(AbstractApi):
                 sorted_df = df.sort(column_names, descending=descending_flags)
 
             # ソート結果でテーブルを更新
-            self.tables_manager.update_table(self.table_name, sorted_df)
+            self.tables_store.update_table(self.table_name, sorted_df)
 
             # 結果を返す
             result = {'tableName': self.table_name}

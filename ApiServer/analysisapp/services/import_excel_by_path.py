@@ -5,9 +5,9 @@ import polars as pl
 from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.file_validators import (validate_file_path,
                                                validate_sheet_name)
-from ..utils.validator.tables_manager_validator import validate_new_table_name
+from ..utils.validator.tables_store_validator import validate_new_table_name
 from .abstract_api import AbstractApi, ApiError
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .django_compat import gettext as _
 
 
@@ -22,7 +22,7 @@ class ImportExcelByPath(AbstractApi):
     def __init__(self, file_path: str, table_name: str,
                  sheet_name: Optional[str] = None):
         # テーブルマネージャーの初期化
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         # ファイルパス
         self.file_path = file_path
         # テーブル名
@@ -44,7 +44,7 @@ class ImportExcelByPath(AbstractApi):
                 self.file_path,
                 self.param_names['file_path']
             )
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             # テーブル名のバリデーション
             validate_new_table_name(
                 self.table_name,
@@ -70,7 +70,7 @@ class ImportExcelByPath(AbstractApi):
                 df = pl.read_excel(self.file_path)
 
             # テーブルを作成
-            created_table_name = self.tables_manager.store_table(
+            created_table_name = self.tables_store.store_table(
                 self.table_name, df)
 
             # 結果を返す

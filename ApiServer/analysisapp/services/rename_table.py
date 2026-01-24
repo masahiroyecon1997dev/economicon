@@ -1,11 +1,11 @@
 from typing import Dict
 from .django_compat import gettext as _
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_table_name,
     validate_new_table_name
 )
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .abstract_api import AbstractApi, ApiError
 
 
@@ -17,7 +17,7 @@ class RenameTable(AbstractApi):
     同じテーブル名が既に存在する場合はエラーとなります。
     """
     def __init__(self, old_table_name: str, new_table_name: str):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         # 変更前のテーブル名
         self.old_table_name = old_table_name
         # 変更後のテーブル名
@@ -31,7 +31,7 @@ class RenameTable(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             # 変更前のテーブル名の存在チェック
             validate_existed_table_name(
                 self.old_table_name,
@@ -50,7 +50,7 @@ class RenameTable(AbstractApi):
         # テーブル名の変更処理
         try:
             # 変更前のテーブル情報を取得し、削除
-            renamed_table_name = self.tables_manager.rename_table(
+            renamed_table_name = self.tables_store.rename_table(
                 self.old_table_name, self.new_table_name
             )
             # 結果を返す

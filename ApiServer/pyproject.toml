@@ -20,6 +20,8 @@ dependencies = [
     "xlsxwriter>=3.2.9",
     "fastapi-babel>=1.0.0",
 ]
+[tool.setuptools.packages.find]
+where = ["."]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

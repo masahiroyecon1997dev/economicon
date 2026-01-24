@@ -47,7 +47,7 @@ Every API service class must inherit from `AbstractApi` and implement:
 
 - **File Name**: `test_*.py`
 - **Function Name**: `test_[feature]_[scenario]`
-- **Required Fixtures**: `client`, `tables_manager`
+- **Required Fixtures**: `client`, `tables_store`
 - **Standard Assertions**:
   - `response.status_code`
   - `response_data['code'] == 'OK'/'NG'`

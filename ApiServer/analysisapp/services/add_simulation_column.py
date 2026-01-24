@@ -3,12 +3,12 @@ from typing import Any, Dict
 import polars as pl
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from ..utils.algorithm.simulation import generate_simulation_data
 from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.statistics_validators import (
     validate_distribution_params, validate_distribution_type)
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_table_name, validate_new_column_name)
 from .abstract_api import AbstractApi, ApiError
 
@@ -24,7 +24,7 @@ class AddSimulationColumn(AbstractApi):
 
     def __init__(self, table_name: str, new_column_name: str,
                  distribution_type: str, distribution_params: Dict[str, Any]):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.table_name = table_name
         self.new_column_name = new_column_name
         self.distribution_type = distribution_type
@@ -39,7 +39,7 @@ class AddSimulationColumn(AbstractApi):
     def validate(self):
         try:
             # テーブル名の検証
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             validate_existed_table_name(
                 self.table_name,
                 table_name_list,
@@ -47,7 +47,7 @@ class AddSimulationColumn(AbstractApi):
             )
 
             # 新しい列名の検証
-            column_name_list = self.tables_manager.get_column_name_list(
+            column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
             validate_new_column_name(
@@ -72,7 +72,7 @@ class AddSimulationColumn(AbstractApi):
 
     def execute(self):
         try:
-            table_info = self.tables_manager.get_table(self.table_name)
+            table_info = self.tables_store.get_table(self.table_name)
             num_rows = table_info.num_rows
 
             # 分布に従ってデータを生成
@@ -85,7 +85,7 @@ class AddSimulationColumn(AbstractApi):
                 pl.Series(self.new_column_name, simulation_data))
 
             # テーブルを更新
-            self.tables_manager.update_table(self.table_name, df_with_new_col)
+            self.tables_store.update_table(self.table_name, df_with_new_col)
 
             # 結果を返す
             result = {
