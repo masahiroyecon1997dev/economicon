@@ -236,7 +236,7 @@ def test_variable_effects_estimation_dependent_in_explanatory(
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "被説明変数を説明変数に含めることはできません" \
+    assert "被説明変数を説明変数に含めることはできません。" \
         == response_data['message']
 
 
@@ -256,7 +256,7 @@ def test_variable_effects_estimation_invalid_standard_error_method(
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert ("standardErrorMethod は次のいずれかである必要があります: nonrobust, HC0, HC1, "
+    assert ("standardErrorMethodは次のいずれかである必要があります: nonrobust, HC0, HC1, "
             "HC2, HC3, HAC, hac-panel, hac-groupsum, cluster") \
         == response_data['message']
 
