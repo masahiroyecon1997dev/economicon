@@ -3,9 +3,9 @@ from typing import Dict, List
 import polars as pl
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_new_columns, validate_new_table_name, validate_table_num_rows)
 from .abstract_api import AbstractApi, ApiError
 
@@ -20,7 +20,7 @@ class CreateTable(AbstractApi):
     def __init__(self, table_name: str,
                  table_number_of_rows: int,
                  columnNames: List[str]):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         # テーブル名
         self.table_name = table_name
         # テーブルの行数
@@ -37,7 +37,7 @@ class CreateTable(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の重複チェック
             validate_new_table_name(
                 self.table_name,
@@ -68,7 +68,7 @@ class CreateTable(AbstractApi):
             # DataFrameを作成
             df = pl.DataFrame(data)
             # テーブル情報を保存
-            created_table_name = self.tables_manager.store_table(
+            created_table_name = self.tables_store.store_table(
                 self.table_name, df)
             # 結果を返す
             result = {'tableName': created_table_name}

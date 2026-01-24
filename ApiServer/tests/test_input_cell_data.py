@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -13,9 +13,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # テスト用テーブルをセット
     df = pl.DataFrame({
@@ -28,7 +28,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_input_cell_data_success(client, tables_manager):
+def test_input_cell_data_success(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'columnName': 'A',
@@ -42,11 +42,11 @@ def test_input_cell_data_success(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     assert df['A'][1] == 99
 
 
-def test_input_cell_data_success_with_string(client, tables_manager):
+def test_input_cell_data_success_with_string(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'columnName': 'A',
@@ -60,11 +60,11 @@ def test_input_cell_data_success_with_string(client, tables_manager):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     assert df['A'][0] == 'AAA'
 
 
-def test_input_cell_data_invalid_table(client, tables_manager):
+def test_input_cell_data_invalid_table(client, tables_store):
     payload = {
         'tableName': 'NoTable',
         'columnName': 'A',
@@ -81,7 +81,7 @@ def test_input_cell_data_invalid_table(client, tables_manager):
     assert "tableName 'NoTable' does not exist." == response_data['message']
 
 
-def test_input_cell_data_invalid_column(client, tables_manager):
+def test_input_cell_data_invalid_column(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'columnName': 'Z',
@@ -98,7 +98,7 @@ def test_input_cell_data_invalid_column(client, tables_manager):
     assert "columnName 'Z' does not exist." in response_data['message']
 
 
-def test_input_cell_data_invalid_row_over(client, tables_manager):
+def test_input_cell_data_invalid_row_over(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'columnName': 'A',
@@ -115,7 +115,7 @@ def test_input_cell_data_invalid_row_over(client, tables_manager):
     assert "rowIndex must be between 1 and 10." == response_data['message']
 
 
-def test_input_cell_data_invalid_row_string(client, tables_manager):
+def test_input_cell_data_invalid_row_string(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'columnName': 'A',

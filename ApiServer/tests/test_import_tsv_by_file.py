@@ -3,7 +3,7 @@ import tempfile
 
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -17,8 +17,8 @@ def client():
 
 @pytest.fixture
 def prepared_data():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # テスト用の出力ディレクトリ
     test_dir = tempfile.mkdtemp()
@@ -33,7 +33,7 @@ def test_upload_valid_tsv_file(client, prepared_data):
     """
     有効なTSVファイルをアップロードした場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -52,7 +52,7 @@ def test_upload_valid_tsv_file(client, prepared_data):
     # レスポンスデータの検証
     assert 'OK' == response_data['code']
     assert 'TestDataTab1' == response_data['result']['tableName']
-    df = tables_manager.get_table('TestDataTab1').table
+    df = tables_store.get_table('TestDataTab1').table
     assert test_data.equals(df)
 
 
@@ -60,7 +60,7 @@ def test_upload_valid_tsv_file_with_txt_extension(client, prepared_data):
     """
     拡張子が.txtの有効なTSVファイルをアップロードした場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -78,7 +78,7 @@ def test_upload_valid_tsv_file_with_txt_extension(client, prepared_data):
     # レスポンスデータの検証
     assert 'OK' == response_data['code']
     assert 'TestDataTab2' == response_data['result']['tableName']
-    df = tables_manager.get_table('TestDataTab2').table
+    df = tables_store.get_table('TestDataTab2').table
     assert test_data.equals(df)
 
 
@@ -87,7 +87,7 @@ def test_upload_tsv_with_only_headers(client, prepared_data):
     ヘッダーのみのTSVファイルをアップロードした場合のテスト
     問題なく読み込める
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [],
         'col_2': [],
@@ -103,7 +103,7 @@ def test_upload_tsv_with_only_headers(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('OnlyHeaderTab').table
+    df = tables_store.get_table('OnlyHeaderTab').table
     assert test_data.equals(df)
 
 
@@ -111,7 +111,7 @@ def test_no_tsv_file_uploaded(client, prepared_data):
     """
     ファイルがアップロードされていない場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     response = client.post('/api/data/import-tsv-by-file')
     # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -123,7 +123,7 @@ def test_upload_non_tsv_file(client, prepared_data):
     """
     TSVではないファイルをアップロードした場合のテスト (拡張子チェック)
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -146,7 +146,7 @@ def test_upload_empty_tsv_file(client, prepared_data):
     """
     空のTSVファイルをアップロードした場合のテスト (Polars NoDataError)
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     with open(f'{test_dir}/Empty.txt', 'w',
               encoding='utf-8'):
         pass
@@ -165,7 +165,7 @@ def test_upload_malformed_tsv_file(client, prepared_data):
     """
     不正な形式のTSVファイルをアップロードした場合のテスト (Polars PanicExceptionを想定)
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     with open(f'{test_dir}/Error.txt', 'rb') as f:
         response = client.post('/api/data/import-tsv-by-file',
                                files={'Error.txt',

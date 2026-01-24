@@ -1,7 +1,7 @@
 import numpy as np
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -14,9 +14,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     # テーブルをクリア
     manager.clear_tables()
     # 固定効果分析用テストデータを作成
@@ -66,7 +66,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_fixed_effects_estimation_success(client, tables_manager):
+def test_fixed_effects_estimation_success(client, tables_store):
     """正常に固定効果推定が実行できる"""
     payload = {
         'tableName': 'PanelData',
@@ -123,7 +123,7 @@ def test_fixed_effects_estimation_success(client, tables_manager):
 
 
 def test_fixed_effects_estimation_robust_standard_errors(client,
-                                                         tables_manager):
+                                                         tables_store):
     """頑健な標準誤差で固定効果推定が実行できる"""
     payload = {
         'tableName': 'PanelData',
@@ -146,7 +146,7 @@ def test_fixed_effects_estimation_robust_standard_errors(client,
 
 
 def test_fixed_effects_estimation_clustered_standard_errors(client,
-                                                            tables_manager):
+                                                            tables_store):
     """クラスター標準誤差で固定効果推定が実行できる"""
     payload = {
         'tableName': 'PanelData',
@@ -167,7 +167,7 @@ def test_fixed_effects_estimation_clustered_standard_errors(client,
     assert result['modelStatistics']['standardErrorMethod'] == 'clustered'
 
 
-def test_fixed_effects_estimation_hac_standard_errors(client, tables_manager):
+def test_fixed_effects_estimation_hac_standard_errors(client, tables_store):
     """HAC標準誤差で固定効果推定が実行できる"""
     payload = {
         'tableName': 'PanelData',
@@ -188,7 +188,7 @@ def test_fixed_effects_estimation_hac_standard_errors(client, tables_manager):
     assert result['modelStatistics']['standardErrorMethod'] == 'hac'
 
 
-def test_fixed_effects_estimation_invalid_table(client, tables_manager):
+def test_fixed_effects_estimation_invalid_table(client, tables_store):
     """存在しないテーブル名でエラーが返される"""
     payload = {
         'tableName': 'NonExistentTable',
@@ -208,7 +208,7 @@ def test_fixed_effects_estimation_invalid_table(client, tables_manager):
 
 
 def test_fixed_effects_estimation_invalid_dependent_variable(client,
-                                                             tables_manager):
+                                                             tables_store):
     """存在しない被説明変数でエラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -228,7 +228,7 @@ def test_fixed_effects_estimation_invalid_dependent_variable(client,
 
 
 def test_fixed_effects_estimation_invalid_explanatory_variable(client,
-                                                               tables_manager):
+                                                               tables_store):
     """存在しない説明変数でエラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -248,7 +248,7 @@ def test_fixed_effects_estimation_invalid_explanatory_variable(client,
 
 
 def test_fixed_effects_estimation_invalid_entity_id_column(client,
-                                                           tables_manager):
+                                                           tables_store):
     """存在しない個体ID列でエラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -268,7 +268,7 @@ def test_fixed_effects_estimation_invalid_entity_id_column(client,
 
 
 def test_fixed_effects_estimation_entity_id_same_as_dependent(client,
-                                                              tables_manager):
+                                                              tables_store):
     """個体ID列が被説明変数と同じ場合エラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -288,7 +288,7 @@ def test_fixed_effects_estimation_entity_id_same_as_dependent(client,
 
 
 def test_fixed_effects_estimation_entity_id_in_explanatory(client,
-                                                           tables_manager):
+                                                           tables_store):
     """個体ID列が説明変数に含まれている場合エラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -308,7 +308,7 @@ def test_fixed_effects_estimation_entity_id_in_explanatory(client,
 
 
 def test_fixed_effects_estimation_invalid_standard_error_method(client,
-                                                                tables_manager
+                                                                tables_store
                                                                 ):
     """無効な標準誤差計算方法でエラーが返される"""
     payload = {
@@ -330,7 +330,7 @@ def test_fixed_effects_estimation_invalid_standard_error_method(client,
     assert message == response_data['message']
 
 
-def test_fixed_effects_estimation_single_period_data(client, tables_manager):
+def test_fixed_effects_estimation_single_period_data(client, tables_store):
     """単一時点のデータでエラーが返される"""
     payload = {
         'tableName': 'SinglePeriod',
@@ -351,7 +351,7 @@ def test_fixed_effects_estimation_single_period_data(client, tables_manager):
 
 
 def test_fixed_effects_estimation_empty_explanatory_variables(client,
-                                                              tables_manager):
+                                                              tables_store):
     """説明変数が空の場合エラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -372,7 +372,7 @@ def test_fixed_effects_estimation_empty_explanatory_variables(client,
 
 
 def test_fixed_effects_estimation_dependent_in_explanatory(client,
-                                                           tables_manager):
+                                                           tables_store):
     """被説明変数が説明変数に含まれている場合エラーが返される"""
     payload = {
         'tableName': 'PanelData',
@@ -392,7 +392,7 @@ def test_fixed_effects_estimation_dependent_in_explanatory(client,
 
 
 def test_fixed_effects_estimation_missing_required_parameters(client,
-                                                              tables_manager):
+                                                              tables_store):
     """必須パラメータが不足している場合エラーが返される"""
     # entityIdColumn がない場合
     payload = {
@@ -411,7 +411,7 @@ def test_fixed_effects_estimation_missing_required_parameters(client,
 
 
 def test_fixed_effects_estimation_single_explanatory_variable(client,
-                                                              tables_manager):
+                                                              tables_store):
     """単一の説明変数でも固定効果推定が実行できる"""
     payload = {
         'tableName': 'PanelData',
@@ -434,7 +434,7 @@ def test_fixed_effects_estimation_single_explanatory_variable(client,
 
 
 def test_fixed_effects_estimation_with_default_parameters(client,
-                                                          tables_manager):
+                                                          tables_store):
     """デフォルトパラメータで固定効果推定が実行できる"""
     payload = {
         'tableName': 'PanelData',

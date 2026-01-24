@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -20,10 +20,10 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
+def tables_store():
+    """TablesStoreのフィクスチャ"""
     # テスト用のテーブルをセットアップ
-    manager = TablesManager()
+    manager = TablesStore()
     # テーブルをクリア
     manager.clear_tables()
     manager.store_table(table_name, test_data)
@@ -32,7 +32,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_fetch_data_to_json_success(client, tables_manager):
+def test_fetch_data_to_json_success(client, tables_store):
     # 正常系テスト: JSONデータを取得
     start_row = 2
     fetch_rows = 2
@@ -58,7 +58,7 @@ def test_fetch_data_to_json_success(client, tables_manager):
     assert data == expected_data
 
 
-def test_fetch_data_to_json_table_not_found(client, tables_manager):
+def test_fetch_data_to_json_table_not_found(client, tables_store):
     # 異常系テスト: 存在しないテーブル名
     not_existent_table = "non_existent_table"
     start_row = 1
@@ -77,7 +77,7 @@ def test_fetch_data_to_json_table_not_found(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_fetch_data_to_json_invalid_start_row_range(client, tables_manager):
+def test_fetch_data_to_json_invalid_start_row_range(client, tables_store):
     # 異常系テスト: 無効な行範囲 startRow
     start_row = 0
     fetch_rows = 4
@@ -94,7 +94,7 @@ def test_fetch_data_to_json_invalid_start_row_range(client, tables_manager):
     assert "startRow must be between 1 and 5." in response_data['message']
 
 
-def test_fetch_data_to_json_invalid_fetch_rows(client, tables_manager):
+def test_fetch_data_to_json_invalid_fetch_rows(client, tables_store):
     # 異常系テスト: 無効な取得行数 fetchRows
     start_row = 1
     fetch_rows = 0
@@ -111,7 +111,7 @@ def test_fetch_data_to_json_invalid_fetch_rows(client, tables_manager):
     assert "fetchRows must be a positive integer." == response_data['message']
 
 
-def test_fetch_data_to_json_missing_table_name(client, tables_manager):
+def test_fetch_data_to_json_missing_table_name(client, tables_store):
     # 異常系テスト: 必須パラメータが不足している場合（tableName）
     not_table_name = ""
     start_row = 1
@@ -129,7 +129,7 @@ def test_fetch_data_to_json_missing_table_name(client, tables_manager):
     assert "tableName is required." == response_data['message']
 
 
-def test_fetch_data_to_json_missing_start_row(client, tables_manager):
+def test_fetch_data_to_json_missing_start_row(client, tables_store):
     # 異常系テスト: 必須パラメータが不足している場合（startRow）
     start_row = ""
     fetch_rows = 6
@@ -146,7 +146,7 @@ def test_fetch_data_to_json_missing_start_row(client, tables_manager):
     # assert "startRow is required." == response_data['message']
 
 
-def test_fetch_data_to_json_missing_fetch_rows(client, tables_manager):
+def test_fetch_data_to_json_missing_fetch_rows(client, tables_store):
     # 異常系テスト: 必須パラメータが不足している場合（fetchRows）
     start_row = 1
     fetch_rows = ""
@@ -163,7 +163,7 @@ def test_fetch_data_to_json_missing_fetch_rows(client, tables_manager):
     # assert "fetchRows is required." == response_data['message']
 
 
-def test_fetch_data_to_json_fetch_beyond_table(client, tables_manager):
+def test_fetch_data_to_json_fetch_beyond_table(client, tables_store):
     # 正常系テスト: テーブルの行数を超える取得行数
     start_row = 3
     fetch_rows = 10  # テーブルは5行なので3行目から最後までの3行を取得

@@ -1,5 +1,5 @@
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -12,15 +12,15 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
 
 
-def test_create_table_success(client, tables_manager):
+def test_create_table_success(client, tables_store):
     payload = {
         'tableName': 'NewTable',
         'tableNumberOfRows': 3,
@@ -34,14 +34,14 @@ def test_create_table_success(client, tables_manager):
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     # テーブルが作成されているか
-    assert 'NewTable' in tables_manager.get_table_name_list()
-    df = tables_manager.get_table('NewTable').table
+    assert 'NewTable' in tables_store.get_table_name_list()
+    df = tables_store.get_table('NewTable').table
     assert df.shape == (3, 2)
     assert df.columns == ['A', 'B']
     assert df['A'].to_list() == [None, None, None]
 
 
-def test_create_table_invalid_table_name(client, tables_manager):
+def test_create_table_invalid_table_name(client, tables_store):
     # テーブル名が空
     payload = {
         'tableName': '',
@@ -58,7 +58,7 @@ def test_create_table_invalid_table_name(client, tables_manager):
     assert "tableName is required." == response_data['message']
 
 
-def test_create_table_invalid_number_of_rows(client, tables_manager):
+def test_create_table_invalid_number_of_rows(client, tables_store):
     # テーブル行数が文字列
     payload = {
         'tableName': 'EmptyRowTable',
@@ -75,7 +75,7 @@ def test_create_table_invalid_number_of_rows(client, tables_manager):
     # assert "tableNumberOfRows must be a number." == response_data['message']
 
 
-def test_create_table_invalid_columns(client, tables_manager):
+def test_create_table_invalid_columns(client, tables_store):
     # columnsが空
     payload = {
         'tableName': 'EmptyColTable',

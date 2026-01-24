@@ -2,9 +2,9 @@ from typing import Dict
 
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_column_name, validate_existed_table_name)
 from .abstract_api import AbstractApi, ApiError
 
@@ -17,7 +17,7 @@ class DeleteColumn(AbstractApi):
     削除後のテーブルは更新されたデータフレームに置き換えられます。
     """
     def __init__(self, table_name: str, column_name: str):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         # テーブル名
         self.table_name = table_name
         # 削除する列名
@@ -31,7 +31,7 @@ class DeleteColumn(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の存在チェック
             validate_existed_table_name(
                 self.table_name,
@@ -39,7 +39,7 @@ class DeleteColumn(AbstractApi):
                 self.param_names['table_name']
             )
             # 列名の存在チェック
-            column_names = self.tables_manager.get_column_name_list(
+            column_names = self.tables_store.get_column_name_list(
                 self.table_name)
             validate_existed_column_name(
                 self.column_name,
@@ -54,11 +54,11 @@ class DeleteColumn(AbstractApi):
         # 列の削除処理
         try:
             # テーブルからデータフレームを取得
-            df = self.tables_manager.get_table(self.table_name).table
+            df = self.tables_store.get_table(self.table_name).table
             # 指定された列を削除
             new_df = df.drop(self.column_name)
             # 更新されたデータフレームを保存
-            updated_table_name = self.tables_manager.update_table(
+            updated_table_name = self.tables_store.update_table(
                 self.table_name, new_df
             )
             # 結果を返す

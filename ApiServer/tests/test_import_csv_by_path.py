@@ -5,7 +5,7 @@ import tempfile
 
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -19,8 +19,8 @@ def client():
 
 @pytest.fixture
 def prepared_data():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # テスト用のCSVファイルパス
     test_data = pl.DataFrame({
@@ -49,7 +49,7 @@ def test_import_csv_by_path_comma_separator(client, prepared_data):
     """
     カンマ区切りのCSVファイルをパス指定でインポートするテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
     # 期待データをPolarsで読み込み
     expected_data = pl.read_csv(test_csv_comma, encoding='utf8')
@@ -66,7 +66,7 @@ def test_import_csv_by_path_comma_separator(client, prepared_data):
     assert 'OK' == response_data['code']
     assert 'TestCommaTable' == response_data['result']['tableName']
     # データの検証
-    df = tables_manager.get_table('TestCommaTable').table
+    df = tables_store.get_table('TestCommaTable').table
     assert expected_data.equals(df)
 
 
@@ -74,7 +74,7 @@ def test_import_csv_by_path_tab_separator(client, prepared_data):
     """
     タブ区切りのファイルをCSVとしてパス指定でインポートするテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_csv_tab = f'{test_dir}/TestDataTab1.tsv'
     # 期待データをPolarsで読み込み
     expected_data = pl.read_csv(test_csv_tab, separator='\t',
@@ -92,7 +92,7 @@ def test_import_csv_by_path_tab_separator(client, prepared_data):
     assert 'OK' == response_data['code']
     assert 'TestTabTable' == response_data['result']['tableName']
     # データの検証
-    df = tables_manager.get_table('TestTabTable').table
+    df = tables_store.get_table('TestTabTable').table
     assert expected_data.equals(df)
 
 
@@ -100,7 +100,7 @@ def test_import_csv_by_path_custom_separator(client, prepared_data):
     """
     セミコロン区切りのCSVファイルのテスト（テストファイルを作成）
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     # 一時的なセミコロン区切りファイルを作成
     temp_data = "col1;col2;col3\n1;2;3\n4;5;6\n"
     with tempfile.NamedTemporaryFile(mode='w', suffix='.csv',
@@ -121,7 +121,7 @@ def test_import_csv_by_path_custom_separator(client, prepared_data):
         assert 'OK' == response_data['code']
         assert 'TestSemicolonTable' == response_data['result']['tableName']
         # データの検証
-        df = tables_manager.get_table('TestSemicolonTable').table
+        df = tables_store.get_table('TestSemicolonTable').table
         assert 3 == len(df.columns)
         assert 2 == len(df)
     finally:
@@ -133,7 +133,7 @@ def test_import_csv_by_path_default_separator(client, prepared_data):
     """
     separatorパラメータを省略した場合のテスト（デフォルトはカンマ）
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
     # 期待データをPolarsで読み込み
     expected_data = pl.read_csv(test_csv_comma, encoding='utf8')
@@ -149,7 +149,7 @@ def test_import_csv_by_path_default_separator(client, prepared_data):
     assert 'OK' == response_data['code']
     assert 'TestDefaultSeparator' == response_data['result']['tableName']
     # データの検証
-    df = tables_manager.get_table('TestDefaultSeparator').table
+    df = tables_store.get_table('TestDefaultSeparator').table
     assert expected_data.equals(df)
 
 
@@ -157,7 +157,7 @@ def test_import_csv_by_path_file_not_exists(client, prepared_data):
     """
     存在しないファイルパスを指定した場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     request_data = {
         'filePath': '/non/existent/file.csv',
         'tableName': 'TestNonExistent',
@@ -177,7 +177,7 @@ def test_import_csv_by_path_invalid_file_extension(client, prepared_data):
     CSV以外のファイル拡張子を指定した場合のテスト
     ExcelファイルをCSVとしてパースしようとして失敗し500が返る
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     request_data = {
         'filePath': f'{test_dir}/TestDataXlsx.xlsx',
         'tableName': 'TestInvalidExtension',
@@ -197,7 +197,7 @@ def test_import_csv_by_path_missing_file_path(client, prepared_data):
     filePathパラメータが未指定の場合のテスト
     FastAPIのバリデーションエラーで422が返る
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     request_data = {
         'tableName': 'TestMissingPath',
         'separator': ','
@@ -215,7 +215,7 @@ def test_import_csv_by_path_missing_table_name(client, prepared_data):
     tableNameパラメータが未指定の場合のテスト
     FastAPIのバリデーションエラーで422が返る
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
     request_data = {
         'filePath': test_csv_comma,
@@ -233,7 +233,7 @@ def test_import_csv_by_path_duplicate_table_name(client, prepared_data):
     """
     既存のテーブル名と重複する場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
     # 先にテーブルを作成
     first_request_data = {
@@ -261,7 +261,7 @@ def test_import_csv_by_path_empty_separator(client, prepared_data):
     """
     空の区切り文字を指定した場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_csv_comma = f'{test_dir}/TestDataComma.csv'
     request_data = {
         'filePath': test_csv_comma,

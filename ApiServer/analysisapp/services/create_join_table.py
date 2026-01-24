@@ -3,9 +3,9 @@ from typing import Dict, List
 
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_column_name, validate_existed_table_name,
     validate_join_type, validate_new_table_name)
 from .abstract_api import AbstractApi, ApiError
@@ -27,7 +27,7 @@ class CreateJoinTable(AbstractApi):
         right_key_column_names: List[str],
         join_type: str,
     ):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         # 結合後のテーブル名
         self.join_table_name = join_table_name
         # 左テーブル名
@@ -53,7 +53,7 @@ class CreateJoinTable(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             # 新しいテーブル名の重複チェック
             validate_new_table_name(
                 self.join_table_name,
@@ -73,7 +73,7 @@ class CreateJoinTable(AbstractApi):
                 self.param_names['right_table_name']
             )
             # 左テーブルのキー列の存在チェック
-            left_table_column_name_list = TablesManager().get_column_name_list(
+            left_table_column_name_list = TablesStore().get_column_name_list(
                 self.left_table_name
             )
             for left_key_column_name in self.left_key_column_names:
@@ -84,7 +84,7 @@ class CreateJoinTable(AbstractApi):
                 )
             # 右テーブルのキー列の存在チェック
             right_table_column_name_list = \
-                TablesManager().get_column_name_list(
+                TablesStore().get_column_name_list(
                     self.right_table_name
                 )
             for right_key_column_name in self.right_key_column_names:
@@ -106,10 +106,10 @@ class CreateJoinTable(AbstractApi):
         # テーブル結合処理
         try:
             # 左テーブルのデータフレームを取得
-            left_df = self.tables_manager.get_table(
+            left_df = self.tables_store.get_table(
                 self.left_table_name).table
             # 右テーブルのデータフレームを取得
-            right_df = self.tables_manager.get_table(
+            right_df = self.tables_store.get_table(
                 self.right_table_name).table
             # 結合タイプに応じて結合処理を実行
             match self.join_type:
@@ -150,7 +150,7 @@ class CreateJoinTable(AbstractApi):
                 case _:
                     raise ApiError("Invalid join type specified.")
             # 新しいテーブル情報を保存
-            created_table_name = self.tables_manager.store_table(
+            created_table_name = self.tables_store.store_table(
                 self.join_table_name, df
             )
             # 結果を返す

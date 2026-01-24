@@ -1,6 +1,6 @@
 ﻿import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -13,9 +13,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     # テーブルをクリア
     manager.clear_tables()
     # テスト用テーブルをセット
@@ -29,7 +29,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_add_uniform_column_success(client, tables_manager):
+def test_add_uniform_column_success(client, tables_store):
     """一様分布の列追加が正常に動作することをテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -51,7 +51,7 @@ def test_add_uniform_column_success(client, tables_manager):
     assert response_data['result']['columnName'] == 'UniformCol'
     assert response_data['result']['distributionType'] == 'uniform'
     # データが追加されているか確認
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     assert 'UniformCol' in df.columns
     uniform_values = df['UniformCol'].to_list()
     assert len(uniform_values) == 5
@@ -59,7 +59,7 @@ def test_add_uniform_column_success(client, tables_manager):
     assert all(0.0 <= val <= 1.0 for val in uniform_values)
 
 
-def test_add_normal_column_success(client, tables_manager):
+def test_add_normal_column_success(client, tables_store):
     """正規分布の列追加が正常に動作することをテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -78,13 +78,13 @@ def test_add_normal_column_success(client, tables_manager):
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     # データが追加されているか確認
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     assert 'NormalCol' in df.columns
     normal_values = df['NormalCol'].to_list()
     assert len(normal_values) == 5
 
 
-def test_add_binomial_column_success(client, tables_manager):
+def test_add_binomial_column_success(client, tables_store):
     """二項分布の列追加が正常に動作することをテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -103,7 +103,7 @@ def test_add_binomial_column_success(client, tables_manager):
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     # データが追加されているか確認
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     assert 'BinomialCol' in df.columns
     binomial_values = df['BinomialCol'].to_list()
     assert len(binomial_values) == 5
@@ -111,7 +111,7 @@ def test_add_binomial_column_success(client, tables_manager):
     assert all(0 <= val <= 10 for val in binomial_values)
 
 
-def test_add_exponential_column_success(client, tables_manager):
+def test_add_exponential_column_success(client, tables_store):
     """指数分布の列追加が正常に動作することをテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -129,7 +129,7 @@ def test_add_exponential_column_success(client, tables_manager):
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     # データが追加されているか確認
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     assert 'ExponentialCol' in df.columns
     exp_values = df['ExponentialCol'].to_list()
     assert len(exp_values) == 5
@@ -137,7 +137,7 @@ def test_add_exponential_column_success(client, tables_manager):
     assert all(val >= 0 for val in exp_values)
 
 
-def test_add_gamma_column_success(client, tables_manager):
+def test_add_gamma_column_success(client, tables_store):
     """ガンマ分布の列追加が正常に動作することをテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -155,7 +155,7 @@ def test_add_gamma_column_success(client, tables_manager):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_add_beta_column_success(client, tables_manager):
+def test_add_beta_column_success(client, tables_store):
     """ベータ分布の列追加が正常に動作することをテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -172,12 +172,12 @@ def test_add_beta_column_success(client, tables_manager):
     )
     assert response.status_code == status.HTTP_200_OK
     # ベータ分布は[0,1]の範囲
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     beta_values = df['BetaCol'].to_list()
     assert all(0 <= val <= 1 for val in beta_values)
 
 
-def test_add_poisson_column_success(client, tables_manager):
+def test_add_poisson_column_success(client, tables_store):
     """ポアソン分布の列追加が正常に動作することをテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -193,12 +193,12 @@ def test_add_poisson_column_success(client, tables_manager):
     )
     assert response.status_code == status.HTTP_200_OK
     # ポアソン分布は非負の整数
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     poisson_values = df['PoissonCol'].to_list()
     assert all(val >= 0 for val in poisson_values)
 
 
-def test_invalid_table_name(client, tables_manager):
+def test_invalid_table_name(client, tables_store):
     """存在しないテーブル名を指定した場合のテスト"""
     payload = {
         'tableName': 'NoTable',
@@ -219,7 +219,7 @@ def test_invalid_table_name(client, tables_manager):
     assert "tableName 'NoTable' does not exist" in response_data['message']
 
 
-def test_duplicate_column_name(client, tables_manager):
+def test_duplicate_column_name(client, tables_store):
     """既存の列名と同じ名前を指定した場合のテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -240,7 +240,7 @@ def test_duplicate_column_name(client, tables_manager):
     assert "newColumnName 'A' already exists." == response_data['message']
 
 
-def test_unsupported_distribution(client, tables_manager):
+def test_unsupported_distribution(client, tables_store):
     """サポートされていない分布を指定した場合のテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -262,7 +262,7 @@ def test_unsupported_distribution(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_invalid_uniform_params(client, tables_manager):
+def test_invalid_uniform_params(client, tables_store):
     """一様分布の無効なパラメータを指定した場合のテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -283,7 +283,7 @@ def test_invalid_uniform_params(client, tables_manager):
     assert "'low' must be less than 'high'" in response_data['message']
 
 
-def test_missing_required_params(client, tables_manager):
+def test_missing_required_params(client, tables_store):
     """必要なパラメータが不足している場合のテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -305,7 +305,7 @@ def test_missing_required_params(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_invalid_param_type(client, tables_manager):
+def test_invalid_param_type(client, tables_store):
     """パラメータの型が不正な場合のテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -326,7 +326,7 @@ def test_invalid_param_type(client, tables_manager):
     assert "loc must be a number." in response_data['message']
 
 
-def test_negative_scale_normal(client, tables_manager):
+def test_negative_scale_normal(client, tables_store):
     """正規分布で負のscaleを指定した場合のテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -347,7 +347,7 @@ def test_negative_scale_normal(client, tables_manager):
     assert "'scale' must be positive" in response_data['message']
 
 
-def test_binomial_invalid_p(client, tables_manager):
+def test_binomial_invalid_p(client, tables_store):
     """二項分布で無効なpを指定した場合のテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -368,7 +368,7 @@ def test_binomial_invalid_p(client, tables_manager):
     assert "'p' must be between 0 and 1" in response_data['message']
 
 
-def test_hypergeometric_success(client, tables_manager):
+def test_hypergeometric_success(client, tables_store):
     """超幾何分布の列追加が正常に動作することをテスト"""
     payload = {
         'tableName': 'TestTable',
@@ -389,7 +389,7 @@ def test_hypergeometric_success(client, tables_manager):
     assert response_data['code'] == 'OK'
 
 
-def test_hypergeometric_invalid_params(client, tables_manager):
+def test_hypergeometric_invalid_params(client, tables_store):
     """超幾何分布で無効なパラメータを指定した場合のテスト"""
     payload = {
         'tableName': 'TestTable',

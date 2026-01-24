@@ -17,13 +17,13 @@
 
 全てのビジネスロジックは `AbstractApi` を継承したクラスとして実装します。
 
-- **`__init__`**: パラメータ受領、`TablesManager` の初期化、`param_names` (camelCase ↔ snake_case) の定義。
+- **`__init__`**: パラメータ受領、`TablesStore` の初期化、`param_names` (camelCase ↔ snake_case) の定義。
 - **`validate`**: 入力値の整合性チェック。失敗時は `ValidationError` を送出。
 - **`execute`**: メインロジック。例外は `ApiError` でラップ。
 
-### 2. データ管理 (TablesManager & Polars)
+### 2. データ管理 (TablesStore & Polars)
 
-- **Centralized Data**: データの読み書きや保持は必ず `TablesManager` を介して行います。
+- **Centralized Data**: データの読み書きや保持は必ず `TablesStore` を介して行います。
 - **Polars First**: Pandas ではなく Polars を使用し、パフォーマンスと型安全性を重視したデータ操作を行います。
 
 ### 3. 型安全な通信 (Pydantic & JSON)
@@ -51,7 +51,7 @@
 
 ## 🧪 テスト戦略 (pytest)
 
-- **Fixtures**: `client` および `tables_manager` フィクスチャを活用します。
+- **Fixtures**: `client` および `tables_store` フィクスチャを活用します。
 - **Scenarios**: 正常系 (`test_..._success`) だけでなく、各種バリデーションエラーや例外系 (`test_..._fail`) を網羅します。
 - **Assertions**: ステータスコード、レスポンス内の `code ('OK'/'NG')`、およびメッセージを検証します。
 

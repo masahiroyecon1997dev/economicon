@@ -3,9 +3,9 @@ from typing import Dict
 import polars as pl
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_column_name, validate_existed_table_name,
     validate_new_column_name)
 from .abstract_api import AbstractApi, ApiError
@@ -24,7 +24,7 @@ class AddColumn(AbstractApi):
         new_column_name: str,
         add_position_column: str
     ):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.table_name = table_name
         self.new_column_name = new_column_name
         self.add_position_column = add_position_column
@@ -36,13 +36,13 @@ class AddColumn(AbstractApi):
 
     def validate(self):
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             validate_existed_table_name(
                 self.table_name,
                 table_name_list,
                 self.param_names['table_name']
             )
-            column_name_list = self.tables_manager.get_column_name_list(
+            column_name_list = self.tables_store.get_column_name_list(
                 self.table_name)
             validate_new_column_name(
                 self.new_column_name,
@@ -60,7 +60,7 @@ class AddColumn(AbstractApi):
 
     def execute(self):
         try:
-            table_info = self.tables_manager.get_table(self.table_name)
+            table_info = self.tables_store.get_table(self.table_name)
             num_rows = table_info.num_rows
             new_column_data_none = [None] * num_rows
             df = table_info.table
@@ -70,7 +70,7 @@ class AddColumn(AbstractApi):
                 column=pl.Series(self.new_column_name, new_column_data_none)
             )
             # 新しい列をデータフレームに追加
-            self.tables_manager.update_table(self.table_name, df_with_new_col)
+            self.tables_store.update_table(self.table_name, df_with_new_col)
             # 結果を返す
             result = {
                 'tableName': self.table_name,

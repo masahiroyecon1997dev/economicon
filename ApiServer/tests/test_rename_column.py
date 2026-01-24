@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -13,9 +13,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # テスト用テーブルをセット
     df = pl.DataFrame({
@@ -28,7 +28,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_rename_column_success(client, tables_manager):
+def test_rename_column_success(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'oldColumnName': 'A',
@@ -42,13 +42,13 @@ def test_rename_column_success(client, tables_manager):
     print(response_data)
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     assert 'C' in df.columns
     assert 'A' not in df.columns
     assert df['C'].to_list() == [1, 2]
 
 
-def test_rename_column_not_found(client, tables_manager):
+def test_rename_column_not_found(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'oldColumnName': 'Z',
@@ -64,7 +64,7 @@ def test_rename_column_not_found(client, tables_manager):
     assert "oldColumnName 'Z' does not exist." in response_data['message']
 
 
-def test_rename_column_empty_old_column_name(client, tables_manager):
+def test_rename_column_empty_old_column_name(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'oldColumnName': '',
@@ -80,7 +80,7 @@ def test_rename_column_empty_old_column_name(client, tables_manager):
     assert "oldColumnName is required." in response_data['message']
 
 
-def test_rename_column_empty_new_column_name(client, tables_manager):
+def test_rename_column_empty_new_column_name(client, tables_store):
     payload = {
         'tableName': 'TestTable',
         'oldColumnName': 'A',
@@ -96,7 +96,7 @@ def test_rename_column_empty_new_column_name(client, tables_manager):
     assert "newColumnName is required." in response_data['message']
 
 
-def test_rename_column_table_not_found(client, tables_manager):
+def test_rename_column_table_not_found(client, tables_store):
     # 存在しないテーブル名を指定した場合の異常系
     payload = {
         'tableName': 'NotExistTable',

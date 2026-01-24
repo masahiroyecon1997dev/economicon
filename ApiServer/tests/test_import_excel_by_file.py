@@ -3,7 +3,7 @@ import tempfile
 
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -17,8 +17,8 @@ def client():
 
 @pytest.fixture
 def prepared_data():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # テスト用の出力ディレクトリ
     test_dir = tempfile.mkdtemp()
@@ -33,7 +33,7 @@ def test_upload_valid_excel_file(client, prepared_data):
     """
     有効なExcel(xlsx)ファイルをアップロードした場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -54,7 +54,7 @@ def test_upload_valid_excel_file(client, prepared_data):
     # レスポンスデータの検証
     assert 'OK' == response_data['code']
     assert 'TestDataXlsx' == response_data['result']['tableName']
-    df = tables_manager.get_table('TestDataXlsx').table
+    df = tables_store.get_table('TestDataXlsx').table
     assert test_data.equals(df)
 
 
@@ -63,7 +63,7 @@ def test_upload_valid_excel_file_with_extension_xls(client, prepared_data):
     """
     有効なExcel(xls)ファイルをアップロードした場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -81,7 +81,7 @@ def test_upload_valid_excel_file_with_extension_xls(client, prepared_data):
     # レスポンスデータの検証
     assert 'OK' == response_data['code']
     assert 'TestDataXls' == response_data['result']['tableName']
-    df = tables_manager.get_table('TestDataXls').table
+    df = tables_store.get_table('TestDataXls').table
     assert test_data.equals(df)
 
 
@@ -90,7 +90,7 @@ def test_upload_excel_with_only_headers(client, prepared_data):
     ヘッダーのみのEXCELファイルをアップロードした場合のテスト
     問題なく読み込める
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [],
         'col_2': [],
@@ -109,7 +109,7 @@ def test_upload_excel_with_only_headers(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
-    df = tables_manager.get_table('OnlyHeaderExcel').table
+    df = tables_store.get_table('OnlyHeaderExcel').table
     assert test_data.equals(df)
 
 
@@ -117,7 +117,7 @@ def test_no_file_uploaded(client, prepared_data):
     """
     ファイルがアップロードされていない場合のテスト。
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     response = client.post('/api/data/import-csv-by-file')
     # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -129,7 +129,7 @@ def test_upload_non_excel_file(client, prepared_data):
     """
     Excel以外のファイルをアップロードした場合のエラーケースをテストする。
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -152,7 +152,7 @@ def test_upload_empty_excel_file(client, prepared_data):
     """
     空のEXCELファイルをアップロードした場合のテスト (Polars NoDataError)
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame()
     test_data.write_excel(
         f'{test_dir}/Empty.xlsx')
@@ -173,7 +173,7 @@ def test_upload_malformed_excel_file(client, prepared_data):
     """
     不正な形式のCSVファイルをアップロードした場合のテスト (Polars PanicExceptionを想定)
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     with open('/AnalysisApp/AnalysisApp'
               '/SampleData/Error.xlsx', 'rb') as f:
         response = client.post('/api/data/import-excel-by-file',

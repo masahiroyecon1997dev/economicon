@@ -1,10 +1,10 @@
 from ..utils.validator.common_validators import (ValidationError,
                                                  validate_integer_positive,
                                                  validate_required)
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_table_name, validate_row_index)
 from .abstract_api import AbstractApi, ApiError
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .django_compat import gettext as _
 
 
@@ -17,7 +17,7 @@ class FetchDataToJson(AbstractApi):
     取得行数がテーブルの行数を超える場合は、テーブルの最後まで取得します。
     """
     def __init__(self, table_name: str, start_row: int, fetch_rows: int):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.table_name = table_name
         self.start_row = start_row
         self.fetch_rows = fetch_rows
@@ -34,14 +34,14 @@ class FetchDataToJson(AbstractApi):
             validate_required(self.start_row, self.param_names['start_row'])
             validate_required(self.fetch_rows, self.param_names['fetch_rows'])
 
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の存在チェック
             validate_existed_table_name(
                 self.table_name,
                 table_name_list,
                 self.param_names['table_name']
             )
-            num_rows = self.tables_manager.get_table(self.table_name).num_rows
+            num_rows = self.tables_store.get_table(self.table_name).num_rows
             # 開始行番号の妥当性チェック
             validate_row_index(
                 self.start_row,
@@ -61,7 +61,7 @@ class FetchDataToJson(AbstractApi):
     def execute(self):
         try:
             # テーブルのデータを取得
-            table = self.tables_manager.get_table(self.table_name)
+            table = self.tables_store.get_table(self.table_name)
             start_row = int(self.start_row)
             fetch_rows = int(self.fetch_rows)
             total_rows = table.num_rows

@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -13,9 +13,9 @@ def client():
 
 
 @pytest.fixture
-def tables_manager():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+def tables_store():
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     # テーブルをクリア
     manager.clear_tables()
     # テスト用テーブルをセット
@@ -32,7 +32,7 @@ def tables_manager():
     manager.clear_tables()
 
 
-def test_calculate_column_simple_addition(client, tables_manager):
+def test_calculate_column_simple_addition(client, tables_store):
     # 単純な足し算
     payload = {
         'tableName': 'TestTable',
@@ -49,13 +49,13 @@ def test_calculate_column_simple_addition(client, tables_manager):
     assert response_data['result']['tableName'] == 'TestTable'
     assert response_data['result']['columnName'] == 'E'
     # 計算結果の確認
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     assert 'E' in df.columns
     expected_values = [5, 7, 9]  # [1+4, 2+5, 3+6]
     assert df['E'].to_list() == expected_values
 
 
-def test_calculate_column_complex_expression(client, tables_manager):
+def test_calculate_column_complex_expression(client, tables_store):
     # 複雑な計算式（四則演算とかっこ）
     payload = {
         'tableName': 'TestTable',
@@ -71,7 +71,7 @@ def test_calculate_column_complex_expression(client, tables_manager):
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     # 計算結果の確認
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     assert 'F' in df.columns
     # 期待値: 10.0/2.5+(1+4)*2=4+10=14, 20.0/3.5+(2+5)*2=5.714...+14
     # =19.714..., 30.0/4.5+(3+6)*2=6.666...+18=24.666...
@@ -81,7 +81,7 @@ def test_calculate_column_complex_expression(client, tables_manager):
     assert abs(result_values[2] - 24.666666666666668) < 1e-5
 
 
-def test_calculate_column_with_numbers(client, tables_manager):
+def test_calculate_column_with_numbers(client, tables_store):
     # 列と数値の計算
     payload = {
         'tableName': 'TestTable',
@@ -94,12 +94,12 @@ def test_calculate_column_with_numbers(client, tables_manager):
     )
     assert response.status_code == status.HTTP_200_OK
     # 計算結果の確認
-    df = tables_manager.get_table('TestTable').table
+    df = tables_store.get_table('TestTable').table
     expected_values = [15, 20, 25]  # [1*5+10, 2*5+10, 3*5+10]
     assert df['G'].to_list() == expected_values
 
 
-def test_calculate_column_invalid_table(client, tables_manager):
+def test_calculate_column_invalid_table(client, tables_store):
     # 存在しないテーブル名を参照
     payload = {
         'tableName': 'NoTable',
@@ -116,7 +116,7 @@ def test_calculate_column_invalid_table(client, tables_manager):
     assert "tableName 'NoTable' does not exist" in response_data['message']
 
 
-def test_calculate_column_invalid_column(client, tables_manager):
+def test_calculate_column_invalid_column(client, tables_store):
     # 存在しない列名を参照
     payload = {
         'tableName': 'TestTable',
@@ -134,7 +134,7 @@ def test_calculate_column_invalid_column(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_calculate_column_non_numeric_column(client, tables_manager):
+def test_calculate_column_non_numeric_column(client, tables_store):
     # 非数値列を参照
     payload = {
         'tableName': 'TestTable',
@@ -152,7 +152,7 @@ def test_calculate_column_non_numeric_column(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_calculate_column_empty_expression(client, tables_manager):
+def test_calculate_column_empty_expression(client, tables_store):
     # 空の計算式
     payload = {
         'tableName': 'TestTable',
@@ -169,7 +169,7 @@ def test_calculate_column_empty_expression(client, tables_manager):
     assert "calculationExpression is required." in response_data['message']
 
 
-def test_calculate_column_no_column_reference(client, tables_manager):
+def test_calculate_column_no_column_reference(client, tables_store):
     # 列参照がない計算式
     payload = {
         'tableName': 'TestTable',
@@ -187,7 +187,7 @@ def test_calculate_column_no_column_reference(client, tables_manager):
     assert message == response_data['message']
 
 
-def test_calculate_column_duplicate_column_name(client, tables_manager):
+def test_calculate_column_duplicate_column_name(client, tables_store):
     # 既存の列名と同じ新列名
     payload = {
         'tableName': 'TestTable',
@@ -204,7 +204,7 @@ def test_calculate_column_duplicate_column_name(client, tables_manager):
     assert "newColumnName 'A' already exists" in response_data['message']
 
 
-def test_calculate_column_invalid_syntax(client, tables_manager):
+def test_calculate_column_invalid_syntax(client, tables_store):
     # 不正な計算式の構文
     payload = {
         'tableName': 'TestTable',
@@ -221,14 +221,14 @@ def test_calculate_column_invalid_syntax(client, tables_manager):
     assert "Invalid calculation expression" in response_data['message']
 
 
-def test_calculate_column_division_by_zero_handling(client, tables_manager):
+def test_calculate_column_division_by_zero_handling(client, tables_store):
     # ゼロ除算の処理
     # ゼロを含むテーブルを作成
     df_zero = pl.DataFrame({
         'X': [1, 2, 0],
         'Y': [0, 2, 1]
     })
-    tables_manager.store_table('ZeroTable', df_zero)
+    tables_store.store_table('ZeroTable', df_zero)
     payload = {
         'tableName': 'ZeroTable',
         'newColumnName': 'Z',
@@ -240,7 +240,7 @@ def test_calculate_column_division_by_zero_handling(client, tables_manager):
     )
     assert response.status_code == status.HTTP_200_OK
     # ゼロ除算の結果を確認。Polarsはinfまたはnullを返す。
-    df = tables_manager.get_table('ZeroTable').table
+    df = tables_store.get_table('ZeroTable').table
     result_values = df['Z'].to_list()
     # 1/0 = inf, 2/2 = 1.0, 0/1 = 0.0
     import math

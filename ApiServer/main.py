@@ -11,7 +11,7 @@ from analysisapp.exception_handlers import init_exception_handlers
 from analysisapp.i18n.translation import get_locale_from_settings
 from analysisapp.routers import api_router
 from analysisapp.services.data.settings_manager import SettingsManager
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -43,8 +43,8 @@ async def lifespan(app: FastAPI):
     settings_manager = SettingsManager()
     settings_manager.load_settings()
     logger.info("SettingsManager has been initialized at startup.")
-    tables_manager = TablesManager()
-    logger.info("TablesManager has been initialized at startup.")
+    tables_store = TablesStore()
+    logger.info("TablesStore has been initialized at startup.")
 
     # ブラウザでアプリを自動的に開く
     url = 'http://127.0.0.1:8000'
@@ -54,8 +54,8 @@ async def lifespan(app: FastAPI):
     yield  # ここでアプリがリクエストを待ち受ける
     # --- 終了時の処理 ---
     # 必要に応じてクリーンアップ
-    tables_manager.clear_tables()
-    logger.info("Cleanup TablesManager.")
+    tables_store.clear_tables()
+    logger.info("Cleanup TablesStore.")
 
 
 app = FastAPI(

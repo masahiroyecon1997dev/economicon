@@ -6,7 +6,7 @@ import tempfile
 import numpy as np
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -20,8 +20,8 @@ def client():
 
 @pytest.fixture
 def prepared_data():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     manager.clear_tables()
     # テスト用の出力ディレクトリ
     test_dir = tempfile.mkdtemp()
@@ -36,7 +36,7 @@ def test_import_excel_by_path_simple(client, prepared_data):
     """
     シンプルなEXCELファイルをパス指定でインポートするテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -56,7 +56,7 @@ def test_import_excel_by_path_simple(client, prepared_data):
     assert 'OK' == response_data['code']
     assert 'TestSimpleExcel' == response_data['result']['tableName']
     # データの検証
-    df = tables_manager.get_table('TestSimpleExcel').table
+    df = tables_store.get_table('TestSimpleExcel').table
     assert test_data.equals(df)
 
 
@@ -64,7 +64,7 @@ def test_import_excel_by_path_large_data(client, prepared_data):
     """
     大きなEXCELファイルをパス指定でインポートするテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     N_ROWS = 5000
     N_COLS = 500
     rng = np.random.default_rng(42)
@@ -88,7 +88,7 @@ def test_import_excel_by_path_large_data(client, prepared_data):
     assert 'OK' == response_data['code']
     assert 'TestLargeExcel' == response_data['result']['tableName']
     # データの検証
-    df = tables_manager.get_table('TestLargeExcel').table
+    df = tables_store.get_table('TestLargeExcel').table
     assert df_sample.equals(df)
 
 
@@ -96,7 +96,7 @@ def test_import_excel_by_path_custom_table_name(client, prepared_data):
     """
     カスタムテーブル名でEXCELファイルをインポートするテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -116,7 +116,7 @@ def test_import_excel_by_path_custom_table_name(client, prepared_data):
     assert 'OK' == response_data['code']
     assert 'MyCustomExcelTable' == response_data['result']['tableName']
     # データの検証
-    df = tables_manager.get_table('MyCustomExcelTable').table
+    df = tables_store.get_table('MyCustomExcelTable').table
     assert test_data.equals(df)
 
 
@@ -124,7 +124,7 @@ def test_import_excel_by_path_file_not_exists(client, prepared_data):
     """
     存在しないファイルパスを指定した場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     request_data = {
         'filePath': '/non/existent/file.parquet',
         'tableName': 'TestNonExistent'
@@ -142,7 +142,7 @@ def test_import_excel_by_path_invalid_file_extension(client, prepared_data):
     """
     EXCEL以外のファイル拡張子を指定した場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -167,7 +167,7 @@ def test_import_excel_by_path_missing_file_path(client, prepared_data):
     """
     filePathパラメータが未指定の場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     request_data = {
         'tableName': 'TestMissingPath'
     }
@@ -183,7 +183,7 @@ def test_import_excel_by_path_missing_table_name(client, prepared_data):
     """
     tableNameパラメータが未指定の場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -206,7 +206,7 @@ def test_import_excel_by_path_duplicate_table_name(client, prepared_data):
     """
     既存のテーブル名と重複する場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     test_data = pl.DataFrame({
         'col_1': [1, 2, 3],
         'col_2': [10.1, 20.2, 30.3],
@@ -240,7 +240,7 @@ def test_import_excel_by_path_invalid_json(client, prepared_data):
     """
     不正なJSONを送信した場合のテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     response = client.post('/api/data/import-excel-by-path',
                            data='invalid json')
     # response_data = response.json()
@@ -253,7 +253,7 @@ def test_import_excel_by_path_with_temporary_file(client, prepared_data):
     """
     一時的なEXCELファイルを作成してインポートするテスト
     """
-    tables_manager, test_dir = prepared_data
+    tables_store, test_dir = prepared_data
     # 一時的なEXCELファイルを作成
     temp_data = pl.DataFrame({
         'col1': [1, 2, 3, 4, 5],
@@ -277,7 +277,7 @@ def test_import_excel_by_path_with_temporary_file(client, prepared_data):
         assert 'OK' == response_data['code']
         assert 'TestTempExcel' == response_data['result']['tableName']
         # データの検証
-        df = tables_manager.get_table('TestTempExcel').table
+        df = tables_store.get_table('TestTempExcel').table
         assert 3 == len(df.columns)
         assert 5 == len(df)
         assert temp_data.equals(df)

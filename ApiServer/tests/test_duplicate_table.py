@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_manager import TablesManager
+from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -14,8 +14,8 @@ def client():
 
 @pytest.fixture
 def prepared_data():
-    """TablesManagerのフィクスチャ"""
-    manager = TablesManager()
+    """TablesStoreのフィクスチャ"""
+    manager = TablesStore()
     # テーブルをクリア
     manager.clear_tables()
     # テスト用テーブルをセット
@@ -31,7 +31,7 @@ def prepared_data():
 
 
 def test_duplicate_table_success(client, prepared_data):
-    tables_manager, df = prepared_data
+    tables_store, df = prepared_data
     # 正常にテーブル複製できる
     payload = {
         'tableName': 'TestTable',
@@ -46,11 +46,11 @@ def test_duplicate_table_success(client, prepared_data):
     assert response_data['code'] == 'OK'
     assert response_data['result']['tableName'] == 'DuplicatedTable'
     # 複製されたテーブルが存在することを確認
-    table_list = tables_manager.get_table_name_list()
+    table_list = tables_store.get_table_name_list()
     assert 'DuplicatedTable' in table_list
     # 複製されたテーブルの内容が元のテーブルと同じことを確認
-    original_df = tables_manager.get_table('TestTable').table
-    duplicated_df = tables_manager.get_table('DuplicatedTable').table
+    original_df = tables_store.get_table('TestTable').table
+    duplicated_df = tables_store.get_table('DuplicatedTable').table
     # データフレームの内容が同じかチェック
     assert original_df.equals(duplicated_df)
     # 列名が同じかチェック
@@ -62,7 +62,7 @@ def test_duplicate_table_success(client, prepared_data):
 
 
 def test_duplicate_table_invalid_source_table(client, prepared_data):
-    tables_manager, df = prepared_data
+    tables_store, df = prepared_data
     # 存在しないソーステーブル名
     payload = {
         'tableName': 'NonExistentTable',
@@ -80,7 +80,7 @@ def test_duplicate_table_invalid_source_table(client, prepared_data):
 
 
 def test_duplicate_table_existing_destination_table(client, prepared_data):
-    tables_manager, df = prepared_data
+    tables_store, df = prepared_data
     # 既に存在するテーブル名を新しいテーブル名として指定
     payload = {
         'tableName': 'TestTable',
@@ -98,13 +98,13 @@ def test_duplicate_table_existing_destination_table(client, prepared_data):
 
 
 def test_duplicate_table_empty_table(client, prepared_data):
-    tables_manager, df = prepared_data
+    tables_store, df = prepared_data
     # 空のテーブルを複製
     empty_df = pl.DataFrame({
         'Col1': [],
         'Col2': []
     })
-    tables_manager.store_table('EmptyTable', empty_df)
+    tables_store.store_table('EmptyTable', empty_df)
     payload = {
         'tableName': 'EmptyTable',
         'newTableName': 'DuplicatedEmptyTable'
@@ -118,7 +118,7 @@ def test_duplicate_table_empty_table(client, prepared_data):
     assert response_data['code'] == 'OK'
     assert response_data['result']['tableName'] == 'DuplicatedEmptyTable'
     # 空のテーブルも正しく複製されることを確認
-    duplicated_df = tables_manager.get_table(
+    duplicated_df = tables_store.get_table(
         'DuplicatedEmptyTable').table
     assert duplicated_df.height == 0
     assert duplicated_df.columns == ['Col1', 'Col2']

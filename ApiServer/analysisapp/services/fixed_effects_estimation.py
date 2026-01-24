@@ -8,10 +8,10 @@ from ..utils.validator.common_validators import (ValidationError,
                                                  validate_candidates)
 from ..utils.validator.statistics_validators import (
     validate_dependent_variable, validate_explanatory_variables)
-from ..utils.validator.tables_manager_validator import (
+from ..utils.validator.tables_store_validator import (
     validate_existed_column_name, validate_existed_table_name)
 from .abstract_api import AbstractApi, ApiError
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from .django_compat import gettext as _
 
 # 標準誤差計算方法の候補
@@ -35,7 +35,7 @@ class FixedEffectsEstimation(AbstractApi):
         standard_error_method: str = 'normal',
         use_t_distribution: bool = True
     ):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         self.table_name = table_name
         self.dependent_variable = dependent_variable
         self.explanatory_variables = explanatory_variables
@@ -54,7 +54,7 @@ class FixedEffectsEstimation(AbstractApi):
     def validate(self):
         try:
             # テーブル名の検証
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             validate_existed_table_name(
                 self.table_name,
                 table_name_list,
@@ -62,11 +62,11 @@ class FixedEffectsEstimation(AbstractApi):
             )
 
             # 列名リストの取得
-            column_name_list = self.tables_manager.get_column_name_list(
+            column_name_list = self.tables_store.get_column_name_list(
                 self.table_name)
 
             # 説明変数の検証
-            df_schema = self.tables_manager.get_column_info_list(
+            df_schema = self.tables_store.get_column_info_list(
                 self.table_name)
             validate_explanatory_variables(
                 self.explanatory_variables,
@@ -117,7 +117,7 @@ class FixedEffectsEstimation(AbstractApi):
     def execute(self) -> Dict:
         try:
             # テーブルの取得
-            table_info = self.tables_manager.get_table(self.table_name)
+            table_info = self.tables_store.get_table(self.table_name)
             df = table_info.table
 
             # データの準備

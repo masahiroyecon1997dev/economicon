@@ -2,9 +2,9 @@ from typing import Dict
 
 from .django_compat import gettext as _
 
-from .data.tables_manager import TablesManager
+from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.tables_manager_validator import \
+from ..utils.validator.tables_store_validator import \
     validate_existed_table_name
 from .abstract_api import AbstractApi, ApiError
 
@@ -17,7 +17,7 @@ class DeleteTable(AbstractApi):
     削除後、テーブルは復元できません。
     """
     def __init__(self, table_name: str):
-        self.tables_manager = TablesManager()
+        self.tables_store = TablesStore()
         # 削除するテーブル名
         self.table_name = table_name
         # パラメータ名のマッピング
@@ -26,7 +26,7 @@ class DeleteTable(AbstractApi):
     def validate(self):
         # 入力値のバリデーション
         try:
-            table_name_list = self.tables_manager.get_table_name_list()
+            table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の存在チェック
             validate_existed_table_name(
                 self.table_name,
@@ -41,7 +41,7 @@ class DeleteTable(AbstractApi):
         # テーブルの削除処理
         try:
             # テーブル情報から削除
-            self.tables_manager.delete_table(self.table_name)
+            self.tables_store.delete_table(self.table_name)
             # 結果を返す
             result = {'tableName': self.table_name}
             return result
