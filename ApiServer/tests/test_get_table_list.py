@@ -44,19 +44,15 @@ def test_get_table_list_multiple(client, tables_store):
     assert set(response_data['result']['tableNameList']) == set(table_names)
 
 
-def test_get_table_list_exception(client, tables_store):
+def test_get_table_list_exception(client, tables_store, monkeypatch):
     """例外発生時のテスト"""
-    original_method = tables_store.get_table_name_list
-
     def raise_exception():
         raise Exception("DB error")
 
-    tables_store.get_table_name_list = raise_exception
+    monkeypatch.setattr(tables_store, 'get_table_name_list', raise_exception)
     response = client.get('/api/table/get-list')
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
-    expected_message = 'An unexpected error during getting table name list.'
+    expected_message = 'テーブル名リストの取得中に予期しないエラーが発生しました。'
     assert expected_message == response_data['message']
-    # 後始末
-    tables_store.get_table_name_list = original_method
