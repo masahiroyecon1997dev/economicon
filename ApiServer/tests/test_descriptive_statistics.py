@@ -141,7 +141,7 @@ def test_descriptive_statistics_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist." == response_data['message']
+    assert "tableName 'NoTable'は存在しません。" == response_data['message']
 
 
 def test_descriptive_statistics_invalid_column(client, tables_store):
@@ -158,7 +158,7 @@ def test_descriptive_statistics_invalid_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnName 'Z' does not exist." == response_data['message']
+    assert "columnName 'Z'は存在しません。" == response_data['message']
 
 
 def test_descriptive_statistics_invalid_statistic(client, tables_store):
@@ -175,8 +175,8 @@ def test_descriptive_statistics_invalid_statistic(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = ("statistics 'invalid_stat' is not supported. "
-               "Available: ['mean', 'mode', 'median', "
+    message = ("statistics 'invalid_stat'はサポートされていません。"
+               "利用可能: ['mean', 'mode', 'median', "
                "'variance', 'std', 'range', 'iqr']")
     assert message == response_data['message']
 
@@ -195,4 +195,4 @@ def test_descriptive_statistics_empty_statistics_list(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "statistics is required" == response_data['message']
+    assert "statisticsは必須です。" == response_data['message']

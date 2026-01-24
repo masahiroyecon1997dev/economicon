@@ -59,7 +59,7 @@ def test_delete_table_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "tableName 'NotExistTable' does not exist."
+    message = "tableName 'NotExistTable'は存在しません。"
     assert message == response_data['message']
 
 
@@ -74,4 +74,4 @@ def test_delete_table_empty_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName is required." in response_data['message']
+    assert "tableNameは必須です。" in response_data['message']

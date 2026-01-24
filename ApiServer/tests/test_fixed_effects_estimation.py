@@ -203,7 +203,7 @@ def test_fixed_effects_estimation_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "tableName 'NonExistentTable' does not exist."
+    message = "tableName 'NonExistentTable'は存在しません。"
     assert message == response_data['message']
 
 
@@ -223,7 +223,7 @@ def test_fixed_effects_estimation_invalid_dependent_variable(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "dependentVariable 'nonexistent_y' does not exist."
+    message = "dependentVariable 'nonexistent_y'は存在しません。"
     assert message == response_data['message']
 
 
@@ -243,7 +243,7 @@ def test_fixed_effects_estimation_invalid_explanatory_variable(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "explanatoryVariables 'nonexistent_x' does not exist."
+    message = "explanatoryVariables 'nonexistent_x'は存在しません。"
     assert message == response_data['message']
 
 
@@ -263,7 +263,7 @@ def test_fixed_effects_estimation_invalid_entity_id_column(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "entityIdColumn 'nonexistent_id' does not exist."
+    message = "entityIdColumn 'nonexistent_id'は存在しません。"
     assert message == response_data['message']
 
 
@@ -283,7 +283,7 @@ def test_fixed_effects_estimation_entity_id_same_as_dependent(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "Entity ID column cannot be the same as dependent variable"
+    message = "個体ID列を被説明変数と同じにすることはできません"
     assert message == response_data['message']
 
 
@@ -303,7 +303,7 @@ def test_fixed_effects_estimation_entity_id_in_explanatory(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "Entity ID column cannot be included in explanatory variables"
+    message = "個体ID列を説明変数に含めることはできません"
     assert message == response_data['message']
 
 
@@ -325,8 +325,8 @@ def test_fixed_effects_estimation_invalid_standard_error_method(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = ("standardErrorMethod 'invalid_method' is not supported. "
-               "Supported standardErrorMethod: normal, clustered, robust, hac")
+    message = ("standardErrorMethod 'invalid_method'はサポートされていません。"
+               "サポートされるstandardErrorMethod: normal, clustered, robust, hac")
     assert message == response_data['message']
 
 
@@ -345,8 +345,8 @@ def test_fixed_effects_estimation_single_period_data(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
-    message = ("No entities with multiple observations found. "
-               "Fixed effects requires multiple time periods per entity.")
+    message = ("複数の観測値を持つ個体が見つかりません。"
+               "固定効果推定には、個体ごとに複数の時点が必要です。")
     assert message == response_data['message']
 
 

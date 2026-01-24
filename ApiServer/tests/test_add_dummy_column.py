@@ -69,7 +69,7 @@ def test_add_dummy_column_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist." == response_data['message']
+    assert "tableName 'NoTable'は存在しません。" == response_data['message']
 
 
 def test_add_dummy_column_invalid_source_column(client, tables_store):
@@ -87,7 +87,7 @@ def test_add_dummy_column_invalid_source_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "sourceColumnName 'invalid_column' does not exist." \
+    assert "sourceColumnName 'invalid_column'は存在しません。" \
         == response_data['message']
 
 
@@ -106,7 +106,7 @@ def test_add_dummy_column_duplicate_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "dummyColumnName 'age' already exists." == response_data['message']
+    assert "dummyColumnName 'age'は既に存在します。" == response_data['message']
 
 
 def test_add_dummy_column_with_numeric_target(client, tables_store):

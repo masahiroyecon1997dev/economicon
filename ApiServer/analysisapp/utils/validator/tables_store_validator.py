@@ -61,7 +61,7 @@ def validate_new_columns(
     least_num_columns = 1
     validate_required_list(columns, column_names_param)
     validate_list_length(columns, least_num_columns,
-                         column_names_param, 'item')
+                         column_names_param, '項目')
     column_name_min_length = TABLES_MANAGER_VALIDATOR_CONFIG.get(
         "column_name_min_length", 1)
     column_name_max_length = TABLES_MANAGER_VALIDATOR_CONFIG.get(
@@ -124,7 +124,7 @@ def validate_existed_tables(
     validate_required_list(table_names, table_names_param)
     least_num_tables = 2
     validate_list_length(table_names, least_num_tables,
-                         table_names_param, 'tableName')
+                         table_names_param, 'テーブル名')
     for table_name in table_names:
         validate_existed_table_name(table_name,
                                     table_name_list,
@@ -150,7 +150,7 @@ def validate_existed_columns(
     validate_required_list(column_names, column_names_param)
     least_num_columns = 1
     validate_list_length(column_names, least_num_columns,
-                         column_names_param, 'columnName')
+                         column_names_param, 'カラム名')
     for column_name in column_names:
         validate_existed_column_name(column_name,
                                      column_name_list,
@@ -223,7 +223,7 @@ def validate_existed_numeric_columns(
 ) -> None:
     least_num_columns = 1
     validate_list_length(column_names, least_num_columns,
-                         calculation_expression_param, 'column')
+                         calculation_expression_param, 'カラム')
     for col_name in column_names:
         validate_required(col_name, column_names_param)
         validate_item_exists_in_list(col_name,

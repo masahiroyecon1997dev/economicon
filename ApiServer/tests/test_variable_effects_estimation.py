@@ -158,7 +158,7 @@ def test_variable_effects_estimation_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NonExistentTable' does not exist." \
+    assert "tableName 'NonExistentTable'は存在しません。" \
         == response_data['message']
 
 
@@ -178,7 +178,7 @@ def test_variable_effects_estimation_invalid_dependent_variable(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "dependentVariable 'nonexistent_y' does not exist." \
+    assert "dependentVariable 'nonexistent_y'は存在しません。" \
         == response_data['message']
 
 
@@ -197,7 +197,7 @@ def test_variable_effects_estimation_invalid_explanatory_variable(
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "explanatoryVariables 'nonexistent_x' does not exist." \
+    assert "explanatoryVariables 'nonexistent_x'は存在しません。" \
         == response_data['message']
 
 
@@ -216,8 +216,8 @@ def test_variable_effects_estimation_empty_explanatory_variables(
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert ("explanatoryVariables must be with "
-            "at least 1 explanatory_variable.") \
+    assert ("explanatoryVariablesは少なくとも 1 つの "
+            "explanatory_variableが必要です。") \
         == response_data['message']
 
 
@@ -236,7 +236,7 @@ def test_variable_effects_estimation_dependent_in_explanatory(
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Dependent variable cannot be included in explanatory variables" \
+    assert "被説明変数を説明変数に含めることはできません" \
         == response_data['message']
 
 
@@ -256,7 +256,7 @@ def test_variable_effects_estimation_invalid_standard_error_method(
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert ("standardErrorMethod must be one of: ""nonrobust, HC0, HC1, "
+    assert ("standardErrorMethod は次のいずれかである必要があります: nonrobust, HC0, HC1, "
             "HC2, HC3, HAC, hac-panel, hac-groupsum, cluster") \
         == response_data['message']
 

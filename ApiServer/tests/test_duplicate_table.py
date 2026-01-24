@@ -75,7 +75,7 @@ def test_duplicate_table_invalid_source_table(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "tableName 'NonExistentTable' does not exist."
+    message = "tableName 'NonExistentTable'は存在しません。"
     assert message == response_data['message']
 
 
@@ -93,7 +93,7 @@ def test_duplicate_table_existing_destination_table(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "newTableName 'TestTable' already exists."
+    message = "newTableName 'TestTable'は既に存在します。"
     assert message == response_data['message']
 
 

@@ -71,11 +71,11 @@ class ConfidenceInterval(AbstractApi):
 
             # 信頼度レベルの検証
             if not isinstance(self.confidence_level, (int, float)):
-                raise ValidationError("confidenceLevel must be a number")
+                raise ValidationError(_("confidenceLevel must be a number"))
 
             if not (0 < self.confidence_level < 1):
-                raise ValidationError("confidenceLevel must be "
-                                      "between 0 and 1")
+                raise ValidationError(_("confidenceLevel must be "
+                                      "between 0 and 1"))
 
             return None
         except ValidationError as e:
@@ -90,7 +90,7 @@ class ConfidenceInterval(AbstractApi):
             column_data = df[self.column_name].drop_nulls()
 
             if column_data.len() == 0:
-                raise ValidationError("Column contains no valid data")
+                raise ValidationError(_("Column contains no valid data"))
 
             # データを numpy array に変換
             data_array = column_data.to_numpy()
@@ -113,7 +113,7 @@ class ConfidenceInterval(AbstractApi):
                     statistic_value, ci_lower, ci_upper = \
                         self._calculate_std_ci(data_array)
                 case _:
-                    raise ValidationError("Unsupported statistic type")
+                    raise ValidationError(_("Unsupported statistic type"))
 
             # 結果を返す
             result = {
@@ -178,8 +178,8 @@ class ConfidenceInterval(AbstractApi):
         if not (
             len(unique_vals) <= 2 and all(v in [0, 1] for v in unique_vals)
         ):
-            raise ValidationError("For proportion confidence interval, "
-                                  "data must contain only 0 and 1 values")
+            raise ValidationError(_("For proportion confidence interval, "
+                                  "data must contain only 0 and 1 values"))
 
         n = len(data)
         successes = np.sum(data)

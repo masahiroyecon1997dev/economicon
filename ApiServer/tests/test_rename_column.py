@@ -61,7 +61,7 @@ def test_rename_column_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "oldColumnName 'Z' does not exist." in response_data['message']
+    assert "oldColumnName 'Z'は存在しません。" in response_data['message']
 
 
 def test_rename_column_empty_old_column_name(client, tables_store):
@@ -77,7 +77,7 @@ def test_rename_column_empty_old_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "oldColumnName is required." in response_data['message']
+    assert "oldColumnNameは必須です。" in response_data['message']
 
 
 def test_rename_column_empty_new_column_name(client, tables_store):
@@ -93,7 +93,7 @@ def test_rename_column_empty_new_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newColumnName is required." in response_data['message']
+    assert "newColumnNameは必須です。" in response_data['message']
 
 
 def test_rename_column_table_not_found(client, tables_store):
@@ -110,5 +110,5 @@ def test_rename_column_table_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "tableName 'NotExistTable' does not exist."
+    message = "tableName 'NotExistTable'は存在しません。"
     assert message in response_data['message']

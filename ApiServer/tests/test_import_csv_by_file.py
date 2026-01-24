@@ -105,7 +105,7 @@ def test_upload_non_csv_file(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "File must be a CSV file" == response_data['message']
+    assert "CSVファイルである必要があります" == response_data['message']
 
 
 def test_upload_empty_csv_file(client, prepared_data):
@@ -125,7 +125,7 @@ def test_upload_empty_csv_file(client, prepared_data):
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
     expected_message = (
-        "The uploaded CSV file is empty or contains no valid data."
+        "アップロードされたCSVファイルが空、または有効なデータが含まれていません。"
     )
     assert expected_message == response_data['message']
 
@@ -151,6 +151,6 @@ def test_upload_malformed_csv_file(client, prepared_data):
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
     expected_message = (
-        "Failed to parse CSV file: Invalid format or encoding."
+        "CSVファイルの解析に失敗しました: 無効なフォーマットまたはエンコーディングです。"
     )
     assert expected_message == response_data['message']

@@ -55,6 +55,10 @@ def _get_translation(
     if locale is None:
         locale = get_locale_from_settings()
 
+    # テスト環境でデフォルトで日本語を使用
+    if locale is None or locale == '':
+        locale = 'ja'
+
     if locale not in _translations:
         try:
             _translations[locale] = gettext_module.translation(

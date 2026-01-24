@@ -120,7 +120,7 @@ def test_sort_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist." == response_data['message']
+    assert "tableName 'NoTable'は存在しません。" == response_data['message']
 
 
 def test_sort_invalid_column(client, tables_store):
@@ -138,7 +138,7 @@ def test_sort_invalid_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnName 'Z' does not exist." == response_data['message']
+    assert "columnName 'Z'は存在しません。" == response_data['message']
 
 
 def test_sort_empty_columns(client, tables_store):
