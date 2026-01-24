@@ -193,7 +193,7 @@ def test_confidence_interval_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "tableName 'NonExistentTable' does not exist."
+    message = "tableName 'NonExistentTable'は存在しません。"
     assert message == response_data['message']
 
 
@@ -212,7 +212,7 @@ def test_confidence_interval_invalid_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "columnName 'nonexistent_column' does not exist."
+    message = "columnName 'nonexistent_column'は存在しません。"
     assert message == response_data['message']
 
 
@@ -231,8 +231,8 @@ def test_confidence_interval_invalid_statistic_type(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = ("statisticType 'invalid_stat' is not supported. "
-               "Supported statisticType: mean, median, proportion, "
+    message = ("statisticType 'invalid_stat'はサポートされていません。"
+               "サポートされるstatisticType: mean, median, proportion, "
                "variance, std")
     assert message == response_data['message']
 
@@ -253,7 +253,7 @@ def test_confidence_interval_invalid_confidence_level_high(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "confidenceLevel must be between 0 and 1"
+    message = "confidenceLevelは0から1の間である必要があります"
     assert message == response_data['message']
 
 
@@ -273,7 +273,7 @@ def test_confidence_interval_invalid_confidence_level_low(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "confidenceLevel must be between 0 and 1"
+    message = "confidenceLevelは0から1の間である必要があります"
     assert message == response_data['message']
 
 
@@ -292,7 +292,7 @@ def test_confidence_interval_proportion_invalid_data(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "data must contain only 0 and 1 values" in response_data['message']
+    assert "データには0と1の値のみが含まれる必要があります" in response_data['message']
 
 
 def test_confidence_interval_empty_data(client, tables_store):
@@ -310,7 +310,7 @@ def test_confidence_interval_empty_data(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Column contains no valid data" in response_data['message']
+    assert "カラムに有効なデータが含まれていません" in response_data['message']
 
 
 def test_confidence_interval_missing_parameters(client, tables_store):

@@ -128,7 +128,7 @@ def test_probit_regression_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "tableName 'NonExistentTable' does not exist."
+    message = "tableName 'NonExistentTable'は存在しません。"
     assert message == response_data['message']
 
 
@@ -146,7 +146,7 @@ def test_probit_regression_invalid_dependent_variable(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "dependentVariable 'nonexistent_y' does not exist."
+    message = "dependentVariable 'nonexistent_y'は存在しません。"
     assert message == response_data['message']
 
 
@@ -165,7 +165,7 @@ def test_probit_regression_invalid_explanatory_variable(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "explanatoryVariables 'nonexistent_x' does not exist."
+    message = "explanatoryVariables 'nonexistent_x'は存在しません。"
     assert message == response_data['message']
 
 
@@ -183,8 +183,8 @@ def test_probit_regression_empty_explanatory_variables(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = ("explanatoryVariables must be with "
-               "at least 1 explanatory_variable.")
+    message = ("explanatoryVariablesは少なくとも 1 つの "
+               "explanatory_variableが必要です。")
     assert message == response_data['message']
 
 
@@ -202,7 +202,7 @@ def test_probit_regression_dependent_in_explanatory(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "Dependent variable cannot be included in explanatory variables"
+    message = "被説明変数を説明変数に含めることはできません"
     assert message == response_data['message']
 
 

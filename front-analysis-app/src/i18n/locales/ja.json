@@ -99,7 +99,7 @@
     "DataTable": "データテーブル",
     "SelectATable": "テーブルを選択してください",
     "SelectVariables": "変数の選択",
-    "DependentVariable": "目的変数",
+    "DependentVariable": "被説明変数",
     "DependentVariableDescription": "分析対象となる変数を1つ選択",
     "ExplanatoryVariables": "説明変数",
     "ExplanatoryVariablesDescription": "予測に使用する変数を複数選択可能",
@@ -111,7 +111,7 @@
   "RegressionResult": {
     "AnalysisSummary": "分析概要",
     "TableName": "テーブル名",
-    "DependentVariable": "目的変数",
+    "DependentVariable": "被説明変数",
     "ExplanatoryVariables": "説明変数",
     "ModelStatistics": "モデル統計量",
     "AdjustedR2": "調整済みR²",
@@ -237,7 +237,7 @@
     "HypergeometricParamPopulationSize": "母集団サイズは0以上の整数でなければなりません。",
     "HypergeometricParamNumberOfSuccesses": "成功数は0以上の整数でなければなりません。",
     "HypergeometricParamSampleSize": "標本サイズは0以上の整数でなければなりません。",
-    "DependentVariableRequired": "目的変数を選択してください",
+    "DependentVariableRequired": "被説明変数を選択してください",
     "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください",
     "NewColumnNameRequired": "新しいカラム名を入力してください。",
     "CalculationExpressionRequired": "計算式を入力してください。"

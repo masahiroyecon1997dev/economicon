@@ -139,7 +139,7 @@ def test_upload_non_tsv_file(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "File must be a TSV file" == response_data['message']
+    assert "TSVファイルである必要があります" == response_data['message']
 
 
 def test_upload_empty_tsv_file(client, prepared_data):

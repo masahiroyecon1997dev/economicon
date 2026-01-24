@@ -73,7 +73,7 @@ def test_fetch_data_to_json_table_not_found(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    message = "tableName 'non_existent_table' does not exist."
+    message = "tableName 'non_existent_table' は存在しません。"
     assert message == response_data['message']
 
 
@@ -91,7 +91,7 @@ def test_fetch_data_to_json_invalid_start_row_range(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "startRow must be between 1 and 5." in response_data['message']
+    assert "startRowは1から5の間である必要があります。" in response_data['message']
 
 
 def test_fetch_data_to_json_invalid_fetch_rows(client, tables_store):
@@ -108,7 +108,7 @@ def test_fetch_data_to_json_invalid_fetch_rows(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "fetchRows must be a positive integer." == response_data['message']
+    assert "fetchRowsは正の整数である必要があります。" == response_data['message']
 
 
 def test_fetch_data_to_json_missing_table_name(client, tables_store):
@@ -126,7 +126,7 @@ def test_fetch_data_to_json_missing_table_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "tableName is required." == response_data['message']
+    assert "tableNameは必須です。" == response_data['message']
 
 
 def test_fetch_data_to_json_missing_start_row(client, tables_store):

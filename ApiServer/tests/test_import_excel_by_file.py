@@ -145,7 +145,7 @@ def test_upload_non_excel_file(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "File must be an Excel file" == response_data['message']
+    assert "Excelファイルである必要があります" == response_data['message']
 
 
 def test_upload_empty_excel_file(client, prepared_data):
@@ -164,7 +164,7 @@ def test_upload_empty_excel_file(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
-    message = "The uploaded EXCEL file is empty or contains no valid data."
+    message = "アップロードされたEXCELファイルが空、または有効なデータが含まれていません。"
     assert message == response_data['message']
 
 

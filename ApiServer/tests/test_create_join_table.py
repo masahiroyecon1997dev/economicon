@@ -146,7 +146,7 @@ def test_join_table_name_empty(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "joinTableName is required." == response_data['message']
+    assert "joinTableNameは必須です。" == response_data['message']
 
 
 def test_left_table_not_found(client, tables_store):
@@ -165,7 +165,7 @@ def test_left_table_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "leftTableName 'NotExist' does not exist."
+    message = "leftTableName 'NotExist'は存在しません。"
     assert message == response_data['message']
 
 
@@ -185,7 +185,7 @@ def test_right_table_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "rightTableName 'NotExist' does not exist."
+    message = "rightTableName 'NotExist'は存在しません。"
     assert message == response_data['message']
 
 
@@ -205,7 +205,7 @@ def test_left_key_column_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "leftKeyColumnNames 'not_exist_col' does not exist."
+    message = "leftKeyColumnNames 'not_exist_col' は存在しません。"
     assert message == response_data['message']
 
 
@@ -225,7 +225,7 @@ def test_right_key_column_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "rightKeyColumnNames 'not_exist_col' does not exist."
+    message = "rightKeyColumnNames 'not_exist_col' は存在しません。"
     assert message == response_data['message']
 
 
@@ -245,6 +245,6 @@ def test_invalid_join_type(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = ("joinType 'invalid_type' is not supported. "
-               "Supported joinType: inner, left, right, outer")
+    message = ("joinType 'invalid_type'はサポートされていません。"
+               "サポートされるjoinType: inner, left, right, outer")
     assert message == response_data['message']

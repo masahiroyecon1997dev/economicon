@@ -104,7 +104,7 @@ class CalculateColumn(AbstractApi):
 
             except Exception as e:
                 raise ValidationError(
-                    f"Invalid calculation expression: {str(e)}")
+                    _(f"Invalid calculation expression: {str(e)}"))
 
             # テーブルを更新
             self.tables_store.update_table(self.table_name, df_with_new_col)

@@ -61,12 +61,13 @@ class DescriptiveStatistics(AbstractApi):
             # 統計の種類をバリデーション
             if not self.statistics:
                 raise ValidationError(
-                    "statistics is required")
+                    _("statistics is required"))
             for stat in self.statistics:
                 if stat not in self.AVAILABLE_STATISTICS:
+                    available = list(self.AVAILABLE_STATISTICS.keys())
                     raise ValidationError(
-                        f"statistics '{stat}' is not supported. "
-                        f"Available: {list(self.AVAILABLE_STATISTICS.keys())}")
+                        _("statistics '{}'はサポートされていません。利用可能: {}").format(
+                            stat, available))
 
             return None
         except ValidationError as e:

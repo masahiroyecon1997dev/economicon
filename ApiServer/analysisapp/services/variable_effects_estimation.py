@@ -95,10 +95,9 @@ class VariableEffectsEstimation(AbstractApi):
             # 標準誤差計算方法の検証
             if (self.standard_error_method not
                     in self.SUPPORTED_STANDARD_ERROR_METHODS):
-                message = _(f"{self.param_names['standard_error_method']} "
-                            "must be one of: "
-                            f"{', '.join(
-                                self.SUPPORTED_STANDARD_ERROR_METHODS)}")
+                methods = ', '.join(self.SUPPORTED_STANDARD_ERROR_METHODS)
+                message = _("{}は次のいずれかである必要があります: {}").format(
+                    self.param_names['standard_error_method'], methods)
                 raise ValidationError(message)
 
             return None

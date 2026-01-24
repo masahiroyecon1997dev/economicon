@@ -78,7 +78,7 @@ def test_input_cell_data_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist." == response_data['message']
+    assert "tableName 'NoTable'は存在しません。" == response_data['message']
 
 
 def test_input_cell_data_invalid_column(client, tables_store):
@@ -95,7 +95,7 @@ def test_input_cell_data_invalid_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnName 'Z' does not exist." in response_data['message']
+    assert "columnName 'Z'は存在しません。" in response_data['message']
 
 
 def test_input_cell_data_invalid_row_over(client, tables_store):
@@ -112,7 +112,7 @@ def test_input_cell_data_invalid_row_over(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "rowIndex must be between 1 and 10." == response_data['message']
+    assert "rowIndexは1から10の間である必要があります。" == response_data['message']
 
 
 def test_input_cell_data_invalid_row_string(client, tables_store):

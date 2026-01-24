@@ -114,7 +114,7 @@ def test_get_list_files_invalid_directory(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Directory does not exist" in response_data['message']
+    assert "ディレクトリが存在しません" in response_data['message']
 
 
 def test_get_list_files_missing_directory_path(client, prepared_data):
@@ -129,7 +129,7 @@ def test_get_list_files_missing_directory_path(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "directoryPath is required" in response_data['message']
+    assert "directoryPathは必須です" in response_data['message']
 
 
 def test_get_list_files_file_instead_of_directory(client, prepared_data):
@@ -144,7 +144,7 @@ def test_get_list_files_file_instead_of_directory(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Path is not a directory" in response_data['message']
+    assert "パスがディレクトリではありません" in response_data['message']
 
 
 def test_get_list_files_file_sizes(client, prepared_data):

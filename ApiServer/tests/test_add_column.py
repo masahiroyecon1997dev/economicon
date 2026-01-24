@@ -69,7 +69,7 @@ def test_add_column_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist." == response_data['message']
+    assert "tableName 'NoTable'は存在しません。" == response_data['message']
 
 
 def test_add_column_duplicate_name(client, tables_store):
@@ -87,7 +87,7 @@ def test_add_column_duplicate_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newColumnName 'A' already exists." == response_data['message']
+    assert "newColumnName 'A'は既に存在します。" == response_data['message']
 
 
 def test_add_column_invalid_position_column(client, tables_store):
@@ -105,4 +105,4 @@ def test_add_column_invalid_position_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "addPositionColumn 'Z' does not exist." == response_data['message']
+    assert "addPositionColumn 'Z'は存在しません。" == response_data['message']
