@@ -366,8 +366,8 @@ def test_fixed_effects_estimation_empty_explanatory_variables(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = ("explanatoryVariables must be with at least 1 "
-               "explanatory_variable.")
+    message = ("explanatoryVariablesは少なくとも 1 つの "
+               "explanatory_variableが必要です。")
     assert message == response_data['message']
 
 
@@ -387,7 +387,7 @@ def test_fixed_effects_estimation_dependent_in_explanatory(client,
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "Dependent variable cannot be included in explanatory variables"
+    message = "被説明変数を説明変数に含めることはできません。"
     assert message == response_data['message']
 
 

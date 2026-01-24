@@ -188,7 +188,7 @@ def test_import_csv_by_path_invalid_file_extension(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert 'NG' == response_data['code']
-    message = "Failed to parse CSV file: Invalid format or encoding."
+    message = "CSVファイルの解析に失敗しました: 無効なフォーマットまたはエンコーディングです。"
     assert message == response_data['message']
 
 
