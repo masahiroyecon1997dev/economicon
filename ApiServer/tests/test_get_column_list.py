@@ -80,7 +80,7 @@ def test_get_column_info_list_table_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     # エラーメッセージにテーブル名が存在しない旨が含まれることを確認
-    expected_message = "tableName 'non_existent_table' does not exist."
+    expected_message = "tableName 'non_existent_table' は存在しません。"
     assert expected_message == response_data['message']
 
 
@@ -99,7 +99,7 @@ def test_get_column_info_list_exception(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response_data['code'] == 'NG'
-    expected_message = "An unexpected error during getting column info list."
+    expected_message = "カラム情報リストの取得中に予期しないエラーが発生しました。"
     assert expected_message == response_data['message']
     # 後始末
     tables_store.get_column_info_list = original_method

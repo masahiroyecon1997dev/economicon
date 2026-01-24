@@ -131,7 +131,7 @@ def test_export_csv_by_path_table_not_exists(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    message = "tableName 'NonExistentTable' does not exist."
+    message = "tableName 'NonExistentTable' は存在しません。"
     assert message == response_data['message']
 
 
@@ -150,7 +150,7 @@ def test_export_csv_by_path_invalid_output_directory(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    message = "Directory does not exist: /non/existent/directory"
+    message = "ディレクトリが存在しません: /non/existent/directory"
     assert message == response_data['message']
 
 

@@ -134,7 +134,7 @@ def test_import_excel_by_path_file_not_exists(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'NG' == response_data['code']
-    message = "filePath does not exist: /non/existent/file.parquet"
+    message = "filePathが存在しません: /non/existent/file.parquet"
     assert message == response_data['message']
 
 
@@ -159,7 +159,7 @@ def test_import_excel_by_path_invalid_file_extension(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert 'NG' == response_data['code']
-    message = "An unexpected error occurred during EXCEL processing"
+    message = "EXCEL 処理中に予期しないエラーが発生しました"
     assert message == response_data['message']
 
 

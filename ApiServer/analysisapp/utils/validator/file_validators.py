@@ -6,6 +6,7 @@ from .common_validators import (ValidationError,
                                 validate_file_path_exists,
                                 validate_invalid_chars, validate_required,
                                 validate_string_length)
+from analysisapp.i18n.translation import gettext as _
 
 
 def validate_file_path(
@@ -28,7 +29,7 @@ def validate_directory_path_is_directory(
     directory: str
 ) -> None:
     if not os.path.isdir(directory):
-        message = f"Path is not a directory: {directory}"
+        message = _("パスがディレクトリではありません: {}").format(directory)
         raise ValidationError(message)
 
 

@@ -60,7 +60,7 @@ def test_rename_table_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "oldTableName 'NotExist' does not exist."
+    message = "oldTableName 'NotExist'は存在しません。"
     assert message == response_data['message']
 
 
@@ -77,7 +77,7 @@ def test_rename_table_empty_old_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "oldTableName is required." == response_data['message']
+    assert "oldTableNameは必須です。" == response_data['message']
 
 
 def test_rename_table_empty_new_table_name(client, tables_store):
@@ -93,4 +93,4 @@ def test_rename_table_empty_new_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newTableName is required." == response_data['message']
+    assert "newTableNameは必須です。" == response_data['message']

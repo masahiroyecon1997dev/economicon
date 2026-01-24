@@ -110,7 +110,7 @@ def test_union_table_name_empty(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "unionTableName is required." == response_data['message']
+    assert "unionTableNameは必須です。" == response_data['message']
 
 
 def test_union_table_name_already_exists(client, tables_store):
@@ -126,7 +126,7 @@ def test_union_table_name_already_exists(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "unionTableName 'Table1' already exists."
+    message = "unionTableName 'Table1'は既に存在します。"
     assert message == response_data['message']
 
 
@@ -143,7 +143,7 @@ def test_single_table_in_list(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "tableNames must be with at least 2 tableName."
+    message = "tableNamesは少なくとも 2 つの テーブル名が必要です。"
     assert message == response_data['message']
 
 
@@ -160,7 +160,7 @@ def test_nonexistent_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "tableNames 'NonExistentTable' does not exist."
+    message = "tableNames 'NonExistentTable' は存在しません。"
     assert message == response_data['message']
 
 
@@ -177,7 +177,7 @@ def test_empty_column_names(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "columnNames must be with at least 1 columnName."
+    message = "columnNamesは少なくとも 1 つの カラム名が必要です。"
     assert message == response_data['message']
 
 
@@ -194,7 +194,7 @@ def test_nonexistent_column_in_first_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "columnNames 'nonexistent_column' does not exist."
+    message = "columnNames 'nonexistent_column' は存在しません。"
     assert message == response_data['message']
 
 
@@ -212,7 +212,7 @@ def test_column_missing_in_one_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnNames 'name' does not exist." == response_data['message']
+    assert "columnNames 'name' は存在しません。" == response_data['message']
 
 
 def test_union_preserves_column_order(client, tables_store):

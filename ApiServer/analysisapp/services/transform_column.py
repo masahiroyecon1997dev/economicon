@@ -61,27 +61,28 @@ class TransformColumn(AbstractApi):
             # Validate transform method
             valid_methods = ['log', 'power', 'root']
             if self.transform_method not in valid_methods:
+                methods_str = ', '.join(valid_methods)
                 raise ValidationError(
-                    f"transformMethod '{self.transform_method}' is invalid. "
-                    f"Valid methods are: {', '.join(valid_methods)}")
+                    _("transformMethodの'{}'は無効です。有効なメソッド: {}").format(
+                        self.transform_method, methods_str))
 
             # Validate log base if provided
             if self.transform_method == 'log' and self.log_base is not None:
                 if self.log_base <= 0 or self.log_base == 1:
                     raise ValidationError(
-                        "logBase must be a positive number not equal to 1")
+                        _("logBaseは1ではない正の数でなければなりません"))
 
             # Validate exponent if provided
             if self.transform_method == 'power' and self.exponent is not None:
                 if not isinstance(self.exponent, (int, float)):
-                    raise ValidationError("exponent must be a number")
+                    raise ValidationError(_("exponentは数値でなければなりません"))
 
             # Validate root index if provided
             if self.transform_method == 'root' and self.root_index is not None:
                 if not (isinstance(self.root_index, (int, float))
                         or self.root_index == 0):
-                    raise ValidationError("rootIndex must be "
-                                          "a non-zero number")
+                    raise ValidationError(
+                        _("rootIndexは0以外の数値でなければなりません"))
 
             return None
         except ValidationError as e:

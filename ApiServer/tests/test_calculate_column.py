@@ -113,7 +113,7 @@ def test_calculate_column_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist" in response_data['message']
+    assert "tableName 'NoTable'は存在しません" in response_data['message']
 
 
 def test_calculate_column_invalid_column(client, tables_store):
@@ -130,7 +130,7 @@ def test_calculate_column_invalid_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "columnName in calculationExpression 'Z' does not exist."
+    message = "columnName in calculationExpression 'Z' は存在しません。"
     assert message == response_data['message']
 
 
@@ -148,7 +148,7 @@ def test_calculate_column_non_numeric_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "columnName in calculationExpression 'text_col' is not numeric."
+    message = "columnName in calculationExpression 'text_col' は数値ではありません。"
     assert message == response_data['message']
 
 
@@ -166,7 +166,7 @@ def test_calculate_column_empty_expression(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "calculationExpression is required." in response_data['message']
+    assert "calculationExpressionは必須です。" in response_data['message']
 
 
 def test_calculate_column_no_column_reference(client, tables_store):
@@ -183,7 +183,7 @@ def test_calculate_column_no_column_reference(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "calculationExpression must be with at least 1 column."
+    message = "calculationExpressionは少なくとも 1 つの カラムが必要です。"
     assert message == response_data['message']
 
 
@@ -201,7 +201,7 @@ def test_calculate_column_duplicate_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newColumnName 'A' already exists" in response_data['message']
+    assert "newColumnName 'A'は既に存在します" in response_data['message']
 
 
 def test_calculate_column_invalid_syntax(client, tables_store):
@@ -218,7 +218,7 @@ def test_calculate_column_invalid_syntax(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Invalid calculation expression" in response_data['message']
+    assert "無効な計算式です" in response_data['message']
 
 
 def test_calculate_column_division_by_zero_handling(client, tables_store):

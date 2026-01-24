@@ -55,7 +55,7 @@ def test_create_table_invalid_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName is required." == response_data['message']
+    assert "tableNameは必須です。" == response_data['message']
 
 
 def test_create_table_invalid_number_of_rows(client, tables_store):
@@ -89,5 +89,5 @@ def test_create_table_invalid_columns(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "columnNames must be with at least 1 item."
+    message = "columnNamesは少なくとも 1 つの 項目が必要です。"
     assert message == response_data['message']

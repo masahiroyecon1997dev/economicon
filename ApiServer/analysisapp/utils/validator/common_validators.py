@@ -265,7 +265,7 @@ def validate_directory_path_exists(
     """ディレクトリパスのバリデーション"""
     if not os.path.exists(directory):
         raise ValidationError(
-            "Directory does not exist: {}".format(directory)
+            _("ディレクトリが存在しません: {}").format(directory)
         )
     return None
 

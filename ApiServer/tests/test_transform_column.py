@@ -246,7 +246,7 @@ def test_transform_column_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist." == response_data['message']
+    assert "tableName 'NoTable'は存在しません。" == response_data['message']
 
 
 def test_transform_column_invalid_source_column(client, tables_store):
@@ -264,7 +264,7 @@ def test_transform_column_invalid_source_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "sourceColumnName 'Z' does not exist." in response_data['message']
+    assert "sourceColumnName 'Z'は存在しません。" in response_data['message']
 
 
 def test_transform_column_duplicate_column_name(client, tables_store):
@@ -282,7 +282,7 @@ def test_transform_column_duplicate_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newColumnName 'B' already exists." in response_data['message']
+    assert "newColumnName 'B'は既に存在します。" in response_data['message']
 
 
 def test_transform_column_invalid_method(client, tables_store):
@@ -300,7 +300,7 @@ def test_transform_column_invalid_method(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert ("transformMethod 'invalid' is invalid. Valid methods are: "
+    assert ("transformMethod 'invalid' は無効です。有効なメソッド: "
             "log, power, root") == response_data[
         'message']
 
@@ -321,7 +321,7 @@ def test_transform_column_invalid_log_base(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "logBase must be a positive number not equal to 1" \
+    assert "logBaseは1ではない正の数値である必要があります" \
         == response_data['message']
 
 
@@ -341,5 +341,5 @@ def test_transform_column_negative_log_base(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "logBase must be a positive number not equal to 1" \
+    assert "logBase は 1 ではない正の数値である必要があります" \
         == response_data['message']

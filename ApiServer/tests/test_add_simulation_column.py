@@ -216,7 +216,7 @@ def test_invalid_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist" in response_data['message']
+    assert "tableName 'NoTable'は存在しません" in response_data['message']
 
 
 def test_duplicate_column_name(client, tables_store):
@@ -237,7 +237,7 @@ def test_duplicate_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "newColumnName 'A' already exists." == response_data['message']
+    assert "newColumnName 'A'は既に存在します。" == response_data['message']
 
 
 def test_unsupported_distribution(client, tables_store):
@@ -255,8 +255,8 @@ def test_unsupported_distribution(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = ("distributionType 'unsupported' is not supported. "
-               "Supported distributionType: uniform, exponential, normal, "
+    message = ("distributionType 'unsupported'はサポートされていません。"
+               "サポートされるdistributionType: uniform, exponential, normal, "
                "gamma, beta, weibull, lognormal, binomial, bernoulli, "
                "poisson, geometric, hypergeometric")
     assert message == response_data['message']
@@ -280,7 +280,7 @@ def test_invalid_uniform_params(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "'low' must be less than 'high'" in response_data['message']
+    assert "'low'は'high'より小さい必要があります" in response_data['message']
 
 
 def test_missing_required_params(client, tables_store):
@@ -301,7 +301,7 @@ def test_missing_required_params(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "Normal distribution requires 'loc' and 'scale' parameters"
+    message = "正規分布には'loc'と'scale'パラメータが必要です"
     assert message == response_data['message']
 
 
@@ -323,7 +323,7 @@ def test_invalid_param_type(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "loc must be a number." in response_data['message']
+    assert "locは数値である必要があります。" in response_data['message']
 
 
 def test_negative_scale_normal(client, tables_store):
@@ -344,7 +344,7 @@ def test_negative_scale_normal(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "'scale' must be positive" in response_data['message']
+    assert "正規分布では、'scale'は正の値である必要があります" in response_data['message']
 
 
 def test_binomial_invalid_p(client, tables_store):
@@ -365,7 +365,7 @@ def test_binomial_invalid_p(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "'p' must be between 0 and 1" in response_data['message']
+    assert "'p'は0から1の間である必要があります" in response_data['message']
 
 
 def test_hypergeometric_success(client, tables_store):
@@ -408,4 +408,4 @@ def test_hypergeometric_invalid_params(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "'K' must not exceed 'N'" in response_data['message']
+    assert "'K'は'N'を超えてはいけません" in response_data['message']

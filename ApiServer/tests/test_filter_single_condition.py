@@ -240,7 +240,7 @@ def test_filter_invalid_table(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "tableName 'NoTable' does not exist." == response_data['message']
+    assert "tableName 'NoTable'は存在しません。" == response_data['message']
 
 
 def test_filter_invalid_column(client, tables_store):
@@ -259,7 +259,7 @@ def test_filter_invalid_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "columnName 'Z' does not exist." == response_data['message']
+    assert "columnName 'Z'は存在しません。" == response_data['message']
 
 
 def test_filter_invalid_condition(client, tables_store):
@@ -278,7 +278,7 @@ def test_filter_invalid_condition(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = ("condition 'invalid_condition' is not supported. "
-               "Supported condition: equals, notEquals, greaterThan, "
+    message = ("condition 'invalid_condition'はサポートされていません。"
+               "サポートされる条件: equals, notEquals, greaterThan, "
                "lessThan, greaterThanOrEquals, lessThanOrEquals")
     assert message == response_data['message']
