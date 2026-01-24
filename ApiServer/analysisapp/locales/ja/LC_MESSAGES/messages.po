@@ -233,7 +233,7 @@ msgstr "設定の取得処理中に予期しないエラーが発生しました
 
 #: analysisapp/services/get_table_list.py:34
 msgid "An unexpected error during getting table name list."
-msgstr "テーブル名リストの取得中に予期しないエラーが発生しました"
+msgstr "テーブル名リストの取得中に予期しないエラーが発生しました。"
 
 #: analysisapp/services/import_csv_by_file.py:38
 #: analysisapp/services/import_excel_by_file.py:39
@@ -359,7 +359,7 @@ msgstr "transformMethod '{}'は無効です。有効なメソッド: {}"
 
 #: analysisapp/services/transform_column.py:73
 msgid "logBaseは1ではない正の数でなければなりません"
-msgstr "logBaseは1ではない正の数値である必要があります"
+msgstr "logBaseは1ではない正の数値である必要があります。"
 
 #: analysisapp/services/transform_column.py:78
 msgid "exponentは数値でなければなりません"
@@ -609,7 +609,7 @@ msgstr "超幾何分布では、'n'は'N'を超えてはいけません"
 
 #: analysisapp/utils/validator/statistics_validators.py:198
 msgid "Dependent variable cannot be included in explanatory variables"
-msgstr "被説明変数を説明変数に含めることはできません"
+msgstr "被説明変数を説明変数に含めることはできません。"
 
 #~ msgid "standard_error_methodmust be one of: , "
 #~ msgstr "standard_error_method は次のいずれかである必要があります: , "

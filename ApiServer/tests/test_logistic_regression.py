@@ -202,7 +202,7 @@ def test_logistic_regression_dependent_in_explanatory(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    message = "被説明変数を説明変数に含めることはできません"
+    message = "被説明変数を説明変数に含めることはできません。"
     assert message == response_data['message']
 
 

@@ -87,7 +87,7 @@ def test_upload_non_parquet_file(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "Parquetファイルである必要があります" == response_data['message']
+    assert "Parquetファイルである必要があります。" == response_data['message']
 
 
 def test_upload_empty_parquet_file(client, prepared_data):

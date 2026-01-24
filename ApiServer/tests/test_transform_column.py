@@ -300,7 +300,7 @@ def test_transform_column_invalid_method(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert ("transformMethod 'invalid' は無効です。有効なメソッド: "
+    assert ("transformMethod 'invalid'は無効です。有効なメソッド: "
             "log, power, root") == response_data[
         'message']
 
@@ -321,7 +321,7 @@ def test_transform_column_invalid_log_base(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "logBaseは1ではない正の数値である必要があります" \
+    assert "logBaseは1ではない正の数値である必要があります。" \
         == response_data['message']
 
 
@@ -341,5 +341,5 @@ def test_transform_column_negative_log_base(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
-    assert "logBase は 1 ではない正の数値である必要があります" \
+    assert "logBaseは1ではない正の数値である必要があります。" \
         == response_data['message']

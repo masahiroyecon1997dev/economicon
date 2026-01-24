@@ -279,6 +279,6 @@ def test_filter_invalid_condition(client, tables_store):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data['code'] == 'NG'
     message = ("condition 'invalid_condition'はサポートされていません。"
-               "サポートされる条件: equals, notEquals, greaterThan, "
+               "サポートされるcondition: equals, notEquals, greaterThan, "
                "lessThan, greaterThanOrEquals, lessThanOrEquals")
     assert message == response_data['message']
