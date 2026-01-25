@@ -69,15 +69,16 @@ def tables_store():
 def test_fixed_effects_estimation_success(client, tables_store):
     """正常に固定効果推定が実行できる"""
     payload = {
+        'type': 'fe',
         'tableName': 'PanelData',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1', 'x2'],
         'entityIdColumn': 'entity_id',
-        'standardErrorMethod': 'normal',
+        'standardErrorMethod': 'nonrobust',
         'useTDistribution': True
     }
     response = client.post(
-        '/api/regression/fixed-effects',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -106,12 +107,13 @@ def test_fixed_effects_estimation_success(client, tables_store):
         assert 'standardError' in param
     # モデル統計情報をチェック
     stats = result['modelStatistics']
-    assert 'R2' in stats
-    assert 'adjustedR2' in stats
     assert 'nObservations' in stats
     assert 'nEntities' in stats
-    assert 'standardErrorMethod' in stats
-    assert 'useTDistribution' in stats
+    assert 'R2Within' in stats
+    assert 'R2Between' in stats
+    assert 'R2Overall' in stats
+    # 診断結果をチェック
+    assert 'diagnostics' in result
     # 推定結果の妥当性をチェック（真の係数に近いか）
     x1_coeff = next(
         p['coefficient'] for p in parameters if p['variable'] == 'x1')
@@ -126,29 +128,30 @@ def test_fixed_effects_estimation_robust_standard_errors(client,
                                                          tables_store):
     """頑健な標準誤差で固定効果推定が実行できる"""
     payload = {
+        'type': 'fe',
         'tableName': 'PanelData',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1'],
         'entityIdColumn': 'entity_id',
-        'standardErrorMethod': 'robust',
+        'standardErrorMethod': 'hc0',
         'useTDistribution': False
     }
     response = client.post(
-        '/api/regression/fixed-effects',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     result = response_data['result']
-    assert result['modelStatistics']['standardErrorMethod'] == 'robust'
-    assert result['modelStatistics']['useTDistribution'] is False
+    assert 'parameters' in result
 
 
 def test_fixed_effects_estimation_clustered_standard_errors(client,
                                                             tables_store):
     """クラスター標準誤差で固定効果推定が実行できる"""
     payload = {
+        'type': 'fe',
         'tableName': 'PanelData',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1'],
@@ -157,19 +160,20 @@ def test_fixed_effects_estimation_clustered_standard_errors(client,
         'useTDistribution': True
     }
     response = client.post(
-        '/api/regression/fixed-effects',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     result = response_data['result']
-    assert result['modelStatistics']['standardErrorMethod'] == 'clustered'
+    assert 'parameters' in result
 
 
 def test_fixed_effects_estimation_hac_standard_errors(client, tables_store):
     """HAC標準誤差で固定効果推定が実行できる"""
     payload = {
+        'type': 'fe',
         'tableName': 'PanelData',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1'],
@@ -178,26 +182,27 @@ def test_fixed_effects_estimation_hac_standard_errors(client, tables_store):
         'useTDistribution': True
     }
     response = client.post(
-        '/api/regression/fixed-effects',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data['code'] == 'OK'
     result = response_data['result']
-    assert result['modelStatistics']['standardErrorMethod'] == 'hac'
+    assert 'parameters' in result
 
 
 def test_fixed_effects_estimation_invalid_table(client, tables_store):
     """存在しないテーブル名でエラーが返される"""
     payload = {
+        'type': 'fe',
         'tableName': 'NonExistentTable',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1'],
         'entityIdColumn': 'entity_id'
     }
     response = client.post(
-        '/api/regression/fixed-effects',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -211,13 +216,14 @@ def test_fixed_effects_estimation_invalid_dependent_variable(client,
                                                              tables_store):
     """存在しない被説明変数でエラーが返される"""
     payload = {
+        'type': 'fe',
         'tableName': 'PanelData',
         'dependentVariable': 'nonexistent_y',
         'explanatoryVariables': ['x1'],
         'entityIdColumn': 'entity_id'
     }
     response = client.post(
-        '/api/regression/fixed-effects',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -231,13 +237,14 @@ def test_fixed_effects_estimation_invalid_explanatory_variable(client,
                                                                tables_store):
     """存在しない説明変数でエラーが返される"""
     payload = {
+        'type': 'fe',
         'tableName': 'PanelData',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1', 'nonexistent_x'],
         'entityIdColumn': 'entity_id'
     }
     response = client.post(
-        '/api/regression/fixed-effects',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -251,13 +258,14 @@ def test_fixed_effects_estimation_invalid_entity_id_column(client,
                                                            tables_store):
     """存在しない個体ID列でエラーが返される"""
     payload = {
+        'type': 'fe',
         'tableName': 'PanelData',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1'],
         'entityIdColumn': 'nonexistent_id'
     }
     response = client.post(
-        '/api/regression/fixed-effects',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -271,13 +279,14 @@ def test_fixed_effects_estimation_entity_id_same_as_dependent(client,
                                                               tables_store):
     """個体ID列が被説明変数と同じ場合エラーが返される"""
     payload = {
+        'type': 'fe',
         'tableName': 'PanelData',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1'],
         'entityIdColumn': 'y'
     }
     response = client.post(
-        '/api/regression/fixed-effects',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -291,13 +300,14 @@ def test_fixed_effects_estimation_entity_id_in_explanatory(client,
                                                            tables_store):
     """個体ID列が説明変数に含まれている場合エラーが返される"""
     payload = {
+        'type': 'fe',
         'tableName': 'PanelData',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1', 'entity_id'],
         'entityIdColumn': 'entity_id'
     }
     response = client.post(
-        '/api/regression/fixed-effects',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()

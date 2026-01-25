@@ -56,12 +56,13 @@ def tables_store():
 def test_probit_regression_success(client, tables_store):
     """正常にプロビット分析が実行できる"""
     payload = {
+        'type': 'probit',
         'tableName': 'ProbitTestTable',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post(
-        '/api/regression/probit',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -97,12 +98,13 @@ def test_probit_regression_success(client, tables_store):
 def test_probit_regression_multiple_variables(client, tables_store):
     """複数の説明変数でプロビット分析が実行できる"""
     payload = {
+        'type': 'probit',
         'tableName': 'ProbitTestTable',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1', 'x2', 'x3']
     }
     response = client.post(
-        '/api/regression/probit',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -117,12 +119,13 @@ def test_probit_regression_multiple_variables(client, tables_store):
 def test_probit_regression_invalid_table(client, tables_store):
     """存在しないテーブル名でエラーが返される"""
     payload = {
+        'type': 'probit',
         'tableName': 'NonExistentTable',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post(
-        '/api/regression/probit',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -134,13 +137,13 @@ def test_probit_regression_invalid_table(client, tables_store):
 
 def test_probit_regression_invalid_dependent_variable(client, tables_store):
     """存在しない被説明変数でエラーが返される"""
-    payload = {
+    payload = {        'type': 'probit',        'type': 'probit',
         'tableName': 'ProbitTestTable',
         'dependentVariable': 'nonexistent_y',
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post(
-        '/api/regression/probit',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -159,7 +162,7 @@ def test_probit_regression_invalid_explanatory_variable(client,
         'explanatoryVariables': ['x1', 'nonexistent_x']
     }
     response = client.post(
-        '/api/regression/probit',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -177,7 +180,7 @@ def test_probit_regression_empty_explanatory_variables(client, tables_store):
         'explanatoryVariables': []
     }
     response = client.post(
-        '/api/regression/probit',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -196,7 +199,7 @@ def test_probit_regression_dependent_in_explanatory(client, tables_store):
         'explanatoryVariables': ['x1', 'y', 'x2']
     }
     response = client.post(
-        '/api/regression/probit',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
@@ -214,7 +217,7 @@ def test_probit_regression_missing_parameters(client, tables_store):
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post(
-        '/api/regression/probit',
+        '/api/analysis/regression',
         json=payload,
     )
     # response_data = response.json()
@@ -231,7 +234,7 @@ def test_probit_regression_single_explanatory_variable(client, tables_store):
         'explanatoryVariables': ['x1']
     }
     response = client.post(
-        '/api/regression/probit',
+        '/api/analysis/regression',
         json=payload,
     )
     response_data = response.json()
