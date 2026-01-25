@@ -23,77 +23,90 @@ class DeleteColumnRequest(BaseModel):
 
 class RenameColumnRequest(BaseModel):
     """カラム名変更リクエスト"""
-    tableName: str = Field(..., description="テーブル名")
-    oldColumnName: str = Field(..., description="元のカラム名")
-    newColumnName: str = Field(..., description="新しいカラム名")
+    table_name: str = Field(..., alias="tableName", description="テーブル名", min_length=1, max_length=255)
+    old_column_name: str = Field(..., alias="oldColumnName", description="元のカラム名", min_length=1, max_length=255)
+    new_column_name: str = Field(..., alias="newColumnName", description="新しいカラム名", min_length=1, max_length=255)
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class DuplicateColumnRequest(BaseModel):
     """カラム複製リクエスト"""
-    tableName: str = Field(..., description="テーブル名")
-    sourceColumnName: str = Field(..., description="元のカラム名")
-    newColumnName: str = Field(..., description="新しいカラム名")
+    table_name: str = Field(..., alias="tableName", description="テーブル名", min_length=1, max_length=255)
+    source_column_name: str = Field(..., alias="sourceColumnName", description="元のカラム名", min_length=1, max_length=255)
+    new_column_name: str = Field(..., alias="newColumnName", description="新しいカラム名", min_length=1, max_length=255)
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class CalculateColumnRequest(BaseModel):
     """カラム計算リクエスト"""
-    tableName: str = Field(..., description="テーブル名")
-    newColumnName: str = Field(..., description="新しいカラム名")
-    calculationExpression: str = Field(..., description="計算式")
+    table_name: str = Field(..., alias="tableName", description="テーブル名", min_length=1, max_length=255)
+    new_column_name: str = Field(..., alias="newColumnName", description="新しいカラム名", min_length=1, max_length=255)
+    calculation_expression: str = Field(..., alias="calculationExpression", description="計算式", min_length=1)
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class AddDummyColumnRequest(BaseModel):
     """ダミー変数カラム追加リクエスト"""
-    tableName: str = Field(..., description="テーブル名")
-    sourceColumnName: str = Field(..., description="元となるカラム名")
-    dummyColumnName: str = Field(..., description="ダミー変数カラム名")
-    targetValue: str = Field(..., description="1にする対象の値")
+    table_name: str = Field(..., alias="tableName", description="テーブル名", min_length=1, max_length=255)
+    source_column_name: str = Field(..., alias="sourceColumnName", description="元となるカラム名", min_length=1, max_length=255)
+    dummy_column_name: str = Field(..., alias="dummyColumnName", description="ダミー変数カラム名", min_length=1, max_length=255)
+    target_value: str = Field(..., alias="targetValue", description="1にする対象の値")
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class AddLagLeadColumnRequest(BaseModel):
     """ラグ・リードカラム追加リクエスト"""
-    tableName: str = Field(..., description="テーブル名")
-    sourceColumn: str = Field(..., description="元となるカラム名")
-    newColumnName: str = Field(..., description="新しいカラム名")
-    periods: int = Field(..., description="ラグ・リード期間")
-    groupColumns: List[str] = Field(
+    table_name: str = Field(..., alias="tableName", description="テーブル名", min_length=1, max_length=255)
+    source_column: str = Field(..., alias="sourceColumn", description="元となるカラム名", min_length=1, max_length=255)
+    new_column_name: str = Field(..., alias="newColumnName", description="新しいカラム名", min_length=1, max_length=255)
+    periods: int = Field(..., alias="periods", description="ラグ・リード期間")
+    group_columns: List[str] = Field(
         default_factory=list,
+        alias="groupColumns",
         description="グループ化するカラムのリスト"
     )
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class AddSimulationColumnRequest(BaseModel):
     """シミュレーションカラム追加リクエスト"""
-    tableName: str = Field(..., description="テーブル名")
-    newColumnName: str = Field(..., description="新しいカラム名")
-    distributionType: str = Field(..., description="分布の種類")
-    distributionParams: dict = Field(..., description="分布のパラメータ")
+    table_name: str = Field(..., alias="tableName", description="テーブル名", min_length=1, max_length=255)
+    new_column_name: str = Field(..., alias="newColumnName", description="新しいカラム名", min_length=1, max_length=255)
+    distribution_type: str = Field(..., alias="distributionType", description="分布の種類", min_length=1)
+    distribution_params: dict = Field(..., alias="distributionParams", description="分布のパラメータ")
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class SortColumnsRequest(BaseModel):
     """カラムソートリクエスト"""
-    tableName: str = Field(..., description="テーブル名")
-    sortColumns: List[Dict[str, str]] = Field(
+    table_name: str = Field(..., alias="tableName", description="テーブル名", min_length=1, max_length=255)
+    sort_columns: List[Dict[str, str]] = Field(
         ...,
-        description="ソート設定のリスト"
+        alias="sortColumns",
+        description="ソート設定のリスト",
+        min_length=1
     )
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class TransformColumnRequest(BaseModel):
     """カラム変換リクエスト"""
-    tableName: str = Field(..., description="テーブル名")
-    sourceColumnName: str = Field(..., description="元となるカラム名")
-    newColumnName: str = Field(..., description="新しい列名")
-    transformMethod: str = Field(..., description="変換メソッド")
-    logBase: Optional[float] = Field(None, description="対数の底（オプション）")
-    exponent: Optional[float] = Field(None, description="指数（オプション）")
-    rootIndex: Optional[float] = Field(
+    table_name: str = Field(..., alias="tableName", description="テーブル名", min_length=1, max_length=255)
+    source_column_name: str = Field(..., alias="sourceColumnName", description="元となるカラム名", min_length=1, max_length=255)
+    new_column_name: str = Field(..., alias="newColumnName", description="新しい列名", min_length=1, max_length=255)
+    transform_method: str = Field(..., alias="transformMethod", description="変換メソッド", min_length=1)
+    log_base: Optional[float] = Field(None, alias="logBase", description="対数の底（オプション）")
+    exponent: Optional[float] = Field(None, alias="exponent", description="指数（オプション）")
+    root_index: Optional[float] = Field(
         None,
+        alias="rootIndex",
         description="累乗根の次数（オプション）"
     )
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class GetColumnListRequest(BaseModel):
     """カラムリスト取得リクエスト"""
-    tableName: str = Field(..., description="対象テーブル名")
-    isNumberOnly: str = Field(default="false", description="数値カラムのみ取得")
+    table_name: str = Field(..., alias="tableName", description="対象テーブル名", min_length=1, max_length=255)
+    is_number_only: str = Field(default="false", alias="isNumberOnly", description="数値カラムのみ取得")
+    model_config = ConfigDict(populate_by_name=True)

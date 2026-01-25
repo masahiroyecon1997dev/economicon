@@ -72,5 +72,5 @@ def get_column_list(table_name: str,
     api = GetColumnList(table_name, is_number_only)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     return api.execute()

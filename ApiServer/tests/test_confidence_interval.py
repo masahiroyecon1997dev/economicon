@@ -326,7 +326,7 @@ def test_confidence_interval_missing_parameters(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['message'] is not None
 
 
