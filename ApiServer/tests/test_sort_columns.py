@@ -152,8 +152,9 @@ def test_sort_empty_columns(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
+    assert "sortColumns は少なくとも1つの要素を含む必要があります。" == response_data['message']
 
 
 def test_sort_missing_column_name(client, tables_store):
