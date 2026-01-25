@@ -322,6 +322,8 @@ def test_invalid_table_name(client, tables_store):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     response_data = response.json()
     assert response_data['code'] == 'NG'
+    assert 'NonExistentTable' in response_data['message']
+    assert 'table' in response_data['message'].lower() or 'テーブル' in response_data['message']
 
 
 @pytest.mark.parametrize("std_error_method", [
@@ -441,6 +443,7 @@ def test_invalid_dependent_variable(client, tables_store):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     response_data = response.json()
     assert response_data['code'] == 'NG'
+    assert 'nonexistent_y' in response_data['message']
 
 
 def test_invalid_explanatory_variable(client, tables_store):
@@ -456,6 +459,7 @@ def test_invalid_explanatory_variable(client, tables_store):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     response_data = response.json()
     assert response_data['code'] == 'NG'
+    assert 'nonexistent_x' in response_data['message']
 
 
 def test_empty_explanatory_variables(client, tables_store):
@@ -470,6 +474,9 @@ def test_empty_explanatory_variables(client, tables_store):
 
     # サービス層のバリデーションで400が返される
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    response_data = response.json()
+    assert response_data['code'] == 'NG'
+    assert 'explanatory' in response_data['message'].lower() or '説明変数' in response_data['message']
 
 
 def test_dependent_in_explanatory(client, tables_store):
@@ -485,6 +492,7 @@ def test_dependent_in_explanatory(client, tables_store):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     response_data = response.json()
     assert response_data['code'] == 'NG'
+    assert 'y_linear' in response_data['message'] or 'dependent' in response_data['message'].lower() or '被説明' in response_data['message']
 
 
 def test_missing_entity_id_for_panel(client, tables_store):
@@ -498,6 +506,11 @@ def test_missing_entity_id_for_panel(client, tables_store):
     response = client.post('/api/analysis/regression', json=payload)
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    response_data = response.json()
+    # Pydanticのエラーメッセージ構造を確認
+    assert 'detail' in response_data
+    error_message = str(response_data['detail'])
+    assert 'entityIdColumn' in error_message or 'entity' in error_message.lower()
 
 
 def test_missing_instrumental_variables(client, tables_store):
@@ -512,6 +525,10 @@ def test_missing_instrumental_variables(client, tables_store):
     response = client.post('/api/analysis/regression', json=payload)
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    response_data = response.json()
+    assert 'detail' in response_data
+    error_message = str(response_data['detail'])
+    assert 'instrumentalVariables' in error_message or 'instrumental' in error_message.lower()
 
 
 def test_missing_alpha_for_lasso(client, tables_store):
@@ -525,6 +542,10 @@ def test_missing_alpha_for_lasso(client, tables_store):
     response = client.post('/api/analysis/regression', json=payload)
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    response_data = response.json()
+    assert 'detail' in response_data
+    error_message = str(response_data['detail'])
+    assert 'alpha' in error_message.lower()
 
 
 def test_invalid_entity_id_column(client, tables_store):
@@ -541,6 +562,7 @@ def test_invalid_entity_id_column(client, tables_store):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     response_data = response.json()
     assert response_data['code'] == 'NG'
+    assert 'nonexistent_id' in response_data['message']
 
 
 def test_invalid_instrumental_variable(client, tables_store):
@@ -558,6 +580,7 @@ def test_invalid_instrumental_variable(client, tables_store):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     response_data = response.json()
     assert response_data['code'] == 'NG'
+    assert 'nonexistent_z' in response_data['message']
 
 
 def test_clustered_without_groups(client, tables_store):
@@ -573,3 +596,7 @@ def test_clustered_without_groups(client, tables_store):
 
     # バリデーションエラーで422が返される
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    response_data = response.json()
+    assert 'detail' in response_data
+    error_message = str(response_data['detail'])
+    assert 'groups' in error_message.lower() or 'clustered' in error_message.lower()
