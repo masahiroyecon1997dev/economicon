@@ -100,5 +100,5 @@ def fetch_data_to_json(table_name: str, start_row: int, fetch_rows: int):
     api = FetchDataToJson(table_name, start_row, fetch_rows)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     return api.execute()

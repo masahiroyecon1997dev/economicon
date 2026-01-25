@@ -72,6 +72,41 @@ def test_delete_table_empty_table_name(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    assert "tableNameは必須です。" in response_data['message']
+    assert "tableName は1文字以上である必要があります。" in response_data['message']
+
+
+# Pydanticバリデーションテスト
+
+
+def test_delete_table_pydantic_empty_table_name(client, tables_store):
+    """
+    tableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': ''
+    }
+    response = client.post(
+        '/api/table/delete',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_delete_table_pydantic_missing_table_name(client, tables_store):
+    """
+    tableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {}
+    response = client.post(
+        '/api/table/delete',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']

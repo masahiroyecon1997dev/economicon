@@ -15,9 +15,9 @@ class DuplicateTable(AbstractApi):
 
     指定されたテーブルを複製して、新しい名前で追加します。
     """
-    def __init__(self, source_table_name: str, new_table_name: str):
+    def __init__(self, table_name: str, new_table_name: str):
         self.tables_store = TablesStore()
-        self.source_table_name = source_table_name
+        self.table_name = table_name
         self.new_table_name = new_table_name
         self.param_names = {
                 'table_name': 'tableName',
@@ -29,7 +29,7 @@ class DuplicateTable(AbstractApi):
             table_name_list = self.tables_store.get_table_name_list()
             # ソーステーブルの存在チェック
             validate_existed_table_name(
-                self.source_table_name,
+                self.table_name,
                 table_name_list,
                 self.param_names['table_name']
             )
@@ -47,7 +47,7 @@ class DuplicateTable(AbstractApi):
         try:
             # ソーステーブルを取得
             source_table_info = self.tables_store.get_table(
-                self.source_table_name)
+                self.table_name)
             source_df = source_table_info.table
 
             # テーブルを複製
@@ -66,11 +66,11 @@ class DuplicateTable(AbstractApi):
             raise ApiError(message) from e
 
 
-def duplicate_table(source_table_name: str,
+def duplicate_table(table_name: str,
                     new_table_name: str) -> Dict:
-    api = DuplicateTable(source_table_name, new_table_name)
+    api = DuplicateTable(table_name, new_table_name)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     result = api.execute()
     return result

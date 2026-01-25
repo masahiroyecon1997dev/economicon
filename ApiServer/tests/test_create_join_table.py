@@ -144,9 +144,9 @@ def test_join_table_name_empty(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    assert "joinTableNameは必須です。" == response_data['message']
+    assert "joinTableName は1文字以上である必要があります。" == response_data['message']
 
 
 def test_left_table_not_found(client, tables_store):
@@ -248,3 +248,264 @@ def test_invalid_join_type(client, tables_store):
     message = ("joinType 'invalid_type'はサポートされていません。"
                "サポートされるjoinType: inner, left, right, outer")
     assert message == response_data['message']
+
+
+# Pydanticバリデーションテスト
+
+
+def test_create_join_table_pydantic_empty_join_table_name(client, tables_store):
+    """
+    joinTableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': '',
+        'leftTableName': 'LeftTable',
+        'rightTableName': 'RightTable',
+        'leftKeyColumnNames': ['id'],
+        'rightKeyColumnNames': ['id'],
+        'joinType': 'inner'
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'joinTableName' in response_data['message']
+
+
+def test_create_join_table_pydantic_empty_left_table_name(client, tables_store):
+    """
+    leftTableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': 'JoinTable',
+        'leftTableName': '',
+        'rightTableName': 'RightTable',
+        'leftKeyColumnNames': ['id'],
+        'rightKeyColumnNames': ['id'],
+        'joinType': 'inner'
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'leftTableName' in response_data['message']
+
+
+def test_create_join_table_pydantic_empty_right_table_name(client, tables_store):
+    """
+    rightTableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': 'JoinTable',
+        'leftTableName': 'LeftTable',
+        'rightTableName': '',
+        'leftKeyColumnNames': ['id'],
+        'rightKeyColumnNames': ['id'],
+        'joinType': 'inner'
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'rightTableName' in response_data['message']
+
+
+def test_create_join_table_pydantic_empty_join_type(client, tables_store):
+    """
+    joinTypeが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': 'JoinTable',
+        'leftTableName': 'LeftTable',
+        'rightTableName': 'RightTable',
+        'leftKeyColumnNames': ['id'],
+        'rightKeyColumnNames': ['id'],
+        'joinType': ''
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'joinType' in response_data['message']
+
+
+def test_create_join_table_pydantic_empty_left_key_column_names(client, tables_store):
+    """
+    leftKeyColumnNamesが空の場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': 'JoinTable',
+        'leftTableName': 'LeftTable',
+        'rightTableName': 'RightTable',
+        'leftKeyColumnNames': [],
+        'rightKeyColumnNames': ['id'],
+        'joinType': 'inner'
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'List should have at least 1 item' in response_data['message']
+
+
+def test_create_join_table_pydantic_empty_right_key_column_names(client, tables_store):
+    """
+    rightKeyColumnNamesが空の場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': 'JoinTable',
+        'leftTableName': 'LeftTable',
+        'rightTableName': 'RightTable',
+        'leftKeyColumnNames': ['id'],
+        'rightKeyColumnNames': [],
+        'joinType': 'inner'
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'List should have at least 1 item' in response_data['message']
+
+
+def test_create_join_table_pydantic_missing_join_table_name(client, tables_store):
+    """
+    joinTableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'leftTableName': 'LeftTable',
+        'rightTableName': 'RightTable',
+        'leftKeyColumnNames': ['id'],
+        'rightKeyColumnNames': ['id'],
+        'joinType': 'inner'
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'joinTableName' in response_data['message']
+
+
+def test_create_join_table_pydantic_missing_left_table_name(client, tables_store):
+    """
+    leftTableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': 'JoinTable',
+        'rightTableName': 'RightTable',
+        'leftKeyColumnNames': ['id'],
+        'rightKeyColumnNames': ['id'],
+        'joinType': 'inner'
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'leftTableName' in response_data['message']
+
+
+def test_create_join_table_pydantic_missing_right_table_name(client, tables_store):
+    """
+    rightTableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': 'JoinTable',
+        'leftTableName': 'LeftTable',
+        'leftKeyColumnNames': ['id'],
+        'rightKeyColumnNames': ['id'],
+        'joinType': 'inner'
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'rightTableName' in response_data['message']
+
+
+def test_create_join_table_pydantic_missing_left_key_column_names(client, tables_store):
+    """
+    leftKeyColumnNamesが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': 'JoinTable',
+        'leftTableName': 'LeftTable',
+        'rightTableName': 'RightTable',
+        'rightKeyColumnNames': ['id'],
+        'joinType': 'inner'
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'leftKeyColumnNames' in response_data['message']
+
+
+def test_create_join_table_pydantic_missing_right_key_column_names(client, tables_store):
+    """
+    rightKeyColumnNamesが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': 'JoinTable',
+        'leftTableName': 'LeftTable',
+        'rightTableName': 'RightTable',
+        'leftKeyColumnNames': ['id'],
+        'joinType': 'inner'
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'rightKeyColumnNames' in response_data['message']
+
+
+def test_create_join_table_pydantic_missing_join_type(client, tables_store):
+    """
+    joinTypeが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'joinTableName': 'JoinTable',
+        'leftTableName': 'LeftTable',
+        'rightTableName': 'RightTable',
+        'leftKeyColumnNames': ['id'],
+        'rightKeyColumnNames': ['id']
+    }
+    response = client.post(
+        '/api/table/create-join',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'joinType' in response_data['message']

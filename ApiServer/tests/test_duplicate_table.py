@@ -122,3 +122,76 @@ def test_duplicate_table_empty_table(client, prepared_data):
         'DuplicatedEmptyTable').table
     assert duplicated_df.height == 0
     assert duplicated_df.columns == ['Col1', 'Col2']
+
+
+# Pydanticバリデーションテスト
+
+
+def test_duplicate_table_pydantic_empty_table_name(client, prepared_data):
+    """
+    tableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': '',
+        'newTableName': 'DuplicatedTable'
+    }
+    response = client.post(
+        '/api/table/duplicate',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_duplicate_table_pydantic_empty_new_table_name(client, prepared_data):
+    """
+    newTableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTable',
+        'newTableName': ''
+    }
+    response = client.post(
+        '/api/table/duplicate',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'newTableName' in response_data['message']
+
+
+def test_duplicate_table_pydantic_missing_table_name(client, prepared_data):
+    """
+    tableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'newTableName': 'DuplicatedTable'
+    }
+    response = client.post(
+        '/api/table/duplicate',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_duplicate_table_pydantic_missing_new_table_name(client, prepared_data):
+    """
+    newTableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTable'
+    }
+    response = client.post(
+        '/api/table/duplicate',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'newTableName' in response_data['message']
