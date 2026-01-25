@@ -1,188 +1,115 @@
+"""
+統合回帰分析エンドポイント
+
+全ての回帰分析タイプを単一のエンドポイントで処理します。
+"""
+
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..schemas import (FixedEffectsEstimationRequest, LinearRegressionRequest,
-                       LogisticRegressionRequest, ProbitRegressionRequest,
-                       VariableEffectsEstimationRequest)
-from ..services.fixed_effects_estimation import fixed_effects_estimation
-from ..services.linear_regression import linear_regression
-from ..services.logistic_regression import logistic_regression
-from ..services.probit_regression import probit_regression
-from ..services.variable_effects_estimation import variable_effects_estimation
-from ..utils import create_log_api_request, create_success_response
+from ..schemas.regressions import RegressionRequest
+from ..services.regression import execute_regression_analysis
+from ..utils.validator.common_validators import ValidationError
+from ..services.abstract_api import ApiError
+from ..utils import (
+    create_log_api_request,
+    create_success_response,
+    create_error_response
+)
 
-router = APIRouter(prefix="/regression", tags=["regression"])
+router = APIRouter(prefix="/analysis", tags=["analysis"])
 
 
-@router.post("/linear")
-async def linear_regression_endpoint(request: Request,
-                                     body: LinearRegressionRequest):
-    """線形回帰分析を実行するエンドポイント
+@router.post("/regression")
+async def unified_regression_endpoint(
+    request: Request,
+    body: RegressionRequest
+):
+    """
+    統合回帰分析エンドポイント
+
+    typeフィールドに応じて適切な分析手法を選択し、実行します。
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : LinearRegressionRequest
-        リクエストボディ
-        - tableName: テーブル名
-        - dependentVariable: 被説明変数の列名
-        - explanatoryVariables: 説明変数の列名リスト
+    body : AnalysisRequest
+        統合回帰分析リクエスト
+        - type: 分析タイプ (ols, logit, probit, tobit, fe, re, iv,
+          feiv, lasso, ridge)
+        - tableName: 対象テーブル名
+        - dependentVariable: 被説明変数
+        - explanatoryVariables: 説明変数のリスト
+        - その他分析固有のパラメータ
 
     Returns
     -------
     JSONResponse
-        線形回帰分析の結果
+        分析結果またはエラーメッセージ
     """
     create_log_api_request(request)
 
-    result = linear_regression(
-        table_name=body.tableName,
-        dependent_variable=body.dependentVariable,
-        explanatory_variables=body.explanatoryVariables
-    )
+    try:
+        # 共通パラメータの準備
+        params = {
+            'analysis_type': body.type,
+            'table_name': body.tableName,
+            'dependent_variable': body.dependentVariable,
+            'explanatory_variables': body.explanatoryVariables,
+            'standard_error_method': body.standardErrorMethod,
+            'has_const': body.hasConst,
+            'missing_value_handling': body.missingValueHandling,
+            'use_t_distribution': body.useTDistribution,
+        }
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+        # パネルデータパラメータ
+        if body.entityIdColumn:
+            params['entity_id_column'] = body.entityIdColumn
+        if body.timeColumn:
+            params['time_column'] = body.timeColumn
 
+        # 操作変数パラメータ
+        if body.instrumentalVariables:
+            params['instrumental_variables'] = body.instrumentalVariables
+        if body.endogenousVariables:
+            params['endogenous_variables'] = body.endogenousVariables
 
-@router.post("/logistic")
-async def logistic_regression_endpoint(request: Request,
-                                       body: LogisticRegressionRequest):
-    """ロジット分析を実行するエンドポイント
+        # Tobitパラメータ
+        if body.leftCensoringLimit is not None:
+            params['left_censoring_limit'] = body.leftCensoringLimit
+        if body.rightCensoringLimit is not None:
+            params['right_censoring_limit'] = body.rightCensoringLimit
 
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : LogisticRegressionRequest
-        リクエストボディ
-        - tableName: テーブル名
-        - dependentVariable: 被説明変数の列名
-        - explanatoryVariables: 説明変数の列名リスト
+        # 正則化パラメータ
+        if 'alpha' in body.hyperParameters:
+            params['alpha'] = body.hyperParameters['alpha']
 
-    Returns
-    -------
-    JSONResponse
-        ロジット分析の結果
-    """
-    create_log_api_request(request)
+        # 統合サービスを呼び出し
+        result = execute_regression_analysis(**params)
 
-    result = logistic_regression(
-        table_name=body.tableName,
-        dependent_variable=body.dependentVariable,
-        explanatory_variables=body.explanatoryVariables
-    )
+        return create_success_response(
+            http_status.HTTP_200_OK,
+            result
+        )
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
-
-
-@router.post("/probit")
-async def probit_regression_endpoint(request: Request,
-                                     body: ProbitRegressionRequest):
-    """プロビット分析を実行するエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : ProbitRegressionRequest
-        リクエストボディ
-        - tableName: テーブル名
-        - dependentVariable: 被説明変数の列名
-        - explanatoryVariables: 説明変数の列名リスト
-
-    Returns
-    -------
-    JSONResponse
-        プロビット分析の結果
-    """
-    create_log_api_request(request)
-
-    result = probit_regression(
-        table_name=body.tableName,
-        dependent_variable=body.dependentVariable,
-        explanatory_variables=body.explanatoryVariables
-    )
-
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
-
-
-@router.post("/variable-effects")
-async def variable_effects_estimation_endpoint(
-        request: Request, body: VariableEffectsEstimationRequest):
-    """変量効果推定分析を実行するエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : VariableEffectsEstimationRequest
-        リクエストボディ
-        - tableName: テーブル名
-        - dependentVariable: 被説明変数の列名
-        - explanatoryVariables: 説明変数の列名リスト
-        - standardErrorMethod: 標準誤差の計算方法（オプション、デフォルト: "nonrobust"）
-        - useTDistribution: t分布を使用するか（オプション、デフォルト: true）
-
-    Returns
-    -------
-    JSONResponse
-        変量効果推定分析の結果
-    """
-    create_log_api_request(request)
-
-    result = variable_effects_estimation(
-        table_name=body.tableName,
-        dependent_variable=body.dependentVariable,
-        explanatory_variables=body.explanatoryVariables,
-        standard_error_method=body.standardErrorMethod,
-        use_t_distribution=body.useTDistribution
-    )
-
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
-
-
-@router.post("/fixed-effects")
-async def fixed_effects_estimation_endpoint(
-        request: Request, body: FixedEffectsEstimationRequest):
-    """固定効果推定を実行するエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : FixedEffectsEstimationRequest
-        リクエストボディ
-
-    Returns
-    -------
-    JSONResponse
-        処理結果
-    """
-    create_log_api_request(request)
-
-    result = fixed_effects_estimation(
-        table_name=body.tableName,
-        dependent_variable=body.dependentVariable,
-        explanatory_variables=body.explanatoryVariables,
-        entity_id_column=body.entityIdColumn,
-        standard_error_method=body.standardErrorMethod,
-        use_t_distribution=body.useTDistribution
-    )
-
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    except ValidationError as e:
+        return create_error_response(
+            http_status.HTTP_400_BAD_REQUEST,
+            str(e)
+        )
+    except ApiError as e:
+        return create_error_response(
+            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            str(e)
+        )
+    except NotImplementedError as e:
+        return create_error_response(
+            http_status.HTTP_501_NOT_IMPLEMENTED,
+            str(e)
+        )
+    except Exception as e:
+        return create_error_response(
+            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            f"Unexpected error: {str(e)}"
+        )
