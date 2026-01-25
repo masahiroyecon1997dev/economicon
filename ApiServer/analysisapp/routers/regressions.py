@@ -11,6 +11,12 @@ from ..schemas.regressions import RegressionRequest
 from ..services.regression import execute_regression_analysis
 from ..services.data.analysis_result import AnalysisResult
 from ..services.data.analysis_result_store import AnalysisResultStore
+from ..services.regressions.result import (
+    get_all_analysis_results,
+    get_analysis_result,
+    delete_analysis_result,
+    clear_all_analysis_results
+)
 from ..utils.validator.common_validators import ValidationError
 from ..services.abstract_api import ApiError
 from ..utils import (
@@ -130,7 +136,7 @@ async def unified_regression_endpoint(
 
 
 @router.get("/results")
-async def get_all_analysis_results(request: Request):
+async def get_all_analysis_results_endpoint(request: Request):
     """
     すべての分析結果のサマリーを取得
 
@@ -142,14 +148,26 @@ async def get_all_analysis_results(request: Request):
     create_log_api_request(request)
 
     try:
-        result_store = AnalysisResultStore()
-        summaries = result_store.get_all_summaries()
+        # リクエスト受け取りログ
+        create_log_api_request(request)
+        # ビジネスロジックの実行（既存のpython_apisをそのまま使用）
+        result = get_all_analysis_results()
 
         return create_success_response(
             http_status.HTTP_200_OK,
-            {'results': summaries}
+            result
         )
 
+    except ValidationError as e:
+        return create_error_response(
+            http_status.HTTP_400_BAD_REQUEST,
+            str(e)
+        )
+    except ApiError as e:
+        return create_error_response(
+            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            str(e)
+        )
     except Exception as e:
         return create_error_response(
             http_status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -158,7 +176,7 @@ async def get_all_analysis_results(request: Request):
 
 
 @router.get("/results/{result_id}")
-async def get_analysis_result(request: Request, result_id: str):
+async def get_analysis_result_endpoint(request: Request, result_id: str):
     """
     指定されたIDの分析結果を取得
 
@@ -177,14 +195,23 @@ async def get_analysis_result(request: Request, result_id: str):
     create_log_api_request(request)
 
     try:
-        result_store = AnalysisResultStore()
-        result = result_store.get_result(result_id)
+        result = get_analysis_result(result_id)
 
         return create_success_response(
             http_status.HTTP_200_OK,
-            result.to_dict()
+            result
         )
 
+    except ValidationError as e:
+        return create_error_response(
+            http_status.HTTP_400_BAD_REQUEST,
+            str(e)
+        )
+    except ApiError as e:
+        return create_error_response(
+            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            str(e)
+        )
     except KeyError as e:
         return create_error_response(
             http_status.HTTP_404_NOT_FOUND,
@@ -198,7 +225,7 @@ async def get_analysis_result(request: Request, result_id: str):
 
 
 @router.delete("/results/{result_id}")
-async def delete_analysis_result(request: Request, result_id: str):
+async def delete_analysis_result_endpoint(request: Request, result_id: str):
     """
     指定されたIDの分析結果を削除
 
@@ -217,14 +244,23 @@ async def delete_analysis_result(request: Request, result_id: str):
     create_log_api_request(request)
 
     try:
-        result_store = AnalysisResultStore()
-        deleted_id = result_store.delete_result(result_id)
+        result = delete_analysis_result(result_id)
 
         return create_success_response(
             http_status.HTTP_200_OK,
-            {'deletedResultId': deleted_id}
+            result
         )
 
+    except ValidationError as e:
+        return create_error_response(
+            http_status.HTTP_400_BAD_REQUEST,
+            str(e)
+        )
+    except ApiError as e:
+        return create_error_response(
+            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            str(e)
+        )
     except KeyError as e:
         return create_error_response(
             http_status.HTTP_404_NOT_FOUND,
@@ -238,7 +274,7 @@ async def delete_analysis_result(request: Request, result_id: str):
 
 
 @router.delete("/results")
-async def clear_all_analysis_results(request: Request):
+async def clear_all_analysis_results_endpoint(request: Request):
     """
     すべての分析結果を削除
 
@@ -250,14 +286,23 @@ async def clear_all_analysis_results(request: Request):
     create_log_api_request(request)
 
     try:
-        result_store = AnalysisResultStore()
-        result_store.clear_all()
+        result = clear_all_analysis_results()
 
         return create_success_response(
             http_status.HTTP_200_OK,
-            {'message': 'All analysis results cleared'}
+            result
         )
 
+    except ValidationError as e:
+        return create_error_response(
+            http_status.HTTP_400_BAD_REQUEST,
+            str(e)
+        )
+    except ApiError as e:
+        return create_error_response(
+            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            str(e)
+        )
     except Exception as e:
         return create_error_response(
             http_status.HTTP_500_INTERNAL_SERVER_ERROR,
