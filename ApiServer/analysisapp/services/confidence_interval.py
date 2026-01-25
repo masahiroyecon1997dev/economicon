@@ -236,7 +236,7 @@ def confidence_interval(table_name: str, column_name: str,
                              statistic_type)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     try:
         result = api.execute()
         return result
