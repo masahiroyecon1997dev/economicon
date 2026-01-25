@@ -688,5 +688,94 @@ msgstr "リストを入力してください"
 msgid "Input should be a valid dictionary"
 msgstr "辞書を入力してください"
 
+# フィールド名の翻訳
+msgid "Field.tableName"
+msgstr "テーブル名"
+
+msgid "Field.type"
+msgstr "分析タイプ"
+
+msgid "Field.method"
+msgstr "計算手法"
+
+msgid "Field.name"
+msgstr "名前"
+
+msgid "Field.description"
+msgstr "説明"
+
+msgid "Field.dependentVariable"
+msgstr "被説明変数"
+
+msgid "Field.explanatoryVariables"
+msgstr "説明変数"
+
+msgid "Field.standardErrorMethod"
+msgstr "標準誤差計算方法"
+
+msgid "Field.confidenceLevel"
+msgstr "信頼水準"
+
+msgid "Field.columnName"
+msgstr "列名"
+
+msgid "Field.newColumnName"
+msgstr "新しい列名"
+
+msgid "Field.dataType"
+msgstr "データ型"
+
+msgid "Field.expression"
+msgstr "計算式"
+
+msgid "Field.filterConditions"
+msgstr "フィルタ条件"
+
+# 動的バリデーションメッセージテンプレート
+msgid "{field} は必須です"
+msgstr "{field} は必須です"
+
+msgid "{field} は文字列である必要があります"
+msgstr "{field} は文字列である必要があります"
+
+msgid "{field} は整数である必要があります"
+msgstr "{field} は整数である必要があります"
+
+msgid "{field} は数値である必要があります"
+msgstr "{field} は数値である必要があります"
+
+msgid "{field} は真偽値である必要があります"
+msgstr "{field} は真偽値である必要があります"
+
+msgid "{field} はリストである必要があります"
+msgstr "{field} はリストである必要があります"
+
+msgid "{field} は辞書である必要があります"
+msgstr "{field} は辞書である必要があります"
+
+msgid "{field} は{min_length}文字以上である必要があります"
+msgstr "{field} は{min_length}文字以上である必要があります"
+
+msgid "{field} は{max_length}文字以下である必要があります"
+msgstr "{field} は{max_length}文字以下である必要があります"
+
+msgid "{field} は{limit}未満である必要があります"
+msgstr "{field} は{limit}未満である必要があります"
+
+msgid "{field} は{limit}以下である必要があります"
+msgstr "{field} は{limit}以下である必要があります"
+
+msgid "{field} は{limit}より大きい必要があります"
+msgstr "{field} は{limit}より大きい必要があります"
+
+msgid "{field} は{limit}以上である必要があります"
+msgstr "{field} は{limit}以上である必要があります"
+
+msgid "{field} は次のいずれかである必要があります: {expected}"
+msgstr "{field} は次のいずれかである必要があります: {expected}"
+
+msgid "{field} の値が無効です"
+msgstr "{field} の値が無効です"
+
 #~ msgid "standard_error_methodmust be one of: , "
 #~ msgstr "standard_error_method は次のいずれかである必要があります: , "

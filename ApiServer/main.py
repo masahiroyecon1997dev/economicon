@@ -119,59 +119,140 @@ async def validation_exception_handler(
     """
     Pydantic バリデーションエラーハンドラ
 
-    422 エラーのメッセージを多言語化します。
+    422 エラーのメッセージを多言語化し、ユーザーフレンドリーな
+    メッセージを生成します。
     """
     errors = exc.errors()
-    translated_errors = []
+    translated_messages = []
 
     for error in errors:
-        translated_error = error.copy()
+        # フィールド名を取得（loc の最後の要素）
+        loc = error.get("loc", ())
+        field_name = loc[-1] if loc else ""
 
-        # エラータイプに基づく翻訳
+        # フィールド名を翻訳（messages.po に定義）
+        translated_field = _(f"Field.{field_name}")
+        if translated_field == f"Field.{field_name}":
+            # 翻訳が見つからない場合はそのまま使用
+            translated_field = field_name
+
+        # エラータイプとコンテキストを取得
         error_type = error.get("type", "")
-        error_msg = error.get("msg", "")
+        ctx = error.get("ctx", {})
 
-        # エラータイプごとの翻訳キーマッピング
-        type_translation_map = {
-            "missing": "ValidationError.FieldRequired",
-            "string_type": "ValidationError.StringTypeExpected",
-            "int_type": "ValidationError.IntTypeExpected",
-            "float_type": "ValidationError.FloatTypeExpected",
-            "bool_type": "ValidationError.BoolTypeExpected",
-            "list_type": "ValidationError.ListTypeExpected",
-            "dict_type": "ValidationError.DictTypeExpected",
-            "value_error": "ValidationError.ValueError",
-            "type_error": "ValidationError.TypeError",
-            "assertion_error": "ValidationError.AssertionError",
-            "less_than": "ValidationError.LessThan",
-            "less_than_equal": "ValidationError.LessThanEqual",
-            "greater_than": "ValidationError.GreaterThan",
-            "greater_than_equal": "ValidationError.GreaterThanEqual",
-            "string_too_short": "ValidationError.StringTooShort",
-            "string_too_long": "ValidationError.StringTooLong",
-            "enum": "ValidationError.InvalidEnum",
-            "literal_error": "ValidationError.LiteralError",
-        }
+        # エラータイプに応じてメッセージを構築
+        if error_type == "missing":
+            message = _("{field} は必須です").format(
+                field=translated_field
+            )
 
-        # エラータイプに対応する翻訳キーがあれば使用
-        if error_type in type_translation_map:
-            translation_key = type_translation_map[error_type]
-            translated_msg = _(translation_key)
+        elif error_type == "string_type":
+            message = _("{field} は文字列である必要があります").format(
+                field=translated_field
+            )
 
-            # 翻訳が見つからない場合（キーがそのまま返る）は
-            # 元のメッセージを翻訳
-            if translated_msg == translation_key:
-                translated_msg = _(error_msg)
+        elif error_type == "int_type":
+            message = _("{field} は整数である必要があります").format(
+                field=translated_field
+            )
+
+        elif error_type == "float_type":
+            message = _("{field} は数値である必要があります").format(
+                field=translated_field
+            )
+
+        elif error_type == "bool_type":
+            message = _("{field} は真偽値である必要があります").format(
+                field=translated_field
+            )
+
+        elif error_type == "list_type":
+            message = _("{field} はリストである必要があります").format(
+                field=translated_field
+            )
+
+        elif error_type == "dict_type":
+            message = _("{field} は辞書である必要があります").format(
+                field=translated_field
+            )
+
+        elif error_type == "string_too_short":
+            min_length = ctx.get("min_length", "")
+            message = _(
+                "{field} は{min_length}文字以上である必要があります"
+            ).format(
+                field=translated_field,
+                min_length=min_length
+            )
+
+        elif error_type == "string_too_long":
+            max_length = ctx.get("max_length", "")
+            message = _(
+                "{field} は{max_length}文字以下である必要があります"
+            ).format(
+                field=translated_field,
+                max_length=max_length
+            )
+
+        elif error_type == "less_than":
+            limit = ctx.get("lt", "")
+            message = _("{field} は{limit}未満である必要があります").format(
+                field=translated_field,
+                limit=limit
+            )
+
+        elif error_type == "less_than_equal":
+            limit = ctx.get("le", "")
+            message = _("{field} は{limit}以下である必要があります").format(
+                field=translated_field,
+                limit=limit
+            )
+
+        elif error_type == "greater_than":
+            limit = ctx.get("gt", "")
+            message = _("{field} は{limit}より大きい必要があります").format(
+                field=translated_field,
+                limit=limit
+            )
+
+        elif error_type == "greater_than_equal":
+            limit = ctx.get("ge", "")
+            message = _("{field} は{limit}以上である必要があります").format(
+                field=translated_field,
+                limit=limit
+            )
+
+        elif error_type in ("literal_error", "enum"):
+            expected = ctx.get("expected", "")
+            if expected:
+                message = _(
+                    "{field} は次のいずれかである必要があります: {expected}"
+                ).format(
+                    field=translated_field,
+                    expected=expected
+                )
+            else:
+                message = _("{field} の値が無効です").format(
+                    field=translated_field
+                )
+
         else:
-            # マッピングにない場合は直接メッセージを翻訳
-            translated_msg = _(error_msg)
+            # その他のエラータイプは元のメッセージを翻訳
+            original_msg = error.get("msg", "")
+            translated_msg = _(original_msg)
+            if translated_field and translated_field != field_name:
+                message = f"{translated_field}: {translated_msg}"
+            else:
+                message = translated_msg
 
-        translated_error["msg"] = translated_msg
-        translated_errors.append(translated_error)
+        translated_messages.append(message)
 
     return JSONResponse(
         status_code=422,
-        content={"detail": translated_errors}
+        content={
+            'code': 'NG',
+            'message': translated_messages
+        }
     )
 
 @app.exception_handler(ValueError)

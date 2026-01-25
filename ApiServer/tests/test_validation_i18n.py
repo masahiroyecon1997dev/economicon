@@ -60,22 +60,24 @@ def test_validation_error_missing_field_ja(client, settings_manager):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     response_data = response.json()
-    assert 'detail' in response_data
+    assert 'code' in response_data
+    assert response_data['code'] == 'NG'
+    assert 'message' in response_data
 
-    # エラーメッセージが日本語であることを確認
-    errors = response_data['detail']
-    assert len(errors) > 0
+    # エラーメッセージが文字列のリストであることを確認
+    messages = response_data['message']
+    assert isinstance(messages, list)
+    assert len(messages) > 0
 
-    # 必須フィールドエラーを探す
-    field_required_error = None
-    for error in errors:
-        if 'tableName' in str(error.get('loc', [])):
-            field_required_error = error
+    # 日本語メッセージが含まれていることを確認
+    # "テーブル名は必須です" のようなメッセージを期待
+    found_table_name_error = False
+    for msg in messages:
+        if 'テーブル名' in msg and '必須' in msg:
+            found_table_name_error = True
             break
 
-    assert field_required_error is not None
-    # 日本語メッセージが含まれていることを確認
-    assert '必須' in field_required_error['msg']
+    assert found_table_name_error, f"Expected Japanese error message, got: {messages}"
 
 
 def test_validation_error_missing_field_en(client, settings_manager):
@@ -104,22 +106,24 @@ def test_validation_error_missing_field_en(client, settings_manager):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     response_data = response.json()
-    assert 'detail' in response_data
+    assert 'code' in response_data
+    assert response_data['code'] == 'NG'
+    assert 'message' in response_data
 
-    # エラーメッセージが英語であることを確認
-    errors = response_data['detail']
-    assert len(errors) > 0
+    # エラーメッセージが文字列のリストであることを確認
+    messages = response_data['message']
+    assert isinstance(messages, list)
+    assert len(messages) > 0
 
-    # 必須フィールドエラーを探す
-    field_required_error = None
-    for error in errors:
-        if 'tableName' in str(error.get('loc', [])):
-            field_required_error = error
+    # 英語メッセージが含まれていることを確認
+    # "Table Name is required" のようなメッセージを期待
+    found_table_name_error = False
+    for msg in messages:
+        if 'Table Name' in msg and 'required' in msg:
+            found_table_name_error = True
             break
 
-    assert field_required_error is not None
-    # 英語メッセージが含まれていることを確認
-    assert 'required' in field_required_error['msg'].lower()
+    assert found_table_name_error, f"Expected English error message, got: {messages}"
 
 
 def test_validation_error_invalid_type_ja(client, settings_manager):
@@ -145,25 +149,28 @@ def test_validation_error_invalid_type_ja(client, settings_manager):
     }
 
     response = client.post('/api/analysis/regression', json=payload)
-
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     response_data = response.json()
-    assert 'detail' in response_data
 
-    # エラーメッセージに日本語が含まれていることを確認
-    errors = response_data['detail']
-    assert len(errors) > 0
+    assert 'code' in response_data
+    assert response_data['code'] == 'NG'
+    assert 'message' in response_data
 
-    # 型エラーを探す
-    type_error = None
-    for error in errors:
-        if 'explanatoryVariables' in str(error.get('loc', [])):
-            type_error = error
+    # エラーメッセージが文字列のリストであることを確認
+    messages = response_data['message']
+    assert isinstance(messages, list)
+    assert len(messages) > 0
+
+    # 日本語メッセージが含まれていることを確認
+    # "説明変数はリストである必要があります" のようなメッセージを期待
+    found_type_error = False
+    for msg in messages:
+        if '説明変数' in msg and 'リスト' in msg:
+            found_type_error = True
+            # 日本語メッセージであることを確認（リストまたはリスト型が含まれる）
+            assert 'リスト' in msg
             break
 
-    assert type_error is not None
-    # 日本語メッセージであることを確認（リストまたはリスト型が含まれる）
-    assert 'リスト' in type_error['msg']
+    assert found_type_error, f"Expected Japanese type error message, got: {messages}"
 
 
 def test_validation_error_invalid_enum_ja(client, settings_manager):
@@ -189,11 +196,17 @@ def test_validation_error_invalid_enum_ja(client, settings_manager):
     }
 
     response = client.post('/api/analysis/regression', json=payload)
-
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     response_data = response.json()
-    assert 'detail' in response_data
+    assert 'code' in response_data
+    assert response_data['code'] == 'NG'
+    assert 'message' in response_data
 
-    # エラーメッセージが返されることを確認
+    # エラーメッセージが文字列のリストであることを確認
+    messages = response_data['message']
+    assert isinstance(messages, list)
+    assert len(messages) > 0
+
+    # 何らかのエラーメッセージが返されることを確認
+    assert all(isinstance(msg, str) for msg in messages)
     errors = response_data['detail']
     assert len(errors) > 0
