@@ -7,28 +7,22 @@ import { FormField } from '../../molecules/Form/FormField';
 
 type SimulationColumnConfigProps = {
   column: SimulationColumnSetting;
-  index: number;
   distributionOptions: Array<{ value: DistributionType; label: string; params: string[] }>;
   onUpdate: (id: string, updates: Partial<SimulationColumnSetting>) => void;
   onDataTypeChange: (id: string, dataType: 'distribution' | 'fixed') => void;
   onDistributionTypeChange: (id: string, distributionType: DistributionType) => void;
   onDistributionParamChange: (id: string, param: string, value: number) => void;
-  onRemove: (id: string) => void;
-  canRemove: boolean;
   error: { columnName: string | undefined; distributionParams: Record<string, string | undefined> | undefined; fixedValue: string | undefined };
   disabled?: boolean;
 };
 
 export const SimulationColumnConfig = ({
   column,
-  index,
   distributionOptions,
   onUpdate,
   onDataTypeChange,
   onDistributionTypeChange,
   onDistributionParamChange,
-  onRemove,
-  canRemove,
   error,
   disabled = false,
 }: SimulationColumnConfigProps) => {
