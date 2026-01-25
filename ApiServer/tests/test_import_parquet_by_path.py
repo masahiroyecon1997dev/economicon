@@ -173,10 +173,10 @@ def test_import_parquet_by_path_missing_file_path(client, prepared_data):
     }
     response = client.post('/api/data/import-parquet-by-path',
                            data=json.dumps(request_data))
-    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert 'NG' == response_data['code']
-    # assert "filePath is required" == response_data['message']
+    response_data = response.json()
+    assert 'NG' == response_data['code']
+    assert "filePath は必須です。" == response_data['message']
 
 
 def test_import_parquet_by_path_missing_table_name(client, prepared_data):
@@ -196,10 +196,10 @@ def test_import_parquet_by_path_missing_table_name(client, prepared_data):
     }
     response = client.post('/api/data/import-parquet-by-path',
                            data=json.dumps(request_data))
-    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert 'NG' == response_data['code']
-    # assert "tableName is required." == response_data['message']
+    response_data = response.json()
+    assert 'NG' == response_data['code']
+    assert "tableName は必須です。" == response_data['message']
 
 
 def test_import_parquet_by_path_duplicate_table_name(client, prepared_data):
@@ -243,10 +243,10 @@ def test_import_parquet_by_path_invalid_json(client, prepared_data):
     tables_store, test_dir = prepared_data
     response = client.post('/api/data/import-parquet-by-path',
                            data='invalid json')
-    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert 'NG' == response_data['code']
-    # assert "Invalid JSON format" == response_data['message']
+    response_data = response.json()
+    assert 'NG' == response_data['code']
+    assert "JSON decode error" == response_data['message']
 
 
 def test_import_parquet_by_path_with_temporary_file(client, prepared_data):
@@ -284,3 +284,35 @@ def test_import_parquet_by_path_with_temporary_file(client, prepared_data):
     finally:
         # 一時ファイルを削除
         os.unlink(temp_path)
+
+
+def test_import_parquet_by_path_empty_file_path(client, prepared_data):
+    """
+    filePathが空文字列の場合はバリデーションエラーになる
+    """
+    request_data = {
+        'filePath': '',
+        'tableName': 'TestTable'
+    }
+    response = client.post('/api/data/import-parquet-by-path',
+                          data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'filePath' in response_data['message']
+
+
+def test_import_parquet_by_path_empty_table_name(client, prepared_data):
+    """
+    tableNameが空文字列の場合はバリデーションエラーになる
+    """
+    request_data = {
+        'filePath': '/some/path/test.parquet',
+        'tableName': ''
+    }
+    response = client.post('/api/data/import-parquet-by-path',
+                          data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']

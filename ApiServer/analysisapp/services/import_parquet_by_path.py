@@ -90,7 +90,7 @@ def import_parquet_by_path(file_path: str, table_name: str) -> Dict:
     api = ImportParquetByPath(file_path, table_name)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     try:
         result = api.execute()
     except ApiError as e:
