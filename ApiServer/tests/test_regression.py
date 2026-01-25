@@ -200,6 +200,8 @@ def test_iv_regression(client, tables_store):
     }
     response = client.post('/api/analysis/regression', json=payload)
 
+    if response.status_code != status.HTTP_200_OK:
+        print(f"Response: {response.json()}")
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data['code'] == 'OK'
@@ -360,3 +362,214 @@ def test_confidence_intervals_present(client, tables_store):
         assert 'confidenceIntervalUpper' in param
         assert param['confidenceIntervalLower'] <= param['coefficient']
         assert param['coefficient'] <= param['confidenceIntervalUpper']
+
+
+# ========================================
+# 定数項有無のテスト
+# ========================================
+
+def test_ols_without_constant(client, tables_store):
+    """定数項なしのOLS回帰"""
+    payload = {
+        'type': 'ols',
+        'tableName': 'BasicData',
+        'dependentVariable': 'y_linear',
+        'explanatoryVariables': ['x1', 'x2'],
+        'hasConst': False
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data['code'] == 'OK'
+    # 定数項がないため、パラメータ数は説明変数の数と同じ
+    assert len(response_data['result']['parameters']) == 2
+
+
+def test_lasso_without_constant(client, tables_store):
+    """定数項なしのLasso回帰"""
+    payload = {
+        'type': 'lasso',
+        'tableName': 'BasicData',
+        'dependentVariable': 'y_linear',
+        'explanatoryVariables': ['x1'],
+        'hasConst': False,
+        'hyperParameters': {'alpha': 0.1}
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data['code'] == 'OK'
+
+
+# ========================================
+# クラスター標準誤差のテスト
+# ========================================
+
+def test_clustered_standard_errors(client, tables_store):
+    """クラスター標準誤差のテスト（パネルデータで自動設定）"""
+    payload = {
+        'type': 'fe',
+        'tableName': 'PanelData',
+        'dependentVariable': 'y',
+        'explanatoryVariables': ['x1', 'x2'],
+        'entityIdColumn': 'entity_id',
+        'standardErrorMethod': 'clustered'
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data['code'] == 'OK'
+
+
+# ========================================
+# バリデーションエラーのテスト
+# ========================================
+
+def test_invalid_dependent_variable(client, tables_store):
+    """存在しない被説明変数でエラー"""
+    payload = {
+        'type': 'ols',
+        'tableName': 'BasicData',
+        'dependentVariable': 'nonexistent_y',
+        'explanatoryVariables': ['x1']
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    response_data = response.json()
+    assert response_data['code'] == 'NG'
+
+
+def test_invalid_explanatory_variable(client, tables_store):
+    """存在しない説明変数でエラー"""
+    payload = {
+        'type': 'ols',
+        'tableName': 'BasicData',
+        'dependentVariable': 'y_linear',
+        'explanatoryVariables': ['x1', 'nonexistent_x']
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    response_data = response.json()
+    assert response_data['code'] == 'NG'
+
+
+def test_empty_explanatory_variables(client, tables_store):
+    """説明変数が空の場合"""
+    payload = {
+        'type': 'ols',
+        'tableName': 'BasicData',
+        'dependentVariable': 'y_linear',
+        'explanatoryVariables': []
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    # サービス層のバリデーションで400が返される
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_dependent_in_explanatory(client, tables_store):
+    """被説明変数が説明変数に含まれる場合"""
+    payload = {
+        'type': 'ols',
+        'tableName': 'BasicData',
+        'dependentVariable': 'y_linear',
+        'explanatoryVariables': ['x1', 'y_linear']
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    response_data = response.json()
+    assert response_data['code'] == 'NG'
+
+
+def test_missing_entity_id_for_panel(client, tables_store):
+    """パネルデータ分析でentityIdColumnが不足"""
+    payload = {
+        'type': 're',
+        'tableName': 'PanelData',
+        'dependentVariable': 'y',
+        'explanatoryVariables': ['x1']
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_missing_instrumental_variables(client, tables_store):
+    """IV分析でinstrumentalVariablesが不足"""
+    payload = {
+        'type': 'iv',
+        'tableName': 'IVData',
+        'dependentVariable': 'y',
+        'explanatoryVariables': ['x1'],
+        'endogenousVariables': ['x2_endog']
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_missing_alpha_for_lasso(client, tables_store):
+    """Lasso回帰でalphaが不足"""
+    payload = {
+        'type': 'lasso',
+        'tableName': 'BasicData',
+        'dependentVariable': 'y_linear',
+        'explanatoryVariables': ['x1']
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_invalid_entity_id_column(client, tables_store):
+    """存在しないentityIdColumn"""
+    payload = {
+        'type': 'fe',
+        'tableName': 'PanelData',
+        'dependentVariable': 'y',
+        'explanatoryVariables': ['x1'],
+        'entityIdColumn': 'nonexistent_id'
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    response_data = response.json()
+    assert response_data['code'] == 'NG'
+
+
+def test_invalid_instrumental_variable(client, tables_store):
+    """存在しない操作変数"""
+    payload = {
+        'type': 'iv',
+        'tableName': 'IVData',
+        'dependentVariable': 'y',
+        'explanatoryVariables': ['x1'],
+        'endogenousVariables': ['x2_endog'],
+        'instrumentalVariables': ['nonexistent_z']
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    response_data = response.json()
+    assert response_data['code'] == 'NG'
+
+
+def test_clustered_without_groups(client, tables_store):
+    """クラスター標準誤差でgroupsが不足（非パネルデータ）"""
+    payload = {
+        'type': 'ols',
+        'tableName': 'BasicData',
+        'dependentVariable': 'y_linear',
+        'explanatoryVariables': ['x1'],
+        'standardErrorMethod': 'clustered'
+    }
+    response = client.post('/api/analysis/regression', json=payload)
+
+    # バリデーションエラーで422が返される
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
