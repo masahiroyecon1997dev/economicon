@@ -24,24 +24,24 @@ def tables_store():
     n_entities = 20  # 蛟倶ｽ捺焚
     n_periods = 5    # 譎らせ謨ｰ
     n_total = n_entities * n_periods
-    
+
     # 蛟倶ｽ的D
     entity_ids = np.repeat(range(1, n_entities + 1), n_periods)
     # 譎らせID
     time_ids = np.tile(range(1, n_periods + 1), n_entities)
-    
+
     # 繝ｩ繝ｳ繝繝蜉ｹ譫・
     random_effects = np.random.normal(0, 1, n_entities)
     random_effects_expanded = np.repeat(random_effects, n_periods)
-    
+
     # 隱ｬ譏主､画焚縺ｮ逕滓・
     x1 = np.random.normal(0, 1, n_total)
     x2 = np.random.normal(0, 1, n_total)
-    
+
     # 陲ｫ隱ｬ譏主､画焚縺ｮ逕滓・・医Λ繝ｳ繝繝蜉ｹ譫懊ｒ蜷ｫ繧・・
     error = np.random.normal(0, 0.5, n_total)
     y = 2.0 + 1.5 * x1 + 0.8 * x2 + random_effects_expanded + error
-    
+
     df = pl.DataFrame({
         'entity_id': entity_ids,
         'time_id': time_ids,
