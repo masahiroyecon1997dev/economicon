@@ -5,6 +5,7 @@ linearmodels の IV2SLS による操作変数回帰を提供します。
 """
 
 from typing import Dict, List, Any, Optional
+import gc
 import pandas as pd
 from linearmodels.iv import IV2SLS  # type: ignore
 
@@ -126,8 +127,14 @@ class IVRegression(AbstractRegressionService):
             + self.instrumental_variables
         )
 
-        # Pandas DataFrameに変換
-        df = df_polars.select(required_cols).to_pandas()
+        # Pandas DataFrameに変換（PyArrow拡張配列を使用してメモリ効率向上）
+        df = df_polars.select(required_cols).to_pandas(
+            use_pyarrow_extension_array=True
+        )
+
+        # Polars DataFrameを明示的に削除してメモリを解放
+        del df_polars
+        gc.collect()
 
         # 欠損値の処理
         if missing == 'drop':

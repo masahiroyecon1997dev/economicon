@@ -32,7 +32,7 @@
       "request": "launch",
       "module": "pytest",
       "args": ["tests", "-v"],
-      "justMyCode": true,
+      "justMyCode": false,
       "cwd": "${workspaceFolder}/ApiServer"
     }
   ]
