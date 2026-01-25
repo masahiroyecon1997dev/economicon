@@ -250,8 +250,16 @@ def test_lasso_regression(client, tables_store):
 
     result = response_data['result']
     assert 'resultId' in result
+     # 結果を取得するAPIの正しいパス
+    response_result = client.get(
+        f"/api/analysis/results/{result['resultId']}"
+    )
+    assert response_result.status_code == status.HTTP_200_OK
+    # IV固有の診断統計量を確認
+    analysis_result = response_result.json()['result']
+    regression_output = analysis_result['regressionOutput']
     # Lassoでは一部の係数がゼロになる可能性がある
-    assert len(result['parameters']) >= 0
+    assert len(regression_output['parameters']) >= 0
 
 
 def test_ridge_regression(client, tables_store):
@@ -624,7 +632,7 @@ def test_clustered_without_groups(client, tables_store):
     }
     response = client.post('/api/analysis/regression', json=payload)
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert response_data['code'] == 'NG'
 
