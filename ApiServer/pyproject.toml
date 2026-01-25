@@ -10,6 +10,7 @@ dependencies = [
     "fastexcel>=0.18.0",
     "numpy>=2.4.1",
     "polars>=1.36.1",
+    "pyarrow>=8.0.0",
     "python-magic; sys_platform != 'win32'",      # Linux/macOS用
     "python-magic-bin; sys_platform == 'win32'",  # Windows用
     "python-multipart>=0.0.21",

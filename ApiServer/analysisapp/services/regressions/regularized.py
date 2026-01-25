@@ -78,7 +78,7 @@ class LassoRegression(AbstractRegressionService):
 
         Args:
             y_data: 被説明変数のデータ
-            x_data: 説明変数のデータ
+            x_data: 説明変数のデータ（定数項が含まれる可能性あり）
             missing: 欠損値の処理方法
 
         Returns:
@@ -86,16 +86,20 @@ class LassoRegression(AbstractRegressionService):
         """
         alpha = self.hyper_parameters.get('alpha', 1.0)
 
+        # x_dataに定数項が含まれている場合は除去
+        # （scikit-learnはfit_interceptで定数項を扱うため）
+        x_data_sklearn = x_data
+        if self.has_const:
+            # 最初の列が定数項かチェック（全て1の列）
+            if x_data.shape[1] > 0 and np.allclose(x_data[:, 0], 1.0):
+                x_data_sklearn = x_data[:, 1:]  # 定数項を除去
+
         # scikit-learn の Lasso を使用
         lasso = Lasso(alpha=alpha, fit_intercept=self.has_const)
-        lasso.fit(x_data, y_data)
+        lasso.fit(x_data_sklearn, y_data)
 
-        # statsmodels 形式に変換するためにOLSで再フィット
-        # （統計量を取得するため）
-        y_pred = lasso.predict(x_data)
-        residuals = y_data - y_pred
-
-        # OLS で統計量を計算
+        # statsmodels 形式で再構築（統計量を取得するため）
+        # Lassoの予測値を使ってOLSで統計量を計算
         model = sm.OLS(y_data, x_data, missing=missing)
         result = model.fit()
 
@@ -173,7 +177,7 @@ class RidgeRegression(AbstractRegressionService):
 
         Args:
             y_data: 被説明変数のデータ
-            x_data: 説明変数のデータ
+            x_data: 説明変数のデータ（定数項が含まれる可能性あり）
             missing: 欠損値の処理方法
 
         Returns:
@@ -181,16 +185,20 @@ class RidgeRegression(AbstractRegressionService):
         """
         alpha = self.hyper_parameters.get('alpha', 1.0)
 
+        # x_dataに定数項が含まれている場合は除去
+        # （scikit-learnはfit_interceptで定数項を扱うため）
+        x_data_sklearn = x_data
+        if self.has_const:
+            # 最初の列が定数項かチェック（全て1の列）
+            if x_data.shape[1] > 0 and np.allclose(x_data[:, 0], 1.0):
+                x_data_sklearn = x_data[:, 1:]  # 定数項を除去
+
         # scikit-learn の Ridge を使用
         ridge = Ridge(alpha=alpha, fit_intercept=self.has_const)
-        ridge.fit(x_data, y_data)
+        ridge.fit(x_data_sklearn, y_data)
 
-        # statsmodels 形式に変換するためにOLSで再フィット
-        # （統計量を取得するため）
-        y_pred = ridge.predict(x_data)
-        residuals = y_data - y_pred
-
-        # OLS で統計量を計算
+        # statsmodels 形式で再構築（統計量を取得するため）
+        # Ridgeの予測値を使ってOLSで統計量を計算
         model = sm.OLS(y_data, x_data, missing=missing)
         result = model.fit()
 
