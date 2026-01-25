@@ -744,50 +744,50 @@ msgid "Field.filterConditions"
 msgstr "Filter Conditions"
 
 # Dynamic validation message templates
-msgid "{field} は必須です"
-msgstr "{field} is required"
+msgid "{field} is required"
+msgstr "{field} is required."
 
-msgid "{field} は文字列である必要があります"
-msgstr "{field} must be a string"
+msgid "{field} must be a string"
+msgstr "{field} must be a string."
 
-msgid "{field} は整数である必要があります"
-msgstr "{field} must be an integer"
+msgid "{field} must be an integer"
+msgstr "{field} must be an integer."
 
-msgid "{field} は数値である必要があります"
-msgstr "{field} must be a number"
+msgid "{field} must be a number"
+msgstr "{field} must be a number."
 
-msgid "{field} は真偽値である必要があります"
-msgstr "{field} must be a boolean"
+msgid "{field} must be a boolean"
+msgstr "{field} must be a boolean."
 
-msgid "{field} はリストである必要があります"
-msgstr "{field} must be a list"
+msgid "{field} must be a list"
+msgstr "{field} must be a list."
 
-msgid "{field} は辞書である必要があります"
-msgstr "{field} must be a dictionary"
+msgid "{field} must be a dictionary"
+msgstr "{field} must be a dictionary."
 
-msgid "{field} は{min_length}文字以上である必要があります"
-msgstr "{field} must be at least {min_length} characters"
+msgid "{field} must be at least {min_length} characters"
+msgstr "{field} must be at least {min_length} characters."
 
-msgid "{field} は{max_length}文字以下である必要があります"
-msgstr "{field} must be at most {max_length} characters"
+msgid "{field} must be at most {max_length} characters"
+msgstr "{field} must be at most {max_length} characters."
 
-msgid "{field} は{limit}未満である必要があります"
-msgstr "{field} must be less than {limit}"
+msgid "{field} must be less than {limit}"
+msgstr "{field} must be less than {limit}."
 
-msgid "{field} は{limit}以下である必要があります"
-msgstr "{field} must be less than or equal to {limit}"
+msgid "{field} must be less than or equal to {limit}"
+msgstr "{field} must be less than or equal to {limit}."
 
-msgid "{field} は{limit}より大きい必要があります"
-msgstr "{field} must be greater than {limit}"
+msgid "{field} must be greater than {limit}"
+msgstr "{field} must be greater than {limit}."
 
-msgid "{field} は{limit}以上である必要があります"
-msgstr "{field} must be greater than or equal to {limit}"
+msgid "{field} must be greater than or equal to {limit}"
+msgstr "{field} must be greater than or equal to {limit}."
 
-msgid "{field} は次のいずれかである必要があります: {expected}"
-msgstr "{field} must be one of: {expected}"
+msgid "{field} must be one of: {expected}"
+msgstr "{field} must be one of: {expected}."
 
-msgid "{field} の値が無効です"
-msgstr "{field} has an invalid value"
+msgid "{field} has an invalid value"
+msgstr "{field} has an invalid value."
 
 #~ msgid "standard_error_methodmust be one of: , "
 #~ msgstr ""

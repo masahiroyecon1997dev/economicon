@@ -123,18 +123,12 @@ async def validation_exception_handler(
     メッセージを生成します。
     """
     errors = exc.errors()
-    translated_messages = []
+    message = ""
 
     for error in errors:
         # フィールド名を取得（loc の最後の要素）
         loc = error.get("loc", ())
         field_name = loc[-1] if loc else ""
-
-        # フィールド名を翻訳（messages.po に定義）
-        translated_field = _(f"Field.{field_name}")
-        if translated_field == f"Field.{field_name}":
-            # 翻訳が見つからない場合はそのまま使用
-            translated_field = field_name
 
         # エラータイプとコンテキストを取得
         error_type = error.get("type", "")
@@ -142,83 +136,83 @@ async def validation_exception_handler(
 
         # エラータイプに応じてメッセージを構築
         if error_type == "missing":
-            message = _("{field} は必須です").format(
-                field=translated_field
+            message = _("{field} is required").format(
+                field=field_name
             )
 
         elif error_type == "string_type":
-            message = _("{field} は文字列である必要があります").format(
-                field=translated_field
+            message = _("{field} must be a string").format(
+                field=field_name
             )
 
         elif error_type == "int_type":
-            message = _("{field} は整数である必要があります").format(
-                field=translated_field
+            message = _("{field} must be an integer").format(
+                field=field_name
             )
 
         elif error_type == "float_type":
-            message = _("{field} は数値である必要があります").format(
-                field=translated_field
+            message = _("{field} must be a number").format(
+                field=field_name
             )
 
         elif error_type == "bool_type":
-            message = _("{field} は真偽値である必要があります").format(
-                field=translated_field
+            message = _("{field} must be a boolean").format(
+                field=field_name
             )
 
         elif error_type == "list_type":
-            message = _("{field} はリストである必要があります").format(
-                field=translated_field
+            message = _("{field} must be a list").format(
+                field=field_name
             )
 
         elif error_type == "dict_type":
-            message = _("{field} は辞書である必要があります").format(
-                field=translated_field
+            message = _("{field} must be a dictionary").format(
+                field=field_name
             )
 
         elif error_type == "string_too_short":
             min_length = ctx.get("min_length", "")
             message = _(
-                "{field} は{min_length}文字以上である必要があります"
+                "{field} must be at least {min_length} characters"
             ).format(
-                field=translated_field,
+                field=field_name,
                 min_length=min_length
             )
 
         elif error_type == "string_too_long":
             max_length = ctx.get("max_length", "")
             message = _(
-                "{field} は{max_length}文字以下である必要があります"
+                "{field} must be at most {max_length} characters"
             ).format(
-                field=translated_field,
+                field=field_name,
                 max_length=max_length
             )
 
         elif error_type == "less_than":
             limit = ctx.get("lt", "")
-            message = _("{field} は{limit}未満である必要があります").format(
-                field=translated_field,
+            message = _("{field} must be less than {limit}").format(
+                field=field_name,
                 limit=limit
             )
 
         elif error_type == "less_than_equal":
             limit = ctx.get("le", "")
-            message = _("{field} は{limit}以下である必要があります").format(
-                field=translated_field,
+            message = _("{field} must be less than or equal to {limit}").format(
+                field=field_name,
                 limit=limit
             )
 
         elif error_type == "greater_than":
             limit = ctx.get("gt", "")
-            message = _("{field} は{limit}より大きい必要があります").format(
-                field=translated_field,
+            message = _("{field} must be greater than {limit}").format(
+                field=field_name,
                 limit=limit
             )
 
         elif error_type == "greater_than_equal":
             limit = ctx.get("ge", "")
-            message = _("{field} は{limit}以上である必要があります").format(
-                field=translated_field,
+            message = _("{field} must be greater than or equal to {limit}").format(
+                field=field_name,
                 limit=limit
             )
 
@@ -226,32 +220,31 @@ async def validation_exception_handler(
             expected = ctx.get("expected", "")
             if expected:
                 message = _(
-                    "{field} は次のいずれかである必要があります: {expected}"
+                    "{field} must be one of: {expected}"
                 ).format(
-                    field=translated_field,
+                    field=field_name,
                     expected=expected
                 )
             else:
-                message = _("{field} の値が無効です").format(
-                    field=translated_field
+                message = _("{field} has an invalid value").format(
+                    field=field_name
                 )
 
         else:
             # その他のエラータイプは元のメッセージを翻訳
             original_msg = error.get("msg", "")
             translated_msg = _(original_msg)
-            if translated_field and translated_field != field_name:
-                message = f"{translated_field}: {translated_msg}"
+            if field_name and field_name != field_name:
+                message = f"{field_name}: {translated_msg}"
             else:
                 message = translated_msg
 
-        translated_messages.append(message)
 
     return JSONResponse(
         status_code=422,
         content={
             'code': 'NG',
-            'message': translated_messages
+            'message': message
         }
     )
 
