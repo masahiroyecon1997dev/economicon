@@ -384,7 +384,7 @@ export const CreateSimulationDataTableView = () => {
           <div className="space-y-0 max-h-48 overflow-y-auto">
             {columns.map((column, index) => (
               <div
-                key={column.id}
+                key={index}
                 className="flex items-center justify-between py-2 px-3 border-t border-gray-300 dark:border-gray-600 first:border-t-0"
               >
                 <span className="text-sm text-gray-700 dark:text-gray-300 flex-1 mr-4">

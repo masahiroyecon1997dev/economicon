@@ -32,9 +32,7 @@ export const SimulationColumnEditDialog = ({
   index,
   distributionOptions,
   onUpdate,
-  onRemove,
   onClose,
-  canRemove,
   error,
   disabled = false,
 }: SimulationColumnEditDialogProps) => {
@@ -156,14 +154,11 @@ export const SimulationColumnEditDialog = ({
             <div className="p-4 md:p-5 overflow-y-auto max-h-[calc(85vh-160px)]">
               <SimulationColumnConfig
                 column={editingColumn}
-                index={index}
                 distributionOptions={distributionOptions}
                 onUpdate={handleLocalUpdate}
                 onDataTypeChange={handleLocalDataTypeChange}
                 onDistributionTypeChange={handleLocalDistributionTypeChange}
                 onDistributionParamChange={handleLocalDistributionParamChange}
-                onRemove={onRemove}
-                canRemove={canRemove}
                 error={error}
                 disabled={disabled}
               />
