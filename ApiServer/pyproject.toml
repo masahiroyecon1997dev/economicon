@@ -8,7 +8,7 @@ dependencies = [
     "coverage>=7.13.1",
     "fastapi>=0.128.0",
     "fastexcel>=0.18.0",
-    "numpy>=2.4.0",
+    "numpy>=2.4.1",
     "polars>=1.36.1",
     "python-magic; sys_platform != 'win32'",      # Linux/macOS用
     "python-magic-bin; sys_platform == 'win32'",  # Windows用
@@ -19,6 +19,9 @@ dependencies = [
     "uvicorn[standard]>=0.40.0",
     "xlsxwriter>=3.2.9",
     "fastapi-babel>=1.0.0",
+    "linearmodels>=7.0",
+    "py4etrics>=0.1.9",
+    "scikit-learn>=1.8.0",
 ]
 [tool.setuptools.packages.find]
 where = ["."]
