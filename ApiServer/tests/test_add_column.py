@@ -53,6 +53,22 @@ def test_add_column_success(client, tables_store):
     # 追加カラムはNoneで埋まっている
     assert df['C'].to_list() == [None, None, None]
 
+def test_add_column_table_not_found(client, tables_store):
+    """存在しないテーブル名"""
+    payload = {
+        # テーブル名が存在しない
+        'newColumnName': 'C',
+        'addPositionColumn': 'A'
+    }
+    response = client.post(
+        '/api/column/add',
+        json=payload
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert "tableName 'NoTable'は存在しません。" == response_data['message']
+
 
 def test_add_column_invalid_table(client, tables_store):
     """存在しないテーブル名"""

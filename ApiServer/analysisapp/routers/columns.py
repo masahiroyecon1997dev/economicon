@@ -45,9 +45,7 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
     create_log_api_request(request)
     # ビジネスロジックの実行（既存のpython_apisをそのまま使用）
     result = add_column(
-        table_name=body.tableName,
-        new_column_name=body.newColumnName,
-        add_position_column=body.addPositionColumn
+        **body.model_dump()
     )
     return create_success_response(
         http_status.HTTP_200_OK,
