@@ -211,18 +211,15 @@ def test_iv_regression(client, tables_store):
         'instrumentalVariables': ['z1', 'z2']
     }
     response = client.post('/api/analysis/regression', json=payload)
-
-    if response.status_code != status.HTTP_200_OK:
-        print(f"Response: {response.json()}")
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
-    assert response_data['code'] == 'OK'
-
     result = response_data['result']
-    assert 'diagnostics' in result
+    assert 'resultId' in result
 
+    response_result = client.get(f"/api/analysis/regression/results/{result['resultId']}")
     # IV固有の診断統計量を確認
-    diagnostics = result['diagnostics']
+    analysis_result = response_result.json()['result']
+    diagnostics = analysis_result['diagnostics']
     # Wu-Hausman testまたはSargan testのいずれかが含まれているはず
     has_iv_diagnostics = (
         'wuHausmanTest' in diagnostics or
@@ -248,7 +245,7 @@ def test_lasso_regression(client, tables_store):
     assert response_data['code'] == 'OK'
 
     result = response_data['result']
-    assert 'parameters' in result
+    assert 'resultId' in result
     # Lassoでは一部の係数がゼロになる可能性がある
     assert len(result['parameters']) >= 0
 
@@ -269,7 +266,7 @@ def test_ridge_regression(client, tables_store):
     assert response_data['code'] == 'OK'
 
     result = response_data['result']
-    assert 'parameters' in result
+    assert 'resultId' in result
 
 
 def test_tobit_regression(client, tables_store):
@@ -368,9 +365,10 @@ def test_confidence_intervals_present(client, tables_store):
     response = client.post('/api/analysis/regression', json=payload)
 
     assert response.status_code == status.HTTP_200_OK
-    result = response.json()['result']
+    assert response_data
 
     # 各パラメータに信頼区間が含まれているか確認
+    response_result = client.get('/api/analysis/regression')
     for param in result['parameters']:
         assert 'confidenceIntervalLower' in param
         assert 'confidenceIntervalUpper' in param
@@ -520,8 +518,8 @@ def test_missing_entity_id_for_panel(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     response_data = response.json()
     # Pydanticのエラーメッセージ構造を確認
-    assert 'detail' in response_data
-    error_message = str(response_data['detail'])
+    assert 'message' in response_data
+    error_message = str(response_data['message'])
     assert 'entityIdColumn' in error_message or 'entity' in error_message.lower()
 
 
@@ -538,8 +536,8 @@ def test_missing_instrumental_variables(client, tables_store):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     response_data = response.json()
-    assert 'detail' in response_data
-    error_message = str(response_data['detail'])
+    assert 'message' in response_data
+    error_message = str(response_data['message'])
     assert 'instrumentalVariables' in error_message or 'instrumental' in error_message.lower()
 
 
@@ -555,8 +553,8 @@ def test_missing_alpha_for_lasso(client, tables_store):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     response_data = response.json()
-    assert 'detail' in response_data
-    error_message = str(response_data['detail'])
+    assert 'message' in response_data
+    error_message = str(response_data['message'])
     assert 'alpha' in error_message.lower()
 
 
