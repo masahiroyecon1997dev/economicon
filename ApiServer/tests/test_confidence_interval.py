@@ -251,10 +251,9 @@ def test_confidence_interval_invalid_confidence_level_high(client,
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    message = "confidenceLevelは0から1の間である必要があります"
-    assert message == response_data['message']
+    assert 'confidenceLevel' in response_data['message']
 
 
 def test_confidence_interval_invalid_confidence_level_low(client,
@@ -271,10 +270,9 @@ def test_confidence_interval_invalid_confidence_level_low(client,
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    message = "confidenceLevelは0から1の間である必要があります"
-    assert message == response_data['message']
+    assert 'confidenceLevel' in response_data['message']
 
 
 def test_confidence_interval_proportion_invalid_data(client, tables_store):
@@ -396,3 +394,179 @@ def test_confidence_interval_json_structure_validation(client, tables_store):
     ci = result['confidence_interval']
     assert 'lower' in ci
     assert 'upper' in ci
+
+
+def test_confidence_interval_empty_table_name(client, tables_store):
+    """
+    tableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': '',
+        'columnName': 'normal_col',
+        'confidenceLevel': 0.95,
+        'statisticType': 'mean'
+    }
+    response = client.post(
+        '/api/statistics/confidence-interval',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_confidence_interval_empty_column_name(client, tables_store):
+    """
+    columnNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'ConfidenceTestTable',
+        'columnName': '',
+        'confidenceLevel': 0.95,
+        'statisticType': 'mean'
+    }
+    response = client.post(
+        '/api/statistics/confidence-interval',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'columnName' in response_data['message']
+
+
+def test_confidence_interval_empty_statistic_type(client, tables_store):
+    """
+    statisticTypeが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'ConfidenceTestTable',
+        'columnName': 'normal_col',
+        'confidenceLevel': 0.95,
+        'statisticType': ''
+    }
+    response = client.post(
+        '/api/statistics/confidence-interval',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'statisticType' in response_data['message']
+
+
+def test_confidence_interval_confidence_level_negative(client, tables_store):
+    """
+    confidenceLevelが0未満の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'ConfidenceTestTable',
+        'columnName': 'normal_col',
+        'confidenceLevel': -0.1,
+        'statisticType': 'mean'
+    }
+    response = client.post(
+        '/api/statistics/confidence-interval',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'confidenceLevel' in response_data['message']
+
+
+def test_confidence_interval_confidence_level_over_one(client, tables_store):
+    """
+    confidenceLevelが1以上の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'ConfidenceTestTable',
+        'columnName': 'normal_col',
+        'confidenceLevel': 1.0,
+        'statisticType': 'mean'
+    }
+    response = client.post(
+        '/api/statistics/confidence-interval',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'confidenceLevel' in response_data['message']
+
+
+def test_confidence_interval_missing_table_name(client, tables_store):
+    """
+    tableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'columnName': 'normal_col',
+        'confidenceLevel': 0.95,
+        'statisticType': 'mean'
+    }
+    response = client.post(
+        '/api/statistics/confidence-interval',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_confidence_interval_missing_column_name(client, tables_store):
+    """
+    columnNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'ConfidenceTestTable',
+        'confidenceLevel': 0.95,
+        'statisticType': 'mean'
+    }
+    response = client.post(
+        '/api/statistics/confidence-interval',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'columnName' in response_data['message']
+
+
+def test_confidence_interval_missing_confidence_level(client, tables_store):
+    """
+    confidenceLevelが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'ConfidenceTestTable',
+        'columnName': 'normal_col',
+        'statisticType': 'mean'
+    }
+    response = client.post(
+        '/api/statistics/confidence-interval',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'confidenceLevel' in response_data['message']
+
+
+def test_confidence_interval_missing_statistic_type(client, tables_store):
+    """
+    statisticTypeが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'ConfidenceTestTable',
+        'columnName': 'normal_col',
+        'confidenceLevel': 0.95
+    }
+    response = client.post(
+        '/api/statistics/confidence-interval',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'statisticType' in response_data['message']
