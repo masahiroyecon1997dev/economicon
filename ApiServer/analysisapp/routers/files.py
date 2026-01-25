@@ -26,7 +26,7 @@ async def get_files_endpoint(request: Request, body: GetFilesRequest):
     """
     create_log_api_request(request)
 
-    result = get_files(directory_path=body.directoryPath)
+    result = get_files(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,

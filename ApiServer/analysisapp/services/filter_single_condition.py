@@ -182,6 +182,6 @@ def filter_single_condition(
     )
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     result = api.execute()
     return result
