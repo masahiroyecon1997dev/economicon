@@ -127,6 +127,5 @@ def calculate_column(table_name: str,
     api = CalculateColumn(table_name, new_column_name, calculation_expression)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
-    result = api.execute()
-    return result
+        raise ValueError(validation_error.message)
+    return api.execute()

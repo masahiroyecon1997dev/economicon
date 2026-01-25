@@ -91,6 +91,5 @@ def add_dummy_column(table_name: str,
                          dummy_column_name, target_value)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
-    result = api.execute()
-    return result
+        raise ValueError(validation_error.message)
+    return api.execute()
