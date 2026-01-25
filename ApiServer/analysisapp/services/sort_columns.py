@@ -100,6 +100,5 @@ def sort_columns(table_name: str, sort_columns: List[Dict[str, str]]) -> Dict:
     api = SortColumns(table_name, sort_columns)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
-    result = api.execute()
-    return result
+        raise ValueError(validation_error.message)
+    return api.execute()

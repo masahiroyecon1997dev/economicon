@@ -164,9 +164,9 @@ def test_calculate_column_empty_expression(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    assert "calculationExpressionは必須です。" in response_data['message']
+    assert "calculationExpression" in response_data['message']
 
 
 def test_calculate_column_no_column_reference(client, tables_store):
@@ -247,3 +247,51 @@ def test_calculate_column_division_by_zero_handling(client, tables_store):
     assert math.isinf(result_values[0])
     assert result_values[1] == 1.0
     assert result_values[2] == 0.0
+
+
+def test_calculate_column_missing_table_name(client, tables_store):
+    """必須フィールドtableNameが欠けている場合のテスト"""
+    payload = {
+        'newColumnName': 'E',
+        'calculationExpression': 'pl.col("A") + pl.col("B")'
+    }
+    response = client.post(
+        '/api/column/calculate',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data['code'] == 'NG'
+    assert "tableName" in response_data['message']
+
+
+def test_calculate_column_missing_new_column_name(client, tables_store):
+    """必須フィールドnewColumnNameが欠けている場合のテスト"""
+    payload = {
+        'tableName': 'TestTable',
+        'calculationExpression': 'pl.col("A") + pl.col("B")'
+    }
+    response = client.post(
+        '/api/column/calculate',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data['code'] == 'NG'
+    assert "newColumnName" in response_data['message']
+
+
+def test_calculate_column_missing_calculation_expression(client, tables_store):
+    """必須フィールドcalculationExpressionが欠けている場合のテスト"""
+    payload = {
+        'tableName': 'TestTable',
+        'newColumnName': 'E'
+    }
+    response = client.post(
+        '/api/column/calculate',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data['code'] == 'NG'
+    assert "calculationExpression" in response_data['message']

@@ -112,6 +112,5 @@ def add_simulation_column(table_name: str,
                               distribution_type, distribution_params)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
-    result = api.execute()
-    return result
+        raise ValueError(validation_error.message)
+    return api.execute()

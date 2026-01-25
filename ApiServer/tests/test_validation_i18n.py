@@ -58,7 +58,7 @@ def test_validation_error_missing_field_ja(client, settings_manager):
 
     response = client.post('/api/analysis/regression', json=payload)
 
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert 'code' in response_data
     assert response_data['code'] == 'NG'
@@ -98,7 +98,7 @@ def test_validation_error_missing_field_en(client, settings_manager):
 
     response = client.post('/api/analysis/regression', json=payload)
 
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert 'code' in response_data
     assert response_data['code'] == 'NG'

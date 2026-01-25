@@ -327,7 +327,7 @@ def test_missing_required_parameters(client, tables_store):
     response = client.post('/api/analysis/regression', json=payload)
 
     # Pydanticバリデーションエラーで422
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_invalid_table_name(client, tables_store):
@@ -543,7 +543,7 @@ def test_missing_entity_id_for_panel(client, tables_store):
     }
     response = client.post('/api/analysis/regression', json=payload)
 
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     # Pydanticのエラーメッセージ構造を確認
     assert 'message' in response_data
@@ -562,7 +562,7 @@ def test_missing_instrumental_variables(client, tables_store):
     }
     response = client.post('/api/analysis/regression', json=payload)
 
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert 'message' in response_data
     error_message = str(response_data['message'])
@@ -579,7 +579,7 @@ def test_missing_alpha_for_lasso(client, tables_store):
     }
     response = client.post('/api/analysis/regression', json=payload)
 
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert 'message' in response_data
     error_message = str(response_data['message'])

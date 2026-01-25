@@ -74,10 +74,7 @@ async def add_dummy_column_endpoint(request: Request,
     create_log_api_request(request)
     # ビジネスロジックの実行
     result = add_dummy_column(
-        table_name=body.tableName,
-        source_column_name=body.sourceColumnName,
-        dummy_column_name=body.dummyColumnName,
-        target_value=body.targetValue
+        **body.model_dump()
     )
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -133,9 +130,7 @@ async def rename_column_endpoint(request: Request, body: RenameColumnRequest):
     """
     create_log_api_request(request)
     result = rename_column(
-        table_name=body.tableName,
-        old_column_name=body.oldColumnName,
-        new_column_name=body.newColumnName
+        **body.model_dump()
     )
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -165,11 +160,7 @@ async def add_lag_lead_column_endpoint(request: Request,
 
     # ビジネスロジックの実行
     result = add_lag_lead_column(
-        table_name=body.tableName,
-        source_column=body.sourceColumn,
-        new_column_name=body.newColumnName,
-        periods=body.periods,
-        group_columns=body.groupColumns
+        **body.model_dump()
     )
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -198,10 +189,7 @@ async def add_simulation_column_endpoint(request: Request,
     create_log_api_request(request)
     # ビジネスロジックの実行
     result = add_simulation_column(
-        table_name=body.tableName,
-        new_column_name=body.newColumnName,
-        distribution_type=body.distributionType,
-        distribution_params=body.distributionParams
+        **body.model_dump()
     )
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -231,9 +219,7 @@ async def calculate_column_endpoint(request: Request,
 
     # ビジネスロジックの実行
     result = calculate_column(
-        table_name=body.tableName,
-        new_column_name=body.newColumnName,
-        calculation_expression=body.calculationExpression
+        **body.model_dump()
     )
 
     return create_success_response(
@@ -263,9 +249,7 @@ async def duplicate_column_endpoint(request: Request,
     create_log_api_request(request)
     # ビジネスロジックの実行
     result = duplicate_column(
-        table_name=body.tableName,
-        source_column_name=body.sourceColumnName,
-        new_column_name=body.newColumnName
+        **body.model_dump()
     )
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -295,13 +279,7 @@ async def transform_column_endpoint(request: Request,
     create_log_api_request(request)
     # ビジネスロジックの実行
     result = transform_column(
-        table_name=body.tableName,
-        source_column_name=body.sourceColumnName,
-        new_column_name=body.newColumnName,
-        transform_method=body.transformMethod,
-        log_base=body.logBase,
-        exponent=body.exponent,
-        root_index=body.rootIndex
+        **body.model_dump()
     )
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -328,7 +306,7 @@ async def get_column_list_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = get_column_list(body.tableName, body.isNumberOnly)
+    result = get_column_list(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -358,8 +336,7 @@ async def sort_columns_endpoint(request: Request, body: SortColumnsRequest):
     create_log_api_request(request)
 
     result = sort_columns(
-        table_name=body.tableName,
-        sort_columns=body.sortColumns
+        **body.model_dump()
     )
 
     return create_success_response(
