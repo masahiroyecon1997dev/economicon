@@ -8,17 +8,7 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..schemas.regressions import AnalysisRequest
-from ..services.regressions import (
-    OLSRegression,
-    LogitRegression,
-    ProbitRegression,
-    TobitRegression,
-    FixedEffectsRegression,
-    RandomEffectsRegression,
-    IVRegression,
-    LassoRegression,
-    RidgeRegression
-)
+from ..services.regression import execute_regression_analysis
 from ..utils.validator.common_validators import ValidationError
 from ..services.abstract_api import ApiError
 from ..utils import (
@@ -47,7 +37,7 @@ async def unified_regression_endpoint(
     body : AnalysisRequest
         統合回帰分析リクエスト
         - type: 分析タイプ (ols, logit, probit, tobit, fe, re, iv,
-          lasso, ridge)
+          feiv, lasso, ridge)
         - tableName: 対象テーブル名
         - dependentVariable: 被説明変数
         - explanatoryVariables: 説明変数のリスト
@@ -61,118 +51,42 @@ async def unified_regression_endpoint(
     create_log_api_request(request)
 
     try:
-        # 共通パラメータの抽出（基本的なもの）
-        common_params = {
+        # 共通パラメータの準備
+        params = {
+            'analysis_type': body.type,
             'table_name': body.tableName,
             'dependent_variable': body.dependentVariable,
             'explanatory_variables': body.explanatoryVariables,
             'standard_error_method': body.standardErrorMethod,
+            'has_const': body.hasConst,
             'missing_value_handling': body.missingValueHandling,
-            'use_t_distribution': body.useTDistribution
+            'use_t_distribution': body.useTDistribution,
         }
 
-        # typeに応じてサービスクラスを選択
-        match body.type:
-            case 'ols':
-                api = OLSRegression(**common_params, has_const=body.hasConst)
+        # パネルデータパラメータ
+        if body.entityIdColumn:
+            params['entity_id_column'] = body.entityIdColumn
+        if body.timeColumn:
+            params['time_column'] = body.timeColumn
 
-            case 'logit':
-                api = LogitRegression(**common_params, has_const=body.hasConst)
+        # 操作変数パラメータ
+        if body.instrumentalVariables:
+            params['instrumental_variables'] = body.instrumentalVariables
+        if body.endogenousVariables:
+            params['endogenous_variables'] = body.endogenousVariables
 
-            case 'probit':
-                api = ProbitRegression(**common_params, has_const=body.hasConst)
+        # Tobitパラメータ
+        if body.leftCensoringLimit is not None:
+            params['left_censoring_limit'] = body.leftCensoringLimit
+        if body.rightCensoringLimit is not None:
+            params['right_censoring_limit'] = body.rightCensoringLimit
 
-            case 'tobit':
-                api = TobitRegression(
-                    **common_params,
-                    has_const=body.hasConst,
-                    left_censoring_limit=body.leftCensoringLimit,
-                    right_censoring_limit=body.rightCensoringLimit
-                )
+        # 正則化パラメータ
+        if 'alpha' in body.hyperParameters:
+            params['alpha'] = body.hyperParameters['alpha']
 
-            case 'fe':
-                if not body.entityIdColumn:
-                    return create_error_response(
-                        http_status.HTTP_400_BAD_REQUEST,
-                        "entityIdColumn is required for fixed effects "
-                        "analysis"
-                    )
-                # パネル分析では has_const は使用しない
-                api = FixedEffectsRegression(
-                    **common_params,
-                    entity_id_column=body.entityIdColumn,
-                    time_column=body.timeColumn
-                )
-
-            case 're':
-                if not body.entityIdColumn:
-                    return create_error_response(
-                        http_status.HTTP_400_BAD_REQUEST,
-                        "entityIdColumn is required for random effects "
-                        "analysis"
-                    )
-                # パネル分析では has_const は使用しない
-                api = RandomEffectsRegression(
-                    **common_params,
-                    entity_id_column=body.entityIdColumn,
-                    time_column=body.timeColumn
-                )
-
-            case 'iv':
-                if not body.instrumentalVariables:
-                    return create_error_response(
-                        http_status.HTTP_400_BAD_REQUEST,
-                        "instrumentalVariables is required for IV analysis"
-                    )
-                api = IVRegression(
-                    **common_params,
-                    has_const=body.hasConst,
-                    instrumental_variables=body.instrumentalVariables,
-                    endogenous_variables=body.endogenousVariables
-                )
-
-            case 'lasso':
-                if 'alpha' not in body.hyperParameters:
-                    return create_error_response(
-                        http_status.HTTP_400_BAD_REQUEST,
-                        "alpha is required in hyperParameters for "
-                        "Lasso regression"
-                    )
-                api = LassoRegression(
-                    **common_params,
-                    has_const=body.hasConst,
-                    alpha=body.hyperParameters['alpha']
-                )
-
-            case 'ridge':
-                if 'alpha' not in body.hyperParameters:
-                    return create_error_response(
-                        http_status.HTTP_400_BAD_REQUEST,
-                        "alpha is required in hyperParameters for "
-                        "Ridge regression"
-                    )
-                api = RidgeRegression(
-                    **common_params,
-                    has_const=body.hasConst,
-                    alpha=body.hyperParameters['alpha']
-                )
-
-            case _:
-                return create_error_response(
-                    http_status.HTTP_400_BAD_REQUEST,
-                    f"Unknown analysis type: {body.type}"
-                )
-
-        # バリデーション実行
-        validation_error = api.validate()
-        if validation_error:
-            return create_error_response(
-                http_status.HTTP_400_BAD_REQUEST,
-                str(validation_error)
-            )
-
-        # 分析実行
-        result = api.execute()
+        # 統合サービスを呼び出し
+        result = execute_regression_analysis(**params)
 
         return create_success_response(
             http_status.HTTP_200_OK,
@@ -187,6 +101,11 @@ async def unified_regression_endpoint(
     except ApiError as e:
         return create_error_response(
             http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            str(e)
+        )
+    except NotImplementedError as e:
+        return create_error_response(
+            http_status.HTTP_501_NOT_IMPLEMENTED,
             str(e)
         )
     except Exception as e:

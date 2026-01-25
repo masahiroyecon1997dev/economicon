@@ -66,6 +66,11 @@ class FixedEffectsRegression(AbstractRegressionService):
         self.param_names['entity_id_column'] = 'entityIdColumn'
         self.param_names['time_column'] = 'timeColumn'
 
+        # クラスター標準誤差の場合、groupsが未指定なら entity_id_column を使用
+        if (standard_error_method == 'clustered' and 
+                'groups' not in self.standard_error_params):
+            self.standard_error_params['groups'] = entity_id_column
+
     def _validate_specific(self):
         """
         固定効果モデル固有のバリデーション
@@ -236,6 +241,7 @@ class FixedEffectsRegression(AbstractRegressionService):
             'dependentVariable': self.dependent_variable,
             'explanatoryVariables': self.explanatory_variables,
             'entityIdColumn': self.entity_id_column,
+            'estimationMethod': 'Fixed Effects (Within)',
             'regressionResult': summary_text,
             'parameters': params_info,
             'modelStatistics': model_stats,
@@ -286,6 +292,11 @@ class RandomEffectsRegression(AbstractRegressionService):
         self.time_column = time_column
         self.param_names['entity_id_column'] = 'entityIdColumn'
         self.param_names['time_column'] = 'timeColumn'
+
+        # クラスター標準誤差の場合、groupsが未指定なら entity_id_column を使用
+        if (standard_error_method == 'clustered' and 
+                'groups' not in self.standard_error_params):
+            self.standard_error_params['groups'] = entity_id_column
 
     def _validate_specific(self):
         """
@@ -430,7 +441,16 @@ class RandomEffectsRegression(AbstractRegressionService):
 
         # theta (変量効果の重み)
         if hasattr(model_result, 'theta'):
-            diagnostics['theta'] = float(model_result.theta)
+            theta_value = model_result.theta
+            # thetaがDataFrameの場合は平均値を取る
+            if hasattr(theta_value, 'mean'):
+                if hasattr(theta_value, 'values'):
+                    # DataFrameまたはSeriesの場合
+                    diagnostics['theta'] = float(theta_value.values.mean())
+                else:
+                    diagnostics['theta'] = float(theta_value.mean())
+            else:
+                diagnostics['theta'] = float(theta_value)
             diagnostics['thetaDescription'] = (
                 'Weight of random effects transformation '
                 '(0=pooled, 1=within)'
@@ -441,6 +461,7 @@ class RandomEffectsRegression(AbstractRegressionService):
             'dependentVariable': self.dependent_variable,
             'explanatoryVariables': self.explanatory_variables,
             'entityIdColumn': self.entity_id_column,
+            'estimationMethod': 'Random Effects (GLS)',
             'regressionResult': summary_text,
             'parameters': params_info,
             'modelStatistics': model_stats,
