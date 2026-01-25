@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { Plus } from "lucide-react";
+import { Edit2, Plus, Trash2 } from "lucide-react";
 import { startTransition, useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -17,7 +17,7 @@ import type { DistributionType, SimulationColumnSetting } from "../../../types/c
 import { InputText } from "../../atoms/Input/InputText";
 import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
 import { FormField } from "../../molecules/Form/FormField";
-import { SimulationColumnConfig } from "../../organisms/Form/SimulationColumnConfig";
+import { SimulationColumnEditDialog } from "../../organisms/Modal/SimulationColumnEditDialog";
 import { MainViewLayout } from "../Layouts/MainViewLayout";
 
 const createSimulationSchema = (t: (key: string) => string) =>
@@ -64,6 +64,8 @@ export const CreateSimulationDataTableView = () => {
   const [columns, setColumns] = useState<SimulationColumnSetting[]>([
     COLUMN_SETTINGS_DEFAULT
   ]);
+
+  const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
 
   type ActionState = {
     success: boolean;
@@ -307,6 +309,24 @@ export const CreateSimulationDataTableView = () => {
   const handleCancel = () => {
     setCurrentView('SelectFile');
   };
+
+  const getColumnSummary = (column: SimulationColumnSetting): string => {
+    if (column.dataType === 'fixed') {
+      return `${column.columnName || t('CreateSimulationDataTableView.NotSet')} - ${t('Common.Constant')}: ${column.fixedValue || t('CreateSimulationDataTableView.NotSet')}`;
+    }
+
+    const distOption = DISTRIBUTION_OPTIONS.find(d => d.value === column.distributionType);
+    if (!distOption) {
+      return `${column.columnName || t('CreateSimulationDataTableView.NotSet')} - ${t('Common.Distribution')}`;
+    }
+
+    const paramsStr = distOption.params
+      .map(param => `${param}=${column.distributionParams?.[param] ?? '?'}`)
+      .join(', ');
+
+    return `${column.columnName || t('CreateSimulationDataTableView.NotSet')} - ${t(distOption.label)} (${paramsStr})`;
+  };
+
   return (
     <MainViewLayout
       title={t("CreateSimulationDataTableView.CreateNewDataTable")}
@@ -350,7 +370,7 @@ export const CreateSimulationDataTableView = () => {
         </div>
         <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-main dark:text-white text-base font-bold leading-tight">列の設定</h2>
+            <h2 className="text-main dark:text-white text-base font-bold leading-tight">{t('CreateSimulationDataTableView.ColumnSettings')}</h2>
             <button
               type="button"
               onClick={addColumn}
@@ -361,22 +381,39 @@ export const CreateSimulationDataTableView = () => {
               {t("CreateSimulationDataTableView.AddColumn")}
             </button>
           </div>
-          <div className="space-y-4 overflow-y-auto max-h-64">
+          <div className="space-y-0 max-h-48 overflow-y-auto">
             {columns.map((column, index) => (
-              <SimulationColumnConfig
+              <div
                 key={column.id}
-                column={column}
-                index={index}
-                distributionOptions={DISTRIBUTION_OPTIONS}
-                onUpdate={updateColumn}
-                onDataTypeChange={handleDataTypeChange}
-                onDistributionTypeChange={handleDistributionTypeChange}
-                onDistributionParamChange={handleDistributionParamChange}
-                onRemove={removeColumn}
-                canRemove={columns.length > 1}
-                error={column.errorMessage}
-                disabled={isPending}
-              />
+                className="flex items-center justify-between py-2 px-3 border-t border-gray-300 dark:border-gray-600 first:border-t-0"
+              >
+                <span className="text-sm text-gray-700 dark:text-gray-300 flex-1 mr-4">
+                  {getColumnSummary(column)}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingColumnId(column.id)}
+                    className="flex items-center gap-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    disabled={isPending}
+                    aria-label={t('Common.Edit')}
+                  >
+                    <Edit2 size={16} />
+                    {t('Common.Edit')}
+                  </button>
+                  {columns.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeColumn(column.id)}
+                      className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isPending}
+                      aria-label={t('Common.Delete')}
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -392,6 +429,31 @@ export const CreateSimulationDataTableView = () => {
           onSelectType="submit"
         />
       </form>
+
+      {editingColumnId && (
+        <SimulationColumnEditDialog
+          isOpen={!!editingColumnId}
+          column={columns.find(col => col.id === editingColumnId)!}
+          index={columns.findIndex(col => col.id === editingColumnId)}
+          distributionOptions={DISTRIBUTION_OPTIONS}
+          onUpdate={updateColumn}
+          onDataTypeChange={handleDataTypeChange}
+          onDistributionTypeChange={handleDistributionTypeChange}
+          onDistributionParamChange={handleDistributionParamChange}
+          onRemove={(id) => {
+            removeColumn(id);
+            setEditingColumnId(null);
+          }}
+          onClose={() => setEditingColumnId(null)}
+          canRemove={columns.length > 1}
+          error={columns.find(col => col.id === editingColumnId)?.errorMessage || {
+            columnName: undefined,
+            distributionParams: undefined,
+            fixedValue: undefined
+          }}
+          disabled={isPending}
+        />
+      )}
     </MainViewLayout>
   );
 }
