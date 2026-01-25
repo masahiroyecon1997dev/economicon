@@ -75,7 +75,7 @@ class AnalysisRequest(BaseModel):
     """
     type: Literal[
         'ols', 'logit', 'probit', 'tobit',
-        'fe', 're', 'iv', 'lasso', 'ridge'
+        'fe', 're', 'iv', 'feiv', 'lasso', 'ridge'
     ] = Field(..., description="分析タイプ")
 
     method: Literal['ols', 'wls', 'gls', 'gmm'] = Field(
@@ -170,7 +170,13 @@ class AnalysisRequest(BaseModel):
 
         # 標準誤差の検証: clustered の場合 groups が必要
         if self.standardErrorMethod == 'clustered':
-            if 'groups' not in self.standardErrorParams:
+            # パネルデータの場合はentityIdColumnをデフォルトのgroups として使用
+            if self.type in ['fe', 're'] and self.entityIdColumn:
+                # standardErrorParamsにgroupsがない場合、entityIdColumnを設定
+                if 'groups' not in self.standardErrorParams:
+                    self.standardErrorParams['groups'] = self.entityIdColumn
+            elif 'groups' not in self.standardErrorParams:
+                # パネルデータ以外ではgroupsが必須
                 raise ValueError(
                     "standardErrorMethod='clustered' の場合、"
                     "standardErrorParams に 'groups' "
@@ -186,7 +192,7 @@ class AnalysisRequest(BaseModel):
                 )
 
         # パネルデータ分析の検証
-        if self.type in ['fe', 're']:
+        if self.type in ['fe', 're', 'feiv']:
             if not self.entityIdColumn:
                 raise ValueError(
                     f"type='{self.type}' の場合、"
@@ -194,10 +200,10 @@ class AnalysisRequest(BaseModel):
                 )
 
         # 操作変数法の検証
-        if self.type == 'iv':
+        if self.type in ['iv', 'feiv']:
             if not self.instrumentalVariables:
                 raise ValueError(
-                    "type='iv' の場合、"
+                    f"type='{self.type}' の場合、"
                     "instrumentalVariables が必要です"
                 )
 

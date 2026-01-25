@@ -195,8 +195,10 @@ class AbstractRegressionService(AbstractApi, ABC):
             return result
 
         except Exception as e:
-            message = _("An unexpected error occurred during "
-                        "regression analysis execution")
+            message = _(
+                "An unexpected error occurred during "
+                "regression analysis execution"
+            )
             raise ApiError(message) from e
 
     @abstractmethod
@@ -332,6 +334,20 @@ class AbstractRegressionService(AbstractApi, ABC):
         cov_type = cov_type_map.get(self.standard_error_method)
         if not cov_type:
             return model_result
+
+        # HACの場合はmaxlagsを渡す (デフォルトは sqrt(n) に基づく計算)
+        if self.standard_error_method == 'hac':
+            maxlags = self.standard_error_params.get('maxlags')
+            if maxlags is None:
+                # maxlagsが未指定の場合、デフォルト値を計算
+                import numpy as np
+                table_info = self.tables_store.get_table(self.table_name)
+                n = len(table_info.table)
+                maxlags = int(np.floor(4 * (n / 100) ** (2 / 9)))
+            return model_result.get_robustcov_results(
+                cov_type=cov_type,
+                maxlags=maxlags
+            )
 
         # クラスタリングの場合は groups を渡す
         if self.standard_error_method == 'clustered':
