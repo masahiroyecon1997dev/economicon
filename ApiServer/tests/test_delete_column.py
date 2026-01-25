@@ -88,9 +88,9 @@ def test_delete_column_empty_table_name(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    assert "tableNameは必須です。" in response_data['message']
+    assert "tableName" in response_data['message']
 
 
 def test_delete_column_empty_column_name(client, tables_store):
@@ -103,6 +103,36 @@ def test_delete_column_empty_column_name(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    assert "columnNameは必須です。" in response_data['message']
+    assert "columnName" in response_data['message']
+
+
+def test_delete_column_missing_table_name(client, tables_store):
+    """必須フィールドtableNameが欠けている場合のテスト"""
+    payload = {
+        'columnName': 'A'
+    }
+    response = client.post(
+        '/api/column/delete',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data['code'] == 'NG'
+    assert "tableName" in response_data['message']
+
+
+def test_delete_column_missing_column_name(client, tables_store):
+    """必須フィールドcolumnNameが欠けている場合のテスト"""
+    payload = {
+        'tableName': 'TestTable'
+    }
+    response = client.post(
+        '/api/column/delete',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data['code'] == 'NG'
+    assert "columnName" in response_data['message']

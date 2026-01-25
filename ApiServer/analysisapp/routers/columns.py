@@ -103,8 +103,7 @@ async def delete_column_endpoint(request: Request, body: DeleteColumnRequest):
     """
     create_log_api_request(request)
     result = delete_column(
-        table_name=body.tableName,
-        column_name=body.columnName
+        **body.model_dump()
     )
     return create_success_response(
         http_status.HTTP_200_OK,
