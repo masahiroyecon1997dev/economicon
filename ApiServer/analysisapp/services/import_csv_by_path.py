@@ -102,7 +102,7 @@ def import_csv_by_path(file_path: str,
     api = ImportCsvByPath(file_path, table_name, separator)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     try:
         result = api.execute()
     except ApiError as e:

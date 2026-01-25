@@ -165,10 +165,10 @@ def test_export_csv_by_path_missing_table_name(client, prepared_data):
     }
     response = client.post('/api/data/export-csv-by-path',
                            data=json.dumps(request_data))
-    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert 'NG' == response_data['code']
-    # assert "tableName is required" == response_data['message']
+    response_data = response.json()
+    assert 'NG' == response_data['code']
+    assert "tableName は必須です。" == response_data['message']
 
 
 def test_export_csv_by_path_missing_directory_path(client, prepared_data):
@@ -181,10 +181,10 @@ def test_export_csv_by_path_missing_directory_path(client, prepared_data):
     }
     response = client.post('/api/data/export-csv-by-path',
                            data=json.dumps(request_data))
-    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert 'NG' == response_data['code']
-    # assert "directoryPath is required" == response_data['message']
+    response_data = response.json()
+    assert 'NG' == response_data['code']
+    assert "directoryPath は必須です。" == response_data['message']
 
 
 def test_export_csv_by_path_missing_file_name(client, prepared_data):
@@ -198,10 +198,10 @@ def test_export_csv_by_path_missing_file_name(client, prepared_data):
     }
     response = client.post('/api/data/export-csv-by-path',
                            data=json.dumps(request_data))
-    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert 'NG' == response_data['code']
-    # assert "fileName is required" == response_data['message']
+    response_data = response.json()
+    assert 'NG' == response_data['code']
+    assert "fileName は必須です。" == response_data['message']
 
 
 def test_export_csv_by_path_empty_separator(client, prepared_data):
@@ -218,9 +218,9 @@ def test_export_csv_by_path_empty_separator(client, prepared_data):
     response = client.post('/api/data/export-csv-by-path',
                            data=json.dumps(request_data))
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert 'NG' == response_data['code']
-    message = "separatorは少なくとも1文字である必要があります。"
+    message = "separator は1文字以上である必要があります。"
     assert message == response_data['message']
 
 
@@ -230,10 +230,10 @@ def test_export_csv_by_path_invalid_json(client, prepared_data):
     """
     response = client.post('/api/data/export-csv-by-path',
                            data='invalid json')
-    # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert 'NG' == response_data['code']
-    # assert "Invalid JSON format" == response_data['message']
+    response_data = response.json()
+    assert 'NG' == response_data['code']
+    assert "JSON decode error" == response_data['message']
 
 
 def test_export_csv_by_path_empty_table(client, prepared_data):
@@ -293,3 +293,57 @@ def test_export_csv_by_path_large_table(client, prepared_data):
     exported_data = pl.read_csv(output_path)
     assert large_data.equals(exported_data)
     assert 1000 == len(exported_data)
+
+
+def test_export_csv_by_path_empty_table_name(client, prepared_data):
+    """
+    tableNameが空文字列の場合はバリデーションエラーになる
+    """
+    tables_store, test_output_dir, test_data = prepared_data
+    request_data = {
+        'tableName': '',
+        'directoryPath': test_output_dir,
+        'fileName': 'test_output.csv'
+    }
+    response = client.post('/api/data/export-csv-by-path',
+                          data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_export_csv_by_path_empty_directory_path(client, prepared_data):
+    """
+    directoryPathが空文字列の場合はバリデーションエラーになる
+    """
+    tables_store, test_output_dir, test_data = prepared_data
+    request_data = {
+        'tableName': 'TestTable',
+        'directoryPath': '',
+        'fileName': 'test_output.csv'
+    }
+    response = client.post('/api/data/export-csv-by-path',
+                          data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'directoryPath' in response_data['message']
+
+
+def test_export_csv_by_path_empty_file_name(client, prepared_data):
+    """
+    fileNameが空文字列の場合はバリデーションエラーになる
+    """
+    tables_store, test_output_dir, test_data = prepared_data
+    request_data = {
+        'tableName': 'TestTable',
+        'directoryPath': test_output_dir,
+        'fileName': ''
+    }
+    response = client.post('/api/data/export-csv-by-path',
+                          data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'fileName' in response_data['message']

@@ -83,7 +83,7 @@ class AddColumn(AbstractApi):
                         "during adding column processing")
             raise ApiError(message) from e
 
-@validate_call
+
 def add_column(
     table_name: str,
     new_column_name: str,

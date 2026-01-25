@@ -68,11 +68,7 @@ async def import_csv_by_path_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = import_csv_by_path(
-        file_path=body.filePath,
-        table_name=body.tableName,
-        separator=body.separator
-    )
+    result = import_csv_by_path(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -162,11 +158,7 @@ async def import_excel_by_path_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = import_excel_by_path(
-        file_path=body.filePath,
-        table_name=body.tableName,
-        sheet_name=body.sheetName
-    )
+    result = import_excel_by_path(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -225,10 +217,7 @@ async def import_parquet_by_path_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = import_parquet_by_path(
-        file_path=body.filePath,
-        table_name=body.tableName
-    )
+    result = import_parquet_by_path(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -255,12 +244,7 @@ async def export_csv_by_path_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = export_csv_by_path(
-        table_name=body.tableName,
-        directory_path=body.directoryPath,
-        file_name=body.fileName,
-        separator=body.separator
-    )
+    result = export_csv_by_path(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -287,11 +271,7 @@ async def export_excel_by_path_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = export_excel_by_path(
-        table_name=body.tableName,
-        directory_path=body.directoryPath,
-        file_name=body.fileName
-    )
+    result = export_excel_by_path(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -318,11 +298,7 @@ async def export_parquet_by_path_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = export_parquet_by_path(
-        table_name=body.tableName,
-        directory_path=body.directoryPath,
-        file_name=body.fileName
-    )
+    result = export_parquet_by_path(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,

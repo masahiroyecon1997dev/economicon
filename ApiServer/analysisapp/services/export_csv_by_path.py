@@ -119,7 +119,7 @@ def export_csv_by_path(table_name: str,
     api = ExportCsvByPath(table_name, directory_path, file_name, separator)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     try:
         result = api.execute()
     except ApiError as e:
