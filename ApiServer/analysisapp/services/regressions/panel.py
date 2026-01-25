@@ -67,7 +67,7 @@ class FixedEffectsRegression(AbstractRegressionService):
         self.param_names['time_column'] = 'timeColumn'
 
         # クラスター標準誤差の場合、groupsが未指定なら entity_id_column を使用
-        if (standard_error_method == 'clustered' and 
+        if (standard_error_method == 'clustered' and
                 'groups' not in self.standard_error_params):
             self.standard_error_params['groups'] = entity_id_column
 
@@ -294,7 +294,7 @@ class RandomEffectsRegression(AbstractRegressionService):
         self.param_names['time_column'] = 'timeColumn'
 
         # クラスター標準誤差の場合、groupsが未指定なら entity_id_column を使用
-        if (standard_error_method == 'clustered' and 
+        if (standard_error_method == 'clustered' and
                 'groups' not in self.standard_error_params):
             self.standard_error_params['groups'] = entity_id_column
 

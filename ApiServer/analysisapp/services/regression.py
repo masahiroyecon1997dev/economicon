@@ -48,7 +48,7 @@ def execute_regression_analysis(
     統合回帰分析の実行
 
     Args:
-        analysis_type: 分析タイプ (ols, logit, probit, tobit, fe, re, 
+        analysis_type: 分析タイプ (ols, logit, probit, tobit, fe, re,
                       feiv, iv, lasso, ridge)
         table_name: 対象テーブル名
         dependent_variable: 被説明変数
@@ -131,7 +131,7 @@ def execute_regression_analysis(
             raise ValidationError(
                 "instrumentalVariables is required for IV analysis"
             )
-        
+
         # feivの場合、entity_id_columnも必要
         if analysis_type == 'feiv':
             if not entity_id_column:
@@ -145,7 +145,7 @@ def execute_regression_analysis(
                 "Fixed Effects IV (feiv) is not yet implemented. "
                 "Use 'iv' for standard instrumental variables regression."
             )
-        
+
         api = IVRegression(
             **common_params,
             has_const=has_const,
