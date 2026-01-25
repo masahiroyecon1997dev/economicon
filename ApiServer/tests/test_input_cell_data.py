@@ -130,3 +130,132 @@ def test_input_cell_data_invalid_row_string(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     # assert response_data['code'] == 'NG'
     # assert "rowIndex must be an integer." == response_data['message']
+
+
+def test_input_cell_data_empty_table_name(client, tables_store):
+    """
+    tableNameが空文字列の場合はバリデーションエラーになる
+    """
+    response = client.post(
+        '/api/operation/input-cell-data',
+        json={
+            'tableName': '',
+            'columnName': 'A',
+            'rowIndex': 1,
+            'newValue': 10
+        }
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_input_cell_data_empty_column_name(client, tables_store):
+    """
+    columnNameが空文字列の場合はバリデーションエラーになる
+    """
+    response = client.post(
+        '/api/operation/input-cell-data',
+        json={
+            'tableName': 'TestTable',
+            'columnName': '',
+            'rowIndex': 1,
+            'newValue': 10
+        }
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'columnName' in response_data['message']
+
+
+def test_input_cell_data_negative_row_index(client, tables_store):
+    """
+    rowIndexが負の値の場合はバリデーションエラーになる
+    """
+    response = client.post(
+        '/api/operation/input-cell-data',
+        json={
+            'tableName': 'TestTable',
+            'columnName': 'A',
+            'rowIndex': -1,
+            'newValue': 10
+        }
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'rowIndex' in response_data['message']
+
+
+def test_input_cell_data_missing_table_name(client, tables_store):
+    """
+    tableNameが欠損している場合はバリデーションエラーになる
+    """
+    response = client.post(
+        '/api/operation/input-cell-data',
+        json={
+            'columnName': 'A',
+            'rowIndex': 1,
+            'newValue': 10
+        }
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_input_cell_data_missing_column_name(client, tables_store):
+    """
+    columnNameが欠損している場合はバリデーションエラーになる
+    """
+    response = client.post(
+        '/api/operation/input-cell-data',
+        json={
+            'tableName': 'TestTable',
+            'rowIndex': 1,
+            'newValue': 10
+        }
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'columnName' in response_data['message']
+
+
+def test_input_cell_data_missing_row_index(client, tables_store):
+    """
+    rowIndexが欠損している場合はバリデーションエラーになる
+    """
+    response = client.post(
+        '/api/operation/input-cell-data',
+        json={
+            'tableName': 'TestTable',
+            'columnName': 'A',
+            'newValue': 10
+        }
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'rowIndex' in response_data['message']
+
+
+def test_input_cell_data_missing_new_value(client, tables_store):
+    """
+    newValueが欠損している場合はバリデーションエラーになる
+    """
+    response = client.post(
+        '/api/operation/input-cell-data',
+        json={
+            'tableName': 'TestTable',
+            'columnName': 'A',
+            'rowIndex': 1
+        }
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'newValue' in response_data['message']
