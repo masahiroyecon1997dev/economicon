@@ -8,11 +8,12 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from analysisapp.exception_handlers import init_exception_handlers
-from analysisapp.i18n.translation import get_locale_from_settings
+from analysisapp.i18n.translation import get_locale_from_settings, gettext as _
 from analysisapp.routers import api_router
 from analysisapp.services.data.settings_manager import SettingsManager
 from analysisapp.services.data.tables_store import TablesStore
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -76,7 +77,6 @@ app.add_middleware(
 
 
 # i18nミドルウェア（fastapi-babelが自動的に処理）
-# リクエストのAccept-Languageヘッダーから言語が自動検出されます
 @app.middleware("http")
 async def babel_middleware(request: Request, call_next):
     """settingsManagerのロケールを設定"""
@@ -109,6 +109,81 @@ async def root():
 async def health_check():
     """ヘルスチェック"""
     return {"status": "ok"}
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request,
+    exc: RequestValidationError
+):
+    """
+    Pydantic バリデーションエラーハンドラ
+
+    422 エラーのメッセージを多言語化します。
+    """
+    errors = exc.errors()
+    translated_errors = []
+
+    for error in errors:
+        translated_error = error.copy()
+
+        # エラータイプに基づく翻訳
+        error_type = error.get("type", "")
+        error_msg = error.get("msg", "")
+
+        # エラータイプごとの翻訳キーマッピング
+        type_translation_map = {
+            "missing": "ValidationError.FieldRequired",
+            "string_type": "ValidationError.StringTypeExpected",
+            "int_type": "ValidationError.IntTypeExpected",
+            "float_type": "ValidationError.FloatTypeExpected",
+            "bool_type": "ValidationError.BoolTypeExpected",
+            "list_type": "ValidationError.ListTypeExpected",
+            "dict_type": "ValidationError.DictTypeExpected",
+            "value_error": "ValidationError.ValueError",
+            "type_error": "ValidationError.TypeError",
+            "assertion_error": "ValidationError.AssertionError",
+            "less_than": "ValidationError.LessThan",
+            "less_than_equal": "ValidationError.LessThanEqual",
+            "greater_than": "ValidationError.GreaterThan",
+            "greater_than_equal": "ValidationError.GreaterThanEqual",
+            "string_too_short": "ValidationError.StringTooShort",
+            "string_too_long": "ValidationError.StringTooLong",
+            "enum": "ValidationError.InvalidEnum",
+            "literal_error": "ValidationError.LiteralError",
+        }
+
+        # エラータイプに対応する翻訳キーがあれば使用
+        if error_type in type_translation_map:
+            translation_key = type_translation_map[error_type]
+            translated_msg = _(translation_key)
+
+            # 翻訳が見つからない場合（キーがそのまま返る）は
+            # 元のメッセージを翻訳
+            if translated_msg == translation_key:
+                translated_msg = _(error_msg)
+        else:
+            # マッピングにない場合は直接メッセージを翻訳
+            translated_msg = _(error_msg)
+
+        translated_error["msg"] = translated_msg
+        translated_errors.append(translated_error)
+
+    return JSONResponse(
+        status_code=422,
+        content={"detail": translated_errors}
+    )
+
+@app.exception_handler(ValueError)
+async def value_error_handler(request: Request, exc: ValueError):
+    # ロジックで発生した ValueError を 400 Bad Request としてフロントに返す
+    return JSONResponse(
+        status_code=400,
+        content={
+            'code': 'NG',
+            'message': str(exc)
+        }
+    )
 
 
 # 1. ルーターの登録

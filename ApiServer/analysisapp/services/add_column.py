@@ -1,6 +1,7 @@
 from typing import Dict
 
 import polars as pl
+from pydantic import validate_call
 from .django_compat import gettext as _
 
 from .data.tables_store import TablesStore
@@ -82,7 +83,7 @@ class AddColumn(AbstractApi):
                         "during adding column processing")
             raise ApiError(message) from e
 
-
+@validate_call
 def add_column(
     table_name: str,
     new_column_name: str,
@@ -91,5 +92,5 @@ def add_column(
     api = AddColumn(table_name, new_column_name, add_position_column)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     return api.execute()
