@@ -64,20 +64,14 @@ def test_validation_error_missing_field_ja(client, settings_manager):
     assert response_data['code'] == 'NG'
     assert 'message' in response_data
 
-    # エラーメッセージが文字列のリストであることを確認
-    messages = response_data['message']
-    assert isinstance(messages, list)
-    assert len(messages) > 0
+    # エラーメッセージが文字列であることを確認
+    message = response_data['message']
+    assert isinstance(message, str)
+    assert len(message) > 0
 
     # 日本語メッセージが含まれていることを確認
-    # "テーブル名は必須です" のようなメッセージを期待
-    found_table_name_error = False
-    for msg in messages:
-        if 'テーブル名' in msg and '必須' in msg:
-            found_table_name_error = True
-            break
-
-    assert found_table_name_error, f"Expected Japanese error message, got: {messages}"
+    # "tableName は必須です" のようなメッセージを期待
+    assert 'tableName' in message and '必須' in message, f"Expected Japanese error message, got: {message}"
 
 
 def test_validation_error_missing_field_en(client, settings_manager):
@@ -110,20 +104,14 @@ def test_validation_error_missing_field_en(client, settings_manager):
     assert response_data['code'] == 'NG'
     assert 'message' in response_data
 
-    # エラーメッセージが文字列のリストであることを確認
-    messages = response_data['message']
-    assert isinstance(messages, list)
-    assert len(messages) > 0
+    # エラーメッセージが文字列であることを確認
+    message = response_data['message']
+    assert isinstance(message, str)
+    assert len(message) > 0
 
     # 英語メッセージが含まれていることを確認
-    # "Table Name is required" のようなメッセージを期待
-    found_table_name_error = False
-    for msg in messages:
-        if 'Table Name' in msg and 'required' in msg:
-            found_table_name_error = True
-            break
-
-    assert found_table_name_error, f"Expected English error message, got: {messages}"
+    # "tableName is required" のようなメッセージを期待
+    assert 'tableName' in message and 'required' in message, f"Expected English error message, got: {message}"
 
 
 def test_validation_error_invalid_type_ja(client, settings_manager):
@@ -155,22 +143,14 @@ def test_validation_error_invalid_type_ja(client, settings_manager):
     assert response_data['code'] == 'NG'
     assert 'message' in response_data
 
-    # エラーメッセージが文字列のリストであることを確認
-    messages = response_data['message']
-    assert isinstance(messages, list)
-    assert len(messages) > 0
+    # エラーメッセージが文字列であることを確認
+    message = response_data['message']
+    assert isinstance(message, str)
+    assert len(message) > 0
 
     # 日本語メッセージが含まれていることを確認
-    # "説明変数はリストである必要があります" のようなメッセージを期待
-    found_type_error = False
-    for msg in messages:
-        if '説明変数' in msg and 'リスト' in msg:
-            found_type_error = True
-            # 日本語メッセージであることを確認（リストまたはリスト型が含まれる）
-            assert 'リスト' in msg
-            break
-
-    assert found_type_error, f"Expected Japanese type error message, got: {messages}"
+    # "explanatoryVariables はリストである必要があります" のようなメッセージを期待
+    assert 'explanatoryVariables' in message and 'リスト' in message, f"Expected Japanese type error message, got: {message}"
 
 
 def test_validation_error_invalid_enum_ja(client, settings_manager):
@@ -201,12 +181,11 @@ def test_validation_error_invalid_enum_ja(client, settings_manager):
     assert response_data['code'] == 'NG'
     assert 'message' in response_data
 
-    # エラーメッセージが文字列のリストであることを確認
-    messages = response_data['message']
-    assert isinstance(messages, list)
-    assert len(messages) > 0
+    # エラーメッセージが文字列であることを確認
+    message = response_data['message']
+    assert isinstance(message, str)
+    assert len(message) > 0
 
-    # 何らかのエラーメッセージが返されることを確認
-    assert all(isinstance(msg, str) for msg in messages)
-    errors = response_data['detail']
-    assert len(errors) > 0
+    # 日本語でエラーメッセージが返されることを確認
+    # "type は次のいずれかである必要があります" のようなメッセージを期待
+    assert 'type' in message, f"Expected error message about 'type', got: {message}"
