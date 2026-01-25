@@ -30,15 +30,15 @@ def tables_store():
     n_samples = 100
     x1 = np.random.normal(0, 1, n_samples)
     x2 = np.random.normal(0, 1, n_samples)
-    
+
     # 線形回帰用
     y_linear = 2.0 + 1.5 * x1 + 0.8 * x2 + np.random.normal(0, 0.5, n_samples)
-    
+
     # ロジット/プロビット用
     linear_combination = -1 + 0.5 * x1 + 1.2 * x2
     probabilities = 1 / (1 + np.exp(-linear_combination))
     y_binary = np.random.binomial(1, probabilities, n_samples)
-    
+
     df_basic = pl.DataFrame({
         'y_linear': y_linear,
         'y_binary': y_binary,
@@ -59,7 +59,7 @@ def tables_store():
     x2_panel = np.random.normal(0, 1, n_total)
     error = np.random.normal(0, 1, n_total)
     y_panel = 2.0 + 1.5 * x1_panel + -0.8 * x2_panel + entity_effects_expanded + error
-    
+
     df_panel = pl.DataFrame({
         'entity_id': entity_ids,
         'time_id': time_ids,
@@ -75,13 +75,13 @@ def tables_store():
     z1 = np.random.normal(0, 1, n_iv)  # 操作変数1
     z2 = np.random.normal(0, 1, n_iv)  # 操作変数2
     x1_iv = np.random.normal(0, 1, n_iv)  # 外生説明変数
-    
+
     # 内生変数（操作変数と相関）
     x2_endog = 0.5 * z1 + 0.3 * z2 + np.random.normal(0, 0.5, n_iv)
-    
+
     # 被説明変数
     y_iv = 1.0 + 0.5 * x1_iv + 1.0 * x2_endog + np.random.normal(0, 1, n_iv)
-    
+
     df_iv = pl.DataFrame({
         'y': y_iv,
         'x1': x1_iv,
@@ -96,7 +96,7 @@ def tables_store():
     x_tobit = np.random.normal(0, 1, n_tobit)
     latent_y = 1.0 + 2.0 * x_tobit + np.random.normal(0, 1, n_tobit)
     y_tobit = np.maximum(0, latent_y)  # 0で左側打ち切り
-    
+
     df_tobit = pl.DataFrame({
         'y': y_tobit,
         'x': x_tobit
@@ -112,7 +112,7 @@ def tables_store():
     ('logit', 'BasicData', 'y_binary', ['pseudoRSquared', 'logLikelihood']),
     ('probit', 'BasicData', 'y_binary', ['pseudoRSquared', 'logLikelihood']),
 ])
-def test_basic_regression_types(client, tables_store, analysis_type, 
+def test_basic_regression_types(client, tables_store, analysis_type,
                                 table_name, dependent_var, expected_diagnostics):
     """基本的な回帰分析タイプのテスト"""
     payload = {
@@ -122,15 +122,15 @@ def test_basic_regression_types(client, tables_store, analysis_type,
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data['code'] == 'OK'
-    
+
     result = response_data['result']
     assert 'parameters' in result
     assert 'modelStatistics' in result
-    
+
     # 期待される診断統計量が含まれているか確認
     stats = result['modelStatistics']
     for diagnostic in expected_diagnostics:
@@ -148,14 +148,14 @@ def test_fixed_effects_regression(client, tables_store):
         'standardErrorMethod': 'nonrobust'
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data['code'] == 'OK'
-    
+
     result = response_data['result']
     assert 'diagnostics' in result
-    
+
     # パネルデータ固有の診断統計量を確認
     diagnostics = result['diagnostics']
     assert 'rsquaredWithin' in diagnostics
@@ -174,14 +174,14 @@ def test_random_effects_regression(client, tables_store):
         'standardErrorMethod': 'nonrobust'
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data['code'] == 'OK'
-    
+
     result = response_data['result']
     assert 'diagnostics' in result
-    
+
     # 変量効果固有の診断統計量を確認
     diagnostics = result['diagnostics']
     assert 'rsquaredWithin' in diagnostics
@@ -199,19 +199,19 @@ def test_iv_regression(client, tables_store):
         'instrumentalVariables': ['z1', 'z2']
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data['code'] == 'OK'
-    
+
     result = response_data['result']
     assert 'diagnostics' in result
-    
+
     # IV固有の診断統計量を確認
     diagnostics = result['diagnostics']
     # Wu-Hausman testまたはSargan testのいずれかが含まれているはず
     has_iv_diagnostics = (
-        'wuHausmanTest' in diagnostics or 
+        'wuHausmanTest' in diagnostics or
         'sarganTest' in diagnostics or
         'firstStage' in diagnostics
     )
@@ -228,11 +228,11 @@ def test_lasso_regression(client, tables_store):
         'hyperParameters': {'alpha': 0.1}
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data['code'] == 'OK'
-    
+
     result = response_data['result']
     assert 'parameters' in result
     # Lassoでは一部の係数がゼロになる可能性がある
@@ -249,11 +249,11 @@ def test_ridge_regression(client, tables_store):
         'hyperParameters': {'alpha': 0.5}
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data['code'] == 'OK'
-    
+
     result = response_data['result']
     assert 'parameters' in result
 
@@ -268,10 +268,10 @@ def test_tobit_regression(client, tables_store):
         'leftCensoringLimit': 0.0
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     # py4etricsがない場合は500エラーまたは代替処理
     # とりあえず実行されることを確認
-    assert response.status_code in [status.HTTP_200_OK, 
+    assert response.status_code in [status.HTTP_200_OK,
                                     status.HTTP_500_INTERNAL_SERVER_ERROR]
 
 
@@ -287,7 +287,7 @@ def test_feiv_not_implemented(client, tables_store):
         'entityIdColumn': 'entity_id'
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     # 未実装のため501エラーが返されるはず
     assert response.status_code == status.HTTP_501_NOT_IMPLEMENTED
 
@@ -302,7 +302,7 @@ def test_missing_required_parameters(client, tables_store):
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     # Pydanticバリデーションエラーで422
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -316,7 +316,7 @@ def test_invalid_table_name(client, tables_store):
         'explanatoryVariables': ['x1']
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     response_data = response.json()
     assert response_data['code'] == 'NG'
@@ -335,7 +335,7 @@ def test_standard_error_methods(client, tables_store, std_error_method):
         'standardErrorMethod': std_error_method
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data['code'] == 'OK'
@@ -350,10 +350,10 @@ def test_confidence_intervals_present(client, tables_store):
         'explanatoryVariables': ['x1', 'x2']
     }
     response = client.post('/api/analysis/regression', json=payload)
-    
+
     assert response.status_code == status.HTTP_200_OK
     result = response.json()['result']
-    
+
     # 各パラメータに信頼区間が含まれているか確認
     for param in result['parameters']:
         assert 'confidenceIntervalLower' in param
