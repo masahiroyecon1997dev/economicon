@@ -11,10 +11,7 @@ from .data_io import (ExportCsvByPathRequest, ExportExcelByPathRequest,
                       ImportExcelByPathRequest, ImportParquetByPathRequest)
 from .files import GetFilesRequest
 from .operations import FilterSingleConditionRequest, InputCellDataRequest
-from .regressions import (FixedEffectsEstimationRequest,
-                          LinearRegressionRequest, LogisticRegressionRequest,
-                          ProbitRegressionRequest,
-                          VariableEffectsEstimationRequest)
+from .regressions import RegressionRequest
 from .settings import GetSettingsRequest
 from .statistics import ConfidenceIntervalRequest, DescriptiveStatisticsRequest
 from .tables import (ClearTablesRequest, CreateJoinTableRequest,
@@ -66,11 +63,7 @@ __all__ = [
     'ExportExcelByPathRequest',
     'ExportParquetByPathRequest',
     # Regression
-    'LinearRegressionRequest',
-    'LogisticRegressionRequest',
-    'ProbitRegressionRequest',
-    'VariableEffectsEstimationRequest',
-    'FixedEffectsEstimationRequest',
+    'RegressionRequest',
     # Operations
     'InputCellDataRequest',
     'FilterSingleConditionRequest'
