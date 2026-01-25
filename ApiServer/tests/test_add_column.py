@@ -67,7 +67,7 @@ def test_add_column_table_not_found(client, tables_store):
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "tableName 'NoTable'は存在しません。" == response_data['message']
+    assert "tableName は必須です。" == response_data['message']
 
 
 def test_add_column_invalid_table(client, tables_store):

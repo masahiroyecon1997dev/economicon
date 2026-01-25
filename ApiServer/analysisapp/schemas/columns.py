@@ -8,9 +8,9 @@ from .common import BaseModel
 
 class AddColumnRequest(BaseModel):
     """カラム追加リクエスト"""
-    table_name: str = Field(..., alias="tableName", description="テーブル名", min_length=1)
-    new_column_name: str = Field(..., alias="newColumnName", description="新しいカラム名", min_length=1)
-    add_position_column: str = Field(..., alias="addPositionColumn", description="追加位置の基準となるカラム名", min_length=1)
+    table_name: str = Field(..., alias="tableName", description="tableName", min_length=1)
+    new_column_name: str = Field(..., alias="newColumnName", description="newColumnName", min_length=1)
+    add_position_column: str = Field(..., alias="addPositionColumn", description="addPositionColumn", min_length=1)
     model_config = ConfigDict(populate_by_name=True)
 
 
