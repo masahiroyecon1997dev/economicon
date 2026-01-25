@@ -30,12 +30,7 @@ async def confidence_interval_endpoint(request: Request,
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = confidence_interval(
-        table_name=body.tableName,
-        column_name=body.columnName,
-        confidence_level=body.confidenceLevel,
-        statistic_type=body.statisticType
-    )
+    result = confidence_interval(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -62,11 +57,7 @@ async def descriptive_statistics_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = descriptive_statistics(
-        table_name=body.tableName,
-        column_name_list=body.columnNameList,
-        statistics=body.statistics
-    )
+    result = descriptive_statistics(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,

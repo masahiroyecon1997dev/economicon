@@ -193,6 +193,114 @@ def test_descriptive_statistics_empty_statistics_list(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    assert "statisticsは必須です。" == response_data['message']
+
+
+def test_descriptive_statistics_empty_table_name(client, tables_store):
+    """
+    tableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': '',
+        'columnNameList': ['A'],
+        'statistics': ['mean']
+    }
+    response = client.post(
+        '/api/statistics/descriptive',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_descriptive_statistics_empty_column_name_list(client, tables_store):
+    """
+    columnNameListが空の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTableNumeric',
+        'columnNameList': [],
+        'statistics': ['mean']
+    }
+    response = client.post(
+        '/api/statistics/descriptive',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+
+
+def test_descriptive_statistics_empty_statistics(client, tables_store):
+    """
+    statisticsが空の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTableNumeric',
+        'columnNameList': ['A'],
+        'statistics': []
+    }
+    response = client.post(
+        '/api/statistics/descriptive',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+
+
+def test_descriptive_statistics_missing_table_name(client, tables_store):
+    """
+    tableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'columnNameList': ['A'],
+        'statistics': ['mean']
+    }
+    response = client.post(
+        '/api/statistics/descriptive',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_descriptive_statistics_missing_column_name_list(client, tables_store):
+    """
+    columnNameListが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTableNumeric',
+        'statistics': ['mean']
+    }
+    response = client.post(
+        '/api/statistics/descriptive',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'columnNameList' in response_data['message']
+
+
+def test_descriptive_statistics_missing_statistics(client, tables_store):
+    """
+    statisticsが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTableNumeric',
+        'columnNameList': ['A']
+    }
+    response = client.post(
+        '/api/statistics/descriptive',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'statistics' in response_data['message']

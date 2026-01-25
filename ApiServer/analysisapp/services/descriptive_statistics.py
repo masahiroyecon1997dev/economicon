@@ -156,6 +156,6 @@ def descriptive_statistics(table_name: str,
     api = DescriptiveStatistics(table_name, column_name_list, statistics)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     result = api.execute()
     return result
