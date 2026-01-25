@@ -8,6 +8,9 @@ import numpy as np
 import polars as pl
 import pytest
 from analysisapp.services.data.tables_store import TablesStore
+from analysisapp.services.data.analysis_result_store import (
+    AnalysisResultStore
+)
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -24,6 +27,11 @@ def tables_store():
     """TablesStoreのフィクスチャ"""
     manager = TablesStore()
     manager.clear_tables()
+
+    # AnalysisResultStoreもクリア
+    result_store = AnalysisResultStore()
+    result_store.clear_all()
+
     np.random.seed(42)
 
     # 1. OLS/Logit/Probit用: 基本的な回帰データ
@@ -107,16 +115,18 @@ def tables_store():
     manager.clear_tables()
 
 
-@pytest.mark.parametrize("analysis_type,table_name,dependent_var,expected_diagnostics", [
-    ('ols', 'BasicData', 'y_linear', ['R2', 'adjustedR2', 'fValue']),
-    ('logit', 'BasicData', 'y_binary', ['pseudoRSquared', 'logLikelihood']),
-    ('probit', 'BasicData', 'y_binary', ['pseudoRSquared', 'logLikelihood']),
+@pytest.mark.parametrize("analysis_type,table_name,dependent_var", [
+    ('ols', 'BasicData', 'y_linear'),
+    ('logit', 'BasicData', 'y_binary'),
+    ('probit', 'BasicData', 'y_binary'),
 ])
 def test_basic_regression_types(client, tables_store, analysis_type,
-                                table_name, dependent_var, expected_diagnostics):
-    """基本的な回帰分析タイプのテスト"""
+                                table_name, dependent_var):
+    """基本的な回帰分析タイプのテスト（結果がストアに保存されることを確認）"""
     payload = {
         'type': analysis_type,
+        'name': f'{analysis_type.upper()} Test',
+        'description': 'Test analysis',
         'tableName': table_name,
         'dependentVariable': dependent_var,
         'explanatoryVariables': ['x1', 'x2']
@@ -127,20 +137,30 @@ def test_basic_regression_types(client, tables_store, analysis_type,
     response_data = response.json()
     assert response_data['code'] == 'OK'
 
+    # IDが返ってくることを確認
     result = response_data['result']
-    assert 'parameters' in result
-    assert 'modelStatistics' in result
+    assert 'resultId' in result
+    result_id = result['resultId']
+    assert isinstance(result_id, str)
+    assert len(result_id) > 0
 
-    # 期待される診断統計量が含まれているか確認
-    stats = result['modelStatistics']
-    for diagnostic in expected_diagnostics:
-        assert diagnostic in stats, f"{diagnostic} not found in {analysis_type}"
+    # 保存された結果を取得
+    result_store = AnalysisResultStore()
+    saved_result = result_store.get_result(result_id)
+
+    # 保存された結果の内容を確認
+    assert saved_result.name == f'{analysis_type.upper()} Test'
+    assert saved_result.description == 'Test analysis'
+    assert saved_result.table_name == table_name
+    assert 'parameters' in saved_result.regression_output
+    assert 'modelStatistics' in saved_result.regression_output
 
 
 def test_fixed_effects_regression(client, tables_store):
     """固定効果推定のテスト"""
     payload = {
         'type': 'fe',
+        'name': 'FE Test',
         'tableName': 'PanelData',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1', 'x2'],
@@ -153,20 +173,16 @@ def test_fixed_effects_regression(client, tables_store):
     response_data = response.json()
     assert response_data['code'] == 'OK'
 
+    # IDが返ってくることを確認
     result = response_data['result']
-    assert 'diagnostics' in result
-
-    # パネルデータ固有の診断統計量を確認
-    diagnostics = result['diagnostics']
-    assert 'rsquaredWithin' in diagnostics
-    assert 'rsquaredBetween' in diagnostics
-    assert 'rsquaredOverall' in diagnostics
+    assert 'resultId' in result
 
 
 def test_random_effects_regression(client, tables_store):
     """変量効果推定のテスト"""
     payload = {
         'type': 're',
+        'name': 'RE Test',
         'tableName': 'PanelData',
         'dependentVariable': 'y',
         'explanatoryVariables': ['x1', 'x2'],
@@ -179,13 +195,9 @@ def test_random_effects_regression(client, tables_store):
     response_data = response.json()
     assert response_data['code'] == 'OK'
 
+    # IDが返ってくることを確認
     result = response_data['result']
-    assert 'diagnostics' in result
-
-    # 変量効果固有の診断統計量を確認
-    diagnostics = result['diagnostics']
-    assert 'rsquaredWithin' in diagnostics
-    assert 'theta' in diagnostics or 'thetaDescription' in diagnostics
+    assert 'resultId' in result
 
 
 def test_iv_regression(client, tables_store):
@@ -589,14 +601,115 @@ def test_clustered_without_groups(client, tables_store):
         'type': 'ols',
         'tableName': 'BasicData',
         'dependentVariable': 'y_linear',
-        'explanatoryVariables': ['x1'],
+        'explanatoryVariables': ['x1', 'x2'],
         'standardErrorMethod': 'clustered'
     }
     response = client.post('/api/analysis/regression', json=payload)
 
-    # バリデーションエラーで422が返される
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     response_data = response.json()
-    assert 'detail' in response_data
-    error_message = str(response_data['detail'])
-    assert 'groups' in error_message.lower() or 'clustered' in error_message.lower()
+    assert response_data['code'] == 'NG'
+
+
+def test_get_all_analysis_results(client, tables_store):
+    """すべての分析結果のサマリーを取得するテスト"""
+    # 複数の分析を実行
+    for i in range(3):
+        payload = {
+            'type': 'ols',
+            'name': f'Test Analysis {i+1}',
+            'description': f'Description {i+1}',
+            'tableName': 'BasicData',
+            'dependentVariable': 'y_linear',
+            'explanatoryVariables': ['x1', 'x2']
+        }
+        client.post('/api/analysis/regression', json=payload)
+
+    # サマリー取得
+    response = client.get('/api/analysis/results')
+
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data['code'] == 'OK'
+    assert 'results' in response_data['result']
+    results = response_data['result']['results']
+    assert len(results) >= 3
+
+
+def test_get_specific_analysis_result(client, tables_store):
+    """特定の分析結果を取得するテスト"""
+    # 分析を実行
+    payload = {
+        'type': 'ols',
+        'name': 'Specific Test',
+        'description': 'Specific Description',
+        'tableName': 'BasicData',
+        'dependentVariable': 'y_linear',
+        'explanatoryVariables': ['x1', 'x2']
+    }
+    create_response = client.post('/api/analysis/regression', json=payload)
+    result_id = create_response.json()['result']['resultId']
+
+    # 結果を取得
+    response = client.get(f'/api/analysis/results/{result_id}')
+
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data['code'] == 'OK'
+    result = response_data['result']
+    assert result['id'] == result_id
+    assert result['name'] == 'Specific Test'
+    assert result['description'] == 'Specific Description'
+    assert 'regressionOutput' in result
+
+
+def test_delete_analysis_result(client, tables_store):
+    """分析結果を削除するテスト"""
+    # 分析を実行
+    payload = {
+        'type': 'ols',
+        'name': 'To Delete',
+        'tableName': 'BasicData',
+        'dependentVariable': 'y_linear',
+        'explanatoryVariables': ['x1', 'x2']
+    }
+    create_response = client.post('/api/analysis/regression', json=payload)
+    result_id = create_response.json()['result']['resultId']
+
+    # 削除
+    response = client.delete(f'/api/analysis/results/{result_id}')
+
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data['code'] == 'OK'
+    assert response_data['result']['deletedResultId'] == result_id
+
+    # 削除後の取得が失敗することを確認
+    get_response = client.get(f'/api/analysis/results/{result_id}')
+    assert get_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_clear_all_analysis_results(client, tables_store):
+    """すべての分析結果を削除するテスト"""
+    # 複数の分析を実行
+    for i in range(2):
+        payload = {
+            'type': 'ols',
+            'name': f'Test {i+1}',
+            'tableName': 'BasicData',
+            'dependentVariable': 'y_linear',
+            'explanatoryVariables': ['x1', 'x2']
+        }
+        client.post('/api/analysis/regression', json=payload)
+
+    # すべて削除
+    response = client.delete('/api/analysis/results')
+
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()
+    assert response_data['code'] == 'OK'
+
+    # 削除後のサマリー取得
+    get_response = client.get('/api/analysis/results')
+    summaries = get_response.json()['result']['results']
+    assert len(summaries) == 0

@@ -3,6 +3,10 @@
     "Cancel": "キャンセル",
     "OK": "OK",
     "Delete": "削除",
+    "Edit": "編集",
+    "Save": "設定",
+    "Close": "閉じる",
+    "ColumnSuffix": "列目",
     "Table": "テーブル",
     "NoColumnsAvailable": "利用可能なカラムがありません",
     "OpenSideMenu": "サイドメニューを開く",
@@ -141,6 +145,7 @@
     "NumberOfRows": "行数",
     "NumberOfRowsPlaceholder": "1000",
     "Columns": "列の設定",
+    "ColumnSettings": "列の設定",
     "AddColumn": "列を追加",
     "ColumnName": "列名",
     "InputColumnName": "列名を入力してください。",
@@ -152,7 +157,11 @@
     "InputDistributionParameters": "を入力してください。",
     "Parameters": "パラメータ",
     "CreatingTable": "シミュレーションデータテーブルを作成",
-    "Submit": "テーブルを作成"
+    "Submit": "テーブルを作成",
+    "EditColumn": "列の編集",
+    "NotSet": "未設定",
+    "TableCreationFailed": "テーブルの作成に失敗しました。",
+    "TableCreationError": "テーブル作成中にエラーが発生しました。"
   },
   "ImportFileModal": {
     "Title": "ファイルを開く",

@@ -1,4 +1,3 @@
-import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DistributionType, SimulationColumnSetting } from '../../../types/commonTypes';
 import { InputText } from '../../atoms/Input/InputText';
@@ -61,18 +60,6 @@ export const SimulationColumnConfig = ({
   return (
     <div className="border border-border-color dark:border-gray-700 rounded-lg p-4 bg-secondary-main dark:bg-gray-900/30 overflow-y-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-        <div className="md:col-span-2 flex justify-between items-center">
-          <p className="font-bold brand-text-main dark:text-white">列 {index + 1}</p>
-          <button
-            type="button"
-            onClick={() => onRemove(column.id)}
-            className="text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            disabled={!canRemove || disabled}
-          >
-            <X size={20} />
-          </button>
-        </div>
-
         <FormField label={t('CreateSimulationDataTableView.ColumnName')} htmlFor={`column-name-${column.id}`}>
           <InputText
             id={`column-name-${column.id}`}
