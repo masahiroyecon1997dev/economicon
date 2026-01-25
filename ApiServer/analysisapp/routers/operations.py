@@ -32,12 +32,7 @@ async def input_cell_data_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = input_cell_data(
-        body.tableName,
-        body.columnName,
-        body.rowIndex,
-        body.newValue
-    )
+    result = input_cell_data(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -64,14 +59,7 @@ async def filter_single_condition_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = filter_single_condition(
-        new_table_name=body.newTableName,
-        table_name=body.tableName,
-        column_name=body.columnName,
-        condition=body.condition,
-        is_compare_column=body.isCompareColumn,
-        compare_value=body.compareValue
-    )
+    result = filter_single_condition(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,

@@ -101,6 +101,6 @@ def input_cell_data(table_name: str,
     api = InputCellData(table_name, column_name, row_index, new_value)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     result = api.execute()
     return result

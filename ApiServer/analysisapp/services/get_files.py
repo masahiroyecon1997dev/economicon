@@ -80,5 +80,5 @@ def get_files(directory_path: str) -> Dict:
     api = GetFiles(directory_path)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     return api.execute()

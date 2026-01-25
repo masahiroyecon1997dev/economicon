@@ -117,8 +117,8 @@ def test_get_list_files_invalid_directory(client, prepared_data):
     assert "ディレクトリが存在しません" in response_data['message']
 
 
-def test_get_list_files_missing_directory_path(client, prepared_data):
-    """directoryPathパラメータが未指定の場合のテスト"""
+def test_get_list_files_empty_directory_path_validation(client, prepared_data):
+    """directoryPathが空文字列の場合のPydanticバリデーションエラーテスト"""
     tables_store, test_dir, test_file1, test_file2, test_subdir = (
         prepared_data
     )
@@ -127,9 +127,9 @@ def test_get_list_files_missing_directory_path(client, prepared_data):
         json={'directoryPath': ''}
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    assert "directoryPathは必須です" in response_data['message']
+    assert 'directoryPath' in response_data['message']
 
 
 def test_get_list_files_file_instead_of_directory(client, prepared_data):
@@ -174,3 +174,31 @@ def test_get_list_files_file_sizes(client, prepared_data):
         item for item in files if item['name'] == 'subdir'
     )
     assert subdir_item['size'] == 0
+
+
+def test_get_files_empty_directory_path(client, prepared_data):
+    """
+    directoryPathが空文字列の場合はバリデーションエラーになる
+    """
+    response = client.post(
+        '/api/file/get-list',
+        json={'directoryPath': ''}
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'directoryPath' in response_data['message']
+
+
+def test_get_files_missing_directory_path(client, prepared_data):
+    """
+    directoryPathが欠損している場合はバリデーションエラーになる
+    """
+    response = client.post(
+        '/api/file/get-list',
+        json={}
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'directoryPath' in response_data['message']
