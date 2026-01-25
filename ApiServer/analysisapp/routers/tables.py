@@ -42,11 +42,7 @@ async def create_table_endpoint(request: Request, body: CreateTableRequest):
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = create_table(
-        table_name=body.tableName,
-        table_number_of_rows=body.tableNumberOfRows,
-        columnNames=body.columnNames
-    )
+    result = create_table(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -75,14 +71,7 @@ async def create_join_table_endpoint(request: Request,
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = create_join_table(
-        join_table_name=body.joinTableName,
-        left_table_name=body.leftTableName,
-        right_table_name=body.rightTableName,
-        left_key_column_names=body.leftKeyColumnNames,
-        right_key_column_names=body.rightKeyColumnNames,
-        join_type=body.joinType
-    )
+    result = create_join_table(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -111,11 +100,7 @@ async def create_union_table_endpoint(request: Request,
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = create_union_table(
-        union_table_name=body.unionTableName,
-        table_names=body.tableNames,
-        column_names=body.columnNames
-    )
+    result = create_union_table(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -144,11 +129,7 @@ async def create_simulation_data_table_endpoint(
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = create_simulation_data_table(
-        table_name=body.tableName,
-        num_rows=body.tableNumberOfRows,
-        column_settings=body.columnSettings
-    )
+    result = create_simulation_data_table(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -175,7 +156,7 @@ async def delete_table_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = delete_table(table_name=body.tableName)
+    result = delete_table(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -202,10 +183,7 @@ async def duplicate_table_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = duplicate_table(
-        source_table_name=body.tableName,
-        new_table_name=body.newTableName
-    )
+    result = duplicate_table(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -235,10 +213,7 @@ async def rename_table_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = rename_table(
-        old_table_name=body.oldTableName,
-        new_table_name=body.newTableName,
-    )
+    result = rename_table(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,
@@ -315,11 +290,7 @@ async def fetch_data_to_json_endpoint(request: Request,
     """
     create_log_api_request(request)
 
-    result = fetch_data_to_json(
-        table_name=body.tableName,
-        start_row=body.startRow,
-        fetch_rows=body.fetchRows
-    )
+    result = fetch_data_to_json(**body.model_dump())
 
     return create_success_response(
         http_status.HTTP_200_OK,

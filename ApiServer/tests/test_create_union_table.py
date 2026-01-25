@@ -108,9 +108,9 @@ def test_union_table_name_empty(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    assert "unionTableNameは必須です。" == response_data['message']
+    assert "unionTableName は1文字以上である必要があります。" == response_data['message']
 
 
 def test_union_table_name_already_exists(client, tables_store):
@@ -264,3 +264,80 @@ def test_missing_request_fields(client, tables_store):
         json=payload,
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+# Pydanticバリデーションテスト
+
+
+def test_create_union_table_pydantic_empty_union_table_name(client, tables_store):
+    """
+    unionTableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'unionTableName': '',
+        'tableNames': ['Table1', 'Table2'],
+        'columnNames': ['id', 'name']
+    }
+    response = client.post(
+        '/api/table/create-union',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'unionTableName' in response_data['message']
+
+
+def test_create_union_table_pydantic_empty_table_names(client, tables_store):
+    """
+    tableNamesが空の場合はバリデーションエラーになる
+    """
+    payload = {
+        'unionTableName': 'UnionTable',
+        'tableNames': [],
+        'columnNames': ['id', 'name']
+    }
+    response = client.post(
+        '/api/table/create-union',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'List should have at least 1 item' in response_data['message']
+
+
+def test_create_union_table_pydantic_missing_union_table_name(client, tables_store):
+    """
+    unionTableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableNames': ['Table1', 'Table2'],
+        'columnNames': ['id', 'name']
+    }
+    response = client.post(
+        '/api/table/create-union',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'unionTableName' in response_data['message']
+
+
+def test_create_union_table_pydantic_missing_table_names(client, tables_store):
+    """
+    tableNamesが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'unionTableName': 'UnionTable',
+        'columnNames': ['id', 'name']
+    }
+    response = client.post(
+        '/api/table/create-union',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableNames' in response_data['message']
