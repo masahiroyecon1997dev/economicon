@@ -181,3 +181,106 @@ class SettingsManager:
         設定を再読み込み
         """
         self.load_settings()
+
+    def update_settings(
+        self,
+        os_name: Optional[str] = None,
+        default_folder_path: Optional[str] = None,
+        display_rows: Optional[int] = None,
+        app_language: Optional[str] = None,
+        encoding: Optional[str] = None,
+        path_separator: Optional[str] = None
+    ) -> None:
+        """
+        設定を更新する（指定された項目のみ）
+
+        Args:
+            os_name: OS名
+            default_folder_path: デフォルトフォルダパス
+            display_rows: 表示行数
+            app_language: アプリケーション言語
+            encoding: エンコーディング
+            path_separator: パス区切り文字
+        """
+        with self._lock:
+            if self._settings is None:
+                raise RuntimeError(
+                    "Settings not initialized. "
+                    "Call load_settings() first."
+                )
+
+            # 現在の設定を取得
+            current_settings = self._settings
+
+            # 指定された値で更新（Noneでない場合のみ）
+            updated_os_name = (
+                os_name if os_name is not None
+                else current_settings.os_name
+            )
+            updated_folder_path = (
+                default_folder_path if default_folder_path is not None
+                else current_settings.default_folder_path
+            )
+            updated_display_rows = (
+                display_rows if display_rows is not None
+                else current_settings.display_rows
+            )
+            updated_app_language = (
+                app_language if app_language is not None
+                else current_settings.app_language
+            )
+            updated_encoding = (
+                encoding if encoding is not None
+                else current_settings.encoding
+            )
+            updated_path_separator = (
+                path_separator if path_separator is not None
+                else current_settings.path_separator
+            )
+
+            # 新しい設定オブジェクトを作成
+            self._settings = SettingsInfo(
+                os_name=updated_os_name,
+                default_folder_path=updated_folder_path,
+                display_rows=updated_display_rows,
+                app_language=updated_app_language,
+                encoding=updated_encoding,
+                path_separator=updated_path_separator
+            )
+
+    def save_settings(self) -> None:
+        """
+        現在の設定をファイルに保存する
+        """
+        with self._lock:
+            if self._settings is None:
+                raise RuntimeError(
+                    "Settings not initialized. "
+                    "Call load_settings() first."
+                )
+
+            settings_file_path = self._get_settings_file_path()
+
+            settings_dict = {
+                'os_name': self._settings.os_name,
+                'default_folder_path': self._settings.default_folder_path,
+                'display_rows': self._settings.display_rows,
+                'app_language': self._settings.app_language,
+                'encoding': self._settings.encoding,
+                'path_separator': self._settings.path_separator
+            }
+
+            try:
+                with open(
+                    settings_file_path,
+                    'w',
+                    encoding='utf-8'
+                ) as f:
+                    yaml.dump(
+                        settings_dict,
+                        f,
+                        default_flow_style=False,
+                        allow_unicode=True
+                    )
+            except Exception as e:
+                raise RuntimeError(f"Failed to save settings: {e}")

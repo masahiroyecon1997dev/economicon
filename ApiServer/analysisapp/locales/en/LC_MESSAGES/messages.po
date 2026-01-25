@@ -623,6 +623,82 @@ msgstr ""
 msgid "Dependent variable cannot be included in explanatory variables"
 msgstr ""
 
+# Pydantic バリデーションエラーメッセージ
+msgid "ValidationError.FieldRequired"
+msgstr "Field required"
+
+msgid "ValidationError.StringTypeExpected"
+msgstr "String type expected"
+
+msgid "ValidationError.IntTypeExpected"
+msgstr "Integer type expected"
+
+msgid "ValidationError.FloatTypeExpected"
+msgstr "Float type expected"
+
+msgid "ValidationError.BoolTypeExpected"
+msgstr "Boolean type expected"
+
+msgid "ValidationError.ListTypeExpected"
+msgstr "List type expected"
+
+msgid "ValidationError.DictTypeExpected"
+msgstr "Dictionary type expected"
+
+msgid "ValidationError.ValueError"
+msgstr "Value error"
+
+msgid "ValidationError.TypeError"
+msgstr "Type error"
+
+msgid "ValidationError.AssertionError"
+msgstr "Assertion error"
+
+msgid "ValidationError.LessThan"
+msgstr "Value must be less than specified"
+
+msgid "ValidationError.LessThanEqual"
+msgstr "Value must be less than or equal to specified"
+
+msgid "ValidationError.GreaterThan"
+msgstr "Value must be greater than specified"
+
+msgid "ValidationError.GreaterThanEqual"
+msgstr "Value must be greater than or equal to specified"
+
+msgid "ValidationError.StringTooShort"
+msgstr "String is too short"
+
+msgid "ValidationError.StringTooLong"
+msgstr "String is too long"
+
+msgid "ValidationError.InvalidEnum"
+msgstr "Invalid enum value"
+
+msgid "ValidationError.LiteralError"
+msgstr "Invalid literal value"
+
+# Pydantic V2 デフォルトメッセージ
+msgid "Field required"
+msgstr "Field required"
+
+msgid "Input should be a valid string"
+msgstr "Input should be a valid string"
+
+msgid "Input should be a valid integer"
+msgstr "Input should be a valid integer"
+
+msgid "Input should be a valid number"
+msgstr "Input should be a valid number"
+
+msgid "Input should be a valid boolean"
+msgstr "Input should be a valid boolean"
+
+msgid "Input should be a valid list"
+msgstr "Input should be a valid list"
+
+msgid "Input should be a valid dictionary"
+msgstr "Input should be a valid dictionary"
+
 #~ msgid "standard_error_methodmust be one of: , "
 #~ msgstr ""
-
