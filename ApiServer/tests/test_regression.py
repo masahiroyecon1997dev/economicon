@@ -216,10 +216,14 @@ def test_iv_regression(client, tables_store):
     result = response_data['result']
     assert 'resultId' in result
 
-    response_result = client.get(f"/api/analysis/regression/results/{result['resultId']}")
+    # 結果を取得するAPIの正しいパス
+    response_result = client.get(
+        f"/api/analysis/results/{result['resultId']}"
+    )
+    assert response_result.status_code == status.HTTP_200_OK
     # IV固有の診断統計量を確認
     analysis_result = response_result.json()['result']
-    diagnostics = analysis_result['diagnostics']
+    diagnostics = analysis_result['regressionOutput']['diagnostics']
     # Wu-Hausman testまたはSargan testのいずれかが含まれているはず
     has_iv_diagnostics = (
         'wuHausmanTest' in diagnostics or
@@ -365,11 +369,18 @@ def test_confidence_intervals_present(client, tables_store):
     response = client.post('/api/analysis/regression', json=payload)
 
     assert response.status_code == status.HTTP_200_OK
-    assert response_data
+    response_data = response.json()
+    assert response_data['code'] == 'OK'
+
+    # 保存された結果を取得
+    result_id = response_data['result']['resultId']
+    get_response = client.get(f"/api/analysis/results/{result_id}")
+    assert get_response.status_code == status.HTTP_200_OK
+    analysis_result = get_response.json()['result']
 
     # 各パラメータに信頼区間が含まれているか確認
-    response_result = client.get('/api/analysis/regression')
-    for param in result['parameters']:
+    parameters = analysis_result['regressionOutput']['parameters']
+    for param in parameters:
         assert 'confidenceIntervalLower' in param
         assert 'confidenceIntervalUpper' in param
         assert param['confidenceIntervalLower'] <= param['coefficient']
@@ -394,8 +405,17 @@ def test_ols_without_constant(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data['code'] == 'OK'
+
+    # 保存された結果を取得
+    result_id = response_data['result']['resultId']
+    get_response = client.get(f"/api/analysis/results/{result_id}")
+    assert get_response.status_code == status.HTTP_200_OK
+    analysis_result = get_response.json()['result']
+
     # 定数項がないため、パラメータ数は説明変数の数と同じ
-    assert len(response_data['result']['parameters']) == 2
+    assert len(
+        analysis_result['regressionOutput']['parameters']
+    ) == 2
 
 
 def test_lasso_without_constant(client, tables_store):
