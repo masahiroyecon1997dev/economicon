@@ -53,9 +53,9 @@ def test_create_table_invalid_table_name(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    assert "tableNameは必須です。" == response_data['message']
+    assert "tableName は1文字以上である必要があります。" == response_data['message']
 
 
 def test_create_table_invalid_number_of_rows(client, tables_store):
@@ -87,7 +87,121 @@ def test_create_table_invalid_columns(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data['code'] == 'NG'
-    message = "columnNamesは少なくとも 1 つの 項目が必要です。"
+    message = "List should have at least 1 item after validation, not 0"
     assert message == response_data['message']
+
+
+# Pydanticバリデーションテスト
+
+
+def test_create_table_pydantic_empty_table_name(client, tables_store):
+    """
+    tableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': '',
+        'tableNumberOfRows': 3,
+        'columnNames': ['A', 'B']
+    }
+    response = client.post(
+        '/api/table/create',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_create_table_pydantic_negative_number_of_rows(client, tables_store):
+    """
+    tableNumberOfRowsが負の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTable',
+        'tableNumberOfRows': -1,
+        'columnNames': ['A', 'B']
+    }
+    response = client.post(
+        '/api/table/create',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableNumberOfRows' in response_data['message']
+
+
+def test_create_table_pydantic_empty_column_names(client, tables_store):
+    """
+    columnNamesが空の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTable',
+        'tableNumberOfRows': 3,
+        'columnNames': []
+    }
+    response = client.post(
+        '/api/table/create',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'List should have at least 1 item' in response_data['message']
+
+
+def test_create_table_pydantic_missing_table_name(client, tables_store):
+    """
+    tableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableNumberOfRows': 3,
+        'columnNames': ['A', 'B']
+    }
+    response = client.post(
+        '/api/table/create',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_create_table_pydantic_missing_number_of_rows(client, tables_store):
+    """
+    tableNumberOfRowsが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTable',
+        'columnNames': ['A', 'B']
+    }
+    response = client.post(
+        '/api/table/create',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableNumberOfRows' in response_data['message']
+
+
+def test_create_table_pydantic_missing_column_names(client, tables_store):
+    """
+    columnNamesが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTable',
+        'tableNumberOfRows': 3
+    }
+    response = client.post(
+        '/api/table/create',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'columnNames' in response_data['message']

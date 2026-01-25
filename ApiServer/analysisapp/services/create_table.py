@@ -19,14 +19,14 @@ class CreateTable(AbstractApi):
     """
     def __init__(self, table_name: str,
                  table_number_of_rows: int,
-                 columnNames: List[str]):
+                 column_names: List[str]):
         self.tables_store = TablesStore()
         # テーブル名
         self.table_name = table_name
         # テーブルの行数
         self.table_number_of_rows = table_number_of_rows
         # カラム名のリスト
-        self.columnNames = columnNames
+        self.column_names = column_names
         # パラメータ名のマッピング
         self.param_names = {
             'table_name': 'tableName',
@@ -51,7 +51,7 @@ class CreateTable(AbstractApi):
             )
             # カラム名の妥当性チェック
             validate_new_columns(
-                self.columnNames,
+                self.column_names,
                 self.param_names['column_names']
             )
             return None
@@ -64,7 +64,7 @@ class CreateTable(AbstractApi):
             # 空のデータを作成
             new_column_data_none = [None] * self.table_number_of_rows
             # 各カラムに空のデータを設定
-            data = {col: new_column_data_none for col in self.columnNames}
+            data = {col: new_column_data_none for col in self.column_names}
             # DataFrameを作成
             df = pl.DataFrame(data)
             # テーブル情報を保存
@@ -80,10 +80,10 @@ class CreateTable(AbstractApi):
 
 
 def create_table(table_name: str, table_number_of_rows: int,
-                 columnNames: List[str]) -> Dict:
-    api = CreateTable(table_name, table_number_of_rows, columnNames)
+                 column_names: List[str]) -> Dict:
+    api = CreateTable(table_name, table_number_of_rows, column_names)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     result = api.execute()
     return result

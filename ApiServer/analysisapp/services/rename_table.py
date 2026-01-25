@@ -66,6 +66,6 @@ def rename_table(old_table_name: str, new_table_name: str) -> Dict:
     api = RenameTable(old_table_name, new_table_name)
     validation_error = api.validate()
     if validation_error:
-        raise validation_error
+        raise ValueError(validation_error.message)
     result = api.execute()
     return result

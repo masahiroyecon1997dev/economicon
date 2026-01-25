@@ -213,7 +213,7 @@ def test_validation_error_invalid_num_rows(client, tables_store):
         json=payload
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_validation_error_empty_column_settings(client, tables_store):
@@ -230,7 +230,7 @@ def test_validation_error_empty_column_settings(client, tables_store):
         json=payload
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_validation_error_missing_column_name(client, tables_store):
@@ -360,3 +360,133 @@ def test_validation_error_invalid_distribution_params(client, tables_store):
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+# Pydanticバリデーションテスト
+
+
+def test_create_simulation_data_table_pydantic_empty_table_name(client, tables_store):
+    """
+    tableNameが空文字列の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': '',
+        'tableNumberOfRows': 10,
+        'columnSettings': [{
+            'columnName': 'test_col',
+            'dataType': 'fixed',
+            'fixedValue': 1
+        }]
+    }
+    response = client.post(
+        '/api/table/create-simulation-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_create_simulation_data_table_pydantic_negative_number_of_rows(client, tables_store):
+    """
+    tableNumberOfRowsが負の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTable',
+        'tableNumberOfRows': -1,
+        'columnSettings': [{
+            'columnName': 'test_col',
+            'dataType': 'fixed',
+            'fixedValue': 1
+        }]
+    }
+    response = client.post(
+        '/api/table/create-simulation-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableNumberOfRows' in response_data['message']
+
+
+def test_create_simulation_data_table_pydantic_empty_column_settings(client, tables_store):
+    """
+    columnSettingsが空の場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTable',
+        'tableNumberOfRows': 10,
+        'columnSettings': []
+    }
+    response = client.post(
+        '/api/table/create-simulation-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'List should have at least 1 item' in response_data['message']
+
+
+def test_create_simulation_data_table_pydantic_missing_table_name(client, tables_store):
+    """
+    tableNameが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableNumberOfRows': 10,
+        'columnSettings': [{
+            'columnName': 'test_col',
+            'dataType': 'fixed',
+            'fixedValue': 1
+        }]
+    }
+    response = client.post(
+        '/api/table/create-simulation-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableName' in response_data['message']
+
+
+def test_create_simulation_data_table_pydantic_missing_number_of_rows(client, tables_store):
+    """
+    tableNumberOfRowsが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTable',
+        'columnSettings': [{
+            'columnName': 'test_col',
+            'dataType': 'fixed',
+            'fixedValue': 1
+        }]
+    }
+    response = client.post(
+        '/api/table/create-simulation-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'tableNumberOfRows' in response_data['message']
+
+
+def test_create_simulation_data_table_pydantic_missing_column_settings(client, tables_store):
+    """
+    columnSettingsが欠損している場合はバリデーションエラーになる
+    """
+    payload = {
+        'tableName': 'TestTable',
+        'tableNumberOfRows': 10
+    }
+    response = client.post(
+        '/api/table/create-simulation-data',
+        json=payload,
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert 'NG' == response_data['code']
+    assert 'columnSettings' in response_data['message']
