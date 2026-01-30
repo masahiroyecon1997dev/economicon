@@ -2,52 +2,52 @@
 applyTo: "ApiServer/**"
 ---
 
-# FastAPI Backend Implementation Rules
+# FastAPI バックエンド実装ルール
 
-## 1. Environment & Tools
+## 1. 環境とツール
 
-- **Manager**: `uv`
-- **Linting**: `flake8`
-  - **Max line length**: 79 characters (72 for docstrings/comments)
-  - **Indentation**: 4 spaces
+- **パッケージ管理**: `uv`
+- **リント**: `flake8`
+  - **最大行長**: 79文字（docstring/コメントは72文字）
+  - **インデント**: 4スペース
 
-## 2. i18n & Global Context
+## 2. 国際化（i18n）とグローバルコンテキスト
 
-- **Translation**: `analysisapp.i18n.translation.gettext_lazy as _`
-- **Language Setup**: Use `ContextVar` based thread-safe settings.
-- **Rules**: All user-facing strings must be wrapped in `_()`.
+- **翻訳関数**: `analysisapp.i18n.translation.gettext_lazy as _`
+- **言語設定**: `ContextVar`ベースのスレッドセーフな設定を使用
+- **ルール**: ユーザー向けの文字列は必ず`_()`でラップする
 
-## 3. Services (AbstractApi) Requirements
+## 3. サービス（AbstractApi）要件
 
-Every API service class must inherit from `AbstractApi` and implement:
+すべてのAPIサービスクラスは`AbstractApi`を継承し、以下を実装する必要があります:
 
-1. `__init__`: Define `self.param_names` (Map `camelCase` to `snake_case`).
-2. `validate`: Return `None` on success, raise `ValidationError`.
-3. `execute`: Core logic using `Polars`. Raise `ApiError` for expected failures.
+1. `__init__`: `self.param_names`を定義（`camelCase`を`snake_case`にマッピング）
+2. `validate`: 成功時は`None`を返し、失敗時は`ValidationError`を送出
+3. `execute`: `Polars`を使用したコアロジック。期待されるエラーは`ApiError`を送出
 
-## 4. Router & Response Patterns
+## 4. ルーターとレスポンスパターン
 
-- **Endpoint**: `@router.post("/kebab-case-path")`
-- **Error Mapping**:
-  - `ValidationError` -> `status.HTTP_400_BAD_REQUEST`
-  - `ApiError` / `Exception` -> `status.HTTP_500_INTERNAL_SERVER_ERROR`
-- **Helper**: Use `create_success_response` or `create_error_response`.
+- **エンドポイント**: `@router.post("/kebab-case-path")`
+- **エラーマッピング**:
+  - `ValidationError` → `status.HTTP_400_BAD_REQUEST`
+  - `ApiError` / `Exception` → `status.HTTP_500_INTERNAL_SERVER_ERROR`
+- **ヘルパー**: `create_success_response`または`create_error_response`を使用
 
-## 5. Naming Convention Reference
+## 5. 命名規則リファレンス
 
-| Category       | Convention | Example             |
+| カテゴリ       | 規則       | 例                  |
 | :------------- | :--------- | :------------------ |
-| **Files**      | snake_case | `create_table.py`   |
-| **Classes**    | PascalCase | `CreateTable`       |
-| **JSON Key**   | camelCase  | `tableName`         |
-| **Python Var** | snake_case | `table_name`        |
-| **URLs**       | kebab-case | `/api/create-table` |
+| **ファイル**   | snake_case | `create_table.py`   |
+| **クラス**     | PascalCase | `CreateTable`       |
+| **JSONキー**   | camelCase  | `tableName`         |
+| **Python変数** | snake_case | `table_name`        |
+| **URL**        | kebab-case | `/api/create-table` |
 
-## 6. Testing (pytest)
+## 6. テスト（pytest）
 
-- **File Name**: `test_*.py`
-- **Function Name**: `test_[feature]_[scenario]`
-- **Required Fixtures**: `client`, `tables_store`
-- **Standard Assertions**:
+- **ファイル名**: `test_*.py`
+- **関数名**: `test_[機能]_[シナリオ]`
+- **必須フィクスチャ**: `client`, `tables_store`
+- **標準アサーション**:
   - `response.status_code`
   - `response_data['code'] == 'OK'/'NG'`
