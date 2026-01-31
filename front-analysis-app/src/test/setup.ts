@@ -1,7 +1,25 @@
 import "@testing-library/jest-dom";
 import { cleanup } from "@testing-library/react";
-import { afterEach, beforeAll } from "vitest";
+import { afterEach, beforeAll, vi } from "vitest";
 
+// --- Tauri API Mock ---
+// @tauri-apps/api/core モジュールをモック化
+vi.mock("@tauri-apps/api/core", () => ({
+  invoke: vi.fn(async (cmd: string, args: any) => {
+    console.log(`[Tauri Mock] invoke called: ${cmd}`, args);
+    // コマンドに応じたレスポンスを定義
+    switch (cmd) {
+      case "proxy_request":
+        return { message: "Mock response from proxy_request" };
+      case "upload_file":
+        return { message: "Mock response from upload_file" };
+      default:
+        return {};
+    }
+  }),
+}));
+
+// --- Existing Mocks ---
 // ResizeObserverのモック
 class ResizeObserverMock {
   observe() {}
@@ -9,12 +27,10 @@ class ResizeObserverMock {
   disconnect() {}
 }
 
-// グローバルにResizeObserverを設定
 beforeAll(() => {
   global.ResizeObserver =
     ResizeObserverMock as unknown as typeof ResizeObserver;
 
-  // PointerEventのモック（必要に応じて）
   global.PointerEvent = class PointerEvent extends Event {
     button: number;
     ctrlKey: boolean;
@@ -28,7 +44,6 @@ beforeAll(() => {
     }
   } as unknown as typeof PointerEvent;
 
-  // DOMRectのモック
   global.DOMRect = class DOMRect {
     x: number;
     y: number;
@@ -49,14 +64,12 @@ beforeAll(() => {
       this.right = x + width;
       this.bottom = y + height;
     }
-
     toJSON() {
       return JSON.stringify(this);
     }
   } as unknown as typeof DOMRect;
 });
 
-// 各テスト後にクリーンアップを実行
 afterEach(() => {
   cleanup();
 });

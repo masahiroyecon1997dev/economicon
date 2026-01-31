@@ -4,8 +4,30 @@ import path from "node:path";
 import license from "rollup-plugin-license";
 import { defineConfig } from "vitest/config";
 
+const host = process.env.TAURI_DEV_HOST;
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+
+  // Tauri CLI出力を見やすくするための設定
+  clearScreen: false,
+
+  server: {
+    port: 5173, // Tauriのデフォルトポート
+    strictPort: true,
+    host: host || false,
+    hmr: host
+      ? {
+          protocol: "ws",
+          host,
+          port: 5173,
+        }
+      : undefined,
+    watch: {
+      ignored: ["**/src-tauri/**"],
+    },
+  },
+
   build: {
     rollupOptions: {
       plugins: [
