@@ -1,22 +1,20 @@
 {
   "recommendations": [
     "oderwat.indent-rainbow",
-    "ms-python.autopep8",
     "ms-python.debugpy",
-    "ms-python.flake8",
-    "ms-python.isort",
     "ms-python.python",
     "ms-python.vscode-pylance",
     "ms-python.vscode-python-envs",
     "streetsidesoftware.code-spell-checker",
     "christian-kohler.path-intellisense",
-    "oderwat.indent-rainbow",
     "pkief.material-icon-theme",
-    "sdras.night-owl",
     "rust-lang.rust-analyzer",
     "tamasfe.even-better-toml",
     "tauri-apps.tauri-vscode",
     "usernamehw.errorlens",
-    "wallabyjs.console-ninja"
+    "charliermarsh.ruff",
+    "Bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode"
   ]
 }
