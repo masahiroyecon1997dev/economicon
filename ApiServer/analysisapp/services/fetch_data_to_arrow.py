@@ -117,10 +117,13 @@ class FetchDataToArrow(AbstractApi):
             # 指定された行範囲のデータを取得
             arrow_table = table.table[start_row - 1 : end_row]
 
+            # Polars DataFrameをPyArrow Tableに変換
+            pyarrow_table = arrow_table.to_arrow()
+
             # Apache Arrow IPC形式にシリアライズ
             sink = pa.BufferOutputStream()
-            writer = pa.ipc.new_stream(sink, arrow_table.schema)
-            writer.write_table(arrow_table)
+            writer = pa.ipc.new_stream(sink, pyarrow_table.schema)
+            writer.write_table(pyarrow_table)
             writer.close()
 
             # バイナリデータを取得してBase64エンコード
