@@ -11,9 +11,7 @@ from linearmodels.panel import PanelOLS, RandomEffects  # type: ignore
 
 from ...i18n.translation import gettext as _
 from ...utils.validator.common_validators import ValidationError
-from ...utils.validator.tables_store_validator import (
-    validate_existed_column_name
-)
+from ...utils.validator.tables_store_validator import validate_existed_column_name
 from ..abstract_api import ApiError
 from .base import AbstractRegressionService
 
@@ -72,9 +70,7 @@ class FixedEffectsRegression(AbstractRegressionService):
         固定効果モデル固有のバリデーション
         """
         # 列名リストの取得
-        column_name_list = self.tables_store.get_column_name_list(
-            self.table_name
-        )
+        column_name_list = self.tables_store.get_column_name_list(self.table_name)
 
         # 個体ID列の検証
         validate_existed_column_name(
@@ -90,15 +86,13 @@ class FixedEffectsRegression(AbstractRegressionService):
             )
         if self.entity_id_column in self.explanatory_variables:
             raise ValidationError(
-                _("Entity ID column cannot be included in "
-                  "explanatory variables")
+                _("Entity ID column cannot be included in explanatory variables")
             )
 
         # 時間列の検証（オプション）
         if self.time_column:
             validate_existed_column_name(
-                self.time_column, column_name_list,
-                self.param_names["time_column"]
+                self.time_column, column_name_list, self.param_names["time_column"]
             )
 
     def fit(self, y_data, x_data, missing: str):
@@ -128,9 +122,7 @@ class FixedEffectsRegression(AbstractRegressionService):
 
         # Pandas DataFrameに変換
         # （PyArrow拡張配列を使用してメモリ効率向上）
-        df = df_polars.select(required_cols).to_pandas(
-            use_pyarrow_extension_array=True
-        )
+        df = df_polars.select(required_cols).to_pandas(use_pyarrow_extension_array=True)
 
         # Polars DataFrameを明示的に削除してメモリを解放
         del df_polars
@@ -144,10 +136,7 @@ class FixedEffectsRegression(AbstractRegressionService):
                 raise ApiError(_("Missing values found in data"))
 
         if len(df) == 0:
-            raise ApiError(
-                _("No valid observations after removing "
-                  "missing values")
-            )
+            raise ApiError(_("No valid observations after removing missing values"))
 
         # MultiIndex の設定
         if self.time_column:
@@ -302,9 +291,7 @@ class RandomEffectsRegression(AbstractRegressionService):
         変量効果モデル固有のバリデーション
         """
         # 列名リストの取得
-        column_name_list = self.tables_store.get_column_name_list(
-            self.table_name
-        )
+        column_name_list = self.tables_store.get_column_name_list(self.table_name)
 
         # 個体ID列の検証
         validate_existed_column_name(
@@ -316,8 +303,7 @@ class RandomEffectsRegression(AbstractRegressionService):
         # 時間列の検証（オプション）
         if self.time_column:
             validate_existed_column_name(
-                self.time_column, column_name_list,
-                self.param_names["time_column"]
+                self.time_column, column_name_list, self.param_names["time_column"]
             )
 
     def fit(self, y_data, x_data, missing: str):
@@ -347,9 +333,7 @@ class RandomEffectsRegression(AbstractRegressionService):
 
         # Pandas DataFrameに変換
         # （PyArrow拡張配列を使用してメモリ効率向上）
-        df = df_polars.select(required_cols).to_pandas(
-            use_pyarrow_extension_array=True
-        )
+        df = df_polars.select(required_cols).to_pandas(use_pyarrow_extension_array=True)
 
         # Polars DataFrameを明示的に削除してメモリを解放
         del df_polars
@@ -363,10 +347,7 @@ class RandomEffectsRegression(AbstractRegressionService):
                 raise ApiError(_("Missing values found in data"))
 
         if len(df) == 0:
-            raise ApiError(
-                _("No valid observations after removing "
-                  "missing values")
-            )
+            raise ApiError(_("No valid observations after removing missing values"))
 
         # MultiIndex の設定
         if self.time_column:

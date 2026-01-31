@@ -1,6 +1,6 @@
 import logging
 
-api_logger = logging.getLogger('api_logger')
+api_logger = logging.getLogger("api_logger")
 
 
 def create_log_api_request(request) -> None:
@@ -8,7 +8,7 @@ def create_log_api_request(request) -> None:
         "API REQUEST",
         # requestオブジェクト全体をログに含める
         # （オプション）
-        extra={'request': request}
+        extra={"request": request},
     )
 
 
@@ -25,6 +25,4 @@ def create_log_api_error(message):
 
 
 def create_log_api_exception(exception):
-    api_logger.error(
-        exception
-    )
+    api_logger.error(exception)
