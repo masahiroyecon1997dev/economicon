@@ -18,9 +18,7 @@ from analysisapp.utils.validator.common_validators import (ValidationError,
 def temp_settings_file():
     """一時的な設定ファイルを作成するフィクスチャ"""
     # 元の設定ファイルのパスを保存
-    original_settings_path = (
-        Path.home() / SettingsManager.SETTINGS_FILE_NAME
-    )
+    original_settings_path = SettingsManager._get_settings_file_path()
     backup_exists = original_settings_path.exists()
     backup_content = None
 
@@ -45,7 +43,7 @@ def temp_settings_file():
 
 def create_settings_file(language: str):
     """指定された言語で設定ファイルを作成"""
-    settings_path = Path.home() / SettingsManager.SETTINGS_FILE_NAME
+    settings_path = SettingsManager._get_settings_file_path()
     settings = {
         'os_name': 'Windows',
         'default_folder_path': str(Path.home()).replace(os.sep, '/'),
