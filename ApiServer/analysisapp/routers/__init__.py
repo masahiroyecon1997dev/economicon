@@ -1,7 +1,14 @@
 from fastapi import APIRouter
+
 from . import (
-    columns, regressions, tables, data_io, statistics,
-    operations, files, settings
+    columns,
+    data_io,
+    files,
+    operations,
+    regressions,
+    settings,
+    statistics,
+    tables,
 )
 
 api_router = APIRouter()
