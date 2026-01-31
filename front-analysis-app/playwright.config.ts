@@ -18,8 +18,8 @@ export default defineConfig({
   reporter: "html",
 
   use: {
-    // ベースURL（開発サーバーのURL）
-    baseURL: "http://localhost:5173",
+    // ベースURL ポート: 1420 (Tauri Default)
+    baseURL: "http://localhost:1420",
     // スクリーンショットを失敗時のみ撮影
     screenshot: "only-on-failure",
     // ビデオを失敗時のみ録画
@@ -33,12 +33,10 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-
     {
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },
     },
-
     {
       name: "webkit",
       use: { ...devices["Desktop Safari"] },
@@ -48,8 +46,8 @@ export default defineConfig({
   // 開発サーバーの自動起動設定
   webServer: {
     command: "pnpm run dev",
-    url: "http://localhost:5173",
+    // ベースURL ポート: 1420 (Tauri Default)
+    port: 1420,
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
   },
 });

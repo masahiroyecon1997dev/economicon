@@ -12,6 +12,11 @@
     "christian-kohler.path-intellisense",
     "oderwat.indent-rainbow",
     "pkief.material-icon-theme",
-    "sdras.night-owl"
+    "sdras.night-owl",
+    "rust-lang.rust-analyzer",
+    "tamasfe.even-better-toml",
+    "tauri-apps.tauri-vscode",
+    "usernamehw.errorlens",
+    "wallabyjs.console-ninja"
   ]
 }
