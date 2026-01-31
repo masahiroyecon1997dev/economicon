@@ -49,7 +49,7 @@ export const HeaderMenu = () => {
             <div className="size-6 text-white">
               <Layers size={24} />
             </div>
-            <h1 className="text-xl font-bold">Data Analysis Tool</h1>
+            <h1 className="text-xl font-bold">Economicon</h1>
           </div>
           <div className="flex items-center gap-2">
             {menus.map((menu, index) => (

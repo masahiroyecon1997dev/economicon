@@ -69,10 +69,10 @@
     "MenuDuplicateTable": "テーブルを複製",
     "MenuDeleteTable": "テーブルを削除"
   },
-  "SelectFileView": {
-    "Title": "ファイルを選択",
+  "ImportDataFileView": {
+    "Title": "ファイルをインポート",
     "SelectFile": "ファイルを選択",
-    "Description": "ファイルを選択してデータをインポートしてください。",
+    "Description": "ファイルをドラッグ&ドロップまたは選択してデータをインポートしてください。",
     "SearchPlaceholder": "ファイル名で検索",
     "GoUpDirectory": "上位ディレクトリへ移動",
     "AllFiles": "すべてのファイル",
@@ -85,6 +85,7 @@
     "DragAndDropTab": "ドラッグ&ドロップ",
     "FileSelectTab": "ファイル選択",
     "DragDropAreaTitle": "ファイルをここにドラッグ&ドロップ",
+    "DragDropAreaTitleActive": "ファイルをドロップしてください",
     "DragDropAreaDescription": "サポートされている形式: .csv, .xlsx, .xls, .parquet",
     "ImportDialog": {
       "Title": "インポート設定",

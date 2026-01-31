@@ -51,7 +51,7 @@ export function FileListTable({
   return (
     <div className="overflow-hidden rounded-xl border border-brand-primary/20 w-full">
       <div className="overflow-y-auto overflow-x-auto" style={{ maxHeight }}>
-        <table className="w-full min-w-96" title={t('SelectFileView.FileListTableTitle')}>
+        <table className="w-full min-w-96" title={t('ImportDataFileView.FileListTableTitle')}>
           <thead className="bg-brand-primary-light sticky top-0">
             <tr>
               <th

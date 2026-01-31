@@ -208,7 +208,7 @@ export const SaveDataView = () => {
   };
 
   const hadleCancelNoTables = async () => {
-    setCurrentView('SelectFile');
+    setCurrentView('ImportDataFile');
   };
 
   const handleCancel = () => {
@@ -290,8 +290,8 @@ export const SaveDataView = () => {
               <NavigationSearchBar
                 pathSegments={getPathSegments()}
                 searchValue={searchValue}
-                searchPlaceholder={t("SelectFileView.SearchPlaceholder")}
-                upDirectoryTitle={t('SelectFileView.GoUpDirectory')}
+                searchPlaceholder={t("ImportDataFileView.SearchPlaceholder")}
+                upDirectoryTitle={t('ImportDataFileView.GoUpDirectory')}
                 onUpDirectory={goUpDirectory}
                 onBreadcrumbClick={handleBreadcrumbClick}
                 onSearchChange={setSearchValue}
@@ -302,9 +302,9 @@ export const SaveDataView = () => {
               <FileListTable
                 files={sortedFiles}
                 onFileClick={handleFileClick}
-                fileNameHeader={t('SelectFileView.FileNameHeader')}
-                sizeHeader={t('SelectFileView.SizeHeader')}
-                lastModifiedHeader={t('SelectFileView.LastModifiedHeader')}
+                fileNameHeader={t('ImportDataFileView.FileNameHeader')}
+                sizeHeader={t('ImportDataFileView.SizeHeader')}
+                lastModifiedHeader={t('ImportDataFileView.LastModifiedHeader')}
                 maxHeight="200px"
                 sortField={sortField}
                 sortDirection={sortDirection}
