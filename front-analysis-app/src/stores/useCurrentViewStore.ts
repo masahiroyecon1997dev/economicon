@@ -17,6 +17,6 @@ type CurrentViewStore = {
 } & CurrentViewActions;
 
 export const useCurrentViewStore = create<CurrentViewStore>((set) => ({
-  currentView: "SelectFile",
+  currentView: "ImportDataFile",
   setCurrentView: (view) => set({ currentView: view }),
 }));

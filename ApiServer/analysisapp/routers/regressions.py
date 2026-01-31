@@ -8,28 +8,23 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..schemas.regressions import RegressionRequest
-from ..services.regression import execute_regression_analysis
+from ..services.abstract_api import ApiError
 from ..services.data.analysis_result import AnalysisResult
 from ..services.data.analysis_result_store import AnalysisResultStore
-from ..services.regressions.result import (
-    get_all_analysis_results,
-    get_analysis_result,
-    delete_analysis_result,
-    clear_all_analysis_results
-)
+from ..services.regression import execute_regression_analysis
+from ..services.regressions.result import (clear_all_analysis_results,
+                                           delete_analysis_result,
+                                           get_all_analysis_results,
+                                           get_analysis_result)
+from ..utils import (create_error_response, create_log_api_request,
+                     create_success_response)
 from ..utils.validator.common_validators import ValidationError
-from ..services.abstract_api import ApiError
-from ..utils import (
-    create_log_api_request,
-    create_success_response,
-    create_error_response
-)
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
 
 @router.post("/regression")
-async def unified_regression_endpoint(
+async def regression_endpoint(
     request: Request,
     body: RegressionRequest
 ):
@@ -42,7 +37,7 @@ async def unified_regression_endpoint(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : AnalysisRequest
+    body : RegressionRequest
         統合回帰分析リクエスト
         - type: 分析タイプ (ols, logit, probit, tobit, fe, re, iv,
           feiv, lasso, ridge)
