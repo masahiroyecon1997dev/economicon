@@ -4,20 +4,15 @@
 Logit, Probit, Tobit モデルによる離散選択分析を提供します。
 """
 
-from typing import Dict, List, Any, Optional
-import numpy as np
+from typing import Any, Dict, List, Optional
+
 import statsmodels.api as sm
+from py4etrics.tobit import Tobit
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
-from .base import AbstractRegressionService
 from ..abstract_api import ApiError
 from ..django_compat import gettext as _
-
-try:
-    from py4etrics.tobit import Tobit  # type: ignore
-    PY4ETRICS_AVAILABLE = True
-except ImportError:
-    PY4ETRICS_AVAILABLE = False
+from .base import AbstractRegressionService
 
 
 class LogitRegression(AbstractRegressionService):
@@ -199,13 +194,8 @@ class TobitRegression(AbstractRegressionService):
         cens = (self.left_censoring_limit, self.right_censoring_limit)
 
         # Tobit モデルの作成とフィット
-        if PY4ETRICS_AVAILABLE:
-            model = Tobit(y, X, cens=cens)  # type: ignore
-            result = model.fit()
-        else:
-            # py4etricsがない場合はOLSで代替
-            model_ols = sm.OLS(y, X, missing=missing)
-            result = model_ols.fit()
+        model = Tobit(y, X, cens=cens)  # type: ignore
+        result = model.fit()
 
         return result  # type: ignore
 
@@ -335,4 +325,5 @@ def probit_regression(
     if validation_error:
         raise validation_error
     result = api.execute()
+    return result
     return result
