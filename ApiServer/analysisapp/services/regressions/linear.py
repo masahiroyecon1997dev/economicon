@@ -9,7 +9,7 @@ import statsmodels.api as sm
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
 from .base import AbstractRegressionService
-from ..django_compat import gettext as _
+from ...i18n.translation import gettext as _
 
 
 class OLSRegression(AbstractRegressionService):

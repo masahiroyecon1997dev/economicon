@@ -9,7 +9,7 @@ from ..utils.validator.tables_store_validator import (
     validate_new_column_name)
 from .abstract_api import AbstractApi, ApiError
 from .data.tables_store import TablesStore
-from .django_compat import gettext as _
+from ..i18n.translation import gettext as _
 
 
 class AddDummyColumn(AbstractApi):

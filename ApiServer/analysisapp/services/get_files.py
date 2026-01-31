@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from typing import Dict
 
-from .django_compat import gettext as _
+from ..i18n.translation import gettext as _
 
 from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.file_validators import (

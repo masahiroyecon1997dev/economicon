@@ -11,7 +11,7 @@ from py4etrics.tobit import Tobit
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
 from ..abstract_api import ApiError
-from ..django_compat import gettext as _
+from ...i18n.translation import gettext as _
 from .base import AbstractRegressionService
 
 

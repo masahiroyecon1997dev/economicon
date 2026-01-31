@@ -9,7 +9,7 @@ from typing import Dict
 from ...utils.validator.common_validators import ValidationError
 from ..abstract_api import AbstractApi, ApiError
 from ..data.analysis_result_store import AnalysisResultStore
-from ..django_compat import gettext as _
+from ...i18n.translation import gettext as _
 
 
 class GetAllAnalysisResults(AbstractApi):
