@@ -5,20 +5,17 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any, Optional, Literal, Union
-import statsmodels.api as sm
-from statsmodels.regression.linear_model import RegressionResultsWrapper
+from typing import Any, Dict, List, Literal, Optional
 
-from ..data.tables_store import TablesStore
+import statsmodels.api as sm
+
 from ...utils.validator.common_validators import ValidationError
-from ...utils.validator.tables_store_validator import (
-    validate_existed_table_name
-)
 from ...utils.validator.statistics_validators import (
-    validate_dependent_variable,
-    validate_explanatory_variables
-)
+    validate_dependent_variable, validate_explanatory_variables)
+from ...utils.validator.tables_store_validator import \
+    validate_existed_table_name
 from ..abstract_api import AbstractApi, ApiError
+from ..data.tables_store import TablesStore
 from ..django_compat import gettext as _
 
 # 型エイリアス

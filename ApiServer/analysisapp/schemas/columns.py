@@ -1,16 +1,22 @@
 """カラム操作関連のスキーマ定義"""
 from typing import Dict, List, Optional
 
-from pydantic import Field, ConfigDict
+from pydantic import ConfigDict, Field
 
 from .common import BaseModel
 
 
 class AddColumnRequest(BaseModel):
     """カラム追加リクエスト"""
-    table_name: str = Field(..., alias="tableName", description="テーブル名", min_length=1, max_length=255)
-    new_column_name: str = Field(..., alias="newColumnName", description="新しいカラム名", min_length=1, max_length=255)
-    add_position_column: str = Field(..., alias="addPositionColumn", description="追加位置のカラム名", min_length=1, max_length=255)
+    table_name: str = Field(..., alias="tableName",
+                            description="テーブル名",
+                            min_length=1, max_length=255)
+    new_column_name: str = Field(..., alias="newColumnName",
+                                 description="新しいカラム名",
+                                 min_length=1, max_length=255)
+    add_position_column: str = Field(..., alias="addPositionColumn",
+                                     description="追加位置のカラム名",
+                                     min_length=1, max_length=255)
     model_config = ConfigDict(populate_by_name=True)
 
 
