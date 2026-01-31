@@ -81,7 +81,18 @@
     "FileListTableTitle": "ファイル一覧",
     "FileNameHeader": "ファイル名",
     "SizeHeader": "サイズ",
-    "LastModifiedHeader": "最終更新日"
+    "LastModifiedHeader": "最終更新日",
+    "DragAndDropTab": "ドラッグ&ドロップ",
+    "FileSelectTab": "ファイル選択",
+    "DragDropAreaTitle": "ファイルをここにドラッグ&ドロップ",
+    "DragDropAreaDescription": "サポートされている形式: .csv, .xlsx, .xls, .parquet",
+    "ImportDialog": {
+      "Title": "インポート設定",
+      "TableName": "テーブル名",
+      "SheetName": "シート名 (Excelのみ)",
+      "Separator": "区切り文字 (CSVのみ, デフォルト: ,)",
+      "Import": "インポート"
+    }
   },
   "SaveDataView": {
     "Title": "データを保存",

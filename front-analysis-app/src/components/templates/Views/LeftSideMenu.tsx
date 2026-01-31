@@ -39,7 +39,7 @@ export const LeftSideMenu = () => {
   }
 
   const showImportFileView = () => {
-    setCurrentView("SelectFile");
+    setCurrentView("ImportDataFile");
   }
 
   const showSaveFileView = () => {

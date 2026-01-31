@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export type CurrentViewValue =
-  | "SelectFile"
+  | "ImportDataFile"
   | "LinearRegressionForm"
   | "CreateSimulationDataTable"
   | "CalculationView"
