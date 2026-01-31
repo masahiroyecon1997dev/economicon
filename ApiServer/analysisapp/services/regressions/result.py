@@ -4,12 +4,11 @@
 AnalysisResultStoreへのアクセスをラップし、
 統一されたエラーハンドリングとバリデーションを提供します。
 """
-from typing import Optional, Dict
+from typing import Dict
 
-from ..data.analysis_result_store import AnalysisResultStore
-from ..data.analysis_result import AnalysisResult
-from ..abstract_api import AbstractApi, ApiError
 from ...utils.validator.common_validators import ValidationError
+from ..abstract_api import AbstractApi, ApiError
+from ..data.analysis_result_store import AnalysisResultStore
 from ..django_compat import gettext as _
 
 
@@ -181,13 +180,13 @@ class ClearAllAnalysisResults(AbstractApi):
             ) from e
 
 
-
 def get_all_analysis_results() -> Dict:
     api = GetAllAnalysisResults()
     validation_error = api.validate()
     if validation_error:
         raise ValueError(validation_error.message)
     return api.execute()
+
 
 def get_analysis_result(result_id: str) -> Dict:
     api = GetAnalysisResult(result_id)
@@ -196,12 +195,14 @@ def get_analysis_result(result_id: str) -> Dict:
         raise ValueError(validation_error.message)
     return api.execute()
 
+
 def delete_analysis_result(result_id: str) -> Dict:
     api = DeleteAnalysisResult(result_id)
     validation_error = api.validate()
     if validation_error:
         raise ValueError(validation_error.message)
     return api.execute()
+
 
 def clear_all_analysis_results() -> Dict:
     api = ClearAllAnalysisResults()
