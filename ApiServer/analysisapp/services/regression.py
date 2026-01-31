@@ -5,21 +5,13 @@
 services/regressions/ 配下の各分析クラスへのディスパッチャとして機能します。
 """
 
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
-from .regressions import (
-    OLSRegression,
-    LogitRegression,
-    ProbitRegression,
-    TobitRegression,
-    FixedEffectsRegression,
-    RandomEffectsRegression,
-    IVRegression,
-    LassoRegression,
-    RidgeRegression
-)
 from ..utils.validator.common_validators import ValidationError
-from .abstract_api import ApiError
+from .regressions import (FixedEffectsRegression, IVRegression,
+                          LassoRegression, LogitRegression, OLSRegression,
+                          ProbitRegression, RandomEffectsRegression,
+                          RidgeRegression, TobitRegression)
 
 
 def execute_regression_analysis(
@@ -71,7 +63,6 @@ def execute_regression_analysis(
 
     Raises:
         ValidationError: パラメータバリデーションエラー
-        ApiError: 分析実行時エラー
     """
     # 共通パラメータ
     common_params = {
