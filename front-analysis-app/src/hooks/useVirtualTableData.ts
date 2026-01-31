@@ -2,9 +2,9 @@
  * 仮想スクロール用のテーブルデータ管理フック
  * チャンク単位でデータを取得・キャッシュする
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { arrowTableToRows, fetchDataToArrow } from '../functions/arrowUtils';
-import type { TalbeDataRowType } from '../types/commonTypes';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { arrowTableToRows, fetchDataToArrow } from "../functions/arrowUtils";
+import type { TalbeDataRowType } from "../types/commonTypes";
 
 const CHUNK_SIZE = 500;
 const MAX_CACHE_CHUNKS = 10; // 最大キャッシュチャンク数（約5000行分）
@@ -60,13 +60,18 @@ export function useVirtualTableData({
       }
 
       // タイムスタンプでソートして古いものから削除
-      const sortedChunks = Array.from(prevChunks.entries())
-        .sort(([, a], [, b]) => a.timestamp - b.timestamp);
+      const sortedChunks = Array.from(prevChunks.entries()).sort(
+        ([, a], [, b]) => a.timestamp - b.timestamp,
+      );
 
       const newChunks = new Map<number, ChunkData>();
       const keepCount = Math.floor(MAX_CACHE_CHUNKS * 0.8); // 80%を保持
 
-      for (let i = sortedChunks.length - keepCount; i < sortedChunks.length; i++) {
+      for (
+        let i = sortedChunks.length - keepCount;
+        i < sortedChunks.length;
+        i++
+      ) {
         const [index, data] = sortedChunks[i];
         newChunks.set(index, data);
       }
@@ -102,7 +107,7 @@ export function useVirtualTableData({
         const { table, endRow } = await fetchDataToArrow(
           tableName,
           startRow,
-          CHUNK_SIZE
+          CHUNK_SIZE,
         );
 
         // Arrow TableをJavaScriptオブジェクトの配列に変換
@@ -124,7 +129,7 @@ export function useVirtualTableData({
         cleanupCache();
       } catch (err) {
         console.error(`Failed to fetch chunk ${chunkIndex}:`, err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
+        setError(err instanceof Error ? err : new Error("Unknown error"));
       } finally {
         fetchingChunksRef.current.delete(chunkIndex);
         setLoadingChunks((prev) => {
@@ -134,7 +139,7 @@ export function useVirtualTableData({
         });
       }
     },
-    [tableName, enabled, chunks, getChunkStartRow, cleanupCache]
+    [tableName, enabled, chunks, getChunkStartRow, cleanupCache],
   );
 
   /**
@@ -154,7 +159,7 @@ export function useVirtualTableData({
 
       return chunk.data[indexInChunk];
     },
-    [chunks, getChunkIndex]
+    [chunks, getChunkIndex],
   );
 
   /**
@@ -172,7 +177,7 @@ export function useVirtualTableData({
         fetchChunk(i);
       }
     },
-    [enabled, getChunkIndex, fetchChunk]
+    [enabled, getChunkIndex, fetchChunk],
   );
 
   /**
