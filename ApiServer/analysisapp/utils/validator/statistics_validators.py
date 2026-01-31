@@ -2,7 +2,7 @@ from typing import List
 
 import polars as pl
 
-from ...services.django_compat import gettext as _
+from ...i18n.translation import gettext as _
 from .common_validators import (ValidationError, validate_candidates,
                                 validate_column_is_numeric, validate_integer,
                                 validate_item_exists_in_list,

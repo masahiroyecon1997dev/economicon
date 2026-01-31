@@ -7,7 +7,7 @@ from ..utils.create_table_name import create_table_name_by_file_name
 from ..utils.validator.common_validators import ValidationError
 from .abstract_api import AbstractApi, ApiError
 from .data.tables_store import TablesStore
-from .django_compat import gettext as _
+from ..i18n.translation import gettext as _
 
 
 class ImportCsvByFile(AbstractApi):

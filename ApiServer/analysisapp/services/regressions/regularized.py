@@ -13,7 +13,7 @@ from statsmodels.regression.linear_model import RegressionResultsWrapper
 from .base import AbstractRegressionService
 from ...utils.validator.common_validators import ValidationError
 from ..abstract_api import ApiError
-from ..django_compat import gettext as _
+from ...i18n.translation import gettext as _
 
 
 class LassoRegression(AbstractRegressionService):

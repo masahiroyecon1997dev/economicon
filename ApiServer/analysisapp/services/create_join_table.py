@@ -1,7 +1,7 @@
 
 from typing import Dict, List
 
-from .django_compat import gettext as _
+from ..i18n.translation import gettext as _
 
 from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
