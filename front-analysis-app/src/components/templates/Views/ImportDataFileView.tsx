@@ -1,7 +1,7 @@
 import * as RadixTabs from '@radix-ui/react-tabs';
-import { listen } from "@tauri-apps/api/event";
 import { UploadCloud } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useDropzone } from 'react-dropzone';
 import { useTranslation } from "react-i18next";
 import { getTableInfo } from "../../../functions/internalFunctions";
 import { showMessageDialog } from "../../../functions/messageDialog";
@@ -18,12 +18,6 @@ import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearch
 import { FileListTable } from "../../molecules/Table/FileListTable";
 import { ImportConfigDialog } from "../../organisms/Modal/ImportConfigDialog";
 import { MainViewLayout } from "../Layouts/MainViewLayout";
-
-interface DropEvent {
-  payload: {
-    paths: string[];
-  };
-}
 
 export const ImportDataFileView = () => {
   const { t } = useTranslation();
@@ -46,63 +40,51 @@ export const ImportDataFileView = () => {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [selectedFileInfo, setSelectedFileInfo] = useState<{ path: string; name: string } | null>(null);
 
-  // Tauri Drop Event Listener
-  useEffect(() => {
-    let unlisten: () => void;
 
-    const setupListener = async () => {
-      unlisten = await listen('tauri://drop', (event: DropEvent) => {
-        if (event.payload.paths && event.payload.paths.length > 0) {
-          const path = event.payload.paths[0];
-          // ファイル名を取得する簡易ロジック
-          const name = path.split(/[/\\]/).pop() || path;
-          setSelectedFileInfo({ path, name });
-          setIsImportDialogOpen(true);
-        }
-      });
-    };
+  // ドロップゾーンのonDropハンドラ
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    console.log("Dropped file path:");
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0];
 
-    setupListener();
+      // Tauri環境の場合、Fileオブジェクトに 'path' プロパティが含まれていることが一般的
+      // 型定義にはないので any キャストを使用、または @types/react-dropzoneの内容を確認
+      const filePath = (file as any).path;
+      if (filePath) {
 
-    return () => {
-      if (unlisten) unlisten();
-    };
+        setSelectedFileInfo({ path: filePath, name: file.name });
+        setIsImportDialogOpen(true);
+      } else {
+        // ブラウザなどでpathが取れない場合のフォールバック（今回はTauri前提なのでエラー表示も検討）
+        // TauriのWebViewでpathが取れない場合は、上記のtauri://dropを使うことになりますが、
+        // react-dropzone経由でも通常はpathが取れます。
+        console.warn("File path not found in dropped file object.");
+      }
+    }
   }, []);
 
-  // HTML5 Drag & Drop (Mainly for UI indication, actual drop handled by Tauri event or below)
-  const [isDragOver, setIsDragOver] = useState(false);
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    // Note: React's onDrop gives File objects. File.path might be available in Tauri.
-    // However, we rely on tauri://drop listener primarily for path accuracy.
-    // If tauri://drop doesn't fire for some reason (e.g. not configured), we can fallback:
-    /*
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    if (droppedFiles.length > 0) {
-        // (droppedFiles[0] as any).path logic
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    noClick: true, // クリックでファイル選択ダイアログを開かない（今回はD&D専用エリアとするため）
+    multiple: false,
+    accept: {
+      'text/csv': ['.csv'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.ms-excel': ['.xls'],
+      // parquetはMIMEタイプが決まっていないことが多いので拡張子で
+      'application/octet-stream': ['.parquet']
     }
-    */
-  };
+  });
 
 
+  // ファイルパスを分割するヘルパー関数
   const getPathSegments = () => {
     if (!directoryPath) return [];
     const separator = pathSeparator || "/";
     return directoryPath.split(separator).filter((segment) => segment.length > 0);
   };
 
+  // 指定したインデックスまでのパスを構築するヘルパー関数
   const buildPathUpToIndex = (index: number) => {
     const segments = getPathSegments();
     const separator = pathSeparator || "/";
@@ -114,6 +96,7 @@ export const ImportDataFileView = () => {
     return path;
   };
 
+  // ディレクトリ変更処理
   const changeDirectory = async (newPath: string) => {
     setLoading(true, t("Loading.Loading"));
     try {
@@ -127,6 +110,7 @@ export const ImportDataFileView = () => {
     }
   };
 
+  // 上位ディレクトリへ移動
   const goUpDirectory = async () => {
     const segments = getPathSegments();
     if (segments.length > 0) {
@@ -135,11 +119,13 @@ export const ImportDataFileView = () => {
     }
   };
 
+  // パンくずリストクリック処理
   const handleBreadcrumbClick = async (index: number) => {
     const targetPath = buildPathUpToIndex(index);
     await changeDirectory(targetPath);
   };
 
+  // ファイルクリック処理
   const handleFileClick = async (file: FileType) => {
     if (!file.isFile) {
       const separator = pathSeparator || "/";
@@ -158,7 +144,6 @@ export const ImportDataFileView = () => {
         clearLoading();
       }
     } else {
-      // Instead of importing immediately, open dialog
       setSelectedFileInfo({
         path: directoryPath + (pathSeparator || '/') + file.name,
         name: file.name
@@ -195,7 +180,7 @@ export const ImportDataFileView = () => {
           tableName: settings.tableName,
         });
       } else {
-        await showMessageDialog(t('Error.Error'), t('SelectFileView.UnsupportedFileType'));
+        await showMessageDialog(t('Error.Error'), t('ImportDataFileView.UnsupportedFileType'));
         return;
       }
 
@@ -263,8 +248,8 @@ export const ImportDataFileView = () => {
 
   return (
     <MainViewLayout
-      title={t("SelectFileView.Title")}
-      description={t("SelectFileView.Description")}
+      title={t("ImportDataFileView.Title")}
+      description={t("ImportDataFileView.Description")}
     >
       <ImportConfigDialog
         isOpen={isImportDialogOpen}
@@ -279,32 +264,31 @@ export const ImportDataFileView = () => {
             value="dragDrop"
             className="group relative flex h-9 items-center justify-center px-4 text-sm font-medium text-gray-500 hover:text-gray-700 data-[state=active]:font-semibold data-[state=active]:text-gray-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
           >
-            {t('SelectFileView.DragAndDropTab')}
+            {t('ImportDataFileView.DragAndDropTab')}
             <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-gray-900 opacity-0 transition-opacity group-data-[state=active]:opacity-100" />
           </RadixTabs.Trigger>
           <RadixTabs.Trigger
             value="fileSelect"
             className="group relative flex h-9 items-center justify-center px-4 text-sm font-medium text-gray-500 hover:text-gray-700 data-[state=active]:font-semibold data-[state=active]:text-gray-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
           >
-            {t('SelectFileView.FileSelectTab')}
+            {t('ImportDataFileView.FileSelectTab')}
             <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-gray-900 opacity-0 transition-opacity group-data-[state=active]:opacity-100" />
           </RadixTabs.Trigger>
         </RadixTabs.List>
 
         <RadixTabs.Content value="dragDrop" className="flex-1 outline-none">
           <div
-            className={`flex h-[400px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${isDragOver ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400 bg-gray-50"
+            {...getRootProps()}
+            className={`flex h-[400px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400 bg-gray-50"
               }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
           >
-            <UploadCloud className={`mb-4 h-16 w-16 ${isDragOver ? "text-blue-500" : "text-gray-400"}`} />
+            <input {...getInputProps()} />
+            <UploadCloud className={`mb-4 h-16 w-16 ${isDragActive ? "text-blue-500" : "text-gray-400"}`} />
             <h3 className="mb-2 text-lg font-semibold text-gray-700">
-              {t('SelectFileView.DragDropAreaTitle')}
+              {isDragActive ? t('ImportDataFileView.DragDropAreaTitleActive') : t('ImportDataFileView.DragDropAreaTitle')}
             </h3>
             <p className="text-sm text-gray-500">
-              {t('SelectFileView.DragDropAreaDescription')}
+              {t('ImportDataFileView.DragDropAreaDescription')}
             </p>
           </div>
         </RadixTabs.Content>
@@ -313,8 +297,8 @@ export const ImportDataFileView = () => {
           <NavigationSearchBar
             pathSegments={getPathSegments()}
             searchValue={searchValue}
-            searchPlaceholder={t("SelectFileView.SearchPlaceholder")}
-            upDirectoryTitle={t("SelectFileView.GoUpDirectory")}
+            searchPlaceholder={t("ImportDataFileView.SearchPlaceholder")}
+            upDirectoryTitle={t("ImportDataFileView.GoUpDirectory")}
             onUpDirectory={goUpDirectory}
             onBreadcrumbClick={handleBreadcrumbClick}
             onSearchChange={setSearchValue}
@@ -323,9 +307,9 @@ export const ImportDataFileView = () => {
           <FileListTable
             files={sortedFiles}
             onFileClick={handleFileClick}
-            fileNameHeader={t("SelectFileView.FileNameHeader")}
-            sizeHeader={t("SelectFileView.SizeHeader")}
-            lastModifiedHeader={t("SelectFileView.LastModifiedHeader")}
+            fileNameHeader={t("ImportDataFileView.FileNameHeader")}
+            sizeHeader={t("ImportDataFileView.SizeHeader")}
+            lastModifiedHeader={t("ImportDataFileView.LastModifiedHeader")}
             maxHeight="max(200px, calc(100vh - 350px))"
             sortField={sortField}
             sortDirection={sortDirection}
