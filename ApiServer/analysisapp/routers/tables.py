@@ -1,19 +1,27 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..schemas import (CreateJoinTableRequest,
-                       CreateSimulationDataTableRequest, CreateTableRequest,
-                       CreateUnionTableRequest, DeleteTableRequest,
-                       DuplicateTableRequest, FetchDataToJsonRequest,
-                       RenameTableRequest)
+from ..schemas import (
+    CreateJoinTableRequest,
+    CreateSimulationDataTableRequest,
+    CreateTableRequest,
+    CreateUnionTableRequest,
+    DeleteTableRequest,
+    DuplicateTableRequest,
+    FetchDataToArrowRequest,
+    FetchDataToJsonRequest,
+    RenameTableRequest,
+)
 from ..services.clear_tables import clear_tables
 from ..services.create_join_table import create_join_table
-from ..services.create_simulation_data_table import \
-    create_simulation_data_table
+from ..services.create_simulation_data_table import (
+    create_simulation_data_table,
+)
 from ..services.create_table import create_table
 from ..services.create_union_table import create_union_table
 from ..services.delete_table import delete_table
 from ..services.duplicate_table import duplicate_table
+from ..services.fetch_data_to_arrow import fetch_data_to_arrow
 from ..services.fetch_data_to_json import fetch_data_to_json
 from ..services.get_table_list import get_table_list
 from ..services.rename_table import rename_table
@@ -44,15 +52,13 @@ async def create_table_endpoint(request: Request, body: CreateTableRequest):
     # ビジネスロジックの実行
     result = create_table(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/create-join")
-async def create_join_table_endpoint(request: Request,
-                                     body: CreateJoinTableRequest):
+async def create_join_table_endpoint(
+    request: Request, body: CreateJoinTableRequest
+):
     """結合テーブルを作成するエンドポイント
 
     Parameters
@@ -73,15 +79,13 @@ async def create_join_table_endpoint(request: Request,
     # ビジネスロジックの実行
     result = create_join_table(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/create-union")
-async def create_union_table_endpoint(request: Request,
-                                      body: CreateUnionTableRequest):
+async def create_union_table_endpoint(
+    request: Request, body: CreateUnionTableRequest
+):
     """ユニオンテーブルを作成するエンドポイント
 
     Parameters
@@ -102,15 +106,13 @@ async def create_union_table_endpoint(request: Request,
     # ビジネスロジックの実行
     result = create_union_table(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/create-simulation-data")
 async def create_simulation_data_table_endpoint(
-        request: Request, body: CreateSimulationDataTableRequest):
+    request: Request, body: CreateSimulationDataTableRequest
+):
     """シミュレーションデータテーブルを作成するエンドポイント
 
     Parameters
@@ -131,15 +133,11 @@ async def create_simulation_data_table_endpoint(
     # ビジネスロジックの実行
     result = create_simulation_data_table(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/delete")
-async def delete_table_endpoint(request: Request,
-                                body: DeleteTableRequest):
+async def delete_table_endpoint(request: Request, body: DeleteTableRequest):
     """テーブルを削除するエンドポイント
 
     Parameters
@@ -158,15 +156,13 @@ async def delete_table_endpoint(request: Request,
 
     result = delete_table(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/duplicate")
-async def duplicate_table_endpoint(request: Request,
-                                   body: DuplicateTableRequest):
+async def duplicate_table_endpoint(
+    request: Request, body: DuplicateTableRequest
+):
     """テーブルを複製するエンドポイント
 
     Parameters
@@ -185,15 +181,11 @@ async def duplicate_table_endpoint(request: Request,
 
     result = duplicate_table(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/rename")
-async def rename_table_endpoint(request: Request,
-                                body: RenameTableRequest):
+async def rename_table_endpoint(request: Request, body: RenameTableRequest):
     """
     テーブル名変更エンドポイント
 
@@ -215,10 +207,7 @@ async def rename_table_endpoint(request: Request,
 
     result = rename_table(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.get("/get-list")
@@ -239,10 +228,7 @@ async def get_table_list_endpoint(request: Request):
 
     result = get_table_list()
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.delete("/clear-all")
@@ -265,15 +251,13 @@ async def clear_tables_endpoint(request: Request):
     # ビジネスロジックの実行
     result = clear_tables()
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/fetch-data")
-async def fetch_data_to_json_endpoint(request: Request,
-                                      body: FetchDataToJsonRequest):
+async def fetch_data_to_json_endpoint(
+    request: Request, body: FetchDataToJsonRequest
+):
     """データをJSON形式で取得するエンドポイント
 
     Parameters
@@ -292,7 +276,35 @@ async def fetch_data_to_json_endpoint(request: Request,
 
     result = fetch_data_to_json(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
+
+
+@router.post("/fetch-data-arrow")
+async def fetch_data_to_arrow_endpoint(
+    request: Request, body: FetchDataToArrowRequest
+):
+    """データをApache Arrow IPC形式で取得するエンドポイント
+
+    仮想スクロール用のチャンク取得API。
+    Apache Arrow IPC形式のバイナリデータ（Base64エンコード）を返します。
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    body : FetchDataToArrowRequest
+        リクエストボディ
+
+    Returns
+    -------
+    JSONResponse
+        処理結果（Arrow IPC形式のBase64エンコードされたバイナリを含む）
+    """
+    create_log_api_request(request)
+
+    result = fetch_data_to_arrow(**body.model_dump())
+
+    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(http_status.HTTP_200_OK, result)
