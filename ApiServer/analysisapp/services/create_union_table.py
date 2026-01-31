@@ -74,7 +74,8 @@ class CreateUnionTable(AbstractApi):
     def execute(self):
         # テーブルユニオン処理
         try:
-            # 各テーブルから指定された列のみを選択してデータフレームのリストを作成
+            # 各テーブルから指定された列のみを選択して
+            # データフレームのリストを作成
             dataframes = []
             for table_name in self.table_names:
                 df = self.tables_store.get_table(table_name).table

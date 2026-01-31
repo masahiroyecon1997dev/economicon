@@ -63,7 +63,8 @@ class TransformColumn(AbstractApi):
             if self.transform_method not in valid_methods:
                 methods_str = ', '.join(valid_methods)
                 raise ValidationError(
-                    _("transformMethodの'{}'は無効です。有効なメソッド: {}").format(
+                    _("transformMethodの'{}'は無効です。"
+                      "有効なメソッド: {}").format(
                         self.transform_method, methods_str))
 
             # Validate log base if provided
@@ -75,7 +76,9 @@ class TransformColumn(AbstractApi):
             # Validate exponent if provided
             if self.transform_method == 'power' and self.exponent is not None:
                 if not isinstance(self.exponent, (int, float)):
-                    raise ValidationError(_("exponentは数値でなければなりません"))
+                    raise ValidationError(
+                        _("exponentは数値でなければなりません")
+                    )
 
             # Validate root index if provided
             if self.transform_method == 'root' and self.root_index is not None:

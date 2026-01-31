@@ -6,7 +6,6 @@ linearmodels の IV2SLS による操作変数回帰を提供します。
 
 from typing import Dict, List, Any, Optional
 import gc
-import pandas as pd
 from linearmodels.iv import IV2SLS  # type: ignore
 
 from .base import AbstractRegressionService
@@ -149,8 +148,14 @@ class IVRegression(AbstractRegressionService):
 
         # 被説明変数、外生変数、内生変数、操作変数を設定
         dependent = df[self.dependent_variable]
-        exog = df[self.explanatory_variables] if self.explanatory_variables else None
-        endog = df[self.endogenous_variables] if self.endogenous_variables else None
+        exog = (
+            df[self.explanatory_variables]
+            if self.explanatory_variables else None
+        )
+        endog = (
+            df[self.endogenous_variables]
+            if self.endogenous_variables else None
+        )
         instruments = df[self.instrumental_variables]
 
         # 標準誤差方法のマッピング
