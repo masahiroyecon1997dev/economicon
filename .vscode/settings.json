@@ -97,7 +97,13 @@
   },
   "[python]": {
     // 1つのタブに相当する半角スペースの数
-    "editor.tabSize": 4
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "always",
+      "source.organizeImports.ruff": "always"
+    }
   },
   "[tsv]": {
     // Tabキーで半角スペースを挿入
