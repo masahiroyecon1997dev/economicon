@@ -1,6 +1,6 @@
 import polars as pl
 import math
-from .django_compat import gettext as _
+from ..i18n.translation import gettext as _
 from typing import Dict, Optional
 from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.tables_store_validator import (

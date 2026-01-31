@@ -1,5 +1,5 @@
 from typing import Dict
-from .django_compat import gettext as _
+from ..i18n.translation import gettext as _
 from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.tables_store_validator import (
     validate_existed_table_name,

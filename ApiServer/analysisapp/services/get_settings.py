@@ -1,6 +1,6 @@
 from typing import Dict
 
-from .django_compat import gettext as _
+from ..i18n.translation import gettext as _
 
 from .data.settings_manager import SettingsManager
 from .abstract_api import AbstractApi, ApiError

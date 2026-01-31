@@ -5,7 +5,7 @@ from ..utils.validator.tables_store_validator import (
     validate_existed_table_name, validate_row_index)
 from .abstract_api import AbstractApi, ApiError
 from .data.tables_store import TablesStore
-from .django_compat import gettext as _
+from ..i18n.translation import gettext as _
 
 
 class FetchDataToJson(AbstractApi):

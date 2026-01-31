@@ -21,7 +21,7 @@ from ...utils.validator.tables_store_validator import (
     validate_existed_column_name
 )
 from ..abstract_api import ApiError
-from ..django_compat import gettext as _
+from ...i18n.translation import gettext as _
 
 
 class FixedEffectsRegression(AbstractRegressionService):
