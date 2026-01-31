@@ -5,7 +5,9 @@ import polars as pl
 
 def rename_duplicate_columns(df: pl.DataFrame) -> pl.DataFrame:
     """
-    Polars DataFrame内の重複する列名に '_copy_1', '_copy_2' などのサフィックスを付けてリネームします。
+    Polars DataFrame内の重複する列名に
+    '_copy_1', '_copy_2' などのサフィックスを付けて
+    リネームします。
 
     Args:
         df: リネーム対象のPolars DataFrame。
