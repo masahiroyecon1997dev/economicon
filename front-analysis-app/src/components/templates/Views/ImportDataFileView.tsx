@@ -16,7 +16,7 @@ import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearch
 import { FileListTable } from "../../molecules/Table/FileListTable";
 import { MainViewLayout } from "../Layouts/MainViewLayout";
 
-export const SelectFileView = () => {
+export const ImportDataFileView = () => {
   const { t } = useTranslation();
   const files = useFilesStore((state) => state.files);
   const directoryPath = useFilesStore((state) => state.directoryPath);
