@@ -1,15 +1,14 @@
 from typing import Dict
 
 import polars as pl
-from pydantic import validate_call
-from .django_compat import gettext as _
 
-from .data.tables_store import TablesStore
 from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.tables_store_validator import (
     validate_existed_column_name, validate_existed_table_name,
     validate_new_column_name)
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_store import TablesStore
+from .django_compat import gettext as _
 
 
 class AddColumn(AbstractApi):

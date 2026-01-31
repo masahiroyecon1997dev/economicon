@@ -1,5 +1,5 @@
 # アプリケーション設定ファイル
-# ホームディレクトリに「analysis_app_settings.yml」として保存してください
+# ホームディレクトリに「economicon.config.yml」として保存してください
 
 # ファイル読み込みをするフォルダパスの初期値
 default_folder_path: "C:/Users/YourName/Documents"

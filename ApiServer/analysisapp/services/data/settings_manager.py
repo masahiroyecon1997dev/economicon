@@ -23,7 +23,7 @@ class SettingsManager:
     _instance = None
     _lock: threading.RLock = threading.RLock()
 
-    SETTINGS_FILE_NAME = 'analysis_app_settings.yml'
+    SETTINGS_FILE_NAME = 'economicon.config.yml'
 
     def __new__(cls):
         if cls._instance is None:
@@ -74,7 +74,19 @@ class SettingsManager:
         Returns:
             Path: 設定ファイルのパス
         """
-        return Path.home() / SettingsManager.SETTINGS_FILE_NAME
+        os_system = platform.system()
+
+        if os_system == "Windows":
+            # WindowsではAppData/Roaming/economicon/配下に配置
+            settings_dir = Path.home() / 'AppData' / 'Roaming' / 'economicon'
+        else:
+            # macOS/Linuxではホームディレクトリ直下
+            settings_dir = Path.home()
+
+        # ディレクトリが存在しない場合は作成
+        settings_dir.mkdir(parents=True, exist_ok=True)
+
+        return settings_dir / SettingsManager.SETTINGS_FILE_NAME
 
     def load_settings(self) -> None:
         """
