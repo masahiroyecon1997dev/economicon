@@ -1,13 +1,16 @@
 from typing import Dict, List
 
 import polars as pl
-from ..i18n.translation import gettext as _
 
-from .data.tables_store import TablesStore
+from ..i18n.translation import gettext as _
 from ..utils.validator.common_validators import ValidationError
 from ..utils.validator.tables_store_validator import (
-    validate_existed_columns, validate_existed_tables, validate_new_table_name)
+    validate_existed_columns,
+    validate_existed_tables,
+    validate_new_table_name,
+)
 from .abstract_api import AbstractApi, ApiError
+from .data.tables_store import TablesStore
 
 
 class CreateUnionTable(AbstractApi):
@@ -17,6 +20,7 @@ class CreateUnionTable(AbstractApi):
     複数のテーブルを指定された列でユニオン（結合）し、新しいテーブルを作成します。
     すべてのテーブルに共通する列名を指定して、それらの行を結合します。
     """
+
     def __init__(
         self,
         union_table_name: str,
@@ -32,9 +36,9 @@ class CreateUnionTable(AbstractApi):
         self.column_names = column_names
         # パラメータ名のマッピング
         self.param_names = {
-            'union_table_name': 'unionTableName',
-            'table_names': 'tableNames',
-            'column_names': 'columnNames',
+            "union_table_name": "unionTableName",
+            "table_names": "tableNames",
+            "column_names": "columnNames",
         }
 
     def validate(self):
@@ -46,25 +50,22 @@ class CreateUnionTable(AbstractApi):
             validate_new_table_name(
                 self.union_table_name,
                 table_name_list,
-                self.param_names['union_table_name']
+                self.param_names["union_table_name"],
             )
 
             validate_existed_tables(
-                self.table_names,
-                table_name_list,
-                self.param_names['table_names']
+                self.table_names, table_name_list, self.param_names["table_names"]
             )
 
             # すべてのテーブルで指定された列が存在することをチェック
             for table_name in self.table_names:
-                table_column_name_list = \
-                    self.tables_store.get_column_name_list(
-                        table_name
-                    )
+                table_column_name_list = self.tables_store.get_column_name_list(
+                    table_name
+                )
                 validate_existed_columns(
                     self.column_names,
                     table_column_name_list,
-                    self.param_names['column_names']
+                    self.param_names["column_names"],
                 )
 
             return None
@@ -92,12 +93,11 @@ class CreateUnionTable(AbstractApi):
             )
 
             # 結果を返す
-            result = {'tableName': created_table_name}
+            result = {"tableName": created_table_name}
             return result
         except Exception as e:
             message = _(
-                "An unexpected error occurred during "
-                "union table creation processing"
+                "An unexpected error occurred during union table creation processing"
             )
             raise ApiError(message) from e
 
@@ -107,9 +107,7 @@ def create_union_table(
     table_names: List[str],
     column_names: List[str],
 ) -> Dict:
-    api = CreateUnionTable(
-        union_table_name, table_names, column_names
-    )
+    api = CreateUnionTable(union_table_name, table_names, column_names)
     validation_error = api.validate()
     if validation_error:
         raise ValueError(validation_error.message)
