@@ -2,7 +2,6 @@ import * as RadixDialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cn } from '../../../../lib/utils';
 
 type ImportConfigDialogProps = {
   isOpen: boolean;
@@ -57,7 +56,7 @@ export const ImportConfigDialog = ({
               {t('SelectFileView.ImportDialog.Title')}
             </RadixDialog.Title>
             <RadixDialog.Description className="text-sm text-gray-500">
-               {fileInfo.path}
+              {fileInfo.path}
             </RadixDialog.Description>
           </div>
 
@@ -90,17 +89,17 @@ export const ImportConfigDialog = ({
             )}
 
             {isCsv && (
-               <div className="grid grid-cols-4 items-center gap-4">
-               <label htmlFor="separator" className="text-right text-sm font-medium">
-                 {t('SelectFileView.ImportDialog.Separator')}
-               </label>
-               <input
-                 id="separator"
-                 value={separator}
-                 onChange={(e) => setSeparator(e.target.value)}
-                 className="col-span-3 flex h-9 w-full rounded-md border border-gray-300 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50"
-               />
-             </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="separator" className="text-right text-sm font-medium">
+                  {t('SelectFileView.ImportDialog.Separator')}
+                </label>
+                <input
+                  id="separator"
+                  value={separator}
+                  onChange={(e) => setSeparator(e.target.value)}
+                  className="col-span-3 flex h-9 w-full rounded-md border border-gray-300 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
             )}
           </div>
 
