@@ -72,6 +72,10 @@ class FileValidator:
         """
         ファイル拡張子のチェック
         """
+        if not uploaded_file.filename:
+            message = _("Filename is missing.")
+            raise FileValidationError(message, 400)
+
         if not uploaded_file.filename.lower().endswith(self.allowed_extensions):
             extensions = ", ".join(self.allowed_extensions)
             message = _(f"Uploaded file is not a {extensions} file.")
@@ -90,7 +94,10 @@ class FileValidator:
             detected_mime = magic.from_buffer(file_content, mime=True)
         except Exception:
             # python-magicが利用できない場合はファイル名から推測
-            detected_mime, _encoding = mimetypes.guess_type(uploaded_file.filename)
+            if uploaded_file.filename:
+                detected_mime, _encoding = mimetypes.guess_type(uploaded_file.filename)
+            else:
+                detected_mime = None
 
         if detected_mime not in self.allowed_mime_types:
             mime_types = ", ".join(self.allowed_mime_types)
