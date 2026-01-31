@@ -53,7 +53,7 @@ export const ImportConfigDialog = ({
         <RadixDialog.Content className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-white p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg md:w-full">
           <div className="flex flex-col space-y-1.5 text-center sm:text-left">
             <RadixDialog.Title className="text-lg font-semibold leading-none tracking-tight">
-              {t('SelectFileView.ImportDialog.Title')}
+              {t('ImportDataFileView.ImportDialog.Title')}
             </RadixDialog.Title>
             <RadixDialog.Description className="text-sm text-gray-500">
               {fileInfo.path}
@@ -63,7 +63,7 @@ export const ImportConfigDialog = ({
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="tableName" className="text-right text-sm font-medium">
-                {t('SelectFileView.ImportDialog.TableName')}
+                {t('ImportDataFileView.ImportDialog.TableName')}
               </label>
               <input
                 id="tableName"
@@ -76,7 +76,7 @@ export const ImportConfigDialog = ({
             {isExcel && (
               <div className="grid grid-cols-4 items-center gap-4">
                 <label htmlFor="sheetName" className="text-right text-sm font-medium">
-                  {t('SelectFileView.ImportDialog.SheetName')}
+                  {t('ImportDataFileView.ImportDialog.SheetName')}
                 </label>
                 <input
                   id="sheetName"
@@ -91,7 +91,7 @@ export const ImportConfigDialog = ({
             {isCsv && (
               <div className="grid grid-cols-4 items-center gap-4">
                 <label htmlFor="separator" className="text-right text-sm font-medium">
-                  {t('SelectFileView.ImportDialog.Separator')}
+                  {t('ImportDataFileView.ImportDialog.Separator')}
                 </label>
                 <input
                   id="separator"
@@ -114,7 +114,7 @@ export const ImportConfigDialog = ({
               className="inline-flex h-9 items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-gray-50 shadow hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50"
               onClick={handleImport}
             >
-              {t('SelectFileView.ImportDialog.Import')}
+              {t('ImportDataFileView.ImportDialog.Import')}
             </button>
           </div>
 

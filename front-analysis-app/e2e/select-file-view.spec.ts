@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("SelectFileView - ファイル選択画面", () => {
+test.describe("ImportDataFileView - ファイル選択画面", () => {
   test.beforeEach(async ({ page }) => {
     // テスト前にページをロード
     await page.goto("/");
 
-    // SelectFileViewに遷移（実際のナビゲーションに合わせて調整）
+    // ImportDataFileViewに遷移（実際のナビゲーションに合わせて調整）
     // 例: ファイル選択ボタンをクリックするなど
     // await page.click('button:has-text("ファイルを選択")');
   });

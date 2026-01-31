@@ -21,7 +21,7 @@
     "SaveData": "Save Data",
     "Tables": "Tables"
   },
-  "SelectFileView": {
+  "ImportDataFileView": {
     "Title": "Select File",
     "SelectFile": "Select File",
     "Description": "Please select a file to import data.",
