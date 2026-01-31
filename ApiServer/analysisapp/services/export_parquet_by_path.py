@@ -1,14 +1,17 @@
 import os
 from typing import Dict
 
+from ..i18n.translation import gettext as _
 from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.file_validators import (validate_directory_path,
-                                               validate_file_name)
-from ..utils.validator.tables_store_validator import \
-    validate_existed_table_name
+from ..utils.validator.file_validators import (
+    validate_directory_path,
+    validate_file_name,
+)
+from ..utils.validator.tables_store_validator import (
+    validate_existed_table_name,
+)
 from .abstract_api import AbstractApi, ApiError
 from .data.tables_store import TablesStore
-from ..i18n.translation import gettext as _
 
 
 class ExportParquetByPath(AbstractApi):
@@ -18,8 +21,7 @@ class ExportParquetByPath(AbstractApi):
     指定されたテーブル名のデータを指定されたパスにPARQUETファイルとして出力します。
     """
 
-    def __init__(self, table_name: str, directory_path: str,
-                 file_name: str):
+    def __init__(self, table_name: str, directory_path: str, file_name: str):
         # テーブルマネージャーの初期化
         self.tables_store = TablesStore()
         # テーブル名
@@ -30,9 +32,9 @@ class ExportParquetByPath(AbstractApi):
         self.file_name = file_name
         # パラメータ名のマッピング
         self.param_names = {
-            'table_name': 'tableName',
-            'directory_path': 'directoryPath',
-            'file_name': 'fileName',
+            "table_name": "tableName",
+            "directory_path": "directoryPath",
+            "file_name": "fileName",
         }
 
     def validate(self):
@@ -43,20 +45,16 @@ class ExportParquetByPath(AbstractApi):
             validate_existed_table_name(
                 self.table_name,
                 table_name_list,
-                self.param_names['table_name']
+                self.param_names["table_name"],
             )
 
             # ディレクトリパスのバリデーション
             validate_directory_path(
-                self.directory_path,
-                self.param_names['directory_path']
+                self.directory_path, self.param_names["directory_path"]
             )
 
             # ファイル名のバリデーション
-            validate_file_name(
-                self.file_name,
-                self.param_names['file_name']
-            )
+            validate_file_name(self.file_name, self.param_names["file_name"])
 
             return None
         except ValidationError as e:
@@ -75,25 +73,27 @@ class ExportParquetByPath(AbstractApi):
             df.write_parquet(file_path)
 
             # 結果を返す
-            result = {'filePath': file_path}
+            result = {"filePath": file_path}
             return result
 
         except KeyError as e:
             message = _("Table does not exist: {}").format(self.table_name)
             raise ApiError(message) from e
         except PermissionError as e:
-            message = _("Permission denied: Cannot write to "
-                        "the specified path.")
+            message = _(
+                "Permission denied: Cannot write to the specified path."
+            )
             raise ApiError(message) from e
         except Exception as e:
-            message = _("An unexpected error occurred during "
-                        "PARQUET export processing")
+            message = _(
+                "An unexpected error occurred during PARQUET export processing"
+            )
             raise ApiError(message) from e
 
 
-def export_parquet_by_path(table_name: str,
-                           directory_path: str,
-                           file_name: str) -> Dict:
+def export_parquet_by_path(
+    table_name: str, directory_path: str, file_name: str
+) -> Dict:
     """
     テーブルをPARQUETファイルパスに出力する関数
 

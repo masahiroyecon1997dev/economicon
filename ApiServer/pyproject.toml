@@ -40,3 +40,14 @@ dev = [
     "ruff>=0.14.14",
     "wooldridge>=0.5.0",
 ]
+
+[tool.ruff]
+# 1行の最大文字数を79文字に制限
+line-length = 79
+[tool.ruff.format]
+# フォーマッタ実行時にもこの設定を適用
+quote-style = "double"
+indent-style = "space"
+[tool.ruff.lint]
+# E203 (Whitespace before ':') を無視リストに追加
+ignore = ["E203"]
