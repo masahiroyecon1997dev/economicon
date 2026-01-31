@@ -4,12 +4,11 @@
 OLS (Ordinary Least Squares) による線形回帰分析を提供します。
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List
 import statsmodels.api as sm
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
 from .base import AbstractRegressionService
-from ...i18n.translation import gettext as _
 
 
 class OLSRegression(AbstractRegressionService):

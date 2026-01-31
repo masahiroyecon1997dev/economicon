@@ -6,7 +6,9 @@ api_logger = logging.getLogger('api_logger')
 def create_log_api_request(request) -> None:
     api_logger.info(
         "API REQUEST",
-        extra={'request': request}  # requestオブジェクト全体をログに含める（オプション）
+        # requestオブジェクト全体をログに含める
+        # （オプション）
+        extra={'request': request}
     )
 
 

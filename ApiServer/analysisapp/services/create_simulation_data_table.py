@@ -191,7 +191,9 @@ def create_simulation_data_table(
         column_settings: List[Dict[str, Any]]
 ) -> Dict:
     """シミュレーションデータテーブル作成のエントリーポイント"""
-    api = CreateSimulationDataTable(table_name, table_number_of_rows, column_settings)
+    api = CreateSimulationDataTable(
+        table_name, table_number_of_rows, column_settings
+    )
     validation_error = api.validate()
     if validation_error:
         raise ValueError(validation_error.message)

@@ -14,6 +14,13 @@ from ..abstract_api import ApiError
 from ...i18n.translation import gettext as _
 from .base import AbstractRegressionService
 
+# Check if py4etrics is available
+try:
+    from py4etrics.tobit import Tobit  # noqa: F811
+    PY4ETRICS_AVAILABLE = True
+except ImportError:
+    PY4ETRICS_AVAILABLE = False
+
 
 class LogitRegression(AbstractRegressionService):
     """
