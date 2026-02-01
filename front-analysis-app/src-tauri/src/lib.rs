@@ -57,6 +57,47 @@ async fn proxy_request(
     Ok(json_response)
 }
 
+#[derive(Deserialize)]
+struct SliceRequest {
+    offset: usize,
+    limit: usize,
+}
+
+#[tauri::command]
+async fn fetch_binary(
+    state: State<'_, ClientState>,
+    method: String,
+    path: String,
+    body: Option<serde_json::Value>,
+    query: Option<serde_json::Value>,
+) -> Result<serde_json::Value, ApiError> {
+    let base_url = "http://127.0.0.1:8000";
+    let url = format!("{}{}", base_url, path);
+    let mut request_builder = match method.to_uppercase().as_str() {
+        "GET" => state.client.get(&url),
+        "POST" => state.client.post(&url),
+        "PUT" => state.client.put(&url),
+        "DELETE" => state.client.delete(&url),
+        _ => return Err(ApiError { message: format!("Unsupported method: {}", method) }),
+    };
+
+    if let Some(q) = query {
+        request_builder = request_builder.query(&q);
+    }
+
+    if let Some(b) = body {
+        request_builder = request_builder.json(&b);
+    }
+    let response = request_builder.send().await?;
+
+    let bytes = response
+        .bytes()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(bytes.to_vec()) // フロントエンド（JS）へ Uint8Array として渡る
+}
+
 // ファイルアップロード用コマンド (マルチパート)
 #[tauri::command]
 async fn upload_file(
@@ -96,6 +137,7 @@ pub fn run() {
         .manage(ClientState { client }) // Stateを登録
         .invoke_handler(tauri::generate_handler![
             proxy_request,
+            fetch_binary,
             upload_file
         ])
         .run(tauri::generate_context!())

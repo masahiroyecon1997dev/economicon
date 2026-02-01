@@ -77,13 +77,31 @@ export const fetchDataToJson = async (
   fetchRows: number = 100,
 ): Promise<apiTypes.ResFetchDataToJsonType> => {
   const response = await apiClient.post<apiTypes.ResFetchDataToJsonType>(
-    API_ENDPOINTS.TABLE.FETCH_DATA,
+    API_ENDPOINTS.TABLE.FETCH_DATA_TO_JSON,
     {
       tableName: tableName,
       startRow: startRow,
       fetchRows: fetchRows,
     },
   );
+  return response.data;
+};
+
+export const fetchDataToArrow = async (
+  tableName: string,
+  startRow: number = 1,
+  chunk_size: number = 500,
+): Promise<apiTypes.ResFetchDataToArrowType> => {
+  const response =
+    await apiClient.fetch_binary<apiTypes.ResFetchDataToArrowType>(
+      "POST",
+      API_ENDPOINTS.TABLE.FETCH_DATA_TO_ARROW,
+      {
+        tableName: tableName,
+        startRow: startRow,
+        chunkSize: chunk_size,
+      },
+    );
   return response.data;
 };
 
@@ -135,56 +153,6 @@ export const importCsv = async (
   const response = await apiClient.upload<apiTypes.ResImportCsvType>(
     API_ENDPOINTS.DATA.IMPORT_CSV_BY_FILE,
     file,
-  );
-  return response.data;
-};
-
-// 以下の関数は古いエンドポイントを使用しています
-// 新しいAPIには対応するエンドポイントが存在しない可能性があります
-
-export const outputCsv = async (
-  tableName: string,
-): Promise<apiTypes.ResOutputCsvType> => {
-  // GETリクエストでクエリパラメータを渡す
-  const response = await apiClient.get<apiTypes.ResOutputCsvType>(
-    "/output_csv",
-    { tableName: tableName } as any, // Note: 型が不明瞭なためキャストしていますが、必要に応じて修正してください
-  );
-  return response.data;
-};
-
-export const generateSimulationData = async (
-  requestBody: apiTypes.ReqGenerateSimulationDataType,
-): Promise<apiTypes.ResGenerateSimulationDataType> => {
-  try {
-    const response =
-      await apiClient.post<apiTypes.ResGenerateSimulationDataType>(
-        "/generate_simulation_data",
-        requestBody,
-      );
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    return { code: "NG", result: { tableName: "" }, message: "エラーです" };
-  }
-};
-
-export const linearRegression = async (
-  requestBody: apiTypes.ReqLinearRegressionType,
-): Promise<apiTypes.ResLinearRegressionType> => {
-  const response = await apiClient.post<apiTypes.ResLinearRegressionType>(
-    API_ENDPOINTS.REGRESSION.LINEAR,
-    requestBody,
-  );
-  return response.data;
-};
-
-export const calculateColumn = async (
-  requestBody: apiTypes.ReqCalculateColumnType,
-): Promise<apiTypes.ResCalculateColumnType> => {
-  const response = await apiClient.post<apiTypes.ResCalculateColumnType>(
-    API_ENDPOINTS.COLUMN.CALCULATE,
-    requestBody,
   );
   return response.data;
 };

@@ -2,7 +2,7 @@
 テーブルデータをApache Arrow形式で取得するサービス
 """
 
-import base64
+import io
 
 import pyarrow as pa
 
@@ -121,24 +121,12 @@ class FetchDataToArrow(AbstractApi):
             pyarrow_table = arrow_table.to_arrow()
 
             # Apache Arrow IPC形式にシリアライズ
-            sink = pa.BufferOutputStream()
-            writer = pa.ipc.new_stream(sink, pyarrow_table.schema)
-            writer.write_table(pyarrow_table)
-            writer.close()
+            sink = io.BytesIO()
+            with pa.ipc.new_file(sink, pyarrow_table.schema) as writer:
+                writer.write_table(pyarrow_table)
 
-            # バイナリデータを取得してBase64エンコード
-            arrow_bytes = sink.getvalue().to_pybytes()
-            arrow_base64 = base64.b64encode(arrow_bytes).decode("utf-8")
+            return sink.getvalue()
 
-            result = {
-                "tableName": self.table_name,
-                "arrowData": arrow_base64,
-                "totalRows": total_rows,
-                "startRow": start_row,
-                "endRow": end_row,
-            }
-
-            return result
         except Exception as e:
             message = _(
                 f"An unexpected error during fetching Arrow data "
