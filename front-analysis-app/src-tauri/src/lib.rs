@@ -1,6 +1,6 @@
 use tauri::State;
 use reqwest::Client;
-use serde::{Serialize, Deserialize};
+use serde::{Serialize};
 use std::time::Duration;
 
 // HTTPクライアントを保持するState
@@ -17,6 +17,12 @@ struct ApiError {
 impl From<reqwest::Error> for ApiError {
     fn from(err: reqwest::Error) -> Self {
         ApiError { message: err.to_string() }
+    }
+}
+
+impl From<String> for ApiError {
+    fn from(s: String) -> Self {
+        ApiError { message: s }
     }
 }
 
@@ -57,12 +63,6 @@ async fn proxy_request(
     Ok(json_response)
 }
 
-#[derive(Deserialize)]
-struct SliceRequest {
-    offset: usize,
-    limit: usize,
-}
-
 #[tauri::command]
 async fn fetch_binary(
     state: State<'_, ClientState>,
@@ -70,7 +70,7 @@ async fn fetch_binary(
     path: String,
     body: Option<serde_json::Value>,
     query: Option<serde_json::Value>,
-) -> Result<serde_json::Value, ApiError> {
+) -> Result<Vec<u8>, ApiError> {
     let base_url = "http://127.0.0.1:8000";
     let url = format!("{}{}", base_url, path);
     let mut request_builder = match method.to_uppercase().as_str() {

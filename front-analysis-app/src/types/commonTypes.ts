@@ -104,3 +104,5 @@ export type LinearRegressionResultType = {
     nObservations: number;
   };
 };
+
+export type TauriFile = File & { path: string };

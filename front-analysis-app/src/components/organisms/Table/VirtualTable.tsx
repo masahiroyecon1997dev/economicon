@@ -138,6 +138,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   }, [totalRows, getRowData]);
 
   // TanStack Tableの設定
+
   const table = useReactTable({
     data: virtualData,
     columns,

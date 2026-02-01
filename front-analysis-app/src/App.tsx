@@ -57,7 +57,7 @@ export const App = () => {
         // 全て成功した場合のみストアを更新
         if (isMounted) {
           setSettings(resGetSettings.result);
-          setCurrentView("SelectFile");
+          setCurrentView("ImportDataFile");
           setTableList(resGetTableNames.result.tableNameList);
           setFiles(resGetFiles.result);
         }
