@@ -56,7 +56,7 @@ export const apiClient = {
     body?: RequestBody,
     query?: RequestBody,
   ): Promise<{ data: T }> => {
-    return invokeRequest<T>(method, path, body, query);
+    return invokeBinaryRequest<T>(method, path, body, query);
   },
 };
 
@@ -73,6 +73,31 @@ async function invokeRequest<T>(
 
   try {
     const response = await invoke<T>("proxy_request", {
+      method,
+      path: fullPath,
+      body,
+      query,
+    });
+    return { data: response };
+  } catch (error) {
+    console.error(`API Request Failed: ${method} ${fullPath}`, error);
+    throw error;
+  }
+}
+
+/**
+ * 共通リクエスト処理
+ */
+async function invokeBinaryRequest<T>(
+  method: string,
+  path: string,
+  body?: RequestBody,
+  query?: RequestBody,
+): Promise<{ data: T }> {
+  const fullPath = `${BASE_API_PREFIX}${path}`;
+
+  try {
+    const response = await invoke<T>("fetch_binary", {
       method,
       path: fullPath,
       body,
