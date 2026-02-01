@@ -48,7 +48,7 @@ def test_fetch_data_to_arrow_success(client, tables_store):
     start_row = 1
     chunk_size = 3
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={
             "tableName": table_name,
             "startRow": start_row,
@@ -75,7 +75,7 @@ def test_fetch_data_to_arrow_default_chunk_size(client, tables_store):
     """正常系テスト: デフォルトのチャンクサイズ（500行）"""
     start_row = 0
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={"tableName": table_name, "startRow": start_row},
     )
     assert response.status_code == status.HTTP_200_OK
@@ -91,7 +91,7 @@ def test_fetch_data_to_arrow_fetch_beyond_table(client, tables_store):
     start_row = 7
     chunk_size = 500
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={
             "tableName": table_name,
             "startRow": start_row,
@@ -112,7 +112,7 @@ def test_fetch_data_to_arrow_table_not_found(client, tables_store):
     start_row = 1
     chunk_size = 500
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={
             "tableName": not_existent_table,
             "startRow": start_row,
@@ -130,7 +130,7 @@ def test_fetch_data_to_arrow_invalid_start_row_range(client, tables_store):
     start_row = -1
     chunk_size = 500
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={
             "tableName": table_name,
             "startRow": start_row,
@@ -147,7 +147,7 @@ def test_fetch_data_to_arrow_invalid_chunk_size_zero(client, tables_store):
     start_row = 1
     chunk_size = 0
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={
             "tableName": table_name,
             "startRow": start_row,
@@ -168,7 +168,7 @@ def test_fetch_data_to_arrow_invalid_chunk_size_too_large(
     start_row = 1
     chunk_size = 10001
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={
             "tableName": table_name,
             "startRow": start_row,
@@ -183,7 +183,8 @@ def test_fetch_data_to_arrow_invalid_chunk_size_too_large(
 def test_fetch_data_to_arrow_missing_table_name(client, tables_store):
     """異常系テスト: テーブル名が未指定"""
     response = client.post(
-        "/api/table/fetch-data-arrow", json={"startRow": 1, "chunkSize": 500}
+        "/api/table/fetch-data-to-arrow",
+        json={"startRow": 1, "chunkSize": 500},
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -193,7 +194,7 @@ def test_fetch_data_to_arrow_missing_table_name(client, tables_store):
 def test_fetch_data_to_arrow_missing_start_row(client, tables_store):
     """異常系テスト: 開始行が未指定"""
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={"tableName": table_name, "chunkSize": 500},
     )
     response_data = response.json()
@@ -204,7 +205,7 @@ def test_fetch_data_to_arrow_missing_start_row(client, tables_store):
 def test_fetch_data_to_arrow_empty_table_name(client, tables_store):
     """異常系テスト: 空のテーブル名"""
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={"tableName": "", "startRow": 1, "chunkSize": 500},
     )
     response_data = response.json()
@@ -217,7 +218,7 @@ def test_fetch_data_to_arrow_start_row_beyond_table(client, tables_store):
     start_row = 11
     chunk_size = 500
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={
             "tableName": table_name,
             "startRow": start_row,
@@ -234,7 +235,7 @@ def test_fetch_data_to_arrow_single_row(client, tables_store):
     start_row = 5
     chunk_size = 1
     response = client.post(
-        "/api/table/fetch-data-arrow",
+        "/api/table/fetch-data-to-arrow",
         json={
             "tableName": table_name,
             "startRow": start_row,

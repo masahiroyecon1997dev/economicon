@@ -60,7 +60,9 @@ class InputCellData(AbstractApi):
                 column_name_list,
                 self.param_names["column_names"],
             )
-            num_rows = self.tables_store.get_table(self.table_name).num_rows
+            num_rows = (
+                self.tables_store.get_table(self.table_name).num_rows - 1
+            )
             # 行インデックスの妥当性チェック
             validate_row_index(
                 self.row_index, num_rows, self.param_names["row_index"]
