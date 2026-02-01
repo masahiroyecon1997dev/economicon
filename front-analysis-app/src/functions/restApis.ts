@@ -156,3 +156,23 @@ export const importCsv = async (
   );
   return response.data;
 };
+
+export const calculateColumn = async (
+  requestBody: apiTypes.ReqCalculateColumnType,
+): Promise<apiTypes.ResCalculateColumnType> => {
+  const response = await apiClient.post<apiTypes.ResCalculateColumnType>(
+    API_ENDPOINTS.COLUMN.CALCULATE,
+    requestBody,
+  );
+  return response.data;
+};
+
+export const linearRegression = async (
+  requestBody: apiTypes.ReqLinearRegressionType,
+): Promise<apiTypes.ResLinearRegressionType> => {
+  const response = await apiClient.post<apiTypes.ResLinearRegressionType>(
+    API_ENDPOINTS.REGRESSION.LINEAR,
+    requestBody,
+  );
+  return response.data;
+};
