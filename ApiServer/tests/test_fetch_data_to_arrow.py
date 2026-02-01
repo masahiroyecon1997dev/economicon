@@ -2,7 +2,7 @@
 fetch_data_to_arrow APIのテスト
 """
 
-import base64
+import io
 
 import polars as pl
 import pyarrow as pa
@@ -45,7 +45,7 @@ def tables_store():
 
 def test_fetch_data_to_arrow_success(client, tables_store):
     """正常系テスト: Arrow形式でデータを取得"""
-    start_row = 2
+    start_row = 1
     chunk_size = 3
     response = client.post(
         "/api/table/fetch-data-arrow",
@@ -55,19 +55,11 @@ def test_fetch_data_to_arrow_success(client, tables_store):
             "chunkSize": chunk_size,
         },
     )
-    response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert response_data["code"] == "OK"
-    assert response_data["result"]["tableName"] == table_name
-    # メタ情報の確認
-    assert response_data["result"]["totalRows"] == 10
-    assert response_data["result"]["startRow"] == start_row
-    assert response_data["result"]["endRow"] == start_row + chunk_size - 1
+    assert response.headers["content-type"] == "application/octet-stream"
 
     # Arrowデータのデコードと検証
-    arrow_base64 = response_data["result"]["arrowData"]
-    arrow_bytes = base64.b64decode(arrow_base64)
-    reader = pa.ipc.open_stream(arrow_bytes)
+    reader = pa.ipc.open_file(io.BytesIO(response.content))
     arrow_table = reader.read_all()
 
     # 期待されるデータと比較
@@ -81,21 +73,22 @@ def test_fetch_data_to_arrow_success(client, tables_store):
 
 def test_fetch_data_to_arrow_default_chunk_size(client, tables_store):
     """正常系テスト: デフォルトのチャンクサイズ（500行）"""
-    start_row = 1
+    start_row = 0
     response = client.post(
         "/api/table/fetch-data-arrow",
         json={"tableName": table_name, "startRow": start_row},
     )
-    response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert response_data["code"] == "OK"
+
     # テーブルが10行しかないので、全行取得される
-    assert response_data["result"]["endRow"] == 10
+    reader = pa.ipc.open_file(io.BytesIO(response.content))
+    arrow_table = reader.read_all()
+    assert arrow_table.num_rows == 10
 
 
 def test_fetch_data_to_arrow_fetch_beyond_table(client, tables_store):
     """正常系テスト: テーブルの最後を超えて取得"""
-    start_row = 8
+    start_row = 7
     chunk_size = 500
     response = client.post(
         "/api/table/fetch-data-arrow",
@@ -105,17 +98,10 @@ def test_fetch_data_to_arrow_fetch_beyond_table(client, tables_store):
             "chunkSize": chunk_size,
         },
     )
-    response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert response_data["code"] == "OK"
-    # テーブルの最後までのみ取得される
-    assert response_data["result"]["startRow"] == 8
-    assert response_data["result"]["endRow"] == 10
 
     # Arrowデータの検証
-    arrow_base64 = response_data["result"]["arrowData"]
-    arrow_bytes = base64.b64decode(arrow_base64)
-    reader = pa.ipc.open_stream(arrow_bytes)
+    reader = pa.ipc.open_file(io.BytesIO(response.content))
     arrow_table = reader.read_all()
     assert arrow_table.num_rows == 3
 
@@ -141,7 +127,7 @@ def test_fetch_data_to_arrow_table_not_found(client, tables_store):
 
 def test_fetch_data_to_arrow_invalid_start_row_range(client, tables_store):
     """異常系テスト: 無効な行範囲 startRow"""
-    start_row = 0
+    start_row = -1
     chunk_size = 500
     response = client.post(
         "/api/table/fetch-data-arrow",
@@ -153,7 +139,7 @@ def test_fetch_data_to_arrow_invalid_start_row_range(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "startRow は1以上である必要があります。" in response_data["message"]
+    assert "startRow は0以上である必要があります。" in response_data["message"]
 
 
 def test_fetch_data_to_arrow_invalid_chunk_size_zero(client, tables_store):
@@ -255,14 +241,9 @@ def test_fetch_data_to_arrow_single_row(client, tables_store):
             "chunkSize": chunk_size,
         },
     )
-    response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert response_data["result"]["startRow"] == 5
-    assert response_data["result"]["endRow"] == 5
 
     # Arrowデータの検証
-    arrow_base64 = response_data["result"]["arrowData"]
-    arrow_bytes = base64.b64decode(arrow_base64)
-    reader = pa.ipc.open_stream(arrow_bytes)
+    reader = pa.ipc.open_file(io.BytesIO(response.content))
     arrow_table = reader.read_all()
     assert arrow_table.num_rows == 1

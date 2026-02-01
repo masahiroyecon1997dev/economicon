@@ -9,7 +9,11 @@ class CreateTableRequest(BaseModel):
     """テーブル作成リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     table_number_of_rows: int = Field(
         ..., alias="tableNumberOfRows", description="テーブルの行数", ge=1
@@ -46,13 +50,20 @@ class CreateSimulationDataTableRequest(BaseModel):
     """シミュレーションデータテーブル作成リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     table_number_of_rows: int = Field(
         ..., alias="tableNumberOfRows", description="テーブルの行数", ge=1
     )
     column_settings: List[Dict[str, Any]] = Field(
-        ..., alias="columnSettings", description="カラム設定のリスト", min_length=1
+        ...,
+        alias="columnSettings",
+        description="カラム設定のリスト",
+        min_length=1,
     )
 
     model_config = ConfigDict(populate_by_name=True)
@@ -116,10 +127,15 @@ class CreateUnionTableRequest(BaseModel):
         max_length=255,
     )
     table_names: List[str] = Field(
-        ..., alias="tableNames", description="結合するテーブル名のリスト", min_length=1
+        ...,
+        alias="tableNames",
+        description="結合するテーブル名のリスト",
+        min_length=1,
     )
     column_names: List[str] = Field(
-        default_factory=list, alias="columnNames", description="対象カラム名のリスト"
+        default_factory=list,
+        alias="columnNames",
+        description="対象カラム名のリスト",
     )
 
     model_config = ConfigDict(populate_by_name=True)
@@ -156,7 +172,11 @@ class DeleteTableRequest(BaseModel):
     """テーブル削除リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
 
     model_config = ConfigDict(populate_by_name=True)
@@ -172,8 +192,12 @@ class FetchDataToJsonRequest(BaseModel):
         min_length=1,
         max_length=255,
     )
-    start_row: int = Field(..., alias="startRow", description="開始行番号", ge=1)
-    fetch_rows: int = Field(..., alias="fetchRows", description="取得行数", ge=1)
+    start_row: int = Field(
+        ..., alias="startRow", description="開始行番号", ge=0
+    )
+    fetch_rows: int = Field(
+        ..., alias="fetchRows", description="取得行数", ge=1
+    )
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -188,7 +212,9 @@ class FetchDataToArrowRequest(BaseModel):
         min_length=1,
         max_length=255,
     )
-    start_row: int = Field(..., alias="startRow", description="開始行番号", ge=1)
+    start_row: int = Field(
+        ..., alias="startRow", description="開始行番号", ge=0
+    )
     chunk_size: int = Field(
         default=500,
         alias="chunkSize",
