@@ -68,10 +68,10 @@ export function useVirtualTableData({
   }, []);
 
   /**
-   * チャンクインデックスから開始行を計算（1-based）
+   * チャンクインデックスから開始行を計算（0-based）
    */
   const getChunkStartRow = useCallback((chunkIndex: number): number => {
-    return chunkIndex * CHUNK_SIZE + 1;
+    return chunkIndex * CHUNK_SIZE;
   }, []);
 
   /**
@@ -141,7 +141,7 @@ export function useVirtualTableData({
         const rows = arrowTableToRows(table);
 
         // 実際の終了行を計算
-        const endRow = startRow + table.numRows - 1;
+        const endRow = startRow + table.numRows;
 
         // キャッシュに追加
         setChunks((prevChunks) => {
