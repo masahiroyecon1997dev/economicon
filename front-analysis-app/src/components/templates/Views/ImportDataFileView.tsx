@@ -12,7 +12,7 @@ import { useLoadingStore } from "../../../stores/useLoadingStore";
 import { useSettingsStore } from "../../../stores/useSettingsStore";
 import { useTableInfosStore } from "../../../stores/useTableInfosStore";
 import { useTableListStore } from "../../../stores/useTableListStore";
-import type { FileType, SortDirection, SortField } from "../../../types/commonTypes";
+import type { FileType, SortDirection, SortField, TauriFile } from "../../../types/commonTypes";
 import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
 import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../../molecules/Table/FileListTable";
@@ -49,7 +49,7 @@ export const ImportDataFileView = () => {
 
       // Tauri環境の場合、Fileオブジェクトに 'path' プロパティが含まれていることが一般的
       // 型定義にはないので any キャストを使用、または @types/react-dropzoneの内容を確認
-      const filePath = (file as any).path;
+      const filePath = (file as TauriFile).path;
       if (filePath) {
 
         setSelectedFileInfo({ path: filePath, name: file.name });
@@ -197,7 +197,7 @@ export const ImportDataFileView = () => {
         setCurrentView("DataPreview");
       }
 
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
     } finally {
@@ -279,7 +279,7 @@ export const ImportDataFileView = () => {
         <RadixTabs.Content value="dragDrop" className="flex-1 outline-none">
           <div
             {...getRootProps()}
-            className={`flex h-[400px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400 bg-gray-50"
+            className={`flex h-100 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400 bg-gray-50"
               }`}
           >
             <input {...getInputProps()} />

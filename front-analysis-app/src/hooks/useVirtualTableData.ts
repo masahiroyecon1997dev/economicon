@@ -16,13 +16,13 @@ const MAX_CACHE_CHUNKS = 20; // キャッシュサイズを少し増やす
  * @param table Apache Arrowテーブル
  * @returns 行データの配列
  */
-function arrowTableToRows(table: Table): Record<string, any>[] {
-  const rows: Record<string, any>[] = [];
+function arrowTableToRows(table: Table): TalbeDataRowType[] {
+  const rows: TalbeDataRowType[] = [];
   const numRows = table.numRows;
   const schema = table.schema;
 
   for (let i = 0; i < numRows; i++) {
-    const row: Record<string, any> = {};
+    const row: TalbeDataRowType = {};
     for (const field of schema.fields) {
       const column = table.getChild(field.name);
       row[field.name] = column?.get(i);
