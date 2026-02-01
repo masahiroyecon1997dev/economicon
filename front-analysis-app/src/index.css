@@ -121,3 +121,10 @@
 body {
   font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;
 }
+
+@layer base {
+  html,
+  body {
+    @apply h-full w-full overflow-hidden overscroll-none;
+  }
+}
