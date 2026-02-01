@@ -73,7 +73,7 @@ export const getColumnList = async (
 
 export const fetchDataToJson = async (
   tableName: string,
-  startRow: number = 1,
+  startRow: number = 0,
   fetchRows: number = 100,
 ): Promise<apiTypes.ResFetchDataToJsonType> => {
   const response = await apiClient.post<apiTypes.ResFetchDataToJsonType>(
@@ -89,7 +89,7 @@ export const fetchDataToJson = async (
 
 export const fetchDataToArrow = async (
   tableName: string,
-  startRow: number = 1,
+  startRow: number = 0,
   chunk_size: number = 500,
 ): Promise<apiTypes.ResFetchDataToArrowType> => {
   const response =
