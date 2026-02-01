@@ -283,7 +283,7 @@ async def fetch_data_to_json_endpoint(
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
-@router.post("/fetch-data-arrow")
+@router.post("/fetch-data-to-arrow")
 async def fetch_data_to_arrow_endpoint(
     request: Request, body: FetchDataToArrowRequest
 ):
