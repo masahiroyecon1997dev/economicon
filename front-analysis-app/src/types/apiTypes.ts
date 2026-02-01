@@ -61,6 +61,8 @@ export type ResFetchDataToJsonType = BaseResponseType & {
   };
 };
 
+export type ResFetchDataToArrowType = Uint8Array;
+
 export type ReqCreateSimulationDataTableType = {
   tableName: string;
   tableNumberOfRows: number;

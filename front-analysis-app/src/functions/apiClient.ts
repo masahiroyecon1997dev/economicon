@@ -46,6 +46,18 @@ export const apiClient = {
 
     return { data: response };
   },
+
+  /**
+   * テーブルデータ（バイナリ）取得用
+   */
+  fetch_binary: async <T>(
+    method: string,
+    path: string,
+    body?: RequestBody,
+    query?: RequestBody,
+  ): Promise<{ data: T }> => {
+    return invokeRequest<T>(method, path, body, query);
+  },
 };
 
 /**
