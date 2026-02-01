@@ -367,6 +367,8 @@ def validate_time_column(
     time_column_param: str,
 ) -> None:
     # 時間列の検証
+    if not time_column:
+        return
     validate_existed_column_name(
         time_column,
         column_name_list,

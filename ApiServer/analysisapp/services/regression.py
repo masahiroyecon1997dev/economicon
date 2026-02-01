@@ -19,6 +19,7 @@ from ..utils.validator.statistics_validators import (
     validate_entity_id_column,
     validate_explanatory_variables,
     validate_instrumental_variables,
+    validate_regulalized_hyperparameters,
     validate_standard_error_method,
     validate_time_column,
 )
@@ -145,7 +146,7 @@ class Regression(AbstractApi):
 
             # 分析手法ごとの追加検証
             match self.type:
-                case "fe":
+                case "fe" | "re":
                     # 固定効果分析の場合、個体IDと時間列の検証
                     validate_entity_id_column(
                         self.entity_id_column,
@@ -175,20 +176,13 @@ class Regression(AbstractApi):
                         column_name_list,
                         self.param_names["endogenous_variables"],
                     )
-                case "tobit":
-                    # トビット分析の場合、打ち切り値の検証
-                    if self.left_censoring_limit is None:
-                        raise ValidationError(
-                            _(
-                                "leftCensoringLimit is required for tobit analysis"
-                            )
-                        )
-                    if self.right_censoring_limit is None:
-                        raise ValidationError(
-                            _(
-                                "rightCensoringLimit is required for tobit analysis"
-                            )
-                        )
+                case "lasso" | "ridge":
+                    # ハイパーパラメータの検証
+                    validate_regulalized_hyperparameters(
+                        self.hyper_parameters,
+                        "alpha",
+                        self.param_names["hyper_parameters"],
+                    )
 
             return None
         except ValidationError as e:
@@ -220,9 +214,9 @@ class Regression(AbstractApi):
             )
 
             # モデルのフィット
-            model_result = None
+            analysis_result = None
             match self.type:
-                case "linear":
+                case "ols":
                     model_result = self._linear_fit(
                         y_data,
                         x_data,
@@ -231,6 +225,7 @@ class Regression(AbstractApi):
                     model_result = self._apply_standard_errors(
                         model_result,
                     )
+                    analysis_result = self._format_result(model_result)
                 case "logit":
                     model_result = self._logit_fit(
                         y_data,
@@ -240,6 +235,7 @@ class Regression(AbstractApi):
                     model_result = self._apply_standard_errors(
                         model_result,
                     )
+                    analysis_result = self._format_result(model_result)
                 case "probit":
                     model_result = self._probit_fit(
                         y_data,
@@ -249,6 +245,7 @@ class Regression(AbstractApi):
                     model_result = self._apply_standard_errors(
                         model_result,
                     )
+                    analysis_result = self._format_result(model_result)
                 case "tobit":
                     model_result = self._tobit_fit(
                         self.table_info,
@@ -257,6 +254,27 @@ class Regression(AbstractApi):
                     model_result = self._apply_standard_errors(
                         model_result,
                     )
+                    analysis_result = self._tobit_format_result(model_result)
+                case "fe":
+                    model_result = self._fe_fit(
+                        y_data,
+                        x_data,
+                        missing,
+                    )
+                    model_result = self._apply_standard_errors(
+                        model_result,
+                    )
+                    analysis_result = self._fe_format_result(model_result)
+                case "re":
+                    model_result = self._re_fit(
+                        y_data,
+                        x_data,
+                        missing,
+                    )
+                    model_result = self._apply_standard_errors(
+                        model_result,
+                    )
+                    analysis_result = self._re_format_result(model_result)
                 case "iv":
                     model_result = self._iv_fit(
                         y_data,
@@ -266,6 +284,25 @@ class Regression(AbstractApi):
                     model_result = self._apply_standard_errors(
                         model_result,
                     )
+                    analysis_result = self._iv_format_result(model_result)
+                case "feiv":
+                    raise NotImplementedError(
+                        _("FEIV regression is not yet implemented")
+                    )
+                case "lasso":
+                    model_result = self._lasso_fit(
+                        y_data,
+                        x_data,
+                        missing,
+                    )
+                    analysis_result = self._format_result(model_result)
+                case "ridge":
+                    model_result = self._ridge_fit(
+                        y_data,
+                        x_data,
+                        missing,
+                    )
+                    analysis_result = self._format_result(model_result)
                 case _:
                     raise ApiError(
                         _(f"Unsupported regression type: {self.type}")
@@ -276,7 +313,7 @@ class Regression(AbstractApi):
                 name=self.name or f"{self.type.upper()} Analysis",
                 description=self.description,
                 table_name=self.table_name,
-                regression_output=model_result,
+                regression_output=analysis_result,
             )
 
             result_store = AnalysisResultStore()
