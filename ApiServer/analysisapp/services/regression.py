@@ -192,13 +192,11 @@ class Regression(AbstractApi):
         try:
             # テーブルの取得
             table_info = self.tables_store.get_table(self.table_name)
-            self.table_info = table_info.table
+            df = table_info.table
 
             # データの準備
-            y_data = self.table_info[self.dependent_variable].to_numpy()
-            x_data = self.table_info.select(
-                self.explanatory_variables
-            ).to_numpy()
+            y_data = df[self.dependent_variable].to_numpy()
+            x_data = df[self.explanatory_variables].to_numpy()
             # 定数項の追加
             if self.has_const:
                 x_data = sm.add_constant(x_data)
@@ -248,11 +246,8 @@ class Regression(AbstractApi):
                     analysis_result = self._format_result(model_result)
                 case "tobit":
                     model_result = self._tobit_fit(
-                        self.table_info,
+                        df,
                         missing,
-                    )
-                    model_result = self._apply_standard_errors(
-                        model_result,
                     )
                     analysis_result = self._tobit_format_result(model_result)
                 case "fe":
@@ -261,18 +256,12 @@ class Regression(AbstractApi):
                         x_data,
                         missing,
                     )
-                    model_result = self._apply_standard_errors(
-                        model_result,
-                    )
                     analysis_result = self._fe_format_result(model_result)
                 case "re":
                     model_result = self._re_fit(
                         y_data,
                         x_data,
                         missing,
-                    )
-                    model_result = self._apply_standard_errors(
-                        model_result,
                     )
                     analysis_result = self._re_format_result(model_result)
                 case "iv":
@@ -432,11 +421,23 @@ class Regression(AbstractApi):
         if self.has_const:
             X = sm.add_constant(X)
 
-        # 打ち切り設定
-        cens = (self.left_censoring_limit, self.right_censoring_limit)
+        cens = np.zeros(len(y))
+        if self.left_censoring_limit is not None:
+            # 実際に打ち切られている行を -1 にする
+            cens[y <= self.left_censoring_limit] = -1
+
+        if self.right_censoring_limit is not None:
+            # 実際に打ち切られている行を 1 にする
+            cens[y >= self.right_censoring_limit] = 1
 
         # Tobit モデルの作成とフィット
-        model = Tobit(y, X, cens=cens)  # type: ignore
+        model = Tobit(
+            y,
+            X,
+            cens=cens,
+            left=self.left_censoring_limit,
+            right=self.right_censoring_limit,
+        )  # type: ignore
         result = model.fit()
 
         return result
