@@ -20,7 +20,7 @@ type VirtualTableProps = {
   tableInfo: TableInfoType;
 };
 
-const OVERSCAN_COUNT = 20; // 上下に余分に描画する行数
+const OVERSCAN_COUNT = 50; // 上下に余分に描画する行数（スムーズなスクロールのために増やす）
 
 // 内部コンポーネント: CellContent
 function CellContent({ value, onEdit }: { value: TableDataCellType; onEdit: () => void }) {
@@ -164,9 +164,10 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
       const firstRow = virtualRows[0].index;
       const lastRow = virtualRows[virtualRows.length - 1].index;
 
-      // オーバースキャンを含めた範囲をプリフェッチ
-      const prefetchStart = Math.max(0, firstRow - OVERSCAN_COUNT);
-      const prefetchEnd = Math.min(totalRows - 1, lastRow + OVERSCAN_COUNT);
+      // 前後の部分に余裕を持って動的フェッチ（+30行以上のバッファを確保）
+      const PREFETCH_BUFFER = 50;
+      const prefetchStart = Math.max(0, firstRow - PREFETCH_BUFFER);
+      const prefetchEnd = Math.min(totalRows - 1, lastRow + PREFETCH_BUFFER);
 
       prefetchRange(prefetchStart, prefetchEnd);
     }

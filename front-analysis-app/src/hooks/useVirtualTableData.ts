@@ -2,12 +2,36 @@
  * 仮想スクロール用のテーブルデータ管理フック
  * チャンク単位でデータを取得・キャッシュする
  */
+import { tableFromIPC, type Table } from "apache-arrow";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { arrowTableToRows, fetchDataToArrow } from "../functions/arrowUtils";
+import { fetchDataToArrow } from "../functions/restApis";
 import type { TalbeDataRowType } from "../types/commonTypes";
 
 const CHUNK_SIZE = 500;
-const MAX_CACHE_CHUNKS = 10; // 最大キャッシュチャンク数（約5000行分）
+const MAX_CACHE_CHUNKS = 20; // キャッシュサイズを少し増やす
+
+/**
+ * Arrow Tableを行オブジェクトの配列に変換
+ *
+ * @param table Apache Arrowテーブル
+ * @returns 行データの配列
+ */
+function arrowTableToRows(table: Table): Record<string, any>[] {
+  const rows: Record<string, any>[] = [];
+  const numRows = table.numRows;
+  const schema = table.schema;
+
+  for (let i = 0; i < numRows; i++) {
+    const row: Record<string, any> = {};
+    for (const field of schema.fields) {
+      const column = table.getChild(field.name);
+      row[field.name] = column?.get(i);
+    }
+    rows.push(row);
+  }
+
+  return rows;
+}
 
 interface ChunkData {
   startRow: number;
@@ -104,14 +128,20 @@ export function useVirtualTableData({
         const startRow = getChunkStartRow(chunkIndex);
 
         // データをフェッチ
-        const { table, endRow } = await fetchDataToArrow(
+        const arrowBytes = await fetchDataToArrow(
           tableName,
           startRow,
           CHUNK_SIZE,
         );
 
+        // Arrow IPCからテーブルを復元
+        const table = tableFromIPC(arrowBytes);
+
         // Arrow TableをJavaScriptオブジェクトの配列に変換
         const rows = arrowTableToRows(table);
+
+        // 実際の終了行を計算
+        const endRow = startRow + table.numRows - 1;
 
         // キャッシュに追加
         setChunks((prevChunks) => {
