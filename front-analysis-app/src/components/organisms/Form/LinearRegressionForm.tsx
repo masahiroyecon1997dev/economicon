@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { startTransition, useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -104,11 +103,8 @@ export const LinearRegressionForm = ({
       }
     } catch (error) {
       let errorMessage = t("Error.UnexpectedError");
-      if (axios.isAxiosError(error)) {
-        const serverMessage = error.response?.data?.message;
-        if (serverMessage) {
-          errorMessage = serverMessage;
-        }
+      if (error instanceof Error) {
+        errorMessage = error.message;
       }
       await showMessageDialog(t("Error.Error"), errorMessage);
       return { success: false };
