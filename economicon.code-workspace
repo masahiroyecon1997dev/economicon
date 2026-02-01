@@ -1,0 +1,70 @@
+{
+  "folders": [
+	{
+		"name": "economicon",
+		"path": "."
+	}
+],
+  "settings": {
+    "debug.inlineValues": "on",
+    "debug.internalConsoleOptions": "openOnSessionStart",
+    "debug.openDebug": "openOnSessionStart",
+    "editor.copyWithSyntaxHighlighting": false,
+    "editor.dragAndDrop": false,
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.minimap.maxColumn": 60,
+    "editor.minimap.showSlider": "always",
+    "editor.minimap.size": "fit",
+    "editor.renderControlCharacters": true,
+    "editor.renderWhitespace": "all",
+    "editor.showFoldingControls": "always",
+    "editor.tabSize": 2,
+    "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?　、。！？「」【】『』（）",
+    "editor.wordWrap": "off",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "files.autoSave": "onFocusChange",
+    "explorer.incrementalNaming": "smart",
+    "files.associations": {
+      "*.css": "tailwindcss"
+    },
+    "files.encoding": "utf8",
+    "files.eol": "\n",
+    "files.exclude": {},
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "files.watcherExclude": {},
+    "search.exclude": {},
+    "search.showLineNumbers": true,
+    "terminal.integrated.confirmOnExit": "never",
+    "terminal.integrated.copyOnSelection": true,
+    "workbench.editor.tabSizing": "shrink",
+    "workbench.iconTheme": "material-icon-theme",
+    "workbench.startupEditor": "readme",
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[python]": {
+      "editor.tabSize": 4
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "python.testing.cwd": "${workspaceFolder}/ApiServer",
+    "python.testing.pytestArgs": [],
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.defaultInterpreterPath": "${workspaceFolder}/ApiServer/.venv/Scripts/python.exe",
+    "python.analysis.typeCheckingMode": "standard",
+    "[html]": {
+      "editor.defaultFormatter": "vscode.html-language-features"
+    },
+    "rust-analyzer.check.command": "clippy"
+  }
+}

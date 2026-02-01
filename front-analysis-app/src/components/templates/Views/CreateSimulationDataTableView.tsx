@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { Edit2, Plus, Trash2 } from "lucide-react";
 import { startTransition, useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -201,11 +200,8 @@ export const CreateSimulationDataTableView = () => {
       }
     } catch (error) {
       let errorMessage = t('CreateSimulationDataTableView.TableCreationError');
-      if (axios.isAxiosError(error)) {
-        const serverMessage = error.response?.data?.message;
-        if (serverMessage) {
-          errorMessage = serverMessage;
-        }
+      if (error instanceof Error) {
+        errorMessage = error.message;
       }
       await showMessageDialog(t('Error.Error'), errorMessage);
       return { success: false };
@@ -307,7 +303,7 @@ export const CreateSimulationDataTableView = () => {
   };
 
   const handleCancel = () => {
-    setCurrentView('SelectFile');
+    setCurrentView('ImportDataFile');
   };
 
   const getColumnSummary = (column: SimulationColumnSetting): string => {
