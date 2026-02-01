@@ -25,7 +25,11 @@ from ..services.fetch_data_to_arrow import fetch_data_to_arrow
 from ..services.fetch_data_to_json import fetch_data_to_json
 from ..services.get_table_list import get_table_list
 from ..services.rename_table import rename_table
-from ..utils import create_log_api_request, create_success_response
+from ..utils import (
+    create_log_api_request,
+    create_success_binary_response,
+    create_success_response,
+)
 
 router = APIRouter(prefix="/table", tags=["table"])
 
@@ -254,7 +258,7 @@ async def clear_tables_endpoint(request: Request):
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
-@router.post("/fetch-data")
+@router.post("/fetch-data-to-json")
 async def fetch_data_to_json_endpoint(
     request: Request, body: FetchDataToJsonRequest
 ):
@@ -304,7 +308,6 @@ async def fetch_data_to_arrow_endpoint(
 
     result = fetch_data_to_arrow(**body.model_dump())
 
-    return create_success_response(http_status.HTTP_200_OK, result)
-    return create_success_response(http_status.HTTP_200_OK, result)
-    return create_success_response(http_status.HTTP_200_OK, result)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_binary_response(
+        http_status.HTTP_200_OK, result, "application/octet-stream"
+    )

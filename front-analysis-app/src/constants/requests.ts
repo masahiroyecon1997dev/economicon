@@ -19,7 +19,8 @@ export const API_ENDPOINTS = {
     RENAME: "/table/rename",
     GET_LIST: "/table/get-list",
     CLEAR_ALL: "/table/clear-all",
-    FETCH_DATA: "/table/fetch-data",
+    FETCH_DATA_TO_JSON: "/table/fetch-data-to-json",
+    FETCH_DATA_TO_ARROW: "/table/fetch-data-to-arrow",
   },
   COLUMN: {
     ADD: "/column/add",
