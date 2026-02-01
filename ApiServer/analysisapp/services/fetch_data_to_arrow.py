@@ -109,13 +109,7 @@ class FetchDataToArrow(AbstractApi):
             table = self.tables_store.get_table(self.table_name)
             start_row = int(self.start_row)
             chunk_size = int(self.chunk_size)
-            total_rows = table.num_rows
-
-            # 実際の終了行を計算（テーブルの行数を超えない範囲）
-            end_row = min(start_row + chunk_size - 1, total_rows)
-
-            # 指定された行範囲のデータを取得
-            arrow_table = table.table[start_row - 1 : end_row]
+            arrow_table = table.table.slice(start_row, chunk_size)
 
             # Polars DataFrameをPyArrow Tableに変換
             pyarrow_table = arrow_table.to_arrow()

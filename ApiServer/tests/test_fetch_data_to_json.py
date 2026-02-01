@@ -1,16 +1,16 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from analysisapp.services.data.tables_store import TablesStore
 from main import app
 
 # test用テーブル名とデータ
 table_name = "test_table"
-test_data = pl.DataFrame({
-    "column1": [1, 2, 3, 4, 5],
-    "column2": ["a", "b", "c", "d", "e"]
-})
+test_data = pl.DataFrame(
+    {"column1": [1, 2, 3, 4, 5], "column2": ["a", "b", "c", "d", "e"]}
+)
 
 
 @pytest.fixture
@@ -34,24 +34,24 @@ def tables_store():
 
 def test_fetch_data_to_json_success(client, tables_store):
     # 正常系テスト: JSONデータを取得
-    start_row = 2
+    start_row = 1
     fetch_rows = 2
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json={
-            'tableName': table_name,
-            'startRow': start_row,
-            'fetchRows': fetch_rows
-        }
+            "tableName": table_name,
+            "startRow": start_row,
+            "fetchRows": fetch_rows,
+        },
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert response_data['code'] == 'OK'
+    assert response_data["code"] == "OK"
     assert response_data["result"]["tableName"] == table_name
     # メタ情報の確認
     assert response_data["result"]["totalRows"] == 5
     assert response_data["result"]["startRow"] == start_row
-    assert response_data["result"]["endRow"] == start_row + fetch_rows - 1
+    assert response_data["result"]["endRow"] == start_row + fetch_rows
     # データの内容を確認
     data = response_data["result"]["data"]
     expected_data = test_data[1:3].write_json()
@@ -64,34 +64,34 @@ def test_fetch_data_to_json_table_not_found(client, tables_store):
     start_row = 1
     fetch_rows = 3
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json={
-            'tableName': not_existent_table,
-            'startRow': start_row,
-            'fetchRows': fetch_rows
-        }
+            "tableName": not_existent_table,
+            "startRow": start_row,
+            "fetchRows": fetch_rows,
+        },
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     message = "tableName 'non_existent_table'は存在しません。"
-    assert message == response_data['message']
+    assert message == response_data["message"]
 
 
 def test_fetch_data_to_json_invalid_start_row_range(client, tables_store):
     # 異常系テスト: 無効な行範囲 startRow
-    start_row = 0
+    start_row = -1
     fetch_rows = 4
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json={
-            'tableName': table_name,
-            'startRow': start_row,
-            'fetchRows': fetch_rows
-        }
+            "tableName": table_name,
+            "startRow": start_row,
+            "fetchRows": fetch_rows,
+        },
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "startRow は1以上である必要があります。" in response_data['message']
+    assert "startRow は0以上である必要があります。" in response_data["message"]
 
 
 def test_fetch_data_to_json_invalid_fetch_rows(client, tables_store):
@@ -99,16 +99,18 @@ def test_fetch_data_to_json_invalid_fetch_rows(client, tables_store):
     start_row = 1
     fetch_rows = 0
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json={
-            'tableName': table_name,
-            'startRow': start_row,
-            'fetchRows': fetch_rows
-        }
+            "tableName": table_name,
+            "startRow": start_row,
+            "fetchRows": fetch_rows,
+        },
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "fetchRows は1以上である必要があります。" == response_data['message']
+    assert (
+        "fetchRows は1以上である必要があります。" == response_data["message"]
+    )
 
 
 def test_fetch_data_to_json_missing_table_name(client, tables_store):
@@ -117,16 +119,19 @@ def test_fetch_data_to_json_missing_table_name(client, tables_store):
     start_row = 1
     fetch_rows = 6
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json={
-            'tableName': not_table_name,
-            'startRow': start_row,
-            'fetchRows': fetch_rows
-        }
+            "tableName": not_table_name,
+            "startRow": start_row,
+            "fetchRows": fetch_rows,
+        },
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "tableName は1文字以上である必要があります。" == response_data['message']
+    assert (
+        "tableName は1文字以上である必要があります。"
+        == response_data["message"]
+    )
 
 
 def test_fetch_data_to_json_missing_start_row(client, tables_store):
@@ -134,12 +139,12 @@ def test_fetch_data_to_json_missing_start_row(client, tables_store):
     start_row = ""
     fetch_rows = 6
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json={
-            'tableName': table_name,
-            'startRow': start_row,
-            'fetchRows': fetch_rows
-        }
+            "tableName": table_name,
+            "startRow": start_row,
+            "fetchRows": fetch_rows,
+        },
     )
     # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -151,12 +156,12 @@ def test_fetch_data_to_json_missing_fetch_rows(client, tables_store):
     start_row = 1
     fetch_rows = ""
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json={
-            'tableName': table_name,
-            'startRow': start_row,
-            'fetchRows': fetch_rows
-        }
+            "tableName": table_name,
+            "startRow": start_row,
+            "fetchRows": fetch_rows,
+        },
     )
     # response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -165,19 +170,19 @@ def test_fetch_data_to_json_missing_fetch_rows(client, tables_store):
 
 def test_fetch_data_to_json_fetch_beyond_table(client, tables_store):
     # 正常系テスト: テーブルの行数を超える取得行数
-    start_row = 3
+    start_row = 2
     fetch_rows = 10  # テーブルは5行なので3行目から最後までの3行を取得
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json={
-            'tableName': table_name,
-            'startRow': start_row,
-            'fetchRows': fetch_rows
-        }
+            "tableName": table_name,
+            "startRow": start_row,
+            "fetchRows": fetch_rows,
+        },
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert response_data['code'] == 'OK'
+    assert response_data["code"] == "OK"
     # メタ情報の確認
     assert response_data["result"]["totalRows"] == 5
     assert response_data["result"]["startRow"] == start_row
@@ -195,108 +200,87 @@ def test_fetch_data_to_json_pydantic_empty_table_name(client, tables_store):
     """
     tableNameが空文字列の場合はバリデーションエラーになる
     """
-    payload = {
-        'tableName': '',
-        'startRow': 1,
-        'fetchRows': 3
-    }
+    payload = {"tableName": "", "startRow": 1, "fetchRows": 3}
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert 'NG' == response_data['code']
-    assert 'tableName' in response_data['message']
+    assert "NG" == response_data["code"]
+    assert "tableName" in response_data["message"]
 
 
 def test_fetch_data_to_json_pydantic_negative_start_row(client, tables_store):
     """
     startRowが負の場合はバリデーションエラーになる
     """
-    payload = {
-        'tableName': table_name,
-        'startRow': -1,
-        'fetchRows': 3
-    }
+    payload = {"tableName": table_name, "startRow": -1, "fetchRows": 3}
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert 'NG' == response_data['code']
-    assert 'startRow' in response_data['message']
+    assert "NG" == response_data["code"]
+    assert "startRow" in response_data["message"]
 
 
 def test_fetch_data_to_json_pydantic_negative_fetch_rows(client, tables_store):
     """
     fetchRowsが負の場合はバリデーションエラーになる
     """
-    payload = {
-        'tableName': table_name,
-        'startRow': 1,
-        'fetchRows': -1
-    }
+    payload = {"tableName": table_name, "startRow": 1, "fetchRows": -1}
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert 'NG' == response_data['code']
-    assert 'fetchRows' in response_data['message']
+    assert "NG" == response_data["code"]
+    assert "fetchRows" in response_data["message"]
 
 
 def test_fetch_data_to_json_pydantic_missing_table_name(client, tables_store):
     """
     tableNameが欠損している場合はバリデーションエラーになる
     """
-    payload = {
-        'startRow': 1,
-        'fetchRows': 3
-    }
+    payload = {"startRow": 1, "fetchRows": 3}
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert 'NG' == response_data['code']
-    assert 'tableName' in response_data['message']
+    assert "NG" == response_data["code"]
+    assert "tableName" in response_data["message"]
 
 
 def test_fetch_data_to_json_pydantic_missing_start_row(client, tables_store):
     """
     startRowが欠損している場合はバリデーションエラーになる
     """
-    payload = {
-        'tableName': table_name,
-        'fetchRows': 3
-    }
+    payload = {"tableName": table_name, "fetchRows": 3}
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert 'NG' == response_data['code']
-    assert 'startRow' in response_data['message']
+    assert "NG" == response_data["code"]
+    assert "startRow" in response_data["message"]
 
 
 def test_fetch_data_to_json_pydantic_missing_fetch_rows(client, tables_store):
     """
     fetchRowsが欠損している場合はバリデーションエラーになる
     """
-    payload = {
-        'tableName': table_name,
-        'startRow': 1
-    }
+    payload = {"tableName": table_name, "startRow": 1}
     response = client.post(
-        '/api/table/fetch-data',
+        "/api/table/fetch-data-to-json",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert 'NG' == response_data['code']
-    assert 'fetchRows' in response_data['message']
+    assert "NG" == response_data["code"]
+    assert "fetchRows" in response_data["message"]
