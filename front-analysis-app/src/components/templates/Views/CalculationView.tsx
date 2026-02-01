@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
 import { startTransition, useActionState, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -87,11 +86,8 @@ export const CalculationView = () => {
       }
     } catch (error) {
       let errorMessage = t("Error.UnexpectedError");
-      if (axios.isAxiosError(error)) {
-        const serverMessage = error.response?.data?.message;
-        if (serverMessage) {
-          errorMessage = serverMessage;
-        }
+      if (error instanceof Error) {
+        errorMessage = error.message;
       }
       await showMessageDialog(t("Error.Error"), errorMessage);
       return { success: false };
