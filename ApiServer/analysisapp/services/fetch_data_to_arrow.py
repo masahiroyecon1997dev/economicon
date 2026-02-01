@@ -75,7 +75,9 @@ class FetchDataToArrow(AbstractApi):
                 table_name_list,
                 self.param_names["table_name"],
             )
-            num_rows = self.tables_store.get_table(self.table_name).num_rows
+            num_rows = (
+                self.tables_store.get_table(self.table_name).num_rows - 1
+            )
             # 開始行番号の妥当性チェック
             validate_row_index(
                 self.start_row, num_rows, self.param_names["start_row"]
