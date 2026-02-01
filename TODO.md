@@ -47,6 +47,8 @@ Economicon
 **テスト**
 
 - test_sort_empty_columns（空のソート列指定）のエラーメッセージのテストを行う
-- from .django*compat import gettext as *を介さないように修正
+- 分析結果の妥当性検証を行う（回帰分析、FE、IV等に対して）。
+  1. 同じ分析方法（statsmodels, linearmodels）で10回シミュレーションデータを生成して値がAPIから来たものと変わらないことを確認
+  2. Rとのパラメータ比較（Rでの分析結果との突合せ、wooldridge等のデータを使うもの3つとシミュレーションデータによるもの2つ）
 
 ## その他

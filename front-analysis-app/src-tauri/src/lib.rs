@@ -1,6 +1,6 @@
 use tauri::State;
 use reqwest::Client;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use std::time::Duration;
 
 // HTTPクライアントを保持するState

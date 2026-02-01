@@ -92,17 +92,17 @@ export const fetchDataToArrow = async (
   startRow: number = 0,
   chunk_size: number = 500,
 ): Promise<apiTypes.ResFetchDataToArrowType> => {
-  const response =
-    await apiClient.fetch_binary<apiTypes.ResFetchDataToArrowType>(
-      "POST",
-      API_ENDPOINTS.TABLE.FETCH_DATA_TO_ARROW,
-      {
-        tableName: tableName,
-        startRow: startRow,
-        chunkSize: chunk_size,
-      },
-    );
-  return response.data;
+  const response = await apiClient.fetch_binary<number[]>(
+    "POST",
+    API_ENDPOINTS.TABLE.FETCH_DATA_TO_ARROW,
+    {
+      tableName: tableName,
+      startRow: startRow,
+      chunkSize: chunk_size,
+    },
+  );
+  // Tauriからのバイナリ配列(number[])をUint8Arrayに変換
+  return new Uint8Array(response.data);
 };
 
 export const createSimulationDataTable = async (
