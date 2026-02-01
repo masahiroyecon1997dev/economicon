@@ -185,7 +185,7 @@ export function useVirtualTableData({
       }
 
       // チャンク内でのインデックスを計算（0-based）
-      const indexInChunk = rowIndex - (chunk.startRow - 1);
+      const indexInChunk = rowIndex - chunk.startRow;
 
       return chunk.data[indexInChunk];
     },
