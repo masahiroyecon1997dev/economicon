@@ -1,24 +1,32 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..schemas import (AddColumnRequest, AddDummyColumnRequest,
-                       AddLagLeadColumnRequest, AddSimulationColumnRequest,
-                       CalculateColumnRequest, DeleteColumnRequest,
-                       DuplicateColumnRequest, GetColumnListRequest,
-                       RenameColumnRequest, SortColumnsRequest,
-                       TransformColumnRequest)
+from ..schemas import (
+    AddColumnRequest,
+    AddDummyColumnRequest,
+    AddLagLeadColumnRequest,
+    AddSimulationColumnRequest,
+    CalculateColumnRequest,
+    DeleteColumnRequest,
+    DuplicateColumnRequest,
+    GetColumnListRequest,
+    RenameColumnRequest,
+    SortColumnsRequest,
+    TransformColumnRequest,
+)
+
 # 各ビジネスロジック（既存のpython_apis）
-from ..services.add_column import add_column
-from ..services.add_dummy_column import add_dummy_column
-from ..services.add_lag_lead_column import add_lag_lead_column
-from ..services.add_simulation_column import add_simulation_column
-from ..services.calculate_column import calculate_column
-from ..services.delete_column import delete_column
-from ..services.duplicate_column import duplicate_column
-from ..services.get_column_list import get_column_list
-from ..services.rename_column import rename_column
-from ..services.sort_columns import sort_columns
-from ..services.transform_column import transform_column
+from ..services.columns.add_column import add_column
+from ..services.columns.add_dummy_column import add_dummy_column
+from ..services.columns.add_lag_lead_column import add_lag_lead_column
+from ..services.columns.add_simulation_column import add_simulation_column
+from ..services.columns.calculate_column import calculate_column
+from ..services.columns.delete_column import delete_column
+from ..services.columns.duplicate_column import duplicate_column
+from ..services.columns.get_column_list import get_column_list
+from ..services.columns.rename_column import rename_column
+from ..services.columns.sort_columns import sort_columns
+from ..services.columns.transform_column import transform_column
 from ..utils import create_log_api_request, create_success_response
 
 # ルーターの定義（ここで共通のprefixとtagをつけておくと便利！）
@@ -44,18 +52,14 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行（既存のpython_apisをそのまま使用）
-    result = add_column(
-        **body.model_dump()
-    )
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    result = add_column(**body.model_dump())
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/add-dummy")
-async def add_dummy_column_endpoint(request: Request,
-                                    body: AddDummyColumnRequest):
+async def add_dummy_column_endpoint(
+    request: Request, body: AddDummyColumnRequest
+):
     """ダミー変数カラムを追加するエンドポイント
 
     Parameters
@@ -73,13 +77,8 @@ async def add_dummy_column_endpoint(request: Request,
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    result = add_dummy_column(
-        **body.model_dump()
-    )
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    result = add_dummy_column(**body.model_dump())
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/delete")
@@ -99,13 +98,8 @@ async def delete_column_endpoint(request: Request, body: DeleteColumnRequest):
         処理結果
     """
     create_log_api_request(request)
-    result = delete_column(
-        **body.model_dump()
-    )
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    result = delete_column(**body.model_dump())
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/rename")
@@ -129,18 +123,14 @@ async def rename_column_endpoint(request: Request, body: RenameColumnRequest):
         処理結果
     """
     create_log_api_request(request)
-    result = rename_column(
-        **body.model_dump()
-    )
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    result = rename_column(**body.model_dump())
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/add-lag-lead")
-async def add_lag_lead_column_endpoint(request: Request,
-                                       body: AddLagLeadColumnRequest):
+async def add_lag_lead_column_endpoint(
+    request: Request, body: AddLagLeadColumnRequest
+):
     """ラグ・リードカラムを追加するエンドポイント
 
     Parameters
@@ -159,18 +149,14 @@ async def add_lag_lead_column_endpoint(request: Request,
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = add_lag_lead_column(
-        **body.model_dump()
-    )
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    result = add_lag_lead_column(**body.model_dump())
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/add-simulation")
-async def add_simulation_column_endpoint(request: Request,
-                                         body: AddSimulationColumnRequest):
+async def add_simulation_column_endpoint(
+    request: Request, body: AddSimulationColumnRequest
+):
     """シミュレーションカラムを追加するエンドポイント
 
     Parameters
@@ -188,18 +174,14 @@ async def add_simulation_column_endpoint(request: Request,
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    result = add_simulation_column(
-        **body.model_dump()
-    )
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    result = add_simulation_column(**body.model_dump())
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/calculate")
-async def calculate_column_endpoint(request: Request,
-                                    body: CalculateColumnRequest):
+async def calculate_column_endpoint(
+    request: Request, body: CalculateColumnRequest
+):
     """カラム計算を実行するエンドポイント
 
     Parameters
@@ -218,19 +200,15 @@ async def calculate_column_endpoint(request: Request,
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = calculate_column(
-        **body.model_dump()
-    )
+    result = calculate_column(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/duplicate")
-async def duplicate_column_endpoint(request: Request,
-                                    body: DuplicateColumnRequest):
+async def duplicate_column_endpoint(
+    request: Request, body: DuplicateColumnRequest
+):
     """カラムを複製するエンドポイント
 
     Parameters
@@ -248,18 +226,14 @@ async def duplicate_column_endpoint(request: Request,
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    result = duplicate_column(
-        **body.model_dump()
-    )
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    result = duplicate_column(**body.model_dump())
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/transform")
-async def transform_column_endpoint(request: Request,
-                                    body: TransformColumnRequest):
+async def transform_column_endpoint(
+    request: Request, body: TransformColumnRequest
+):
     """
     列の変換処理エンドポイント
 
@@ -278,18 +252,14 @@ async def transform_column_endpoint(request: Request,
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    result = transform_column(
-        **body.model_dump()
-    )
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    result = transform_column(**body.model_dump())
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/get-list")
-async def get_column_list_endpoint(request: Request,
-                                   body: GetColumnListRequest):
+async def get_column_list_endpoint(
+    request: Request, body: GetColumnListRequest
+):
     """カラムリストを取得するエンドポイント
 
     Parameters
@@ -308,10 +278,7 @@ async def get_column_list_endpoint(request: Request,
 
     result = get_column_list(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/sort")
@@ -335,11 +302,6 @@ async def sort_columns_endpoint(request: Request, body: SortColumnsRequest):
     """
     create_log_api_request(request)
 
-    result = sort_columns(
-        **body.model_dump()
-    )
+    result = sort_columns(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
