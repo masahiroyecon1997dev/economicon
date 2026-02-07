@@ -12,19 +12,19 @@ from ..schemas import (
     FetchDataToJsonRequest,
     RenameTableRequest,
 )
-from ..services.clear_tables import clear_tables
-from ..services.create_join_table import create_join_table
-from ..services.create_simulation_data_table import (
+from ..services.tables.clear_tables import clear_tables
+from ..services.tables.create_join_table import create_join_table
+from ..services.tables.create_simulation_data_table import (
     create_simulation_data_table,
 )
-from ..services.create_table import create_table
-from ..services.create_union_table import create_union_table
-from ..services.delete_table import delete_table
-from ..services.duplicate_table import duplicate_table
-from ..services.fetch_data_to_arrow import fetch_data_to_arrow
-from ..services.fetch_data_to_json import fetch_data_to_json
-from ..services.get_table_list import get_table_list
-from ..services.rename_table import rename_table
+from ..services.tables.create_table import create_table
+from ..services.tables.create_union_table import create_union_table
+from ..services.tables.delete_table import delete_table
+from ..services.tables.duplicate_table import duplicate_table
+from ..services.tables.fetch_data_to_arrow import fetch_data_to_arrow
+from ..services.tables.fetch_data_to_json import fetch_data_to_json
+from ..services.tables.get_table_list import get_table_list
+from ..services.tables.rename_table import rename_table
 from ..utils import (
     create_log_api_request,
     create_success_binary_response,
