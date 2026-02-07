@@ -56,6 +56,7 @@ Economicon
 **フォーム**
 
 - zodを有効活用してできる限りこれでバリデーションを行いたい。独自実装のバリデーションが可能かどうかも調べる。
+- react hook formからTanstack formに乗り換えてみては？
 
 ## REST API, Python API
 
