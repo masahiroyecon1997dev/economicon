@@ -9,11 +9,11 @@ from py4etrics.tobit import Tobit
 from sklearn.linear_model import Lasso, Ridge
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
-from ..i18n.translation import gettext as _
-from ..services.data.analysis_result import AnalysisResult
-from ..services.data.analysis_result_store import AnalysisResultStore
-from ..utils.validator.common_validators import ValidationError
-from ..utils.validator.statistics_validators import (
+from ...i18n.translation import gettext as _
+from ..data.analysis_result import AnalysisResult
+from ..data.analysis_result_store import AnalysisResultStore
+from ...utils.validator.common_validators import ValidationError
+from ...utils.validator.statistics_validators import (
     validate_dependent_variable,
     validate_endogenous_variables,
     validate_entity_id_column,
@@ -23,11 +23,11 @@ from ..utils.validator.statistics_validators import (
     validate_standard_error_method,
     validate_time_column,
 )
-from ..utils.validator.tables_store_validator import (
+from ...utils.validator.tables_store_validator import (
     validate_existed_table_name,
 )
-from .abstract_api import AbstractApi, ApiError
-from .data.tables_store import TablesStore
+from ..abstract_api import AbstractApi, ApiError
+from ..data.tables_store import TablesStore
 
 
 class Regression(AbstractApi):

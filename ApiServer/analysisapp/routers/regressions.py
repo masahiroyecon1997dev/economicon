@@ -9,7 +9,7 @@ from fastapi import status as http_status
 
 from ..schemas.regressions import RegressionRequest
 from ..services.abstract_api import ApiError
-from ..services.regression import regression
+from ..services.regressions.regression import regression
 from ..services.regressions.result import (
     clear_all_analysis_results,
     delete_analysis_result,
