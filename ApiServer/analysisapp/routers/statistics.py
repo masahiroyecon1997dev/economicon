@@ -2,16 +2,17 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..schemas import ConfidenceIntervalRequest, DescriptiveStatisticsRequest
-from ..services.confidence_interval import confidence_interval
-from ..services.descriptive_statistics import descriptive_statistics
+from ..services.statistics.confidence_interval import confidence_interval
+from ..services.statistics.descriptive_statistics import descriptive_statistics
 from ..utils import create_log_api_request, create_success_response
 
 router = APIRouter(prefix="/statistics", tags=["statistics"])
 
 
 @router.post("/confidence-interval")
-async def confidence_interval_endpoint(request: Request,
-                                       body: ConfidenceIntervalRequest):
+async def confidence_interval_endpoint(
+    request: Request, body: ConfidenceIntervalRequest
+):
     """信頼区間計算を行うエンドポイント
 
     Parameters
@@ -32,15 +33,13 @@ async def confidence_interval_endpoint(request: Request,
     # ビジネスロジックの実行
     result = confidence_interval(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.post("/descriptive")
-async def descriptive_statistics_endpoint(request: Request,
-                                          body: DescriptiveStatisticsRequest):
+async def descriptive_statistics_endpoint(
+    request: Request, body: DescriptiveStatisticsRequest
+):
     """記述統計を計算するエンドポイント
 
     Parameters
@@ -59,7 +58,4 @@ async def descriptive_statistics_endpoint(request: Request,
 
     result = descriptive_statistics(**body.model_dump())
 
-    return create_success_response(
-        http_status.HTTP_200_OK,
-        result
-    )
+    return create_success_response(http_status.HTTP_200_OK, result)

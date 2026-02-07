@@ -1,0 +1,75 @@
+from typing import Dict
+from ...i18n.translation import gettext as _
+from ...utils.validator.common_validators import ValidationError
+from ...utils.validator.tables_store_validator import (
+    validate_existed_table_name,
+    validate_new_table_name,
+)
+from ..data.tables_store import TablesStore
+from ..abstract_api import AbstractApi, ApiError
+
+
+class RenameTable(AbstractApi):
+    """
+    テーブル名変更APIのPythonロジック
+
+    既存のテーブルの名前を新しい名前に変更します。
+    同じテーブル名が既に存在する場合はエラーとなります。
+    """
+
+    def __init__(self, old_table_name: str, new_table_name: str):
+        self.tables_store = TablesStore()
+        # 変更前のテーブル名
+        self.old_table_name = old_table_name
+        # 変更後のテーブル名
+        self.new_table_name = new_table_name
+        # パラメータ名のマッピング
+        self.param_names = {
+            "table_name": "oldTableName",
+            "new_table_name": "newTableName",
+        }
+
+    def validate(self):
+        # 入力値のバリデーション
+        try:
+            table_name_list = self.tables_store.get_table_name_list()
+            # 変更前のテーブル名の存在チェック
+            validate_existed_table_name(
+                self.old_table_name,
+                table_name_list,
+                self.param_names["table_name"],
+            )
+            # 変更後のテーブル名の重複チェック
+            validate_new_table_name(
+                self.new_table_name,
+                table_name_list,
+                self.param_names["new_table_name"],
+            )
+            return None
+        except ValidationError as e:
+            return e
+
+    def execute(self):
+        # テーブル名の変更処理
+        try:
+            # 変更前のテーブル情報を取得し、削除
+            renamed_table_name = self.tables_store.rename_table(
+                self.old_table_name, self.new_table_name
+            )
+            # 結果を返す
+            result = {"tableName": renamed_table_name}
+            return result
+        except Exception as e:
+            message = _(
+                "An unexpected error occurred during table rename processing"
+            )
+            raise ApiError(message) from e
+
+
+def rename_table(old_table_name: str, new_table_name: str) -> Dict:
+    api = RenameTable(old_table_name, new_table_name)
+    validation_error = api.validate()
+    if validation_error:
+        raise ValueError(validation_error.message)
+    result = api.execute()
+    return result
