@@ -7,12 +7,12 @@ import io
 import pyarrow as pa
 
 from ...i18n.translation import gettext as _
-from ...utils.validators.common_validators import (
+from ...utils.validators.common import (
     ValidationError,
     validate_integer_positive,
     validate_required,
 )
-from ...utils.validators.tables_store_validator import (
+from ...utils.validators.tables_store import (
     validate_existed_table_name,
     validate_row_index,
 )

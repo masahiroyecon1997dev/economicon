@@ -12,8 +12,8 @@ from statsmodels.regression.linear_model import RegressionResultsWrapper
 from ...i18n.translation import gettext as _
 from ..data.analysis_result import AnalysisResult
 from ..data.analysis_result_store import AnalysisResultStore
-from ...utils.validators.common_validators import ValidationError
-from ...utils.validators.statistics_validators import (
+from ...utils.validators.common import ValidationError
+from ...utils.validators.statistics import (
     validate_dependent_variable,
     validate_endogenous_variables,
     validate_entity_id_column,
@@ -23,7 +23,7 @@ from ...utils.validators.statistics_validators import (
     validate_standard_error_method,
     validate_time_column,
 )
-from ...utils.validators.tables_store_validator import (
+from ...utils.validators.tables_store import (
     validate_existed_table_name,
 )
 from ..abstract_api import AbstractApi, ApiError

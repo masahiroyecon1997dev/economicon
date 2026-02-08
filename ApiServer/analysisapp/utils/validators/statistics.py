@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 import polars as pl
 
 from ...i18n.translation import gettext as _
-from .common_validators import (
+from .common import (
     ValidationError,
     validate_candidates,
     validate_column_is_numeric,
@@ -14,8 +14,8 @@ from .common_validators import (
     validate_number,
     validate_required,
 )
-from .tables_store_validator import validate_existed_column_name
-from .validation_config import SUPPORTED_DISTRIBUTIONS
+from .tables_store import validate_existed_column_name
+from .config.base import SUPPORTED_DISTRIBUTIONS
 
 
 def validate_distribution_type(

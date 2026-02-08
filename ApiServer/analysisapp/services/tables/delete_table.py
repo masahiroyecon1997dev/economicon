@@ -3,8 +3,8 @@ from typing import Dict
 from ...i18n.translation import gettext as _
 
 from ..data.tables_store import TablesStore
-from ...utils.validators.common_validators import ValidationError
-from ...utils.validators.tables_store_validator import (
+from ...utils.validators.common import ValidationError
+from ...utils.validators.tables_store import (
     validate_existed_table_name,
 )
 from ..abstract_api import AbstractApi, ApiError
