@@ -4,9 +4,10 @@
 AnalysisResultStoreへのアクセスをラップし、
 統一されたエラーハンドリングとバリデーションを提供します。
 """
+
 from typing import Dict
 
-from ...utils.validator.common_validators import ValidationError
+from ...utils.validators.common_validators import ValidationError
 from ..abstract_api import AbstractApi, ApiError
 from ..data.analysis_result_store import AnalysisResultStore
 from ...i18n.translation import gettext as _
@@ -36,11 +37,13 @@ class GetAllAnalysisResults(AbstractApi):
         """
         try:
             summaries = self.result_store.get_all_summaries()
-            return {'results': summaries}
+            return {"results": summaries}
         except Exception as e:
             raise ApiError(
-                _("An unexpected error occurred during getting "
-                  "analysis results")
+                _(
+                    "An unexpected error occurred during getting "
+                    "analysis results"
+                )
             ) from e
 
 
@@ -52,9 +55,7 @@ class GetAnalysisResult(AbstractApi):
     def __init__(self, result_id: str):
         self.result_store = AnalysisResultStore()
         self.result_id = result_id
-        self.param_names = {
-            'result_id': 'resultId'
-        }
+        self.param_names = {"result_id": "resultId"}
 
     def validate(self):
         """
@@ -63,9 +64,7 @@ class GetAnalysisResult(AbstractApi):
         結果IDが空でないことを確認
         """
         if not self.result_id or not self.result_id.strip():
-            raise ValidationError(
-                _("Result ID is required")
-            )
+            raise ValidationError(_("Result ID is required"))
         return None
 
     def execute(self):
@@ -91,8 +90,10 @@ class GetAnalysisResult(AbstractApi):
             raise
         except Exception as e:
             raise ApiError(
-                _("An unexpected error occurred during getting "
-                  "analysis result")
+                _(
+                    "An unexpected error occurred during getting "
+                    "analysis result"
+                )
             ) from e
 
 
@@ -104,9 +105,7 @@ class DeleteAnalysisResult(AbstractApi):
     def __init__(self, result_id: str):
         self.result_store = AnalysisResultStore()
         self.result_id = result_id
-        self.param_names = {
-            'result_id': 'resultId'
-        }
+        self.param_names = {"result_id": "resultId"}
 
     def validate(self):
         """
@@ -115,9 +114,7 @@ class DeleteAnalysisResult(AbstractApi):
         結果IDが空でないことを確認
         """
         if not self.result_id or not self.result_id.strip():
-            raise ValidationError(
-                _("Result ID is required")
-            )
+            raise ValidationError(_("Result ID is required"))
         return None
 
     def execute(self):
@@ -138,13 +135,15 @@ class DeleteAnalysisResult(AbstractApi):
         """
         try:
             deleted_id = self.result_store.delete_result(self.result_id)
-            return {'deletedResultId': deleted_id}
+            return {"deletedResultId": deleted_id}
         except KeyError:
             raise
         except Exception as e:
             raise ApiError(
-                _("An unexpected error occurred during deleting "
-                  "analysis result")
+                _(
+                    "An unexpected error occurred during deleting "
+                    "analysis result"
+                )
             ) from e
 
 
@@ -172,11 +171,13 @@ class ClearAllAnalysisResults(AbstractApi):
         """
         try:
             self.result_store.clear_all()
-            return {'message': 'All analysis results cleared'}
+            return {"message": "All analysis results cleared"}
         except Exception as e:
             raise ApiError(
-                _("An unexpected error occurred during clearing "
-                  "analysis results")
+                _(
+                    "An unexpected error occurred during clearing "
+                    "analysis results"
+                )
             ) from e
 
 

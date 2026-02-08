@@ -1,11 +1,11 @@
 from ...i18n.translation import gettext as _
 from typing import Dict, List
-from ...utils.validator.common_validators import ValidationError
-from ...utils.validator.tables_store_validator import (
+from ...utils.validators.common_validators import ValidationError
+from ...utils.validators.tables_store_validator import (
     validate_existed_table_name,
     validate_existed_column_name,
 )
-from ...utils.validator.common_validators import (
+from ...utils.validators.common_validators import (
     validate_required_list,
     validate_item_in_dict,
     validate_list_length,

@@ -2,11 +2,11 @@ from typing import Dict
 
 import polars as pl
 
-from ...utils.validator.common_validators import (
+from ...utils.validators.common_validators import (
     ValidationError,
     validate_required,
 )
-from ...utils.validator.tables_store_validator import (
+from ...utils.validators.tables_store_validator import (
     validate_existed_column_name,
     validate_existed_table_name,
     validate_new_column_name,

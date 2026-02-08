@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
-from ..utils.validator.common_validators import ValidationError
+from ..utils.validators.common_validators import ValidationError
 
 
 class AbstractApi(ABC):

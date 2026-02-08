@@ -3,16 +3,16 @@ from typing import Any, Dict, List
 import polars as pl
 
 from ...i18n.translation import gettext as _
-from ...utils.algorithm.simulation import generate_simulation_data
-from ...utils.validator.common_validators import (
+from ...utils.algorithms.simulation import generate_simulation_data
+from ...utils.validators.common_validators import (
     ValidationError,
     validate_integer,
 )
-from ...utils.validator.statistics_validators import (
+from ...utils.validators.statistics_validators import (
     validate_distribution_params,
     validate_distribution_type,
 )
-from ...utils.validator.tables_store_validator import (
+from ...utils.validators.tables_store_validator import (
     validate_new_column_name,
     validate_new_table_name,
 )
