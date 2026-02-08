@@ -324,16 +324,20 @@ class Regression:
                     )
                 case "lasso":
                     alpha = self.hyper_parameters.get("alpha", 1.0)
-                    model_result = fit_lasso(
+                    model_result, coef_scaled = fit_lasso(
                         y_data, x_data, self.has_const, alpha, missing
                     )
-                    analysis_result = self._format_result(model_result)
+                    analysis_result = self._format_regularized_result(
+                        model_result, coef_scaled
+                    )
                 case "ridge":
                     alpha = self.hyper_parameters.get("alpha", 1.0)
-                    model_result = fit_ridge(
+                    model_result, coef_scaled = fit_ridge(
                         y_data, x_data, self.has_const, alpha, missing
                     )
-                    analysis_result = self._format_result(model_result)
+                    analysis_result = self._format_regularized_result(
+                        model_result, coef_scaled
+                    )
                 case _:
                     raise ApiError(
                         _(f"Unsupported regression type: {self.type}")
@@ -415,6 +419,37 @@ class Regression:
             "parameters": params_info,
             "modelStatistics": model_stats,
         }
+
+        return result
+
+    def _format_regularized_result(
+        self, model_result: Any, coef_scaled: Any
+    ) -> Dict:
+        """
+        正則化回帰（Lasso/Ridge）の結果をJSON形式にフォーマット
+
+        元のスケールの係数に加えて、標準化後の係数も返す。
+        標準化後の係数は変数間の相対的重要度の比較に使用できる。
+
+        Args:
+            model_result: statsmodels の回帰結果オブジェクト
+            coef_scaled: 標準化後の係数配列
+
+        Returns:
+            フォーマット済みの結果辞書
+        """
+        # 基本的なフォーマットを取得
+        result = self._format_result(model_result)
+
+        # 各パラメータに標準化後の係数を追加
+        for i, param in enumerate(result["parameters"]):
+            if param["variable"] == "const":
+                # 定数項は標準化しないのでNone
+                param["coefficientScaled"] = None
+            else:
+                # 定数項を除いたインデックス
+                idx = i - 1 if self.has_const else i
+                param["coefficientScaled"] = float(coef_scaled[idx])
 
         return result
 
