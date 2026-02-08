@@ -102,29 +102,3 @@ class ExportCsvByPath(AbstractApi):
                 "An unexpected error occurred during CSV export processing"
             )
             raise ApiError(message) from e
-
-
-def export_csv_by_path(
-    table_name: str, directory_path: str, file_name: str, separator: str = ","
-) -> Dict:
-    """
-    テーブルをCSVファイルパスに出力する関数
-
-    Args:
-        table_name: エクスポートするテーブル名
-        file_path: 出力するCSVファイルのパス
-        separator: CSVの区切り文字（デフォルト: カンマ）
-
-    Returns:
-        出力されたファイルパスを含む辞書
-    """
-    api = ExportCsvByPath(table_name, directory_path, file_name, separator)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    try:
-        result = api.execute()
-    except ApiError as e:
-        # APIエラーが発生した場合はそのまま再スロー
-        raise e
-    return result

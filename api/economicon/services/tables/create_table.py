@@ -84,14 +84,3 @@ class CreateTable(AbstractApi):
                 "An unexpected error occurred during table creation processing"
             )
             raise ApiError(message) from e
-
-
-def create_table(
-    table_name: str, table_number_of_rows: int, column_names: List[str]
-) -> Dict:
-    api = CreateTable(table_name, table_number_of_rows, column_names)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    result = api.execute()
-    return result

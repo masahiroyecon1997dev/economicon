@@ -14,21 +14,22 @@ from ..schemas import (
     InputCellDataRequest,
     RenameTableRequest,
 )
-from ..services.tables.clear_tables import clear_tables
-from ..services.tables.create_join_table import create_join_table
+from ..services.tables.clear_tables import ClearTables
+from ..services.tables.create_join_table import CreateJoinTable
 from ..services.tables.create_simulation_data_table import (
-    create_simulation_data_table,
+    CreateSimulationDataTable,
 )
-from ..services.tables.create_table import create_table
-from ..services.tables.create_union_table import create_union_table
-from ..services.tables.delete_table import delete_table
-from ..services.tables.duplicate_table import duplicate_table
-from ..services.tables.fetch_data_to_arrow import fetch_data_to_arrow
-from ..services.tables.fetch_data_to_json import fetch_data_to_json
-from ..services.tables.filter_single_condition import filter_single_condition
-from ..services.tables.get_table_list import get_table_list
-from ..services.tables.input_cell_data import input_cell_data
-from ..services.tables.rename_table import rename_table
+from ..services.tables.create_table import CreateTable
+from ..services.tables.create_union_table import CreateUnionTable
+from ..services.tables.delete_table import DeleteTable
+from ..services.tables.duplicate_table import DuplicateTable
+from ..services.tables.fetch_data_to_arrow import FetchDataToArrow
+from ..services.tables.fetch_data_to_json import FetchDataToJson
+from ..services.tables.filter_single_condition import FilterSingleCondition
+from ..services.tables.get_table_list import GetTableList
+from ..services.tables.input_cell_data import InputCellData
+from ..services.tables.rename_table import RenameTable
+from ..services.operation import run_operation
 from ..utils import (
     create_log_api_request,
     create_success_binary_response,
@@ -58,7 +59,8 @@ async def create_table_endpoint(request: Request, body: CreateTableRequest):
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = create_table(**body.model_dump())
+    api = CreateTable(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -85,7 +87,8 @@ async def create_join_table_endpoint(
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = create_join_table(**body.model_dump())
+    api = CreateJoinTable(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -112,7 +115,8 @@ async def create_union_table_endpoint(
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = create_union_table(**body.model_dump())
+    api = CreateUnionTable(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -139,7 +143,8 @@ async def create_simulation_data_table_endpoint(
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = create_simulation_data_table(**body.model_dump())
+    api = CreateSimulationDataTable(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -162,7 +167,8 @@ async def delete_table_endpoint(request: Request, body: DeleteTableRequest):
     """
     create_log_api_request(request)
 
-    result = delete_table(**body.model_dump())
+    api = DeleteTable(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -187,7 +193,8 @@ async def duplicate_table_endpoint(
     """
     create_log_api_request(request)
 
-    result = duplicate_table(**body.model_dump())
+    api = DuplicateTable(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -213,7 +220,8 @@ async def rename_table_endpoint(request: Request, body: RenameTableRequest):
     """
     create_log_api_request(request)
 
-    result = rename_table(**body.model_dump())
+    api = RenameTable(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -234,7 +242,8 @@ async def get_table_list_endpoint(request: Request):
     """
     create_log_api_request(request)
 
-    result = get_table_list()
+    api = GetTableList()
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -257,7 +266,8 @@ async def clear_tables_endpoint(request: Request):
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = clear_tables()
+    api = ClearTables()
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -282,7 +292,8 @@ async def fetch_data_to_json_endpoint(
     """
     create_log_api_request(request)
 
-    result = fetch_data_to_json(**body.model_dump())
+    api = FetchDataToJson(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -310,7 +321,8 @@ async def fetch_data_to_arrow_endpoint(
     """
     create_log_api_request(request)
 
-    result = fetch_data_to_arrow(**body.model_dump())
+    api = FetchDataToArrow(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_binary_response(
         http_status.HTTP_200_OK, result, "application/octet-stream"
@@ -341,7 +353,8 @@ async def input_cell_data_endpoint(
     """
     create_log_api_request(request)
 
-    result = input_cell_data(**body.model_dump())
+    api = InputCellData(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -366,6 +379,7 @@ async def filter_single_condition_endpoint(
     """
     create_log_api_request(request)
 
-    result = filter_single_condition(**body.model_dump())
+    api = FilterSingleCondition(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)

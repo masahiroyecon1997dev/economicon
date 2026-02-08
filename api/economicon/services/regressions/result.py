@@ -179,35 +179,3 @@ class ClearAllAnalysisResults(AbstractApi):
                     "analysis results"
                 )
             ) from e
-
-
-def get_all_analysis_results() -> Dict:
-    api = GetAllAnalysisResults()
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()
-
-
-def get_analysis_result(result_id: str) -> Dict:
-    api = GetAnalysisResult(result_id)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()
-
-
-def delete_analysis_result(result_id: str) -> Dict:
-    api = DeleteAnalysisResult(result_id)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()
-
-
-def clear_all_analysis_results() -> Dict:
-    api = ClearAllAnalysisResults()
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()

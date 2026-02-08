@@ -89,29 +89,3 @@ class ExportExcelByPath(AbstractApi):
                 "An unexpected error occurred during EXCEL export processing"
             )
             raise ApiError(message) from e
-
-
-def export_excel_by_path(
-    table_name: str, directory_path: str, file_name: str
-) -> Dict:
-    """
-    テーブルをEXCELファイルパスに出力する関数
-
-    Args:
-        table_name: エクスポートするテーブル名
-        directory_path: 出力するディレクトリパス
-        file_name: 出力するEXCELファイル名
-
-    Returns:
-        出力されたファイルパスを含む辞書
-    """
-    api = ExportExcelByPath(table_name, directory_path, file_name)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    try:
-        result = api.execute()
-    except ApiError as e:
-        # APIエラーが発生した場合はそのまま再スロー
-        raise e
-    return result

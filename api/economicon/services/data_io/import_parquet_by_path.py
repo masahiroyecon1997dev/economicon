@@ -73,26 +73,3 @@ class ImportParquetByPath(AbstractApi):
                 "An unexpected error occurred during PARQUET processing"
             )
             raise ApiError(message) from e
-
-
-def import_parquet_by_path(file_path: str, table_name: str) -> Dict:
-    """
-    PARQUETファイルパスからデータをインポートしてテーブルを作成する関数
-
-    Args:
-        file_path: PARQUETファイルのパス
-        table_name: 作成するテーブル名
-
-    Returns:
-        作成されたテーブル名を含む辞書
-    """
-    api = ImportParquetByPath(file_path, table_name)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    try:
-        result = api.execute()
-    except ApiError as e:
-        # APIエラーが発生した場合はそのまま再スロー
-        raise e
-    return result

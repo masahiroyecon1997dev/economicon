@@ -17,16 +17,16 @@ from ..schemas import (
 
 # 各ビジネスロジック（既存のpython_apis）
 from ..services.columns.add_column import AddColumn
-from ..services.columns.add_dummy_column import add_dummy_column
-from ..services.columns.add_lag_lead_column import add_lag_lead_column
-from ..services.columns.add_simulation_column import add_simulation_column
-from ..services.columns.calculate_column import calculate_column
-from ..services.columns.delete_column import delete_column
-from ..services.columns.duplicate_column import duplicate_column
-from ..services.columns.get_column_list import get_column_list
-from ..services.columns.rename_column import rename_column
-from ..services.columns.sort_columns import sort_columns
-from ..services.columns.transform_column import transform_column
+from ..services.columns.add_dummy_column import AddDummyColumn
+from ..services.columns.add_lag_lead_column import AddLagLeadColumn
+from ..services.columns.add_simulation_column import AddSimulationColumn
+from ..services.columns.calculate_column import CalculateColumn
+from ..services.columns.delete_column import DeleteColumn
+from ..services.columns.duplicate_column import DuplicateColumn
+from ..services.columns.get_column_list import GetColumnList
+from ..services.columns.rename_column import RenameColumn
+from ..services.columns.sort_columns import SortColumns
+from ..services.columns.transform_column import TransformColumn
 from ..services.operation import run_operation
 from ..utils import create_log_api_request, create_success_response
 
@@ -79,7 +79,8 @@ async def add_dummy_column_endpoint(
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    result = add_dummy_column(**body.model_dump())
+    api = AddDummyColumn(**body.model_dump())
+    result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
@@ -100,7 +101,8 @@ async def delete_column_endpoint(request: Request, body: DeleteColumnRequest):
         処理結果
     """
     create_log_api_request(request)
-    result = delete_column(**body.model_dump())
+    api = DeleteColumn(**body.model_dump())
+    result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
@@ -125,7 +127,8 @@ async def rename_column_endpoint(request: Request, body: RenameColumnRequest):
         処理結果
     """
     create_log_api_request(request)
-    result = rename_column(**body.model_dump())
+    api = RenameColumn(**body.model_dump())
+    result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
@@ -151,7 +154,8 @@ async def add_lag_lead_column_endpoint(
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = add_lag_lead_column(**body.model_dump())
+    api = AddLagLeadColumn(**body.model_dump())
+    result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
@@ -176,7 +180,8 @@ async def add_simulation_column_endpoint(
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    result = add_simulation_column(**body.model_dump())
+    api = AddSimulationColumn(**body.model_dump())
+    result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
@@ -202,7 +207,8 @@ async def calculate_column_endpoint(
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = calculate_column(**body.model_dump())
+    api = CalculateColumn(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -228,7 +234,8 @@ async def duplicate_column_endpoint(
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    result = duplicate_column(**body.model_dump())
+    api = DuplicateColumn(**body.model_dump())
+    result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
@@ -254,7 +261,8 @@ async def transform_column_endpoint(
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    result = transform_column(**body.model_dump())
+    api = TransformColumn(**body.model_dump())
+    result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
@@ -278,7 +286,8 @@ async def get_column_list_endpoint(
     """
     create_log_api_request(request)
 
-    result = get_column_list(**body.model_dump())
+    api = GetColumnList(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -304,6 +313,7 @@ async def sort_columns_endpoint(request: Request, body: SortColumnsRequest):
     """
     create_log_api_request(request)
 
-    result = sort_columns(**body.model_dump())
+    api = SortColumns(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)

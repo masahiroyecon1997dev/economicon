@@ -9,12 +9,13 @@ from ..schemas import (
     ImportExcelByPathRequest,
     ImportParquetByPathRequest,
 )
-from ..services.data_io.export_csv_by_path import export_csv_by_path
-from ..services.data_io.export_excel_by_path import export_excel_by_path
-from ..services.data_io.export_parquet_by_path import export_parquet_by_path
-from ..services.data_io.import_csv_by_path import import_csv_by_path
-from ..services.data_io.import_excel_by_path import import_excel_by_path
-from ..services.data_io.import_parquet_by_path import import_parquet_by_path
+from ..services.data_io.export_csv_by_path import ExportCsvByPath
+from ..services.data_io.export_excel_by_path import ExportExcelByPath
+from ..services.data_io.export_parquet_by_path import ExportParquetByPath
+from ..services.data_io.import_csv_by_path import ImportCsvByPath
+from ..services.data_io.import_excel_by_path import ImportExcelByPath
+from ..services.data_io.import_parquet_by_path import ImportParquetByPath
+from ..services.operation import run_operation
 from ..utils import create_log_api_request, create_success_response
 
 router = APIRouter(prefix="/data", tags=["data"])
@@ -40,7 +41,8 @@ async def import_csv_by_path_endpoint(
     """
     create_log_api_request(request)
 
-    result = import_csv_by_path(**body.model_dump())
+    api = ImportCsvByPath(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -68,7 +70,8 @@ async def import_excel_by_path_endpoint(
     """
     create_log_api_request(request)
 
-    result = import_excel_by_path(**body.model_dump())
+    api = ImportExcelByPath(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -95,7 +98,8 @@ async def import_parquet_by_path_endpoint(
     """
     create_log_api_request(request)
 
-    result = import_parquet_by_path(**body.model_dump())
+    api = ImportParquetByPath(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -120,7 +124,8 @@ async def export_csv_by_path_endpoint(
     """
     create_log_api_request(request)
 
-    result = export_csv_by_path(**body.model_dump())
+    api = ExportCsvByPath(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -145,7 +150,8 @@ async def export_excel_by_path_endpoint(
     """
     create_log_api_request(request)
 
-    result = export_excel_by_path(**body.model_dump())
+    api = ExportExcelByPath(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -170,6 +176,7 @@ async def export_parquet_by_path_endpoint(
     """
     create_log_api_request(request)
 
-    result = export_parquet_by_path(**body.model_dump())
+    api = ExportParquetByPath(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)

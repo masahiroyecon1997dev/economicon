@@ -185,26 +185,3 @@ class FilterSingleCondition(AbstractApi):
                 "An unexpected error occurred during filter processing"
             )
             raise ApiError(message) from e
-
-
-def filter_single_condition(
-    new_table_name: str,
-    table_name: str,
-    column_name: str,
-    condition: str,
-    is_compare_column: str,
-    compare_value: str,
-) -> Dict:
-    api = FilterSingleCondition(
-        new_table_name,
-        table_name,
-        column_name,
-        condition,
-        is_compare_column,
-        compare_value,
-    )
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    result = api.execute()
-    return result

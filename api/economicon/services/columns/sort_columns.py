@@ -107,11 +107,3 @@ class SortColumns(AbstractApi):
                 "An unexpected error occurred during column sorting processing"
             )
             raise ApiError(message) from e
-
-
-def sort_columns(table_name: str, sort_columns: List[Dict[str, str]]) -> Dict:
-    api = SortColumns(table_name, sort_columns)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()
