@@ -1,12 +1,12 @@
 import { FileUp, Menu, Save } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { getTableInfo } from "../../../functions/internalFunctions";
-import { showMessageDialog } from "../../../functions/messageDialog";
-import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { useSideMenuStore } from "../../../stores/useSideMenuStore";
-import { useTableInfosStore } from "../../../stores/useTableInfosStore";
-import { SectionHeading } from "../../atoms/List/SectionHeading";
-import { TableNav } from "../../molecules/List/TableNav";
+import { showMessageDialog } from "../../lib/dialog/message";
+import { getTableInfo } from "../../lib/utils/internal";
+import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
+import { useSideMenuStore } from "../../stores/useSideMenuStore";
+import { useTableInfosStore } from "../../stores/useTableInfosStore";
+import { SectionHeading } from "../atoms/List/SectionHeading";
+import { TableNav } from "../molecules/List/TableNav";
 
 export const LeftSideMenu = () => {
   const { t } = useTranslation();

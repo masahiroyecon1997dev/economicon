@@ -4,7 +4,7 @@
  */
 import { tableFromIPC, type Table } from "apache-arrow";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchDataToArrow } from "../functions/restApis";
+import { fetchDataToArrow } from "../lib/api/endpoints";
 import type { TalbeDataRowType } from "../types/commonTypes";
 
 const CHUNK_SIZE = 500;

@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "../../../functions/utils";
-import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { useRegressionResultsStore } from "../../../stores/useRegressionResultsStore";
-import { LinearRegressionForm } from "../../organisms/Form/LinearRegressionForm";
-import { RegressionResult } from "../../organisms/Result/RegressionResult";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../organisms/Tab/BaseTab";
-import { MainViewLayout } from "../Layouts/MainViewLayout";
+import { cn } from "../../lib/utils/helpers";
+import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
+import { useRegressionResultsStore } from "../../stores/useRegressionResultsStore";
+import { LinearRegressionForm } from "../organisms/Form/LinearRegressionForm";
+import { RegressionResult } from "../organisms/Result/RegressionResult";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../organisms/Tab/BaseTab";
+import { PageLayout } from "../templates/PageLayout";
 
-type RegressionViewProps = {
+type RegressionProps = {
   className?: string;
 };
 
-export const RegressionView = ({ className }: RegressionViewProps) => {
+export const Regression = ({ className }: RegressionProps) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<string>("analysis-settings");
   const results = useRegressionResultsStore((state) => state.results);
@@ -27,7 +27,7 @@ export const RegressionView = ({ className }: RegressionViewProps) => {
   };
 
   return (
-    <MainViewLayout>
+    <PageLayout>
       <Tabs
         className={cn("flex w-full flex-col", className)}
         value={activeTab}
@@ -66,6 +66,6 @@ export const RegressionView = ({ className }: RegressionViewProps) => {
           </TabsContent>
         ))}
       </Tabs>
-    </MainViewLayout>
+    </PageLayout>
   );
 };

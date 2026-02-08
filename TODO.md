@@ -61,6 +61,7 @@ Economicon
 **コード**
 
 - functionが使用されている。アロー関数に統一。
+- tauriのvscodeでのデバッグ設定追加
 
 ## REST API, Python API
 

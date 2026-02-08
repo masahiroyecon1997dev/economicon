@@ -4,20 +4,20 @@ import { startTransition, useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { DISTRIBUTION_OPTIONS } from "../../../constants/constant";
-import { getTableInfo } from "../../../functions/internalFunctions";
-import { showMessageDialog } from "../../../functions/messageDialog";
-import { createSimulationDataTable } from "../../../functions/restApis";
-import { validateDistributionParam } from "../../../functions/validations";
-import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { useTableInfosStore } from "../../../stores/useTableInfosStore";
-import { useTableListStore } from "../../../stores/useTableListStore";
-import type { DistributionType, SimulationColumnSetting } from "../../../types/commonTypes";
-import { InputText } from "../../atoms/Input/InputText";
-import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
-import { FormField } from "../../molecules/Form/FormField";
-import { SimulationColumnEditDialog } from "../../organisms/Modal/SimulationColumnEditDialog";
-import { MainViewLayout } from "../Layouts/MainViewLayout";
+import { DISTRIBUTION_OPTIONS } from "../../constants/constant";
+import { createSimulationDataTable } from "../../lib/api/endpoints";
+import { showMessageDialog } from "../../lib/dialog/message";
+import { getTableInfo } from "../../lib/utils/internal";
+import { validateDistributionParam } from "../../lib/utils/validation";
+import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
+import { useTableInfosStore } from "../../stores/useTableInfosStore";
+import { useTableListStore } from "../../stores/useTableListStore";
+import type { DistributionType, SimulationColumnSetting } from "../../types/commonTypes";
+import { InputText } from "../atoms/Input/InputText";
+import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
+import { FormField } from "../molecules/Form/FormField";
+import { SimulationColumnEditDialog } from "../organisms/Modal/SimulationColumnEditDialog";
+import { PageLayout } from "../templates/PageLayout";
 
 const createSimulationSchema = (t: (key: string) => string) =>
   z.object({
@@ -27,7 +27,7 @@ const createSimulationSchema = (t: (key: string) => string) =>
 
 type SimulationFormData = z.infer<ReturnType<typeof createSimulationSchema>>;
 
-export const CreateSimulationDataTableView = () => {
+export const CreateSimulationDataTable = () => {
   const { t } = useTranslation();
   const setCurrentView = useCurrentViewStore(state => state.setCurrentView);
   const addTableName = useTableListStore(state => state.addTableName);
@@ -324,7 +324,7 @@ export const CreateSimulationDataTableView = () => {
   };
 
   return (
-    <MainViewLayout
+    <PageLayout
       title={t("CreateSimulationDataTableView.CreateNewDataTable")}
       description={t("CreateSimulationDataTableView.DefineYourTableNameAndRows")}
     >
@@ -450,6 +450,6 @@ export const CreateSimulationDataTableView = () => {
           disabled={isPending}
         />
       )}
-    </MainViewLayout>
+    </PageLayout>
   );
 }

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 
 import { useState } from "react";
-import { cn } from "../../../functions/utils";
+import { cn } from "../../../lib/utils/helpers";
 import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
 import type { DropmenuPositionType } from "../../../types/commonTypes";
 import { MenuItem } from "../../atoms/Menu/MenuItem";

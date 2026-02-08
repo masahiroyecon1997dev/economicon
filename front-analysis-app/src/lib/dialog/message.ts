@@ -1,4 +1,4 @@
-import { useMessageDialogStore } from "../stores/useMessageDialogStore";
+import { useMessageDialogStore } from "../../stores/useMessageDialogStore";
 
 /**
  * メッセージダイアログを表示する汎用関数
@@ -8,7 +8,7 @@ import { useMessageDialogStore } from "../stores/useMessageDialogStore";
  */
 export const showMessageDialog = (
   title: string,
-  message: string
+  message: string,
 ): Promise<void> => {
   return useMessageDialogStore.getState().showMessageDialog(title, message);
 };

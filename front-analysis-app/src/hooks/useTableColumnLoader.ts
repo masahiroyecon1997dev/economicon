@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { showMessageDialog } from "../functions/messageDialog";
-import { getColumnList } from "../functions/restApis";
+import { getColumnList } from "../lib/api/endpoints";
+import { showMessageDialog } from "../lib/dialog/message";
 import { useLoadingStore } from "../stores/useLoadingStore";
 import { useTableInfosStore } from "../stores/useTableInfosStore";
 import type { ColumnType } from "../types/commonTypes";
@@ -12,7 +12,7 @@ type UseTableColumnLoaderOptions = {
 };
 
 export const useTableColumnLoader = (
-  options: UseTableColumnLoaderOptions = {}
+  options: UseTableColumnLoaderOptions = {},
 ) => {
   const { numericOnly = false, autoLoadOnMount = true } = options;
   const { t } = useTranslation();
@@ -20,7 +20,7 @@ export const useTableColumnLoader = (
   const { setLoading, clearLoading } = useLoadingStore();
   // TODO : アクティブなテーブルがなければ、テーブルリストの最初のテーブルをセットする処理を追加する
   const [selectedTableName, setSelectedTableName] = useState<string>(
-    activeTableName || ""
+    activeTableName || "",
   );
   const [columnList, setColumnList] = useState<ColumnType[]>([]);
 
@@ -30,7 +30,7 @@ export const useTableColumnLoader = (
       try {
         const response = await getColumnList(
           tableName,
-          numericOnly ? "true" : undefined
+          numericOnly ? "true" : undefined,
         );
         if (response.code === "OK") {
           setColumnList(response.result.columnInfoList);
