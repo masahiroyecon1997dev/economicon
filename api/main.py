@@ -1,23 +1,24 @@
-"""FastAPI メインアプリケーション
+"""FastAPI メインアプリケーション"""
 
-"""
 import logging
 import os
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from analysisapp.exception_handlers import init_exception_handlers
-from analysisapp.i18n.translation import get_locale_from_settings, gettext as _
-from analysisapp.routers import api_router
-from analysisapp.services.data.settings_manager import SettingsManager
-from analysisapp.services.data.tables_store import TablesStore
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_babel import Babel, BabelConfigs
+
+from economicon.exception_handlers import init_exception_handlers
+from economicon.i18n.translation import get_locale_from_settings
+from economicon.i18n.translation import gettext as _
+from economicon.routers import api_router
+from economicon.services.data.settings_manager import SettingsManager
+from economicon.services.data.tables_store import TablesStore
 
 # ロガーのセットアップ
 # "uvicorn.error" を使うと、Uvicornの標準ログと同じ形式で出力されます
@@ -32,7 +33,7 @@ STATIC_DIR = BASE_DIR / "static"
 configs = BabelConfigs(
     ROOT_DIR=str(BASE_DIR),
     BABEL_DEFAULT_LOCALE="ja",
-    BABEL_TRANSLATION_DIRECTORY="analysisapp/locales",
+    BABEL_TRANSLATION_DIRECTORY="economicon/locales",
 )
 babel = Babel(configs=configs)
 
@@ -48,8 +49,8 @@ async def lifespan(app: FastAPI):
     logger.info("TablesStore has been initialized at startup.")
 
     # ブラウザでアプリを自動的に開く
-    url = 'http://127.0.0.1:8000'
-    dev_run = os.environ.get("ANALYSISAPP_DEV_RUN", "false").lower()
+    url = "http://127.0.0.1:8000"
+    dev_run = os.environ.get("economicon_DEV_RUN", "false").lower()
     if dev_run == "false":
         webbrowser.open(url)
     yield  # ここでアプリがリクエストを待ち受ける
@@ -63,7 +64,7 @@ app = FastAPI(
     title="Analysis App API",
     description="データ分析アプリケーションのAPI",
     version="2.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS設定
@@ -83,8 +84,8 @@ async def babel_middleware(request: Request, call_next):
     locale = get_locale_from_settings()
 
     # サポートされている言語のみ設定
-    if locale not in ['ja', 'en']:
-        locale = 'ja'
+    if locale not in ["ja", "en"]:
+        locale = "ja"
 
     # Babelのロケールを設定
     babel.locale = locale
@@ -101,8 +102,9 @@ async def root():
         return FileResponse(index_path)
     else:
         # ファイルがない場合はJSONメッセージなどを返す
-        return JSONResponse(content={"message": ("No index.html "
-                                                 "found in static folder.")})
+        return JSONResponse(
+            content={"message": ("No index.html found in static folder.")}
+        )
 
 
 @app.get("/health")
@@ -113,8 +115,7 @@ async def health_check():
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(
-    request: Request,
-    exc: RequestValidationError
+    request: Request, exc: RequestValidationError
 ):
     """
     Pydantic バリデーションエラーハンドラ
@@ -136,34 +137,22 @@ async def validation_exception_handler(
 
         # エラータイプに応じてメッセージを構築
         if error_type == "missing":
-            message = _("{field} is required").format(
-                field=field_name
-            )
+            message = _("{field} is required").format(field=field_name)
 
         elif error_type == "string_type":
-            message = _("{field} must be a string").format(
-                field=field_name
-            )
+            message = _("{field} must be a string").format(field=field_name)
 
         elif error_type == "int_type":
-            message = _("{field} must be an integer").format(
-                field=field_name
-            )
+            message = _("{field} must be an integer").format(field=field_name)
 
         elif error_type == "float_type":
-            message = _("{field} must be a number").format(
-                field=field_name
-            )
+            message = _("{field} must be a number").format(field=field_name)
 
         elif error_type == "bool_type":
-            message = _("{field} must be a boolean").format(
-                field=field_name
-            )
+            message = _("{field} must be a boolean").format(field=field_name)
 
         elif error_type == "list_type":
-            message = _("{field} must be a list").format(
-                field=field_name
-            )
+            message = _("{field} must be a list").format(field=field_name)
 
         elif error_type == "dict_type":
             message = _("{field} must be a dictionary").format(
@@ -174,56 +163,43 @@ async def validation_exception_handler(
             min_length = ctx.get("min_length", "")
             message = _(
                 "{field} must be at least {min_length} characters"
-            ).format(
-                field=field_name,
-                min_length=min_length
-            )
+            ).format(field=field_name, min_length=min_length)
 
         elif error_type == "string_too_long":
             max_length = ctx.get("max_length", "")
             message = _(
                 "{field} must be at most {max_length} characters"
-            ).format(
-                field=field_name,
-                max_length=max_length
-            )
+            ).format(field=field_name, max_length=max_length)
 
         elif error_type == "less_than":
             limit = ctx.get("lt", "")
             message = _("{field} must be less than {limit}").format(
-                field=field_name,
-                limit=limit
+                field=field_name, limit=limit
             )
 
         elif error_type == "less_than_equal":
             limit = ctx.get("le", "")
-            message = _("{field} must be less than or equal to {limit}").format(
-                field=field_name,
-                limit=limit
-            )
+            message = _(
+                "{field} must be less than or equal to {limit}"
+            ).format(field=field_name, limit=limit)
 
         elif error_type == "greater_than":
             limit = ctx.get("gt", "")
             message = _("{field} must be greater than {limit}").format(
-                field=field_name,
-                limit=limit
+                field=field_name, limit=limit
             )
 
         elif error_type == "greater_than_equal":
             limit = ctx.get("ge", "")
-            message = _("{field} must be greater than or equal to {limit}").format(
-                field=field_name,
-                limit=limit
-            )
+            message = _(
+                "{field} must be greater than or equal to {limit}"
+            ).format(field=field_name, limit=limit)
 
         elif error_type in ("literal_error", "enum"):
             expected = ctx.get("expected", "")
             if expected:
-                message = _(
-                    "{field} must be one of: {expected}"
-                ).format(
-                    field=field_name,
-                    expected=expected
+                message = _("{field} must be one of: {expected}").format(
+                    field=field_name, expected=expected
                 )
             else:
                 message = _("{field} has an invalid value").format(
@@ -239,24 +215,16 @@ async def validation_exception_handler(
             else:
                 message = translated_msg
 
-
     return JSONResponse(
-        status_code=422,
-        content={
-            'code': 'NG',
-            'message': message
-        }
+        status_code=422, content={"code": "NG", "message": message}
     )
+
 
 @app.exception_handler(ValueError)
 async def value_error_handler(request: Request, exc: ValueError):
     # ロジックで発生した ValueError を 400 Bad Request としてフロントに返す
     return JSONResponse(
-        status_code=400,
-        content={
-            'code': 'NG',
-            'message': str(exc)
-        }
+        status_code=400, content={"code": "NG", "message": str(exc)}
     )
 
 
@@ -275,4 +243,5 @@ else:
     logger.info(f"'{STATIC_DIR}' directory not found. Skipping mount.")
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="127.0.0.1", port=8000)

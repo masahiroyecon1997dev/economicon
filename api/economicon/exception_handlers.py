@@ -1,4 +1,4 @@
-# analysisapp/api/exception_handlers.py
+# economicon/api/exception_handlers.py
 from fastapi import FastAPI, Request
 from fastapi import status as http_status
 

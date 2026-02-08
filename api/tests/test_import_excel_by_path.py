@@ -6,7 +6,7 @@ import tempfile
 import numpy as np
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_store import TablesStore
+from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -37,26 +37,28 @@ def test_import_excel_by_path_simple(client, prepared_data):
     シンプルなEXCELファイルをパス指定でインポートするテスト
     """
     tables_store, test_dir = prepared_data
-    test_data = pl.DataFrame({
-        'col_1': [1, 2, 3],
-        'col_2': [10.1, 20.2, 30.3],
-        'col_3': ['A', 'B', 'C']
-    })
-    test_data.write_excel(
-        f'{test_dir}/SimpleTest.xlsx')
+    test_data = pl.DataFrame(
+        {
+            "col_1": [1, 2, 3],
+            "col_2": [10.1, 20.2, 30.3],
+            "col_3": ["A", "B", "C"],
+        }
+    )
+    test_data.write_excel(f"{test_dir}/SimpleTest.xlsx")
     # APIリクエスト
     request_data = {
-        'filePath': f'{test_dir}/SimpleTest.xlsx',
-        'tableName': 'TestSimpleExcel'
+        "filePath": f"{test_dir}/SimpleTest.xlsx",
+        "tableName": "TestSimpleExcel",
     }
-    response = client.post('/api/data/import-excel-by-path',
-                           data=json.dumps(request_data))
+    response = client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(request_data)
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert 'OK' == response_data['code']
-    assert 'TestSimpleExcel' == response_data['result']['tableName']
+    assert "OK" == response_data["code"]
+    assert "TestSimpleExcel" == response_data["result"]["tableName"]
     # データの検証
-    df = tables_store.get_table('TestSimpleExcel').table
+    df = tables_store.get_table("TestSimpleExcel").table
     assert test_data.equals(df)
 
 
@@ -70,25 +72,22 @@ def test_import_excel_by_path_large_data(client, prepared_data):
     rng = np.random.default_rng(42)
     data = rng.integers(0, 100, size=(N_ROWS, N_COLS), dtype=np.int32)
     column_names = [f"col_{i}" for i in range(N_COLS)]
-    df_sample = pl.DataFrame(
-        data,
-        schema=column_names
-    )
-    df_sample.write_excel(
-        f'{test_dir}/TestDataXlsx.xlsx')
+    df_sample = pl.DataFrame(data, schema=column_names)
+    df_sample.write_excel(f"{test_dir}/TestDataXlsx.xlsx")
     # APIリクエスト
     request_data = {
-        'filePath': f'{test_dir}/TestDataXlsx.xlsx',
-        'tableName': 'TestLargeExcel'
+        "filePath": f"{test_dir}/TestDataXlsx.xlsx",
+        "tableName": "TestLargeExcel",
     }
-    response = client.post('/api/data/import-excel-by-path',
-                           data=json.dumps(request_data))
+    response = client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(request_data)
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert 'OK' == response_data['code']
-    assert 'TestLargeExcel' == response_data['result']['tableName']
+    assert "OK" == response_data["code"]
+    assert "TestLargeExcel" == response_data["result"]["tableName"]
     # データの検証
-    df = tables_store.get_table('TestLargeExcel').table
+    df = tables_store.get_table("TestLargeExcel").table
     assert df_sample.equals(df)
 
 
@@ -97,26 +96,28 @@ def test_import_excel_by_path_custom_table_name(client, prepared_data):
     カスタムテーブル名でEXCELファイルをインポートするテスト
     """
     tables_store, test_dir = prepared_data
-    test_data = pl.DataFrame({
-        'col_1': [1, 2, 3],
-        'col_2': [10.1, 20.2, 30.3],
-        'col_3': ['A', 'B', 'C']
-    })
-    test_data.write_excel(
-        f'{test_dir}/SimpleTest.xlsx')
+    test_data = pl.DataFrame(
+        {
+            "col_1": [1, 2, 3],
+            "col_2": [10.1, 20.2, 30.3],
+            "col_3": ["A", "B", "C"],
+        }
+    )
+    test_data.write_excel(f"{test_dir}/SimpleTest.xlsx")
     # APIリクエスト
     request_data = {
-        'filePath': f'{test_dir}/SimpleTest.xlsx',
-        'tableName': 'MyCustomExcelTable'
+        "filePath": f"{test_dir}/SimpleTest.xlsx",
+        "tableName": "MyCustomExcelTable",
     }
-    response = client.post('/api/data/import-excel-by-path',
-                           data=json.dumps(request_data))
+    response = client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(request_data)
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert 'OK' == response_data['code']
-    assert 'MyCustomExcelTable' == response_data['result']['tableName']
+    assert "OK" == response_data["code"]
+    assert "MyCustomExcelTable" == response_data["result"]["tableName"]
     # データの検証
-    df = tables_store.get_table('MyCustomExcelTable').table
+    df = tables_store.get_table("MyCustomExcelTable").table
     assert test_data.equals(df)
 
 
@@ -126,16 +127,17 @@ def test_import_excel_by_path_file_not_exists(client, prepared_data):
     """
     tables_store, test_dir = prepared_data
     request_data = {
-        'filePath': '/non/existent/file.parquet',
-        'tableName': 'TestNonExistent'
+        "filePath": "/non/existent/file.parquet",
+        "tableName": "TestNonExistent",
     }
-    response = client.post('/api/data/import-excel-by-path',
-                           data=json.dumps(request_data))
+    response = client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(request_data)
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'NG' == response_data['code']
+    assert "NG" == response_data["code"]
     message = "filePathが存在しません: /non/existent/file.parquet"
-    assert message == response_data['message']
+    assert message == response_data["message"]
 
 
 def test_import_excel_by_path_invalid_file_extension(client, prepared_data):
@@ -143,24 +145,26 @@ def test_import_excel_by_path_invalid_file_extension(client, prepared_data):
     EXCEL以外のファイル拡張子を指定した場合のテスト
     """
     tables_store, test_dir = prepared_data
-    test_data = pl.DataFrame({
-        'col_1': [1, 2, 3],
-        'col_2': [10.1, 20.2, 30.3],
-        'col_3': ['A', 'B', 'C']
-    })
-    test_data.write_csv(
-        f'{test_dir}/TestDataComma.csv', separator=',')
+    test_data = pl.DataFrame(
+        {
+            "col_1": [1, 2, 3],
+            "col_2": [10.1, 20.2, 30.3],
+            "col_3": ["A", "B", "C"],
+        }
+    )
+    test_data.write_csv(f"{test_dir}/TestDataComma.csv", separator=",")
     request_data = {
-        'filePath': f'{test_dir}/TestDataComma.csv',
-        'tableName': 'TestInvalidExtension'
+        "filePath": f"{test_dir}/TestDataComma.csv",
+        "tableName": "TestInvalidExtension",
     }
-    response = client.post('/api/data/import-excel-by-path',
-                           data=json.dumps(request_data))
+    response = client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(request_data)
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-    assert 'NG' == response_data['code']
+    assert "NG" == response_data["code"]
     message = "EXCEL処理中に予期しないエラーが発生しました。"
-    assert message == response_data['message']
+    assert message == response_data["message"]
 
 
 def test_import_excel_by_path_missing_file_path(client, prepared_data):
@@ -168,15 +172,14 @@ def test_import_excel_by_path_missing_file_path(client, prepared_data):
     filePathパラメータが未指定の場合のテスト
     """
     tables_store, test_dir = prepared_data
-    request_data = {
-        'tableName': 'TestMissingPath'
-    }
-    response = client.post('/api/data/import-excel-by-path',
-                           data=json.dumps(request_data))
+    request_data = {"tableName": "TestMissingPath"}
+    response = client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(request_data)
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
-    assert 'NG' == response_data['code']
-    assert "filePath は必須です。" == response_data['message']
+    assert "NG" == response_data["code"]
+    assert "filePath は必須です。" == response_data["message"]
 
 
 def test_import_excel_by_path_missing_table_name(client, prepared_data):
@@ -184,22 +187,22 @@ def test_import_excel_by_path_missing_table_name(client, prepared_data):
     tableNameパラメータが未指定の場合のテスト
     """
     tables_store, test_dir = prepared_data
-    test_data = pl.DataFrame({
-        'col_1': [1, 2, 3],
-        'col_2': [10.1, 20.2, 30.3],
-        'col_3': ['A', 'B', 'C']
-    })
-    test_data.write_excel(
-        f'{test_dir}/TestDataComma.xlsx')
-    request_data = {
-        'filePath': f'{test_dir}/TestDataComma.xlsx'
-    }
-    response = client.post('/api/data/import-excel-by-path',
-                           data=json.dumps(request_data))
+    test_data = pl.DataFrame(
+        {
+            "col_1": [1, 2, 3],
+            "col_2": [10.1, 20.2, 30.3],
+            "col_3": ["A", "B", "C"],
+        }
+    )
+    test_data.write_excel(f"{test_dir}/TestDataComma.xlsx")
+    request_data = {"filePath": f"{test_dir}/TestDataComma.xlsx"}
+    response = client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(request_data)
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
-    assert 'NG' == response_data['code']
-    assert "tableName は必須です。" == response_data['message']
+    assert "NG" == response_data["code"]
+    assert "tableName は必須です。" == response_data["message"]
 
 
 def test_import_excel_by_path_duplicate_table_name(client, prepared_data):
@@ -207,33 +210,36 @@ def test_import_excel_by_path_duplicate_table_name(client, prepared_data):
     既存のテーブル名と重複する場合のテスト
     """
     tables_store, test_dir = prepared_data
-    test_data = pl.DataFrame({
-        'col_1': [1, 2, 3],
-        'col_2': [10.1, 20.2, 30.3],
-        'col_3': ['A', 'B', 'C']
-    })
-    test_data.write_excel(
-        f'{test_dir}/TestDataComma.xlsx')
+    test_data = pl.DataFrame(
+        {
+            "col_1": [1, 2, 3],
+            "col_2": [10.1, 20.2, 30.3],
+            "col_3": ["A", "B", "C"],
+        }
+    )
+    test_data.write_excel(f"{test_dir}/TestDataComma.xlsx")
     # 先にテーブルを作成
     first_request_data = {
-        'filePath': f'{test_dir}/TestDataComma.xlsx',
-        'tableName': 'DuplicateTable'
+        "filePath": f"{test_dir}/TestDataComma.xlsx",
+        "tableName": "DuplicateTable",
     }
-    client.post('/api/data/import-excel-by-path',
-                data=json.dumps(first_request_data))
+    client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(first_request_data)
+    )
     # 同じテーブル名で再度作成を試行
     second_request_data = {
-        'filePath': f'{test_dir}/TestDataComma.xlsx',
-        'tableName': 'DuplicateTable'
+        "filePath": f"{test_dir}/TestDataComma.xlsx",
+        "tableName": "DuplicateTable",
     }
-    response = client.post('/api/data/import-excel-by-path',
-                           data=json.dumps(second_request_data))
+    response = client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(second_request_data)
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'NG' == response_data['code']
+    assert "NG" == response_data["code"]
     # テーブル名重複エラーメッセージを確認
     message = "tableName 'DuplicateTable'は既に存在します。"
-    assert message == response_data['message']
+    assert message == response_data["message"]
 
 
 def test_import_excel_by_path_invalid_json(client, prepared_data):
@@ -241,12 +247,13 @@ def test_import_excel_by_path_invalid_json(client, prepared_data):
     不正なJSONを送信した場合のテスト
     """
     tables_store, test_dir = prepared_data
-    response = client.post('/api/data/import-excel-by-path',
-                           data='invalid json')
+    response = client.post(
+        "/api/data/import-excel-by-path", data="invalid json"
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
-    assert 'NG' == response_data['code']
-    assert "JSON decode error" == response_data['message']
+    assert "NG" == response_data["code"]
+    assert "JSON decode error" == response_data["message"]
 
 
 def test_import_excel_by_path_with_temporary_file(client, prepared_data):
@@ -255,29 +262,30 @@ def test_import_excel_by_path_with_temporary_file(client, prepared_data):
     """
     tables_store, test_dir = prepared_data
     # 一時的なEXCELファイルを作成
-    temp_data = pl.DataFrame({
-        'col1': [1, 2, 3, 4, 5],
-        'col2': ['A', 'B', 'C', 'D', 'E'],
-        'col3': [10.1, 20.2, 30.3, 40.4, 50.5]
-    })
-    with tempfile.NamedTemporaryFile(mode='wb', suffix='.xlsx',
-                                     delete=False) as f:
+    temp_data = pl.DataFrame(
+        {
+            "col1": [1, 2, 3, 4, 5],
+            "col2": ["A", "B", "C", "D", "E"],
+            "col3": [10.1, 20.2, 30.3, 40.4, 50.5],
+        }
+    )
+    with tempfile.NamedTemporaryFile(
+        mode="wb", suffix=".xlsx", delete=False
+    ) as f:
         temp_data.write_excel(f.name)
         temp_path = f.name
     try:
         # APIリクエスト
-        request_data = {
-            'filePath': temp_path,
-            'tableName': 'TestTempExcel'
-        }
-        response = client.post('/api/data/import-excel-by-path',
-                               data=json.dumps(request_data))
+        request_data = {"filePath": temp_path, "tableName": "TestTempExcel"}
+        response = client.post(
+            "/api/data/import-excel-by-path", data=json.dumps(request_data)
+        )
         response_data = response.json()
         assert response.status_code == status.HTTP_200_OK
-        assert 'OK' == response_data['code']
-        assert 'TestTempExcel' == response_data['result']['tableName']
+        assert "OK" == response_data["code"]
+        assert "TestTempExcel" == response_data["result"]["tableName"]
         # データの検証
-        df = tables_store.get_table('TestTempExcel').table
+        df = tables_store.get_table("TestTempExcel").table
         assert 3 == len(df.columns)
         assert 5 == len(df)
         assert temp_data.equals(df)
@@ -290,29 +298,25 @@ def test_import_excel_by_path_empty_file_path(client, prepared_data):
     """
     filePathが空文字列の場合はバリデーションエラーになる
     """
-    request_data = {
-        'filePath': '',
-        'tableName': 'TestTable'
-    }
-    response = client.post('/api/data/import-excel-by-path',
-                          data=json.dumps(request_data))
+    request_data = {"filePath": "", "tableName": "TestTable"}
+    response = client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(request_data)
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert 'NG' == response_data['code']
-    assert 'filePath' in response_data['message']
+    assert "NG" == response_data["code"]
+    assert "filePath" in response_data["message"]
 
 
 def test_import_excel_by_path_empty_table_name(client, prepared_data):
     """
     tableNameが空文字列の場合はバリデーションエラーになる
     """
-    request_data = {
-        'filePath': '/some/path/test.xlsx',
-        'tableName': ''
-    }
-    response = client.post('/api/data/import-excel-by-path',
-                          data=json.dumps(request_data))
+    request_data = {"filePath": "/some/path/test.xlsx", "tableName": ""}
+    response = client.post(
+        "/api/data/import-excel-by-path", data=json.dumps(request_data)
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert 'NG' == response_data['code']
-    assert 'tableName' in response_data['message']
+    assert "NG" == response_data["code"]
+    assert "tableName" in response_data["message"]

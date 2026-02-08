@@ -10,7 +10,7 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from analysisapp.services.data.tables_store import TablesStore
+from economicon.services.data.tables_store import TablesStore
 from main import app
 
 # test用テーブル名とデータ

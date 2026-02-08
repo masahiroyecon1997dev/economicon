@@ -1,29 +1,29 @@
 @echo off
 setlocal
 
-:: ƒ‹[ƒgƒfƒBƒŒƒNƒgƒŠ‚ÌÝ’èi‚±‚Ìƒoƒbƒ`ƒtƒ@ƒCƒ‹‚ª‚ ‚éêŠj
+:: ï¿½ï¿½ï¿½[ï¿½gï¿½fï¿½Bï¿½ï¿½ï¿½Nï¿½gï¿½ï¿½ï¿½ÌÝ’ï¿½iï¿½ï¿½ï¿½Ìƒoï¿½bï¿½`ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½êŠï¿½j
 set ROOT_DIR=%~dp0
 
-:: PYTHONPATH‚ÌÝ’èiâ‘ÎƒpƒX‚ÅÝ’èj
+:: PYTHONPATHï¿½ÌÝ’ï¿½iï¿½ï¿½Îƒpï¿½Xï¿½ÅÝ’ï¿½j
 set PYTHONPATH=%ROOT_DIR%libs
 
-:: PythonŽÀsƒtƒ@ƒCƒ‹‚ÌƒpƒX
+:: Pythonï¿½ï¿½ï¿½sï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ìƒpï¿½X
 set PYTHON_EXE=%ROOT_DIR%python_dist\python.exe
 
-:: ƒ|[ƒ^ƒuƒ‹”Å‚ÌPython‚ðŽg‚Á‚ÄFastAPIƒAƒvƒŠ‚ð‹N“®
+:: ï¿½|ï¿½[ï¿½^ï¿½uï¿½ï¿½ï¿½Å‚ï¿½Pythonï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½FastAPIï¿½Aï¿½vï¿½ï¿½ï¿½ï¿½ï¿½Nï¿½ï¿½
 echo ========================================
-echo  AnalysisApp ‚ð‹N“®‚µ‚Ä‚¢‚Ü‚·...
+echo  economicon ï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½...
 echo ========================================
 echo.
 
-:: app ƒfƒBƒŒƒNƒgƒŠ‚ÉˆÚ“®‚µ‚Ä‚©‚ç main.py ‚ðŽÀs
+:: app ï¿½fï¿½Bï¿½ï¿½ï¿½Nï¿½gï¿½ï¿½ï¿½ÉˆÚ“ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ main.py ï¿½ï¿½ï¿½ï¿½ï¿½s
 cd /d "%ROOT_DIR%app"
 "%PYTHON_EXE%" main.py
 
 if %ERRORLEVEL% neq 0 (
     echo.
     echo ========================================
-    echo  ƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½
+    echo  ï¿½Gï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½
     echo ========================================
     pause
     exit /b %ERRORLEVEL%
