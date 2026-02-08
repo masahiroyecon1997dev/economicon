@@ -4,8 +4,7 @@
 各回帰モデルのフィッティングロジックを提供する純粋関数群
 """
 
-import gc
-from typing import Any, List, Optional
+from typing import Any
 
 import numpy as np
 import statsmodels.api as sm
@@ -15,8 +14,7 @@ from py4etrics.tobit import Tobit
 from sklearn.linear_model import Lasso, Ridge
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
-from ...exceptions import ApiError
-from ...i18n.translation import gettext as _
+from .common import LINEARMODELS_COV_TYPE_MAP
 
 
 def fit_ols(
@@ -83,50 +81,30 @@ def fit_probit(
 
 
 def fit_tobit(
-    df_polars: Any,
+    df_pandas: Any,
     dependent_variable: str,
-    explanatory_variables: List[str],
+    explanatory_variables: str,
     has_const: bool,
-    missing: str,
-    left_censoring_limit: Optional[float],
-    right_censoring_limit: Optional[float],
+    left_censoring_limit: float | None,
+    right_censoring_limit: float | None,
 ) -> Any:
     """
     Tobitモデルのフィッティング (py4etrics を使用)
 
     Args:
-        df_polars: Polars DataFrame
+        df_pandas: prepare_tobit_dataframe()で準備されたPandas DataFrame
         dependent_variable: 被説明変数名
         explanatory_variables: 説明変数名のリスト
         has_const: 定数項を含むかどうか
-        missing: 欠損値の処理方法
         left_censoring_limit: 左側打ち切り値
         right_censoring_limit: 右側打ち切り値
 
     Returns:
         py4etrics の Tobit 回帰結果
     """
-    # 必要な列を選択
-    required_cols = [dependent_variable] + explanatory_variables
-
-    # Pandas DataFrameに変換
-    df = df_polars.select(required_cols).to_pandas()
-
-    # 欠損値の処理
-    if missing == "drop":
-        df = df.dropna()
-    elif missing == "raise":
-        if df.isnull().any().any():
-            raise ApiError(_("Missing values found in data"))
-
-    if len(df) == 0:
-        raise ApiError(
-            _("No valid observations after removing missing values")
-        )
-
     # 被説明変数と説明変数を設定
-    y = df[dependent_variable].values
-    X = df[explanatory_variables].values
+    y = df_pandas[dependent_variable].values
+    X = df_pandas[explanatory_variables].values
 
     # 定数項を追加
     if has_const:
@@ -155,75 +133,37 @@ def fit_tobit(
 
 
 def fit_iv(
-    df_polars: Any,
+    df_pandas: Any,
     dependent_variable: str,
-    explanatory_variables: List[str],
-    endogenous_variables: List[str],
-    instrumental_variables: List[str],
+    explanatory_variables: list[str],
+    endogenous_variables: list[str],
+    instrumental_variables: list[str],
     standard_error_method: str,
-    missing: str,
 ) -> Any:
     """
     IVモデルのフィッティング (linearmodels を使用)
 
     Args:
-        df_polars: Polars DataFrame
+        df_pandas: prepare_iv_dataframe()で準備されたPandas DataFrame
         dependent_variable: 被説明変数名
         explanatory_variables: 説明変数名のリスト
         endogenous_variables: 内生変数名のリスト
         instrumental_variables: 操作変数名のリスト
         standard_error_method: 標準誤差計算方法
-        missing: 欠損値の処理方法
 
     Returns:
         linearmodels の IV2SLS 回帰結果
     """
-    # 必要な列を選択
-    required_cols = (
-        [dependent_variable]
-        + explanatory_variables
-        + endogenous_variables
-        + instrumental_variables
-    )
-
-    # Pandas DataFrameに変換（PyArrow拡張配列を使用してメモリ効率向上）
-    df = df_polars.select(required_cols).to_pandas(
-        use_pyarrow_extension_array=True
-    )
-
-    # Polars DataFrameを明示的に削除してメモリを解放
-    del df_polars
-    gc.collect()
-
-    # 欠損値の処理
-    if missing == "drop":
-        df = df.dropna()
-    elif missing == "raise":
-        if df.isnull().any().any():
-            raise ApiError(_("Missing values found in data"))
-
-    if len(df) == 0:
-        raise ApiError(
-            _("No valid observations after removing missing values")
-        )
-
     # 被説明変数、外生変数、内生変数、操作変数を設定
-    dependent = df[dependent_variable]
-    exog = df[explanatory_variables] if explanatory_variables else None
-    endog = df[endogenous_variables] if endogenous_variables else None
-    instruments = df[instrumental_variables]
+    dependent = df_pandas[dependent_variable]
+    exog = df_pandas[explanatory_variables] if explanatory_variables else None
+    endog = df_pandas[endogenous_variables] if endogenous_variables else None
+    instruments = df_pandas[instrumental_variables]
 
-    # 標準誤差方法のマッピング
-    cov_type_map = {
-        "nonrobust": "unadjusted",
-        "hc0": "robust",
-        "hc1": "robust",
-        "hc2": "robust",
-        "hc3": "robust",
-        "hac": "kernel",
-        "clustered": "clustered",
-    }
-    cov_type = cov_type_map.get(standard_error_method, "unadjusted")
+    # 標準誤差方法のマッピングを使用
+    cov_type = LINEARMODELS_COV_TYPE_MAP.get(
+        standard_error_method, "unadjusted"
+    )
 
     # IV2SLS モデルの作成とフィット
     model = IV2SLS(dependent, exog, endog, instruments)
@@ -233,84 +173,31 @@ def fit_iv(
 
 
 def fit_fe(
-    df_polars: Any,
+    df_pandas: Any,
     dependent_variable: str,
-    explanatory_variables: List[str],
-    entity_id_column: str,
-    time_column: Optional[str],
+    explanatory_variables: list[str],
     standard_error_method: str,
-    missing: str,
 ) -> Any:
     """
     固定効果モデルのフィッティング (linearmodels を使用)
 
     Args:
-        df_polars: Polars DataFrame
+        df_pandas: prepare_panel_dataframe()で準備されたPandas DataFrame (MultiIndex設定済み)
         dependent_variable: 被説明変数名
         explanatory_variables: 説明変数名のリスト
-        entity_id_column: 個体ID列名
-        time_column: 時間列名 (Noneの場合は自動生成)
         standard_error_method: 標準誤差計算方法
-        missing: 欠損値の処理方法
 
     Returns:
         linearmodels の PanelOLS 回帰結果
     """
-    # 必要な列を選択
-    required_cols = (
-        [dependent_variable] + explanatory_variables + [entity_id_column]
-    )
-    if time_column:
-        required_cols.append(time_column)
-
-    # Pandas DataFrameに変換（PyArrow拡張配列を使用してメモリ効率向上）
-    df = df_polars.select(required_cols).to_pandas(
-        use_pyarrow_extension_array=True
-    )
-
-    # Polars DataFrameを明示的に削除してメモリを解放
-    del df_polars
-    gc.collect()
-
-    # 欠損値の処理
-    if missing == "drop":
-        df = df.dropna()
-    elif missing == "raise":
-        if df.isnull().any().any():
-            raise ApiError(_("Missing values found in data"))
-
-    if len(df) == 0:
-        raise ApiError(
-            _("No valid observations after removing missing values")
-        )
-
-    # MultiIndex の設定
-    if time_column:
-        df = df.set_index([entity_id_column, time_column])
-    else:
-        # 時間列がない場合は自動生成
-        # 既存列との衝突を避けるためユニークな名前を使用
-        temp_time_col = "__panel_time_idx__"
-        while temp_time_col in df.columns:
-            temp_time_col += "_"
-        df[temp_time_col] = df.groupby(entity_id_column).cumcount()
-        df = df.set_index([entity_id_column, temp_time_col])
-
     # 被説明変数と説明変数を設定
-    y = df[dependent_variable]
-    X = df[explanatory_variables]
+    y = df_pandas[dependent_variable]
+    X = df_pandas[explanatory_variables]
 
-    # 標準誤差方法のマッピング
-    cov_type_map = {
-        "nonrobust": "unadjusted",
-        "hc0": "robust",
-        "hc1": "robust",
-        "hc2": "robust",
-        "hc3": "robust",
-        "hac": "kernel",
-        "clustered": "clustered",
-    }
-    cov_type = cov_type_map.get(standard_error_method, "clustered")
+    # 標準誤差方法のマッピングを使用
+    cov_type = LINEARMODELS_COV_TYPE_MAP.get(
+        standard_error_method, "clustered"
+    )
 
     # PanelOLS モデルの作成とフィット
     model = PanelOLS(y, X, entity_effects=True)
@@ -320,84 +207,31 @@ def fit_fe(
 
 
 def fit_re(
-    df_polars: Any,
+    df_pandas: Any,
     dependent_variable: str,
-    explanatory_variables: List[str],
-    entity_id_column: str,
-    time_column: Optional[str],
+    explanatory_variables: list[str],
     standard_error_method: str,
-    missing: str,
 ) -> Any:
     """
     変量効果モデルのフィッティング (linearmodels を使用)
 
     Args:
-        df_polars: Polars DataFrame
+        df_pandas: prepare_panel_dataframe()で準備されたPandas DataFrame (MultiIndex設定済み)
         dependent_variable: 被説明変数名
         explanatory_variables: 説明変数名のリスト
-        entity_id_column: 個体ID列名
-        time_column: 時間列名 (Noneの場合は自動生成)
         standard_error_method: 標準誤差計算方法
-        missing: 欠損値の処理方法
 
     Returns:
         linearmodels の RandomEffects 回帰結果
     """
-    # 必要な列を選択
-    required_cols = (
-        [dependent_variable] + explanatory_variables + [entity_id_column]
-    )
-    if time_column:
-        required_cols.append(time_column)
-
-    # Pandas DataFrameに変換（PyArrow拡張配列を使用してメモリ効率向上）
-    df = df_polars.select(required_cols).to_pandas(
-        use_pyarrow_extension_array=True
-    )
-
-    # Polars DataFrameを明示的に削除してメモリを解放
-    del df_polars
-    gc.collect()
-
-    # 欠損値の処理
-    if missing == "drop":
-        df = df.dropna()
-    elif missing == "raise":
-        if df.isnull().any().any():
-            raise ApiError(_("Missing values found in data"))
-
-    if len(df) == 0:
-        raise ApiError(
-            _("No valid observations after removing missing values")
-        )
-
-    # MultiIndex の設定
-    if time_column:
-        df = df.set_index([entity_id_column, time_column])
-    else:
-        # 時間列がない場合は自動生成
-        # 既存列との衝突を避けるためユニークな名前を使用
-        temp_time_col = "__panel_time_idx__"
-        while temp_time_col in df.columns:
-            temp_time_col += "_"
-        df[temp_time_col] = df.groupby(entity_id_column).cumcount()
-        df = df.set_index([entity_id_column, temp_time_col])
-
     # 被説明変数と説明変数を設定
-    y = df[dependent_variable]
-    X = df[explanatory_variables]
+    y = df_pandas[dependent_variable]
+    X = df_pandas[explanatory_variables]
 
-    # 標準誤差方法のマッピング
-    cov_type_map = {
-        "nonrobust": "unadjusted",
-        "hc0": "robust",
-        "hc1": "robust",
-        "hc2": "robust",
-        "hc3": "robust",
-        "hac": "kernel",
-        "clustered": "clustered",
-    }
-    cov_type = cov_type_map.get(standard_error_method, "clustered")
+    # 標準誤差方法のマッピングを使用
+    cov_type = LINEARMODELS_COV_TYPE_MAP.get(
+        standard_error_method, "clustered"
+    )
 
     # RandomEffects モデルの作成とフィット
     model = RandomEffects(y, X)
