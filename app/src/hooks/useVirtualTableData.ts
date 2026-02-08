@@ -16,7 +16,7 @@ const MAX_CACHE_CHUNKS = 20; // キャッシュサイズを少し増やす
  * @param table Apache Arrowテーブル
  * @returns 行データの配列
  */
-function arrowTableToRows(table: Table): TalbeDataRowType[] {
+const arrowTableToRows = (table: Table): TalbeDataRowType[] => {
   const rows: TalbeDataRowType[] = [];
   const numRows = table.numRows;
   const schema = table.schema;
@@ -31,7 +31,7 @@ function arrowTableToRows(table: Table): TalbeDataRowType[] {
   }
 
   return rows;
-}
+};
 
 interface ChunkData {
   startRow: number;
@@ -46,10 +46,10 @@ interface UseVirtualTableDataOptions {
   enabled?: boolean;
 }
 
-export function useVirtualTableData({
+export const useVirtualTableData = ({
   tableName,
   enabled = true,
-}: UseVirtualTableDataOptions) {
+}: UseVirtualTableDataOptions) => {
   // チャンクキャッシュ（チャンクインデックス → データ）
   const [chunks, setChunks] = useState<Map<number, ChunkData>>(new Map());
   // ロード中のチャンクインデックスのセット
@@ -235,4 +235,4 @@ export function useVirtualTableData({
     error,
     cachedChunks: Array.from(chunks.keys()),
   };
-}
+};

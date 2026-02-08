@@ -9,7 +9,7 @@ type MainTableProps = {
 };
 
 // 内部コンポーネント: CellContent
-function CellContent({ value, onEdit }: { value: TableDataCellType; onEdit: () => void }) {
+const CellContent = ({ value, onEdit }: { value: TableDataCellType; onEdit: () => void }) => {
   return (
     <div className="flex items-center justify-between">
       <span onClick={onEdit}>{value}</span>
@@ -18,7 +18,7 @@ function CellContent({ value, onEdit }: { value: TableDataCellType; onEdit: () =
 }
 
 // 内部コンポーネント: TableInputText
-function TableInputText({
+const TableInputText = ({
   value,
   onChange,
   onBlur,
@@ -28,7 +28,7 @@ function TableInputText({
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onBlur: () => void;
   className?: string;
-}) {
+}) => {
   return (
     <input
       type="text"
@@ -42,13 +42,13 @@ function TableInputText({
 }
 
 // 内部コンポーネント: TableCell
-function TableCell({
+const TableCell = ({
   children,
   onContextMenu
 }: {
   children: React.ReactNode;
   onContextMenu?: (event: React.MouseEvent) => void
-}) {
+}) => {
   return (
     <td className="px-6 py-4" onContextMenu={onContextMenu}>
       {children}
@@ -57,25 +57,25 @@ function TableCell({
 }
 
 // 内部コンポーネント: EditableTableCell
-function EditableTableCell({
+const EditableTableCell = ({
   value,
   handleContextMenu
 }: {
   value: TableDataCellType;
   handleContextMenu: (event: React.MouseEvent, type: 'cell', targetId: string) => void;
-}) {
+}) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [cellValue, setCellValue] = useState<TableDataCellType>(value);
 
-  function handleEditCell() {
+  const handleEditCell = () => {
     setIsEditing(true);
   }
 
-  function handleEditingCell(event: ChangeEvent<HTMLInputElement>) {
+  const handleEditingCell = (event: ChangeEvent<HTMLInputElement>) => {
     setCellValue(event.target.value);
   }
 
-  function handleSaveCell() {
+  const handleSaveCell = () => {
     setIsEditing(false);
   }
 
@@ -99,13 +99,13 @@ function EditableTableCell({
 }
 
 // 内部コンポーネント: TableRowHeaderCell
-function TableRowHeaderCell({
+const TableRowHeaderCell = ({
   children,
   onContextMenu
 }: {
   children: React.ReactNode;
   onContextMenu?: (event: React.MouseEvent) => void;
-}) {
+}) => {
   return (
     <th
       className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
@@ -117,7 +117,7 @@ function TableRowHeaderCell({
 }
 
 // 内部コンポーネント: TableRow
-function TableRow({
+const TableRow = ({
   row,
   index,
   handleContextMenu
@@ -125,7 +125,7 @@ function TableRow({
   row: TalbeDataRowType;
   index: number;
   handleContextMenu: (event: React.MouseEvent, type: 'row' | 'cell', targetId: string) => void;
-}) {
+}) => {
   return (
     <tr className="bg-white border-b">
       <TableRowHeaderCell onContextMenu={e => handleContextMenu(e, 'row', index.toString())}>
@@ -143,7 +143,7 @@ function TableRow({
 }
 
 // 内部コンポーネント: DraggableTableHeader
-function DraggableTableHeader({ column }: { column: ColumnType }) {
+const DraggableTableHeader = ({ column }: { column: ColumnType }) => {
   return (
     <th className="px-6 py-3">
       {column.name}
@@ -152,13 +152,13 @@ function DraggableTableHeader({ column }: { column: ColumnType }) {
 }
 
 // 内部コンポーネント: TableHeaderCell
-function TableHeaderCell({
+const TableHeaderCell = ({
   children,
   onContextMenu
 }: {
   children: React.ReactNode;
   onContextMenu?: (event: React.MouseEvent) => void;
-}) {
+}) => {
   return (
     <th
       className="px-6 py-3"

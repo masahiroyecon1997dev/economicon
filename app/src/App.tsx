@@ -28,7 +28,7 @@ export const App = () => {
 
     let isMounted = true;
 
-    async function initialize() {
+    const initialize = async () => {
       try {
         // 設定を取得
         const resGetSettings = await getSettings();

@@ -6,7 +6,7 @@ type TableFooterProps = {
   onPageChange: (tableName: string, page: number) => void;
 };
 
-export function TableFooter({ tableInfo, onPageChange }: TableFooterProps) {
+export const TableFooter = ({ tableInfo, onPageChange }: TableFooterProps) => {
   if (!tableInfo) {
     return null;
   }

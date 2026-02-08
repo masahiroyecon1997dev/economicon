@@ -12,8 +12,8 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React, { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 
-import { cn } from '../../../lib/utils/helpers';
 import { useVirtualTableData } from '../../../hooks/useVirtualTableData';
+import { cn } from '../../../lib/utils/helpers';
 import type { ColumnType, TableDataCellType, TableInfoType, TalbeDataRowType } from '../../../types/commonTypes';
 
 type VirtualTableProps = {
@@ -23,7 +23,7 @@ type VirtualTableProps = {
 const OVERSCAN_COUNT = 50; // 上下に余分に描画する行数（スムーズなスクロールのために増やす）
 
 // 内部コンポーネント: CellContent
-function CellContent({ value, onEdit }: { value: TableDataCellType; onEdit: () => void }) {
+const CellContent = ({ value, onEdit }: { value: TableDataCellType; onEdit: () => void }) => {
   return (
     <div className="flex items-center justify-between">
       <span onClick={onEdit}>{String(value ?? '')}</span>
@@ -32,7 +32,7 @@ function CellContent({ value, onEdit }: { value: TableDataCellType; onEdit: () =
 }
 
 // 内部コンポーネント: TableInputText
-function TableInputText({
+const TableInputText = ({
   value,
   onChange,
   onBlur,
@@ -42,7 +42,7 @@ function TableInputText({
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onBlur: () => void;
   className?: string;
-}) {
+}) => {
   return (
     <input
       type="text"
@@ -56,19 +56,19 @@ function TableInputText({
 }
 
 // 内部コンポーネント: EditableCell
-function EditableCell({ value }: { value: TableDataCellType }) {
+const EditableCell = ({ value }: { value: TableDataCellType }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [cellValue, setCellValue] = useState<TableDataCellType>(value);
 
-  function handleEditCell() {
+  const handleEditCell = () => {
     setIsEditing(true);
   }
 
-  function handleEditingCell(event: ChangeEvent<HTMLInputElement>) {
+  const handleEditingCell = (event: ChangeEvent<HTMLInputElement>) => {
     setCellValue(event.target.value);
   }
 
-  function handleSaveCell() {
+  const handleSaveCell = () => {
     setIsEditing(false);
     // TODO: API呼び出しでセル値を保存
   }

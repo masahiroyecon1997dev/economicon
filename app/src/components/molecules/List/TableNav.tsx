@@ -6,7 +6,7 @@ type TableNavProps = {
   onTableClick: (tableName: string) => void;
 };
 
-export function TableNav({ activeTableName, onTableClick }: TableNavProps) {
+export const TableNav = ({ activeTableName, onTableClick }: TableNavProps) => {
   const tableList = useTableListStore((state) => state.tableList);
 
   return (
