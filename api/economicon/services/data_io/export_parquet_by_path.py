@@ -1,5 +1,6 @@
 import os
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError
 from ...utils.validators.file import (
@@ -9,11 +10,10 @@ from ...utils.validators.file import (
 from ...utils.validators.tables_store import (
     validate_existed_table_name,
 )
-from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 
 
-class ExportParquetByPath(AbstractApi):
+class ExportParquetByPath:
     """
     テーブルをPARQUETファイルパス指定でエクスポートするAPIクラス
 

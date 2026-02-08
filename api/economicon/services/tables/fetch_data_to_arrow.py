@@ -6,6 +6,7 @@ import io
 
 import pyarrow as pa
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import (
     ValidationError,
@@ -16,11 +17,10 @@ from ...utils.validators.tables_store import (
     validate_existed_table_name,
     validate_row_index,
 )
-from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 
 
-class FetchDataToArrow(AbstractApi):
+class FetchDataToArrow:
     """
     テーブルのデータをApache Arrow IPC形式で取得するAPIクラス
 

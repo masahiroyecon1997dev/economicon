@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 import polars as pl
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.algorithms.simulation import generate_simulation_data
 from ...utils.validators.common import ValidationError
@@ -13,11 +14,10 @@ from ...utils.validators.tables_store import (
     validate_existed_table_name,
     validate_new_column_name,
 )
-from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 
 
-class AddSimulationColumn(AbstractApi):
+class AddSimulationColumn:
     """
     テーブルにシミュレーションデータの列を追加するためのAPIクラス
 

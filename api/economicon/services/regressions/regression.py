@@ -9,6 +9,7 @@ from py4etrics.tobit import Tobit
 from sklearn.linear_model import Lasso, Ridge
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError
 from ...utils.validators.statistics import (
@@ -24,13 +25,12 @@ from ...utils.validators.statistics import (
 from ...utils.validators.tables_store import (
     validate_existed_table_name,
 )
-from ..abstract_api import AbstractApi, ApiError
 from ..data.analysis_result import AnalysisResult
 from ..data.analysis_result_store import AnalysisResultStore
 from ..data.tables_store import TablesStore
 
 
-class Regression(AbstractApi):
+class Regression:
     """
     回帰分析を実行するためのAPIクラス
 

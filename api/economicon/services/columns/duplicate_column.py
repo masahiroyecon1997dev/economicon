@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
@@ -7,11 +8,10 @@ from ...utils.validators.tables_store import (
     validate_existed_table_name,
     validate_new_column_name,
 )
-from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 
 
-class DuplicateColumn(AbstractApi):
+class DuplicateColumn:
     """
     テーブルの既存の列を複製して新しい列として追加するためのAPIクラス
 

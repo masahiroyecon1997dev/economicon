@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import stats
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import (
     ValidationError,
@@ -10,11 +11,10 @@ from ...utils.validators.tables_store import (
     validate_existed_column_name,
     validate_existed_table_name,
 )
-from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 
 
-class ConfidenceInterval(AbstractApi):
+class ConfidenceInterval:
     """
     指定されたテーブルの列の信頼区間を計算するためのAPIクラス
 
