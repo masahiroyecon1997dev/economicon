@@ -1,10 +1,10 @@
 {
   "folders": [
-	{
-		"name": "economicon",
-		"path": "."
-	}
-],
+    {
+      "name": "economicon",
+      "path": ".",
+    },
+  ],
   "settings": {
     "debug.inlineValues": "on",
     "debug.internalConsoleOptions": "openOnSessionStart",
@@ -26,12 +26,12 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit",
-      "source.organizeImports": "explicit"
+      "source.organizeImports": "explicit",
     },
     "files.autoSave": "onFocusChange",
     "explorer.incrementalNaming": "smart",
     "files.associations": {
-      "*.css": "tailwindcss"
+      "*.css": "tailwindcss",
     },
     "files.encoding": "utf8",
     "files.eol": "\n",
@@ -48,23 +48,23 @@
     "workbench.iconTheme": "material-icon-theme",
     "workbench.startupEditor": "readme",
     "[json]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
     "[python]": {
-      "editor.tabSize": 4
+      "editor.tabSize": 4,
     },
     "[javascript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
-    "python.testing.cwd": "${workspaceFolder}/ApiServer",
+    "python.testing.cwd": "${workspaceFolder}/api",
     "python.testing.pytestArgs": [],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
-    "python.defaultInterpreterPath": "${workspaceFolder}/ApiServer/.venv/Scripts/python.exe",
+    "python.defaultInterpreterPath": "${workspaceFolder}/api/.venv/Scripts/python.exe",
     "python.analysis.typeCheckingMode": "standard",
     "[html]": {
-      "editor.defaultFormatter": "vscode.html-language-features"
+      "editor.defaultFormatter": "vscode.html-language-features",
     },
-    "rust-analyzer.check.command": "clippy"
-  }
+    "rust-analyzer.check.command": "clippy",
+  },
 }

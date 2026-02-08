@@ -7,7 +7,7 @@
 
 - **Statistical Models**: OLS (最小二乗法), Fixed Effects (固定効果モデル), Instrumental Variables (操作変数法/2SLS).
 - **Core Libraries**: `Polars` (高速データ処理), `NumPy`/`SciPy`/`Statsmodels` (統計演算).
-- **Scope**: `ApiServer/analysisapp/services/**`, `frontend/src/logic/**`
+- **Scope**: `api/analysisapp/services/**`, `frontend/src/logic/**`
 
 ## 🎯 専門的指針
 
