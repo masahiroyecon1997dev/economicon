@@ -49,7 +49,7 @@ uv pip install -r python-requirements\windows-requirements.txt
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 # 別のターミナルでフロントエンドのセットアップと起動
-cd front-analysis-app
+cd app
 pnpm install
 pnpm dev
 ```
@@ -177,7 +177,7 @@ coverage report -m           # ターミナルにレポート表示
 
 ```powershell
 # 全テストの実行
-cd front-analysis-app
+cd app
 pnpm test
 
 # UIモードでテスト実行
@@ -194,7 +194,7 @@ pnpm test -- Tooltip.test.tsx
 
 ```powershell
 # 全E2Eテストの実行
-cd front-analysis-app
+cd app
 pnpm test:e2e
 
 # UIモードで実行（テスト結果をブラウザで確認）
@@ -230,7 +230,7 @@ economicon/
 │   │   └── locales/             # 翻訳ファイル
 │   ├── tests/                   # テストコード
 │   └── python-requirements/     # 依存関係定義
-├── front-analysis-app/          # Reactフロントエンド
+├── app/          # Reactフロントエンド
 │   ├── src/
 │   │   ├── components/          # UIコンポーネント (Atomic Design)
 │   │   │   ├── atoms/           # 基本コンポーネント

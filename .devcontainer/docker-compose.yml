@@ -14,7 +14,7 @@ services:
       - ../.github:/economicon/.github
       - ../.vscode:/economicon/economicon/.vscode
       - ../api:/economicon/economiconServer
-      - ../front-analysis-app:/economicon/economicon/front-analysis-app
+      - ../app:/economicon/economicon/app
       - ../SampleData:/economicon/economicon/SampleData
       - ../.env:/economicon/economicon/.env
       - ../.gitignore:/economicon/economicon/.gitignore
