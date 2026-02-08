@@ -14,6 +14,36 @@ import statsmodels.api as sm
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 
+
+def handle_missing_values(df: Any, missing: str) -> Any:
+    """
+    欠損値を処理する共通関数
+
+    Args:
+        df: Pandas DataFrame
+        missing: 欠損値処理方法 ('drop', 'raise', 'none')
+
+    Returns:
+        処理後のDataFrame
+
+    Raises:
+        ApiError: 欠損値がある場合（missing='raise'時）
+                  または有効な観測値がない場合
+    """
+    if missing == "drop":
+        df = df.dropna()
+    elif missing == "raise":
+        if df.isnull().any().any():
+            raise ApiError(_("Missing values found in data"))
+
+    if len(df) == 0:
+        raise ApiError(
+            _("No valid observations after removing missing values")
+        )
+
+    return df
+
+
 # 欠損値処理方法のマッピング
 MISSING_HANDLING_MAP = {
     "ignore": "none",
@@ -126,16 +156,7 @@ def prepare_panel_dataframe(
     gc.collect()
 
     # 欠損値の処理
-    if missing == "drop":
-        df = df.dropna()
-    elif missing == "raise":
-        if df.isnull().any().any():
-            raise ApiError(_("Missing values found in data"))
-
-    if len(df) == 0:
-        raise ApiError(
-            _("No valid observations after removing missing values")
-        )
+    df = handle_missing_values(df, missing)
 
     # MultiIndex の設定
     if time_column:
@@ -192,16 +213,7 @@ def prepare_iv_dataframe(
     gc.collect()
 
     # 欠損値の処理
-    if missing == "drop":
-        df = df.dropna()
-    elif missing == "raise":
-        if df.isnull().any().any():
-            raise ApiError(_("Missing values found in data"))
-
-    if len(df) == 0:
-        raise ApiError(
-            _("No valid observations after removing missing values")
-        )
+    df = handle_missing_values(df, missing)
 
     return df
 
@@ -231,18 +243,79 @@ def prepare_tobit_dataframe(
     df = df_polars.select(required_cols).to_pandas()
 
     # 欠損値の処理
-    if missing == "drop":
-        df = df.dropna()
-    elif missing == "raise":
-        if df.isnull().any().any():
-            raise ApiError(_("Missing values found in data"))
-
-    if len(df) == 0:
-        raise ApiError(
-            _("No valid observations after removing missing values")
-        )
+    df = handle_missing_values(df, missing)
 
     return df
+
+
+def extract_statsmodels_params(
+    model_result: Any,
+    param_names: list[str],
+) -> list[dict]:
+    """
+    statsmodelsの回帰結果からパラメータ情報を抽出
+
+    Args:
+        model_result: statsmodels の回帰結果オブジェクト
+        param_names: パラメータ名のリスト
+
+    Returns:
+        パラメータ情報の辞書リスト
+    """
+    params_info = []
+    for i, name in enumerate(param_names):
+        param_dict = {
+            "variable": name,
+            "coefficient": float(model_result.params[i]),
+            "standardError": float(model_result.bse[i]),
+            "pValue": float(model_result.pvalues[i]),
+        }
+
+        # t値またはz値
+        if hasattr(model_result, "tvalues"):
+            param_dict["tValue"] = float(model_result.tvalues[i])
+
+        # 信頼区間
+        if hasattr(model_result, "conf_int"):
+            conf_int = model_result.conf_int()
+            param_dict["confidenceIntervalLower"] = float(conf_int[i, 0])
+            param_dict["confidenceIntervalUpper"] = float(conf_int[i, 1])
+
+        params_info.append(param_dict)
+
+    return params_info
+
+
+def extract_linearmodels_params(
+    model_result: Any,
+    param_names: list[str],
+) -> list[dict]:
+    """
+    linearmodelsの回帰結果からパラメータ情報を抽出
+
+    Args:
+        model_result: linearmodels の回帰結果オブジェクト
+        param_names: パラメータ名のリスト
+
+    Returns:
+        パラメータ情報の辞書リスト
+    """
+    params_info = []
+    conf_int = model_result.conf_int()
+    for i, name in enumerate(param_names):
+        params_info.append(
+            {
+                "variable": name,
+                "coefficient": float(model_result.params.iloc[i]),
+                "standardError": float(model_result.std_errors.iloc[i]),
+                "pValue": float(model_result.pvalues.iloc[i]),
+                "tValue": float(model_result.tstats.iloc[i]),
+                "confidenceIntervalLower": float(conf_int.iloc[i, 0]),
+                "confidenceIntervalUpper": float(conf_int.iloc[i, 1]),
+            }
+        )
+
+    return params_info
 
 
 def get_param_names_with_const(
