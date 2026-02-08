@@ -1,9 +1,8 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 import polars as pl
-from ...i18n.translation import gettext as _
 
-from ..data.tables_store import TablesStore
+from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -12,6 +11,7 @@ from ...utils.validators.tables_store import (
     validate_new_column_name,
 )
 from ..abstract_api import AbstractApi, ApiError
+from ..data.tables_store import TablesStore
 
 
 class AddLagLeadColumn(AbstractApi):

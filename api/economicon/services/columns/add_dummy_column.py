@@ -1,7 +1,6 @@
-from typing import Dict
-
 import polars as pl
 
+from ...i18n.translation import gettext as _
 from ...utils.validators.common import (
     ValidationError,
     validate_required,
@@ -13,7 +12,6 @@ from ...utils.validators.tables_store import (
 )
 from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
-from ...i18n.translation import gettext as _
 
 
 class AddDummyColumn(AbstractApi):

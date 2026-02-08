@@ -1,16 +1,18 @@
-import polars as pl
 import re
+from typing import List
+
+import polars as pl
+
 from ...i18n.translation import gettext as _
-from typing import Dict, List
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
-    validate_existed_table_name,
-    validate_new_column_name,
     validate_calculation_expression,
     validate_existed_numeric_columns,
+    validate_existed_table_name,
+    validate_new_column_name,
 )
-from ..data.tables_store import TablesStore
 from ..abstract_api import AbstractApi, ApiError
+from ..data.tables_store import TablesStore
 
 
 class CalculateColumn(AbstractApi):

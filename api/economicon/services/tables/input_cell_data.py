@@ -1,5 +1,3 @@
-from typing import Dict
-
 import polars as pl
 
 from ...i18n.translation import gettext as _
