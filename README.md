@@ -41,7 +41,7 @@
 pip install uv
 
 # 仮想環境の作成と依存関係のインストール
-cd ApiServer
+cd api
 uv venv
 .venv\Scripts\Activate.ps1  # Windows
 uv add -r python-requirements\windows-requirements.txt
@@ -100,7 +100,7 @@ pnpm test:e2e:debug   # E2Eテストのデバッグモード
 ### バックエンド (Python/FastAPI)
 
 ```powershell
-cd ApiServer
+cd api
 uvicorn main:app --reload                     # 開発サーバーの起動
 pytest tests                                  # テストの実行
 pytest tests -v                               # 詳細表示でテスト実行
@@ -163,7 +163,7 @@ git push -u origin feature/your-feature-name
 
 ```powershell
 # 全テストの実行
-cd ApiServer
+cd api
 pytest tests
 
 # 詳細表示でテスト実行
@@ -224,8 +224,8 @@ pnpm test:e2e:report
 ## プロジェクト構造
 
 ```
-AnalysisApp/
-├── ApiServer/                    # FastAPIバックエンド
+economicon/
+├── api/                    # FastAPIバックエンド
 │   ├── main.py                  # FastAPIエントリーポイント
 │   └── analysisapp/
 │       └── api/                  # メインAPIアプリケーション

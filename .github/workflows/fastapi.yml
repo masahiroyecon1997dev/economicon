@@ -21,7 +21,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-          cache-dependency-glob: "ApiServer/python-requirements/ubuntu-requirements.txt"
+          cache-dependency-glob: "api/python-requirements/ubuntu-requirements.txt"
       # Python のインストール
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
@@ -35,12 +35,12 @@ jobs:
       # 依存関係のインストール (uv pip を使用)
       - name: Install dependencies
         run: |
-          uv add -r ApiServer/python-requirements/ubuntu-requirements.txt
+          uv add -r api/python-requirements/ubuntu-requirements.txt
           uv add flake8 pylint coverage
 
       # Linterの実行
       - name: Lint with flake8
-        working-directory: ./ApiServer/analysisapp
+        working-directory: ./api/analysisapp
         run: |
           # uv run を使うことで仮想環境を意識せずに実行可能
           uv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -48,7 +48,7 @@ jobs:
 
       # テストとカバレッジの実行
       - name: Run tests with coverage
-        working-directory: ./ApiServer
+        working-directory: ./api
         run: |
           uv run pytest tests --cov=analysisapp --cov-report=xml --cov-report=term
 
@@ -56,7 +56,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          file: ./ApiServer/coverage.xml
+          file: ./api/coverage.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
