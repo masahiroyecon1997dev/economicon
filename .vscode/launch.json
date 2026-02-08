@@ -10,7 +10,7 @@
       "cwd": "${workspaceFolder}/api",
       "console": "integratedTerminal",
       "env": {
-        "ANALYSISAPP_DEV_RUN": "true"
+        "economicon_DEV_RUN": "true"
       }
     },
     {

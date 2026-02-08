@@ -9,7 +9,7 @@ from .common import (
     validate_required,
     validate_string_length,
 )
-from analysisapp.i18n.translation import gettext as _
+from economicon.i18n.translation import gettext as _
 
 
 def validate_file_path(file_path: str, file_path_param: str) -> None:

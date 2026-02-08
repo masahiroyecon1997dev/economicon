@@ -1,6 +1,6 @@
-# Japanese translations for AnalysisApp.
+# Japanese translations for economicon.
 # Copyright (C) 2026
-# This file is distributed under the same license as the AnalysisApp
+# This file is distributed under the same license as the economicon
 # project.
 #
 msgid ""
@@ -18,596 +18,596 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: analysisapp/exception_handlers.py:34
+#: economicon/exception_handlers.py:34
 msgid "An unexpected error occurred during processing"
 msgstr "処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/add_column.py:81
+#: economicon/services/add_column.py:81
 msgid "An unexpected error occurred during adding column processing"
 msgstr "列の追加処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/add_dummy_column.py:81
+#: economicon/services/add_dummy_column.py:81
 msgid "An unexpected error occurred during adding dummy column processing"
 msgstr "ダミー列の追加処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/add_lag_lead_column.py:63
+#: economicon/services/add_lag_lead_column.py:63
 msgid "periods must be an integer"
 msgstr "periods は整数である必要があります"
 
-#: analysisapp/services/add_lag_lead_column.py:106
+#: economicon/services/add_lag_lead_column.py:106
 msgid "An unexpected error occurred during adding lag/lead column processing"
 msgstr "ラグ/リード列の追加処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/add_simulation_column.py:99
+#: economicon/services/add_simulation_column.py:99
 msgid "An unexpected error occurred during adding simulation column processing"
 msgstr "シミュレーション列の追加処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/calculate_column.py:107
+#: economicon/services/calculate_column.py:107
 #, python-brace-format
 msgid "Invalid calculation expression: {}"
 msgstr "無効な計算式です: {}"
 
-#: analysisapp/services/calculate_column.py:119
+#: economicon/services/calculate_column.py:119
 msgid "An unexpected error occurred during column calculation processing"
 msgstr "列の計算処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/clear_tables.py:30
+#: economicon/services/clear_tables.py:30
 msgid "An unexpected error occurred during clearing tables processing"
 msgstr "テーブルのクリア処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/confidence_interval.py:74
+#: economicon/services/confidence_interval.py:74
 msgid "confidenceLevel must be a number"
 msgstr "confidenceLevel は数値である必要があります"
 
-#: analysisapp/services/confidence_interval.py:77
+#: economicon/services/confidence_interval.py:77
 msgid "confidenceLevel must be between 0 and 1"
 msgstr "confidenceLevelは0から1の間である必要があります"
 
-#: analysisapp/services/confidence_interval.py:93
+#: economicon/services/confidence_interval.py:93
 msgid "Column contains no valid data"
 msgstr "カラムに有効なデータが含まれていません"
 
-#: analysisapp/services/confidence_interval.py:116
+#: economicon/services/confidence_interval.py:116
 msgid "Unsupported statistic type"
 msgstr "サポートされていない統計タイプです"
 
-#: analysisapp/services/confidence_interval.py:138
+#: economicon/services/confidence_interval.py:138
 msgid "An unexpected error occurred during confidence interval processing"
 msgstr "信頼区間の処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/confidence_interval.py:181
+#: economicon/services/confidence_interval.py:181
 msgid "For proportion confidence interval, data must contain only 0 and 1 values"
 msgstr "データには0と1の値のみが含まれる必要があります"
 
-#: analysisapp/services/create_join_table.py:161
+#: economicon/services/create_join_table.py:161
 msgid "An unexpected error occurred during join table creation processing"
 msgstr "結合テーブルの作成処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/create_simulation_data_table.py:53
+#: economicon/services/create_simulation_data_table.py:53
 msgid "The number of rows must be a positive integer."
 msgstr "行数は正の整数である必要があります"
 
-#: analysisapp/services/create_simulation_data_table.py:59
+#: economicon/services/create_simulation_data_table.py:59
 msgid "Column settings must be a list."
 msgstr "列の設定はリストである必要があります"
 
-#: analysisapp/services/create_simulation_data_table.py:64
+#: economicon/services/create_simulation_data_table.py:64
 msgid "At least one column setting is required."
 msgstr "少なくとも 1 つの列設定が必要です"
 
-#: analysisapp/services/create_simulation_data_table.py:88
+#: economicon/services/create_simulation_data_table.py:88
 msgid "Column name is required."
 msgstr "列名は必須です。"
 
-#: analysisapp/services/create_simulation_data_table.py:102
+#: economicon/services/create_simulation_data_table.py:102
 msgid "Data type is required."
 msgstr "データ型は必須です。"
 
-#: analysisapp/services/create_simulation_data_table.py:108
+#: economicon/services/create_simulation_data_table.py:108
 msgid "Data type must be 'distribution' or 'fixed'."
 msgstr "データ型は 'distribution' または 'fixed' である必要があります"
 
-#: analysisapp/services/create_simulation_data_table.py:115
+#: economicon/services/create_simulation_data_table.py:115
 msgid "Distribution type is required for distribution data."
 msgstr "分布データには分布タイプが必要です"
 
-#: analysisapp/services/create_simulation_data_table.py:126
+#: economicon/services/create_simulation_data_table.py:126
 msgid "Distribution parameters are required for distribution data."
 msgstr "分布データには分布パラメータが必要です"
 
-#: analysisapp/services/create_simulation_data_table.py:139
+#: economicon/services/create_simulation_data_table.py:139
 msgid "Fixed value is required for fixed data."
 msgstr "固定データには固定値が必要です"
 
-#: analysisapp/services/create_simulation_data_table.py:183
+#: economicon/services/create_simulation_data_table.py:183
 msgid "An unexpected error occurred during creating simulation data table"
 msgstr "シミュレーションデータテーブルの作成中に予期しないエラーが発生しました"
 
-#: analysisapp/services/create_table.py:77
+#: economicon/services/create_table.py:77
 msgid "An unexpected error occurred during table creation processing"
 msgstr "テーブルの作成処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/create_union_table.py:98
+#: economicon/services/create_union_table.py:98
 msgid "An unexpected error occurred during union table creation processing"
 msgstr "結合テーブルの作成処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/delete_column.py:68
+#: economicon/services/delete_column.py:68
 msgid "An unexpected error occurred during column deletion processing"
 msgstr "列の削除処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/delete_table.py:49
+#: economicon/services/delete_table.py:49
 msgid "An unexpected error occurred during table deletion processing"
 msgstr "テーブルの削除処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/descriptive_statistics.py:64
+#: economicon/services/descriptive_statistics.py:64
 msgid "statistics is required"
 msgstr "statisticsは必須です。"
 
-#: analysisapp/services/descriptive_statistics.py:69
+#: economicon/services/descriptive_statistics.py:69
 #, python-brace-format
 msgid "statistics '{}'はサポートされていません。利用可能: {}"
 msgstr "statistics '{}'はサポートされていません。利用可能: {}"
 
-#: analysisapp/services/descriptive_statistics.py:148
+#: economicon/services/descriptive_statistics.py:148
 msgid "An unexpected error occurred during descriptive statistics processing"
 msgstr "記述統計の処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/duplicate_column.py:82
+#: economicon/services/duplicate_column.py:82
 msgid "An unexpected error occurred during duplicating column processing"
 msgstr "列の複製処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/duplicate_table.py:64
+#: economicon/services/duplicate_table.py:64
 msgid "An unexpected error occurred during table duplication processing"
 msgstr "テーブルの複製処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/export_csv_by_path.py:92
-#: analysisapp/services/export_excel_by_path.py:82
-#: analysisapp/services/export_parquet_by_path.py:82
+#: economicon/services/export_csv_by_path.py:92
+#: economicon/services/export_excel_by_path.py:82
+#: economicon/services/export_parquet_by_path.py:82
 #, python-brace-format
 msgid "Table does not exist: {}"
 msgstr "テーブルが存在しません: {}"
 
-#: analysisapp/services/export_csv_by_path.py:95
-#: analysisapp/services/export_excel_by_path.py:85
-#: analysisapp/services/export_parquet_by_path.py:85
+#: economicon/services/export_csv_by_path.py:95
+#: economicon/services/export_excel_by_path.py:85
+#: economicon/services/export_parquet_by_path.py:85
 msgid "Permission denied: Cannot write to the specified path."
 msgstr "アクセスが拒否されました: 指定されたパスへの書き込みができません"
 
-#: analysisapp/services/export_csv_by_path.py:99
+#: economicon/services/export_csv_by_path.py:99
 msgid "An unexpected error occurred during CSV export processing"
 msgstr "CSVエクスポート処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/export_excel_by_path.py:89
+#: economicon/services/export_excel_by_path.py:89
 msgid "An unexpected error occurred during EXCEL export processing"
 msgstr "EXCELエクスポート処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/export_parquet_by_path.py:89
+#: economicon/services/export_parquet_by_path.py:89
 msgid "An unexpected error occurred during PARQUET export processing"
 msgstr "PARQUETエクスポート処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/fetch_data_to_json.py:85
+#: economicon/services/fetch_data_to_json.py:85
 msgid "An unexpected error during "
 msgstr "予期しないエラーが発生しました: "
 
-#: analysisapp/services/filter_single_condition.py:160
+#: economicon/services/filter_single_condition.py:160
 msgid "Invalid condition specified"
 msgstr "無効な条件が指定されました"
 
-#: analysisapp/services/filter_single_condition.py:170
+#: economicon/services/filter_single_condition.py:170
 msgid "An unexpected error occurred during filter processing"
 msgstr "フィルタ処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/fixed_effects_estimation.py:97
+#: economicon/services/fixed_effects_estimation.py:97
 msgid "Entity ID column cannot be the same as dependent variable"
 msgstr "個体ID列を被説明変数と同じにすることはできません"
 
-#: analysisapp/services/fixed_effects_estimation.py:102
+#: economicon/services/fixed_effects_estimation.py:102
 msgid "Entity ID column cannot be included in explanatory variables"
 msgstr "個体ID列を説明変数に含めることはできません"
 
-#: analysisapp/services/fixed_effects_estimation.py:131
+#: economicon/services/fixed_effects_estimation.py:131
 msgid "No valid observations after removing missing values"
 msgstr "欠損値を除去した後、有効な観測値がありません"
 
-#: analysisapp/services/fixed_effects_estimation.py:143
+#: economicon/services/fixed_effects_estimation.py:143
 msgid ""
 "No entities with multiple observations found. Fixed effects requires "
 "multiple time periods per entity."
 msgstr "複数の観測値を持つ個体が見つかりません。固定効果推定には、個体ごとに複数の時点が必要です。"
 
-#: analysisapp/services/fixed_effects_estimation.py:257
+#: economicon/services/fixed_effects_estimation.py:257
 msgid "An unexpected error occurred during fixed effects estimation processing"
 msgstr "固定効果推定処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/get_column_list.py:59
+#: economicon/services/get_column_list.py:59
 msgid "An unexpected error during getting column info list."
 msgstr "カラム情報リストの取得中に予期しないエラーが発生しました。"
 
-#: analysisapp/services/get_files.py:74
+#: economicon/services/get_files.py:74
 msgid "An unexpected error occurred during listing files processing"
 msgstr "ファイル一覧処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/get_settings.py:32
+#: economicon/services/get_settings.py:32
 msgid "An unexpected error occurred during getting settings processing"
 msgstr "設定の取得処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/get_table_list.py:34
+#: economicon/services/get_table_list.py:34
 msgid "An unexpected error during getting table name list."
 msgstr "テーブル名リストの取得中に予期しないエラーが発生しました。"
 
-#: analysisapp/services/import_csv_by_file.py:38
-#: analysisapp/services/import_excel_by_file.py:39
-#: analysisapp/services/import_parquet_by_file.py:38
-#: analysisapp/services/import_tsv_by_file.py:38
+#: economicon/services/import_csv_by_file.py:38
+#: economicon/services/import_excel_by_file.py:39
+#: economicon/services/import_parquet_by_file.py:38
+#: economicon/services/import_tsv_by_file.py:38
 msgid "File data or file name is missing"
 msgstr "ファイルデータまたはファイル名が欠落しています"
 
-#: analysisapp/services/import_csv_by_file.py:45
+#: economicon/services/import_csv_by_file.py:45
 msgid "File must be a CSV file"
 msgstr "CSVファイルである必要があります"
 
-#: analysisapp/services/import_csv_by_file.py:71
+#: economicon/services/import_csv_by_file.py:71
 msgid "The uploaded CSV file is empty or contains no valid data."
 msgstr "アップロードされたCSVファイルが空、または有効なデータが含まれていません。"
 
-#: analysisapp/services/import_csv_by_file.py:75
-#: analysisapp/services/import_csv_by_path.py:81
+#: economicon/services/import_csv_by_file.py:75
+#: economicon/services/import_csv_by_path.py:81
 msgid "Failed to parse CSV file: Invalid format or encoding."
 msgstr "CSVファイルの解析に失敗しました: 無効なフォーマットまたはエンコーディングです。"
 
-#: analysisapp/services/import_csv_by_file.py:79
-#: analysisapp/services/import_csv_by_path.py:85
+#: economicon/services/import_csv_by_file.py:79
+#: economicon/services/import_csv_by_path.py:85
 msgid "An unexpected error occurred during CSV processing"
 msgstr "CSV処理中に予期しないエラーが発生しました。"
 
-#: analysisapp/services/import_csv_by_path.py:78
+#: economicon/services/import_csv_by_path.py:78
 msgid "The CSV file is empty or contains no valid data."
 msgstr "CSVファイルが空であるか、有効なデータが含まれていません。"
 
-#: analysisapp/services/import_excel_by_file.py:47
+#: economicon/services/import_excel_by_file.py:47
 msgid "File must be an Excel file"
 msgstr "Excelファイルである必要があります"
 
-#: analysisapp/services/import_excel_by_file.py:72
+#: economicon/services/import_excel_by_file.py:72
 msgid "The uploaded EXCEL file is empty or contains no valid data."
 msgstr "アップロードされたEXCELファイルが空、または有効なデータが含まれていません。"
 
-#: analysisapp/services/import_excel_by_file.py:76
-#: analysisapp/services/import_excel_by_path.py:84
+#: economicon/services/import_excel_by_file.py:76
+#: economicon/services/import_excel_by_path.py:84
 msgid "Failed to parse EXCEL file: Invalid format or encoding."
 msgstr "EXCELファイルの解析に失敗しました: 無効なフォーマットまたはエンコーディングです。"
 
-#: analysisapp/services/import_excel_by_file.py:80
-#: analysisapp/services/import_excel_by_path.py:88
+#: economicon/services/import_excel_by_file.py:80
+#: economicon/services/import_excel_by_path.py:88
 msgid "An unexpected error occurred during EXCEL processing"
 msgstr "EXCEL処理中に予期しないエラーが発生しました。"
 
-#: analysisapp/services/import_excel_by_path.py:81
+#: economicon/services/import_excel_by_path.py:81
 msgid "The EXCEL file is empty or contains no valid data."
 msgstr "EXCELファイルが空であるか、有効なデータが含まれていません。"
 
-#: analysisapp/services/import_parquet_by_file.py:45
+#: economicon/services/import_parquet_by_file.py:45
 msgid "File must be a Parquet file"
 msgstr "Parquetファイルである必要があります。"
 
-#: analysisapp/services/import_parquet_by_file.py:70
+#: economicon/services/import_parquet_by_file.py:70
 msgid "The uploaded PARQUET file is empty or contains no valid data."
 msgstr "アップロードされたPARQUETファイルが空であるか、有効なデータが含まれていません。"
 
-#: analysisapp/services/import_parquet_by_file.py:74
-#: analysisapp/services/import_parquet_by_path.py:70
+#: economicon/services/import_parquet_by_file.py:74
+#: economicon/services/import_parquet_by_path.py:70
 msgid "Failed to parse PARQUET file: Invalid format or encoding."
 msgstr "PARQUETファイルの解析に失敗しました: 無効なフォーマットまたはエンコーディングです。"
 
-#: analysisapp/services/import_parquet_by_file.py:78
-#: analysisapp/services/import_parquet_by_path.py:74
+#: economicon/services/import_parquet_by_file.py:78
+#: economicon/services/import_parquet_by_path.py:74
 msgid "An unexpected error occurred during PARQUET processing"
 msgstr "PARQUET処理中に予期しないエラーが発生しました。"
 
-#: analysisapp/services/import_parquet_by_path.py:67
+#: economicon/services/import_parquet_by_path.py:67
 msgid "The PARQUET file is empty or contains no valid data."
 msgstr "PARQUETファイルが空であるか、有効なデータが含まれていません。"
 
-#: analysisapp/services/import_tsv_by_file.py:46
+#: economicon/services/import_tsv_by_file.py:46
 msgid "File must be a TSV file"
 msgstr "TSVファイルである必要があります。"
 
-#: analysisapp/services/import_tsv_by_file.py:73
+#: economicon/services/import_tsv_by_file.py:73
 msgid "The uploaded TSV file is empty or contains no valid data."
 msgstr "アップロードされたTSVファイルが空であるか、有効なデータが含まれていません。"
 
-#: analysisapp/services/import_tsv_by_file.py:77
+#: economicon/services/import_tsv_by_file.py:77
 msgid "Failed to parse TSV file: Invalid format or encoding."
 msgstr "TSVファイルの解析に失敗しました: 無効なフォーマットまたはエンコーディングです。"
 
-#: analysisapp/services/import_tsv_by_file.py:81
+#: economicon/services/import_tsv_by_file.py:81
 msgid "An unexpected error occurred during TSV processing"
 msgstr "TSV処理中に予期しないエラーが発生しました。"
 
-#: analysisapp/services/input_cell_data.py:92
+#: economicon/services/input_cell_data.py:92
 msgid "An unexpected error occurred during input cell data processing"
 msgstr "セルデータの入力処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/linear_regression.py:134
+#: economicon/services/linear_regression.py:134
 msgid "An unexpected error occurred during linear regression processing"
 msgstr "線形回帰処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/logistic_regression.py:130
+#: economicon/services/logistic_regression.py:130
 msgid "An unexpected error occurred during logistic regression processing"
 msgstr "ロジスティック回帰処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/probit_regression.py:129
+#: economicon/services/probit_regression.py:129
 msgid "An unexpected error occurred during probit regression processing"
 msgstr "プロビット回帰処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/rename_column.py:81
+#: economicon/services/rename_column.py:81
 msgid "An unexpected error occurred during renaming column processing"
 msgstr "列名の変更処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/rename_table.py:60
+#: economicon/services/rename_table.py:60
 msgid "An unexpected error occurred during table rename processing"
 msgstr "テーブル名の変更処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/sort_columns.py:94
+#: economicon/services/sort_columns.py:94
 msgid "An unexpected error occurred during column sorting processing"
 msgstr "列のソート処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/transform_column.py:66
+#: economicon/services/transform_column.py:66
 #, python-brace-format
 msgid "transformMethodの'{}'は無効です。有効なメソッド: {}"
 msgstr "transformMethod '{}'は無効です。有効なメソッド: {}"
 
-#: analysisapp/services/transform_column.py:73
+#: economicon/services/transform_column.py:73
 msgid "logBaseは1ではない正の数でなければなりません"
 msgstr "logBaseは1ではない正の数値である必要があります。"
 
-#: analysisapp/services/transform_column.py:78
+#: economicon/services/transform_column.py:78
 msgid "exponentは数値でなければなりません"
 msgstr "exponentは数値でなければなりません"
 
-#: analysisapp/services/transform_column.py:85
+#: economicon/services/transform_column.py:85
 msgid "rootIndexは0以外の数値でなければなりません"
 msgstr "rootIndexは0以外の数値でなければなりません"
 
-#: analysisapp/services/transform_column.py:145
+#: economicon/services/transform_column.py:145
 msgid "An unexpected error occurred during column transformation processing"
 msgstr "列の変換処理中に予期しないエラーが発生しました"
 
-#: analysisapp/services/variable_effects_estimation.py:99
+#: economicon/services/variable_effects_estimation.py:99
 #, python-brace-format
 msgid "{}は次のいずれかである必要があります: {}"
 msgstr "{}は次のいずれかである必要があります: {}"
 
-#: analysisapp/services/variable_effects_estimation.py:208
+#: economicon/services/variable_effects_estimation.py:208
 msgid "An unexpected error occurred during variable effects estimation processing"
 msgstr "変動効果推定処理中に予期しないエラーが発生しました"
 
-#: analysisapp/utils/validator/common_validators.py:25
-#: analysisapp/utils/validator/common_validators.py:196
+#: economicon/utils/validator/common_validators.py:25
+#: economicon/utils/validator/common_validators.py:196
 #, python-brace-format
 msgid "{} is required."
 msgstr "{}は必須です。"
 
-#: analysisapp/utils/validator/common_validators.py:33
+#: economicon/utils/validator/common_validators.py:33
 #, python-brace-format
 msgid "{} must be 'true' or 'false'."
 msgstr "{}は'true'または'false'である必要があります。"
 
-#: analysisapp/utils/validator/common_validators.py:47
+#: economicon/utils/validator/common_validators.py:47
 #, python-brace-format
 msgid "{} must be a number."
 msgstr "{}は数値である必要があります。"
 
-#: analysisapp/utils/validator/common_validators.py:60
+#: economicon/utils/validator/common_validators.py:60
 #, python-brace-format
 msgid "{} must be an integer."
 msgstr "{}は整数である必要があります。"
 
-#: analysisapp/utils/validator/common_validators.py:72
-#: analysisapp/utils/validator/common_validators.py:78
+#: economicon/utils/validator/common_validators.py:72
+#: economicon/utils/validator/common_validators.py:78
 #, python-brace-format
 msgid "{} must be a positive integer."
 msgstr "{}は正の整数である必要があります。"
 
-#: analysisapp/utils/validator/common_validators.py:85
+#: economicon/utils/validator/common_validators.py:85
 #, python-brace-format
 msgid "{} must be a string."
 msgstr "{}は文字列である必要があります。"
 
-#: analysisapp/utils/validator/common_validators.py:93
+#: economicon/utils/validator/common_validators.py:93
 #, python-brace-format
 msgid "{} must be a list."
 msgstr "{}はリストである必要があります。"
 
-#: analysisapp/utils/validator/common_validators.py:107
+#: economicon/utils/validator/common_validators.py:107
 #, python-brace-format
 msgid "{} must be with at least {} {}."
 msgstr "{}は少なくとも {} つの {}が必要です。"
 
-#: analysisapp/utils/validator/common_validators.py:120
-#: analysisapp/utils/validator/common_validators.py:217
+#: economicon/utils/validator/common_validators.py:120
+#: economicon/utils/validator/common_validators.py:217
 #, python-brace-format
 msgid "{} '{}' does not exist."
 msgstr "{} '{}'は存在しません。"
 
-#: analysisapp/utils/validator/common_validators.py:137
+#: economicon/utils/validator/common_validators.py:137
 #, python-brace-format
 msgid "{} must be at least {} characters long."
 msgstr "{}は少なくとも{}文字である必要があります。"
 
-#: analysisapp/utils/validator/common_validators.py:142
+#: economicon/utils/validator/common_validators.py:142
 #, python-brace-format
 msgid "{} must be at most {} characters long."
 msgstr "{}は最大{}文字である必要があります。"
 
-#: analysisapp/utils/validator/common_validators.py:154
+#: economicon/utils/validator/common_validators.py:154
 #, python-brace-format
 msgid "{} contains invalid characters."
 msgstr "{}に無効な文字が含まれています。"
 
-#: analysisapp/utils/validator/common_validators.py:170
-#: analysisapp/utils/validator/common_validators.py:175
+#: economicon/utils/validator/common_validators.py:170
+#: economicon/utils/validator/common_validators.py:175
 #, python-brace-format
 msgid "{} must be between {} and {}."
 msgstr "{}は{}から{}の間である必要があります。"
 
-#: analysisapp/utils/validator/common_validators.py:188
+#: economicon/utils/validator/common_validators.py:188
 #, python-brace-format
 msgid "{} is invalid value."
 msgstr "{}は無効な値です。"
 
-#: analysisapp/utils/validator/common_validators.py:229
+#: economicon/utils/validator/common_validators.py:229
 #, python-brace-format
 msgid "{} '{}' already exists."
 msgstr "{} '{}'は既に存在します。"
 
-#: analysisapp/utils/validator/common_validators.py:242
+#: economicon/utils/validator/common_validators.py:242
 #, python-brace-format
 msgid "{} '{}' is not supported. Supported {}: {}"
 msgstr "{} '{}'はサポートされていません。サポートされる{}: {}"
 
-#: analysisapp/utils/validator/common_validators.py:256
+#: economicon/utils/validator/common_validators.py:256
 #, python-brace-format
 msgid "{} does not exist: {}"
 msgstr "{}が存在しません: {}"
 
-#: analysisapp/utils/validator/common_validators.py:268
+#: economicon/utils/validator/common_validators.py:268
 #, python-brace-format
 msgid "ディレクトリが存在しません: {}"
 msgstr "ディレクトリが存在しません: {}"
 
-#: analysisapp/utils/validator/common_validators.py:276
+#: economicon/utils/validator/common_validators.py:276
 #, python-brace-format
 msgid "{} is not readable: {}"
 msgstr "{}は読み取れません: {}"
 
-#: analysisapp/utils/validator/common_validators.py:288
+#: economicon/utils/validator/common_validators.py:288
 #, python-brace-format
 msgid "{} '{}' is not numeric."
 msgstr "{} '{}'は数値ではありません。"
 
-#: analysisapp/utils/validator/file_validator.py:47
+#: economicon/utils/validator/file_validator.py:47
 msgid "No file uploaded."
 msgstr "ファイルがアップロードされていません"
 
-#: analysisapp/utils/validator/file_validators.py:32
+#: economicon/utils/validator/file_validators.py:32
 #, python-brace-format
 msgid "パスがディレクトリではありません: {}"
 msgstr "パスがディレクトリではありません: {}"
 
-#: analysisapp/utils/validator/statistics_validators.py:35
+#: economicon/utils/validator/statistics_validators.py:35
 msgid "Uniform distribution requires 'low' and 'high' parameters"
 msgstr "一様分布には'low'と'high'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:40
+#: economicon/utils/validator/statistics_validators.py:40
 msgid "For uniform distribution, 'low' must be less than 'high'"
 msgstr "一様分布では、'low'は'high'より小さい必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:44
+#: economicon/utils/validator/statistics_validators.py:44
 msgid "Exponential distribution requires 'scale' parameter"
 msgstr "指数分布には'scale'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:48
+#: economicon/utils/validator/statistics_validators.py:48
 msgid "For exponential distribution, 'scale' must be positive"
 msgstr "指数分布では、'scale'は正の値である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:52
+#: economicon/utils/validator/statistics_validators.py:52
 msgid "Normal distribution requires 'loc' and 'scale' parameters"
 msgstr "正規分布には'loc'と'scale'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:57
+#: economicon/utils/validator/statistics_validators.py:57
 msgid "For normal distribution, 'scale' must be positive"
 msgstr "正規分布では、'scale'は正の値である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:61
+#: economicon/utils/validator/statistics_validators.py:61
 msgid "Gamma distribution requires 'shape' and 'scale' parameters"
 msgstr "ガンマ分布には'shape'と'scale'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:66
+#: economicon/utils/validator/statistics_validators.py:66
 msgid "For gamma distribution, 'shape' and 'scale' must be positive"
 msgstr "ガンマ分布では、'shape'と'scale'は正の値である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:71
+#: economicon/utils/validator/statistics_validators.py:71
 msgid "Beta distribution requires 'a' and 'b' parameters"
 msgstr "ベータ分布には'a'と'b'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:76
+#: economicon/utils/validator/statistics_validators.py:76
 msgid "For beta distribution, 'a' and 'b' must be positive"
 msgstr "ベータ分布では、'a'と'b'は正の値である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:80
+#: economicon/utils/validator/statistics_validators.py:80
 msgid "Weibull distribution requires 'a' and 'scale' parameters"
 msgstr "ワイブル分布には'a'と'scale'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:84
+#: economicon/utils/validator/statistics_validators.py:84
 msgid "For weibull distribution, 'a' must be positive"
 msgstr "ワイブル分布では、'a'は正の値である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:88
+#: economicon/utils/validator/statistics_validators.py:88
 msgid "For weibull distribution, 'scale' must be positive"
 msgstr "ワイブル分布では、'scale'は正の値である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:92
+#: economicon/utils/validator/statistics_validators.py:92
 msgid "Lognormal distribution requires 'mean' and 'sigma' parameters"
 msgstr "対数正規分布には'mean'と'sigma'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:97
+#: economicon/utils/validator/statistics_validators.py:97
 msgid "For lognormal distribution, 'sigma' must be positive"
 msgstr "対数正規分布では、'sigma'は正の値である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:101
+#: economicon/utils/validator/statistics_validators.py:101
 msgid "Binomial distribution requires 'n' and 'p' parameters"
 msgstr "二項分布には'n'と'p'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:106
+#: economicon/utils/validator/statistics_validators.py:106
 msgid "For binomial distribution, 'n' must be positive"
 msgstr "二項分布では、'n'は正の値である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:109
+#: economicon/utils/validator/statistics_validators.py:109
 msgid "For binomial distribution, 'p' must be between 0 and 1"
 msgstr "二項分布では、'p'は0から1の間である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:113
+#: economicon/utils/validator/statistics_validators.py:113
 msgid "Bernoulli distribution requires 'p' parameter"
 msgstr "ベルヌーイ分布には'p'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:117
+#: economicon/utils/validator/statistics_validators.py:117
 msgid "For bernoulli distribution, 'p' must be between 0 and 1"
 msgstr "ベルヌーイ分布では、'p'は0から1の間である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:121
+#: economicon/utils/validator/statistics_validators.py:121
 msgid "Poisson distribution requires 'lam' parameter"
 msgstr "ポアソン分布には'lam'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:125
+#: economicon/utils/validator/statistics_validators.py:125
 msgid "For poisson distribution, 'lam' must be positive"
 msgstr "ポアソン分布では、'lam'は正の値である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:129
+#: economicon/utils/validator/statistics_validators.py:129
 msgid "Geometric distribution requires 'p' parameter"
 msgstr "幾何分布には'p'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:133
+#: economicon/utils/validator/statistics_validators.py:133
 msgid "For geometric distribution, 'p' must be between 0 and 1 (exclusive of 0)"
 msgstr "幾何分布では、'p'は0と1の間である必要があります(0を除く)"
 
-#: analysisapp/utils/validator/statistics_validators.py:138
+#: economicon/utils/validator/statistics_validators.py:138
 msgid "Hypergeometric distribution requires 'N', 'K', and 'n' parameters"
 msgstr "超幾何分布には'N','K','n'パラメータが必要です"
 
-#: analysisapp/utils/validator/statistics_validators.py:144
+#: economicon/utils/validator/statistics_validators.py:144
 msgid "For hypergeometric distribution, 'N', 'K', and 'n' must be positive"
 msgstr "超幾何分布では、'N','K','n'は正の値である必要があります"
 
-#: analysisapp/utils/validator/statistics_validators.py:148
+#: economicon/utils/validator/statistics_validators.py:148
 msgid "For hypergeometric distribution, 'K' must not exceed 'N'"
 msgstr "超幾何分布では、'K'は'N'を超えてはいけません"
 
-#: analysisapp/utils/validator/statistics_validators.py:152
+#: economicon/utils/validator/statistics_validators.py:152
 msgid "For hypergeometric distribution, 'n' must not exceed 'N'"
 msgstr "超幾何分布では、'n'は'N'を超えてはいけません"
 
-#: analysisapp/utils/validator/statistics_validators.py:198
+#: economicon/utils/validator/statistics_validators.py:198
 msgid "Dependent variable cannot be included in explanatory variables"
 msgstr "被説明変数を説明変数に含めることはできません。"
 

@@ -40,7 +40,7 @@ jobs:
 
       # Linterの実行
       - name: Lint with flake8
-        working-directory: ./api/analysisapp
+        working-directory: ./api/economicon
         run: |
           # uv run を使うことで仮想環境を意識せずに実行可能
           uv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -50,7 +50,7 @@ jobs:
       - name: Run tests with coverage
         working-directory: ./api
         run: |
-          uv run pytest tests --cov=analysisapp --cov-report=xml --cov-report=term
+          uv run pytest tests --cov=economicon --cov-report=xml --cov-report=term
 
       # カバレッジレポートのアップロード
       - name: Upload coverage to Codecov

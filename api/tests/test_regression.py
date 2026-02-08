@@ -7,8 +7,8 @@
 import numpy as np
 import polars as pl
 import pytest
-from analysisapp.services.data.analysis_result_store import AnalysisResultStore
-from analysisapp.services.data.tables_store import TablesStore
+from economicon.services.data.analysis_result_store import AnalysisResultStore
+from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -61,7 +61,13 @@ def tables_store():
     x1_panel = np.random.normal(0, 1, n_total)
     x2_panel = np.random.normal(0, 1, n_total)
     error = np.random.normal(0, 1, n_total)
-    y_panel = 2.0 + 1.5 * x1_panel + -0.8 * x2_panel + entity_effects_expanded + error
+    y_panel = (
+        2.0
+        + 1.5 * x1_panel
+        + -0.8 * x2_panel
+        + entity_effects_expanded
+        + error
+    )
 
     df_panel = pl.DataFrame(
         {
@@ -179,7 +185,9 @@ def test_basic_regression_types(
         # キー名は'R2'または'rSquared'の可能性がある
         r_squared_key = "rSquared" if "rSquared" in model_stats else "R2"
         adj_r_squared_key = (
-            "adjustedRSquared" if "adjustedRSquared" in model_stats else "adjustedR2"
+            "adjustedRSquared"
+            if "adjustedRSquared" in model_stats
+            else "adjustedR2"
         )
         assert r_squared_key in model_stats
         assert adj_r_squared_key in model_stats
@@ -256,7 +264,9 @@ def test_random_effects_regression(client, tables_store):
     # パネルデータの処理により除外される場合もある
     param_names = [p.get("variable", "") for p in params]
     # パラメータ数が説明変数の数と一致することを確認
-    assert len(params) >= 2, f"RE should have at least 2 parameters, got {len(params)}"
+    assert len(params) >= 2, (
+        f"RE should have at least 2 parameters, got {len(params)}"
+    )
 
     # Overall R-squaredが存在することを確認
     # キー名は'rSquared'または'R2'の可能性がある
@@ -398,7 +408,9 @@ def test_tobit_regression(client, tables_store):
             assert len(params) > 0, "No parameters estimated"
             # 対数尤度が存在することを確認
             if "logLikelihood" in regression_output.get("modelStatistics", {}):
-                assert regression_output["modelStatistics"]["logLikelihood"] <= 0
+                assert (
+                    regression_output["modelStatistics"]["logLikelihood"] <= 0
+                )
 
 
 def test_feiv_not_implemented(client, tables_store):
@@ -502,7 +514,9 @@ def test_confidence_intervals_present(client, tables_store):
 
         # 信頼区間の幅と標準誤差の関係検証
         # CI幅 ≈ 2 * 1.96 * SE（95%信頼区間の場合）
-        ci_width = param["confidenceIntervalUpper"] - param["confidenceIntervalLower"]
+        ci_width = (
+            param["confidenceIntervalUpper"] - param["confidenceIntervalLower"]
+        )
         expected_width = 2 * 1.96 * param["standardError"]
         # 許容誤差20%で検証
         assert abs(ci_width - expected_width) / expected_width < 0.2, (
@@ -543,7 +557,9 @@ def test_ols_without_constant(client, tables_store):
     # 定数項が含まれていないことを確認
     params = analysis_result["regressionOutput"]["parameters"]
     param_names = [p.get("variable", "") for p in params]
-    assert "const" not in param_names, "Const should not exist when hasConst=False"
+    assert "const" not in param_names, (
+        "Const should not exist when hasConst=False"
+    )
     # 説明変数のみが含まれることを確認
     assert "x1" in param_names and "x2" in param_names
 
@@ -690,7 +706,9 @@ def test_missing_entity_id_for_panel(client, tables_store):
     # Pydanticのエラーメッセージ構造を確認
     assert "message" in response_data
     error_message = str(response_data["message"])
-    assert "entityIdColumn" in error_message or "entity" in error_message.lower()
+    assert (
+        "entityIdColumn" in error_message or "entity" in error_message.lower()
+    )
 
 
 def test_missing_instrumental_variables(client, tables_store):
