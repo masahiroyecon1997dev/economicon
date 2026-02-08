@@ -83,7 +83,7 @@ def fit_probit(
 def fit_tobit(
     df_pandas: Any,
     dependent_variable: str,
-    explanatory_variables: str,
+    explanatory_variables: list[str],
     has_const: bool,
     left_censoring_limit: float | None,
     right_censoring_limit: float | None,
