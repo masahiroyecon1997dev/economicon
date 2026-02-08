@@ -1,12 +1,11 @@
 from typing import Dict
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
-
 from ..data.settings_manager import SettingsManager
-from ..abstract_api import AbstractApi, ApiError
 
 
-class GetSettings(AbstractApi):
+class GetSettings:
     """
     アプリケーション設定を取得するためのAPIクラス
 

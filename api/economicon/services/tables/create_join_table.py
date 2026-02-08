@@ -1,5 +1,6 @@
 from typing import List
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
@@ -8,11 +9,10 @@ from ...utils.validators.tables_store import (
     validate_join_type,
     validate_new_table_name,
 )
-from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 
 
-class CreateJoinTable(AbstractApi):
+class CreateJoinTable:
     """
     結合テーブル作成APIのPythonロジック
 

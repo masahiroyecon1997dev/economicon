@@ -1,9 +1,9 @@
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
-from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 
 
-class GetTableList(AbstractApi):
+class GetTableList:
     """
     テーブル名のリストを取得するAPIクラス
 

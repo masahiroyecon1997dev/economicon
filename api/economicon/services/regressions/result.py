@@ -5,13 +5,13 @@ AnalysisResultStoreへのアクセスをラップし、
 統一されたエラーハンドリングとバリデーションを提供します。
 """
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError
-from ..abstract_api import AbstractApi, ApiError
 from ..data.analysis_result_store import AnalysisResultStore
 
 
-class GetAllAnalysisResults(AbstractApi):
+class GetAllAnalysisResults:
     """
     すべての分析結果のサマリーを取得するサービス
     """
@@ -45,7 +45,7 @@ class GetAllAnalysisResults(AbstractApi):
             ) from e
 
 
-class GetAnalysisResult(AbstractApi):
+class GetAnalysisResult:
     """
     特定の分析結果を取得するサービス
     """
@@ -95,7 +95,7 @@ class GetAnalysisResult(AbstractApi):
             ) from e
 
 
-class DeleteAnalysisResult(AbstractApi):
+class DeleteAnalysisResult:
     """
     特定の分析結果を削除するサービス
     """
@@ -145,7 +145,7 @@ class DeleteAnalysisResult(AbstractApi):
             ) from e
 
 
-class ClearAllAnalysisResults(AbstractApi):
+class ClearAllAnalysisResults:
     """
     すべての分析結果を削除するサービス
     """

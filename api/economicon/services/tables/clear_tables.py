@@ -1,9 +1,9 @@
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
-from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 
 
-class ClearTables(AbstractApi):
+class ClearTables:
     """
     全てのテーブル情報をクリアするためのAPIクラス
 
