@@ -1,7 +1,6 @@
-from typing import Dict
-
 import polars as pl
 
+from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -10,7 +9,6 @@ from ...utils.validators.tables_store import (
 )
 from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
-from ...i18n.translation import gettext as _
 
 
 class AddColumn(AbstractApi):
@@ -83,13 +81,3 @@ class AddColumn(AbstractApi):
                 "An unexpected error occurred during adding column processing"
             )
             raise ApiError(message) from e
-
-
-def add_column(
-    table_name: str, new_column_name: str, add_position_column: str
-) -> Dict:
-    api = AddColumn(table_name, new_column_name, add_position_column)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()
