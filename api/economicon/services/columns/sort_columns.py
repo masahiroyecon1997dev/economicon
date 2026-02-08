@@ -1,18 +1,19 @@
-from ...i18n.translation import gettext as _
 from typing import Dict, List
-from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_existed_table_name,
-    validate_existed_column_name,
-)
+
+from ...i18n.translation import gettext as _
 from ...utils.validators.common import (
-    validate_required_list,
+    ValidationError,
+    validate_boolean,
     validate_item_in_dict,
     validate_list_length,
-    validate_boolean,
+    validate_required_list,
 )
-from ..data.tables_store import TablesStore
+from ...utils.validators.tables_store import (
+    validate_existed_column_name,
+    validate_existed_table_name,
+)
 from ..abstract_api import AbstractApi, ApiError
+from ..data.tables_store import TablesStore
 
 
 class SortColumns(AbstractApi):

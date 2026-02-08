@@ -9,6 +9,7 @@ from fastapi import status as http_status
 
 from ..schemas.regressions import RegressionRequest
 from ..services.abstract_api import ApiError
+from ..services.operation import run_operation
 from ..services.regressions.regression import Regression
 from ..services.regressions.result import (
     ClearAllAnalysisResults,
@@ -16,7 +17,6 @@ from ..services.regressions.result import (
     GetAllAnalysisResults,
     GetAnalysisResult,
 )
-from ..services.operation import run_operation
 from ..utils import (
     create_error_response,
     create_log_api_request,

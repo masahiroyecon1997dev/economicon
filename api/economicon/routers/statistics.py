@@ -2,9 +2,9 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..schemas import ConfidenceIntervalRequest, DescriptiveStatisticsRequest
+from ..services.operation import run_operation
 from ..services.statistics.confidence_interval import ConfidenceInterval
 from ..services.statistics.descriptive_statistics import DescriptiveStatistics
-from ..services.operation import run_operation
 from ..utils import create_log_api_request, create_success_response
 
 router = APIRouter(prefix="/statistics", tags=["statistics"])

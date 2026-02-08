@@ -1,6 +1,6 @@
 import os
-from typing import Dict
 
+from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError
 from ...utils.validators.file import (
     validate_directory_path,
@@ -11,7 +11,6 @@ from ...utils.validators.tables_store import (
 )
 from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
-from ...i18n.translation import gettext as _
 
 
 class ExportExcelByPath(AbstractApi):

@@ -1,13 +1,11 @@
-from typing import Dict
-
 import polars as pl
-from ...i18n.translation import gettext as _
 
-from ..data.tables_store import TablesStore
+from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError
 from ...utils.validators.file import validate_file_path
 from ...utils.validators.tables_store import validate_new_table_name
 from ..abstract_api import AbstractApi, ApiError
+from ..data.tables_store import TablesStore
 
 
 class ImportParquetByPath(AbstractApi):

@@ -14,6 +14,7 @@ from ..schemas import (
     InputCellDataRequest,
     RenameTableRequest,
 )
+from ..services.operation import run_operation
 from ..services.tables.clear_tables import ClearTables
 from ..services.tables.create_join_table import CreateJoinTable
 from ..services.tables.create_simulation_data_table import (
@@ -29,7 +30,6 @@ from ..services.tables.filter_single_condition import FilterSingleCondition
 from ..services.tables.get_table_list import GetTableList
 from ..services.tables.input_cell_data import InputCellData
 from ..services.tables.rename_table import RenameTable
-from ..services.operation import run_operation
 from ..utils import (
     create_log_api_request,
     create_success_binary_response,
