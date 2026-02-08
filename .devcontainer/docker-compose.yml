@@ -10,16 +10,16 @@ services:
         DEV_ENV: "development"
     tty: true
     volumes:
-      - ../.devcontainer:/AnalysisApp/.devcontainer
-      - ../.github:/AnalysisApp/.github
-      - ../.vscode:/AnalysisApp/AnalysisApp/.vscode
-      - ../api:/AnalysisApp/analysisappServer
-      - ../front-analysis-app:/AnalysisApp/AnalysisApp/front-analysis-app
-      - ../SampleData:/AnalysisApp/AnalysisApp/SampleData
-      - ../.env:/AnalysisApp/AnalysisApp/.env
-      - ../.gitignore:/AnalysisApp/AnalysisApp/.gitignore
-      - ../README.md:/AnalysisApp/README.md
+      - ../.devcontainer:/economicon/.devcontainer
+      - ../.github:/economicon/.github
+      - ../.vscode:/economicon/economicon/.vscode
+      - ../api:/economicon/economiconServer
+      - ../front-analysis-app:/economicon/economicon/front-analysis-app
+      - ../SampleData:/economicon/economicon/SampleData
+      - ../.env:/economicon/economicon/.env
+      - ../.gitignore:/economicon/economicon/.gitignore
+      - ../README.md:/economicon/README.md
     ports:
       - "127.0.0.1:3000:3000"
       - "8000:8000"
-    working_dir: /AnalysisApp/AnalysisApp
+    working_dir: /economicon/economicon

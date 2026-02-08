@@ -1,4 +1,4 @@
-# AnalysisApp
+# economicon
 
 データ分析のための Web アプリケーション。Django バックエンド + React フロントエンドで構成されています。
 
@@ -104,7 +104,7 @@ cd api
 uvicorn main:app --reload                     # 開発サーバーの起動
 pytest tests                                  # テストの実行
 pytest tests -v                               # 詳細表示でテスト実行
-pytest tests --cov=analysisapp            # カバレッジ付きテスト
+pytest tests --cov=economicon            # カバレッジ付きテスト
 ```
 
 ### ビルドとデプロイ
@@ -173,7 +173,7 @@ pytest tests -v
 pytest tests/test_create_table.py
 
 # カバレッジ付きテスト
-pytest tests --cov=analysisapp --cov-report=html
+pytest tests --cov=economicon --cov-report=html
 coverage report -m           # ターミナルにレポート表示
 ```
 
@@ -227,7 +227,7 @@ pnpm test:e2e:report
 economicon/
 ├── api/                    # FastAPIバックエンド
 │   ├── main.py                  # FastAPIエントリーポイント
-│   └── analysisapp/
+│   └── economicon/
 │       └── api/                  # メインAPIアプリケーション
 │           ├── routers/          # FastAPIエンドポイント
 │           ├── schemas/          # Pydanticモデル

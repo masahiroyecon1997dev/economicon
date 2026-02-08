@@ -1,6 +1,6 @@
 import polars as pl
 import pytest
-from analysisapp.services.data.tables_store import TablesStore
+from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
 from main import app
@@ -18,121 +18,98 @@ def tables_store():
     manager = TablesStore()
     manager.clear_tables()
     # テスト用テーブルをセット
-    df = pl.DataFrame({
-        'A': [1, 2, 3],
-        'B': [4, 5, 6],
-        'C': [7, 8, 9]
-    })
-    manager.store_table('TestTable', df)
+    df = pl.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6], "C": [7, 8, 9]})
+    manager.store_table("TestTable", df)
     yield manager
     # テスト後のクリーンアップ
     manager.clear_tables()
 
 
 def test_delete_column_success(client, tables_store):
-    payload = {
-        'tableName': 'TestTable',
-        'columnName': 'A'
-    }
+    payload = {"tableName": "TestTable", "columnName": "A"}
     response = client.post(
-        '/api/column/delete',
+        "/api/column/delete",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert response_data['code'] == 'OK'
-    df = tables_store.get_table('TestTable').table
-    assert 'A' not in df.columns
-    assert 'B' in df.columns
-    assert 'C' in df.columns
+    assert response_data["code"] == "OK"
+    df = tables_store.get_table("TestTable").table
+    assert "A" not in df.columns
+    assert "B" in df.columns
+    assert "C" in df.columns
 
 
 def test_delete_column_not_found(client, tables_store):
-    payload = {
-        'tableName': 'TestTable',
-        'columnName': 'Z'
-    }
+    payload = {"tableName": "TestTable", "columnName": "Z"}
     response = client.post(
-        '/api/column/delete',
+        "/api/column/delete",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data['code'] == 'NG'
-    assert "columnName 'Z'は存在しません。" in response_data['message']
+    assert response_data["code"] == "NG"
+    assert "columnName 'Z'は存在しません。" in response_data["message"]
 
 
 def test_delete_column_table_not_found(client, tables_store):
-    payload = {
-        'tableName': 'NotExistTable',
-        'columnName': 'A'
-    }
+    payload = {"tableName": "NotExistTable", "columnName": "A"}
     response = client.post(
-        '/api/column/delete',
+        "/api/column/delete",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data['code'] == 'NG'
+    assert response_data["code"] == "NG"
     message = "tableName 'NotExistTable'は存在しません。"
-    assert message == response_data['message']
+    assert message == response_data["message"]
 
 
 def test_delete_column_empty_table_name(client, tables_store):
-    payload = {
-        'tableName': '',
-        'columnName': 'A'
-    }
+    payload = {"tableName": "", "columnName": "A"}
     response = client.post(
-        '/api/column/delete',
+        "/api/column/delete",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data['code'] == 'NG'
-    assert "tableName" in response_data['message']
+    assert response_data["code"] == "NG"
+    assert "tableName" in response_data["message"]
 
 
 def test_delete_column_empty_column_name(client, tables_store):
-    payload = {
-        'tableName': 'TestTable',
-        'columnName': ''
-    }
+    payload = {"tableName": "TestTable", "columnName": ""}
     response = client.post(
-        '/api/column/delete',
+        "/api/column/delete",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data['code'] == 'NG'
-    assert "columnName" in response_data['message']
+    assert response_data["code"] == "NG"
+    assert "columnName" in response_data["message"]
 
 
 def test_delete_column_missing_table_name(client, tables_store):
     """必須フィールドtableNameが欠けている場合のテスト"""
-    payload = {
-        'columnName': 'A'
-    }
+    payload = {"columnName": "A"}
     response = client.post(
-        '/api/column/delete',
+        "/api/column/delete",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data['code'] == 'NG'
-    assert "tableName" in response_data['message']
+    assert response_data["code"] == "NG"
+    assert "tableName" in response_data["message"]
 
 
 def test_delete_column_missing_column_name(client, tables_store):
     """必須フィールドcolumnNameが欠けている場合のテスト"""
-    payload = {
-        'tableName': 'TestTable'
-    }
+    payload = {"tableName": "TestTable"}
     response = client.post(
-        '/api/column/delete',
+        "/api/column/delete",
         json=payload,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data['code'] == 'NG'
-    assert "columnName" in response_data['message']
+    assert response_data["code"] == "NG"
+    assert "columnName" in response_data["message"]

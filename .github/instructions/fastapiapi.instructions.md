@@ -13,7 +13,7 @@ applyTo: "api/**"
 
 ## 2. 国際化（i18n）とグローバルコンテキスト
 
-- **翻訳関数**: `analysisapp.i18n.translation.gettext_lazy as _`
+- **翻訳関数**: `economicon.i18n.translation.gettext_lazy as _`
 - **言語設定**: `ContextVar`ベースのスレッドセーフな設定を使用
 - **ルール**: ユーザー向けの文字列は必ず`_()`でラップする
 

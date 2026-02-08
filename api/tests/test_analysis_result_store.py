@@ -3,10 +3,8 @@ AnalysisResultStore のテスト
 """
 
 import pytest
-from analysisapp.services.data.analysis_result import AnalysisResult
-from analysisapp.services.data.analysis_result_store import (
-    AnalysisResultStore
-)
+from economicon.services.data.analysis_result import AnalysisResult
+from economicon.services.data.analysis_result_store import AnalysisResultStore
 
 
 @pytest.fixture
@@ -25,10 +23,7 @@ def sample_result():
         name="Test Analysis",
         description="Test Description",
         table_name="test_table",
-        regression_output={
-            "coefficients": [1.0, 2.0, 3.0],
-            "r_squared": 0.95
-        }
+        regression_output={"coefficients": [1.0, 2.0, 3.0], "r_squared": 0.95},
     )
 
 
@@ -54,8 +49,7 @@ def test_get_result_returns_saved_result(result_store, sample_result):
 def test_get_result_raises_key_error_for_nonexistent_id(result_store):
     """存在しないIDで KeyError が発生することを確認"""
     with pytest.raises(
-        KeyError,
-        match="Analysis result with ID 'nonexistent' does not exist."
+        KeyError, match="Analysis result with ID 'nonexistent' does not exist."
     ):
         result_store.get_result("nonexistent")
 
@@ -68,17 +62,17 @@ def test_get_all_summaries_returns_list(result_store, sample_result):
         name="Test Analysis 2",
         description="Test Description 2",
         table_name="test_table_2",
-        regression_output={"coefficients": [4.0, 5.0]}
+        regression_output={"coefficients": [4.0, 5.0]},
     )
     result_store.save_result(sample_result2)
 
     summaries = result_store.get_all_summaries()
 
     assert len(summaries) == 2
-    assert all('id' in s for s in summaries)
-    assert all('name' in s for s in summaries)
-    assert all('description' in s for s in summaries)
-    assert all('createdAt' in s for s in summaries)
+    assert all("id" in s for s in summaries)
+    assert all("name" in s for s in summaries)
+    assert all("description" in s for s in summaries)
+    assert all("createdAt" in s for s in summaries)
 
 
 def test_delete_result_removes_result(result_store, sample_result):
@@ -95,8 +89,7 @@ def test_delete_result_removes_result(result_store, sample_result):
 def test_delete_result_raises_key_error_for_nonexistent_id(result_store):
     """存在しないIDの削除で KeyError が発生することを確認"""
     with pytest.raises(
-        KeyError,
-        match="Analysis result with ID 'nonexistent' does not exist."
+        KeyError, match="Analysis result with ID 'nonexistent' does not exist."
     ):
         result_store.delete_result("nonexistent")
 
@@ -109,7 +102,7 @@ def test_clear_all_removes_all_results(result_store, sample_result):
         name="Test Analysis 2",
         description="Test Description 2",
         table_name="test_table_2",
-        regression_output={"coefficients": [4.0, 5.0]}
+        regression_output={"coefficients": [4.0, 5.0]},
     )
     result_store.save_result(sample_result2)
 
