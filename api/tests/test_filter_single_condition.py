@@ -1,8 +1,9 @@
 import polars as pl
 import pytest
-from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.services.data.tables_store import TablesStore
 from main import app
 
 
@@ -41,7 +42,7 @@ def test_filter_equals(client, tables_store):
         "compareValue": 2,
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -62,7 +63,7 @@ def test_filter_greater_than(client, tables_store):
         "compareValue": 10,
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -83,7 +84,7 @@ def test_filter_not_equals(client, tables_store):
         "compareValue": 2,
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -104,7 +105,7 @@ def test_filter_greater_than_or_equals(client, tables_store):
         "compareValue": 30,
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -125,7 +126,7 @@ def test_filter_less_than(client, tables_store):
         "compareValue": 3,
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -146,7 +147,7 @@ def test_filter_less_than_or_equals(client, tables_store):
         "compareValue": 12,
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -167,7 +168,7 @@ def test_filter_equals_compare_column(client, tables_store):
         "compareValue": "C",
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -190,7 +191,7 @@ def test_filter_greater_than_compare_column(client, tables_store):
         "compareValue": "C",
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -213,7 +214,7 @@ def test_filter_less_than_or_equals_compare_column(client, tables_store):
         "compareValue": "C",
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -236,7 +237,7 @@ def test_filter_invalid_table(client, tables_store):
         "compareValue": 1,
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -255,7 +256,7 @@ def test_filter_invalid_column(client, tables_store):
         "compareValue": 1,
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -274,7 +275,7 @@ def test_filter_invalid_condition(client, tables_store):
         "compareValue": 1,
     }
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json=payload,
     )
     response_data = response.json()
@@ -293,7 +294,7 @@ def test_filter_single_condition_empty_table_name(client, tables_store):
     tableNameが空文字列の場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "tableName": "",
             "newTableName": "FilteredTable",
@@ -314,7 +315,7 @@ def test_filter_single_condition_empty_new_table_name(client, tables_store):
     newTableNameが空文字列の場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "tableName": "TestTable",
             "newTableName": "",
@@ -335,7 +336,7 @@ def test_filter_single_condition_empty_column_name(client, tables_store):
     columnNameが空文字列の場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "tableName": "TestTable",
             "newTableName": "FilteredTable",
@@ -356,7 +357,7 @@ def test_filter_single_condition_empty_condition(client, tables_store):
     conditionが空文字列の場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "tableName": "TestTable",
             "newTableName": "FilteredTable",
@@ -377,7 +378,7 @@ def test_filter_single_condition_empty_is_compare_column(client, tables_store):
     isCompareColumnが空文字列の場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "tableName": "TestTable",
             "newTableName": "FilteredTable",
@@ -398,7 +399,7 @@ def test_filter_single_condition_missing_table_name(client, tables_store):
     tableNameが欠損している場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "newTableName": "FilteredTable",
             "columnName": "A",
@@ -418,7 +419,7 @@ def test_filter_single_condition_missing_new_table_name(client, tables_store):
     newTableNameが欠損している場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "tableName": "TestTable",
             "columnName": "A",
@@ -438,7 +439,7 @@ def test_filter_single_condition_missing_column_name(client, tables_store):
     columnNameが欠損している場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "tableName": "TestTable",
             "newTableName": "FilteredTable",
@@ -458,7 +459,7 @@ def test_filter_single_condition_missing_condition(client, tables_store):
     conditionが欠損している場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "tableName": "TestTable",
             "newTableName": "FilteredTable",
@@ -480,7 +481,7 @@ def test_filter_single_condition_missing_is_compare_column(
     isCompareColumnが欠損している場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "tableName": "TestTable",
             "newTableName": "FilteredTable",
@@ -500,7 +501,7 @@ def test_filter_single_condition_missing_compare_value(client, tables_store):
     compareValueが欠損している場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/filter-single-condition",
+        "/api/table/filter-single-condition",
         json={
             "tableName": "TestTable",
             "newTableName": "FilteredTable",
