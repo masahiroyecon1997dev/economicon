@@ -14,8 +14,8 @@ from .common import (
     validate_number,
     validate_required,
 )
-from .tables_store import validate_existed_column_name
 from .config.base import SUPPORTED_DISTRIBUTIONS
+from .tables_store import validate_existed_column_name
 
 
 def validate_distribution_type(
@@ -239,6 +239,15 @@ def validate_explanatory_variables(
     )
     for col_name in explanatory_variables:
         validate_required(col_name, explanatory_variables_param)
+
+        # "const"は定数項として予約されているため使用不可
+        if col_name == "const":
+            raise ValidationError(
+                _(
+                    '"const" is a reserved column name and cannot be used as an explanatory variable'
+                )
+            )
+
         validate_item_exists_in_list(
             col_name, explanatory_variables_param, column_name_list
         )
@@ -257,6 +266,15 @@ def validate_dependent_variable(
     dependent_variable_param: str,
 ) -> None:
     validate_required(dependent_variable, dependent_variable_param)
+
+    # "const"は定数項として予約されているため使用不可
+    if dependent_variable == "const":
+        raise ValidationError(
+            _(
+                '"const" is a reserved column name and cannot be used as a dependent variable'
+            )
+        )
+
     validate_item_exists_in_list(
         dependent_variable, dependent_variable_param, column_name_list
     )
@@ -329,6 +347,13 @@ def validate_endogenous_variables(
 ) -> None:
     # 内生変数の検証
     for endog in endogenous_variables:
+        # "const"は定数項として予約されているため使用不可
+        if endog == "const":
+            raise ValidationError(
+                _(
+                    '"const" is a reserved column name and cannot be used as an endogenous variable'
+                )
+            )
         validate_existed_column_name(
             endog, column_name_list, endogenous_variables_param
         )
