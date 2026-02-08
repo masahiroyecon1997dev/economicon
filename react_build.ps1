@@ -9,7 +9,7 @@ $ReactRootDir = Resolve-Path ".\front-analysis-app"
 $DistDir = "$ReactRootDir\dist"
 
 # FastAPIの静的ファイルディレクトリ (ビルドしたReactアプリを配置する場所)
-$FastApiStaticDir = ".\ApiServer\static"
+$FastApiStaticDir = ".\api\static"
 
 # ==============================================================================
 # ?? 処理の実行

@@ -6,7 +6,7 @@ $PACKAGE_NAME = "AnalysisApp_Portable"
 $PYTHON_DIST = "python_dist"
 
 # パス設定
-$API_SERVER_DIR = "ApiServer"
+$API_SERVER_DIR = "api"
 $REACT_BUILD_SCRIPT = ".\react_build.ps1"
 $LAUNCH_BAT = "app_launch.bat"
 
@@ -154,7 +154,7 @@ Write-Host ""
 # ステップ7: アプリケーションファイルのコピー
 Write-Host "--- [7/8] アプリケーションファイルをコピー ---" -ForegroundColor Yellow
 
-# ApiServerディレクトリの内容をコピー
+# apiディレクトリの内容をコピー
 if (Test-Path "$API_SERVER_DIR/main.py") {
     Copy-Item -Path "$API_SERVER_DIR/main.py" -Destination "$PACKAGE_NAME/app/" -Force
     Write-Host "  ? main.py をコピーしました。"

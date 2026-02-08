@@ -1,5 +1,5 @@
 ---
-applyTo: "ApiServer/**"
+applyTo: "api/**"
 ---
 
 # FastAPI バックエンド実装ルール
