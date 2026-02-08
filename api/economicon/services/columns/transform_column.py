@@ -3,6 +3,7 @@ from typing import Optional
 
 import polars as pl
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
@@ -10,11 +11,10 @@ from ...utils.validators.tables_store import (
     validate_existed_table_name,
     validate_new_column_name,
 )
-from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 
 
-class TransformColumn(AbstractApi):
+class TransformColumn:
     """
     テーブルの列の値を変換して新しい列を追加するためのAPIクラス
 

@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 import polars as pl
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.algorithms.simulation import generate_simulation_data
 from ...utils.validators.common import (
@@ -16,11 +17,10 @@ from ...utils.validators.tables_store import (
     validate_new_column_name,
     validate_new_table_name,
 )
-from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 
 
-class CreateSimulationDataTable(AbstractApi):
+class CreateSimulationDataTable:
     """
     シミュレーションデータテーブルを作成するためのAPIクラス
 

@@ -2,17 +2,16 @@ import os
 from datetime import datetime
 from typing import Dict
 
+from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
-
 from ...utils.validators.common import ValidationError
 from ...utils.validators.file import (
     validate_directory_path,
     validate_directory_path_is_directory,
 )
-from ..abstract_api import AbstractApi, ApiError
 
 
-class GetFiles(AbstractApi):
+class GetFiles:
     """
     指定されたディレクトリ内のファイルとフォルダ一覧を取得するAPIクラス
 

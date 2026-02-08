@@ -17,13 +17,15 @@ applyTo: "api/**"
 - **言語設定**: `ContextVar`ベースのスレッドセーフな設定を使用
 - **ルール**: ユーザー向けの文字列は必ず`_()`でラップする
 
-## 3. サービス（AbstractApi）要件
+## 3. サービス（DataOperation）要件
 
-すべてのAPIサービスクラスは`AbstractApi`を継承し、以下を実装する必要があります:
+すべてのAPIサービスクラスは`DataOperation`プロトコルに適合する必要があります:
 
 1. `__init__`: `self.param_names`を定義（`camelCase`を`snake_case`にマッピング）
-2. `validate`: 成功時は`None`を返し、失敗時は`ValidationError`を送出
-3. `execute`: `Polars`を使用したコアロジック。期待されるエラーは`ApiError`を送出
+2. `validate() -> Optional[ValidationError]`: 成功時は`None`を返し、失敗時は`ValidationError`を送出
+3. `execute() -> Optional[Dict | bytes]`: `Polars`を使用したコアロジック。期待されるエラーは`ApiError`を送出
+
+**注意**: `DataOperation`はProtocolによる構造的部分型（structural subtyping）を使用しており、継承は不要です。
 
 ## 4. ルーターとレスポンスパターン
 
