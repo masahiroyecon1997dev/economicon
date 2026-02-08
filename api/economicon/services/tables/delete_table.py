@@ -52,12 +52,3 @@ class DeleteTable(AbstractApi):
                 "An unexpected error occurred during table deletion processing"
             )
             raise ApiError(message) from e
-
-
-def delete_table(table_name: str) -> Dict:
-    api = DeleteTable(table_name)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    result = api.execute()
-    return result

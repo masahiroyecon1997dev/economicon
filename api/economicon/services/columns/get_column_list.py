@@ -67,18 +67,3 @@ class GetColumnList(AbstractApi):
         except Exception as e:
             message = _("An unexpected error during getting column info list.")
             raise ApiError(message) from e
-
-
-def get_column_list(
-    table_name: str, is_number_only: str
-) -> Dict[str, List[Dict[str, str]]]:
-    """
-    指定されたテーブルのカラム名のリストを取得する関数
-    :param table_name: テーブル名
-    :return: カラム名のリスト
-    """
-    api = GetColumnList(table_name, is_number_only)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()

@@ -169,27 +169,3 @@ class TransformColumn(AbstractApi):
                 "An unexpected error occurred during column transformation processing"
             )
             raise ApiError(message) from e
-
-
-def transform_column(
-    table_name: str,
-    source_column_name: str,
-    new_column_name: str,
-    transform_method: str,
-    log_base: Optional[float] = None,
-    exponent: Optional[float] = None,
-    root_index: Optional[float] = None,
-) -> Dict:
-    api = TransformColumn(
-        table_name,
-        source_column_name,
-        new_column_name,
-        transform_method,
-        log_base,
-        exponent,
-        root_index,
-    )
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()

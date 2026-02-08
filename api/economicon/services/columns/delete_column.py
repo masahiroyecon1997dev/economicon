@@ -74,25 +74,3 @@ class DeleteColumn(AbstractApi):
                 "column deletion processing"
             )
             raise ApiError(message) from e
-
-
-def delete_column(table_name: str, column_name: str) -> Dict:
-    """列削除のエントリーポイント
-
-    Parameters
-    ----------
-    table_name : str
-        テーブル名
-    column_name : str
-        列名
-
-    Returns
-    -------
-    Dict
-        処理結果
-    """
-    api = DeleteColumn(table_name, column_name)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()

@@ -83,29 +83,3 @@ class ImportCsvByPath(AbstractApi):
         except Exception as e:
             message = _("An unexpected error occurred during CSV processing")
             raise ApiError(message) from e
-
-
-def import_csv_by_path(
-    file_path: str, table_name: str, separator: str = ","
-) -> Dict:
-    """
-    CSVファイルパスからデータをインポートしてテーブルを作成する関数
-
-    Args:
-        file_path: CSVファイルのパス
-        table_name: 作成するテーブル名
-        separator: CSVの区切り文字（デフォルト: カンマ）
-
-    Returns:
-        作成されたテーブル名を含む辞書
-    """
-    api = ImportCsvByPath(file_path, table_name, separator)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    try:
-        result = api.execute()
-    except ApiError as e:
-        # APIエラーが発生した場合はそのまま再スロー
-        raise e
-    return result

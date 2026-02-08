@@ -9,13 +9,14 @@ from fastapi import status as http_status
 
 from ..schemas.regressions import RegressionRequest
 from ..services.abstract_api import ApiError
-from ..services.regressions.regression import regression
+from ..services.regressions.regression import Regression
 from ..services.regressions.result import (
-    clear_all_analysis_results,
-    delete_analysis_result,
-    get_all_analysis_results,
-    get_analysis_result,
+    ClearAllAnalysisResults,
+    DeleteAnalysisResult,
+    GetAllAnalysisResults,
+    GetAnalysisResult,
 )
+from ..services.operation import run_operation
 from ..utils import (
     create_error_response,
     create_log_api_request,
@@ -52,7 +53,8 @@ async def regression_endpoint(request: Request, body: RegressionRequest):
         分析結果またはエラーメッセージ
     """
     create_log_api_request(request)
-    result = regression(**body.model_dump())
+    api = Regression(**body.model_dump())
+    result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
@@ -71,8 +73,9 @@ async def get_all_analysis_results_endpoint(request: Request):
     try:
         # リクエスト受け取りログ
         create_log_api_request(request)
-        # ビジネスロジックの実行（既存のpython_apisをそのまま使用）
-        result = get_all_analysis_results()
+        # ビジネスロジックの実行
+        api = GetAllAnalysisResults()
+        result = run_operation(api)
 
         return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -109,7 +112,8 @@ async def get_analysis_result_endpoint(request: Request, result_id: str):
     create_log_api_request(request)
 
     try:
-        result = get_analysis_result(result_id)
+        api = GetAnalysisResult(result_id)
+        result = run_operation(api)
 
         return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -148,7 +152,8 @@ async def delete_analysis_result_endpoint(request: Request, result_id: str):
     create_log_api_request(request)
 
     try:
-        result = delete_analysis_result(result_id)
+        api = DeleteAnalysisResult(result_id)
+        result = run_operation(api)
 
         return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -180,7 +185,8 @@ async def clear_all_analysis_results_endpoint(request: Request):
     create_log_api_request(request)
 
     try:
-        result = clear_all_analysis_results()
+        api = ClearAllAnalysisResults()
+        result = run_operation(api)
 
         return create_success_response(http_status.HTTP_200_OK, result)
 

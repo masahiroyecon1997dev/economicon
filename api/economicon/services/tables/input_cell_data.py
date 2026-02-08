@@ -99,14 +99,3 @@ class InputCellData(AbstractApi):
                 "input cell data processing"
             )
             raise ApiError(message) from e
-
-
-def input_cell_data(
-    table_name: str, column_name: str, row_index: int, new_value
-) -> Dict:
-    api = InputCellData(table_name, column_name, row_index, new_value)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    result = api.execute()
-    return result

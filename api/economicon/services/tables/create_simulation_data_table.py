@@ -188,19 +188,3 @@ class CreateSimulationDataTable(AbstractApi):
                 "An unexpected error occurred during creating simulation data table"
             )
             raise ApiError(message) from e
-
-
-def create_simulation_data_table(
-    table_name: str,
-    table_number_of_rows: int,
-    column_settings: List[Dict[str, Any]],
-) -> Dict:
-    """シミュレーションデータテーブル作成のエントリーポイント"""
-    api = CreateSimulationDataTable(
-        table_name, table_number_of_rows, column_settings
-    )
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    result = api.execute()
-    return result

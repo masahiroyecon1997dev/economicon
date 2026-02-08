@@ -67,12 +67,3 @@ class DuplicateTable(AbstractApi):
                 "table duplication processing"
             )
             raise ApiError(message) from e
-
-
-def duplicate_table(table_name: str, new_table_name: str) -> Dict:
-    api = DuplicateTable(table_name, new_table_name)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    result = api.execute()
-    return result

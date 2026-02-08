@@ -100,18 +100,3 @@ class AddDummyColumn(AbstractApi):
                 "adding dummy column processing"
             )
             raise ApiError(message) from e
-
-
-def add_dummy_column(
-    table_name: str,
-    source_column_name: str,
-    dummy_column_name: str,
-    target_value: str,
-) -> Dict:
-    api = AddDummyColumn(
-        table_name, source_column_name, dummy_column_name, target_value
-    )
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()

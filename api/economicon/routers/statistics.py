@@ -2,8 +2,9 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..schemas import ConfidenceIntervalRequest, DescriptiveStatisticsRequest
-from ..services.statistics.confidence_interval import confidence_interval
-from ..services.statistics.descriptive_statistics import descriptive_statistics
+from ..services.statistics.confidence_interval import ConfidenceInterval
+from ..services.statistics.descriptive_statistics import DescriptiveStatistics
+from ..services.operation import run_operation
 from ..utils import create_log_api_request, create_success_response
 
 router = APIRouter(prefix="/statistics", tags=["statistics"])
@@ -31,7 +32,8 @@ async def confidence_interval_endpoint(
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    result = confidence_interval(**body.model_dump())
+    api = ConfidenceInterval(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -56,6 +58,7 @@ async def descriptive_statistics_endpoint(
     """
     create_log_api_request(request)
 
-    result = descriptive_statistics(**body.model_dump())
+    api = DescriptiveStatistics(**body.model_dump())
+    result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)

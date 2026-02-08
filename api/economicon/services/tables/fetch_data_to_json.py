@@ -91,19 +91,3 @@ class FetchDataToJson(AbstractApi):
                 f" {str(e)}"
             )
             raise ApiError(message) from e
-
-
-def fetch_data_to_json(table_name: str, start_row: int, fetch_rows: int):
-    """
-    テーブルのデータをJSON形式で取得する関数
-
-    :param table_name: テーブル名
-    :param start_row: 取得開始行（1から始まる）
-    :param fetch_rows: 取得行数
-    :return: JSON形式のデータとメタ情報（総行数、開始行、終了行）
-    """
-    api = FetchDataToJson(table_name, start_row, fetch_rows)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()
