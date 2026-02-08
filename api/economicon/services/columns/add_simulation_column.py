@@ -112,21 +112,3 @@ class AddSimulationColumn(AbstractApi):
                 "adding simulation column processing"
             )
             raise ApiError(message) from e
-
-
-def add_simulation_column(
-    table_name: str,
-    new_column_name: str,
-    distribution_type: str,
-    distribution_params: Dict[str, Any],
-) -> Dict:
-    """
-    テーブルにシミュレーション列を追加するためのAPI関数
-    """
-    api = AddSimulationColumn(
-        table_name, new_column_name, distribution_type, distribution_params
-    )
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()

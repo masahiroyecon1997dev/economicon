@@ -33,11 +33,3 @@ class ClearTables(AbstractApi):
                 "during clearing tables processing"
             )
             raise ApiError(message) from e
-
-
-def clear_tables() -> Dict:
-    api = ClearTables()
-    validation_error = api.validate()
-    if validation_error:
-        raise validation_error
-    return api.execute()

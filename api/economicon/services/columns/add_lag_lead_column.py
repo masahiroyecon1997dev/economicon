@@ -126,19 +126,3 @@ class AddLagLeadColumn(AbstractApi):
                 "adding lag/lead column processing"
             )
             raise ApiError(message) from e
-
-
-def add_lag_lead_column(
-    table_name: str,
-    source_column: str,
-    new_column_name: str,
-    periods: int,
-    group_columns: Optional[List[str]] = None,
-) -> Dict:
-    api = AddLagLeadColumn(
-        table_name, source_column, new_column_name, periods, group_columns
-    )
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()

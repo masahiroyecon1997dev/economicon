@@ -32,11 +32,3 @@ class GetTableList(AbstractApi):
         except Exception as e:
             message = _("An unexpected error during getting table name list.")
             raise ApiError(message) from e
-
-
-def get_table_list() -> dict:
-    api = GetTableList()
-    validation_error = api.validate()
-    if validation_error:
-        raise validation_error
-    return api.execute()

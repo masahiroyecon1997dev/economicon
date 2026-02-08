@@ -129,38 +129,3 @@ class FetchDataToArrow(AbstractApi):
                 f"from table '{self.table_name}': {str(e)}"
             )
             raise ApiError(message) from e
-
-
-def fetch_data_to_arrow(
-    table_name: str, start_row: int, chunk_size: int = 500
-):
-    """
-    テーブルのデータをApache Arrow IPC形式で取得する関数
-
-    Parameters
-    ----------
-    table_name : str
-        テーブル名
-    start_row : int
-        取得開始行（1から始まる）
-    chunk_size : int, optional
-        チャンクサイズ（デフォルト500行）
-
-    Returns
-    -------
-    dict
-        Apache Arrow IPC形式のデータとメタ情報
-        （総行数、開始行、終了行）
-
-    Raises
-    ------
-    ValueError
-        バリデーションエラーが発生した場合
-    ApiError
-        データ取得中にエラーが発生した場合
-    """
-    api = FetchDataToArrow(table_name, start_row, chunk_size)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()

@@ -88,29 +88,3 @@ class ImportExcelByPath(AbstractApi):
         except Exception as e:
             message = _("An unexpected error occurred during EXCEL processing")
             raise ApiError(message) from e
-
-
-def import_excel_by_path(
-    file_path: str, table_name: str, sheet_name: Optional[str] = None
-) -> Dict:
-    """
-    EXCELファイルパスからデータをインポートしてテーブルを作成する関数
-
-    Args:
-        file_path: EXCELファイルのパス
-        table_name: 作成するテーブル名
-        sheet_name: シート名（デフォルト: None）
-
-    Returns:
-        作成されたテーブル名を含む辞書
-    """
-    api = ImportExcelByPath(file_path, table_name, sheet_name)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    try:
-        result = api.execute()
-    except ApiError as e:
-        # APIエラーが発生した場合はそのまま再スロー
-        raise e
-    return result

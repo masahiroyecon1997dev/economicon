@@ -89,29 +89,3 @@ class ExportParquetByPath(AbstractApi):
                 "An unexpected error occurred during PARQUET export processing"
             )
             raise ApiError(message) from e
-
-
-def export_parquet_by_path(
-    table_name: str, directory_path: str, file_name: str
-) -> Dict:
-    """
-    テーブルをPARQUETファイルパスに出力する関数
-
-    Args:
-        table_name: エクスポートするテーブル名
-        directory_path: 出力するディレクトリパス
-        file_name: 出力するPARQUETファイル名
-
-    Returns:
-        出力されたファイルパスを含む辞書
-    """
-    api = ExportParquetByPath(table_name, directory_path, file_name)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    try:
-        result = api.execute()
-    except ApiError as e:
-        # APIエラーが発生した場合はそのまま再スロー
-        raise e
-    return result

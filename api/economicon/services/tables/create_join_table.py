@@ -159,26 +159,3 @@ class CreateJoinTable(AbstractApi):
                 "join table creation processing"
             )
             raise ApiError(message) from e
-
-
-def create_join_table(
-    join_table_name: str,
-    left_table_name: str,
-    right_table_name: str,
-    left_key_column_names: List[str],
-    right_key_column_names: List[str],
-    join_type: str,
-) -> Dict:
-    api = CreateJoinTable(
-        join_table_name,
-        left_table_name,
-        right_table_name,
-        left_key_column_names,
-        right_key_column_names,
-        join_type,
-    )
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    result = api.execute()
-    return result

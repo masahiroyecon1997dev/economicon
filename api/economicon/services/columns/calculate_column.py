@@ -127,13 +127,3 @@ class CalculateColumn(AbstractApi):
                 "column calculation processing"
             )
             raise ApiError(message) from e
-
-
-def calculate_column(
-    table_name: str, new_column_name: str, calculation_expression: str
-) -> Dict:
-    api = CalculateColumn(table_name, new_column_name, calculation_expression)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()

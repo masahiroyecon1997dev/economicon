@@ -102,16 +102,3 @@ class CreateUnionTable(AbstractApi):
                 "An unexpected error occurred during union table creation processing"
             )
             raise ApiError(message) from e
-
-
-def create_union_table(
-    union_table_name: str,
-    table_names: List[str],
-    column_names: List[str],
-) -> Dict:
-    api = CreateUnionTable(union_table_name, table_names, column_names)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    result = api.execute()
-    return result

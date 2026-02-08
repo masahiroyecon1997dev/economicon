@@ -87,13 +87,3 @@ class RenameColumn(AbstractApi):
                 "renaming column processing"
             )
             raise ApiError(message) from e
-
-
-def rename_column(
-    table_name: str, old_column_name: str, new_column_name: str
-) -> Dict:
-    api = RenameColumn(table_name, old_column_name, new_column_name)
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    return api.execute()

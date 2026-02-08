@@ -247,24 +247,3 @@ class ConfidenceInterval(AbstractApi):
         ci_upper = np.sqrt(var_ci_upper)
 
         return float(std_val), float(ci_lower), float(ci_upper)
-
-
-def confidence_interval(
-    table_name: str,
-    column_name: str,
-    confidence_level: float,
-    statistic_type: str,
-) -> Dict:
-    """信頼区間計算の関数インターフェース"""
-    api = ConfidenceInterval(
-        table_name, column_name, confidence_level, statistic_type
-    )
-    validation_error = api.validate()
-    if validation_error:
-        raise ValueError(validation_error.message)
-    try:
-        result = api.execute()
-        return result
-    except ValidationError:
-        # Validation errors from execute should also be re-raised
-        raise
