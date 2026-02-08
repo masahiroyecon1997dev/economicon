@@ -4,7 +4,7 @@
 各回帰モデルのフィッティングロジックを提供する純粋関数群
 """
 
-from typing import Any
+from typing import Any, Tuple
 
 import numpy as np
 import statsmodels.api as sm
@@ -12,6 +12,8 @@ from linearmodels.iv import IV2SLS
 from linearmodels.panel import PanelOLS, RandomEffects
 from py4etrics.tobit import Tobit
 from sklearn.linear_model import Lasso, Ridge
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
 from .common import LINEARMODELS_COV_TYPE_MAP, remove_const_column
@@ -246,9 +248,13 @@ def fit_lasso(
     has_const: bool,
     alpha: float,
     missing: str,
-) -> RegressionResultsWrapper:
+) -> Tuple[RegressionResultsWrapper, np.ndarray]:
     """
-    Lassoモデルのフィッティング
+    Lassoモデルのフィッティング（Pipeline使用、両係数を返す）
+
+    make_pipelineで標準化とLassoを統合し、変数のスケールに依存しない正則化を実現。
+    元のスケールの係数と標準化後の係数の両方を返すことで、
+    実務的解釈（元のスケール）と変数間比較（標準化後）の両方を可能にする。
 
     Args:
         y_data: 被説明変数のデータ
@@ -258,29 +264,45 @@ def fit_lasso(
         missing: 欠損値の処理方法
 
     Returns:
-        statsmodels 互換の回帰結果
+        result: statsmodels互換の回帰結果（元のスケールの係数）
+        coef_scaled: 標準化後の係数（変数間の相対的重要度比較用）
     """
     # x_dataに定数項が含まれている場合は除去
     x_data_sklearn = remove_const_column(x_data, has_const)
 
-    # scikit-learn の Lasso を使用
-    lasso = Lasso(alpha=alpha, fit_intercept=has_const)
-    lasso.fit(x_data_sklearn, y_data)
+    # Pipelineで標準化＋Lasso
+    model = make_pipeline(StandardScaler(), Lasso(alpha=alpha))
+    model.fit(x_data_sklearn, y_data)
+
+    # 各ステップを取得
+    scaler = model.named_steps["standardscaler"]
+    lasso = model.named_steps["lasso"]
+
+    # 標準化後の係数（変数間比較用）
+    coef_scaled = lasso.coef_
+    intercept_scaled = lasso.intercept_
+
+    # 元のスケールに戻す
+    coef_original = coef_scaled / scaler.scale_
+    intercept_original = (
+        np.mean(y_data)
+        - np.dot(coef_original, scaler.mean_)
+        + intercept_scaled
+    )
 
     # statsmodels 形式で再構築（統計量を取得するため）
-    # Lassoの予測値を使ってOLSで統計量を計算
-    model = sm.OLS(y_data, x_data, missing=missing)
-    result = model.fit()
+    model_ols = sm.OLS(y_data, x_data, missing=missing)
+    result = model_ols.fit()
 
-    # Lasso の係数で上書き
+    # Lasso の係数で上書き（元のスケール）
     if has_const:
         result._results.params = np.hstack(
-            ([lasso.intercept_], lasso.coef_)  # type: ignore
+            ([intercept_original], coef_original)  # type: ignore
         )
     else:
-        result._results.params = lasso.coef_
+        result._results.params = coef_original
 
-    return result
+    return result, coef_scaled
 
 
 def fit_ridge(
@@ -289,9 +311,13 @@ def fit_ridge(
     has_const: bool,
     alpha: float,
     missing: str,
-) -> RegressionResultsWrapper:
+) -> Tuple[RegressionResultsWrapper, np.ndarray]:
     """
-    Ridgeモデルのフィッティング
+    Ridgeモデルのフィッティング（Pipeline使用、両係数を返す）
+
+    make_pipelineで標準化とRidgeを統合し、変数のスケールに依存しない正則化を実現。
+    元のスケールの係数と標準化後の係数の両方を返すことで、
+    実務的解釈（元のスケール）と変数間比較（標準化後）の両方を可能にする。
 
     Args:
         y_data: 被説明変数のデータ
@@ -301,26 +327,42 @@ def fit_ridge(
         missing: 欠損値の処理方法
 
     Returns:
-        statsmodels 互換の回帰結果
+        result: statsmodels互換の回帰結果（元のスケールの係数）
+        coef_scaled: 標準化後の係数（変数間の相対的重要度比較用）
     """
     # x_dataに定数項が含まれている場合は除去
     x_data_sklearn = remove_const_column(x_data, has_const)
 
-    # scikit-learn の Ridge を使用
-    ridge = Ridge(alpha=alpha, fit_intercept=has_const)
-    ridge.fit(x_data_sklearn, y_data)
+    # Pipelineで標準化＋Ridge
+    model = make_pipeline(StandardScaler(), Ridge(alpha=alpha))
+    model.fit(x_data_sklearn, y_data)
+
+    # 各ステップを取得
+    scaler = model.named_steps["standardscaler"]
+    ridge = model.named_steps["ridge"]
+
+    # 標準化後の係数（変数間比較用）
+    coef_scaled = ridge.coef_
+    intercept_scaled = ridge.intercept_
+
+    # 元のスケールに戻す
+    coef_original = coef_scaled / scaler.scale_
+    intercept_original = (
+        np.mean(y_data)
+        - np.dot(coef_original, scaler.mean_)
+        + intercept_scaled
+    )
 
     # statsmodels 形式で再構築（統計量を取得するため）
-    # Ridgeの予測値を使ってOLSで統計量を計算
-    model = sm.OLS(y_data, x_data, missing=missing)
-    result = model.fit()
+    model_ols = sm.OLS(y_data, x_data, missing=missing)
+    result = model_ols.fit()
 
-    # Ridge の係数で上書き
+    # Ridge の係数で上書き（元のスケール）
     if has_const:
         result._results.params = np.hstack(
-            ([ridge.intercept_], ridge.coef_)  # type: ignore
+            ([intercept_original], coef_original)  # type: ignore
         )
     else:
-        result._results.params = ridge.coef_
+        result._results.params = coef_original
 
-    return result
+    return result, coef_scaled

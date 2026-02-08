@@ -7,10 +7,11 @@
 import numpy as np
 import polars as pl
 import pytest
-from economicon.services.data.analysis_result_store import AnalysisResultStore
-from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.services.data.analysis_result_store import AnalysisResultStore
+from economicon.services.data.tables_store import TablesStore
 from main import app
 
 
@@ -340,6 +341,17 @@ def test_lasso_regression(client, tables_store):
             f"Coefficient too large for Lasso: {param.get('variable', 'unknown')}"
         )
 
+        # coefficientScaledが含まれていることを確認
+        assert "coefficientScaled" in param, (
+            f"coefficientScaled not found for {param.get('variable', 'unknown')}"
+        )
+
+        # 定数項はNone、その他は数値
+        if param["variable"] == "const":
+            assert param["coefficientScaled"] is None
+        else:
+            assert isinstance(param["coefficientScaled"], (int, float))
+
 
 def test_ridge_regression(client, tables_store):
     """Ridge回帰のテスト"""
@@ -373,6 +385,17 @@ def test_ridge_regression(client, tables_store):
         assert abs(param["coefficient"]) < 100, (
             f"Coefficient too large for Ridge: {param.get('variable', 'unknown')}"
         )
+
+        # coefficientScaledが含まれていることを確認
+        assert "coefficientScaled" in param, (
+            f"coefficientScaled not found for {param.get('variable', 'unknown')}"
+        )
+
+        # 定数項はNone、その他は数値
+        if param["variable"] == "const":
+            assert param["coefficientScaled"] is None
+        else:
+            assert isinstance(param["coefficientScaled"], (int, float))
 
 
 def test_tobit_regression(client, tables_store):
