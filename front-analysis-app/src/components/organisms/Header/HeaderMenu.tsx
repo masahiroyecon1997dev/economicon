@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useState } from "react";
 import { cn } from "../../../lib/utils/helpers";
-import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
+import { useCurrentPageStore } from "../../../stores/currentView";
 import type { DropmenuPositionType } from "../../../types/commonTypes";
 import { MenuItem } from "../../atoms/Menu/MenuItem";
 import { DropdownMenu } from "../../molecules/Menu/DropdownMenu";
@@ -13,7 +13,7 @@ const menuPosition: DropmenuPositionType = 'bottom';
 
 export const HeaderMenu = () => {
   const { t } = useTranslation();
-  const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const [isDataMenuOpen, setIsDataMenuOpen] = useState(false);
   const [isRegressionMenuOpen, setIsRegressionMenuOpen] = useState(false);
 
