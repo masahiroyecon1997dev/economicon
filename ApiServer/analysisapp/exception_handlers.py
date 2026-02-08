@@ -5,7 +5,7 @@ from fastapi import status as http_status
 from .i18n import _
 from .services import ApiError
 from .utils import create_error_response
-from .utils.validator import ValidationError
+from .utils.validators import ValidationError
 
 
 def init_exception_handlers(app: FastAPI):

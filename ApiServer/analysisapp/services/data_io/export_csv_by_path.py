@@ -1,13 +1,13 @@
 import os
 from typing import Dict
 
-from ...utils.validator.common_validators import ValidationError
-from ...utils.validator.file_validators import (
+from ...utils.validators.common_validators import ValidationError
+from ...utils.validators.file_validators import (
     validate_directory_path,
     validate_file_name,
     validate_separator,
 )
-from ...utils.validator.tables_store_validator import (
+from ...utils.validators.tables_store_validator import (
     validate_existed_table_name,
 )
 from ..abstract_api import AbstractApi, ApiError

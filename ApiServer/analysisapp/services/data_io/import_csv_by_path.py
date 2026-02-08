@@ -2,12 +2,12 @@ from typing import Dict
 
 import polars as pl
 
-from ...utils.validator.common_validators import ValidationError
-from ...utils.validator.file_validators import (
+from ...utils.validators.common_validators import ValidationError
+from ...utils.validators.file_validators import (
     validate_file_path,
     validate_separator,
 )
-from ...utils.validator.tables_store_validator import validate_new_table_name
+from ...utils.validators.tables_store_validator import validate_new_table_name
 from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
 from ...i18n.translation import gettext as _

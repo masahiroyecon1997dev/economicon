@@ -4,14 +4,17 @@ fastapi-babel統合とvalidate_required翻訳のテスト
 SettingsManagerの言語設定に基づいて、validate_required関数の
 エラーメッセージが正しく日本語と英語で翻訳されることを確認します。
 """
+
 import os
 from pathlib import Path
 
 import pytest
 import yaml
 from analysisapp.services.data.settings_manager import SettingsManager
-from analysisapp.utils.validator.common_validators import (ValidationError,
-                                                           validate_required)
+from analysisapp.utils.validators.common_validators import (
+    ValidationError,
+    validate_required,
+)
 
 
 @pytest.fixture
@@ -24,14 +27,14 @@ def temp_settings_file():
 
     if backup_exists:
         # バックアップを作成
-        with open(original_settings_path, 'r', encoding='utf-8') as f:
+        with open(original_settings_path, "r", encoding="utf-8") as f:
             backup_content = f.read()
 
     yield
 
     # テスト後に元の設定を復元
     if backup_exists and backup_content:
-        with open(original_settings_path, 'w', encoding='utf-8') as f:
+        with open(original_settings_path, "w", encoding="utf-8") as f:
             f.write(backup_content)
     elif original_settings_path.exists():
         # テストで作成された設定ファイルを削除
@@ -45,21 +48,16 @@ def create_settings_file(language: str):
     """指定された言語で設定ファイルを作成"""
     settings_path = SettingsManager._get_settings_file_path()
     settings = {
-        'os_name': 'Windows',
-        'default_folder_path': str(Path.home()).replace(os.sep, '/'),
-        'display_rows': 100,
-        'app_language': language,
-        'encoding': 'utf-8',
-        'path_separator': '/'
+        "os_name": "Windows",
+        "default_folder_path": str(Path.home()).replace(os.sep, "/"),
+        "display_rows": 100,
+        "app_language": language,
+        "encoding": "utf-8",
+        "path_separator": "/",
     }
 
-    with open(settings_path, 'w', encoding='utf-8') as f:
-        yaml.dump(
-            settings,
-            f,
-            default_flow_style=False,
-            allow_unicode=True
-        )
+    with open(settings_path, "w", encoding="utf-8") as f:
+        yaml.dump(settings, f, default_flow_style=False, allow_unicode=True)
 
 
 class TestValidateRequiredTranslation:
@@ -71,7 +69,7 @@ class TestValidateRequiredTranslation:
         日本語で表示されることを確認
         """
         # 日本語設定ファイルを作成
-        create_settings_file('ja')
+        create_settings_file("ja")
 
         # SettingsManagerをリセットして再初期化
         SettingsManager._instance = None
@@ -90,8 +88,8 @@ class TestValidateRequiredTranslation:
         # より詳細なアサーション
         expected_ja_message = "testParamは必須です。"
         assert (
-            expected_ja_message in error_message or
-            "testParam is required." in error_message
+            expected_ja_message in error_message
+            or "testParam is required." in error_message
         ), f"Unexpected message: {error_message}"
 
     def test_validate_required_english(self, temp_settings_file):
@@ -100,7 +98,7 @@ class TestValidateRequiredTranslation:
         英語で表示されることを確認
         """
         # 英語設定ファイルを作成
-        create_settings_file('en')
+        create_settings_file("en")
 
         # SettingsManagerをリセットして再初期化
         SettingsManager._instance = None
@@ -118,15 +116,12 @@ class TestValidateRequiredTranslation:
             f"Expected '{expected_en_message}' in '{error_message}'"
         )
 
-    def test_validate_required_empty_value_japanese(
-        self,
-        temp_settings_file
-    ):
+    def test_validate_required_empty_value_japanese(self, temp_settings_file):
         """
         日本語設定で空文字のバリデーションエラーメッセージを確認
         """
         # 日本語設定ファイルを作成
-        create_settings_file('ja')
+        create_settings_file("ja")
 
         # SettingsManagerをリセットして再初期化
         SettingsManager._instance = None
@@ -142,15 +137,12 @@ class TestValidateRequiredTranslation:
         assert "dataField" in error_message
         assert "必須です" in error_message or "is required" in error_message
 
-    def test_validate_required_empty_value_english(
-        self,
-        temp_settings_file
-    ):
+    def test_validate_required_empty_value_english(self, temp_settings_file):
         """
         英語設定で空文字のバリデーションエラーメッセージを確認
         """
         # 英語設定ファイルを作成
-        create_settings_file('en')
+        create_settings_file("en")
 
         # SettingsManagerをリセットして再初期化
         SettingsManager._instance = None
@@ -171,7 +163,7 @@ class TestValidateRequiredTranslation:
     def test_validate_required_success(self, temp_settings_file):
         """有効な値でvalidate_requiredが成功することを確認"""
         # 日本語設定ファイルを作成
-        create_settings_file('ja')
+        create_settings_file("ja")
 
         # SettingsManagerをリセットして再初期化
         SettingsManager._instance = None
@@ -194,7 +186,7 @@ class TestValidateRequiredTranslation:
         切り替わることを確認
         """
         # 最初は日本語で設定
-        create_settings_file('ja')
+        create_settings_file("ja")
         SettingsManager._instance = None
         settings_manager = SettingsManager()
         settings_manager.load_settings()
@@ -205,7 +197,7 @@ class TestValidateRequiredTranslation:
         error_message_ja = str(exc_info_ja.value)
 
         # 英語に切り替え
-        create_settings_file('en')
+        create_settings_file("en")
         SettingsManager._instance = None
         settings_manager = SettingsManager()
         settings_manager.load_settings()
@@ -223,7 +215,6 @@ class TestValidateRequiredTranslation:
         # 注: 実際の翻訳が機能している場合は、
         # 日本語と英語で異なるメッセージになるはず
         assert (
-            "必須です" in error_message_ja or
-            "is required" in error_message_ja
+            "必須です" in error_message_ja or "is required" in error_message_ja
         )
         assert "is required" in error_message_en
