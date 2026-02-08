@@ -3,7 +3,7 @@
   "tasks": [
     {
       "type": "shell",
-      "command": "cd app && pnpm run dev",
+      "command": "cd app; pnpm run dev",
       "label": "pnpm: start",
       "detail": "start-dev-server",
       "group": {

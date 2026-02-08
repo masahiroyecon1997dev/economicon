@@ -14,17 +14,14 @@
       }
     },
     {
-      "name": "Launch Chrome against localhost",
-      "type": "chrome",
+      "name": "Tauri Development (Windows)",
+      "type": "cppvsdbg",
       "request": "launch",
-      "preLaunchTask": "pnpm: start",
-      "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}/app",
-      "sourceMaps": true,
-      "sourceMapPathOverrides": {
-        "webpack:///./~/*": "${webRoot}/node_modules/*",
-        "webpack://?:*/*": "${webRoot}/src/*"
-      }
+      "program": "${workspaceFolder}/app/src-tauri/target/debug/economicon.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}/app",
+      "stopAtEntry": false,
+      "preLaunchTask": "pnpm: start"
     },
     {
       "name": "pytest",
@@ -34,6 +31,18 @@
       "args": ["tests", "-v"],
       "justMyCode": false,
       "cwd": "${workspaceFolder}/api"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack Debug (API + Tauri)",
+      "configurations": ["api-server", "Tauri Development (Windows)"],
+      "stopAll": true,
+      "presentation": {
+        "hidden": false,
+        "group": "Full Stack",
+        "order": 1
+      }
     }
   ]
 }
