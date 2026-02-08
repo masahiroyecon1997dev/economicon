@@ -22,7 +22,6 @@ applyTo: "api/**"
 - **翻訳関数**: `economicon.i18n.translation.gettext as _`
 - **言語設定**: `ContextVar`ベースのスレッドセーフな設定を使用
 - **ルール**: ユーザー向けの文字列は必ず`_()`でラップする
-- **注意**: `gettext_lazy`は後方互換性のため存在しますが、`gettext`を使用してください
 
 ## 3. サービス（DataOperation）要件
 
