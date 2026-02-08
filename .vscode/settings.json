@@ -52,10 +52,6 @@
   "files.encoding": "utf8",
   // 改行コードの規定値
   "files.eol": "\n",
-  // 非表示にするファイル・ディレクトリのパスのパターン
-  "files.exclude": {
-    // あれば記述する
-  },
   // ファイル保存時に行末に改行を挿入
   "files.insertFinalNewline": true,
   // ファイル保存時に最終行以降の空行を削除
@@ -64,11 +60,20 @@
   "files.trimTrailingWhitespace": true,
   // 監視対象から外すファイル・ディレクトリのパスのパターン
   "files.watcherExclude": {
-    // あれば記述する
+    "**/target/**": true,
+    "**/node_modules/**": true,
+    "**/.venv/**": true,
+    "**/dist/**": true,
+    "**/__pycache__/**": true
   },
   // 検索対象から外すファイル・ディレクトリのパスのパターン
   "search.exclude": {
-    //あれば記述する
+    "**/target/**": true,
+    "**/node_modules/**": true,
+    "**/.venv/**": true,
+    "**/dist/**": true,
+    "**/__pycache__/**": true,
+    "**/pnpm-lock.yaml": true
   },
   // 検索ビューの検索結果に行数を併記
   "search.showLineNumbers": true,
@@ -123,21 +128,41 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    // 既定のフォーマッター（Prettierに統一）
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "python.testing.cwd": "${workspaceFolder}/api",
-  "python.testing.pytestArgs": [],
-  // "python.testing.autoTestDiscoverOnSaveEnabled": true,
-  "python.testing.pytestEnabled": true,
-  "python.testing.unittestEnabled": false,
-  "python.defaultInterpreterPath": "${workspaceFolder}/api/.venv/Scripts/python.exe",
-  "python.analysis.typeCheckingMode": "standard",
+  "[toml]": {
+    // 既定のフォーマッター
+    "editor.defaultFormatter": "tamasfe.even-better-toml",
+    // ファイル保存時に自動でフォーマット
+    "editor.formatOnSave": true,
+    // 1つのタブに相当する半角スペースの数
+    "editor.tabSize": 2
+  },
   "[html]": {
+    // 既定のフォーマッター
     "editor.defaultFormatter": "vscode.html-language-features"
   },
   "[rust]": {
+    // 既定のフォーマッター
     "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    // ファイル保存時に自動でフォーマット
     "editor.formatOnSave": true
   },
-  "rust-analyzer.check.command": "clippy"
+  // Rust Analyzerでclippyを使用してチェック
+  "rust-analyzer.check.command": "clippy",
+  // すべての機能を有効化
+  "rust-analyzer.cargo.features": "all",
+  // Python テストの作業ディレクトリ
+  "python.testing.cwd": "${workspaceFolder}/api",
+  // pytest の引数
+  "python.testing.pytestArgs": [],
+  // pytest を有効化
+  "python.testing.pytestEnabled": true,
+  // unittest を無効化
+  "python.testing.unittestEnabled": false,
+  // Python インタープリターのパス
+  "python.defaultInterpreterPath": "${workspaceFolder}/api/.venv/Scripts/python.exe",
+  // Python 型チェックモード
+  "python.analysis.typeCheckingMode": "standard"
 }

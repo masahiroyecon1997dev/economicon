@@ -1,13 +1,4 @@
-import gc
 from typing import Any, Dict, List, Optional
-
-import numpy as np
-import statsmodels.api as sm
-from linearmodels.iv import IV2SLS
-from linearmodels.panel import PanelOLS, RandomEffects
-from py4etrics.tobit import Tobit
-from sklearn.linear_model import Lasso, Ridge
-from statsmodels.regression.linear_model import RegressionResultsWrapper
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
@@ -28,6 +19,22 @@ from ...utils.validators.tables_store import (
 from ..data.analysis_result import AnalysisResult
 from ..data.analysis_result_store import AnalysisResultStore
 from ..data.tables_store import TablesStore
+from .common import (
+    MISSING_HANDLING_MAP,
+    prepare_basic_data,
+)
+from .fitters import (
+    fit_fe,
+    fit_iv,
+    fit_lasso,
+    fit_logit,
+    fit_ols,
+    fit_probit,
+    fit_re,
+    fit_ridge,
+    fit_tobit,
+)
+from .standard_errors import apply_standard_errors
 
 
 class Regression:
@@ -195,19 +202,16 @@ class Regression:
             df = table_info.table
 
             # データの準備
-            y_data = df[self.dependent_variable].to_numpy()
-            x_data = df[self.explanatory_variables].to_numpy()
-            # 定数項の追加
-            if self.has_const:
-                x_data = sm.add_constant(x_data)
+            y_data, x_data = prepare_basic_data(
+                df,
+                self.dependent_variable,
+                self.explanatory_variables,
+                self.has_const,
+                MISSING_HANDLING_MAP.get(self.missing_value_handling, "drop"),
+            )
 
             # 欠損値の処理を statsmodels の形式に変換
-            missing_handling_map = {
-                "ignore": "none",
-                "remove": "drop",
-                "error": "raise",
-            }
-            missing = missing_handling_map.get(
+            missing = MISSING_HANDLING_MAP.get(
                 self.missing_value_handling, "drop"
             )
 
@@ -215,63 +219,76 @@ class Regression:
             analysis_result = None
             match self.type:
                 case "ols":
-                    model_result = self._linear_fit(
-                        y_data,
-                        x_data,
-                        missing,
-                    )
-                    model_result = self._apply_standard_errors(
+                    model_result = fit_ols(y_data, x_data, missing)
+                    model_result = apply_standard_errors(
                         model_result,
+                        self.standard_error_method,
+                        self.standard_error_params,
                     )
                     analysis_result = self._format_result(model_result)
                 case "logit":
-                    model_result = self._logit_fit(
-                        y_data,
-                        x_data,
-                        missing,
-                    )
-                    model_result = self._apply_standard_errors(
+                    model_result = fit_logit(y_data, x_data, missing)
+                    model_result = apply_standard_errors(
                         model_result,
+                        self.standard_error_method,
+                        self.standard_error_params,
                     )
                     analysis_result = self._format_result(model_result)
                 case "probit":
-                    model_result = self._probit_fit(
-                        y_data,
-                        x_data,
-                        missing,
-                    )
-                    model_result = self._apply_standard_errors(
+                    model_result = fit_probit(y_data, x_data, missing)
+                    model_result = apply_standard_errors(
                         model_result,
+                        self.standard_error_method,
+                        self.standard_error_params,
                     )
                     analysis_result = self._format_result(model_result)
                 case "tobit":
-                    model_result = self._tobit_fit(
+                    model_result = fit_tobit(
                         df,
+                        self.dependent_variable,
+                        self.explanatory_variables,
+                        self.has_const,
                         missing,
+                        self.left_censoring_limit,
+                        self.right_censoring_limit,
                     )
                     analysis_result = self._tobit_format_result(model_result)
                 case "fe":
-                    model_result = self._fe_fit(
-                        y_data,
-                        x_data,
+                    model_result = fit_fe(
+                        df,
+                        self.dependent_variable,
+                        self.explanatory_variables,
+                        self.entity_id_column,
+                        self.time_column,
+                        self.standard_error_method,
                         missing,
                     )
                     analysis_result = self._fe_format_result(model_result)
                 case "re":
-                    model_result = self._re_fit(
-                        y_data,
-                        x_data,
+                    model_result = fit_re(
+                        df,
+                        self.dependent_variable,
+                        self.explanatory_variables,
+                        self.entity_id_column,
+                        self.time_column,
+                        self.standard_error_method,
                         missing,
                     )
                     analysis_result = self._re_format_result(model_result)
                 case "iv":
-                    model_result = self._iv_fit(
-                        y_data,
-                        x_data,
+                    model_result = fit_iv(
+                        df,
+                        self.dependent_variable,
+                        self.explanatory_variables,
+                        self.endogenous_variables,
+                        self.instrumental_variables,
+                        self.standard_error_method,
                         missing,
                     )
-                    model_result = self._apply_standard_errors(
+                    model_result = apply_standard_errors(
                         model_result,
+                        self.standard_error_method,
+                        self.standard_error_params,
                     )
                     analysis_result = self._iv_format_result(model_result)
                 case "feiv":
@@ -279,17 +296,15 @@ class Regression:
                         _("FEIV regression is not yet implemented")
                     )
                 case "lasso":
-                    model_result = self._lasso_fit(
-                        y_data,
-                        x_data,
-                        missing,
+                    alpha = self.hyper_parameters.get("alpha", 1.0)
+                    model_result = fit_lasso(
+                        y_data, x_data, self.has_const, alpha, missing
                     )
                     analysis_result = self._format_result(model_result)
                 case "ridge":
-                    model_result = self._ridge_fit(
-                        y_data,
-                        x_data,
-                        missing,
+                    alpha = self.hyper_parameters.get("alpha", 1.0)
+                    model_result = fit_ridge(
+                        y_data, x_data, self.has_const, alpha, missing
                     )
                     analysis_result = self._format_result(model_result)
                 case _:
@@ -321,495 +336,6 @@ class Regression:
             raise Exception(
                 f"Unexpected error: {str(e)}",
             )
-
-    def _linear_fit(
-        self,
-        y_data,
-        x_data,
-        missing: str,
-    ) -> RegressionResultsWrapper:
-        """
-        OLSモデルのフィッティング
-
-        Args:
-            y_data: 被説明変数のデータ
-            x_data: 説明変数のデータ
-            missing: 欠損値の処理方法 ('none', 'drop', 'raise')
-
-        Returns:
-            statsmodels の OLS 回帰結果
-        """
-        # OLSモデルの作成とフィット
-        model = sm.OLS(y_data, x_data, missing=missing)
-        result = model.fit()
-
-        return result
-
-    def _logit_fit(
-        self, y_data, x_data, missing: str
-    ) -> RegressionResultsWrapper:
-        """
-        Logitモデルのフィッティング
-
-        Args:
-            y_data: 被説明変数のデータ
-            x_data: 説明変数のデータ
-            missing: 欠損値の処理方法 ('none', 'drop', 'raise')
-
-        Returns:
-            statsmodels の Logit 回帰結果
-        """
-        model = sm.Logit(y_data, x_data, missing=missing)
-        result = model.fit()
-
-        return result
-
-    def _probit_fit(
-        self, y_data, x_data, missing: str
-    ) -> RegressionResultsWrapper:
-        """
-        Probitモデルのフィッティング
-
-        Args:
-            y_data: 被説明変数のデータ
-            x_data: 説明変数のデータ
-            missing: 欠損値の処理方法 ('none', 'drop', 'raise')
-
-        Returns:
-            statsmodels の Probit 回帰結果
-        """
-        model = sm.Probit(y_data, x_data, missing=missing)
-        result = model.fit()
-
-        return result
-
-    def _tobit_fit(self, df_polars, missing: str):
-        """
-        Tobitモデルのフィッティング (py4etrics を使用)
-
-        Args:
-            y_data: 被説明変数のデータ
-            x_data: 説明変数のデータ
-            missing: 欠損値の処理方法
-
-        Returns:
-            py4etrics の Tobit 回帰結果
-        """
-        # 必要な列を選択
-        required_cols = [self.dependent_variable] + self.explanatory_variables
-
-        # Pandas DataFrameに変換
-        df = df_polars.select(required_cols).to_pandas()
-
-        # 欠損値の処理
-        if missing == "drop":
-            df = df.dropna()
-        elif missing == "raise":
-            if df.isnull().any().any():
-                raise ApiError(_("Missing values found in data"))
-
-        if len(df) == 0:
-            raise ApiError(
-                _("No valid observations after removing missing values")
-            )
-
-        # 被説明変数と説明変数を設定
-        y = df[self.dependent_variable].values
-        X = df[self.explanatory_variables].values
-
-        # 定数項を追加
-        if self.has_const:
-            X = sm.add_constant(X)
-
-        cens = np.zeros(len(y))
-        if self.left_censoring_limit is not None:
-            # 実際に打ち切られている行を -1 にする
-            cens[y <= self.left_censoring_limit] = -1
-
-        if self.right_censoring_limit is not None:
-            # 実際に打ち切られている行を 1 にする
-            cens[y >= self.right_censoring_limit] = 1
-
-        # Tobit モデルの作成とフィット
-        model = Tobit(
-            y,
-            X,
-            cens=cens,
-            left=self.left_censoring_limit,
-            right=self.right_censoring_limit,
-        )  # type: ignore
-        result = model.fit()
-
-        return result
-
-    def _iv_fit(self, y_data, x_data, missing: str):
-        """
-        IVモデルのフィッティング (linearmodels を使用)
-
-        Args:
-            y_data: 被説明変数のデータ（使用しない）
-            x_data: 説明変数のデータ（使用しない）
-            missing: 欠損値の処理方法
-
-        Returns:
-            linearmodels の IV2SLS 回帰結果
-        """
-        # テーブルの取得
-        table_info = self.tables_store.get_table(self.table_name)
-        df_polars = table_info.table
-
-        # 必要な列を選択
-        required_cols = (
-            [self.dependent_variable]
-            + self.explanatory_variables
-            + self.endogenous_variables
-            + self.instrumental_variables
-        )
-
-        # Pandas DataFrameに変換（PyArrow拡張配列を使用してメモリ効率向上）
-        df = df_polars.select(required_cols).to_pandas(
-            use_pyarrow_extension_array=True
-        )
-
-        # Polars DataFrameを明示的に削除してメモリを解放
-        del df_polars
-        gc.collect()
-
-        # 欠損値の処理
-        if missing == "drop":
-            df = df.dropna()
-        elif missing == "raise":
-            if df.isnull().any().any():
-                raise ApiError(_("Missing values found in data"))
-
-        if len(df) == 0:
-            raise ApiError(
-                _("No valid observations after removing missing values")
-            )
-
-        # 被説明変数、外生変数、内生変数、操作変数を設定
-        dependent = df[self.dependent_variable]
-        exog = (
-            df[self.explanatory_variables]
-            if self.explanatory_variables
-            else None
-        )
-        endog = (
-            df[self.endogenous_variables]
-            if self.endogenous_variables
-            else None
-        )
-        instruments = df[self.instrumental_variables]
-
-        # 標準誤差方法のマッピング
-        cov_type_map = {
-            "nonrobust": "unadjusted",
-            "hc0": "robust",
-            "hc1": "robust",
-            "hc2": "robust",
-            "hc3": "robust",
-            "hac": "kernel",
-            "clustered": "clustered",
-        }
-        cov_type = cov_type_map.get(self.standard_error_method, "unadjusted")
-
-        # IV2SLS モデルの作成とフィット
-        model = IV2SLS(dependent, exog, endog, instruments)
-        result = model.fit(cov_type=cov_type)
-
-        return result
-
-    def _fe_fit(self, y_data, x_data, missing: str):
-        """
-        固定効果モデルのフィッティング (linearmodels を使用)
-
-        Args:
-            y_data: 被説明変数のデータ（使用しない、直接取得）
-            x_data: 説明変数のデータ（使用しない、直接取得）
-            missing: 欠損値の処理方法
-
-        Returns:
-            linearmodels の PanelOLS 回帰結果
-        """
-        # テーブルの取得
-        table_info = self.tables_store.get_table(self.table_name)
-        df_polars = table_info.table
-
-        # 必要な列を選択
-        required_cols = (
-            [self.dependent_variable]
-            + self.explanatory_variables
-            + [self.entity_id_column]
-        )
-        if self.time_column:
-            required_cols.append(self.time_column)
-
-        # Pandas DataFrameに変換
-        # （PyArrow拡張配列を使用してメモリ効率向上）
-        df = df_polars.select(required_cols).to_pandas(
-            use_pyarrow_extension_array=True
-        )
-
-        # Polars DataFrameを明示的に削除してメモリを解放
-        del df_polars
-        gc.collect()
-
-        # 欠損値の処理
-        if missing == "drop":
-            df = df.dropna()
-        elif missing == "raise":
-            if df.isnull().any().any():
-                raise ApiError(_("Missing values found in data"))
-
-        if len(df) == 0:
-            raise ApiError(
-                _("No valid observations after removing missing values")
-            )
-
-        # MultiIndex の設定
-        if self.time_column:
-            df = df.set_index([self.entity_id_column, self.time_column])
-        else:
-            # 時間列がない場合は自動生成
-            df["_time"] = df.groupby(self.entity_id_column).cumcount()
-            df = df.set_index([self.entity_id_column, "_time"])
-
-        # 被説明変数と説明変数を設定
-        y = df[self.dependent_variable]
-        X = df[self.explanatory_variables]
-
-        # 標準誤差方法のマッピング
-        cov_type_map = {
-            "nonrobust": "unadjusted",
-            "hc0": "robust",
-            "hc1": "robust",
-            "hc2": "robust",
-            "hc3": "robust",
-            "hac": "kernel",
-            "clustered": "clustered",
-        }
-        cov_type = cov_type_map.get(self.standard_error_method, "clustered")
-
-        # PanelOLS モデルの作成とフィット
-        model = PanelOLS(y, X, entity_effects=True)
-        result = model.fit(cov_type=cov_type)
-
-        return result
-
-    def _re_fit(self, y_data, x_data, missing: str):
-        """
-        変量効果モデルのフィッティング (linearmodels を使用)
-
-        Args:
-            y_data: 被説明変数のデータ（使用しない）
-            x_data: 説明変数のデータ（使用しない）
-            missing: 欠損値の処理方法
-
-        Returns:
-            linearmodels の RandomEffects 回帰結果
-        """
-        # テーブルの取得
-        table_info = self.tables_store.get_table(self.table_name)
-        df_polars = table_info.table
-
-        # 必要な列を選択
-        required_cols = (
-            [self.dependent_variable]
-            + self.explanatory_variables
-            + [self.entity_id_column]
-        )
-        if self.time_column:
-            required_cols.append(self.time_column)
-
-        # Pandas DataFrameに変換
-        # （PyArrow拡張配列を使用してメモリ効率向上）
-        df = df_polars.select(required_cols).to_pandas(
-            use_pyarrow_extension_array=True
-        )
-
-        # Polars DataFrameを明示的に削除してメモリを解放
-        del df_polars
-        gc.collect()
-
-        # 欠損値の処理
-        if missing == "drop":
-            df = df.dropna()
-        elif missing == "raise":
-            if df.isnull().any().any():
-                raise ApiError(_("Missing values found in data"))
-
-        if len(df) == 0:
-            raise ApiError(
-                _("No valid observations after removing missing values")
-            )
-
-        # MultiIndex の設定
-        if self.time_column:
-            df = df.set_index([self.entity_id_column, self.time_column])
-        else:
-            df["_time"] = df.groupby(self.entity_id_column).cumcount()
-            df = df.set_index([self.entity_id_column, "_time"])
-
-        # 被説明変数と説明変数を設定
-        y = df[self.dependent_variable]
-        X = df[self.explanatory_variables]
-
-        # 標準誤差方法のマッピング
-        cov_type_map = {
-            "nonrobust": "unadjusted",
-            "hc0": "robust",
-            "hc1": "robust",
-            "hc2": "robust",
-            "hc3": "robust",
-            "hac": "kernel",
-            "clustered": "clustered",
-        }
-        cov_type = cov_type_map.get(self.standard_error_method, "clustered")
-
-        # RandomEffects モデルの作成とフィット
-        model = RandomEffects(y, X)
-        result = model.fit(cov_type=cov_type)
-
-        return result
-
-    def _apply_standard_errors(self, model_result: Any) -> Any:
-        """
-        標準誤差の計算方法を適用
-
-        Args:
-            model_result: 初期の回帰結果
-
-        Returns:
-            標準誤差が調整された回帰結果
-        """
-        if self.standard_error_method == "nonrobust":
-            return model_result
-
-        cov_type_map = {
-            "hc0": "HC0",
-            "hc1": "HC1",
-            "hc2": "HC2",
-            "hc3": "HC3",
-            "hac": "HAC",
-            "clustered": "cluster",
-        }
-
-        cov_type = cov_type_map.get(self.standard_error_method)
-        if not cov_type:
-            return model_result
-
-        # HACの場合はmaxlagsを渡す (デフォルトは sqrt(n) に基づく計算)
-        if self.standard_error_method == "hac":
-            maxlags = self.standard_error_params.get("maxlags")
-            if maxlags is None:
-                # maxlagsが未指定の場合、デフォルト値を計算
-                import numpy as np
-
-                table_info = self.tables_store.get_table(self.table_name)
-                n = len(table_info.table)
-                maxlags = int(np.floor(4 * (n / 100) ** (2 / 9)))
-            return model_result.get_robustcov_results(
-                cov_type=cov_type, maxlags=maxlags
-            )
-
-        # クラスタリングの場合は groups を渡す
-        if self.standard_error_method == "clustered":
-            groups_col = self.standard_error_params.get("groups")
-            if groups_col:
-                table_info = self.tables_store.get_table(self.table_name)
-                df = table_info.table
-                groups = df[groups_col].to_numpy()
-                return model_result.get_robustcov_results(
-                    cov_type=cov_type, groups=groups
-                )
-
-        return model_result.get_robustcov_results(cov_type=cov_type)
-
-    def _lasso_fit(
-        self, y_data, x_data, missing: str
-    ) -> RegressionResultsWrapper:
-        """
-        Lassoモデルのフィッティング
-
-        Args:
-            y_data: 被説明変数のデータ
-            x_data: 説明変数のデータ（定数項が含まれる可能性あり）
-            missing: 欠損値の処理方法
-
-        Returns:
-            statsmodels 互換の回帰結果
-        """
-        alpha = self.hyper_parameters.get("alpha", 1.0)
-
-        # x_dataに定数項が含まれている場合は除去
-        # （scikit-learnはfit_interceptで定数項を扱うため）
-        x_data_sklearn = x_data
-        if self.has_const:
-            # 最初の列が定数項かチェック（全て1の列）
-            if x_data.shape[1] > 0 and np.allclose(x_data[:, 0], 1.0):
-                x_data_sklearn = x_data[:, 1:]  # 定数項を除去
-
-        # scikit-learn の Lasso を使用
-        lasso = Lasso(alpha=alpha, fit_intercept=self.has_const)
-        lasso.fit(x_data_sklearn, y_data)
-
-        # statsmodels 形式で再構築（統計量を取得するため）
-        # Lassoの予測値を使ってOLSで統計量を計算
-        model = sm.OLS(y_data, x_data, missing=missing)
-        result = model.fit()
-
-        # Lasso の係数で上書き
-        if self.has_const:
-            result._results.params = np.hstack(
-                ([lasso.intercept_], lasso.coef_)  # type: ignore
-            )
-        else:
-            result._results.params = lasso.coef_
-
-        return result
-
-    def _ridge_fit(
-        self, y_data, x_data, missing: str
-    ) -> RegressionResultsWrapper:
-        """
-        Ridgeモデルのフィッティング
-
-        Args:
-            y_data: 被説明変数のデータ
-            x_data: 説明変数のデータ（定数項が含まれる可能性あり）
-            missing: 欠損値の処理方法
-
-        Returns:
-            statsmodels 互換の回帰結果
-        """
-        alpha = self.hyper_parameters.get("alpha", 1.0)
-
-        # x_dataに定数項が含まれている場合は除去
-        # （scikit-learnはfit_interceptで定数項を扱うため）
-        x_data_sklearn = x_data
-        if self.has_const:
-            # 最初の列が定数項かチェック（全て1の列）
-            if x_data.shape[1] > 0 and np.allclose(x_data[:, 0], 1.0):
-                x_data_sklearn = x_data[:, 1:]  # 定数項を除去
-
-        # scikit-learn の Ridge を使用
-        ridge = Ridge(alpha=alpha, fit_intercept=self.has_const)
-        ridge.fit(x_data_sklearn, y_data)
-
-        # statsmodels 形式で再構築（統計量を取得するため）
-        # Ridgeの予測値を使ってOLSで統計量を計算
-        model = sm.OLS(y_data, x_data, missing=missing)
-        result = model.fit()
-
-        # Ridge の係数で上書き
-        if self.has_const:
-            result._results.params = np.hstack(
-                ([ridge.intercept_], ridge.coef_)  # type: ignore
-            )
-        else:
-            result._results.params = ridge.coef_
-
-        return result
 
     def _format_result(self, model_result: Any) -> Dict:
         """
