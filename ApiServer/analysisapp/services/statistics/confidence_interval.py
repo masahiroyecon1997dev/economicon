@@ -3,11 +3,11 @@ from typing import Dict
 import numpy as np
 from scipy import stats
 
-from ...utils.validators.common_validators import (
+from ...utils.validators.common import (
     ValidationError,
     validate_candidates,
 )
-from ...utils.validators.tables_store_validator import (
+from ...utils.validators.tables_store import (
     validate_existed_column_name,
     validate_existed_table_name,
 )

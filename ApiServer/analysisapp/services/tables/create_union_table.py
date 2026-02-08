@@ -3,8 +3,8 @@ from typing import Dict, List
 import polars as pl
 
 from ...i18n.translation import gettext as _
-from ...utils.validators.common_validators import ValidationError
-from ...utils.validators.tables_store_validator import (
+from ...utils.validators.common import ValidationError
+from ...utils.validators.tables_store import (
     validate_existed_columns,
     validate_existed_tables,
     validate_new_table_name,

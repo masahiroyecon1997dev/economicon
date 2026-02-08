@@ -4,9 +4,9 @@ import polars as pl
 from ...i18n.translation import gettext as _
 
 from ..data.tables_store import TablesStore
-from ...utils.validators.common_validators import ValidationError
-from ...utils.validators.file_validators import validate_file_path
-from ...utils.validators.tables_store_validator import validate_new_table_name
+from ...utils.validators.common import ValidationError
+from ...utils.validators.file import validate_file_path
+from ...utils.validators.tables_store import validate_new_table_name
 from ..abstract_api import AbstractApi, ApiError
 
 

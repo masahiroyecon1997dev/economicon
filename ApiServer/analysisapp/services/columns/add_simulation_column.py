@@ -4,12 +4,12 @@ import polars as pl
 
 from ...i18n.translation import gettext as _
 from ...utils.algorithms.simulation import generate_simulation_data
-from ...utils.validators.common_validators import ValidationError
-from ...utils.validators.statistics_validators import (
+from ...utils.validators.common import ValidationError
+from ...utils.validators.statistics import (
     validate_distribution_params,
     validate_distribution_type,
 )
-from ...utils.validators.tables_store_validator import (
+from ...utils.validators.tables_store import (
     validate_existed_table_name,
     validate_new_column_name,
 )

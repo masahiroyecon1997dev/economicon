@@ -7,7 +7,7 @@ AnalysisResultStoreへのアクセスをラップし、
 
 from typing import Dict
 
-from ...utils.validators.common_validators import ValidationError
+from ...utils.validators.common import ValidationError
 from ..abstract_api import AbstractApi, ApiError
 from ..data.analysis_result_store import AnalysisResultStore
 from ...i18n.translation import gettext as _
