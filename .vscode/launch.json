@@ -19,7 +19,7 @@
       "request": "launch",
       "preLaunchTask": "pnpm: start",
       "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}/front-analysis-app",
+      "webRoot": "${workspaceFolder}/app",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
         "webpack:///./~/*": "${webRoot}/node_modules/*",
