@@ -10,8 +10,6 @@ from sklearn.linear_model import Lasso, Ridge
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
 from ...i18n.translation import gettext as _
-from ..data.analysis_result import AnalysisResult
-from ..data.analysis_result_store import AnalysisResultStore
 from ...utils.validators.common import ValidationError
 from ...utils.validators.statistics import (
     validate_dependent_variable,
@@ -27,6 +25,8 @@ from ...utils.validators.tables_store import (
     validate_existed_table_name,
 )
 from ..abstract_api import AbstractApi, ApiError
+from ..data.analysis_result import AnalysisResult
+from ..data.analysis_result_store import AnalysisResultStore
 from ..data.tables_store import TablesStore
 
 

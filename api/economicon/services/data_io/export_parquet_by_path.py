@@ -1,5 +1,4 @@
 import os
-from typing import Dict
 
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import ValidationError

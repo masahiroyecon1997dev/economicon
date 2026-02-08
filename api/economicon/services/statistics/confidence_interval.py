@@ -1,8 +1,7 @@
-from typing import Dict
-
 import numpy as np
 from scipy import stats
 
+from ...i18n.translation import gettext as _
 from ...utils.validators.common import (
     ValidationError,
     validate_candidates,
@@ -13,7 +12,6 @@ from ...utils.validators.tables_store import (
 )
 from ..abstract_api import AbstractApi, ApiError
 from ..data.tables_store import TablesStore
-from ...i18n.translation import gettext as _
 
 
 class ConfidenceInterval(AbstractApi):
