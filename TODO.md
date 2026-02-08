@@ -97,17 +97,6 @@ Economicon
 
 **README.md**
 
-- 情報の更新とバックエンド・フロントエンドで分けたい。メインは概要等を記述。
 - agent.mdとinstructions.mdを更新
 
 **Docs**
-
-- ドキュメント整備
-  #codebase
-  プロジェクト直下にある #file:README.md には情報がありすぎるので分割したい。
-  プロジェクト直下にdocsディレクトリを作成し、その中にsetupディレクトリを作成し、環境構築ドキュメントを作成
-  docs/
-  └── setup/
-  ├── frontend.md
-  ├── backend.md
-  └── common.md

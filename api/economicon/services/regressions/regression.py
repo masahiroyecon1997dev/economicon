@@ -21,6 +21,8 @@ from ..data.analysis_result_store import AnalysisResultStore
 from ..data.tables_store import TablesStore
 from .common import (
     MISSING_HANDLING_MAP,
+    extract_linearmodels_params,
+    extract_statsmodels_params,
     prepare_basic_data,
     prepare_iv_dataframe,
     prepare_panel_dataframe,
@@ -378,27 +380,7 @@ class Regression:
         param_names = (
             ["const"] if self.has_const else []
         ) + self.explanatory_variables
-        params_info = []
-
-        for i, name in enumerate(param_names):
-            param_dict = {
-                "variable": name,
-                "coefficient": float(model_result.params[i]),
-                "standardError": float(model_result.bse[i]),
-                "pValue": float(model_result.pvalues[i]),
-            }
-
-            # t値またはz値
-            if hasattr(model_result, "tvalues"):
-                param_dict["tValue"] = float(model_result.tvalues[i])
-
-            # 信頼区間
-            if hasattr(model_result, "conf_int"):
-                conf_int = model_result.conf_int()
-                param_dict["confidenceIntervalLower"] = float(conf_int[i, 0])
-                param_dict["confidenceIntervalUpper"] = float(conf_int[i, 1])
-
-            params_info.append(param_dict)
+        params_info = extract_statsmodels_params(model_result, param_names)
 
         # モデル統計情報
         model_stats: Dict[str, Any] = {"nObservations": int(model_result.nobs)}
@@ -452,18 +434,7 @@ class Regression:
         param_names = (
             ["const"] if self.has_const else []
         ) + self.explanatory_variables
-        params_info = []
-
-        for i, name in enumerate(param_names):
-            params_info.append(
-                {
-                    "variable": name,
-                    "coefficient": float(model_result.params[i]),
-                    "standardError": float(model_result.bse[i]),
-                    "pValue": float(model_result.pvalues[i]),
-                    "tValue": float(model_result.tvalues[i]),
-                }
-            )
+        params_info = extract_statsmodels_params(model_result, param_names)
 
         # モデル統計情報
         model_stats: Dict[str, Any] = {
@@ -517,21 +488,8 @@ class Regression:
         summary_text = str(model_result.summary)
 
         # パラメータの詳細情報
-        params_info = []
         all_vars = self.explanatory_variables + self.endogenous_variables
-        for i, name in enumerate(all_vars):
-            conf_int = model_result.conf_int()
-            params_info.append(
-                {
-                    "variable": name,
-                    "coefficient": float(model_result.params.iloc[i]),
-                    "standardError": float(model_result.std_errors.iloc[i]),
-                    "pValue": float(model_result.pvalues.iloc[i]),
-                    "tValue": float(model_result.tstats.iloc[i]),
-                    "confidenceIntervalLower": float(conf_int.iloc[i, 0]),
-                    "confidenceIntervalUpper": float(conf_int.iloc[i, 1]),
-                }
-            )
+        params_info = extract_linearmodels_params(model_result, all_vars)
 
         # モデル統計情報
         model_stats: Dict[str, Any] = {
@@ -609,20 +567,9 @@ class Regression:
         summary_text = str(model_result.summary)
 
         # パラメータの詳細情報
-        params_info = []
-        for i, name in enumerate(self.explanatory_variables):
-            conf_int = model_result.conf_int()
-            params_info.append(
-                {
-                    "variable": name,
-                    "coefficient": float(model_result.params.iloc[i]),
-                    "standardError": float(model_result.std_errors.iloc[i]),
-                    "pValue": float(model_result.pvalues.iloc[i]),
-                    "tValue": float(model_result.tstats.iloc[i]),
-                    "confidenceIntervalLower": float(conf_int.iloc[i, 0]),
-                    "confidenceIntervalUpper": float(conf_int.iloc[i, 1]),
-                }
-            )
+        params_info = extract_linearmodels_params(
+            model_result, self.explanatory_variables
+        )
 
         # モデル統計情報と診断結果
         model_stats: Dict[str, Any] = {
@@ -677,20 +624,9 @@ class Regression:
         summary_text = str(model_result.summary)
 
         # パラメータの詳細情報
-        params_info = []
-        for i, name in enumerate(self.explanatory_variables):
-            conf_int = model_result.conf_int()
-            params_info.append(
-                {
-                    "variable": name,
-                    "coefficient": float(model_result.params.iloc[i]),
-                    "standardError": float(model_result.std_errors.iloc[i]),
-                    "pValue": float(model_result.pvalues.iloc[i]),
-                    "tValue": float(model_result.tstats.iloc[i]),
-                    "confidenceIntervalLower": float(conf_int.iloc[i, 0]),
-                    "confidenceIntervalUpper": float(conf_int.iloc[i, 1]),
-                }
-            )
+        params_info = extract_linearmodels_params(
+            model_result, self.explanatory_variables
+        )
 
         # モデル統計情報と診断結果
         model_stats: Dict[str, Any] = {
