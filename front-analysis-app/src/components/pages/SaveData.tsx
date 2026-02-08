@@ -1,26 +1,26 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { showMessageDialog } from "../../../functions/messageDialog";
-import { exportCsvByPath, exportExcelByPath, exportParquetByPath, getFiles } from "../../../functions/restApis";
-import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { useFilesStore } from "../../../stores/useFilesStore";
-import { useLoadingStore } from "../../../stores/useLoadingStore";
-import { useSettingsStore } from "../../../stores/useSettingsStore";
-import { useTableInfosStore } from "../../../stores/useTableInfosStore";
-import { useTableListStore } from "../../../stores/useTableListStore";
-import type { FileType, SortDirection, SortField } from "../../../types/commonTypes";
-import { InputText } from "../../atoms/Input/InputText";
-import { Select, SelectItem } from "../../atoms/Input/Select";
-import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
-import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
-import { FormField } from "../../molecules/Form/FormField";
-import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
-import { FileListTable } from "../../molecules/Table/FileListTable";
-import { MainViewLayout } from "../Layouts/MainViewLayout";
+import { exportCsvByPath, exportExcelByPath, exportParquetByPath, getFiles } from "../../lib/api/endpoints";
+import { showMessageDialog } from "../../lib/dialog/message";
+import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
+import { useFilesStore } from "../../stores/useFilesStore";
+import { useLoadingStore } from "../../stores/useLoadingStore";
+import { useSettingsStore } from "../../stores/useSettingsStore";
+import { useTableInfosStore } from "../../stores/useTableInfosStore";
+import { useTableListStore } from "../../stores/useTableListStore";
+import type { FileType, SortDirection, SortField } from "../../types/commonTypes";
+import { InputText } from "../atoms/Input/InputText";
+import { Select, SelectItem } from "../atoms/Input/Select";
+import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
+import { CancelButtonBar } from "../molecules/ActionBar/CancelButtonBar";
+import { FormField } from "../molecules/Form/FormField";
+import { NavigationSearchBar } from "../molecules/Navigation/NavigationSearchBar";
+import { FileListTable } from "../molecules/Table/FileListTable";
+import { PageLayout } from "../templates/PageLayout";
 
 type FileFormat = 'csv' | 'excel' | 'parquet';
 
-export const SaveDataView = () => {
+export const SaveData = () => {
   const { t } = useTranslation();
   const files = useFilesStore((state) => state.files);
   const directoryPath = useFilesStore((state) => state.directoryPath);
@@ -271,7 +271,7 @@ export const SaveDataView = () => {
   };
 
   return (
-    <MainViewLayout
+    <PageLayout
       title={t("SaveDataView.Title")}
       description={tableNameList.length === 0 ? t("SaveDataView.NoTablesImported") : t("SaveDataView.Description")}
     >
@@ -376,6 +376,6 @@ export const SaveDataView = () => {
         </>
 
       )}
-    </MainViewLayout>
+    </PageLayout>
   );
 };

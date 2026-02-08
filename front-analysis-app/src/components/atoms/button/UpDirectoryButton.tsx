@@ -1,5 +1,5 @@
 import { ArrowUp } from "lucide-react";
-import { cn } from "../../../functions/utils";
+import { cn } from "../../../lib/utils/helpers";
 
 type UpDirectoryButtonProps = {
   onClick: () => void;

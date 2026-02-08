@@ -1,4 +1,4 @@
-import { cn } from "../../../functions/utils";
+import { cn } from "../../../lib/utils/helpers";
 
 type ExpressionHelperButtonProps = {
   onClick: () => void;

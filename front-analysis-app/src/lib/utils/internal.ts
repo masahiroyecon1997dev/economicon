@@ -1,16 +1,16 @@
-import type { TableInfoType } from "../types/commonTypes";
-import { fetchDataToJson, getColumnList } from "./restApis";
+import type { TableInfoType } from "../../types/commonTypes";
+import { fetchDataToJson, getColumnList } from "../api/endpoints";
 
 export const getTableInfo = async (
   tableName: string,
   startRow: number = 1,
-  fetchRows: number = 100
+  fetchRows: number = 100,
 ): Promise<TableInfoType> => {
   try {
     const resFetchDataToJson = await fetchDataToJson(
       tableName,
       startRow,
-      fetchRows
+      fetchRows,
     );
     if (resFetchDataToJson.code !== "OK") {
       throw new Error(resFetchDataToJson.message);

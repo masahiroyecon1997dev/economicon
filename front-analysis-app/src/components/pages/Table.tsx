@@ -1,9 +1,9 @@
 import { Fragment } from "react/jsx-runtime";
-import { useTableInfosStore } from "../../../stores/useTableInfosStore";
-import { VirtualTable } from "../../organisms/Table/VirtualTable";
+import { useTableInfosStore } from "../../stores/useTableInfosStore";
+import { VirtualTable } from "../organisms/Table/VirtualTable";
 
 
-export const TableView = () => {
+export const Table = () => {
   const tableInfos = useTableInfosStore((state) => state.tableInfos);
 
   return (

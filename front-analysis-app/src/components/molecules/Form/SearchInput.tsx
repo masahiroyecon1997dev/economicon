@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { cn } from "../../../functions/utils";
+import { cn } from "../../../lib/utils/helpers";
 
 type SearchInputProps = {
   placeholder: string;

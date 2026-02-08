@@ -10,7 +10,7 @@ type RequestBody = Record<string, unknown> | undefined;
 /**
  * Tauri経由でAPIリクエストを行うクライアント
  */
-export const apiClient = {
+export const client = {
   get: async <T>(path: string, params?: RequestBody): Promise<{ data: T }> => {
     // クエリパラメータがある場合はURLに付加するか、bodyとして送るか
     // Rust側の実装では `proxy_request` は `query` 引数を受け取るようになっているため

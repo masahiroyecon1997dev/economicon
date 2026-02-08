@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { cn } from "../../../functions/utils";
+import { cn } from "../../../lib/utils/helpers";
 import type { LinearRegressionResultType } from "../../../types/commonTypes";
 
 type RegressionResultProps = {
