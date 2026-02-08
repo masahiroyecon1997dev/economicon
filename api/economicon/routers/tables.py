@@ -10,6 +10,8 @@ from ..schemas import (
     DuplicateTableRequest,
     FetchDataToArrowRequest,
     FetchDataToJsonRequest,
+    FilterSingleConditionRequest,
+    InputCellDataRequest,
     RenameTableRequest,
 )
 from ..services.tables.clear_tables import clear_tables
@@ -23,7 +25,9 @@ from ..services.tables.delete_table import delete_table
 from ..services.tables.duplicate_table import duplicate_table
 from ..services.tables.fetch_data_to_arrow import fetch_data_to_arrow
 from ..services.tables.fetch_data_to_json import fetch_data_to_json
+from ..services.tables.filter_single_condition import filter_single_condition
 from ..services.tables.get_table_list import get_table_list
+from ..services.tables.input_cell_data import input_cell_data
 from ..services.tables.rename_table import rename_table
 from ..utils import (
     create_log_api_request,
@@ -311,3 +315,57 @@ async def fetch_data_to_arrow_endpoint(
     return create_success_binary_response(
         http_status.HTTP_200_OK, result, "application/octet-stream"
     )
+
+
+@router.post("/input-cell-data")
+async def input_cell_data_endpoint(
+    request: Request, body: InputCellDataRequest
+):
+    """セルデータ入力エンドポイント
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    body : InputCellDataRequest
+        リクエストボディ
+        - tableName: テーブル名
+        - columnName: 列名
+        - rowIndex: 行インデックス
+        - newValue: 新しい値
+
+    Returns
+    -------
+    JSONResponse
+        処理結果
+    """
+    create_log_api_request(request)
+
+    result = input_cell_data(**body.model_dump())
+
+    return create_success_response(http_status.HTTP_200_OK, result)
+
+
+@router.post("/filter-single-condition")
+async def filter_single_condition_endpoint(
+    request: Request, body: FilterSingleConditionRequest
+):
+    """単一条件フィルタリングを実行するエンドポイント
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    body : FilterSingleConditionRequest
+        リクエストボディ
+
+    Returns
+    -------
+    JSONResponse
+        処理結果
+    """
+    create_log_api_request(request)
+
+    result = filter_single_condition(**body.model_dump())
+
+    return create_success_response(http_status.HTTP_200_OK, result)
