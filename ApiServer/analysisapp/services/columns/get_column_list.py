@@ -1,10 +1,10 @@
 from typing import Dict, List
 
-from ...utils.validators.common_validators import (
+from ...utils.validators.common import (
     ValidationError,
     validate_boolean,
 )
-from ...utils.validators.tables_store_validator import (
+from ...utils.validators.tables_store import (
     validate_existed_table_name,
 )
 from ..abstract_api import AbstractApi, ApiError

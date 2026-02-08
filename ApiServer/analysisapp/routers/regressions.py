@@ -21,7 +21,7 @@ from ..utils import (
     create_log_api_request,
     create_success_response,
 )
-from ..utils.validators.common_validators import ValidationError
+from ..utils.validators.common import ValidationError
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 

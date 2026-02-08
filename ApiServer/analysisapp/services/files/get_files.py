@@ -4,8 +4,8 @@ from typing import Dict
 
 from ...i18n.translation import gettext as _
 
-from ...utils.validators.common_validators import ValidationError
-from ...utils.validators.file_validators import (
+from ...utils.validators.common import ValidationError
+from ...utils.validators.file import (
     validate_directory_path,
     validate_directory_path_is_directory,
 )

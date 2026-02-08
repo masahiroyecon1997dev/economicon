@@ -10,8 +10,9 @@ from pathlib import Path
 
 import pytest
 import yaml
+
 from analysisapp.services.data.settings_manager import SettingsManager
-from analysisapp.utils.validators.common_validators import (
+from analysisapp.utils.validators.common import (
     ValidationError,
     validate_required,
 )

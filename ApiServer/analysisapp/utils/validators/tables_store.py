@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import polars as pl
 
-from .common_validators import (
+from .common import (
     validate_boolean,
     validate_candidates,
     validate_column_is_numeric,
@@ -17,11 +17,11 @@ from .common_validators import (
     validate_required_list,
     validate_string_length,
 )
-from .validation_config import (
+from .utils import remove_one_string_copy
+from .config.base import (
     FILTER_CONDITION_CANDIDATES,
     TABLES_MANAGER_VALIDATOR_CONFIG,
 )
-from .validator_utils import remove_one_string_copy
 
 
 def validate_new_table_name(

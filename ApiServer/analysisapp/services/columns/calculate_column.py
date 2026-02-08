@@ -2,8 +2,8 @@ import polars as pl
 import re
 from ...i18n.translation import gettext as _
 from typing import Dict, List
-from ...utils.validators.common_validators import ValidationError
-from ...utils.validators.tables_store_validator import (
+from ...utils.validators.common import ValidationError
+from ...utils.validators.tables_store import (
     validate_existed_table_name,
     validate_new_column_name,
     validate_calculation_expression,
