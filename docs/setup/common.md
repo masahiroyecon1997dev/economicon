@@ -90,7 +90,7 @@ brew install --cask visual-studio-code
 
 4. **開発サーバーの起動**
    - バックエンド: `cd ApiServer && uvicorn main:app --reload --host 0.0.0.0 --port 8000`
-   - フロントエンド: `cd front-analysis-app && pnpm dev`
+   - フロントエンド: `cd app && pnpm dev`
 
 ## Docker 環境での開発
 

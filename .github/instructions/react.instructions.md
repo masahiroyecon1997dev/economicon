@@ -1,5 +1,5 @@
 ---
-applyTo: "front-analysis-app/**"
+applyTo: "app/**"
 ---
 
 # React & Tailwind 実装ルール

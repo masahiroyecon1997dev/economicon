@@ -167,7 +167,7 @@ Vite は高速なビルドツールで、既にプロジェクトに組み込ま
 
 ```powershell
 # プロジェクトディレクトリに移動
-cd economicon/front-analysis-app
+cd economicon/app
 
 # 依存関係をインストール
 pnpm install
@@ -278,7 +278,7 @@ cargo --version
 
 ```powershell
 # プロジェクトの依存関係として既に含まれています
-cd front-analysis-app
+cd app
 pnpm install
 ```
 
@@ -290,7 +290,7 @@ cd ../ApiServer
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 # 別のターミナルで Tauri 開発サーバーを起動
-cd ../front-analysis-app
+cd ../app
 pnpm tauri dev
 ```
 
@@ -351,7 +351,7 @@ pnpm test:e2e:headed
 
 ### React アプリのデバッグ
 
-1. VS Code で `front-analysis-app` を開く
+1. VS Code で `app` を開く
 2. F5 キーを押す、または「実行とデバッグ」パネルから「Launch Chrome」を選択
 3. ブレークポイントを設定してデバッグ開始
 
