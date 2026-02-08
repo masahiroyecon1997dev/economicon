@@ -1,0 +1,51 @@
+from typing import Dict, Optional, Protocol
+
+from ..utils.validators.common import ValidationError
+
+
+class DataOperation(Protocol):
+    """
+    データ操作のProtocolインターフェイス。
+    validate()とexecute()メソッドを持つクラスはこのProtocolに適合します。
+    """
+
+    def validate(self) -> Optional[ValidationError]:
+        """
+        操作のバリデーションを実行します。
+
+        Returns:
+            ValidationError: バリデーションエラーがある場合
+            None: バリデーションが成功した場合
+        """
+        ...
+
+    def execute(self) -> Optional[Dict | bytes]:
+        """
+        操作を実行します。
+
+        Returns:
+            Dict | bytes: 実行結果のデータ
+            None: 結果がない場合
+        """
+        ...
+
+
+def run_operation(operation: DataOperation) -> Optional[Dict | bytes]:
+    """
+    DataOperationプロトコルに適合するオブジェクトを受け取り、
+    validateとexecuteを順次実行します。
+
+    Args:
+        operation: DataOperationプロトコルに適合するオブジェクト
+
+    Returns:
+        Optional[Dict | bytes]: execute()の実行結果
+
+    Raises:
+        ValidationError: バリデーションが失敗した場合
+    """
+    validation_error = operation.validate()
+    if validation_error is not None:
+        raise validation_error
+
+    return operation.execute()
