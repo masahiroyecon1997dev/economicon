@@ -16,7 +16,7 @@ from ..schemas import (
 )
 
 # 各ビジネスロジック（既存のpython_apis）
-from ..services.columns.add_column import add_column
+from ..services.columns.add_column import AddColumn
 from ..services.columns.add_dummy_column import add_dummy_column
 from ..services.columns.add_lag_lead_column import add_lag_lead_column
 from ..services.columns.add_simulation_column import add_simulation_column
@@ -27,6 +27,7 @@ from ..services.columns.get_column_list import get_column_list
 from ..services.columns.rename_column import rename_column
 from ..services.columns.sort_columns import sort_columns
 from ..services.columns.transform_column import transform_column
+from ..services.operation import run_operation
 from ..utils import create_log_api_request, create_success_response
 
 # ルーターの定義（ここで共通のprefixとtagをつけておくと便利！）
@@ -51,8 +52,9 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
     """
     # リクエスト受け取りログ
     create_log_api_request(request)
-    # ビジネスロジックの実行（既存のpython_apisをそのまま使用）
-    result = add_column(**body.model_dump())
+    # ビジネスロジックの実行
+    api = AddColumn(**body.model_dump())
+    result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
 
