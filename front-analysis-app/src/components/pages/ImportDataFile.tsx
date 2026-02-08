@@ -3,23 +3,23 @@ import { UploadCloud } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from "react-i18next";
-import { getTableInfo } from "../../../functions/internalFunctions";
-import { showMessageDialog } from "../../../functions/messageDialog";
-import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../../functions/restApis";
-import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { useFilesStore } from "../../../stores/useFilesStore";
-import { useLoadingStore } from "../../../stores/useLoadingStore";
-import { useSettingsStore } from "../../../stores/useSettingsStore";
-import { useTableInfosStore } from "../../../stores/useTableInfosStore";
-import { useTableListStore } from "../../../stores/useTableListStore";
-import type { FileType, SortDirection, SortField, TauriFile } from "../../../types/commonTypes";
-import { CancelButtonBar } from "../../molecules/ActionBar/CancelButtonBar";
-import { NavigationSearchBar } from "../../molecules/Navigation/NavigationSearchBar";
-import { FileListTable } from "../../molecules/Table/FileListTable";
-import { ImportConfigDialog } from "../../organisms/Modal/ImportConfigDialog";
-import { MainViewLayout } from "../Layouts/MainViewLayout";
+import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../lib/api/endpoints";
+import { showMessageDialog } from "../../lib/dialog/message";
+import { getTableInfo } from "../../lib/utils/internal";
+import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
+import { useFilesStore } from "../../stores/useFilesStore";
+import { useLoadingStore } from "../../stores/useLoadingStore";
+import { useSettingsStore } from "../../stores/useSettingsStore";
+import { useTableInfosStore } from "../../stores/useTableInfosStore";
+import { useTableListStore } from "../../stores/useTableListStore";
+import type { FileType, SortDirection, SortField, TauriFile } from "../../types/commonTypes";
+import { CancelButtonBar } from "../molecules/ActionBar/CancelButtonBar";
+import { NavigationSearchBar } from "../molecules/Navigation/NavigationSearchBar";
+import { FileListTable } from "../molecules/Table/FileListTable";
+import { ImportConfigDialog } from "../organisms/Modal/ImportConfigDialog";
+import { PageLayout } from "../templates/PageLayout";
 
-export const ImportDataFileView = () => {
+export const ImportDataFile = () => {
   const { t } = useTranslation();
   const files = useFilesStore((state) => state.files);
   const directoryPath = useFilesStore((state) => state.directoryPath);
@@ -247,7 +247,7 @@ export const ImportDataFileView = () => {
   const handleCancel = () => setCurrentView("DataPreview");
 
   return (
-    <MainViewLayout
+    <PageLayout
       title={t("ImportDataFileView.Title")}
       description={t("ImportDataFileView.Description")}
     >
@@ -322,6 +322,6 @@ export const ImportDataFileView = () => {
         cancelText={t("Common.Cancel")}
         onCancel={handleCancel}
       />
-    </MainViewLayout>
+    </PageLayout>
   );
 };

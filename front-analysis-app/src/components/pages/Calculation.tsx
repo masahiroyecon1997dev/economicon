@@ -4,18 +4,18 @@ import { startTransition, useActionState, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { showMessageDialog } from "../../../functions/messageDialog";
-import { calculateColumn } from "../../../functions/restApis";
-import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
-import { useCurrentViewStore } from "../../../stores/useCurrentViewStore";
-import { useTableListStore } from "../../../stores/useTableListStore";
-import { ExpressionHelperButton } from "../../atoms/Button/ExpressionHelperButton";
-import { InputText } from "../../atoms/Input/InputText";
-import { Select, SelectItem } from "../../atoms/Input/Select";
-import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
-import { FormField } from "../../molecules/Form/FormField";
-import { SearchInput } from "../../molecules/Form/SearchInput";
-import { MainViewLayout } from "../Layouts/MainViewLayout";
+import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
+import { calculateColumn } from "../../lib/api/endpoints";
+import { showMessageDialog } from "../../lib/dialog/message";
+import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
+import { useTableListStore } from "../../stores/useTableListStore";
+import { ExpressionHelperButton } from "../atoms/Button/ExpressionHelperButton";
+import { InputText } from "../atoms/Input/InputText";
+import { Select, SelectItem } from "../atoms/Input/Select";
+import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
+import { FormField } from "../molecules/Form/FormField";
+import { SearchInput } from "../molecules/Form/SearchInput";
+import { PageLayout } from "../templates/PageLayout";
 
 const createCalculationSchema = (t: (key: string) => string) =>
   z.object({
@@ -26,7 +26,7 @@ const createCalculationSchema = (t: (key: string) => string) =>
 
 type CalculationFormData = z.infer<ReturnType<typeof createCalculationSchema>>;
 
-export const CalculationView = () => {
+export const Calculation = () => {
   const { t } = useTranslation();
   const tableList = useTableListStore((state) => state.tableList);
   const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
@@ -173,7 +173,7 @@ export const CalculationView = () => {
   };
 
   return (
-    <MainViewLayout
+    <PageLayout
       title={t("CalculationView.Title")}
       description={t("CalculationView.Description")}
     >
@@ -358,6 +358,6 @@ export const CalculationView = () => {
           onSelectType="submit"
         />
       </form>
-    </MainViewLayout>
+    </PageLayout>
   );
 };

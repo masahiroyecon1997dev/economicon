@@ -1,19 +1,19 @@
 import { type ReactNode } from "react";
-import { cn } from "../../../functions/utils";
+import { cn } from "../../lib/utils/helpers";
 
-interface MainViewLayoutProps {
+interface PageLayoutProps {
   children: ReactNode;
   title?: string;
   description?: string;
   className?: string;
 }
 
-export const MainViewLayout = ({
+export const PageLayout = ({
   children,
   title,
   description,
   className,
-}: MainViewLayoutProps) => {
+}: PageLayoutProps) => {
 
   return (
     <div className={cn("w-full h-full px-3", className)}>

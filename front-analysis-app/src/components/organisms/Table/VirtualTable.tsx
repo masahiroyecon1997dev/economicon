@@ -12,7 +12,7 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React, { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 
-import { cn } from '../../../functions/utils';
+import { cn } from '../../../lib/utils/helpers';
 import { useVirtualTableData } from '../../../hooks/useVirtualTableData';
 import type { ColumnType, TableDataCellType, TableInfoType, TalbeDataRowType } from '../../../types/commonTypes';
 
