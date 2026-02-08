@@ -107,7 +107,7 @@ Economicon
 
 **フォルダ構成**
 
-- python, reactのフォルダ構成を修正。
+- reactのフォルダ構成を修正。
 
 **Docs**
 

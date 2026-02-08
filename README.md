@@ -6,6 +6,7 @@
 
 ### バックエンド (Python)
 
+- **Python**: 3.14
 - **フレームワーク**: FastAPI 0.128.0
 - **パッケージマネージャー**: uv
 - **データ処理**: Polars, NumPy, SciPy, statsmodels
@@ -14,9 +15,11 @@
 
 ### フロントエンド (React)
 
+- **Node.js**: 18+ (fnm で管理)
 - **フレームワーク**: React 19.2.3 + TypeScript
 - **ビルドツール**: Vite 7.2.7
 - **パッケージマネージャー**: pnpm
+- **デスクトップアプリ**: Tauri
 - **スタイリング**: Tailwind CSS 4.1.18
 - **UI コンポーネント**: Radix UI Primitives
 - **状態管理**: Zustand
@@ -25,51 +28,41 @@
 
 ## 開発環境のセットアップ
 
-### 前提条件
+詳細なセットアップ手順は以下のドキュメントを参照してください：
 
-- Python 3.11 以上
-- Node.js 18 以上
-- pnpm (グローバルインストール推奨)
-- uv (Python パッケージマネージャー)
+- **[共通セットアップ](docs/setup/common.md)** - 前提条件とGit、VS Code の設定
+- **[バックエンドセットアップ](docs/setup/backend.md)** - Python 3.14、uv、FastAPIの環境構築
+- **[フロントエンドセットアップ](docs/setup/frontend.md)** - fnm、Node.js、pnpm、Vite、Tauriの環境構築
 
-### セットアップ手順
-
-#### 1. Python バックエンド
+### クイックスタート
 
 ```powershell
-# uvのインストール (未インストールの場合)
-pip install uv
+# リポジトリのクローン
+git clone xxx
+cd economicon
 
-# 仮想環境の作成と依存関係のインストール
-cd api
-uv venv
-.venv\Scripts\Activate.ps1  # Windows
-uv add -r python-requirements\windows-requirements.txt
-
-# 開発サーバーの起動
+# バックエンドのセットアップと起動
+cd ApiServer
+uv venv --python 3.14
+.venv\Scripts\Activate.ps1
+uv pip install -r python-requirements\windows-requirements.txt
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
 
-#### 2. React フロントエンド
-
-```powershell
-# pnpmインストール
-npm install -g pnpm@latest-10
-# 依存関係のインストール
+# 別のターミナルでフロントエンドのセットアップと起動
 cd front-analysis-app
 pnpm install
-
-# 開発サーバーの起動
 pnpm dev
 ```
 
 ### Docker 環境での開発
 
-1. Docker のインストール
-2. Visual Studio Code にて以下の拡張機能を追加
-   - Dev Containers
-3. Dev Containers の「開発コンテナー: キャッシュなしでリビルドし、コンテナーで再度開く」を実行
-   ※次回以降「開発コンテナー: コンテナーで再度開く」を実行
+Docker を使用した開発環境も提供しています。詳細は[共通セットアップガイド](docs/setup/common.md#docker-環境での開発)を参照してください。
+
+```powershell
+# VS Code で Dev Container を使用
+# 1. Dev Containers 拡張機能をインストール
+# 2. F1 → "Dev Containers: Rebuild and Reopen in Container"
+```
 
 ## デバッグ
 
@@ -97,21 +90,22 @@ pnpm test:e2e:headed  # ブラウザを表示してE2E実行
 pnpm test:e2e:debug   # E2Eテストのデバッグモード
 ```
 
-### バックエンド (Python/FastAPI)
+###ApiServer
+uvicorn main:app --reload # 開発サーバーの起動
+pytest tests # テストの実行
+pytest tests -v # 詳細表示でテスト実行
+pytest tests --cov=analysisapp # 開発サーバーの起動
+pytest tests # テストの実行
+pytest tests -v # 詳細表示でテスト実行
+pytest tests --cov=economicon # カバレッジ付きテスト
 
-```powershell
-cd api
-uvicorn main:app --reload                     # 開発サーバーの起動
-pytest tests                                  # テストの実行
-pytest tests -v                               # 詳細表示でテスト実行
-pytest tests --cov=economicon            # カバレッジ付きテスト
-```
+````
 
 ### ビルドとデプロイ
 
 ```powershell
 .\app_build.ps1       # Reactビルド + Djangoへの統合
-```
+````
 
 このスクリプトは以下を実行します：
 
@@ -225,56 +219,48 @@ pnpm test:e2e:report
 
 ```
 economicon/
-├── api/                    # FastAPIバックエンド
+├── ApiServer/                   # FastAPIバックエンド
 │   ├── main.py                  # FastAPIエントリーポイント
-│   └── economicon/
-│       └── api/                  # メインAPIアプリケーション
-│           ├── routers/          # FastAPIエンドポイント
-│           ├── schemas/          # Pydanticモデル
-│           ├── services/         # ビジネスロジック
-│           ├── utils/            # ユーティリティ
-│           ├── i18n/             # 国際化
-│           ├── locale/           # 翻訳ファイル
-│           └── tests/            # テストコード
+│   ├── analysisapp/             # メインAPIアプリケーション
+│   │   ├── routers/             # FastAPIエンドポイント
+│   │   ├── schemas/             # Pydanticモデル
+│   │   ├── services/            # ビジネスロジック
+│   │   ├── utils/               # ユーティリティ
+│   │   ├── i18n/                # 国際化
+│   │   └── locales/             # 翻訳ファイル
+│   ├── tests/                   # テストコード
+│   └── python-requirements/     # 依存関係定義
 ├── front-analysis-app/          # Reactフロントエンド
 │   ├── src/
-│   │   ├── components/         # UIコンポーネント (Atomic Design)
-│   │   │   ├── atoms/          # 基本コンポーネント
-│   │   │   ├── molecules/      # 複合コンポーネント
-│   │   │   └── organisms/      # 複雑なコンポーネント
-│   │   ├── stores/             # Zustand状態管理
-│   │   ├── types/              # TypeScript型定義
-│   │   ├── i18n/               # 国際化設定
-│   │   └── function/           # ユーティリティ関数
-│   ├── vite.config.ts          # Vite設定
-│   ├── tailwind.config.ts      # Tailwind CSS設定
+│   │   ├── components/          # UIコンポーネント (Atomic Design)
+│   │   │   ├── atoms/           # 基本コンポーネント
+│   │   │   ├── molecules/       # 複合コンポーネント
+│   │   │   └── organisms/       # 複雑なコンポーネント
+│   │   ├── stores/              # Zustand状態管理
+│   │   ├── types/               # TypeScript型定義
+│   │   ├── i18n/                # 国際化設定
+│   │   └── function/            # ユーティリティ関数
+│   ├── src-tauri/               # Tauriデスクトップアプリ
+│   ├── vite.config.ts           # Vite設定
+│   ├── tailwind.config.ts       # Tailwind CSS設定
 │   └── package.json
+├── docs/                        # ドキュメント
+│   └── setup/                   # セットアップガイド
+│       ├── common.md            # 共通セットアップ
+│       ├── backend.md           # バックエンドセットアップ
+│       └── frontend.md          # フロントエンドセットアップ
 ├── .github/
-│   └── instructions/           # Copilot指示書
-├── app_build.ps1               # ビルドスクリプト
+│   └── instructions/            # Copilot指示書
+├── app_build.ps1                # ビルドスクリプト
 └── README.md
 ```
 
 ## トラブルシューティング
 
-### Python パッケージのインストールエラー
+セットアップやビルドで問題が発生した場合は、以下のドキュメントを参照してください：
 
-```powershell
-# uvを最新版に更新
-pip install --upgrade uv
-
-# キャッシュをクリアして再インストール
-uv add --reinstall -r python-requirements\windows-requirements.txt
-```
-
-### フロントエンドのビルドエラー
-
-```powershell
-# node_modulesを削除して再インストール
-cd front-analysis-app
-Remove-Item -Recurse -Force node_modules
-pnpm install
-```
+- [バックエンドのトラブルシューティング](docs/setup/backend.md#トラブルシューティング)
+- [フロントエンドのトラブルシューティング](docs/setup/frontend.md#トラブルシューティング)
 
 ## 今後の課題
 
