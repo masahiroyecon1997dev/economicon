@@ -14,7 +14,7 @@ from py4etrics.tobit import Tobit
 from sklearn.linear_model import Lasso, Ridge
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
-from .common import LINEARMODELS_COV_TYPE_MAP
+from .common import LINEARMODELS_COV_TYPE_MAP, remove_const_column
 
 
 def fit_ols(
@@ -261,12 +261,7 @@ def fit_lasso(
         statsmodels 互換の回帰結果
     """
     # x_dataに定数項が含まれている場合は除去
-    # （scikit-learnはfit_interceptで定数項を扱うため）
-    x_data_sklearn = x_data
-    if has_const:
-        # 最初の列が定数項かチェック（全て1の列）
-        if x_data.shape[1] > 0 and np.allclose(x_data[:, 0], 1.0):
-            x_data_sklearn = x_data[:, 1:]  # 定数項を除去
+    x_data_sklearn = remove_const_column(x_data, has_const)
 
     # scikit-learn の Lasso を使用
     lasso = Lasso(alpha=alpha, fit_intercept=has_const)
@@ -309,12 +304,7 @@ def fit_ridge(
         statsmodels 互換の回帰結果
     """
     # x_dataに定数項が含まれている場合は除去
-    # （scikit-learnはfit_interceptで定数項を扱うため）
-    x_data_sklearn = x_data
-    if has_const:
-        # 最初の列が定数項かチェック（全て1の列）
-        if x_data.shape[1] > 0 and np.allclose(x_data[:, 0], 1.0):
-            x_data_sklearn = x_data[:, 1:]  # 定数項を除去
+    x_data_sklearn = remove_const_column(x_data, has_const)
 
     # scikit-learn の Ridge を使用
     ridge = Ridge(alpha=alpha, fit_intercept=has_const)
