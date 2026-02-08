@@ -14,7 +14,7 @@ type ModalProps = {
   modalSize: string;
 };
 
-export function Modal({
+export const Modal = ({
   isOpenModal,
   children,
   modalTitle,
@@ -22,7 +22,7 @@ export function Modal({
   submit,
   close,
   modalSize,
-}: ModalProps) {
+}: ModalProps) => {
   const { t } = useTranslation();
 
   return (

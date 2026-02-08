@@ -10,7 +10,7 @@ type InputFieldTextMiddleProps = {
   error: string;
 };
 
-export function InputTextField({ label, value, change, error }: InputFieldTextMiddleProps) {
+export const InputTextField = ({ label, value, change, error }: InputFieldTextMiddleProps) => {
   const { t } = useTranslation();
 
   return (

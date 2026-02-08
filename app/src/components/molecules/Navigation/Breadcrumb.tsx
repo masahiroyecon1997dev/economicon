@@ -5,7 +5,7 @@ type BreadcrumbProps = {
   onSegmentClick: (index: number) => void;
 };
 
-export function Breadcrumb({ segments, onSegmentClick }: BreadcrumbProps) {
+export const Breadcrumb = ({ segments, onSegmentClick }: BreadcrumbProps) => {
   return (
     <nav className="flex h-8 px-2 sm:px-2.5 md:px-4 text-gray-700 border border-gray-200 rounded-lg bg-gray-50 min-w-0 max-w-full overflow-hidden" aria-label="Breadcrumb">
       <div className="overflow-x-auto scrollbar-hide w-full flex items-center">

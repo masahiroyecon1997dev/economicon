@@ -67,7 +67,6 @@ Economicon
 
 **リファクタリング**
 
-- ABCによるインタフェース→継承からprotocolを使用した方式に変更
 - シングルトンから依存性注入に変更可能かどうか検討
 - pydanticをPython APIにも適用
 - ファイルリストを取得するAPIをRust側に移行

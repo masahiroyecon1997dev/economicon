@@ -8,7 +8,7 @@ type ActionButtonBarProps = {
   onSelectType?: "button" | "submit" | "reset";
 };
 
-export function ActionButtonBar({ cancelText, selectText, onCancel, onSelect, onSelectType = "button" }: ActionButtonBarProps) {
+export const ActionButtonBar = ({ cancelText, selectText, onCancel, onSelect, onSelectType = "button" }: ActionButtonBarProps) => {
   return (
     <div className="pt-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
       <div className="flex justify-end gap-3">

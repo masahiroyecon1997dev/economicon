@@ -6,7 +6,7 @@ type ErrorModalFooterProps = {
   onOk: () => void;
 };
 
-export function ErrorModalFooter({ onOk }: ErrorModalFooterProps) {
+export const ErrorModalFooter = ({ onOk }: ErrorModalFooterProps) => {
   const { t } = useTranslation();
 
   return (

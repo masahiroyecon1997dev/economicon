@@ -14,7 +14,7 @@ type FileListTableProps = {
   onSort?: (field: SortField) => void;
 };
 
-export function FileListTable({
+export const FileListTable = ({
   files,
   onFileClick,
   fileNameHeader,
@@ -24,7 +24,7 @@ export function FileListTable({
   sortField = null,
   sortDirection = null,
   onSort
-}: FileListTableProps) {
+}: FileListTableProps) => {
   const { t } = useTranslation();
 
   // ソートアイコンを返す関数
