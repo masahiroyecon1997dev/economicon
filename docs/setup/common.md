@@ -6,78 +6,60 @@
 
 ### オペレーティングシステム
 
-- **Windows**: Windows 10/11 (推奨)
-- **Linux**: Ubuntu 20.04 以上
-- **macOS**: macOS 12 (Monterey) 以上
+- **Windows 11**
+
+> **注意**: 現在、開発環境は Windows 11 のみをサポートしています。
 
 ### 必須ツール
 
 - **Git**: バージョン管理
-- **Visual Studio Code**: 推奨エディタ（任意）
+- **Visual Studio Code**: 推奨エディタ
+
+## ツールのインストール
 
 ### Git のインストール
 
-#### Windows
+1. [Git公式サイト](https://git-scm.com/download/win) から Windows版をダウンロード
+2. インストーラーを実行
+3. デフォルト設定で進める（推奨）
+
+#### インストール確認
 
 ```powershell
-# Windows Package Manager (winget) を使用
-winget install Git.Git
-
-# または Chocolatey を使用
-choco install git
+git --version
+# git version 2.x.x と表示されることを確認
 ```
 
-#### Linux (Ubuntu/Debian)
+### Visual Studio Code のインストール
 
-```bash
-sudo apt update
-sudo apt install git
-```
+1. [Visual Studio Code公式サイト](https://code.visualstudio.com/) から Windows版をダウンロード
+2. インストーラーを実行
+3. 推奨設定:
+   - 「PATH への追加」にチェック
+   - 「コンテキストメニューに追加」にチェック
 
-#### macOS
-
-```bash
-# Homebrew を使用
-brew install git
-```
-
-### Visual Studio Code のインストール（推奨）
-
-#### Windows
+#### インストール確認
 
 ```powershell
-winget install Microsoft.VisualStudioCode
-```
-
-#### Linux
-
-```bash
-sudo snap install code --classic
-```
-
-#### macOS
-
-```bash
-brew install --cask visual-studio-code
+code --version
 ```
 
 ### VS Code 推奨拡張機能
 
-開発を効率化するための推奨拡張機能：
+プロジェクトには推奨拡張機能リストが含まれています。
 
-- **Python**: ms-python.python
-- **Pylance**: ms-python.vscode-pylance
-- **ESLint**: dbaeumer.vscode-eslint
-- **Prettier**: esbenp.prettier-vscode
-- **Tailwind CSS IntelliSense**: bradlc.vscode-tailwindcss
-- **TypeScript Vue Plugin (Volar)**: Vue.vscode-typescript-vue-plugin
-- **GitHub Copilot**: github.copilot
+1. VS Code を開く
+2. 拡張機能パネル（Ctrl+Shift+X）を開く
+3. 検索欄に `@recommended` と入力
+4. 「ワークスペースの推奨事項」に表示される拡張機能をすべてインストール
+
+> `.vscode/extensions.json` に推奨拡張機能のリストが定義されています。
 
 ## セットアップの流れ
 
 1. **リポジトリのクローン**
 
-   ```bash
+   ```powershell
    git clone https://github.com/MasahiroYamada1997-1/economicon.git
    cd economicon
    ```
@@ -88,49 +70,8 @@ brew install --cask visual-studio-code
 3. **フロントエンドのセットアップ**
    - [フロントエンドセットアップガイド](./frontend.md) を参照
 
-4. **開発サーバーの起動**
-   - バックエンド: `cd ApiServer && uvicorn main:app --reload --host 0.0.0.0 --port 8000`
-   - フロントエンド: `cd app && pnpm dev`
-
-## Docker 環境での開発
-
-Docker を使用した開発環境も提供しています。
-
-### Docker のインストール
-
-#### Windows
-
-```powershell
-winget install Docker.DockerDesktop
-```
-
-#### Linux
-
-```bash
-# Docker Engine のインストール
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker $USER
-```
-
-#### macOS
-
-```bash
-brew install --cask docker
-```
-
-### Dev Container を使用した開発
-
-1. **Visual Studio Code に拡張機能をインストール**
-   - Dev Containers: ms-vscode-remote.remote-containers
-
-2. **コンテナで開く**
-   - VS Code で `F1` を押し、「Dev Containers: Rebuild and Reopen in Container」を実行
-   - 初回は時間がかかりますが、次回以降は「Dev Containers: Reopen in Container」で高速に起動
-
-3. **コンテナ内での作業**
-   - すべての依存関係が自動的にインストールされます
-   - ターミナルはコンテナ内で実行されます
+4. **開発サーバーの起動とデバッグ**
+   - [開発・デバッグガイド](../debug/debug.md) を参照
 
 ## トラブルシューティング
 
@@ -139,28 +80,22 @@ brew install --cask docker
 バックエンドサーバーがポート 8000 で起動できない場合：
 
 ```powershell
-# Windows: ポートを使用しているプロセスを確認
+# ポートを使用しているプロセスを確認
 netstat -ano | findstr :8000
 
 # プロセスを終了
 taskkill /PID <プロセスID> /F
 ```
 
-```bash
-# Linux/macOS
-lsof -i :8000
-kill -9 <プロセスID>
-```
+フロントエンドがポート 5173 で起動できない場合：
 
-### 権限エラー（Linux/macOS）
-
-```bash
-# sudo なしで Docker を実行できるようにする
-sudo usermod -aG docker $USER
-newgrp docker
+```powershell
+# Vite は自動的に別のポートを使用しますが、手動で指定することも可能
+pnpm dev --port 3000
 ```
 
 ## 次のステップ
 
 - [バックエンドセットアップ](./backend.md) - Python/FastAPI 環境の構築
-- [フロントエンドセットアップ](./frontend.md) - Node.js/React 環境の構築
+- [フロントエンドセットアップ](./frontend.md) - Node.js/React/Tauri 環境の構築
+- [開発・デバッグガイド](../debug/debug.md) - 開発サーバーの起動方法とデバッグ方法

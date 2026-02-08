@@ -22,6 +22,9 @@ from ..data.tables_store import TablesStore
 from .common import (
     MISSING_HANDLING_MAP,
     prepare_basic_data,
+    prepare_iv_dataframe,
+    prepare_panel_dataframe,
+    prepare_tobit_dataframe,
 )
 from .fitters import (
     fit_fe,
@@ -243,47 +246,69 @@ class Regression:
                     )
                     analysis_result = self._format_result(model_result)
                 case "tobit":
-                    model_result = fit_tobit(
+                    df_pandas = prepare_tobit_dataframe(
                         df,
                         self.dependent_variable,
                         self.explanatory_variables,
-                        self.has_const,
                         missing,
+                    )
+                    model_result = fit_tobit(
+                        df_pandas,
+                        self.dependent_variable,
+                        self.explanatory_variables,
+                        self.has_const,
                         self.left_censoring_limit,
                         self.right_censoring_limit,
                     )
                     analysis_result = self._tobit_format_result(model_result)
                 case "fe":
-                    model_result = fit_fe(
+                    df_pandas = prepare_panel_dataframe(
                         df,
                         self.dependent_variable,
                         self.explanatory_variables,
                         self.entity_id_column,
                         self.time_column,
-                        self.standard_error_method,
                         missing,
+                    )
+                    model_result = fit_fe(
+                        df_pandas,
+                        self.dependent_variable,
+                        self.explanatory_variables,
+                        self.standard_error_method,
                     )
                     analysis_result = self._fe_format_result(model_result)
                 case "re":
-                    model_result = fit_re(
+                    df_pandas = prepare_panel_dataframe(
                         df,
                         self.dependent_variable,
                         self.explanatory_variables,
                         self.entity_id_column,
                         self.time_column,
-                        self.standard_error_method,
                         missing,
+                    )
+                    model_result = fit_re(
+                        df_pandas,
+                        self.dependent_variable,
+                        self.explanatory_variables,
+                        self.standard_error_method,
                     )
                     analysis_result = self._re_format_result(model_result)
                 case "iv":
-                    model_result = fit_iv(
+                    df_pandas = prepare_iv_dataframe(
                         df,
                         self.dependent_variable,
                         self.explanatory_variables,
                         self.endogenous_variables,
                         self.instrumental_variables,
-                        self.standard_error_method,
                         missing,
+                    )
+                    model_result = fit_iv(
+                        df_pandas,
+                        self.dependent_variable,
+                        self.explanatory_variables,
+                        self.endogenous_variables,
+                        self.instrumental_variables,
+                        self.standard_error_method,
                     )
                     model_result = apply_standard_errors(
                         model_result,

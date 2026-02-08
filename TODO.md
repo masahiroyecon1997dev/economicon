@@ -58,10 +58,6 @@ Economicon
 - zodを有効活用してできる限りこれでバリデーションを行いたい。独自実装のバリデーションが可能かどうかも調べる。
 - react hook formからTanstack formに乗り換えてみては？
 
-**コード**
-
-- tauriのvscodeでのデバッグ設定追加
-
 ## REST API, Python API
 
 **リファクタリング**
