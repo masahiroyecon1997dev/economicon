@@ -96,4 +96,3 @@ def gettext(message: str, locale: Optional[str] = None) -> str:
 
 # 翻訳関数のエイリアス
 _ = gettext
-gettext_lazy = gettext  # 後方互換性のため
