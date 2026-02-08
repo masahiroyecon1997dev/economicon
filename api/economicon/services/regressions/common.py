@@ -44,6 +44,28 @@ def handle_missing_values(df: Any, missing: str) -> Any:
     return df
 
 
+def remove_const_column(x_data: np.ndarray, has_const: bool) -> np.ndarray:
+    """
+    scikit-learn用に定数項列を除去する共通関数
+
+    scikit-learnはfit_interceptパラメータで定数項を扱うため、
+    x_dataに定数項が含まれている場合は除去する必要がある。
+
+    Args:
+        x_data: 説明変数のデータ（定数項が含まれる可能性あり）
+        has_const: 定数項を含むかどうか
+
+    Returns:
+        定数項を除去した説明変数のデータ
+    """
+    x_data_sklearn = x_data
+    if has_const:
+        # 最初の列が定数項かチェック（全て1の列）
+        if x_data.shape[1] > 0 and np.allclose(x_data[:, 0], 1.0):
+            x_data_sklearn = x_data[:, 1:]  # 定数項を除去
+    return x_data_sklearn
+
+
 # 欠損値処理方法のマッピング
 MISSING_HANDLING_MAP = {
     "ignore": "none",
