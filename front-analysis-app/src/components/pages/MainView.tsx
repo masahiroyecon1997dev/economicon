@@ -1,4 +1,4 @@
-import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
+import { useCurrentPageStore } from "../../stores/currentView";
 import { Calculation } from "./Calculation";
 import { CreateSimulationDataTable } from "./CreateSimulationDataTable";
 import { ImportDataFile } from "./ImportDataFile";
@@ -7,7 +7,7 @@ import { SaveData } from "./SaveData";
 import { Table } from "./Table";
 
 export const MainView = () => {
-  const currentView = useCurrentViewStore((state) => state.currentView);
+  const currentView = useCurrentPageStore((state) => state.currentView);
 
   const renderContent = () => {
     switch (currentView) {

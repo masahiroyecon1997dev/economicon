@@ -2,9 +2,9 @@ import { FileUp, Menu, Save } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
-import { useSideMenuStore } from "../../stores/useSideMenuStore";
-import { useTableInfosStore } from "../../stores/useTableInfosStore";
+import { useCurrentPageStore } from "../../stores/currentView";
+import { useSideMenuStore } from "../../stores/sideMenu";
+import { useTableInfosStore } from "../../stores/tableInfos";
 import { SectionHeading } from "../atoms/List/SectionHeading";
 import { TableNav } from "../molecules/List/TableNav";
 
@@ -16,7 +16,7 @@ export const LeftSideMenu = () => {
   const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
   const activateTableInfo = useTableInfosStore((state) => state.activateTableInfo);
-  const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
 
 
   const clickTableName = async (tableName: string) => {

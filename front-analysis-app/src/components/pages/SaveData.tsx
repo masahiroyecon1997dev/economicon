@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { exportCsvByPath, exportExcelByPath, exportParquetByPath, getFiles } from "../../lib/api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
-import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
-import { useFilesStore } from "../../stores/useFilesStore";
-import { useLoadingStore } from "../../stores/useLoadingStore";
-import { useSettingsStore } from "../../stores/useSettingsStore";
-import { useTableInfosStore } from "../../stores/useTableInfosStore";
-import { useTableListStore } from "../../stores/useTableListStore";
+import { useCurrentPageStore } from "../../stores/currentView";
+import { useFilesStore } from "../../stores/files";
+import { useLoadingStore } from "../../stores/loading";
+import { useSettingsStore } from "../../stores/settings";
+import { useTableInfosStore } from "../../stores/tableInfos";
+import { useTableListStore } from "../../stores/tableList";
 import type { FileType, SortDirection, SortField } from "../../types/commonTypes";
 import { InputText } from "../atoms/Input/InputText";
 import { Select, SelectItem } from "../atoms/Input/Select";
@@ -29,7 +29,7 @@ export const SaveData = () => {
   const pathSeparator = useSettingsStore((state) => state.pathSeparator);
   const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const tableNameList = useTableListStore((state) => state.tableList);
-  const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
 
   const { setLoading, clearLoading } = useLoadingStore();
 

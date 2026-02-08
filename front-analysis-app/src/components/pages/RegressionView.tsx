@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/utils/helpers";
-import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
-import { useRegressionResultsStore } from "../../stores/useRegressionResultsStore";
+import { useCurrentPageStore } from "../../stores/currentView";
+import { useRegressionResultsStore } from "../../stores/regressionResults";
 import { LinearRegressionForm } from "../organisms/Form/LinearRegressionForm";
 import { RegressionResult } from "../organisms/Result/RegressionResult";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../organisms/Tab/BaseTab";
@@ -16,7 +16,7 @@ export const Regression = ({ className }: RegressionProps) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<string>("analysis-settings");
   const results = useRegressionResultsStore((state) => state.results);
-  const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
 
   const handleCancel = () => {
     setCurrentView("DataPreview");

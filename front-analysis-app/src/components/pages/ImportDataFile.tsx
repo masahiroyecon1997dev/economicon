@@ -6,12 +6,12 @@ import { useTranslation } from "react-i18next";
 import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../lib/api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
-import { useFilesStore } from "../../stores/useFilesStore";
-import { useLoadingStore } from "../../stores/useLoadingStore";
-import { useSettingsStore } from "../../stores/useSettingsStore";
-import { useTableInfosStore } from "../../stores/useTableInfosStore";
-import { useTableListStore } from "../../stores/useTableListStore";
+import { useCurrentPageStore } from "../../stores/currentView";
+import { useFilesStore } from "../../stores/files";
+import { useLoadingStore } from "../../stores/loading";
+import { useSettingsStore } from "../../stores/settings";
+import { useTableInfosStore } from "../../stores/tableInfos";
+import { useTableListStore } from "../../stores/tableList";
 import type { FileType, SortDirection, SortField, TauriFile } from "../../types/commonTypes";
 import { CancelButtonBar } from "../molecules/ActionBar/CancelButtonBar";
 import { NavigationSearchBar } from "../molecules/Navigation/NavigationSearchBar";
@@ -28,7 +28,7 @@ export const ImportDataFile = () => {
   const pathSeparator = useSettingsStore((state) => state.pathSeparator);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
   const addTableList = useTableListStore((state) => state.addTableName);
-  const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
 
   const { setLoading, clearLoading } = useLoadingStore();
 
