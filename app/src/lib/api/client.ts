@@ -63,12 +63,12 @@ export const client = {
 /**
  * 共通リクエスト処理
  */
-async function invokeRequest<T>(
+const invokeRequest = async <T>(
   method: string,
   path: string,
   body?: RequestBody,
   query?: RequestBody,
-): Promise<{ data: T }> {
+): Promise<{ data: T }> => {
   const fullPath = `${BASE_API_PREFIX}${path}`;
 
   try {
@@ -83,17 +83,17 @@ async function invokeRequest<T>(
     console.error(`API Request Failed: ${method} ${fullPath}`, error);
     throw error;
   }
-}
+};
 
 /**
  * 共通リクエスト処理
  */
-async function invokeBinaryRequest<T>(
+const invokeBinaryRequest = async <T>(
   method: string,
   path: string,
   body?: RequestBody,
   query?: RequestBody,
-): Promise<{ data: T }> {
+): Promise<{ data: T }> => {
   const fullPath = `${BASE_API_PREFIX}${path}`;
 
   try {
@@ -108,4 +108,4 @@ async function invokeBinaryRequest<T>(
     console.error(`API Request Failed: ${method} ${fullPath}`, error);
     throw error;
   }
-}
+};

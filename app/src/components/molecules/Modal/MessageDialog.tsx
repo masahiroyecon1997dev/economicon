@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { useMessageDialogStore } from '../../../stores/messageDialog';
 import { ErrorModalFooter } from './ErrorModalFooter';
 
-export function MessageDialog() {
+export const MessageDialog = () => {
   const { isOpen, title, message, closeMessageDialog } = useMessageDialogStore();
 
   const handleOk = () => {

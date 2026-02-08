@@ -12,7 +12,7 @@ type NavigationSearchBarProps = {
   onSearchChange: (value: string) => void;
 };
 
-export function NavigationSearchBar({
+export const NavigationSearchBar = ({
   pathSegments,
   searchValue,
   searchPlaceholder,
@@ -20,7 +20,7 @@ export function NavigationSearchBar({
   onUpDirectory,
   onBreadcrumbClick,
   onSearchChange
-}: NavigationSearchBarProps) {
+}: NavigationSearchBarProps) => {
   return (
     <div className="w-full">
       {/* 幅が十分にある場合（768px以上）は横並び */}
