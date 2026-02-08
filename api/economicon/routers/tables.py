@@ -323,9 +323,12 @@ async def fetch_data_to_arrow_endpoint(
 
     api = FetchDataToArrow(**body.model_dump())
     result = run_operation(api)
+    assert isinstance(result, bytes), "FetchDataToArrow must return bytes"
 
     return create_success_binary_response(
-        http_status.HTTP_200_OK, result, "application/octet-stream"
+        http_status.HTTP_200_OK,
+        result,
+        "application/octet-stream",
     )
 
 
