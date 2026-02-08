@@ -23,7 +23,6 @@ from .data_io import (
     ImportParquetByPathRequest,
 )
 from .files import GetFilesRequest
-from .operations import FilterSingleConditionRequest, InputCellDataRequest
 from .regressions import RegressionRequest
 from .settings import GetSettingsRequest
 from .statistics import ConfidenceIntervalRequest, DescriptiveStatisticsRequest
@@ -37,7 +36,9 @@ from .tables import (
     DuplicateTableRequest,
     FetchDataToArrowRequest,
     FetchDataToJsonRequest,
+    FilterSingleConditionRequest,
     GetTableListRequest,
+    InputCellDataRequest,
     RenameTableRequest,
 )
 

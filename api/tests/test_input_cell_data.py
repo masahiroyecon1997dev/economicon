@@ -39,7 +39,7 @@ def test_input_cell_data_success(client, tables_store):
         "newValue": 99,
     }
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json=payload,
     )
     response_data = response.json()
@@ -57,7 +57,7 @@ def test_input_cell_data_success_with_string(client, tables_store):
         "newValue": "AAA",
     }
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json=payload,
     )
     response_data = response.json()
@@ -75,7 +75,7 @@ def test_input_cell_data_invalid_table(client, tables_store):
         "newValue": 10,
     }
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json=payload,
     )
     response_data = response.json()
@@ -92,7 +92,7 @@ def test_input_cell_data_invalid_column(client, tables_store):
         "newValue": 10,
     }
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json=payload,
     )
     response_data = response.json()
@@ -109,7 +109,7 @@ def test_input_cell_data_invalid_row_over(client, tables_store):
         "newValue": 10,
     }
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json=payload,
     )
     response_data = response.json()
@@ -129,7 +129,7 @@ def test_input_cell_data_invalid_row_string(client, tables_store):
         "newValue": 10,
     }
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json=payload,
     )
     # response_data = response.json()
@@ -143,7 +143,7 @@ def test_input_cell_data_empty_table_name(client, tables_store):
     tableNameが空文字列の場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json={
             "tableName": "",
             "columnName": "A",
@@ -162,7 +162,7 @@ def test_input_cell_data_empty_column_name(client, tables_store):
     columnNameが空文字列の場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json={
             "tableName": "TestTable",
             "columnName": "",
@@ -181,7 +181,7 @@ def test_input_cell_data_negative_row_index(client, tables_store):
     rowIndexが負の値の場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json={
             "tableName": "TestTable",
             "columnName": "A",
@@ -200,7 +200,7 @@ def test_input_cell_data_missing_table_name(client, tables_store):
     tableNameが欠損している場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json={"columnName": "A", "rowIndex": 1, "newValue": 10},
     )
     response_data = response.json()
@@ -214,7 +214,7 @@ def test_input_cell_data_missing_column_name(client, tables_store):
     columnNameが欠損している場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json={"tableName": "TestTable", "rowIndex": 1, "newValue": 10},
     )
     response_data = response.json()
@@ -228,7 +228,7 @@ def test_input_cell_data_missing_row_index(client, tables_store):
     rowIndexが欠損している場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json={"tableName": "TestTable", "columnName": "A", "newValue": 10},
     )
     response_data = response.json()
@@ -242,7 +242,7 @@ def test_input_cell_data_missing_new_value(client, tables_store):
     newValueが欠損している場合はバリデーションエラーになる
     """
     response = client.post(
-        "/api/operation/input-cell-data",
+        "/api/table/input-cell-data",
         json={"tableName": "TestTable", "columnName": "A", "rowIndex": 1},
     )
     response_data = response.json()
