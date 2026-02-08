@@ -3,6 +3,7 @@
 SettingsManagerからロケール設定を取得し、fastapi-babelと統合します。
 リクエストコンテキスト外でも動作するように、独自の翻訳関数も提供します。
 """
+
 import gettext as gettext_module
 from pathlib import Path
 from typing import Optional
@@ -10,10 +11,9 @@ from typing import Optional
 from fastapi_babel import _ as babel_gettext
 
 # ロケールディレクトリ
-LOCALE_DIR = Path(__file__).parent.parent / 'locales'
+LOCALE_DIR = Path(__file__).parent.parent / "locales"
 _translations: dict[
-    str,
-    gettext_module.NullTranslations | gettext_module.GNUTranslations
+    str, gettext_module.NullTranslations | gettext_module.GNUTranslations
 ] = {}
 
 
@@ -26,22 +26,22 @@ def get_locale_from_settings() -> str:
     設定値を返します。
 
     Returns:
-        str: 現在のロケール('ja', 'en'など)
+        str: 現在のロケール("ja", "en"など)
     """
     # 循環インポートを避けるため、関数内でインポート
-    from analysisapp.services.data.settings_manager import SettingsManager
+    from ..services.data.settings_manager import SettingsManager
 
     try:
         settings_manager = SettingsManager()
         settings = settings_manager.get_settings()
         return settings.app_language
     except Exception:
-        # 設定が初期化されていない場合はデフォルトで'ja'を返す
-        return 'ja'
+        # 設定が初期化されていない場合はデフォルトで"ja"を返す
+        return "ja"
 
 
 def _get_translation(
-    locale: Optional[str] = None
+    locale: Optional[str] = None,
 ) -> gettext_module.NullTranslations | gettext_module.GNUTranslations:
     """
     指定されたロケールの翻訳オブジェクトを取得
@@ -56,15 +56,13 @@ def _get_translation(
         locale = get_locale_from_settings()
 
     # テスト環境でデフォルトで日本語を使用
-    if locale is None or locale == '':
-        locale = 'ja'
+    if locale is None or locale == "":
+        locale = "ja"
 
     if locale not in _translations:
         try:
             _translations[locale] = gettext_module.translation(
-                'messages',
-                localedir=str(LOCALE_DIR),
-                languages=[locale]
+                "messages", localedir=str(LOCALE_DIR), languages=[locale]
             )
         except FileNotFoundError:
             # 翻訳ファイルが見つからない場合はNullTranslationsを使用
