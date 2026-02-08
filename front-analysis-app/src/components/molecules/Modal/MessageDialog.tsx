@@ -1,7 +1,7 @@
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 
-import { useMessageDialogStore } from '../../../stores/useMessageDialogStore';
+import { useMessageDialogStore } from '../../../stores/messageDialog';
 import { ErrorModalFooter } from './ErrorModalFooter';
 
 export function MessageDialog() {

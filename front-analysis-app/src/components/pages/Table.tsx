@@ -1,5 +1,5 @@
 import { Fragment } from "react/jsx-runtime";
-import { useTableInfosStore } from "../../stores/useTableInfosStore";
+import { useTableInfosStore } from "../../stores/tableInfos";
 import { VirtualTable } from "../organisms/Table/VirtualTable";
 
 

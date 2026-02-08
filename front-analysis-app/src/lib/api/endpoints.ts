@@ -1,5 +1,5 @@
 // axiosを廃止し、clientをインポート
-import { API_ENDPOINTS } from "../../constants/requests";
+import { API_ENDPOINTS } from "../../constants/api";
 import type * as apiTypes from "../../types/apiTypes";
 import { client } from "./client";
 

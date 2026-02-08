@@ -4,14 +4,14 @@ import { startTransition, useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { DISTRIBUTION_OPTIONS } from "../../constants/constant";
+import { DISTRIBUTION_OPTIONS } from "../../constants/app";
 import { createSimulationDataTable } from "../../lib/api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { getTableInfo } from "../../lib/utils/internal";
 import { validateDistributionParam } from "../../lib/utils/validation";
-import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
-import { useTableInfosStore } from "../../stores/useTableInfosStore";
-import { useTableListStore } from "../../stores/useTableListStore";
+import { useCurrentPageStore } from "../../stores/currentView";
+import { useTableInfosStore } from "../../stores/tableInfos";
+import { useTableListStore } from "../../stores/tableList";
 import type { DistributionType, SimulationColumnSetting } from "../../types/commonTypes";
 import { InputText } from "../atoms/Input/InputText";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
@@ -29,7 +29,7 @@ type SimulationFormData = z.infer<ReturnType<typeof createSimulationSchema>>;
 
 export const CreateSimulationDataTable = () => {
   const { t } = useTranslation();
-  const setCurrentView = useCurrentViewStore(state => state.setCurrentView);
+  const setCurrentView = useCurrentPageStore(state => state.setCurrentView);
   const addTableName = useTableListStore(state => state.addTableName);
   const addTableInfo = useTableInfosStore(state => state.addTableInfo);
 

@@ -7,8 +7,8 @@ import { z } from "zod";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
 import { calculateColumn } from "../../lib/api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
-import { useCurrentViewStore } from "../../stores/useCurrentViewStore";
-import { useTableListStore } from "../../stores/useTableListStore";
+import { useCurrentPageStore } from "../../stores/currentView";
+import { useTableListStore } from "../../stores/tableList";
 import { ExpressionHelperButton } from "../atoms/Button/ExpressionHelperButton";
 import { InputText } from "../atoms/Input/InputText";
 import { Select, SelectItem } from "../atoms/Input/Select";
@@ -29,7 +29,7 @@ type CalculationFormData = z.infer<ReturnType<typeof createCalculationSchema>>;
 export const Calculation = () => {
   const { t } = useTranslation();
   const tableList = useTableListStore((state) => state.tableList);
-  const setCurrentView = useCurrentViewStore((state) => state.setCurrentView);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
 
   const { selectedTableName, setSelectedTableName, columnList } = useTableColumnLoader({
     numericOnly: true,
