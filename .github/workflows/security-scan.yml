@@ -29,7 +29,8 @@ jobs:
       - name: Python Dependency Check (pip-audit)
         run: |
           cd api
-          uv pip install --system pip-audit
+          uv venv
+          uv pip install pip-audit
           uv run pip-audit
 
       # --- React (pnpm) の設定 ---
