@@ -5,14 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "coverage>=7.13.1",
-    "fastapi>=0.128.0",
-    "fastexcel>=0.18.0",
-    "numpy>=2.4.1",
-    "polars>=1.36.1",
+    "coverage>=7.13.4",
+    "fastapi>=0.128.7",
+    "fastexcel>=0.19.0",
+    "numpy>=2.4.2",
+    "polars>=1.38.1",
     "pyarrow>=8.0.0",
-    "python-magic; sys_platform != 'win32'",      # Linux/macOS用
-    "python-magic-bin; sys_platform == 'win32'",  # Windows用
+    "python-magic; sys_platform != 'win32'",     # Linux/macOS用
+    "python-magic-bin; sys_platform == 'win32'", # Windows用
     "python-multipart>=0.0.21",
     "pyyaml>=6.0.3",
     "scipy>=1.16.3",
@@ -33,11 +33,11 @@ pythonpath = ["."]
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
-    "pip-licenses>=5.5.0",
+    "pip-licenses>=5.5.1",
     "pipdeptree>=2.30.0",
-    "pyinstaller>=6.17.0",
+    "pyinstaller>=6.18.0",
     "pytest>=9.0.2",
-    "ruff>=0.14.14",
+    "ruff>=0.15.0",
     "wooldridge>=0.5.0",
 ]
 
