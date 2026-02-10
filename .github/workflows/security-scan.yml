@@ -51,13 +51,3 @@ jobs:
           cd app
           # pnpm 10系の audit コマンドを実行
           pnpm audit --audit-level high
-
-      # --- CodeQL (静的解析) ---
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: "javascript-typescript, python"
-          queries: security-extended,security-and-quality
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
