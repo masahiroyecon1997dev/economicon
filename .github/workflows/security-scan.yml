@@ -1,10 +1,10 @@
 name: "Security Scan"
 
 on:
-  # 1. 1週間に1回（月曜日の午前0時）に実行
-  schedule:
-    - cron: "0 0 * * 1"
-  # 2. 手動での実行を可能にする
+  # 1. 1週間に1回（月曜日の午前0時）に実行（現状はなし）
+  # schedule:
+  #   - cron: "0 0 * * 1"
+  # 手動での実行を可能にする
   workflow_dispatch:
 
 jobs:
