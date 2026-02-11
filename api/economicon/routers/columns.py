@@ -37,7 +37,7 @@ router = APIRouter(prefix="/column", tags=["column"])
 
 
 @router.post("/add", response_model=SuccessResponse[AddColumnResult])
-async def add_column_endpoint(request: Request, body: AddColumnRequest):
+async def add_column(request: Request, body: AddColumnRequest):
     """カラムを追加するエンドポイント
 
     Parameters
@@ -61,9 +61,7 @@ async def add_column_endpoint(request: Request, body: AddColumnRequest):
 
 
 @router.post("/add-dummy")
-async def add_dummy_column_endpoint(
-    request: Request, body: AddDummyColumnRequest
-):
+async def add_dummy_column(request: Request, body: AddDummyColumnRequest):
     """ダミー変数カラムを追加するエンドポイント
 
     Parameters
@@ -87,7 +85,7 @@ async def add_dummy_column_endpoint(
 
 
 @router.post("/delete")
-async def delete_column_endpoint(request: Request, body: DeleteColumnRequest):
+async def delete_column(request: Request, body: DeleteColumnRequest):
     """カラムを削除するエンドポイント
 
     Parameters
@@ -109,7 +107,7 @@ async def delete_column_endpoint(request: Request, body: DeleteColumnRequest):
 
 
 @router.post("/rename")
-async def rename_column_endpoint(request: Request, body: RenameColumnRequest):
+async def rename_column(request: Request, body: RenameColumnRequest):
     """
     列名変更エンドポイント
 
@@ -135,9 +133,7 @@ async def rename_column_endpoint(request: Request, body: RenameColumnRequest):
 
 
 @router.post("/add-lag-lead")
-async def add_lag_lead_column_endpoint(
-    request: Request, body: AddLagLeadColumnRequest
-):
+async def add_lag_lead_column(request: Request, body: AddLagLeadColumnRequest):
     """ラグ・リードカラムを追加するエンドポイント
 
     Parameters
@@ -162,7 +158,7 @@ async def add_lag_lead_column_endpoint(
 
 
 @router.post("/add-simulation")
-async def add_simulation_column_endpoint(
+async def add_simulation_column(
     request: Request, body: AddSimulationColumnRequest
 ):
     """シミュレーションカラムを追加するエンドポイント
@@ -188,9 +184,7 @@ async def add_simulation_column_endpoint(
 
 
 @router.post("/calculate")
-async def calculate_column_endpoint(
-    request: Request, body: CalculateColumnRequest
-):
+async def calculate_column(request: Request, body: CalculateColumnRequest):
     """カラム計算を実行するエンドポイント
 
     Parameters
@@ -216,9 +210,7 @@ async def calculate_column_endpoint(
 
 
 @router.post("/duplicate")
-async def duplicate_column_endpoint(
-    request: Request, body: DuplicateColumnRequest
-):
+async def duplicate_column(request: Request, body: DuplicateColumnRequest):
     """カラムを複製するエンドポイント
 
     Parameters
@@ -242,9 +234,7 @@ async def duplicate_column_endpoint(
 
 
 @router.post("/transform")
-async def transform_column_endpoint(
-    request: Request, body: TransformColumnRequest
-):
+async def transform_column(request: Request, body: TransformColumnRequest):
     """
     列の変換処理エンドポイント
 
@@ -269,9 +259,7 @@ async def transform_column_endpoint(
 
 
 @router.post("/get-list")
-async def get_column_list_endpoint(
-    request: Request, body: GetColumnListRequest
-):
+async def get_column_list(request: Request, body: GetColumnListRequest):
     """カラムリストを取得するエンドポイント
 
     Parameters
@@ -295,7 +283,7 @@ async def get_column_list_endpoint(
 
 
 @router.post("/sort")
-async def sort_columns_endpoint(request: Request, body: SortColumnsRequest):
+async def sort_columns(request: Request, body: SortColumnsRequest):
     """
     列のソート処理エンドポイント
 

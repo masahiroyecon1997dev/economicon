@@ -1,6 +1,6 @@
 """共通のスキーマ定義"""
 
-from typing import Generic, TypeVar
+from typing import Annotated, Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -25,3 +25,16 @@ class ErrorResponse(BaseResponse):
 
     code: str = Field(default="NG", description="レスポンスコード")
     message: str = Field(..., description="エラーメッセージ")
+
+
+NAME_PATTERN = r"^[^\x00-\x1f\x7f]+$"
+
+TableName = Annotated[
+    str,
+    Field(
+        min_length=1,
+        max_length=128,
+        pattern=NAME_PATTERN,
+        examples=["geographic_data", "市区町村人口データ"],
+    ),
+]
