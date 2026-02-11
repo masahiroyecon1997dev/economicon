@@ -119,7 +119,6 @@ def validate_new_column_name(
 def validate_existed_table_name(
     table_name: str, table_name_list: List[str], table_name_param: str
 ) -> None:
-    validate_required(table_name, table_name_param)
     validate_item_exists_in_list(table_name, table_name_param, table_name_list)
 
 

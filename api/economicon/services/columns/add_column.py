@@ -9,6 +9,7 @@ from ...utils.validators.tables_store import (
     validate_new_column_name,
 )
 from ..data.tables_store import TablesStore
+from ...schemas.columns import AddColumnResult
 
 
 class AddColumn:
@@ -71,6 +72,10 @@ class AddColumn:
             # 新しい列をデータフレームに追加
             self.tables_store.update_table(self.table_name, df_with_new_col)
             # 結果を返す
+            result = AddColumnResult(
+                table_name=self.table_name,
+                column_name=self.new_column_name,
+            )
             result = {
                 "tableName": self.table_name,
                 "columnName": self.new_column_name,
