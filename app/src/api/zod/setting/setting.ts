@@ -21,5 +21,5 @@ JSONResponse
     処理結果
  * @summary Get Settings Endpoint
  */
-export const GetSettingsEndpointApiSettingGetSettingsGetResponse = zod.unknown()
+export const GetSettingsEndpointResponse = zod.unknown()
 

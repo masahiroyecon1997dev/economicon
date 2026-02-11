@@ -23,24 +23,24 @@ JSONResponse
     処理結果
  * @summary Add Column Endpoint
  */
-export const addColumnEndpointApiColumnAddPostBodyTableNameMax = 255;
+export const addColumnEndpointBodyTableNameMax = 255;
 
-export const addColumnEndpointApiColumnAddPostBodyNewColumnNameMax = 255;
+export const addColumnEndpointBodyNewColumnNameMax = 255;
 
-export const addColumnEndpointApiColumnAddPostBodyAddPositionColumnMax = 255;
+export const addColumnEndpointBodyAddPositionColumnMax = 255;
 
 
 
-export const AddColumnEndpointApiColumnAddPostBody = zod.object({
-  "tableName": zod.string().min(1).max(addColumnEndpointApiColumnAddPostBodyTableNameMax).describe('テーブル名'),
-  "newColumnName": zod.string().min(1).max(addColumnEndpointApiColumnAddPostBodyNewColumnNameMax).describe('新しいカラム名'),
-  "addPositionColumn": zod.string().min(1).max(addColumnEndpointApiColumnAddPostBodyAddPositionColumnMax).describe('追加位置のカラム名')
+export const AddColumnEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(addColumnEndpointBodyTableNameMax).describe('テーブル名'),
+  "newColumnName": zod.string().min(1).max(addColumnEndpointBodyNewColumnNameMax).describe('新しいカラム名'),
+  "addPositionColumn": zod.string().min(1).max(addColumnEndpointBodyAddPositionColumnMax).describe('追加位置のカラム名')
 }).describe('カラム追加リクエスト')
 
-export const addColumnEndpointApiColumnAddPostResponseCodeDefault = `OK`;
+export const addColumnEndpointResponseCodeDefault = `OK`;
 
-export const AddColumnEndpointApiColumnAddPostResponse = zod.object({
-  "code": zod.string().default(addColumnEndpointApiColumnAddPostResponseCodeDefault).describe('レスポンスコード'),
+export const AddColumnEndpointResponse = zod.object({
+  "code": zod.string().default(addColumnEndpointResponseCodeDefault).describe('レスポンスコード'),
   "result": zod.object({
   "tableName": zod.string(),
   "columnName": zod.string()
@@ -63,22 +63,22 @@ JSONResponse
     処理結果
  * @summary Add Dummy Column Endpoint
  */
-export const addDummyColumnEndpointApiColumnAddDummyPostBodyTableNameMax = 255;
+export const addDummyColumnEndpointBodyTableNameMax = 255;
 
-export const addDummyColumnEndpointApiColumnAddDummyPostBodySourceColumnNameMax = 255;
+export const addDummyColumnEndpointBodySourceColumnNameMax = 255;
 
-export const addDummyColumnEndpointApiColumnAddDummyPostBodyDummyColumnNameMax = 255;
+export const addDummyColumnEndpointBodyDummyColumnNameMax = 255;
 
 
 
-export const AddDummyColumnEndpointApiColumnAddDummyPostBody = zod.object({
-  "tableName": zod.string().min(1).max(addDummyColumnEndpointApiColumnAddDummyPostBodyTableNameMax).describe('テーブル名'),
-  "sourceColumnName": zod.string().min(1).max(addDummyColumnEndpointApiColumnAddDummyPostBodySourceColumnNameMax).describe('元となるカラム名'),
-  "dummyColumnName": zod.string().min(1).max(addDummyColumnEndpointApiColumnAddDummyPostBodyDummyColumnNameMax).describe('ダミー変数カラム名'),
+export const AddDummyColumnEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(addDummyColumnEndpointBodyTableNameMax).describe('テーブル名'),
+  "sourceColumnName": zod.string().min(1).max(addDummyColumnEndpointBodySourceColumnNameMax).describe('元となるカラム名'),
+  "dummyColumnName": zod.string().min(1).max(addDummyColumnEndpointBodyDummyColumnNameMax).describe('ダミー変数カラム名'),
   "targetValue": zod.string().describe('1にする対象の値')
 }).describe('ダミー変数カラム追加リクエスト')
 
-export const AddDummyColumnEndpointApiColumnAddDummyPostResponse = zod.unknown()
+export const AddDummyColumnEndpointResponse = zod.unknown()
 
 /**
  * カラムを削除するエンドポイント
@@ -96,18 +96,18 @@ JSONResponse
     処理結果
  * @summary Delete Column Endpoint
  */
-export const deleteColumnEndpointApiColumnDeletePostBodyTableNameMax = 255;
+export const deleteColumnEndpointBodyTableNameMax = 255;
 
-export const deleteColumnEndpointApiColumnDeletePostBodyColumnNameMax = 255;
+export const deleteColumnEndpointBodyColumnNameMax = 255;
 
 
 
-export const DeleteColumnEndpointApiColumnDeletePostBody = zod.object({
-  "tableName": zod.string().min(1).max(deleteColumnEndpointApiColumnDeletePostBodyTableNameMax).describe('テーブル名'),
-  "columnName": zod.string().min(1).max(deleteColumnEndpointApiColumnDeletePostBodyColumnNameMax).describe('カラム名')
+export const DeleteColumnEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(deleteColumnEndpointBodyTableNameMax).describe('テーブル名'),
+  "columnName": zod.string().min(1).max(deleteColumnEndpointBodyColumnNameMax).describe('カラム名')
 }).describe('カラム削除リクエスト')
 
-export const DeleteColumnEndpointApiColumnDeletePostResponse = zod.unknown()
+export const DeleteColumnEndpointResponse = zod.unknown()
 
 /**
  * 列名変更エンドポイント
@@ -128,21 +128,21 @@ JSONResponse
     処理結果
  * @summary Rename Column Endpoint
  */
-export const renameColumnEndpointApiColumnRenamePostBodyTableNameMax = 255;
+export const renameColumnEndpointBodyTableNameMax = 255;
 
-export const renameColumnEndpointApiColumnRenamePostBodyOldColumnNameMax = 255;
+export const renameColumnEndpointBodyOldColumnNameMax = 255;
 
-export const renameColumnEndpointApiColumnRenamePostBodyNewColumnNameMax = 255;
+export const renameColumnEndpointBodyNewColumnNameMax = 255;
 
 
 
-export const RenameColumnEndpointApiColumnRenamePostBody = zod.object({
-  "tableName": zod.string().min(1).max(renameColumnEndpointApiColumnRenamePostBodyTableNameMax).describe('テーブル名'),
-  "oldColumnName": zod.string().min(1).max(renameColumnEndpointApiColumnRenamePostBodyOldColumnNameMax).describe('元のカラム名'),
-  "newColumnName": zod.string().min(1).max(renameColumnEndpointApiColumnRenamePostBodyNewColumnNameMax).describe('新しいカラム名')
+export const RenameColumnEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(renameColumnEndpointBodyTableNameMax).describe('テーブル名'),
+  "oldColumnName": zod.string().min(1).max(renameColumnEndpointBodyOldColumnNameMax).describe('元のカラム名'),
+  "newColumnName": zod.string().min(1).max(renameColumnEndpointBodyNewColumnNameMax).describe('新しいカラム名')
 }).describe('カラム名変更リクエスト')
 
-export const RenameColumnEndpointApiColumnRenamePostResponse = zod.unknown()
+export const RenameColumnEndpointResponse = zod.unknown()
 
 /**
  * ラグ・リードカラムを追加するエンドポイント
@@ -160,23 +160,23 @@ JSONResponse
     処理結果
  * @summary Add Lag Lead Column Endpoint
  */
-export const addLagLeadColumnEndpointApiColumnAddLagLeadPostBodyTableNameMax = 255;
+export const addLagLeadColumnEndpointBodyTableNameMax = 255;
 
-export const addLagLeadColumnEndpointApiColumnAddLagLeadPostBodySourceColumnMax = 255;
+export const addLagLeadColumnEndpointBodySourceColumnMax = 255;
 
-export const addLagLeadColumnEndpointApiColumnAddLagLeadPostBodyNewColumnNameMax = 255;
+export const addLagLeadColumnEndpointBodyNewColumnNameMax = 255;
 
 
 
-export const AddLagLeadColumnEndpointApiColumnAddLagLeadPostBody = zod.object({
-  "tableName": zod.string().min(1).max(addLagLeadColumnEndpointApiColumnAddLagLeadPostBodyTableNameMax).describe('テーブル名'),
-  "sourceColumn": zod.string().min(1).max(addLagLeadColumnEndpointApiColumnAddLagLeadPostBodySourceColumnMax).describe('元となるカラム名'),
-  "newColumnName": zod.string().min(1).max(addLagLeadColumnEndpointApiColumnAddLagLeadPostBodyNewColumnNameMax).describe('新しいカラム名'),
+export const AddLagLeadColumnEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(addLagLeadColumnEndpointBodyTableNameMax).describe('テーブル名'),
+  "sourceColumn": zod.string().min(1).max(addLagLeadColumnEndpointBodySourceColumnMax).describe('元となるカラム名'),
+  "newColumnName": zod.string().min(1).max(addLagLeadColumnEndpointBodyNewColumnNameMax).describe('新しいカラム名'),
   "periods": zod.number().describe('ラグ・リード期間'),
   "groupColumns": zod.array(zod.string()).optional().describe('グループ化するカラムのリスト')
 }).describe('ラグ・リードカラム追加リクエスト')
 
-export const AddLagLeadColumnEndpointApiColumnAddLagLeadPostResponse = zod.unknown()
+export const AddLagLeadColumnEndpointResponse = zod.unknown()
 
 /**
  * シミュレーションカラムを追加するエンドポイント
@@ -194,21 +194,21 @@ JSONResponse
     処理結果
  * @summary Add Simulation Column Endpoint
  */
-export const addSimulationColumnEndpointApiColumnAddSimulationPostBodyTableNameMax = 255;
+export const addSimulationColumnEndpointBodyTableNameMax = 255;
 
-export const addSimulationColumnEndpointApiColumnAddSimulationPostBodyNewColumnNameMax = 255;
-
-
+export const addSimulationColumnEndpointBodyNewColumnNameMax = 255;
 
 
-export const AddSimulationColumnEndpointApiColumnAddSimulationPostBody = zod.object({
-  "tableName": zod.string().min(1).max(addSimulationColumnEndpointApiColumnAddSimulationPostBodyTableNameMax).describe('テーブル名'),
-  "newColumnName": zod.string().min(1).max(addSimulationColumnEndpointApiColumnAddSimulationPostBodyNewColumnNameMax).describe('新しいカラム名'),
+
+
+export const AddSimulationColumnEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(addSimulationColumnEndpointBodyTableNameMax).describe('テーブル名'),
+  "newColumnName": zod.string().min(1).max(addSimulationColumnEndpointBodyNewColumnNameMax).describe('新しいカラム名'),
   "distributionType": zod.string().min(1).describe('分布の種類'),
   "distributionParams": zod.record(zod.string(), zod.unknown()).describe('分布のパラメータ')
 }).describe('シミュレーションカラム追加リクエスト')
 
-export const AddSimulationColumnEndpointApiColumnAddSimulationPostResponse = zod.unknown()
+export const AddSimulationColumnEndpointResponse = zod.unknown()
 
 /**
  * カラム計算を実行するエンドポイント
@@ -226,20 +226,20 @@ JSONResponse
     処理結果
  * @summary Calculate Column Endpoint
  */
-export const calculateColumnEndpointApiColumnCalculatePostBodyTableNameMax = 255;
+export const calculateColumnEndpointBodyTableNameMax = 255;
 
-export const calculateColumnEndpointApiColumnCalculatePostBodyNewColumnNameMax = 255;
-
-
+export const calculateColumnEndpointBodyNewColumnNameMax = 255;
 
 
-export const CalculateColumnEndpointApiColumnCalculatePostBody = zod.object({
-  "tableName": zod.string().min(1).max(calculateColumnEndpointApiColumnCalculatePostBodyTableNameMax).describe('テーブル名'),
-  "newColumnName": zod.string().min(1).max(calculateColumnEndpointApiColumnCalculatePostBodyNewColumnNameMax).describe('新しいカラム名'),
+
+
+export const CalculateColumnEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(calculateColumnEndpointBodyTableNameMax).describe('テーブル名'),
+  "newColumnName": zod.string().min(1).max(calculateColumnEndpointBodyNewColumnNameMax).describe('新しいカラム名'),
   "calculationExpression": zod.string().min(1).describe('計算式')
 }).describe('カラム計算リクエスト')
 
-export const CalculateColumnEndpointApiColumnCalculatePostResponse = zod.unknown()
+export const CalculateColumnEndpointResponse = zod.unknown()
 
 /**
  * カラムを複製するエンドポイント
@@ -257,21 +257,21 @@ JSONResponse
     処理結果
  * @summary Duplicate Column Endpoint
  */
-export const duplicateColumnEndpointApiColumnDuplicatePostBodyTableNameMax = 255;
+export const duplicateColumnEndpointBodyTableNameMax = 255;
 
-export const duplicateColumnEndpointApiColumnDuplicatePostBodySourceColumnNameMax = 255;
+export const duplicateColumnEndpointBodySourceColumnNameMax = 255;
 
-export const duplicateColumnEndpointApiColumnDuplicatePostBodyNewColumnNameMax = 255;
+export const duplicateColumnEndpointBodyNewColumnNameMax = 255;
 
 
 
-export const DuplicateColumnEndpointApiColumnDuplicatePostBody = zod.object({
-  "tableName": zod.string().min(1).max(duplicateColumnEndpointApiColumnDuplicatePostBodyTableNameMax).describe('テーブル名'),
-  "sourceColumnName": zod.string().min(1).max(duplicateColumnEndpointApiColumnDuplicatePostBodySourceColumnNameMax).describe('元のカラム名'),
-  "newColumnName": zod.string().min(1).max(duplicateColumnEndpointApiColumnDuplicatePostBodyNewColumnNameMax).describe('新しいカラム名')
+export const DuplicateColumnEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(duplicateColumnEndpointBodyTableNameMax).describe('テーブル名'),
+  "sourceColumnName": zod.string().min(1).max(duplicateColumnEndpointBodySourceColumnNameMax).describe('元のカラム名'),
+  "newColumnName": zod.string().min(1).max(duplicateColumnEndpointBodyNewColumnNameMax).describe('新しいカラム名')
 }).describe('カラム複製リクエスト')
 
-export const DuplicateColumnEndpointApiColumnDuplicatePostResponse = zod.unknown()
+export const DuplicateColumnEndpointResponse = zod.unknown()
 
 /**
  * 列の変換処理エンドポイント
@@ -289,26 +289,26 @@ JSONResponse
     処理結果
  * @summary Transform Column Endpoint
  */
-export const transformColumnEndpointApiColumnTransformPostBodyTableNameMax = 255;
+export const transformColumnEndpointBodyTableNameMax = 255;
 
-export const transformColumnEndpointApiColumnTransformPostBodySourceColumnNameMax = 255;
+export const transformColumnEndpointBodySourceColumnNameMax = 255;
 
-export const transformColumnEndpointApiColumnTransformPostBodyNewColumnNameMax = 255;
-
-
+export const transformColumnEndpointBodyNewColumnNameMax = 255;
 
 
-export const TransformColumnEndpointApiColumnTransformPostBody = zod.object({
-  "tableName": zod.string().min(1).max(transformColumnEndpointApiColumnTransformPostBodyTableNameMax).describe('テーブル名'),
-  "sourceColumnName": zod.string().min(1).max(transformColumnEndpointApiColumnTransformPostBodySourceColumnNameMax).describe('元となるカラム名'),
-  "newColumnName": zod.string().min(1).max(transformColumnEndpointApiColumnTransformPostBodyNewColumnNameMax).describe('新しい列名'),
+
+
+export const TransformColumnEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(transformColumnEndpointBodyTableNameMax).describe('テーブル名'),
+  "sourceColumnName": zod.string().min(1).max(transformColumnEndpointBodySourceColumnNameMax).describe('元となるカラム名'),
+  "newColumnName": zod.string().min(1).max(transformColumnEndpointBodyNewColumnNameMax).describe('新しい列名'),
   "transformMethod": zod.string().min(1).describe('変換メソッド'),
   "logBase": zod.union([zod.number(),zod.null()]).optional().describe('対数の底（オプション）'),
   "exponent": zod.union([zod.number(),zod.null()]).optional().describe('指数（オプション）'),
   "rootIndex": zod.union([zod.number(),zod.null()]).optional().describe('累乗根の次数（オプション）')
 }).describe('カラム変換リクエスト')
 
-export const TransformColumnEndpointApiColumnTransformPostResponse = zod.unknown()
+export const TransformColumnEndpointResponse = zod.unknown()
 
 /**
  * カラムリストを取得するエンドポイント
@@ -326,16 +326,16 @@ JSONResponse
     処理結果
  * @summary Get Column List Endpoint
  */
-export const getColumnListEndpointApiColumnGetListPostBodyTableNameMax = 255;
+export const getColumnListEndpointBodyTableNameMax = 255;
 
-export const getColumnListEndpointApiColumnGetListPostBodyIsNumberOnlyDefault = `false`;
+export const getColumnListEndpointBodyIsNumberOnlyDefault = `false`;
 
-export const GetColumnListEndpointApiColumnGetListPostBody = zod.object({
-  "tableName": zod.string().min(1).max(getColumnListEndpointApiColumnGetListPostBodyTableNameMax).describe('対象テーブル名'),
-  "isNumberOnly": zod.string().default(getColumnListEndpointApiColumnGetListPostBodyIsNumberOnlyDefault).describe('数値カラムのみ取得')
+export const GetColumnListEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(getColumnListEndpointBodyTableNameMax).describe('対象テーブル名'),
+  "isNumberOnly": zod.string().default(getColumnListEndpointBodyIsNumberOnlyDefault).describe('数値カラムのみ取得')
 }).describe('カラムリスト取得リクエスト')
 
-export const GetColumnListEndpointApiColumnGetListPostResponse = zod.unknown()
+export const GetColumnListEndpointResponse = zod.unknown()
 
 /**
  * 列のソート処理エンドポイント
@@ -355,15 +355,15 @@ JSONResponse
     処理結果
  * @summary Sort Columns Endpoint
  */
-export const sortColumnsEndpointApiColumnSortPostBodyTableNameMax = 255;
+export const sortColumnsEndpointBodyTableNameMax = 255;
 
 
 
 
-export const SortColumnsEndpointApiColumnSortPostBody = zod.object({
-  "tableName": zod.string().min(1).max(sortColumnsEndpointApiColumnSortPostBodyTableNameMax).describe('テーブル名'),
+export const SortColumnsEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(sortColumnsEndpointBodyTableNameMax).describe('テーブル名'),
   "sortColumns": zod.array(zod.record(zod.string(), zod.string())).min(1).describe('ソート設定のリスト')
 }).describe('カラムソートリクエスト')
 
-export const SortColumnsEndpointApiColumnSortPostResponse = zod.unknown()
+export const SortColumnsEndpointResponse = zod.unknown()
 

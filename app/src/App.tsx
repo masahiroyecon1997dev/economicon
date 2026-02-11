@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { getFiles, getSettings, getTableList } from "./lib/api/endpoints";
-import { showMessageDialog } from './lib/dialog/message';
+import { showMessageDialog } from "./lib/dialog/message";
 import { useCurrentPageStore } from "./stores/currentView";
 import { useLoadingStore } from "./stores/loading";
 import { useSettingsStore } from "./stores/settings";
@@ -34,15 +34,17 @@ export const App = () => {
         const resGetSettings = await getSettings();
         if (resGetSettings.code !== "OK") {
           if (isMounted) {
-            await showMessageDialog(t('Error.Error'), resGetSettings.message);
+            await showMessageDialog(t("Error.Error"), resGetSettings.message);
           }
           return;
         }
         // ファイル一覧を取得
-        const resGetFiles = await getFiles(resGetSettings.result.defaultFolderPath);
+        const resGetFiles = await getFiles(
+          resGetSettings.result.defaultFolderPath,
+        );
         if (resGetFiles.code !== "OK") {
           if (isMounted) {
-            await showMessageDialog(t('Error.Error'), resGetFiles.message);
+            await showMessageDialog(t("Error.Error"), resGetFiles.message);
           }
           return;
         }
@@ -50,7 +52,7 @@ export const App = () => {
         const resGetTableNames = await getTableList();
         if (resGetTableNames.code !== "OK") {
           if (isMounted) {
-            await showMessageDialog(t('Error.Error'), resGetTableNames.message);
+            await showMessageDialog(t("Error.Error"), resGetTableNames.message);
           }
           return;
         }
@@ -62,12 +64,12 @@ export const App = () => {
           setFiles(resGetFiles.result);
         }
       } catch (error) {
-        console.error('App initialization error:', error);
+        console.error("App initialization error:", error);
         if (isMounted) {
-          await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
+          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
         }
       }
-    }
+    };
 
     initialize();
 
@@ -80,18 +82,13 @@ export const App = () => {
     <>
       <div className="flex h-screen flex-col overflow-hidden bg-white">
         <HeaderMenu />
-        <div
-          className="flex flex-1 overflow-hidden"
-        >
+        <div className="flex flex-1 overflow-hidden">
           <LeftSideMenu />
           <MainView />
         </div>
         <MessageDialog />
       </div>
-      <LoadingOverlay
-        isVisible={isLoading}
-        message={loadingMessage}
-      />
+      <LoadingOverlay isVisible={isLoading} message={loadingMessage} />
     </>
   );
-}
+};

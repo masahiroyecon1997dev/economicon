@@ -7,8 +7,14 @@ export default defineConfig({
       mode: "split",
       target: "./src/api/endpoints.ts",
       schemas: "./src/api/model",
-      client: "fetch",
-      httpClient: "fetch",
+      client: "axios",
+      httpClient: "axios",
+      override: {
+        mutator: {
+          path: "./src/api/mutator/custom-instance.ts",
+          name: "customInstance",
+        },
+      },
     },
   },
   economiconZod: {
