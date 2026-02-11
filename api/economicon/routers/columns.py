@@ -303,7 +303,7 @@ async def sort_columns(request: Request, body: SortColumnsRequest):
     """
     create_log_api_request(request)
 
-    api = SortColumns(**body.model_dump())
+    api = SortColumns(body.table_name, body.sort_columns)
     result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)

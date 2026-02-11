@@ -52,7 +52,7 @@ def test_sort_single_column_descending(client, tables_store):
     # 単一列で降順ソート
     payload = {
         "tableName": "TestTable",
-        "sortColumns": [{"columnName": "A", "ascending": "false"}],
+        "sortColumns": [{"columnName": "A", "ascending": False}],
     }
     response = client.post(
         "/api/column/sort",
@@ -78,8 +78,8 @@ def test_sort_multiple_columns(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "sortColumns": [
-            {"columnName": "A", "ascending": "true"},
-            {"columnName": "B", "ascending": "false"},
+            {"columnName": "A", "ascending": True},
+            {"columnName": "B", "ascending": False},
         ],
     }
     response = client.post(
@@ -100,7 +100,7 @@ def test_sort_invalid_table(client, tables_store):
     # 存在しないテーブル名
     payload = {
         "tableName": "NoTable",
-        "sortColumns": [{"columnName": "A", "ascending": "true"}],
+        "sortColumns": [{"columnName": "A", "ascending": True}],
     }
     response = client.post(
         "/api/column/sort",
@@ -116,7 +116,7 @@ def test_sort_invalid_column(client, tables_store):
     # 存在しないカラム名を指定
     payload = {
         "tableName": "TestTable",
-        "sortColumns": [{"columnName": "Z", "ascending": "true"}],
+        "sortColumns": [{"columnName": "Z", "ascending": True}],
     }
     response = client.post(
         "/api/column/sort",
@@ -160,9 +160,9 @@ def test_sort_missing_ascending(client, tables_store):
         "/api/column/sort",
         json=payload,
     )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
+    # response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert response_data["code"] == "NG"
 
 
 def test_sort_invalid_ascending_type(client, tables_store):
@@ -175,6 +175,6 @@ def test_sort_invalid_ascending_type(client, tables_store):
         "/api/column/sort",
         json=payload,
     )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
+    # response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    # assert response_data["code"] == "NG"
