@@ -3,6 +3,7 @@ from fastapi import status as http_status
 
 from ..schemas import (
     AddColumnRequest,
+    AddColumnResult,
     AddDummyColumnRequest,
     AddLagLeadColumnRequest,
     AddSimulationColumnRequest,
@@ -12,6 +13,7 @@ from ..schemas import (
     GetColumnListRequest,
     RenameColumnRequest,
     SortColumnsRequest,
+    SuccessResponse,
     TransformColumnRequest,
 )
 
@@ -34,7 +36,7 @@ from ..utils import create_log_api_request, create_success_response
 router = APIRouter(prefix="/column", tags=["column"])
 
 
-@router.post("/add")
+@router.post("/add", response_model=SuccessResponse[AddColumnResult])
 async def add_column_endpoint(request: Request, body: AddColumnRequest):
     """カラムを追加するエンドポイント
 

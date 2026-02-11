@@ -2,6 +2,7 @@
 
 from .columns import (
     AddColumnRequest,
+    AddColumnResult,
     AddDummyColumnRequest,
     AddLagLeadColumnRequest,
     AddSimulationColumnRequest,
@@ -49,6 +50,7 @@ __all__ = [
     "ErrorResponse",
     # Column operations
     "AddColumnRequest",
+    "AddColumnResult",
     "DeleteColumnRequest",
     "RenameColumnRequest",
     "DuplicateColumnRequest",

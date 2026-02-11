@@ -2,16 +2,19 @@
 
 from typing import Dict, List, Optional
 
-from pydantic import ConfigDict, Field
-
-from .common import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 
 
 class AddColumnRequest(BaseModel):
     """カラム追加リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     new_column_name: str = Field(
         ...,
@@ -30,14 +33,35 @@ class AddColumnRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class AddColumnResult(BaseModel):
+    """カラム追加レスポンス"""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,  # Python名のままでも代入できるようにする
+        from_attributes=True,  # self.table_name 等の属性から作成可能にする
+    )
+
+    table_name: str
+    column_name: str
+
+
 class DeleteColumnRequest(BaseModel):
     """カラム削除リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     column_name: str = Field(
-        ..., alias="columnName", description="カラム名", min_length=1, max_length=255
+        ...,
+        alias="columnName",
+        description="カラム名",
+        min_length=1,
+        max_length=255,
     )
     model_config = ConfigDict(populate_by_name=True)
 
@@ -46,7 +70,11 @@ class RenameColumnRequest(BaseModel):
     """カラム名変更リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     old_column_name: str = Field(
         ...,
@@ -69,7 +97,11 @@ class DuplicateColumnRequest(BaseModel):
     """カラム複製リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     source_column_name: str = Field(
         ...,
@@ -92,7 +124,11 @@ class CalculateColumnRequest(BaseModel):
     """カラム計算リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     new_column_name: str = Field(
         ...,
@@ -111,7 +147,11 @@ class AddDummyColumnRequest(BaseModel):
     """ダミー変数カラム追加リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     source_column_name: str = Field(
         ...,
@@ -127,7 +167,9 @@ class AddDummyColumnRequest(BaseModel):
         min_length=1,
         max_length=255,
     )
-    target_value: str = Field(..., alias="targetValue", description="1にする対象の値")
+    target_value: str = Field(
+        ..., alias="targetValue", description="1にする対象の値"
+    )
     model_config = ConfigDict(populate_by_name=True)
 
 
@@ -135,7 +177,11 @@ class AddLagLeadColumnRequest(BaseModel):
     """ラグ・リードカラム追加リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     source_column: str = Field(
         ...,
@@ -164,7 +210,11 @@ class AddSimulationColumnRequest(BaseModel):
     """シミュレーションカラム追加リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     new_column_name: str = Field(
         ...,
@@ -186,10 +236,17 @@ class SortColumnsRequest(BaseModel):
     """カラムソートリクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     sort_columns: List[Dict[str, str]] = Field(
-        ..., alias="sortColumns", description="ソート設定のリスト", min_length=1
+        ...,
+        alias="sortColumns",
+        description="ソート設定のリスト",
+        min_length=1,
     )
     model_config = ConfigDict(populate_by_name=True)
 
@@ -198,7 +255,11 @@ class TransformColumnRequest(BaseModel):
     """カラム変換リクエスト"""
 
     table_name: str = Field(
-        ..., alias="tableName", description="テーブル名", min_length=1, max_length=255
+        ...,
+        alias="tableName",
+        description="テーブル名",
+        min_length=1,
+        max_length=255,
     )
     source_column_name: str = Field(
         ...,

@@ -61,7 +61,7 @@ export const client = {
 };
 
 /**
- * 共通リクエスト処理
+ * リクエスト処理（共通用）
  */
 const invokeRequest = async <T>(
   method: string,
@@ -86,7 +86,7 @@ const invokeRequest = async <T>(
 };
 
 /**
- * 共通リクエスト処理
+ * リクエスト処理（バイナリレスポンス用）
  */
 const invokeBinaryRequest = async <T>(
   method: string,
