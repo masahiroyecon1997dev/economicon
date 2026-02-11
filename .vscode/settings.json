@@ -64,7 +64,8 @@
     "**/node_modules/**": true,
     "**/.venv/**": true,
     "**/dist/**": true,
-    "**/__pycache__/**": true
+    "**/__pycache__/**": true,
+    "**/src/api/generated/**": true
   },
   // 検索対象から外すファイル・ディレクトリのパスのパターン
   "search.exclude": {
@@ -73,7 +74,8 @@
     "**/.venv/**": true,
     "**/dist/**": true,
     "**/__pycache__/**": true,
-    "**/pnpm-lock.yaml": true
+    "**/pnpm-lock.yaml": true,
+    "**/src/api/generated/**": true
   },
   // 検索ビューの検索結果に行数を併記
   "search.showLineNumbers": true,
