@@ -9,7 +9,7 @@ from ...utils.validators.tables_store import (
     validate_new_column_name,
 )
 from ..data.tables_store import TablesStore
-from ...schemas.columns import AddColumnResult
+from ...models.columns import AddColumnResult
 
 
 class AddColumn:

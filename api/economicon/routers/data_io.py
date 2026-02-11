@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..schemas import (
+from ..models import (
     ExportCsvByPathRequest,
     ExportExcelByPathRequest,
     ExportParquetByPathRequest,
