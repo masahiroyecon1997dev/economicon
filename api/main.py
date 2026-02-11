@@ -10,6 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 from fastapi_babel import Babel, BabelConfigs
 
@@ -233,6 +234,18 @@ app.include_router(api_router, prefix="/api")
 
 # 2. エンドポイントより「後」にハンドラを初期化・登録
 init_exception_handlers(app)
+
+
+# 関数名をそのまま operationId に使うためのロジック
+def use_route_names_as_operation_ids(app: FastAPI) -> None:
+    for route in app.routes:
+        if isinstance(route, APIRoute):
+            route.operation_id = (
+                route.name
+            )  # Pythonの関数名 (get_settings 等) が入る
+
+
+use_route_names_as_operation_ids(app)
 
 # フォルダが存在するかチェック
 # 存在すればフロントリソースをマウント

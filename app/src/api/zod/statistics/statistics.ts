@@ -23,25 +23,25 @@ JSONResponse
     処理結果
  * @summary Confidence Interval Endpoint
  */
-export const confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBodyTableNameMax = 255;
+export const confidenceIntervalEndpointBodyTableNameMax = 255;
 
-export const confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBodyColumnNameMax = 255;
+export const confidenceIntervalEndpointBodyColumnNameMax = 255;
 
-export const confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBodyConfidenceLevelExclusiveMin = 0;
-export const confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBodyConfidenceLevelExclusiveMax = 1;
+export const confidenceIntervalEndpointBodyConfidenceLevelExclusiveMin = 0;
+export const confidenceIntervalEndpointBodyConfidenceLevelExclusiveMax = 1;
 
-export const confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBodyStatisticTypeMax = 50;
+export const confidenceIntervalEndpointBodyStatisticTypeMax = 50;
 
 
 
-export const ConfidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBody = zod.object({
-  "tableName": zod.string().min(1).max(confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBodyTableNameMax).describe('テーブル名'),
-  "columnName": zod.string().min(1).max(confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBodyColumnNameMax).describe('対象カラム名'),
-  "confidenceLevel": zod.number().gt(confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBodyConfidenceLevelExclusiveMin).lt(confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBodyConfidenceLevelExclusiveMax).describe('信頼水準 (例: 0.95)'),
-  "statisticType": zod.string().min(1).max(confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostBodyStatisticTypeMax).describe('統計量のタイプ (mean, median, etc.)')
+export const ConfidenceIntervalEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(confidenceIntervalEndpointBodyTableNameMax).describe('テーブル名'),
+  "columnName": zod.string().min(1).max(confidenceIntervalEndpointBodyColumnNameMax).describe('対象カラム名'),
+  "confidenceLevel": zod.number().gt(confidenceIntervalEndpointBodyConfidenceLevelExclusiveMin).lt(confidenceIntervalEndpointBodyConfidenceLevelExclusiveMax).describe('信頼水準 (例: 0.95)'),
+  "statisticType": zod.string().min(1).max(confidenceIntervalEndpointBodyStatisticTypeMax).describe('統計量のタイプ (mean, median, etc.)')
 }).describe('信頼区間計算リクエスト')
 
-export const ConfidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponse = zod.unknown()
+export const ConfidenceIntervalEndpointResponse = zod.unknown()
 
 /**
  * 記述統計を計算するエンドポイント
@@ -59,17 +59,17 @@ JSONResponse
     処理結果
  * @summary Descriptive Statistics Endpoint
  */
-export const descriptiveStatisticsEndpointApiStatisticsDescriptivePostBodyTableNameMax = 255;
+export const descriptiveStatisticsEndpointBodyTableNameMax = 255;
 
 
 
 
 
-export const DescriptiveStatisticsEndpointApiStatisticsDescriptivePostBody = zod.object({
-  "tableName": zod.string().min(1).max(descriptiveStatisticsEndpointApiStatisticsDescriptivePostBodyTableNameMax).describe('テーブル名'),
+export const DescriptiveStatisticsEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(descriptiveStatisticsEndpointBodyTableNameMax).describe('テーブル名'),
   "columnNameList": zod.array(zod.string()).min(1).describe('対象カラム名のリスト'),
   "statistics": zod.array(zod.string()).min(1).describe('統計量のリスト')
 }).describe('記述統計リクエスト')
 
-export const DescriptiveStatisticsEndpointApiStatisticsDescriptivePostResponse = zod.unknown()
+export const DescriptiveStatisticsEndpointResponse = zod.unknown()
 

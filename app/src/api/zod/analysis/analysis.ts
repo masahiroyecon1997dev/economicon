@@ -31,22 +31,22 @@ JSONResponse
     分析結果またはエラーメッセージ
  * @summary Regression Endpoint
  */
-export const regressionEndpointApiAnalysisRegressionPostBodyMethodDefault = `ols`;export const regressionEndpointApiAnalysisRegressionPostBodyNameDefault = ``;export const regressionEndpointApiAnalysisRegressionPostBodyDescriptionDefault = ``;export const regressionEndpointApiAnalysisRegressionPostBodyStandardErrorMethodDefault = `nonrobust`;export const regressionEndpointApiAnalysisRegressionPostBodyUseTDistributionDefault = true;export const regressionEndpointApiAnalysisRegressionPostBodyHasConstDefault = true;export const regressionEndpointApiAnalysisRegressionPostBodyMissingValueHandlingDefault = `remove`;
+export const regressionEndpointBodyMethodDefault = `ols`;export const regressionEndpointBodyNameDefault = ``;export const regressionEndpointBodyDescriptionDefault = ``;export const regressionEndpointBodyStandardErrorMethodDefault = `nonrobust`;export const regressionEndpointBodyUseTDistributionDefault = true;export const regressionEndpointBodyHasConstDefault = true;export const regressionEndpointBodyMissingValueHandlingDefault = `remove`;
 
-export const RegressionEndpointApiAnalysisRegressionPostBody = zod.object({
+export const RegressionEndpointBody = zod.object({
   "type": zod.enum(['ols', 'logit', 'probit', 'tobit', 'fe', 're', 'iv', 'feiv', 'lasso', 'ridge']).describe('分析タイプ'),
-  "method": zod.enum(['ols', 'wls', 'gls', 'gmm']).default(regressionEndpointApiAnalysisRegressionPostBodyMethodDefault).describe('計算手法'),
+  "method": zod.enum(['ols', 'wls', 'gls', 'gmm']).default(regressionEndpointBodyMethodDefault).describe('計算手法'),
   "tableName": zod.string().describe('対象テーブル名'),
-  "name": zod.string().default(regressionEndpointApiAnalysisRegressionPostBodyNameDefault).describe('分析結果の名前（ユーザー指定）'),
-  "description": zod.string().default(regressionEndpointApiAnalysisRegressionPostBodyDescriptionDefault).describe('分析結果の説明・メモ（ユーザー指定）'),
+  "name": zod.string().default(regressionEndpointBodyNameDefault).describe('分析結果の名前（ユーザー指定）'),
+  "description": zod.string().default(regressionEndpointBodyDescriptionDefault).describe('分析結果の説明・メモ（ユーザー指定）'),
   "dependentVariable": zod.string().describe('被説明変数の列名'),
   "explanatoryVariables": zod.array(zod.string()).describe('説明変数の列名リスト'),
-  "standardErrorMethod": zod.enum(['nonrobust', 'hc0', 'hc1', 'hc2', 'hc3', 'hac', 'clustered']).default(regressionEndpointApiAnalysisRegressionPostBodyStandardErrorMethodDefault).describe('標準誤差計算方法'),
+  "standardErrorMethod": zod.enum(['nonrobust', 'hc0', 'hc1', 'hc2', 'hc3', 'hac', 'clustered']).default(regressionEndpointBodyStandardErrorMethodDefault).describe('標準誤差計算方法'),
   "standardErrorParams": zod.record(zod.string(), zod.unknown()).optional().describe('標準誤差計算のパラメータ (例: クラスタ変数名)'),
   "hyperParameters": zod.record(zod.string(), zod.unknown()).optional().describe('ハイパーパラメータ (例: Lasso\/Ridge の alpha)'),
-  "useTDistribution": zod.boolean().default(regressionEndpointApiAnalysisRegressionPostBodyUseTDistributionDefault).describe('t分布を使用するか'),
-  "hasConst": zod.boolean().default(regressionEndpointApiAnalysisRegressionPostBodyHasConstDefault).describe('定数項を追加するか'),
-  "missingValueHandling": zod.enum(['ignore', 'remove', 'error']).default(regressionEndpointApiAnalysisRegressionPostBodyMissingValueHandlingDefault).describe('欠損値の処理方法'),
+  "useTDistribution": zod.boolean().default(regressionEndpointBodyUseTDistributionDefault).describe('t分布を使用するか'),
+  "hasConst": zod.boolean().default(regressionEndpointBodyHasConstDefault).describe('定数項を追加するか'),
+  "missingValueHandling": zod.enum(['ignore', 'remove', 'error']).default(regressionEndpointBodyMissingValueHandlingDefault).describe('欠損値の処理方法'),
   "entityIdColumn": zod.union([zod.string(),zod.null()]).optional().describe('個体ID列名 (固定効果・変量効果の場合に必要)'),
   "timeColumn": zod.union([zod.string(),zod.null()]).optional().describe('時間列名 (パネルデータ分析の場合に使用)'),
   "instrumentalVariables": zod.union([zod.array(zod.string()),zod.null()]).optional().describe('操作変数の列名リスト (IV の場合に必要)'),
@@ -55,7 +55,7 @@ export const RegressionEndpointApiAnalysisRegressionPostBody = zod.object({
   "rightCensoringLimit": zod.union([zod.number(),zod.null()]).optional().describe('右側打ち切り値 (Tobit の場合に使用)')
 }).describe('統合回帰分析リクエスト\n\n全ての回帰分析タイプを単一のエンドポイントで扱うための\n統合スキーマです。')
 
-export const RegressionEndpointApiAnalysisRegressionPostResponse = zod.unknown()
+export const RegressionEndpointResponse = zod.unknown()
 
 /**
  * すべての分析結果のサマリーを取得
@@ -66,7 +66,7 @@ JSONResponse
     分析結果のサマリーリスト
  * @summary Get All Analysis Results Endpoint
  */
-export const GetAllAnalysisResultsEndpointApiAnalysisResultsGetResponse = zod.unknown()
+export const GetAllAnalysisResultsEndpointResponse = zod.unknown()
 
 /**
  * すべての分析結果を削除
@@ -77,7 +77,7 @@ JSONResponse
     削除成功メッセージ
  * @summary Clear All Analysis Results Endpoint
  */
-export const ClearAllAnalysisResultsEndpointApiAnalysisResultsDeleteResponse = zod.unknown()
+export const ClearAllAnalysisResultsEndpointResponse = zod.unknown()
 
 /**
  * 指定されたIDの分析結果を取得
@@ -95,11 +95,11 @@ JSONResponse
     分析結果の詳細
  * @summary Get Analysis Result Endpoint
  */
-export const GetAnalysisResultEndpointApiAnalysisResultsResultIdGetParams = zod.object({
+export const GetAnalysisResultEndpointParams = zod.object({
   "result_id": zod.string()
 })
 
-export const GetAnalysisResultEndpointApiAnalysisResultsResultIdGetResponse = zod.unknown()
+export const GetAnalysisResultEndpointResponse = zod.unknown()
 
 /**
  * 指定されたIDの分析結果を削除
@@ -117,9 +117,9 @@ JSONResponse
     削除成功メッセージ
  * @summary Delete Analysis Result Endpoint
  */
-export const DeleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteParams = zod.object({
+export const DeleteAnalysisResultEndpointParams = zod.object({
   "result_id": zod.string()
 })
 
-export const DeleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponse = zod.unknown()
+export const DeleteAnalysisResultEndpointResponse = zod.unknown()
 
