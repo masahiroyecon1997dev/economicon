@@ -35,6 +35,7 @@ class BaseRequest(BaseModel):
         alias_generator=to_camel,
         populate_by_name=True,
         from_attributes=True,
+        strict=True,
     )
 
 

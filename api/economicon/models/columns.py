@@ -2,7 +2,7 @@
 
 from typing import Annotated, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 from .common import BaseRequest
 from .schemas import SortInstruction
@@ -97,7 +97,6 @@ class AddLagLeadColumnRequest(BaseRequest):
         default_factory=list,
         description="グループ化するカラムのリスト",
     )
-    model_config = ConfigDict(populate_by_name=True)
 
 
 class AddSimulationColumnRequest(BaseRequest):
@@ -111,7 +110,6 @@ class AddSimulationColumnRequest(BaseRequest):
     distribution_params: dict = Field(
         ..., alias="distributionParams", description="分布のパラメータ"
     )
-    model_config = ConfigDict(populate_by_name=True)
 
 
 class SortColumnsRequest(BaseRequest):
@@ -122,7 +120,6 @@ class SortColumnsRequest(BaseRequest):
         description="ソート設定のリスト",
         min_length=1,
     )
-    model_config = ConfigDict(populate_by_name=True)
 
 
 class TransformColumnRequest(BaseRequest):
