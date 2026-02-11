@@ -1,21 +1,23 @@
 """カラム操作関連のスキーマ定義"""
 
-from typing import Dict, List, Optional
+from typing import Annotated, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
+
+from .common import TableName
 
 
 class AddColumnRequest(BaseModel):
     """カラム追加リクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="テーブル名",
-        min_length=1,
-        max_length=255,
-    )
+    table_name: Annotated[
+        TableName,
+        Field(
+            alias="tableName",
+            description="テーブル名",
+        ),
+    ]
     new_column_name: str = Field(
         ...,
         alias="newColumnName",
