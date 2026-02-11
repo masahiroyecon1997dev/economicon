@@ -1,8 +1,9 @@
 import polars as pl
 import pytest
-from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.services.data.tables_store import TablesStore
 from main import app
 
 
@@ -30,7 +31,7 @@ def test_sort_single_column_ascending(client, tables_store):
     # 単一列で昇順ソート
     payload = {
         "tableName": "TestTable",
-        "sortColumns": [{"columnName": "A", "ascending": "true"}],
+        "sortColumns": [{"columnName": "A", "ascending": True}],
     }
     response = client.post(
         "/api/column/sort",

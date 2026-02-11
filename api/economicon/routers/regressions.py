@@ -8,7 +8,7 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..exceptions import ApiError
-from ..schemas.regressions import RegressionRequest
+from ..models.regressions import RegressionRequest
 from ..services.operation import run_operation
 from ..services.regressions.regression import Regression
 from ..services.regressions.result import (

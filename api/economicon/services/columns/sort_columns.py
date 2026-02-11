@@ -4,8 +4,6 @@ from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import (
     ValidationError,
-    validate_boolean,
-    validate_item_in_dict,
     validate_list_length,
     validate_required_list,
 )
@@ -57,22 +55,11 @@ class SortColumns:
                 self.table_name
             )
             for sort_spec in self.sort_columns:
-                validate_item_in_dict(
-                    sort_spec, "columnName", self.param_names["column_name"]
-                )
-                validate_item_in_dict(
-                    sort_spec, "ascending", self.param_names["ascending"]
-                )
-
                 # 列名の存在チェック
                 validate_existed_column_name(
                     sort_spec["columnName"],
                     column_name_list,
                     self.param_names["column_name"],
-                )
-                # ascendingフィールドがbooleanかチェック
-                validate_boolean(
-                    sort_spec["ascending"], self.param_names["ascending"]
                 )
             return None
         except ValidationError as e:
@@ -86,7 +73,7 @@ class SortColumns:
             # ソート列とdescendingフラグを準備
             column_names = [spec["columnName"] for spec in self.sort_columns]
             descending_flags = [
-                (not spec["ascending"] == "true") for spec in self.sort_columns
+                (not spec["ascending"]) for spec in self.sort_columns
             ]
 
             # polarsでソート実行

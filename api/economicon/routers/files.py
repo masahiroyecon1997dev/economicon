@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..schemas import GetFilesRequest
+from ..models import GetFilesRequest
 from ..services.files.get_files import get_files
 from ..utils import create_log_api_request, create_success_response
 

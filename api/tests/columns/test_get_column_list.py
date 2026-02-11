@@ -1,8 +1,9 @@
 import polars as pl
 import pytest
-from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.services.data.tables_store import TablesStore
 from main import app
 
 table_name = "test_table"
@@ -51,7 +52,7 @@ def test_get_column_info_list_number_success(client, tables_store):
     """正常系テスト：テーブルが存在する場合（数値型の列のみ）"""
     response = client.post(
         "/api/column/get-list",
-        json={"tableName": table_name, "isNumberOnly": "true"},
+        json={"tableName": table_name, "isNumberOnly": True},
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
