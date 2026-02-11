@@ -1,8 +1,9 @@
 """共通のスキーマ定義"""
 
-from typing import Annotated, Generic, TypeVar
+from typing import Generic, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 
 T = TypeVar("T")
 
@@ -27,14 +28,21 @@ class ErrorResponse(BaseResponse):
     message: str = Field(..., description="エラーメッセージ")
 
 
-NAME_PATTERN = r"^[^\x00-\x1f\x7f]+$"
+class BaseRequest(BaseModel):
+    """基本リクエストモデル"""
 
-TableName = Annotated[
-    str,
-    Field(
-        min_length=1,
-        max_length=128,
-        pattern=NAME_PATTERN,
-        examples=["geographic_data", "市区町村人口データ"],
-    ),
-]
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+class BaseResult(BaseModel):
+    """基本レスポンスモデル"""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )

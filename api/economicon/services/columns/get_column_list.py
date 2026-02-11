@@ -2,7 +2,6 @@ from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...utils.validators.common import (
     ValidationError,
-    validate_boolean,
 )
 from ...utils.validators.tables_store import (
     validate_existed_table_name,
@@ -17,7 +16,7 @@ class GetColumnList:
     データベースの指定されたテーブルに存在するすべてのカラム名を取得します。
     """
 
-    def __init__(self, table_name: str, is_number_only: str):
+    def __init__(self, table_name: str, is_number_only: bool = False):
         self.tables_store = TablesStore()
         self.table_name = table_name
         self.is_number_only = is_number_only
@@ -34,9 +33,6 @@ class GetColumnList:
                 table_name_list,
                 self.param_names["table_name"],
             )
-            validate_boolean(
-                self.is_number_only, self.param_names["is_number_only"]
-            )
             return None
         except ValidationError as e:
             return e
@@ -46,7 +42,7 @@ class GetColumnList:
             column_list = self.tables_store.get_column_info_list(
                 self.table_name
             )
-            if self.is_number_only.lower() == "true":
+            if self.is_number_only:
                 column_info_list = [
                     {"name": name, "type": str(dtype)}
                     for name, dtype in column_list.items()
