@@ -28,7 +28,6 @@ import type {
   FilterSingleConditionRequest,
   GetColumnListRequest,
   GetFilesRequest,
-  HTTPValidationError,
   ImportCsvByPathRequest,
   ImportExcelByPathRequest,
   ImportParquetByPathRequest,
@@ -41,93 +40,39 @@ import type {
   TransformColumnRequest
 } from './model';
 
+import { customInstance } from './mutator/custom-instance';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+  export const getMyAPI = () => {
 /**
  * ルートエンドポイント
  * @summary Root
  */
-export type rootGetResponse200 = {
-  data: unknown
-  status: 200
-}
+const root = (
     
-export type rootGetResponseSuccess = (rootGetResponse200) & {
-  headers: Headers;
-};
-;
-
-export type rootGetResponse = (rootGetResponseSuccess)
-
-export const getRootGetUrl = () => {
-
-
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/`, method: 'GET'
+    },
+      options);
+    }
   
-
-  return `/`
-}
-
-export const rootGet = async ( options?: RequestInit): Promise<rootGetResponse> => {
-  
-  const res = await fetch(getRootGetUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: rootGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as rootGetResponse
-}
-
-
-
 /**
  * ヘルスチェック
  * @summary Health Check
  */
-export type healthCheckHealthGetResponse200 = {
-  data: unknown
-  status: 200
-}
+const healthCheck = (
     
-export type healthCheckHealthGetResponseSuccess = (healthCheckHealthGetResponse200) & {
-  headers: Headers;
-};
-;
-
-export type healthCheckHealthGetResponse = (healthCheckHealthGetResponseSuccess)
-
-export const getHealthCheckHealthGetUrl = () => {
-
-
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/health`, method: 'GET'
+    },
+      options);
+    }
   
-
-  return `/health`
-}
-
-export const healthCheckHealthGet = async ( options?: RequestInit): Promise<healthCheckHealthGetResponse> => {
-  
-  const res = await fetch(getHealthCheckHealthGetUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: healthCheckHealthGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as healthCheckHealthGetResponse
-}
-
-
-
 /**
  * カラムを追加するエンドポイント
 
@@ -144,53 +89,17 @@ JSONResponse
     処理結果
  * @summary Add Column Endpoint
  */
-export type addColumnEndpointApiColumnAddPostResponse200 = {
-  data: SuccessResponseAddColumnResult
-  status: 200
-}
-
-export type addColumnEndpointApiColumnAddPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type addColumnEndpointApiColumnAddPostResponseSuccess = (addColumnEndpointApiColumnAddPostResponse200) & {
-  headers: Headers;
-};
-export type addColumnEndpointApiColumnAddPostResponseError = (addColumnEndpointApiColumnAddPostResponse422) & {
-  headers: Headers;
-};
-
-export type addColumnEndpointApiColumnAddPostResponse = (addColumnEndpointApiColumnAddPostResponseSuccess | addColumnEndpointApiColumnAddPostResponseError)
-
-export const getAddColumnEndpointApiColumnAddPostUrl = () => {
-
-
+const addColumnEndpoint = (
+    addColumnRequest: AddColumnRequest,
+ options?: SecondParameter<typeof customInstance<SuccessResponseAddColumnResult>>,) => {
+      return customInstance<SuccessResponseAddColumnResult>(
+      {url: `/api/column/add`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: addColumnRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/add`
-}
-
-export const addColumnEndpointApiColumnAddPost = async (addColumnRequest: AddColumnRequest, options?: RequestInit): Promise<addColumnEndpointApiColumnAddPostResponse> => {
-  
-  const res = await fetch(getAddColumnEndpointApiColumnAddPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      addColumnRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: addColumnEndpointApiColumnAddPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as addColumnEndpointApiColumnAddPostResponse
-}
-
-
-
 /**
  * ダミー変数カラムを追加するエンドポイント
 
@@ -207,53 +116,17 @@ JSONResponse
     処理結果
  * @summary Add Dummy Column Endpoint
  */
-export type addDummyColumnEndpointApiColumnAddDummyPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type addDummyColumnEndpointApiColumnAddDummyPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type addDummyColumnEndpointApiColumnAddDummyPostResponseSuccess = (addDummyColumnEndpointApiColumnAddDummyPostResponse200) & {
-  headers: Headers;
-};
-export type addDummyColumnEndpointApiColumnAddDummyPostResponseError = (addDummyColumnEndpointApiColumnAddDummyPostResponse422) & {
-  headers: Headers;
-};
-
-export type addDummyColumnEndpointApiColumnAddDummyPostResponse = (addDummyColumnEndpointApiColumnAddDummyPostResponseSuccess | addDummyColumnEndpointApiColumnAddDummyPostResponseError)
-
-export const getAddDummyColumnEndpointApiColumnAddDummyPostUrl = () => {
-
-
+const addDummyColumnEndpoint = (
+    addDummyColumnRequest: AddDummyColumnRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/column/add-dummy`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: addDummyColumnRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/add-dummy`
-}
-
-export const addDummyColumnEndpointApiColumnAddDummyPost = async (addDummyColumnRequest: AddDummyColumnRequest, options?: RequestInit): Promise<addDummyColumnEndpointApiColumnAddDummyPostResponse> => {
-  
-  const res = await fetch(getAddDummyColumnEndpointApiColumnAddDummyPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      addDummyColumnRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: addDummyColumnEndpointApiColumnAddDummyPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as addDummyColumnEndpointApiColumnAddDummyPostResponse
-}
-
-
-
 /**
  * カラムを削除するエンドポイント
 
@@ -270,53 +143,17 @@ JSONResponse
     処理結果
  * @summary Delete Column Endpoint
  */
-export type deleteColumnEndpointApiColumnDeletePostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type deleteColumnEndpointApiColumnDeletePostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type deleteColumnEndpointApiColumnDeletePostResponseSuccess = (deleteColumnEndpointApiColumnDeletePostResponse200) & {
-  headers: Headers;
-};
-export type deleteColumnEndpointApiColumnDeletePostResponseError = (deleteColumnEndpointApiColumnDeletePostResponse422) & {
-  headers: Headers;
-};
-
-export type deleteColumnEndpointApiColumnDeletePostResponse = (deleteColumnEndpointApiColumnDeletePostResponseSuccess | deleteColumnEndpointApiColumnDeletePostResponseError)
-
-export const getDeleteColumnEndpointApiColumnDeletePostUrl = () => {
-
-
+const deleteColumnEndpoint = (
+    deleteColumnRequest: DeleteColumnRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/column/delete`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: deleteColumnRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/delete`
-}
-
-export const deleteColumnEndpointApiColumnDeletePost = async (deleteColumnRequest: DeleteColumnRequest, options?: RequestInit): Promise<deleteColumnEndpointApiColumnDeletePostResponse> => {
-  
-  const res = await fetch(getDeleteColumnEndpointApiColumnDeletePostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      deleteColumnRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: deleteColumnEndpointApiColumnDeletePostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as deleteColumnEndpointApiColumnDeletePostResponse
-}
-
-
-
 /**
  * 列名変更エンドポイント
 
@@ -336,53 +173,17 @@ JSONResponse
     処理結果
  * @summary Rename Column Endpoint
  */
-export type renameColumnEndpointApiColumnRenamePostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type renameColumnEndpointApiColumnRenamePostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type renameColumnEndpointApiColumnRenamePostResponseSuccess = (renameColumnEndpointApiColumnRenamePostResponse200) & {
-  headers: Headers;
-};
-export type renameColumnEndpointApiColumnRenamePostResponseError = (renameColumnEndpointApiColumnRenamePostResponse422) & {
-  headers: Headers;
-};
-
-export type renameColumnEndpointApiColumnRenamePostResponse = (renameColumnEndpointApiColumnRenamePostResponseSuccess | renameColumnEndpointApiColumnRenamePostResponseError)
-
-export const getRenameColumnEndpointApiColumnRenamePostUrl = () => {
-
-
+const renameColumnEndpoint = (
+    renameColumnRequest: RenameColumnRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/column/rename`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: renameColumnRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/rename`
-}
-
-export const renameColumnEndpointApiColumnRenamePost = async (renameColumnRequest: RenameColumnRequest, options?: RequestInit): Promise<renameColumnEndpointApiColumnRenamePostResponse> => {
-  
-  const res = await fetch(getRenameColumnEndpointApiColumnRenamePostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      renameColumnRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: renameColumnEndpointApiColumnRenamePostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as renameColumnEndpointApiColumnRenamePostResponse
-}
-
-
-
 /**
  * ラグ・リードカラムを追加するエンドポイント
 
@@ -399,53 +200,17 @@ JSONResponse
     処理結果
  * @summary Add Lag Lead Column Endpoint
  */
-export type addLagLeadColumnEndpointApiColumnAddLagLeadPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type addLagLeadColumnEndpointApiColumnAddLagLeadPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type addLagLeadColumnEndpointApiColumnAddLagLeadPostResponseSuccess = (addLagLeadColumnEndpointApiColumnAddLagLeadPostResponse200) & {
-  headers: Headers;
-};
-export type addLagLeadColumnEndpointApiColumnAddLagLeadPostResponseError = (addLagLeadColumnEndpointApiColumnAddLagLeadPostResponse422) & {
-  headers: Headers;
-};
-
-export type addLagLeadColumnEndpointApiColumnAddLagLeadPostResponse = (addLagLeadColumnEndpointApiColumnAddLagLeadPostResponseSuccess | addLagLeadColumnEndpointApiColumnAddLagLeadPostResponseError)
-
-export const getAddLagLeadColumnEndpointApiColumnAddLagLeadPostUrl = () => {
-
-
+const addLagLeadColumnEndpoint = (
+    addLagLeadColumnRequest: AddLagLeadColumnRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/column/add-lag-lead`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: addLagLeadColumnRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/add-lag-lead`
-}
-
-export const addLagLeadColumnEndpointApiColumnAddLagLeadPost = async (addLagLeadColumnRequest: AddLagLeadColumnRequest, options?: RequestInit): Promise<addLagLeadColumnEndpointApiColumnAddLagLeadPostResponse> => {
-  
-  const res = await fetch(getAddLagLeadColumnEndpointApiColumnAddLagLeadPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      addLagLeadColumnRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: addLagLeadColumnEndpointApiColumnAddLagLeadPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as addLagLeadColumnEndpointApiColumnAddLagLeadPostResponse
-}
-
-
-
 /**
  * シミュレーションカラムを追加するエンドポイント
 
@@ -462,53 +227,17 @@ JSONResponse
     処理結果
  * @summary Add Simulation Column Endpoint
  */
-export type addSimulationColumnEndpointApiColumnAddSimulationPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type addSimulationColumnEndpointApiColumnAddSimulationPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type addSimulationColumnEndpointApiColumnAddSimulationPostResponseSuccess = (addSimulationColumnEndpointApiColumnAddSimulationPostResponse200) & {
-  headers: Headers;
-};
-export type addSimulationColumnEndpointApiColumnAddSimulationPostResponseError = (addSimulationColumnEndpointApiColumnAddSimulationPostResponse422) & {
-  headers: Headers;
-};
-
-export type addSimulationColumnEndpointApiColumnAddSimulationPostResponse = (addSimulationColumnEndpointApiColumnAddSimulationPostResponseSuccess | addSimulationColumnEndpointApiColumnAddSimulationPostResponseError)
-
-export const getAddSimulationColumnEndpointApiColumnAddSimulationPostUrl = () => {
-
-
+const addSimulationColumnEndpoint = (
+    addSimulationColumnRequest: AddSimulationColumnRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/column/add-simulation`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: addSimulationColumnRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/add-simulation`
-}
-
-export const addSimulationColumnEndpointApiColumnAddSimulationPost = async (addSimulationColumnRequest: AddSimulationColumnRequest, options?: RequestInit): Promise<addSimulationColumnEndpointApiColumnAddSimulationPostResponse> => {
-  
-  const res = await fetch(getAddSimulationColumnEndpointApiColumnAddSimulationPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      addSimulationColumnRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: addSimulationColumnEndpointApiColumnAddSimulationPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as addSimulationColumnEndpointApiColumnAddSimulationPostResponse
-}
-
-
-
 /**
  * カラム計算を実行するエンドポイント
 
@@ -525,53 +254,17 @@ JSONResponse
     処理結果
  * @summary Calculate Column Endpoint
  */
-export type calculateColumnEndpointApiColumnCalculatePostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type calculateColumnEndpointApiColumnCalculatePostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type calculateColumnEndpointApiColumnCalculatePostResponseSuccess = (calculateColumnEndpointApiColumnCalculatePostResponse200) & {
-  headers: Headers;
-};
-export type calculateColumnEndpointApiColumnCalculatePostResponseError = (calculateColumnEndpointApiColumnCalculatePostResponse422) & {
-  headers: Headers;
-};
-
-export type calculateColumnEndpointApiColumnCalculatePostResponse = (calculateColumnEndpointApiColumnCalculatePostResponseSuccess | calculateColumnEndpointApiColumnCalculatePostResponseError)
-
-export const getCalculateColumnEndpointApiColumnCalculatePostUrl = () => {
-
-
+const calculateColumnEndpoint = (
+    calculateColumnRequest: CalculateColumnRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/column/calculate`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: calculateColumnRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/calculate`
-}
-
-export const calculateColumnEndpointApiColumnCalculatePost = async (calculateColumnRequest: CalculateColumnRequest, options?: RequestInit): Promise<calculateColumnEndpointApiColumnCalculatePostResponse> => {
-  
-  const res = await fetch(getCalculateColumnEndpointApiColumnCalculatePostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      calculateColumnRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: calculateColumnEndpointApiColumnCalculatePostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as calculateColumnEndpointApiColumnCalculatePostResponse
-}
-
-
-
 /**
  * カラムを複製するエンドポイント
 
@@ -588,53 +281,17 @@ JSONResponse
     処理結果
  * @summary Duplicate Column Endpoint
  */
-export type duplicateColumnEndpointApiColumnDuplicatePostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type duplicateColumnEndpointApiColumnDuplicatePostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type duplicateColumnEndpointApiColumnDuplicatePostResponseSuccess = (duplicateColumnEndpointApiColumnDuplicatePostResponse200) & {
-  headers: Headers;
-};
-export type duplicateColumnEndpointApiColumnDuplicatePostResponseError = (duplicateColumnEndpointApiColumnDuplicatePostResponse422) & {
-  headers: Headers;
-};
-
-export type duplicateColumnEndpointApiColumnDuplicatePostResponse = (duplicateColumnEndpointApiColumnDuplicatePostResponseSuccess | duplicateColumnEndpointApiColumnDuplicatePostResponseError)
-
-export const getDuplicateColumnEndpointApiColumnDuplicatePostUrl = () => {
-
-
+const duplicateColumnEndpoint = (
+    duplicateColumnRequest: DuplicateColumnRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/column/duplicate`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: duplicateColumnRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/duplicate`
-}
-
-export const duplicateColumnEndpointApiColumnDuplicatePost = async (duplicateColumnRequest: DuplicateColumnRequest, options?: RequestInit): Promise<duplicateColumnEndpointApiColumnDuplicatePostResponse> => {
-  
-  const res = await fetch(getDuplicateColumnEndpointApiColumnDuplicatePostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      duplicateColumnRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: duplicateColumnEndpointApiColumnDuplicatePostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as duplicateColumnEndpointApiColumnDuplicatePostResponse
-}
-
-
-
 /**
  * 列の変換処理エンドポイント
 
@@ -651,53 +308,17 @@ JSONResponse
     処理結果
  * @summary Transform Column Endpoint
  */
-export type transformColumnEndpointApiColumnTransformPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type transformColumnEndpointApiColumnTransformPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type transformColumnEndpointApiColumnTransformPostResponseSuccess = (transformColumnEndpointApiColumnTransformPostResponse200) & {
-  headers: Headers;
-};
-export type transformColumnEndpointApiColumnTransformPostResponseError = (transformColumnEndpointApiColumnTransformPostResponse422) & {
-  headers: Headers;
-};
-
-export type transformColumnEndpointApiColumnTransformPostResponse = (transformColumnEndpointApiColumnTransformPostResponseSuccess | transformColumnEndpointApiColumnTransformPostResponseError)
-
-export const getTransformColumnEndpointApiColumnTransformPostUrl = () => {
-
-
+const transformColumnEndpoint = (
+    transformColumnRequest: TransformColumnRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/column/transform`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: transformColumnRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/transform`
-}
-
-export const transformColumnEndpointApiColumnTransformPost = async (transformColumnRequest: TransformColumnRequest, options?: RequestInit): Promise<transformColumnEndpointApiColumnTransformPostResponse> => {
-  
-  const res = await fetch(getTransformColumnEndpointApiColumnTransformPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      transformColumnRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: transformColumnEndpointApiColumnTransformPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as transformColumnEndpointApiColumnTransformPostResponse
-}
-
-
-
 /**
  * カラムリストを取得するエンドポイント
 
@@ -714,53 +335,17 @@ JSONResponse
     処理結果
  * @summary Get Column List Endpoint
  */
-export type getColumnListEndpointApiColumnGetListPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type getColumnListEndpointApiColumnGetListPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type getColumnListEndpointApiColumnGetListPostResponseSuccess = (getColumnListEndpointApiColumnGetListPostResponse200) & {
-  headers: Headers;
-};
-export type getColumnListEndpointApiColumnGetListPostResponseError = (getColumnListEndpointApiColumnGetListPostResponse422) & {
-  headers: Headers;
-};
-
-export type getColumnListEndpointApiColumnGetListPostResponse = (getColumnListEndpointApiColumnGetListPostResponseSuccess | getColumnListEndpointApiColumnGetListPostResponseError)
-
-export const getGetColumnListEndpointApiColumnGetListPostUrl = () => {
-
-
+const getColumnListEndpoint = (
+    getColumnListRequest: GetColumnListRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/column/get-list`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: getColumnListRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/get-list`
-}
-
-export const getColumnListEndpointApiColumnGetListPost = async (getColumnListRequest: GetColumnListRequest, options?: RequestInit): Promise<getColumnListEndpointApiColumnGetListPostResponse> => {
-  
-  const res = await fetch(getGetColumnListEndpointApiColumnGetListPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      getColumnListRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getColumnListEndpointApiColumnGetListPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getColumnListEndpointApiColumnGetListPostResponse
-}
-
-
-
 /**
  * 列のソート処理エンドポイント
 
@@ -779,53 +364,17 @@ JSONResponse
     処理結果
  * @summary Sort Columns Endpoint
  */
-export type sortColumnsEndpointApiColumnSortPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type sortColumnsEndpointApiColumnSortPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type sortColumnsEndpointApiColumnSortPostResponseSuccess = (sortColumnsEndpointApiColumnSortPostResponse200) & {
-  headers: Headers;
-};
-export type sortColumnsEndpointApiColumnSortPostResponseError = (sortColumnsEndpointApiColumnSortPostResponse422) & {
-  headers: Headers;
-};
-
-export type sortColumnsEndpointApiColumnSortPostResponse = (sortColumnsEndpointApiColumnSortPostResponseSuccess | sortColumnsEndpointApiColumnSortPostResponseError)
-
-export const getSortColumnsEndpointApiColumnSortPostUrl = () => {
-
-
+const sortColumnsEndpoint = (
+    sortColumnsRequest: SortColumnsRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/column/sort`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: sortColumnsRequest
+    },
+      options);
+    }
   
-
-  return `/api/column/sort`
-}
-
-export const sortColumnsEndpointApiColumnSortPost = async (sortColumnsRequest: SortColumnsRequest, options?: RequestInit): Promise<sortColumnsEndpointApiColumnSortPostResponse> => {
-  
-  const res = await fetch(getSortColumnsEndpointApiColumnSortPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      sortColumnsRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: sortColumnsEndpointApiColumnSortPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as sortColumnsEndpointApiColumnSortPostResponse
-}
-
-
-
 /**
  * テーブルを作成するエンドポイント
 
@@ -842,53 +391,17 @@ JSONResponse
     処理結果
  * @summary Create Table Endpoint
  */
-export type createTableEndpointApiTableCreatePostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type createTableEndpointApiTableCreatePostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type createTableEndpointApiTableCreatePostResponseSuccess = (createTableEndpointApiTableCreatePostResponse200) & {
-  headers: Headers;
-};
-export type createTableEndpointApiTableCreatePostResponseError = (createTableEndpointApiTableCreatePostResponse422) & {
-  headers: Headers;
-};
-
-export type createTableEndpointApiTableCreatePostResponse = (createTableEndpointApiTableCreatePostResponseSuccess | createTableEndpointApiTableCreatePostResponseError)
-
-export const getCreateTableEndpointApiTableCreatePostUrl = () => {
-
-
+const createTableEndpoint = (
+    createTableRequest: CreateTableRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/create`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createTableRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/create`
-}
-
-export const createTableEndpointApiTableCreatePost = async (createTableRequest: CreateTableRequest, options?: RequestInit): Promise<createTableEndpointApiTableCreatePostResponse> => {
-  
-  const res = await fetch(getCreateTableEndpointApiTableCreatePostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      createTableRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: createTableEndpointApiTableCreatePostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createTableEndpointApiTableCreatePostResponse
-}
-
-
-
 /**
  * 結合テーブルを作成するエンドポイント
 
@@ -905,53 +418,17 @@ JSONResponse
     処理結果
  * @summary Create Join Table Endpoint
  */
-export type createJoinTableEndpointApiTableCreateJoinPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type createJoinTableEndpointApiTableCreateJoinPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type createJoinTableEndpointApiTableCreateJoinPostResponseSuccess = (createJoinTableEndpointApiTableCreateJoinPostResponse200) & {
-  headers: Headers;
-};
-export type createJoinTableEndpointApiTableCreateJoinPostResponseError = (createJoinTableEndpointApiTableCreateJoinPostResponse422) & {
-  headers: Headers;
-};
-
-export type createJoinTableEndpointApiTableCreateJoinPostResponse = (createJoinTableEndpointApiTableCreateJoinPostResponseSuccess | createJoinTableEndpointApiTableCreateJoinPostResponseError)
-
-export const getCreateJoinTableEndpointApiTableCreateJoinPostUrl = () => {
-
-
+const createJoinTableEndpoint = (
+    createJoinTableRequest: CreateJoinTableRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/create-join`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createJoinTableRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/create-join`
-}
-
-export const createJoinTableEndpointApiTableCreateJoinPost = async (createJoinTableRequest: CreateJoinTableRequest, options?: RequestInit): Promise<createJoinTableEndpointApiTableCreateJoinPostResponse> => {
-  
-  const res = await fetch(getCreateJoinTableEndpointApiTableCreateJoinPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      createJoinTableRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: createJoinTableEndpointApiTableCreateJoinPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createJoinTableEndpointApiTableCreateJoinPostResponse
-}
-
-
-
 /**
  * ユニオンテーブルを作成するエンドポイント
 
@@ -968,53 +445,17 @@ JSONResponse
     処理結果
  * @summary Create Union Table Endpoint
  */
-export type createUnionTableEndpointApiTableCreateUnionPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type createUnionTableEndpointApiTableCreateUnionPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type createUnionTableEndpointApiTableCreateUnionPostResponseSuccess = (createUnionTableEndpointApiTableCreateUnionPostResponse200) & {
-  headers: Headers;
-};
-export type createUnionTableEndpointApiTableCreateUnionPostResponseError = (createUnionTableEndpointApiTableCreateUnionPostResponse422) & {
-  headers: Headers;
-};
-
-export type createUnionTableEndpointApiTableCreateUnionPostResponse = (createUnionTableEndpointApiTableCreateUnionPostResponseSuccess | createUnionTableEndpointApiTableCreateUnionPostResponseError)
-
-export const getCreateUnionTableEndpointApiTableCreateUnionPostUrl = () => {
-
-
+const createUnionTableEndpoint = (
+    createUnionTableRequest: CreateUnionTableRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/create-union`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createUnionTableRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/create-union`
-}
-
-export const createUnionTableEndpointApiTableCreateUnionPost = async (createUnionTableRequest: CreateUnionTableRequest, options?: RequestInit): Promise<createUnionTableEndpointApiTableCreateUnionPostResponse> => {
-  
-  const res = await fetch(getCreateUnionTableEndpointApiTableCreateUnionPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      createUnionTableRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: createUnionTableEndpointApiTableCreateUnionPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createUnionTableEndpointApiTableCreateUnionPostResponse
-}
-
-
-
 /**
  * シミュレーションデータテーブルを作成するエンドポイント
 
@@ -1031,53 +472,17 @@ JSONResponse
     処理結果
  * @summary Create Simulation Data Table Endpoint
  */
-export type createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponseSuccess = (createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponse200) & {
-  headers: Headers;
-};
-export type createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponseError = (createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponse422) & {
-  headers: Headers;
-};
-
-export type createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponse = (createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponseSuccess | createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponseError)
-
-export const getCreateSimulationDataTableEndpointApiTableCreateSimulationDataPostUrl = () => {
-
-
+const createSimulationDataTableEndpoint = (
+    createSimulationDataTableRequest: CreateSimulationDataTableRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/create-simulation-data`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createSimulationDataTableRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/create-simulation-data`
-}
-
-export const createSimulationDataTableEndpointApiTableCreateSimulationDataPost = async (createSimulationDataTableRequest: CreateSimulationDataTableRequest, options?: RequestInit): Promise<createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponse> => {
-  
-  const res = await fetch(getCreateSimulationDataTableEndpointApiTableCreateSimulationDataPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      createSimulationDataTableRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createSimulationDataTableEndpointApiTableCreateSimulationDataPostResponse
-}
-
-
-
 /**
  * テーブルを削除するエンドポイント
 
@@ -1094,53 +499,17 @@ JSONResponse
     処理結果
  * @summary Delete Table Endpoint
  */
-export type deleteTableEndpointApiTableDeletePostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type deleteTableEndpointApiTableDeletePostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type deleteTableEndpointApiTableDeletePostResponseSuccess = (deleteTableEndpointApiTableDeletePostResponse200) & {
-  headers: Headers;
-};
-export type deleteTableEndpointApiTableDeletePostResponseError = (deleteTableEndpointApiTableDeletePostResponse422) & {
-  headers: Headers;
-};
-
-export type deleteTableEndpointApiTableDeletePostResponse = (deleteTableEndpointApiTableDeletePostResponseSuccess | deleteTableEndpointApiTableDeletePostResponseError)
-
-export const getDeleteTableEndpointApiTableDeletePostUrl = () => {
-
-
+const deleteTableEndpoint = (
+    deleteTableRequest: DeleteTableRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/delete`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: deleteTableRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/delete`
-}
-
-export const deleteTableEndpointApiTableDeletePost = async (deleteTableRequest: DeleteTableRequest, options?: RequestInit): Promise<deleteTableEndpointApiTableDeletePostResponse> => {
-  
-  const res = await fetch(getDeleteTableEndpointApiTableDeletePostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      deleteTableRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: deleteTableEndpointApiTableDeletePostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as deleteTableEndpointApiTableDeletePostResponse
-}
-
-
-
 /**
  * テーブルを複製するエンドポイント
 
@@ -1157,53 +526,17 @@ JSONResponse
     処理結果
  * @summary Duplicate Table Endpoint
  */
-export type duplicateTableEndpointApiTableDuplicatePostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type duplicateTableEndpointApiTableDuplicatePostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type duplicateTableEndpointApiTableDuplicatePostResponseSuccess = (duplicateTableEndpointApiTableDuplicatePostResponse200) & {
-  headers: Headers;
-};
-export type duplicateTableEndpointApiTableDuplicatePostResponseError = (duplicateTableEndpointApiTableDuplicatePostResponse422) & {
-  headers: Headers;
-};
-
-export type duplicateTableEndpointApiTableDuplicatePostResponse = (duplicateTableEndpointApiTableDuplicatePostResponseSuccess | duplicateTableEndpointApiTableDuplicatePostResponseError)
-
-export const getDuplicateTableEndpointApiTableDuplicatePostUrl = () => {
-
-
+const duplicateTableEndpoint = (
+    duplicateTableRequest: DuplicateTableRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/duplicate`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: duplicateTableRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/duplicate`
-}
-
-export const duplicateTableEndpointApiTableDuplicatePost = async (duplicateTableRequest: DuplicateTableRequest, options?: RequestInit): Promise<duplicateTableEndpointApiTableDuplicatePostResponse> => {
-  
-  const res = await fetch(getDuplicateTableEndpointApiTableDuplicatePostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      duplicateTableRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: duplicateTableEndpointApiTableDuplicatePostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as duplicateTableEndpointApiTableDuplicatePostResponse
-}
-
-
-
 /**
  * テーブル名変更エンドポイント
 
@@ -1222,53 +555,17 @@ JSONResponse
     処理結果
  * @summary Rename Table Endpoint
  */
-export type renameTableEndpointApiTableRenamePostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type renameTableEndpointApiTableRenamePostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type renameTableEndpointApiTableRenamePostResponseSuccess = (renameTableEndpointApiTableRenamePostResponse200) & {
-  headers: Headers;
-};
-export type renameTableEndpointApiTableRenamePostResponseError = (renameTableEndpointApiTableRenamePostResponse422) & {
-  headers: Headers;
-};
-
-export type renameTableEndpointApiTableRenamePostResponse = (renameTableEndpointApiTableRenamePostResponseSuccess | renameTableEndpointApiTableRenamePostResponseError)
-
-export const getRenameTableEndpointApiTableRenamePostUrl = () => {
-
-
+const renameTableEndpoint = (
+    renameTableRequest: RenameTableRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/rename`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: renameTableRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/rename`
-}
-
-export const renameTableEndpointApiTableRenamePost = async (renameTableRequest: RenameTableRequest, options?: RequestInit): Promise<renameTableEndpointApiTableRenamePostResponse> => {
-  
-  const res = await fetch(getRenameTableEndpointApiTableRenamePostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      renameTableRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: renameTableEndpointApiTableRenamePostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as renameTableEndpointApiTableRenamePostResponse
-}
-
-
-
 /**
  * テーブルリストを取得するエンドポイント
 
@@ -1283,45 +580,15 @@ JSONResponse
     処理結果
  * @summary Get Table List Endpoint
  */
-export type getTableListEndpointApiTableGetListGetResponse200 = {
-  data: unknown
-  status: 200
-}
+const getTableListEndpoint = (
     
-export type getTableListEndpointApiTableGetListGetResponseSuccess = (getTableListEndpointApiTableGetListGetResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getTableListEndpointApiTableGetListGetResponse = (getTableListEndpointApiTableGetListGetResponseSuccess)
-
-export const getGetTableListEndpointApiTableGetListGetUrl = () => {
-
-
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/get-list`, method: 'GET'
+    },
+      options);
+    }
   
-
-  return `/api/table/get-list`
-}
-
-export const getTableListEndpointApiTableGetListGet = async ( options?: RequestInit): Promise<getTableListEndpointApiTableGetListGetResponse> => {
-  
-  const res = await fetch(getGetTableListEndpointApiTableGetListGetUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getTableListEndpointApiTableGetListGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getTableListEndpointApiTableGetListGetResponse
-}
-
-
-
 /**
  * 全テーブルをクリアするエンドポイント
 
@@ -1336,45 +603,15 @@ JSONResponse
     処理結果
  * @summary Clear Tables Endpoint
  */
-export type clearTablesEndpointApiTableClearAllDeleteResponse200 = {
-  data: unknown
-  status: 200
-}
+const clearTablesEndpoint = (
     
-export type clearTablesEndpointApiTableClearAllDeleteResponseSuccess = (clearTablesEndpointApiTableClearAllDeleteResponse200) & {
-  headers: Headers;
-};
-;
-
-export type clearTablesEndpointApiTableClearAllDeleteResponse = (clearTablesEndpointApiTableClearAllDeleteResponseSuccess)
-
-export const getClearTablesEndpointApiTableClearAllDeleteUrl = () => {
-
-
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/clear-all`, method: 'DELETE'
+    },
+      options);
+    }
   
-
-  return `/api/table/clear-all`
-}
-
-export const clearTablesEndpointApiTableClearAllDelete = async ( options?: RequestInit): Promise<clearTablesEndpointApiTableClearAllDeleteResponse> => {
-  
-  const res = await fetch(getClearTablesEndpointApiTableClearAllDeleteUrl(),
-  {      
-    ...options,
-    method: 'DELETE'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: clearTablesEndpointApiTableClearAllDeleteResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as clearTablesEndpointApiTableClearAllDeleteResponse
-}
-
-
-
 /**
  * データをJSON形式で取得するエンドポイント
 
@@ -1391,53 +628,17 @@ JSONResponse
     処理結果
  * @summary Fetch Data To Json Endpoint
  */
-export type fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponseSuccess = (fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponse200) & {
-  headers: Headers;
-};
-export type fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponseError = (fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponse422) & {
-  headers: Headers;
-};
-
-export type fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponse = (fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponseSuccess | fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponseError)
-
-export const getFetchDataToJsonEndpointApiTableFetchDataToJsonPostUrl = () => {
-
-
+const fetchDataToJsonEndpoint = (
+    fetchDataToJsonRequest: FetchDataToJsonRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/fetch-data-to-json`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: fetchDataToJsonRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/fetch-data-to-json`
-}
-
-export const fetchDataToJsonEndpointApiTableFetchDataToJsonPost = async (fetchDataToJsonRequest: FetchDataToJsonRequest, options?: RequestInit): Promise<fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponse> => {
-  
-  const res = await fetch(getFetchDataToJsonEndpointApiTableFetchDataToJsonPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      fetchDataToJsonRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as fetchDataToJsonEndpointApiTableFetchDataToJsonPostResponse
-}
-
-
-
 /**
  * データをApache Arrow IPC形式で取得するエンドポイント
 
@@ -1457,53 +658,17 @@ JSONResponse
     処理結果（Arrow IPC形式のBase64エンコードされたバイナリを含む）
  * @summary Fetch Data To Arrow Endpoint
  */
-export type fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponseSuccess = (fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponse200) & {
-  headers: Headers;
-};
-export type fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponseError = (fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponse422) & {
-  headers: Headers;
-};
-
-export type fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponse = (fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponseSuccess | fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponseError)
-
-export const getFetchDataToArrowEndpointApiTableFetchDataToArrowPostUrl = () => {
-
-
+const fetchDataToArrowEndpoint = (
+    fetchDataToArrowRequest: FetchDataToArrowRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/fetch-data-to-arrow`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: fetchDataToArrowRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/fetch-data-to-arrow`
-}
-
-export const fetchDataToArrowEndpointApiTableFetchDataToArrowPost = async (fetchDataToArrowRequest: FetchDataToArrowRequest, options?: RequestInit): Promise<fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponse> => {
-  
-  const res = await fetch(getFetchDataToArrowEndpointApiTableFetchDataToArrowPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      fetchDataToArrowRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as fetchDataToArrowEndpointApiTableFetchDataToArrowPostResponse
-}
-
-
-
 /**
  * セルデータ入力エンドポイント
 
@@ -1524,53 +689,17 @@ JSONResponse
     処理結果
  * @summary Input Cell Data Endpoint
  */
-export type inputCellDataEndpointApiTableInputCellDataPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type inputCellDataEndpointApiTableInputCellDataPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type inputCellDataEndpointApiTableInputCellDataPostResponseSuccess = (inputCellDataEndpointApiTableInputCellDataPostResponse200) & {
-  headers: Headers;
-};
-export type inputCellDataEndpointApiTableInputCellDataPostResponseError = (inputCellDataEndpointApiTableInputCellDataPostResponse422) & {
-  headers: Headers;
-};
-
-export type inputCellDataEndpointApiTableInputCellDataPostResponse = (inputCellDataEndpointApiTableInputCellDataPostResponseSuccess | inputCellDataEndpointApiTableInputCellDataPostResponseError)
-
-export const getInputCellDataEndpointApiTableInputCellDataPostUrl = () => {
-
-
+const inputCellDataEndpoint = (
+    inputCellDataRequest: InputCellDataRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/input-cell-data`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: inputCellDataRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/input-cell-data`
-}
-
-export const inputCellDataEndpointApiTableInputCellDataPost = async (inputCellDataRequest: InputCellDataRequest, options?: RequestInit): Promise<inputCellDataEndpointApiTableInputCellDataPostResponse> => {
-  
-  const res = await fetch(getInputCellDataEndpointApiTableInputCellDataPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      inputCellDataRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: inputCellDataEndpointApiTableInputCellDataPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as inputCellDataEndpointApiTableInputCellDataPostResponse
-}
-
-
-
 /**
  * 単一条件フィルタリングを実行するエンドポイント
 
@@ -1587,53 +716,17 @@ JSONResponse
     処理結果
  * @summary Filter Single Condition Endpoint
  */
-export type filterSingleConditionEndpointApiTableFilterSingleConditionPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type filterSingleConditionEndpointApiTableFilterSingleConditionPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type filterSingleConditionEndpointApiTableFilterSingleConditionPostResponseSuccess = (filterSingleConditionEndpointApiTableFilterSingleConditionPostResponse200) & {
-  headers: Headers;
-};
-export type filterSingleConditionEndpointApiTableFilterSingleConditionPostResponseError = (filterSingleConditionEndpointApiTableFilterSingleConditionPostResponse422) & {
-  headers: Headers;
-};
-
-export type filterSingleConditionEndpointApiTableFilterSingleConditionPostResponse = (filterSingleConditionEndpointApiTableFilterSingleConditionPostResponseSuccess | filterSingleConditionEndpointApiTableFilterSingleConditionPostResponseError)
-
-export const getFilterSingleConditionEndpointApiTableFilterSingleConditionPostUrl = () => {
-
-
+const filterSingleConditionEndpoint = (
+    filterSingleConditionRequest: FilterSingleConditionRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/table/filter-single-condition`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: filterSingleConditionRequest
+    },
+      options);
+    }
   
-
-  return `/api/table/filter-single-condition`
-}
-
-export const filterSingleConditionEndpointApiTableFilterSingleConditionPost = async (filterSingleConditionRequest: FilterSingleConditionRequest, options?: RequestInit): Promise<filterSingleConditionEndpointApiTableFilterSingleConditionPostResponse> => {
-  
-  const res = await fetch(getFilterSingleConditionEndpointApiTableFilterSingleConditionPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      filterSingleConditionRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: filterSingleConditionEndpointApiTableFilterSingleConditionPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as filterSingleConditionEndpointApiTableFilterSingleConditionPostResponse
-}
-
-
-
 /**
  * 統合回帰分析エンドポイント
 
@@ -1658,53 +751,17 @@ JSONResponse
     分析結果またはエラーメッセージ
  * @summary Regression Endpoint
  */
-export type regressionEndpointApiAnalysisRegressionPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type regressionEndpointApiAnalysisRegressionPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type regressionEndpointApiAnalysisRegressionPostResponseSuccess = (regressionEndpointApiAnalysisRegressionPostResponse200) & {
-  headers: Headers;
-};
-export type regressionEndpointApiAnalysisRegressionPostResponseError = (regressionEndpointApiAnalysisRegressionPostResponse422) & {
-  headers: Headers;
-};
-
-export type regressionEndpointApiAnalysisRegressionPostResponse = (regressionEndpointApiAnalysisRegressionPostResponseSuccess | regressionEndpointApiAnalysisRegressionPostResponseError)
-
-export const getRegressionEndpointApiAnalysisRegressionPostUrl = () => {
-
-
+const regressionEndpoint = (
+    regressionRequest: RegressionRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/analysis/regression`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: regressionRequest
+    },
+      options);
+    }
   
-
-  return `/api/analysis/regression`
-}
-
-export const regressionEndpointApiAnalysisRegressionPost = async (regressionRequest: RegressionRequest, options?: RequestInit): Promise<regressionEndpointApiAnalysisRegressionPostResponse> => {
-  
-  const res = await fetch(getRegressionEndpointApiAnalysisRegressionPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      regressionRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: regressionEndpointApiAnalysisRegressionPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as regressionEndpointApiAnalysisRegressionPostResponse
-}
-
-
-
 /**
  * すべての分析結果のサマリーを取得
 
@@ -1714,45 +771,15 @@ JSONResponse
     分析結果のサマリーリスト
  * @summary Get All Analysis Results Endpoint
  */
-export type getAllAnalysisResultsEndpointApiAnalysisResultsGetResponse200 = {
-  data: unknown
-  status: 200
-}
+const getAllAnalysisResultsEndpoint = (
     
-export type getAllAnalysisResultsEndpointApiAnalysisResultsGetResponseSuccess = (getAllAnalysisResultsEndpointApiAnalysisResultsGetResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getAllAnalysisResultsEndpointApiAnalysisResultsGetResponse = (getAllAnalysisResultsEndpointApiAnalysisResultsGetResponseSuccess)
-
-export const getGetAllAnalysisResultsEndpointApiAnalysisResultsGetUrl = () => {
-
-
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/analysis/results`, method: 'GET'
+    },
+      options);
+    }
   
-
-  return `/api/analysis/results`
-}
-
-export const getAllAnalysisResultsEndpointApiAnalysisResultsGet = async ( options?: RequestInit): Promise<getAllAnalysisResultsEndpointApiAnalysisResultsGetResponse> => {
-  
-  const res = await fetch(getGetAllAnalysisResultsEndpointApiAnalysisResultsGetUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getAllAnalysisResultsEndpointApiAnalysisResultsGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getAllAnalysisResultsEndpointApiAnalysisResultsGetResponse
-}
-
-
-
 /**
  * すべての分析結果を削除
 
@@ -1762,45 +789,15 @@ JSONResponse
     削除成功メッセージ
  * @summary Clear All Analysis Results Endpoint
  */
-export type clearAllAnalysisResultsEndpointApiAnalysisResultsDeleteResponse200 = {
-  data: unknown
-  status: 200
-}
+const clearAllAnalysisResultsEndpoint = (
     
-export type clearAllAnalysisResultsEndpointApiAnalysisResultsDeleteResponseSuccess = (clearAllAnalysisResultsEndpointApiAnalysisResultsDeleteResponse200) & {
-  headers: Headers;
-};
-;
-
-export type clearAllAnalysisResultsEndpointApiAnalysisResultsDeleteResponse = (clearAllAnalysisResultsEndpointApiAnalysisResultsDeleteResponseSuccess)
-
-export const getClearAllAnalysisResultsEndpointApiAnalysisResultsDeleteUrl = () => {
-
-
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/analysis/results`, method: 'DELETE'
+    },
+      options);
+    }
   
-
-  return `/api/analysis/results`
-}
-
-export const clearAllAnalysisResultsEndpointApiAnalysisResultsDelete = async ( options?: RequestInit): Promise<clearAllAnalysisResultsEndpointApiAnalysisResultsDeleteResponse> => {
-  
-  const res = await fetch(getClearAllAnalysisResultsEndpointApiAnalysisResultsDeleteUrl(),
-  {      
-    ...options,
-    method: 'DELETE'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: clearAllAnalysisResultsEndpointApiAnalysisResultsDeleteResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as clearAllAnalysisResultsEndpointApiAnalysisResultsDeleteResponse
-}
-
-
-
 /**
  * 指定されたIDの分析結果を取得
 
@@ -1817,52 +814,15 @@ JSONResponse
     分析結果の詳細
  * @summary Get Analysis Result Endpoint
  */
-export type getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponseSuccess = (getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponse200) & {
-  headers: Headers;
-};
-export type getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponseError = (getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponse422) & {
-  headers: Headers;
-};
-
-export type getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponse = (getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponseSuccess | getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponseError)
-
-export const getGetAnalysisResultEndpointApiAnalysisResultsResultIdGetUrl = (resultId: string,) => {
-
-
+const getAnalysisResultEndpoint = (
+    resultId: string,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/analysis/results/${resultId}`, method: 'GET'
+    },
+      options);
+    }
   
-
-  return `/api/analysis/results/${resultId}`
-}
-
-export const getAnalysisResultEndpointApiAnalysisResultsResultIdGet = async (resultId: string, options?: RequestInit): Promise<getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponse> => {
-  
-  const res = await fetch(getGetAnalysisResultEndpointApiAnalysisResultsResultIdGetUrl(resultId),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getAnalysisResultEndpointApiAnalysisResultsResultIdGetResponse
-}
-
-
-
 /**
  * 指定されたIDの分析結果を削除
 
@@ -1879,52 +839,15 @@ JSONResponse
     削除成功メッセージ
  * @summary Delete Analysis Result Endpoint
  */
-export type deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponseSuccess = (deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponse200) & {
-  headers: Headers;
-};
-export type deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponseError = (deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponse422) & {
-  headers: Headers;
-};
-
-export type deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponse = (deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponseSuccess | deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponseError)
-
-export const getDeleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteUrl = (resultId: string,) => {
-
-
+const deleteAnalysisResultEndpoint = (
+    resultId: string,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/analysis/results/${resultId}`, method: 'DELETE'
+    },
+      options);
+    }
   
-
-  return `/api/analysis/results/${resultId}`
-}
-
-export const deleteAnalysisResultEndpointApiAnalysisResultsResultIdDelete = async (resultId: string, options?: RequestInit): Promise<deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponse> => {
-  
-  const res = await fetch(getDeleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteUrl(resultId),
-  {      
-    ...options,
-    method: 'DELETE'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as deleteAnalysisResultEndpointApiAnalysisResultsResultIdDeleteResponse
-}
-
-
-
 /**
  * パス指定でCSVファイルをインポートするエンドポイント
 
@@ -1941,53 +864,17 @@ JSONResponse
     処理結果
  * @summary Import Csv By Path Endpoint
  */
-export type importCsvByPathEndpointApiDataImportCsvByPathPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type importCsvByPathEndpointApiDataImportCsvByPathPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type importCsvByPathEndpointApiDataImportCsvByPathPostResponseSuccess = (importCsvByPathEndpointApiDataImportCsvByPathPostResponse200) & {
-  headers: Headers;
-};
-export type importCsvByPathEndpointApiDataImportCsvByPathPostResponseError = (importCsvByPathEndpointApiDataImportCsvByPathPostResponse422) & {
-  headers: Headers;
-};
-
-export type importCsvByPathEndpointApiDataImportCsvByPathPostResponse = (importCsvByPathEndpointApiDataImportCsvByPathPostResponseSuccess | importCsvByPathEndpointApiDataImportCsvByPathPostResponseError)
-
-export const getImportCsvByPathEndpointApiDataImportCsvByPathPostUrl = () => {
-
-
+const importCsvByPathEndpoint = (
+    importCsvByPathRequest: ImportCsvByPathRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/data/import-csv-by-path`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: importCsvByPathRequest
+    },
+      options);
+    }
   
-
-  return `/api/data/import-csv-by-path`
-}
-
-export const importCsvByPathEndpointApiDataImportCsvByPathPost = async (importCsvByPathRequest: ImportCsvByPathRequest, options?: RequestInit): Promise<importCsvByPathEndpointApiDataImportCsvByPathPostResponse> => {
-  
-  const res = await fetch(getImportCsvByPathEndpointApiDataImportCsvByPathPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      importCsvByPathRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: importCsvByPathEndpointApiDataImportCsvByPathPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as importCsvByPathEndpointApiDataImportCsvByPathPostResponse
-}
-
-
-
 /**
  * EXCELファイルをパス指定でインポートしてテーブルを作成する
 
@@ -2007,53 +894,17 @@ JSONResponse
     処理結果
  * @summary Import Excel By Path Endpoint
  */
-export type importExcelByPathEndpointApiDataImportExcelByPathPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type importExcelByPathEndpointApiDataImportExcelByPathPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type importExcelByPathEndpointApiDataImportExcelByPathPostResponseSuccess = (importExcelByPathEndpointApiDataImportExcelByPathPostResponse200) & {
-  headers: Headers;
-};
-export type importExcelByPathEndpointApiDataImportExcelByPathPostResponseError = (importExcelByPathEndpointApiDataImportExcelByPathPostResponse422) & {
-  headers: Headers;
-};
-
-export type importExcelByPathEndpointApiDataImportExcelByPathPostResponse = (importExcelByPathEndpointApiDataImportExcelByPathPostResponseSuccess | importExcelByPathEndpointApiDataImportExcelByPathPostResponseError)
-
-export const getImportExcelByPathEndpointApiDataImportExcelByPathPostUrl = () => {
-
-
+const importExcelByPathEndpoint = (
+    importExcelByPathRequest: ImportExcelByPathRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/data/import-excel-by-path`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: importExcelByPathRequest
+    },
+      options);
+    }
   
-
-  return `/api/data/import-excel-by-path`
-}
-
-export const importExcelByPathEndpointApiDataImportExcelByPathPost = async (importExcelByPathRequest: ImportExcelByPathRequest, options?: RequestInit): Promise<importExcelByPathEndpointApiDataImportExcelByPathPostResponse> => {
-  
-  const res = await fetch(getImportExcelByPathEndpointApiDataImportExcelByPathPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      importExcelByPathRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: importExcelByPathEndpointApiDataImportExcelByPathPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as importExcelByPathEndpointApiDataImportExcelByPathPostResponse
-}
-
-
-
 /**
  * PARQUETファイルをパス指定でインポートしてテーブルを作成する
 
@@ -2072,53 +923,17 @@ JSONResponse
     処理結果
  * @summary Import Parquet By Path Endpoint
  */
-export type importParquetByPathEndpointApiDataImportParquetByPathPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type importParquetByPathEndpointApiDataImportParquetByPathPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type importParquetByPathEndpointApiDataImportParquetByPathPostResponseSuccess = (importParquetByPathEndpointApiDataImportParquetByPathPostResponse200) & {
-  headers: Headers;
-};
-export type importParquetByPathEndpointApiDataImportParquetByPathPostResponseError = (importParquetByPathEndpointApiDataImportParquetByPathPostResponse422) & {
-  headers: Headers;
-};
-
-export type importParquetByPathEndpointApiDataImportParquetByPathPostResponse = (importParquetByPathEndpointApiDataImportParquetByPathPostResponseSuccess | importParquetByPathEndpointApiDataImportParquetByPathPostResponseError)
-
-export const getImportParquetByPathEndpointApiDataImportParquetByPathPostUrl = () => {
-
-
+const importParquetByPathEndpoint = (
+    importParquetByPathRequest: ImportParquetByPathRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/data/import-parquet-by-path`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: importParquetByPathRequest
+    },
+      options);
+    }
   
-
-  return `/api/data/import-parquet-by-path`
-}
-
-export const importParquetByPathEndpointApiDataImportParquetByPathPost = async (importParquetByPathRequest: ImportParquetByPathRequest, options?: RequestInit): Promise<importParquetByPathEndpointApiDataImportParquetByPathPostResponse> => {
-  
-  const res = await fetch(getImportParquetByPathEndpointApiDataImportParquetByPathPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      importParquetByPathRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: importParquetByPathEndpointApiDataImportParquetByPathPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as importParquetByPathEndpointApiDataImportParquetByPathPostResponse
-}
-
-
-
 /**
  * テーブルをCSVファイルにパス指定でエクスポートするエンドポイント
 
@@ -2135,53 +950,17 @@ JSONResponse
     処理結果
  * @summary Export Csv By Path Endpoint
  */
-export type exportCsvByPathEndpointApiDataExportCsvByPathPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type exportCsvByPathEndpointApiDataExportCsvByPathPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type exportCsvByPathEndpointApiDataExportCsvByPathPostResponseSuccess = (exportCsvByPathEndpointApiDataExportCsvByPathPostResponse200) & {
-  headers: Headers;
-};
-export type exportCsvByPathEndpointApiDataExportCsvByPathPostResponseError = (exportCsvByPathEndpointApiDataExportCsvByPathPostResponse422) & {
-  headers: Headers;
-};
-
-export type exportCsvByPathEndpointApiDataExportCsvByPathPostResponse = (exportCsvByPathEndpointApiDataExportCsvByPathPostResponseSuccess | exportCsvByPathEndpointApiDataExportCsvByPathPostResponseError)
-
-export const getExportCsvByPathEndpointApiDataExportCsvByPathPostUrl = () => {
-
-
+const exportCsvByPathEndpoint = (
+    exportCsvByPathRequest: ExportCsvByPathRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/data/export-csv-by-path`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: exportCsvByPathRequest
+    },
+      options);
+    }
   
-
-  return `/api/data/export-csv-by-path`
-}
-
-export const exportCsvByPathEndpointApiDataExportCsvByPathPost = async (exportCsvByPathRequest: ExportCsvByPathRequest, options?: RequestInit): Promise<exportCsvByPathEndpointApiDataExportCsvByPathPostResponse> => {
-  
-  const res = await fetch(getExportCsvByPathEndpointApiDataExportCsvByPathPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      exportCsvByPathRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: exportCsvByPathEndpointApiDataExportCsvByPathPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as exportCsvByPathEndpointApiDataExportCsvByPathPostResponse
-}
-
-
-
 /**
  * テーブルをExcelファイルにパス指定でエクスポートするエンドポイント
 
@@ -2198,53 +977,17 @@ JSONResponse
     処理結果
  * @summary Export Excel By Path Endpoint
  */
-export type exportExcelByPathEndpointApiDataExportExcelByPathPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type exportExcelByPathEndpointApiDataExportExcelByPathPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type exportExcelByPathEndpointApiDataExportExcelByPathPostResponseSuccess = (exportExcelByPathEndpointApiDataExportExcelByPathPostResponse200) & {
-  headers: Headers;
-};
-export type exportExcelByPathEndpointApiDataExportExcelByPathPostResponseError = (exportExcelByPathEndpointApiDataExportExcelByPathPostResponse422) & {
-  headers: Headers;
-};
-
-export type exportExcelByPathEndpointApiDataExportExcelByPathPostResponse = (exportExcelByPathEndpointApiDataExportExcelByPathPostResponseSuccess | exportExcelByPathEndpointApiDataExportExcelByPathPostResponseError)
-
-export const getExportExcelByPathEndpointApiDataExportExcelByPathPostUrl = () => {
-
-
+const exportExcelByPathEndpoint = (
+    exportExcelByPathRequest: ExportExcelByPathRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/data/export-excel-by-path`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: exportExcelByPathRequest
+    },
+      options);
+    }
   
-
-  return `/api/data/export-excel-by-path`
-}
-
-export const exportExcelByPathEndpointApiDataExportExcelByPathPost = async (exportExcelByPathRequest: ExportExcelByPathRequest, options?: RequestInit): Promise<exportExcelByPathEndpointApiDataExportExcelByPathPostResponse> => {
-  
-  const res = await fetch(getExportExcelByPathEndpointApiDataExportExcelByPathPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      exportExcelByPathRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: exportExcelByPathEndpointApiDataExportExcelByPathPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as exportExcelByPathEndpointApiDataExportExcelByPathPostResponse
-}
-
-
-
 /**
  * テーブルをParquetファイルにパス指定でエクスポートするエンドポイント
 
@@ -2261,53 +1004,17 @@ JSONResponse
     処理結果
  * @summary Export Parquet By Path Endpoint
  */
-export type exportParquetByPathEndpointApiDataExportParquetByPathPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type exportParquetByPathEndpointApiDataExportParquetByPathPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type exportParquetByPathEndpointApiDataExportParquetByPathPostResponseSuccess = (exportParquetByPathEndpointApiDataExportParquetByPathPostResponse200) & {
-  headers: Headers;
-};
-export type exportParquetByPathEndpointApiDataExportParquetByPathPostResponseError = (exportParquetByPathEndpointApiDataExportParquetByPathPostResponse422) & {
-  headers: Headers;
-};
-
-export type exportParquetByPathEndpointApiDataExportParquetByPathPostResponse = (exportParquetByPathEndpointApiDataExportParquetByPathPostResponseSuccess | exportParquetByPathEndpointApiDataExportParquetByPathPostResponseError)
-
-export const getExportParquetByPathEndpointApiDataExportParquetByPathPostUrl = () => {
-
-
+const exportParquetByPathEndpoint = (
+    exportParquetByPathRequest: ExportParquetByPathRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/data/export-parquet-by-path`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: exportParquetByPathRequest
+    },
+      options);
+    }
   
-
-  return `/api/data/export-parquet-by-path`
-}
-
-export const exportParquetByPathEndpointApiDataExportParquetByPathPost = async (exportParquetByPathRequest: ExportParquetByPathRequest, options?: RequestInit): Promise<exportParquetByPathEndpointApiDataExportParquetByPathPostResponse> => {
-  
-  const res = await fetch(getExportParquetByPathEndpointApiDataExportParquetByPathPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      exportParquetByPathRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: exportParquetByPathEndpointApiDataExportParquetByPathPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as exportParquetByPathEndpointApiDataExportParquetByPathPostResponse
-}
-
-
-
 /**
  * 信頼区間計算を行うエンドポイント
 
@@ -2324,53 +1031,17 @@ JSONResponse
     処理結果
  * @summary Confidence Interval Endpoint
  */
-export type confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponseSuccess = (confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponse200) & {
-  headers: Headers;
-};
-export type confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponseError = (confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponse422) & {
-  headers: Headers;
-};
-
-export type confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponse = (confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponseSuccess | confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponseError)
-
-export const getConfidenceIntervalEndpointApiStatisticsConfidenceIntervalPostUrl = () => {
-
-
+const confidenceIntervalEndpoint = (
+    confidenceIntervalRequest: ConfidenceIntervalRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/statistics/confidence-interval`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: confidenceIntervalRequest
+    },
+      options);
+    }
   
-
-  return `/api/statistics/confidence-interval`
-}
-
-export const confidenceIntervalEndpointApiStatisticsConfidenceIntervalPost = async (confidenceIntervalRequest: ConfidenceIntervalRequest, options?: RequestInit): Promise<confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponse> => {
-  
-  const res = await fetch(getConfidenceIntervalEndpointApiStatisticsConfidenceIntervalPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      confidenceIntervalRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as confidenceIntervalEndpointApiStatisticsConfidenceIntervalPostResponse
-}
-
-
-
 /**
  * 記述統計を計算するエンドポイント
 
@@ -2387,53 +1058,17 @@ JSONResponse
     処理結果
  * @summary Descriptive Statistics Endpoint
  */
-export type descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponseSuccess = (descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponse200) & {
-  headers: Headers;
-};
-export type descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponseError = (descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponse422) & {
-  headers: Headers;
-};
-
-export type descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponse = (descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponseSuccess | descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponseError)
-
-export const getDescriptiveStatisticsEndpointApiStatisticsDescriptivePostUrl = () => {
-
-
+const descriptiveStatisticsEndpoint = (
+    descriptiveStatisticsRequest: DescriptiveStatisticsRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/statistics/descriptive`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: descriptiveStatisticsRequest
+    },
+      options);
+    }
   
-
-  return `/api/statistics/descriptive`
-}
-
-export const descriptiveStatisticsEndpointApiStatisticsDescriptivePost = async (descriptiveStatisticsRequest: DescriptiveStatisticsRequest, options?: RequestInit): Promise<descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponse> => {
-  
-  const res = await fetch(getDescriptiveStatisticsEndpointApiStatisticsDescriptivePostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      descriptiveStatisticsRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as descriptiveStatisticsEndpointApiStatisticsDescriptivePostResponse
-}
-
-
-
 /**
  * ファイル一覧を取得するエンドポイント
 
@@ -2450,53 +1085,17 @@ JSONResponse
     処理結果
  * @summary Get Files Endpoint
  */
-export type getFilesEndpointApiFileGetListPostResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type getFilesEndpointApiFileGetListPostResponse422 = {
-  data: HTTPValidationError
-  status: 422
-}
-    
-export type getFilesEndpointApiFileGetListPostResponseSuccess = (getFilesEndpointApiFileGetListPostResponse200) & {
-  headers: Headers;
-};
-export type getFilesEndpointApiFileGetListPostResponseError = (getFilesEndpointApiFileGetListPostResponse422) & {
-  headers: Headers;
-};
-
-export type getFilesEndpointApiFileGetListPostResponse = (getFilesEndpointApiFileGetListPostResponseSuccess | getFilesEndpointApiFileGetListPostResponseError)
-
-export const getGetFilesEndpointApiFileGetListPostUrl = () => {
-
-
+const getFilesEndpoint = (
+    getFilesRequest: GetFilesRequest,
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/file/get-list`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: getFilesRequest
+    },
+      options);
+    }
   
-
-  return `/api/file/get-list`
-}
-
-export const getFilesEndpointApiFileGetListPost = async (getFilesRequest: GetFilesRequest, options?: RequestInit): Promise<getFilesEndpointApiFileGetListPostResponse> => {
-  
-  const res = await fetch(getGetFilesEndpointApiFileGetListPostUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      getFilesRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getFilesEndpointApiFileGetListPostResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getFilesEndpointApiFileGetListPostResponse
-}
-
-
-
 /**
  * アプリケーション設定を取得するエンドポイント
 
@@ -2511,42 +1110,54 @@ JSONResponse
     処理結果
  * @summary Get Settings Endpoint
  */
-export type getSettingsEndpointApiSettingGetSettingsGetResponse200 = {
-  data: unknown
-  status: 200
-}
+const getSettingsEndpoint = (
     
-export type getSettingsEndpointApiSettingGetSettingsGetResponseSuccess = (getSettingsEndpointApiSettingGetSettingsGetResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getSettingsEndpointApiSettingGetSettingsGetResponse = (getSettingsEndpointApiSettingGetSettingsGetResponseSuccess)
-
-export const getGetSettingsEndpointApiSettingGetSettingsGetUrl = () => {
-
-
+ options?: SecondParameter<typeof customInstance<unknown>>,) => {
+      return customInstance<unknown>(
+      {url: `/api/setting/get-settings`, method: 'GET'
+    },
+      options);
+    }
   
-
-  return `/api/setting/get-settings`
-}
-
-export const getSettingsEndpointApiSettingGetSettingsGet = async ( options?: RequestInit): Promise<getSettingsEndpointApiSettingGetSettingsGetResponse> => {
-  
-  const res = await fetch(getGetSettingsEndpointApiSettingGetSettingsGetUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getSettingsEndpointApiSettingGetSettingsGetResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getSettingsEndpointApiSettingGetSettingsGetResponse
-}
-
-
-
+return {root,healthCheck,addColumnEndpoint,addDummyColumnEndpoint,deleteColumnEndpoint,renameColumnEndpoint,addLagLeadColumnEndpoint,addSimulationColumnEndpoint,calculateColumnEndpoint,duplicateColumnEndpoint,transformColumnEndpoint,getColumnListEndpoint,sortColumnsEndpoint,createTableEndpoint,createJoinTableEndpoint,createUnionTableEndpoint,createSimulationDataTableEndpoint,deleteTableEndpoint,duplicateTableEndpoint,renameTableEndpoint,getTableListEndpoint,clearTablesEndpoint,fetchDataToJsonEndpoint,fetchDataToArrowEndpoint,inputCellDataEndpoint,filterSingleConditionEndpoint,regressionEndpoint,getAllAnalysisResultsEndpoint,clearAllAnalysisResultsEndpoint,getAnalysisResultEndpoint,deleteAnalysisResultEndpoint,importCsvByPathEndpoint,importExcelByPathEndpoint,importParquetByPathEndpoint,exportCsvByPathEndpoint,exportExcelByPathEndpoint,exportParquetByPathEndpoint,confidenceIntervalEndpoint,descriptiveStatisticsEndpoint,getFilesEndpoint,getSettingsEndpoint}};
+export type RootResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['root']>>>
+export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['healthCheck']>>>
+export type AddColumnEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['addColumnEndpoint']>>>
+export type AddDummyColumnEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['addDummyColumnEndpoint']>>>
+export type DeleteColumnEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['deleteColumnEndpoint']>>>
+export type RenameColumnEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['renameColumnEndpoint']>>>
+export type AddLagLeadColumnEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['addLagLeadColumnEndpoint']>>>
+export type AddSimulationColumnEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['addSimulationColumnEndpoint']>>>
+export type CalculateColumnEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['calculateColumnEndpoint']>>>
+export type DuplicateColumnEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['duplicateColumnEndpoint']>>>
+export type TransformColumnEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['transformColumnEndpoint']>>>
+export type GetColumnListEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['getColumnListEndpoint']>>>
+export type SortColumnsEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['sortColumnsEndpoint']>>>
+export type CreateTableEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['createTableEndpoint']>>>
+export type CreateJoinTableEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['createJoinTableEndpoint']>>>
+export type CreateUnionTableEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['createUnionTableEndpoint']>>>
+export type CreateSimulationDataTableEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['createSimulationDataTableEndpoint']>>>
+export type DeleteTableEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['deleteTableEndpoint']>>>
+export type DuplicateTableEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['duplicateTableEndpoint']>>>
+export type RenameTableEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['renameTableEndpoint']>>>
+export type GetTableListEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['getTableListEndpoint']>>>
+export type ClearTablesEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['clearTablesEndpoint']>>>
+export type FetchDataToJsonEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['fetchDataToJsonEndpoint']>>>
+export type FetchDataToArrowEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['fetchDataToArrowEndpoint']>>>
+export type InputCellDataEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['inputCellDataEndpoint']>>>
+export type FilterSingleConditionEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['filterSingleConditionEndpoint']>>>
+export type RegressionEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['regressionEndpoint']>>>
+export type GetAllAnalysisResultsEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['getAllAnalysisResultsEndpoint']>>>
+export type ClearAllAnalysisResultsEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['clearAllAnalysisResultsEndpoint']>>>
+export type GetAnalysisResultEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['getAnalysisResultEndpoint']>>>
+export type DeleteAnalysisResultEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['deleteAnalysisResultEndpoint']>>>
+export type ImportCsvByPathEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['importCsvByPathEndpoint']>>>
+export type ImportExcelByPathEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['importExcelByPathEndpoint']>>>
+export type ImportParquetByPathEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['importParquetByPathEndpoint']>>>
+export type ExportCsvByPathEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['exportCsvByPathEndpoint']>>>
+export type ExportExcelByPathEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['exportExcelByPathEndpoint']>>>
+export type ExportParquetByPathEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['exportParquetByPathEndpoint']>>>
+export type ConfidenceIntervalEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['confidenceIntervalEndpoint']>>>
+export type DescriptiveStatisticsEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['descriptiveStatisticsEndpoint']>>>
+export type GetFilesEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['getFilesEndpoint']>>>
+export type GetSettingsEndpointResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getMyAPI>['getSettingsEndpoint']>>>

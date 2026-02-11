@@ -23,22 +23,22 @@ JSONResponse
     処理結果
  * @summary Import Csv By Path Endpoint
  */
-export const importCsvByPathEndpointApiDataImportCsvByPathPostBodyFilePathMax = 1024;
+export const importCsvByPathEndpointBodyFilePathMax = 1024;
 
-export const importCsvByPathEndpointApiDataImportCsvByPathPostBodyTableNameMax = 255;
+export const importCsvByPathEndpointBodyTableNameMax = 255;
 
-export const importCsvByPathEndpointApiDataImportCsvByPathPostBodySeparatorDefault = `,`;
-export const importCsvByPathEndpointApiDataImportCsvByPathPostBodySeparatorMax = 10;
+export const importCsvByPathEndpointBodySeparatorDefault = `,`;
+export const importCsvByPathEndpointBodySeparatorMax = 10;
 
 
 
-export const ImportCsvByPathEndpointApiDataImportCsvByPathPostBody = zod.object({
-  "filePath": zod.string().min(1).max(importCsvByPathEndpointApiDataImportCsvByPathPostBodyFilePathMax).describe('インポートするCSVファイルのパス'),
-  "tableName": zod.string().min(1).max(importCsvByPathEndpointApiDataImportCsvByPathPostBodyTableNameMax).describe('作成するテーブル名'),
-  "separator": zod.string().min(1).max(importCsvByPathEndpointApiDataImportCsvByPathPostBodySeparatorMax).default(importCsvByPathEndpointApiDataImportCsvByPathPostBodySeparatorDefault).describe('区切り文字')
+export const ImportCsvByPathEndpointBody = zod.object({
+  "filePath": zod.string().min(1).max(importCsvByPathEndpointBodyFilePathMax).describe('インポートするCSVファイルのパス'),
+  "tableName": zod.string().min(1).max(importCsvByPathEndpointBodyTableNameMax).describe('作成するテーブル名'),
+  "separator": zod.string().min(1).max(importCsvByPathEndpointBodySeparatorMax).default(importCsvByPathEndpointBodySeparatorDefault).describe('区切り文字')
 }).describe('CSVファイルパス指定インポートリクエスト')
 
-export const ImportCsvByPathEndpointApiDataImportCsvByPathPostResponse = zod.unknown()
+export const ImportCsvByPathEndpointResponse = zod.unknown()
 
 /**
  * EXCELファイルをパス指定でインポートしてテーブルを作成する
@@ -59,21 +59,21 @@ JSONResponse
     処理結果
  * @summary Import Excel By Path Endpoint
  */
-export const importExcelByPathEndpointApiDataImportExcelByPathPostBodyFilePathMax = 1024;
+export const importExcelByPathEndpointBodyFilePathMax = 1024;
 
-export const importExcelByPathEndpointApiDataImportExcelByPathPostBodyTableNameMax = 255;
+export const importExcelByPathEndpointBodyTableNameMax = 255;
 
-export const importExcelByPathEndpointApiDataImportExcelByPathPostBodySheetNameOneMax = 255;
+export const importExcelByPathEndpointBodySheetNameOneMax = 255;
 
 
 
-export const ImportExcelByPathEndpointApiDataImportExcelByPathPostBody = zod.object({
-  "filePath": zod.string().min(1).max(importExcelByPathEndpointApiDataImportExcelByPathPostBodyFilePathMax).describe('インポートするExcelファイルのパス'),
-  "tableName": zod.string().min(1).max(importExcelByPathEndpointApiDataImportExcelByPathPostBodyTableNameMax).describe('作成するテーブル名'),
-  "sheetName": zod.union([zod.string().max(importExcelByPathEndpointApiDataImportExcelByPathPostBodySheetNameOneMax),zod.null()]).optional().describe('シート名')
+export const ImportExcelByPathEndpointBody = zod.object({
+  "filePath": zod.string().min(1).max(importExcelByPathEndpointBodyFilePathMax).describe('インポートするExcelファイルのパス'),
+  "tableName": zod.string().min(1).max(importExcelByPathEndpointBodyTableNameMax).describe('作成するテーブル名'),
+  "sheetName": zod.union([zod.string().max(importExcelByPathEndpointBodySheetNameOneMax),zod.null()]).optional().describe('シート名')
 }).describe('Excelファイルパス指定インポートリクエスト')
 
-export const ImportExcelByPathEndpointApiDataImportExcelByPathPostResponse = zod.unknown()
+export const ImportExcelByPathEndpointResponse = zod.unknown()
 
 /**
  * PARQUETファイルをパス指定でインポートしてテーブルを作成する
@@ -93,18 +93,18 @@ JSONResponse
     処理結果
  * @summary Import Parquet By Path Endpoint
  */
-export const importParquetByPathEndpointApiDataImportParquetByPathPostBodyFilePathMax = 1024;
+export const importParquetByPathEndpointBodyFilePathMax = 1024;
 
-export const importParquetByPathEndpointApiDataImportParquetByPathPostBodyTableNameMax = 255;
+export const importParquetByPathEndpointBodyTableNameMax = 255;
 
 
 
-export const ImportParquetByPathEndpointApiDataImportParquetByPathPostBody = zod.object({
-  "filePath": zod.string().min(1).max(importParquetByPathEndpointApiDataImportParquetByPathPostBodyFilePathMax).describe('インポートするParquetファイルのパス'),
-  "tableName": zod.string().min(1).max(importParquetByPathEndpointApiDataImportParquetByPathPostBodyTableNameMax).describe('作成するテーブル名')
+export const ImportParquetByPathEndpointBody = zod.object({
+  "filePath": zod.string().min(1).max(importParquetByPathEndpointBodyFilePathMax).describe('インポートするParquetファイルのパス'),
+  "tableName": zod.string().min(1).max(importParquetByPathEndpointBodyTableNameMax).describe('作成するテーブル名')
 }).describe('Parquetファイルパス指定インポートリクエスト')
 
-export const ImportParquetByPathEndpointApiDataImportParquetByPathPostResponse = zod.unknown()
+export const ImportParquetByPathEndpointResponse = zod.unknown()
 
 /**
  * テーブルをCSVファイルにパス指定でエクスポートするエンドポイント
@@ -122,25 +122,25 @@ JSONResponse
     処理結果
  * @summary Export Csv By Path Endpoint
  */
-export const exportCsvByPathEndpointApiDataExportCsvByPathPostBodyTableNameMax = 255;
+export const exportCsvByPathEndpointBodyTableNameMax = 255;
 
-export const exportCsvByPathEndpointApiDataExportCsvByPathPostBodyDirectoryPathMax = 1024;
+export const exportCsvByPathEndpointBodyDirectoryPathMax = 1024;
 
-export const exportCsvByPathEndpointApiDataExportCsvByPathPostBodyFileNameMax = 255;
+export const exportCsvByPathEndpointBodyFileNameMax = 255;
 
-export const exportCsvByPathEndpointApiDataExportCsvByPathPostBodySeparatorDefault = `,`;
-export const exportCsvByPathEndpointApiDataExportCsvByPathPostBodySeparatorMax = 10;
+export const exportCsvByPathEndpointBodySeparatorDefault = `,`;
+export const exportCsvByPathEndpointBodySeparatorMax = 10;
 
 
 
-export const ExportCsvByPathEndpointApiDataExportCsvByPathPostBody = zod.object({
-  "tableName": zod.string().min(1).max(exportCsvByPathEndpointApiDataExportCsvByPathPostBodyTableNameMax).describe('テーブル名'),
-  "directoryPath": zod.string().min(1).max(exportCsvByPathEndpointApiDataExportCsvByPathPostBodyDirectoryPathMax).describe('出力するディレクトリパス'),
-  "fileName": zod.string().min(1).max(exportCsvByPathEndpointApiDataExportCsvByPathPostBodyFileNameMax).describe('出力するCSVファイル名'),
-  "separator": zod.string().min(1).max(exportCsvByPathEndpointApiDataExportCsvByPathPostBodySeparatorMax).default(exportCsvByPathEndpointApiDataExportCsvByPathPostBodySeparatorDefault).describe('区切り文字')
+export const ExportCsvByPathEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(exportCsvByPathEndpointBodyTableNameMax).describe('テーブル名'),
+  "directoryPath": zod.string().min(1).max(exportCsvByPathEndpointBodyDirectoryPathMax).describe('出力するディレクトリパス'),
+  "fileName": zod.string().min(1).max(exportCsvByPathEndpointBodyFileNameMax).describe('出力するCSVファイル名'),
+  "separator": zod.string().min(1).max(exportCsvByPathEndpointBodySeparatorMax).default(exportCsvByPathEndpointBodySeparatorDefault).describe('区切り文字')
 }).describe('CSVファイルパス指定エクスポートリクエスト')
 
-export const ExportCsvByPathEndpointApiDataExportCsvByPathPostResponse = zod.unknown()
+export const ExportCsvByPathEndpointResponse = zod.unknown()
 
 /**
  * テーブルをExcelファイルにパス指定でエクスポートするエンドポイント
@@ -158,21 +158,21 @@ JSONResponse
     処理結果
  * @summary Export Excel By Path Endpoint
  */
-export const exportExcelByPathEndpointApiDataExportExcelByPathPostBodyTableNameMax = 255;
+export const exportExcelByPathEndpointBodyTableNameMax = 255;
 
-export const exportExcelByPathEndpointApiDataExportExcelByPathPostBodyDirectoryPathMax = 1024;
+export const exportExcelByPathEndpointBodyDirectoryPathMax = 1024;
 
-export const exportExcelByPathEndpointApiDataExportExcelByPathPostBodyFileNameMax = 255;
+export const exportExcelByPathEndpointBodyFileNameMax = 255;
 
 
 
-export const ExportExcelByPathEndpointApiDataExportExcelByPathPostBody = zod.object({
-  "tableName": zod.string().min(1).max(exportExcelByPathEndpointApiDataExportExcelByPathPostBodyTableNameMax).describe('テーブル名'),
-  "directoryPath": zod.string().min(1).max(exportExcelByPathEndpointApiDataExportExcelByPathPostBodyDirectoryPathMax).describe('出力するディレクトリパス'),
-  "fileName": zod.string().min(1).max(exportExcelByPathEndpointApiDataExportExcelByPathPostBodyFileNameMax).describe('出力するExcelファイル名')
+export const ExportExcelByPathEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(exportExcelByPathEndpointBodyTableNameMax).describe('テーブル名'),
+  "directoryPath": zod.string().min(1).max(exportExcelByPathEndpointBodyDirectoryPathMax).describe('出力するディレクトリパス'),
+  "fileName": zod.string().min(1).max(exportExcelByPathEndpointBodyFileNameMax).describe('出力するExcelファイル名')
 }).describe('Excelファイルパス指定エクスポートリクエスト')
 
-export const ExportExcelByPathEndpointApiDataExportExcelByPathPostResponse = zod.unknown()
+export const ExportExcelByPathEndpointResponse = zod.unknown()
 
 /**
  * テーブルをParquetファイルにパス指定でエクスポートするエンドポイント
@@ -190,19 +190,19 @@ JSONResponse
     処理結果
  * @summary Export Parquet By Path Endpoint
  */
-export const exportParquetByPathEndpointApiDataExportParquetByPathPostBodyTableNameMax = 255;
+export const exportParquetByPathEndpointBodyTableNameMax = 255;
 
-export const exportParquetByPathEndpointApiDataExportParquetByPathPostBodyDirectoryPathMax = 1024;
+export const exportParquetByPathEndpointBodyDirectoryPathMax = 1024;
 
-export const exportParquetByPathEndpointApiDataExportParquetByPathPostBodyFileNameMax = 255;
+export const exportParquetByPathEndpointBodyFileNameMax = 255;
 
 
 
-export const ExportParquetByPathEndpointApiDataExportParquetByPathPostBody = zod.object({
-  "tableName": zod.string().min(1).max(exportParquetByPathEndpointApiDataExportParquetByPathPostBodyTableNameMax).describe('テーブル名'),
-  "directoryPath": zod.string().min(1).max(exportParquetByPathEndpointApiDataExportParquetByPathPostBodyDirectoryPathMax).describe('出力するディレクトリパス'),
-  "fileName": zod.string().min(1).max(exportParquetByPathEndpointApiDataExportParquetByPathPostBodyFileNameMax).describe('出力するParquetファイル名')
+export const ExportParquetByPathEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(exportParquetByPathEndpointBodyTableNameMax).describe('テーブル名'),
+  "directoryPath": zod.string().min(1).max(exportParquetByPathEndpointBodyDirectoryPathMax).describe('出力するディレクトリパス'),
+  "fileName": zod.string().min(1).max(exportParquetByPathEndpointBodyFileNameMax).describe('出力するParquetファイル名')
 }).describe('Parquetファイルパス指定エクスポートリクエスト')
 
-export const ExportParquetByPathEndpointApiDataExportParquetByPathPostResponse = zod.unknown()
+export const ExportParquetByPathEndpointResponse = zod.unknown()
 

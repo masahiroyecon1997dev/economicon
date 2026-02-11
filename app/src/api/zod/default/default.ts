@@ -11,11 +11,11 @@ import * as zod from 'zod';
  * ルートエンドポイント
  * @summary Root
  */
-export const RootGetResponse = zod.unknown()
+export const RootResponse = zod.unknown()
 
 /**
  * ヘルスチェック
  * @summary Health Check
  */
-export const HealthCheckHealthGetResponse = zod.unknown()
+export const HealthCheckResponse = zod.unknown()
 

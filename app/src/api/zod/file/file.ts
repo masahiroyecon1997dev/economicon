@@ -23,13 +23,13 @@ JSONResponse
     処理結果
  * @summary Get Files Endpoint
  */
-export const getFilesEndpointApiFileGetListPostBodyDirectoryPathMax = 1024;
+export const getFilesEndpointBodyDirectoryPathMax = 1024;
 
 
 
-export const GetFilesEndpointApiFileGetListPostBody = zod.object({
-  "directoryPath": zod.string().min(1).max(getFilesEndpointApiFileGetListPostBodyDirectoryPathMax).describe('対象ディレクトリパス')
+export const GetFilesEndpointBody = zod.object({
+  "directoryPath": zod.string().min(1).max(getFilesEndpointBodyDirectoryPathMax).describe('対象ディレクトリパス')
 }).describe('ファイル一覧取得リクエスト')
 
-export const GetFilesEndpointApiFileGetListPostResponse = zod.unknown()
+export const GetFilesEndpointResponse = zod.unknown()
 

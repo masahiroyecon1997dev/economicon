@@ -23,19 +23,19 @@ JSONResponse
     処理結果
  * @summary Create Table Endpoint
  */
-export const createTableEndpointApiTableCreatePostBodyTableNameMax = 255;
+export const createTableEndpointBodyTableNameMax = 255;
 
 
 
 
 
-export const CreateTableEndpointApiTableCreatePostBody = zod.object({
-  "tableName": zod.string().min(1).max(createTableEndpointApiTableCreatePostBodyTableNameMax).describe('テーブル名'),
+export const CreateTableEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(createTableEndpointBodyTableNameMax).describe('テーブル名'),
   "tableNumberOfRows": zod.number().min(1).describe('テーブルの行数'),
   "columnNames": zod.array(zod.string()).min(1).describe('カラム名のリスト')
 }).describe('テーブル作成リクエスト')
 
-export const CreateTableEndpointApiTableCreatePostResponse = zod.unknown()
+export const CreateTableEndpointResponse = zod.unknown()
 
 /**
  * 結合テーブルを作成するエンドポイント
@@ -53,28 +53,28 @@ JSONResponse
     処理結果
  * @summary Create Join Table Endpoint
  */
-export const createJoinTableEndpointApiTableCreateJoinPostBodyJoinTableNameMax = 255;
+export const createJoinTableEndpointBodyJoinTableNameMax = 255;
 
-export const createJoinTableEndpointApiTableCreateJoinPostBodyLeftTableNameMax = 255;
+export const createJoinTableEndpointBodyLeftTableNameMax = 255;
 
-export const createJoinTableEndpointApiTableCreateJoinPostBodyRightTableNameMax = 255;
-
-
-
-export const createJoinTableEndpointApiTableCreateJoinPostBodyJoinTypeMax = 50;
+export const createJoinTableEndpointBodyRightTableNameMax = 255;
 
 
 
-export const CreateJoinTableEndpointApiTableCreateJoinPostBody = zod.object({
-  "joinTableName": zod.string().min(1).max(createJoinTableEndpointApiTableCreateJoinPostBodyJoinTableNameMax).describe('結合後のテーブル名'),
-  "leftTableName": zod.string().min(1).max(createJoinTableEndpointApiTableCreateJoinPostBodyLeftTableNameMax).describe('左側のテーブル名'),
-  "rightTableName": zod.string().min(1).max(createJoinTableEndpointApiTableCreateJoinPostBodyRightTableNameMax).describe('右側のテーブル名'),
+export const createJoinTableEndpointBodyJoinTypeMax = 50;
+
+
+
+export const CreateJoinTableEndpointBody = zod.object({
+  "joinTableName": zod.string().min(1).max(createJoinTableEndpointBodyJoinTableNameMax).describe('結合後のテーブル名'),
+  "leftTableName": zod.string().min(1).max(createJoinTableEndpointBodyLeftTableNameMax).describe('左側のテーブル名'),
+  "rightTableName": zod.string().min(1).max(createJoinTableEndpointBodyRightTableNameMax).describe('右側のテーブル名'),
   "leftKeyColumnNames": zod.array(zod.string()).min(1).describe('左側の結合キーカラム名のリスト'),
   "rightKeyColumnNames": zod.array(zod.string()).min(1).describe('右側の結合キーカラム名のリスト'),
-  "joinType": zod.string().min(1).max(createJoinTableEndpointApiTableCreateJoinPostBodyJoinTypeMax).describe('結合タイプ (inner, left, right, outer)')
+  "joinType": zod.string().min(1).max(createJoinTableEndpointBodyJoinTypeMax).describe('結合タイプ (inner, left, right, outer)')
 }).describe('結合テーブル作成リクエスト')
 
-export const CreateJoinTableEndpointApiTableCreateJoinPostResponse = zod.unknown()
+export const CreateJoinTableEndpointResponse = zod.unknown()
 
 /**
  * ユニオンテーブルを作成するエンドポイント
@@ -92,18 +92,18 @@ JSONResponse
     処理結果
  * @summary Create Union Table Endpoint
  */
-export const createUnionTableEndpointApiTableCreateUnionPostBodyUnionTableNameMax = 255;
+export const createUnionTableEndpointBodyUnionTableNameMax = 255;
 
 
 
 
-export const CreateUnionTableEndpointApiTableCreateUnionPostBody = zod.object({
-  "unionTableName": zod.string().min(1).max(createUnionTableEndpointApiTableCreateUnionPostBodyUnionTableNameMax).describe('ユニオン後のテーブル名'),
+export const CreateUnionTableEndpointBody = zod.object({
+  "unionTableName": zod.string().min(1).max(createUnionTableEndpointBodyUnionTableNameMax).describe('ユニオン後のテーブル名'),
   "tableNames": zod.array(zod.string()).min(1).describe('結合するテーブル名のリスト'),
   "columnNames": zod.array(zod.string()).optional().describe('対象カラム名のリスト')
 }).describe('ユニオンテーブル作成リクエスト')
 
-export const CreateUnionTableEndpointApiTableCreateUnionPostResponse = zod.unknown()
+export const CreateUnionTableEndpointResponse = zod.unknown()
 
 /**
  * シミュレーションデータテーブルを作成するエンドポイント
@@ -121,19 +121,19 @@ JSONResponse
     処理結果
  * @summary Create Simulation Data Table Endpoint
  */
-export const createSimulationDataTableEndpointApiTableCreateSimulationDataPostBodyTableNameMax = 255;
+export const createSimulationDataTableEndpointBodyTableNameMax = 255;
 
 
 
 
 
-export const CreateSimulationDataTableEndpointApiTableCreateSimulationDataPostBody = zod.object({
-  "tableName": zod.string().min(1).max(createSimulationDataTableEndpointApiTableCreateSimulationDataPostBodyTableNameMax).describe('テーブル名'),
+export const CreateSimulationDataTableEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(createSimulationDataTableEndpointBodyTableNameMax).describe('テーブル名'),
   "tableNumberOfRows": zod.number().min(1).describe('テーブルの行数'),
   "columnSettings": zod.array(zod.record(zod.string(), zod.unknown())).min(1).describe('カラム設定のリスト')
 }).describe('シミュレーションデータテーブル作成リクエスト')
 
-export const CreateSimulationDataTableEndpointApiTableCreateSimulationDataPostResponse = zod.unknown()
+export const CreateSimulationDataTableEndpointResponse = zod.unknown()
 
 /**
  * テーブルを削除するエンドポイント
@@ -151,15 +151,15 @@ JSONResponse
     処理結果
  * @summary Delete Table Endpoint
  */
-export const deleteTableEndpointApiTableDeletePostBodyTableNameMax = 255;
+export const deleteTableEndpointBodyTableNameMax = 255;
 
 
 
-export const DeleteTableEndpointApiTableDeletePostBody = zod.object({
-  "tableName": zod.string().min(1).max(deleteTableEndpointApiTableDeletePostBodyTableNameMax).describe('テーブル名')
+export const DeleteTableEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(deleteTableEndpointBodyTableNameMax).describe('テーブル名')
 }).describe('テーブル削除リクエスト')
 
-export const DeleteTableEndpointApiTableDeletePostResponse = zod.unknown()
+export const DeleteTableEndpointResponse = zod.unknown()
 
 /**
  * テーブルを複製するエンドポイント
@@ -177,18 +177,18 @@ JSONResponse
     処理結果
  * @summary Duplicate Table Endpoint
  */
-export const duplicateTableEndpointApiTableDuplicatePostBodyTableNameMax = 255;
+export const duplicateTableEndpointBodyTableNameMax = 255;
 
-export const duplicateTableEndpointApiTableDuplicatePostBodyNewTableNameMax = 255;
+export const duplicateTableEndpointBodyNewTableNameMax = 255;
 
 
 
-export const DuplicateTableEndpointApiTableDuplicatePostBody = zod.object({
-  "tableName": zod.string().min(1).max(duplicateTableEndpointApiTableDuplicatePostBodyTableNameMax).describe('元のテーブル名'),
-  "newTableName": zod.string().min(1).max(duplicateTableEndpointApiTableDuplicatePostBodyNewTableNameMax).describe('新しいテーブル名')
+export const DuplicateTableEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(duplicateTableEndpointBodyTableNameMax).describe('元のテーブル名'),
+  "newTableName": zod.string().min(1).max(duplicateTableEndpointBodyNewTableNameMax).describe('新しいテーブル名')
 }).describe('テーブル複製リクエスト')
 
-export const DuplicateTableEndpointApiTableDuplicatePostResponse = zod.unknown()
+export const DuplicateTableEndpointResponse = zod.unknown()
 
 /**
  * テーブル名変更エンドポイント
@@ -208,18 +208,18 @@ JSONResponse
     処理結果
  * @summary Rename Table Endpoint
  */
-export const renameTableEndpointApiTableRenamePostBodyOldTableNameMax = 255;
+export const renameTableEndpointBodyOldTableNameMax = 255;
 
-export const renameTableEndpointApiTableRenamePostBodyNewTableNameMax = 255;
+export const renameTableEndpointBodyNewTableNameMax = 255;
 
 
 
-export const RenameTableEndpointApiTableRenamePostBody = zod.object({
-  "oldTableName": zod.string().min(1).max(renameTableEndpointApiTableRenamePostBodyOldTableNameMax).describe('元のテーブル名'),
-  "newTableName": zod.string().min(1).max(renameTableEndpointApiTableRenamePostBodyNewTableNameMax).describe('新しいテーブル名')
+export const RenameTableEndpointBody = zod.object({
+  "oldTableName": zod.string().min(1).max(renameTableEndpointBodyOldTableNameMax).describe('元のテーブル名'),
+  "newTableName": zod.string().min(1).max(renameTableEndpointBodyNewTableNameMax).describe('新しいテーブル名')
 }).describe('テーブル名変更リクエスト')
 
-export const RenameTableEndpointApiTableRenamePostResponse = zod.unknown()
+export const RenameTableEndpointResponse = zod.unknown()
 
 /**
  * テーブルリストを取得するエンドポイント
@@ -235,7 +235,7 @@ JSONResponse
     処理結果
  * @summary Get Table List Endpoint
  */
-export const GetTableListEndpointApiTableGetListGetResponse = zod.unknown()
+export const GetTableListEndpointResponse = zod.unknown()
 
 /**
  * 全テーブルをクリアするエンドポイント
@@ -251,7 +251,7 @@ JSONResponse
     処理結果
  * @summary Clear Tables Endpoint
  */
-export const ClearTablesEndpointApiTableClearAllDeleteResponse = zod.unknown()
+export const ClearTablesEndpointResponse = zod.unknown()
 
 /**
  * データをJSON形式で取得するエンドポイント
@@ -269,20 +269,20 @@ JSONResponse
     処理結果
  * @summary Fetch Data To Json Endpoint
  */
-export const fetchDataToJsonEndpointApiTableFetchDataToJsonPostBodyTableNameMax = 255;
+export const fetchDataToJsonEndpointBodyTableNameMax = 255;
 
-export const fetchDataToJsonEndpointApiTableFetchDataToJsonPostBodyStartRowMin = 0;
-
-
+export const fetchDataToJsonEndpointBodyStartRowMin = 0;
 
 
-export const FetchDataToJsonEndpointApiTableFetchDataToJsonPostBody = zod.object({
-  "tableName": zod.string().min(1).max(fetchDataToJsonEndpointApiTableFetchDataToJsonPostBodyTableNameMax).describe('対象テーブル名'),
-  "startRow": zod.number().min(fetchDataToJsonEndpointApiTableFetchDataToJsonPostBodyStartRowMin).describe('開始行番号'),
+
+
+export const FetchDataToJsonEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(fetchDataToJsonEndpointBodyTableNameMax).describe('対象テーブル名'),
+  "startRow": zod.number().min(fetchDataToJsonEndpointBodyStartRowMin).describe('開始行番号'),
   "fetchRows": zod.number().min(1).describe('取得行数')
 }).describe('データJSON取得リクエスト')
 
-export const FetchDataToJsonEndpointApiTableFetchDataToJsonPostResponse = zod.unknown()
+export const FetchDataToJsonEndpointResponse = zod.unknown()
 
 /**
  * データをApache Arrow IPC形式で取得するエンドポイント
@@ -303,22 +303,22 @@ JSONResponse
     処理結果（Arrow IPC形式のBase64エンコードされたバイナリを含む）
  * @summary Fetch Data To Arrow Endpoint
  */
-export const fetchDataToArrowEndpointApiTableFetchDataToArrowPostBodyTableNameMax = 255;
+export const fetchDataToArrowEndpointBodyTableNameMax = 255;
 
-export const fetchDataToArrowEndpointApiTableFetchDataToArrowPostBodyStartRowMin = 0;
+export const fetchDataToArrowEndpointBodyStartRowMin = 0;
 
-export const fetchDataToArrowEndpointApiTableFetchDataToArrowPostBodyChunkSizeDefault = 500;
-export const fetchDataToArrowEndpointApiTableFetchDataToArrowPostBodyChunkSizeMax = 10000;
+export const fetchDataToArrowEndpointBodyChunkSizeDefault = 500;
+export const fetchDataToArrowEndpointBodyChunkSizeMax = 10000;
 
 
 
-export const FetchDataToArrowEndpointApiTableFetchDataToArrowPostBody = zod.object({
-  "tableName": zod.string().min(1).max(fetchDataToArrowEndpointApiTableFetchDataToArrowPostBodyTableNameMax).describe('対象テーブル名'),
-  "startRow": zod.number().min(fetchDataToArrowEndpointApiTableFetchDataToArrowPostBodyStartRowMin).describe('開始行番号'),
-  "chunkSize": zod.number().min(1).max(fetchDataToArrowEndpointApiTableFetchDataToArrowPostBodyChunkSizeMax).default(fetchDataToArrowEndpointApiTableFetchDataToArrowPostBodyChunkSizeDefault).describe('チャンクサイズ（デフォルト500行）')
+export const FetchDataToArrowEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(fetchDataToArrowEndpointBodyTableNameMax).describe('対象テーブル名'),
+  "startRow": zod.number().min(fetchDataToArrowEndpointBodyStartRowMin).describe('開始行番号'),
+  "chunkSize": zod.number().min(1).max(fetchDataToArrowEndpointBodyChunkSizeMax).default(fetchDataToArrowEndpointBodyChunkSizeDefault).describe('チャンクサイズ（デフォルト500行）')
 }).describe('データArrow取得リクエスト')
 
-export const FetchDataToArrowEndpointApiTableFetchDataToArrowPostResponse = zod.unknown()
+export const FetchDataToArrowEndpointResponse = zod.unknown()
 
 /**
  * セルデータ入力エンドポイント
@@ -340,22 +340,22 @@ JSONResponse
     処理結果
  * @summary Input Cell Data Endpoint
  */
-export const inputCellDataEndpointApiTableInputCellDataPostBodyTableNameMax = 255;
+export const inputCellDataEndpointBodyTableNameMax = 255;
 
-export const inputCellDataEndpointApiTableInputCellDataPostBodyColumnNameMax = 255;
+export const inputCellDataEndpointBodyColumnNameMax = 255;
 
-export const inputCellDataEndpointApiTableInputCellDataPostBodyRowIndexMin = 0;
+export const inputCellDataEndpointBodyRowIndexMin = 0;
 
 
 
-export const InputCellDataEndpointApiTableInputCellDataPostBody = zod.object({
-  "tableName": zod.string().min(1).max(inputCellDataEndpointApiTableInputCellDataPostBodyTableNameMax).describe('テーブル名'),
-  "columnName": zod.string().min(1).max(inputCellDataEndpointApiTableInputCellDataPostBodyColumnNameMax).describe('カラム名'),
-  "rowIndex": zod.number().min(inputCellDataEndpointApiTableInputCellDataPostBodyRowIndexMin).describe('行インデックス'),
+export const InputCellDataEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(inputCellDataEndpointBodyTableNameMax).describe('テーブル名'),
+  "columnName": zod.string().min(1).max(inputCellDataEndpointBodyColumnNameMax).describe('カラム名'),
+  "rowIndex": zod.number().min(inputCellDataEndpointBodyRowIndexMin).describe('行インデックス'),
   "newValue": zod.unknown().describe('新しい入力値')
 }).describe('セルデータ入力リクエスト')
 
-export const InputCellDataEndpointApiTableInputCellDataPostResponse = zod.unknown()
+export const InputCellDataEndpointResponse = zod.unknown()
 
 /**
  * 単一条件フィルタリングを実行するエンドポイント
@@ -373,26 +373,26 @@ JSONResponse
     処理結果
  * @summary Filter Single Condition Endpoint
  */
-export const filterSingleConditionEndpointApiTableFilterSingleConditionPostBodyTableNameMax = 255;
+export const filterSingleConditionEndpointBodyTableNameMax = 255;
 
-export const filterSingleConditionEndpointApiTableFilterSingleConditionPostBodyNewTableNameMax = 255;
+export const filterSingleConditionEndpointBodyNewTableNameMax = 255;
 
-export const filterSingleConditionEndpointApiTableFilterSingleConditionPostBodyColumnNameMax = 255;
+export const filterSingleConditionEndpointBodyColumnNameMax = 255;
 
-export const filterSingleConditionEndpointApiTableFilterSingleConditionPostBodyConditionMax = 50;
+export const filterSingleConditionEndpointBodyConditionMax = 50;
 
-export const filterSingleConditionEndpointApiTableFilterSingleConditionPostBodyIsCompareColumnMax = 10;
+export const filterSingleConditionEndpointBodyIsCompareColumnMax = 10;
 
 
 
-export const FilterSingleConditionEndpointApiTableFilterSingleConditionPostBody = zod.object({
-  "tableName": zod.string().min(1).max(filterSingleConditionEndpointApiTableFilterSingleConditionPostBodyTableNameMax).describe('テーブル名'),
-  "newTableName": zod.string().min(1).max(filterSingleConditionEndpointApiTableFilterSingleConditionPostBodyNewTableNameMax).describe('新しいテーブル名'),
-  "columnName": zod.string().min(1).max(filterSingleConditionEndpointApiTableFilterSingleConditionPostBodyColumnNameMax).describe('対象カラム名'),
-  "condition": zod.string().min(1).max(filterSingleConditionEndpointApiTableFilterSingleConditionPostBodyConditionMax).describe('条件'),
-  "isCompareColumn": zod.string().min(1).max(filterSingleConditionEndpointApiTableFilterSingleConditionPostBodyIsCompareColumnMax).describe('比較対象がカラムかどうか'),
+export const FilterSingleConditionEndpointBody = zod.object({
+  "tableName": zod.string().min(1).max(filterSingleConditionEndpointBodyTableNameMax).describe('テーブル名'),
+  "newTableName": zod.string().min(1).max(filterSingleConditionEndpointBodyNewTableNameMax).describe('新しいテーブル名'),
+  "columnName": zod.string().min(1).max(filterSingleConditionEndpointBodyColumnNameMax).describe('対象カラム名'),
+  "condition": zod.string().min(1).max(filterSingleConditionEndpointBodyConditionMax).describe('条件'),
+  "isCompareColumn": zod.string().min(1).max(filterSingleConditionEndpointBodyIsCompareColumnMax).describe('比較対象がカラムかどうか'),
   "compareValue": zod.unknown().describe('比較値')
 }).describe('単一条件フィルタリクエスト')
 
-export const FilterSingleConditionEndpointApiTableFilterSingleConditionPostResponse = zod.unknown()
+export const FilterSingleConditionEndpointResponse = zod.unknown()
 

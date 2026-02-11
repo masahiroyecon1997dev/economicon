@@ -3,23 +3,26 @@ import { invoke } from "@tauri-apps/api/core";
 const BASE_API_PREFIX = "/api";
 
 /**
- * リクエストボディの型定義
- */
-type RequestBody = Record<string, unknown> | undefined;
-
-/**
  * Tauri経由でAPIリクエストを行うクライアント
  */
 export const client = {
-  get: async <T>(path: string, params?: RequestBody): Promise<{ data: T }> => {
+  get: async <T>(path: string, params?: unknown): Promise<{ data: T }> => {
     // クエリパラメータがある場合はURLに付加するか、bodyとして送るか
     // Rust側の実装では `proxy_request` は `query` 引数を受け取るようになっているため
     // ここでparamsをqueryとして渡します
     return invokeRequest<T>("GET", path, undefined, params);
   },
 
-  post: async <T>(path: string, data?: RequestBody): Promise<{ data: T }> => {
+  post: async <T>(path: string, data?: unknown): Promise<{ data: T }> => {
     return invokeRequest<T>("POST", path, data);
+  },
+
+  put: async <T>(path: string, data?: unknown): Promise<{ data: T }> => {
+    return invokeRequest<T>("PUT", path, data);
+  },
+
+  delete: async <T>(path: string, params?: unknown): Promise<{ data: T }> => {
+    return invokeRequest<T>("DELETE", path, undefined, params);
   },
 
   /**
@@ -53,8 +56,8 @@ export const client = {
   fetch_binary: async <T>(
     method: string,
     path: string,
-    body?: RequestBody,
-    query?: RequestBody,
+    body?: unknown,
+    query?: unknown,
   ): Promise<{ data: T }> => {
     return invokeBinaryRequest<T>(method, path, body, query);
   },
@@ -66,8 +69,8 @@ export const client = {
 const invokeRequest = async <T>(
   method: string,
   path: string,
-  body?: RequestBody,
-  query?: RequestBody,
+  body?: unknown,
+  query?: unknown,
 ): Promise<{ data: T }> => {
   const fullPath = `${BASE_API_PREFIX}${path}`;
 
@@ -91,8 +94,8 @@ const invokeRequest = async <T>(
 const invokeBinaryRequest = async <T>(
   method: string,
   path: string,
-  body?: RequestBody,
-  query?: RequestBody,
+  body?: unknown,
+  query?: unknown,
 ): Promise<{ data: T }> => {
   const fullPath = `${BASE_API_PREFIX}${path}`;
 
