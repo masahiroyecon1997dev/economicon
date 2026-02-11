@@ -1,0 +1,2885 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "My API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Root",
+        "description": "\u30eb\u30fc\u30c8\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "\u30d8\u30eb\u30b9\u30c1\u30a7\u30c3\u30af",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/add": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Add Column Endpoint",
+        "description": "\u30ab\u30e9\u30e0\u3092\u8ffd\u52a0\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : AddColumnRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "add_column_endpoint_api_column_add_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddColumnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_AddColumnResult_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/add-dummy": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Add Dummy Column Endpoint",
+        "description": "\u30c0\u30df\u30fc\u5909\u6570\u30ab\u30e9\u30e0\u3092\u8ffd\u52a0\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : AddDummyColumnRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "add_dummy_column_endpoint_api_column_add_dummy_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDummyColumnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/delete": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Delete Column Endpoint",
+        "description": "\u30ab\u30e9\u30e0\u3092\u524a\u9664\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : DeleteColumnRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "delete_column_endpoint_api_column_delete_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteColumnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/rename": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Rename Column Endpoint",
+        "description": "\u5217\u540d\u5909\u66f4\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : RenameColumnNameRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n    - tableName: \u30c6\u30fc\u30d6\u30eb\u540d\n    - oldColumnName: \u65e7\u5217\u540d\n    - newColumnName: \u65b0\u5217\u540d\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "rename_column_endpoint_api_column_rename_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameColumnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/add-lag-lead": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Add Lag Lead Column Endpoint",
+        "description": "\u30e9\u30b0\u30fb\u30ea\u30fc\u30c9\u30ab\u30e9\u30e0\u3092\u8ffd\u52a0\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : AddLagLeadColumnRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "add_lag_lead_column_endpoint_api_column_add_lag_lead_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddLagLeadColumnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/add-simulation": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Add Simulation Column Endpoint",
+        "description": "\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u30ab\u30e9\u30e0\u3092\u8ffd\u52a0\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : AddSimulationColumnRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "add_simulation_column_endpoint_api_column_add_simulation_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddSimulationColumnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/calculate": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Calculate Column Endpoint",
+        "description": "\u30ab\u30e9\u30e0\u8a08\u7b97\u3092\u5b9f\u884c\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : StatisticsCalculateColumnRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "calculate_column_endpoint_api_column_calculate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculateColumnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/duplicate": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Duplicate Column Endpoint",
+        "description": "\u30ab\u30e9\u30e0\u3092\u8907\u88fd\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : DataDuplicateColumnRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "duplicate_column_endpoint_api_column_duplicate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuplicateColumnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/transform": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Transform Column Endpoint",
+        "description": "\u5217\u306e\u5909\u63db\u51e6\u7406\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : TransformColumnRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "transform_column_endpoint_api_column_transform_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransformColumnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/get-list": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Get Column List Endpoint",
+        "description": "\u30ab\u30e9\u30e0\u30ea\u30b9\u30c8\u3092\u53d6\u5f97\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : GetColumnListRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "get_column_list_endpoint_api_column_get_list_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetColumnListRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/column/sort": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Sort Columns Endpoint",
+        "description": "\u5217\u306e\u30bd\u30fc\u30c8\u51e6\u7406\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : SortColumnsRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n    - tableName: \u30c6\u30fc\u30d6\u30eb\u540d\n    - sortColumns: \u30bd\u30fc\u30c8\u5217\u60c5\u5831\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "sort_columns_endpoint_api_column_sort_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SortColumnsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/create": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Create Table Endpoint",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u3092\u4f5c\u6210\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : CreateTableRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "create_table_endpoint_api_table_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTableRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/create-join": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Create Join Table Endpoint",
+        "description": "\u7d50\u5408\u30c6\u30fc\u30d6\u30eb\u3092\u4f5c\u6210\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : CreateJoinTableRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "create_join_table_endpoint_api_table_create_join_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateJoinTableRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/create-union": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Create Union Table Endpoint",
+        "description": "\u30e6\u30cb\u30aa\u30f3\u30c6\u30fc\u30d6\u30eb\u3092\u4f5c\u6210\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : CreateUnionTableRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "create_union_table_endpoint_api_table_create_union_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUnionTableRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/create-simulation-data": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Create Simulation Data Table Endpoint",
+        "description": "\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u30c7\u30fc\u30bf\u30c6\u30fc\u30d6\u30eb\u3092\u4f5c\u6210\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : CreateSimulationDataTableRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "create_simulation_data_table_endpoint_api_table_create_simulation_data_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSimulationDataTableRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/delete": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Delete Table Endpoint",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u3092\u524a\u9664\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : DeleteTableRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "delete_table_endpoint_api_table_delete_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteTableRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/duplicate": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Duplicate Table Endpoint",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u3092\u8907\u88fd\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : DuplicateTableRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "duplicate_table_endpoint_api_table_duplicate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuplicateTableRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/rename": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Rename Table Endpoint",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u540d\u5909\u66f4\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : RenameTableRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n    - oldTableName: \u65e7\u30c6\u30fc\u30d6\u30eb\u540d\n    - newTableName: \u65b0\u30c6\u30fc\u30d6\u30eb\u540d\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "rename_table_endpoint_api_table_rename_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameTableRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/get-list": {
+      "get": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Get Table List Endpoint",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u30ea\u30b9\u30c8\u3092\u53d6\u5f97\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "get_table_list_endpoint_api_table_get_list_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/clear-all": {
+      "delete": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Clear Tables Endpoint",
+        "description": "\u5168\u30c6\u30fc\u30d6\u30eb\u3092\u30af\u30ea\u30a2\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "clear_tables_endpoint_api_table_clear_all_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/fetch-data-to-json": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Fetch Data To Json Endpoint",
+        "description": "\u30c7\u30fc\u30bf\u3092JSON\u5f62\u5f0f\u3067\u53d6\u5f97\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : FetchDataToJsonRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "fetch_data_to_json_endpoint_api_table_fetch_data_to_json_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FetchDataToJsonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/fetch-data-to-arrow": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Fetch Data To Arrow Endpoint",
+        "description": "\u30c7\u30fc\u30bf\u3092Apache Arrow IPC\u5f62\u5f0f\u3067\u53d6\u5f97\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u4eee\u60f3\u30b9\u30af\u30ed\u30fc\u30eb\u7528\u306e\u30c1\u30e3\u30f3\u30af\u53d6\u5f97API\u3002\nApache Arrow IPC\u5f62\u5f0f\u306e\u30d0\u30a4\u30ca\u30ea\u30c7\u30fc\u30bf\uff08Base64\u30a8\u30f3\u30b3\u30fc\u30c9\uff09\u3092\u8fd4\u3057\u307e\u3059\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : FetchDataToArrowRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c\uff08Arrow IPC\u5f62\u5f0f\u306eBase64\u30a8\u30f3\u30b3\u30fc\u30c9\u3055\u308c\u305f\u30d0\u30a4\u30ca\u30ea\u3092\u542b\u3080\uff09",
+        "operationId": "fetch_data_to_arrow_endpoint_api_table_fetch_data_to_arrow_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FetchDataToArrowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/input-cell-data": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Input Cell Data Endpoint",
+        "description": "\u30bb\u30eb\u30c7\u30fc\u30bf\u5165\u529b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : InputCellDataRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n    - tableName: \u30c6\u30fc\u30d6\u30eb\u540d\n    - columnName: \u5217\u540d\n    - rowIndex: \u884c\u30a4\u30f3\u30c7\u30c3\u30af\u30b9\n    - newValue: \u65b0\u3057\u3044\u5024\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "input_cell_data_endpoint_api_table_input_cell_data_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InputCellDataRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/table/filter-single-condition": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Filter Single Condition Endpoint",
+        "description": "\u5358\u4e00\u6761\u4ef6\u30d5\u30a3\u30eb\u30bf\u30ea\u30f3\u30b0\u3092\u5b9f\u884c\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : FilterSingleConditionRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "filter_single_condition_endpoint_api_table_filter_single_condition_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterSingleConditionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/regression": {
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Regression Endpoint",
+        "description": "\u7d71\u5408\u56de\u5e30\u5206\u6790\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\ntype\u30d5\u30a3\u30fc\u30eb\u30c9\u306b\u5fdc\u3058\u3066\u9069\u5207\u306a\u5206\u6790\u624b\u6cd5\u3092\u9078\u629e\u3057\u3001\u5b9f\u884c\u3057\u307e\u3059\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : RegressionRequest\n    \u7d71\u5408\u56de\u5e30\u5206\u6790\u30ea\u30af\u30a8\u30b9\u30c8\n    - type: \u5206\u6790\u30bf\u30a4\u30d7 (ols, logit, probit, tobit, fe, re, iv,\n      feiv, lasso, ridge)\n    - tableName: \u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d\n    - dependentVariable: \u88ab\u8aac\u660e\u5909\u6570\n    - explanatoryVariables: \u8aac\u660e\u5909\u6570\u306e\u30ea\u30b9\u30c8\n    - \u305d\u306e\u4ed6\u5206\u6790\u56fa\u6709\u306e\u30d1\u30e9\u30e1\u30fc\u30bf\n\nReturns\n-------\nJSONResponse\n    \u5206\u6790\u7d50\u679c\u307e\u305f\u306f\u30a8\u30e9\u30fc\u30e1\u30c3\u30bb\u30fc\u30b8",
+        "operationId": "regression_endpoint_api_analysis_regression_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegressionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/results": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Get All Analysis Results Endpoint",
+        "description": "\u3059\u3079\u3066\u306e\u5206\u6790\u7d50\u679c\u306e\u30b5\u30de\u30ea\u30fc\u3092\u53d6\u5f97\n\nReturns\n-------\nJSONResponse\n    \u5206\u6790\u7d50\u679c\u306e\u30b5\u30de\u30ea\u30fc\u30ea\u30b9\u30c8",
+        "operationId": "get_all_analysis_results_endpoint_api_analysis_results_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Clear All Analysis Results Endpoint",
+        "description": "\u3059\u3079\u3066\u306e\u5206\u6790\u7d50\u679c\u3092\u524a\u9664\n\nReturns\n-------\nJSONResponse\n    \u524a\u9664\u6210\u529f\u30e1\u30c3\u30bb\u30fc\u30b8",
+        "operationId": "clear_all_analysis_results_endpoint_api_analysis_results_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/results/{result_id}": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Get Analysis Result Endpoint",
+        "description": "\u6307\u5b9a\u3055\u308c\u305fID\u306e\u5206\u6790\u7d50\u679c\u3092\u53d6\u5f97\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nresult_id : str\n    \u7d50\u679c\u306eID\n\nReturns\n-------\nJSONResponse\n    \u5206\u6790\u7d50\u679c\u306e\u8a73\u7d30",
+        "operationId": "get_analysis_result_endpoint_api_analysis_results__result_id__get",
+        "parameters": [
+          {
+            "name": "result_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Result Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Delete Analysis Result Endpoint",
+        "description": "\u6307\u5b9a\u3055\u308c\u305fID\u306e\u5206\u6790\u7d50\u679c\u3092\u524a\u9664\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nresult_id : str\n    \u524a\u9664\u3059\u308b\u7d50\u679c\u306eID\n\nReturns\n-------\nJSONResponse\n    \u524a\u9664\u6210\u529f\u30e1\u30c3\u30bb\u30fc\u30b8",
+        "operationId": "delete_analysis_result_endpoint_api_analysis_results__result_id__delete",
+        "parameters": [
+          {
+            "name": "result_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Result Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/import-csv-by-path": {
+      "post": {
+        "tags": [
+          "data"
+        ],
+        "summary": "Import Csv By Path Endpoint",
+        "description": "\u30d1\u30b9\u6307\u5b9a\u3067CSV\u30d5\u30a1\u30a4\u30eb\u3092\u30a4\u30f3\u30dd\u30fc\u30c8\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : ImportCsvByPathRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "import_csv_by_path_endpoint_api_data_import_csv_by_path_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportCsvByPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/import-excel-by-path": {
+      "post": {
+        "tags": [
+          "data"
+        ],
+        "summary": "Import Excel By Path Endpoint",
+        "description": "EXCEL\u30d5\u30a1\u30a4\u30eb\u3092\u30d1\u30b9\u6307\u5b9a\u3067\u30a4\u30f3\u30dd\u30fc\u30c8\u3057\u3066\u30c6\u30fc\u30d6\u30eb\u3092\u4f5c\u6210\u3059\u308b\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : ImportExcelByPathRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n    - filePath: EXCEL\u30d5\u30a1\u30a4\u30eb\u306e\u30d1\u30b9\n    - tableName: \u4f5c\u6210\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d\n    - sheetName: \u30b7\u30fc\u30c8\u540d\uff08\u30aa\u30d7\u30b7\u30e7\u30f3\uff09\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "import_excel_by_path_endpoint_api_data_import_excel_by_path_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportExcelByPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/import-parquet-by-path": {
+      "post": {
+        "tags": [
+          "data"
+        ],
+        "summary": "Import Parquet By Path Endpoint",
+        "description": "PARQUET\u30d5\u30a1\u30a4\u30eb\u3092\u30d1\u30b9\u6307\u5b9a\u3067\u30a4\u30f3\u30dd\u30fc\u30c8\u3057\u3066\u30c6\u30fc\u30d6\u30eb\u3092\u4f5c\u6210\u3059\u308b\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : ImportParquetByPathRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n    - filePath: PARQUET\u30d5\u30a1\u30a4\u30eb\u306e\u30d1\u30b9\n    - tableName: \u4f5c\u6210\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "import_parquet_by_path_endpoint_api_data_import_parquet_by_path_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportParquetByPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/export-csv-by-path": {
+      "post": {
+        "tags": [
+          "data"
+        ],
+        "summary": "Export Csv By Path Endpoint",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u3092CSV\u30d5\u30a1\u30a4\u30eb\u306b\u30d1\u30b9\u6307\u5b9a\u3067\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : ExportCsvByPathRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "export_csv_by_path_endpoint_api_data_export_csv_by_path_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportCsvByPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/export-excel-by-path": {
+      "post": {
+        "tags": [
+          "data"
+        ],
+        "summary": "Export Excel By Path Endpoint",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u3092Excel\u30d5\u30a1\u30a4\u30eb\u306b\u30d1\u30b9\u6307\u5b9a\u3067\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : ExportExcelByPathRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "export_excel_by_path_endpoint_api_data_export_excel_by_path_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportExcelByPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/export-parquet-by-path": {
+      "post": {
+        "tags": [
+          "data"
+        ],
+        "summary": "Export Parquet By Path Endpoint",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u3092Parquet\u30d5\u30a1\u30a4\u30eb\u306b\u30d1\u30b9\u6307\u5b9a\u3067\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : ExportParquetByPathRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "export_parquet_by_path_endpoint_api_data_export_parquet_by_path_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportParquetByPathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistics/confidence-interval": {
+      "post": {
+        "tags": [
+          "statistics"
+        ],
+        "summary": "Confidence Interval Endpoint",
+        "description": "\u4fe1\u983c\u533a\u9593\u8a08\u7b97\u3092\u884c\u3046\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : ConfidenceIntervalRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "confidence_interval_endpoint_api_statistics_confidence_interval_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfidenceIntervalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistics/descriptive": {
+      "post": {
+        "tags": [
+          "statistics"
+        ],
+        "summary": "Descriptive Statistics Endpoint",
+        "description": "\u8a18\u8ff0\u7d71\u8a08\u3092\u8a08\u7b97\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : DescriptiveStatisticsRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "descriptive_statistics_endpoint_api_statistics_descriptive_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescriptiveStatisticsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/file/get-list": {
+      "post": {
+        "tags": [
+          "file"
+        ],
+        "summary": "Get Files Endpoint",
+        "description": "\u30d5\u30a1\u30a4\u30eb\u4e00\u89a7\u3092\u53d6\u5f97\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : GetFilesRequest\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "get_files_endpoint_api_file_get_list_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetFilesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/setting/get-settings": {
+      "get": {
+        "tags": [
+          "setting"
+        ],
+        "summary": "Get Settings Endpoint",
+        "description": "\u30a2\u30d7\u30ea\u30b1\u30fc\u30b7\u30e7\u30f3\u8a2d\u5b9a\u3092\u53d6\u5f97\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "get_settings_endpoint_api_setting_get_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddColumnRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "newColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Newcolumnname",
+            "description": "\u65b0\u3057\u3044\u30ab\u30e9\u30e0\u540d"
+          },
+          "addPositionColumn": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Addpositioncolumn",
+            "description": "\u8ffd\u52a0\u4f4d\u7f6e\u306e\u30ab\u30e9\u30e0\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "newColumnName",
+          "addPositionColumn"
+        ],
+        "title": "AddColumnRequest",
+        "description": "\u30ab\u30e9\u30e0\u8ffd\u52a0\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "AddColumnResult": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "title": "Tablename"
+          },
+          "columnName": {
+            "type": "string",
+            "title": "Columnname"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "columnName"
+        ],
+        "title": "AddColumnResult",
+        "description": "\u30ab\u30e9\u30e0\u8ffd\u52a0\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "AddDummyColumnRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "sourceColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Sourcecolumnname",
+            "description": "\u5143\u3068\u306a\u308b\u30ab\u30e9\u30e0\u540d"
+          },
+          "dummyColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Dummycolumnname",
+            "description": "\u30c0\u30df\u30fc\u5909\u6570\u30ab\u30e9\u30e0\u540d"
+          },
+          "targetValue": {
+            "type": "string",
+            "title": "Targetvalue",
+            "description": "1\u306b\u3059\u308b\u5bfe\u8c61\u306e\u5024"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "sourceColumnName",
+          "dummyColumnName",
+          "targetValue"
+        ],
+        "title": "AddDummyColumnRequest",
+        "description": "\u30c0\u30df\u30fc\u5909\u6570\u30ab\u30e9\u30e0\u8ffd\u52a0\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "AddLagLeadColumnRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "sourceColumn": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Sourcecolumn",
+            "description": "\u5143\u3068\u306a\u308b\u30ab\u30e9\u30e0\u540d"
+          },
+          "newColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Newcolumnname",
+            "description": "\u65b0\u3057\u3044\u30ab\u30e9\u30e0\u540d"
+          },
+          "periods": {
+            "type": "integer",
+            "title": "Periods",
+            "description": "\u30e9\u30b0\u30fb\u30ea\u30fc\u30c9\u671f\u9593"
+          },
+          "groupColumns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Groupcolumns",
+            "description": "\u30b0\u30eb\u30fc\u30d7\u5316\u3059\u308b\u30ab\u30e9\u30e0\u306e\u30ea\u30b9\u30c8"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "sourceColumn",
+          "newColumnName",
+          "periods"
+        ],
+        "title": "AddLagLeadColumnRequest",
+        "description": "\u30e9\u30b0\u30fb\u30ea\u30fc\u30c9\u30ab\u30e9\u30e0\u8ffd\u52a0\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "AddSimulationColumnRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "newColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Newcolumnname",
+            "description": "\u65b0\u3057\u3044\u30ab\u30e9\u30e0\u540d"
+          },
+          "distributionType": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Distributiontype",
+            "description": "\u5206\u5e03\u306e\u7a2e\u985e"
+          },
+          "distributionParams": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Distributionparams",
+            "description": "\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "newColumnName",
+          "distributionType",
+          "distributionParams"
+        ],
+        "title": "AddSimulationColumnRequest",
+        "description": "\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u30ab\u30e9\u30e0\u8ffd\u52a0\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "CalculateColumnRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "newColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Newcolumnname",
+            "description": "\u65b0\u3057\u3044\u30ab\u30e9\u30e0\u540d"
+          },
+          "calculationExpression": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Calculationexpression",
+            "description": "\u8a08\u7b97\u5f0f"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "newColumnName",
+          "calculationExpression"
+        ],
+        "title": "CalculateColumnRequest",
+        "description": "\u30ab\u30e9\u30e0\u8a08\u7b97\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "ConfidenceIntervalRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "columnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Columnname",
+            "description": "\u5bfe\u8c61\u30ab\u30e9\u30e0\u540d"
+          },
+          "confidenceLevel": {
+            "type": "number",
+            "exclusiveMaximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Confidencelevel",
+            "description": "\u4fe1\u983c\u6c34\u6e96 (\u4f8b: 0.95)"
+          },
+          "statisticType": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Statistictype",
+            "description": "\u7d71\u8a08\u91cf\u306e\u30bf\u30a4\u30d7 (mean, median, etc.)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "columnName",
+          "confidenceLevel",
+          "statisticType"
+        ],
+        "title": "ConfidenceIntervalRequest",
+        "description": "\u4fe1\u983c\u533a\u9593\u8a08\u7b97\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "CreateJoinTableRequest": {
+        "properties": {
+          "joinTableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Jointablename",
+            "description": "\u7d50\u5408\u5f8c\u306e\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "leftTableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Lefttablename",
+            "description": "\u5de6\u5074\u306e\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "rightTableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Righttablename",
+            "description": "\u53f3\u5074\u306e\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "leftKeyColumnNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Leftkeycolumnnames",
+            "description": "\u5de6\u5074\u306e\u7d50\u5408\u30ad\u30fc\u30ab\u30e9\u30e0\u540d\u306e\u30ea\u30b9\u30c8"
+          },
+          "rightKeyColumnNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Rightkeycolumnnames",
+            "description": "\u53f3\u5074\u306e\u7d50\u5408\u30ad\u30fc\u30ab\u30e9\u30e0\u540d\u306e\u30ea\u30b9\u30c8"
+          },
+          "joinType": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Jointype",
+            "description": "\u7d50\u5408\u30bf\u30a4\u30d7 (inner, left, right, outer)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "joinTableName",
+          "leftTableName",
+          "rightTableName",
+          "leftKeyColumnNames",
+          "rightKeyColumnNames",
+          "joinType"
+        ],
+        "title": "CreateJoinTableRequest",
+        "description": "\u7d50\u5408\u30c6\u30fc\u30d6\u30eb\u4f5c\u6210\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "CreateSimulationDataTableRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "tableNumberOfRows": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Tablenumberofrows",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u306e\u884c\u6570"
+          },
+          "columnSettings": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Columnsettings",
+            "description": "\u30ab\u30e9\u30e0\u8a2d\u5b9a\u306e\u30ea\u30b9\u30c8"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "tableNumberOfRows",
+          "columnSettings"
+        ],
+        "title": "CreateSimulationDataTableRequest",
+        "description": "\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u30c7\u30fc\u30bf\u30c6\u30fc\u30d6\u30eb\u4f5c\u6210\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "CreateTableRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "tableNumberOfRows": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Tablenumberofrows",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u306e\u884c\u6570"
+          },
+          "columnNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Columnnames",
+            "description": "\u30ab\u30e9\u30e0\u540d\u306e\u30ea\u30b9\u30c8"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "tableNumberOfRows",
+          "columnNames"
+        ],
+        "title": "CreateTableRequest",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u4f5c\u6210\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "CreateUnionTableRequest": {
+        "properties": {
+          "unionTableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Uniontablename",
+            "description": "\u30e6\u30cb\u30aa\u30f3\u5f8c\u306e\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "tableNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Tablenames",
+            "description": "\u7d50\u5408\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d\u306e\u30ea\u30b9\u30c8"
+          },
+          "columnNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Columnnames",
+            "description": "\u5bfe\u8c61\u30ab\u30e9\u30e0\u540d\u306e\u30ea\u30b9\u30c8"
+          }
+        },
+        "type": "object",
+        "required": [
+          "unionTableName",
+          "tableNames"
+        ],
+        "title": "CreateUnionTableRequest",
+        "description": "\u30e6\u30cb\u30aa\u30f3\u30c6\u30fc\u30d6\u30eb\u4f5c\u6210\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "DeleteColumnRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "columnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Columnname",
+            "description": "\u30ab\u30e9\u30e0\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "columnName"
+        ],
+        "title": "DeleteColumnRequest",
+        "description": "\u30ab\u30e9\u30e0\u524a\u9664\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "DeleteTableRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName"
+        ],
+        "title": "DeleteTableRequest",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u524a\u9664\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "DescriptiveStatisticsRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "columnNameList": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Columnnamelist",
+            "description": "\u5bfe\u8c61\u30ab\u30e9\u30e0\u540d\u306e\u30ea\u30b9\u30c8"
+          },
+          "statistics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Statistics",
+            "description": "\u7d71\u8a08\u91cf\u306e\u30ea\u30b9\u30c8"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "columnNameList",
+          "statistics"
+        ],
+        "title": "DescriptiveStatisticsRequest",
+        "description": "\u8a18\u8ff0\u7d71\u8a08\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "DuplicateColumnRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "sourceColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Sourcecolumnname",
+            "description": "\u5143\u306e\u30ab\u30e9\u30e0\u540d"
+          },
+          "newColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Newcolumnname",
+            "description": "\u65b0\u3057\u3044\u30ab\u30e9\u30e0\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "sourceColumnName",
+          "newColumnName"
+        ],
+        "title": "DuplicateColumnRequest",
+        "description": "\u30ab\u30e9\u30e0\u8907\u88fd\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "DuplicateTableRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u5143\u306e\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "newTableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Newtablename",
+            "description": "\u65b0\u3057\u3044\u30c6\u30fc\u30d6\u30eb\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "newTableName"
+        ],
+        "title": "DuplicateTableRequest",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u8907\u88fd\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "ExportCsvByPathRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "directoryPath": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Directorypath",
+            "description": "\u51fa\u529b\u3059\u308b\u30c7\u30a3\u30ec\u30af\u30c8\u30ea\u30d1\u30b9"
+          },
+          "fileName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Filename",
+            "description": "\u51fa\u529b\u3059\u308bCSV\u30d5\u30a1\u30a4\u30eb\u540d"
+          },
+          "separator": {
+            "type": "string",
+            "maxLength": 10,
+            "minLength": 1,
+            "title": "Separator",
+            "description": "\u533a\u5207\u308a\u6587\u5b57",
+            "default": ","
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "directoryPath",
+          "fileName"
+        ],
+        "title": "ExportCsvByPathRequest",
+        "description": "CSV\u30d5\u30a1\u30a4\u30eb\u30d1\u30b9\u6307\u5b9a\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "ExportExcelByPathRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "directoryPath": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Directorypath",
+            "description": "\u51fa\u529b\u3059\u308b\u30c7\u30a3\u30ec\u30af\u30c8\u30ea\u30d1\u30b9"
+          },
+          "fileName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Filename",
+            "description": "\u51fa\u529b\u3059\u308bExcel\u30d5\u30a1\u30a4\u30eb\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "directoryPath",
+          "fileName"
+        ],
+        "title": "ExportExcelByPathRequest",
+        "description": "Excel\u30d5\u30a1\u30a4\u30eb\u30d1\u30b9\u6307\u5b9a\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "ExportParquetByPathRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "directoryPath": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Directorypath",
+            "description": "\u51fa\u529b\u3059\u308b\u30c7\u30a3\u30ec\u30af\u30c8\u30ea\u30d1\u30b9"
+          },
+          "fileName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Filename",
+            "description": "\u51fa\u529b\u3059\u308bParquet\u30d5\u30a1\u30a4\u30eb\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "directoryPath",
+          "fileName"
+        ],
+        "title": "ExportParquetByPathRequest",
+        "description": "Parquet\u30d5\u30a1\u30a4\u30eb\u30d1\u30b9\u6307\u5b9a\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "FetchDataToArrowRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "startRow": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Startrow",
+            "description": "\u958b\u59cb\u884c\u756a\u53f7"
+          },
+          "chunkSize": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Chunksize",
+            "description": "\u30c1\u30e3\u30f3\u30af\u30b5\u30a4\u30ba\uff08\u30c7\u30d5\u30a9\u30eb\u30c8500\u884c\uff09",
+            "default": 500
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "startRow"
+        ],
+        "title": "FetchDataToArrowRequest",
+        "description": "\u30c7\u30fc\u30bfArrow\u53d6\u5f97\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "FetchDataToJsonRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "startRow": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Startrow",
+            "description": "\u958b\u59cb\u884c\u756a\u53f7"
+          },
+          "fetchRows": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Fetchrows",
+            "description": "\u53d6\u5f97\u884c\u6570"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "startRow",
+          "fetchRows"
+        ],
+        "title": "FetchDataToJsonRequest",
+        "description": "\u30c7\u30fc\u30bfJSON\u53d6\u5f97\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "FilterSingleConditionRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "newTableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Newtablename",
+            "description": "\u65b0\u3057\u3044\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "columnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Columnname",
+            "description": "\u5bfe\u8c61\u30ab\u30e9\u30e0\u540d"
+          },
+          "condition": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Condition",
+            "description": "\u6761\u4ef6"
+          },
+          "isCompareColumn": {
+            "type": "string",
+            "maxLength": 10,
+            "minLength": 1,
+            "title": "Iscomparecolumn",
+            "description": "\u6bd4\u8f03\u5bfe\u8c61\u304c\u30ab\u30e9\u30e0\u304b\u3069\u3046\u304b"
+          },
+          "compareValue": {
+            "title": "Comparevalue",
+            "description": "\u6bd4\u8f03\u5024"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "newTableName",
+          "columnName",
+          "condition",
+          "isCompareColumn",
+          "compareValue"
+        ],
+        "title": "FilterSingleConditionRequest",
+        "description": "\u5358\u4e00\u6761\u4ef6\u30d5\u30a3\u30eb\u30bf\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "GetColumnListRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "isNumberOnly": {
+            "type": "string",
+            "title": "Isnumberonly",
+            "description": "\u6570\u5024\u30ab\u30e9\u30e0\u306e\u307f\u53d6\u5f97",
+            "default": "false"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName"
+        ],
+        "title": "GetColumnListRequest",
+        "description": "\u30ab\u30e9\u30e0\u30ea\u30b9\u30c8\u53d6\u5f97\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "GetFilesRequest": {
+        "properties": {
+          "directoryPath": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Directorypath",
+            "description": "\u5bfe\u8c61\u30c7\u30a3\u30ec\u30af\u30c8\u30ea\u30d1\u30b9"
+          }
+        },
+        "type": "object",
+        "required": [
+          "directoryPath"
+        ],
+        "title": "GetFilesRequest",
+        "description": "\u30d5\u30a1\u30a4\u30eb\u4e00\u89a7\u53d6\u5f97\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ImportCsvByPathRequest": {
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Filepath",
+            "description": "\u30a4\u30f3\u30dd\u30fc\u30c8\u3059\u308bCSV\u30d5\u30a1\u30a4\u30eb\u306e\u30d1\u30b9"
+          },
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u4f5c\u6210\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "separator": {
+            "type": "string",
+            "maxLength": 10,
+            "minLength": 1,
+            "title": "Separator",
+            "description": "\u533a\u5207\u308a\u6587\u5b57",
+            "default": ","
+          }
+        },
+        "type": "object",
+        "required": [
+          "filePath",
+          "tableName"
+        ],
+        "title": "ImportCsvByPathRequest",
+        "description": "CSV\u30d5\u30a1\u30a4\u30eb\u30d1\u30b9\u6307\u5b9a\u30a4\u30f3\u30dd\u30fc\u30c8\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "ImportExcelByPathRequest": {
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Filepath",
+            "description": "\u30a4\u30f3\u30dd\u30fc\u30c8\u3059\u308bExcel\u30d5\u30a1\u30a4\u30eb\u306e\u30d1\u30b9"
+          },
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u4f5c\u6210\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "sheetName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheetname",
+            "description": "\u30b7\u30fc\u30c8\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filePath",
+          "tableName"
+        ],
+        "title": "ImportExcelByPathRequest",
+        "description": "Excel\u30d5\u30a1\u30a4\u30eb\u30d1\u30b9\u6307\u5b9a\u30a4\u30f3\u30dd\u30fc\u30c8\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "ImportParquetByPathRequest": {
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Filepath",
+            "description": "\u30a4\u30f3\u30dd\u30fc\u30c8\u3059\u308bParquet\u30d5\u30a1\u30a4\u30eb\u306e\u30d1\u30b9"
+          },
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u4f5c\u6210\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filePath",
+          "tableName"
+        ],
+        "title": "ImportParquetByPathRequest",
+        "description": "Parquet\u30d5\u30a1\u30a4\u30eb\u30d1\u30b9\u6307\u5b9a\u30a4\u30f3\u30dd\u30fc\u30c8\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "InputCellDataRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "columnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Columnname",
+            "description": "\u30ab\u30e9\u30e0\u540d"
+          },
+          "rowIndex": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Rowindex",
+            "description": "\u884c\u30a4\u30f3\u30c7\u30c3\u30af\u30b9"
+          },
+          "newValue": {
+            "title": "Newvalue",
+            "description": "\u65b0\u3057\u3044\u5165\u529b\u5024"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "columnName",
+          "rowIndex",
+          "newValue"
+        ],
+        "title": "InputCellDataRequest",
+        "description": "\u30bb\u30eb\u30c7\u30fc\u30bf\u5165\u529b\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "RegressionRequest": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ols",
+              "logit",
+              "probit",
+              "tobit",
+              "fe",
+              "re",
+              "iv",
+              "feiv",
+              "lasso",
+              "ridge"
+            ],
+            "title": "Type",
+            "description": "\u5206\u6790\u30bf\u30a4\u30d7"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "ols",
+              "wls",
+              "gls",
+              "gmm"
+            ],
+            "title": "Method",
+            "description": "\u8a08\u7b97\u624b\u6cd5",
+            "default": "ols"
+          },
+          "tableName": {
+            "type": "string",
+            "title": "Tablename",
+            "description": "\u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u540d\u524d\uff08\u30e6\u30fc\u30b6\u30fc\u6307\u5b9a\uff09",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u8aac\u660e\u30fb\u30e1\u30e2\uff08\u30e6\u30fc\u30b6\u30fc\u6307\u5b9a\uff09",
+            "default": ""
+          },
+          "dependentVariable": {
+            "type": "string",
+            "title": "Dependentvariable",
+            "description": "\u88ab\u8aac\u660e\u5909\u6570\u306e\u5217\u540d"
+          },
+          "explanatoryVariables": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Explanatoryvariables",
+            "description": "\u8aac\u660e\u5909\u6570\u306e\u5217\u540d\u30ea\u30b9\u30c8"
+          },
+          "standardErrorMethod": {
+            "type": "string",
+            "enum": [
+              "nonrobust",
+              "hc0",
+              "hc1",
+              "hc2",
+              "hc3",
+              "hac",
+              "clustered"
+            ],
+            "title": "Standarderrormethod",
+            "description": "\u6a19\u6e96\u8aa4\u5dee\u8a08\u7b97\u65b9\u6cd5",
+            "default": "nonrobust"
+          },
+          "standardErrorParams": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Standarderrorparams",
+            "description": "\u6a19\u6e96\u8aa4\u5dee\u8a08\u7b97\u306e\u30d1\u30e9\u30e1\u30fc\u30bf (\u4f8b: \u30af\u30e9\u30b9\u30bf\u5909\u6570\u540d)"
+          },
+          "hyperParameters": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Hyperparameters",
+            "description": "\u30cf\u30a4\u30d1\u30fc\u30d1\u30e9\u30e1\u30fc\u30bf (\u4f8b: Lasso/Ridge \u306e alpha)"
+          },
+          "useTDistribution": {
+            "type": "boolean",
+            "title": "Usetdistribution",
+            "description": "t\u5206\u5e03\u3092\u4f7f\u7528\u3059\u308b\u304b",
+            "default": true
+          },
+          "hasConst": {
+            "type": "boolean",
+            "title": "Hasconst",
+            "description": "\u5b9a\u6570\u9805\u3092\u8ffd\u52a0\u3059\u308b\u304b",
+            "default": true
+          },
+          "missingValueHandling": {
+            "type": "string",
+            "enum": [
+              "ignore",
+              "remove",
+              "error"
+            ],
+            "title": "Missingvaluehandling",
+            "description": "\u6b20\u640d\u5024\u306e\u51e6\u7406\u65b9\u6cd5",
+            "default": "remove"
+          },
+          "entityIdColumn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entityidcolumn",
+            "description": "\u500b\u4f53ID\u5217\u540d (\u56fa\u5b9a\u52b9\u679c\u30fb\u5909\u91cf\u52b9\u679c\u306e\u5834\u5408\u306b\u5fc5\u8981)"
+          },
+          "timeColumn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timecolumn",
+            "description": "\u6642\u9593\u5217\u540d (\u30d1\u30cd\u30eb\u30c7\u30fc\u30bf\u5206\u6790\u306e\u5834\u5408\u306b\u4f7f\u7528)"
+          },
+          "instrumentalVariables": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instrumentalvariables",
+            "description": "\u64cd\u4f5c\u5909\u6570\u306e\u5217\u540d\u30ea\u30b9\u30c8 (IV \u306e\u5834\u5408\u306b\u5fc5\u8981)"
+          },
+          "endogenousVariables": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endogenousvariables",
+            "description": "\u5185\u751f\u5909\u6570\u306e\u5217\u540d\u30ea\u30b9\u30c8 (IV \u306e\u5834\u5408\u306b\u5fc5\u8981)"
+          },
+          "leftCensoringLimit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leftcensoringlimit",
+            "description": "\u5de6\u5074\u6253\u3061\u5207\u308a\u5024 (Tobit \u306e\u5834\u5408\u306b\u4f7f\u7528\u3001\u30c7\u30d5\u30a9\u30eb\u30c80.0)"
+          },
+          "rightCensoringLimit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rightcensoringlimit",
+            "description": "\u53f3\u5074\u6253\u3061\u5207\u308a\u5024 (Tobit \u306e\u5834\u5408\u306b\u4f7f\u7528)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "tableName",
+          "dependentVariable",
+          "explanatoryVariables"
+        ],
+        "title": "RegressionRequest",
+        "description": "\u7d71\u5408\u56de\u5e30\u5206\u6790\u30ea\u30af\u30a8\u30b9\u30c8\n\n\u5168\u3066\u306e\u56de\u5e30\u5206\u6790\u30bf\u30a4\u30d7\u3092\u5358\u4e00\u306e\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\u3067\u6271\u3046\u305f\u3081\u306e\n\u7d71\u5408\u30b9\u30ad\u30fc\u30de\u3067\u3059\u3002"
+      },
+      "RenameColumnRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "oldColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Oldcolumnname",
+            "description": "\u5143\u306e\u30ab\u30e9\u30e0\u540d"
+          },
+          "newColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Newcolumnname",
+            "description": "\u65b0\u3057\u3044\u30ab\u30e9\u30e0\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "oldColumnName",
+          "newColumnName"
+        ],
+        "title": "RenameColumnRequest",
+        "description": "\u30ab\u30e9\u30e0\u540d\u5909\u66f4\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "RenameTableRequest": {
+        "properties": {
+          "oldTableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Oldtablename",
+            "description": "\u5143\u306e\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "newTableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Newtablename",
+            "description": "\u65b0\u3057\u3044\u30c6\u30fc\u30d6\u30eb\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "oldTableName",
+          "newTableName"
+        ],
+        "title": "RenameTableRequest",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u540d\u5909\u66f4\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "SortColumnsRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "sortColumns": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Sortcolumns",
+            "description": "\u30bd\u30fc\u30c8\u8a2d\u5b9a\u306e\u30ea\u30b9\u30c8"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "sortColumns"
+        ],
+        "title": "SortColumnsRequest",
+        "description": "\u30ab\u30e9\u30e0\u30bd\u30fc\u30c8\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "SuccessResponse_AddColumnResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/AddColumnResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[AddColumnResult]"
+      },
+      "TransformColumnRequest": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Tablename",
+            "description": "\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "sourceColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Sourcecolumnname",
+            "description": "\u5143\u3068\u306a\u308b\u30ab\u30e9\u30e0\u540d"
+          },
+          "newColumnName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Newcolumnname",
+            "description": "\u65b0\u3057\u3044\u5217\u540d"
+          },
+          "transformMethod": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Transformmethod",
+            "description": "\u5909\u63db\u30e1\u30bd\u30c3\u30c9"
+          },
+          "logBase": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logbase",
+            "description": "\u5bfe\u6570\u306e\u5e95\uff08\u30aa\u30d7\u30b7\u30e7\u30f3\uff09"
+          },
+          "exponent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exponent",
+            "description": "\u6307\u6570\uff08\u30aa\u30d7\u30b7\u30e7\u30f3\uff09"
+          },
+          "rootIndex": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rootindex",
+            "description": "\u7d2f\u4e57\u6839\u306e\u6b21\u6570\uff08\u30aa\u30d7\u30b7\u30e7\u30f3\uff09"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "sourceColumnName",
+          "newColumnName",
+          "transformMethod"
+        ],
+        "title": "TransformColumnRequest",
+        "description": "\u30ab\u30e9\u30e0\u5909\u63db\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

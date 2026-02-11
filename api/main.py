@@ -61,9 +61,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Analysis App API",
+    title="Economicon App API",
     description="データ分析アプリケーションのAPI",
-    version="2.0.0",
+    version="1.0.0",
     lifespan=lifespan,
 )
 
