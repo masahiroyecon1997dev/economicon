@@ -1,7 +1,8 @@
-from typing import Dict, List
+from typing import List
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models.schemas import SortInstruction
 from ...utils.validators.common import (
     ValidationError,
     validate_list_length,
@@ -22,7 +23,7 @@ class SortColumns:
     複数列でのソート、昇順・降順の指定が可能です。
     """
 
-    def __init__(self, table_name: str, sort_columns: List[Dict[str, str]]):
+    def __init__(self, table_name: str, sort_columns: List[SortInstruction]):
         self.tables_store = TablesStore()
         self.table_name = table_name
         self.sort_columns = sort_columns
@@ -57,7 +58,7 @@ class SortColumns:
             for sort_spec in self.sort_columns:
                 # 列名の存在チェック
                 validate_existed_column_name(
-                    sort_spec["columnName"],
+                    sort_spec.column_name,
                     column_name_list,
                     self.param_names["column_name"],
                 )
@@ -71,9 +72,9 @@ class SortColumns:
             df = table_info.table
 
             # ソート列とdescendingフラグを準備
-            column_names = [spec["columnName"] for spec in self.sort_columns]
+            column_names = [spec.column_name for spec in self.sort_columns]
             descending_flags = [
-                (not spec["ascending"]) for spec in self.sort_columns
+                (not spec.ascending) for spec in self.sort_columns
             ]
 
             # polarsでソート実行
