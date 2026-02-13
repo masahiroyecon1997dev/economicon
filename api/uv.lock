@@ -84,13 +84,13 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "coverage", specifier = ">=7.13.1" },
-    { name = "fastapi", specifier = ">=0.128.0" },
+    { name = "coverage", specifier = ">=7.13.4" },
+    { name = "fastapi", specifier = ">=0.128.7" },
     { name = "fastapi-babel", specifier = ">=1.0.0" },
-    { name = "fastexcel", specifier = ">=0.18.0" },
+    { name = "fastexcel", specifier = ">=0.19.0" },
     { name = "linearmodels", specifier = ">=7.0" },
-    { name = "numpy", specifier = ">=2.4.1" },
-    { name = "polars", specifier = ">=1.36.1" },
+    { name = "numpy", specifier = ">=2.4.2" },
+    { name = "polars", specifier = ">=1.38.1" },
     { name = "py4etrics", specifier = ">=0.1.9" },
     { name = "pyarrow", specifier = ">=8.0.0" },
     { name = "python-magic", marker = "sys_platform != 'win32'" },
@@ -107,11 +107,11 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "pip-licenses", specifier = ">=5.5.0" },
+    { name = "pip-licenses", specifier = ">=5.5.1" },
     { name = "pipdeptree", specifier = ">=2.30.0" },
-    { name = "pyinstaller", specifier = ">=6.17.0" },
+    { name = "pyinstaller", specifier = ">=6.18.0" },
     { name = "pytest", specifier = ">=9.0.2" },
-    { name = "ruff", specifier = ">=0.14.14" },
+    { name = "ruff", specifier = ">=0.15.0" },
     { name = "wooldridge", specifier = ">=0.5.0" },
 ]
 
@@ -375,7 +375,7 @@ name = "macholib"
 version = "1.16.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "altgraph" },
+    { name = "altgraph", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/10/2f/97589876ea967487978071c9042518d28b958d87b17dceb7cdc1d881f963/macholib-1.16.4.tar.gz", hash = "sha256:f408c93ab2e995cd2c46e34fe328b130404be143469e41bc366c807448979362", size = 59427, upload-time = "2025-11-22T08:28:38.373Z" }
 wheels = [

@@ -7,8 +7,8 @@ from ..utils import create_log_api_request, create_success_response
 router = APIRouter(prefix="/setting", tags=["setting"])
 
 
-@router.get("/get-settings")
-async def get_settings_endpoint(request: Request):
+@router.get("/settings")
+async def get_settings(request: Request):
     """アプリケーション設定を取得するエンドポイント
 
     Parameters
