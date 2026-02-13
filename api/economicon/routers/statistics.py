@@ -11,7 +11,7 @@ router = APIRouter(prefix="/statistics", tags=["statistics"])
 
 
 @router.post("/confidence-interval")
-async def confidence_interval_endpoint(
+async def confidence_interval(
     request: Request, body: ConfidenceIntervalRequest
 ):
     """信頼区間計算を行うエンドポイント
@@ -39,7 +39,7 @@ async def confidence_interval_endpoint(
 
 
 @router.post("/descriptive")
-async def descriptive_statistics_endpoint(
+async def descriptive_statistics(
     request: Request, body: DescriptiveStatisticsRequest
 ):
     """記述統計を計算するエンドポイント
