@@ -11,24 +11,19 @@ from ..exceptions import ApiError
 from ..models.regressions import RegressionRequest
 from ..services.operation import run_operation
 from ..services.regressions.regression import Regression
-from ..services.regressions.result import (
-    ClearAllAnalysisResults,
-    DeleteAnalysisResult,
-    GetAllAnalysisResults,
-    GetAnalysisResult,
-)
-from ..utils import (
-    create_error_response,
-    create_log_api_request,
-    create_success_response,
-)
+from ..services.regressions.result import (ClearAllAnalysisResults,
+                                           DeleteAnalysisResult,
+                                           GetAllAnalysisResults,
+                                           GetAnalysisResult)
+from ..utils import (create_error_response, create_log_api_request,
+                     create_success_response)
 from ..utils.validators.common import ValidationError
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
 
 @router.post("/regression")
-async def regression_endpoint(request: Request, body: RegressionRequest):
+async def regression(request: Request, body: RegressionRequest):
     """
     統合回帰分析エンドポイント
 
@@ -59,7 +54,7 @@ async def regression_endpoint(request: Request, body: RegressionRequest):
 
 
 @router.get("/results")
-async def get_all_analysis_results_endpoint(request: Request):
+async def get_all_analysis_results(request: Request):
     """
     すべての分析結果のサマリーを取得
 
@@ -93,7 +88,7 @@ async def get_all_analysis_results_endpoint(request: Request):
 
 
 @router.get("/results/{result_id}")
-async def get_analysis_result_endpoint(request: Request, result_id: str):
+async def get_analysis_result(request: Request, result_id: str):
     """
     指定されたIDの分析結果を取得
 
@@ -133,7 +128,7 @@ async def get_analysis_result_endpoint(request: Request, result_id: str):
 
 
 @router.delete("/results/{result_id}")
-async def delete_analysis_result_endpoint(request: Request, result_id: str):
+async def delete_analysis_result(request: Request, result_id: str):
     """
     指定されたIDの分析結果を削除
 
@@ -173,7 +168,7 @@ async def delete_analysis_result_endpoint(request: Request, result_id: str):
 
 
 @router.delete("/results")
-async def clear_all_analysis_results_endpoint(request: Request):
+async def clear_all_analysis_results(request: Request):
     """
     すべての分析結果を削除
 

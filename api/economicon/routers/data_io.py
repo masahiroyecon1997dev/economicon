@@ -1,14 +1,9 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..models import (
-    ExportCsvByPathRequest,
-    ExportExcelByPathRequest,
-    ExportParquetByPathRequest,
-    ImportCsvByPathRequest,
-    ImportExcelByPathRequest,
-    ImportParquetByPathRequest,
-)
+from ..models import (ExportCsvByPathRequest, ExportExcelByPathRequest,
+                      ExportParquetByPathRequest, ImportCsvByPathRequest,
+                      ImportExcelByPathRequest, ImportParquetByPathRequest)
 from ..services.data_io.export_csv_by_path import ExportCsvByPath
 from ..services.data_io.export_excel_by_path import ExportExcelByPath
 from ..services.data_io.export_parquet_by_path import ExportParquetByPath
@@ -22,7 +17,7 @@ router = APIRouter(prefix="/data", tags=["data"])
 
 
 @router.post("/import-csv-by-path")
-async def import_csv_by_path_endpoint(
+async def import_csv_by_path(
     request: Request, body: ImportCsvByPathRequest
 ):
     """パス指定でCSVファイルをインポートするエンドポイント
@@ -48,7 +43,7 @@ async def import_csv_by_path_endpoint(
 
 
 @router.post("/import-excel-by-path")
-async def import_excel_by_path_endpoint(
+async def import_excel_by_path(
     request: Request, body: ImportExcelByPathRequest
 ):
     """EXCELファイルをパス指定でインポートしてテーブルを作成する
@@ -77,7 +72,7 @@ async def import_excel_by_path_endpoint(
 
 
 @router.post("/import-parquet-by-path")
-async def import_parquet_by_path_endpoint(
+async def import_parquet_by_path(
     request: Request, body: ImportParquetByPathRequest
 ):
     """PARQUETファイルをパス指定でインポートしてテーブルを作成する
@@ -105,7 +100,7 @@ async def import_parquet_by_path_endpoint(
 
 
 @router.post("/export-csv-by-path")
-async def export_csv_by_path_endpoint(
+async def export_csv_by_path(
     request: Request, body: ExportCsvByPathRequest
 ):
     """テーブルをCSVファイルにパス指定でエクスポートするエンドポイント
@@ -131,7 +126,7 @@ async def export_csv_by_path_endpoint(
 
 
 @router.post("/export-excel-by-path")
-async def export_excel_by_path_endpoint(
+async def export_excel_by_path(
     request: Request, body: ExportExcelByPathRequest
 ):
     """テーブルをExcelファイルにパス指定でエクスポートするエンドポイント
@@ -157,7 +152,7 @@ async def export_excel_by_path_endpoint(
 
 
 @router.post("/export-parquet-by-path")
-async def export_parquet_by_path_endpoint(
+async def export_parquet_by_path(
     request: Request, body: ExportParquetByPathRequest
 ):
     """テーブルをParquetファイルにパス指定でエクスポートするエンドポイント

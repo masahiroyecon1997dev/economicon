@@ -1,25 +1,17 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..models import (
-    CreateJoinTableRequest,
-    CreateSimulationDataTableRequest,
-    CreateTableRequest,
-    CreateUnionTableRequest,
-    DeleteTableRequest,
-    DuplicateTableRequest,
-    FetchDataToArrowRequest,
-    FetchDataToJsonRequest,
-    FilterSingleConditionRequest,
-    InputCellDataRequest,
-    RenameTableRequest,
-)
+from ..models import (CreateJoinTableRequest, CreateSimulationDataTableRequest,
+                      CreateTableRequest, CreateUnionTableRequest,
+                      DeleteTableRequest, DuplicateTableRequest,
+                      FetchDataToArrowRequest, FetchDataToJsonRequest,
+                      FilterSingleConditionRequest, InputCellDataRequest,
+                      RenameTableRequest)
 from ..services.operation import run_operation
 from ..services.tables.clear_tables import ClearTables
 from ..services.tables.create_join_table import CreateJoinTable
-from ..services.tables.create_simulation_data_table import (
-    CreateSimulationDataTable,
-)
+from ..services.tables.create_simulation_data_table import \
+    CreateSimulationDataTable
 from ..services.tables.create_table import CreateTable
 from ..services.tables.create_union_table import CreateUnionTable
 from ..services.tables.delete_table import DeleteTable
@@ -30,17 +22,14 @@ from ..services.tables.filter_single_condition import FilterSingleCondition
 from ..services.tables.get_table_list import GetTableList
 from ..services.tables.input_cell_data import InputCellData
 from ..services.tables.rename_table import RenameTable
-from ..utils import (
-    create_log_api_request,
-    create_success_binary_response,
-    create_success_response,
-)
+from ..utils import (create_log_api_request, create_success_binary_response,
+                     create_success_response)
 
 router = APIRouter(prefix="/table", tags=["table"])
 
 
 @router.post("/create")
-async def create_table_endpoint(request: Request, body: CreateTableRequest):
+async def create_table(request: Request, body: CreateTableRequest):
     """テーブルを作成するエンドポイント
 
     Parameters
@@ -66,7 +55,7 @@ async def create_table_endpoint(request: Request, body: CreateTableRequest):
 
 
 @router.post("/create-join")
-async def create_join_table_endpoint(
+async def create_join_table(
     request: Request, body: CreateJoinTableRequest
 ):
     """結合テーブルを作成するエンドポイント
@@ -94,7 +83,7 @@ async def create_join_table_endpoint(
 
 
 @router.post("/create-union")
-async def create_union_table_endpoint(
+async def create_union_table(
     request: Request, body: CreateUnionTableRequest
 ):
     """ユニオンテーブルを作成するエンドポイント
@@ -122,7 +111,7 @@ async def create_union_table_endpoint(
 
 
 @router.post("/create-simulation-data")
-async def create_simulation_data_table_endpoint(
+async def create_simulation_data_table(
     request: Request, body: CreateSimulationDataTableRequest
 ):
     """シミュレーションデータテーブルを作成するエンドポイント
@@ -150,7 +139,7 @@ async def create_simulation_data_table_endpoint(
 
 
 @router.post("/delete")
-async def delete_table_endpoint(request: Request, body: DeleteTableRequest):
+async def delete_table(request: Request, body: DeleteTableRequest):
     """テーブルを削除するエンドポイント
 
     Parameters
@@ -174,7 +163,7 @@ async def delete_table_endpoint(request: Request, body: DeleteTableRequest):
 
 
 @router.post("/duplicate")
-async def duplicate_table_endpoint(
+async def duplicate_table(
     request: Request, body: DuplicateTableRequest
 ):
     """テーブルを複製するエンドポイント
@@ -200,7 +189,7 @@ async def duplicate_table_endpoint(
 
 
 @router.post("/rename")
-async def rename_table_endpoint(request: Request, body: RenameTableRequest):
+async def rename_table(request: Request, body: RenameTableRequest):
     """
     テーブル名変更エンドポイント
 
@@ -227,7 +216,7 @@ async def rename_table_endpoint(request: Request, body: RenameTableRequest):
 
 
 @router.get("/get-list")
-async def get_table_list_endpoint(request: Request):
+async def get_table_list(request: Request):
     """テーブルリストを取得するエンドポイント
 
     Parameters
@@ -249,7 +238,7 @@ async def get_table_list_endpoint(request: Request):
 
 
 @router.delete("/clear-all")
-async def clear_tables_endpoint(request: Request):
+async def clear_tables(request: Request):
     """全テーブルをクリアするエンドポイント
 
     Parameters
@@ -273,7 +262,7 @@ async def clear_tables_endpoint(request: Request):
 
 
 @router.post("/fetch-data-to-json")
-async def fetch_data_to_json_endpoint(
+async def fetch_data_to_json(
     request: Request, body: FetchDataToJsonRequest
 ):
     """データをJSON形式で取得するエンドポイント
@@ -299,7 +288,7 @@ async def fetch_data_to_json_endpoint(
 
 
 @router.post("/fetch-data-to-arrow")
-async def fetch_data_to_arrow_endpoint(
+async def fetch_data_to_arrow(
     request: Request, body: FetchDataToArrowRequest
 ):
     """データをApache Arrow IPC形式で取得するエンドポイント
@@ -333,7 +322,7 @@ async def fetch_data_to_arrow_endpoint(
 
 
 @router.post("/input-cell-data")
-async def input_cell_data_endpoint(
+async def input_cell_data(
     request: Request, body: InputCellDataRequest
 ):
     """セルデータ入力エンドポイント
@@ -363,7 +352,7 @@ async def input_cell_data_endpoint(
 
 
 @router.post("/filter-single-condition")
-async def filter_single_condition_endpoint(
+async def filter_single_condition(
     request: Request, body: FilterSingleConditionRequest
 ):
     """単一条件フィルタリングを実行するエンドポイント

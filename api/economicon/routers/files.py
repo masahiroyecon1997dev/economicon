@@ -9,7 +9,7 @@ router = APIRouter(prefix="/file", tags=["file"])
 
 
 @router.post("/get-list")
-async def get_files_endpoint(request: Request, body: GetFilesRequest):
+async def get_files(request: Request, body: GetFilesRequest):
     """ファイル一覧を取得するエンドポイント
 
     Parameters
