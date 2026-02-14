@@ -1,7 +1,11 @@
+mod files;
+
 use tauri::State;
 use reqwest::Client;
 use serde::{Serialize};
 use std::time::Duration;
+
+use files::{get_files_internal, GetFilesResponse};
 
 // HTTPクライアントを保持するState
 struct ClientState {
@@ -124,6 +128,12 @@ async fn upload_file(
     Ok(json_response)
 }
 
+// ファイル一覧取得用コマンド
+#[tauri::command]
+async fn get_files(directory_path: String) -> Result<GetFilesResponse, String> {
+    get_files_internal(&directory_path).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // クライアントの初期化（タイムアウト設定など）
@@ -138,7 +148,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             proxy_request,
             fetch_binary,
-            upload_file
+            upload_file,
+            get_files
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -25,8 +25,8 @@ class AddColumnRequest(BaseRequest):
 class AddColumnResult(BaseModel):
     """カラム追加レスポンス"""
 
-    table_name: str
-    column_name: str
+    table_name: TableName
+    column_name: ColumnName
 
 
 class DeleteColumnRequest(BaseRequest):
@@ -34,6 +34,13 @@ class DeleteColumnRequest(BaseRequest):
 
     table_name: TableName
     column_name: Annotated[ColumnName, Field(description="削除するカラム名")]
+
+
+class DeleteColumnResult(BaseModel):
+    """カラム削除レスポンス"""
+
+    table_name: TableName
+    column_name: ColumnName
 
 
 class RenameColumnRequest(BaseRequest):
