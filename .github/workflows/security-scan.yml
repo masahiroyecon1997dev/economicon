@@ -52,3 +52,25 @@ jobs:
           cd app
           # pnpm 10系の audit コマンドを実行
           pnpm audit --audit-level high
+
+      # --- Rust (Cargo) の設定 ---
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo-audit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cargo-audit
+          key: ${{ runner.os }}-cargo-audit
+
+      - name: Install cargo-audit
+        # キャッシュがない場合のみインストール
+        run: |
+          if ! command -v cargo-audit &> /dev/null; then
+            cargo install cargo-audit
+          fi
+
+      - name: Run cargo-audit
+        run: |
+          cd src-tauri
+          cargo audit
