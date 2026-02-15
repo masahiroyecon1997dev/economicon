@@ -55,7 +55,7 @@ async def add_column(request: Request, body: AddColumnRequestBody):
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    api = AddColumn(**body.model_dump())
+    api = AddColumn(body)
     result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -79,7 +79,7 @@ async def add_dummy_column(request: Request, body: AddDummyColumnRequestBody):
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    api = AddDummyColumn(**body.model_dump())
+    api = AddDummyColumn(body)
     result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -101,7 +101,7 @@ async def delete_column(request: Request, body: DeleteColumnRequestBody):
         処理結果
     """
     create_log_api_request(request)
-    api = DeleteColumn(**body.model_dump())
+    api = DeleteColumn(body)
     result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -127,7 +127,7 @@ async def rename_column(request: Request, body: RenameColumnRequestBody):
         処理結果
     """
     create_log_api_request(request)
-    api = RenameColumn(**body.model_dump())
+    api = RenameColumn(body)
     result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -154,7 +154,7 @@ async def add_lag_lead_column(
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    api = AddLagLeadColumn(**body.model_dump())
+    api = AddLagLeadColumn(body)
     result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -169,7 +169,7 @@ async def add_simulation_column(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : AddSimulationColumnRequest
+    body : AddSimulationColumnRequestBody
         リクエストボディ
 
     Returns
@@ -180,11 +180,7 @@ async def add_simulation_column(
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    api = AddSimulationColumn(
-        table_name=body.table_name,
-        new_column_name=body.new_column_name,
-        distribution=body.distribution,
-    )
+    api = AddSimulationColumn(body)
     result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -209,7 +205,7 @@ async def calculate_column(request: Request, body: CalculateColumnRequestBody):
     create_log_api_request(request)
 
     # ビジネスロジックの実行
-    api = CalculateColumn(**body.model_dump())
+    api = CalculateColumn(body)
     result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
@@ -234,7 +230,7 @@ async def duplicate_column(request: Request, body: DuplicateColumnRequestBody):
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    api = DuplicateColumn(**body.model_dump())
+    api = DuplicateColumn(body)
     result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -259,7 +255,7 @@ async def transform_column(request: Request, body: TransformColumnRequestBody):
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    api = TransformColumn(**body.model_dump())
+    api = TransformColumn(body)
     result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 
@@ -272,7 +268,7 @@ async def get_column_list(request: Request, body: GetColumnListRequestBody):
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : GetColumnListRequest
+    body : GetColumnListRequestBody
         リクエストボディ
 
     Returns
@@ -282,7 +278,7 @@ async def get_column_list(request: Request, body: GetColumnListRequestBody):
     """
     create_log_api_request(request)
 
-    api = GetColumnList(**body.model_dump())
+    api = GetColumnList(body)
     result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
@@ -309,7 +305,7 @@ async def sort_columns(request: Request, body: SortColumnsRequestBody):
     """
     create_log_api_request(request)
 
-    api = SortColumns(body.table_name, body.sort_columns)
+    api = SortColumns(body)
     result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)

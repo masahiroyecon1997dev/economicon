@@ -1,27 +1,23 @@
 """統計解析関連のスキーマ定義"""
 
-from typing import List
+from typing import Annotated, List
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from .common import BaseRequest
+from .types import ColumnName, TableName
 
 
-class ConfidenceIntervalRequestBody(BaseModel):
+class ConfidenceIntervalRequestBody(BaseRequest):
     """信頼区間計算リクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="テーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    column_name: str = Field(
-        ...,
-        alias="columnName",
-        description="対象カラム名",
-        min_length=1,
-        max_length=255,
-    )
+    table_name: TableName
+    column_name: Annotated[
+        ColumnName,
+        Field(
+            description="対象カラム名",
+        ),
+    ]
     confidence_level: float = Field(
         ...,
         alias="confidenceLevel",
@@ -37,27 +33,14 @@ class ConfidenceIntervalRequestBody(BaseModel):
         max_length=50,
     )
 
-    model_config = ConfigDict(populate_by_name=True)
 
-
-class DescriptiveStatisticsRequestBody(BaseModel):
+class DescriptiveStatisticsRequestBody(BaseRequest):
     """記述統計リクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="テーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    column_name_list: List[str] = Field(
-        ...,
-        alias="columnNameList",
-        description="対象カラム名のリスト",
-        min_length=1,
-    )
+    table_name: TableName
+    column_name_list: List[
+        Annotated[ColumnName, Field(description="対象カラム名のリスト")]
+    ]
     statistics: List[str] = Field(
         ..., description="統計量のリスト", min_length=1
     )
-
-    model_config = ConfigDict(populate_by_name=True)

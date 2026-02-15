@@ -19,7 +19,6 @@ from .common import (
     BernoulliParams,
     BetaParams,
     BinomialParams,
-    DistributionParams,
     ErrorResponse,
     ExponentialParams,
     GammaParams,
@@ -40,6 +39,7 @@ from .data_io import (
     ImportExcelByPathRequestBody,
     ImportParquetByPathRequestBody,
 )
+from .enums import DistributionType, TransformMethodType
 from .regressions import RegressionRequestBody
 from .settings import GetSettingsRequestBody
 from .statistics import (
@@ -61,14 +61,13 @@ from .tables import (
     InputCellDataRequestBody,
     RenameTableRequestBody,
 )
+from .types import DistributionConfig, TransformMethodConfig
 
 __all__ = [
     # Common
     "BaseResponse",
     "SuccessResponse",
     "ErrorResponse",
-    # Distribution Parameters
-    "DistributionParams",
     "UniformParams",
     "ExponentialParams",
     "NormalParams",
@@ -81,6 +80,12 @@ __all__ = [
     "PoissonParams",
     "GeometricParams",
     "HypergeometricParams",
+    # Enums
+    "DistributionType",
+    "TransformMethodType",
+    # Types
+    "DistributionConfig",
+    "TransformMethodConfig",
     # Column operations
     "AddColumnRequestBody",
     "AddColumnResult",

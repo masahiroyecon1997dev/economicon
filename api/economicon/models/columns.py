@@ -4,9 +4,16 @@ from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, Field
 
-from .common import BaseRequest, DistributionParams
+from .common import BaseRequest
 from .schemas import SortInstruction
-from .types import ColumnName, NewColumnName, TableName
+from .types import (
+    ColumnName,
+    DistributionConfig,
+    NewColumnName,
+    TableName,
+    TransformMethodConfig,
+    FilePath,
+)
 
 
 class AddColumnRequestBody(BaseRequest):
@@ -20,16 +27,7 @@ class AddColumnRequestBody(BaseRequest):
             description="追加位置のカラム名",
         ),
     ]
-    csv_file_path: Optional[
-        Annotated[
-            str,
-            Field(
-                alias="csvFilePath",
-                description="CSVファイルのパス（指定時にCSVから列データを読み込む）",
-                max_length=1024,
-            ),
-        ]
-    ] = None
+    csv_file_path: Optional[FilePath] = None
     csv_has_header: Annotated[
         bool,
         Field(
@@ -143,10 +141,7 @@ class AddSimulationColumnRequestBody(BaseRequest):
 
     table_name: TableName
     new_column_name: NewColumnName
-    distribution: Annotated[
-        DistributionParams,
-        Field(discriminator="type", description="分布設定"),
-    ]
+    distribution: DistributionConfig
 
 
 class SortColumnsRequestBody(BaseRequest):
@@ -170,18 +165,7 @@ class TransformColumnRequestBody(BaseRequest):
         ),
     ]
     new_column_name: NewColumnName
-    transform_method: str = Field(
-        ..., alias="transformMethod", description="変換メソッド", min_length=1
-    )
-    log_base: Optional[float] = Field(
-        None, alias="logBase", description="対数の底（オプション）"
-    )
-    exponent: Optional[float] = Field(
-        None, alias="exponent", description="指数（オプション）"
-    )
-    root_index: Optional[float] = Field(
-        None, alias="rootIndex", description="累乗根の次数（オプション）"
-    )
+    transform_method: TransformMethodConfig
 
 
 class GetColumnListRequestBody(BaseRequest):

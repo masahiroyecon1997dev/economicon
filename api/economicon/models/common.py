@@ -1,17 +1,18 @@
 """共通のスキーマ定義"""
 
-from typing import Generic, Literal, TypeVar, Union
+from typing import Generic, Literal, TypeVar
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    field_validator,
     model_validator,
 )
 from pydantic.alias_generators import to_camel
 
 from ..i18n.translation import gettext as _
-from .types import DistributionType
+from .enums import DistributionType, TransformMethodType
 
 T = TypeVar("T")
 
@@ -174,17 +175,49 @@ class HypergeometricParams(BaseModel):
         return self
 
 
-DistributionParams = Union[
-    UniformParams,
-    ExponentialParams,
-    NormalParams,
-    GammaParams,
-    BetaParams,
-    WeibullParams,
-    LognormalParams,
-    BinomialParams,
-    BernoulliParams,
-    PoissonParams,
-    GeometricParams,
-    HypergeometricParams,
-]
+class LogParams(BaseModel):
+    """対数変換のパラメータ"""
+
+    method: Literal[TransformMethodType.LOG] = Field(description="変換方法")
+    log_base: float | None = Field(
+        None,
+        gt=0,
+        description="対数の底 (省略時は自然対数)",
+    )
+
+    @field_validator("log_base")
+    @classmethod
+    def validate_log_base(cls, v: float) -> float:
+        # log_base == 1 のケースを個別にチェック
+        if v == 1:
+            raise ValueError(_("Log base cannot be 1."))
+        return v
+
+
+class PowerParams(BaseModel):
+    """べき乗変換のパラメータ"""
+
+    method: Literal[TransformMethodType.POWER] = Field(description="変換方法")
+    exponent: float = Field(
+        default=2.0,
+        description="べき乗の指数 (省略時は2乗)",
+    )
+
+
+class RootParams(BaseModel):
+    """平方根変換のパラメータ"""
+
+    method: Literal[TransformMethodType.ROOT] = Field(description="変換方法")
+    root_index: float = Field(
+        default=2.0,
+        gt=0,
+        description="ルートの指数 (省略時は平方根)",
+    )
+
+    @field_validator("root_index")
+    @classmethod
+    def validate_root_index(cls, v: float) -> float:
+        # root_index == 0 のケースを個別にチェック
+        if v == 0:
+            raise ValueError(_("Root index cannot be 0."))
+        return v

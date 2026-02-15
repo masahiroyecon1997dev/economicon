@@ -2,6 +2,7 @@ import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import DuplicateColumnRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -19,13 +20,11 @@ class DuplicateColumn:
     新しい列は元の列と同じ値で初期化されます。
     """
 
-    def __init__(
-        self, table_name: str, source_column_name: str, new_column_name: str
-    ):
+    def __init__(self, body: DuplicateColumnRequestBody):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.source_column_name = source_column_name
-        self.new_column_name = new_column_name
+        self.table_name = body.table_name
+        self.source_column_name = body.source_column_name
+        self.new_column_name = body.new_column_name
         self.param_names = {
             "table_name": "tableName",
             "new_column_name": "newColumnName",

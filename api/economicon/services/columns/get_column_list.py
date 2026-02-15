@@ -1,5 +1,6 @@
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import GetColumnListRequestBody
 from ...utils.validators.common import (
     ValidationError,
 )
@@ -16,10 +17,10 @@ class GetColumnList:
     データベースの指定されたテーブルに存在するすべてのカラム名を取得します。
     """
 
-    def __init__(self, table_name: str, is_number_only: bool = False):
+    def __init__(self, body: GetColumnListRequestBody):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.is_number_only = is_number_only
+        self.table_name = body.table_name
+        self.is_number_only = body.is_number_only
         self.param_names = {
             "table_name": "tableName",
             "is_number_only": "isNumberOnly",

@@ -1,5 +1,6 @@
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import DeleteColumnRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -16,12 +17,12 @@ class DeleteColumn:
     削除後のテーブルは更新されたデータフレームに置き換えられます。
     """
 
-    def __init__(self, table_name: str, column_name: str):
+    def __init__(self, body: DeleteColumnRequestBody):
         self.tables_store = TablesStore()
         # テーブル名
-        self.table_name = table_name
+        self.table_name = body.table_name
         # 削除する列名
-        self.column_name = column_name
+        self.column_name = body.column_name
         # パラメータ名のマッピング
         self.param_names = {
             "table_name": "tableName",

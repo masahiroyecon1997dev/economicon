@@ -1,188 +1,110 @@
 """テーブル操作関連のスキーマ定義"""
 
-from typing import Any, Dict, List
+from typing import Annotated, Any, List
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from .common import BaseRequest
+from .types import (
+    ColumnName,
+    DistributionConfig,
+    NewColumnName,
+    NewTableName,
+    TableName,
+)
 
 
-class CreateTableRequestBody(BaseModel):
+class CreateTableRequestBody(BaseRequest):
     """テーブル作成リクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="テーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    table_number_of_rows: int = Field(
-        ..., alias="tableNumberOfRows", description="テーブルの行数", ge=1
-    )
-    column_names: List[str] = Field(
-        ..., alias="columnNames", description="カラム名のリスト", min_length=1
+    table_name: NewTableName
+    table_number_of_rows: int = Field(description="テーブルの行数", ge=1)
+    column_names: List[NewColumnName] = Field(
+        description="カラム名のリスト", min_length=1
     )
 
-    model_config = ConfigDict(populate_by_name=True)
 
-
-class RenameTableRequestBody(BaseModel):
+class RenameTableRequestBody(BaseRequest):
     """テーブル名変更リクエスト"""
 
-    old_table_name: str = Field(
-        ...,
-        alias="oldTableName",
-        description="元のテーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    new_table_name: str = Field(
-        ...,
-        alias="newTableName",
-        description="新しいテーブル名",
-        min_length=1,
-        max_length=255,
-    )
-
-    model_config = ConfigDict(populate_by_name=True)
+    old_table_name: Annotated[TableName, Field(description="元のテーブル名")]
+    new_table_name: Annotated[
+        NewTableName, Field(description="新しいテーブル名")
+    ]
 
 
-class CreateSimulationDataTableRequestBody(BaseModel):
+class CreateSimulationDataTableRequestBody(BaseRequest):
     """シミュレーションデータテーブル作成リクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="テーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    table_number_of_rows: int = Field(
-        ..., alias="tableNumberOfRows", description="テーブルの行数", ge=1
-    )
-    column_settings: List[Dict[str, Any]] = Field(
-        ...,
-        alias="columnSettings",
+    table_name: NewTableName
+    table_number_of_rows: int = Field(description="テーブルの行数", ge=1)
+    column_settings: List[DistributionConfig] = Field(
         description="カラム設定のリスト",
         min_length=1,
     )
 
-    model_config = ConfigDict(populate_by_name=True)
 
-
-class CreateJoinTableRequestBody(BaseModel):
+class CreateJoinTableRequestBody(BaseRequest):
     """結合テーブル作成リクエスト"""
 
-    join_table_name: str = Field(
-        ...,
-        alias="joinTableName",
-        description="結合後のテーブル名",
-        min_length=1,
-        max_length=255,
+    join_table_name: Annotated[
+        NewTableName, Field(description="結合後のテーブル名")
+    ]
+    left_table_name: Annotated[
+        TableName, Field(description="左側のテーブル名")
+    ]
+    right_table_name: Annotated[
+        TableName, Field(description="右側のテーブル名")
+    ]
+    left_key_column_names: List[ColumnName] = Field(
+        description="左側の結合キーカラム名のリスト"
     )
-    left_table_name: str = Field(
-        ...,
-        alias="leftTableName",
-        description="左側のテーブル名",
-        min_length=1,
-        max_length=255,
+    right_key_column_names: List[ColumnName] = Field(
+        description="右側の結合キーカラム名のリスト"
     )
-    right_table_name: str = Field(
-        ...,
-        alias="rightTableName",
-        description="右側のテーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    left_key_column_names: List[str] = Field(
-        ...,
-        alias="leftKeyColumnNames",
-        description="左側の結合キーカラム名のリスト",
-        min_length=1,
-    )
-    right_key_column_names: List[str] = Field(
-        ...,
-        alias="rightKeyColumnNames",
-        description="右側の結合キーカラム名のリスト",
-        min_length=1,
-    )
-    join_type: str = Field(
-        ...,
-        alias="joinType",
-        description="結合タイプ (inner, left, right, outer)",
-        min_length=1,
-        max_length=50,
-    )
-
-    model_config = ConfigDict(populate_by_name=True)
+    join_type: Annotated[
+        str, Field(description="結合タイプ (inner, left, right, outer)")
+    ]
 
 
-class CreateUnionTableRequestBody(BaseModel):
+class CreateUnionTableRequestBody(BaseRequest):
     """ユニオンテーブル作成リクエスト"""
 
-    union_table_name: str = Field(
-        ...,
-        alias="unionTableName",
-        description="ユニオン後のテーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    table_names: List[str] = Field(
-        ...,
-        alias="tableNames",
+    union_table_name: Annotated[
+        NewTableName, Field(description="ユニオン後のテーブル名")
+    ]
+    table_names: List[TableName] = Field(
         description="結合するテーブル名のリスト",
+        min_length=2,
+    )
+    column_names: List[ColumnName] = Field(
+        description="対象カラム名のリスト",
         min_length=1,
     )
-    column_names: List[str] = Field(
-        default_factory=list,
-        alias="columnNames",
-        description="対象カラム名のリスト",
-    )
-
-    model_config = ConfigDict(populate_by_name=True)
 
 
-class ClearTablesRequestBody(BaseModel):
+class ClearTablesRequestBody(BaseRequest):
     """テーブルクリアリクエスト（パラメータなし）"""
 
     pass
 
 
-class DuplicateTableRequestBody(BaseModel):
+class DuplicateTableRequestBody(BaseRequest):
     """テーブル複製リクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="元のテーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    new_table_name: str = Field(
-        ...,
-        alias="newTableName",
-        description="新しいテーブル名",
-        min_length=1,
-        max_length=255,
-    )
-
-    model_config = ConfigDict(populate_by_name=True)
+    table_name: Annotated[TableName, Field(description="元のテーブル名")]
+    new_table_name: Annotated[
+        NewTableName, Field(description="新しいテーブル名")
+    ]
 
 
-class DeleteTableRequestBody(BaseModel):
+class DeleteTableRequestBody(BaseRequest):
     """テーブル削除リクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="テーブル名",
-        min_length=1,
-        max_length=255,
-    )
-
-    model_config = ConfigDict(populate_by_name=True)
+    table_name: Annotated[TableName, Field(description="削除するテーブル名")]
 
 
-class FetchDataToJsonRequestBody(BaseModel):
+class FetchDataToJsonRequestBody(BaseRequest):
     """データJSON取得リクエスト"""
 
     table_name: str = Field(
@@ -199,10 +121,8 @@ class FetchDataToJsonRequestBody(BaseModel):
         ..., alias="fetchRows", description="取得行数", ge=1
     )
 
-    model_config = ConfigDict(populate_by_name=True)
 
-
-class FetchDataToArrowRequestBody(BaseModel):
+class FetchDataToArrowRequestBody(BaseRequest):
     """データArrow取得リクエスト"""
 
     table_name: str = Field(
@@ -223,16 +143,14 @@ class FetchDataToArrowRequestBody(BaseModel):
         le=10000,
     )
 
-    model_config = ConfigDict(populate_by_name=True)
 
-
-class GetTableListRequestBody(BaseModel):
+class GetTableListRequestBody(BaseRequest):
     """テーブルリスト取得リクエスト（パラメータなし）"""
 
     pass
 
 
-class InputCellDataRequestBody(BaseModel):
+class InputCellDataRequestBody(BaseRequest):
     """セルデータ入力リクエスト"""
 
     table_name: str = Field(
@@ -254,33 +172,18 @@ class InputCellDataRequestBody(BaseModel):
     )
     new_value: Any = Field(..., alias="newValue", description="新しい入力値")
 
-    model_config = ConfigDict(populate_by_name=True)
 
-
-class FilterSingleConditionRequestBody(BaseModel):
+class FilterSingleConditionRequestBody(BaseRequest):
     """単一条件フィルタリクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="テーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    new_table_name: str = Field(
-        ...,
-        alias="newTableName",
-        description="新しいテーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    column_name: str = Field(
-        ...,
-        alias="columnName",
-        description="対象カラム名",
-        min_length=1,
-        max_length=255,
-    )
+    table_name: TableName
+    new_table_name: NewTableName
+    column_name: Annotated[
+        ColumnName,
+        Field(
+            description="対象カラム名",
+        ),
+    ]
     condition: str = Field(
         ..., description="条件", min_length=1, max_length=50
     )
@@ -292,5 +195,3 @@ class FilterSingleConditionRequestBody(BaseModel):
         max_length=10,
     )
     compare_value: Any = Field(..., alias="compareValue", description="比較値")
-
-    model_config = ConfigDict(populate_by_name=True)
