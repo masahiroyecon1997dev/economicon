@@ -23,7 +23,6 @@ from .data_io import (
     ImportExcelByPathRequest,
     ImportParquetByPathRequest,
 )
-from .files import GetFilesRequest
 from .regressions import RegressionRequest
 from .settings import GetSettingsRequest
 from .statistics import ConfidenceIntervalRequest, DescriptiveStatisticsRequest
@@ -78,8 +77,6 @@ __all__ = [
     "DescriptiveStatisticsRequest",
     # Settings
     "GetSettingsRequest",
-    # Files
-    "GetFilesRequest",
     # Data I/O
     "ImportCsvByPathRequest",
     "ImportExcelByPathRequest",

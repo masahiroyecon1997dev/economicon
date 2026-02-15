@@ -1,5 +1,3 @@
-from typing import Dict
-
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ..data.settings_manager import SettingsManager
@@ -33,23 +31,3 @@ class GetSettings:
                 "during getting settings processing"
             )
             raise ApiError(message) from e
-
-
-def get_setting() -> Dict:
-    """
-    アプリケーション設定を取得する関数
-
-    Returns:
-        Dict: 設定情報を含む辞書
-            - osName: クライアントOSの名前
-            - defaultFolderPath: ファイル読み込みをするフォルダパスの初期値
-            - displayRows: テーブルに表示する行数
-            - appLanguage: アプリケーションの表示言語
-            - encoding: ファイル読み込み時のデフォルトエンコーディング
-            - pathSeparator: パス区切り文字
-    """
-    api = GetSettings()
-    validation_error = api.validate()
-    if validation_error:
-        raise validation_error
-    return api.execute()
