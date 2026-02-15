@@ -1,21 +1,36 @@
 from typing import Any, Dict, List
 
 import polars as pl
+from pydantic import ValidationError as PydanticValidationError
 
 from ...i18n.translation import gettext as _
+from ...models.common import (
+    BernoulliParams,
+    BetaParams,
+    BinomialParams,
+    ExponentialParams,
+    GammaParams,
+    GeometricParams,
+    HypergeometricParams,
+    LognormalParams,
+    NormalParams,
+    PoissonParams,
+    UniformParams,
+    WeibullParams,
+)
+from ...models.types import DistributionType
 from .common import (
     ValidationError,
     validate_candidates,
     validate_column_is_numeric,
-    validate_integer,
     validate_item_exists_in_list,
     validate_item_in_dict,
     validate_list_length,
-    validate_number,
     validate_required,
 )
-from .config.base import SUPPORTED_DISTRIBUTIONS
 from .tables_store import validate_existed_column_name
+
+SUPPORTED_DISTRIBUTIONS = [dist.value for dist in DistributionType]
 
 
 def validate_distribution_type(
@@ -30,198 +45,134 @@ def validate_distribution_type(
 
 
 def validate_distribution_params(distribution_type: str, params: dict) -> None:
-    """分布ごとのパラメータを検証"""
+    """分布ごとのパラメータを検証（Pydanticモデルを使用）"""
+    validate_distribution_type(distribution_type, "distributionType")
 
-    match distribution_type:
-        case "uniform":
-            if "low" not in params or "high" not in params:
+    if not isinstance(params, dict):
+        raise ValidationError(_("distributionParams must be an object"))
+
+    model_by_distribution = {
+        "uniform": UniformParams,
+        "exponential": ExponentialParams,
+        "normal": NormalParams,
+        "gamma": GammaParams,
+        "beta": BetaParams,
+        "weibull": WeibullParams,
+        "lognormal": LognormalParams,
+        "binomial": BinomialParams,
+        "bernoulli": BernoulliParams,
+        "poisson": PoissonParams,
+        "geometric": GeometricParams,
+        "hypergeometric": HypergeometricParams,
+    }
+
+    model_class = model_by_distribution[distribution_type]
+    input_params = {"type": distribution_type, **params}
+
+    try:
+        # Pydanticモデルの基本バリデーション
+        model = model_class.model_validate(input_params)
+
+        # 個別の分布パラメータチェック
+        if distribution_type == "uniform":
+            if model.low >= model.high:
                 raise ValidationError(
                     _(
-                        "Uniform distribution requires "
-                        "'low' and 'high' parameters"
+                        "For uniform distribution, 'low' must be less than 'high'"
                     )
                 )
-            validate_number(params["low"], "low")
-            validate_number(params["high"], "high")
-            if params["low"] >= params["high"]:
-                raise ValidationError(
-                    _(
-                        "For uniform distribution, "
-                        "'low' must be less than 'high'"
-                    )
-                )
-        case "exponential":
-            if "scale" not in params:
-                raise ValidationError(
-                    _("Exponential distribution requires 'scale' parameter")
-                )
-            validate_number(params["scale"], "scale")
-            if params["scale"] <= 0:
+        elif distribution_type == "exponential":
+            if model.scale <= 0:
                 raise ValidationError(
                     _("For exponential distribution, 'scale' must be positive")
                 )
-        case "normal":
-            if "loc" not in params or "scale" not in params:
-                raise ValidationError(
-                    _(
-                        "Normal distribution requires "
-                        "'loc' and 'scale' parameters"
-                    )
-                )
-            validate_number(params["loc"], "loc")
-            validate_number(params["scale"], "scale")
-            if params["scale"] <= 0:
+        elif distribution_type == "normal":
+            if model.scale <= 0:
                 raise ValidationError(
                     _("For normal distribution, 'scale' must be positive")
                 )
-        case "gamma":
-            if "shape" not in params or "scale" not in params:
+        elif distribution_type == "gamma":
+            if model.shape <= 0 or model.scale <= 0:
                 raise ValidationError(
                     _(
-                        "Gamma distribution requires "
-                        "'shape' and 'scale' parameters"
+                        "For gamma distribution, 'shape' and 'scale' must be positive"
                     )
                 )
-            validate_number(params["shape"], "shape")
-            validate_number(params["scale"], "scale")
-            if params["shape"] <= 0 or params["scale"] <= 0:
-                raise ValidationError(
-                    _(
-                        "For gamma distribution, "
-                        "'shape' and 'scale' must be "
-                        "positive"
-                    )
-                )
-        case "beta":
-            if "a" not in params or "b" not in params:
-                raise ValidationError(
-                    _("Beta distribution requires 'a' and 'b' parameters")
-                )
-            validate_number(params["a"], "a")
-            validate_number(params["b"], "b")
-            if params["a"] <= 0 or params["b"] <= 0:
+        elif distribution_type == "beta":
+            if model.a <= 0 or model.b <= 0:
                 raise ValidationError(
                     _("For beta distribution, 'a' and 'b' must be positive")
                 )
-        case "weibull":
-            if "a" not in params or "scale" not in params:
-                raise ValidationError(
-                    _(
-                        "Weibull distribution requires 'a' "
-                        "and 'scale' parameters"
-                    )
-                )
-            validate_number(params["a"], "a")
-            if params["a"] <= 0:
+        elif distribution_type == "weibull":
+            if model.a <= 0:
                 raise ValidationError(
                     _("For weibull distribution, 'a' must be positive")
                 )
-            validate_number(params["scale"], "scale")
-            if params["scale"] > 0:
+            if model.scale <= 0:
                 raise ValidationError(
                     _("For weibull distribution, 'scale' must be positive")
                 )
-        case "lognormal":
-            if "mean" not in params or "sigma" not in params:
-                raise ValidationError(
-                    _(
-                        "Lognormal distribution requires "
-                        "'mean' and 'sigma' parameters"
-                    )
-                )
-            validate_number(params["mean"], "mean")
-            validate_number(params["sigma"], "sigma")
-            if params["sigma"] <= 0:
+        elif distribution_type == "lognormal":
+            if model.sigma <= 0:
                 raise ValidationError(
                     _("For lognormal distribution, 'sigma' must be positive")
                 )
-        case "binomial":
-            if "n" not in params or "p" not in params:
-                raise ValidationError(
-                    _("Binomial distribution requires 'n' and 'p' parameters")
-                )
-            validate_integer(params["n"], "n")
-            validate_number(params["p"], "p")
-            if params["n"] <= 0:
+        elif distribution_type == "binomial":
+            if model.n <= 0:
                 raise ValidationError(
                     _("For binomial distribution, 'n' must be positive")
                 )
-            if not (0 <= params["p"] <= 1):
+            if not 0 <= model.p <= 1:
                 raise ValidationError(
                     _("For binomial distribution, 'p' must be between 0 and 1")
                 )
-        case "bernoulli":
-            if "p" not in params:
-                raise ValidationError(
-                    _("Bernoulli distribution requires 'p' parameter")
-                )
-            validate_number(params["p"], "p")
-            if not (0 <= params["p"] <= 1):
+        elif distribution_type == "bernoulli":
+            if not 0 <= model.p <= 1:
                 raise ValidationError(
                     _(
-                        "For bernoulli distribution, "
-                        "'p' must be between 0 and 1"
+                        "For bernoulli distribution, 'p' must be between 0 and 1"
                     )
                 )
-        case "poisson":
-            if "lam" not in params:
-                raise ValidationError(
-                    _("Poisson distribution requires 'lam' parameter")
-                )
-            validate_number(params["lam"], "lam")
-            if params["lam"] <= 0:
+        elif distribution_type == "poisson":
+            if model.lam <= 0:
                 raise ValidationError(
                     _("For poisson distribution, 'lam' must be positive")
                 )
-        case "geometric":
-            if "p" not in params:
-                raise ValidationError(
-                    _("Geometric distribution requires 'p' parameter")
-                )
-            validate_number(params["p"], "p")
-            if not (0 < params["p"] <= 1):
+        elif distribution_type == "geometric":
+            if not 0 < model.p <= 1:
                 raise ValidationError(
                     _(
-                        "For geometric distribution, "
-                        "'p' must be between 0 and 1 "
-                        "(exclusive of 0)"
+                        "For geometric distribution, 'p' must be between 0 and 1 (exclusive of 0)"
                     )
                 )
-        case "hypergeometric":
-            if "N" not in params or "K" not in params or "n" not in params:
+        elif distribution_type == "hypergeometric":
+            if model.N <= 0 or model.K <= 0 or model.n <= 0:
                 raise ValidationError(
                     _(
-                        "Hypergeometric distribution requires "
-                        "'N', 'K', and 'n' parameters"
+                        "For hypergeometric distribution, 'N', 'K', and 'n' must be positive"
                     )
                 )
-            validate_integer(params["N"], "N")
-            validate_integer(params["K"], "K")
-            validate_integer(params["n"], "n")
-            if params["N"] <= 0 or params["K"] <= 0 or params["n"] <= 0:
+            if model.K > model.N:
                 raise ValidationError(
                     _(
-                        "For hypergeometric "
-                        "distribution, 'N', 'K', "
-                        "and 'n' must be positive"
+                        "For hypergeometric distribution, 'K' must not exceed 'N'"
                     )
                 )
-            if params["K"] > params["N"]:
+            if model.n > model.N:
                 raise ValidationError(
                     _(
-                        "For hypergeometric "
-                        "distribution, 'K' "
-                        "must not exceed 'N'"
+                        "For hypergeometric distribution, 'n' must not exceed 'N'"
                     )
                 )
-            if params["n"] > params["N"]:
-                raise ValidationError(
-                    _(
-                        "For hypergeometric "
-                        "distribution, 'n' "
-                        "must not exceed 'N'"
-                    )
-                )
+    except PydanticValidationError as e:
+        errors = e.errors()
+        if errors:
+            message = str(
+                errors[0].get("msg", _("Invalid distributionParams"))
+            )
+        else:
+            message = _("Invalid distributionParams")
+        raise ValidationError(message) from e
 
 
 def validate_explanatory_variables(

@@ -180,7 +180,11 @@ async def add_simulation_column(
     # リクエスト受け取りログ
     create_log_api_request(request)
     # ビジネスロジックの実行
-    api = AddSimulationColumn(**body.model_dump())
+    api = AddSimulationColumn(
+        table_name=body.table_name,
+        new_column_name=body.new_column_name,
+        distribution=body.distribution,
+    )
     result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
 

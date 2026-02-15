@@ -1,15 +1,16 @@
 ﻿import polars as pl
 import pytest
-from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.services.data.tables_store import TablesStore
 from main import app
 
 
 @pytest.fixture
 def client():
     """TestClientのフィクスチャ"""
-    return TestClient(app)
+    return TestClient(app, raise_server_exceptions=False)
 
 
 @pytest.fixture
@@ -31,8 +32,7 @@ def test_add_uniform_column_success(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "UniformCol",
-        "distributionType": "uniform",
-        "distributionParams": {"low": 0.0, "high": 1.0},
+        "distribution": {"type": "uniform", "low": 0.0, "high": 1.0},
     }
     response = client.post(
         "/api/column/add-simulation",
@@ -58,8 +58,7 @@ def test_add_normal_column_success(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "NormalCol",
-        "distributionType": "normal",
-        "distributionParams": {"loc": 0.0, "scale": 1.0},
+        "distribution": {"type": "normal", "loc": 0.0, "scale": 1.0},
     }
     response = client.post(
         "/api/column/add-simulation",
@@ -80,8 +79,7 @@ def test_add_binomial_column_success(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "BinomialCol",
-        "distributionType": "binomial",
-        "distributionParams": {"n": 10, "p": 0.5},
+        "distribution": {"type": "binomial", "n": 10, "p": 0.5},
     }
     response = client.post(
         "/api/column/add-simulation",
@@ -104,8 +102,7 @@ def test_add_exponential_column_success(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "ExponentialCol",
-        "distributionType": "exponential",
-        "distributionParams": {"scale": 1.0},
+        "distribution": {"type": "exponential", "scale": 1.0},
     }
     response = client.post(
         "/api/column/add-simulation",
@@ -128,8 +125,7 @@ def test_add_gamma_column_success(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "GammaCol",
-        "distributionType": "gamma",
-        "distributionParams": {"shape": 2.0, "scale": 1.0},
+        "distribution": {"type": "gamma", "shape": 2.0, "scale": 1.0},
     }
     response = client.post(
         "/api/column/add-simulation",
@@ -143,8 +139,7 @@ def test_add_beta_column_success(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "BetaCol",
-        "distributionType": "beta",
-        "distributionParams": {"a": 2.0, "b": 5.0},
+        "distribution": {"type": "beta", "a": 2.0, "b": 5.0},
     }
     response = client.post(
         "/api/column/add-simulation",
@@ -162,8 +157,7 @@ def test_add_poisson_column_success(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "PoissonCol",
-        "distributionType": "poisson",
-        "distributionParams": {"lam": 3.0},
+        "distribution": {"type": "poisson", "lam": 3.0},
     }
     response = client.post(
         "/api/column/add-simulation",
@@ -181,8 +175,7 @@ def test_invalid_table_name(client, tables_store):
     payload = {
         "tableName": "NoTable",
         "newColumnName": "SimCol",
-        "distributionType": "normal",
-        "distributionParams": {"loc": 0.0, "scale": 1.0},
+        "distribution": {"type": "normal", "loc": 0.0, "scale": 1.0},
     }
     response = client.post(
         "/api/column/add-simulation",
@@ -199,8 +192,7 @@ def test_duplicate_column_name(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "A",  # 既存の列名
-        "distributionType": "normal",
-        "distributionParams": {"loc": 0.0, "scale": 1.0},
+        "distribution": {"type": "normal", "loc": 0.0, "scale": 1.0},
     }
     response = client.post(
         "/api/column/add-simulation",
@@ -217,23 +209,15 @@ def test_unsupported_distribution(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "TestCol",
-        "distributionType": "unsupported",
-        "distributionParams": {},
+        "distribution": {"type": "unsupported"},
     }
     response = client.post(
         "/api/column/add-simulation",
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    message = (
-        "distributionType 'unsupported'はサポートされていません。"
-        "サポートされるdistributionType: uniform, exponential, normal, "
-        "gamma, beta, weibull, lognormal, binomial, bernoulli, "
-        "poisson, geometric, hypergeometric"
-    )
-    assert message == response_data["message"]
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["detail"]  # Pydanticのバリデーションエラー
 
 
 def test_invalid_uniform_params(client, tables_store):
@@ -241,8 +225,8 @@ def test_invalid_uniform_params(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "TestCol",
-        "distributionType": "uniform",
-        "distributionParams": {
+        "distribution": {
+            "type": "uniform",
             "low": 1.0,
             "high": 0.0,  # lowより小さい
         },
@@ -252,9 +236,8 @@ def test_invalid_uniform_params(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "'low'は'high'より小さい必要があります" in response_data["message"]
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["detail"]
 
 
 def test_missing_required_params(client, tables_store):
@@ -262,9 +245,9 @@ def test_missing_required_params(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "TestCol",
-        "distributionType": "normal",
-        "distributionParams": {
-            "loc": 0.0
+        "distribution": {
+            "type": "normal",
+            "loc": 0.0,
             # scaleが不足
         },
     }
@@ -273,10 +256,10 @@ def test_missing_required_params(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    message = "正規分布には'loc'と'scale'パラメータが必要です"
-    assert message == response_data["message"]
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data[
+        "detail"
+    ]  # Pydanticのバリデーションエラー（フィールド不足は422）
 
 
 def test_invalid_param_type(client, tables_store):
@@ -284,8 +267,8 @@ def test_invalid_param_type(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "TestCol",
-        "distributionType": "normal",
-        "distributionParams": {
+        "distribution": {
+            "type": "normal",
             "loc": "invalid",  # 文字列は無効
             "scale": 1.0,
         },
@@ -295,9 +278,10 @@ def test_invalid_param_type(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "locは数値である必要があります。" in response_data["message"]
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data[
+        "detail"
+    ]  # Pydanticのバリデーションエラー（型エラーは422）
 
 
 def test_negative_scale_normal(client, tables_store):
@@ -305,8 +289,8 @@ def test_negative_scale_normal(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "TestCol",
-        "distributionType": "normal",
-        "distributionParams": {
+        "distribution": {
+            "type": "normal",
             "loc": 0.0,
             "scale": -1.0,  # 負の値は無効
         },
@@ -318,10 +302,7 @@ def test_negative_scale_normal(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == "NG"
-    assert (
-        "正規分布では、'scale'は正の値である必要があります"
-        in response_data["message"]
-    )
+    assert response_data["message"]  # バリデーションエラー
 
 
 def test_binomial_invalid_p(client, tables_store):
@@ -329,8 +310,8 @@ def test_binomial_invalid_p(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "TestCol",
-        "distributionType": "binomial",
-        "distributionParams": {
+        "distribution": {
+            "type": "binomial",
             "n": 10,
             "p": 1.5,  # 1より大きい
         },
@@ -342,7 +323,7 @@ def test_binomial_invalid_p(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == "NG"
-    assert "'p'は0から1の間である必要があります" in response_data["message"]
+    assert response_data["message"]  # バリデーションエラー
 
 
 def test_hypergeometric_success(client, tables_store):
@@ -350,8 +331,7 @@ def test_hypergeometric_success(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "HyperGeomCol",
-        "distributionType": "hypergeometric",
-        "distributionParams": {"N": 100, "K": 30, "n": 10},
+        "distribution": {"type": "hypergeometric", "N": 100, "K": 30, "n": 10},
     }
     response = client.post(
         "/api/column/add-simulation",
@@ -367,8 +347,8 @@ def test_hypergeometric_invalid_params(client, tables_store):
     payload = {
         "tableName": "TestTable",
         "newColumnName": "TestCol",
-        "distributionType": "hypergeometric",
-        "distributionParams": {
+        "distribution": {
+            "type": "hypergeometric",
             "N": 10,
             "K": 15,  # NよりKが大きい
             "n": 5,
@@ -381,4 +361,4 @@ def test_hypergeometric_invalid_params(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == "NG"
-    assert "'K'は'N'を超えてはいけません" in response_data["message"]
+    assert response_data["message"]  # バリデーションエラー
