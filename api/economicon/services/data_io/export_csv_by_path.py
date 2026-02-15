@@ -2,6 +2,7 @@ import os
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import ExportCsvByPathRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.file import (
     validate_directory_path,
@@ -22,23 +23,17 @@ class ExportCsvByPath:
     区切り文字を指定できます。
     """
 
-    def __init__(
-        self,
-        table_name: str,
-        directory_path: str,
-        file_name: str,
-        separator: str = ",",
-    ):
+    def __init__(self, body: ExportCsvByPathRequestBody):
         # テーブルマネージャーの初期化
         self.tables_store = TablesStore()
         # テーブル名
-        self.table_name = table_name
+        self.table_name = body.table_name
         # ディレクトリパス
-        self.directory_path = directory_path
+        self.directory_path = body.directory_path
         # ファイル名
-        self.file_name = file_name
+        self.file_name = body.file_name
         # 区切り文字
-        self.separator = separator
+        self.separator = body.separator
         # パラメータ名のマッピング
         self.param_names = {
             "table_name": "tableName",

@@ -77,6 +77,29 @@ FilePath = Annotated[
     ),
 ]
 
+DirectoryPath = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True,
+        min_length=1,
+        max_length=200,
+        pattern=r'^[^\\/:*?"<>|]+$',
+    ),
+    Field(
+        examples=["/path/to/directory", "C:\\data\\directory"],
+        description="ディレクトリのパス",
+    ),
+]
+
+FileName = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=255),
+    Field(
+        examples=["output.csv", "人口動態データ.xlsx"],
+        description="ファイル名",
+    ),
+]
+
 Separator = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=1, max_length=10),

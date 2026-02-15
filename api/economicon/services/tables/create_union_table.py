@@ -1,9 +1,8 @@
-from typing import List
-
 import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import CreateUnionTableRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_columns,
@@ -23,17 +22,15 @@ class CreateUnionTable:
 
     def __init__(
         self,
-        union_table_name: str,
-        table_names: List[str],
-        column_names: List[str],
+        body: CreateUnionTableRequestBody,
     ):
         self.tables_store = TablesStore()
         # ユニオン後のテーブル名
-        self.union_table_name = union_table_name
+        self.union_table_name = body.union_table_name
         # ユニオンするテーブル名リスト
-        self.table_names = table_names
+        self.table_names = body.table_names
         # ユニオンする列名リスト
-        self.column_names = column_names
+        self.column_names = body.column_names
         # パラメータ名のマッピング
         self.param_names = {
             "union_table_name": "unionTableName",

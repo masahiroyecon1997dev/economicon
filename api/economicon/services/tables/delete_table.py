@@ -1,5 +1,6 @@
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import DeleteTableRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_table_name,
@@ -15,10 +16,10 @@ class DeleteTable:
     削除後、テーブルは復元できません。
     """
 
-    def __init__(self, table_name: str):
+    def __init__(self, body: DeleteTableRequestBody):
         self.tables_store = TablesStore()
         # 削除するテーブル名
-        self.table_name = table_name
+        self.table_name = body.table_name
         # パラメータ名のマッピング
         self.param_names = {"table_name": "tableName"}
 

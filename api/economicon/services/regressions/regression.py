@@ -1,7 +1,8 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import RegressionRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.statistics import (
     validate_dependent_variable,
@@ -51,47 +52,29 @@ class Regression:
 
     def __init__(
         self,
-        type: str,
-        method: Optional[str],
-        table_name: str,
-        name: str,
-        description: str,
-        dependent_variable: str,
-        explanatory_variables: List[str],
-        standard_error_method: str,
-        standard_error_params: Dict[str, Any],
-        hyper_parameters: Dict[str, Any],
-        use_t_distribution: bool,
-        has_const: bool,
-        missing_value_handling: str,
-        entity_id_column: str,
-        time_column: str,
-        instrumental_variables: List[str],
-        endogenous_variables: List[str],
-        left_censoring_limit: float,
-        right_censoring_limit: float,
+        body: RegressionRequestBody,
     ):
         self.tables_store = TablesStore()
         self.table_info = None
-        self.type = type
-        self.method = method
-        self.table_name = table_name
-        self.name = name
-        self.description = description
-        self.dependent_variable = dependent_variable
-        self.explanatory_variables = explanatory_variables
-        self.standard_error_method = standard_error_method
-        self.standard_error_params = standard_error_params
-        self.hyper_parameters = hyper_parameters
-        self.use_t_distribution = use_t_distribution
-        self.has_const = has_const
-        self.missing_value_handling = missing_value_handling
-        self.entity_id_column = entity_id_column
-        self.time_column = time_column
-        self.instrumental_variables = instrumental_variables
-        self.endogenous_variables = endogenous_variables
-        self.left_censoring_limit = left_censoring_limit
-        self.right_censoring_limit = right_censoring_limit
+        self.type = body.type
+        self.method = body.method
+        self.table_name = body.table_name
+        self.name = body.name
+        self.description = body.description
+        self.dependent_variable = body.dependent_variable
+        self.explanatory_variables = body.explanatory_variables
+        self.standard_error_method = body.standard_error_method
+        self.standard_error_params = body.standard_error_params
+        self.hyper_parameters = body.hyper_parameters
+        self.use_t_distribution = body.use_t_distribution
+        self.has_const = body.has_const
+        self.missing_value_handling = body.missing_value_handling
+        self.entity_id_column = body.entity_id_column
+        self.time_column = body.time_column
+        self.instrumental_variables = body.instrumental_variables
+        self.endogenous_variables = body.endogenous_variables
+        self.left_censoring_limit = body.left_censoring_limit
+        self.right_censoring_limit = body.right_censoring_limit
         self.param_names = {
             "type": "type",
             "method": "method",

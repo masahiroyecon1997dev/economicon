@@ -5,7 +5,14 @@ from typing import Annotated
 from pydantic import BaseModel, Field, StringConstraints
 
 from .common import BaseRequest
-from .types import FilePath, NewTableName, Separator, TableName
+from .types import (
+    DirectoryPath,
+    FileName,
+    FilePath,
+    NewTableName,
+    Separator,
+    TableName,
+)
 
 
 class ImportCsvByPathRequestBody(BaseRequest):
@@ -54,8 +61,12 @@ class ExportCsvByPathRequestBody(BaseRequest):
     """CSVファイルパス指定エクスポートリクエスト"""
 
     table_name: TableName
-    file_path: Annotated[
-        FilePath, Field(description="出力するCSVファイルのパス")
+    directory_path: Annotated[
+        DirectoryPath,
+        Field(description="出力するCSVファイルのディレクトリパス"),
+    ]
+    file_name: Annotated[
+        FileName, Field(description="出力するCSVファイルのファイル名")
     ]
     separator: Separator
 
@@ -64,8 +75,12 @@ class ExportExcelByPathRequestBody(BaseModel):
     """Excelファイルパス指定エクスポートリクエスト"""
 
     table_name: TableName
-    file_path: Annotated[
-        FilePath, Field(description="出力するExcelファイルのパス")
+    directory_path: Annotated[
+        DirectoryPath,
+        Field(description="出力するExcelファイルのディレクトリパス"),
+    ]
+    file_name: Annotated[
+        FileName, Field(description="出力するExcelファイルのファイル名")
     ]
 
 
@@ -73,6 +88,10 @@ class ExportParquetByPathRequestBody(BaseModel):
     """Parquetファイルパス指定エクスポートリクエスト"""
 
     table_name: TableName
-    file_path: Annotated[
-        FilePath, Field(description="出力するParquetファイルのパス")
+    directory_path: Annotated[
+        DirectoryPath,
+        Field(description="出力するParquetファイルのディレクトリパス"),
+    ]
+    file_name: Annotated[
+        FileName, Field(description="出力するParquetファイルのファイル名")
     ]

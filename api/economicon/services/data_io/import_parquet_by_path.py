@@ -2,6 +2,7 @@ import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import ImportParquetByPathRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.file import validate_file_path
 from ...utils.validators.tables_store import validate_new_table_name
@@ -15,13 +16,13 @@ class ImportParquetByPath:
     指定されたパスのPARQUETファイルを解析し、指定されたテーブル名で登録します。
     """
 
-    def __init__(self, file_path: str, table_name: str):
+    def __init__(self, body: ImportParquetByPathRequestBody):
         # テーブルマネージャーの初期化
         self.tables_store = TablesStore()
         # ファイルパス
-        self.file_path = file_path
+        self.file_path = body.file_path
         # テーブル名
-        self.table_name = table_name
+        self.table_name = body.table_name
         # パラメータ名のマッピング
         self.param_names = {
             "file_path": "filePath",

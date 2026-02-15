@@ -1,9 +1,8 @@
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import FetchDataToJsonRequestBody
 from ...utils.validators.common import (
     ValidationError,
-    validate_integer_positive,
-    validate_required,
 )
 from ...utils.validators.tables_store import (
     validate_existed_table_name,
@@ -21,11 +20,11 @@ class FetchDataToJson:
     取得行数がテーブルの行数を超える場合は、テーブルの最後まで取得します。
     """
 
-    def __init__(self, table_name: str, start_row: int, fetch_rows: int):
+    def __init__(self, body: FetchDataToJsonRequestBody):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.start_row = start_row
-        self.fetch_rows = fetch_rows
+        self.table_name = body.table_name
+        self.start_row = body.start_row
+        self.fetch_rows = body.fetch_rows
         self.param_names = {
             "table_name": "tableName",
             "start_row": "startRow",
@@ -34,11 +33,6 @@ class FetchDataToJson:
 
     def validate(self):
         try:
-            # 必須パラメータのチェック
-            validate_required(self.table_name, self.param_names["table_name"])
-            validate_required(self.start_row, self.param_names["start_row"])
-            validate_required(self.fetch_rows, self.param_names["fetch_rows"])
-
             table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の存在チェック
             validate_existed_table_name(
@@ -52,10 +46,6 @@ class FetchDataToJson:
             # 開始行番号の妥当性チェック
             validate_row_index(
                 self.start_row, num_rows, self.param_names["start_row"]
-            )
-            # 取得行数が正の整数であることをチェック
-            validate_integer_positive(
-                self.fetch_rows, self.param_names["fetch_rows"]
             )
 
             return None

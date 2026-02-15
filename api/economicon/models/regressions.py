@@ -1,10 +1,16 @@
 """回帰分析関連のスキーマ定義"""
 
-from typing import Annotated, Any, Dict, List, Literal, Optional
+from typing import Annotated, Any, Dict, List, Optional
 
 from pydantic import Field, model_validator
 
 from .common import BaseRequest
+from .enums import (
+    MissingValueHandlingType,
+    RegressionMethodType,
+    RegressionType,
+    StandardErrorMethodType,
+)
 from .types import ColumnName, TableName
 
 
@@ -17,21 +23,12 @@ class RegressionRequestBody(BaseRequest):
     統合スキーマです。
     """
 
-    type: Literal[
-        "ols",
-        "logit",
-        "probit",
-        "tobit",
-        "fe",
-        "re",
-        "iv",
-        "feiv",
-        "lasso",
-        "ridge",
-    ] = Field(..., alias="type", description="分析タイプ")
+    type: RegressionType = Field(alias="type", description="分析タイプ")
 
-    method: Literal["ols", "wls", "gls", "gmm"] = Field(
-        default="ols", alias="method", description="計算手法"
+    method: RegressionMethodType = Field(
+        default=RegressionMethodType.OLS,
+        alias="method",
+        description="計算手法",
     )
 
     table_name: TableName
@@ -55,10 +52,8 @@ class RegressionRequestBody(BaseRequest):
         ]
     ]
 
-    standard_error_method: Literal[
-        "nonrobust", "hc0", "hc1", "hc2", "hc3", "hac", "clustered"
-    ] = Field(
-        default="nonrobust",
+    standard_error_method: StandardErrorMethodType = Field(
+        default=StandardErrorMethodType.NONROBUST,
         alias="standardErrorMethod",
         description="標準誤差計算方法",
     )
@@ -83,33 +78,33 @@ class RegressionRequestBody(BaseRequest):
         default=True, alias="hasConst", description="定数項を追加するか"
     )
 
-    missing_value_handling: Literal["ignore", "remove", "error"] = Field(
-        default="remove",
+    missing_value_handling: MissingValueHandlingType = Field(
+        default=MissingValueHandlingType.REMOVE,
         alias="missingValueHandling",
         description="欠損値の処理方法",
     )
 
     # パネルデータ分析用
-    entity_id_column: Optional[str] = Field(
+    entity_id_column: Optional[ColumnName] = Field(
         None,
         alias="entityIdColumn",
         description="個体ID列名 (固定効果・変量効果の場合に必要)",
     )
 
-    time_column: Optional[str] = Field(
+    time_column: Optional[ColumnName] = Field(
         None,
         alias="timeColumn",
         description="時間列名 (パネルデータ分析の場合に使用)",
     )
 
     # 操作変数法用
-    instrumental_variables: Optional[List[str]] = Field(
+    instrumental_variables: Optional[List[ColumnName]] = Field(
         None,
         alias="instrumentalVariables",
         description="操作変数の列名リスト (IV の場合に必要)",
     )
 
-    endogenous_variables: Optional[List[str]] = Field(
+    endogenous_variables: Optional[List[ColumnName]] = Field(
         None,
         alias="endogenousVariables",
         description="内生変数の列名リスト (IV の場合に必要)",
@@ -134,15 +129,21 @@ class RegressionRequestBody(BaseRequest):
         分析パラメータの整合性をバリデーション
         """
         # GMM の制限: type="iv" のみ許可
-        if self.method == "gmm" and self.type != "iv":
+        if (
+            self.method == RegressionMethodType.GMM
+            and self.type != RegressionType.IV
+        ):
             raise ValueError(
                 "method='gmm' は type='iv' の場合のみ使用できます"
             )
 
         # 標準誤差の検証: clustered の場合 groups が必要
-        if self.standard_error_method == "clustered":
+        if self.standard_error_method == StandardErrorMethodType.CLUSTERED:
             # パネルデータの場合はentity_id_columnをデフォルトのgroups として使用
-            if self.type in ["fe", "re"] and self.entity_id_column:
+            if (
+                self.type in [RegressionType.FE, RegressionType.RE]
+                and self.entity_id_column
+            ):
                 # standard_error_paramsにgroupsがない場合、entity_id_columnを設定
                 if "groups" not in self.standard_error_params:
                     self.standard_error_params["groups"] = (
@@ -157,7 +158,7 @@ class RegressionRequestBody(BaseRequest):
                 )
 
         # 正則化の検証: lasso, ridge の場合 alpha が必要
-        if self.type in ["lasso", "ridge"]:
+        if self.type in [RegressionType.LASSO, RegressionType.RIDGE]:
             if "alpha" not in self.hyper_parameters:
                 raise ValueError(
                     f"type='{self.type}' の場合、"
@@ -165,14 +166,18 @@ class RegressionRequestBody(BaseRequest):
                 )
 
         # パネルデータ分析の検証
-        if self.type in ["fe", "re", "feiv"]:
+        if self.type in [
+            RegressionType.FE,
+            RegressionType.RE,
+            RegressionType.FEIV,
+        ]:
             if not self.entity_id_column:
                 raise ValueError(
                     f"type='{self.type}' の場合、entityIdColumn が必要です"
                 )
 
         # 操作変数法の検証
-        if self.type in ["iv", "feiv"]:
+        if self.type in [RegressionType.IV, RegressionType.FEIV]:
             if not self.instrumental_variables:
                 raise ValueError(
                     f"type='{self.type}' の場合、"

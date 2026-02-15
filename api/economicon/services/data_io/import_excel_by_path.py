@@ -1,9 +1,8 @@
-from typing import Optional
-
 import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import ImportExcelByPathRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.file import (
     validate_file_path,
@@ -21,17 +20,15 @@ class ImportExcelByPath:
     シート名を指定できます。
     """
 
-    def __init__(
-        self, file_path: str, table_name: str, sheet_name: Optional[str] = None
-    ):
+    def __init__(self, body: ImportExcelByPathRequestBody):
         # テーブルマネージャーの初期化
         self.tables_store = TablesStore()
         # ファイルパス
-        self.file_path = file_path
+        self.file_path = body.file_path
         # テーブル名
-        self.table_name = table_name
+        self.table_name = body.table_name
         # シート名
-        self.sheet_name = sheet_name
+        self.sheet_name = body.sheet_name
         # パラメータ名のマッピング
         self.param_names = {
             "file_path": "filePath",
