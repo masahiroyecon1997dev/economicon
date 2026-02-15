@@ -1,9 +1,14 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..models import (ExportCsvByPathRequest, ExportExcelByPathRequest,
-                      ExportParquetByPathRequest, ImportCsvByPathRequest,
-                      ImportExcelByPathRequest, ImportParquetByPathRequest)
+from ..models import (
+    ExportCsvByPathRequestBody,
+    ExportExcelByPathRequestBody,
+    ExportParquetByPathRequestBody,
+    ImportCsvByPathRequestBody,
+    ImportExcelByPathRequestBody,
+    ImportParquetByPathRequestBody,
+)
 from ..services.data_io.export_csv_by_path import ExportCsvByPath
 from ..services.data_io.export_excel_by_path import ExportExcelByPath
 from ..services.data_io.export_parquet_by_path import ExportParquetByPath
@@ -18,7 +23,7 @@ router = APIRouter(prefix="/data", tags=["data"])
 
 @router.post("/import-csv-by-path")
 async def import_csv_by_path(
-    request: Request, body: ImportCsvByPathRequest
+    request: Request, body: ImportCsvByPathRequestBody
 ):
     """パス指定でCSVファイルをインポートするエンドポイント
 
@@ -26,7 +31,7 @@ async def import_csv_by_path(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : ImportCsvByPathRequest
+    body : ImportCsvByPathRequestBody
         リクエストボディ
 
     Returns
@@ -44,7 +49,7 @@ async def import_csv_by_path(
 
 @router.post("/import-excel-by-path")
 async def import_excel_by_path(
-    request: Request, body: ImportExcelByPathRequest
+    request: Request, body: ImportExcelByPathRequestBody
 ):
     """EXCELファイルをパス指定でインポートしてテーブルを作成する
 
@@ -52,7 +57,7 @@ async def import_excel_by_path(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : ImportExcelByPathRequest
+    body : ImportExcelByPathRequestBody
         リクエストボディ
         - filePath: EXCELファイルのパス
         - tableName: 作成するテーブル名
@@ -73,7 +78,7 @@ async def import_excel_by_path(
 
 @router.post("/import-parquet-by-path")
 async def import_parquet_by_path(
-    request: Request, body: ImportParquetByPathRequest
+    request: Request, body: ImportParquetByPathRequestBody
 ):
     """PARQUETファイルをパス指定でインポートしてテーブルを作成する
 
@@ -81,7 +86,7 @@ async def import_parquet_by_path(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : ImportParquetByPathRequest
+    body : ImportParquetByPathRequestBody
         リクエストボディ
         - filePath: PARQUETファイルのパス
         - tableName: 作成するテーブル名
@@ -101,7 +106,7 @@ async def import_parquet_by_path(
 
 @router.post("/export-csv-by-path")
 async def export_csv_by_path(
-    request: Request, body: ExportCsvByPathRequest
+    request: Request, body: ExportCsvByPathRequestBody
 ):
     """テーブルをCSVファイルにパス指定でエクスポートするエンドポイント
 
@@ -109,7 +114,7 @@ async def export_csv_by_path(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : ExportCsvByPathRequest
+    body : ExportCsvByPathRequestBody
         リクエストボディ
 
     Returns
@@ -127,7 +132,7 @@ async def export_csv_by_path(
 
 @router.post("/export-excel-by-path")
 async def export_excel_by_path(
-    request: Request, body: ExportExcelByPathRequest
+    request: Request, body: ExportExcelByPathRequestBody
 ):
     """テーブルをExcelファイルにパス指定でエクスポートするエンドポイント
 
@@ -153,7 +158,7 @@ async def export_excel_by_path(
 
 @router.post("/export-parquet-by-path")
 async def export_parquet_by_path(
-    request: Request, body: ExportParquetByPathRequest
+    request: Request, body: ExportParquetByPathRequestBody
 ):
     """テーブルをParquetファイルにパス指定でエクスポートするエンドポイント
 
