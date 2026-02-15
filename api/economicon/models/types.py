@@ -82,8 +82,7 @@ DirectoryPath = Annotated[
     StringConstraints(
         strip_whitespace=True,
         min_length=1,
-        max_length=200,
-        pattern=r'^[^\\/:*?"<>|]+$',
+        max_length=1024,
     ),
     Field(
         examples=["/path/to/directory", "C:\\data\\directory"],
@@ -93,7 +92,12 @@ DirectoryPath = Annotated[
 
 FileName = Annotated[
     str,
-    StringConstraints(strip_whitespace=True, min_length=1, max_length=255),
+    StringConstraints(
+        strip_whitespace=True,
+        min_length=1,
+        max_length=255,
+        pattern=r'^[^\\/:*?"<>|]+$',
+    ),
     Field(
         examples=["output.csv", "人口動態データ.xlsx"],
         description="ファイル名",

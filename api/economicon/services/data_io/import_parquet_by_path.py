@@ -4,7 +4,7 @@ from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import ImportParquetByPathRequestBody
 from ...utils.validators.common import ValidationError
-from ...utils.validators.file import validate_file_path
+from ...utils.validators.files import validate_file_path
 from ...utils.validators.tables_store import validate_new_table_name
 from ..data.tables_store import TablesStore
 
