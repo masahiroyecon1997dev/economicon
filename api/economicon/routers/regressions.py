@@ -8,22 +8,27 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..exceptions import ApiError
-from ..models.regressions import RegressionRequest
+from ..models.regressions import RegressionRequestBody
 from ..services.operation import run_operation
 from ..services.regressions.regression import Regression
-from ..services.regressions.result import (ClearAllAnalysisResults,
-                                           DeleteAnalysisResult,
-                                           GetAllAnalysisResults,
-                                           GetAnalysisResult)
-from ..utils import (create_error_response, create_log_api_request,
-                     create_success_response)
+from ..services.regressions.result import (
+    ClearAllAnalysisResults,
+    DeleteAnalysisResult,
+    GetAllAnalysisResults,
+    GetAnalysisResult,
+)
+from ..utils import (
+    create_error_response,
+    create_log_api_request,
+    create_success_response,
+)
 from ..utils.validators.common import ValidationError
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
 
 @router.post("/regression")
-async def regression(request: Request, body: RegressionRequest):
+async def regression(request: Request, body: RegressionRequestBody):
     """
     統合回帰分析エンドポイント
 
@@ -33,7 +38,7 @@ async def regression(request: Request, body: RegressionRequest):
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : RegressionRequest
+    body : RegressionRequestBody
         統合回帰分析リクエスト
         - type: 分析タイプ (ols, logit, probit, tobit, fe, re, iv,
           feiv, lasso, ridge)

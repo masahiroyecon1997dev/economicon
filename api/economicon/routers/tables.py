@@ -1,17 +1,25 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..models import (CreateJoinTableRequest, CreateSimulationDataTableRequest,
-                      CreateTableRequest, CreateUnionTableRequest,
-                      DeleteTableRequest, DuplicateTableRequest,
-                      FetchDataToArrowRequest, FetchDataToJsonRequest,
-                      FilterSingleConditionRequest, InputCellDataRequest,
-                      RenameTableRequest)
+from ..models import (
+    CreateJoinTableRequestBody,
+    CreateSimulationDataTableRequestBody,
+    CreateTableRequestBody,
+    CreateUnionTableRequestBody,
+    DeleteTableRequestBody,
+    DuplicateTableRequestBody,
+    FetchDataToArrowRequestBody,
+    FetchDataToJsonRequestBody,
+    FilterSingleConditionRequestBody,
+    InputCellDataRequestBody,
+    RenameTableRequestBody,
+)
 from ..services.operation import run_operation
 from ..services.tables.clear_tables import ClearTables
 from ..services.tables.create_join_table import CreateJoinTable
-from ..services.tables.create_simulation_data_table import \
-    CreateSimulationDataTable
+from ..services.tables.create_simulation_data_table import (
+    CreateSimulationDataTable,
+)
 from ..services.tables.create_table import CreateTable
 from ..services.tables.create_union_table import CreateUnionTable
 from ..services.tables.delete_table import DeleteTable
@@ -22,21 +30,24 @@ from ..services.tables.filter_single_condition import FilterSingleCondition
 from ..services.tables.get_table_list import GetTableList
 from ..services.tables.input_cell_data import InputCellData
 from ..services.tables.rename_table import RenameTable
-from ..utils import (create_log_api_request, create_success_binary_response,
-                     create_success_response)
+from ..utils import (
+    create_log_api_request,
+    create_success_binary_response,
+    create_success_response,
+)
 
 router = APIRouter(prefix="/table", tags=["table"])
 
 
 @router.post("/create")
-async def create_table(request: Request, body: CreateTableRequest):
+async def create_table(request: Request, body: CreateTableRequestBody):
     """テーブルを作成するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : CreateTableRequest
+    body : CreateTableRequestBody
         リクエストボディ
 
     Returns
@@ -56,7 +67,7 @@ async def create_table(request: Request, body: CreateTableRequest):
 
 @router.post("/create-join")
 async def create_join_table(
-    request: Request, body: CreateJoinTableRequest
+    request: Request, body: CreateJoinTableRequestBody
 ):
     """結合テーブルを作成するエンドポイント
 
@@ -64,7 +75,7 @@ async def create_join_table(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : CreateJoinTableRequest
+    body : CreateJoinTableRequestBody
         リクエストボディ
 
     Returns
@@ -84,7 +95,7 @@ async def create_join_table(
 
 @router.post("/create-union")
 async def create_union_table(
-    request: Request, body: CreateUnionTableRequest
+    request: Request, body: CreateUnionTableRequestBody
 ):
     """ユニオンテーブルを作成するエンドポイント
 
@@ -92,7 +103,7 @@ async def create_union_table(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : CreateUnionTableRequest
+    body : CreateUnionTableRequestBody
         リクエストボディ
 
     Returns
@@ -112,7 +123,7 @@ async def create_union_table(
 
 @router.post("/create-simulation-data")
 async def create_simulation_data_table(
-    request: Request, body: CreateSimulationDataTableRequest
+    request: Request, body: CreateSimulationDataTableRequestBody
 ):
     """シミュレーションデータテーブルを作成するエンドポイント
 
@@ -120,7 +131,7 @@ async def create_simulation_data_table(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : CreateSimulationDataTableRequest
+    body : CreateSimulationDataTableRequestBody
         リクエストボディ
 
     Returns
@@ -139,14 +150,14 @@ async def create_simulation_data_table(
 
 
 @router.post("/delete")
-async def delete_table(request: Request, body: DeleteTableRequest):
+async def delete_table(request: Request, body: DeleteTableRequestBody):
     """テーブルを削除するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : DeleteTableRequest
+    body : DeleteTableRequestBody
         リクエストボディ
 
     Returns
@@ -163,16 +174,14 @@ async def delete_table(request: Request, body: DeleteTableRequest):
 
 
 @router.post("/duplicate")
-async def duplicate_table(
-    request: Request, body: DuplicateTableRequest
-):
+async def duplicate_table(request: Request, body: DuplicateTableRequestBody):
     """テーブルを複製するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : DuplicateTableRequest
+    body : DuplicateTableRequestBody
         リクエストボディ
 
     Returns
@@ -189,7 +198,7 @@ async def duplicate_table(
 
 
 @router.post("/rename")
-async def rename_table(request: Request, body: RenameTableRequest):
+async def rename_table(request: Request, body: RenameTableRequestBody):
     """
     テーブル名変更エンドポイント
 
@@ -197,7 +206,7 @@ async def rename_table(request: Request, body: RenameTableRequest):
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : RenameTableRequest
+    body : RenameTableRequestBody
         リクエストボディ
         - oldTableName: 旧テーブル名
         - newTableName: 新テーブル名
@@ -263,7 +272,7 @@ async def clear_tables(request: Request):
 
 @router.post("/fetch-data-to-json")
 async def fetch_data_to_json(
-    request: Request, body: FetchDataToJsonRequest
+    request: Request, body: FetchDataToJsonRequestBody
 ):
     """データをJSON形式で取得するエンドポイント
 
@@ -271,7 +280,7 @@ async def fetch_data_to_json(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : FetchDataToJsonRequest
+    body : FetchDataToJsonRequestBody
         リクエストボディ
 
     Returns
@@ -289,7 +298,7 @@ async def fetch_data_to_json(
 
 @router.post("/fetch-data-to-arrow")
 async def fetch_data_to_arrow(
-    request: Request, body: FetchDataToArrowRequest
+    request: Request, body: FetchDataToArrowRequestBody
 ):
     """データをApache Arrow IPC形式で取得するエンドポイント
 
@@ -300,7 +309,7 @@ async def fetch_data_to_arrow(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : FetchDataToArrowRequest
+    body : FetchDataToArrowRequestBody
         リクエストボディ
 
     Returns
@@ -322,16 +331,14 @@ async def fetch_data_to_arrow(
 
 
 @router.post("/input-cell-data")
-async def input_cell_data(
-    request: Request, body: InputCellDataRequest
-):
+async def input_cell_data(request: Request, body: InputCellDataRequestBody):
     """セルデータ入力エンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : InputCellDataRequest
+    body : InputCellDataRequestBodyBody
         リクエストボディ
         - tableName: テーブル名
         - columnName: 列名
@@ -353,7 +360,7 @@ async def input_cell_data(
 
 @router.post("/filter-single-condition")
 async def filter_single_condition(
-    request: Request, body: FilterSingleConditionRequest
+    request: Request, body: FilterSingleConditionRequestBody
 ):
     """単一条件フィルタリングを実行するエンドポイント
 
@@ -361,7 +368,7 @@ async def filter_single_condition(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : FilterSingleConditionRequest
+    body : FilterSingleConditionRequestBody
         リクエストボディ
 
     Returns

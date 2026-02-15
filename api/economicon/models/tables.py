@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class CreateTableRequest(BaseModel):
+class CreateTableRequestBody(BaseModel):
     """テーブル作成リクエスト"""
 
     table_name: str = Field(
@@ -25,7 +25,7 @@ class CreateTableRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class RenameTableRequest(BaseModel):
+class RenameTableRequestBody(BaseModel):
     """テーブル名変更リクエスト"""
 
     old_table_name: str = Field(
@@ -46,7 +46,7 @@ class RenameTableRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class CreateSimulationDataTableRequest(BaseModel):
+class CreateSimulationDataTableRequestBody(BaseModel):
     """シミュレーションデータテーブル作成リクエスト"""
 
     table_name: str = Field(
@@ -69,7 +69,7 @@ class CreateSimulationDataTableRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class CreateJoinTableRequest(BaseModel):
+class CreateJoinTableRequestBody(BaseModel):
     """結合テーブル作成リクエスト"""
 
     join_table_name: str = Field(
@@ -116,7 +116,7 @@ class CreateJoinTableRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class CreateUnionTableRequest(BaseModel):
+class CreateUnionTableRequestBody(BaseModel):
     """ユニオンテーブル作成リクエスト"""
 
     union_table_name: str = Field(
@@ -141,13 +141,13 @@ class CreateUnionTableRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class ClearTablesRequest(BaseModel):
+class ClearTablesRequestBody(BaseModel):
     """テーブルクリアリクエスト（パラメータなし）"""
 
     pass
 
 
-class DuplicateTableRequest(BaseModel):
+class DuplicateTableRequestBody(BaseModel):
     """テーブル複製リクエスト"""
 
     table_name: str = Field(
@@ -168,7 +168,7 @@ class DuplicateTableRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class DeleteTableRequest(BaseModel):
+class DeleteTableRequestBody(BaseModel):
     """テーブル削除リクエスト"""
 
     table_name: str = Field(
@@ -182,7 +182,7 @@ class DeleteTableRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class FetchDataToJsonRequest(BaseModel):
+class FetchDataToJsonRequestBody(BaseModel):
     """データJSON取得リクエスト"""
 
     table_name: str = Field(
@@ -202,7 +202,7 @@ class FetchDataToJsonRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class FetchDataToArrowRequest(BaseModel):
+class FetchDataToArrowRequestBody(BaseModel):
     """データArrow取得リクエスト"""
 
     table_name: str = Field(
@@ -226,13 +226,13 @@ class FetchDataToArrowRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class GetTableListRequest(BaseModel):
+class GetTableListRequestBody(BaseModel):
     """テーブルリスト取得リクエスト（パラメータなし）"""
 
     pass
 
 
-class InputCellDataRequest(BaseModel):
+class InputCellDataRequestBody(BaseModel):
     """セルデータ入力リクエスト"""
 
     table_name: str = Field(
@@ -257,7 +257,7 @@ class InputCellDataRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class FilterSingleConditionRequest(BaseModel):
+class FilterSingleConditionRequestBody(BaseModel):
     """単一条件フィルタリクエスト"""
 
     table_name: str = Field(

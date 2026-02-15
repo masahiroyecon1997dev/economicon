@@ -9,7 +9,7 @@ from .schemas import SortInstruction
 from .types import ColumnName, NewColumnName, TableName
 
 
-class AddColumnRequest(BaseRequest):
+class AddColumnRequestBody(BaseRequest):
     """カラム追加リクエスト"""
 
     table_name: TableName
@@ -29,7 +29,7 @@ class AddColumnResult(BaseModel):
     column_name: ColumnName
 
 
-class DeleteColumnRequest(BaseRequest):
+class DeleteColumnRequestBody(BaseRequest):
     """カラム削除リクエスト"""
 
     table_name: TableName
@@ -43,7 +43,7 @@ class DeleteColumnResult(BaseModel):
     column_name: ColumnName
 
 
-class RenameColumnRequest(BaseRequest):
+class RenameColumnRequestBody(BaseRequest):
     """カラム名変更リクエスト"""
 
     table_name: TableName
@@ -55,7 +55,7 @@ class RenameColumnRequest(BaseRequest):
     ]
 
 
-class DuplicateColumnRequest(BaseRequest):
+class DuplicateColumnRequestBody(BaseRequest):
     """カラム複製リクエスト"""
 
     table_name: TableName
@@ -67,7 +67,7 @@ class DuplicateColumnRequest(BaseRequest):
     ]
 
 
-class CalculateColumnRequest(BaseRequest):
+class CalculateColumnRequestBody(BaseRequest):
     """カラム計算リクエスト"""
 
     table_name: TableName
@@ -75,7 +75,7 @@ class CalculateColumnRequest(BaseRequest):
     calculation_expression: str = Field(description="計算式", min_length=1)
 
 
-class AddDummyColumnRequest(BaseRequest):
+class AddDummyColumnRequestBody(BaseRequest):
     """ダミー変数カラム追加リクエスト"""
 
     table_name: TableName
@@ -88,7 +88,7 @@ class AddDummyColumnRequest(BaseRequest):
     target_value: str = Field(description="1にする対象の値")
 
 
-class AddLagLeadColumnRequest(BaseRequest):
+class AddLagLeadColumnRequestBody(BaseRequest):
     """ラグ・リードカラム追加リクエスト"""
 
     table_name: TableName
@@ -106,7 +106,7 @@ class AddLagLeadColumnRequest(BaseRequest):
     )
 
 
-class AddSimulationColumnRequest(BaseRequest):
+class AddSimulationColumnRequestBody(BaseRequest):
     """シミュレーションカラム追加リクエスト"""
 
     table_name: TableName
@@ -119,7 +119,7 @@ class AddSimulationColumnRequest(BaseRequest):
     )
 
 
-class SortColumnsRequest(BaseRequest):
+class SortColumnsRequestBody(BaseRequest):
     """カラムソートリクエスト"""
 
     table_name: TableName
@@ -129,7 +129,7 @@ class SortColumnsRequest(BaseRequest):
     )
 
 
-class TransformColumnRequest(BaseRequest):
+class TransformColumnRequestBody(BaseRequest):
     """カラム変換リクエスト"""
 
     table_name: TableName
@@ -154,7 +154,7 @@ class TransformColumnRequest(BaseRequest):
     )
 
 
-class GetColumnListRequest(BaseRequest):
+class GetColumnListRequestBody(BaseRequest):
     """カラムリスト取得リクエスト"""
 
     table_name: TableName
