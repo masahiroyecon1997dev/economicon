@@ -1,16 +1,10 @@
 import os
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import ExportCsvByPathRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils.validators.files import (
-    validate_directory_path,
-    validate_file_name,
-    validate_separator,
-)
-from ...utils.validators.tables_store import (
-    validate_existed_table_name,
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import (
+    validate_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -47,10 +41,10 @@ class ExportCsvByPath:
         try:
             # テーブル名のバリデーション
             table_name_list = self.tables_store.get_table_name_list()
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
 
             # ディレクトリパスのバリデーション
@@ -61,8 +55,6 @@ class ExportCsvByPath:
             # ファイル名のバリデーション
             validate_file_name(self.file_name, self.param_names["file_name"])
 
-            # 区切り文字のバリデーション
-            validate_separator(self.separator, self.param_names["separator"])
             return None
         except ValidationError as e:
             return e
@@ -83,16 +75,20 @@ class ExportCsvByPath:
             result = {"filePath": file_path}
             return result
 
-        except KeyError as e:
+        except KeyError:
             message = _("Table does not exist: {}").format(self.table_name)
-            raise ApiError(message) from e
-        except PermissionError as e:
+            raise ProcessingError(error_code="TableNotFound", message=message)
+        except PermissionError:
             message = _(
                 "Permission denied: Cannot write to the specified path."
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="PermissionDenied", message=message
+            )
         except Exception as e:
             message = _(
                 "An unexpected error occurred during CSV export processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="CsvExportError", message=message, detail=str(e)
+            )
