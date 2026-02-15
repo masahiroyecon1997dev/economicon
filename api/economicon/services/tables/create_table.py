@@ -1,9 +1,8 @@
-from typing import List
-
 import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import CreateTableRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_new_columns,
@@ -23,17 +22,15 @@ class CreateTable:
 
     def __init__(
         self,
-        table_name: str,
-        table_number_of_rows: int,
-        column_names: List[str],
+        body: CreateTableRequestBody,
     ):
         self.tables_store = TablesStore()
         # テーブル名
-        self.table_name = table_name
+        self.table_name = body.table_name
         # テーブルの行数
-        self.table_number_of_rows = table_number_of_rows
+        self.table_number_of_rows = body.table_number_of_rows
         # カラム名のリスト
-        self.column_names = column_names
+        self.column_names = body.column_names
         # パラメータ名のマッピング
         self.param_names = {
             "table_name": "tableName",

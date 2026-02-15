@@ -41,7 +41,7 @@ async def import_csv_by_path(
     """
     create_log_api_request(request)
 
-    api = ImportCsvByPath(**body.model_dump())
+    api = ImportCsvByPath(body)
     result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
@@ -70,7 +70,7 @@ async def import_excel_by_path(
     """
     create_log_api_request(request)
 
-    api = ImportExcelByPath(**body.model_dump())
+    api = ImportExcelByPath(body)
     result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
@@ -98,7 +98,7 @@ async def import_parquet_by_path(
     """
     create_log_api_request(request)
 
-    api = ImportParquetByPath(**body.model_dump())
+    api = ImportParquetByPath(body)
     result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
@@ -124,7 +124,7 @@ async def export_csv_by_path(
     """
     create_log_api_request(request)
 
-    api = ExportCsvByPath(**body.model_dump())
+    api = ExportCsvByPath(body)
     result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
@@ -150,7 +150,7 @@ async def export_excel_by_path(
     """
     create_log_api_request(request)
 
-    api = ExportExcelByPath(**body.model_dump())
+    api = ExportExcelByPath(body)
     result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)
@@ -176,7 +176,7 @@ async def export_parquet_by_path(
     """
     create_log_api_request(request)
 
-    api = ExportParquetByPath(**body.model_dump())
+    api = ExportParquetByPath(body)
     result = run_operation(api)
 
     return create_success_response(http_status.HTTP_200_OK, result)

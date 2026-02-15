@@ -2,6 +2,7 @@ import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import FilterSingleConditionRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_compare_value,
@@ -24,26 +25,21 @@ class FilterSingleCondition:
 
     def __init__(
         self,
-        new_table_name: str,
-        table_name: str,
-        column_name: str,
-        condition: str,
-        is_compare_column: str,
-        compare_value: str,
+        body: FilterSingleConditionRequestBody,
     ):
         self.manager = TablesStore()
         # 新しいテーブル名
-        self.new_table_name = new_table_name
+        self.new_table_name = body.new_table_name
         # フィルタリング対象のテーブル名
-        self.table_name = table_name
+        self.table_name = body.table_name
         # フィルタリング対象のカラム名
-        self.column_name = column_name
+        self.column_name = body.column_name
         # フィルタリング条件
-        self.condition = condition
+        self.condition = body.condition
         # 比較値がカラムかどうか
-        self.is_compare_column = is_compare_column
+        self.is_compare_column = body.is_compare_column
         # 比較値
-        self.compare_value = compare_value
+        self.compare_value = body.compare_value
         # パラメータ名のマッピング
         self.param_names = {
             "new_table_name": "newTableName",

@@ -5,6 +5,10 @@ from typing import Annotated, List
 from pydantic import Field
 
 from .common import BaseRequest
+from .enums import (
+    ConfidenceIntervalStatisticsType,
+    DescriptiveStatisticType,
+)
 from .types import ColumnName, TableName
 
 
@@ -25,12 +29,10 @@ class ConfidenceIntervalRequestBody(BaseRequest):
         gt=0.0,
         lt=1.0,
     )
-    statistic_type: str = Field(
+    statistic_type: ConfidenceIntervalStatisticsType = Field(
         ...,
         alias="statisticType",
         description="統計量のタイプ (mean, median, etc.)",
-        min_length=1,
-        max_length=50,
     )
 
 
@@ -41,6 +43,6 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
     column_name_list: List[
         Annotated[ColumnName, Field(description="対象カラム名のリスト")]
     ]
-    statistics: List[str] = Field(
+    statistics: List[DescriptiveStatisticType] = Field(
         ..., description="統計量のリスト", min_length=1
     )

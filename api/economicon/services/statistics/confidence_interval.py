@@ -3,6 +3,7 @@ from scipy import stats
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import ConfidenceIntervalRequestBody
 from ...utils.validators.common import (
     ValidationError,
     validate_candidates,
@@ -33,16 +34,13 @@ class ConfidenceInterval:
 
     def __init__(
         self,
-        table_name: str,
-        column_name: str,
-        confidence_level: float,
-        statistic_type: str,
+        body: ConfidenceIntervalRequestBody,
     ):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.column_name = column_name
-        self.confidence_level = confidence_level
-        self.statistic_type = statistic_type
+        self.table_name = body.table_name
+        self.column_name = body.column_name
+        self.confidence_level = body.confidence_level
+        self.statistic_type = body.statistic_type
         self.param_names = {
             "table_name": "tableName",
             "column_name": "columnName",

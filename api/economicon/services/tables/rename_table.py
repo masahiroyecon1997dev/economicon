@@ -1,5 +1,6 @@
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import RenameTableRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_table_name,
@@ -16,12 +17,12 @@ class RenameTable:
     同じテーブル名が既に存在する場合はエラーとなります。
     """
 
-    def __init__(self, old_table_name: str, new_table_name: str):
+    def __init__(self, body: RenameTableRequestBody):
         self.tables_store = TablesStore()
         # 変更前のテーブル名
-        self.old_table_name = old_table_name
+        self.old_table_name = body.old_table_name
         # 変更後のテーブル名
-        self.new_table_name = new_table_name
+        self.new_table_name = body.new_table_name
         # パラメータ名のマッピング
         self.param_names = {
             "table_name": "oldTableName",
