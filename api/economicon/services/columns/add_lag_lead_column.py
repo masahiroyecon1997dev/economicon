@@ -88,11 +88,6 @@ class AddLagLeadColumn:
             table_info = self.tables_store.get_table(self.table_name)
             df = table_info.table
 
-            # shift操作を実行
-            # Note: polars.shift(1) gives previous value (lag),
-            # shift(-1) gives next value (lead)
-            # But we want periods=-1 to mean lag, periods=1 to mean lead
-            # So we need to negate the periods value
             shift_periods = -self.periods
 
             if self.group_columns:

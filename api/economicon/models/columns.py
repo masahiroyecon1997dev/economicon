@@ -4,7 +4,7 @@ from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, Field
 
-from .common import BaseRequest
+from .common import BaseRequest, DistributionParams
 from .schemas import SortInstruction
 from .types import ColumnName, NewColumnName, TableName
 
@@ -20,6 +20,38 @@ class AddColumnRequestBody(BaseRequest):
             description="追加位置のカラム名",
         ),
     ]
+    csv_file_path: Optional[
+        Annotated[
+            str,
+            Field(
+                alias="csvFilePath",
+                description="CSVファイルのパス（指定時にCSVから列データを読み込む）",
+                max_length=1024,
+            ),
+        ]
+    ] = None
+    csv_has_header: Annotated[
+        bool,
+        Field(
+            alias="csvHasHeader",
+            description="CSVファイルにヘッダ行があるか（True:ヘッダ行をスキップして2行目から読み込む、False:1行目から読み込む）",
+        ),
+    ] = True
+    csv_strict_row_count: Annotated[
+        bool,
+        Field(
+            alias="csvStrictRowCount",
+            description="行数の厳密チェック（True:行数不一致でエラー、False:超過分を切り捨て・不足分はNoneで埋める）",
+        ),
+    ] = True
+    separator: Annotated[
+        str,
+        Field(
+            description="CSV区切り文字",
+            min_length=1,
+            max_length=10,
+        ),
+    ] = ","
 
 
 class AddColumnResult(BaseModel):
@@ -85,7 +117,7 @@ class AddDummyColumnRequestBody(BaseRequest):
     dummy_column_name: Annotated[
         NewColumnName, Field(description="新しいカラム名")
     ]
-    target_value: str = Field(description="1にする対象の値")
+    target_value: str = Field(description="1にする対象の値", min_length=1)
 
 
 class AddLagLeadColumnRequestBody(BaseRequest):
@@ -100,7 +132,7 @@ class AddLagLeadColumnRequestBody(BaseRequest):
     ]
     new_column_name: NewColumnName
     periods: int = Field(alias="periods", description="ラグ・リード期間")
-    group_columns: List[str] = Field(
+    group_columns: List[ColumnName] = Field(
         default_factory=list,
         description="グループ化するカラムのリスト",
     )
@@ -111,12 +143,10 @@ class AddSimulationColumnRequestBody(BaseRequest):
 
     table_name: TableName
     new_column_name: NewColumnName
-    distribution_type: str = Field(
-        ..., alias="distributionType", description="分布の種類", min_length=1
-    )
-    distribution_params: dict = Field(
-        ..., alias="distributionParams", description="分布のパラメータ"
-    )
+    distribution: Annotated[
+        DistributionParams,
+        Field(discriminator="type", description="分布設定"),
+    ]
 
 
 class SortColumnsRequestBody(BaseRequest):

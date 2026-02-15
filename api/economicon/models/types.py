@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Annotated
 
 from pydantic import Field, StringConstraints
@@ -49,3 +50,18 @@ NewColumnName = Annotated[
         description="新しいカラム名",
     ),
 ]
+
+
+class DistributionType(str, Enum):
+    UNIFORM = "uniform"
+    EXPONENTIAL = "exponential"
+    NORMAL = "normal"
+    GAMMA = "gamma"
+    BETA = "beta"
+    WEIBULL = "weibull"
+    LOGNORMAL = "lognormal"
+    BINOMIAL = "binomial"
+    BERNOULLI = "bernoulli"
+    POISSON = "poisson"
+    GEOMETRIC = "geometric"
+    HYPERGEOMETRIC = "hypergeometric"
