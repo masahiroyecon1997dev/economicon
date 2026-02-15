@@ -1,12 +1,9 @@
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import CreateJoinTableRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_existed_column_name,
-    validate_existed_table_name,
-    validate_join_type,
-    validate_new_table_name,
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import (
+    validate_existence,
+    validate_non_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -51,45 +48,43 @@ class CreateJoinTable:
         try:
             table_name_list = self.tables_store.get_table_name_list()
             # 新しいテーブル名の重複チェック
-            validate_new_table_name(
-                self.join_table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_non_existence(
+                value=self.join_table_name,
+                existing_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             # 左テーブルの存在チェック
-            validate_existed_table_name(
-                self.left_table_name,
-                table_name_list,
-                self.param_names["left_table_name"],
+            validate_existence(
+                value=self.left_table_name,
+                valid_list=table_name_list,
+                target=self.param_names["left_table_name"],
             )
             # 右テーブルの存在チェック
-            validate_existed_table_name(
-                self.right_table_name,
-                table_name_list,
-                self.param_names["right_table_name"],
+            validate_existence(
+                value=self.right_table_name,
+                valid_list=table_name_list,
+                target=self.param_names["right_table_name"],
             )
             # 左テーブルのキー列の存在チェック
             left_table_column_name_list = TablesStore().get_column_name_list(
                 self.left_table_name
             )
             for left_key_column_name in self.left_key_column_names:
-                validate_existed_column_name(
-                    left_key_column_name,
-                    left_table_column_name_list,
-                    self.param_names["left_key_column_names"],
+                validate_existence(
+                    value=left_key_column_name,
+                    valid_list=left_table_column_name_list,
+                    target=self.param_names["left_key_column_names"],
                 )
             # 右テーブルのキー列の存在チェック
             right_table_column_name_list = TablesStore().get_column_name_list(
                 self.right_table_name
             )
             for right_key_column_name in self.right_key_column_names:
-                validate_existed_column_name(
-                    right_key_column_name,
-                    right_table_column_name_list,
-                    self.param_names["right_key_column_names"],
+                validate_existence(
+                    value=right_key_column_name,
+                    valid_list=right_table_column_name_list,
+                    target=self.param_names["right_key_column_names"],
                 )
-            # 結合タイプの妥当性チェック
-            validate_join_type(self.join_type, self.param_names["join_type"])
             return None
         except ValidationError as e:
             return e
@@ -103,14 +98,6 @@ class CreateJoinTable:
             right_df = self.tables_store.get_table(self.right_table_name).table
             # 結合タイプに応じて結合処理を実行
             match self.join_type:
-                case "inner":
-                    # 内部結合
-                    df = left_df.join(
-                        right_df,
-                        left_on=self.left_key_column_names,
-                        right_on=self.right_key_column_names,
-                        how="inner",
-                    )
                 case "left":
                     # 左結合
                     df = left_df.join(
@@ -138,7 +125,13 @@ class CreateJoinTable:
                         maintain_order="left",
                     )
                 case _:
-                    raise ApiError("Invalid join type specified.")
+                    # 内部結合（デフォルト）
+                    df = left_df.join(
+                        right_df,
+                        left_on=self.left_key_column_names,
+                        right_on=self.right_key_column_names,
+                        how="inner",
+                    )
             # 新しいテーブル情報を保存
             created_table_name = self.tables_store.store_table(
                 self.join_table_name, df
@@ -151,4 +144,8 @@ class CreateJoinTable:
                 "An unexpected error occurred during "
                 "join table creation processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="JoinTableCreationError",
+                message=message,
+                detail=str(e),
+            )

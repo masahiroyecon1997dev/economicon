@@ -1,15 +1,11 @@
 import polars as pl
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import AddDummyColumnRequestBody
-from ...utils.validators.common import (
-    ValidationError,
-)
-from ...utils.validators.tables_store import (
-    validate_existed_column_name,
-    validate_existed_table_name,
-    validate_new_column_name,
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import (
+    validate_existence,
+    validate_non_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -41,23 +37,23 @@ class AddDummyColumn:
     def validate(self):
         try:
             table_name_list = self.tables_store.get_table_name_list()
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
-            validate_existed_column_name(
-                self.source_column_name,
-                column_name_list,
-                self.param_names["source_column_name"],
+            validate_existence(
+                value=self.source_column_name,
+                valid_list=column_name_list,
+                target=self.param_names["source_column_name"],
             )
-            validate_new_column_name(
-                self.dummy_column_name,
-                column_name_list,
-                self.param_names["dummy_column_name"],
+            validate_non_existence(
+                value=self.dummy_column_name,
+                existing_list=column_name_list,
+                target=self.param_names["dummy_column_name"],
             )
             return None
         except ValidationError as e:
@@ -91,4 +87,8 @@ class AddDummyColumn:
                 "An unexpected error occurred during "
                 "adding dummy column processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="AddDummyColumnProcessError",
+                message=message,
+                detail=str(e),
+            )

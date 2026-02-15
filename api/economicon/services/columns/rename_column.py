@@ -1,11 +1,9 @@
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import RenameColumnRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_existed_column_name,
-    validate_existed_table_name,
-    validate_new_column_name,
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import (
+    validate_existence,
+    validate_non_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -38,25 +36,25 @@ class RenameColumn:
         try:
             table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の存在チェック
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                table_name_param=self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             # 変更前の列名の存在チェック
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
-            validate_existed_column_name(
-                self.old_column_name,
-                column_name_list,
-                self.param_names["old_column_name"],
+            validate_existence(
+                value=self.old_column_name,
+                valid_list=column_name_list,
+                target=self.param_names["old_column_name"],
             )
             # 変更後の列名の重複チェック
-            validate_new_column_name(
-                self.new_column_name,
-                column_name_list,
-                self.param_names["new_column_name"],
+            validate_non_existence(
+                value=self.new_column_name,
+                existing_list=column_name_list,
+                target=self.param_names["new_column_name"],
             )
             return None
         except ValidationError as e:
@@ -83,4 +81,8 @@ class RenameColumn:
                 "An unexpected error occurred during "
                 "renaming column processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="RenameColumnProcessError",
+                message=message,
+                detail=str(e),
+            )

@@ -1,13 +1,12 @@
 import polars as pl
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import AddSimulationColumnRequestBody
+from ...utils import ProcessingError, ValidationError
 from ...utils.algorithms.simulation import generate_simulation_data
-from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_existed_table_name,
-    validate_new_column_name,
+from ...utils.validators import (
+    validate_existence,
+    validate_non_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -40,20 +39,20 @@ class AddSimulationColumn:
         try:
             # テーブル名の検証
             table_name_list = self.tables_store.get_table_name_list()
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
 
             # 新しい列名の検証
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
-            validate_new_column_name(
-                self.new_column_name,
-                column_name_list,
-                self.param_names["new_column_name"],
+            validate_non_existence(
+                value=self.new_column_name,
+                existing_list=column_name_list,
+                target=self.param_names["new_column_name"],
             )
             return None
         except ValidationError as e:
@@ -91,4 +90,8 @@ class AddSimulationColumn:
                 "An unexpected error occurred during "
                 "adding simulation column processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="AddSimulationColumnProcessError",
+                message=message,
+                detail=str(e),
+            )

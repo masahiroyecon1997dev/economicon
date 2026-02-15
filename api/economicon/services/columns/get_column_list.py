@@ -1,11 +1,8 @@
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import GetColumnListRequestBody
-from ...utils.validators.common import (
-    ValidationError,
-)
-from ...utils.validators.tables_store import (
-    validate_existed_table_name,
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import (
+    validate_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -29,10 +26,10 @@ class GetColumnList:
     def validate(self):
         try:
             table_name_list = self.tables_store.get_table_name_list()
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             return None
         except ValidationError as e:
@@ -60,5 +57,11 @@ class GetColumnList:
             }
             return result
         except Exception as e:
-            message = _("An unexpected error during getting column info list.")
-            raise ApiError(message) from e
+            message = _(
+                "An unexpected error occurred during getting column info list."
+            )
+            raise ProcessingError(
+                error_code="GetColumnListProcessError",
+                message=message,
+                detail=str(e),
+            )

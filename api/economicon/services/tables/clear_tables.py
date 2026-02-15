@@ -1,5 +1,5 @@
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...utils import ProcessingError
 from ..data.tables_store import TablesStore
 
 
@@ -29,4 +29,6 @@ class ClearTables:
                 "An unexpected error occurred "
                 "during clearing tables processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="ClearTablesError", message=message, detail=str(e)
+            )
