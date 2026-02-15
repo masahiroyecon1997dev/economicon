@@ -93,8 +93,6 @@ __all__ = [
     "DescriptiveStatisticsRequest",
     # Settings
     "GetSettingsRequest",
-    # Files
-    "GetFilesRequest",
     # Data I/O
     "ImportCsvByPathRequest",
     "ImportExcelByPathRequest",
