@@ -1,10 +1,9 @@
 import polars as pl
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import AddColumnRequestBody
-from ...utils.validators.common import (
-    ValidationError,
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import (
     validate_existence,
     validate_non_existence,
 )
@@ -100,14 +99,17 @@ class AddColumn:
                 "columnName": self.new_column_name,
             }
             return result
-        except ApiError:
-            # ApiErrorはそのまま再raise
-            raise
+        except ProcessingError as e:
+            raise e
         except Exception as e:
             message = _(
                 "An unexpected error occurred during adding column processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="AddColumnProcessError",
+                message=message,
+                detail=str(e),
+            )
 
     def _read_column_from_csv(self, expected_rows: int):
         """
@@ -125,13 +127,16 @@ class AddColumn:
 
         Raises
         ------
-        ApiError
+        ProcessingError
             CSV読み込みエラー、行数不一致エラー
         """
         try:
             if self.csv_file_path is None:
                 message = _("CSV file path is not specified.")
-                raise ApiError(message)
+                raise ProcessingError(
+                    error_code="CSVFilePathNotSpecified",
+                    message=message,
+                )
             # CSVファイルを読み込む
             skip_rows = 1 if self.csv_has_header else 0
             df_csv = pl.read_csv(
@@ -145,12 +150,18 @@ class AddColumn:
             # CSVファイルが空の場合
             if df_csv.height == 0:
                 message = _("The CSV file is empty or contains no valid data.")
-                raise ApiError(message)
+                raise ProcessingError(
+                    error_code="EmptyCSVFile",
+                    message=message,
+                )
 
             # 最初の列を取得（列名はnew_column_nameを使うため、CSVの1列目だけ取得）
             if df_csv.width == 0:
                 message = _("The CSV file does not contain any columns.")
-                raise ApiError(message)
+                raise ProcessingError(
+                    error_code="NoColumnsInCSVFile",
+                    message=message,
+                )
 
             first_column = df_csv[:, 0].to_list()
             csv_rows = len(first_column)
@@ -163,7 +174,10 @@ class AddColumn:
                         "Row count mismatch: CSV has {csv_rows} rows, "
                         "but table has {expected_rows} rows."
                     ).format(csv_rows=csv_rows, expected_rows=expected_rows)
-                    raise ApiError(message)
+                    raise ProcessingError(
+                        error_code="RowCountMismatch",
+                        message=message,
+                    )
                 else:
                     # 非厳密モード：調整する
                     if csv_rows > expected_rows:
@@ -179,14 +193,17 @@ class AddColumn:
 
         except pl.exceptions.NoDataError as e:
             message = _("The CSV file is empty or contains no valid data.")
-            raise ApiError(message) from e
-        except pl.exceptions.ComputeError as e:
-            message = _(
-                "Failed to parse CSV file: Invalid format or encoding."
+            raise ProcessingError(
+                error_code="EmptyCSVFile",
+                message=message,
+                detail=str(e),
             )
-            raise ApiError(message) from e
         except Exception as e:
-            if isinstance(e, ApiError):
+            if isinstance(e, ProcessingError):
                 raise
             message = _("An unexpected error occurred during CSV processing")
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="CSVProcessingError",
+                message=message,
+                detail=str(e),
+            ) from e

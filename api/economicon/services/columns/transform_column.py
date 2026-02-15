@@ -2,14 +2,12 @@ import math
 
 import polars as pl
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import TransformColumnRequestBody, TransformMethodType
-from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_existed_column_name,
-    validate_existed_table_name,
-    validate_new_column_name,
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import (
+    validate_existence,
+    validate_non_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -39,23 +37,23 @@ class TransformColumn:
     def validate(self):
         try:
             table_name_list = self.tables_store.get_table_name_list()
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
-            validate_existed_column_name(
-                self.source_column_name,
-                column_name_list,
-                self.param_names["source_column"],
+            validate_existence(
+                value=self.source_column_name,
+                valid_list=column_name_list,
+                target=self.param_names["source_column"],
             )
-            validate_new_column_name(
-                self.new_column_name,
-                column_name_list,
-                self.param_names["new_column"],
+            validate_non_existence(
+                value=self.new_column_name,
+                existing_list=column_name_list,
+                target=self.param_names["new_column"],
             )
 
             return None
@@ -103,9 +101,10 @@ class TransformColumn:
                     pl.col(self.source_column_name).pow(1.0 / root_index)
                 ).to_series()
             else:
-                raise ValidationError(
-                    "TransformMethodError",
-                    f"Unsupported transform method: {self.transform_method}",
+                raise ProcessingError(
+                    error_code="TransformMethodError",
+                    message=f"Unsupported transform method: {self.transform_method}",
+                    detail=str(self.transform_method),
                 )
 
             # Rename the transformed series
@@ -129,4 +128,8 @@ class TransformColumn:
             message = _(
                 "An unexpected error occurred during column transformation processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="TransformColumnProcessError",
+                message=message,
+                detail=str(e),
+            )

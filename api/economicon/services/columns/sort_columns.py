@@ -1,12 +1,8 @@
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import SortColumnsRequestBody
-from ...utils.validators.common import (
-    ValidationError,
-)
-from ...utils.validators.tables_store import (
-    validate_existed_column_name,
-    validate_existed_table_name,
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import (
+    validate_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -33,20 +29,20 @@ class SortColumns:
     def validate(self):
         try:
             table_name_list = self.tables_store.get_table_name_list()
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
             for sort_spec in self.sort_columns:
                 # 列名の存在チェック
-                validate_existed_column_name(
-                    sort_spec.column_name,
-                    column_name_list,
-                    self.param_names["column_name"],
+                validate_existence(
+                    value=sort_spec.column_name,
+                    valid_list=column_name_list,
+                    target=self.param_names["column_name"],
                 )
             return None
         except ValidationError as e:
@@ -81,4 +77,8 @@ class SortColumns:
             message = _(
                 "An unexpected error occurred during column sorting processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="SortColumnsProcessError",
+                message=message,
+                detail=str(e),
+            )

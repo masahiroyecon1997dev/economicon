@@ -3,14 +3,12 @@ from typing import List
 
 import polars as pl
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import CalculateColumnRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_existed_numeric_columns,
-    validate_existed_table_name,
-    validate_new_column_name,
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import (
+    validate_existence,
+    validate_non_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -47,20 +45,20 @@ class CalculateColumn:
     def validate(self):
         try:
             table_name_list = self.tables_store.get_table_name_list()
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
 
             # 新しい列名の検証
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
-            validate_new_column_name(
-                self.new_column_name,
-                column_name_list,
-                self.param_names["new_column_name"],
+            validate_non_existence(
+                value=self.new_column_name,
+                existing_list=column_name_list,
+                target=self.param_names["new_column_name"],
             )
 
             # 計算式から列名を抽出して存在チェック
@@ -97,9 +95,12 @@ class CalculateColumn:
                 )
 
             except Exception as e:
-                raise ValidationError(
-                    "CalculationExpressionError",
-                    _("Invalid calculation expression: {}").format(str(e)),
+                raise ProcessingError(
+                    error_code="CalculationExpressionError",
+                    message=_("Invalid calculation expression: {}").format(
+                        str(e)
+                    ),
+                    detail=str(e),
                 )
 
             # テーブルを更新
@@ -118,4 +119,8 @@ class CalculateColumn:
                 "An unexpected error occurred during "
                 "column calculation processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="CalculateColumnProcessError",
+                message=message,
+                detail=str(e),
+            )

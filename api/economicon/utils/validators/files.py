@@ -4,7 +4,7 @@ from typing import List
 
 from economicon.i18n.translation import gettext as _
 
-from .common import (
+from ..exceptions import (
     ValidationError,
 )
 

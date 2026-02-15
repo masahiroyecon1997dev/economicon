@@ -1,5 +1,7 @@
 """ユーティリティパッケージ初期化"""
 
+from exceptions import ProcessingError, ValidationError
+
 from .logging import (
     create_log_api_error,
     create_log_api_exception,
@@ -20,4 +22,6 @@ __all__ = [
     "create_log_api_success",
     "create_log_api_error",
     "create_log_api_exception",
+    "ValidationError",
+    "ProcessingError",
 ]
