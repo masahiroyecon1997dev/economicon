@@ -2,6 +2,7 @@ import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import InputCellDataRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -20,18 +21,16 @@ class InputCellData:
     行番号は1から始まると仮定しています。
     """
 
-    def __init__(
-        self, table_name: str, column_name: str, row_index: int, new_value
-    ):
+    def __init__(self, body: InputCellDataRequestBody):
         self.tables_store = TablesStore()
         # テーブル名
-        self.table_name = table_name
+        self.table_name = body.table_name
         # カラム名
-        self.column_name = column_name
+        self.column_name = body.column_name
         # 行インデックス
-        self.row_index = row_index
+        self.row_index = body.row_index
         # 新しい値
-        self.new_value = new_value
+        self.new_value = body.new_value
         # パラメータ名のマッピング
         self.param_names = {
             "table_name": "tableName",

@@ -1,5 +1,6 @@
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import DuplicateTableRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_table_name,
@@ -15,10 +16,10 @@ class DuplicateTable:
     指定されたテーブルを複製して、新しい名前で追加します。
     """
 
-    def __init__(self, table_name: str, new_table_name: str):
+    def __init__(self, body: DuplicateTableRequestBody):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.new_table_name = new_table_name
+        self.table_name = body.table_name
+        self.new_table_name = body.new_table_name
         self.param_names = {
             "table_name": "tableName",
             "new_table_name": "newTableName",

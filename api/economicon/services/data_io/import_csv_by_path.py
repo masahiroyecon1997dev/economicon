@@ -2,6 +2,7 @@ import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import ImportCsvByPathRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.file import (
     validate_file_path,
@@ -19,15 +20,15 @@ class ImportCsvByPath:
     区切り文字を指定できます。
     """
 
-    def __init__(self, file_path: str, table_name: str, separator: str = ","):
+    def __init__(self, body: ImportCsvByPathRequestBody):
         # テーブルマネージャーの初期化
         self.tables_store = TablesStore()
         # ファイルパス
-        self.file_path = file_path
+        self.file_path = body.file_path
         # テーブル名
-        self.table_name = table_name
+        self.table_name = body.table_name
         # 区切り文字
-        self.separator = separator
+        self.separator = body.separator
         # パラメータ名のマッピング
         self.param_names = {
             "file_path": "filePath",

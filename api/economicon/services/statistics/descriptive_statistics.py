@@ -1,9 +1,8 @@
-from typing import List
-
 import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import DescriptiveStatisticsRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -33,14 +32,12 @@ class DescriptiveStatistics:
 
     def __init__(
         self,
-        table_name: str,
-        column_name_list: List[str],
-        statistics: List[str],
+        body: DescriptiveStatisticsRequestBody,
     ):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.column_name_list = column_name_list
-        self.statistics = statistics
+        self.table_name = body.table_name
+        self.column_name_list = body.column_name_list
+        self.statistics = body.statistics
         self.param_names = {
             "table_name": "tableName",
             "column_names": "columnName",

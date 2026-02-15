@@ -5,6 +5,7 @@ from typing import Annotated, Any, List
 from pydantic import Field
 
 from .common import BaseRequest
+from .enums import FilterOperatorType, JoinType
 from .types import (
     ColumnName,
     DistributionConfig,
@@ -62,9 +63,10 @@ class CreateJoinTableRequestBody(BaseRequest):
     right_key_column_names: List[ColumnName] = Field(
         description="右側の結合キーカラム名のリスト"
     )
-    join_type: Annotated[
-        str, Field(description="結合タイプ (inner, left, right, outer)")
-    ]
+    join_type: JoinType = Field(
+        default=JoinType.INNER,
+        description="結合タイプ (inner, left, right, outer)",
+    )
 
 
 class CreateUnionTableRequestBody(BaseRequest):
@@ -107,37 +109,20 @@ class DeleteTableRequestBody(BaseRequest):
 class FetchDataToJsonRequestBody(BaseRequest):
     """データJSON取得リクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="対象テーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    start_row: int = Field(
-        ..., alias="startRow", description="開始行番号", ge=0
-    )
+    table_name: TableName
+    start_row: int = Field(description="開始行番号", ge=0)
     fetch_rows: int = Field(
-        ..., alias="fetchRows", description="取得行数", ge=1
+        default=500, description="取得行数", ge=1, le=10000
     )
 
 
 class FetchDataToArrowRequestBody(BaseRequest):
     """データArrow取得リクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="対象テーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    start_row: int = Field(
-        ..., alias="startRow", description="開始行番号", ge=0
-    )
+    table_name: TableName
+    start_row: int = Field(description="開始行番号", ge=0)
     chunk_size: int = Field(
         default=500,
-        alias="chunkSize",
         description="チャンクサイズ（デフォルト500行）",
         ge=1,
         le=10000,
@@ -153,24 +138,10 @@ class GetTableListRequestBody(BaseRequest):
 class InputCellDataRequestBody(BaseRequest):
     """セルデータ入力リクエスト"""
 
-    table_name: str = Field(
-        ...,
-        alias="tableName",
-        description="テーブル名",
-        min_length=1,
-        max_length=255,
-    )
-    column_name: str = Field(
-        ...,
-        alias="columnName",
-        description="カラム名",
-        min_length=1,
-        max_length=255,
-    )
-    row_index: int = Field(
-        ..., alias="rowIndex", description="行インデックス", ge=0
-    )
-    new_value: Any = Field(..., alias="newValue", description="新しい入力値")
+    table_name: TableName
+    column_name: ColumnName
+    row_index: int = Field(description="行インデックス", ge=0)
+    new_value: Any = Field(description="新しい入力値")
 
 
 class FilterSingleConditionRequestBody(BaseRequest):
@@ -184,7 +155,7 @@ class FilterSingleConditionRequestBody(BaseRequest):
             description="対象カラム名",
         ),
     ]
-    condition: str = Field(
+    condition: FilterOperatorType = Field(
         ..., description="条件", min_length=1, max_length=50
     )
     is_compare_column: str = Field(

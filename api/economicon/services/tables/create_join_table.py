@@ -1,7 +1,6 @@
-from typing import List
-
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import CreateJoinTableRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -22,26 +21,21 @@ class CreateJoinTable:
 
     def __init__(
         self,
-        join_table_name: str,
-        left_table_name: str,
-        right_table_name: str,
-        left_key_column_names: List[str],
-        right_key_column_names: List[str],
-        join_type: str,
+        body: CreateJoinTableRequestBody,
     ):
         self.tables_store = TablesStore()
         # 結合後のテーブル名
-        self.join_table_name = join_table_name
+        self.join_table_name = body.join_table_name
         # 左テーブル名
-        self.left_table_name = left_table_name
+        self.left_table_name = body.left_table_name
         # 右テーブル名
-        self.right_table_name = right_table_name
+        self.right_table_name = body.right_table_name
         # 左テーブルのキー列名リスト
-        self.left_key_column_names = left_key_column_names
+        self.left_key_column_names = body.left_key_column_names
         # 右テーブルのキー列名リスト
-        self.right_key_column_names = right_key_column_names
+        self.right_key_column_names = body.right_key_column_names
         # 結合タイプ（inner, left, right, outer）
-        self.join_type = join_type
+        self.join_type = body.join_type
         # パラメータ名のマッピング
         self.param_names = {
             "table_name": "joinTableName",

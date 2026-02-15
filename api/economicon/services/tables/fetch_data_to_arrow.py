@@ -8,6 +8,7 @@ import pyarrow as pa
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import FetchDataToArrowRequestBody
 from ...utils.validators.common import (
     ValidationError,
 )
@@ -27,7 +28,7 @@ class FetchDataToArrow:
     仮想スクロール用に500行単位でのチャンク取得を想定しています。
     """
 
-    def __init__(self, table_name: str, start_row: int, chunk_size: int = 500):
+    def __init__(self, body: FetchDataToArrowRequestBody):
         """
         初期化
 
@@ -41,9 +42,9 @@ class FetchDataToArrow:
             チャンクサイズ（デフォルト500行）
         """
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.start_row = start_row
-        self.chunk_size = chunk_size
+        self.table_name = body.table_name
+        self.start_row = body.start_row
+        self.chunk_size = body.chunk_size
         self.param_names = {
             "table_name": "tableName",
             "start_row": "startRow",
