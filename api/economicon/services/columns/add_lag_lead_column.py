@@ -1,9 +1,8 @@
-from typing import List, Optional
-
 import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import AddLagLeadColumnRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -25,18 +24,14 @@ class AddLagLeadColumn:
 
     def __init__(
         self,
-        table_name: str,
-        source_column: str,
-        new_column_name: str,
-        periods: int,
-        group_columns: Optional[List[str]] = None,
+        body: AddLagLeadColumnRequestBody,
     ):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.source_column = source_column
-        self.new_column_name = new_column_name
-        self.periods = periods
-        self.group_columns = group_columns or []
+        self.table_name = body.table_name
+        self.source_column = body.source_column
+        self.new_column_name = body.new_column_name
+        self.periods = body.periods
+        self.group_columns = body.group_columns or []
         self.param_names = {
             "table_name": "tableName",
             "source_column_name": "sourceColumn",
@@ -74,10 +69,6 @@ class AddLagLeadColumn:
                     column_name_list,
                     self.param_names["group_columns"],
                 )
-
-            # periodsが整数であることを確認
-            if not isinstance(self.periods, int):
-                raise ValidationError(_("periods must be an integer"))
 
             return None
         except ValidationError as e:

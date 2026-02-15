@@ -1,12 +1,15 @@
 """回帰分析関連のスキーマ定義"""
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Annotated, Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
+
+from .common import BaseRequest
+from .types import ColumnName, TableName
 
 
 # 統合リクエストスキーマ
-class RegressionRequestBody(BaseModel):
+class RegressionRequestBody(BaseRequest):
     """
     統合回帰分析リクエスト
 
@@ -31,27 +34,26 @@ class RegressionRequestBody(BaseModel):
         default="ols", alias="method", description="計算手法"
     )
 
-    table_name: str = Field(
-        ..., alias="tableName", description="対象テーブル名"
-    )
+    table_name: TableName
 
-    name: str = Field(
-        default="", alias="name", description="分析結果の名前（ユーザー指定）"
-    )
+    name: str = Field(default="", description="分析結果の名前（ユーザー指定）")
 
     description: str = Field(
         default="",
-        alias="description",
         description="分析結果の説明・メモ（ユーザー指定）",
     )
 
-    dependent_variable: str = Field(
-        ..., alias="dependentVariable", description="被説明変数の列名"
-    )
+    dependent_variable: Annotated[
+        ColumnName,
+        Field(description="被説明変数の列名"),
+    ]
 
-    explanatory_variables: List[str] = Field(
-        ..., alias="explanatoryVariables", description="説明変数の列名リスト"
-    )
+    explanatory_variables: List[
+        Annotated[
+            ColumnName,
+            Field(description="説明変数の列名"),
+        ]
+    ]
 
     standard_error_method: Literal[
         "nonrobust", "hc0", "hc1", "hc2", "hc3", "hac", "clustered"

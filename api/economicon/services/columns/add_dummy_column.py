@@ -2,9 +2,9 @@ import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import AddDummyColumnRequestBody
 from ...utils.validators.common import (
     ValidationError,
-    validate_required,
 )
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -24,16 +24,13 @@ class AddDummyColumn:
 
     def __init__(
         self,
-        table_name: str,
-        source_column_name: str,
-        dummy_column_name: str,
-        target_value: str,
+        body: AddDummyColumnRequestBody,
     ):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.source_column_name = source_column_name
-        self.dummy_column_name = dummy_column_name
-        self.target_value = target_value
+        self.table_name = body.table_name
+        self.source_column_name = body.source_column_name
+        self.dummy_column_name = body.dummy_column_name
+        self.target_value = body.target_value
         self.param_names = {
             "table_name": "tableName",
             "source_column_name": "sourceColumnName",
@@ -61,9 +58,6 @@ class AddDummyColumn:
                 self.dummy_column_name,
                 column_name_list,
                 self.param_names["dummy_column_name"],
-            )
-            validate_required(
-                self.target_value, self.param_names["target_value"]
             )
             return None
         except ValidationError as e:

@@ -2,10 +2,9 @@ import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
-from ...models.common import DistributionParams
+from ...models import AddSimulationColumnRequestBody
 from ...utils.algorithms.simulation import generate_simulation_data
 from ...utils.validators.common import ValidationError
-from ...utils.validators.statistics import validate_distribution_params
 from ...utils.validators.tables_store import (
     validate_existed_table_name,
     validate_new_column_name,
@@ -24,23 +23,12 @@ class AddSimulationColumn:
 
     def __init__(
         self,
-        table_name: str,
-        new_column_name: str,
-        distribution: DistributionParams,
+        body: AddSimulationColumnRequestBody,
     ):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.new_column_name = new_column_name
-
-        # Pydanticモデルをdictに変換
-        dist_dict = distribution.model_dump()
-
-        # typeフィールドから分布名を取得
-        self.distribution_type = dist_dict["type"]
-        # type以外のフィールドをパラメータとして抽出
-        self.distribution_params = {
-            k: v for k, v in dist_dict.items() if k != "type"
-        }
+        self.table_name = body.table_name
+        self.new_column_name = body.new_column_name
+        self.distribution = body.distribution
 
         self.param_names = {
             "table_name": "tableName",
@@ -67,12 +55,6 @@ class AddSimulationColumn:
                 column_name_list,
                 self.param_names["new_column_name"],
             )
-
-            # 分布パラメータの検証
-            validate_distribution_params(
-                self.distribution_type, self.distribution_params
-            )
-
             return None
         except ValidationError as e:
             return e
@@ -84,7 +66,7 @@ class AddSimulationColumn:
 
             # 分布に従ってデータを生成
             simulation_data = generate_simulation_data(
-                self.distribution_type, self.distribution_params, num_rows
+                self.distribution, num_rows
             )
 
             # 新しい列をデータフレームに追加
@@ -100,7 +82,7 @@ class AddSimulationColumn:
             result = {
                 "tableName": self.table_name,
                 "columnName": self.new_column_name,
-                "distributionType": self.distribution_type,
+                "distributionType": self.distribution.type,
             }
             return result
 

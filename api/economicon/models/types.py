@@ -1,7 +1,24 @@
-from enum import Enum
-from typing import Annotated
+from typing import Annotated, Union
 
 from pydantic import Field, StringConstraints
+
+from .common import (
+    BernoulliParams,
+    BetaParams,
+    BinomialParams,
+    ExponentialParams,
+    GammaParams,
+    GeometricParams,
+    HypergeometricParams,
+    LognormalParams,
+    LogParams,
+    NormalParams,
+    PoissonParams,
+    PowerParams,
+    RootParams,
+    UniformParams,
+    WeibullParams,
+)
 
 NAME_PATTERN = r"^[^\x00-\x1f\x7f]+$"
 
@@ -51,17 +68,51 @@ NewColumnName = Annotated[
     ),
 ]
 
+FilePath = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=1024),
+    Field(
+        examples=["/path/to/file.csv", "C:\\data\\file.csv"],
+        description="ファイルのパス",
+    ),
+]
 
-class DistributionType(str, Enum):
-    UNIFORM = "uniform"
-    EXPONENTIAL = "exponential"
-    NORMAL = "normal"
-    GAMMA = "gamma"
-    BETA = "beta"
-    WEIBULL = "weibull"
-    LOGNORMAL = "lognormal"
-    BINOMIAL = "binomial"
-    BERNOULLI = "bernoulli"
-    POISSON = "poisson"
-    GEOMETRIC = "geometric"
-    HYPERGEOMETRIC = "hypergeometric"
+Separator = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=10),
+    Field(
+        examples=[",", "\t"],
+        description="区切り文字",
+    ),
+]
+
+type DistributionParams = Union[
+    UniformParams,
+    ExponentialParams,
+    NormalParams,
+    GammaParams,
+    BetaParams,
+    WeibullParams,
+    LognormalParams,
+    BinomialParams,
+    BernoulliParams,
+    PoissonParams,
+    GeometricParams,
+    HypergeometricParams,
+]
+
+type DistributionConfig = Annotated[
+    DistributionParams,
+    Field(discriminator="type", description="分布設定"),
+]
+
+type TransformMethodParams = Union[
+    LogParams,
+    PowerParams,
+    RootParams,
+]
+
+type TransformMethodConfig = Annotated[
+    TransformMethodParams,
+    Field(discriminator="method", description="変換方法設定"),
+]

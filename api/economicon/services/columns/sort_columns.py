@@ -1,12 +1,8 @@
-from typing import List
-
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
-from ...models.schemas import SortInstruction
+from ...models import SortColumnsRequestBody
 from ...utils.validators.common import (
     ValidationError,
-    validate_list_length,
-    validate_required_list,
 )
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -23,10 +19,10 @@ class SortColumns:
     複数列でのソート、昇順・降順の指定が可能です。
     """
 
-    def __init__(self, table_name: str, sort_columns: List[SortInstruction]):
+    def __init__(self, body: SortColumnsRequestBody):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.sort_columns = sort_columns
+        self.table_name = body.table_name
+        self.sort_columns = body.sort_columns
         self.param_names = {
             "table_name": "tableName",
             "sort_columns": "sortColumns",
@@ -41,16 +37,6 @@ class SortColumns:
                 self.table_name,
                 table_name_list,
                 self.param_names["table_name"],
-            )
-
-            validate_required_list(
-                self.sort_columns, self.param_names["sort_columns"]
-            )
-            validate_list_length(
-                self.sort_columns,
-                1,
-                self.param_names["sort_columns"],
-                self.param_names["column_name"],
             )
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
