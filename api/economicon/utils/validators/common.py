@@ -1,100 +1,74 @@
-import os
-from pathlib import Path
-from typing import Any, List
+from typing import List, Union
 
 from economicon.i18n.translation import gettext as _
 
+from ..exceptions import ValidationError
 
-class ValidationError(Exception):
+
+def validate_existence(
+    *,
+    value: Union[str, List[str]],
+    valid_list: List[str],
+    target: str,  # パラメータ名を渡す
+) -> None:
     """
-    入力バリデーション専用の例外(全体で統一)
+    指定された値がリスト内に存在することを検証する。
+    テーブル名や列名が存在するかのチェックに使用する。
+    Args:
+        value: チェックする値（単体 or リスト）
+        valid_list: 存在が確認されている値のリスト
+        target: パラメータ名（'table_name', 'column_name' など）
+    Raises:
+        ValidationError: 値がリスト内に存在しない場合
     """
+    targets = [value] if isinstance(value, str) else value
+    valid_set = set(valid_list)
 
-    def __init__(self, error_code: str, message: str):
-        self.error_code = error_code
-        self.message = message
-        super().__init__(message)
+    # リスト内に存在しないものを抽出
+    missing = [t for t in targets if t not in valid_set]
 
+    if missing:
+        # エラーコードは固定で「存在しない」ことを示すものに
+        error_code = "DATA_NOT_FOUND"
 
-def validate_path(value: str, param_name: str) -> None:
-    """パスのバリデーション"""
-    # 空のパスをチェック
-    message = _("{} is required.").format(param_name)
-    validate_required(value, param_name)
-    # 危険な文字列をチェック
-    dangerous_patterns = ["..", "~", "$", "|", ";", "&", "`"]
-    if any(pattern in value for pattern in dangerous_patterns):
-        raise ValidationError(message)
-    # 絶対パスかどうかをチェック
-    try:
-        Path(value).resolve()
-    except OSError, ValueError:
-        raise ValidationError(message)
-    return None
+        # 多言語化メッセージ: 例 "columnName 'age' does not exist."
+        missing_str = ", ".join(missing)
+        message = _("{} '{}' does not exist.").format(target, missing_str)
 
-
-def validate_item_exists_in_list(
-    value: str, param_name: str, item_name_list: List[str]
-) -> None:
-    """項目が存在するかチェック"""
-    if value not in item_name_list:
-        message = _("{} '{}' does not exist.").format(param_name, value)
-        raise ValidationError(message)
-    return None
-
-
-def validate_item_duplicate(
-    value: str, param_name: str, item_name_list: List[str]
-) -> None:
-    """項目が重複していないかチェック"""
-    if value in item_name_list:
-        message = _("{} '{}' already exists.").format(param_name, value)
-        raise ValidationError(message)
-    return None
-
-
-def validate_candidates(
-    value: str, param_name: str, candidate_values: List[str]
-) -> None:
-    """リスト内にその値があるかのバリデーション"""
-    if value not in candidate_values:
-        message = _("{} '{}' is not supported. Supported {}: {}").format(
-            param_name, value, param_name, ", ".join(candidate_values)
-        )
-        raise ValidationError(message)
-    return None
-
-
-def validate_file_path_exists(file_path: str, param_name: str) -> None:
-    """ファイルパスのバリデーション"""
-    if not os.path.exists(file_path):
-        message = _("{} does not exist: {}").format(param_name, file_path)
-        raise ValidationError(message)
-    return None
-
-
-def validate_directory_path_exists(directory: str, param_name: str) -> None:
-    """ディレクトリパスのバリデーション"""
-    if not os.path.exists(directory):
         raise ValidationError(
-            _("ディレクトリが存在しません: {}").format(directory)
+            error_code=error_code, message=message, target=target
         )
-    return None
 
 
-def validate_file_path_readable(file_path: str, param_name: str) -> None:
-    """ファイルパスのバリデーション"""
-    if not os.access(file_path, os.R_OK):
-        message = _("{} is not readable: {}").format(param_name, file_path)
-        raise ValidationError(message)
-    return None
-
-
-def validate_column_is_numeric(
-    column_name: str, param_name: str, column_type: Any
+def validate_non_existence(
+    *, value: Union[str, List[str]], existing_list: List[str], target: str
 ) -> None:
-    """列が数値型であるかチェック"""
-    if not column_type.is_numeric():
-        message = _("{} '{}' is not numeric.").format(param_name, column_name)
-        raise ValidationError(message)
-    return None
+    """
+    指定された値が既にリスト内に存在しないことを検証する（重複チェック）。
+    新しい列の作成や、新しいテーブルの作成時に使用する。
+
+    Args:
+        value: 新しく作ろうとしている名前（単体 or リスト）
+        existing_list: 既に存在する名前のリスト
+        target: パラメータ名（'new_column_name', 'table_name' など）
+
+    Raises:
+        ValidationError: 既に名前が存在する場合
+    """
+    targets = [value] if isinstance(value, str) else value
+    existing_set = set(existing_list)
+
+    # 既に存在するものを抽出
+    already_exists = [t for t in targets if t in existing_set]
+
+    if already_exists:
+        # エラーコードは固定で「既に存在する」ことを示すものに
+        error_code = "DATA_ALREADY_EXISTS"
+
+        # 多言語化メッセージ: 例 "tableName 'users' already exists."
+        exists_str = ", ".join(already_exists)
+        message = _("{} '{}' already exists.").format(target, exists_str)
+
+        raise ValidationError(
+            error_code=error_code, message=message, target=target
+        )

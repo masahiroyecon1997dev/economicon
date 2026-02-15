@@ -4,6 +4,7 @@ from typing import Annotated, Any, Dict, List, Optional
 
 from pydantic import Field, model_validator
 
+from ..i18n.translation import gettext as _
 from .common import BaseRequest
 from .enums import (
     MissingValueHandlingType,
@@ -128,13 +129,23 @@ class RegressionRequestBody(BaseRequest):
         """
         分析パラメータの整合性をバリデーション
         """
+        # IV の制限: type=IV または FEIV の場合、instrumental_variables が必要
+        if self.type in [RegressionType.IV, RegressionType.FEIV]:
+            if not self.instrumental_variables:
+                raise ValueError(
+                    _(
+                        f"type='{self.type}' の場合、instrumentalVariables が必要です"
+                    )
+                )
         # GMM の制限: type="iv" のみ許可
         if (
             self.method == RegressionMethodType.GMM
             and self.type != RegressionType.IV
         ):
             raise ValueError(
-                "method='gmm' は type='iv' の場合のみ使用できます"
+                _(
+                    "method='gmm' is the only supported combination with type='iv'"
+                )
             )
 
         # 標準誤差の検証: clustered の場合 groups が必要
@@ -152,17 +163,21 @@ class RegressionRequestBody(BaseRequest):
             elif "groups" not in self.standard_error_params:
                 # パネルデータ以外ではgroupsが必須
                 raise ValueError(
-                    "standardErrorMethod='clustered' の場合、"
-                    "standardErrorParams に 'groups' "
-                    "(クラスタ変数名) が必要です"
+                    _(
+                        "standardErrorMethod='clustered' の場合、"
+                        "standardErrorParams に 'groups' "
+                        "(クラスタ変数名) が必要です"
+                    )
                 )
 
         # 正則化の検証: lasso, ridge の場合 alpha が必要
         if self.type in [RegressionType.LASSO, RegressionType.RIDGE]:
             if "alpha" not in self.hyper_parameters:
                 raise ValueError(
-                    f"type='{self.type}' の場合、"
-                    "hyperParameters に 'alpha' が必要です"
+                    _(
+                        f"type='{self.type}' の場合、"
+                        "hyperParameters に 'alpha' が必要です"
+                    )
                 )
 
         # パネルデータ分析の検証
@@ -173,15 +188,17 @@ class RegressionRequestBody(BaseRequest):
         ]:
             if not self.entity_id_column:
                 raise ValueError(
-                    f"type='{self.type}' の場合、entityIdColumn が必要です"
+                    _(f"type='{self.type}' の場合、entityIdColumn が必要です")
                 )
 
         # 操作変数法の検証
         if self.type in [RegressionType.IV, RegressionType.FEIV]:
             if not self.instrumental_variables:
                 raise ValueError(
-                    f"type='{self.type}' の場合、"
-                    "instrumentalVariables が必要です"
+                    _(
+                        f"type='{self.type}' の場合、"
+                        "instrumentalVariables が必要です"
+                    )
                 )
 
         return self

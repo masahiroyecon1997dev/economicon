@@ -39,7 +39,18 @@ from .data_io import (
     ImportExcelByPathRequestBody,
     ImportParquetByPathRequestBody,
 )
-from .enums import DistributionType, TransformMethodType
+from .enums import (
+    ConfidenceIntervalStatisticsType,
+    DescriptiveStatisticType,
+    DistributionType,
+    FilterOperatorType,
+    JoinType,
+    MissingValueHandlingType,
+    RegressionMethodType,
+    RegressionType,
+    StandardErrorMethodType,
+    TransformMethodType,
+)
 from .regressions import RegressionRequestBody
 from .settings import GetSettingsRequestBody
 from .statistics import (
@@ -83,6 +94,16 @@ __all__ = [
     # Enums
     "DistributionType",
     "TransformMethodType",
+    "DistributionType",
+    "TransformMethodType",
+    "RegressionType",
+    "RegressionMethodType",
+    "StandardErrorMethodType",
+    "MissingValueHandlingType",
+    "ConfidenceIntervalStatisticsType",
+    "DescriptiveStatisticType",
+    "JoinType",
+    "FilterOperatorType",
     # Types
     "DistributionConfig",
     "TransformMethodConfig",

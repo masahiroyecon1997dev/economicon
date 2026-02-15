@@ -165,7 +165,9 @@ class FilterSingleCondition:
                         )
                     )
                 case _:
-                    raise ValidationError(_("Invalid condition specified"))
+                    raise ValidationError(
+                        "ConditionError", _("Invalid condition specified")
+                    )
 
             # テーブル情報を更新
             updated_table_name = self.manager.store_table(
