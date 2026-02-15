@@ -5,9 +5,9 @@ import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import CalculateColumnRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
-    validate_calculation_expression,
     validate_existed_numeric_columns,
     validate_existed_table_name,
     validate_new_column_name,
@@ -23,16 +23,11 @@ class CalculateColumn:
     計算式は列名を<列名>の形式で指定し、四則演算とかっこをサポートします。
     """
 
-    def __init__(
-        self,
-        table_name: str,
-        new_column_name: str,
-        calculation_expression: str,
-    ):
+    def __init__(self, body: CalculateColumnRequestBody):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.new_column_name = new_column_name
-        self.calculation_expression = calculation_expression
+        self.table_name = body.table_name
+        self.new_column_name = body.new_column_name
+        self.calculation_expression = body.calculation_expression
         self.param_names = {
             "table_name": "tableName",
             "new_column_name": "newColumnName",
@@ -66,12 +61,6 @@ class CalculateColumn:
                 self.new_column_name,
                 column_name_list,
                 self.param_names["new_column_name"],
-            )
-
-            # 計算式が空でないことを検証
-            expression = self.calculation_expression.strip()
-            validate_calculation_expression(
-                expression, self.param_names["calculation_expression"]
             )
 
             # 計算式から列名を抽出して存在チェック
@@ -109,7 +98,8 @@ class CalculateColumn:
 
             except Exception as e:
                 raise ValidationError(
-                    _("Invalid calculation expression: {}").format(str(e))
+                    "CalculationExpressionError",
+                    _("Invalid calculation expression: {}").format(str(e)),
                 )
 
             # テーブルを更新

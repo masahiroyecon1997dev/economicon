@@ -1,10 +1,10 @@
 import math
-from typing import Optional
 
 import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import TransformColumnRequestBody, TransformMethodType
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -23,24 +23,12 @@ class TransformColumn:
     変換方法は対数変換、累乗変換、またはルート変換をサポートします。
     """
 
-    def __init__(
-        self,
-        table_name: str,
-        source_column_name: str,
-        new_column_name: str,
-        transform_method: str,
-        log_base: Optional[float] = None,
-        exponent: Optional[float] = None,
-        root_index: Optional[float] = None,
-    ):
+    def __init__(self, body: TransformColumnRequestBody):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.source_column_name = source_column_name
-        self.new_column_name = new_column_name
-        self.transform_method = transform_method
-        self.log_base = log_base
-        self.exponent = exponent
-        self.root_index = root_index
+        self.table_name = body.table_name
+        self.source_column_name = body.source_column_name
+        self.new_column_name = body.new_column_name
+        self.transform_method = body.transform_method
         self.param_names = {
             "table_name": "tableName",
             "source_column": "sourceColumnName",
@@ -70,40 +58,6 @@ class TransformColumn:
                 self.param_names["new_column"],
             )
 
-            # Validate transform method
-            valid_methods = ["log", "power", "root"]
-            if self.transform_method not in valid_methods:
-                methods_str = ", ".join(valid_methods)
-                raise ValidationError(
-                    _(
-                        "transformMethodの'{}'は無効です。有効なメソッド: {}"
-                    ).format(self.transform_method, methods_str)
-                )
-
-            # Validate log base if provided
-            if self.transform_method == "log" and self.log_base is not None:
-                if self.log_base <= 0 or self.log_base == 1:
-                    raise ValidationError(
-                        _("logBaseは1ではない正の数でなければなりません")
-                    )
-
-            # Validate exponent if provided
-            if self.transform_method == "power" and self.exponent is not None:
-                if not isinstance(self.exponent, (int, float)):
-                    raise ValidationError(
-                        _("exponentは数値でなければなりません")
-                    )
-
-            # Validate root index if provided
-            if self.transform_method == "root" and self.root_index is not None:
-                if not (
-                    isinstance(self.root_index, (int, float))
-                    or self.root_index == 0
-                ):
-                    raise ValidationError(
-                        _("rootIndexは0以外の数値でなければなりません")
-                    )
-
             return None
         except ValidationError as e:
             return e
@@ -117,8 +71,8 @@ class TransformColumn:
             insert_index = df.columns.index(self.source_column_name) + 1
 
             # Apply transformation based on method
-            if self.transform_method == "log":
-                if self.log_base is None:
+            if self.transform_method.method == TransformMethodType.LOG:
+                if self.transform_method.log_base is None:
                     # Natural logarithm
                     transformed_series = df.select(
                         pl.col(self.source_column_name).log()
@@ -127,16 +81,22 @@ class TransformColumn:
                     # Custom base logarithm using change of base formula
                     transformed_series = df.select(
                         pl.col(self.source_column_name).log()
-                        / math.log(self.log_base)
+                        / math.log(self.transform_method.log_base)
                     ).to_series()
-            elif self.transform_method == "power":
-                exponent = self.exponent if self.exponent is not None else 2.0
+            elif self.transform_method.method == TransformMethodType.POWER:
+                exponent = (
+                    self.transform_method.exponent
+                    if self.transform_method.exponent is not None
+                    else 2.0
+                )
                 transformed_series = df.select(
                     pl.col(self.source_column_name).pow(exponent)
                 ).to_series()
-            elif self.transform_method == "root":
+            elif self.transform_method.method == TransformMethodType.ROOT:
                 root_index = (
-                    self.root_index if (self.root_index is not None) else 2.0
+                    self.transform_method.root_index
+                    if (self.transform_method.root_index is not None)
+                    else 2.0
                 )
                 # Root transformation using power with reciprocal
                 transformed_series = df.select(
@@ -144,7 +104,8 @@ class TransformColumn:
                 ).to_series()
             else:
                 raise ValidationError(
-                    f"Unsupported transform method: {self.transform_method}"
+                    "TransformMethodError",
+                    f"Unsupported transform method: {self.transform_method}",
                 )
 
             # Rename the transformed series

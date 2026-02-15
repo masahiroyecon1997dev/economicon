@@ -1,5 +1,6 @@
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import RenameColumnRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.tables_store import (
     validate_existed_column_name,
@@ -17,16 +18,14 @@ class RenameColumn:
     同じ列名が既に存在する場合はエラーとなります。
     """
 
-    def __init__(
-        self, table_name: str, old_column_name: str, new_column_name: str
-    ):
+    def __init__(self, body: RenameColumnRequestBody):
         self.tables_store = TablesStore()
         # テーブル名
-        self.table_name = table_name
+        self.table_name = body.table_name
         # 変更前の列名
-        self.old_column_name = old_column_name
+        self.old_column_name = body.old_column_name
         # 変更後の列名
-        self.new_column_name = new_column_name
+        self.new_column_name = body.new_column_name
         # パラメータ名のマッピング
         self.param_names = {
             "table_name": "tableName",

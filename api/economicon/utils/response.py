@@ -1,6 +1,6 @@
 """FastAPI用レスポンス作成ヘルパー関数"""
 
-from typing import Any, Optional
+from typing import Any, Optional, TypeVar
 
 from fastapi.responses import JSONResponse, Response
 
@@ -10,9 +10,11 @@ from .logging import (
     create_log_api_success,
 )
 
+T = TypeVar("T")
+
 
 def create_success_response(
-    status_code: int, response_object: Any
+    status_code: int, response_object: dict | bytes | None
 ) -> JSONResponse:
     """成功レスポンスを作成"""
     result = {"code": "OK", "result": response_object}
@@ -31,10 +33,13 @@ def create_success_binary_response(
 
 
 def create_error_response(
-    status_code: int, message: str, exception_message: Optional[Any] = None
+    status_code: int,
+    errorCode: str,
+    message: str,
+    exception_message: Optional[Any] = None,
 ) -> JSONResponse:
     """エラーレスポンスを作成"""
-    result = {"code": "NG", "message": message}
+    result = {"code": errorCode, "message": message}
     create_log_api_error(message)
     if exception_message is not None:
         create_log_api_exception(exception_message)

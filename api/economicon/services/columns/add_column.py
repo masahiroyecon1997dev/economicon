@@ -1,9 +1,8 @@
-from typing import Optional
-
 import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models import AddColumnRequestBody
 from ...utils.validators.common import ValidationError
 from ...utils.validators.file import (
     validate_file_path,
@@ -25,24 +24,15 @@ class AddColumn:
     新しい列は空（None）の値で初期化されます。
     """
 
-    def __init__(
-        self,
-        table_name: str,
-        new_column_name: str,
-        add_position_column: str,
-        csv_file_path: Optional[str] = None,
-        csv_has_header: bool = True,
-        csv_strict_row_count: bool = True,
-        separator: str = ",",
-    ):
+    def __init__(self, AddColumnRequestBody: AddColumnRequestBody):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.new_column_name = new_column_name
-        self.add_position_column = add_position_column
-        self.csv_file_path = csv_file_path
-        self.csv_has_header = csv_has_header
-        self.csv_strict_row_count = csv_strict_row_count
-        self.separator = separator
+        self.table_name = AddColumnRequestBody.table_name
+        self.new_column_name = AddColumnRequestBody.new_column_name
+        self.add_position_column = AddColumnRequestBody.add_position_column
+        self.csv_file_path = AddColumnRequestBody.csv_file_path
+        self.csv_has_header = AddColumnRequestBody.csv_has_header
+        self.csv_strict_row_count = AddColumnRequestBody.csv_strict_row_count
+        self.separator = AddColumnRequestBody.separator
         self.param_names = {
             "table_name": "tableName",
             "new_column_name": "newColumnName",
@@ -142,6 +132,9 @@ class AddColumn:
             CSV読み込みエラー、行数不一致エラー
         """
         try:
+            if self.csv_file_path is None:
+                message = _("CSV file path is not specified.")
+                raise ApiError(message)
             # CSVファイルを読み込む
             skip_rows = 1 if self.csv_has_header else 0
             df_csv = pl.read_csv(

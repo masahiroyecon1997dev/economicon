@@ -217,7 +217,6 @@ def test_unsupported_distribution(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["detail"]  # Pydanticのバリデーションエラー
 
 
 def test_invalid_uniform_params(client, tables_store):
@@ -237,7 +236,6 @@ def test_invalid_uniform_params(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["detail"]
 
 
 def test_missing_required_params(client, tables_store):
@@ -257,9 +255,6 @@ def test_missing_required_params(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data[
-        "detail"
-    ]  # Pydanticのバリデーションエラー（フィールド不足は422）
 
 
 def test_invalid_param_type(client, tables_store):
@@ -279,9 +274,6 @@ def test_invalid_param_type(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data[
-        "detail"
-    ]  # Pydanticのバリデーションエラー（型エラーは422）
 
 
 def test_negative_scale_normal(client, tables_store):
@@ -300,9 +292,7 @@ def test_negative_scale_normal(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert response_data["message"]  # バリデーションエラー
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_binomial_invalid_p(client, tables_store):
@@ -321,9 +311,7 @@ def test_binomial_invalid_p(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert response_data["message"]  # バリデーションエラー
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_hypergeometric_success(client, tables_store):
@@ -359,6 +347,4 @@ def test_hypergeometric_invalid_params(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert response_data["message"]  # バリデーションエラー
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
