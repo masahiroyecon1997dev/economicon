@@ -14,7 +14,24 @@ from .columns import (
     SortColumnsRequestBody,
     TransformColumnRequestBody,
 )
-from .common import BaseResponse, ErrorResponse, SuccessResponse
+from .common import (
+    BaseResponse,
+    BernoulliParams,
+    BetaParams,
+    BinomialParams,
+    DistributionParams,
+    ErrorResponse,
+    ExponentialParams,
+    GammaParams,
+    GeometricParams,
+    HypergeometricParams,
+    LognormalParams,
+    NormalParams,
+    PoissonParams,
+    SuccessResponse,
+    UniformParams,
+    WeibullParams,
+)
 from .data_io import (
     ExportCsvByPathRequestBody,
     ExportExcelByPathRequestBody,
@@ -50,6 +67,20 @@ __all__ = [
     "BaseResponse",
     "SuccessResponse",
     "ErrorResponse",
+    # Distribution Parameters
+    "DistributionParams",
+    "UniformParams",
+    "ExponentialParams",
+    "NormalParams",
+    "GammaParams",
+    "BetaParams",
+    "WeibullParams",
+    "LognormalParams",
+    "BinomialParams",
+    "BernoulliParams",
+    "PoissonParams",
+    "GeometricParams",
+    "HypergeometricParams",
     # Column operations
     "AddColumnRequestBody",
     "AddColumnResult",

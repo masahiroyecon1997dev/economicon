@@ -1,15 +1,11 @@
-from typing import Any, Dict
-
 import polars as pl
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...models.common import DistributionParams
 from ...utils.algorithms.simulation import generate_simulation_data
 from ...utils.validators.common import ValidationError
-from ...utils.validators.statistics import (
-    validate_distribution_params,
-    validate_distribution_type,
-)
+from ...utils.validators.statistics import validate_distribution_params
 from ...utils.validators.tables_store import (
     validate_existed_table_name,
     validate_new_column_name,
@@ -30,19 +26,26 @@ class AddSimulationColumn:
         self,
         table_name: str,
         new_column_name: str,
-        distribution_type: str,
-        distribution_params: Dict[str, Any],
+        distribution: DistributionParams,
     ):
         self.tables_store = TablesStore()
         self.table_name = table_name
         self.new_column_name = new_column_name
-        self.distribution_type = distribution_type
-        self.distribution_params = distribution_params
+
+        # Pydanticモデルをdictに変換
+        dist_dict = distribution.model_dump()
+
+        # typeフィールドから分布名を取得
+        self.distribution_type = dist_dict["type"]
+        # type以外のフィールドをパラメータとして抽出
+        self.distribution_params = {
+            k: v for k, v in dist_dict.items() if k != "type"
+        }
+
         self.param_names = {
             "table_name": "tableName",
             "new_column_name": "newColumnName",
-            "distribution_type": "distributionType",
-            "distribution_params": "distributionParams",
+            "distribution": "distribution",
         }
 
     def validate(self):
@@ -63,11 +66,6 @@ class AddSimulationColumn:
                 self.new_column_name,
                 column_name_list,
                 self.param_names["new_column_name"],
-            )
-
-            # 分布タイプの検証
-            validate_distribution_type(
-                self.distribution_type, self.param_names["distribution_type"]
             )
 
             # 分布パラメータの検証

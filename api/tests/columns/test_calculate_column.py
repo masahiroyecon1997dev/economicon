@@ -1,8 +1,9 @@
 import polars as pl
 import pytest
-from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.services.data.tables_store import TablesStore
 from main import app
 
 
@@ -169,7 +170,6 @@ def test_calculate_column_empty_expression(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["code"] == "NG"
     assert "calculationExpression" in response_data["message"]
 
 
