@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..models import ConfidenceIntervalRequest, DescriptiveStatisticsRequest
+from ..models import (
+    ConfidenceIntervalRequestBody,
+    DescriptiveStatisticsRequestBody,
+)
 from ..services.operation import run_operation
 from ..services.statistics.confidence_interval import ConfidenceInterval
 from ..services.statistics.descriptive_statistics import DescriptiveStatistics
@@ -12,7 +15,7 @@ router = APIRouter(prefix="/statistics", tags=["statistics"])
 
 @router.post("/confidence-interval")
 async def confidence_interval(
-    request: Request, body: ConfidenceIntervalRequest
+    request: Request, body: ConfidenceIntervalRequestBody
 ):
     """信頼区間計算を行うエンドポイント
 
@@ -20,7 +23,7 @@ async def confidence_interval(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : ConfidenceIntervalRequest
+    body : ConfidenceIntervalRequestBody
         リクエストボディ
 
     Returns
@@ -40,7 +43,7 @@ async def confidence_interval(
 
 @router.post("/descriptive")
 async def descriptive_statistics(
-    request: Request, body: DescriptiveStatisticsRequest
+    request: Request, body: DescriptiveStatisticsRequestBody
 ):
     """記述統計を計算するエンドポイント
 
@@ -48,7 +51,7 @@ async def descriptive_statistics(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : DescriptiveStatisticsRequest
+    body : DescriptiveStatisticsRequestBody
         リクエストボディ
 
     Returns

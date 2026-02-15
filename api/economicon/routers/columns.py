@@ -2,19 +2,19 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..models import (
-    AddColumnRequest,
+    AddColumnRequestBody,
     AddColumnResult,
-    AddDummyColumnRequest,
-    AddLagLeadColumnRequest,
-    AddSimulationColumnRequest,
-    CalculateColumnRequest,
-    DeleteColumnRequest,
-    DuplicateColumnRequest,
-    GetColumnListRequest,
-    RenameColumnRequest,
-    SortColumnsRequest,
+    AddDummyColumnRequestBody,
+    AddLagLeadColumnRequestBody,
+    AddSimulationColumnRequestBody,
+    CalculateColumnRequestBody,
+    DeleteColumnRequestBody,
+    DuplicateColumnRequestBody,
+    GetColumnListRequestBody,
+    RenameColumnRequestBody,
+    SortColumnsRequestBody,
     SuccessResponse,
-    TransformColumnRequest,
+    TransformColumnRequestBody,
 )
 
 # 各ビジネスロジック（既存のpython_apis）
@@ -37,7 +37,7 @@ router = APIRouter(prefix="/column", tags=["column"])
 
 
 @router.post("/add", response_model=SuccessResponse[AddColumnResult])
-async def add_column(request: Request, body: AddColumnRequest):
+async def add_column(request: Request, body: AddColumnRequestBody):
     """カラムを追加するエンドポイント
 
     Parameters
@@ -61,14 +61,14 @@ async def add_column(request: Request, body: AddColumnRequest):
 
 
 @router.post("/add-dummy")
-async def add_dummy_column(request: Request, body: AddDummyColumnRequest):
+async def add_dummy_column(request: Request, body: AddDummyColumnRequestBody):
     """ダミー変数カラムを追加するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : AddDummyColumnRequest
+    body : AddDummyColumnRequestBody
         リクエストボディ
 
     Returns
@@ -85,14 +85,14 @@ async def add_dummy_column(request: Request, body: AddDummyColumnRequest):
 
 
 @router.post("/delete")
-async def delete_column(request: Request, body: DeleteColumnRequest):
+async def delete_column(request: Request, body: DeleteColumnRequestBody):
     """カラムを削除するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : DeleteColumnRequest
+    body : DeleteColumnRequestBody
         リクエストボディ
 
     Returns
@@ -107,7 +107,7 @@ async def delete_column(request: Request, body: DeleteColumnRequest):
 
 
 @router.post("/rename")
-async def rename_column(request: Request, body: RenameColumnRequest):
+async def rename_column(request: Request, body: RenameColumnRequestBody):
     """
     列名変更エンドポイント
 
@@ -115,7 +115,7 @@ async def rename_column(request: Request, body: RenameColumnRequest):
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : RenameColumnNameRequest
+    body : RenameColumnRequestBody
         リクエストボディ
         - tableName: テーブル名
         - oldColumnName: 旧列名
@@ -133,7 +133,9 @@ async def rename_column(request: Request, body: RenameColumnRequest):
 
 
 @router.post("/add-lag-lead")
-async def add_lag_lead_column(request: Request, body: AddLagLeadColumnRequest):
+async def add_lag_lead_column(
+    request: Request, body: AddLagLeadColumnRequestBody
+):
     """ラグ・リードカラムを追加するエンドポイント
 
     Parameters
@@ -159,7 +161,7 @@ async def add_lag_lead_column(request: Request, body: AddLagLeadColumnRequest):
 
 @router.post("/add-simulation")
 async def add_simulation_column(
-    request: Request, body: AddSimulationColumnRequest
+    request: Request, body: AddSimulationColumnRequestBody
 ):
     """シミュレーションカラムを追加するエンドポイント
 
@@ -184,14 +186,14 @@ async def add_simulation_column(
 
 
 @router.post("/calculate")
-async def calculate_column(request: Request, body: CalculateColumnRequest):
+async def calculate_column(request: Request, body: CalculateColumnRequestBody):
     """カラム計算を実行するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : StatisticsCalculateColumnRequest
+    body : CalculateColumnRequestBody
         リクエストボディ
 
     Returns
@@ -210,14 +212,14 @@ async def calculate_column(request: Request, body: CalculateColumnRequest):
 
 
 @router.post("/duplicate")
-async def duplicate_column(request: Request, body: DuplicateColumnRequest):
+async def duplicate_column(request: Request, body: DuplicateColumnRequestBody):
     """カラムを複製するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : DataDuplicateColumnRequest
+    body : DuplicateColumnRequestBody
         リクエストボディ
 
     Returns
@@ -234,7 +236,7 @@ async def duplicate_column(request: Request, body: DuplicateColumnRequest):
 
 
 @router.post("/transform")
-async def transform_column(request: Request, body: TransformColumnRequest):
+async def transform_column(request: Request, body: TransformColumnRequestBody):
     """
     列の変換処理エンドポイント
 
@@ -242,7 +244,7 @@ async def transform_column(request: Request, body: TransformColumnRequest):
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : TransformColumnRequest
+    body : TransformColumnRequestBody
         リクエストボディ
 
     Returns
@@ -259,7 +261,7 @@ async def transform_column(request: Request, body: TransformColumnRequest):
 
 
 @router.post("/get-list")
-async def get_column_list(request: Request, body: GetColumnListRequest):
+async def get_column_list(request: Request, body: GetColumnListRequestBody):
     """カラムリストを取得するエンドポイント
 
     Parameters
@@ -283,7 +285,7 @@ async def get_column_list(request: Request, body: GetColumnListRequest):
 
 
 @router.post("/sort")
-async def sort_columns(request: Request, body: SortColumnsRequest):
+async def sort_columns(request: Request, body: SortColumnsRequestBody):
     """
     列のソート処理エンドポイント
 
@@ -291,7 +293,7 @@ async def sort_columns(request: Request, body: SortColumnsRequest):
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : SortColumnsRequest
+    body : SortColumnsRequestBody
         リクエストボディ
         - tableName: テーブル名
         - sortColumns: ソート列情報

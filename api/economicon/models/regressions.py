@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, model_validator
 
 
 # 統合リクエストスキーマ
-class RegressionRequest(BaseModel):
+class RegressionRequestBody(BaseModel):
     """
     統合回帰分析リクエスト
 
