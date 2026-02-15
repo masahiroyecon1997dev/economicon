@@ -1,7 +1,8 @@
 import pytest
-from economicon.services.data.settings_manager import SettingsManager
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.services.data.settings_manager import SettingsManager
 from main import app
 
 
@@ -22,7 +23,7 @@ def settings_manager():
 
 def test_get_settings_success(client, settings_manager):
     """正常系テスト: 設定情報を取得"""
-    response = client.get("/api/setting/get-settings")
+    response = client.get("/api/setting/settings")
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"

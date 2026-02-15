@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..services.settings.get_settings import get_setting
+from ..services.operation import run_operation
+from ..services.settings.get_settings import GetSettings
 from ..utils import create_log_api_request, create_success_response
 
 router = APIRouter(prefix="/setting", tags=["setting"])
@@ -23,6 +24,6 @@ async def get_settings(request: Request):
     """
     create_log_api_request(request)
 
-    result = get_setting()
-
+    api = GetSettings()
+    result = run_operation(api)
     return create_success_response(http_status.HTTP_200_OK, result)
