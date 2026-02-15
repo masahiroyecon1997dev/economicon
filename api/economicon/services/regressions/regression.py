@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
-from ...models import RegressionRequestBody
+from ...models import RegressionRequestBody, RegressionType
 from ...utils.validators.common import ValidationError
 from ...utils.validators.statistics import (
     validate_dependent_variable,
@@ -141,7 +141,7 @@ class Regression:
 
             # 分析手法ごとの追加検証
             match self.type:
-                case "fe" | "re":
+                case RegressionType.FE | RegressionType.RE:
                     # 固定効果分析の場合、個体IDと時間列の検証
                     validate_entity_id_column(
                         self.entity_id_column,
@@ -157,7 +157,7 @@ class Regression:
                         self.explanatory_variables,
                         self.param_names["time_column"],
                     )
-                case "iv":
+                case RegressionType.IV:
                     # IV分析の場合、操作変数と内生変数の検証
                     validate_instrumental_variables(
                         self.instrumental_variables,
@@ -171,7 +171,7 @@ class Regression:
                         column_name_list,
                         self.param_names["endogenous_variables"],
                     )
-                case "lasso" | "ridge":
+                case RegressionType.LASSO | RegressionType.RIDGE:
                     # ハイパーパラメータの検証
                     validate_regulalized_hyperparameters(
                         self.hyper_parameters,

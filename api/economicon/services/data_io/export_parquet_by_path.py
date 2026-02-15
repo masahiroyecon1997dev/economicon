@@ -4,7 +4,7 @@ from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import ExportParquetByPathRequestBody
 from ...utils.validators.common import ValidationError
-from ...utils.validators.file import (
+from ...utils.validators.files import (
     validate_directory_path,
     validate_file_name,
 )

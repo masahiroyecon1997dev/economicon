@@ -4,7 +4,7 @@ from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import ImportExcelByPathRequestBody
 from ...utils.validators.common import ValidationError
-from ...utils.validators.file import (
+from ...utils.validators.files import (
     validate_file_path,
     validate_sheet_name,
 )
