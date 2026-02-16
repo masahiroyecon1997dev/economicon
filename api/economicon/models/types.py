@@ -96,7 +96,7 @@ FileName = Annotated[
         strip_whitespace=True,
         min_length=1,
         max_length=255,
-        pattern=r'^[^\\/:*?"<>|]+$',
+        pattern=r'^(?!\.)[^\\/:*?"<>|]+(?<![ .])$',
     ),
     Field(
         examples=["output.csv", "人口動態データ.xlsx"],

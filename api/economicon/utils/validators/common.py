@@ -81,6 +81,16 @@ def validate_numeric_types(
     columns: Union[str, List[str]],
     target: str = "columns",
 ) -> None:
+    """指定された列が数値型であることを検証する。
+
+    Args:
+        schema: 列名とデータ型のマッピング
+        columns: 検証対象の列名（単体 or リスト）
+        target: パラメータ名（デフォルトは "columns"）
+
+    Raises:
+        ValidationError: 数値型でない列が存在する場合
+    """
     targets = [columns] if isinstance(columns, str) else columns
 
     invalid_types = []

@@ -4,7 +4,9 @@ from ...i18n.translation import gettext as _
 from ...models import ExportCsvByPathRequestBody
 from ...utils import ProcessingError, ValidationError
 from ...utils.validators import (
+    validate_directory_path,
     validate_existence,
+    validate_windows_reserved_name,
 )
 from ..data.tables_store import TablesStore
 
@@ -37,9 +39,8 @@ class ExportCsvByPath:
         }
 
     def validate(self):
-        # 入力値のバリデーション
         try:
-            # テーブル名のバリデーション
+            # 対象のテーブルが存在することを検証
             table_name_list = self.tables_store.get_table_name_list()
             validate_existence(
                 value=self.table_name,
@@ -49,11 +50,14 @@ class ExportCsvByPath:
 
             # ディレクトリパスのバリデーション
             validate_directory_path(
-                self.directory_path, self.param_names["directory_path"]
+                path_str=self.directory_path,
+                target=self.param_names["directory_path"],
             )
 
             # ファイル名のバリデーション
-            validate_file_name(self.file_name, self.param_names["file_name"])
+            validate_windows_reserved_name(
+                filename=self.file_name, target=self.param_names["file_name"]
+            )
 
             return None
         except ValidationError as e:
