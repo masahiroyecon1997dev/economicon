@@ -1,9 +1,7 @@
 from ...i18n.translation import gettext as _
 from ...models import DeleteColumnRequestBody
 from ...utils import ProcessingError, ValidationError
-from ...utils.validators import (
-    validate_existence,
-)
+from ...utils.validators import validate_existence
 from ..data.tables_store import TablesStore
 
 
@@ -31,16 +29,17 @@ class DeleteColumn:
         # 入力値のバリデーション
         try:
             table_name_list = self.tables_store.get_table_name_list()
-            # テーブル名の存在チェック
+            # 対象のテーブルが存在することを検証
             validate_existence(
                 value=self.table_name,
                 valid_list=table_name_list,
                 target=self.param_names["table_name"],
             )
-            # 列名の存在チェック
+
             column_names = self.tables_store.get_column_name_list(
                 self.table_name
             )
+            # 対象の列が存在することを検証
             validate_existence(
                 value=self.column_name,
                 valid_list=column_names,

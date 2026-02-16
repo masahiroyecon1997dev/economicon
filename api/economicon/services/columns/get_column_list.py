@@ -1,9 +1,7 @@
 from ...i18n.translation import gettext as _
 from ...models import GetColumnListRequestBody
 from ...utils import ProcessingError, ValidationError
-from ...utils.validators import (
-    validate_existence,
-)
+from ...utils.validators import validate_existence
 from ..data.tables_store import TablesStore
 
 
@@ -26,6 +24,7 @@ class GetColumnList:
     def validate(self):
         try:
             table_name_list = self.tables_store.get_table_name_list()
+            # 対象のテーブルが存在することを検証
             validate_existence(
                 value=self.table_name,
                 valid_list=table_name_list,

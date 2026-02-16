@@ -1,10 +1,7 @@
 from ...i18n.translation import gettext as _
 from ...models import RenameColumnRequestBody
 from ...utils import ProcessingError, ValidationError
-from ...utils.validators import (
-    validate_existence,
-    validate_non_existence,
-)
+from ...utils.validators import validate_existence, validate_non_existence
 from ..data.tables_store import TablesStore
 
 
@@ -35,22 +32,22 @@ class RenameColumn:
         # 入力値のバリデーション
         try:
             table_name_list = self.tables_store.get_table_name_list()
-            # テーブル名の存在チェック
+            # 対象のテーブルが存在することを検証
             validate_existence(
                 value=self.table_name,
                 valid_list=table_name_list,
                 target=self.param_names["table_name"],
             )
-            # 変更前の列名の存在チェック
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
+            # 変更前の列名が既存の列名の中に存在することを検証
             validate_existence(
                 value=self.old_column_name,
                 valid_list=column_name_list,
                 target=self.param_names["old_column_name"],
             )
-            # 変更後の列名の重複チェック
+            # 変更後の列名が既存の列名と重複しないことを検証
             validate_non_existence(
                 value=self.new_column_name,
                 existing_list=column_name_list,
