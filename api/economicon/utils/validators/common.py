@@ -1,5 +1,6 @@
-from typing import List, Union
+from typing import List, Mapping, Union
 
+import polars as pl
 from economicon.i18n.translation import gettext as _
 
 from ..exceptions import ValidationError
@@ -71,4 +72,31 @@ def validate_non_existence(
 
         raise ValidationError(
             error_code=error_code, message=message, target=target
+        )
+
+
+def validate_numeric_types(
+    *,
+    schema: Mapping[str, pl.DataType],
+    columns: Union[str, List[str]],
+    target: str = "columns",
+) -> None:
+    targets = [columns] if isinstance(columns, str) else columns
+
+    invalid_types = []
+    for col in targets:
+        dtype = schema[col]
+
+        # .is_numeric() メソッドで判定
+        # これなら整数(Int), 浮動小数点(Float), 符号なし整数(UInt) すべて判定可能
+        if not dtype.is_numeric():
+            invalid_types.append(f"{col}({dtype})")
+
+    if invalid_types:
+        raise ValidationError(
+            error_code="INVALID_DTYPE",
+            message=_("The following columns must be numeric: {}").format(
+                ", ".join(invalid_types)
+            ),
+            target=target,
         )
