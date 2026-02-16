@@ -9,6 +9,7 @@ from ...utils import ProcessingError, ValidationError
 from ...utils.validators import (
     validate_existence,
     validate_non_existence,
+    validate_numeric_types,
 )
 from ..data.tables_store import TablesStore
 
@@ -30,7 +31,7 @@ class CalculateColumn:
             "table_name": "tableName",
             "new_column_name": "newColumnName",
             "calculation_expression": "calculationExpression",
-            "column_name_in_calculation_expression": "columnName in calculationExpression",
+            "column_name_in_calculation_expression": "columnNameInCalculationExpression",
         }
 
     def _extract_column_names(self, expression: str) -> List[str]:
@@ -45,33 +46,42 @@ class CalculateColumn:
     def validate(self):
         try:
             table_name_list = self.tables_store.get_table_name_list()
+            # 対象のテーブルが存在することを検証
             validate_existence(
                 value=self.table_name,
                 valid_list=table_name_list,
                 target=self.param_names["table_name"],
             )
 
-            # 新しい列名の検証
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
+            # 追加する列名が既存の列名と重複しないことを検証
             validate_non_existence(
                 value=self.new_column_name,
                 existing_list=column_name_list,
                 target=self.param_names["new_column_name"],
             )
 
-            # 計算式から列名を抽出して存在チェック
             referenced_columns = self._extract_column_names(
                 self.calculation_expression,
             )
+            # 計算式に使用されている列が存在することを検証
+            validate_existence(
+                value=referenced_columns,
+                valid_list=column_name_list,
+                target=self.param_names[
+                    "column_name_in_calculation_expression"
+                ],
+            )
             df_schema = self.tables_store.get_column_info_list(self.table_name)
-            validate_existed_numeric_columns(
-                referenced_columns,
-                column_name_list,
-                df_schema,
-                self.param_names["calculation_expression"],
-                self.param_names["column_name_in_calculation_expression"],
+            # 計算式に使用されている列が数値型であることを検証
+            validate_numeric_types(
+                schema=df_schema,
+                columns=referenced_columns,
+                target=self.param_names[
+                    "column_name_in_calculation_expression"
+                ],
             )
 
             return None
