@@ -1,11 +1,7 @@
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import RenameTableRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_existed_table_name,
-    validate_new_table_name,
-)
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import validate_existence, validate_non_existence
 from ..data.tables_store import TablesStore
 
 
@@ -30,20 +26,19 @@ class RenameTable:
         }
 
     def validate(self):
-        # 入力値のバリデーション
         try:
             table_name_list = self.tables_store.get_table_name_list()
             # 変更前のテーブル名の存在チェック
-            validate_existed_table_name(
-                self.old_table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.old_table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             # 変更後のテーブル名の重複チェック
-            validate_new_table_name(
-                self.new_table_name,
-                table_name_list,
-                self.param_names["new_table_name"],
+            validate_non_existence(
+                value=self.new_table_name,
+                existing_list=table_name_list,
+                target=self.param_names["new_table_name"],
             )
             return None
         except ValidationError as e:
@@ -63,4 +58,8 @@ class RenameTable:
             message = _(
                 "An unexpected error occurred during table rename processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="TableRenameError",
+                message=message,
+                detail=str(e),
+            ) from e

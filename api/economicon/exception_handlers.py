@@ -3,9 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi import status as http_status
 
 from .i18n import _
-from .services import ApiError
-from .utils import create_error_response
-from .utils.validators import ValidationError
+from .utils import ProcessingError, ValidationError, create_error_response
 
 
 def init_exception_handlers(app: FastAPI):
@@ -18,13 +16,15 @@ def init_exception_handlers(app: FastAPI):
         request: Request, exc: ValidationError
     ):
         return create_error_response(
-            http_status.HTTP_400_BAD_REQUEST, exc.message
+            http_status.HTTP_400_BAD_REQUEST, exc.error_code, exc.message
         )
 
-    @app.exception_handler(ApiError)
-    async def api_error_handler(request: Request, exc: ApiError):
+    @app.exception_handler(ProcessingError)
+    async def api_error_handler(request: Request, exc: ProcessingError):
         return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR, exc.message
+            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            exc.error_code,
+            exc.message,
         )
 
     @app.exception_handler(NotImplementedError)
@@ -33,7 +33,7 @@ def init_exception_handlers(app: FastAPI):
     ):
         message = _("regression is not yet implemented")
         return create_error_response(
-            http_status.HTTP_501_NOT_IMPLEMENTED, message
+            http_status.HTTP_501_NOT_IMPLEMENTED, "NOT_IMPLEMENTED", message
         )
 
     @app.exception_handler(Exception)
@@ -41,5 +41,7 @@ def init_exception_handlers(app: FastAPI):
         # 予期せぬエラー
         message = _("An unexpected error occurred during processing")
         return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR, message, exc
+            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "UNEXPECTED_ERROR",
+            message,
         )

@@ -91,4 +91,4 @@ class AddSimulationColumn:
                 error_code="AddSimulationColumnProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e

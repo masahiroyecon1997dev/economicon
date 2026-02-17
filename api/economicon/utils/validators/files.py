@@ -14,7 +14,16 @@ def _validate_path_base(
     must_be_type: str,  # "file" or "dir"
     mode: int = os.R_OK,
 ) -> None:
-    """ファイルやディレクトリの存在、型、権限を検証する共通関数"""
+    """ファイルやディレクトリの存在、型、権限を検証する共通関数
+    Args:
+        path_str: パスの文字列
+        target: パラメータ名（例: "filePath"）
+        must_be_type: "file" か "dir" を指定して、ファイルかディレクトリかを検証
+        mode: 権限の種類（デフォルトは読み取り権限 os.R_OK）
+    Raises:
+        ValidationError: パスが存在しない、型が違う、または権限がない場合
+
+    """
     path = Path(path_str)
 
     # 存在チェック
@@ -55,7 +64,15 @@ def _validate_path_base(
 def _validate_file_extension(
     *, path_str: str, target: str, allowed_extensions: List[str]
 ) -> None:
-    """拡張子が許可されたリストに含まれているか検証する"""
+    """拡張子が許可されたリストに含まれているか検証する
+    Args:
+        path_str: ファイルパスの文字列
+        target: パラメータ名（例: "filePath"）
+        allowed_extensions: 許可された拡張子のリスト（例: [".csv", ".json"]）
+    Raises:
+        ValidationError: 拡張子が許可されていない場合
+
+    """
     ext = Path(path_str).suffix.lower()  # 例: ".csv"
     if ext not in [e.lower() for e in allowed_extensions]:
         raise ValidationError(
@@ -68,7 +85,13 @@ def _validate_file_extension(
 
 
 def _validate_file_not_empty(*, path_str: str, target: str) -> None:
-    """ファイルサイズが0より大きいことを検証する"""
+    """ファイルサイズが0より大きいことを検証する
+    Args:
+        path_str: ファイルパスの文字列
+        target: パラメータ名（例: "filePath"）
+    Raises:
+        ValidationError: ファイルが空の場合
+    """
     if os.path.getsize(path_str) == 0:
         raise ValidationError(
             error_code="EMPTY_FILE",

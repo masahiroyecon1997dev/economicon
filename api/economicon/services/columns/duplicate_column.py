@@ -91,4 +91,4 @@ class DuplicateColumn:
                 error_code="DuplicateColumnProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e
