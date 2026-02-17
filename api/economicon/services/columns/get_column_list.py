@@ -63,4 +63,4 @@ class GetColumnList:
                 error_code="GetColumnListProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e

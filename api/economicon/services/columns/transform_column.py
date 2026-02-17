@@ -132,4 +132,4 @@ class TransformColumn:
                 error_code="TransformColumnProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e

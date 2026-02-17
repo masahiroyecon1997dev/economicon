@@ -2,21 +2,10 @@ from typing import Any, Dict, List
 
 import polars as pl
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...utils import ProcessingError, ValidationError
 from ...utils.algorithms.simulation import generate_simulation_data
-from ...utils.validators.common import (
-    ValidationError,
-    validate_integer,
-)
-from ...utils.validators.statistics import (
-    validate_distribution_params,
-    validate_distribution_type,
-)
-from ...utils.validators.tables_store import (
-    validate_new_column_name,
-    validate_new_table_name,
-)
+from ...utils.validators import validate_non_existence
 from ..data.tables_store import TablesStore
 
 
@@ -49,21 +38,11 @@ class CreateSimulationDataTable:
         try:
             # テーブル名の検証
             table_name_list = self.tables_store.get_table_name_list()
-            validate_new_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_non_existence(
+                value=self.table_name,
+                existing_list=table_name_list,
+                target=self.param_names["table_name"],
             )
-
-            # 行数の検証
-            validate_integer(
-                self.table_number_of_rows,
-                self.param_names["table_number_of_rows"],
-            )
-            if self.table_number_of_rows <= 0:
-                raise ValidationError(
-                    _("The number of rows must be a positive integer.")
-                )
 
             # 列設定の検証
             if not isinstance(self.column_settings, list):
@@ -187,4 +166,8 @@ class CreateSimulationDataTable:
             message = _(
                 "An unexpected error occurred during creating simulation data table"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="CreateSimulationDataTableError",
+                message=message,
+                detail=str(e),
+            ) from e

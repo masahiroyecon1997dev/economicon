@@ -82,4 +82,4 @@ class RenameColumn:
                 error_code="RenameColumnProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e

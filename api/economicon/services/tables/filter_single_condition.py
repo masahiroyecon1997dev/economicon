@@ -4,13 +4,10 @@ from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import FilterSingleConditionRequestBody
 from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_compare_value,
-    validate_existed_column_name,
-    validate_existed_table_name,
-    validate_filter_condition,
-    validate_is_compare_column,
-    validate_new_table_name,
+from ...utils import ValidationError
+from ...utils.validators import (
+    validate_existence,
+    validate_non_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -55,23 +52,23 @@ class FilterSingleCondition:
         try:
             table_name_list = self.manager.get_table_name_list()
             # 新しいテーブル名の重複チェック
-            validate_new_table_name(
-                self.new_table_name,
-                table_name_list,
-                self.param_names["new_table_name"],
+            validate_non_existence(
+                value=self.new_table_name,
+                existing_list=table_name_list,
+                target=self.param_names["new_table_name"],
             )
             # 既存テーブル名の存在チェック
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             # カラム名の存在チェック
             column_names = self.manager.get_column_name_list(self.table_name)
-            validate_existed_column_name(
-                self.column_name,
-                column_names,
-                self.param_names["column_names"],
+            validate_existence(
+                value=self.column_name,
+                valid_list=column_names,
+                target=self.param_names["column_names"],
             )
             # フィルタリング条件の妥当性チェック
             validate_filter_condition(

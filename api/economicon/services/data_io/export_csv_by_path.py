@@ -79,20 +79,22 @@ class ExportCsvByPath:
             result = {"filePath": file_path}
             return result
 
-        except KeyError:
+        except KeyError as e:
             message = _("Table does not exist: {}").format(self.table_name)
-            raise ProcessingError(error_code="TableNotFound", message=message)
-        except PermissionError:
+            raise ProcessingError(
+                error_code="TableNotFound", message=message
+            ) from e
+        except PermissionError as e:
             message = _(
                 "Permission denied: Cannot write to the specified path."
             )
             raise ProcessingError(
                 error_code="PermissionDenied", message=message
-            )
+            ) from e
         except Exception as e:
             message = _(
                 "An unexpected error occurred during CSV export processing"
             )
             raise ProcessingError(
                 error_code="CsvExportError", message=message, detail=str(e)
-            )
+            ) from e

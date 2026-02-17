@@ -1,8 +1,9 @@
-from typing import Dict, Optional, Protocol
+from typing import Dict, Optional, Protocol, runtime_checkable
 
 from ..utils.validators.common import ValidationError
 
 
+@runtime_checkable
 class DataOperation(Protocol):
     """
     データ操作のProtocolインターフェイス。
@@ -48,4 +49,6 @@ def run_operation(operation: DataOperation) -> Optional[Dict | bytes]:
     if validation_error is not None:
         raise validation_error
 
+    return operation.execute()
+    return operation.execute()
     return operation.execute()

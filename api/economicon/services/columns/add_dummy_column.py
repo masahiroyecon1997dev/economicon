@@ -91,4 +91,4 @@ class AddDummyColumn:
                 error_code="AddDummyColumnProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e

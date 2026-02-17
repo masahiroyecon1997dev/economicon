@@ -72,4 +72,4 @@ class DeleteColumn:
                 error_code="DeleteColumnProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e
