@@ -31,4 +31,4 @@ class ClearTables:
             )
             raise ProcessingError(
                 error_code="ClearTablesError", message=message, detail=str(e)
-            )
+            ) from e

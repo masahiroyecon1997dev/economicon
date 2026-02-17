@@ -112,4 +112,4 @@ class AddLagLeadColumn:
                 error_code="AddLagLeadColumnProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e

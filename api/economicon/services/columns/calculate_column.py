@@ -111,7 +111,7 @@ class CalculateColumn:
                         str(e)
                     ),
                     detail=str(e),
-                )
+                ) from e
 
             # テーブルを更新
             self.tables_store.update_table(self.table_name, df_with_new_col)
@@ -133,4 +133,4 @@ class CalculateColumn:
                 error_code="CalculateColumnProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e

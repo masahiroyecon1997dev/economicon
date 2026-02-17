@@ -109,7 +109,7 @@ class AddColumn:
                 error_code="AddColumnProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e
 
     def _read_column_from_csv(self, expected_rows: int):
         """
@@ -197,7 +197,7 @@ class AddColumn:
                 error_code="EmptyCSVFile",
                 message=message,
                 detail=str(e),
-            )
+            ) from e
         except Exception as e:
             if isinstance(e, ProcessingError):
                 raise

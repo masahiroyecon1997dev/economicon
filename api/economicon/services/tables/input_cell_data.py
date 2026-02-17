@@ -4,10 +4,9 @@ from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import InputCellDataRequestBody
 from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_existed_column_name,
-    validate_existed_table_name,
-    validate_row_index,
+from ...utils import ValidationError
+from ...utils.validators import (
+    validate_existence,
 )
 from ..data.tables_store import TablesStore
 
@@ -43,19 +42,19 @@ class InputCellData:
         try:
             table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の存在チェック
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
             # カラム名の存在チェック
-            validate_existed_column_name(
-                self.column_name,
-                column_name_list,
-                self.param_names["column_names"],
+            validate_existence(
+                value=self.column_name,
+                valid_list=column_name_list,
+                target=self.param_names["column_names"],
             )
             num_rows = (
                 self.tables_store.get_table(self.table_name).num_rows - 1

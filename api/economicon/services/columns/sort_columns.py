@@ -80,4 +80,4 @@ class SortColumns:
                 error_code="SortColumnsProcessError",
                 message=message,
                 detail=str(e),
-            )
+            ) from e
