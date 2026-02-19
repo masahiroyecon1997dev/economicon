@@ -3,12 +3,8 @@ import polars as pl
 from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import CreateTableRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_new_columns,
-    validate_new_table_name,
-    validate_table_num_rows,
-)
+from ...utils import ValidationError
+from ...utils.validators import validate_non_existence
 from ..data.tables_store import TablesStore
 
 
@@ -43,10 +39,10 @@ class CreateTable:
         try:
             table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の重複チェック
-            validate_new_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_non_existence(
+                value=self.table_name,
+                existing_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             # 行数の妥当性チェック
             validate_table_num_rows(
