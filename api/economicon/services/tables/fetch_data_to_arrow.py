@@ -6,16 +6,11 @@ import io
 
 import pyarrow as pa
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import FetchDataToArrowRequestBody
-from ...utils.validators.common import (
-    ValidationError,
-)
-from ...utils.validators.tables_store import (
-    validate_existed_table_name,
-    validate_row_index,
-)
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import validate_existence
+from ...utils.validators.common import ValidationError
 from ..data.tables_store import TablesStore
 
 
@@ -64,10 +59,10 @@ class FetchDataToArrow:
         try:
             table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の存在チェック
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             num_rows = (
                 self.tables_store.get_table(self.table_name).num_rows - 1
@@ -93,7 +88,7 @@ class FetchDataToArrow:
 
         Raises
         ------
-        ApiError
+        ProcessingError
             データ取得中に予期しないエラーが発生した場合
         """
         try:
@@ -118,4 +113,8 @@ class FetchDataToArrow:
                 f"An unexpected error during fetching Arrow data "
                 f"from table '{self.table_name}': {str(e)}"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="FetchDataToArrowError",
+                message=message,
+                detail=str(e),
+            ) from e

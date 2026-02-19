@@ -1,10 +1,7 @@
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import DeleteTableRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_existed_table_name,
-)
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import validate_existence
 from ..data.tables_store import TablesStore
 
 
@@ -28,10 +25,10 @@ class DeleteTable:
         try:
             table_name_list = self.tables_store.get_table_name_list()
             # テーブル名の存在チェック
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
             return None
         except ValidationError as e:
@@ -49,4 +46,8 @@ class DeleteTable:
             message = _(
                 "An unexpected error occurred during table deletion processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="TableDeletionError",
+                message=message,
+                detail=str(e),
+            ) from e

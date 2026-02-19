@@ -1,14 +1,9 @@
 import polars as pl
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import CreateUnionTableRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils.validators.tables_store import (
-    validate_existed_columns,
-    validate_existed_tables,
-    validate_new_table_name,
-)
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import validate_existence, validate_non_existence
 from ..data.tables_store import TablesStore
 
 
@@ -44,16 +39,16 @@ class CreateUnionTable:
             table_name_list = self.tables_store.get_table_name_list()
 
             # 新しいテーブル名の重複チェック
-            validate_new_table_name(
-                self.union_table_name,
-                table_name_list,
-                self.param_names["union_table_name"],
+            validate_non_existence(
+                value=self.union_table_name,
+                existing_list=table_name_list,
+                target=self.param_names["union_table_name"],
             )
 
-            validate_existed_tables(
-                self.table_names,
-                table_name_list,
-                self.param_names["table_names"],
+            validate_existence(
+                value=self.table_names,
+                valid_list=table_name_list,
+                target=self.param_names["table_names"],
             )
 
             # すべてのテーブルで指定された列が存在することをチェック
@@ -61,10 +56,10 @@ class CreateUnionTable:
                 table_column_name_list = (
                     self.tables_store.get_column_name_list(table_name)
                 )
-                validate_existed_columns(
-                    self.column_names,
-                    table_column_name_list,
-                    self.param_names["column_names"],
+                validate_existence(
+                    value=self.column_names,
+                    valid_list=table_column_name_list,
+                    target=self.param_names["column_names"],
                 )
 
             return None
@@ -98,4 +93,8 @@ class CreateUnionTable:
             message = _(
                 "An unexpected error occurred during union table creation processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="UnionTableCreationError",
+                message=message,
+                detail=str(e),
+            ) from e
