@@ -1,6 +1,7 @@
 from typing import List, Mapping, Union
 
 import polars as pl
+
 from economicon.i18n.translation import gettext as _
 
 from ..exceptions import ValidationError
@@ -108,5 +109,32 @@ def validate_numeric_types(
             message=_("The following columns must be numeric: {}").format(
                 ", ".join(invalid_types)
             ),
+            target=target,
+        )
+
+
+def validate_row_count_limit(
+    *,
+    current_row_count: int,  # dfそのものではなく数値を受け取る
+    requested_count: int,
+    target: str = "row_count",
+) -> None:
+    """
+    指定された行数がテーブルの総行数を超えていないか検証する。
+
+    Args:
+        current_row_count: テーブルの総行数
+        requested_count: クライアントが要求している行数
+        target: パラメータ名（デフォルトは "row_count"）
+
+    Raises:
+        ValidationError: 要求された行数が総行数を超えている場合
+    """
+    if requested_count > current_row_count:
+        raise ValidationError(
+            error_code="ROW_OUT_OF_RANGE",
+            message=_(
+                "Requested {} ({}) exceeds the available rows ({})."
+            ).format(target, requested_count, current_row_count),
             target=target,
         )

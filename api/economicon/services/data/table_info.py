@@ -7,19 +7,16 @@ class TableInfo:
     """
     テーブル情報を保持するデータクラス
     """
+
     _table_id = str
     _table_name: str
     _table: pl.DataFrame
-    _num_columns: int = 0
-    _num_rows: int = 0
     _description: str = ""
 
     def __init__(self, table_name: str, table: pl.DataFrame):
         self._id = str(uuid.uuid4())
         self._table_name = table_name
         self._table = table
-        self._num_columns = table.width
-        self._num_rows = table.height
 
     @property
     def table_id(self) -> str:
@@ -34,12 +31,13 @@ class TableInfo:
         return self._table
 
     @property
-    def num_columns(self) -> int:
-        return self._num_columns
+    def column_count(self) -> int:
+        return len(self._table.columns)
 
     @property
-    def num_rows(self) -> int:
-        return self._num_rows
+    def row_count(self) -> int:
+        # return self._table.select(pl.len()).collect().item()
+        return self._table.height
 
     @property
     def description(self) -> str:
@@ -52,12 +50,7 @@ class TableInfo:
     @table.setter
     def table(self, table: pl.DataFrame):
         self._table = table
-        self._num_columns = table.width
-        self._num_rows = table.height
 
     @description.setter
     def description(self, description: str):
         self._description = description
-
-
-all_tables_info = {}

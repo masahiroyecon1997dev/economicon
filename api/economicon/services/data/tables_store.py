@@ -7,7 +7,6 @@ from .table_info import TableInfo
 
 
 class TablesStore:
-
     _instance = None
     _lock: threading.RLock = threading.RLock()
 
@@ -20,7 +19,7 @@ class TablesStore:
 
     def __init__(self):
         # 初期化が一度だけ行われるようにする
-        if not hasattr(self, '_initialized'):
+        if not hasattr(self, "_initialized"):
             self._tables: Dict[str, TableInfo] = {}
             self._lock = threading.RLock()
             self._initialized = True
@@ -47,7 +46,7 @@ class TablesStore:
             else:
                 raise KeyError(f"Table '{table_name}' does not exist.")
 
-    def get_column_info_list(self, table_name: str) -> pl.Schema:
+    def get_schema(self, table_name: str) -> pl.Schema:
         with self._lock:
             table_info = self._tables.get(table_name)
             if table_info:
@@ -82,6 +81,14 @@ class TablesStore:
     def get_table_name_list(self) -> List[str]:
         with self._lock:
             return list(self._tables.keys())
+
+    def get_table_row_count(self, table_name: str) -> int:
+        with self._lock:
+            table_info = self._tables.get(table_name)
+            if table_info:
+                return table_info.row_count
+            else:
+                raise KeyError(f"Table '{table_name}' does not exist.")
 
     def clear_tables(self):
         with self._lock:

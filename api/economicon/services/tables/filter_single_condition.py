@@ -1,10 +1,8 @@
 import polars as pl
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import FilterSingleConditionRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils import ValidationError
+from ...utils import ProcessingError, ValidationError
 from ...utils.validators import (
     validate_existence,
     validate_non_existence,
@@ -70,24 +68,12 @@ class FilterSingleCondition:
                 valid_list=column_names,
                 target=self.param_names["column_names"],
             )
-            # フィルタリング条件の妥当性チェック
-            validate_filter_condition(
-                self.condition, self.param_names["condition"]
-            )
-            # 比較値タイプの妥当性チェック
-            validate_is_compare_column(
-                self.is_compare_column, self.param_names["is_compare_column"]
-            )
-            # 比較値の妥当性チェック
-            validate_compare_value(
-                self.compare_value, self.param_names["compare_value"]
-            )
             # 比較値がカラムの場合の存在チェック
             if self.is_compare_column == "true":
-                validate_existed_column_name(
-                    self.compare_value,
-                    column_names,
-                    self.param_names["compare_value"],
+                validate_existence(
+                    value=self.compare_value,
+                    valid_list=column_names,
+                    target=self.param_names["compare_value"],
                 )
             return None
         except ValidationError as e:
@@ -162,8 +148,10 @@ class FilterSingleCondition:
                         )
                     )
                 case _:
-                    raise ValidationError(
-                        "ConditionError", _("Invalid condition specified")
+                    raise ProcessingError(
+                        error_code="InvalidConditionError",
+                        message=_("Invalid filter condition specified"),
+                        detail=f"Condition: {self.condition}",
                     )
 
             # テーブル情報を更新
@@ -177,4 +165,8 @@ class FilterSingleCondition:
             message = _(
                 "An unexpected error occurred during filter processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="FilterSingleConditionProcessError",
+                message=message,
+                detail=str(e),
+            ) from e

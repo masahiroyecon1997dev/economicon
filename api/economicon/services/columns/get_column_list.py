@@ -36,9 +36,7 @@ class GetColumnList:
 
     def execute(self):
         try:
-            column_list = self.tables_store.get_column_info_list(
-                self.table_name
-            )
+            column_list = self.tables_store.get_schema(self.table_name)
             if self.is_number_only:
                 column_info_list = [
                     {"name": name, "type": str(dtype)}

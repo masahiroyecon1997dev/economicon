@@ -113,7 +113,7 @@ class Regression:
             )
 
             # スキーマの取得
-            df_schema = self.tables_store.get_column_info_list(self.table_name)
+            df_schema = self.tables_store.get_schema(self.table_name)
 
             # 説明変数の検証
             validate_explanatory_variables(
