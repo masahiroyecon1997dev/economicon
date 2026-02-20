@@ -1,12 +1,11 @@
 import polars as pl
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import InputCellDataRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils import ValidationError
+from ...utils import ProcessingError, ValidationError
 from ...utils.validators import (
     validate_existence,
+    validate_row_count_limit,
 )
 from ..data.tables_store import TablesStore
 
@@ -56,12 +55,14 @@ class InputCellData:
                 valid_list=column_name_list,
                 target=self.param_names["column_names"],
             )
-            num_rows = (
-                self.tables_store.get_table(self.table_name).num_rows - 1
+            row_count = (
+                self.tables_store.get_table_row_count(self.table_name) - 1
             )
             # 行インデックスの妥当性チェック
-            validate_row_index(
-                self.row_index, num_rows, self.param_names["row_index"]
+            validate_row_count_limit(
+                current_row_count=row_count,
+                requested_count=self.row_index,
+                target=self.param_names["row_index"],
             )
             return None
         except ValidationError as e:
@@ -94,4 +95,8 @@ class InputCellData:
                 "An unexpected error occurred during "
                 "input cell data processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="InputCellDataProcessError",
+                message=message,
+                detail=str(e),
+            ) from e
