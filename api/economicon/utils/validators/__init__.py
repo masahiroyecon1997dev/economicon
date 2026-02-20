@@ -4,6 +4,7 @@ from .common import (
     validate_existence,
     validate_non_existence,
     validate_numeric_types,
+    validate_row_count_limit,
 )
 from .files import (
     validate_directory_path,
@@ -17,6 +18,7 @@ __all__ = [
     "validate_existence",
     "validate_non_existence",
     "validate_numeric_types",
+    "validate_row_count_limit",
     # ファイルパス関連のバリデーション関数
     "validate_directory_path",
     "validate_file_format",

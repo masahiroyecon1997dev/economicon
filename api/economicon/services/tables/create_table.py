@@ -4,7 +4,10 @@ from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import CreateTableRequestBody
 from ...utils import ValidationError
-from ...utils.validators import validate_non_existence
+from ...utils.validators import (
+    validate_non_existence,
+    validate_row_count_limit,
+)
 from ..data.tables_store import TablesStore
 
 
@@ -44,9 +47,14 @@ class CreateTable:
                 existing_list=table_name_list,
                 target=self.param_names["table_name"],
             )
+            row_count = (
+                self.tables_store.get_table_row_count(self.table_name) - 1
+            )
             # 行数の妥当性チェック
-            validate_table_num_rows(
-                self.table_number_of_rows, self.param_names["table_num_rows"]
+            validate_row_count_limit(
+                current_row_count=row_count,
+                requested_count=self.table_number_of_rows,
+                target=self.param_names["table_num_rows"],
             )
             # カラム名の妥当性チェック
             validate_new_columns(

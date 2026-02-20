@@ -75,7 +75,7 @@ class AddColumn:
     def execute(self):
         try:
             table_info = self.tables_store.get_table(self.table_name)
-            num_rows = table_info.num_rows
+            num_rows = table_info.row_count
             df = table_info.table
 
             # CSVファイルからデータを読み込むか、空列を作成するか

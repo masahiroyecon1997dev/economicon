@@ -74,7 +74,7 @@ class CalculateColumn:
                     "column_name_in_calculation_expression"
                 ],
             )
-            df_schema = self.tables_store.get_column_info_list(self.table_name)
+            df_schema = self.tables_store.get_schema(self.table_name)
             # 計算式に使用されている列が数値型であることを検証
             validate_numeric_types(
                 schema=df_schema,

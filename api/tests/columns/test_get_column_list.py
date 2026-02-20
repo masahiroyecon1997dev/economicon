@@ -30,7 +30,7 @@ def tables_store():
     manager.clear_tables()
 
 
-def test_get_column_info_list_success(client, tables_store):
+def test_get_column_list_success(client, tables_store):
     """正常系テスト：テーブルが存在する場合"""
     response = client.post(
         "/api/column/get-list", json={"tableName": table_name}
@@ -48,7 +48,7 @@ def test_get_column_info_list_success(client, tables_store):
     assert result["columnInfoList"] == expected_columns
 
 
-def test_get_column_info_list_number_success(client, tables_store):
+def test_get_column_list_number_success(client, tables_store):
     """正常系テスト：テーブルが存在する場合（数値型の列のみ）"""
     response = client.post(
         "/api/column/get-list",
@@ -68,7 +68,7 @@ def test_get_column_info_list_number_success(client, tables_store):
     assert result["columnInfoList"] == expected_columns
 
 
-def test_get_column_info_list_table_not_found(client, tables_store):
+def test_get_column_list_table_not_found(client, tables_store):
     """異常系テスト：存在しないテーブル名の場合"""
     non_existent_table_name = "non_existent_table"
     response = client.post(
@@ -81,14 +81,14 @@ def test_get_column_info_list_table_not_found(client, tables_store):
     assert expected_message == response_data["message"]
 
 
-def test_get_column_info_list_exception(client, tables_store):
+def test_get_column_list_exception(client, tables_store):
     """例外発生時のテスト"""
-    original_method = tables_store.get_column_info_list
+    original_method = tables_store.get_column_list
 
     def raise_exception(table_name: str) -> pl.Schema:
         raise Exception("DB error")
 
-    tables_store.get_column_info_list = raise_exception
+    tables_store.get_column_list = raise_exception
     response = client.post(
         "/api/column/get-list", json={"tableName": table_name}
     )
@@ -100,4 +100,4 @@ def test_get_column_info_list_exception(client, tables_store):
     )
     assert expected_message == response_data["message"]
     # 後始末
-    tables_store.get_column_info_list = original_method
+    tables_store.get_column_list = original_method
