@@ -5,9 +5,8 @@ AnalysisResultStoreへのアクセスをラップし、
 統一されたエラーハンドリングとバリデーションを提供します。
 """
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
-from ...utils.validators.common import ValidationError
+from ...utils import ProcessingError, ValidationError
 from ..data.analysis_result_store import AnalysisResultStore
 
 
@@ -37,11 +36,12 @@ class GetAllAnalysisResults:
             summaries = self.result_store.get_all_summaries()
             return {"results": summaries}
         except Exception as e:
-            raise ApiError(
-                _(
+            raise ProcessingError(
+                error_code="GET_ALL_RESULTS_ERROR",
+                message=_(
                     "An unexpected error occurred during getting "
                     "analysis results"
-                )
+                ),
             ) from e
 
 
@@ -62,7 +62,10 @@ class GetAnalysisResult:
         結果IDが空でないことを確認
         """
         if not self.result_id or not self.result_id.strip():
-            raise ValidationError(_("Result ID is required"))
+            raise ValidationError(
+                error_code="RESULT_ID_REQUIRED",
+                message=_("Result ID is required"),
+            )
         return None
 
     def execute(self):
@@ -87,11 +90,12 @@ class GetAnalysisResult:
         except KeyError:
             raise
         except Exception as e:
-            raise ApiError(
-                _(
+            raise ProcessingError(
+                error_code="GET_ANALYSIS_RESULT_ERROR",
+                message=_(
                     "An unexpected error occurred during getting "
                     "analysis result"
-                )
+                ),
             ) from e
 
 
@@ -112,7 +116,10 @@ class DeleteAnalysisResult:
         結果IDが空でないことを確認
         """
         if not self.result_id or not self.result_id.strip():
-            raise ValidationError(_("Result ID is required"))
+            raise ValidationError(
+                error_code="RESULT_ID_REQUIRED",
+                message=_("Result ID is required"),
+            )
         return None
 
     def execute(self):
@@ -137,11 +144,12 @@ class DeleteAnalysisResult:
         except KeyError:
             raise
         except Exception as e:
-            raise ApiError(
-                _(
+            raise ProcessingError(
+                error_code="DELETE_ANALYSIS_RESULT_ERROR",
+                message=_(
                     "An unexpected error occurred during deleting "
                     "analysis result"
-                )
+                ),
             ) from e
 
 
@@ -171,9 +179,10 @@ class ClearAllAnalysisResults:
             self.result_store.clear_all()
             return {"message": "All analysis results cleared"}
         except Exception as e:
-            raise ApiError(
-                _(
+            raise ProcessingError(
+                error_code="CLEAR_ALL_ANALYSIS_RESULTS_ERROR",
+                message=_(
                     "An unexpected error occurred during clearing "
                     "analysis results"
-                )
+                ),
             ) from e

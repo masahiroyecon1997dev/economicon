@@ -23,7 +23,7 @@ class TransformMethodType(str, Enum):
     ROOT = "root"
 
 
-class RegressionType(str, Enum):
+class RegressionMethodType(str, Enum):
     OLS = "ols"
     LOGIT = "logit"
     PROBIT = "probit"
@@ -34,23 +34,16 @@ class RegressionType(str, Enum):
     FEIV = "feiv"
     LASSO = "lasso"
     RIDGE = "ridge"
-
-
-class RegressionMethodType(str, Enum):
-    OLS = "ols"
     WLS = "wls"
     GLS = "gls"
-    GMM = "gmm"
+    FGLS = "fgls"
 
 
 class StandardErrorMethodType(str, Enum):
     NONROBUST = "nonrobust"
-    HC0 = "hc0"
-    HC1 = "hc1"
-    HC2 = "hc2"
-    HC3 = "hc3"
+    ROBUST = "robust"
     HAC = "hac"
-    CLUSTERED = "clustered"
+    CLUSTER = "cluster"
 
 
 class MissingValueHandlingType(str, Enum):

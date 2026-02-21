@@ -39,6 +39,21 @@ from .data_io import (
     ImportExcelByPathRequestBody,
     ImportParquetByPathRequestBody,
 )
+from .entities import (
+    BinaryChoiceRegressionParams,
+    ClusteredStandardError,
+    HacStandardError,
+    InstrumentalVariablesParams,
+    NonRobustStandardError,
+    OLSParams,
+    PanelDataParams,
+    RegularizedRegressionParams,
+    RobustStandardError,
+    SimulationColumnConfig,
+    SortInstruction,
+    StandardErrorSettings,
+    TobitParams,
+)
 from .enums import (
     ConfidenceIntervalStatisticsType,
     DescriptiveStatisticType,
@@ -47,7 +62,6 @@ from .enums import (
     JoinType,
     MissingValueHandlingType,
     RegressionMethodType,
-    RegressionType,
     StandardErrorMethodType,
     TransformMethodType,
 )
@@ -96,7 +110,6 @@ __all__ = [
     "TransformMethodType",
     "DistributionType",
     "TransformMethodType",
-    "RegressionType",
     "RegressionMethodType",
     "StandardErrorMethodType",
     "MissingValueHandlingType",
@@ -107,6 +120,20 @@ __all__ = [
     # Types
     "DistributionConfig",
     "TransformMethodConfig",
+    # Entities
+    "SimulationColumnConfig",
+    "SortInstruction",
+    "OLSParams",
+    "RegularizedRegressionParams",
+    "BinaryChoiceRegressionParams",
+    "InstrumentalVariablesParams",
+    "PanelDataParams",
+    "TobitParams",
+    "StandardErrorSettings",
+    "NonRobustStandardError",
+    "RobustStandardError",
+    "ClusteredStandardError",
+    "HacStandardError",
     # Column operations
     "AddColumnRequestBody",
     "AddColumnResult",
