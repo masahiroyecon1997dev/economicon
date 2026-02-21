@@ -5,8 +5,7 @@ from typing import Annotated, List, Optional
 from pydantic import BaseModel, Field
 
 from .common import BaseRequest
-from .entities import SimulationColumnConfig
-from .schemas import SortInstruction
+from .entities import SimulationColumnConfig, SortInstruction
 from .types import (
     ColumnName,
     FilePath,

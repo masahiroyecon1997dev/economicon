@@ -6,7 +6,6 @@ from ...utils import ProcessingError, ValidationError
 from ...utils.validators import (
     validate_directory_path,
     validate_existence,
-    validate_windows_reserved_name,
 )
 from ..data.tables_store import TablesStore
 
@@ -49,11 +48,6 @@ class ExportExcelByPath:
             validate_directory_path(
                 path_str=self.directory_path,
                 target=self.param_names["directory_path"],
-            )
-
-            # ファイル名のバリデーション
-            validate_windows_reserved_name(
-                filename=self.file_name, target=self.param_names["file_name"]
             )
 
             return None
