@@ -5,7 +5,7 @@
 """
 
 import gc
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple
 
 import numpy as np
 import polars as pl
@@ -148,8 +148,8 @@ def prepare_panel_dataframe(
     dependent_variable: str,
     explanatory_variables: List[str],
     entity_id_column: str,
-    time_column: str,
     missing: str,
+    time_column: Optional[str] = None,
 ) -> Any:
     """
     パネルデータ分析用のDataFrameを準備

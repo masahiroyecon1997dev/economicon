@@ -1,12 +1,13 @@
+import uuid
 from datetime import datetime
 from typing import Any, Dict
-import uuid
 
 
 class AnalysisResult:
     """
     分析結果を保持するデータクラス
     """
+
     _id: str
     _name: str
     _description: str
@@ -16,21 +17,18 @@ class AnalysisResult:
 
     def __init__(
         self,
+        *,
         name: str,
         description: str,
         table_name: str,
         regression_output: Dict[str, Any],
-        result_id: str | None = None,
-        created_at: str | None = None
     ):
-        self._id = result_id or str(uuid.uuid4())
+        self._id = str(uuid.uuid4())
         self._name = name
         self._description = description
         self._table_name = table_name
         self._regression_output = regression_output
-        self._created_at = (
-            created_at or datetime.now().isoformat()
-        )
+        self._created_at = datetime.now().isoformat()
 
     @property
     def id(self) -> str:
@@ -69,12 +67,12 @@ class AnalysisResult:
         AnalysisResultを辞書形式に変換
         """
         return {
-            'id': self._id,
-            'name': self._name,
-            'description': self._description,
-            'tableName': self._table_name,
-            'regressionOutput': self._regression_output,
-            'createdAt': self._created_at
+            "id": self._id,
+            "name": self._name,
+            "description": self._description,
+            "tableName": self._table_name,
+            "regressionOutput": self._regression_output,
+            "createdAt": self._created_at,
         }
 
     def to_summary_dict(self) -> Dict[str, str]:
@@ -82,8 +80,8 @@ class AnalysisResult:
         サマリー情報を辞書形式に変換
         """
         return {
-            'id': self._id,
-            'name': self._name,
-            'description': self._description,
-            'createdAt': self._created_at
+            "id": self._id,
+            "name": self._name,
+            "description": self._description,
+            "createdAt": self._created_at,
         }
