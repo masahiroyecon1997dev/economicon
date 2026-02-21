@@ -1,8 +1,7 @@
-from typing import Any, Dict, List
-
 import polars as pl
 
 from ...i18n.translation import gettext as _
+from ...models import CreateSimulationDataTableRequestBody
 from ...utils import ProcessingError, ValidationError
 from ...utils.algorithms.simulation import generate_simulation_data
 from ...utils.validators import validate_non_existence
@@ -18,20 +17,15 @@ class CreateSimulationDataTable:
     各列は分布に従うランダムデータまたは固定値を持つことができます。
     """
 
-    def __init__(
-        self,
-        table_name: str,
-        table_number_of_rows: int,
-        column_settings: List[Dict[str, Any]],
-    ):
+    def __init__(self, body: CreateSimulationDataTableRequestBody):
         self.tables_store = TablesStore()
-        self.table_name = table_name
-        self.table_number_of_rows = table_number_of_rows
-        self.column_settings = column_settings
+        self.table_name = body.table_name
+        self.row_count = body.row_count
+        self.simulation_columns = body.simulation_columns
         self.param_names = {
             "table_name": "tableName",
-            "table_number_of_rows": "tableNumberOfRows",
-            "column_settings": "columnSettings",
+            "row_count": "rowCount",
+            "simulation_columns": "simulationColumns",
         }
 
     def validate(self):
@@ -43,86 +37,9 @@ class CreateSimulationDataTable:
                 existing_list=table_name_list,
                 target=self.param_names["table_name"],
             )
-
-            # 列設定の検証
-            if not isinstance(self.column_settings, list):
-                raise ValidationError(_("Column settings must be a list."))
-
-            if len(self.column_settings) == 0:
-                raise ValidationError(
-                    _("At least one column setting is required.")
-                )
-
-            # 各列設定の詳細検証
-            column_names = []
-            for i, column_setting in enumerate(self.column_settings):
-                param_prefix = f"{self.param_names['column_settings']}[{i}]"
-                self._validate_column_setting(
-                    column_setting, column_names, param_prefix
-                )
-
             return None
         except ValidationError as e:
             return e
-
-    def _validate_column_setting(
-        self,
-        column_setting: Dict[str, Any],
-        existing_column_names: List[str],
-        param_prefix: str,
-    ):
-        """個別の列設定を検証"""
-
-        # 列名の検証
-        if "columnName" not in column_setting:
-            raise ValidationError(_("Column name is required."))
-
-        column_name = column_setting["columnName"]
-        validate_new_column_name(
-            column_name, existing_column_names, f"{param_prefix}.columnName"
-        )
-        existing_column_names.append(column_name)
-
-        # データタイプの検証
-        if "dataType" not in column_setting:
-            raise ValidationError(_("Data type is required."))
-
-        data_type = column_setting["dataType"]
-        if data_type not in ["distribution", "fixed"]:
-            raise ValidationError(
-                _("Data type must be 'distribution' or 'fixed'.")
-            )
-
-        # 分布データの場合の検証
-        if data_type == "distribution":
-            if "distributionType" not in column_setting:
-                raise ValidationError(
-                    _("Distribution type is required for distribution data.")
-                )
-
-            distribution_type = column_setting["distributionType"]
-            validate_distribution_type(
-                distribution_type, f"{param_prefix}.distributionType"
-            )
-
-            if "distributionParams" not in column_setting:
-                raise ValidationError(
-                    _(
-                        "Distribution parameters are required for distribution data."
-                    )
-                )
-
-            distribution_params = column_setting["distributionParams"]
-            validate_distribution_params(
-                distribution_type, distribution_params
-            )
-
-        # 固定値データの場合の検証
-        elif data_type == "fixed":
-            if "fixedValue" not in column_setting:
-                raise ValidationError(
-                    _("Fixed value is required for fixed data.")
-                )
 
     def execute(self):
         try:
@@ -130,25 +47,13 @@ class CreateSimulationDataTable:
             df = pl.DataFrame()
 
             # 各列設定に従ってデータを生成
-            for column_setting in self.column_settings:
-                column_name = column_setting["columnName"]
-                data_type = column_setting["dataType"]
-                column_data = []  # 初期化
+            for column in self.simulation_columns:
+                column_name = column.column_name
 
-                if data_type == "distribution":
-                    # 分布に従ってデータを生成
-                    distribution_type = column_setting["distributionType"]
-                    distribution_params = column_setting["distributionParams"]
-                    column_data = generate_simulation_data(
-                        distribution_type,
-                        distribution_params,
-                        self.table_number_of_rows,
-                    )
-                elif data_type == "fixed":
-                    # 固定値でデータを生成
-                    fixed_value = column_setting["fixedValue"]
-                    column_data = [fixed_value] * self.table_number_of_rows
-
+                column_data = generate_simulation_data(
+                    column.distribution,
+                    self.row_count,
+                )
                 # 列をデータフレームに追加
                 if df.is_empty():
                     df = pl.DataFrame({column_name: column_data})

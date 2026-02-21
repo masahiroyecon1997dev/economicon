@@ -175,6 +175,13 @@ class HypergeometricParams(BaseModel):
         return self
 
 
+class FixedParams(BaseModel):
+    """固定値のパラメータ"""
+
+    type: Literal[DistributionType.FIXED] = Field(description="分布の種類")
+    value: float = Field(description="固定値")
+
+
 class LogParams(BaseModel):
     """対数変換のパラメータ"""
 
