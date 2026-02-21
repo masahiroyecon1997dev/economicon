@@ -5,10 +5,10 @@ from typing import Annotated, Any, List
 from pydantic import Field
 
 from .common import BaseRequest
+from .entities import SimulationColumnConfig
 from .enums import FilterOperatorType, JoinType
 from .types import (
     ColumnName,
-    DistributionConfig,
     NewColumnName,
     NewTableName,
     TableName,
@@ -38,8 +38,8 @@ class CreateSimulationDataTableRequestBody(BaseRequest):
     """シミュレーションデータテーブル作成リクエスト"""
 
     table_name: NewTableName
-    table_number_of_rows: int = Field(description="テーブルの行数", ge=1)
-    column_settings: List[DistributionConfig] = Field(
+    row_count: int = Field(description="テーブルの行数", ge=1)
+    simulation_columns: List[SimulationColumnConfig] = Field(
         description="カラム設定のリスト",
         min_length=1,
     )

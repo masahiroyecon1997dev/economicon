@@ -14,6 +14,7 @@ class DistributionType(str, Enum):
     POISSON = "poisson"
     GEOMETRIC = "geometric"
     HYPERGEOMETRIC = "hypergeometric"
+    FIXED = "fixed"
 
 
 class TransformMethodType(str, Enum):

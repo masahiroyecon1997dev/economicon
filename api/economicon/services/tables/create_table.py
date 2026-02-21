@@ -1,9 +1,8 @@
 import polars as pl
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import CreateTableRequestBody
-from ...utils import ValidationError
+from ...utils import ProcessingError, ValidationError
 from ...utils.validators import (
     validate_non_existence,
     validate_row_count_limit,
@@ -56,10 +55,6 @@ class CreateTable:
                 requested_count=self.table_number_of_rows,
                 target=self.param_names["table_num_rows"],
             )
-            # カラム名の妥当性チェック
-            validate_new_columns(
-                self.column_names, self.param_names["column_names"]
-            )
             return None
         except ValidationError as e:
             return e
@@ -84,4 +79,8 @@ class CreateTable:
             message = _(
                 "An unexpected error occurred during table creation processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="CreateTableError",
+                message=message,
+                detail=str(e),
+            ) from e
