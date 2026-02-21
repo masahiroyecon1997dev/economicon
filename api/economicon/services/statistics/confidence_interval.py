@@ -1,17 +1,11 @@
 import numpy as np
 from scipy import stats
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import ConfidenceIntervalRequestBody
-from ...utils.validators.common import (
-    ValidationError,
-    validate_candidates,
-)
-from ...utils.validators.tables_store import (
-    validate_existed_column_name,
-    validate_existed_table_name,
-)
+from ...models.enums import ConfidenceIntervalStatisticsType
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import validate_existence
 from ..data.tables_store import TablesStore
 
 
@@ -52,37 +46,21 @@ class ConfidenceInterval:
         try:
             # テーブル名の検証
             table_name_list = self.tables_store.get_table_name_list()
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
 
             # 列名の検証
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
-            validate_existed_column_name(
-                self.column_name,
-                column_name_list,
-                self.param_names["column_name"],
+            validate_existence(
+                value=self.column_name,
+                valid_list=column_name_list,
+                target=self.param_names["column_name"],
             )
-
-            # 統計タイプの検証
-            validate_candidates(
-                self.statistic_type,
-                self.param_names["statistic_type"],
-                list(self.AVAILABLE_STATISTICS.keys()),
-            )
-
-            # 信頼度レベルの検証
-            if not isinstance(self.confidence_level, (int, float)):
-                raise ValidationError(_("confidenceLevel must be a number"))
-
-            if not (0 < self.confidence_level < 1):
-                raise ValidationError(
-                    _("confidenceLevel must be between 0 and 1")
-                )
 
             return None
         except ValidationError as e:
@@ -96,43 +74,38 @@ class ConfidenceInterval:
             # 列のデータを取得
             column_data = df[self.column_name].drop_nulls()
 
-            if column_data.len() == 0:
-                raise ValidationError(_("Column contains no valid data"))
-
             # データを numpy array に変換
             data_array = column_data.to_numpy()
 
             # 統計量と信頼区間を計算
             match self.statistic_type:
-                case "mean":
+                case ConfidenceIntervalStatisticsType.MEAN:
                     statistic_value, ci_lower, ci_upper = (
                         self._calculate_mean_ci(data_array)
                     )
-                case "median":
+                case ConfidenceIntervalStatisticsType.MEDIAN:
                     statistic_value, ci_lower, ci_upper = (
                         self._calculate_median_ci(data_array)
                     )
-                case "proportion":
+                case ConfidenceIntervalStatisticsType.PROPORTION:
                     statistic_value, ci_lower, ci_upper = (
                         self._calculate_proportion_ci(data_array)
                     )
-                case "variance":
+                case ConfidenceIntervalStatisticsType.VARIANCE:
                     statistic_value, ci_lower, ci_upper = (
                         self._calculate_variance_ci(data_array)
                     )
-                case "std":
+                case ConfidenceIntervalStatisticsType.STD:
                     statistic_value, ci_lower, ci_upper = (
                         self._calculate_std_ci(data_array)
                     )
-                case _:
-                    raise ValidationError(_("Unsupported statistic type"))
 
             # 結果を返す
             result = {
                 "tableName": self.table_name,
                 "columnName": self.column_name,
                 "statistic": {
-                    "type": self.statistic_type,
+                    "type": self.statistic_type.value,
                     "value": statistic_value,
                 },
                 "confidence_interval": {"lower": ci_lower, "upper": ci_upper},
@@ -148,7 +121,11 @@ class ConfidenceInterval:
                 "An unexpected error occurred during "
                 "confidence interval processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="CONFIDENCE_INTERVAL_ERROR",
+                message=message,
+                detail=str(e),
+            ) from e
 
     def _calculate_mean_ci(self, data):
         """平均値の信頼区間を計算"""
@@ -190,11 +167,12 @@ class ConfidenceInterval:
         if not (
             len(unique_vals) <= 2 and all(v in [0, 1] for v in unique_vals)
         ):
-            raise ValidationError(
-                _(
+            raise ProcessingError(
+                error_code="INVALID_PROPORTION_DATA",
+                message=_(
                     "For proportion confidence interval, "
                     "data must contain only 0 and 1 values"
-                )
+                ),
             )
 
         n = len(data)
