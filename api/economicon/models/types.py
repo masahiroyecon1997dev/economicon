@@ -1,7 +1,8 @@
 from typing import Annotated, Union
 
-from pydantic import Field, StringConstraints
+from pydantic import AfterValidator, Field, StringConstraints
 
+from ..i18n.translation import gettext as _
 from .common import (
     BernoulliParams,
     BetaParams,
@@ -21,6 +22,62 @@ from .common import (
 )
 
 NAME_PATTERN = r"^[^\x00-\x1f\x7f]+$"
+
+
+def validate_sheet_name_quotes(v: str) -> str:
+    """先頭と末尾の引用符をチェックする関数"""
+    if v.startswith("'") or v.endswith("'"):
+        # _() は翻訳関数として定義されている前提
+        raise ValueError(
+            _("Sheet name cannot start or end with a single quote")
+        )
+    return v
+
+
+def validate_file_name_chars(v: str) -> str:
+    """
+    ファイル名としての整合性をチェックする関数。
+    """
+    # 1. 先頭のドット禁止
+    if v.startswith("."):
+        raise ValueError(_("File name cannot start with a dot (.)"))
+
+    # 2. 末尾のスペースまたはドット禁止 (Windows制限対策)
+    if v.endswith(" ") or v.endswith("."):
+        raise ValueError(_("File name cannot end with a space or a dot"))
+
+    # 3. 予約名のチェック (CON, PRN, AUX, NUL など)
+    # 大文字小文字問わず、拡張子があってもなくてもダメ
+    reserved_names = {
+        "CON",
+        "PRN",
+        "AUX",
+        "NUL",
+        "COM1",
+        "COM2",
+        "COM3",
+        "COM4",
+        "COM5",
+        "COM6",
+        "COM7",
+        "COM8",
+        "COM9",
+        "LPT1",
+        "LPT2",
+        "LPT3",
+        "LPT4",
+        "LPT5",
+        "LPT6",
+        "LPT7",
+        "LPT8",
+        "LPT9",
+    }
+    base_name = v.split(".")[0].upper()
+    if base_name in reserved_names:
+        raise ValueError(_(f"'{base_name}' is a reserved system name"))
+
+    return v
+
 
 TableName = Annotated[
     str,
@@ -90,26 +147,45 @@ DirectoryPath = Annotated[
     ),
 ]
 
-FileName = Annotated[
-    str,
-    StringConstraints(
-        strip_whitespace=True,
-        min_length=1,
-        max_length=255,
-        pattern=r'^(?!\.)[^\\/:*?"<>|]+(?<![ .])$',
-    ),
-    Field(
-        examples=["output.csv", "人口動態データ.xlsx"],
-        description="ファイル名",
-    ),
-]
-
 Separator = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=1, max_length=10),
     Field(
         examples=[",", "\t"],
         description="区切り文字",
+    ),
+]
+
+ExcelSheetName = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True,
+        min_length=1,
+        max_length=31,
+        # 禁止記号 \ / ? * : [ ] を除外
+        pattern=r"^[^\/\\\?\*\:\[\]]+$",
+    ),
+    # field_validatorの代わりにAfterValidatorでロジックを注入
+    AfterValidator(validate_sheet_name_quotes),
+    Field(
+        examples=["人口動態", "Sheet1"],
+        description="Excelのシート名（31文字以内、使用不可記号あり）",
+    ),
+]
+
+FileName = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True,
+        min_length=1,
+        max_length=255,
+        # 禁止記号
+        pattern=r'^[^\\/:*?"<>|]+$',
+    ),
+    AfterValidator(validate_file_name_chars),
+    Field(
+        examples=["report_2024", "analysis_result"],
+        description="OSで使用可能なファイル名（記号制限あり）",
     ),
 ]
 

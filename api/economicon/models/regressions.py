@@ -34,13 +34,6 @@ class RegressionRequestBody(BaseRequest):
 
     table_name: TableName
 
-    name: str = Field(default="", description="分析結果の名前（ユーザー指定）")
-
-    description: str = Field(
-        default="",
-        description="分析結果の説明・メモ（ユーザー指定）",
-    )
-
     dependent_variable: Annotated[
         ColumnName,
         Field(description="被説明変数の列名"),

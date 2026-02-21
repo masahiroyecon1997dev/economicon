@@ -1,22 +1,9 @@
 from typing import Any, Dict
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import RegressionRequestBody, RegressionType
-from ...utils.validators.common import ValidationError
-from ...utils.validators.statistics import (
-    validate_dependent_variable,
-    validate_endogenous_variables,
-    validate_entity_id_column,
-    validate_explanatory_variables,
-    validate_instrumental_variables,
-    validate_regulalized_hyperparameters,
-    validate_standard_error_method,
-    validate_time_column,
-)
-from ...utils.validators.tables_store import (
-    validate_existed_table_name,
-)
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import validate_existence, validate_numeric_types
 from ..data.analysis_result import AnalysisResult
 from ..data.analysis_result_store import AnalysisResultStore
 from ..data.tables_store import TablesStore
@@ -59,8 +46,6 @@ class Regression:
         self.type = body.type
         self.method = body.method
         self.table_name = body.table_name
-        self.name = body.name
-        self.description = body.description
         self.dependent_variable = body.dependent_variable
         self.explanatory_variables = body.explanatory_variables
         self.standard_error_method = body.standard_error_method
@@ -101,84 +86,93 @@ class Regression:
         try:
             # テーブル名の検証
             table_name_list = self.tables_store.get_table_name_list()
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
 
             # 列名リストの取得
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
             )
-
             # スキーマの取得
             df_schema = self.tables_store.get_schema(self.table_name)
 
             # 説明変数の検証
-            validate_explanatory_variables(
-                self.explanatory_variables,
-                column_name_list,
-                df_schema,
-                self.param_names["explanatory_variables"],
+            validate_existence(
+                value=self.explanatory_variables,
+                valid_list=column_name_list,
+                target=self.param_names["explanatory_variables"],
+            )
+            validate_numeric_types(
+                schema=df_schema,
+                columns=self.explanatory_variables,
+                target=self.param_names["explanatory_variables"],
             )
 
             # 被説明変数の検証
-            validate_dependent_variable(
-                self.dependent_variable,
-                column_name_list,
-                self.explanatory_variables,
-                df_schema,
-                self.param_names["dependent_variable"],
+            validate_existence(
+                value=self.dependent_variable,
+                valid_list=column_name_list,
+                target=self.param_names["dependent_variable"],
             )
-
-            # 標準誤差のパラメータ検証
-            validate_standard_error_method(
-                self.standard_error_method,
-                self.standard_error_params,
-                column_name_list,
+            validate_numeric_types(
+                schema=df_schema,
+                columns=[self.dependent_variable],
+                target=self.param_names["dependent_variable"],
             )
 
             # 分析手法ごとの追加検証
             match self.type:
                 case RegressionType.FE | RegressionType.RE:
                     # 固定効果分析の場合、個体IDと時間列の検証
-                    validate_entity_id_column(
-                        self.entity_id_column,
-                        column_name_list,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        self.param_names["entity_id_column"],
-                    )
-                    validate_time_column(
-                        self.time_column,
-                        column_name_list,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        self.param_names["time_column"],
-                    )
+                    if self.entity_id_column:
+                        validate_existence(
+                            value=self.entity_id_column,
+                            valid_list=column_name_list,
+                            target=self.param_names["entity_id_column"],
+                        )
+                        validate_numeric_types(
+                            schema=df_schema,
+                            columns=self.entity_id_column,
+                            target=self.param_names["entity_id_column"],
+                        )
+                    if self.time_column:
+                        validate_existence(
+                            value=self.time_column,
+                            valid_list=column_name_list,
+                            target=self.param_names["time_column"],
+                        )
+                        validate_numeric_types(
+                            schema=df_schema,
+                            columns=self.time_column,
+                            target=self.param_names["time_column"],
+                        )
                 case RegressionType.IV:
                     # IV分析の場合、操作変数と内生変数の検証
-                    validate_instrumental_variables(
-                        self.instrumental_variables,
-                        column_name_list,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        self.param_names["instrumental_variables"],
-                    )
-                    validate_endogenous_variables(
-                        self.endogenous_variables,
-                        column_name_list,
-                        self.param_names["endogenous_variables"],
-                    )
-                case RegressionType.LASSO | RegressionType.RIDGE:
-                    # ハイパーパラメータの検証
-                    validate_regulalized_hyperparameters(
-                        self.hyper_parameters,
-                        "alpha",
-                        self.param_names["hyper_parameters"],
-                    )
-
+                    if self.instrumental_variables:
+                        validate_existence(
+                            value=self.instrumental_variables,
+                            valid_list=column_name_list,
+                            target=self.param_names["instrumental_variables"],
+                        )
+                        validate_numeric_types(
+                            schema=df_schema,
+                            columns=self.instrumental_variables,
+                            target=self.param_names["instrumental_variables"],
+                        )
+                    if self.endogenous_variables:
+                        validate_existence(
+                            value=self.endogenous_variables,
+                            valid_list=column_name_list,
+                            target=self.param_names["endogenous_variables"],
+                        )
+                        validate_numeric_types(
+                            schema=df_schema,
+                            columns=self.endogenous_variables,
+                            target=self.param_names["endogenous_variables"],
+                        )
             return None
         except ValidationError as e:
             return e
@@ -206,7 +200,7 @@ class Regression:
             # モデルのフィット
             analysis_result = None
             match self.type:
-                case "ols":
+                case RegressionType.OLS:
                     model_result = fit_ols(y_data, x_data, missing)
                     model_result = apply_standard_errors(
                         model_result,
@@ -214,7 +208,7 @@ class Regression:
                         self.standard_error_params,
                     )
                     analysis_result = self._format_result(model_result)
-                case "logit":
+                case RegressionType.LOGIT:
                     model_result = fit_logit(y_data, x_data, missing)
                     model_result = apply_standard_errors(
                         model_result,
@@ -222,7 +216,7 @@ class Regression:
                         self.standard_error_params,
                     )
                     analysis_result = self._format_result(model_result)
-                case "probit":
+                case RegressionType.PROBIT:
                     model_result = fit_probit(y_data, x_data, missing)
                     model_result = apply_standard_errors(
                         model_result,
@@ -230,7 +224,7 @@ class Regression:
                         self.standard_error_params,
                     )
                     analysis_result = self._format_result(model_result)
-                case "tobit":
+                case RegressionType.TOBIT:
                     df_pandas = prepare_tobit_dataframe(
                         df,
                         self.dependent_variable,
@@ -246,7 +240,7 @@ class Regression:
                         self.right_censoring_limit,
                     )
                     analysis_result = self._tobit_format_result(model_result)
-                case "fe":
+                case RegressionType.FE:
                     df_pandas = prepare_panel_dataframe(
                         df,
                         self.dependent_variable,
@@ -262,7 +256,7 @@ class Regression:
                         self.standard_error_method,
                     )
                     analysis_result = self._fe_format_result(model_result)
-                case "re":
+                case RegressionType.RE:
                     df_pandas = prepare_panel_dataframe(
                         df,
                         self.dependent_variable,
@@ -278,7 +272,7 @@ class Regression:
                         self.standard_error_method,
                     )
                     analysis_result = self._re_format_result(model_result)
-                case "iv":
+                case RegressionType.IV:
                     df_pandas = prepare_iv_dataframe(
                         df,
                         self.dependent_variable,
@@ -301,11 +295,11 @@ class Regression:
                         self.standard_error_params,
                     )
                     analysis_result = self._iv_format_result(model_result)
-                case "feiv":
+                case RegressionType.FEIV:
                     raise NotImplementedError(
                         _("FEIV regression is not yet implemented")
                     )
-                case "lasso":
+                case RegressionType.LASSO:
                     alpha = self.hyper_parameters.get("alpha", 1.0)
                     model_result, coef_scaled = fit_lasso(
                         y_data, x_data, self.has_const, alpha, missing
@@ -313,17 +307,13 @@ class Regression:
                     analysis_result = self._format_regularized_result(
                         model_result, coef_scaled
                     )
-                case "ridge":
+                case RegressionType.RIDGE:
                     alpha = self.hyper_parameters.get("alpha", 1.0)
                     model_result, coef_scaled = fit_ridge(
                         y_data, x_data, self.has_const, alpha, missing
                     )
                     analysis_result = self._format_regularized_result(
                         model_result, coef_scaled
-                    )
-                case _:
-                    raise ApiError(
-                        _(f"Unsupported regression type: {self.type}")
                     )
 
             # 分析結果をストアに保存
@@ -342,13 +332,10 @@ class Regression:
             }
             # IDのみを返却
             return result
-        except ApiError as e:
-            raise ApiError(str(e))
-        except NotImplementedError as e:
-            raise NotImplementedError(str(e))
         except Exception as e:
-            raise Exception(
-                f"Unexpected error: {str(e)}",
+            raise ProcessingError(
+                error_code="RegressionProcessError",
+                message=f"Unexpected error: {str(e)}",
             )
 
     def _format_result(self, model_result: Any) -> Dict:
