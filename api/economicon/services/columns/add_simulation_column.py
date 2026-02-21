@@ -23,8 +23,8 @@ class AddSimulationColumn:
     ):
         self.tables_store = TablesStore()
         self.table_name = body.table_name
-        self.new_column_name = body.new_column_name
-        self.distribution = body.distribution
+        self.new_column_name = body.simulation_column.column_name
+        self.distribution = body.simulation_column.distribution
 
         self.param_names = {
             "table_name": "tableName",
@@ -58,11 +58,11 @@ class AddSimulationColumn:
     def execute(self):
         try:
             table_info = self.tables_store.get_table(self.table_name)
-            num_rows = table_info.num_rows
+            row_count = table_info.row_count
 
             # 分布に従ってデータを生成
             simulation_data = generate_simulation_data(
-                self.distribution, num_rows
+                self.distribution, row_count
             )
 
             # 新しい列をデータフレームに追加

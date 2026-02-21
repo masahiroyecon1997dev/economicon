@@ -5,14 +5,14 @@ from typing import Annotated, List, Optional
 from pydantic import BaseModel, Field
 
 from .common import BaseRequest
+from .entities import SimulationColumnConfig
 from .schemas import SortInstruction
 from .types import (
     ColumnName,
-    DistributionConfig,
+    FilePath,
     NewColumnName,
     TableName,
     TransformMethodConfig,
-    FilePath,
 )
 
 
@@ -140,8 +140,13 @@ class AddSimulationColumnRequestBody(BaseRequest):
     """シミュレーションカラム追加リクエスト"""
 
     table_name: TableName
-    new_column_name: NewColumnName
-    distribution: DistributionConfig
+    add_position_column: Annotated[
+        ColumnName,
+        Field(
+            description="追加位置のカラム名",
+        ),
+    ]
+    simulation_column: SimulationColumnConfig
 
 
 class SortColumnsRequestBody(BaseRequest):

@@ -9,8 +9,7 @@ import pyarrow as pa
 from ...i18n.translation import gettext as _
 from ...models import FetchDataToArrowRequestBody
 from ...utils import ProcessingError, ValidationError
-from ...utils.validators import validate_existence
-from ...utils.validators.common import ValidationError
+from ...utils.validators import validate_existence, validate_row_count_limit
 from ..data.tables_store import TablesStore
 
 
@@ -64,12 +63,14 @@ class FetchDataToArrow:
                 valid_list=table_name_list,
                 target=self.param_names["table_name"],
             )
-            num_rows = (
-                self.tables_store.get_table(self.table_name).num_rows - 1
+            row_count = (
+                self.tables_store.get_table(self.table_name).row_count - 1
             )
             # 開始行番号の妥当性チェック
-            validate_row_index(
-                self.start_row, num_rows, self.param_names["start_row"]
+            validate_row_count_limit(
+                current_row_count=row_count,
+                requested_count=self.start_row,
+                target=self.param_names["start_row"],
             )
 
             return None

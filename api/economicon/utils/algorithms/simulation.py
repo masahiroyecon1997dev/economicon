@@ -1,58 +1,51 @@
 import numpy as np
 
-from ...models import DistributionType, DistributionConfig
+from ...models import DistributionConfig, DistributionType
 
 
-def generate_simulation_data(distribution: DistributionConfig, num_rows: int):
+def generate_simulation_data(
+    distribution: DistributionConfig, row_count: int
+) -> np.ndarray:
     """指定された分布に従ってシミュレーションデータを生成"""
 
     # NumPyのランダムジェネレータを使用
     rng = np.random.default_rng()
 
-    if distribution.type == DistributionType.UNIFORM:
-        return rng.uniform(distribution.low, distribution.high, num_rows)
-
-    elif distribution.type == DistributionType.EXPONENTIAL:
-        return rng.exponential(distribution.scale, num_rows)
-
-    elif distribution.type == DistributionType.NORMAL:
-        return rng.normal(distribution.loc, distribution.scale, num_rows)
-
-    elif distribution.type == DistributionType.GAMMA:
-        return rng.gamma(
-            distribution.shape,
-            distribution.scale,
-            num_rows,
-        )
-
-    elif distribution.type == DistributionType.BETA:
-        return rng.beta(distribution.a, distribution.b, num_rows)
-
-    elif distribution.type == DistributionType.WEIBULL:
-        return rng.weibull(distribution.a, num_rows) * distribution.scale
-
-    elif distribution.type == DistributionType.LOGNORMAL:
-        return rng.lognormal(distribution.mean, distribution.sigma, num_rows)
-
-    elif distribution.type == DistributionType.BINOMIAL:
-        return rng.binomial(distribution.n, distribution.p, num_rows)
-
-    elif distribution.type == DistributionType.BERNOULLI:
-        return rng.binomial(1, distribution.p, num_rows)
-
-    elif distribution.type == DistributionType.POISSON:
-        return rng.poisson(distribution.lam, num_rows)
-
-    elif distribution.type == DistributionType.GEOMETRIC:
-        return rng.geometric(distribution.p, num_rows)
-
-    elif distribution.type == DistributionType.HYPERGEOMETRIC:
-        return rng.hypergeometric(
-            distribution.K,
-            distribution.N - distribution.K,
-            distribution.n,
-            num_rows,
-        )
-
-    else:
-        raise ValueError(f"Unsupported distribution type: {distribution.type}")
+    match distribution.type:
+        case DistributionType.UNIFORM:
+            return rng.uniform(distribution.low, distribution.high, row_count)
+        case DistributionType.EXPONENTIAL:
+            return rng.exponential(distribution.scale, row_count)
+        case DistributionType.NORMAL:
+            return rng.normal(distribution.loc, distribution.scale, row_count)
+        case DistributionType.GAMMA:
+            return rng.gamma(
+                distribution.shape,
+                distribution.scale,
+                row_count,
+            )
+        case DistributionType.BETA:
+            return rng.beta(distribution.a, distribution.b, row_count)
+        case DistributionType.WEIBULL:
+            return rng.weibull(distribution.a, row_count) * distribution.scale
+        case DistributionType.LOGNORMAL:
+            return rng.lognormal(
+                distribution.mean, distribution.sigma, row_count
+            )
+        case DistributionType.BINOMIAL:
+            return rng.binomial(distribution.n, distribution.p, row_count)
+        case DistributionType.BERNOULLI:
+            return rng.binomial(1, distribution.p, row_count)
+        case DistributionType.POISSON:
+            return rng.poisson(distribution.lam, row_count)
+        case DistributionType.GEOMETRIC:
+            return rng.geometric(distribution.p, row_count)
+        case DistributionType.HYPERGEOMETRIC:
+            return rng.hypergeometric(
+                distribution.K,
+                distribution.N - distribution.K,
+                distribution.n,
+                row_count,
+            )
+        case DistributionType.FIXED:
+            return np.full(row_count, distribution.value)
