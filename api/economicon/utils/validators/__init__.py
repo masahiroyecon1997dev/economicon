@@ -10,7 +10,6 @@ from .files import (
     validate_directory_path,
     validate_file_format,
     validate_file_path,
-    validate_windows_reserved_name,
 )
 
 __all__ = [
@@ -23,5 +22,4 @@ __all__ = [
     "validate_directory_path",
     "validate_file_format",
     "validate_file_path",
-    "validate_windows_reserved_name",
 ]
