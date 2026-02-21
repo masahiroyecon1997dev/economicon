@@ -1,7 +1,6 @@
 """ユーティリティパッケージ初期化"""
 
-from exceptions import ProcessingError, ValidationError
-
+from .exceptions import ProcessingError, ValidationError
 from .logging import (
     create_log_api_error,
     create_log_api_exception,

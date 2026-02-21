@@ -7,7 +7,6 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..exceptions import ApiError
 from ..models.regressions import RegressionRequestBody
 from ..services.operation import run_operation
 from ..services.regressions.regression import Regression
@@ -18,11 +17,9 @@ from ..services.regressions.result import (
     GetAnalysisResult,
 )
 from ..utils import (
-    create_error_response,
     create_log_api_request,
     create_success_response,
 )
-from ..utils.validators.common import ValidationError
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
@@ -69,27 +66,13 @@ async def get_all_analysis_results(request: Request):
         分析結果のサマリーリスト
     """
     create_log_api_request(request)
+    # リクエスト受け取りログ
+    create_log_api_request(request)
+    # ビジネスロジックの実行
+    api = GetAllAnalysisResults()
+    result = run_operation(api)
 
-    try:
-        # リクエスト受け取りログ
-        create_log_api_request(request)
-        # ビジネスロジックの実行
-        api = GetAllAnalysisResults()
-        result = run_operation(api)
-
-        return create_success_response(http_status.HTTP_200_OK, result)
-
-    except ValidationError as e:
-        return create_error_response(http_status.HTTP_400_BAD_REQUEST, str(e))
-    except ApiError as e:
-        return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)
-        )
-    except Exception as e:
-        return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
-            f"Unexpected error: {str(e)}",
-        )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.get("/results/{result_id}")
@@ -110,26 +93,10 @@ async def get_analysis_result(request: Request, result_id: str):
         分析結果の詳細
     """
     create_log_api_request(request)
+    api = GetAnalysisResult(result_id)
+    result = run_operation(api)
 
-    try:
-        api = GetAnalysisResult(result_id)
-        result = run_operation(api)
-
-        return create_success_response(http_status.HTTP_200_OK, result)
-
-    except ValidationError as e:
-        return create_error_response(http_status.HTTP_400_BAD_REQUEST, str(e))
-    except ApiError as e:
-        return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)
-        )
-    except KeyError as e:
-        return create_error_response(http_status.HTTP_404_NOT_FOUND, str(e))
-    except Exception as e:
-        return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
-            f"Unexpected error: {str(e)}",
-        )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.delete("/results/{result_id}")
@@ -151,25 +118,10 @@ async def delete_analysis_result(request: Request, result_id: str):
     """
     create_log_api_request(request)
 
-    try:
-        api = DeleteAnalysisResult(result_id)
-        result = run_operation(api)
+    api = DeleteAnalysisResult(result_id)
+    result = run_operation(api)
 
-        return create_success_response(http_status.HTTP_200_OK, result)
-
-    except ValidationError as e:
-        return create_error_response(http_status.HTTP_400_BAD_REQUEST, str(e))
-    except ApiError as e:
-        return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)
-        )
-    except KeyError as e:
-        return create_error_response(http_status.HTTP_404_NOT_FOUND, str(e))
-    except Exception as e:
-        return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
-            f"Unexpected error: {str(e)}",
-        )
+    return create_success_response(http_status.HTTP_200_OK, result)
 
 
 @router.delete("/results")
@@ -184,20 +136,7 @@ async def clear_all_analysis_results(request: Request):
     """
     create_log_api_request(request)
 
-    try:
-        api = ClearAllAnalysisResults()
-        result = run_operation(api)
+    api = ClearAllAnalysisResults()
+    result = run_operation(api)
 
-        return create_success_response(http_status.HTTP_200_OK, result)
-
-    except ValidationError as e:
-        return create_error_response(http_status.HTTP_400_BAD_REQUEST, str(e))
-    except ApiError as e:
-        return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)
-        )
-    except Exception as e:
-        return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
-            f"Unexpected error: {str(e)}",
-        )
+    return create_success_response(http_status.HTTP_200_OK, result)
