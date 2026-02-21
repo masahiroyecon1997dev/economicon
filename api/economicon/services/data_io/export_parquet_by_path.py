@@ -1,15 +1,12 @@
 import os
 
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
 from ...models import ExportParquetByPathRequestBody
-from ...utils.validators.common import ValidationError
-from ...utils.validators.files import (
+from ...utils import ProcessingError, ValidationError
+from ...utils.validators import (
     validate_directory_path,
-    validate_file_name,
-)
-from ...utils.validators.tables_store import (
-    validate_existed_table_name,
+    validate_existence,
+    validate_windows_reserved_name,
 )
 from ..data.tables_store import TablesStore
 
@@ -42,19 +39,22 @@ class ExportParquetByPath:
         try:
             # テーブル名のバリデーション
             table_name_list = self.tables_store.get_table_name_list()
-            validate_existed_table_name(
-                self.table_name,
-                table_name_list,
-                self.param_names["table_name"],
+            validate_existence(
+                value=self.table_name,
+                valid_list=table_name_list,
+                target=self.param_names["table_name"],
             )
 
             # ディレクトリパスのバリデーション
             validate_directory_path(
-                self.directory_path, self.param_names["directory_path"]
+                path_str=self.directory_path,
+                target=self.param_names["directory_path"],
             )
 
             # ファイル名のバリデーション
-            validate_file_name(self.file_name, self.param_names["file_name"])
+            validate_windows_reserved_name(
+                filename=self.file_name, target=self.param_names["file_name"]
+            )
 
             return None
         except ValidationError as e:
@@ -78,14 +78,20 @@ class ExportParquetByPath:
 
         except KeyError as e:
             message = _("Table does not exist: {}").format(self.table_name)
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="PARQUET_EXPORT_ERROR", message=message
+            ) from e
         except PermissionError as e:
             message = _(
                 "Permission denied: Cannot write to the specified path."
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="PARQUET_EXPORT_ERROR", message=message
+            ) from e
         except Exception as e:
             message = _(
                 "An unexpected error occurred during PARQUET export processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="PARQUET_EXPORT_ERROR", message=message
+            ) from e

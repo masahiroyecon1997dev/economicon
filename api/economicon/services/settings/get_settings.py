@@ -1,5 +1,5 @@
-from ...exceptions import ApiError
 from ...i18n.translation import gettext as _
+from ...utils import ProcessingError
 from ..data.settings_manager import SettingsManager
 
 
@@ -30,4 +30,6 @@ class GetSettings:
                 "An unexpected error occurred "
                 "during getting settings processing"
             )
-            raise ApiError(message) from e
+            raise ProcessingError(
+                error_code="GET_SETTINGS_ERROR", message=message, detail=str(e)
+            ) from e
