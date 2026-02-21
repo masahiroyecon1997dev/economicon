@@ -1,7 +1,16 @@
 from typing import Any, Dict
 
 from ...i18n.translation import gettext as _
-from ...models import RegressionRequestBody, RegressionType
+from ...models import (
+    BinaryChoiceRegressionParams,
+    InstrumentalVariablesParams,
+    OLSParams,
+    PanelDataParams,
+    RegressionMethodType,
+    RegressionRequestBody,
+    RegularizedRegressionParams,
+    TobitParams,
+)
 from ...utils import ProcessingError, ValidationError
 from ...utils.validators import validate_existence, validate_numeric_types
 from ..data.analysis_result import AnalysisResult
@@ -43,23 +52,16 @@ class Regression:
     ):
         self.tables_store = TablesStore()
         self.table_info = None
-        self.type = body.type
-        self.method = body.method
         self.table_name = body.table_name
+        self.result_name = body.result_name
+        self.description = body.description
         self.dependent_variable = body.dependent_variable
         self.explanatory_variables = body.explanatory_variables
-        self.standard_error_method = body.standard_error_method
-        self.standard_error_params = body.standard_error_params
-        self.hyper_parameters = body.hyper_parameters
-        self.use_t_distribution = body.use_t_distribution
         self.has_const = body.has_const
         self.missing_value_handling = body.missing_value_handling
-        self.entity_id_column = body.entity_id_column
-        self.time_column = body.time_column
-        self.instrumental_variables = body.instrumental_variables
-        self.endogenous_variables = body.endogenous_variables
-        self.left_censoring_limit = body.left_censoring_limit
-        self.right_censoring_limit = body.right_censoring_limit
+        self.analysis = body.analysis
+        self.standard_error = body.standard_error
+
         self.param_names = {
             "type": "type",
             "method": "method",
@@ -124,23 +126,23 @@ class Regression:
             )
 
             # 分析手法ごとの追加検証
-            match self.type:
-                case RegressionType.FE | RegressionType.RE:
+            match self.analysis.method:
+                case PanelDataParams():
                     # 固定効果分析の場合、個体IDと時間列の検証
-                    if self.entity_id_column:
+                    if self.analysis.entity_id_column:
                         validate_existence(
-                            value=self.entity_id_column,
+                            value=self.analysis.entity_id_column,
                             valid_list=column_name_list,
                             target=self.param_names["entity_id_column"],
                         )
                         validate_numeric_types(
                             schema=df_schema,
-                            columns=self.entity_id_column,
+                            columns=self.analysis.entity_id_column,
                             target=self.param_names["entity_id_column"],
                         )
-                    if self.time_column:
+                    if self.analysis.time_column:
                         validate_existence(
-                            value=self.time_column,
+                            value=self.analysis.time_column,
                             valid_list=column_name_list,
                             target=self.param_names["time_column"],
                         )
@@ -149,28 +151,28 @@ class Regression:
                             columns=self.time_column,
                             target=self.param_names["time_column"],
                         )
-                case RegressionType.IV:
+                case InstrumentalVariablesParams():
                     # IV分析の場合、操作変数と内生変数の検証
-                    if self.instrumental_variables:
+                    if self.analysis.instrumental_variables:
                         validate_existence(
-                            value=self.instrumental_variables,
+                            value=self.analysis.instrumental_variables,
                             valid_list=column_name_list,
                             target=self.param_names["instrumental_variables"],
                         )
                         validate_numeric_types(
                             schema=df_schema,
-                            columns=self.instrumental_variables,
+                            columns=self.analysis.instrumental_variables,
                             target=self.param_names["instrumental_variables"],
                         )
-                    if self.endogenous_variables:
+                    if self.analysis.endogenous_variables:
                         validate_existence(
-                            value=self.endogenous_variables,
+                            value=self.analysis.endogenous_variables,
                             valid_list=column_name_list,
                             target=self.param_names["endogenous_variables"],
                         )
                         validate_numeric_types(
                             schema=df_schema,
-                            columns=self.endogenous_variables,
+                            columns=self.analysis.endogenous_variables,
                             target=self.param_names["endogenous_variables"],
                         )
             return None
@@ -199,32 +201,32 @@ class Regression:
 
             # モデルのフィット
             analysis_result = None
-            match self.type:
-                case RegressionType.OLS:
+            match self.analysis:
+                case OLSParams():
                     model_result = fit_ols(y_data, x_data, missing)
                     model_result = apply_standard_errors(
                         model_result,
-                        self.standard_error_method,
-                        self.standard_error_params,
+                        self.standard_error,
                     )
                     analysis_result = self._format_result(model_result)
-                case RegressionType.LOGIT:
+                case BinaryChoiceRegressionParams(
+                    method=RegressionMethodType.LOGIT
+                ):
                     model_result = fit_logit(y_data, x_data, missing)
                     model_result = apply_standard_errors(
                         model_result,
-                        self.standard_error_method,
-                        self.standard_error_params,
+                        self.standard_error,
                     )
                     analysis_result = self._format_result(model_result)
-                case RegressionType.PROBIT:
+                case BinaryChoiceRegressionParams(
+                    method=RegressionMethodType.PROBIT
+                ):
                     model_result = fit_probit(y_data, x_data, missing)
                     model_result = apply_standard_errors(
-                        model_result,
-                        self.standard_error_method,
-                        self.standard_error_params,
+                        model_result, self.standard_error
                     )
                     analysis_result = self._format_result(model_result)
-                case RegressionType.TOBIT:
+                case TobitParams():
                     df_pandas = prepare_tobit_dataframe(
                         df,
                         self.dependent_variable,
@@ -236,89 +238,112 @@ class Regression:
                         self.dependent_variable,
                         self.explanatory_variables,
                         self.has_const,
-                        self.left_censoring_limit,
-                        self.right_censoring_limit,
+                        self.analysis.left_censoring_limit,
+                        self.analysis.right_censoring_limit,
                     )
-                    analysis_result = self._tobit_format_result(model_result)
-                case RegressionType.FE:
+                    analysis_result = self._tobit_format_result(
+                        model_result,
+                        self.analysis.left_censoring_limit,
+                        self.analysis.right_censoring_limit,
+                    )
+                case PanelDataParams(method=RegressionMethodType.FE):
                     df_pandas = prepare_panel_dataframe(
                         df,
                         self.dependent_variable,
                         self.explanatory_variables,
-                        self.entity_id_column,
-                        self.time_column,
+                        self.analysis.entity_id_column,
                         missing,
+                        self.analysis.time_column,
                     )
                     model_result = fit_fe(
                         df_pandas,
                         self.dependent_variable,
                         self.explanatory_variables,
-                        self.standard_error_method,
+                        self.standard_error.method,
                     )
-                    analysis_result = self._fe_format_result(model_result)
-                case RegressionType.RE:
+                    analysis_result = self._fe_format_result(
+                        model_result, self.analysis.entity_id_column
+                    )
+                case PanelDataParams(method=RegressionMethodType.RE):
                     df_pandas = prepare_panel_dataframe(
                         df,
                         self.dependent_variable,
                         self.explanatory_variables,
-                        self.entity_id_column,
-                        self.time_column,
+                        self.analysis.entity_id_column,
                         missing,
+                        self.analysis.time_column,
                     )
                     model_result = fit_re(
                         df_pandas,
                         self.dependent_variable,
                         self.explanatory_variables,
-                        self.standard_error_method,
+                        self.standard_error.method,
                     )
-                    analysis_result = self._re_format_result(model_result)
-                case RegressionType.IV:
+                    analysis_result = self._re_format_result(
+                        model_result, self.analysis.entity_id_column
+                    )
+                case InstrumentalVariablesParams(
+                    method=RegressionMethodType.IV
+                ):
                     df_pandas = prepare_iv_dataframe(
                         df,
                         self.dependent_variable,
                         self.explanatory_variables,
-                        self.endogenous_variables,
-                        self.instrumental_variables,
+                        self.analysis.endogenous_variables,
+                        self.analysis.instrumental_variables,
                         missing,
                     )
                     model_result = fit_iv(
                         df_pandas,
                         self.dependent_variable,
                         self.explanatory_variables,
-                        self.endogenous_variables,
-                        self.instrumental_variables,
-                        self.standard_error_method,
+                        self.analysis.endogenous_variables,
+                        self.analysis.instrumental_variables,
+                        self.standard_error.method,
                     )
                     model_result = apply_standard_errors(
                         model_result,
-                        self.standard_error_method,
-                        self.standard_error_params,
+                        self.standard_error,
                     )
-                    analysis_result = self._iv_format_result(model_result)
-                case RegressionType.FEIV:
+                    analysis_result = self._iv_format_result(
+                        model_result,
+                        self.analysis.endogenous_variables,
+                        self.analysis.instrumental_variables,
+                    )
+                case InstrumentalVariablesParams(
+                    method=RegressionMethodType.FEIV
+                ):
                     raise NotImplementedError(
                         _("FEIV regression is not yet implemented")
                     )
-                case RegressionType.LASSO:
-                    alpha = self.hyper_parameters.get("alpha", 1.0)
+                case RegularizedRegressionParams(
+                    method=RegressionMethodType.LASSO
+                ):
+                    alpha = self.analysis.alpha
                     model_result, coef_scaled = fit_lasso(
                         y_data, x_data, self.has_const, alpha, missing
                     )
                     analysis_result = self._format_regularized_result(
                         model_result, coef_scaled
                     )
-                case RegressionType.RIDGE:
-                    alpha = self.hyper_parameters.get("alpha", 1.0)
+                case RegularizedRegressionParams(
+                    method=RegressionMethodType.RIDGE
+                ):
+                    alpha = self.analysis.alpha
                     model_result, coef_scaled = fit_ridge(
                         y_data, x_data, self.has_const, alpha, missing
                     )
                     analysis_result = self._format_regularized_result(
                         model_result, coef_scaled
                     )
+                case _:
+                    raise NotImplementedError(
+                        _("Specified regression method is not supported")
+                    )
 
             # 分析結果をストアに保存
             analysis_result = AnalysisResult(
-                name=self.name or f"{self.type.upper()} Analysis",
+                name=self.result_name or self.dependent_variable,
                 description=self.description,
                 table_name=self.table_name,
                 regression_output=analysis_result,
@@ -423,7 +448,9 @@ class Regression:
 
         return result
 
-    def _tobit_format_result(self, model_result) -> Dict:
+    def _tobit_format_result(
+        self, model_result, left_censoring_limit, right_censoring_limit
+    ) -> Dict:
         """
         Tobit モデルの結果を JSON 形式にフォーマット
 
@@ -456,8 +483,8 @@ class Regression:
         # 診断結果 (diagnostics)
         diagnostics: Dict[str, Any] = {
             "censoringLimits": {
-                "left": self.left_censoring_limit,
-                "right": self.right_censoring_limit,
+                "left": left_censoring_limit,
+                "right": right_censoring_limit,
             }
         }
 
@@ -480,7 +507,9 @@ class Regression:
 
         return result
 
-    def _iv_format_result(self, model_result) -> Dict:
+    def _iv_format_result(
+        self, model_result, endogenous_variables, instrumental_variables
+    ) -> Dict:
         """
         IV モデルの結果を JSON 形式にフォーマット
 
@@ -493,7 +522,7 @@ class Regression:
         summary_text = str(model_result.summary)
 
         # パラメータの詳細情報
-        all_vars = self.explanatory_variables + self.endogenous_variables
+        all_vars = self.explanatory_variables + endogenous_variables
         params_info = extract_linearmodels_params(model_result, all_vars)
 
         # モデル統計情報
@@ -534,7 +563,7 @@ class Regression:
             try:
                 first_stage = model_result.first_stage
                 diagnostics["firstStage"] = {}
-                for endog_var in self.endogenous_variables:
+                for endog_var in endogenous_variables:
                     if endog_var in first_stage.individual:
                         fs_result = first_stage.individual[endog_var]
                         diagnostics["firstStage"][endog_var] = {
@@ -549,8 +578,8 @@ class Regression:
             "tableName": self.table_name,
             "dependentVariable": self.dependent_variable,
             "explanatoryVariables": self.explanatory_variables,
-            "endogenousVariables": self.endogenous_variables,
-            "instrumentalVariables": self.instrumental_variables,
+            "endogenousVariables": endogenous_variables,
+            "instrumentalVariables": instrumental_variables,
             "regressionResult": summary_text,
             "parameters": params_info,
             "modelStatistics": model_stats,
@@ -559,7 +588,7 @@ class Regression:
 
         return result
 
-    def _fe_format_result(self, model_result) -> Dict:
+    def _fe_format_result(self, model_result, entity_id_column) -> Dict:
         """
         固定効果モデルの結果を JSON 形式にフォーマット
 
@@ -606,7 +635,7 @@ class Regression:
             "tableName": self.table_name,
             "dependentVariable": self.dependent_variable,
             "explanatoryVariables": self.explanatory_variables,
-            "entityIdColumn": self.entity_id_column,
+            "entityIdColumn": entity_id_column,
             "estimationMethod": "Fixed Effects (Within)",
             "regressionResult": summary_text,
             "parameters": params_info,
@@ -616,7 +645,7 @@ class Regression:
 
         return result
 
-    def _re_format_result(self, model_result) -> Dict:
+    def _re_format_result(self, model_result, entity_id_column) -> Dict:
         """
         変量効果モデルの結果を JSON 形式にフォーマット
 
@@ -668,7 +697,7 @@ class Regression:
             "tableName": self.table_name,
             "dependentVariable": self.dependent_variable,
             "explanatoryVariables": self.explanatory_variables,
-            "entityIdColumn": self.entity_id_column,
+            "entityIdColumn": entity_id_column,
             "estimationMethod": "Random Effects (GLS)",
             "regressionResult": summary_text,
             "parameters": params_info,

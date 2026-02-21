@@ -6,13 +6,16 @@
 
 from typing import Any
 
-from .common import STATSMODELS_COV_TYPE_MAP
+from ...models import (
+    ClusteredStandardError,
+    HacStandardError,
+    RobustStandardError,
+    StandardErrorSettings,
+)
 
 
 def apply_standard_errors(
-    model_result: Any,
-    standard_error_method: str,
-    standard_error_params: dict,
+    model_result: Any, standard_error_settings: StandardErrorSettings
 ) -> Any:
     """
     標準誤差の計算方法を適用
@@ -26,31 +29,23 @@ def apply_standard_errors(
         標準誤差が調整された回帰結果
     """
     # nonrobustの場合は何も調整せずそのまま返す
-    if standard_error_method == "nonrobust":
-        return model_result
+    match standard_error_settings:
+        case RobustStandardError():
+            model_result = model_result.get_robustcov_results(
+                cov_type=standard_error_settings.hc_type
+            )
 
-    cov_type = STATSMODELS_COV_TYPE_MAP.get(standard_error_method)
-    # Noneまたは存在しない場合は調整なし
-    if not cov_type:
-        return model_result
-
-    # HACの場合はmaxlagsを渡す (デフォルトは sqrt(n) に基づく計算)
-    if standard_error_method == "hac":
-        maxlags = standard_error_params.get("maxlags")
-        if maxlags is None:
-            import numpy as np
-
-            n = model_result.nobs
-            maxlags = int(np.floor(4 * (n / 100) ** (2 / 9)))
-        return model_result.get_robustcov_results(
-            cov_type=cov_type, maxlags=maxlags
-        )
-
-    # クラスタリングの場合は groups を渡す
-    if standard_error_method == "clustered":
-        groups = standard_error_params.get("groups")
-        if groups is None:
-            return model_result
-        return model_result.get_robustcov_results(cov_type=cov_type, groups=groups)
-
-    return model_result.get_robustcov_results(cov_type=cov_type)
+        case ClusteredStandardError():
+            model_result = model_result.get_robustcov_results(
+                cov_type=standard_error_settings.method,
+                groups=standard_error_settings.groups,
+                use_correction=standard_error_settings.use_correction,
+            )
+        case HacStandardError():
+            maxlags = standard_error_settings.maxlags
+            model_result = model_result.get_robustcov_results(
+                cov_type=standard_error_settings.method,
+                maxlags=maxlags,
+                use_correction=standard_error_settings.use_correction,
+            )
+    return model_result

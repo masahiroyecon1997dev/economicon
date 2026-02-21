@@ -228,3 +228,8 @@ class RootParams(BaseModel):
         if v == 0:
             raise ValueError(_("Root index cannot be 0."))
         return v
+
+
+class BinaryChoiceRegularization(BaseModel):
+    type: Literal["l1", "l2"] = "l1"
+    alpha: float = Field(default=1.0, ge=0.0)
