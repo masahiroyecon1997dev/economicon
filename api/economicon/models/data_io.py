@@ -2,8 +2,9 @@
 
 from typing import Annotated
 
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints, field_validator
 
+from ..i18n.translation import gettext as _
 from .common import BaseRequest
 from .types import (
     DirectoryPath,
@@ -39,13 +40,23 @@ class ImportExcelByPathRequestBody(BaseRequest):
             min_length=1,
             max_length=31,  # Excelの絶対ルール
             # 禁止記号 \ / ? * : [ ] を除外し、先頭末尾の ' も防ぐ正規表現
-            pattern=r"^(?!')[^\\/?*:\[\]]+(?<!')$",
+            pattern=r"^[^\/\\\?\*\:\[\]]+$",
         ),
         Field(
             examples=["人口動態", "Sheet1"],
             description="Excelのシート名（31文字以内、使用不可記号あり）",
         ),
     ]
+
+    @field_validator("sheet_name")
+    @classmethod
+    def validate_quotes(cls, v: str) -> str:
+        # 先頭と末尾の引用符チェックを Python 側でやる
+        if v.startswith("'") or v.endswith("'"):
+            raise ValueError(
+                _("Sheet name cannot start or end with a single quote")
+            )
+        return v
 
 
 class ImportParquetByPathRequestBody(BaseRequest):
