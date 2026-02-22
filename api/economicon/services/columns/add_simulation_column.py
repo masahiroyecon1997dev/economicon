@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import AddSimulationColumnRequestBody
 from ...utils import ProcessingError
@@ -85,7 +86,7 @@ class AddSimulationColumn:
                 "adding simulation column processing"
             )
             raise ProcessingError(
-                error_code="AddSimulationColumnProcessError",
+                error_code=ErrorCode.ADD_SIMULATION_COLUMN_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

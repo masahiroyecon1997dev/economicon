@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import AddLagLeadColumnRequestBody
 from ...utils import ProcessingError
@@ -106,7 +107,7 @@ class AddLagLeadColumn:
                 "adding lag/lead column processing"
             )
             raise ProcessingError(
-                error_code="AddLagLeadColumnProcessError",
+                error_code=ErrorCode.ADD_LAG_LEAD_COLUMN_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

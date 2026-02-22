@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import AddColumnRequestBody
 from ...utils import ProcessingError
@@ -103,7 +104,7 @@ class AddColumn:
                 "An unexpected error occurred during adding column processing"
             )
             raise ProcessingError(
-                error_code="AddColumnProcessError",
+                error_code=ErrorCode.ADD_COLUMN_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e
@@ -131,7 +132,7 @@ class AddColumn:
             if self.csv_file_path is None:
                 message = _("CSV file path is not specified.")
                 raise ProcessingError(
-                    error_code="CSVFilePathNotSpecified",
+                    error_code=ErrorCode.CSV_FILE_PATH_NOT_SPECIFIED,
                     message=message,
                 )
             # CSVファイルを読み込む
@@ -148,7 +149,7 @@ class AddColumn:
             if df_csv.height == 0:
                 message = _("The CSV file is empty or contains no valid data.")
                 raise ProcessingError(
-                    error_code="EmptyCSVFile",
+                    error_code=ErrorCode.EMPTY_CSV_FILE,
                     message=message,
                 )
 
@@ -156,7 +157,7 @@ class AddColumn:
             if df_csv.width == 0:
                 message = _("The CSV file does not contain any columns.")
                 raise ProcessingError(
-                    error_code="NoColumnsInCSVFile",
+                    error_code=ErrorCode.NO_COLUMNS_IN_CSV_FILE,
                     message=message,
                 )
 
@@ -172,7 +173,7 @@ class AddColumn:
                         "but table has {expected_rows} rows."
                     ).format(csv_rows=csv_rows, expected_rows=expected_rows)
                     raise ProcessingError(
-                        error_code="RowCountMismatch",
+                        error_code=ErrorCode.ROW_COUNT_MISMATCH,
                         message=message,
                     )
                 else:
@@ -191,7 +192,7 @@ class AddColumn:
         except pl.exceptions.NoDataError as e:
             message = _("The CSV file is empty or contains no valid data.")
             raise ProcessingError(
-                error_code="EmptyCSVFile",
+                error_code=ErrorCode.EMPTY_CSV_FILE,
                 message=message,
                 detail=str(e),
             ) from e
@@ -200,7 +201,7 @@ class AddColumn:
                 raise
             message = _("An unexpected error occurred during CSV processing")
             raise ProcessingError(
-                error_code="CSVProcessingError",
+                error_code=ErrorCode.CSV_PROCESSING_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

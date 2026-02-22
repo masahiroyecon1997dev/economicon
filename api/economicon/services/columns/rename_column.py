@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import RenameColumnRequestBody
 from ...utils import ProcessingError
@@ -75,7 +76,7 @@ class RenameColumn:
                 "renaming column processing"
             )
             raise ProcessingError(
-                error_code="RenameColumnProcessError",
+                error_code=ErrorCode.RENAME_COLUMN_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e
