@@ -94,6 +94,12 @@ class DuplicateColumnRequestBody(BaseRequest):
     new_column_name: Annotated[
         NewColumnName, Field(description="新しいカラム名")
     ]
+    add_position_column: Annotated[
+        ColumnName,
+        Field(
+            description="追加位置のカラム名",
+        ),
+    ]
 
 
 class CalculateColumnRequestBody(BaseRequest):
@@ -101,6 +107,12 @@ class CalculateColumnRequestBody(BaseRequest):
 
     table_name: TableName
     new_column_name: NewColumnName
+    add_position_column: Annotated[
+        ColumnName,
+        Field(
+            description="追加位置のカラム名",
+        ),
+    ]
     calculation_expression: str = Field(description="計算式", min_length=1)
 
 
@@ -113,6 +125,12 @@ class AddDummyColumnRequestBody(BaseRequest):
     ]
     dummy_column_name: Annotated[
         NewColumnName, Field(description="新しいカラム名")
+    ]
+    add_position_column: Annotated[
+        ColumnName,
+        Field(
+            description="追加位置のカラム名",
+        ),
     ]
     target_value: str = Field(description="1にする対象の値", min_length=1)
 
@@ -128,6 +146,12 @@ class AddLagLeadColumnRequestBody(BaseRequest):
         ),
     ]
     new_column_name: NewColumnName
+    add_position_column: Annotated[
+        ColumnName,
+        Field(
+            description="追加位置のカラム名",
+        ),
+    ]
     periods: int = Field(alias="periods", description="ラグ・リード期間")
     group_columns: List[ColumnName] = Field(
         default_factory=list,
@@ -139,13 +163,13 @@ class AddSimulationColumnRequestBody(BaseRequest):
     """シミュレーションカラム追加リクエスト"""
 
     table_name: TableName
+    simulation_column: SimulationColumnConfig
     add_position_column: Annotated[
         ColumnName,
         Field(
             description="追加位置のカラム名",
         ),
     ]
-    simulation_column: SimulationColumnConfig
 
 
 class SortColumnsRequestBody(BaseRequest):
@@ -169,6 +193,12 @@ class TransformColumnRequestBody(BaseRequest):
         ),
     ]
     new_column_name: NewColumnName
+    add_position_column: Annotated[
+        ColumnName,
+        Field(
+            description="追加位置のカラム名",
+        ),
+    ]
     transform_method: TransformMethodConfig
 
 
