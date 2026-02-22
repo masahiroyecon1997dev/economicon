@@ -28,7 +28,7 @@ def init_exception_handlers(app: FastAPI):
         localized_errors = [get_localized_message(e) for e in errors]
 
         return create_error_response(
-            http_status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT,
             error_code=ErrorCode.VALIDATION_ERROR,
             message=localized_errors[0],
             details=localized_errors,
@@ -39,22 +39,26 @@ def init_exception_handlers(app: FastAPI):
         request: Request, exc: ValidationError
     ):
         return create_error_response(
-            http_status.HTTP_400_BAD_REQUEST, exc.error_code, exc.message
+            status_code=http_status.HTTP_400_BAD_REQUEST,
+            error_code=exc.error_code,
+            message=exc.message,
         )
 
     @app.exception_handler(ValueError)
     async def value_error_handler(request: Request, exc: ValueError):
         # ロジックで発生した ValueError を 400 Bad Request としてフロントに返す
         return create_error_response(
-            http_status.HTTP_400_BAD_REQUEST, "VALUE_ERROR", str(exc)
+            status_code=http_status.HTTP_400_BAD_REQUEST,
+            error_code="VALUE_ERROR",
+            message=str(exc),
         )
 
     @app.exception_handler(ProcessingError)
     async def api_error_handler(request: Request, exc: ProcessingError):
         return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
-            exc.error_code,
-            exc.message,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            error_code=exc.error_code,
+            message=exc.message,
         )
 
     @app.exception_handler(NotImplementedError)
@@ -63,7 +67,9 @@ def init_exception_handlers(app: FastAPI):
     ):
         message = _("regression is not yet implemented")
         return create_error_response(
-            http_status.HTTP_501_NOT_IMPLEMENTED, "NOT_IMPLEMENTED", message
+            status_code=http_status.HTTP_501_NOT_IMPLEMENTED,
+            error_code="NOT_IMPLEMENTED",
+            message=message,
         )
 
     @app.exception_handler(Exception)
@@ -71,7 +77,7 @@ def init_exception_handlers(app: FastAPI):
         # 予期せぬエラー
         message = _("An unexpected error occurred during processing")
         return create_error_response(
-            http_status.HTTP_500_INTERNAL_SERVER_ERROR,
-            "UNEXPECTED_ERROR",
-            message,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            error_code="UNEXPECTED_ERROR",
+            message=message,
         )

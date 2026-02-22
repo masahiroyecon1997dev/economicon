@@ -14,7 +14,7 @@ T = TypeVar("T")
 
 
 def create_success_response(
-    status_code: int, response_object: dict | bytes | None
+    *, status_code: int, response_object: dict | bytes | None
 ) -> JSONResponse:
     """成功レスポンスを作成"""
     result = {"code": "OK", "result": response_object}
@@ -23,7 +23,7 @@ def create_success_response(
 
 
 def create_success_binary_response(
-    status_code: int, binary_data: bytes, content_type: str
+    *, status_code: int, binary_data: bytes, content_type: str
 ) -> Response:
     """成功バイナリレスポンスを作成"""
     create_log_api_success()
@@ -33,6 +33,7 @@ def create_success_binary_response(
 
 
 def create_error_response(
+    *,
     status_code: int,
     error_code: str,  # error_code に統一
     message: str,
