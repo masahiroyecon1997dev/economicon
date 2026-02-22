@@ -74,8 +74,8 @@ def _validate_file_extension(
         ValidationError: 拡張子が許可されていない場合
 
     """
-    ext = Path(path_str).suffix.lower()  # 例: ".csv"
-    if ext not in [e.lower() for e in allowed_extensions]:
+    ext = Path(path_str).suffix.lower().lstrip(".")  # 例: "csv"
+    if ext not in [e.lower().lstrip(".") for e in allowed_extensions]:
         raise ValidationError(
             error_code=ErrorCode.INVALID_FILE_TYPE,
             message=_("{} must be one of the following types: {}.").format(
