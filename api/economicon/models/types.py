@@ -83,6 +83,7 @@ TableName = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=1),
     Field(
+        title="Table Name",
         examples=["population_data", "市区町村人口データ"],
         description="テーブル名",
     ),
@@ -97,6 +98,7 @@ NewTableName = Annotated[
         pattern=NAME_PATTERN,
     ),
     Field(
+        title="New Table Name",
         examples=["population_data", "市区町村人口データ"],
         description="新しいテーブル名",
     ),
@@ -106,6 +108,7 @@ ColumnName = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=1),
     Field(
+        title="Column Name",
         examples=["population", "人口"],
         description="カラム名",
     ),
@@ -120,6 +123,7 @@ NewColumnName = Annotated[
         pattern=NAME_PATTERN,
     ),
     Field(
+        title="New Column Name",
         examples=["population", "人口"],
         description="新しいカラム名",
     ),
@@ -129,6 +133,7 @@ FilePath = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=1, max_length=1024),
     Field(
+        title="File Path",
         examples=["/path/to/file.csv", "C:\\data\\file.csv"],
         description="ファイルのパス",
     ),
@@ -142,6 +147,7 @@ DirectoryPath = Annotated[
         max_length=1024,
     ),
     Field(
+        title="Directory Path",
         examples=["/path/to/directory", "C:\\data\\directory"],
         description="ディレクトリのパス",
     ),
@@ -151,6 +157,7 @@ Separator = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=1, max_length=10),
     Field(
+        title="Separator",
         examples=[",", "\t"],
         description="区切り文字",
     ),
@@ -168,6 +175,7 @@ ExcelSheetName = Annotated[
     # field_validatorの代わりにAfterValidatorでロジックを注入
     AfterValidator(validate_sheet_name_quotes),
     Field(
+        title="Excel Sheet Name",
         examples=["人口動態", "Sheet1"],
         description="Excelのシート名（31文字以内、使用不可記号あり）",
     ),
@@ -184,6 +192,7 @@ FileName = Annotated[
     ),
     AfterValidator(validate_file_name_chars),
     Field(
+        title="File Name",
         examples=["report_2024", "analysis_result"],
         description="OSで使用可能なファイル名（記号制限あり）",
     ),
