@@ -51,8 +51,10 @@ class Regression:
         self,
         body: RegressionRequestBody,
         tables_store: TablesStore,
+        result_store: AnalysisResultStore,
     ):
         self.tables_store = tables_store
+        self.result_store = result_store
         self.table_info = None
         self.table_name = body.table_name
         self.result_name = body.result_name
@@ -348,8 +350,7 @@ class Regression:
                 regression_output=analysis_result,
             )
 
-            result_store = AnalysisResultStore()
-            result_id = result_store.save_result(analysis_result)
+            result_id = self.result_store.save_result(analysis_result)
 
             result = {
                 "resultId": result_id,

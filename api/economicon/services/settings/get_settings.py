@@ -11,8 +11,8 @@ class GetSettings:
     SettingsStoreから設定情報を取得して返します。
     """
 
-    def __init__(self):
-        self.settings_manager = SettingsStore()
+    def __init__(self, settings_store: SettingsStore):
+        self.settings_manager = settings_store
 
     def validate(self):
         # 設定取得にはバリデーションは不要
