@@ -1,6 +1,6 @@
 """FastAPI用レスポンス作成ヘルパー関数"""
 
-from typing import Any, List, Optional, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar
 
 from fastapi.responses import JSONResponse, Response
 
@@ -32,28 +32,31 @@ def create_success_binary_response(
     )
 
 
-def create_validation_error_response(
-    status_code: int, message: str, details: List[str]
-) -> JSONResponse:
-    """バリデーションエラーレスポンスを作成"""
-    result = {
-        "code": "VALIDATION_ERROR",
-        "message": message,
-        "details": details,
-    }
-    create_log_api_error("Validation error")
-    return JSONResponse(content=result, status_code=status_code)
-
-
 def create_error_response(
     status_code: int,
-    errorCode: str,
+    error_code: str,  # error_code に統一
     message: str,
-    exception_message: Optional[Any] = None,
+    details: Optional[List[str]] = None,  # バリデーションエラー用を統合
+    exception: Optional[
+        Exception
+    ] = None,  # 文字列より Exception オブジェクトを受け取る方がロギングに有利
 ) -> JSONResponse:
-    """エラーレスポンスを作成"""
-    result = {"code": errorCode, "message": message}
+    """
+    エラーレスポンスを作成
+    バリデーションエラー(422)や業務エラー(400)、システムエラー(500)で共用
+    """
+    result: Dict[str, Any] = {
+        "code": error_code,
+        "message": message,
+    }
+
+    if details is not None:
+        result["details"] = details
+
+    # ロギング処理
     create_log_api_error(message)
-    if exception_message is not None:
-        create_log_api_exception(exception_message)
+    if exception is not None:
+        # ロギング側でスタックトレースを処理できるよう、オブジェクトごと渡すか文字列化
+        create_log_api_exception(str(exception))
+
     return JSONResponse(content=result, status_code=status_code)
