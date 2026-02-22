@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-from typing import Union
 
 from loguru import logger
 
@@ -17,7 +16,7 @@ logger.add(
 _file_handler_id: int | None = None
 
 
-def configure_file_logging(log_path: Union[str, Path]) -> None:
+def configure_file_logging(log_path: str | Path) -> None:
     """
     ファイルログハンドラを設定する。
 
