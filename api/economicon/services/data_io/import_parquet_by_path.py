@@ -2,7 +2,7 @@ import polars as pl
 
 from ...i18n.translation import gettext as _
 from ...models import ImportParquetByPathRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import (
     validate_file_path,
     validate_non_existence,
@@ -31,21 +31,17 @@ class ImportParquetByPath:
         }
 
     def validate(self):
-        # 入力値のバリデーション
-        try:
-            validate_file_path(
-                path_str=self.file_path, target=self.param_names["file_path"]
-            )
-            table_name_list = self.tables_store.get_table_name_list()
-            # テーブル名のバリデーション
-            validate_non_existence(
-                value=self.table_name,
-                existing_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            return None
-        except ValidationError as e:
-            return e
+        validate_file_path(
+            path_str=self.file_path, target=self.param_names["file_path"]
+        )
+        table_name_list = self.tables_store.get_table_name_list()
+        # テーブル名のバリデーション
+        validate_non_existence(
+            value=self.table_name,
+            existing_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        return None
 
     def execute(self):
         # PARQUETファイルのインポート処理

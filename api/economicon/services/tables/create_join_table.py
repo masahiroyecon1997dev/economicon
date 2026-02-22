@@ -1,6 +1,6 @@
 from ...i18n.translation import gettext as _
 from ...models import CreateJoinTableRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence, validate_non_existence
 from ..data.tables_store import TablesStore
 
@@ -41,49 +41,46 @@ class CreateJoinTable:
         }
 
     def validate(self):
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            # 新しいテーブル名の重複チェック
-            validate_non_existence(
-                value=self.join_table_name,
-                existing_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            # 左テーブルの存在チェック
+        table_name_list = self.tables_store.get_table_name_list()
+        # 新しいテーブル名の重複チェック
+        validate_non_existence(
+            value=self.join_table_name,
+            existing_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        # 左テーブルの存在チェック
+        validate_existence(
+            value=self.left_table_name,
+            valid_list=table_name_list,
+            target=self.param_names["left_table_name"],
+        )
+        # 右テーブルの存在チェック
+        validate_existence(
+            value=self.right_table_name,
+            valid_list=table_name_list,
+            target=self.param_names["right_table_name"],
+        )
+        # 左テーブルのキー列の存在チェック
+        left_table_column_name_list = TablesStore().get_column_name_list(
+            self.left_table_name
+        )
+        for left_key_column_name in self.left_key_column_names:
             validate_existence(
-                value=self.left_table_name,
-                valid_list=table_name_list,
-                target=self.param_names["left_table_name"],
+                value=left_key_column_name,
+                valid_list=left_table_column_name_list,
+                target=self.param_names["left_key_column_names"],
             )
-            # 右テーブルの存在チェック
+        # 右テーブルのキー列の存在チェック
+        right_table_column_name_list = TablesStore().get_column_name_list(
+            self.right_table_name
+        )
+        for right_key_column_name in self.right_key_column_names:
             validate_existence(
-                value=self.right_table_name,
-                valid_list=table_name_list,
-                target=self.param_names["right_table_name"],
+                value=right_key_column_name,
+                valid_list=right_table_column_name_list,
+                target=self.param_names["right_key_column_names"],
             )
-            # 左テーブルのキー列の存在チェック
-            left_table_column_name_list = TablesStore().get_column_name_list(
-                self.left_table_name
-            )
-            for left_key_column_name in self.left_key_column_names:
-                validate_existence(
-                    value=left_key_column_name,
-                    valid_list=left_table_column_name_list,
-                    target=self.param_names["left_key_column_names"],
-                )
-            # 右テーブルのキー列の存在チェック
-            right_table_column_name_list = TablesStore().get_column_name_list(
-                self.right_table_name
-            )
-            for right_key_column_name in self.right_key_column_names:
-                validate_existence(
-                    value=right_key_column_name,
-                    valid_list=right_table_column_name_list,
-                    target=self.param_names["right_key_column_names"],
-                )
-            return None
-        except ValidationError as e:
-            return e
+        return None
 
     def execute(self):
         # テーブル結合処理

@@ -5,7 +5,7 @@ from ...models import (
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticType,
 )
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence
 from ..data.tables_store import TablesStore
 
@@ -47,25 +47,22 @@ class DescriptiveStatistics:
         }
 
     def validate(self):
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            column_name_list = self.tables_store.get_column_name_list(
-                self.table_name
-            )
-            validate_existence(
-                value=self.column_name_list,
-                valid_list=column_name_list,
-                target=self.param_names["column_names"],
-            )
+        table_name_list = self.tables_store.get_table_name_list()
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        column_name_list = self.tables_store.get_column_name_list(
+            self.table_name
+        )
+        validate_existence(
+            value=self.column_name_list,
+            valid_list=column_name_list,
+            target=self.param_names["column_names"],
+        )
 
-            return None
-        except ValidationError as e:
-            return e
+        return None
 
     def execute(self):
         try:

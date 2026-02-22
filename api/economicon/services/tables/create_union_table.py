@@ -2,7 +2,7 @@ import polars as pl
 
 from ...i18n.translation import gettext as _
 from ...models import CreateUnionTableRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence, validate_non_existence
 from ..data.tables_store import TablesStore
 
@@ -34,37 +34,33 @@ class CreateUnionTable:
         }
 
     def validate(self):
-        # 入力値のバリデーション
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
+        table_name_list = self.tables_store.get_table_name_list()
 
-            # 新しいテーブル名の重複チェック
-            validate_non_existence(
-                value=self.union_table_name,
-                existing_list=table_name_list,
-                target=self.param_names["union_table_name"],
+        # 新しいテーブル名の重複チェック
+        validate_non_existence(
+            value=self.union_table_name,
+            existing_list=table_name_list,
+            target=self.param_names["union_table_name"],
+        )
+
+        validate_existence(
+            value=self.table_names,
+            valid_list=table_name_list,
+            target=self.param_names["table_names"],
+        )
+
+        # すべてのテーブルで指定された列が存在することをチェック
+        for table_name in self.table_names:
+            table_column_name_list = self.tables_store.get_column_name_list(
+                table_name
             )
-
             validate_existence(
-                value=self.table_names,
-                valid_list=table_name_list,
-                target=self.param_names["table_names"],
+                value=self.column_names,
+                valid_list=table_column_name_list,
+                target=self.param_names["column_names"],
             )
 
-            # すべてのテーブルで指定された列が存在することをチェック
-            for table_name in self.table_names:
-                table_column_name_list = (
-                    self.tables_store.get_column_name_list(table_name)
-                )
-                validate_existence(
-                    value=self.column_names,
-                    valid_list=table_column_name_list,
-                    target=self.param_names["column_names"],
-                )
-
-            return None
-        except ValidationError as e:
-            return e
+        return None
 
     def execute(self):
         # テーブルユニオン処理
