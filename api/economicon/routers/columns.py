@@ -30,7 +30,7 @@ from ..services.columns.rename_column import RenameColumn
 from ..services.columns.sort_columns import SortColumns
 from ..services.columns.transform_column import TransformColumn
 from ..services.operation import run_operation
-from ..utils import create_log_api_request, create_success_response
+from ..utils import create_success_response
 
 # ルーターの定義（ここで共通のprefixとtagをつけておくと便利！）
 router = APIRouter(prefix="/column", tags=["column"])
@@ -52,8 +52,6 @@ async def add_column(request: Request, body: AddColumnRequestBody):
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
     # ビジネスロジックの実行
     api = AddColumn(body)
     result = run_operation(api)
@@ -78,8 +76,6 @@ async def add_dummy_column(request: Request, body: AddDummyColumnRequestBody):
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
     # ビジネスロジックの実行
     api = AddDummyColumn(body)
     result = run_operation(api)
@@ -104,7 +100,6 @@ async def delete_column(request: Request, body: DeleteColumnRequestBody):
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
     api = DeleteColumn(body)
     result = run_operation(api)
     return create_success_response(
@@ -132,7 +127,6 @@ async def rename_column(request: Request, body: RenameColumnRequestBody):
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
     api = RenameColumn(body)
     result = run_operation(api)
     return create_success_response(
@@ -158,8 +152,6 @@ async def add_lag_lead_column(
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
 
     # ビジネスロジックの実行
     api = AddLagLeadColumn(body)
@@ -187,8 +179,6 @@ async def add_simulation_column(
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
     # ビジネスロジックの実行
     api = AddSimulationColumn(body)
     result = run_operation(api)
@@ -213,9 +203,6 @@ async def calculate_column(request: Request, body: CalculateColumnRequestBody):
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
-
     # ビジネスロジックの実行
     api = CalculateColumn(body)
     result = run_operation(api)
@@ -241,8 +228,6 @@ async def duplicate_column(request: Request, body: DuplicateColumnRequestBody):
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
     # ビジネスロジックの実行
     api = DuplicateColumn(body)
     result = run_operation(api)
@@ -268,8 +253,6 @@ async def transform_column(request: Request, body: TransformColumnRequestBody):
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
     # ビジネスロジックの実行
     api = TransformColumn(body)
     result = run_operation(api)
@@ -294,8 +277,7 @@ async def get_column_list(request: Request, body: GetColumnListRequestBody):
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = GetColumnList(body)
     result = run_operation(api)
 
@@ -323,8 +305,7 @@ async def sort_columns(request: Request, body: SortColumnsRequestBody):
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = SortColumns(body)
     result = run_operation(api)
 

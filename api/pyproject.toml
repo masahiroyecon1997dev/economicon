@@ -21,6 +21,7 @@ dependencies = [
     "linearmodels>=7.0",
     "py4etrics>=0.1.9",
     "scikit-learn>=1.8.0",
+    "loguru>=0.7.3",
 ]
 [tool.setuptools.packages.find]
 where = ["."]

@@ -31,7 +31,6 @@ from ..services.tables.get_table_list import GetTableList
 from ..services.tables.input_cell_data import InputCellData
 from ..services.tables.rename_table import RenameTable
 from ..utils import (
-    create_log_api_request,
     create_success_binary_response,
     create_success_response,
 )
@@ -55,9 +54,6 @@ async def create_table(request: Request, body: CreateTableRequestBody):
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
-
     # ビジネスロジックの実行
     api = CreateTable(**body.model_dump())
     result = run_operation(api)
@@ -85,9 +81,6 @@ async def create_join_table(
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
-
     # ビジネスロジックの実行
     api = CreateJoinTable(**body.model_dump())
     result = run_operation(api)
@@ -115,9 +108,6 @@ async def create_union_table(
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
-
     # ビジネスロジックの実行
     api = CreateUnionTable(**body.model_dump())
     result = run_operation(api)
@@ -145,9 +135,6 @@ async def create_simulation_data_table(
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
-
     # ビジネスロジックの実行
     api = CreateSimulationDataTable(**body.model_dump())
     result = run_operation(api)
@@ -173,8 +160,7 @@ async def delete_table(request: Request, body: DeleteTableRequestBody):
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = DeleteTable(**body.model_dump())
     result = run_operation(api)
 
@@ -199,8 +185,7 @@ async def duplicate_table(request: Request, body: DuplicateTableRequestBody):
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = DuplicateTable(**body.model_dump())
     result = run_operation(api)
 
@@ -228,8 +213,7 @@ async def rename_table(request: Request, body: RenameTableRequestBody):
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = RenameTable(**body.model_dump())
     result = run_operation(api)
 
@@ -252,8 +236,7 @@ async def get_table_list(request: Request):
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = GetTableList()
     result = run_operation(api)
 
@@ -276,9 +259,6 @@ async def clear_tables(request: Request):
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
-
     # ビジネスロジックの実行
     api = ClearTables()
     result = run_operation(api)
@@ -306,8 +286,7 @@ async def fetch_data_to_json(
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = FetchDataToJson(**body.model_dump())
     result = run_operation(api)
 
@@ -337,8 +316,7 @@ async def fetch_data_to_arrow(
     JSONResponse
         処理結果（Arrow IPC形式のBase64エンコードされたバイナリを含む）
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = FetchDataToArrow(**body.model_dump())
     result = run_operation(api)
     assert isinstance(result, bytes), "FetchDataToArrow must return bytes"
@@ -370,8 +348,7 @@ async def input_cell_data(request: Request, body: InputCellDataRequestBody):
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = InputCellData(**body.model_dump())
     result = run_operation(api)
 
@@ -398,8 +375,7 @@ async def filter_single_condition(
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = FilterSingleCondition(**body.model_dump())
     result = run_operation(api)
 
