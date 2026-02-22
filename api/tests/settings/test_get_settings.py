@@ -30,16 +30,15 @@ def test_get_settings_success(client, settings_manager):
     # 必須フィールドの存在確認
     result = response_data["result"]
     assert "osName" in result
-    assert "defaultFolderPath" in result
-    assert "displayRows" in result
-    assert "appLanguage" in result
+    assert "language" in result
+    assert "lastOpenedPath" in result
+    assert "theme" in result
     assert "encoding" in result
-    assert "pathSeparator" in result
+    assert "logPath" in result
     # デフォルト値の確認
-    assert result["displayRows"] == 100
-    assert result["appLanguage"] == "ja"
+    assert result["language"] == "ja"
     assert result["encoding"] == "utf-8"
-    assert result["pathSeparator"] == "/"
+    assert result["theme"] == "light"
 
 
 def test_settings_manager_singleton(client, settings_manager):
@@ -54,11 +53,11 @@ def test_settings_info_properties(client, settings_manager):
     settings_info = settings_manager.get_settings()
     # プロパティが正しく取得できることを確認
     assert settings_info.os_name is not None
-    assert settings_info.default_folder_path is not None
-    assert settings_info.display_rows == 100
-    assert settings_info.app_language == "ja"
+    assert settings_info.language == "ja"
+    assert settings_info.last_opened_path is not None
+    assert settings_info.theme == "light"
     assert settings_info.encoding == "utf-8"
-    assert settings_info.path_separator == "/"
+    assert settings_info.log_path is not None
 
 
 def test_settings_info_to_dict(client, settings_manager):
@@ -67,8 +66,8 @@ def test_settings_info_to_dict(client, settings_manager):
     settings_dict = settings_info.to_dict()
     # キャメルケースのキーが存在することを確認
     assert "osName" in settings_dict
-    assert "defaultFolderPath" in settings_dict
-    assert "displayRows" in settings_dict
-    assert "appLanguage" in settings_dict
+    assert "language" in settings_dict
+    assert "lastOpenedPath" in settings_dict
+    assert "theme" in settings_dict
     assert "encoding" in settings_dict
-    assert "pathSeparator" in settings_dict
+    assert "logPath" in settings_dict
