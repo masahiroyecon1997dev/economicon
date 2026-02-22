@@ -34,7 +34,7 @@ def get_locale_from_settings() -> str:
     try:
         settings_manager = SettingsStore()
         settings = settings_manager.get_settings()
-        return settings.app_language
+        return settings.language
     except Exception:
         # 設定が初期化されていない場合はデフォルトで"ja"を返す
         return "ja"
