@@ -17,8 +17,9 @@ class CreateJoinTable:
     def __init__(
         self,
         body: CreateJoinTableRequestBody,
+        tables_store: TablesStore,
     ):
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         # 結合後のテーブル名
         self.join_table_name = body.join_table_name
         # 左テーブル名

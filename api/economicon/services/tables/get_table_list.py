@@ -13,8 +13,9 @@ class GetTableList:
 
     def __init__(
         self,
+        tables_store: TablesStore,
     ):
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
 
     def validate(
         self,

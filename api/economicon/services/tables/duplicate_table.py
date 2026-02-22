@@ -13,8 +13,12 @@ class DuplicateTable:
     指定されたテーブルを複製して、新しい名前で追加します。
     """
 
-    def __init__(self, body: DuplicateTableRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: DuplicateTableRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.new_table_name = body.new_table_name
         self.param_names = {

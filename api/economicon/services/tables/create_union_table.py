@@ -19,8 +19,9 @@ class CreateUnionTable:
     def __init__(
         self,
         body: CreateUnionTableRequestBody,
+        tables_store: TablesStore,
     ):
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         # ユニオン後のテーブル名
         self.union_table_name = body.union_table_name
         # ユニオンするテーブル名リスト

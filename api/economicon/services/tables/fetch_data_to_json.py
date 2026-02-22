@@ -15,8 +15,12 @@ class FetchDataToJson:
     取得行数がテーブルの行数を超える場合は、テーブルの最後まで取得します。
     """
 
-    def __init__(self, body: FetchDataToJsonRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: FetchDataToJsonRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.start_row = body.start_row
         self.fetch_rows = body.fetch_rows

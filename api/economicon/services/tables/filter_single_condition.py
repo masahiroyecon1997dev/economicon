@@ -22,8 +22,9 @@ class FilterSingleCondition:
     def __init__(
         self,
         body: FilterSingleConditionRequestBody,
+        tables_store: TablesStore,
     ):
-        self.manager = TablesStore()
+        self.manager = tables_store
         # 新しいテーブル名
         self.new_table_name = body.new_table_name
         # フィルタリング対象のテーブル名

@@ -9,6 +9,7 @@ from ..models import (
     ImportExcelByPathRequestBody,
     ImportParquetByPathRequestBody,
 )
+from ..services.data.dependencies import TablesStoreDep
 from ..services.data_io.export_csv_by_path import ExportCsvByPath
 from ..services.data_io.export_excel_by_path import ExportExcelByPath
 from ..services.data_io.export_parquet_by_path import ExportParquetByPath
@@ -23,7 +24,9 @@ router = APIRouter(prefix="/data", tags=["data"])
 
 @router.post("/import-csv-by-path")
 async def import_csv_by_path(
-    request: Request, body: ImportCsvByPathRequestBody
+    request: Request,
+    body: ImportCsvByPathRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """パス指定でCSVファイルをインポートするエンドポイント
 
@@ -40,7 +43,7 @@ async def import_csv_by_path(
         処理結果
     """
     # ビジネスロジックの実行
-    api = ImportCsvByPath(body)
+    api = ImportCsvByPath(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -50,7 +53,9 @@ async def import_csv_by_path(
 
 @router.post("/import-excel-by-path")
 async def import_excel_by_path(
-    request: Request, body: ImportExcelByPathRequestBody
+    request: Request,
+    body: ImportExcelByPathRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """EXCELファイルをパス指定でインポートしてテーブルを作成する
 
@@ -70,7 +75,7 @@ async def import_excel_by_path(
         処理結果
     """
     # ビジネスロジックの実行
-    api = ImportExcelByPath(body)
+    api = ImportExcelByPath(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -80,7 +85,9 @@ async def import_excel_by_path(
 
 @router.post("/import-parquet-by-path")
 async def import_parquet_by_path(
-    request: Request, body: ImportParquetByPathRequestBody
+    request: Request,
+    body: ImportParquetByPathRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """PARQUETファイルをパス指定でインポートしてテーブルを作成する
 
@@ -99,7 +106,7 @@ async def import_parquet_by_path(
         処理結果
     """
     # ビジネスロジックの実行
-    api = ImportParquetByPath(body)
+    api = ImportParquetByPath(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -109,7 +116,9 @@ async def import_parquet_by_path(
 
 @router.post("/export-csv-by-path")
 async def export_csv_by_path(
-    request: Request, body: ExportCsvByPathRequestBody
+    request: Request,
+    body: ExportCsvByPathRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """テーブルをCSVファイルにパス指定でエクスポートするエンドポイント
 
@@ -126,7 +135,7 @@ async def export_csv_by_path(
         処理結果
     """
     # ビジネスロジックの実行
-    api = ExportCsvByPath(body)
+    api = ExportCsvByPath(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -136,7 +145,9 @@ async def export_csv_by_path(
 
 @router.post("/export-excel-by-path")
 async def export_excel_by_path(
-    request: Request, body: ExportExcelByPathRequestBody
+    request: Request,
+    body: ExportExcelByPathRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """テーブルをExcelファイルにパス指定でエクスポートするエンドポイント
 
@@ -153,7 +164,7 @@ async def export_excel_by_path(
         処理結果
     """
     # ビジネスロジックの実行
-    api = ExportExcelByPath(body)
+    api = ExportExcelByPath(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -163,7 +174,9 @@ async def export_excel_by_path(
 
 @router.post("/export-parquet-by-path")
 async def export_parquet_by_path(
-    request: Request, body: ExportParquetByPathRequestBody
+    request: Request,
+    body: ExportParquetByPathRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """テーブルをParquetファイルにパス指定でエクスポートするエンドポイント
 
@@ -180,7 +193,7 @@ async def export_parquet_by_path(
         処理結果
     """
     # ビジネスロジックの実行
-    api = ExportParquetByPath(body)
+    api = ExportParquetByPath(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(

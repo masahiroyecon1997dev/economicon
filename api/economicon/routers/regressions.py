@@ -8,6 +8,7 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..models.regressions import RegressionRequestBody
+from ..services.data.dependencies import TablesStoreDep
 from ..services.operation import run_operation
 from ..services.regressions.regression import Regression
 from ..services.regressions.result import (
@@ -24,7 +25,11 @@ router = APIRouter(prefix="/analysis", tags=["analysis"])
 
 
 @router.post("/regression")
-async def regression(request: Request, body: RegressionRequestBody):
+async def regression(
+    request: Request,
+    body: RegressionRequestBody,
+    tables_store: TablesStoreDep,
+):
     """
     統合回帰分析エンドポイント
 
@@ -49,7 +54,7 @@ async def regression(request: Request, body: RegressionRequestBody):
         分析結果またはエラーメッセージ
     """
     # ビジネスロジックの実行
-    api = Regression(**body.model_dump())
+    api = Regression(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result

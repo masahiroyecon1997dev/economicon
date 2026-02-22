@@ -18,9 +18,13 @@ class ImportParquetByPath:
     指定されたパスのPARQUETファイルを解析し、指定されたテーブル名で登録します。
     """
 
-    def __init__(self, body: ImportParquetByPathRequestBody):
+    def __init__(
+        self,
+        body: ImportParquetByPathRequestBody,
+        tables_store: TablesStore,
+    ):
         # テーブルマネージャーの初期化
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         # ファイルパス
         self.file_path = body.file_path
         # テーブル名

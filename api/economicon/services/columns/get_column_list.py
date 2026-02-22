@@ -13,8 +13,12 @@ class GetColumnList:
     データベースの指定されたテーブルに存在するすべてのカラム名を取得します。
     """
 
-    def __init__(self, body: GetColumnListRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: GetColumnListRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.is_number_only = body.is_number_only
         self.param_names = {

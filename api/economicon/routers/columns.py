@@ -29,6 +29,7 @@ from ..services.columns.get_column_list import GetColumnList
 from ..services.columns.rename_column import RenameColumn
 from ..services.columns.sort_columns import SortColumns
 from ..services.columns.transform_column import TransformColumn
+from ..services.data.dependencies import TablesStoreDep
 from ..services.operation import run_operation
 from ..utils import create_success_response
 
@@ -37,7 +38,11 @@ router = APIRouter(prefix="/column", tags=["column"])
 
 
 @router.post("/add", response_model=SuccessResponse[AddColumnResult])
-async def add_column(request: Request, body: AddColumnRequestBody):
+async def add_column(
+    request: Request,
+    body: AddColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
     """カラムを追加するエンドポイント
 
     Parameters
@@ -53,7 +58,7 @@ async def add_column(request: Request, body: AddColumnRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = AddColumn(body)
+    api = AddColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
@@ -61,7 +66,11 @@ async def add_column(request: Request, body: AddColumnRequestBody):
 
 
 @router.post("/add-dummy")
-async def add_dummy_column(request: Request, body: AddDummyColumnRequestBody):
+async def add_dummy_column(
+    request: Request,
+    body: AddDummyColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
     """ダミー変数カラムを追加するエンドポイント
 
     Parameters
@@ -77,7 +86,7 @@ async def add_dummy_column(request: Request, body: AddDummyColumnRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = AddDummyColumn(body)
+    api = AddDummyColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
@@ -85,7 +94,11 @@ async def add_dummy_column(request: Request, body: AddDummyColumnRequestBody):
 
 
 @router.post("/delete")
-async def delete_column(request: Request, body: DeleteColumnRequestBody):
+async def delete_column(
+    request: Request,
+    body: DeleteColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
     """カラムを削除するエンドポイント
 
     Parameters
@@ -100,7 +113,7 @@ async def delete_column(request: Request, body: DeleteColumnRequestBody):
     JSONResponse
         処理結果
     """
-    api = DeleteColumn(body)
+    api = DeleteColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
@@ -108,7 +121,11 @@ async def delete_column(request: Request, body: DeleteColumnRequestBody):
 
 
 @router.post("/rename")
-async def rename_column(request: Request, body: RenameColumnRequestBody):
+async def rename_column(
+    request: Request,
+    body: RenameColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
     """
     列名変更エンドポイント
 
@@ -127,7 +144,7 @@ async def rename_column(request: Request, body: RenameColumnRequestBody):
     JSONResponse
         処理結果
     """
-    api = RenameColumn(body)
+    api = RenameColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
@@ -136,7 +153,9 @@ async def rename_column(request: Request, body: RenameColumnRequestBody):
 
 @router.post("/add-lag-lead")
 async def add_lag_lead_column(
-    request: Request, body: AddLagLeadColumnRequestBody
+    request: Request,
+    body: AddLagLeadColumnRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """ラグ・リードカラムを追加するエンドポイント
 
@@ -154,7 +173,7 @@ async def add_lag_lead_column(
     """
 
     # ビジネスロジックの実行
-    api = AddLagLeadColumn(body)
+    api = AddLagLeadColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
@@ -163,7 +182,9 @@ async def add_lag_lead_column(
 
 @router.post("/add-simulation")
 async def add_simulation_column(
-    request: Request, body: AddSimulationColumnRequestBody
+    request: Request,
+    body: AddSimulationColumnRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """シミュレーションカラムを追加するエンドポイント
 
@@ -180,7 +201,7 @@ async def add_simulation_column(
         処理結果
     """
     # ビジネスロジックの実行
-    api = AddSimulationColumn(body)
+    api = AddSimulationColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
@@ -188,7 +209,11 @@ async def add_simulation_column(
 
 
 @router.post("/calculate")
-async def calculate_column(request: Request, body: CalculateColumnRequestBody):
+async def calculate_column(
+    request: Request,
+    body: CalculateColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
     """カラム計算を実行するエンドポイント
 
     Parameters
@@ -204,7 +229,7 @@ async def calculate_column(request: Request, body: CalculateColumnRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = CalculateColumn(body)
+    api = CalculateColumn(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -213,7 +238,11 @@ async def calculate_column(request: Request, body: CalculateColumnRequestBody):
 
 
 @router.post("/duplicate")
-async def duplicate_column(request: Request, body: DuplicateColumnRequestBody):
+async def duplicate_column(
+    request: Request,
+    body: DuplicateColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
     """カラムを複製するエンドポイント
 
     Parameters
@@ -229,7 +258,7 @@ async def duplicate_column(request: Request, body: DuplicateColumnRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = DuplicateColumn(body)
+    api = DuplicateColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
@@ -237,7 +266,11 @@ async def duplicate_column(request: Request, body: DuplicateColumnRequestBody):
 
 
 @router.post("/transform")
-async def transform_column(request: Request, body: TransformColumnRequestBody):
+async def transform_column(
+    request: Request,
+    body: TransformColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
     """
     列の変換処理エンドポイント
 
@@ -254,7 +287,7 @@ async def transform_column(request: Request, body: TransformColumnRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = TransformColumn(body)
+    api = TransformColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
@@ -262,7 +295,11 @@ async def transform_column(request: Request, body: TransformColumnRequestBody):
 
 
 @router.post("/get-list")
-async def get_column_list(request: Request, body: GetColumnListRequestBody):
+async def get_column_list(
+    request: Request,
+    body: GetColumnListRequestBody,
+    tables_store: TablesStoreDep,
+):
     """カラムリストを取得するエンドポイント
 
     Parameters
@@ -278,7 +315,7 @@ async def get_column_list(request: Request, body: GetColumnListRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = GetColumnList(body)
+    api = GetColumnList(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -287,7 +324,11 @@ async def get_column_list(request: Request, body: GetColumnListRequestBody):
 
 
 @router.post("/sort")
-async def sort_columns(request: Request, body: SortColumnsRequestBody):
+async def sort_columns(
+    request: Request,
+    body: SortColumnsRequestBody,
+    tables_store: TablesStoreDep,
+):
     """
     列のソート処理エンドポイント
 
@@ -306,7 +347,7 @@ async def sort_columns(request: Request, body: SortColumnsRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = SortColumns(body)
+    api = SortColumns(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(

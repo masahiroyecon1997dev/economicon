@@ -23,8 +23,12 @@ class CalculateColumn:
     計算式は列名を<列名>の形式で指定し、四則演算とかっこをサポートします。
     """
 
-    def __init__(self, body: CalculateColumnRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: CalculateColumnRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.new_column_name = body.new_column_name
         self.add_position_column = body.add_position_column

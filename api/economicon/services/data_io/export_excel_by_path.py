@@ -18,9 +18,13 @@ class ExportExcelByPath:
     指定されたテーブル名のデータを指定されたパスにEXCELファイルとして出力します。
     """
 
-    def __init__(self, body: ExportExcelByPathRequestBody):
+    def __init__(
+        self,
+        body: ExportExcelByPathRequestBody,
+        tables_store: TablesStore,
+    ):
         # テーブルマネージャーの初期化
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         # テーブル名
         self.table_name = body.table_name
         # ディレクトリパス

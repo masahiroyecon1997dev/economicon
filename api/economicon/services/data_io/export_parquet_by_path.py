@@ -18,9 +18,13 @@ class ExportParquetByPath:
     指定されたテーブル名のデータを指定されたパスにPARQUETファイルとして出力します。
     """
 
-    def __init__(self, body: ExportParquetByPathRequestBody):
+    def __init__(
+        self,
+        body: ExportParquetByPathRequestBody,
+        tables_store: TablesStore,
+    ):
         # テーブルマネージャーの初期化
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         # テーブル名
         self.table_name = body.table_name
         # ディレクトリパス

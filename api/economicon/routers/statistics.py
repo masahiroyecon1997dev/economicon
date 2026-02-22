@@ -5,6 +5,7 @@ from ..models import (
     ConfidenceIntervalRequestBody,
     DescriptiveStatisticsRequestBody,
 )
+from ..services.data.dependencies import TablesStoreDep
 from ..services.operation import run_operation
 from ..services.statistics.confidence_interval import ConfidenceInterval
 from ..services.statistics.descriptive_statistics import DescriptiveStatistics
@@ -15,7 +16,9 @@ router = APIRouter(prefix="/statistics", tags=["statistics"])
 
 @router.post("/confidence-interval")
 async def confidence_interval(
-    request: Request, body: ConfidenceIntervalRequestBody
+    request: Request,
+    body: ConfidenceIntervalRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """信頼区間計算を行うエンドポイント
 
@@ -32,7 +35,7 @@ async def confidence_interval(
         処理結果
     """
     # ビジネスロジックの実行
-    api = ConfidenceInterval(**body.model_dump())
+    api = ConfidenceInterval(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -42,7 +45,9 @@ async def confidence_interval(
 
 @router.post("/descriptive")
 async def descriptive_statistics(
-    request: Request, body: DescriptiveStatisticsRequestBody
+    request: Request,
+    body: DescriptiveStatisticsRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """記述統計を計算するエンドポイント
 
@@ -59,7 +64,7 @@ async def descriptive_statistics(
         処理結果
     """
     # ビジネスロジックの実行
-    api = DescriptiveStatistics(**body.model_dump())
+    api = DescriptiveStatistics(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
