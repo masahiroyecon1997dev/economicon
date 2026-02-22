@@ -1,7 +1,7 @@
 """FastAPI メインアプリケーション"""
 
-import logging
 import os
+import time
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -18,10 +18,7 @@ from economicon.i18n.translation import get_locale_from_settings
 from economicon.routers import api_router
 from economicon.services.data.settings_manager import SettingsManager
 from economicon.services.data.tables_store import TablesStore
-
-# ロガーのセットアップ
-# "uvicorn.error" を使うと、Uvicornの標準ログと同じ形式で出力されます
-logger = logging.getLogger("uvicorn.error")
+from economicon.utils.logging import logger
 
 # ベースディレクトリ
 BASE_DIR = Path(__file__).resolve().parent
@@ -78,18 +75,38 @@ app.add_middleware(
 
 # i18nミドルウェア（fastapi-babelが自動的に処理）
 @app.middleware("http")
-async def babel_middleware(request: Request, call_next):
-    """settingsManagerのロケールを設定"""
-    locale = get_locale_from_settings()
+async def combined_middleware(request: Request, call_next):
+    # 計測開始
+    start_time = time.time()
 
+    # ロケールの設定 - SettingsManagerからロケールを取得してBabelに設定
+    locale = get_locale_from_settings()
     # サポートされている言語のみ設定
     if locale not in ["ja", "en"]:
         locale = "ja"
-
     # Babelのロケールを設定
     babel.locale = locale
 
-    response = await call_next(request)
+    # リクエスト開始ログ
+    # pathだけでなく、どの言語でリクエストされたかも残すとデバッグが捗ります
+    logger.info(
+        f"START: [{request.method}] {request.url.path} (lang: {locale})"
+    )
+
+    # メイン処理の実行
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        # ここで例外をキャッチすると、エラー時のスタックトレースもログに残せる
+        logger.exception(f"Unhandled error occurred: {str(e)}")
+        raise e from None
+
+    # 計測終了と完了ログ
+    process_time = (time.time() - start_time) * 1000  # ミリ秒変換
+    logger.info(
+        f"END:   [{request.method}] {request.url.path} | Status: {response.status_code} | Time: {process_time:.2f}ms"
+    )
+
     return response
 
 

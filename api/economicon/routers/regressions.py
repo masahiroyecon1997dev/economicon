@@ -17,7 +17,6 @@ from ..services.regressions.result import (
     GetAnalysisResult,
 )
 from ..utils import (
-    create_log_api_request,
     create_success_response,
 )
 
@@ -49,7 +48,7 @@ async def regression(request: Request, body: RegressionRequestBody):
     JSONResponse
         分析結果またはエラーメッセージ
     """
-    create_log_api_request(request)
+    # ビジネスロジックの実行
     api = Regression(**body.model_dump())
     result = run_operation(api)
     return create_success_response(
@@ -67,9 +66,6 @@ async def get_all_analysis_results(request: Request):
     JSONResponse
         分析結果のサマリーリスト
     """
-    create_log_api_request(request)
-    # リクエスト受け取りログ
-    create_log_api_request(request)
     # ビジネスロジックの実行
     api = GetAllAnalysisResults()
     result = run_operation(api)
@@ -96,7 +92,7 @@ async def get_analysis_result(request: Request, result_id: str):
     JSONResponse
         分析結果の詳細
     """
-    create_log_api_request(request)
+    # ビジネスロジックの実行
     api = GetAnalysisResult(result_id)
     result = run_operation(api)
 
@@ -122,8 +118,7 @@ async def delete_analysis_result(request: Request, result_id: str):
     JSONResponse
         削除成功メッセージ
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = DeleteAnalysisResult(result_id)
     result = run_operation(api)
 
@@ -142,8 +137,7 @@ async def clear_all_analysis_results(request: Request):
     JSONResponse
         削除成功メッセージ
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = ClearAllAnalysisResults()
     result = run_operation(api)
 
