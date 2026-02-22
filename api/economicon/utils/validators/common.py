@@ -2,6 +2,7 @@ from typing import List, Mapping, Union
 
 import polars as pl
 
+from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 
 from ..exceptions import ValidationError
@@ -31,7 +32,7 @@ def validate_existence(
 
     if missing:
         # エラーコードは固定で「存在しない」ことを示すものに
-        error_code = "DATA_NOT_FOUND"
+        error_code = ErrorCode.DATA_NOT_FOUND
 
         # 多言語化メッセージ: 例 "columnName 'age' does not exist."
         missing_str = ", ".join(missing)
@@ -65,7 +66,7 @@ def validate_non_existence(
 
     if already_exists:
         # エラーコードは固定で「既に存在する」ことを示すものに
-        error_code = "DATA_ALREADY_EXISTS"
+        error_code = ErrorCode.DATA_ALREADY_EXISTS
 
         # 多言語化メッセージ: 例 "tableName 'users' already exists."
         exists_str = ", ".join(already_exists)
@@ -105,7 +106,7 @@ def validate_numeric_types(
 
     if invalid_types:
         raise ValidationError(
-            error_code="INVALID_DTYPE",
+            error_code=ErrorCode.INVALID_DTYPE,
             message=_("The following columns must be numeric: {}").format(
                 ", ".join(invalid_types)
             ),
@@ -132,7 +133,7 @@ def validate_row_count_limit(
     """
     if requested_count > current_row_count:
         raise ValidationError(
-            error_code="ROW_OUT_OF_RANGE",
+            error_code=ErrorCode.ROW_OUT_OF_RANGE,
             message=_(
                 "Requested {} ({}) exceeds the available rows ({})."
             ).format(target, requested_count, current_row_count),
