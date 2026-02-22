@@ -77,16 +77,7 @@ class AddColumn:
     def execute(self):
         try:
             table_info = self.tables_store.get_table(self.table_name)
-            num_rows = table_info.row_count
             df = table_info.table
-
-            # CSVファイルからデータを読み込むか、空列を作成するか
-            if self.csv_file_path is not None:
-                # CSVファイルから列データを読み込む
-                new_column_data = self._read_column_from_csv(num_rows)
-            else:
-                # 空列を作成
-                new_column_data = [None] * num_rows
 
             # 追加位置を計算（指定されたカラムの右隣）
             current_cols = df.columns
@@ -99,10 +90,20 @@ class AddColumn:
                 + current_cols[target_idx:]
             )
 
-            # 新しい列を追加
-            df_with_new_col = df.with_columns(
-                pl.lit(new_column_data).alias(self.new_column_name)
-            ).select(new_order)
+            # CSVファイルからデータを読み込むか、空列を作成するか
+            if self.csv_file_path is not None:
+                row_count = table_info.row_count
+                # CSVファイルから列データを読み込む
+                new_column_data = self._read_column_from_csv(row_count)
+                # 新しい列をデータフレームに追加
+                df_with_new_col = df.with_columns(
+                    pl.lit(new_column_data).alias(self.new_column_name)
+                ).select(new_order)
+            else:
+                # 新しい列を追加
+                df_with_new_col = df.with_columns(
+                    pl.lit(None).alias(self.new_column_name)
+                ).select(new_order)
 
             # 新しい列をデータフレームに追加
             self.tables_store.update_table(self.table_name, df_with_new_col)
@@ -176,30 +177,30 @@ class AddColumn:
                     message=message,
                 )
 
-            first_column = df_csv[:, 0].to_list()
-            csv_rows = len(first_column)
+            first_column = df_csv[:, 0]
+            row_count = len(first_column)
 
             # 行数のチェックと調整
-            if csv_rows != expected_rows:
+            if row_count != expected_rows:
                 if self.csv_strict_row_count:
                     # 厳密モード：エラーを発生
                     message = _(
                         "Row count mismatch: CSV has {csv_rows} rows, "
                         "but table has {expected_rows} rows."
-                    ).format(csv_rows=csv_rows, expected_rows=expected_rows)
+                    ).format(csv_rows=row_count, expected_rows=expected_rows)
                     raise ProcessingError(
                         error_code=ErrorCode.ROW_COUNT_MISMATCH,
                         message=message,
                     )
                 else:
                     # 非厳密モード：調整する
-                    if csv_rows > expected_rows:
+                    if row_count > expected_rows:
                         # 超過分を切り捨て
                         first_column = first_column[:expected_rows]
                     else:
                         # 不足分をNoneで埋める
-                        first_column.extend(
-                            [None] * (expected_rows - csv_rows)
+                        first_column = first_column.extend_constant(
+                            None, expected_rows - row_count
                         )
 
             return first_column
