@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from .common import BaseRequest
 from .types import (
@@ -59,7 +59,7 @@ class ExportCsvByPathRequestBody(BaseRequest):
     separator: Separator
 
 
-class ExportExcelByPathRequestBody(BaseModel):
+class ExportExcelByPathRequestBody(BaseRequest):
     """Excelファイルパス指定エクスポートリクエスト"""
 
     table_name: TableName
@@ -72,7 +72,7 @@ class ExportExcelByPathRequestBody(BaseModel):
     ]
 
 
-class ExportParquetByPathRequestBody(BaseModel):
+class ExportParquetByPathRequestBody(BaseRequest):
     """Parquetファイルパス指定エクスポートリクエスト"""
 
     table_name: TableName
