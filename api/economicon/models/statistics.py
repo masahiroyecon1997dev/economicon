@@ -1,15 +1,19 @@
 """統計解析関連のスキーマ定義"""
 
-from typing import Annotated, List
+from typing import Annotated, Any, List
 
 from pydantic import Field
 
-from .common import BaseRequest
+from .common import BaseRequest, BaseResult
 from .enums import (
     ConfidenceIntervalStatisticsType,
     DescriptiveStatisticType,
 )
 from .types import ColumnName, TableName
+
+# ---------------------------------------------------------------------------
+# リクエストボディ
+# ---------------------------------------------------------------------------
 
 
 class ConfidenceIntervalRequestBody(BaseRequest):
@@ -77,3 +81,72 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
             min_length=1,
         ),
     ]
+
+
+# ---------------------------------------------------------------------------
+# レスポンス（Result）
+# ---------------------------------------------------------------------------
+
+
+class StatisticValue(BaseResult):
+    """統計量の種別と値"""
+
+    type: str = Field(
+        title="Type",
+        description="統計量のタイプ（mean, median 等）",
+    )
+    value: Any = Field(
+        title="Value",
+        description="統計量の計算値",
+    )
+
+
+class ConfidenceIntervalBounds(BaseResult):
+    """信頼区間の下限・上限"""
+
+    lower: float = Field(
+        title="Lower",
+        description="信頼区間の下限値",
+    )
+    upper: float = Field(
+        title="Upper",
+        description="信頼区間の上限値",
+    )
+
+
+class ConfidenceIntervalResult(BaseResult):
+    """信頼区間計算レスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="計算対象のテーブル名",
+    )
+    column_name: str = Field(
+        title="Column Name",
+        description="計算対象のカラム名",
+    )
+    statistic: StatisticValue = Field(
+        title="Statistic",
+        description="計算した統計量のタイプと値",
+    )
+    confidence_interval: ConfidenceIntervalBounds = Field(
+        title="Confidence Interval",
+        description="信頼区間の下限値と上限値",
+    )
+    confidence_level: float = Field(
+        title="Confidence Level",
+        description="計算に使用した信頼水準",
+    )
+
+
+class DescriptiveStatisticsResult(BaseResult):
+    """記述統計レスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="計算対象のテーブル名",
+    )
+    statistics: Any = Field(
+        title="Statistics",
+        description="記述統計の計算結果。カラム名と統計量名をキーに持つ辞書型データ。",
+    )

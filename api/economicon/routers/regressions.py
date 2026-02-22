@@ -7,6 +7,14 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
+from ..models import (
+    ClearAllAnalysisResultsResult,
+    DeleteAnalysisResultResult,
+    GetAllAnalysisResultsResult,
+    GetAnalysisResultResult,
+    RegressionResult,
+    SuccessResponse,
+)
 from ..models.regressions import RegressionRequestBody
 from ..services.data.dependencies import AnalysisResultStoreDep, TablesStoreDep
 from ..services.operation import run_operation
@@ -24,7 +32,7 @@ from ..utils import (
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
 
-@router.post("/regression")
+@router.post("/regression", response_model=SuccessResponse[RegressionResult])
 async def regression(
     request: Request,
     body: RegressionRequestBody,
@@ -62,7 +70,9 @@ async def regression(
     )
 
 
-@router.get("/results")
+@router.get(
+    "/results", response_model=SuccessResponse[GetAllAnalysisResultsResult]
+)
 async def get_all_analysis_results(
     request: Request,
     result_store: AnalysisResultStoreDep,
@@ -84,7 +94,10 @@ async def get_all_analysis_results(
     )
 
 
-@router.get("/results/{result_id}")
+@router.get(
+    "/results/{result_id}",
+    response_model=SuccessResponse[GetAnalysisResultResult],
+)
 async def get_analysis_result(
     request: Request,
     result_id: str,
@@ -114,7 +127,10 @@ async def get_analysis_result(
     )
 
 
-@router.delete("/results/{result_id}")
+@router.delete(
+    "/results/{result_id}",
+    response_model=SuccessResponse[DeleteAnalysisResultResult],
+)
 async def delete_analysis_result(
     request: Request,
     result_id: str,
@@ -144,7 +160,9 @@ async def delete_analysis_result(
     )
 
 
-@router.delete("/results")
+@router.delete(
+    "/results", response_model=SuccessResponse[ClearAllAnalysisResultsResult]
+)
 async def clear_all_analysis_results(
     request: Request,
     result_store: AnalysisResultStoreDep,
