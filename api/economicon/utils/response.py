@@ -1,6 +1,6 @@
 """FastAPI用レスポンス作成ヘルパー関数"""
 
-from typing import Any, Optional, TypeVar
+from typing import Any, List, Optional, TypeVar
 
 from fastapi.responses import JSONResponse, Response
 
@@ -30,6 +30,19 @@ def create_success_binary_response(
     return Response(
         content=binary_data, status_code=status_code, media_type=content_type
     )
+
+
+def create_validation_error_response(
+    status_code: int, message: str, details: List[str]
+) -> JSONResponse:
+    """バリデーションエラーレスポンスを作成"""
+    result = {
+        "code": "VALIDATION_ERROR",
+        "message": message,
+        "details": details,
+    }
+    create_log_api_error("Validation error")
+    return JSONResponse(content=result, status_code=status_code)
 
 
 def create_error_response(
