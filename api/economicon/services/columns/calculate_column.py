@@ -1,12 +1,11 @@
 import re
 from typing import List
 
-import polars as pl
-
 from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import CalculateColumnRequestBody
 from ...utils import ProcessingError
+from ...utils.algorithms import parse_formula_to_expr
 from ...utils.validators import (
     validate_existence,
     validate_non_existence,
@@ -43,12 +42,14 @@ class CalculateColumn:
 
     def _extract_column_names(self, expression: str) -> List[str]:
         """
-        計算式から列名を抽出する
+        計算式から {column} 形式のカラム名を重複なく抽出する。
         """
-        # pl.col("列名")のパターンで列名を抽出
-        pattern = r'pl\.col\("([^"]+)"\)'
-        column_names = re.findall(pattern, expression)
-        return list(set(column_names))  # 重複を除去
+        # { } で囲まれた中身（英数字とアンダースコア）を検索
+        pattern = r"\{(\w+)\}"
+        matches = re.findall(pattern, expression)
+
+        # セット（集合）にして重複を除去して返す
+        return list(set(matches))
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -102,9 +103,7 @@ class CalculateColumn:
 
             # Polarsの式を評価
             try:
-                # 安全なeval環境でPolars式を評価
-                safe_globals = {"pl": pl}
-                polars_expr = eval(self.calculation_expression, safe_globals)
+                calc_expr = parse_formula_to_expr(self.calculation_expression)
 
                 # 追加位置を計算（指定されたカラムの右隣）
                 current_cols = df.columns
@@ -119,7 +118,7 @@ class CalculateColumn:
 
                 # 新しい列を計算して追加
                 df_with_new_col = df.with_columns(
-                    polars_expr.alias(self.new_column_name)
+                    calc_expr.alias(self.new_column_name)
                 ).select(new_order)
 
             except Exception as e:
