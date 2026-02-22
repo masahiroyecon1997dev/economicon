@@ -20,38 +20,80 @@ class RegressionRequestBody(BaseRequest):
     統合スキーマです。
     """
 
-    table_name: TableName
-    result_name: str = Field(
-        default="",
-        max_length=128,
-        description="分析結果の名前（省略時は被説明変数名を使用）",
-    )
-    description: str = Field(
-        default="",
-        max_length=512,
-        description="分析結果の説明",
-    )
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="分析対象のテーブル名。ワークスペース内に存在するテーブル名を指定してください。"
+        ),
+    ]
+    result_name: Annotated[
+        str,
+        Field(
+            default="",
+            title="Result Name",
+            max_length=128,
+            description="分析結果の名前（省略時は被説明変数名を使用）",
+        ),
+    ]
+    description: Annotated[
+        str,
+        Field(
+            default="",
+            title="Description",
+            max_length=512,
+            description="分析結果の説明メモ",
+        ),
+    ]
     dependent_variable: Annotated[
         ColumnName,
-        Field(description="被説明変数の列名"),
+        Field(
+            title="Dependent Variable",
+            description="被説明変数（目的変数）の列名。テーブル内に存在するカラム名を指定してください。",
+        ),
     ]
-    explanatory_variables: List[
-        Annotated[
-            ColumnName,
-            Field(description="説明変数の列名"),
-        ]
+    explanatory_variables: Annotated[
+        List[ColumnName],
+        Field(
+            title="Explanatory Variables",
+            description="説明変数の列名のリスト。テーブル内に存在するカラム名を指定してください。",
+        ),
     ]
-    has_const: bool = Field(
-        default=True, alias="hasConst", description="定数項を追加するか"
-    )
-    missing_value_handling: MissingValueHandlingType = Field(
-        default=MissingValueHandlingType.REMOVE,
-        alias="missingValueHandling",
-        description="欠損値の処理方法",
-    )
+    has_const: Annotated[
+        bool,
+        Field(
+            default=True,
+            alias="hasConst",
+            title="Has Const",
+            description="定数項を設計行列に追加するかどうか",
+        ),
+    ]
+    missing_value_handling: Annotated[
+        MissingValueHandlingType,
+        Field(
+            default=MissingValueHandlingType.REMOVE,
+            alias="missingValueHandling",
+            title="Missing Value Handling",
+            description="欠損値の処理方法"
+            "（remove: 該当行を削除、ignore: そのまま使用、error: エラーとして扱う）",
+        ),
+    ]
 
     # 統計手法ごとの可変部分
-    analysis: RegressionParams
+    analysis: Annotated[
+        RegressionParams,
+        Field(
+            title="Regression Analysis Params",
+            description="回帰分析手法の詳細パラメータ。"
+            "method フィールドで手法（ols, fe, re, iv 等）を指定します。",
+        ),
+    ]
 
     # 標準誤差の設定
-    standard_error: StandardErrorSettings
+    standard_error: Annotated[
+        StandardErrorSettings,
+        Field(
+            title="Standard Error Settings",
+            description="標準誤差の計算方法設定。"
+            "nonrobust, robust（HC）, cluster, hac（Newey-West）から選択します。",
+        ),
+    ]

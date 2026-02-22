@@ -14,8 +14,12 @@ class RenameTable:
     同じテーブル名が既に存在する場合はエラーとなります。
     """
 
-    def __init__(self, body: RenameTableRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: RenameTableRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         # 変更前のテーブル名
         self.old_table_name = body.old_table_name
         # 変更後のテーブル名

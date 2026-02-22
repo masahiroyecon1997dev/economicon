@@ -17,8 +17,12 @@ class AddColumn:
     新しい列は空（None）の値で初期化されます。
     """
 
-    def __init__(self, AddColumnRequestBody: AddColumnRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        AddColumnRequestBody: AddColumnRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         self.table_name = AddColumnRequestBody.table_name
         self.new_column_name = AddColumnRequestBody.new_column_name
         self.add_position_column = AddColumnRequestBody.add_position_column

@@ -14,8 +14,12 @@ class DeleteTable:
     削除後、テーブルは復元できません。
     """
 
-    def __init__(self, body: DeleteTableRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: DeleteTableRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         # 削除するテーブル名
         self.table_name = body.table_name
         # パラメータ名のマッピング

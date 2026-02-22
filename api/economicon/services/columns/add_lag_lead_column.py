@@ -20,8 +20,9 @@ class AddLagLeadColumn:
     def __init__(
         self,
         body: AddLagLeadColumnRequestBody,
+        tables_store: TablesStore,
     ):
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.source_column = body.source_column
         self.new_column_name = body.new_column_name

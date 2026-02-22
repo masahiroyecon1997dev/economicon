@@ -50,8 +50,9 @@ class Regression:
     def __init__(
         self,
         body: RegressionRequestBody,
+        tables_store: TablesStore,
     ):
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         self.table_info = None
         self.table_name = body.table_name
         self.result_name = body.result_name

@@ -19,9 +19,13 @@ class ImportExcelByPath:
     シート名を指定できます。
     """
 
-    def __init__(self, body: ImportExcelByPathRequestBody):
+    def __init__(
+        self,
+        body: ImportExcelByPathRequestBody,
+        tables_store: TablesStore,
+    ):
         # テーブルマネージャーの初期化
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         # ファイルパス
         self.file_path = body.file_path
         # テーブル名

@@ -21,8 +21,9 @@ class ConfidenceInterval:
     def __init__(
         self,
         body: ConfidenceIntervalRequestBody,
+        tables_store: TablesStore,
     ):
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.column_name = body.column_name
         self.confidence_level = body.confidence_level

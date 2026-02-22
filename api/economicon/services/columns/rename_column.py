@@ -14,8 +14,12 @@ class RenameColumn:
     同じ列名が既に存在する場合はエラーとなります。
     """
 
-    def __init__(self, body: RenameColumnRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: RenameColumnRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         # テーブル名
         self.table_name = body.table_name
         # 変更前の列名
