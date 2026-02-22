@@ -905,10 +905,8 @@ def test_add_column_from_csv_file_permission_denied(client, tables_store):
         response_data = response.json()
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response_data["code"] == ErrorCode.PERMISSION_DENIED
-        # permission denied メッセージは翻訳なし（英語）
-        EXPECTED_MSG = (
-            f"csvFilePath '{csv_path}' does not have read permission."
-        )
+        # permission denied メッセージは日本語翻訳あり
+        EXPECTED_MSG = f"csvFilePath '{csv_path}'にはread権限がありません。"
         assert response_data["message"] == EXPECTED_MSG
 
         df_after = tables_store.get_table("TestTable").table
@@ -951,9 +949,9 @@ def test_add_column_from_csv_row_count_mismatch_strict(client, tables_store):
         response_data = response.json()
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert response_data["code"] == ErrorCode.ROW_COUNT_MISMATCH
-        # row count mismatch メッセージは翻訳なし（英語）
+        # row count mismatch メッセージは日本語翻訳あり
         EXPECTED_MSG = (
-            "Row count mismatch: CSV has 5 rows, but table has 3 rows."
+            "行数の不一致: CSVには5行ありますが、テーブルには3行あります。"
         )
         assert response_data["message"] == EXPECTED_MSG
 
@@ -989,8 +987,8 @@ def test_add_column_from_csv_empty_file(client, tables_store):
         # サイズ0のファイルはCSV解析前に validate_file_format が EMPTY_FILE(400)で検出
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response_data["code"] == ErrorCode.EMPTY_FILE
-        # empty file メッセージは翻訳なし（英語）
-        EXPECTED_MSG = f"csvFilePath '{csv_path}' is empty."
+        # empty file メッセージは日本語翻訳あり
+        EXPECTED_MSG = f"csvFilePath '{csv_path}'は空です。"
         assert response_data["message"] == EXPECTED_MSG
 
         df_after = tables_store.get_table("TestTable").table
