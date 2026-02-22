@@ -789,5 +789,17 @@ msgstr "{field} must be one of: {expected}."
 msgid "{field} has an invalid value"
 msgstr "{field} has an invalid value."
 
+#, python-brace-format
+msgid "{} '{}' does not have {} permission."
+msgstr "{} '{}' does not have {} permission."
+
+#, python-brace-format
+msgid "{} '{}' is empty."
+msgstr "{} '{}' is empty."
+
+#, python-brace-format
+msgid "Row count mismatch: CSV has {csv_rows} rows, but table has {expected_rows} rows."
+msgstr "Row count mismatch: CSV has {csv_rows} rows, but table has {expected_rows} rows."
+
 #~ msgid "standard_error_methodmust be one of: , "
 #~ msgstr ""
