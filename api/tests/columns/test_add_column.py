@@ -351,11 +351,14 @@ def test_add_column_missing_table_name(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "tableNameは必須項目です。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -373,11 +376,14 @@ def test_add_column_missing_new_column_name(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "newColumnNameは必須項目です。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -395,11 +401,14 @@ def test_add_column_missing_add_position_column(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "addPositionColumnは必須項目です。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -418,11 +427,14 @@ def test_add_column_empty_table_name(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "tableNameは1文字以上で入力してください。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -441,11 +453,14 @@ def test_add_column_empty_new_column_name(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "newColumnNameは1文字以上で入力してください。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -464,11 +479,14 @@ def test_add_column_empty_add_position_column(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "addPositionColumnは1文字以上で入力してください。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -487,11 +505,14 @@ def test_add_column_table_name_is_number(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "tableNameは文字列で入力してください。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -510,11 +531,14 @@ def test_add_column_new_column_name_is_number(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "newColumnNameは文字列で入力してください。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -533,11 +557,14 @@ def test_add_column_add_position_column_is_number(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "addPositionColumnは文字列で入力してください。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -556,11 +583,14 @@ def test_add_column_new_column_name_too_long(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "newColumnNameは128文字以内で入力してください。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -580,11 +610,14 @@ def test_add_column_csv_file_path_too_long(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "csvFilePathは1024文字以内で入力してください。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -603,10 +636,14 @@ def test_add_column_new_column_name_with_null_char(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "newColumnNameに使用できない文字が含まれています。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -625,10 +662,14 @@ def test_add_column_new_column_name_with_control_char_1f(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "newColumnNameに使用できない文字が含まれています。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -647,10 +688,14 @@ def test_add_column_new_column_name_with_control_char_7f(client, tables_store):
         },
     )
 
+    EXPECTED_MSG = "newColumnNameに使用できない文字が含まれています。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "details" in response_data
+    assert "message" in response_data
+    assert response_data["message"] == EXPECTED_MSG
+    assert response_data["details"] == [EXPECTED_MSG]
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -678,10 +723,14 @@ def test_add_column_separator_empty(client, tables_store):
             },
         )
 
+        EXPECTED_MSG = "separatorは1文字以上で入力してください。"
+
         response_data = response.json()
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-        assert "details" in response_data
+        assert "message" in response_data
+        assert response_data["message"] == EXPECTED_MSG
+        assert response_data["details"] == [EXPECTED_MSG]
 
         df_after = tables_store.get_table("TestTable").table
         assert df_after.equals(df_before)
@@ -711,10 +760,14 @@ def test_add_column_separator_too_long(client, tables_store):
             },
         )
 
+        EXPECTED_MSG = "separatorは10文字以内で入力してください。"
+
         response_data = response.json()
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-        assert "details" in response_data
+        assert "message" in response_data
+        assert response_data["message"] == EXPECTED_MSG
+        assert response_data["details"] == [EXPECTED_MSG]
 
         df_after = tables_store.get_table("TestTable").table
         assert df_after.equals(df_before)
