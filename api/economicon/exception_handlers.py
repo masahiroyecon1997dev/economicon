@@ -4,6 +4,7 @@ from fastapi import status as http_status
 from fastapi.exceptions import RequestValidationError
 
 from .core import get_localized_message
+from .core.enums import ErrorCode
 from .i18n import _
 from .utils import (
     ProcessingError,
@@ -28,7 +29,7 @@ def init_exception_handlers(app: FastAPI):
 
         return create_error_response(
             http_status.HTTP_422_UNPROCESSABLE_CONTENT,
-            error_code="VALIDATION_ERROR",
+            error_code=ErrorCode.VALIDATION_ERROR,
             message=localized_errors[0],
             details=localized_errors,
         )
