@@ -2,7 +2,7 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from economicon.services.data.settings_manager import SettingsManager
+from economicon.services.data.settings_store import SettingsStore
 from main import app
 
 
@@ -14,9 +14,9 @@ def client():
 
 @pytest.fixture
 def settings_manager():
-    """SettingsManagerのフィクスチャ"""
+    """SettingsStoreのフィクスチャ"""
     # 設定マネージャーが初期化されていることを確認
-    settings_manager = SettingsManager()
+    settings_manager = SettingsStore()
     settings_manager.load_settings()
     yield settings_manager
 
@@ -44,8 +44,8 @@ def test_get_settings_success(client, settings_manager):
 
 def test_settings_manager_singleton(client, settings_manager):
     """シングルトンパターンのテスト"""
-    manager1 = SettingsManager()
-    manager2 = SettingsManager()
+    manager1 = SettingsStore()
+    manager2 = SettingsStore()
     assert manager1 is manager2
 
 

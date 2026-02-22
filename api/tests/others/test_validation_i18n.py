@@ -3,9 +3,10 @@ Pydantic バリデーションエラー多言語化のテスト
 """
 
 import pytest
-from economicon.services.data.settings_manager import SettingsManager
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.services.data.settings_store import SettingsStore
 from main import app
 
 
@@ -17,8 +18,8 @@ def client():
 
 @pytest.fixture
 def settings_manager():
-    """SettingsManagerのフィクスチャ"""
-    manager = SettingsManager()
+    """SettingsStoreのフィクスチャ"""
+    manager = SettingsStore()
     manager.load_settings()
     # デフォルトで日本語に設定
     settings = manager.get_settings()

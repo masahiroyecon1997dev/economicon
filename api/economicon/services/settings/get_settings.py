@@ -1,18 +1,18 @@
 from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...utils import ProcessingError
-from ..data.settings_manager import SettingsManager
+from ..data.settings_store import SettingsStore
 
 
 class GetSettings:
     """
     アプリケーション設定を取得するためのAPIクラス
 
-    SettingsManagerから設定情報を取得して返します。
+    SettingsStoreから設定情報を取得して返します。
     """
 
     def __init__(self):
-        self.settings_manager = SettingsManager()
+        self.settings_manager = SettingsStore()
 
     def validate(self):
         # 設定取得にはバリデーションは不要
@@ -20,7 +20,7 @@ class GetSettings:
 
     def execute(self):
         try:
-            # SettingsManagerから設定を取得
+            # SettingsStoreから設定を取得
             settings_info = self.settings_manager.get_settings()
 
             # 結果を返す
