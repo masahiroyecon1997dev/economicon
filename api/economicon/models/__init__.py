@@ -90,7 +90,7 @@ from .regressions import (
     RegressionRequestBody,
     RegressionResult,
 )
-from .settings import GetSettingsRequestBody
+from .settings import GetSettingsRequestBody, GetSettingsResult
 from .statistics import (
     ConfidenceIntervalBounds,
     ConfidenceIntervalRequestBody,
@@ -233,6 +233,7 @@ __all__ = [
     "DescriptiveStatisticsResult",
     # Settings
     "GetSettingsRequestBody",
+    "GetSettingsResult",
     # Data I/O
     "ImportCsvByPathRequestBody",
     "ImportCsvByPathResult",

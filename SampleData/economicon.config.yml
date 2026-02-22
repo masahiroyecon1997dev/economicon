@@ -1,17 +1,19 @@
 # アプリケーション設定ファイル
-# ホームディレクトリに「economicon.config.yml」として保存してください
+# Windows: %APPDATA%\economicon\economicon.config.yml
+# macOS/Linux: ~/economicon.config.yml
 
-# ファイル読み込みをするフォルダパスの初期値
-default_folder_path: "C:/Users/YourName/Documents"
+general:
+  # アプリケーションの表示言語 (ja: 日本語, en: 英語)
+  language: "ja"
+  # 最後に開いたフォルダパス
+  last_opened_path: "C:/Users/YourName/Documents"
+  # テーマ (light: ライト, dark: ダーク)
+  theme: "light"
 
-# テーブルに表示する行数
-display_rows: 100
+data:
+  # ファイルエンコーディング（日本語データなら "shift_jis" に変更）
+  encoding: "utf-8"
 
-# アプリケーションの表示言語 (ja: 日本語, en: 英語)
-app_language: "ja"
-
-# ファイルエンコーディング
-encoding: "utf-8"
-
-# パス区切り文字（自動設定されますが、明示的に指定も可能）
-# path_separator: "/"
+log:
+  # ログファイルの出力先パス
+  path: "./logs/app.log"

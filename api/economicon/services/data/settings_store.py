@@ -60,11 +60,17 @@ class SettingsStore:
 
         return {
             "os_name": os_name,
-            "default_folder_path": str(Path.home()).replace(os.sep, "/"),
-            "display_rows": 100,
-            "app_language": "ja",
-            "encoding": "utf-8",
-            "path_separator": "/",
+            "general": {
+                "language": "ja",
+                "last_opened_path": str(Path.home()).replace(os.sep, "/"),
+                "theme": "light",
+            },
+            "data": {
+                "encoding": "utf-8",
+            },
+            "log": {
+                "path": "./logs/app.log",
+            },
         }
 
     @staticmethod
@@ -113,31 +119,36 @@ class SettingsStore:
                 # デフォルト設定とマージ（ユーザー設定を優先）
                 settings = default_settings.copy()
                 if user_settings:
-                    settings.update(user_settings)
+                    for section in ("general", "data", "log"):
+                        if section in user_settings and isinstance(
+                            user_settings[section], dict
+                        ):
+                            settings[section] = {
+                                **settings.get(section, {}),
+                                **user_settings[section],
+                            }
 
             except yaml.YAMLError:
                 # YAML解析エラーの場合はデフォルト設定を使用
                 settings = default_settings
 
+            general = settings.get("general", {})
+            data_cfg = settings.get("data", {})
+            log_cfg = settings.get("log", {})
+            defaults_general = default_settings["general"]
+            defaults_data = default_settings["data"]
+            defaults_log = default_settings["log"]
+
             # SettingsInfoオブジェクトを作成
             self._settings = SettingsInfo(
                 os_name=settings.get("os_name", default_settings["os_name"]),
-                default_folder_path=settings.get(
-                    "default_folder_path",
-                    default_settings["default_folder_path"],
+                language=general.get("language", defaults_general["language"]),
+                last_opened_path=general.get(
+                    "last_opened_path", defaults_general["last_opened_path"]
                 ),
-                display_rows=settings.get(
-                    "display_rows", default_settings["display_rows"]
-                ),
-                app_language=settings.get(
-                    "app_language", default_settings["app_language"]
-                ),
-                encoding=settings.get(
-                    "encoding", default_settings["encoding"]
-                ),
-                path_separator=settings.get(
-                    "path_separator", default_settings["path_separator"]
-                ),
+                theme=general.get("theme", defaults_general["theme"]),
+                encoding=data_cfg.get("encoding", defaults_data["encoding"]),
+                log_path=log_cfg.get("path", defaults_log["path"]),
             )
 
     def _create_default_settings_file(
@@ -184,22 +195,22 @@ class SettingsStore:
     def update_settings(
         self,
         os_name: Optional[str] = None,
-        default_folder_path: Optional[str] = None,
-        display_rows: Optional[int] = None,
-        app_language: Optional[str] = None,
+        language: Optional[str] = None,
+        last_opened_path: Optional[str] = None,
+        theme: Optional[str] = None,
         encoding: Optional[str] = None,
-        path_separator: Optional[str] = None,
+        log_path: Optional[str] = None,
     ) -> None:
         """
         設定を更新する（指定された項目のみ）
 
         Args:
             os_name: OS名
-            default_folder_path: デフォルトフォルダパス
-            display_rows: 表示行数
-            app_language: アプリケーション言語
+            language: アプリケーション言語
+            last_opened_path: 最後に開いたフォルダパス
+            theme: テーマ
             encoding: エンコーディング
-            path_separator: パス区切り文字
+            log_path: ログファイルパス
         """
         with self._lock:
             if self._settings is None:
@@ -207,45 +218,24 @@ class SettingsStore:
                     "Settings not initialized. Call load_settings() first."
                 )
 
-            # 現在の設定を取得
-            current_settings = self._settings
-
-            # 指定された値で更新（Noneでない場合のみ）
-            updated_os_name = (
-                os_name if os_name is not None else current_settings.os_name
-            )
-            updated_folder_path = (
-                default_folder_path
-                if default_folder_path is not None
-                else current_settings.default_folder_path
-            )
-            updated_display_rows = (
-                display_rows
-                if display_rows is not None
-                else current_settings.display_rows
-            )
-            updated_app_language = (
-                app_language
-                if app_language is not None
-                else current_settings.app_language
-            )
-            updated_encoding = (
-                encoding if encoding is not None else current_settings.encoding
-            )
-            updated_path_separator = (
-                path_separator
-                if path_separator is not None
-                else current_settings.path_separator
-            )
-
-            # 新しい設定オブジェクトを作成
+            current = self._settings
             self._settings = SettingsInfo(
-                os_name=updated_os_name,
-                default_folder_path=updated_folder_path,
-                display_rows=updated_display_rows,
-                app_language=updated_app_language,
-                encoding=updated_encoding,
-                path_separator=updated_path_separator,
+                os_name=os_name if os_name is not None else current.os_name,
+                language=language
+                if language is not None
+                else current.language,
+                last_opened_path=(
+                    last_opened_path
+                    if last_opened_path is not None
+                    else current.last_opened_path
+                ),
+                theme=theme if theme is not None else current.theme,
+                encoding=encoding
+                if encoding is not None
+                else current.encoding,
+                log_path=log_path
+                if log_path is not None
+                else current.log_path,
             )
 
     def save_settings(self) -> None:
@@ -262,11 +252,17 @@ class SettingsStore:
 
             settings_dict = {
                 "os_name": self._settings.os_name,
-                "default_folder_path": self._settings.default_folder_path,
-                "display_rows": self._settings.display_rows,
-                "app_language": self._settings.app_language,
-                "encoding": self._settings.encoding,
-                "path_separator": self._settings.path_separator,
+                "general": {
+                    "language": self._settings.language,
+                    "last_opened_path": self._settings.last_opened_path,
+                    "theme": self._settings.theme,
+                },
+                "data": {
+                    "encoding": self._settings.encoding,
+                },
+                "log": {
+                    "path": self._settings.log_path,
+                },
             }
 
             try:

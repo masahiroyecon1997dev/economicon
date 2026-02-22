@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
+from ..models import (
+    GetSettingsResult,
+    SuccessResponse,
+)
 from ..services.data.dependencies import SettingsStoreDep
 from ..services.operation import run_operation
 from ..services.settings.get_settings import GetSettings
@@ -9,7 +13,7 @@ from ..utils import create_success_response
 router = APIRouter(prefix="/setting", tags=["setting"])
 
 
-@router.get("/settings")
+@router.get("/settings", response_model=SuccessResponse[GetSettingsResult])
 async def get_settings(
     request: Request,
     settings_store: SettingsStoreDep,
