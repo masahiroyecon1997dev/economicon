@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import ImportParquetByPathRequestBody
 from ...utils import ProcessingError
@@ -61,19 +62,19 @@ class ImportParquetByPath:
         except pl.exceptions.NoDataError as e:
             message = _("The PARQUET file is empty or contains no valid data.")
             raise ProcessingError(
-                error_code="PARQUET_IMPORT_ERROR", message=message
+                error_code=ErrorCode.PARQUET_IMPORT_ERROR, message=message
             ) from e
         except pl.exceptions.ComputeError as e:
             message = _(
                 "Failed to parse PARQUET file: Invalid format or encoding."
             )
             raise ProcessingError(
-                error_code="PARQUET_IMPORT_ERROR", message=message
+                error_code=ErrorCode.PARQUET_IMPORT_ERROR, message=message
             ) from e
         except Exception as e:
             message = _(
                 "An unexpected error occurred during PARQUET processing"
             )
             raise ProcessingError(
-                error_code="PARQUET_IMPORT_ERROR", message=message
+                error_code=ErrorCode.PARQUET_IMPORT_ERROR, message=message
             ) from e

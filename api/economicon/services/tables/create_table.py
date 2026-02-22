@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import CreateTableRequestBody
 from ...utils import ProcessingError
@@ -74,7 +75,7 @@ class CreateTable:
                 "An unexpected error occurred during table creation processing"
             )
             raise ProcessingError(
-                error_code="CreateTableError",
+                error_code=ErrorCode.CREATE_TABLE_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

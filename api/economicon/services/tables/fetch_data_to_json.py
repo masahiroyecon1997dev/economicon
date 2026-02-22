@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import FetchDataToJsonRequestBody
 from ...utils import ProcessingError
@@ -71,7 +72,7 @@ class FetchDataToJson:
                 f" {str(e)}"
             )
             raise ProcessingError(
-                error_code="FetchDataToJsonError",
+                error_code=ErrorCode.FETCH_DATA_TO_JSON_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

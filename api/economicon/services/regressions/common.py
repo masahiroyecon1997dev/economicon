@@ -11,6 +11,7 @@ import numpy as np
 import polars as pl
 import statsmodels.api as sm
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...utils import ProcessingError
 
@@ -35,13 +36,13 @@ def handle_missing_values(df: Any, missing: str) -> Any:
     elif missing == "raise":
         if df.isnull().any().any():
             raise ProcessingError(
-                error_code="MISSING_VALUES_FOUND",
+                error_code=ErrorCode.MISSING_VALUES_FOUND,
                 message=_("Missing values found in data"),
             )
 
     if len(df) == 0:
         raise ProcessingError(
-            error_code="NO_VALID_OBSERVATIONS",
+            error_code=ErrorCode.NO_VALID_OBSERVATIONS,
             message=_("No valid observations after removing missing values"),
         )
 

@@ -5,6 +5,7 @@ AnalysisResultStoreへのアクセスをラップし、
 統一されたエラーハンドリングとバリデーションを提供します。
 """
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...utils import ProcessingError, ValidationError
 from ..data.analysis_result_store import AnalysisResultStore
@@ -37,7 +38,7 @@ class GetAllAnalysisResults:
             return {"results": summaries}
         except Exception as e:
             raise ProcessingError(
-                error_code="GET_ALL_RESULTS_ERROR",
+                error_code=ErrorCode.GET_ALL_RESULTS_ERROR,
                 message=_(
                     "An unexpected error occurred during getting "
                     "analysis results"
@@ -63,7 +64,7 @@ class GetAnalysisResult:
         """
         if not self.result_id or not self.result_id.strip():
             raise ValidationError(
-                error_code="RESULT_ID_REQUIRED",
+                error_code=ErrorCode.RESULT_ID_REQUIRED,
                 message=_("Result ID is required"),
             )
         return None
@@ -91,7 +92,7 @@ class GetAnalysisResult:
             raise
         except Exception as e:
             raise ProcessingError(
-                error_code="GET_ANALYSIS_RESULT_ERROR",
+                error_code=ErrorCode.GET_ANALYSIS_RESULT_ERROR,
                 message=_(
                     "An unexpected error occurred during getting "
                     "analysis result"
@@ -117,7 +118,7 @@ class DeleteAnalysisResult:
         """
         if not self.result_id or not self.result_id.strip():
             raise ValidationError(
-                error_code="RESULT_ID_REQUIRED",
+                error_code=ErrorCode.RESULT_ID_REQUIRED,
                 message=_("Result ID is required"),
             )
         return None
@@ -145,7 +146,7 @@ class DeleteAnalysisResult:
             raise
         except Exception as e:
             raise ProcessingError(
-                error_code="DELETE_ANALYSIS_RESULT_ERROR",
+                error_code=ErrorCode.DELETE_ANALYSIS_RESULT_ERROR,
                 message=_(
                     "An unexpected error occurred during deleting "
                     "analysis result"
@@ -180,7 +181,7 @@ class ClearAllAnalysisResults:
             return {"message": "All analysis results cleared"}
         except Exception as e:
             raise ProcessingError(
-                error_code="CLEAR_ALL_ANALYSIS_RESULTS_ERROR",
+                error_code=ErrorCode.CLEAR_ALL_ANALYSIS_RESULTS_ERROR,
                 message=_(
                     "An unexpected error occurred during clearing "
                     "analysis results"

@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import (
     BinaryChoiceRegressionParams,
@@ -356,7 +357,7 @@ class Regression:
             return result
         except Exception as e:
             raise ProcessingError(
-                error_code="RegressionProcessError",
+                error_code=ErrorCode.REGRESSION_PROCESS_ERROR,
                 message=f"Unexpected error: {str(e)}",
             )
 

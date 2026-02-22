@@ -1,5 +1,6 @@
 import os
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import ExportExcelByPathRequestBody
 from ...utils import ProcessingError
@@ -68,19 +69,19 @@ class ExportExcelByPath:
         except KeyError as e:
             message = _("Table does not exist: {}").format(self.table_name)
             raise ProcessingError(
-                error_code="EXCEL_EXPORT_ERROR", message=message
+                error_code=ErrorCode.EXCEL_EXPORT_ERROR, message=message
             ) from e
         except PermissionError as e:
             message = _(
                 "Permission denied: Cannot write to the specified path."
             )
             raise ProcessingError(
-                error_code="EXCEL_EXPORT_ERROR", message=message
+                error_code=ErrorCode.EXCEL_EXPORT_ERROR, message=message
             ) from e
         except Exception as e:
             message = _(
                 "An unexpected error occurred during EXCEL export processing"
             )
             raise ProcessingError(
-                error_code="EXCEL_EXPORT_ERROR", message=message
+                error_code=ErrorCode.EXCEL_EXPORT_ERROR, message=message
             ) from e

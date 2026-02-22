@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import CreateJoinTableRequestBody
 from ...utils import ProcessingError
@@ -138,7 +139,7 @@ class CreateJoinTable:
                 "join table creation processing"
             )
             raise ProcessingError(
-                error_code="JoinTableCreationError",
+                error_code=ErrorCode.JOIN_TABLE_CREATION_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

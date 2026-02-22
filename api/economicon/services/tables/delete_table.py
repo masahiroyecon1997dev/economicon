@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import DeleteTableRequestBody
 from ...utils import ProcessingError
@@ -43,7 +44,7 @@ class DeleteTable:
                 "An unexpected error occurred during table deletion processing"
             )
             raise ProcessingError(
-                error_code="TableDeletionError",
+                error_code=ErrorCode.TABLE_DELETION_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

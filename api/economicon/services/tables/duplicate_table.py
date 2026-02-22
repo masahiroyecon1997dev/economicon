@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import DuplicateTableRequestBody
 from ...utils import ProcessingError
@@ -58,7 +59,7 @@ class DuplicateTable:
                 "table duplication processing"
             )
             raise ProcessingError(
-                error_code="TableDuplicationError",
+                error_code=ErrorCode.TABLE_DUPLICATION_ERROR,
                 message=message,
                 detail=str(e),
             ) from e
