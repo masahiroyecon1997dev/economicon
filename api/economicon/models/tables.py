@@ -4,7 +4,7 @@ from typing import Annotated, Any, List
 
 from pydantic import Field
 
-from .common import BaseRequest
+from .common import BaseRequest, BaseResult
 from .entities import SimulationColumnConfig
 from .enums import FilterOperatorType, JoinType
 from .types import (
@@ -13,6 +13,10 @@ from .types import (
     NewTableName,
     TableName,
 )
+
+# ---------------------------------------------------------------------------
+# リクエストボディ
+# ---------------------------------------------------------------------------
 
 
 class CreateTableRequestBody(BaseRequest):
@@ -341,3 +345,91 @@ class FilterSingleConditionRequestBody(BaseRequest):
             'isCompareColumn が "true" の場合はカラム名を指定。',
         ),
     ]
+
+
+# ---------------------------------------------------------------------------
+# レスポンス（Result）
+# ---------------------------------------------------------------------------
+
+
+class TableNameResult(BaseResult):
+    """テーブル名のみを返す共通レスポンス基底"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="操作対象または生成されたテーブル名",
+    )
+
+
+class CreateTableResult(TableNameResult):
+    """テーブル作成レスポンス"""
+
+
+class CreateJoinTableResult(TableNameResult):
+    """結合テーブル作成レスポンス"""
+
+
+class CreateUnionTableResult(TableNameResult):
+    """ユニオンテーブル作成レスポンス"""
+
+
+class CreateSimulationDataTableResult(TableNameResult):
+    """シミュレーションデータテーブル作成レスポンス"""
+
+
+class DeleteTableResult(TableNameResult):
+    """テーブル削除レスポンス"""
+
+
+class DuplicateTableResult(TableNameResult):
+    """テーブル複製レスポンス"""
+
+
+class RenameTableResult(TableNameResult):
+    """テーブル名変更レスポンス"""
+
+
+class GetTableListResult(BaseResult):
+    """テーブルリスト取得レスポンス"""
+
+    table_name_list: List[str] = Field(
+        title="Table Name List",
+        description="ワークスペースに存在するテーブル名のリスト",
+    )
+
+
+class ClearTablesResult(BaseResult):
+    """全テーブルクリアレスポンス（データなし）"""
+
+
+class FetchDataToJsonResult(BaseResult):
+    """テーブルデータ JSON 形式取得レスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="データを取得したテーブル名",
+    )
+    data: str = Field(
+        title="Data",
+        description="JSON 文字列形式のテーブルデータ",
+    )
+    total_rows: int = Field(
+        title="Total Rows",
+        description="テーブル全体の行数",
+    )
+    start_row: int = Field(
+        title="Start Row",
+        description="取得開始行番号",
+    )
+    end_row: int = Field(
+        title="End Row",
+        description="取得終了行番号",
+    )
+
+
+class InputCellDataResult(TableNameResult):
+    """セルデータ入力レスポンス"""
+
+
+class FilterSingleConditionResult(TableNameResult):
+    """単一条件フィルタレスポンス"""

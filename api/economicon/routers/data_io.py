@@ -3,11 +3,18 @@ from fastapi import status as http_status
 
 from ..models import (
     ExportCsvByPathRequestBody,
+    ExportCsvByPathResult,
     ExportExcelByPathRequestBody,
+    ExportExcelByPathResult,
     ExportParquetByPathRequestBody,
+    ExportParquetByPathResult,
     ImportCsvByPathRequestBody,
+    ImportCsvByPathResult,
     ImportExcelByPathRequestBody,
+    ImportExcelByPathResult,
     ImportParquetByPathRequestBody,
+    ImportParquetByPathResult,
+    SuccessResponse,
 )
 from ..services.data.dependencies import TablesStoreDep
 from ..services.data_io.export_csv_by_path import ExportCsvByPath
@@ -22,7 +29,10 @@ from ..utils import create_success_response
 router = APIRouter(prefix="/data", tags=["data"])
 
 
-@router.post("/import-csv-by-path")
+@router.post(
+    "/import-csv-by-path",
+    response_model=SuccessResponse[ImportCsvByPathResult],
+)
 async def import_csv_by_path(
     request: Request,
     body: ImportCsvByPathRequestBody,
@@ -51,7 +61,10 @@ async def import_csv_by_path(
     )
 
 
-@router.post("/import-excel-by-path")
+@router.post(
+    "/import-excel-by-path",
+    response_model=SuccessResponse[ImportExcelByPathResult],
+)
 async def import_excel_by_path(
     request: Request,
     body: ImportExcelByPathRequestBody,
@@ -83,7 +96,10 @@ async def import_excel_by_path(
     )
 
 
-@router.post("/import-parquet-by-path")
+@router.post(
+    "/import-parquet-by-path",
+    response_model=SuccessResponse[ImportParquetByPathResult],
+)
 async def import_parquet_by_path(
     request: Request,
     body: ImportParquetByPathRequestBody,
@@ -114,7 +130,10 @@ async def import_parquet_by_path(
     )
 
 
-@router.post("/export-csv-by-path")
+@router.post(
+    "/export-csv-by-path",
+    response_model=SuccessResponse[ExportCsvByPathResult],
+)
 async def export_csv_by_path(
     request: Request,
     body: ExportCsvByPathRequestBody,
@@ -143,7 +162,10 @@ async def export_csv_by_path(
     )
 
 
-@router.post("/export-excel-by-path")
+@router.post(
+    "/export-excel-by-path",
+    response_model=SuccessResponse[ExportExcelByPathResult],
+)
 async def export_excel_by_path(
     request: Request,
     body: ExportExcelByPathRequestBody,
@@ -172,7 +194,10 @@ async def export_excel_by_path(
     )
 
 
-@router.post("/export-parquet-by-path")
+@router.post(
+    "/export-parquet-by-path",
+    response_model=SuccessResponse[ExportParquetByPathResult],
+)
 async def export_parquet_by_path(
     request: Request,
     body: ExportParquetByPathRequestBody,

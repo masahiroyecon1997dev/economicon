@@ -3,7 +3,10 @@ from fastapi import status as http_status
 
 from ..models import (
     ConfidenceIntervalRequestBody,
+    ConfidenceIntervalResult,
     DescriptiveStatisticsRequestBody,
+    DescriptiveStatisticsResult,
+    SuccessResponse,
 )
 from ..services.data.dependencies import TablesStoreDep
 from ..services.operation import run_operation
@@ -14,7 +17,10 @@ from ..utils import create_success_response
 router = APIRouter(prefix="/statistics", tags=["statistics"])
 
 
-@router.post("/confidence-interval")
+@router.post(
+    "/confidence-interval",
+    response_model=SuccessResponse[ConfidenceIntervalResult],
+)
 async def confidence_interval(
     request: Request,
     body: ConfidenceIntervalRequestBody,
@@ -43,7 +49,9 @@ async def confidence_interval(
     )
 
 
-@router.post("/descriptive")
+@router.post(
+    "/descriptive", response_model=SuccessResponse[DescriptiveStatisticsResult]
+)
 async def descriptive_statistics(
     request: Request,
     body: DescriptiveStatisticsRequestBody,

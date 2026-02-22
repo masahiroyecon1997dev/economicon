@@ -5,16 +5,26 @@ from ..models import (
     AddColumnRequestBody,
     AddColumnResult,
     AddDummyColumnRequestBody,
+    AddDummyColumnResult,
     AddLagLeadColumnRequestBody,
+    AddLagLeadColumnResult,
     AddSimulationColumnRequestBody,
+    AddSimulationColumnResult,
     CalculateColumnRequestBody,
+    CalculateColumnResult,
     DeleteColumnRequestBody,
+    DeleteColumnResult,
     DuplicateColumnRequestBody,
+    DuplicateColumnResult,
     GetColumnListRequestBody,
+    GetColumnListResult,
     RenameColumnRequestBody,
+    RenameColumnResult,
     SortColumnsRequestBody,
+    SortColumnsResult,
     SuccessResponse,
     TransformColumnRequestBody,
+    TransformColumnResult,
 )
 
 # 各ビジネスロジック（既存のpython_apis）
@@ -65,7 +75,9 @@ async def add_column(
     )
 
 
-@router.post("/add-dummy")
+@router.post(
+    "/add-dummy", response_model=SuccessResponse[AddDummyColumnResult]
+)
 async def add_dummy_column(
     request: Request,
     body: AddDummyColumnRequestBody,
@@ -93,7 +105,7 @@ async def add_dummy_column(
     )
 
 
-@router.post("/delete")
+@router.post("/delete", response_model=SuccessResponse[DeleteColumnResult])
 async def delete_column(
     request: Request,
     body: DeleteColumnRequestBody,
@@ -120,7 +132,7 @@ async def delete_column(
     )
 
 
-@router.post("/rename")
+@router.post("/rename", response_model=SuccessResponse[RenameColumnResult])
 async def rename_column(
     request: Request,
     body: RenameColumnRequestBody,
@@ -151,7 +163,9 @@ async def rename_column(
     )
 
 
-@router.post("/add-lag-lead")
+@router.post(
+    "/add-lag-lead", response_model=SuccessResponse[AddLagLeadColumnResult]
+)
 async def add_lag_lead_column(
     request: Request,
     body: AddLagLeadColumnRequestBody,
@@ -180,7 +194,10 @@ async def add_lag_lead_column(
     )
 
 
-@router.post("/add-simulation")
+@router.post(
+    "/add-simulation",
+    response_model=SuccessResponse[AddSimulationColumnResult],
+)
 async def add_simulation_column(
     request: Request,
     body: AddSimulationColumnRequestBody,
@@ -208,7 +225,9 @@ async def add_simulation_column(
     )
 
 
-@router.post("/calculate")
+@router.post(
+    "/calculate", response_model=SuccessResponse[CalculateColumnResult]
+)
 async def calculate_column(
     request: Request,
     body: CalculateColumnRequestBody,
@@ -237,7 +256,9 @@ async def calculate_column(
     )
 
 
-@router.post("/duplicate")
+@router.post(
+    "/duplicate", response_model=SuccessResponse[DuplicateColumnResult]
+)
 async def duplicate_column(
     request: Request,
     body: DuplicateColumnRequestBody,
@@ -265,7 +286,9 @@ async def duplicate_column(
     )
 
 
-@router.post("/transform")
+@router.post(
+    "/transform", response_model=SuccessResponse[TransformColumnResult]
+)
 async def transform_column(
     request: Request,
     body: TransformColumnRequestBody,
@@ -294,7 +317,7 @@ async def transform_column(
     )
 
 
-@router.post("/get-list")
+@router.post("/get-list", response_model=SuccessResponse[GetColumnListResult])
 async def get_column_list(
     request: Request,
     body: GetColumnListRequestBody,
@@ -323,7 +346,7 @@ async def get_column_list(
     )
 
 
-@router.post("/sort")
+@router.post("/sort", response_model=SuccessResponse[SortColumnsResult])
 async def sort_columns(
     request: Request,
     body: SortColumnsRequestBody,
