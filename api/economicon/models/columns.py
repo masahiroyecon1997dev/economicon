@@ -2,7 +2,7 @@
 
 from typing import Annotated, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StringConstraints
 
 from .common import BaseRequest
 from .entities import SimulationColumnConfig, SortInstruction
@@ -10,6 +10,7 @@ from .types import (
     ColumnName,
     FilePath,
     NewColumnName,
+    Separator,
     TableName,
     TransformMethodConfig,
 )
@@ -18,12 +19,22 @@ from .types import (
 class AddColumnRequestBody(BaseRequest):
     """カラム追加リクエスト"""
 
-    table_name: TableName
-    new_column_name: NewColumnName
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="列を追加するテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
+    new_column_name: Annotated[
+        NewColumnName,
+        Field(
+            description="追加する新しいカラム名。既存のカラム名と重複しない名前を指定してください。"
+        ),
+    ]
     add_position_column: Annotated[
         ColumnName,
         Field(
-            description="追加位置のカラム名",
+            description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
         ),
     ]
     csv_file_path: Optional[FilePath] = None
@@ -42,9 +53,9 @@ class AddColumnRequestBody(BaseRequest):
         ),
     ] = True
     separator: Annotated[
-        str,
+        Separator,
         Field(
-            description="CSV区切り文字",
+            description="CSV区切り文字。カンマかタブ、もしくは1から10文字の任意の文字列から選択してください。",
             min_length=1,
             max_length=10,
         ),
@@ -54,50 +65,98 @@ class AddColumnRequestBody(BaseRequest):
 class AddColumnResult(BaseModel):
     """カラム追加レスポンス"""
 
-    table_name: TableName
-    column_name: ColumnName
+    table_name: Annotated[
+        TableName,
+        Field(description="列を追加したテーブル名"),
+    ]
+    column_name: Annotated[
+        ColumnName,
+        Field(description="追加したカラム名"),
+    ]
 
 
 class DeleteColumnRequestBody(BaseRequest):
     """カラム削除リクエスト"""
 
-    table_name: TableName
-    column_name: Annotated[ColumnName, Field(description="削除するカラム名")]
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="列を削除するテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
+    column_name: Annotated[
+        ColumnName,
+        Field(
+            description="削除するカラム名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
 
 
 class DeleteColumnResult(BaseModel):
     """カラム削除レスポンス"""
 
-    table_name: TableName
-    column_name: ColumnName
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="列を削除したテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
+    column_name: Annotated[
+        ColumnName,
+        Field(
+            description="削除したカラム名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
 
 
 class RenameColumnRequestBody(BaseRequest):
     """カラム名変更リクエスト"""
 
-    table_name: TableName
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="カラム名を変更するテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
     old_column_name: Annotated[
-        ColumnName, Field(description="変更前のカラム名")
+        ColumnName,
+        Field(
+            description="変更前のカラム名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
     ]
     new_column_name: Annotated[
-        NewColumnName, Field(description="新しいカラム名")
+        NewColumnName,
+        Field(
+            description="新しいカラム名。既存のカラム名と重複しない名前を指定してください。",
+        ),
     ]
 
 
 class DuplicateColumnRequestBody(BaseRequest):
     """カラム複製リクエスト"""
 
-    table_name: TableName
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
     source_column_name: Annotated[
-        ColumnName, Field(description="元となるカラム名")
+        ColumnName,
+        Field(
+            description="元となるカラム名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
     ]
     new_column_name: Annotated[
-        NewColumnName, Field(description="新しいカラム名")
+        NewColumnName,
+        Field(
+            description="新しいカラム名。既存のカラム名と重複しない名前を指定してください。"
+        ),
     ]
     add_position_column: Annotated[
         ColumnName,
         Field(
-            description="追加位置のカラム名",
+            description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
         ),
     ]
 
@@ -105,69 +164,140 @@ class DuplicateColumnRequestBody(BaseRequest):
 class CalculateColumnRequestBody(BaseRequest):
     """カラム計算リクエスト"""
 
-    table_name: TableName
-    new_column_name: NewColumnName
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
+    new_column_name: Annotated[
+        NewColumnName,
+        Field(
+            description="新しいカラム名。既存のカラム名と重複しない名前を指定してください。"
+        ),
+    ]
     add_position_column: Annotated[
         ColumnName,
         Field(
-            description="追加位置のカラム名",
+            description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
         ),
     ]
-    calculation_expression: str = Field(description="計算式", min_length=1)
+    calculation_expression: Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=1),
+        Field(
+            title="Calculation Expression",
+            examples=['pl.col("price") * pl.col("quantity")'],
+            description='計算式。数値カラム名をpl.col("price")の形式で指定し、四則演算や関数を組み合わせて計算式を定義してください。例: ({population} / {area}) * 1000',
+        ),
+    ]
 
 
 class AddDummyColumnRequestBody(BaseRequest):
     """ダミー変数カラム追加リクエスト"""
 
-    table_name: TableName
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
     source_column_name: Annotated[
-        ColumnName, Field(description="元となるカラム名")
+        ColumnName,
+        Field(
+            description="ダミー変数を作成する元となるカラム名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
     ]
     dummy_column_name: Annotated[
-        NewColumnName, Field(description="新しいカラム名")
+        NewColumnName,
+        Field(
+            description="新しいカラム名。既存のカラム名と重複しない名前を指定してください。"
+        ),
     ]
     add_position_column: Annotated[
         ColumnName,
         Field(
-            description="追加位置のカラム名",
+            description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
         ),
     ]
-    target_value: str = Field(description="1にする対象の値", min_length=1)
+    target_value: Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=1),
+        Field(
+            title="Target Value",
+            examples=["Tokyo", "東京"],
+            description="列に存在する1にする対象の値。例えば、元の列が都市名で、東京を1、それ以外を0にしたい場合は、'Tokyo'や'東京'を指定してください。",
+        ),
+    ]
 
 
 class AddLagLeadColumnRequestBody(BaseRequest):
     """ラグ・リードカラム追加リクエスト"""
 
-    table_name: TableName
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
     source_column: Annotated[
         ColumnName,
         Field(
-            description="元となるカラム名",
+            description="ラグ・リードの元となるカラム名。ワークスペースに存在するテーブルの中から指定してください。",
         ),
     ]
-    new_column_name: NewColumnName
+    new_column_name: Annotated[
+        NewColumnName,
+        Field(
+            description="新しいカラム名。既存のカラム名と重複しない名前を指定してください。"
+        ),
+    ]
     add_position_column: Annotated[
         ColumnName,
         Field(
-            description="追加位置のカラム名",
+            description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
         ),
     ]
-    periods: int = Field(alias="periods", description="ラグ・リード期間")
-    group_columns: List[ColumnName] = Field(
-        default_factory=list,
-        description="グループ化するカラムのリスト",
-    )
+    periods: Annotated[
+        int,
+        Field(
+            title="Periods",
+            ge=1,
+            examples=[1, 2, 3],
+            description="ラグ・リードの期間。例えば、1を指定すると1行前（ラグ）または1行後（リード）の値が新しいカラムに入ります。2を指定すると2行前後の値が入ります。",
+        ),
+    ]
+    group_columns: Annotated[
+        List[ColumnName],
+        Field(
+            title="Group Columns",
+            examples=[["city"], ["都市"]],
+            default_factory=list,
+            description="ラグ・リードのグループ化に使用するカラムのリスト。指定したカラムの組み合わせごとにラグ・リードが計算されます。例えば、都市ごとにラグ・リードを計算したい場合は、['city']や['都市']を指定してください。複数カラムを指定することもできます。既存カラム名から指定してください。",
+        ),
+    ]
 
 
 class AddSimulationColumnRequestBody(BaseRequest):
     """シミュレーションカラム追加リクエスト"""
 
-    table_name: TableName
-    simulation_column: SimulationColumnConfig
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
+    simulation_column: Annotated[
+        SimulationColumnConfig,
+        Field(
+            title="Simulation Column Config",
+            description="シミュレーションカラムの設定。",
+        ),
+    ]
     add_position_column: Annotated[
         ColumnName,
         Field(
-            description="追加位置のカラム名",
+            description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
         ),
     ]
 
@@ -175,11 +305,20 @@ class AddSimulationColumnRequestBody(BaseRequest):
 class SortColumnsRequestBody(BaseRequest):
     """カラムソートリクエスト"""
 
-    table_name: TableName
-    sort_columns: List[SortInstruction] = Field(
-        description="ソート設定のリスト",
-        min_length=1,
-    )
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
+    sort_columns: Annotated[
+        List[SortInstruction],
+        Field(
+            title="Sort Instructions",
+            description="ソート設定のリスト。ソートするカラム名と昇順・降順の指定を組み合わせて、複数カラムでのソートも可能です。既存カラム名から指定してください。",
+            min_length=1,
+        ),
+    ]
 
 
 class TransformColumnRequestBody(BaseRequest):
@@ -192,11 +331,16 @@ class TransformColumnRequestBody(BaseRequest):
             description="元となるカラム名",
         ),
     ]
-    new_column_name: NewColumnName
+    new_column_name: Annotated[
+        NewColumnName,
+        Field(
+            description="新しいカラム名。既存のカラム名と重複しない名前を指定してください。"
+        ),
+    ]
     add_position_column: Annotated[
         ColumnName,
         Field(
-            description="追加位置のカラム名",
+            description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
         ),
     ]
     transform_method: TransformMethodConfig
@@ -205,7 +349,17 @@ class TransformColumnRequestBody(BaseRequest):
 class GetColumnListRequestBody(BaseRequest):
     """カラムリスト取得リクエスト"""
 
-    table_name: TableName
-    is_number_only: bool = Field(
-        False, description="数値カラムのみ取得するかどうか"
-    )
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
+    is_number_only: Annotated[
+        bool,
+        Field(
+            False,
+            title="Is Number Only",
+            description="数値カラムのみ取得するかどうか。Trueを指定すると、数値カラムのみが返されます。Falseを指定すると、全てのカラムが返されます。",
+        ),
+    ]
