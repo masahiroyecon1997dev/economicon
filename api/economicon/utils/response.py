@@ -5,9 +5,7 @@ from typing import Any, Dict, List, Optional, TypeVar
 from fastapi.responses import JSONResponse, Response
 
 from .logging import (
-    create_log_api_error,
-    create_log_api_exception,
-    create_log_api_success,
+    log_error,
 )
 
 T = TypeVar("T")
@@ -18,7 +16,6 @@ def create_success_response(
 ) -> JSONResponse:
     """成功レスポンスを作成"""
     result = {"code": "OK", "result": response_object}
-    create_log_api_success()
     return JSONResponse(content=result, status_code=status_code)
 
 
@@ -26,7 +23,6 @@ def create_success_binary_response(
     *, status_code: int, binary_data: bytes, content_type: str
 ) -> Response:
     """成功バイナリレスポンスを作成"""
-    create_log_api_success()
     return Response(
         content=binary_data, status_code=status_code, media_type=content_type
     )
@@ -46,6 +42,7 @@ def create_error_response(
     エラーレスポンスを作成
     バリデーションエラー(422)や業務エラー(400)、システムエラー(500)で共用
     """
+    log_error(message=message, error_code=error_code)
     result: Dict[str, Any] = {
         "code": error_code,
         "message": message,
@@ -53,11 +50,5 @@ def create_error_response(
 
     if details is not None:
         result["details"] = details
-
-    # ロギング処理
-    create_log_api_error(message)
-    if exception is not None:
-        # ロギング側でスタックトレースを処理できるよう、オブジェクトごと渡すか文字列化
-        create_log_api_exception(str(exception))
 
     return JSONResponse(content=result, status_code=status_code)
