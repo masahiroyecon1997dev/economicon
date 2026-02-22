@@ -8,7 +8,7 @@ from ..models import (
 from ..services.operation import run_operation
 from ..services.statistics.confidence_interval import ConfidenceInterval
 from ..services.statistics.descriptive_statistics import DescriptiveStatistics
-from ..utils import create_log_api_request, create_success_response
+from ..utils import create_success_response
 
 router = APIRouter(prefix="/statistics", tags=["statistics"])
 
@@ -31,9 +31,6 @@ async def confidence_interval(
     JSONResponse
         処理結果
     """
-    # リクエスト受け取りログ
-    create_log_api_request(request)
-
     # ビジネスロジックの実行
     api = ConfidenceInterval(**body.model_dump())
     result = run_operation(api)
@@ -61,8 +58,7 @@ async def descriptive_statistics(
     JSONResponse
         処理結果
     """
-    create_log_api_request(request)
-
+    # ビジネスロジックの実行
     api = DescriptiveStatistics(**body.model_dump())
     result = run_operation(api)
 
