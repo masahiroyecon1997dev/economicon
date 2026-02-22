@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...utils import ProcessingError
 from ..data.tables_store import TablesStore
@@ -30,5 +31,7 @@ class ClearTables:
                 "during clearing tables processing"
             )
             raise ProcessingError(
-                error_code="ClearTablesError", message=message, detail=str(e)
+                error_code=ErrorCode.CLEAR_TABLES_ERROR,
+                message=message,
+                detail=str(e),
             ) from e

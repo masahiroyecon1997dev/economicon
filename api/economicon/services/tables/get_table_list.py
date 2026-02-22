@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...utils import ProcessingError
 from ..data.tables_store import TablesStore
@@ -33,7 +34,7 @@ class GetTableList:
                 "An unexpected error occurred during getting table name list."
             )
             raise ProcessingError(
-                error_code="GetTableListError",
+                error_code=ErrorCode.GET_TABLE_LIST_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import stats
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import ConfidenceIntervalRequestBody
 from ...models.enums import ConfidenceIntervalStatisticsType
@@ -110,7 +111,7 @@ class ConfidenceInterval:
                 "confidence interval processing"
             )
             raise ProcessingError(
-                error_code="CONFIDENCE_INTERVAL_ERROR",
+                error_code=ErrorCode.CONFIDENCE_INTERVAL_ERROR,
                 message=message,
                 detail=str(e),
             ) from e
@@ -156,7 +157,7 @@ class ConfidenceInterval:
             len(unique_vals) <= 2 and all(v in [0, 1] for v in unique_vals)
         ):
             raise ProcessingError(
-                error_code="INVALID_PROPORTION_DATA",
+                error_code=ErrorCode.INVALID_PROPORTION_DATA,
                 message=_(
                     "For proportion confidence interval, "
                     "data must contain only 0 and 1 values"

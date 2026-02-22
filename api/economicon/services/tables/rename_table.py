@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import RenameTableRequestBody
 from ...utils import ProcessingError
@@ -56,7 +57,7 @@ class RenameTable:
                 "An unexpected error occurred during table rename processing"
             )
             raise ProcessingError(
-                error_code="TableRenameError",
+                error_code=ErrorCode.TABLE_RENAME_ERROR,
                 message=message,
                 detail=str(e),
             ) from e
