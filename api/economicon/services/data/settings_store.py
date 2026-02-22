@@ -69,9 +69,30 @@ class SettingsStore:
                 "encoding": "utf-8",
             },
             "log": {
-                "path": "./logs/app.log",
+                "path": str(SettingsStore._get_logs_dir() / "app.log").replace(
+                    os.sep, "/"
+                ),
             },
         }
+
+    @staticmethod
+    def _get_logs_dir() -> Path:
+        """
+        ログ保存先ディレクトリを取得・作成
+
+        Returns:
+            Path: ログディレクトリのパス
+        """
+        os_system = platform.system()
+        if os_system == "Windows":
+            appdata = os.getenv("APPDATA") or str(
+                Path.home() / "AppData" / "Roaming"
+            )
+            logs_dir = Path(appdata) / "economicon" / "logs"
+        else:
+            logs_dir = Path.home() / ".economicon" / "logs"
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        return logs_dir
 
     @staticmethod
     def _get_settings_file_path() -> Path:
@@ -85,10 +106,13 @@ class SettingsStore:
 
         if os_system == "Windows":
             # WindowsではAppData/Roaming/economicon/配下に配置
-            settings_dir = Path.home() / "AppData" / "Roaming" / "economicon"
+            appdata = os.getenv("APPDATA") or str(
+                Path.home() / "AppData" / "Roaming"
+            )
+            settings_dir = Path(appdata) / "economicon"
         else:
             # macOS/Linuxではホームディレクトリ直下
-            settings_dir = Path.home()
+            settings_dir = Path.home() / ".economicon"
 
         # ディレクトリが存在しない場合は作成
         settings_dir.mkdir(parents=True, exist_ok=True)

@@ -18,7 +18,7 @@ from economicon.i18n.translation import get_locale_from_settings
 from economicon.routers import api_router
 from economicon.services.data.settings_store import SettingsStore
 from economicon.services.data.tables_store import TablesStore
-from economicon.utils.logging import logger
+from economicon.utils.logging import configure_file_logging, logger
 
 # ベースディレクトリ
 BASE_DIR = Path(__file__).resolve().parent
@@ -40,6 +40,7 @@ async def lifespan(app: FastAPI):
     # シングルトンのインスタンスを取得し、初期化を行う
     settings_manager = SettingsStore()
     settings_manager.load_settings()
+    configure_file_logging(settings_manager.get_settings().log_path)
     logger.info("SettingsStore has been initialized at startup.")
     tables_store = TablesStore()
     logger.info("TablesStore has been initialized at startup.")

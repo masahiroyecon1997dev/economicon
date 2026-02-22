@@ -1,11 +1,8 @@
 import sys
 from pathlib import Path
+from typing import Union
 
 from loguru import logger
-
-# ログファイルの保存先
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
 
 # Loguruの設定
 logger.remove()  # デフォルトのハンドラを削除
@@ -15,14 +12,39 @@ logger.add(
     colorize=True,
     format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{message}</cyan>",
 )
-# ファイル出力 (ローテーションと保持期間の設定)
-logger.add(
-    LOG_DIR / "api_{time:YYYY-MM-DD}.log",
-    rotation="10 MB",  # 10MBごとに新しいファイルへ
-    retention="10 days",  # 10日分保持
-    compression="zip",  # 過去ログはzip圧縮
-    level="INFO",
-)
+
+# ファイルハンドラのID（後から削除・差し替えできるように保持）
+_file_handler_id: int | None = None
+
+
+def configure_file_logging(log_path: Union[str, Path]) -> None:
+    """
+    ファイルログハンドラを設定する。
+
+    SettingsStore 初期化後に呼び出し、設定ファイルに記載された
+    パスへログを出力する。すでに登録済みのファイルハンドラがあれば
+    差し替える。
+
+    Args:
+        log_path: ログファイルのパス (例: /AppData/Roaming/economicon/logs/app.log)
+    """
+    global _file_handler_id
+
+    log_path = Path(log_path)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # 既存のファイルハンドラを除去
+    if _file_handler_id is not None:
+        logger.remove(_file_handler_id)
+
+    # ファイル出力 (ローテーションと保持期間の設定)
+    _file_handler_id = logger.add(
+        log_path.parent / "api_{time:YYYY-MM-DD}.log",
+        rotation="10 MB",  # 10 MB ごとに新しいファイルへ
+        retention="10 days",  # 10 日分保持
+        compression="zip",  # 過去ログは zip 圧縮
+        level="INFO",
+    )
 
 
 def log_request(method: str, path: str, query_params: dict) -> None:
