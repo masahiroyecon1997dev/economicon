@@ -9,7 +9,6 @@ from .utils import (
     ProcessingError,
     ValidationError,
     create_error_response,
-    create_validation_error_response,
 )
 
 
@@ -27,8 +26,9 @@ def init_exception_handlers(app: FastAPI):
         # detailsの中に「日本語化されたエラー文字列のリスト」を作成
         localized_errors = [get_localized_message(e) for e in errors]
 
-        return create_validation_error_response(
+        return create_error_response(
             http_status.HTTP_422_UNPROCESSABLE_CONTENT,
+            error_code="VALIDATION_ERROR",
             message=localized_errors[0],
             details=localized_errors,
         )
