@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...utils import ProcessingError
 from ..data.settings_manager import SettingsManager
@@ -31,5 +32,7 @@ class GetSettings:
                 "during getting settings processing"
             )
             raise ProcessingError(
-                error_code="GET_SETTINGS_ERROR", message=message, detail=str(e)
+                error_code=ErrorCode.GET_SETTINGS_ERROR,
+                message=message,
+                detail=str(e),
             ) from e
