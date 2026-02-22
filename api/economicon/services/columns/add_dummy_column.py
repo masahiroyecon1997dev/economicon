@@ -24,11 +24,13 @@ class AddDummyColumn:
         self.table_name = body.table_name
         self.source_column_name = body.source_column_name
         self.dummy_column_name = body.dummy_column_name
+        self.add_position_column = body.add_position_column
         self.target_value = body.target_value
         self.param_names = {
             "table_name": "tableName",
             "source_column_name": "sourceColumnName",
             "dummy_column_name": "dummyColumnName",
+            "add_position_column": "addPositionColumn",
             "target_value": "targetValue",
         }
 
@@ -55,6 +57,12 @@ class AddDummyColumn:
             existing_list=column_name_list,
             target=self.param_names["dummy_column_name"],
         )
+        # 追加位置の列名が既存の列名の中に存在することを検証
+        validate_existence(
+            value=self.add_position_column,
+            valid_list=column_name_list,
+            target=self.param_names["add_position_column"],
+        )
         return None
 
     def execute(self):
@@ -66,10 +74,22 @@ class AddDummyColumn:
             dummy_values = (
                 df[self.source_column_name] == self.target_value
             ).cast(pl.Int32)
-            dummy_column = pl.Series(self.dummy_column_name, dummy_values)
+
+            # 追加位置を計算（指定されたカラムの右隣）
+            current_cols = df.columns
+            target_idx = current_cols.index(self.add_position_column) + 1
+
+            # 列の並び順を定義
+            new_order = (
+                current_cols[:target_idx]
+                + [self.dummy_column_name]
+                + current_cols[target_idx:]
+            )
 
             # 新しい列をデータフレームに追加
-            df_with_dummy = df.with_columns(dummy_column)
+            df_with_dummy = df.with_columns(
+                dummy_values.alias(self.dummy_column_name)
+            ).select(new_order)
 
             # テーブルを更新
             self.tables_store.update_table(self.table_name, df_with_dummy)

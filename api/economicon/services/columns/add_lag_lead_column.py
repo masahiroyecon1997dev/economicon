@@ -25,12 +25,14 @@ class AddLagLeadColumn:
         self.table_name = body.table_name
         self.source_column = body.source_column
         self.new_column_name = body.new_column_name
+        self.add_position_column = body.add_position_column
         self.periods = body.periods
         self.group_columns = body.group_columns or []
         self.param_names = {
             "table_name": "tableName",
             "source_column_name": "sourceColumn",
             "new_column_name": "newColumnName",
+            "add_position_column": "addPositionColumn",
             "periods": "periods",
             "group_columns": "groupColumns",
         }
@@ -59,6 +61,13 @@ class AddLagLeadColumn:
             target=self.param_names["new_column_name"],
         )
 
+        # 追加位置の列名が既存の列名の中に存在することを検証
+        validate_existence(
+            value=self.add_position_column,
+            valid_list=column_name_list,
+            target=self.param_names["add_position_column"],
+        )
+
         # グループ列の存在確認
         if self.group_columns or len(self.group_columns) > 0:
             validate_existence(
@@ -74,6 +83,17 @@ class AddLagLeadColumn:
             table_info = self.tables_store.get_table(self.table_name)
             df = table_info.table
 
+            # 追加位置の計算（指定されたカラムの右隣）
+            current_cols = df.columns
+            target_idx = current_cols.index(self.add_position_column) + 1
+
+            # 列の並び順を定義
+            new_order = (
+                current_cols[:target_idx]
+                + [self.new_column_name]
+                + current_cols[target_idx:]
+            )
+
             shift_periods = -self.periods
 
             if self.group_columns:
@@ -83,14 +103,14 @@ class AddLagLeadColumn:
                     .shift(shift_periods)
                     .over(self.group_columns)
                     .alias(self.new_column_name)
-                )
+                ).select(new_order)
             else:
                 # グループ指定がない場合
                 df_with_lag_lead = df.with_columns(
                     pl.col(self.source_column)
                     .shift(shift_periods)
                     .alias(self.new_column_name)
-                )
+                ).select(new_order)
 
             # 新しい列をデータフレームに追加
             self.tables_store.update_table(self.table_name, df_with_lag_lead)
