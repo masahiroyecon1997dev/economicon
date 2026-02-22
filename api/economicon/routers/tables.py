@@ -2,17 +2,30 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..models import (
+    ClearTablesResult,
     CreateJoinTableRequestBody,
+    CreateJoinTableResult,
     CreateSimulationDataTableRequestBody,
+    CreateSimulationDataTableResult,
     CreateTableRequestBody,
+    CreateTableResult,
     CreateUnionTableRequestBody,
+    CreateUnionTableResult,
     DeleteTableRequestBody,
+    DeleteTableResult,
     DuplicateTableRequestBody,
+    DuplicateTableResult,
     FetchDataToArrowRequestBody,
     FetchDataToJsonRequestBody,
+    FetchDataToJsonResult,
     FilterSingleConditionRequestBody,
+    FilterSingleConditionResult,
+    GetTableListResult,
     InputCellDataRequestBody,
+    InputCellDataResult,
     RenameTableRequestBody,
+    RenameTableResult,
+    SuccessResponse,
 )
 from ..services.data.dependencies import TablesStoreDep
 from ..services.operation import run_operation
@@ -39,7 +52,7 @@ from ..utils import (
 router = APIRouter(prefix="/table", tags=["table"])
 
 
-@router.post("/create")
+@router.post("/create", response_model=SuccessResponse[CreateTableResult])
 async def create_table(
     request: Request,
     body: CreateTableRequestBody,
@@ -68,7 +81,9 @@ async def create_table(
     )
 
 
-@router.post("/create-join")
+@router.post(
+    "/create-join", response_model=SuccessResponse[CreateJoinTableResult]
+)
 async def create_join_table(
     request: Request,
     body: CreateJoinTableRequestBody,
@@ -97,7 +112,9 @@ async def create_join_table(
     )
 
 
-@router.post("/create-union")
+@router.post(
+    "/create-union", response_model=SuccessResponse[CreateUnionTableResult]
+)
 async def create_union_table(
     request: Request,
     body: CreateUnionTableRequestBody,
@@ -126,7 +143,10 @@ async def create_union_table(
     )
 
 
-@router.post("/create-simulation-data")
+@router.post(
+    "/create-simulation-data",
+    response_model=SuccessResponse[CreateSimulationDataTableResult],
+)
 async def create_simulation_data_table(
     request: Request,
     body: CreateSimulationDataTableRequestBody,
@@ -155,7 +175,7 @@ async def create_simulation_data_table(
     )
 
 
-@router.post("/delete")
+@router.post("/delete", response_model=SuccessResponse[DeleteTableResult])
 async def delete_table(
     request: Request,
     body: DeleteTableRequestBody,
@@ -184,7 +204,9 @@ async def delete_table(
     )
 
 
-@router.post("/duplicate")
+@router.post(
+    "/duplicate", response_model=SuccessResponse[DuplicateTableResult]
+)
 async def duplicate_table(
     request: Request,
     body: DuplicateTableRequestBody,
@@ -213,7 +235,7 @@ async def duplicate_table(
     )
 
 
-@router.post("/rename")
+@router.post("/rename", response_model=SuccessResponse[RenameTableResult])
 async def rename_table(
     request: Request,
     body: RenameTableRequestBody,
@@ -245,7 +267,7 @@ async def rename_table(
     )
 
 
-@router.get("/get-list")
+@router.get("/get-list", response_model=SuccessResponse[GetTableListResult])
 async def get_table_list(
     request: Request,
     tables_store: TablesStoreDep,
@@ -271,7 +293,7 @@ async def get_table_list(
     )
 
 
-@router.delete("/clear-all")
+@router.delete("/clear-all", response_model=SuccessResponse[ClearTablesResult])
 async def clear_tables(
     request: Request,
     tables_store: TablesStoreDep,
@@ -297,7 +319,10 @@ async def clear_tables(
     )
 
 
-@router.post("/fetch-data-to-json")
+@router.post(
+    "/fetch-data-to-json",
+    response_model=SuccessResponse[FetchDataToJsonResult],
+)
 async def fetch_data_to_json(
     request: Request,
     body: FetchDataToJsonRequestBody,
@@ -361,7 +386,9 @@ async def fetch_data_to_arrow(
     )
 
 
-@router.post("/input-cell-data")
+@router.post(
+    "/input-cell-data", response_model=SuccessResponse[InputCellDataResult]
+)
 async def input_cell_data(
     request: Request,
     body: InputCellDataRequestBody,
@@ -394,7 +421,10 @@ async def input_cell_data(
     )
 
 
-@router.post("/filter-single-condition")
+@router.post(
+    "/filter-single-condition",
+    response_model=SuccessResponse[FilterSingleConditionResult],
+)
 async def filter_single_condition(
     request: Request,
     body: FilterSingleConditionRequestBody,

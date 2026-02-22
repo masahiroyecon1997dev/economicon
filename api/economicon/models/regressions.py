@@ -1,15 +1,19 @@
 """回帰分析関連のスキーマ定義"""
 
-from typing import Annotated, List
+from typing import Annotated, Any, List
 
 from pydantic import Field
 
-from .common import BaseRequest
+from .common import BaseRequest, BaseResult
 from .entities import RegressionParams, StandardErrorSettings
 from .enums import (
     MissingValueHandlingType,
 )
 from .types import ColumnName, TableName
+
+# ---------------------------------------------------------------------------
+# リクエストボディ
+# ---------------------------------------------------------------------------
 
 
 class RegressionRequestBody(BaseRequest):
@@ -97,3 +101,53 @@ class RegressionRequestBody(BaseRequest):
             "nonrobust, robust（HC）, cluster, hac（Newey-West）から選択します。",
         ),
     ]
+
+
+# ---------------------------------------------------------------------------
+# レスポンス（Result）
+# ---------------------------------------------------------------------------
+
+
+class RegressionResult(BaseResult):
+    """回帰分析実行レスポンス"""
+
+    result_id: str = Field(
+        title="Result ID",
+        description="保存された分析結果の一意 ID",
+    )
+
+
+class GetAllAnalysisResultsResult(BaseResult):
+    """全分析結果サマリー取得レスポンス"""
+
+    results: List[Any] = Field(
+        title="Results",
+        description="分析結果のサマリーリスト",
+    )
+
+
+class GetAnalysisResultResult(BaseResult):
+    """分析結果詳細取得レスポンス"""
+
+    result: Any = Field(
+        title="Result",
+        description="分析結果の詳細データ",
+    )
+
+
+class DeleteAnalysisResultResult(BaseResult):
+    """分析結果削除レスポンス"""
+
+    deleted_result_id: str = Field(
+        title="Deleted Result ID",
+        description="削除した分析結果の ID",
+    )
+
+
+class ClearAllAnalysisResultsResult(BaseResult):
+    """全分析結果クリアレスポンス"""
+
+    message: str = Field(
+        title="Message",
+        description="処理結果メッセージ",
+    )

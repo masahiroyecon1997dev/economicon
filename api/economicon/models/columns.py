@@ -2,10 +2,11 @@
 
 from typing import Annotated, List, Optional
 
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import Field, StringConstraints
 
-from .common import BaseRequest
+from .common import BaseRequest, BaseResult
 from .entities import SimulationColumnConfig, SortInstruction
+from .enums import DistributionType
 from .types import (
     ColumnName,
     FilePath,
@@ -14,6 +15,10 @@ from .types import (
     TableName,
     TransformMethodConfig,
 )
+
+# ---------------------------------------------------------------------------
+# リクエストボディ
+# ---------------------------------------------------------------------------
 
 
 class AddColumnRequestBody(BaseRequest):
@@ -62,19 +67,6 @@ class AddColumnRequestBody(BaseRequest):
     ] = ","
 
 
-class AddColumnResult(BaseModel):
-    """カラム追加レスポンス"""
-
-    table_name: Annotated[
-        TableName,
-        Field(description="列を追加したテーブル名"),
-    ]
-    column_name: Annotated[
-        ColumnName,
-        Field(description="追加したカラム名"),
-    ]
-
-
 class DeleteColumnRequestBody(BaseRequest):
     """カラム削除リクエスト"""
 
@@ -88,23 +80,6 @@ class DeleteColumnRequestBody(BaseRequest):
         ColumnName,
         Field(
             description="削除するカラム名。ワークスペースに存在するテーブルの中から指定してください。"
-        ),
-    ]
-
-
-class DeleteColumnResult(BaseModel):
-    """カラム削除レスポンス"""
-
-    table_name: Annotated[
-        TableName,
-        Field(
-            description="列を削除したテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
-        ),
-    ]
-    column_name: Annotated[
-        ColumnName,
-        Field(
-            description="削除したカラム名。ワークスペースに存在するテーブルの中から指定してください。"
         ),
     ]
 
@@ -363,3 +338,210 @@ class GetColumnListRequestBody(BaseRequest):
             description="数値カラムのみ取得するかどうか。Trueを指定すると、数値カラムのみが返されます。Falseを指定すると、全てのカラムが返されます。",
         ),
     ]
+
+
+# ---------------------------------------------------------------------------
+# レスポンス（Result）
+# ---------------------------------------------------------------------------
+
+
+class AddColumnResult(BaseResult):
+    """カラム追加レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="カラムを追加したテーブル名",
+        ),
+    ]
+    column_name: Annotated[
+        str,
+        Field(
+            title="Column Name",
+            description="追加したカラム名",
+        ),
+    ]
+
+
+class DeleteColumnResult(BaseResult):
+    """カラム削除レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="カラムを削除したテーブル名",
+        ),
+    ]
+
+
+class RenameColumnResult(BaseResult):
+    """カラム名変更レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="カラム名を変更したテーブル名",
+        ),
+    ]
+
+
+class DuplicateColumnResult(BaseResult):
+    """カラム複製レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="複製操作を行ったテーブル名",
+        ),
+    ]
+    column_name: Annotated[
+        str,
+        Field(
+            title="Column Name",
+            description="複製後の新しいカラム名",
+        ),
+    ]
+
+
+class CalculateColumnResult(BaseResult):
+    """カラム計算レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="計算カラムを追加したテーブル名",
+        ),
+    ]
+    column_name: Annotated[
+        str,
+        Field(
+            title="Column Name",
+            description="追加した計算カラム名",
+        ),
+    ]
+
+
+class AddDummyColumnResult(BaseResult):
+    """ダミー変数カラム追加レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="ダミーカラムを追加したテーブル名",
+        ),
+    ]
+    dummy_column_name: Annotated[
+        str,
+        Field(
+            title="Dummy Column Name",
+            description="追加したダミーカラム名",
+        ),
+    ]
+
+
+class AddLagLeadColumnResult(BaseResult):
+    """ラグ・リードカラム追加レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="ラグ・リードカラムを追加したテーブル名",
+        ),
+    ]
+    column_name: Annotated[
+        str,
+        Field(
+            title="Column Name",
+            description="追加したラグ・リードカラム名",
+        ),
+    ]
+
+
+class AddSimulationColumnResult(BaseResult):
+    """シミュレーションカラム追加レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="シミュレーションカラムを追加したテーブル名",
+        ),
+    ]
+    column_name: Annotated[
+        str,
+        Field(
+            title="Column Name",
+            description="追加したシミュレーションカラム名",
+        ),
+    ]
+    distribution_type: DistributionType = Field(
+        title="Distribution Type",
+        description="使用した分布タイプ",
+    )
+
+
+class SortColumnsResult(BaseResult):
+    """カラムソートレスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="ソートを実行したテーブル名",
+        ),
+    ]
+
+
+class TransformColumnResult(BaseResult):
+    """カラム変換レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="変換カラムを追加したテーブル名",
+        ),
+    ]
+    column_name: Annotated[
+        str,
+        Field(
+            title="Column Name",
+            description="追加した変換カラム名",
+        ),
+    ]
+
+
+class ColumnInfo(BaseResult):
+    """カラム情報"""
+
+    name: str = Field(
+        title="Name",
+        description="カラム名",
+    )
+    type: str = Field(
+        title="Type",
+        description="Polarsデータ型（例: Int64, Float64, String）",
+    )
+
+
+class GetColumnListResult(BaseResult):
+    """カラムリスト取得レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="カラムリストを取得したテーブル名",
+        ),
+    ]
+    column_info_list: List[ColumnInfo] = Field(
+        title="Column Info List",
+        description="カラム情報のリスト",
+    )

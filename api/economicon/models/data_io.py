@@ -4,7 +4,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from .common import BaseRequest
+from .common import BaseRequest, BaseResult
 from .types import (
     DirectoryPath,
     ExcelSheetName,
@@ -14,6 +14,10 @@ from .types import (
     Separator,
     TableName,
 )
+
+# ---------------------------------------------------------------------------
+# リクエストボディ
+# ---------------------------------------------------------------------------
 
 
 class ImportCsvByPathRequestBody(BaseRequest):
@@ -170,3 +174,50 @@ class ExportParquetByPathRequestBody(BaseRequest):
             description="出力するParquetファイルのファイル名（拡張子を含む）。同名ファイルが存在する場合は上書きされます。",
         ),
     ]
+
+
+# ---------------------------------------------------------------------------
+# レスポンス（Result）
+# ---------------------------------------------------------------------------
+
+
+class ImportTableResult(BaseResult):
+    """インポート共通レスポンス基底"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="インポートによって作成されたテーブル名",
+    )
+
+
+class ImportCsvByPathResult(ImportTableResult):
+    """CSV インポートレスポンス"""
+
+
+class ImportExcelByPathResult(ImportTableResult):
+    """Excel インポートレスポンス"""
+
+
+class ImportParquetByPathResult(ImportTableResult):
+    """Parquet インポートレスポンス"""
+
+
+class ExportFileResult(BaseResult):
+    """エクスポート共通レスポンス基底"""
+
+    file_path: str = Field(
+        title="File Path",
+        description="出力したファイルのフルパス",
+    )
+
+
+class ExportCsvByPathResult(ExportFileResult):
+    """CSV エクスポートレスポンス"""
+
+
+class ExportExcelByPathResult(ExportFileResult):
+    """Excel エクスポートレスポンス"""
+
+
+class ExportParquetByPathResult(ExportFileResult):
+    """Parquet エクスポートレスポンス"""
