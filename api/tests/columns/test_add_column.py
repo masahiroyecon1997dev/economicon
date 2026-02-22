@@ -865,9 +865,9 @@ def test_add_column_from_csv_file_not_found(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.PATH_NOT_FOUND
-    # 日本語メッセージにパラメータ名とファイルパスが含まれていることを確認
-    assert "csvFilePath" in response_data["message"]
-    assert "は存在しません。" in response_data["message"]
+    assert response_data["message"] == (
+        "csvFilePath '/nonexistent/path/to/file.csv'は存在しません。"
+    )
 
     df_after = tables_store.get_table("TestTable").table
     assert df_after.equals(df_before)
@@ -905,7 +905,11 @@ def test_add_column_from_csv_file_permission_denied(client, tables_store):
         response_data = response.json()
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response_data["code"] == ErrorCode.PERMISSION_DENIED
-        assert "csvFilePath" in response_data["message"]
+        # permission denied メッセージは翻訳なし（英語）
+        EXPECTED_MSG = (
+            f"csvFilePath '{csv_path}' does not have read permission."
+        )
+        assert response_data["message"] == EXPECTED_MSG
 
         df_after = tables_store.get_table("TestTable").table
         assert df_after.equals(df_before)
@@ -947,9 +951,11 @@ def test_add_column_from_csv_row_count_mismatch_strict(client, tables_store):
         response_data = response.json()
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert response_data["code"] == ErrorCode.ROW_COUNT_MISMATCH
-        # メッセージにCSV行数（5）とテーブル行数（3）が含まれる
-        assert "5" in response_data["message"]
-        assert "3" in response_data["message"]
+        # row count mismatch メッセージは翻訳なし（英語）
+        EXPECTED_MSG = (
+            "Row count mismatch: CSV has 5 rows, but table has 3 rows."
+        )
+        assert response_data["message"] == EXPECTED_MSG
 
         df_after = tables_store.get_table("TestTable").table
         assert df_after.equals(df_before)
@@ -983,7 +989,9 @@ def test_add_column_from_csv_empty_file(client, tables_store):
         # サイズ0のファイルはCSV解析前に validate_file_format が EMPTY_FILE(400)で検出
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response_data["code"] == ErrorCode.EMPTY_FILE
-        assert "csvFilePath" in response_data["message"]
+        # empty file メッセージは翻訳なし（英語）
+        EXPECTED_MSG = f"csvFilePath '{csv_path}' is empty."
+        assert response_data["message"] == EXPECTED_MSG
 
         df_after = tables_store.get_table("TestTable").table
         assert df_after.equals(df_before)
