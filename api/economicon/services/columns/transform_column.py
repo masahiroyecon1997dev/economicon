@@ -2,6 +2,7 @@ import math
 
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import TransformColumnRequestBody, TransformMethodType
 from ...utils import ProcessingError
@@ -98,7 +99,7 @@ class TransformColumn:
                 ).to_series()
             else:
                 raise ProcessingError(
-                    error_code="TransformMethodError",
+                    error_code=ErrorCode.TRANSFORM_METHOD_ERROR,
                     message=f"Unsupported transform method: {self.transform_method}",
                     detail=str(self.transform_method),
                 )
@@ -125,7 +126,7 @@ class TransformColumn:
                 "An unexpected error occurred during column transformation processing"
             )
             raise ProcessingError(
-                error_code="TransformColumnProcessError",
+                error_code=ErrorCode.TRANSFORM_COLUMN_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

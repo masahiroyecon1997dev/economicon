@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import GetColumnListRequestBody
 from ...utils import ProcessingError
@@ -55,7 +56,7 @@ class GetColumnList:
                 "An unexpected error occurred during getting column info list."
             )
             raise ProcessingError(
-                error_code="GetColumnListProcessError",
+                error_code=ErrorCode.GET_COLUMN_LIST_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

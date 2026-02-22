@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import SortColumnsRequestBody
 from ...utils import ProcessingError
@@ -74,7 +75,7 @@ class SortColumns:
                 "An unexpected error occurred during column sorting processing"
             )
             raise ProcessingError(
-                error_code="SortColumnsProcessError",
+                error_code=ErrorCode.SORT_COLUMNS_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

@@ -3,6 +3,7 @@ from typing import List
 
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import CalculateColumnRequestBody
 from ...utils import ProcessingError, ValidationError
@@ -98,7 +99,7 @@ class CalculateColumn:
 
             except Exception as e:
                 raise ProcessingError(
-                    error_code="CalculationExpressionError",
+                    error_code=ErrorCode.CALCULATION_EXPRESSION_ERROR,
                     message=_("Invalid calculation expression: {}").format(
                         str(e)
                     ),
@@ -122,7 +123,7 @@ class CalculateColumn:
                 "column calculation processing"
             )
             raise ProcessingError(
-                error_code="CalculateColumnProcessError",
+                error_code=ErrorCode.CALCULATE_COLUMN_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

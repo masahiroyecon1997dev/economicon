@@ -1,3 +1,4 @@
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import DeleteColumnRequestBody
 from ...utils import ProcessingError
@@ -63,7 +64,7 @@ class DeleteColumn:
                 "column deletion processing"
             )
             raise ProcessingError(
-                error_code="DeleteColumnProcessError",
+                error_code=ErrorCode.DELETE_COLUMN_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e
