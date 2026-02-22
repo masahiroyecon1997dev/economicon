@@ -38,7 +38,9 @@ async def confidence_interval(
     api = ConfidenceInterval(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/descriptive")
@@ -64,4 +66,6 @@ async def descriptive_statistics(
     api = DescriptiveStatistics(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )

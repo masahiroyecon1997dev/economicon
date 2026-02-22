@@ -57,7 +57,9 @@ async def add_column(request: Request, body: AddColumnRequestBody):
     # ビジネスロジックの実行
     api = AddColumn(body)
     result = run_operation(api)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/add-dummy")
@@ -81,7 +83,9 @@ async def add_dummy_column(request: Request, body: AddDummyColumnRequestBody):
     # ビジネスロジックの実行
     api = AddDummyColumn(body)
     result = run_operation(api)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/delete")
@@ -103,7 +107,9 @@ async def delete_column(request: Request, body: DeleteColumnRequestBody):
     create_log_api_request(request)
     api = DeleteColumn(body)
     result = run_operation(api)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/rename")
@@ -129,7 +135,9 @@ async def rename_column(request: Request, body: RenameColumnRequestBody):
     create_log_api_request(request)
     api = RenameColumn(body)
     result = run_operation(api)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/add-lag-lead")
@@ -156,7 +164,9 @@ async def add_lag_lead_column(
     # ビジネスロジックの実行
     api = AddLagLeadColumn(body)
     result = run_operation(api)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/add-simulation")
@@ -182,7 +192,9 @@ async def add_simulation_column(
     # ビジネスロジックの実行
     api = AddSimulationColumn(body)
     result = run_operation(api)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/calculate")
@@ -208,7 +220,9 @@ async def calculate_column(request: Request, body: CalculateColumnRequestBody):
     api = CalculateColumn(body)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/duplicate")
@@ -232,7 +246,9 @@ async def duplicate_column(request: Request, body: DuplicateColumnRequestBody):
     # ビジネスロジックの実行
     api = DuplicateColumn(body)
     result = run_operation(api)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/transform")
@@ -257,7 +273,9 @@ async def transform_column(request: Request, body: TransformColumnRequestBody):
     # ビジネスロジックの実行
     api = TransformColumn(body)
     result = run_operation(api)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/get-list")
@@ -281,7 +299,9 @@ async def get_column_list(request: Request, body: GetColumnListRequestBody):
     api = GetColumnList(body)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/sort")
@@ -308,4 +328,6 @@ async def sort_columns(request: Request, body: SortColumnsRequestBody):
     api = SortColumns(body)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )

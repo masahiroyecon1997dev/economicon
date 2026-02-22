@@ -44,7 +44,9 @@ async def import_csv_by_path(
     api = ImportCsvByPath(body)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/import-excel-by-path")
@@ -73,7 +75,9 @@ async def import_excel_by_path(
     api = ImportExcelByPath(body)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/import-parquet-by-path")
@@ -101,7 +105,9 @@ async def import_parquet_by_path(
     api = ImportParquetByPath(body)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/export-csv-by-path")
@@ -127,7 +133,9 @@ async def export_csv_by_path(
     api = ExportCsvByPath(body)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/export-excel-by-path")
@@ -153,7 +161,9 @@ async def export_excel_by_path(
     api = ExportExcelByPath(body)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/export-parquet-by-path")
@@ -179,4 +189,6 @@ async def export_parquet_by_path(
     api = ExportParquetByPath(body)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
