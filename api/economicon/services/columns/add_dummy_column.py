@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import AddDummyColumnRequestBody
 from ...utils import ProcessingError
@@ -85,7 +86,7 @@ class AddDummyColumn:
                 "adding dummy column processing"
             )
             raise ProcessingError(
-                error_code="AddDummyColumnProcessError",
+                error_code=ErrorCode.ADD_DUMMY_COLUMN_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e
