@@ -16,8 +16,8 @@ class GetAllAnalysisResults:
     すべての分析結果のサマリーを取得するサービス
     """
 
-    def __init__(self):
-        self.result_store = AnalysisResultStore()
+    def __init__(self, result_store: AnalysisResultStore):
+        self.result_store = result_store
         self.param_names = {}
 
     def validate(self):
@@ -51,8 +51,8 @@ class GetAnalysisResult:
     特定の分析結果を取得するサービス
     """
 
-    def __init__(self, result_id: str):
-        self.result_store = AnalysisResultStore()
+    def __init__(self, result_id: str, result_store: AnalysisResultStore):
+        self.result_store = result_store
         self.result_id = result_id
         self.param_names = {"result_id": "resultId"}
 
@@ -105,8 +105,8 @@ class DeleteAnalysisResult:
     特定の分析結果を削除するサービス
     """
 
-    def __init__(self, result_id: str):
-        self.result_store = AnalysisResultStore()
+    def __init__(self, result_id: str, result_store: AnalysisResultStore):
+        self.result_store = result_store
         self.result_id = result_id
         self.param_names = {"result_id": "resultId"}
 
@@ -159,8 +159,8 @@ class ClearAllAnalysisResults:
     すべての分析結果を削除するサービス
     """
 
-    def __init__(self):
-        self.result_store = AnalysisResultStore()
+    def __init__(self, result_store: AnalysisResultStore):
+        self.result_store = result_store
         self.param_names = {}
 
     def validate(self):
