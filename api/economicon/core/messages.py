@@ -21,5 +21,8 @@ VALIDATION_ERROR_TEMPLATES = {
     "union_tag_not_found": _(
         "{field}のタイプ（method等）が正しくありません。"
     ),
+    "string_pattern_mismatch": _(
+        "{field}に使用できない文字が含まれています。"
+    ),
     "value_error": "{msg}",  # カスタムバリデータのメッセージをそのまま使う
 }
