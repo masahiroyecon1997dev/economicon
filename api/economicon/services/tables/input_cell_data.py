@@ -2,7 +2,7 @@ import polars as pl
 
 from ...i18n.translation import gettext as _
 from ...models import InputCellDataRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import (
     validate_existence,
     validate_row_count_limit,
@@ -37,36 +37,30 @@ class InputCellData:
         }
 
     def validate(self):
-        # 入力値のバリデーション
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            # テーブル名の存在チェック
-            validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            column_name_list = self.tables_store.get_column_name_list(
-                self.table_name
-            )
-            # カラム名の存在チェック
-            validate_existence(
-                value=self.column_name,
-                valid_list=column_name_list,
-                target=self.param_names["column_names"],
-            )
-            row_count = (
-                self.tables_store.get_table_row_count(self.table_name) - 1
-            )
-            # 行インデックスの妥当性チェック
-            validate_row_count_limit(
-                current_row_count=row_count,
-                requested_count=self.row_index,
-                target=self.param_names["row_index"],
-            )
-            return None
-        except ValidationError as e:
-            return e
+        table_name_list = self.tables_store.get_table_name_list()
+        # テーブル名の存在チェック
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        column_name_list = self.tables_store.get_column_name_list(
+            self.table_name
+        )
+        # カラム名の存在チェック
+        validate_existence(
+            value=self.column_name,
+            valid_list=column_name_list,
+            target=self.param_names["column_names"],
+        )
+        row_count = self.tables_store.get_table_row_count(self.table_name) - 1
+        # 行インデックスの妥当性チェック
+        validate_row_count_limit(
+            current_row_count=row_count,
+            requested_count=self.row_index,
+            target=self.param_names["row_index"],
+        )
+        return None
 
     def execute(self):
         # セルデータの入力処理

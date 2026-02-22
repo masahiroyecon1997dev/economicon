@@ -1,6 +1,6 @@
 from ...i18n.translation import gettext as _
 from ...models import DuplicateTableRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence, validate_non_existence
 from ..data.tables_store import TablesStore
 
@@ -22,23 +22,20 @@ class DuplicateTable:
         }
 
     def validate(self):
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            # ソーステーブルの存在チェック
-            validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            # 新しいテーブル名の重複チェック
-            validate_non_existence(
-                value=self.new_table_name,
-                existing_list=table_name_list,
-                target=self.param_names["new_table_name"],
-            )
-            return None
-        except ValidationError as e:
-            return e
+        table_name_list = self.tables_store.get_table_name_list()
+        # ソーステーブルの存在チェック
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        # 新しいテーブル名の重複チェック
+        validate_non_existence(
+            value=self.new_table_name,
+            existing_list=table_name_list,
+            target=self.param_names["new_table_name"],
+        )
+        return None
 
     def execute(self):
         try:

@@ -1,6 +1,6 @@
 from ...i18n.translation import gettext as _
 from ...models import DeleteColumnRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence
 from ..data.tables_store import TablesStore
 
@@ -26,28 +26,22 @@ class DeleteColumn:
         }
 
     def validate(self):
-        # 入力値のバリデーション
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            # 対象のテーブルが存在することを検証
-            validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
+        table_name_list = self.tables_store.get_table_name_list()
+        # 対象のテーブルが存在することを検証
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
 
-            column_names = self.tables_store.get_column_name_list(
-                self.table_name
-            )
-            # 対象の列が存在することを検証
-            validate_existence(
-                value=self.column_name,
-                valid_list=column_names,
-                target=self.param_names["column_names"],
-            )
-            return None
-        except ValidationError as e:
-            return e
+        column_names = self.tables_store.get_column_name_list(self.table_name)
+        # 対象の列が存在することを検証
+        validate_existence(
+            value=self.column_name,
+            valid_list=column_names,
+            target=self.param_names["column_names"],
+        )
+        return None
 
     def execute(self):
         # 列の削除処理

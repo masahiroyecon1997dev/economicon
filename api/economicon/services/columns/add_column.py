@@ -2,7 +2,7 @@ import polars as pl
 
 from ...i18n.translation import gettext as _
 from ...models import AddColumnRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence, validate_non_existence
 from ...utils.validators.files import validate_file_format, validate_file_path
 from ..data.tables_store import TablesStore
@@ -34,43 +34,40 @@ class AddColumn:
         }
 
     def validate(self):
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            # 追加対象のテーブルが存在することを検証
-            validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
+        table_name_list = self.tables_store.get_table_name_list()
+        # 追加対象のテーブルが存在することを検証
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        column_name_list = self.tables_store.get_column_name_list(
+            self.table_name
+        )
+        # 追加する列名が既存の列名と重複しないことを検証
+        validate_non_existence(
+            value=self.new_column_name,
+            existing_list=column_name_list,
+            target=self.param_names["new_column_name"],
+        )
+        # 追加位置の列名が既存の列名の中に存在することを検証
+        validate_existence(
+            value=self.add_position_column,
+            valid_list=column_name_list,
+            target=self.param_names["add_position_column"],
+        )
+        # CSVファイルパスが指定されている場合の追加バリデーション
+        if self.csv_file_path is not None:
+            validate_file_path(
+                path_str=self.csv_file_path,
+                target=self.param_names["csv_file_path"],
             )
-            column_name_list = self.tables_store.get_column_name_list(
-                self.table_name
+            validate_file_format(
+                path_str=self.csv_file_path,
+                target=self.param_names["csv_file_path"],
+                allowed_extensions=["csv"],
             )
-            # 追加する列名が既存の列名と重複しないことを検証
-            validate_non_existence(
-                value=self.new_column_name,
-                existing_list=column_name_list,
-                target=self.param_names["new_column_name"],
-            )
-            # 追加位置の列名が既存の列名の中に存在することを検証
-            validate_existence(
-                value=self.add_position_column,
-                valid_list=column_name_list,
-                target=self.param_names["add_position_column"],
-            )
-            # CSVファイルパスが指定されている場合の追加バリデーション
-            if self.csv_file_path is not None:
-                validate_file_path(
-                    path_str=self.csv_file_path,
-                    target=self.param_names["csv_file_path"],
-                )
-                validate_file_format(
-                    path_str=self.csv_file_path,
-                    target=self.param_names["csv_file_path"],
-                    allowed_extensions=["csv"],
-                )
-            return None
-        except ValidationError as e:
-            return e
+        return None
 
     def execute(self):
         try:

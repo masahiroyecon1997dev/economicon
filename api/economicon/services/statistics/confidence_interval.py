@@ -17,15 +17,6 @@ class ConfidenceInterval:
     サポートする統計: 平均、中央値、比率、分散、標準偏差
     """
 
-    # 利用可能な統計の種類を定義
-    AVAILABLE_STATISTICS = {
-        "mean": "Mean",
-        "median": "Median",
-        "proportion": "Proportion",
-        "variance": "Variance",
-        "std": "Standard Deviation",
-    }
-
     def __init__(
         self,
         body: ConfidenceIntervalRequestBody,
@@ -43,28 +34,25 @@ class ConfidenceInterval:
         }
 
     def validate(self):
-        try:
-            # テーブル名の検証
-            table_name_list = self.tables_store.get_table_name_list()
-            validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
+        # テーブル名の検証
+        table_name_list = self.tables_store.get_table_name_list()
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
 
-            # 列名の検証
-            column_name_list = self.tables_store.get_column_name_list(
-                self.table_name
-            )
-            validate_existence(
-                value=self.column_name,
-                valid_list=column_name_list,
-                target=self.param_names["column_name"],
-            )
+        # 列名の検証
+        column_name_list = self.tables_store.get_column_name_list(
+            self.table_name
+        )
+        validate_existence(
+            value=self.column_name,
+            valid_list=column_name_list,
+            target=self.param_names["column_name"],
+        )
 
-            return None
-        except ValidationError as e:
-            return e
+        return None
 
     def execute(self):
         try:

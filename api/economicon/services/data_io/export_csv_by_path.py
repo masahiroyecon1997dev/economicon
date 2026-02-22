@@ -2,7 +2,7 @@ import os
 
 from ...i18n.translation import gettext as _
 from ...models import ExportCsvByPathRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import (
     validate_directory_path,
     validate_existence,
@@ -38,24 +38,20 @@ class ExportCsvByPath:
         }
 
     def validate(self):
-        try:
-            # 対象のテーブルが存在することを検証
-            table_name_list = self.tables_store.get_table_name_list()
-            validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
+        # 対象のテーブルが存在することを検証
+        table_name_list = self.tables_store.get_table_name_list()
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
 
-            # ディレクトリパスのバリデーション
-            validate_directory_path(
-                path_str=self.directory_path,
-                target=self.param_names["directory_path"],
-            )
-
-            return None
-        except ValidationError as e:
-            return e
+        # ディレクトリパスのバリデーション
+        validate_directory_path(
+            path_str=self.directory_path,
+            target=self.param_names["directory_path"],
+        )
+        return None
 
     def execute(self):
         # CSVファイルのエクスポート処理

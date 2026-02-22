@@ -2,7 +2,7 @@ import polars as pl
 
 from ...i18n.translation import gettext as _
 from ...models import AddDummyColumnRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence, validate_non_existence
 from ..data.tables_store import TablesStore
 
@@ -32,32 +32,29 @@ class AddDummyColumn:
         }
 
     def validate(self):
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            # 対象のテーブルが存在することを検証
-            validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            column_name_list = self.tables_store.get_column_name_list(
-                self.table_name
-            )
-            # 対象の列が存在することを検証
-            validate_existence(
-                value=self.source_column_name,
-                valid_list=column_name_list,
-                target=self.param_names["source_column_name"],
-            )
-            # ダミー列名が既存の列名と重複しないことを検証
-            validate_non_existence(
-                value=self.dummy_column_name,
-                existing_list=column_name_list,
-                target=self.param_names["dummy_column_name"],
-            )
-            return None
-        except ValidationError as e:
-            return e
+        table_name_list = self.tables_store.get_table_name_list()
+        # 対象のテーブルが存在することを検証
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        column_name_list = self.tables_store.get_column_name_list(
+            self.table_name
+        )
+        # 対象の列が存在することを検証
+        validate_existence(
+            value=self.source_column_name,
+            valid_list=column_name_list,
+            target=self.param_names["source_column_name"],
+        )
+        # ダミー列名が既存の列名と重複しないことを検証
+        validate_non_existence(
+            value=self.dummy_column_name,
+            existing_list=column_name_list,
+            target=self.param_names["dummy_column_name"],
+        )
+        return None
 
     def execute(self):
         try:

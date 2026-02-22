@@ -45,10 +45,7 @@ def run_operation(operation: DataOperation) -> Optional[Dict | bytes]:
     Raises:
         ValidationError: バリデーションが失敗した場合
     """
-    validation_error = operation.validate()
-    if validation_error is not None:
-        raise validation_error
-
+    operation.validate()
     return operation.execute()
     return operation.execute()
     return operation.execute()
