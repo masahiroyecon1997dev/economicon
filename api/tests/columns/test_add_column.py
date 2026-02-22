@@ -53,7 +53,7 @@ def test_add_column_success(client, tables_store):
 
 
 def test_add_column_table_not_found(client, tables_store):
-    """存在しないテーブル名"""
+    """テーブル名に入力がない"""
     payload = {
         # テーブル名が存在しない
         "newColumnName": "C",
@@ -63,8 +63,7 @@ def test_add_column_table_not_found(client, tables_store):
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # 422エラーの場合は"detail"キーを使用
-    assert "detail" in response_data
+    assert "details" in response_data
 
 
 def test_add_column_invalid_table(client, tables_store):
