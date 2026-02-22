@@ -8,7 +8,7 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from ..models.regressions import RegressionRequestBody
-from ..services.data.dependencies import TablesStoreDep
+from ..services.data.dependencies import AnalysisResultStoreDep, TablesStoreDep
 from ..services.operation import run_operation
 from ..services.regressions.regression import Regression
 from ..services.regressions.result import (
@@ -29,6 +29,7 @@ async def regression(
     request: Request,
     body: RegressionRequestBody,
     tables_store: TablesStoreDep,
+    result_store: AnalysisResultStoreDep,
 ):
     """
     統合回帰分析エンドポイント
@@ -54,7 +55,7 @@ async def regression(
         分析結果またはエラーメッセージ
     """
     # ビジネスロジックの実行
-    api = Regression(body, tables_store)
+    api = Regression(body, tables_store, result_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
@@ -62,7 +63,10 @@ async def regression(
 
 
 @router.get("/results")
-async def get_all_analysis_results(request: Request):
+async def get_all_analysis_results(
+    request: Request,
+    result_store: AnalysisResultStoreDep,
+):
     """
     すべての分析結果のサマリーを取得
 
@@ -72,7 +76,7 @@ async def get_all_analysis_results(request: Request):
         分析結果のサマリーリスト
     """
     # ビジネスロジックの実行
-    api = GetAllAnalysisResults()
+    api = GetAllAnalysisResults(result_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -81,7 +85,11 @@ async def get_all_analysis_results(request: Request):
 
 
 @router.get("/results/{result_id}")
-async def get_analysis_result(request: Request, result_id: str):
+async def get_analysis_result(
+    request: Request,
+    result_id: str,
+    result_store: AnalysisResultStoreDep,
+):
     """
     指定されたIDの分析結果を取得
 
@@ -98,7 +106,7 @@ async def get_analysis_result(request: Request, result_id: str):
         分析結果の詳細
     """
     # ビジネスロジックの実行
-    api = GetAnalysisResult(result_id)
+    api = GetAnalysisResult(result_id, result_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -107,7 +115,11 @@ async def get_analysis_result(request: Request, result_id: str):
 
 
 @router.delete("/results/{result_id}")
-async def delete_analysis_result(request: Request, result_id: str):
+async def delete_analysis_result(
+    request: Request,
+    result_id: str,
+    result_store: AnalysisResultStoreDep,
+):
     """
     指定されたIDの分析結果を削除
 
@@ -124,7 +136,7 @@ async def delete_analysis_result(request: Request, result_id: str):
         削除成功メッセージ
     """
     # ビジネスロジックの実行
-    api = DeleteAnalysisResult(result_id)
+    api = DeleteAnalysisResult(result_id, result_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -133,7 +145,10 @@ async def delete_analysis_result(request: Request, result_id: str):
 
 
 @router.delete("/results")
-async def clear_all_analysis_results(request: Request):
+async def clear_all_analysis_results(
+    request: Request,
+    result_store: AnalysisResultStoreDep,
+):
     """
     すべての分析結果を削除
 
@@ -143,7 +158,7 @@ async def clear_all_analysis_results(request: Request):
         削除成功メッセージ
     """
     # ビジネスロジックの実行
-    api = ClearAllAnalysisResults()
+    api = ClearAllAnalysisResults(result_store)
     result = run_operation(api)
 
     return create_success_response(
