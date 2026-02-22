@@ -6,7 +6,7 @@ import polars as pl
 from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import CalculateColumnRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import (
     validate_existence,
     validate_non_existence,
@@ -27,12 +27,14 @@ class CalculateColumn:
         self.tables_store = TablesStore()
         self.table_name = body.table_name
         self.new_column_name = body.new_column_name
+        self.add_position_column = body.add_position_column
         self.calculation_expression = body.calculation_expression
         self.param_names = {
             "table_name": "tableName",
             "new_column_name": "newColumnName",
             "calculation_expression": "calculationExpression",
             "column_name_in_calculation_expression": "columnNameInCalculationExpression",
+            "add_position_column": "addPositionColumn",
         }
 
     def _extract_column_names(self, expression: str) -> List[str]:
@@ -72,6 +74,14 @@ class CalculateColumn:
             valid_list=column_name_list,
             target=self.param_names["column_name_in_calculation_expression"],
         )
+
+        # 追加位置の列名が既存の列名の中に存在することを検証
+        validate_existence(
+            value=self.add_position_column,
+            valid_list=column_name_list,
+            target=self.param_names["add_position_column"],
+        )
+
         df_schema = self.tables_store.get_schema(self.table_name)
         # 計算式に使用されている列が数値型であることを検証
         validate_numeric_types(
@@ -92,10 +102,21 @@ class CalculateColumn:
                 safe_globals = {"pl": pl}
                 polars_expr = eval(self.calculation_expression, safe_globals)
 
+                # 追加位置を計算（指定されたカラムの右隣）
+                current_cols = df.columns
+                target_idx = current_cols.index(self.add_position_column) + 1
+
+                # 列の並び順を定義
+                new_order = (
+                    current_cols[:target_idx]
+                    + [self.new_column_name]
+                    + current_cols[target_idx:]
+                )
+
                 # 新しい列を計算して追加
                 df_with_new_col = df.with_columns(
                     polars_expr.alias(self.new_column_name)
-                )
+                ).select(new_order)
 
             except Exception as e:
                 raise ProcessingError(
@@ -115,8 +136,6 @@ class CalculateColumn:
                 "columnName": self.new_column_name,
             }
             return result
-        except ValidationError:
-            raise
         except Exception as e:
             message = _(
                 "An unexpected error occurred during "

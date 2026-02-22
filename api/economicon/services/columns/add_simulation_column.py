@@ -25,11 +25,13 @@ class AddSimulationColumn:
         self.tables_store = TablesStore()
         self.table_name = body.table_name
         self.new_column_name = body.simulation_column.column_name
+        self.add_position_column = body.add_position_column
         self.distribution = body.simulation_column.distribution
 
         self.param_names = {
             "table_name": "tableName",
             "new_column_name": "newColumnName",
+            "add_position_column": "addPositionColumn",
             "distribution": "distribution",
         }
 
@@ -51,6 +53,13 @@ class AddSimulationColumn:
             existing_list=column_name_list,
             target=self.param_names["new_column_name"],
         )
+
+        # 追加位置の列名が既存の列名の中に存在することを検証
+        validate_existence(
+            value=self.add_position_column,
+            valid_list=column_name_list,
+            target=self.param_names["add_position_column"],
+        )
         return None
 
     def execute(self):
@@ -65,9 +74,21 @@ class AddSimulationColumn:
 
             # 新しい列をデータフレームに追加
             df = table_info.table
-            df_with_new_col = df.with_columns(
-                pl.Series(self.new_column_name, simulation_data)
+
+            # 追加位置の計算（指定されたカラムの右隣）
+            current_cols = df.columns
+            target_idx = current_cols.index(self.add_position_column) + 1
+
+            # 列の並び順を定義
+            new_order = (
+                current_cols[:target_idx]
+                + [self.new_column_name]
+                + current_cols[target_idx:]
             )
+
+            df_with_new_col = df.with_columns(
+                pl.lit(simulation_data).alias(self.new_column_name)
+            ).select(new_order)
 
             # テーブルを更新
             self.tables_store.update_table(self.table_name, df_with_new_col)

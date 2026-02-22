@@ -84,11 +84,22 @@ class AddColumn:
                 # 空列を作成
                 new_column_data = [None] * num_rows
 
-            insert_index = df.columns.index(self.add_position_column) + 1
-            df_with_new_col = df.insert_column(
-                index=insert_index,
-                column=pl.Series(self.new_column_name, new_column_data),
+            # 追加位置を計算（指定されたカラムの右隣）
+            current_cols = df.columns
+            target_idx = current_cols.index(self.add_position_column) + 1
+
+            # 列の並び順を定義
+            new_order = (
+                current_cols[:target_idx]
+                + [self.new_column_name]
+                + current_cols[target_idx:]
             )
+
+            # 新しい列を追加
+            df_with_new_col = df.with_columns(
+                pl.lit(new_column_data).alias(self.new_column_name)
+            ).select(new_order)
+
             # 新しい列をデータフレームに追加
             self.tables_store.update_table(self.table_name, df_with_new_col)
             # 結果を返す
