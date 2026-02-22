@@ -2,7 +2,7 @@ import polars as pl
 
 from ...i18n.translation import gettext as _
 from ...models import FilterSingleConditionRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import (
     validate_existence,
     validate_non_existence,
@@ -46,38 +46,34 @@ class FilterSingleCondition:
         }
 
     def validate(self):
-        # 入力値のバリデーション
-        try:
-            table_name_list = self.manager.get_table_name_list()
-            # 新しいテーブル名の重複チェック
-            validate_non_existence(
-                value=self.new_table_name,
-                existing_list=table_name_list,
-                target=self.param_names["new_table_name"],
-            )
-            # 既存テーブル名の存在チェック
+        table_name_list = self.manager.get_table_name_list()
+        # 新しいテーブル名の重複チェック
+        validate_non_existence(
+            value=self.new_table_name,
+            existing_list=table_name_list,
+            target=self.param_names["new_table_name"],
+        )
+        # 既存テーブル名の存在チェック
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        # カラム名の存在チェック
+        column_names = self.manager.get_column_name_list(self.table_name)
+        validate_existence(
+            value=self.column_name,
+            valid_list=column_names,
+            target=self.param_names["column_names"],
+        )
+        # 比較値がカラムの場合の存在チェック
+        if self.is_compare_column == "true":
             validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            # カラム名の存在チェック
-            column_names = self.manager.get_column_name_list(self.table_name)
-            validate_existence(
-                value=self.column_name,
+                value=self.compare_value,
                 valid_list=column_names,
-                target=self.param_names["column_names"],
+                target=self.param_names["compare_value"],
             )
-            # 比較値がカラムの場合の存在チェック
-            if self.is_compare_column == "true":
-                validate_existence(
-                    value=self.compare_value,
-                    valid_list=column_names,
-                    target=self.param_names["compare_value"],
-                )
-            return None
-        except ValidationError as e:
-            return e
+        return None
 
     def execute(self):
         # フィルタリング処理

@@ -1,6 +1,6 @@
 from ...i18n.translation import gettext as _
 from ...models import RenameTableRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence, validate_non_existence
 from ..data.tables_store import TablesStore
 
@@ -26,23 +26,20 @@ class RenameTable:
         }
 
     def validate(self):
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            # 変更前のテーブル名の存在チェック
-            validate_existence(
-                value=self.old_table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            # 変更後のテーブル名の重複チェック
-            validate_non_existence(
-                value=self.new_table_name,
-                existing_list=table_name_list,
-                target=self.param_names["new_table_name"],
-            )
-            return None
-        except ValidationError as e:
-            return e
+        table_name_list = self.tables_store.get_table_name_list()
+        # 変更前のテーブル名の存在チェック
+        validate_existence(
+            value=self.old_table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        # 変更後のテーブル名の重複チェック
+        validate_non_existence(
+            value=self.new_table_name,
+            existing_list=table_name_list,
+            target=self.param_names["new_table_name"],
+        )
+        return None
 
     def execute(self):
         # テーブル名の変更処理

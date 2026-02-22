@@ -1,6 +1,6 @@
 from ...i18n.translation import gettext as _
 from ...models import FetchDataToJsonRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence, validate_row_count_limit
 from ..data.tables_store import TablesStore
 
@@ -26,27 +26,21 @@ class FetchDataToJson:
         }
 
     def validate(self):
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            # テーブル名の存在チェック
-            validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            row_count = (
-                self.tables_store.get_table(self.table_name).row_count - 1
-            )
-            # 開始行番号の妥当性チェック
-            validate_row_count_limit(
-                current_row_count=row_count,
-                requested_count=self.start_row,
-                target=self.param_names["start_row"],
-            )
-
-            return None
-        except ValidationError as e:
-            return e
+        table_name_list = self.tables_store.get_table_name_list()
+        # テーブル名の存在チェック
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        row_count = self.tables_store.get_table(self.table_name).row_count - 1
+        # 開始行番号の妥当性チェック
+        validate_row_count_limit(
+            current_row_count=row_count,
+            requested_count=self.start_row,
+            target=self.param_names["start_row"],
+        )
+        return None
 
     def execute(self):
         try:

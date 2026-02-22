@@ -11,7 +11,7 @@ from ...models import (
     RegularizedRegressionParams,
     TobitParams,
 )
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence, validate_numeric_types
 from ..data.analysis_result import AnalysisResult
 from ..data.analysis_result_store import AnalysisResultStore
@@ -85,99 +85,96 @@ class Regression:
         }
 
     def validate(self):
-        try:
-            # テーブル名の検証
-            table_name_list = self.tables_store.get_table_name_list()
-            validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
+        # テーブル名の検証
+        table_name_list = self.tables_store.get_table_name_list()
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
 
-            # 列名リストの取得
-            column_name_list = self.tables_store.get_column_name_list(
-                self.table_name
-            )
-            # スキーマの取得
-            df_schema = self.tables_store.get_schema(self.table_name)
+        # 列名リストの取得
+        column_name_list = self.tables_store.get_column_name_list(
+            self.table_name
+        )
+        # スキーマの取得
+        df_schema = self.tables_store.get_schema(self.table_name)
 
-            # 説明変数の検証
-            validate_existence(
-                value=self.explanatory_variables,
-                valid_list=column_name_list,
-                target=self.param_names["explanatory_variables"],
-            )
-            validate_numeric_types(
-                schema=df_schema,
-                columns=self.explanatory_variables,
-                target=self.param_names["explanatory_variables"],
-            )
+        # 説明変数の検証
+        validate_existence(
+            value=self.explanatory_variables,
+            valid_list=column_name_list,
+            target=self.param_names["explanatory_variables"],
+        )
+        validate_numeric_types(
+            schema=df_schema,
+            columns=self.explanatory_variables,
+            target=self.param_names["explanatory_variables"],
+        )
 
-            # 被説明変数の検証
-            validate_existence(
-                value=self.dependent_variable,
-                valid_list=column_name_list,
-                target=self.param_names["dependent_variable"],
-            )
-            validate_numeric_types(
-                schema=df_schema,
-                columns=[self.dependent_variable],
-                target=self.param_names["dependent_variable"],
-            )
+        # 被説明変数の検証
+        validate_existence(
+            value=self.dependent_variable,
+            valid_list=column_name_list,
+            target=self.param_names["dependent_variable"],
+        )
+        validate_numeric_types(
+            schema=df_schema,
+            columns=[self.dependent_variable],
+            target=self.param_names["dependent_variable"],
+        )
 
-            # 分析手法ごとの追加検証
-            match self.analysis.method:
-                case PanelDataParams():
-                    # 固定効果分析の場合、個体IDと時間列の検証
-                    if self.analysis.entity_id_column:
-                        validate_existence(
-                            value=self.analysis.entity_id_column,
-                            valid_list=column_name_list,
-                            target=self.param_names["entity_id_column"],
-                        )
-                        validate_numeric_types(
-                            schema=df_schema,
-                            columns=self.analysis.entity_id_column,
-                            target=self.param_names["entity_id_column"],
-                        )
-                    if self.analysis.time_column:
-                        validate_existence(
-                            value=self.analysis.time_column,
-                            valid_list=column_name_list,
-                            target=self.param_names["time_column"],
-                        )
-                        validate_numeric_types(
-                            schema=df_schema,
-                            columns=self.time_column,
-                            target=self.param_names["time_column"],
-                        )
-                case InstrumentalVariablesParams():
-                    # IV分析の場合、操作変数と内生変数の検証
-                    if self.analysis.instrumental_variables:
-                        validate_existence(
-                            value=self.analysis.instrumental_variables,
-                            valid_list=column_name_list,
-                            target=self.param_names["instrumental_variables"],
-                        )
-                        validate_numeric_types(
-                            schema=df_schema,
-                            columns=self.analysis.instrumental_variables,
-                            target=self.param_names["instrumental_variables"],
-                        )
-                    if self.analysis.endogenous_variables:
-                        validate_existence(
-                            value=self.analysis.endogenous_variables,
-                            valid_list=column_name_list,
-                            target=self.param_names["endogenous_variables"],
-                        )
-                        validate_numeric_types(
-                            schema=df_schema,
-                            columns=self.analysis.endogenous_variables,
-                            target=self.param_names["endogenous_variables"],
-                        )
-            return None
-        except ValidationError as e:
-            return e
+        # 分析手法ごとの追加検証
+        match self.analysis.method:
+            case PanelDataParams():
+                # 固定効果分析の場合、個体IDと時間列の検証
+                if self.analysis.entity_id_column:
+                    validate_existence(
+                        value=self.analysis.entity_id_column,
+                        valid_list=column_name_list,
+                        target=self.param_names["entity_id_column"],
+                    )
+                    validate_numeric_types(
+                        schema=df_schema,
+                        columns=self.analysis.entity_id_column,
+                        target=self.param_names["entity_id_column"],
+                    )
+                if self.analysis.time_column:
+                    validate_existence(
+                        value=self.analysis.time_column,
+                        valid_list=column_name_list,
+                        target=self.param_names["time_column"],
+                    )
+                    validate_numeric_types(
+                        schema=df_schema,
+                        columns=self.time_column,
+                        target=self.param_names["time_column"],
+                    )
+            case InstrumentalVariablesParams():
+                # IV分析の場合、操作変数と内生変数の検証
+                if self.analysis.instrumental_variables:
+                    validate_existence(
+                        value=self.analysis.instrumental_variables,
+                        valid_list=column_name_list,
+                        target=self.param_names["instrumental_variables"],
+                    )
+                    validate_numeric_types(
+                        schema=df_schema,
+                        columns=self.analysis.instrumental_variables,
+                        target=self.param_names["instrumental_variables"],
+                    )
+                if self.analysis.endogenous_variables:
+                    validate_existence(
+                        value=self.analysis.endogenous_variables,
+                        valid_list=column_name_list,
+                        target=self.param_names["endogenous_variables"],
+                    )
+                    validate_numeric_types(
+                        schema=df_schema,
+                        columns=self.analysis.endogenous_variables,
+                        target=self.param_names["endogenous_variables"],
+                    )
+        return None
 
     def execute(self):
         try:

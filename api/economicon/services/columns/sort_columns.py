@@ -1,6 +1,6 @@
 from ...i18n.translation import gettext as _
 from ...models import SortColumnsRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import validate_existence
 from ..data.tables_store import TablesStore
 
@@ -25,27 +25,24 @@ class SortColumns:
         }
 
     def validate(self):
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            # 対象のテーブルが存在することを検証
+        table_name_list = self.tables_store.get_table_name_list()
+        # 対象のテーブルが存在することを検証
+        validate_existence(
+            value=self.table_name,
+            valid_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        column_name_list = self.tables_store.get_column_name_list(
+            self.table_name
+        )
+        for sort_spec in self.sort_columns:
+            # ソート指定された列が既存の列名の中に存在することを検証
             validate_existence(
-                value=self.table_name,
-                valid_list=table_name_list,
-                target=self.param_names["table_name"],
+                value=sort_spec.column_name,
+                valid_list=column_name_list,
+                target=self.param_names["column_name"],
             )
-            column_name_list = self.tables_store.get_column_name_list(
-                self.table_name
-            )
-            for sort_spec in self.sort_columns:
-                # ソート指定された列が既存の列名の中に存在することを検証
-                validate_existence(
-                    value=sort_spec.column_name,
-                    valid_list=column_name_list,
-                    target=self.param_names["column_name"],
-                )
-            return None
-        except ValidationError as e:
-            return e
+        return None
 
     def execute(self):
         try:

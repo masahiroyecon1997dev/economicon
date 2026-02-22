@@ -2,7 +2,7 @@ import polars as pl
 
 from ...i18n.translation import gettext as _
 from ...models import CreateSimulationDataTableRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.algorithms.simulation import generate_simulation_data
 from ...utils.validators import validate_non_existence
 from ..data.tables_store import TablesStore
@@ -29,17 +29,14 @@ class CreateSimulationDataTable:
         }
 
     def validate(self):
-        try:
-            # テーブル名の検証
-            table_name_list = self.tables_store.get_table_name_list()
-            validate_non_existence(
-                value=self.table_name,
-                existing_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            return None
-        except ValidationError as e:
-            return e
+        # テーブル名の検証
+        table_name_list = self.tables_store.get_table_name_list()
+        validate_non_existence(
+            value=self.table_name,
+            existing_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        return None
 
     def execute(self):
         try:

@@ -2,7 +2,7 @@ import polars as pl
 
 from ...i18n.translation import gettext as _
 from ...models import CreateTableRequestBody
-from ...utils import ProcessingError, ValidationError
+from ...utils import ProcessingError
 from ...utils.validators import (
     validate_non_existence,
     validate_row_count_limit,
@@ -37,27 +37,21 @@ class CreateTable:
         }
 
     def validate(self):
-        # 入力値のバリデーション
-        try:
-            table_name_list = self.tables_store.get_table_name_list()
-            # テーブル名の重複チェック
-            validate_non_existence(
-                value=self.table_name,
-                existing_list=table_name_list,
-                target=self.param_names["table_name"],
-            )
-            row_count = (
-                self.tables_store.get_table_row_count(self.table_name) - 1
-            )
-            # 行数の妥当性チェック
-            validate_row_count_limit(
-                current_row_count=row_count,
-                requested_count=self.table_number_of_rows,
-                target=self.param_names["table_num_rows"],
-            )
-            return None
-        except ValidationError as e:
-            return e
+        table_name_list = self.tables_store.get_table_name_list()
+        # テーブル名の重複チェック
+        validate_non_existence(
+            value=self.table_name,
+            existing_list=table_name_list,
+            target=self.param_names["table_name"],
+        )
+        row_count = self.tables_store.get_table_row_count(self.table_name) - 1
+        # 行数の妥当性チェック
+        validate_row_count_limit(
+            current_row_count=row_count,
+            requested_count=self.table_number_of_rows,
+            target=self.param_names["table_num_rows"],
+        )
+        return None
 
     def execute(self):
         # テーブルの作成処理
