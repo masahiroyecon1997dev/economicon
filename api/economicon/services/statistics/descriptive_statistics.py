@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import (
     DescriptiveStatisticsRequestBody,
@@ -89,7 +90,7 @@ class DescriptiveStatistics:
                 "An unexpected error occurred during descriptive statistics processing"
             )
             raise ProcessingError(
-                error_code="DESCRIPTIVE_STATISTICS_ERROR",
+                error_code=ErrorCode.DESCRIPTIVE_STATISTICS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

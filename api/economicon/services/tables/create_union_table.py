@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import CreateUnionTableRequestBody
 from ...utils import ProcessingError
@@ -90,7 +91,7 @@ class CreateUnionTable:
                 "An unexpected error occurred during union table creation processing"
             )
             raise ProcessingError(
-                error_code="UnionTableCreationError",
+                error_code=ErrorCode.UNION_TABLE_CREATION_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

@@ -6,6 +6,7 @@ import io
 
 import pyarrow as pa
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import FetchDataToArrowRequestBody
 from ...utils import ProcessingError
@@ -110,7 +111,7 @@ class FetchDataToArrow:
                 f"from table '{self.table_name}': {str(e)}"
             )
             raise ProcessingError(
-                error_code="FetchDataToArrowError",
+                error_code=ErrorCode.FETCH_DATA_TO_ARROW_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

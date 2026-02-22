@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import InputCellDataRequestBody
 from ...utils import ProcessingError
@@ -90,7 +91,7 @@ class InputCellData:
                 "input cell data processing"
             )
             raise ProcessingError(
-                error_code="InputCellDataProcessError",
+                error_code=ErrorCode.INPUT_CELL_DATA_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

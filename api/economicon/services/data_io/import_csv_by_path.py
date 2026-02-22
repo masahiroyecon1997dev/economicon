@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import ImportCsvByPathRequestBody
 from ...utils import ProcessingError
@@ -68,17 +69,17 @@ class ImportCsvByPath:
         except pl.exceptions.NoDataError as e:
             message = _("The CSV file is empty or contains no valid data.")
             raise ProcessingError(
-                error_code="CSV_IMPORT_ERROR", message=message
+                error_code=ErrorCode.CSV_IMPORT_ERROR, message=message
             ) from e
         except pl.exceptions.ComputeError as e:
             message = _(
                 "Failed to parse CSV file: Invalid format or encoding."
             )
             raise ProcessingError(
-                error_code="CSV_IMPORT_ERROR", message=message
+                error_code=ErrorCode.CSV_IMPORT_ERROR, message=message
             ) from e
         except Exception as e:
             message = _("An unexpected error occurred during CSV processing")
             raise ProcessingError(
-                error_code="CSV_IMPORT_ERROR", message=message
+                error_code=ErrorCode.CSV_IMPORT_ERROR, message=message
             ) from e

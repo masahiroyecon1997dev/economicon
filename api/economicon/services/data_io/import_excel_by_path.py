@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import ImportExcelByPathRequestBody
 from ...utils import ProcessingError
@@ -69,17 +70,17 @@ class ImportExcelByPath:
         except pl.exceptions.NoDataError as e:
             message = _("The EXCEL file is empty or contains no valid data.")
             raise ProcessingError(
-                error_code="EXCEL_IMPORT_ERROR", message=message
+                error_code=ErrorCode.EXCEL_IMPORT_ERROR, message=message
             ) from e
         except pl.exceptions.ComputeError as e:
             message = _(
                 "Failed to parse EXCEL file: Invalid format or encoding."
             )
             raise ProcessingError(
-                error_code="EXCEL_IMPORT_ERROR", message=message
+                error_code=ErrorCode.EXCEL_IMPORT_ERROR, message=message
             ) from e
         except Exception as e:
             message = _("An unexpected error occurred during EXCEL processing")
             raise ProcessingError(
-                error_code="EXCEL_IMPORT_ERROR", message=message
+                error_code=ErrorCode.EXCEL_IMPORT_ERROR, message=message
             ) from e

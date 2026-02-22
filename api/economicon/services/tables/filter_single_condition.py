@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import FilterSingleConditionRequestBody
 from ...utils import ProcessingError
@@ -145,7 +146,7 @@ class FilterSingleCondition:
                     )
                 case _:
                     raise ProcessingError(
-                        error_code="InvalidConditionError",
+                        error_code=ErrorCode.INVALID_CONDITION_ERROR,
                         message=_("Invalid filter condition specified"),
                         detail=f"Condition: {self.condition}",
                     )
@@ -162,7 +163,7 @@ class FilterSingleCondition:
                 "An unexpected error occurred during filter processing"
             )
             raise ProcessingError(
-                error_code="FilterSingleConditionProcessError",
+                error_code=ErrorCode.FILTER_SINGLE_CONDITION_PROCESS_ERROR,
                 message=message,
                 detail=str(e),
             ) from e

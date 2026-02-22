@@ -1,5 +1,6 @@
 import os
 
+from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import ExportCsvByPathRequestBody
 from ...utils import ProcessingError
@@ -72,19 +73,21 @@ class ExportCsvByPath:
         except KeyError as e:
             message = _("Table does not exist: {}").format(self.table_name)
             raise ProcessingError(
-                error_code="TableNotFound", message=message
+                error_code=ErrorCode.TABLE_NOT_FOUND, message=message
             ) from e
         except PermissionError as e:
             message = _(
                 "Permission denied: Cannot write to the specified path."
             )
             raise ProcessingError(
-                error_code="PermissionDenied", message=message
+                error_code=ErrorCode.PERMISSION_DENIED, message=message
             ) from e
         except Exception as e:
             message = _(
                 "An unexpected error occurred during CSV export processing"
             )
             raise ProcessingError(
-                error_code="CsvExportError", message=message, detail=str(e)
+                error_code=ErrorCode.CSV_EXPORT_ERROR,
+                message=message,
+                detail=str(e),
             ) from e
