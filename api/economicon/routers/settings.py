@@ -26,4 +26,6 @@ async def get_settings(request: Request):
 
     api = GetSettings()
     result = run_operation(api)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )

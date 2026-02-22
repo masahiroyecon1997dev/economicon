@@ -62,7 +62,9 @@ async def create_table(request: Request, body: CreateTableRequestBody):
     api = CreateTable(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/create-join")
@@ -90,7 +92,9 @@ async def create_join_table(
     api = CreateJoinTable(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/create-union")
@@ -118,7 +122,9 @@ async def create_union_table(
     api = CreateUnionTable(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/create-simulation-data")
@@ -146,7 +152,9 @@ async def create_simulation_data_table(
     api = CreateSimulationDataTable(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/delete")
@@ -170,7 +178,9 @@ async def delete_table(request: Request, body: DeleteTableRequestBody):
     api = DeleteTable(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/duplicate")
@@ -194,7 +204,9 @@ async def duplicate_table(request: Request, body: DuplicateTableRequestBody):
     api = DuplicateTable(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/rename")
@@ -221,7 +233,9 @@ async def rename_table(request: Request, body: RenameTableRequestBody):
     api = RenameTable(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.get("/get-list")
@@ -243,7 +257,9 @@ async def get_table_list(request: Request):
     api = GetTableList()
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.delete("/clear-all")
@@ -267,7 +283,9 @@ async def clear_tables(request: Request):
     api = ClearTables()
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/fetch-data-to-json")
@@ -293,7 +311,9 @@ async def fetch_data_to_json(
     api = FetchDataToJson(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/fetch-data-to-arrow")
@@ -324,9 +344,9 @@ async def fetch_data_to_arrow(
     assert isinstance(result, bytes), "FetchDataToArrow must return bytes"
 
     return create_success_binary_response(
-        http_status.HTTP_200_OK,
-        result,
-        "application/octet-stream",
+        status_code=http_status.HTTP_200_OK,
+        binary_data=result,
+        content_type="application/octet-stream",
     )
 
 
@@ -338,7 +358,7 @@ async def input_cell_data(request: Request, body: InputCellDataRequestBody):
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : InputCellDataRequestBodyBody
+    body : InputCellDataRequestBody
         リクエストボディ
         - tableName: テーブル名
         - columnName: 列名
@@ -355,7 +375,9 @@ async def input_cell_data(request: Request, body: InputCellDataRequestBody):
     api = InputCellData(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.post("/filter-single-condition")
@@ -381,4 +403,6 @@ async def filter_single_condition(
     api = FilterSingleCondition(**body.model_dump())
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )

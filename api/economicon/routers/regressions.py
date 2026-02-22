@@ -52,7 +52,9 @@ async def regression(request: Request, body: RegressionRequestBody):
     create_log_api_request(request)
     api = Regression(**body.model_dump())
     result = run_operation(api)
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.get("/results")
@@ -72,7 +74,9 @@ async def get_all_analysis_results(request: Request):
     api = GetAllAnalysisResults()
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.get("/results/{result_id}")
@@ -96,7 +100,9 @@ async def get_analysis_result(request: Request, result_id: str):
     api = GetAnalysisResult(result_id)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.delete("/results/{result_id}")
@@ -121,7 +127,9 @@ async def delete_analysis_result(request: Request, result_id: str):
     api = DeleteAnalysisResult(result_id)
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
 
 
 @router.delete("/results")
@@ -139,4 +147,6 @@ async def clear_all_analysis_results(request: Request):
     api = ClearAllAnalysisResults()
     result = run_operation(api)
 
-    return create_success_response(http_status.HTTP_200_OK, result)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
