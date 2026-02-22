@@ -14,6 +14,7 @@ from ..models import (
     InputCellDataRequestBody,
     RenameTableRequestBody,
 )
+from ..services.data.dependencies import TablesStoreDep
 from ..services.operation import run_operation
 from ..services.tables.clear_tables import ClearTables
 from ..services.tables.create_join_table import CreateJoinTable
@@ -39,7 +40,11 @@ router = APIRouter(prefix="/table", tags=["table"])
 
 
 @router.post("/create")
-async def create_table(request: Request, body: CreateTableRequestBody):
+async def create_table(
+    request: Request,
+    body: CreateTableRequestBody,
+    tables_store: TablesStoreDep,
+):
     """テーブルを作成するエンドポイント
 
     Parameters
@@ -55,7 +60,7 @@ async def create_table(request: Request, body: CreateTableRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = CreateTable(**body.model_dump())
+    api = CreateTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -65,7 +70,9 @@ async def create_table(request: Request, body: CreateTableRequestBody):
 
 @router.post("/create-join")
 async def create_join_table(
-    request: Request, body: CreateJoinTableRequestBody
+    request: Request,
+    body: CreateJoinTableRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """結合テーブルを作成するエンドポイント
 
@@ -82,7 +89,7 @@ async def create_join_table(
         処理結果
     """
     # ビジネスロジックの実行
-    api = CreateJoinTable(**body.model_dump())
+    api = CreateJoinTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -92,7 +99,9 @@ async def create_join_table(
 
 @router.post("/create-union")
 async def create_union_table(
-    request: Request, body: CreateUnionTableRequestBody
+    request: Request,
+    body: CreateUnionTableRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """ユニオンテーブルを作成するエンドポイント
 
@@ -109,7 +118,7 @@ async def create_union_table(
         処理結果
     """
     # ビジネスロジックの実行
-    api = CreateUnionTable(**body.model_dump())
+    api = CreateUnionTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -119,7 +128,9 @@ async def create_union_table(
 
 @router.post("/create-simulation-data")
 async def create_simulation_data_table(
-    request: Request, body: CreateSimulationDataTableRequestBody
+    request: Request,
+    body: CreateSimulationDataTableRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """シミュレーションデータテーブルを作成するエンドポイント
 
@@ -136,7 +147,7 @@ async def create_simulation_data_table(
         処理結果
     """
     # ビジネスロジックの実行
-    api = CreateSimulationDataTable(**body.model_dump())
+    api = CreateSimulationDataTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -145,7 +156,11 @@ async def create_simulation_data_table(
 
 
 @router.post("/delete")
-async def delete_table(request: Request, body: DeleteTableRequestBody):
+async def delete_table(
+    request: Request,
+    body: DeleteTableRequestBody,
+    tables_store: TablesStoreDep,
+):
     """テーブルを削除するエンドポイント
 
     Parameters
@@ -161,7 +176,7 @@ async def delete_table(request: Request, body: DeleteTableRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = DeleteTable(**body.model_dump())
+    api = DeleteTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -170,7 +185,11 @@ async def delete_table(request: Request, body: DeleteTableRequestBody):
 
 
 @router.post("/duplicate")
-async def duplicate_table(request: Request, body: DuplicateTableRequestBody):
+async def duplicate_table(
+    request: Request,
+    body: DuplicateTableRequestBody,
+    tables_store: TablesStoreDep,
+):
     """テーブルを複製するエンドポイント
 
     Parameters
@@ -186,7 +205,7 @@ async def duplicate_table(request: Request, body: DuplicateTableRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = DuplicateTable(**body.model_dump())
+    api = DuplicateTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -195,7 +214,11 @@ async def duplicate_table(request: Request, body: DuplicateTableRequestBody):
 
 
 @router.post("/rename")
-async def rename_table(request: Request, body: RenameTableRequestBody):
+async def rename_table(
+    request: Request,
+    body: RenameTableRequestBody,
+    tables_store: TablesStoreDep,
+):
     """
     テーブル名変更エンドポイント
 
@@ -214,7 +237,7 @@ async def rename_table(request: Request, body: RenameTableRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = RenameTable(**body.model_dump())
+    api = RenameTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -223,7 +246,10 @@ async def rename_table(request: Request, body: RenameTableRequestBody):
 
 
 @router.get("/get-list")
-async def get_table_list(request: Request):
+async def get_table_list(
+    request: Request,
+    tables_store: TablesStoreDep,
+):
     """テーブルリストを取得するエンドポイント
 
     Parameters
@@ -237,7 +263,7 @@ async def get_table_list(request: Request):
         処理結果
     """
     # ビジネスロジックの実行
-    api = GetTableList()
+    api = GetTableList(tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -246,7 +272,10 @@ async def get_table_list(request: Request):
 
 
 @router.delete("/clear-all")
-async def clear_tables(request: Request):
+async def clear_tables(
+    request: Request,
+    tables_store: TablesStoreDep,
+):
     """全テーブルをクリアするエンドポイント
 
     Parameters
@@ -260,7 +289,7 @@ async def clear_tables(request: Request):
         処理結果
     """
     # ビジネスロジックの実行
-    api = ClearTables()
+    api = ClearTables(tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -270,7 +299,9 @@ async def clear_tables(request: Request):
 
 @router.post("/fetch-data-to-json")
 async def fetch_data_to_json(
-    request: Request, body: FetchDataToJsonRequestBody
+    request: Request,
+    body: FetchDataToJsonRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """データをJSON形式で取得するエンドポイント
 
@@ -287,7 +318,7 @@ async def fetch_data_to_json(
         処理結果
     """
     # ビジネスロジックの実行
-    api = FetchDataToJson(**body.model_dump())
+    api = FetchDataToJson(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -297,7 +328,9 @@ async def fetch_data_to_json(
 
 @router.post("/fetch-data-to-arrow")
 async def fetch_data_to_arrow(
-    request: Request, body: FetchDataToArrowRequestBody
+    request: Request,
+    body: FetchDataToArrowRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """データをApache Arrow IPC形式で取得するエンドポイント
 
@@ -317,7 +350,7 @@ async def fetch_data_to_arrow(
         処理結果（Arrow IPC形式のBase64エンコードされたバイナリを含む）
     """
     # ビジネスロジックの実行
-    api = FetchDataToArrow(**body.model_dump())
+    api = FetchDataToArrow(body, tables_store)
     result = run_operation(api)
     assert isinstance(result, bytes), "FetchDataToArrow must return bytes"
 
@@ -329,7 +362,11 @@ async def fetch_data_to_arrow(
 
 
 @router.post("/input-cell-data")
-async def input_cell_data(request: Request, body: InputCellDataRequestBody):
+async def input_cell_data(
+    request: Request,
+    body: InputCellDataRequestBody,
+    tables_store: TablesStoreDep,
+):
     """セルデータ入力エンドポイント
 
     Parameters
@@ -349,7 +386,7 @@ async def input_cell_data(request: Request, body: InputCellDataRequestBody):
         処理結果
     """
     # ビジネスロジックの実行
-    api = InputCellData(**body.model_dump())
+    api = InputCellData(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -359,7 +396,9 @@ async def input_cell_data(request: Request, body: InputCellDataRequestBody):
 
 @router.post("/filter-single-condition")
 async def filter_single_condition(
-    request: Request, body: FilterSingleConditionRequestBody
+    request: Request,
+    body: FilterSingleConditionRequestBody,
+    tables_store: TablesStoreDep,
 ):
     """単一条件フィルタリングを実行するエンドポイント
 
@@ -376,7 +415,7 @@ async def filter_single_condition(
         処理結果
     """
     # ビジネスロジックの実行
-    api = FilterSingleCondition(**body.model_dump())
+    api = FilterSingleCondition(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(

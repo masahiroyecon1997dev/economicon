@@ -14,8 +14,12 @@ class DeleteColumn:
     削除後のテーブルは更新されたデータフレームに置き換えられます。
     """
 
-    def __init__(self, body: DeleteColumnRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: DeleteColumnRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         # テーブル名
         self.table_name = body.table_name
         # 削除する列名

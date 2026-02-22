@@ -22,8 +22,9 @@ class CreateTable:
     def __init__(
         self,
         body: CreateTableRequestBody,
+        tables_store: TablesStore,
     ):
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         # テーブル名
         self.table_name = body.table_name
         # テーブルの行数

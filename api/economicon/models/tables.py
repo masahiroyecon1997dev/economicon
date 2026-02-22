@@ -18,71 +18,147 @@ from .types import (
 class CreateTableRequestBody(BaseRequest):
     """テーブル作成リクエスト"""
 
-    table_name: NewTableName
-    table_number_of_rows: int = Field(description="テーブルの行数", ge=1)
-    column_names: List[NewColumnName] = Field(
-        description="カラム名のリスト", min_length=1
-    )
+    table_name: Annotated[
+        NewTableName,
+        Field(
+            title="Table Name",
+            description="作成するテーブルの名前。ワークスペース内に存在しない名前を指定してください。",
+        ),
+    ]
+    table_number_of_rows: Annotated[
+        int,
+        Field(
+            title="Table Number Of Rows",
+            description="テーブルの行数",
+            ge=1,
+        ),
+    ]
+    column_names: Annotated[
+        List[NewColumnName],
+        Field(
+            title="Column Names",
+            description="テーブルに作成するカラム名のリスト",
+            min_length=1,
+        ),
+    ]
 
 
 class RenameTableRequestBody(BaseRequest):
     """テーブル名変更リクエスト"""
 
-    old_table_name: Annotated[TableName, Field(description="元のテーブル名")]
+    old_table_name: Annotated[
+        TableName,
+        Field(title="Old Table Name", description="変更前のテーブル名"),
+    ]
     new_table_name: Annotated[
-        NewTableName, Field(description="新しいテーブル名")
+        NewTableName,
+        Field(title="New Table Name", description="変更後の新しいテーブル名"),
     ]
 
 
 class CreateSimulationDataTableRequestBody(BaseRequest):
     """シミュレーションデータテーブル作成リクエスト"""
 
-    table_name: NewTableName
-    row_count: int = Field(description="テーブルの行数", ge=1)
-    simulation_columns: List[SimulationColumnConfig] = Field(
-        description="カラム設定のリスト",
-        min_length=1,
-    )
+    table_name: Annotated[
+        NewTableName,
+        Field(
+            description="作成するシミュレーションデータテーブルの名前。ワークスペース内に存在しない名前を指定してください。",
+        ),
+    ]
+    row_count: Annotated[
+        int,
+        Field(
+            title="Row Count",
+            description="生成するテーブルの行数",
+            ge=1,
+        ),
+    ]
+    simulation_columns: Annotated[
+        List[SimulationColumnConfig],
+        Field(
+            title="Simulation Columns",
+            description="シミュレーションカラムの設定リスト",
+            min_length=1,
+        ),
+    ]
 
 
 class CreateJoinTableRequestBody(BaseRequest):
     """結合テーブル作成リクエスト"""
 
     join_table_name: Annotated[
-        NewTableName, Field(description="結合後のテーブル名")
+        NewTableName,
+        Field(
+            title="Join Table Name",
+            description="結合後に作成される新しいテーブル名。ワークスペース内に存在しない名前を指定してください。",
+        ),
     ]
     left_table_name: Annotated[
-        TableName, Field(description="左側のテーブル名")
+        TableName,
+        Field(
+            title="Left Table Name",
+            description="結合の左側テーブル名。ワークスペース内に存在するテーブル名を指定してください。",
+        ),
     ]
     right_table_name: Annotated[
-        TableName, Field(description="右側のテーブル名")
+        TableName,
+        Field(
+            title="Right Table Name",
+            description="結合の右側テーブル名。ワークスペース内に存在するテーブル名を指定してください。",
+        ),
     ]
-    left_key_column_names: List[ColumnName] = Field(
-        description="左側の結合キーカラム名のリスト"
-    )
-    right_key_column_names: List[ColumnName] = Field(
-        description="右側の結合キーカラム名のリスト"
-    )
-    join_type: JoinType = Field(
-        default=JoinType.INNER,
-        description="結合タイプ (inner, left, right, outer)",
-    )
+    left_key_column_names: Annotated[
+        List[ColumnName],
+        Field(
+            title="Left Key Column Names",
+            description="左側テーブルの結合キーカラム名のリスト",
+        ),
+    ]
+    right_key_column_names: Annotated[
+        List[ColumnName],
+        Field(
+            title="Right Key Column Names",
+            description="右側テーブルの結合キーカラム名のリスト",
+        ),
+    ]
+    join_type: Annotated[
+        JoinType,
+        Field(
+            default=JoinType.INNER,
+            title="Join Type",
+            description="結合タイプ"
+            "（inner: 内部結合、left: 左外部結合、"
+            "right: 右外部結合、full: 完全外部結合）",
+        ),
+    ]
 
 
 class CreateUnionTableRequestBody(BaseRequest):
     """ユニオンテーブル作成リクエスト"""
 
     union_table_name: Annotated[
-        NewTableName, Field(description="ユニオン後のテーブル名")
+        NewTableName,
+        Field(
+            title="Union Table Name",
+            description="ユニオン後に作成される新しいテーブル名",
+        ),
     ]
-    table_names: List[TableName] = Field(
-        description="結合するテーブル名のリスト",
-        min_length=2,
-    )
-    column_names: List[ColumnName] = Field(
-        description="対象カラム名のリスト",
-        min_length=1,
-    )
+    table_names: Annotated[
+        List[TableName],
+        Field(
+            title="Table Names",
+            description="ユニオンするテーブル名のリスト（2テーブル以上）。ワークスペース内に存在するテーブル名を指定してください。",
+            min_length=2,
+        ),
+    ]
+    column_names: Annotated[
+        List[ColumnName],
+        Field(
+            title="Column Names",
+            description="ユニオンの対象とするカラム名のリスト。指定されたテーブルすべてに存在するカラム名を指定してください。",
+            min_length=1,
+        ),
+    ]
 
 
 class ClearTablesRequestBody(BaseRequest):
@@ -94,39 +170,87 @@ class ClearTablesRequestBody(BaseRequest):
 class DuplicateTableRequestBody(BaseRequest):
     """テーブル複製リクエスト"""
 
-    table_name: Annotated[TableName, Field(description="元のテーブル名")]
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="複製元のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
     new_table_name: Annotated[
-        NewTableName, Field(description="新しいテーブル名")
+        NewTableName,
+        Field(
+            description="複製後の新しいテーブル名。ワークスペースに存在しない名前を指定してください。"
+        ),
     ]
 
 
 class DeleteTableRequestBody(BaseRequest):
     """テーブル削除リクエスト"""
 
-    table_name: Annotated[TableName, Field(description="削除するテーブル名")]
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="削除するテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+        ),
+    ]
 
 
 class FetchDataToJsonRequestBody(BaseRequest):
     """データJSON取得リクエスト"""
 
-    table_name: TableName
-    start_row: int = Field(description="開始行番号", ge=0)
-    fetch_rows: int = Field(
-        default=500, description="取得行数", ge=1, le=10000
-    )
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
+        ),
+    ]
+    start_row: Annotated[
+        int,
+        Field(
+            title="Start Row",
+            description="取得を開始する行番号（0始まり）",
+            ge=0,
+        ),
+    ]
+    fetch_rows: Annotated[
+        int,
+        Field(
+            default=500,
+            title="Fetch Rows",
+            description="取得する行数（1〜10000、デフォルト500）",
+            ge=1,
+            le=10000,
+        ),
+    ]
 
 
 class FetchDataToArrowRequestBody(BaseRequest):
     """データArrow取得リクエスト"""
 
-    table_name: TableName
-    start_row: int = Field(description="開始行番号", ge=0)
-    chunk_size: int = Field(
-        default=500,
-        description="チャンクサイズ（デフォルト500行）",
-        ge=1,
-        le=10000,
-    )
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
+        ),
+    ]
+    start_row: Annotated[
+        int,
+        Field(
+            title="Start Row",
+            description="取得を開始する行番号（0始まり）",
+            ge=0,
+        ),
+    ]
+    chunk_size: Annotated[
+        int,
+        Field(
+            default=500,
+            title="Chunk Size",
+            description="1リクエストで取得する行数（1〜10000、デフォルト500）",
+            ge=1,
+            le=10000,
+        ),
+    ]
 
 
 class GetTableListRequestBody(BaseRequest):
@@ -138,31 +262,82 @@ class GetTableListRequestBody(BaseRequest):
 class InputCellDataRequestBody(BaseRequest):
     """セルデータ入力リクエスト"""
 
-    table_name: TableName
-    column_name: ColumnName
-    row_index: int = Field(description="行インデックス", ge=0)
-    new_value: Any = Field(description="新しい入力値")
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="セルデータを入力するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
+        ),
+    ]
+    column_name: Annotated[
+        ColumnName,
+        Field(
+            description="セルデータを入力するカラム名。ワークスペースに存在するテーブルの中から指定してください。",
+        ),
+    ]
+    row_index: Annotated[
+        int,
+        Field(
+            title="Row Index",
+            description="更新するセルの行インデックス（0始まり）",
+            ge=0,
+        ),
+    ]
+    new_value: Annotated[
+        Any,
+        Field(
+            title="New Value",
+            description="セルに入力する新しい値。カラムのデータ型に合わせた値を指定してください。",
+        ),
+    ]
 
 
 class FilterSingleConditionRequestBody(BaseRequest):
     """単一条件フィルタリクエスト"""
 
-    table_name: TableName
-    new_table_name: NewTableName
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="フィルタ条件を適用するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
+        ),
+    ]
+    new_table_name: Annotated[
+        NewTableName,
+        Field(
+            description="フィルタ結果を格納する新しいテーブル名。ワークスペースに存在しない名前を指定してください。",
+        ),
+    ]
     column_name: Annotated[
         ColumnName,
         Field(
-            description="対象カラム名",
+            description="フィルタ条件を適用するカラム名。ワークスペースに存在するテーブルの中から指定してください。",
         ),
     ]
-    condition: FilterOperatorType = Field(
-        ..., description="条件", min_length=1, max_length=50
-    )
-    is_compare_column: str = Field(
-        ...,
-        alias="isCompareColumn",
-        description="比較対象がカラムかどうか",
-        min_length=1,
-        max_length=10,
-    )
-    compare_value: Any = Field(..., alias="compareValue", description="比較値")
+    condition: Annotated[
+        FilterOperatorType,
+        Field(
+            title="Condition",
+            description="フィルタ条件の演算子"
+            "（equals, notEquals, greaterThan, lessThan 等）",
+            min_length=1,
+            max_length=50,
+        ),
+    ]
+    is_compare_column: Annotated[
+        str,
+        Field(
+            title="Is Compare Column",
+            description="比較対象がカラムかどうか。"
+            '"true": compareValue をカラム名として解釈、'
+            '"false": 定数値として解釈。',
+            min_length=1,
+            max_length=10,
+        ),
+    ]
+    compare_value: Annotated[
+        Any,
+        Field(
+            title="Compare Value",
+            description="比較する値またはカラム名。"
+            'isCompareColumn が "true" の場合はカラム名を指定。',
+        ),
+    ]

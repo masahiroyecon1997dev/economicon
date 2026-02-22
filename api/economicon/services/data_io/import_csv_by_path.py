@@ -19,9 +19,13 @@ class ImportCsvByPath:
     区切り文字を指定できます。
     """
 
-    def __init__(self, body: ImportCsvByPathRequestBody):
+    def __init__(
+        self,
+        body: ImportCsvByPathRequestBody,
+        tables_store: TablesStore,
+    ):
         # テーブルマネージャーの初期化
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         # ファイルパス
         self.file_path = body.file_path
         # テーブル名

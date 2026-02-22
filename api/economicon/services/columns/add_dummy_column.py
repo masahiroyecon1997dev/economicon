@@ -19,8 +19,9 @@ class AddDummyColumn:
     def __init__(
         self,
         body: AddDummyColumnRequestBody,
+        tables_store: TablesStore,
     ):
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.source_column_name = body.source_column_name
         self.dummy_column_name = body.dummy_column_name

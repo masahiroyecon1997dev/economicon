@@ -18,8 +18,12 @@ class CreateSimulationDataTable:
     各列は分布に従うランダムデータまたは固定値を持つことができます。
     """
 
-    def __init__(self, body: CreateSimulationDataTableRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: CreateSimulationDataTableRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.row_count = body.row_count
         self.simulation_columns = body.simulation_columns

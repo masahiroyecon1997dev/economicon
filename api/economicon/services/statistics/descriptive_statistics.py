@@ -36,8 +36,9 @@ class DescriptiveStatistics:
     def __init__(
         self,
         body: DescriptiveStatisticsRequestBody,
+        tables_store: TablesStore,
     ):
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.column_name_list = body.column_name_list
         self.statistics = body.statistics

@@ -14,8 +14,12 @@ class SortColumns:
     複数列でのソート、昇順・降順の指定が可能です。
     """
 
-    def __init__(self, body: SortColumnsRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: SortColumnsRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.sort_columns = body.sort_columns
         self.param_names = {

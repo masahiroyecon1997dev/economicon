@@ -21,8 +21,9 @@ class AddSimulationColumn:
     def __init__(
         self,
         body: AddSimulationColumnRequestBody,
+        tables_store: TablesStore,
     ):
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.new_column_name = body.simulation_column.column_name
         self.add_position_column = body.add_position_column

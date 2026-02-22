@@ -20,8 +20,12 @@ class InputCellData:
     行番号は1から始まると仮定しています。
     """
 
-    def __init__(self, body: InputCellDataRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: InputCellDataRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         # テーブル名
         self.table_name = body.table_name
         # カラム名

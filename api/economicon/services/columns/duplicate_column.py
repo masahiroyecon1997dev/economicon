@@ -16,8 +16,12 @@ class DuplicateColumn:
     新しい列は元の列と同じ値で初期化されます。
     """
 
-    def __init__(self, body: DuplicateColumnRequestBody):
-        self.tables_store = TablesStore()
+    def __init__(
+        self,
+        body: DuplicateColumnRequestBody,
+        tables_store: TablesStore,
+    ):
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.source_column_name = body.source_column_name
         self.new_column_name = body.new_column_name

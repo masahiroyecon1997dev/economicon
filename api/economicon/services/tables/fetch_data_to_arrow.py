@@ -23,7 +23,11 @@ class FetchDataToArrow:
     仮想スクロール用に500行単位でのチャンク取得を想定しています。
     """
 
-    def __init__(self, body: FetchDataToArrowRequestBody):
+    def __init__(
+        self,
+        body: FetchDataToArrowRequestBody,
+        tables_store: TablesStore,
+    ):
         """
         初期化
 
@@ -36,7 +40,7 @@ class FetchDataToArrow:
         chunk_size : int, optional
             チャンクサイズ（デフォルト500行）
         """
-        self.tables_store = TablesStore()
+        self.tables_store = tables_store
         self.table_name = body.table_name
         self.start_row = body.start_row
         self.chunk_size = body.chunk_size

@@ -11,8 +11,8 @@ class ClearTables:
     TablesStoreに保存されている全てのテーブルを削除します。
     """
 
-    def __init__(self):
-        self.tables_store = TablesStore()
+    def __init__(self, tables_store: TablesStore):
+        self.tables_store = tables_store
         self.param_names = {}
 
     def validate(self):
