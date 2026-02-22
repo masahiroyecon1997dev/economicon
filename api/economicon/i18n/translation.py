@@ -1,6 +1,6 @@
 """国際化(i18n)サポート - fastapi-babel統合版
 
-SettingsManagerからロケール設定を取得し、fastapi-babelと統合します。
+SettingsStoreからロケール設定を取得し、fastapi-babelと統合します。
 リクエストコンテキスト外でも動作するように、独自の翻訳関数も提供します。
 """
 
@@ -19,20 +19,20 @@ _translations: dict[
 
 def get_locale_from_settings() -> str:
     """
-    SettingsManagerから現在のロケールを取得
+    SettingsStoreから現在のロケールを取得
 
     この関数はfastapi-babelのget_locale関数をオーバーライドするために
-    使用します。リクエストヘッダーではなく、常にSettingsManagerの
+    使用します。リクエストヘッダーではなく、常にSettingsStoreの
     設定値を返します。
 
     Returns:
         str: 現在のロケール("ja", "en"など)
     """
     # 循環インポートを避けるため、関数内でインポート
-    from ..services.data.settings_manager import SettingsManager
+    from ..services.data.settings_store import SettingsStore
 
     try:
-        settings_manager = SettingsManager()
+        settings_manager = SettingsStore()
         settings = settings_manager.get_settings()
         return settings.app_language
     except Exception:
@@ -47,7 +47,7 @@ def _get_translation(
     指定されたロケールの翻訳オブジェクトを取得
 
     Args:
-        locale: ロケール(指定しない場合はSettingsManagerから取得)
+        locale: ロケール(指定しない場合はSettingsStoreから取得)
 
     Returns:
         NullTranslations | GNUTranslations: 翻訳オブジェクト
@@ -76,11 +76,11 @@ def gettext(message: str, locale: Optional[str] = None) -> str:
     メッセージを翻訳
 
     リクエストコンテキスト内外で動作します。
-    コンテキスト外では、SettingsManagerから直接ロケールを取得します。
+    コンテキスト外では、SettingsStoreから直接ロケールを取得します。
 
     Args:
         message: 翻訳するメッセージ
-        locale: 翻訳先のロケール(省略時はSettingsManagerから取得)
+        locale: 翻訳先のロケール(省略時はSettingsStoreから取得)
 
     Returns:
         str: 翻訳されたメッセージ

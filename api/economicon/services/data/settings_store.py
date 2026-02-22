@@ -1,6 +1,7 @@
 """
 アプリケーション設定を管理するシングルトンマネージャー
 """
+
 import os
 import platform
 import threading
@@ -12,7 +13,7 @@ import yaml
 from .settings_info import SettingsInfo
 
 
-class SettingsManager:
+class SettingsStore:
     """
     アプリケーション設定を管理するシングルトンクラス
 
@@ -23,7 +24,7 @@ class SettingsManager:
     _instance = None
     _lock: threading.RLock = threading.RLock()
 
-    SETTINGS_FILE_NAME = 'economicon.config.yml'
+    SETTINGS_FILE_NAME = "economicon.config.yml"
 
     def __new__(cls):
         if cls._instance is None:
@@ -34,7 +35,7 @@ class SettingsManager:
 
     def __init__(self):
         # 初期化が一度だけ行われるようにする
-        if not hasattr(self, '_initialized'):
+        if not hasattr(self, "_initialized"):
             self._settings: Optional[SettingsInfo] = None
             self._lock = threading.RLock()
             self._initialized = True
@@ -58,12 +59,12 @@ class SettingsManager:
             os_name = "Linux"
 
         return {
-            'os_name': os_name,
-            'default_folder_path': str(Path.home()).replace(os.sep, '/'),
-            'display_rows': 100,
-            'app_language': 'ja',
-            'encoding': 'utf-8',
-            'path_separator': '/'
+            "os_name": os_name,
+            "default_folder_path": str(Path.home()).replace(os.sep, "/"),
+            "display_rows": 100,
+            "app_language": "ja",
+            "encoding": "utf-8",
+            "path_separator": "/",
         }
 
     @staticmethod
@@ -78,7 +79,7 @@ class SettingsManager:
 
         if os_system == "Windows":
             # WindowsではAppData/Roaming/economicon/配下に配置
-            settings_dir = Path.home() / 'AppData' / 'Roaming' / 'economicon'
+            settings_dir = Path.home() / "AppData" / "Roaming" / "economicon"
         else:
             # macOS/Linuxではホームディレクトリ直下
             settings_dir = Path.home()
@@ -86,7 +87,7 @@ class SettingsManager:
         # ディレクトリが存在しない場合は作成
         settings_dir.mkdir(parents=True, exist_ok=True)
 
-        return settings_dir / SettingsManager.SETTINGS_FILE_NAME
+        return settings_dir / SettingsStore.SETTINGS_FILE_NAME
 
     def load_settings(self) -> None:
         """
@@ -101,13 +102,12 @@ class SettingsManager:
             # 設定ファイルが存在しない場合は作成
             if not settings_file_path.exists():
                 self._create_default_settings_file(
-                    settings_file_path,
-                    default_settings
+                    settings_file_path, default_settings
                 )
 
             # 設定ファイルを読み込み
             try:
-                with open(settings_file_path, 'r', encoding='utf-8') as f:
+                with open(settings_file_path, "r", encoding="utf-8") as f:
                     user_settings = yaml.safe_load(f)
 
                 # デフォルト設定とマージ（ユーザー設定を優先）
@@ -121,36 +121,27 @@ class SettingsManager:
 
             # SettingsInfoオブジェクトを作成
             self._settings = SettingsInfo(
-                os_name=settings.get(
-                    'os_name',
-                    default_settings['os_name']
-                ),
+                os_name=settings.get("os_name", default_settings["os_name"]),
                 default_folder_path=settings.get(
-                    'default_folder_path',
-                    default_settings['default_folder_path']
+                    "default_folder_path",
+                    default_settings["default_folder_path"],
                 ),
                 display_rows=settings.get(
-                    'display_rows',
-                    default_settings['display_rows']
+                    "display_rows", default_settings["display_rows"]
                 ),
                 app_language=settings.get(
-                    'app_language',
-                    default_settings['app_language']
+                    "app_language", default_settings["app_language"]
                 ),
                 encoding=settings.get(
-                    'encoding',
-                    default_settings['encoding']
+                    "encoding", default_settings["encoding"]
                 ),
                 path_separator=settings.get(
-                    'path_separator',
-                    default_settings['path_separator']
-                )
+                    "path_separator", default_settings["path_separator"]
+                ),
             )
 
     def _create_default_settings_file(
-        self,
-        file_path: Path,
-        settings: dict
+        self, file_path: Path, settings: dict
     ) -> None:
         """
         デフォルト設定ファイルを作成
@@ -160,12 +151,9 @@ class SettingsManager:
             settings: デフォルト設定の辞書
         """
         try:
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 yaml.dump(
-                    settings,
-                    f,
-                    default_flow_style=False,
-                    allow_unicode=True
+                    settings, f, default_flow_style=False, allow_unicode=True
                 )
         except Exception as e:
             print(f"Failed to create default settings file: {e}")
@@ -183,8 +171,7 @@ class SettingsManager:
         with self._lock:
             if self._settings is None:
                 raise RuntimeError(
-                    "Settings not initialized. "
-                    "Call load_settings() first."
+                    "Settings not initialized. Call load_settings() first."
                 )
             return self._settings
 
@@ -201,7 +188,7 @@ class SettingsManager:
         display_rows: Optional[int] = None,
         app_language: Optional[str] = None,
         encoding: Optional[str] = None,
-        path_separator: Optional[str] = None
+        path_separator: Optional[str] = None,
     ) -> None:
         """
         設定を更新する（指定された項目のみ）
@@ -217,8 +204,7 @@ class SettingsManager:
         with self._lock:
             if self._settings is None:
                 raise RuntimeError(
-                    "Settings not initialized. "
-                    "Call load_settings() first."
+                    "Settings not initialized. Call load_settings() first."
                 )
 
             # 現在の設定を取得
@@ -226,27 +212,29 @@ class SettingsManager:
 
             # 指定された値で更新（Noneでない場合のみ）
             updated_os_name = (
-                os_name if os_name is not None
-                else current_settings.os_name
+                os_name if os_name is not None else current_settings.os_name
             )
             updated_folder_path = (
-                default_folder_path if default_folder_path is not None
+                default_folder_path
+                if default_folder_path is not None
                 else current_settings.default_folder_path
             )
             updated_display_rows = (
-                display_rows if display_rows is not None
+                display_rows
+                if display_rows is not None
                 else current_settings.display_rows
             )
             updated_app_language = (
-                app_language if app_language is not None
+                app_language
+                if app_language is not None
                 else current_settings.app_language
             )
             updated_encoding = (
-                encoding if encoding is not None
-                else current_settings.encoding
+                encoding if encoding is not None else current_settings.encoding
             )
             updated_path_separator = (
-                path_separator if path_separator is not None
+                path_separator
+                if path_separator is not None
                 else current_settings.path_separator
             )
 
@@ -257,7 +245,7 @@ class SettingsManager:
                 display_rows=updated_display_rows,
                 app_language=updated_app_language,
                 encoding=updated_encoding,
-                path_separator=updated_path_separator
+                path_separator=updated_path_separator,
             )
 
     def save_settings(self) -> None:
@@ -267,32 +255,27 @@ class SettingsManager:
         with self._lock:
             if self._settings is None:
                 raise RuntimeError(
-                    "Settings not initialized. "
-                    "Call load_settings() first."
+                    "Settings not initialized. Call load_settings() first."
                 )
 
             settings_file_path = self._get_settings_file_path()
 
             settings_dict = {
-                'os_name': self._settings.os_name,
-                'default_folder_path': self._settings.default_folder_path,
-                'display_rows': self._settings.display_rows,
-                'app_language': self._settings.app_language,
-                'encoding': self._settings.encoding,
-                'path_separator': self._settings.path_separator
+                "os_name": self._settings.os_name,
+                "default_folder_path": self._settings.default_folder_path,
+                "display_rows": self._settings.display_rows,
+                "app_language": self._settings.app_language,
+                "encoding": self._settings.encoding,
+                "path_separator": self._settings.path_separator,
             }
 
             try:
-                with open(
-                    settings_file_path,
-                    'w',
-                    encoding='utf-8'
-                ) as f:
+                with open(settings_file_path, "w", encoding="utf-8") as f:
                     yaml.dump(
                         settings_dict,
                         f,
                         default_flow_style=False,
-                        allow_unicode=True
+                        allow_unicode=True,
                     )
             except Exception as e:
                 raise RuntimeError(f"Failed to save settings: {e}")

@@ -16,7 +16,7 @@ from fastapi_babel import Babel, BabelConfigs
 from economicon.exception_handlers import init_exception_handlers
 from economicon.i18n.translation import get_locale_from_settings
 from economicon.routers import api_router
-from economicon.services.data.settings_manager import SettingsManager
+from economicon.services.data.settings_store import SettingsStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils.logging import logger
 
@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent
 # 静的ファイルのディレクトリ
 STATIC_DIR = BASE_DIR / "static"
 
-# Babel設定 - SettingsManagerからロケールを取得する関数を設定
+# Babel設定 - SettingsStoreからロケールを取得する関数を設定
 configs = BabelConfigs(
     ROOT_DIR=str(BASE_DIR),
     BABEL_DEFAULT_LOCALE="ja",
@@ -38,9 +38,9 @@ babel = Babel(configs=configs)
 async def lifespan(app: FastAPI):
     # --- 起動時の処理 ---
     # シングルトンのインスタンスを取得し、初期化を行う
-    settings_manager = SettingsManager()
+    settings_manager = SettingsStore()
     settings_manager.load_settings()
-    logger.info("SettingsManager has been initialized at startup.")
+    logger.info("SettingsStore has been initialized at startup.")
     tables_store = TablesStore()
     logger.info("TablesStore has been initialized at startup.")
 
@@ -79,7 +79,7 @@ async def combined_middleware(request: Request, call_next):
     # 計測開始
     start_time = time.time()
 
-    # ロケールの設定 - SettingsManagerからロケールを取得してBabelに設定
+    # ロケールの設定 - SettingsStoreからロケールを取得してBabelに設定
     locale = get_locale_from_settings()
     # サポートされている言語のみ設定
     if locale not in ["ja", "en"]:
