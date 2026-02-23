@@ -27,6 +27,14 @@ DATA_C = [10.0, 20.0, 30.0]
 DATA_D = [2.5, 3.5, 4.5]
 DATA_TEXT = ["hello", "world", "test"]
 
+# 計算式パラメータ
+MULTIPLY_FACTOR = 5
+ADD_OFFSET = 10
+COMPLEX_MULTIPLIER = 2
+
+# 浮動小数点比較の許容誤差
+FLOAT_TOLERANCE = 1e-5
+
 
 # ========================================
 # フィクスチャ
@@ -83,8 +91,8 @@ def test_calculate_column_simple_addition(client, tables_store):
 
     df = tables_store.get_table(TABLE_NAME).table
     assert "E" in df.columns
-    # [1+4, 2+5, 3+6]
-    assert df["E"].to_list() == [5, 7, 9]
+    expected = [a + b for a, b in zip(DATA_A, DATA_B, strict=True)]
+    assert df["E"].to_list() == expected
     # 既存データが保持されている
     assert df[COL_A].to_list() == DATA_A
 
@@ -96,7 +104,8 @@ def test_calculate_column_complex_expression(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "newColumnName": "F",
-            "calculationExpression": "{C} / {D} + ({A} + {B}) * 2",
+            "calculationExpression": f"{{C}} / {{D}} + ({{A}} + {{B}})"
+            f" * {COMPLEX_MULTIPLIER}",
             "addPositionColumn": COL_A,
         },
     )
@@ -108,12 +117,12 @@ def test_calculate_column_complex_expression(client, tables_store):
     df = tables_store.get_table(TABLE_NAME).table
     assert "F" in df.columns
     result_values = df["F"].to_list()
-    # row0: 10.0/2.5 + (1+4)*2 = 4.0 + 10 = 14.0
-    assert abs(result_values[0] - 14.0) < 1e-5
-    # row1: 20.0/3.5 + (2+5)*2 ≈ 5.714... + 14
-    assert abs(result_values[1] - 19.714285714285715) < 1e-5
-    # row2: 30.0/4.5 + (3+6)*2 ≈ 6.666... + 18
-    assert abs(result_values[2] - 24.666666666666668) < 1e-5
+    expected = [
+        c / d + (a + b) * COMPLEX_MULTIPLIER
+        for a, b, c, d in zip(DATA_A, DATA_B, DATA_C, DATA_D, strict=True)
+    ]
+    for actual, exp in zip(result_values, expected, strict=True):
+        assert abs(actual - exp) < FLOAT_TOLERANCE
 
 
 def test_calculate_column_with_number(client, tables_store):
@@ -123,7 +132,8 @@ def test_calculate_column_with_number(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "newColumnName": "G",
-            "calculationExpression": "{A} * 5 + 10",
+            "calculationExpression": f"{{A}} * {MULTIPLY_FACTOR} "
+            f"+ {ADD_OFFSET}",
             "addPositionColumn": COL_A,
         },
     )
@@ -131,8 +141,8 @@ def test_calculate_column_with_number(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
 
     df = tables_store.get_table(TABLE_NAME).table
-    # [1*5+10, 2*5+10, 3*5+10]
-    assert df["G"].to_list() == [15, 20, 25]
+    expected = [a * MULTIPLY_FACTOR + ADD_OFFSET for a in DATA_A]
+    assert df["G"].to_list() == expected
 
 
 def test_calculate_column_add_position_right_of_target(client, tables_store):
@@ -437,6 +447,7 @@ def test_calculate_column_invalid_position_column(client, tables_store):
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
+
 
 def test_calculate_column_unsupported_operator(client, tables_store):
     """サポートされていない演算子（@）を使うと 500 を返す"""
