@@ -97,7 +97,8 @@ class ExportFileRequestBody(BaseRequest):
     ``format`` に応じて適切なエクスポーターが自動選択され、
     ファイル拡張子も自動で付与されます。
 
-    - ``csv``     → CSV エクスポーター（separator / encoding / include_header が有効）
+    - ``csv``     →
+        CSV エクスポーター（separator / encoding / include_header が有効）
     - ``excel``   → Excel エクスポーター（sheet_name が有効）
     - ``parquet`` → Parquet エクスポーター
     """
