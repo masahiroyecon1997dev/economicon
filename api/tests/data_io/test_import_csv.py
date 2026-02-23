@@ -45,7 +45,7 @@ def prepared_data():
     shutil.rmtree(test_dir, ignore_errors=True)
 
 
-def test_import_csv_by_path_comma_separator(client, prepared_data):
+def test_import_csv_comma_separator(client, prepared_data):
     """
     カンマ区切りのCSVファイルをパス指定でインポートするテスト
     """
@@ -69,7 +69,7 @@ def test_import_csv_by_path_comma_separator(client, prepared_data):
     assert expected_data.equals(df)
 
 
-def test_import_csv_by_path_tab_separator(client, prepared_data):
+def test_import_csv_tab_separator(client, prepared_data):
     """
     タブ区切りのファイルをCSVとしてパス指定でインポートするテスト
     """
@@ -93,7 +93,7 @@ def test_import_csv_by_path_tab_separator(client, prepared_data):
     assert expected_data.equals(df)
 
 
-def test_import_csv_by_path_custom_separator(client, prepared_data):
+def test_import_csv_custom_separator(client, prepared_data):
     """
     セミコロン区切りのCSVファイルのテスト（テストファイルを作成）
     """
@@ -128,7 +128,7 @@ def test_import_csv_by_path_custom_separator(client, prepared_data):
         os.unlink(temp_path)
 
 
-def test_import_csv_by_path_default_separator(client, prepared_data):
+def test_import_csv_default_separator(client, prepared_data):
     """
     separatorパラメータを省略した場合のテスト（デフォルトはカンマ）
     """
@@ -151,7 +151,7 @@ def test_import_csv_by_path_default_separator(client, prepared_data):
     assert expected_data.equals(df)
 
 
-def test_import_csv_by_path_file_not_exists(client, prepared_data):
+def test_import_csv_file_not_exists(client, prepared_data):
     """
     存在しないファイルパスを指定した場合のテスト
     """
@@ -168,7 +168,7 @@ def test_import_csv_by_path_file_not_exists(client, prepared_data):
     assert message == response_data["message"]
 
 
-def test_import_csv_by_path_invalid_file_extension(client, prepared_data):
+def test_import_csv_invalid_file_extension(client, prepared_data):
     """
     非対応拡張子（.txt）を指定した場合のテスト
     統合 /import エンドポイントでサポート外拡張子は 500 が返る
@@ -187,7 +187,7 @@ def test_import_csv_by_path_invalid_file_extension(client, prepared_data):
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-def test_import_csv_by_path_missing_file_path(client, prepared_data):
+def test_import_csv_missing_file_path(client, prepared_data):
     """
     filePathパラメータが未指定の場合のテスト
     FastAPIのバリデーションエラーで422が返る
@@ -200,7 +200,7 @@ def test_import_csv_by_path_missing_file_path(client, prepared_data):
     assert "filePathは必須項目です。" == response_data["message"]
 
 
-def test_import_csv_by_path_missing_table_name(client, prepared_data):
+def test_import_csv_missing_table_name(client, prepared_data):
     """
     tableNameパラメータが未指定の場合のテスト
     FastAPIのバリデーションエラーで422が返る
@@ -214,7 +214,7 @@ def test_import_csv_by_path_missing_table_name(client, prepared_data):
     assert "tableNameは必須項目です。" == response_data["message"]
 
 
-def test_import_csv_by_path_duplicate_table_name(client, prepared_data):
+def test_import_csv_duplicate_table_name(client, prepared_data):
     """
     既存のテーブル名と重複する場合のテスト
     """
@@ -243,7 +243,7 @@ def test_import_csv_by_path_duplicate_table_name(client, prepared_data):
     assert message == response_data["message"]
 
 
-def test_import_csv_by_path_empty_separator(client, prepared_data):
+def test_import_csv_empty_separator(client, prepared_data):
     """
     空の区切り文字を指定した場合のテスト
     """
@@ -261,7 +261,7 @@ def test_import_csv_by_path_empty_separator(client, prepared_data):
     assert message == response_data["message"]
 
 
-def test_import_csv_by_path_invalid_json(client, prepared_data):
+def test_import_csv_invalid_json(client, prepared_data):
     """
     不正なJSONを送信した場合のテスト
     FastAPIのバリデーションエラーで422が返る
@@ -275,7 +275,7 @@ def test_import_csv_by_path_invalid_json(client, prepared_data):
 @pytest.mark.skip(
     reason="このテストは現在、発生させる方法が不明なためスキップされています。"
 )
-def test_import_csv_by_path_malformed_csv(client, prepared_data):
+def test_import_csv_malformed_csv(client, prepared_data):
     """
     不正な形式のCSVファイルを指定した場合のテスト
     """
@@ -292,7 +292,7 @@ def test_import_csv_by_path_malformed_csv(client, prepared_data):
     assert message == response_data["message"]
 
 
-def test_import_csv_by_path_encoding_utf8bom(client, prepared_data):
+def test_import_csv_encoding_utf8bom(client, prepared_data):
     """
     UTF-8 BOM エンコーディングの CSV ファイルをインポートするテスト
     （Polars は utf8 エンコーディングで BOM を自動処理する）
@@ -317,7 +317,7 @@ def test_import_csv_by_path_encoding_utf8bom(client, prepared_data):
     assert 2 == len(df)
 
 
-def test_import_csv_by_path_invalid_encoding(client, prepared_data):
+def test_import_csv_invalid_encoding(client, prepared_data):
     """
     無効なエンコーディングを指定した場合はバリデーションエラーになる
     """
@@ -332,7 +332,7 @@ def test_import_csv_by_path_invalid_encoding(client, prepared_data):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
-def test_import_csv_by_path_empty_file_path(client, prepared_data):
+def test_import_csv_empty_file_path(client, prepared_data):
     """
     filePathが空文字列の場合はバリデーションエラーになる
     """
@@ -343,7 +343,7 @@ def test_import_csv_by_path_empty_file_path(client, prepared_data):
     assert "filePath" in response_data["message"]
 
 
-def test_import_csv_by_path_empty_table_name(client, prepared_data):
+def test_import_csv_empty_table_name(client, prepared_data):
     """
     tableNameが空文字列の場合はバリデーションエラーになる
     """
