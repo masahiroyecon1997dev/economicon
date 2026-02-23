@@ -61,4 +61,4 @@ def parse_formula_to_expr(formula: str) -> pl.Expr:
         # 3. 再帰的評価
         return _evaluate_node(tree.body)
     except SyntaxError as e:
-        raise ValueError(_("Invalid formula syntax: {}").format(e))
+        raise ValueError(_("Invalid formula syntax: {}").format(e)) from e

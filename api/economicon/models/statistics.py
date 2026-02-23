@@ -1,6 +1,6 @@
 """統計解析関連のスキーマ定義"""
 
-from typing import Annotated, Any, List
+from typing import Annotated, Any
 
 from pydantic import Field
 
@@ -64,7 +64,7 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
         ),
     ]
     column_name_list: Annotated[
-        List[ColumnName],
+        list[ColumnName],
         Field(
             title="Column Name List",
             description="記述統計を計算する対象カラム名のリスト。テーブル内に存在するカラム名を指定してください。複数カラムを指定することもできます。",
@@ -72,12 +72,13 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
         ),
     ]
     statistics: Annotated[
-        List[DescriptiveStatisticType],
+        list[DescriptiveStatisticType],
         Field(
             title="Statistics",
             description="計算する統計量のリスト"
             "（mean: 平均、median: 中央値、mode: 最頻値、"
-            "variance: 分散、std_dev: 標準偏差、range: 範囲、iqr: 四分位数範囲）",
+            "variance: 分散、std_dev: 標準偏差、"
+            "range: 範囲、iqr: 四分位数範囲）",
             min_length=1,
         ),
     ]

@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import List
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
@@ -19,7 +18,8 @@ def _validate_path_base(
     Args:
         path_str: パスの文字列
         target: パラメータ名（例: "filePath"）
-        must_be_type: "file" か "dir" を指定して、ファイルかディレクトリかを検証
+        must_be_type:
+            "file" か "dir" を指定して、ファイルかディレクトリかを検証
         mode: 権限の種類（デフォルトは読み取り権限 os.R_OK）
     Raises:
         ValidationError: パスが存在しない、型が違う、または権限がない場合
@@ -63,7 +63,7 @@ def _validate_path_base(
 
 
 def _validate_file_extension(
-    *, path_str: str, target: str, allowed_extensions: List[str]
+    *, path_str: str, target: str, allowed_extensions: list[str]
 ) -> None:
     """拡張子が許可されたリストに含まれているか検証する
     Args:
@@ -112,7 +112,8 @@ def validate_file_path(
         mode: 権限の種類（デフォルトは読み取り権限 os.R_OK）
 
     Raises:
-        ValidationError: ファイルが存在しない、ファイルでない、または権限がない場合
+        ValidationError:
+                ファイルが存在しない、ファイルでない、または権限がない場合
     """
     _validate_path_base(
         path_str=path_str, target=target, must_be_type="file", mode=mode
@@ -130,7 +131,8 @@ def validate_directory_path(
         mode: 権限の種類（デフォルトは読み取り権限 os.R_OK）
 
     Raises:
-        ValidationError: ディレクトリが存在しない、ディレクトリでない、または権限がない場合
+        ValidationError:
+            ディレクトリが存在しない、ディレクトリでない、または権限がない場合
     """
     _validate_path_base(
         path_str=path_str, target=target, must_be_type="dir", mode=mode
@@ -138,7 +140,7 @@ def validate_directory_path(
 
 
 def validate_file_format(
-    *, path_str: str, target: str, allowed_extensions: List[str]
+    *, path_str: str, target: str, allowed_extensions: list[str]
 ) -> None:
     """拡張子と中身が空でないか検証する
 

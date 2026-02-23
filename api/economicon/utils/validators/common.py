@@ -1,4 +1,4 @@
-from typing import List, Mapping, Union
+from collections.abc import Mapping
 
 import polars as pl
 
@@ -10,8 +10,8 @@ from ..exceptions import ValidationError
 
 def validate_existence(
     *,
-    value: Union[str, List[str]],
-    valid_list: List[str],
+    value: str | list[str],
+    valid_list: list[str],
     target: str,  # パラメータ名を渡す
 ) -> None:
     """
@@ -44,7 +44,7 @@ def validate_existence(
 
 
 def validate_non_existence(
-    *, value: Union[str, List[str]], existing_list: List[str], target: str
+    *, value: str | list[str], existing_list: list[str], target: str
 ) -> None:
     """
     指定された値が既にリスト内に存在しないことを検証する（重複チェック）。
@@ -80,7 +80,7 @@ def validate_non_existence(
 def validate_numeric_types(
     *,
     schema: Mapping[str, pl.DataType],
-    columns: Union[str, List[str]],
+    columns: str | list[str],
     target: str = "columns",
 ) -> None:
     """指定された列が数値型であることを検証する。
@@ -100,7 +100,7 @@ def validate_numeric_types(
         dtype = schema[col]
 
         # .is_numeric() メソッドで判定
-        # これなら整数(Int), 浮動小数点(Float), 符号なし整数(UInt) すべて判定可能
+        # 整数(Int), 浮動小数点(Float), 符号なし整数(UInt) すべて判定可能
         if not dtype.is_numeric():
             invalid_types.append(f"{col}({dtype})")
 

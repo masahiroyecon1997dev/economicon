@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DistributionType(str, Enum):
+class DistributionType(StrEnum):
     UNIFORM = "uniform"
     EXPONENTIAL = "exponential"
     NORMAL = "normal"
@@ -17,13 +17,13 @@ class DistributionType(str, Enum):
     FIXED = "fixed"
 
 
-class TransformMethodType(str, Enum):
+class TransformMethodType(StrEnum):
     LOG = "log"
     POWER = "power"
     ROOT = "root"
 
 
-class RegressionMethodType(str, Enum):
+class RegressionMethodType(StrEnum):
     OLS = "ols"
     LOGIT = "logit"
     PROBIT = "probit"
@@ -39,20 +39,20 @@ class RegressionMethodType(str, Enum):
     FGLS = "fgls"
 
 
-class StandardErrorMethodType(str, Enum):
+class StandardErrorMethodType(StrEnum):
     NONROBUST = "nonrobust"
     ROBUST = "robust"
     HAC = "hac"
     CLUSTER = "cluster"
 
 
-class MissingValueHandlingType(str, Enum):
+class MissingValueHandlingType(StrEnum):
     IGNORE = "ignore"
     REMOVE = "remove"
     ERROR = "error"
 
 
-class ConfidenceIntervalStatisticsType(str, Enum):
+class ConfidenceIntervalStatisticsType(StrEnum):
     MEAN = "mean"
     MEDIAN = "median"
     PROPORTION = "proportion"
@@ -60,7 +60,7 @@ class ConfidenceIntervalStatisticsType(str, Enum):
     STD = "standard_deviation"
 
 
-class DescriptiveStatisticType(str, Enum):
+class DescriptiveStatisticType(StrEnum):
     MEAN = "mean"
     MEDIAN = "median"
     MODE = "mode"
@@ -70,14 +70,14 @@ class DescriptiveStatisticType(str, Enum):
     IQR = "iqr"
 
 
-class JoinType(str, Enum):
+class JoinType(StrEnum):
     INNER = "inner"
     LEFT = "left"
     RIGHT = "right"
     FULL = "full"
 
 
-class FilterOperatorType(str, Enum):
+class FilterOperatorType(StrEnum):
     EQUALS = "equals"
     NOT_EQUALS = "notEquals"
     GREATER_THAN = "greaterThan"
