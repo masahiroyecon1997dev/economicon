@@ -13,6 +13,8 @@ _CONDITION_ERROR = (
     "equals, notEquals, greaterThan, lessThan, "
     "greaterThanOrEquals, lessThanOrEquals"
 )
+# newTableName の最大文字数
+_MAX_TABLE_NAME_LEN = 128
 
 
 @pytest.fixture
@@ -547,3 +549,205 @@ def test_filter_single_condition_missing_compare_value(client, tables_store):
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
     assert "compareValueは必須項目です。" == response_data["message"]
     assert ["compareValueは必須項目です。"] == response_data["details"]
+
+
+# ---------------------------------------------------------------------------
+# 意地悪なリクエストテスト
+# ---------------------------------------------------------------------------
+
+_BASE_FILTER = {
+    "tableName": "TestTable",
+    "newTableName": "FilteredTable",
+    "columnName": "A",
+    "condition": "equals",
+    "isCompareColumn": "false",
+    "compareValue": 1,
+}
+
+
+def test_filter_tablename_only_spaces(client, tables_store):
+    """
+    tableNameがスペースのみの場合、トリム後に空文字になり422エラーになる
+    """
+    payload = {**_BASE_FILTER, "tableName": "   "}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "tableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_filter_tablename_tab_chars(client, tables_store):
+    """
+    tableNameがタブ文字のみの場合、トリム後に空文字になり422エラーになる
+    """
+    payload = {**_BASE_FILTER, "tableName": "\t"}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "tableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_filter_tablename_leading_trailing_spaces(client, tables_store):
+    """
+    tableNameの前後スペースはトリムされ、正常にフィルタできる
+    """
+    payload = {**_BASE_FILTER, "tableName": "  TestTable  "}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_filter_tablename_japanese(client, tables_store):
+    """
+    tableNameに日本語を使った場合、型は有効だが存在しないので400になる
+    """
+    payload = {**_BASE_FILTER, "tableName": "日本語テーブル"}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
+
+
+def test_filter_tablename_emoji(client, tables_store):
+    """
+    tableNameに絵文字を使った場合、型は有効だが存在しないので400になる
+    """
+    payload = {**_BASE_FILTER, "tableName": "🚀table"}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
+
+
+def test_filter_new_tablename_only_spaces(client, tables_store):
+    """
+    newTableNameがスペースのみの場合、トリム後に空文字になり422エラーになる
+    """
+    payload = {**_BASE_FILTER, "newTableName": "   "}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "newTableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_filter_new_tablename_tab_in_middle(client, tables_store):
+    """
+    newTableNameにタブ文字が含まれる場合、パターンエラーで422になる
+    """
+    payload = {**_BASE_FILTER, "newTableName": "Filtered\tTable"}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "newTableNameに使用できない文字が含まれています。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_filter_new_tablename_max_length(client, tables_store):
+    """
+    newTableNameが最大文字数（128文字）のとき正常にフィルタできる
+    """
+    max_name = "a" * _MAX_TABLE_NAME_LEN
+    payload = {**_BASE_FILTER, "newTableName": max_name}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_filter_new_tablename_exceeds_max_length(client, tables_store):
+    """
+    newTableNameが最大文字数を超えた場合422エラーになる
+    """
+    over_name = "a" * (_MAX_TABLE_NAME_LEN + 1)
+    payload = {**_BASE_FILTER, "newTableName": over_name}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = f"newTableNameは{_MAX_TABLE_NAME_LEN}文字以内で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_filter_new_tablename_leading_trailing_spaces(client, tables_store):
+    """
+    newTableNameの前後スペースはトリムされ、正常にフィルタできる
+    """
+    payload = {**_BASE_FILTER, "newTableName": "  FilteredTable  "}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_filter_new_tablename_japanese(client, tables_store):
+    """
+    newTableNameに日本語を使った場合、正常にフィルタできる
+    """
+    payload = {**_BASE_FILTER, "newTableName": "フィルタ結果テーブル"}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_filter_new_tablename_emoji(client, tables_store):
+    """
+    newTableNameに絵文字を使った場合、正常にフィルタできる
+    """
+    payload = {**_BASE_FILTER, "newTableName": "🚀フィルタ結果"}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_filter_columnname_only_spaces(client, tables_store):
+    """
+    columnNameがスペースのみの場合、トリム後に空文字になり422エラーになる
+    """
+    payload = {**_BASE_FILTER, "columnName": "   "}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "columnNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_filter_columnname_tab_chars(client, tables_store):
+    """
+    columnNameがタブ文字のみの場合、トリム後に空文字になり422エラーになる
+    """
+    payload = {**_BASE_FILTER, "columnName": "\t"}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "columnNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_filter_columnname_leading_trailing_spaces(client, tables_store):
+    """
+    columnNameの前後スペースはトリムされ、正常にフィルタできる
+    """
+    payload = {**_BASE_FILTER, "columnName": "  A  "}
+    response = client.post("/api/table/filter-single-condition", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
