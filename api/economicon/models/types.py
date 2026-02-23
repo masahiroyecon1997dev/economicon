@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import AfterValidator, Field, StringConstraints
 
@@ -155,7 +155,7 @@ DirectoryPath = Annotated[
 
 Separator = Annotated[
     str,
-    StringConstraints(strip_whitespace=True, min_length=1, max_length=10),
+    StringConstraints(min_length=1, max_length=10),
     Field(
         title="Separator",
         examples=[",", "\t"],
@@ -196,6 +196,15 @@ FileName = Annotated[
         examples=["report_2024", "analysis_result"],
         description="OSで使用可能なファイル名（記号制限あり）",
     ),
+]
+
+# Polars の read_csv でサポートされるエンコーディング
+CsvEncoding = Literal[
+    "utf8",
+    "latin1",
+    "ascii",
+    "gbk",
+    "windows-1252",
 ]
 
 type DistributionParams = (

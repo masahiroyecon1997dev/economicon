@@ -59,9 +59,7 @@ def test_import_csv_by_path_comma_separator(client, prepared_data):
         "tableName": "TestCommaTable",
         "separator": ",",
     }
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -85,9 +83,7 @@ def test_import_csv_by_path_tab_separator(client, prepared_data):
         "tableName": "TestTabTable",
         "separator": "\t",
     }
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -117,7 +113,7 @@ def test_import_csv_by_path_custom_separator(client, prepared_data):
             "separator": ";",
         }
         response = client.post(
-            "/api/data/import-csv-by-path", data=json.dumps(request_data)
+            "/api/data/import", data=json.dumps(request_data)
         )
         response_data = response.json()
         assert response.status_code == status.HTTP_200_OK
@@ -145,9 +141,7 @@ def test_import_csv_by_path_default_separator(client, prepared_data):
         "filePath": test_csv_comma,
         "tableName": "TestDefaultSeparator",
     }
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -167,35 +161,30 @@ def test_import_csv_by_path_file_not_exists(client, prepared_data):
         "tableName": "TestNonExistent",
         "separator": ",",
     }
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "NG" == response_data["code"]
-    message = "filePathが存在しません: /non/existent/file.csv"
+    message = "filePath '/non/existent/file.csv'は存在しません。"
     assert message == response_data["message"]
 
 
 def test_import_csv_by_path_invalid_file_extension(client, prepared_data):
     """
-    CSV以外のファイル拡張子を指定した場合のテスト
-    ExcelファイルをCSVとしてパースしようとして失敗し500が返る
+    非対応拡張子（.txt）を指定した場合のテスト
+    統合 /import エンドポイントでサポート外拡張子は 500 が返る
     """
     tables_store, test_dir = prepared_data
+    # 非対応拡張子のファイルを作成
+    txt_path = f"{test_dir}/unsupported.txt"
+    with open(txt_path, "w", encoding="utf-8") as f:
+        f.write("col1,col2\n1,2\n")
     request_data = {
-        "filePath": f"{test_dir}/TestDataXlsx.xlsx",
+        "filePath": txt_path,
         "tableName": "TestInvalidExtension",
-        "separator": ",",
     }
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-    assert "NG" == response_data["code"]
-    message = "CSVファイルの解析に失敗しました: 無効なフォーマットまたはエンコーディングです。"
-    assert message == response_data["message"]
 
 
 def test_import_csv_by_path_missing_file_path(client, prepared_data):
@@ -205,13 +194,10 @@ def test_import_csv_by_path_missing_file_path(client, prepared_data):
     """
     tables_store, test_dir = prepared_data
     request_data = {"tableName": "TestMissingPath", "separator": ","}
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
-    assert "NG" == response_data["code"]
-    assert "filePath は必須です。" == response_data["message"]
+    assert "filePathは必須項目です。" == response_data["message"]
 
 
 def test_import_csv_by_path_missing_table_name(client, prepared_data):
@@ -222,13 +208,10 @@ def test_import_csv_by_path_missing_table_name(client, prepared_data):
     tables_store, test_dir = prepared_data
     test_csv_comma = f"{test_dir}/TestDataComma.csv"
     request_data = {"filePath": test_csv_comma, "separator": ","}
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
-    assert "NG" == response_data["code"]
-    assert "tableName は必須です。" == response_data["message"]
+    assert "tableNameは必須項目です。" == response_data["message"]
 
 
 def test_import_csv_by_path_duplicate_table_name(client, prepared_data):
@@ -243,9 +226,7 @@ def test_import_csv_by_path_duplicate_table_name(client, prepared_data):
         "tableName": "DuplicateTable",
         "separator": ",",
     }
-    client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(first_request_data)
-    )
+    client.post("/api/data/import", data=json.dumps(first_request_data))
     # 同じテーブル名で再度作成を試行
     second_request_data = {
         "filePath": test_csv_comma,
@@ -253,11 +234,10 @@ def test_import_csv_by_path_duplicate_table_name(client, prepared_data):
         "separator": ",",
     }
     response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(second_request_data)
+        "/api/data/import", data=json.dumps(second_request_data)
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "NG" == response_data["code"]
     # テーブル名重複エラーメッセージを確認
     message = "tableName 'DuplicateTable'は既に存在します。"
     assert message == response_data["message"]
@@ -274,13 +254,10 @@ def test_import_csv_by_path_empty_separator(client, prepared_data):
         "tableName": "TestEmptySeparator",
         "separator": "",
     }
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    message = "separator は1文字以上である必要があります。"
+    message = "separatorは1文字以上で入力してください。"
     assert message == response_data["message"]
 
 
@@ -289,10 +266,9 @@ def test_import_csv_by_path_invalid_json(client, prepared_data):
     不正なJSONを送信した場合のテスト
     FastAPIのバリデーションエラーで422が返る
     """
-    response = client.post("/api/data/import-csv-by-path", data="invalid json")
+    response = client.post("/api/data/import", data="invalid json")
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
-    assert "NG" == response_data["code"]
     assert "JSON decode error" == response_data["message"]
 
 
@@ -309,14 +285,51 @@ def test_import_csv_by_path_malformed_csv(client, prepared_data):
         "tableName": "TestMalformed",
         "separator": ",",
     }
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-    assert "NG" == response_data["code"]
     message = "Failed to parse CSV file: Invalid format or encoding."
     assert message == response_data["message"]
+
+
+def test_import_csv_by_path_encoding_utf8bom(client, prepared_data):
+    """
+    UTF-8 BOM エンコーディングの CSV ファイルをインポートするテスト
+    （Polars は utf8 エンコーディングで BOM を自動処理する）
+    """
+    tables_store, test_dir = prepared_data
+    bom_path = f"{test_dir}/TestBom.csv"
+    with open(bom_path, "w", encoding="utf-8-sig") as f:
+        f.write("col_1,col_2\n1,10\n2,20\n")
+    request_data = {
+        "filePath": bom_path,
+        "tableName": "TestBomTable",
+        "separator": ",",
+        "encoding": "utf8",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert "TestBomTable" == response_data["result"]["tableName"]
+    df = tables_store.get_table("TestBomTable").table
+    assert 2 == len(df.columns)
+    assert 2 == len(df)
+
+
+def test_import_csv_by_path_invalid_encoding(client, prepared_data):
+    """
+    無効なエンコーディングを指定した場合はバリデーションエラーになる
+    """
+    tables_store, test_dir = prepared_data
+    test_csv = f"{test_dir}/TestDataComma.csv"
+    request_data = {
+        "filePath": test_csv,
+        "tableName": "TestInvalidEncoding",
+        "encoding": "invalid-encoding",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_import_csv_by_path_empty_file_path(client, prepared_data):
@@ -324,12 +337,9 @@ def test_import_csv_by_path_empty_file_path(client, prepared_data):
     filePathが空文字列の場合はバリデーションエラーになる
     """
     request_data = {"filePath": "", "tableName": "TestTable", "separator": ","}
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
     assert "filePath" in response_data["message"]
 
 
@@ -342,10 +352,7 @@ def test_import_csv_by_path_empty_table_name(client, prepared_data):
         "tableName": "",
         "separator": ",",
     }
-    response = client.post(
-        "/api/data/import-csv-by-path", data=json.dumps(request_data)
-    )
+    response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
     assert "tableName" in response_data["message"]

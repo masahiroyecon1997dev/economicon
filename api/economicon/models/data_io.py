@@ -1,4 +1,4 @@
-"""インポート関連のスキーマ定義"""
+"""インポート/エクスポート関連のスキーマ定義"""
 
 from typing import Annotated
 
@@ -6,6 +6,7 @@ from pydantic import Field
 
 from .common import BaseRequest, BaseResult
 from .types import (
+    CsvEncoding,
     DirectoryPath,
     ExcelSheetName,
     FileName,
@@ -20,75 +21,73 @@ from .types import (
 # ---------------------------------------------------------------------------
 
 
-class ImportCsvByPathRequestBody(BaseRequest):
-    """CSVファイルパス指定インポートリクエスト"""
+class ImportByPathRequestBody(BaseRequest):
+    """ファイルパス指定インポートリクエスト（CSV / Excel / Parquet 共通）
+
+    拡張子に応じて適切なインポーターが自動選択されます。
+
+    - .csv / .tsv  → CSV インポーター（separator / encoding が有効）
+    - .xlsx / .xls → Excel インポーター（sheet_name が有効）
+    - .parquet     → Parquet インポーター
+    """
 
     file_path: Annotated[
         FilePath,
         Field(
             title="File Path",
-            description="インポートするCSVファイルの絶対パス（相対パスはサポートされていません）。",
+            description=(
+                "インポートするファイルの絶対パス。"
+                "対応拡張子: .csv, .tsv, .xlsx, .xls, .parquet"
+                "（相対パスはサポートされていません）。"
+            ),
         ),
     ]
     table_name: Annotated[
         NewTableName,
         Field(
             title="Table Name",
-            description="インポート先のテーブル名",
+            description=(
+                "インポート後のテーブル名。"
+                "ワークスペース内で既存のテーブル名と重複しない名前を"
+                "指定してください。"
+            ),
         ),
     ]
+    # --- CSV 専用オプション ---
     separator: Annotated[
         Separator,
         Field(
             title="Separator",
-            description="CSV区切り文字。カンマかタブ、もしくは1から10文字の任意の文字列から選択してください。",
+            description=(
+                "CSV 区切り文字（CSV / TSV のみ有効）。"
+                "カンマかタブ、もしくは 1〜10 文字の任意の文字列から"
+                "選択してください。"
+            ),
         ),
     ] = ","
-
-
-class ImportExcelByPathRequestBody(BaseRequest):
-    """Excelファイルパス指定インポートリクエスト"""
-
-    file_path: Annotated[
-        FilePath,
+    encoding: Annotated[
+        CsvEncoding,
         Field(
-            title="File Path",
-            description="インポートするExcelファイルの絶対パス（相対パスはサポートされていません）。",
+            title="Encoding",
+            description=(
+                "CSV ファイルのエンコーディング（CSV / TSV のみ有効）。"
+                "utf8 / utf8-bom / latin1 / ascii / gbk / windows-1252 "
+                "から選択してください。"
+            ),
         ),
-    ]
-    table_name: Annotated[
-        NewTableName,
-        Field(
-            title="Table Name",
-            description="インポート後のテーブル名。ワークスペース内で既存のテーブル名と重複しない名前を指定してください。",
-        ),
-    ]
+    ] = "utf8"
+    # --- Excel 専用オプション ---
     sheet_name: Annotated[
-        ExcelSheetName,
+        ExcelSheetName | None,
         Field(
             title="Sheet Name",
-            description="インポートするExcelシートの名前。指定したシートがExcelファイル内に存在しない場合、インポートは失敗します。シート名は大文字と小文字を区別します。",
+            description=(
+                "インポートする Excel シート名（Excel のみ有効）。"
+                "省略または null の場合は先頭シートを読み込みます。"
+                "シート名は大文字・小文字を区別します。"
+            ),
         ),
-    ]
-
-
-class ImportParquetByPathRequestBody(BaseRequest):
-    """Parquetファイルパス指定インポートリクエスト"""
-
-    file_path: Annotated[
-        FilePath,
-        Field(
-            title="File Path",
-            description="インポートするParquetファイルの絶対パス（相対パスはサポートされていません）。",
-        ),
-    ]
-    table_name: Annotated[
-        NewTableName,
-        Field(
-            title="Table Name",
-            description="インポート後のテーブル名。ワークスペース内で既存のテーブル名と重複しない名前を指定してください。",
-        ),
-    ]
+    ] = None
 
 
 class ExportCsvByPathRequestBody(BaseRequest):
@@ -190,16 +189,8 @@ class ImportTableResult(BaseResult):
     )
 
 
-class ImportCsvByPathResult(ImportTableResult):
-    """CSV インポートレスポンス"""
-
-
-class ImportExcelByPathResult(ImportTableResult):
-    """Excel インポートレスポンス"""
-
-
-class ImportParquetByPathResult(ImportTableResult):
-    """Parquet インポートレスポンス"""
+class ImportByPathResult(ImportTableResult):
+    """ファイルパス指定インポートレスポンス"""
 
 
 class ExportFileResult(BaseResult):
