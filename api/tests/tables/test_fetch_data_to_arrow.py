@@ -10,20 +10,57 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from economicon.core.enums import ErrorCode
 from economicon.services.data.tables_store import TablesStore
 from main import app
 
-# test用テーブル名とデータ
-table_name = "test_table"
-test_data = pl.DataFrame(
+# ─────────────────────────────────────────────────────────────
+# 定数
+# ─────────────────────────────────────────────────────────────
+_TABLE_NAME = "test_table"
+_DEFAULT_CHUNK_SIZE = 500
+_MAX_CHUNK_SIZE = 10000
+
+_SOURCE_DF = pl.DataFrame(
     {
         "column1": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        "column2": ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
-        "column3": [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0],
+        "column2": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "i",
+            "j",
+        ],
+        "column3": [
+            1.1,
+            2.2,
+            3.3,
+            4.4,
+            5.5,
+            6.6,
+            7.7,
+            8.8,
+            9.9,
+            10.0,
+        ],
     }
 )
 
+_BASE_PAYLOAD: dict = {
+    "tableName": _TABLE_NAME,
+    "startRow": 0,
+    "chunkSize": _DEFAULT_CHUNK_SIZE,
+}
 
+
+# ─────────────────────────────────────────────────────────────
+# フィクスチャ
+# ─────────────────────────────────────────────────────────────
 @pytest.fixture
 def client():
     """TestClientのフィクスチャ"""
@@ -33,218 +70,219 @@ def client():
 @pytest.fixture
 def tables_store():
     """TablesStoreのフィクスチャ"""
-    # テスト用のテーブルをセットアップ
     manager = TablesStore()
-    # テーブルをクリア
     manager.clear_tables()
-    manager.store_table(table_name, test_data)
+    manager.store_table(_TABLE_NAME, _SOURCE_DF)
     yield manager
-    # テスト後のクリーンアップ
     manager.clear_tables()
 
 
+# ─────────────────────────────────────────────────────────────
+# 正常系
+# ─────────────────────────────────────────────────────────────
 def test_fetch_data_to_arrow_success(client, tables_store):
     """正常系テスト: Arrow形式でデータを取得"""
-    start_row = 1
-    chunk_size = 3
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={
-            "tableName": table_name,
-            "startRow": start_row,
-            "chunkSize": chunk_size,
-        },
-    )
+    payload = {**_BASE_PAYLOAD, "startRow": 1, "chunkSize": 3}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
     assert response.status_code == status.HTTP_200_OK
     assert response.headers["content-type"] == "application/octet-stream"
 
-    # Arrowデータのデコードと検証
     reader = pa.ipc.open_file(io.BytesIO(response.content))
     arrow_table = reader.read_all()
-
-    # 期待されるデータと比較
-    expected_data = test_data[1:4]
-    expected_arrow = expected_data.to_arrow()
-
+    expected_arrow = _SOURCE_DF[1:4].to_arrow()
     assert arrow_table.num_rows == expected_arrow.num_rows
     assert arrow_table.num_columns == expected_arrow.num_columns
     assert arrow_table.schema.equals(expected_arrow.schema)
 
 
 def test_fetch_data_to_arrow_default_chunk_size(client, tables_store):
-    """正常系テスト: デフォルトのチャンクサイズ（500行）"""
-    start_row = 0
+    """正常系テスト: chunkSize省略時はデフォルト（500行）が適用される"""
     response = client.post(
         "/api/table/fetch-data-to-arrow",
-        json={"tableName": table_name, "startRow": start_row},
+        json={"tableName": _TABLE_NAME, "startRow": 0},
     )
     assert response.status_code == status.HTTP_200_OK
-
-    # テーブルが10行しかないので、全行取得される
     reader = pa.ipc.open_file(io.BytesIO(response.content))
-    arrow_table = reader.read_all()
-    assert arrow_table.num_rows == 10
+    expexted_row_count = (
+        10  # テーブルの行数は10行なので、500指定しても10行のみ取得される
+    )
+    assert reader.read_all().num_rows == expexted_row_count
 
 
 def test_fetch_data_to_arrow_fetch_beyond_table(client, tables_store):
-    """正常系テスト: テーブルの最後を超えて取得"""
-    start_row = 7
-    chunk_size = 500
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={
-            "tableName": table_name,
-            "startRow": start_row,
-            "chunkSize": chunk_size,
-        },
-    )
+    """正常系テスト: chunkSizeがテーブル残行数を超える場合は残行のみ取得"""
+    payload = {**_BASE_PAYLOAD, "startRow": 7, "chunkSize": _MAX_CHUNK_SIZE}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
     assert response.status_code == status.HTTP_200_OK
-
-    # Arrowデータの検証
     reader = pa.ipc.open_file(io.BytesIO(response.content))
-    arrow_table = reader.read_all()
-    assert arrow_table.num_rows == 3
-
-
-def test_fetch_data_to_arrow_table_not_found(client, tables_store):
-    """異常系テスト: 存在しないテーブル名"""
-    not_existent_table = "non_existent_table"
-    start_row = 1
-    chunk_size = 500
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={
-            "tableName": not_existent_table,
-            "startRow": start_row,
-            "chunkSize": chunk_size,
-        },
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    message = "tableName 'non_existent_table'は存在しません。"
-    assert message == response_data["message"]
-
-
-def test_fetch_data_to_arrow_invalid_start_row_range(client, tables_store):
-    """異常系テスト: 無効な行範囲 startRow"""
-    start_row = -1
-    chunk_size = 500
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={
-            "tableName": table_name,
-            "startRow": start_row,
-            "chunkSize": chunk_size,
-        },
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "startRow は0以上である必要があります。" in response_data["message"]
-
-
-def test_fetch_data_to_arrow_invalid_chunk_size_zero(client, tables_store):
-    """異常系テスト: チャンクサイズが0"""
-    start_row = 1
-    chunk_size = 0
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={
-            "tableName": table_name,
-            "startRow": start_row,
-            "chunkSize": chunk_size,
-        },
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert (
-        "chunkSize は1以上である必要があります。" in response_data["message"]
-    )
-
-
-def test_fetch_data_to_arrow_invalid_chunk_size_too_large(
-    client, tables_store
-):
-    """異常系テスト: チャンクサイズが上限を超える"""
-    start_row = 1
-    chunk_size = 10001
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={
-            "tableName": table_name,
-            "startRow": start_row,
-            "chunkSize": chunk_size,
-        },
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "chunkSize" in response_data["message"]
-
-
-def test_fetch_data_to_arrow_missing_table_name(client, tables_store):
-    """異常系テスト: テーブル名が未指定"""
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={"startRow": 1, "chunkSize": 500},
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "tableName" in response_data["message"]
-
-
-def test_fetch_data_to_arrow_missing_start_row(client, tables_store):
-    """異常系テスト: 開始行が未指定"""
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={"tableName": table_name, "chunkSize": 500},
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "startRow" in response_data["message"]
-
-
-def test_fetch_data_to_arrow_empty_table_name(client, tables_store):
-    """異常系テスト: 空のテーブル名"""
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={"tableName": "", "startRow": 1, "chunkSize": 500},
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "tableName" in response_data["message"]
-
-
-def test_fetch_data_to_arrow_start_row_beyond_table(client, tables_store):
-    """異常系テスト: 開始行がテーブルの行数を超える"""
-    start_row = 11
-    chunk_size = 500
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={
-            "tableName": table_name,
-            "startRow": start_row,
-            "chunkSize": chunk_size,
-        },
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "startRow" in response_data["message"]
+    expected_row_count = 3  # startRow=7で行数10のテーブルなので、残りは3行
+    assert reader.read_all().num_rows == expected_row_count
 
 
 def test_fetch_data_to_arrow_single_row(client, tables_store):
     """正常系テスト: 1行のみ取得"""
-    start_row = 5
-    chunk_size = 1
-    response = client.post(
-        "/api/table/fetch-data-to-arrow",
-        json={
-            "tableName": table_name,
-            "startRow": start_row,
-            "chunkSize": chunk_size,
-        },
+    payload = {**_BASE_PAYLOAD, "startRow": 5, "chunkSize": 1}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+    reader = pa.ipc.open_file(io.BytesIO(response.content))
+    assert reader.read_all().num_rows == 1
+
+
+# ─────────────────────────────────────────────────────────────
+# 異常系 400
+# ─────────────────────────────────────────────────────────────
+def test_fetch_data_to_arrow_table_not_found(client, tables_store):
+    """異常系テスト: 存在しないテーブル名を指定すると 400 DATA_NOT_FOUND"""
+    payload = {**_BASE_PAYLOAD, "tableName": "non_existent_table"}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert (
+        response_data["message"]
+        == "tableName 'non_existent_table'は存在しません。"
     )
+    assert "details" not in response_data
+
+
+def test_fetch_data_to_arrow_start_row_beyond_table(client, tables_store):
+    """異常系テスト: startRowがテーブルの行数を超えると 400 ROW_OUT_OF_RANGE"""
+    # 10行テーブルの最終インデックスは9。11を指定すると超過
+    payload = {**_BASE_PAYLOAD, "startRow": 11}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.ROW_OUT_OF_RANGE
+    assert "startRow" in response_data["message"]
+    assert "details" not in response_data
+
+
+# ─────────────────────────────────────────────────────────────
+# 異常系 422：Pydanticバリデーションエラー
+# ─────────────────────────────────────────────────────────────
+def test_fetch_data_to_arrow_pydantic_empty_table_name(client, tables_store):
+    """tableNameが空文字列の場合は 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "tableName": ""}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert (
+        response_data["message"] == "tableNameは1文字以上で入力してください。"
+    )
+    assert response_data["details"] == [
+        "tableNameは1文字以上で入力してください。"
+    ]
+
+
+def test_fetch_data_to_arrow_pydantic_missing_table_name(client, tables_store):
+    """tableNameが欠損の場合は 422 VALIDATION_ERROR"""
+    payload = {"startRow": 0, "chunkSize": _DEFAULT_CHUNK_SIZE}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == "tableNameは必須項目です。"
+    assert response_data["details"] == ["tableNameは必須項目です。"]
+
+
+def test_fetch_data_to_arrow_pydantic_missing_start_row(client, tables_store):
+    """startRowが欠損の場合は 422 VALIDATION_ERROR"""
+    payload = {"tableName": _TABLE_NAME, "chunkSize": _DEFAULT_CHUNK_SIZE}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == "startRowは必須項目です。"
+    assert response_data["details"] == ["startRowは必須項目です。"]
+
+
+def test_fetch_data_to_arrow_pydantic_start_row_negative(client, tables_store):
+    """startRowが負の場合は 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "startRow": -1}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == "startRowは0以上で入力してください。"
+    assert response_data["details"] == ["startRowは0以上で入力してください。"]
+
+
+def test_fetch_data_to_arrow_pydantic_chunk_size_zero(client, tables_store):
+    """chunkSizeが0の場合は 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "chunkSize": 0}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == "chunkSizeは1以上で入力してください。"
+    assert response_data["details"] == ["chunkSizeは1以上で入力してください。"]
+
+
+def test_fetch_data_to_arrow_pydantic_chunk_size_too_large(
+    client, tables_store
+):
+    """chunkSizeが上限（10000）を超えると 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "chunkSize": _MAX_CHUNK_SIZE + 1}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert (
+        response_data["message"]
+        == f"chunkSizeは{_MAX_CHUNK_SIZE}以下で入力してください。"
+    )
+    assert response_data["details"] == [
+        f"chunkSizeは{_MAX_CHUNK_SIZE}以下で入力してください。"
+    ]
+
+
+# ─────────────────────────────────────────────────────────────
+# 意地悪テスト（N1-N7）
+# ─────────────────────────────────────────────────────────────
+def test_n1_table_name_japanese(client, tables_store):
+    """N1: 日本語テーブル名でも正常取得できる"""
+    tables_store.store_table("日本語テーブル", _SOURCE_DF)
+    payload = {**_BASE_PAYLOAD, "tableName": "日本語テーブル"}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
     assert response.status_code == status.HTTP_200_OK
 
-    # Arrowデータの検証
+
+def test_n2_table_name_surrounding_spaces(client, tables_store):
+    """N2: tableNameの前後スペースはトリムされ正常取得できる"""
+    payload = {**_BASE_PAYLOAD, "tableName": f"  {_TABLE_NAME}  "}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_n3_table_name_only_spaces(client, tables_store):
+    """N3: tableNameがスペースのみはトリム後に空になり 422"""
+    payload = {**_BASE_PAYLOAD, "tableName": "   "}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert (
+        response_data["message"] == "tableNameは1文字以上で入力してください。"
+    )
+
+
+def test_n4_chunk_size_min_boundary(client, tables_store):
+    """N4: chunkSize=1（最小値）でも正常取得できる"""
+    payload = {**_BASE_PAYLOAD, "startRow": 0, "chunkSize": 1}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    assert response.status_code == status.HTTP_200_OK
     reader = pa.ipc.open_file(io.BytesIO(response.content))
-    arrow_table = reader.read_all()
-    assert arrow_table.num_rows == 1
+    assert reader.read_all().num_rows == 1
+
+
+def test_n5_chunk_size_max_boundary(client, tables_store):
+    """N5: chunkSize=10000（最大値）でも正常取得できる"""
+    payload = {**_BASE_PAYLOAD, "startRow": 0, "chunkSize": _MAX_CHUNK_SIZE}
+    response = client.post("/api/table/fetch-data-to-arrow", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+    reader = pa.ipc.open_file(io.BytesIO(response.content))
+    expected_row_count = (
+        10  # テーブルの行数は10行なので、10000指定しても10行のみ取得される
+    )
+    assert reader.read_all().num_rows == expected_row_count
