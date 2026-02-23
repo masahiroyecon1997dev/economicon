@@ -31,9 +31,7 @@ class GetTableList:
             result = {"tableNameList": table_name_list}
             return result
         except Exception as e:
-            message = _(
-                "An unexpected error occurred during getting table name list."
-            )
+            message = _("An unexpected error during getting table name list.")
             raise ProcessingError(
                 error_code=ErrorCode.GET_TABLE_LIST_ERROR,
                 message=message,

@@ -3,8 +3,16 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from economicon.core.enums import ErrorCode
 from economicon.services.data.tables_store import TablesStore
 from main import app
+
+# conditionのバリデーションエラーメッセージ
+_CONDITION_ERROR = (
+    "conditionは次のいずれかである必要があります: "
+    "equals, notEquals, greaterThan, lessThan, "
+    "greaterThanOrEquals, lessThanOrEquals"
+)
 
 
 @pytest.fixture
@@ -49,7 +57,7 @@ def test_filter_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 2
+    assert df.shape[0] == 2  # noqa: PLR2004
     assert df["A"].to_list() == [2, 2]
 
 
@@ -70,7 +78,7 @@ def test_filter_greater_than(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 5
+    assert df.shape[0] == 5  # noqa: PLR2004
     assert df["B"].to_list() == [11, 12, 30, 40, 40]
 
 
@@ -91,8 +99,8 @@ def test_filter_not_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 8
-    assert 2 not in df["A"].to_list()
+    assert df.shape[0] == 8  # noqa: PLR2004
+    assert 2 not in df["A"].to_list()  # noqa: PLR2004
 
 
 def test_filter_greater_than_or_equals(client, tables_store):
@@ -112,7 +120,7 @@ def test_filter_greater_than_or_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 3
+    assert df.shape[0] == 3  # noqa: PLR2004
     assert df["B"].to_list() == [30, 40, 40]
 
 
@@ -133,7 +141,7 @@ def test_filter_less_than(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 4
+    assert df.shape[0] == 4  # noqa: PLR2004
     assert df["A"].to_list() == [1, 2, 1, 2]
 
 
@@ -154,7 +162,7 @@ def test_filter_less_than_or_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 7
+    assert df.shape[0] == 7  # noqa: PLR2004
     assert df["B"].to_list() == [11, 12, 1, 2, 3, 10, 2]
 
 
@@ -176,7 +184,7 @@ def test_filter_equals_compare_column(client, tables_store):
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
     # A==Cとなる行
-    assert df.shape[0] == 3
+    assert df.shape[0] == 3  # noqa: PLR2004
     assert df["A"].to_list() == [1, 6, 7]
     assert df["C"].to_list() == [1, 6, 7]
 
@@ -199,7 +207,7 @@ def test_filter_greater_than_compare_column(client, tables_store):
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
     # B>Cとなる行
-    assert df.shape[0] == 3
+    assert df.shape[0] == 3  # noqa: PLR2004
     assert df["A"].to_list() == [2, 5, 3]
     assert df["C"].to_list() == [1, 4, 2]
 
@@ -222,7 +230,7 @@ def test_filter_less_than_or_equals_compare_column(client, tables_store):
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
     # A<=C
-    assert df.shape[0] == 7
+    assert df.shape[0] == 7  # noqa: PLR2004
     assert df["A"].to_list() == [1, 3, 4, 6, 7, 1, 2]
     assert df["C"].to_list() == [1, 4, 8, 6, 7, 2, 3]
 
@@ -242,7 +250,7 @@ def test_filter_invalid_table(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
     assert "tableName 'NoTable'は存在しません。" == response_data["message"]
 
 
@@ -261,7 +269,7 @@ def test_filter_invalid_column(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
     assert "columnName 'Z'は存在しません。" == response_data["message"]
 
 
@@ -279,14 +287,10 @@ def test_filter_invalid_condition(client, tables_store):
         json=payload,
     )
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    message = (
-        "condition 'invalid_condition'はサポートされていません。"
-        "サポートされるcondition: equals, notEquals, greaterThan, "
-        "lessThan, greaterThanOrEquals, lessThanOrEquals"
-    )
-    assert message == response_data["message"]
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert _CONDITION_ERROR == response_data["message"]
+    assert [_CONDITION_ERROR] == response_data["details"]
 
 
 def test_filter_single_condition_empty_table_name(client, tables_store):
@@ -306,8 +310,13 @@ def test_filter_single_condition_empty_table_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "tableName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert (
+        "tableNameは1文字以上で入力してください。" == response_data["message"]
+    )
+    assert ["tableNameは1文字以上で入力してください。"] == response_data[
+        "details"
+    ]
 
 
 def test_filter_single_condition_empty_new_table_name(client, tables_store):
@@ -327,8 +336,14 @@ def test_filter_single_condition_empty_new_table_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "newTableName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert (
+        "newTableNameは1文字以上で入力してください。"
+        == response_data["message"]
+    )
+    assert ["newTableNameは1文字以上で入力してください。"] == response_data[
+        "details"
+    ]
 
 
 def test_filter_single_condition_empty_column_name(client, tables_store):
@@ -348,8 +363,13 @@ def test_filter_single_condition_empty_column_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "columnName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert (
+        "columnNameは1文字以上で入力してください。" == response_data["message"]
+    )
+    assert ["columnNameは1文字以上で入力してください。"] == response_data[
+        "details"
+    ]
 
 
 def test_filter_single_condition_empty_condition(client, tables_store):
@@ -369,8 +389,9 @@ def test_filter_single_condition_empty_condition(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "condition" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert _CONDITION_ERROR == response_data["message"]
+    assert [_CONDITION_ERROR] == response_data["details"]
 
 
 def test_filter_single_condition_empty_is_compare_column(client, tables_store):
@@ -390,8 +411,14 @@ def test_filter_single_condition_empty_is_compare_column(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "isCompareColumn" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert (
+        "isCompareColumnは1文字以上で入力してください。"
+        == response_data["message"]
+    )
+    assert ["isCompareColumnは1文字以上で入力してください。"] == response_data[
+        "details"
+    ]
 
 
 def test_filter_single_condition_missing_table_name(client, tables_store):
@@ -410,8 +437,9 @@ def test_filter_single_condition_missing_table_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "tableName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "tableNameは必須項目です。" == response_data["message"]
+    assert ["tableNameは必須項目です。"] == response_data["details"]
 
 
 def test_filter_single_condition_missing_new_table_name(client, tables_store):
@@ -430,8 +458,9 @@ def test_filter_single_condition_missing_new_table_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "newTableName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "newTableNameは必須項目です。" == response_data["message"]
+    assert ["newTableNameは必須項目です。"] == response_data["details"]
 
 
 def test_filter_single_condition_missing_column_name(client, tables_store):
@@ -450,8 +479,9 @@ def test_filter_single_condition_missing_column_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "columnName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "columnNameは必須項目です。" == response_data["message"]
+    assert ["columnNameは必須項目です。"] == response_data["details"]
 
 
 def test_filter_single_condition_missing_condition(client, tables_store):
@@ -470,8 +500,9 @@ def test_filter_single_condition_missing_condition(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "condition" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "conditionは必須項目です。" == response_data["message"]
+    assert ["conditionは必須項目です。"] == response_data["details"]
 
 
 def test_filter_single_condition_missing_is_compare_column(
@@ -492,8 +523,9 @@ def test_filter_single_condition_missing_is_compare_column(
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "isCompareColumn" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "isCompareColumnは必須項目です。" == response_data["message"]
+    assert ["isCompareColumnは必須項目です。"] == response_data["details"]
 
 
 def test_filter_single_condition_missing_compare_value(client, tables_store):
@@ -512,5 +544,6 @@ def test_filter_single_condition_missing_compare_value(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "compareValue" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "compareValueは必須項目です。" == response_data["message"]
+    assert ["compareValueは必須項目です。"] == response_data["details"]
