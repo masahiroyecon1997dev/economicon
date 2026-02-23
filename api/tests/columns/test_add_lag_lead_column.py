@@ -785,7 +785,11 @@ def test_add_lag_lead_column_periods_zero(client, tables_store):
 
 
 def test_add_lag_lead_column_periods_large_positive(client, tables_store):
-    """L2: periods=10000 はデータ行数を超えるため全行 null になるが正常に追加される"""
+    """
+    L2:
+        periods=10000 はデータ行数を超えるため
+        全行 null になるが正常に追加される
+    """
     response = client.post(
         "/api/column/add-lag-lead",
         json={
@@ -807,7 +811,10 @@ def test_add_lag_lead_column_periods_large_positive(client, tables_store):
 
 
 def test_add_lag_lead_column_periods_large_negative(client, tables_store):
-    """L3: periods=-10000 はデータ行数を超えるため全行 null になるが正常に追加される"""
+    """
+    L3: periods=-10000 はデータ行数を超えるため
+    全行 null になるが正常に追加される
+    """
     response = client.post(
         "/api/column/add-lag-lead",
         json={

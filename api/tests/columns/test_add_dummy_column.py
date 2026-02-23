@@ -524,7 +524,9 @@ def test_add_dummy_column_japanese_source_column_name(client, tables_store):
     """N2: sourceColumnName に日本語列名を指定しても正常に処理される"""
     tables_store.update_table(
         "TestTable",
-        pl.DataFrame({"性別": ["male", "female", "female"], "age": [25, 30, 35]}),
+        pl.DataFrame(
+            {"性別": ["male", "female", "female"], "age": [25, 30, 35]}
+        ),
     )
     response = client.post(
         "/api/column/add-dummy",
