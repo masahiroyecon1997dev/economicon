@@ -12,8 +12,8 @@ table_name = "test_table"
 test_data = pl.DataFrame(
     {"column1": [1, 2, 3, 4, 5], "column2": ["a", "b", "c", "d", "e"]}
 )
-# テーブルの行数 - 1 (サービスが row_count - 1 を返す)
-TOTAL_ROWS = 4
+# テーブルの行数
+TOTAL_ROWS = 5
 
 
 @pytest.fixture
