@@ -1,8 +1,10 @@
 import polars as pl
 import pytest
-from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.core.enums import ErrorCode
+from economicon.services.data.tables_store import TablesStore
 from main import app
 
 
@@ -54,7 +56,7 @@ def test_get_table_list_exception(client, tables_store, monkeypatch):
     response = client.get("/api/table/get-list")
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-    assert response_data["code"] == "NG"
+    assert response_data["code"] == ErrorCode.GET_TABLE_LIST_ERROR
     expected_message = (
         "テーブル名リストの取得中に予期しないエラーが発生しました。"
     )
