@@ -684,3 +684,422 @@ def test_invalid_position_column(client, tables_store):
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
+
+
+# ========================================
+# 意地悪な入力テスト (N1-N7: 名前バリエーション)
+# ========================================
+
+
+def test_add_simulation_column_japanese_column_name(client, tables_store):
+    """N1: 日本語の新規列名を指定しても正常に追加される"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "GDP成長率",
+                "distribution": {
+                    "type": "uniform",
+                    "low": UNIFORM_LOW,
+                    "high": UNIFORM_HIGH,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "GDP成長率"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert "GDP成長率" in df.columns
+
+
+def test_add_simulation_column_japanese_position_column(client, tables_store):
+    """N2: addPositionColumn に日本語列名を指定しても正常に挿入される"""
+    tables_store.update_table(
+        TABLE_NAME,
+        pl.DataFrame({"売上①": [1, 2, 3, 4, 5], COL_B: [10, 20, 30, 40, 50]}),
+    )
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "SimCol",
+                "distribution": {
+                    "type": "uniform",
+                    "low": UNIFORM_LOW,
+                    "high": UNIFORM_HIGH,
+                },
+            },
+            "addPositionColumn": "売上①",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == ["売上①", "SimCol", COL_B]
+
+
+def test_add_simulation_column_emoji_column_name(client, tables_store):
+    """N3: 絵文字のみの列名でも正常に追加される"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "🔥",
+                "distribution": {
+                    "type": "uniform",
+                    "low": UNIFORM_LOW,
+                    "high": UNIFORM_HIGH,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "🔥"
+
+
+def test_add_simulation_column_strip_whitespace_position_column(
+    client, tables_store
+):
+    """N4: addPositionColumn の前後スペースは除去されて正常に処理される"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "SimCol",
+                "distribution": {
+                    "type": "uniform",
+                    "low": UNIFORM_LOW,
+                    "high": UNIFORM_HIGH,
+                },
+            },
+            "addPositionColumn": "  A  ",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == [COL_A, "SimCol", COL_B]
+
+
+def test_add_simulation_column_max_length_column_name(client, tables_store):
+    """N5: 128文字（最大長境界値）の列名は正常に追加される"""
+    long_name = "x" * 128
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": long_name,
+                "distribution": {
+                    "type": "uniform",
+                    "low": UNIFORM_LOW,
+                    "high": UNIFORM_HIGH,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == long_name
+
+
+def test_add_simulation_column_too_long_column_name(client, tables_store):
+    """N6: 129文字（最大長超過）の列名は422エラーになる"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "x" * 129,
+                "distribution": {
+                    "type": "uniform",
+                    "low": UNIFORM_LOW,
+                    "high": UNIFORM_HIGH,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "simulationColumn.column_nameは128文字以内で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_add_simulation_column_tab_char_column_name(client, tables_store):
+    """N7: タブ文字を含む列名は422エラーになる"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "col\tA",
+                "distribution": {
+                    "type": "uniform",
+                    "low": UNIFORM_LOW,
+                    "high": UNIFORM_HIGH,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "simulationColumn.column_nameに使用できない文字が含まれています。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+# ========================================
+# 意地悪な入力テスト (D1-D8: 分布パラメータ極端値)
+# ========================================
+
+
+def test_add_simulation_column_uniform_low_equals_high(client, tables_store):
+    """D1: 一様分布で low==high の場合は422エラーになる"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "SimCol",
+                "distribution": {
+                    "type": "uniform",
+                    "low": 5.0,
+                    "high": 5.0,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "Value error, 一様分布では、\'low\'は\'high\'より小さい必要があります"
+    assert expected_msg in response_data["message"]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_add_simulation_column_uniform_reversed_range(client, tables_store):
+    """D2: 一様分布で low > high の場合は422エラーになる"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "SimCol",
+                "distribution": {
+                    "type": "uniform",
+                    "low": 10.0,
+                    "high": 5.0,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "一様分布では、\'low\'は\'high\'より小さい必要があります"
+    assert expected_msg in response_data["message"]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_add_simulation_column_uniform_extreme_wide_range(
+    client, tables_store
+):
+    """D3: 一様分布で超広範囲 (-1e10, 1e10) でも正常に追加される"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "WideRangeCol",
+                "distribution": {
+                    "type": "uniform",
+                    "low": -1e10,
+                    "high": 1e10,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+
+def test_add_simulation_column_normal_scale_zero(client, tables_store):
+    """D4: 正規分布で scale=0 は422エラーになる（gt=0 制約）"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "SimCol",
+                "distribution": {
+                    "type": "normal",
+                    "loc": 0.0,
+                    "scale": 0.0,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    # Pydantic v2 の discriminated union ではフィールドエラー時にユニオン検証エラーが
+    # 先に報告されるため、"simulationColumn.distribution" がパスに含まれることを検証する
+    assert "simulationColumn.distribution" in response_data["message"]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_add_simulation_column_normal_near_zero_scale(client, tables_store):
+    """D5: 正規分布で scale=1e-15 (ゼロに非常に近い正の値) でも正常に追加される"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "TinyScaleCol",
+                "distribution": {
+                    "type": "normal",
+                    "loc": 0.0,
+                    "scale": 1e-15,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+
+def test_add_simulation_column_binomial_probability_zero(client, tables_store):
+    """D6: 二項分布で p=0 は422エラーになる（gt=0 制約）"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "SimCol",
+                "distribution": {
+                    "type": "binomial",
+                    "n": BINOMIAL_N,
+                    "p": 0.0,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    # Pydantic v2 の discriminated union ではフィールドエラー時にユニオン検証エラーが
+    # 先に報告されるため、"simulationColumn.distribution" がパスに含まれることを検証する
+    assert "simulationColumn.distribution" in response_data["message"]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_add_simulation_column_binomial_probability_over_one(
+    client, tables_store
+):
+    """D7: 二項分布で p=1.5 は422エラーになる（le=1 制約）"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "SimCol",
+                "distribution": {
+                    "type": "binomial",
+                    "n": BINOMIAL_N,
+                    "p": 1.5,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    # Pydantic v2 の discriminated union ではフィールドエラー時にユニオン検証エラーが
+    # 先に報告されるため、"simulationColumn.distribution" がパスに含まれることを検証する
+    assert "simulationColumn.distribution" in response_data["message"]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_add_simulation_column_hypergeometric_k_exceeds_n(
+    client, tables_store
+):
+    """D8: 超幾何分布で K>N の場合は422エラーになる"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "column_name": "SimCol",
+                "distribution": {
+                    "type": "hypergeometric",
+                    "N": 5,
+                    "K": 6,
+                    "n": 3,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    # Pydantic v2 の discriminated union ではフィールドエラー時にユニオン検証エラーが
+    # 先に報告されるため、"simulationColumn.distribution" がパスに含まれることを検証する
+    assert "simulationColumn.distribution" in response_data["message"]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
