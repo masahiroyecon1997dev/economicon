@@ -2,7 +2,8 @@
 
 from typing import Annotated, Any, Self
 
-from pydantic import Field, model_validator
+from pydantic import BeforeValidator, Field, model_validator
+from pydantic_core import PydanticCustomError
 
 from .common import BaseRequest, BaseResult
 from .entities import SimulationColumnConfig
@@ -19,6 +20,28 @@ from .types import (
 )
 
 # ---------------------------------------------------------------------------
+# バリデーション関数
+# ---------------------------------------------------------------------------
+
+
+def _coerce_join_type(v: Any) -> JoinType:
+    """JSON文字列をJoinTypeに変換するBeforeValidator"""
+    if isinstance(v, JoinType):
+        return v
+    if isinstance(v, str):
+        try:
+            return JoinType(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in JoinType)
+            raise PydanticCustomError(
+                "literal_error",
+                "joinTypeは次のいずれかである必要があります: {expected}",
+                {"expected": valid},
+            ) from None
+    return v
+
+
+# ---------------------------------------------------------------------------
 # リクエストボディ
 # ---------------------------------------------------------------------------
 
@@ -33,13 +56,14 @@ class CreateTableRequestBody(BaseRequest):
             description="作成するテーブルの名前。ワークスペース内に存在しない名前を指定してください。",
         ),
     ]
-    table_number_of_rows: Annotated[
+    row_count: Annotated[
         int | None,
         Field(
-            title="Table Number Of Rows",
+            title="Row Count",
             description=(
                 "テーブルの行数。"
-                "file_path が指定されている場合は省略可能（None の場合はファイルの行数を使用）。"
+                "file_path が指定されている場合は省略可能"
+                "（None の場合はファイルの行数を使用）。"
                 "file_path が省略されている場合は必須（1以上の整数）。"
             ),
             ge=1,
@@ -69,7 +93,8 @@ class CreateTableRequestBody(BaseRequest):
             title="CSV Has Header",
             description=(
                 "CSV ファイルにヘッダ行があるか。"
-                "True: 1 行目をヘッダとして読み飛ばし、2 行目からをデータとする。"
+                "True: 1 行目をヘッダとして読み飛ばし、"
+                "2 行目からをデータとする。"
                 "False: 1 行目からデータとして読み込む。"
                 "file_path が CSV の場合のみ有効。"
             ),
@@ -88,7 +113,9 @@ class CreateTableRequestBody(BaseRequest):
         CsvEncoding,
         Field(
             title="CSV Encoding",
-            description="CSV のエンコーディング。file_path が CSV の場合のみ有効。",
+            description=(
+                "CSV のエンコーディング。file_path が CSV の場合のみ有効。"
+            ),
         ),
     ] = "utf8"
     excel_sheet_name: Annotated[
@@ -104,14 +131,10 @@ class CreateTableRequestBody(BaseRequest):
 
     @model_validator(mode="after")
     def require_rows_when_no_file(self) -> Self:
-        """file_path が None のとき table_number_of_rows は必須"""
-        if (
-            self.file_path is None
-            and self.table_number_of_rows is None
-        ):
+        """file_path が None のとき row_count は必須"""
+        if self.file_path is None and self.row_count is None:
             raise ValueError(
-                "table_number_of_rows is required "
-                "when file_path is not specified"
+                "row_count is required when file_path is not specified"
             )
         return self
 
@@ -185,6 +208,7 @@ class CreateJoinTableRequestBody(BaseRequest):
         Field(
             title="Left Key Column Names",
             description="左側テーブルの結合キーカラム名のリスト",
+            min_length=1,
         ),
     ]
     right_key_column_names: Annotated[
@@ -192,10 +216,12 @@ class CreateJoinTableRequestBody(BaseRequest):
         Field(
             title="Right Key Column Names",
             description="右側テーブルの結合キーカラム名のリスト",
+            min_length=1,
         ),
     ]
     join_type: Annotated[
         JoinType,
+        BeforeValidator(_coerce_join_type),
         Field(
             default=JoinType.INNER,
             title="Join Type",

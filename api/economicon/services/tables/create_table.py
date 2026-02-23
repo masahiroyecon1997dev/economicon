@@ -46,7 +46,7 @@ class CreateTable:
     ):
         self.tables_store = tables_store
         self.table_name = body.table_name
-        self.table_number_of_rows = body.table_number_of_rows
+        self.row_count = body.row_count
         self.column_names = body.column_names
         self.file_path = body.file_path
         self.csv_has_header = body.csv_has_header
@@ -55,7 +55,7 @@ class CreateTable:
         self.excel_sheet_name = body.excel_sheet_name
         self.param_names = {
             "table_name": "tableName",
-            "table_num_rows": "tableNumberOfRows",
+            "row_count": "rowCount",
             "column_names": "columnNames",
             "file_path": "filePath",
         }
@@ -73,11 +73,12 @@ class CreateTable:
             row_count = (
                 self.tables_store.get_table_row_count(self.table_name) - 1
             )
-            validate_row_count_limit(
-                current_row_count=row_count,
-                requested_count=self.table_number_of_rows,
-                target=self.param_names["table_num_rows"],
-            )
+            if self.row_count is not None:
+                validate_row_count_limit(
+                    current_row_count=row_count,
+                    requested_count=self.row_count,
+                    target=self.param_names["row_count"],
+                )
         else:
             # ファイルあり: パスの存在と拡張子を検証
             validate_file_path(
@@ -89,16 +90,17 @@ class CreateTable:
                 target=self.param_names["file_path"],
                 allowed_extensions=_ALLOWED_EXTENSIONS,
             )
-        return None
 
     def execute(self):
         # テーブルの作成処理
         try:
             if self.file_path is not None:
-                df = self._read_file()
+                df = self._read_file(self.file_path)
             else:
-                # 空（None）テーブルを作成
-                none_col = [None] * self.table_number_of_rows
+                # 空（None）テーブルを作成（row_countはNoneではないはず）
+                if self.row_count is None:
+                    self.row_count = 1  # デフォルトは1行
+                none_col = [None] * self.row_count
                 data = {col: none_col for col in self.column_names}
                 df = pl.DataFrame(data)
 
@@ -123,16 +125,16 @@ class CreateTable:
     # プライベートメソッド
     # ------------------------------------------------------------------
 
-    def _read_file(self) -> pl.DataFrame:
+    def _read_file(self, path: str) -> pl.DataFrame:
         """ファイルを読み込み、column_names でカラム名を置換して返す"""
-        ext = Path(self.file_path).suffix.lower().lstrip(".")
+        ext = Path(path).suffix.lower().lstrip(".")
 
         if ext == "csv":
-            df_raw = self._read_csv()
+            df_raw = self._read_csv(path)
         elif ext in ("xlsx", "xls"):
-            df_raw = self._read_excel()
+            df_raw = self._read_excel(path)
         elif ext == "parquet":
-            df_raw = self._read_parquet()
+            df_raw = self._read_parquet(path)
         else:
             message = _("Unsupported file type: {}").format(ext)
             raise ProcessingError(
@@ -159,34 +161,34 @@ class CreateTable:
         df_renamed = df_raw.rename(rename_map)
         return self._adjust_rows(df_renamed)
 
-    def _read_csv(self) -> pl.DataFrame:
+    def _read_csv(self, path: str) -> pl.DataFrame:
         """CSVファイルを読み込む"""
         encoding = _ENCODING_MAP.get(self.csv_encoding, self.csv_encoding)
         return pl.read_csv(
-            self.file_path,
+            path,
             separator=self.csv_separator,
             encoding=encoding,
             has_header=self.csv_has_header,
         )
 
-    def _read_excel(self) -> pl.DataFrame:
+    def _read_excel(self, path: str) -> pl.DataFrame:
         """Excelファイルを読み込む"""
         sheet = self.excel_sheet_name or None
         if sheet:
-            return pl.read_excel(self.file_path, sheet_name=sheet)
-        return pl.read_excel(self.file_path)
+            return pl.read_excel(path, sheet_name=sheet)
+        return pl.read_excel(path)
 
-    def _read_parquet(self) -> pl.DataFrame:
+    def _read_parquet(self, path: str) -> pl.DataFrame:
         """Parquetファイルを読み込む"""
-        return pl.read_parquet(self.file_path)
+        return pl.read_parquet(path)
 
     def _adjust_rows(self, df: pl.DataFrame) -> pl.DataFrame:
-        """table_number_of_rows に応じて行数を調整する。
+        """row_count に応じて行数を調整する。
         None の場合はそのまま返す。"""
-        if self.table_number_of_rows is None:
+        if self.row_count is None:
             return df
         current = df.height
-        target = self.table_number_of_rows
+        target = self.row_count
         if current > target:
             # 超過分を切り捨て
             return df.head(target)

@@ -56,7 +56,6 @@ class RenameColumn:
             existing_list=column_name_list,
             target=self.param_names["new_column_name"],
         )
-        return None
 
     def execute(self):
         # 列名の変更処理
@@ -72,7 +71,10 @@ class RenameColumn:
                 self.table_name, new_df
             )
             # 結果を返す
-            result = {"tableName": renamed_table_name}
+            result = {
+                "tableName": renamed_table_name,
+                "columnName": self.new_column_name,
+            }
             return result
         except Exception as e:
             message = _(

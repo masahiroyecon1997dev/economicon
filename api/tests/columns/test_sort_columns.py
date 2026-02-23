@@ -18,12 +18,6 @@ DATA_A = [3, 1, 2]
 DATA_B = [6, 4, 5]
 DATA_C = ["c", "a", "b"]
 
-# sortColumns 空リスト時の Pydantic デフォルトメッセージ
-# （VALIDATION_ERROR_TEMPLATES に too_short がないため英語のまま）
-MSG_EMPTY_SORT_COLUMNS = (
-    "List should have at least 1 item after validation, not 0"
-)
-
 
 @pytest.fixture
 def client():
@@ -144,8 +138,9 @@ def test_sort_empty_columns(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == MSG_EMPTY_SORT_COLUMNS
-    assert response_data["details"] == [MSG_EMPTY_SORT_COLUMNS]
+    expected_msg = "sortColumnsは1件以上ある必要があります。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
 
 
 def test_sort_missing_table_name(client, tables_store):

@@ -32,7 +32,8 @@ def tables_store():
 def test_clear_tables_success(client, tables_store):
     # テーブルが存在することを確認
     table_names = tables_store.get_table_name_list()
-    assert len(table_names) == 2
+    pre_test_table_count = 2
+    assert len(table_names) == pre_test_table_count
     assert "TestTable1" in table_names
     assert "TestTable2" in table_names
     # テーブルをクリア

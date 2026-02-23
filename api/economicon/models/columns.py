@@ -393,6 +393,13 @@ class RenameColumnResult(BaseResult):
             description="カラム名を変更したテーブル名",
         ),
     ]
+    column_name: Annotated[
+        str,
+        Field(
+            title="Column Name",
+            description="変更後のカラム名",
+        ),
+    ]
 
 
 class DuplicateColumnResult(BaseResult):
