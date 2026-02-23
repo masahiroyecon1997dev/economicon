@@ -1,11 +1,48 @@
+"""信頼区間計算APIのテスト"""
+
+from typing import cast
+
 import numpy as np
 import polars as pl
 import pytest
+import scipy.stats as spstats
 from fastapi import status
 from fastapi.testclient import TestClient
+from statsmodels.stats.proportion import proportion_confint
 
 from economicon.services.data.tables_store import TablesStore
 from main import app
+
+# -----------------------------------------------------------
+# 定数
+# -----------------------------------------------------------
+
+_TABLE_NAME = "ConfidenceTestTable"
+_TEXT_TABLE = "TextTable"
+_EMPTY_TABLE = "EmptyTable"
+_N_SAMPLES = 100
+_SEED = 42
+_CI_LEVEL_90 = 0.90
+_CI_LEVEL_95 = 0.95
+_CI_LEVEL_99 = 0.99
+
+_STAT_MEAN = "mean"
+_STAT_MEDIAN = "median"
+_STAT_PROPORTION = "proportion"
+_STAT_VARIANCE = "variance"
+_STAT_STD = "standard_deviation"
+
+_STATISTIC_TYPE_ERROR = (
+    "statisticTypeは次のいずれかである必要があります: "
+    "mean, median, proportion, variance, standard_deviation"
+)
+
+URL = "/api/statistics/confidence-interval"
+
+
+# -----------------------------------------------------------
+# フィクスチャ
+# -----------------------------------------------------------
 
 
 @pytest.fixture
@@ -18,377 +55,337 @@ def client():
 def tables_store():
     """TablesStoreのフィクスチャ"""
     manager = TablesStore()
-    # テーブルをクリア
     manager.clear_tables()
-    # 信頼区間計算用テストデータを作成
-    np.random.seed(42)  # 再現可能な結果のため
-    n_samples = 100
-    # 正規分布に従うデータ
-    normal_data = np.random.normal(50, 10, n_samples)
-    # 二項データ（0または1）
-    binary_data = np.random.binomial(1, 0.3, n_samples)
-    # テストテーブルの作成
+
+    np.random.seed(_SEED)
+    normal_data = np.random.normal(50, 10, _N_SAMPLES)
+    binary_data = np.random.binomial(1, 0.3, _N_SAMPLES)
+
     df = pl.DataFrame(
         {
             "normal_col": normal_data,
-            "binary_col": binary_data,
-            "id": range(n_samples),
+            "binary_col": binary_data.astype(float),
+            "id": list(range(_N_SAMPLES)),
         }
     )
-    manager.store_table("ConfidenceTestTable", df)
-    # 数値以外のデータを含むテーブル（エラーテスト用）
+    manager.store_table(_TABLE_NAME, df)
+
     df_with_text = pl.DataFrame(
-        {"numeric_col": [1.0, 2.0, 3.0, 4.0], "text_col": ["a", "b", "c", "d"]}
+        {
+            "numeric_col": [1.0, 2.0, 3.0, 4.0],
+            "text_col": ["a", "b", "c", "d"],
+        }
     )
-    manager.store_table("TextTable", df_with_text)
-    # 空データテーブル
-    df_empty = pl.DataFrame({"empty_col": [None, None, None]})
-    manager.store_table("EmptyTable", df_empty)
+    manager.store_table(_TEXT_TABLE, df_with_text)
+
+    df_empty = pl.DataFrame(
+        {"empty_col": [None, None, None]},
+        schema={"empty_col": pl.Float64},
+    )
+    manager.store_table(_EMPTY_TABLE, df_empty)
+
     yield manager
-    # テスト後のクリーンアップ
     manager.clear_tables()
+
+
+# -----------------------------------------------------------
+# 成功ケース
+# -----------------------------------------------------------
 
 
 def test_confidence_interval_mean_success(client, tables_store):
     """平均値の信頼区間計算が正常に動作する"""
     payload = {
-        "tableName": "ConfidenceTestTable",
+        "tableName": _TABLE_NAME,
         "columnName": "normal_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "mean",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
+
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    # 結果の構造をチェック
+
     result = response_data["result"]
-    assert "tableName" in result
-    assert "columnName" in result
-    assert "statistic" in result
-    assert "confidence_interval" in result
-    assert "confidence_level" in result
-    # 統計量の構造をチェック
-    statistic = result["statistic"]
-    assert statistic["type"] == "mean"
-    assert isinstance(statistic["value"], (int, float))
-    # 信頼区間の構造をチェック
+    assert result["tableName"] == _TABLE_NAME
+    assert result["columnName"] == "normal_col"
+    assert result["confidence_level"] == _CI_LEVEL_95
+    assert result["statistic"]["type"] == _STAT_MEAN
+    assert isinstance(result["statistic"]["value"], float)
+
     ci = result["confidence_interval"]
     assert "lower" in ci
     assert "upper" in ci
-    assert isinstance(ci["lower"], (int, float))
-    assert isinstance(ci["upper"], (int, float))
     assert ci["lower"] < ci["upper"]
-    # 信頼度レベルのチェック
-    assert result["confidence_level"] == 0.95
-    assert result["columnName"] == "normal_col"
+
+
+def test_confidence_interval_mean_numerical(client, tables_store):
+    """平均値CIの数値をscipy.stats.t.intervalと照合"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
+    }
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
+    # フィクスチャと同じシード・順序でデータを再現
+    np.random.seed(_SEED)
+    normal_data = np.random.normal(50, 10, _N_SAMPLES)
+
+    expected_lower, expected_upper = spstats.t.interval(
+        _CI_LEVEL_95,
+        df=_N_SAMPLES - 1,
+        loc=float(np.mean(normal_data)),
+        scale=float(spstats.sem(normal_data)),
+    )
+
+    ci = result["confidence_interval"]
+    assert ci["lower"] == pytest.approx(expected_lower, abs=1e-6)
+    assert ci["upper"] == pytest.approx(expected_upper, abs=1e-6)
+    assert result["statistic"]["value"] == pytest.approx(
+        float(np.mean(normal_data)), abs=1e-6
+    )
 
 
 def test_confidence_interval_median_success(client, tables_store):
     """中央値の信頼区間計算が正常に動作する"""
     payload = {
-        "tableName": "ConfidenceTestTable",
+        "tableName": _TABLE_NAME,
         "columnName": "normal_col",
-        "confidenceLevel": 0.90,
-        "statisticType": "median",
+        "confidenceLevel": _CI_LEVEL_90,
+        "statisticType": _STAT_MEDIAN,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
+
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
+
     result = response_data["result"]
-    assert result["statistic"]["type"] == "median"
-    assert result["confidence_level"] == 0.90
+    assert result["statistic"]["type"] == _STAT_MEDIAN
+    assert result["confidence_level"] == _CI_LEVEL_90
+    assert (
+        result["confidence_interval"]["lower"]
+        < result["confidence_interval"]["upper"]
+    )
+
+
+def test_confidence_interval_median_numerical(client, tables_store):
+    """中央値CIの数値をBootstrap法(seed=42)と照合"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_90,
+        "statisticType": _STAT_MEDIAN,
+    }
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
+    np.random.seed(_SEED)
+    normal_data = np.random.normal(50, 10, _N_SAMPLES)
+
+    # サービスと同じBootstrap手順を再現
+    np.random.seed(_SEED)
+    bootstrap_medians = [
+        np.median(np.random.choice(normal_data, size=_N_SAMPLES, replace=True))
+        for _ in range(1000)
+    ]
+    alpha = 1 - _CI_LEVEL_90
+    expected_lower = float(np.percentile(bootstrap_medians, (alpha / 2) * 100))
+    expected_upper = float(
+        np.percentile(bootstrap_medians, (1 - alpha / 2) * 100)
+    )
+
+    ci = result["confidence_interval"]
+    assert ci["lower"] == pytest.approx(expected_lower, abs=1e-6)
+    assert ci["upper"] == pytest.approx(expected_upper, abs=1e-6)
 
 
 def test_confidence_interval_proportion_success(client, tables_store):
     """比率の信頼区間計算が正常に動作する"""
     payload = {
-        "tableName": "ConfidenceTestTable",
+        "tableName": _TABLE_NAME,
         "columnName": "binary_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "proportion",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_PROPORTION,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
+
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
+
     result = response_data["result"]
-    assert result["statistic"]["type"] == "proportion"
-    # 比率は0から1の間でなければならない
+    assert result["statistic"]["type"] == _STAT_PROPORTION
     proportion_value = result["statistic"]["value"]
-    assert proportion_value >= 0
-    assert proportion_value <= 1
-    # 信頼区間も0から1の間
+    assert 0.0 <= proportion_value <= 1.0
+
     ci = result["confidence_interval"]
-    assert ci["lower"] >= 0
-    assert ci["upper"] <= 1
+    assert 0.0 <= ci["lower"] <= ci["upper"] <= 1.0
+
+
+def test_confidence_interval_proportion_numerical(client, tables_store):
+    """比率CIの数値をstatsmodels Wilson scoreと照合"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "binary_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_PROPORTION,
+    }
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
+    # フィクスチャと同じシード・順序でデータを再現
+    np.random.seed(_SEED)
+    _dummy = np.random.normal(50, 10, _N_SAMPLES)  # normal_col分のRNG消費
+    binary_data = np.random.binomial(1, 0.3, _N_SAMPLES)
+    n_successes = int(np.sum(binary_data))
+
+    expected_lower, expected_upper = proportion_confint(
+        n_successes,
+        _N_SAMPLES,
+        alpha=1 - _CI_LEVEL_95,
+        method="wilson",
+    )
+
+    ci = result["confidence_interval"]
+    assert ci["lower"] == pytest.approx(cast(float, expected_lower), abs=1e-6)
+    assert ci["upper"] == pytest.approx(cast(float, expected_upper), abs=1e-6)
 
 
 def test_confidence_interval_variance_success(client, tables_store):
     """分散の信頼区間計算が正常に動作する"""
     payload = {
-        "tableName": "ConfidenceTestTable",
+        "tableName": _TABLE_NAME,
         "columnName": "normal_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "variance",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_VARIANCE,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
+
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
+
     result = response_data["result"]
-    assert result["statistic"]["type"] == "variance"
-    # 分散は正の値でなければならない
-    variance_value = result["statistic"]["value"]
-    assert variance_value > 0
+    assert result["statistic"]["type"] == _STAT_VARIANCE
+    assert result["statistic"]["value"] > 0
+    assert (
+        result["confidence_interval"]["lower"]
+        < result["confidence_interval"]["upper"]
+    )
+
+
+def test_confidence_interval_variance_numerical(client, tables_store):
+    """分散CIの数値をカイ二乗分布と照合"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_VARIANCE,
+    }
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
+    np.random.seed(_SEED)
+    normal_data = np.random.normal(50, 10, _N_SAMPLES)
+    variance_val = float(np.var(normal_data, ddof=1))
+    alpha = 1 - _CI_LEVEL_95
+    chi2_lower = spstats.chi2.ppf(alpha / 2, df=_N_SAMPLES - 1)
+    chi2_upper = spstats.chi2.ppf(1 - alpha / 2, df=_N_SAMPLES - 1)
+    expected_lower = (_N_SAMPLES - 1) * variance_val / chi2_upper
+    expected_upper = (_N_SAMPLES - 1) * variance_val / chi2_lower
+
+    ci = result["confidence_interval"]
+    assert ci["lower"] == pytest.approx(expected_lower, abs=1e-6)
+    assert ci["upper"] == pytest.approx(expected_upper, abs=1e-6)
+    assert result["statistic"]["value"] == pytest.approx(
+        variance_val, abs=1e-6
+    )
 
 
 def test_confidence_interval_std_success(client, tables_store):
     """標準偏差の信頼区間計算が正常に動作する"""
     payload = {
-        "tableName": "ConfidenceTestTable",
+        "tableName": _TABLE_NAME,
         "columnName": "normal_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "std",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_STD,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
+
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
+
     result = response_data["result"]
-    assert result["statistic"]["type"] == "std"
-    # 標準偏差は正の値でなければならない
-    std_value = result["statistic"]["value"]
-    assert std_value > 0
-
-
-def test_confidence_interval_invalid_table(client, tables_store):
-    """存在しないテーブル名でエラーが返される"""
-    payload = {
-        "tableName": "NonExistentTable",
-        "columnName": "normal_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "mean",
-    }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    message = "tableName 'NonExistentTable'は存在しません。"
-    assert message == response_data["message"]
-
-
-def test_confidence_interval_invalid_column(client, tables_store):
-    """存在しない列名でエラーが返される"""
-    payload = {
-        "tableName": "ConfidenceTestTable",
-        "columnName": "nonexistent_column",
-        "confidenceLevel": 0.95,
-        "statisticType": "mean",
-    }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    message = "columnName 'nonexistent_column'は存在しません。"
-    assert message == response_data["message"]
-
-
-def test_confidence_interval_invalid_statistic_type(client, tables_store):
-    """サポートされていない統計タイプでエラーが返される"""
-    payload = {
-        "tableName": "ConfidenceTestTable",
-        "columnName": "normal_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "invalid_stat",
-    }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    message = (
-        "statisticType 'invalid_stat'はサポートされていません。"
-        "サポートされるstatisticType: mean, median, proportion, "
-        "variance, std"
-    )
-    assert message == response_data["message"]
-
-
-def test_confidence_interval_invalid_confidence_level_high(
-    client, tables_store
-):
-    """信頼度レベルが1以上の場合エラーが返される"""
-    payload = {
-        "tableName": "ConfidenceTestTable",
-        "columnName": "normal_col",
-        "confidenceLevel": 1.5,
-        "statisticType": "mean",
-    }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["code"] == "NG"
-    assert "confidenceLevel" in response_data["message"]
-
-
-def test_confidence_interval_invalid_confidence_level_low(
-    client, tables_store
-):
-    """信頼度レベルが0以下の場合エラーが返される"""
-    payload = {
-        "tableName": "ConfidenceTestTable",
-        "columnName": "normal_col",
-        "confidenceLevel": 0,
-        "statisticType": "mean",
-    }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["code"] == "NG"
-    assert "confidenceLevel" in response_data["message"]
-
-
-def test_confidence_interval_proportion_invalid_data(client, tables_store):
-    """比率計算で0,1以外のデータがある場合エラーが返される"""
-    payload = {
-        "tableName": "ConfidenceTestTable",
-        "columnName": "normal_col",  # 0,1以外の値を含む列
-        "confidenceLevel": 0.95,
-        "statisticType": "proportion",
-    }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
+    assert result["statistic"]["type"] == _STAT_STD
+    assert result["statistic"]["value"] > 0
     assert (
-        "データには0と1の値のみが含まれる必要があります"
-        in response_data["message"]
+        result["confidence_interval"]["lower"]
+        < result["confidence_interval"]["upper"]
     )
 
 
-def test_confidence_interval_empty_data(client, tables_store):
-    """空データの場合エラーが返される"""
+def test_confidence_interval_std_numerical(client, tables_store):
+    """標準偏差CIの数値を分散CIの平方根と照合"""
     payload = {
-        "tableName": "EmptyTable",
-        "columnName": "empty_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "mean",
-    }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "カラムに有効なデータが含まれていません" in response_data["message"]
-
-
-def test_confidence_interval_missing_parameters(client, tables_store):
-    """必須パラメータが不足している場合エラーが返される"""
-    # tableName がない場合
-    payload = {
+        "tableName": _TABLE_NAME,
         "columnName": "normal_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "mean",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_STD,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["message"] is not None
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
+    np.random.seed(_SEED)
+    normal_data = np.random.normal(50, 10, _N_SAMPLES)
+    variance_val = float(np.var(normal_data, ddof=1))
+    alpha = 1 - _CI_LEVEL_95
+    chi2_lower = spstats.chi2.ppf(alpha / 2, df=_N_SAMPLES - 1)
+    chi2_upper = spstats.chi2.ppf(1 - alpha / 2, df=_N_SAMPLES - 1)
+    var_lower = (_N_SAMPLES - 1) * variance_val / chi2_upper
+    var_upper = (_N_SAMPLES - 1) * variance_val / chi2_lower
+    expected_lower = float(np.sqrt(var_lower))
+    expected_upper = float(np.sqrt(var_upper))
+
+    ci = result["confidence_interval"]
+    assert ci["lower"] == pytest.approx(expected_lower, abs=1e-6)
+    assert ci["upper"] == pytest.approx(expected_upper, abs=1e-6)
 
 
 def test_confidence_interval_different_levels(client, tables_store):
-    """異なる信頼度レベルでの計算が正常に動作する"""
-    # 初期化しておく
-    width_90 = width_95 = width_99 = None
-    levels = [0.90, 0.95, 0.99]
-    for level in levels:
+    """信頼度レベルが高いほど区間が広くなる"""
+    widths = {}
+    for level in [_CI_LEVEL_90, _CI_LEVEL_95, _CI_LEVEL_99]:
         payload = {
-            "tableName": "ConfidenceTestTable",
+            "tableName": _TABLE_NAME,
             "columnName": "normal_col",
             "confidenceLevel": level,
-            "statisticType": "mean",
+            "statisticType": _STAT_MEAN,
         }
-        response = client.post(
-            "/api/statistics/confidence-interval",
-            json=payload,
-        )
-        response_data = response.json()
+        response = client.post(URL, json=payload)
         assert response.status_code == status.HTTP_200_OK
-        assert response_data["code"] == "OK"
-        result = response_data["result"]
-        assert result["confidence_level"] == level
-        # より高い信頼度レベルはより広い区間になるはず
-        if level == 0.99:
-            ci_99 = result["confidence_interval"]
-            width_99 = ci_99["upper"] - ci_99["lower"]
-        elif level == 0.95:
-            ci_95 = result["confidence_interval"]
-            width_95 = ci_95["upper"] - ci_95["lower"]
-        elif level == 0.90:
-            ci_90 = result["confidence_interval"]
-            width_90 = ci_90["upper"] - ci_90["lower"]
-    # 信頼区間の幅が信頼度レベルと正しい関係にあることを確認
-    # 全ての変数が正しく計算されたかチェックしてから比較
-    assert all([width_90, width_95, width_99])
-    if width_90 and width_95 and width_99:
-        assert width_90 < width_95 < width_99
+        ci = response.json()["result"]["confidence_interval"]
+        widths[level] = ci["upper"] - ci["lower"]
+
+    assert widths[_CI_LEVEL_90] < widths[_CI_LEVEL_95] < widths[_CI_LEVEL_99]
 
 
-def test_confidence_interval_json_structure_validation(client, tables_store):
+def test_confidence_interval_response_structure(client, tables_store):
     """レスポンスのJSON構造が仕様通りである"""
     payload = {
-        "tableName": "ConfidenceTestTable",
+        "tableName": _TABLE_NAME,
         "columnName": "normal_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "std",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_200_OK
-    result = response_data["result"]
-    # 必須フィールドの存在確認
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
     required_fields = [
         "tableName",
         "columnName",
@@ -398,187 +395,347 @@ def test_confidence_interval_json_structure_validation(client, tables_store):
     ]
     for field in required_fields:
         assert field in result
-    # statisticの必須フィールド
-    statistic = result["statistic"]
-    assert "type" in statistic
-    assert "value" in statistic
-    # confidence_intervalの必須フィールド
-    ci = result["confidence_interval"]
-    assert "lower" in ci
-    assert "upper" in ci
+
+    assert "type" in result["statistic"]
+    assert "value" in result["statistic"]
+    assert "lower" in result["confidence_interval"]
+    assert "upper" in result["confidence_interval"]
 
 
-def test_confidence_interval_empty_table_name(client, tables_store):
-    """
-    tableNameが空文字列の場合はバリデーションエラーになる
-    """
+# -----------------------------------------------------------
+# 400 エラーケース
+# -----------------------------------------------------------
+
+
+def test_confidence_interval_invalid_table(client, tables_store):
+    """存在しないテーブル名でDATA_NOT_FOUNDエラーが返される"""
     payload = {
-        "tableName": "",
+        "tableName": "NonExistentTable",
         "columnName": "normal_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "mean",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "tableName" in response_data["message"]
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == "DATA_NOT_FOUND"
+    assert (
+        response_data["message"]
+        == "tableName 'NonExistentTable'は存在しません。"
+    )
 
 
-def test_confidence_interval_empty_column_name(client, tables_store):
-    """
-    columnNameが空文字列の場合はバリデーションエラーになる
-    """
+def test_confidence_interval_invalid_column(client, tables_store):
+    """存在しない列名でDATA_NOT_FOUNDエラーが返される"""
     payload = {
-        "tableName": "ConfidenceTestTable",
-        "columnName": "",
-        "confidenceLevel": 0.95,
-        "statisticType": "mean",
+        "tableName": _TABLE_NAME,
+        "columnName": "nonexistent_column",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "columnName" in response_data["message"]
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == "DATA_NOT_FOUND"
+    assert (
+        response_data["message"]
+        == "columnName 'nonexistent_column'は存在しません。"
+    )
 
 
-def test_confidence_interval_empty_statistic_type(client, tables_store):
-    """
-    statisticTypeが空文字列の場合はバリデーションエラーになる
-    """
+def test_confidence_interval_proportion_invalid_data(client, tables_store):
+    """比率計算で0,1以外のデータがある場合INVALID_PROPORTION_DATAが返される"""
     payload = {
-        "tableName": "ConfidenceTestTable",
-        "columnName": "normal_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "",
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",  # 連続値列
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_PROPORTION,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "statisticType" in response_data["message"]
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == "INVALID_PROPORTION_DATA"
+    assert (
+        "データには0と1の値のみが含まれる必要があります"
+        in response_data["message"]
+    )
 
 
-def test_confidence_interval_confidence_level_negative(client, tables_store):
-    """
-    confidenceLevelが0未満の場合はバリデーションエラーになる
-    """
+def test_confidence_interval_empty_data(client, tables_store):
+    """空データの場合CONFIDENCE_INTERVAL_ERRORが返される"""
     payload = {
-        "tableName": "ConfidenceTestTable",
-        "columnName": "normal_col",
-        "confidenceLevel": -0.1,
-        "statisticType": "mean",
+        "tableName": _EMPTY_TABLE,
+        "columnName": "empty_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "confidenceLevel" in response_data["message"]
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == "CONFIDENCE_INTERVAL_ERROR"
+    assert "カラムに有効なデータが含まれていません" in response_data["message"]
 
 
-def test_confidence_interval_confidence_level_over_one(client, tables_store):
-    """
-    confidenceLevelが1以上の場合はバリデーションエラーになる
-    """
-    payload = {
-        "tableName": "ConfidenceTestTable",
-        "columnName": "normal_col",
-        "confidenceLevel": 1.0,
-        "statisticType": "mean",
-    }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "confidenceLevel" in response_data["message"]
+# -----------------------------------------------------------
+# 422 バリデーションエラーケース
+# -----------------------------------------------------------
 
 
 def test_confidence_interval_missing_table_name(client, tables_store):
-    """
-    tableNameが欠損している場合はバリデーションエラーになる
-    """
+    """tableNameが欠損している場合はVALIDATION_ERRORになる"""
     payload = {
         "columnName": "normal_col",
-        "confidenceLevel": 0.95,
-        "statisticType": "mean",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "tableName" in response_data["message"]
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert "tableNameは必須項目です。" in response_data["message"]
 
 
 def test_confidence_interval_missing_column_name(client, tables_store):
-    """
-    columnNameが欠損している場合はバリデーションエラーになる
-    """
+    """columnNameが欠損している場合はVALIDATION_ERRORになる"""
     payload = {
-        "tableName": "ConfidenceTestTable",
-        "confidenceLevel": 0.95,
-        "statisticType": "mean",
+        "tableName": _TABLE_NAME,
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "columnName" in response_data["message"]
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert "columnNameは必須項目です。" in response_data["message"]
 
 
 def test_confidence_interval_missing_confidence_level(client, tables_store):
-    """
-    confidenceLevelが欠損している場合はバリデーションエラーになる
-    """
+    """confidenceLevelが欠損している場合はVALIDATION_ERRORになる"""
     payload = {
-        "tableName": "ConfidenceTestTable",
+        "tableName": _TABLE_NAME,
         "columnName": "normal_col",
-        "statisticType": "mean",
+        "statisticType": _STAT_MEAN,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "confidenceLevel" in response_data["message"]
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert "confidenceLevelは必須項目です。" in response_data["message"]
 
 
 def test_confidence_interval_missing_statistic_type(client, tables_store):
-    """
-    statisticTypeが欠損している場合はバリデーションエラーになる
-    """
+    """statisticTypeが欠損している場合はVALIDATION_ERRORになる"""
     payload = {
-        "tableName": "ConfidenceTestTable",
+        "tableName": _TABLE_NAME,
         "columnName": "normal_col",
-        "confidenceLevel": 0.95,
+        "confidenceLevel": _CI_LEVEL_95,
     }
-    response = client.post(
-        "/api/statistics/confidence-interval",
-        json=payload,
-    )
+    response = client.post(URL, json=payload)
     response_data = response.json()
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "statisticType" in response_data["message"]
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert "statisticTypeは必須項目です。" in response_data["message"]
+
+
+def test_confidence_interval_empty_table_name(client, tables_store):
+    """tableNameが空文字列の場合はVALIDATION_ERRORになる"""
+    payload = {
+        "tableName": "",
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert (
+        "tableNameは1文字以上で入力してください。" in response_data["message"]
+    )
+
+
+def test_confidence_interval_empty_column_name(client, tables_store):
+    """columnNameが空文字列の場合はVALIDATION_ERRORになる"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert (
+        "columnNameは1文字以上で入力してください。" in response_data["message"]
+    )
+
+
+def test_confidence_interval_whitespace_only_table_name(client, tables_store):
+    """tableNameがスペースのみの場合はVALIDATION_ERRORになる"""
+    payload = {
+        "tableName": "   ",
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert (
+        "tableNameは1文字以上で入力してください。" in response_data["message"]
+    )
+
+
+def test_confidence_interval_tab_only_column_name(client, tables_store):
+    """columnNameがタブのみの場合はVALIDATION_ERRORになる"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "\t",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert (
+        "columnNameは1文字以上で入力してください。" in response_data["message"]
+    )
+
+
+def test_confidence_interval_empty_statistic_type(client, tables_store):
+    """statisticTypeが空文字列の場合はVALIDATION_ERRORになる"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": "",
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert _STATISTIC_TYPE_ERROR in response_data["message"]
+
+
+def test_confidence_interval_invalid_statistic_type(client, tables_store):
+    """不正なstatisticType値の場合はVALIDATION_ERRORになる"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": "invalid_stat",
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert _STATISTIC_TYPE_ERROR in response_data["message"]
+
+
+def test_confidence_interval_old_std_value_is_invalid(client, tables_store):
+    """旧値'std'はVALIDATION_ERRORになる（正しくは'standard_deviation'）"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": "std",
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert _STATISTIC_TYPE_ERROR in response_data["message"]
+
+
+def test_confidence_interval_confidence_level_zero(client, tables_store):
+    """confidenceLevelが0.0の場合はgt=0.0違反でVALIDATION_ERRORになる"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": 0.0,
+        "statisticType": _STAT_MEAN,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert (
+        "confidenceLevelは0.0より大きい値で入力してください。"
+        in response_data["message"]
+    )
+
+
+def test_confidence_interval_confidence_level_negative(client, tables_store):
+    """confidenceLevelが負の場合はVALIDATION_ERRORになる"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": -0.1,
+        "statisticType": _STAT_MEAN,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert (
+        "confidenceLevelは0.0より大きい値で入力してください。"
+        in response_data["message"]
+    )
+
+
+def test_confidence_interval_confidence_level_one(client, tables_store):
+    """confidenceLevelが1.0の場合はlt=1.0違反でVALIDATION_ERRORになる"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": 1.0,
+        "statisticType": _STAT_MEAN,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert (
+        "confidenceLevelは1.0未満で入力してください。"
+        in response_data["message"]
+    )
+
+
+def test_confidence_interval_confidence_level_over_one(client, tables_store):
+    """confidenceLevelが1.0超の場合はVALIDATION_ERRORになる"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": 1.5,
+        "statisticType": _STAT_MEAN,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == "VALIDATION_ERROR"
+    assert (
+        "confidenceLevelは1.0未満で入力してください。"
+        in response_data["message"]
+    )
