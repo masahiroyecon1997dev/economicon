@@ -3,6 +3,7 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from economicon.core.enums import ErrorCode
 from economicon.services.data.tables_store import TablesStore
 from main import app
 
@@ -32,12 +33,18 @@ def tables_store():
     manager.clear_tables()
 
 
+# ========================================
+# 正常系テスト
+# ========================================
+
+
 def test_add_dummy_column_success(client, tables_store):
-    # 正常にダミー変数列を追加できる
+    """正常にダミー変数列を追加できる"""
     payload = {
         "tableName": "TestTable",
         "sourceColumnName": "gender",
         "dummyColumnName": "is_female",
+        "addPositionColumn": "gender",
         "targetValue": "female",
     }
     response = client.post(
@@ -49,94 +56,438 @@ def test_add_dummy_column_success(client, tables_store):
     assert response_data["code"] == "OK"
     assert response_data["result"]["tableName"] == "TestTable"
     assert response_data["result"]["dummyColumnName"] == "is_female"
-    # ダミー変数列が正しく作成されているかチェック
+
     df = tables_store.get_table("TestTable").table
-    assert "is_female" in df.columns
-    # femaleの値が1、それ以外が0になっているかチェック
-    expected_values = [0, 1, 1, 0, 0]  # male, female, female, male, other
-    assert df["is_female"].to_list() == expected_values
+    # gender の後に is_female が挿入されている
+    assert df.columns == ["gender", "is_female", "age"]
+    # female の値が1、それ以外が0になっている
+    assert df["is_female"].to_list() == [0, 1, 1, 0, 0]
+    # 既存データが保持されている
+    assert df["gender"].to_list() == [
+        "male",
+        "female",
+        "female",
+        "male",
+        "other",
+    ]
+    assert df["age"].to_list() == [25, 30, 35, 40, 28]
+
+
+# ========================================
+# 異常系テスト（Pydanticバリデーション: 422）
+# ========================================
+
+
+def test_add_dummy_column_missing_table_name(client, tables_store):
+    """tableName が未指定の場合"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "sourceColumnName": "gender",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+
+    expected_msg = "tableNameは必須項目です。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_column_missing_source_column_name(client, tables_store):
+    """sourceColumnName が未指定の場合"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+
+    expected_msg = "sourceColumnNameは必須項目です。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_column_missing_dummy_column_name(client, tables_store):
+    """dummyColumnName が未指定の場合"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+
+    expected_msg = "dummyColumnNameは必須項目です。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_column_missing_add_position_column(client, tables_store):
+    """addPositionColumn が未指定の場合"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "is_female",
+            "targetValue": "female",
+        },
+    )
+
+    expected_msg = "addPositionColumnは必須項目です。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_column_missing_target_value(client, tables_store):
+    """targetValue が未指定の場合"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "gender",
+        },
+    )
+
+    expected_msg = "targetValueは必須項目です。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_column_empty_table_name(client, tables_store):
+    """tableName がスペースのみ（strip後に空文字）の場合"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "   ",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+
+    expected_msg = "tableNameは1文字以上で入力してください。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_column_empty_target_value(client, tables_store):
+    """targetValue が空文字の場合"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "gender",
+            "targetValue": "",
+        },
+    )
+
+    expected_msg = "targetValueは1文字以上で入力してください。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_column_table_name_is_number(client, tables_store):
+    """tableName が数値の場合（strict=True なので型エラー）"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": 123,
+            "sourceColumnName": "gender",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+
+    expected_msg = "tableNameは文字列で入力してください。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_column_dummy_column_name_too_long(client, tables_store):
+    """dummyColumnName が129文字（最大128文字を超過）の場合"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "a" * 129,
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+
+    expected_msg = "dummyColumnNameは128文字以内で入力してください。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_column_dummy_column_name_with_control_char(
+    client, tables_store
+):
+    """dummyColumnName に制御文字（\\x00）が含まれる場合"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "col\x00name",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+
+    expected_msg = "dummyColumnNameに使用できない文字が含まれています。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+# ========================================
+# 異常系テスト（内部バリデーション: 400）
+# ========================================
 
 
 def test_add_dummy_column_invalid_table(client, tables_store):
-    # 存在しないテーブル名
-    payload = {
-        "tableName": "NoTable",
-        "sourceColumnName": "gender",
-        "dummyColumnName": "is_female",
-        "targetValue": "female",
-    }
+    """存在しないテーブル名"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
     response = client.post(
         "/api/column/add-dummy",
-        json=payload,
+        json={
+            "tableName": "NoTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
     )
+
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "tableName 'NoTable'は存在しません。" == response_data["message"]
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert response_data["message"] == "tableName 'NoTable'は存在しません。"
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
 
 
 def test_add_dummy_column_invalid_source_column(client, tables_store):
-    # 存在しないソース列名を指定
-    payload = {
-        "tableName": "TestTable",
-        "sourceColumnName": "invalid_column",
-        "dummyColumnName": "is_female",
-        "targetValue": "female",
-    }
+    """存在しないソース列名を指定"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
     response = client.post(
         "/api/column/add-dummy",
-        json=payload,
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "invalid_column",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
     )
+
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
     assert (
-        "sourceColumnName 'invalid_column'は存在しません。"
-        == response_data["message"]
+        response_data["message"]
+        == "sourceColumnName 'invalid_column'は存在しません。"
     )
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
 
 
 def test_add_dummy_column_duplicate_column_name(client, tables_store):
-    # 既存の列名をダミー列名として指定
-    payload = {
-        "tableName": "TestTable",
-        "sourceColumnName": "gender",
-        "dummyColumnName": "age",  # 既存の列名
-        "targetValue": "female",
-    }
+    """既存の列名をダミー列名として指定"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
     response = client.post(
         "/api/column/add-dummy",
-        json=payload,
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "age",  # 既存の列名
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
     )
+
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
+    assert response_data["code"] == ErrorCode.DATA_ALREADY_EXISTS
     assert (
-        "dummyColumnName 'age'は既に存在します。" == response_data["message"]
+        response_data["message"] == "dummyColumnName 'age'は既に存在します。"
     )
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_column_invalid_position_column(client, tables_store):
+    """追加位置指定カラムが存在しない"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "no_such_column",
+            "targetValue": "female",
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert (
+        response_data["message"]
+        == "addPositionColumn 'no_such_column'は存在しません。"
+    )
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
 
 
 def test_add_dummy_column_with_numeric_target(client, tables_store):
-    # 数値のターゲット値でダミー変数を作成
-    # 新しいテーブルを作成
+    """数値のターゲット値でダミー変数を作成"""
     df_numeric = pl.DataFrame(
         {"score": [85, 90, 75, 90, 88], "name": ["A", "B", "C", "D", "E"]}
     )
     tables_store.store_table("NumericTable", df_numeric)
-    payload = {
-        "tableName": "NumericTable",
-        "sourceColumnName": "score",
-        "dummyColumnName": "is_excellent",
-        "targetValue": "90",
-    }
+
     response = client.post(
         "/api/column/add-dummy",
-        json=payload,
+        json={
+            "tableName": "NumericTable",
+            "sourceColumnName": "score",
+            "dummyColumnName": "is_excellent",
+            "addPositionColumn": "score",
+            "targetValue": "90",
+        },
     )
+
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    # ダミー変数列が正しく作成されているかチェック
+
     df = tables_store.get_table("NumericTable").table
-    expected_values = [0, 1, 0, 1, 0]  # 90の位置のみ1
-    assert df["is_excellent"].to_list() == expected_values
+    # score の後に is_excellent が挿入されている
+    assert df.columns == ["score", "is_excellent", "name"]
+    # 90 の位置のみ 1
+    assert df["is_excellent"].to_list() == [0, 1, 0, 1, 0]
