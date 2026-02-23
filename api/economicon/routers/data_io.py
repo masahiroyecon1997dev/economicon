@@ -6,21 +6,17 @@ from fastapi import status as http_status
 from ..core.enums import ErrorCode
 from ..i18n.translation import gettext as _
 from ..models import (
-    ExportCsvByPathRequestBody,
-    ExportCsvByPathResult,
-    ExportExcelByPathRequestBody,
-    ExportExcelByPathResult,
-    ExportParquetByPathRequestBody,
-    ExportParquetByPathResult,
+    ExportFileRequestBody,
+    ExportFileResult,
     ImportFileRequestBody,
     ImportFileResult,
     SuccessResponse,
 )
 from ..services.data.dependencies import TablesStoreDep
 from ..services.data.tables_store import TablesStore
-from ..services.data_io.export_csv_by_path import ExportCsvByPath
-from ..services.data_io.export_excel_by_path import ExportExcelByPath
-from ..services.data_io.export_parquet_by_path import ExportParquetByPath
+from ..services.data_io.export_csv import ExportCsv
+from ..services.data_io.export_excel import ExportExcel
+from ..services.data_io.export_parquet import ExportParquet
 from ..services.data_io.import_csv import ImportCsv
 from ..services.data_io.import_excel import ImportExcel
 from ..services.data_io.import_parquet import ImportParquet
@@ -34,6 +30,13 @@ router = APIRouter(prefix="/data", tags=["data"])
 _CSV_EXTENSIONS = {".csv", ".tsv"}
 _EXCEL_EXTENSIONS = {".xlsx", ".xls"}
 _PARQUET_EXTENSIONS = {".parquet"}
+
+# format 値からサービスクラスへのマッピング
+_EXPORT_FORMAT_MAP = {
+    "csv": ExportCsv,
+    "excel": ExportExcel,
+    "parquet": ExportParquet,
+}
 
 
 def get_import_api(
@@ -113,95 +116,59 @@ async def import_file(
     )
 
 
+def get_export_api(
+    body: ExportFileRequestBody,
+    tables_store: TablesStore,
+) -> ExportCsv | ExportExcel | ExportParquet:
+    """format フィールドに基づいて適切なエクスポート API クラスを返す。
+
+    Parameters
+    ----------
+    body : ExportFileRequestBody
+        統合エクスポートリクエストボディ
+    tables_store : TablesStore
+        テーブルストア
+
+    Returns
+    -------
+    ExportCsv | ExportExcel | ExportParquet
+        format に対応するエクスポーター
+    """
+    cls = _EXPORT_FORMAT_MAP[body.format]
+    return cls(body, tables_store)
+
+
 @router.post(
-    "/export-csv-by-path",
-    response_model=SuccessResponse[ExportCsvByPathResult],
+    "/export",
+    response_model=SuccessResponse[ExportFileResult],
 )
-async def export_csv_by_path(
+async def export_file(
     request: Request,
-    body: ExportCsvByPathRequestBody,
+    body: ExportFileRequestBody,
     tables_store: TablesStoreDep,
 ):
-    """テーブルをCSVファイルにパス指定でエクスポートするエンドポイント
+    """format に基づいてテーブルをファイルにエクスポートするエンドポイント
+
+    対応形式：
+    - ``csv``     → CSV エクスポーター（separator / include_header が有効）
+    - ``excel``   → Excel エクスポーター（sheet_name / include_header が有効）
+    - ``parquet`` → Parquet エクスポーター
 
     Parameters
     ----------
     request : Request
-        FastAPIのリクエストオブジェクト
-    body : ExportCsvByPathRequestBody
+        FastAPI のリクエストオブジェクト
+    body : ExportFileRequestBody
         リクエストボディ
+    tables_store : TablesStoreDep
+        依存注入されたテーブルストア
 
     Returns
     -------
     JSONResponse
         処理結果
     """
-    # ビジネスロジックの実行
-    api = ExportCsvByPath(body, tables_store)
-    result = run_operation(api)
-
-    return create_success_response(
-        status_code=http_status.HTTP_200_OK, response_object=result
-    )
-
-
-@router.post(
-    "/export-excel-by-path",
-    response_model=SuccessResponse[ExportExcelByPathResult],
-)
-async def export_excel_by_path(
-    request: Request,
-    body: ExportExcelByPathRequestBody,
-    tables_store: TablesStoreDep,
-):
-    """テーブルをExcelファイルにパス指定でエクスポートするエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : ExportExcelByPathRequest
-        リクエストボディ
-
-    Returns
-    -------
-    JSONResponse
-        処理結果
-    """
-    # ビジネスロジックの実行
-    api = ExportExcelByPath(body, tables_store)
-    result = run_operation(api)
-
-    return create_success_response(
-        status_code=http_status.HTTP_200_OK, response_object=result
-    )
-
-
-@router.post(
-    "/export-parquet-by-path",
-    response_model=SuccessResponse[ExportParquetByPathResult],
-)
-async def export_parquet_by_path(
-    request: Request,
-    body: ExportParquetByPathRequestBody,
-    tables_store: TablesStoreDep,
-):
-    """テーブルをParquetファイルにパス指定でエクスポートするエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : ExportParquetByPathRequest
-        リクエストボディ
-
-    Returns
-    -------
-    JSONResponse
-        処理結果
-    """
-    # ビジネスロジックの実行
-    api = ExportParquetByPath(body, tables_store)
+    api = get_export_api(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(

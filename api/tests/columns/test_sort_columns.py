@@ -3,178 +3,242 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from economicon.core.enums import ErrorCode
 from economicon.services.data.tables_store import TablesStore
 from main import app
+
+# --- 定数 ---
+TABLE_NAME = "TestTable"
+TABLE_NONEXISTENT = "NoTable"
+COL_A = "A"
+COL_B = "B"
+COL_C = "C"
+COL_NONEXISTENT = "Z"
+DATA_A = [3, 1, 2]
+DATA_B = [6, 4, 5]
+DATA_C = ["c", "a", "b"]
+
+# sortColumns 空リスト時の Pydantic デフォルトメッセージ
+# （VALIDATION_ERROR_TEMPLATES に too_short がないため英語のまま）
+MSG_EMPTY_SORT_COLUMNS = (
+    "List should have at least 1 item after validation, not 0"
+)
 
 
 @pytest.fixture
 def client():
     """TestClientのフィクスチャ"""
-    return TestClient(app)
+    return TestClient(app, raise_server_exceptions=False)
 
 
 @pytest.fixture
 def tables_store():
     """TablesStoreのフィクスチャ"""
     manager = TablesStore()
-    # テーブルをクリア
     manager.clear_tables()
-    # テスト用テーブルをセット
-    df = pl.DataFrame({"A": [3, 1, 2], "B": [6, 4, 5], "C": ["c", "a", "b"]})
-    manager.store_table("TestTable", df)
+    df = pl.DataFrame({COL_A: DATA_A, COL_B: DATA_B, COL_C: DATA_C})
+    manager.store_table(TABLE_NAME, df)
     yield manager
-    # テスト後のクリーンアップ
     manager.clear_tables()
 
 
 def test_sort_single_column_ascending(client, tables_store):
-    # 単一列で昇順ソート
+    """正常系: 単一列で昇順ソートできることを検証する"""
+    # SortInstruction は BaseModel なので JSON キーは snake_case
     payload = {
-        "tableName": "TestTable",
-        "sortColumns": [{"columnName": "A", "ascending": True}],
+        "tableName": TABLE_NAME,
+        "sortColumns": [{"column_name": COL_A, "ascending": True}],
     }
-    response = client.post(
-        "/api/column/sort",
-        json=payload,
-    )
+    response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert response_data["result"]["tableName"] == "TestTable"
-    # ソート結果を確認
-    df = tables_store.get_table("TestTable").table
-    assert df["A"].to_list() == [1, 2, 3]
-    assert df["B"].to_list() == [4, 5, 6]
-    assert df["C"].to_list() == ["a", "b", "c"]
+    assert response_data["result"]["tableName"] == TABLE_NAME
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df[COL_A].to_list() == [1, 2, 3]
+    assert df[COL_B].to_list() == [4, 5, 6]
+    assert df[COL_C].to_list() == ["a", "b", "c"]
 
 
 def test_sort_single_column_descending(client, tables_store):
-    # 単一列で降順ソート
+    """正常系: 単一列で降順ソートできることを検証する"""
     payload = {
-        "tableName": "TestTable",
-        "sortColumns": [{"columnName": "A", "ascending": False}],
+        "tableName": TABLE_NAME,
+        "sortColumns": [{"column_name": COL_A, "ascending": False}],
     }
-    response = client.post(
-        "/api/column/sort",
-        json=payload,
-    )
+    response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    # ソート結果を確認
-    df = tables_store.get_table("TestTable").table
-    assert df["A"].to_list() == [3, 2, 1]
-    assert df["B"].to_list() == [6, 5, 4]
-    assert df["C"].to_list() == ["c", "b", "a"]
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df[COL_A].to_list() == [3, 2, 1]
+    assert df[COL_B].to_list() == [6, 5, 4]
+    assert df[COL_C].to_list() == ["c", "b", "a"]
 
 
 def test_sort_multiple_columns(client, tables_store):
-    # 複数列でソート（混合順序）
-    # より複雑なテストデータを準備
+    """正常系: 複数列のソート（A昇順・B降順）が正しく動作することを検証する"""
     df_complex = pl.DataFrame(
-        {"A": [1, 2, 1, 2], "B": [4, 3, 2, 1], "C": ["d", "c", "b", "a"]}
+        {
+            COL_A: [1, 2, 1, 2],
+            COL_B: [4, 3, 2, 1],
+            COL_C: ["d", "c", "b", "a"],
+        }
     )
-    tables_store.update_table("TestTable", df_complex)
+    tables_store.update_table(TABLE_NAME, df_complex)
     payload = {
-        "tableName": "TestTable",
+        "tableName": TABLE_NAME,
         "sortColumns": [
-            {"columnName": "A", "ascending": True},
-            {"columnName": "B", "ascending": False},
+            {"column_name": COL_A, "ascending": True},
+            {"column_name": COL_B, "ascending": False},
         ],
     }
-    response = client.post(
-        "/api/column/sort",
-        json=payload,
-    )
+    response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    # ソート結果を確認（A昇順、B降順）
-    df = tables_store.get_table("TestTable").table
-    assert df["A"].to_list() == [1, 1, 2, 2]
-    assert df["B"].to_list() == [4, 2, 3, 1]
-    assert df["C"].to_list() == ["d", "b", "c", "a"]
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df[COL_A].to_list() == [1, 1, 2, 2]
+    assert df[COL_B].to_list() == [4, 2, 3, 1]
+    assert df[COL_C].to_list() == ["d", "b", "c", "a"]
 
 
 def test_sort_invalid_table(client, tables_store):
-    # 存在しないテーブル名
+    """
+    異常系:
+        存在しないテーブル名を指定した場合は400エラーになることを検証する
+    """
     payload = {
-        "tableName": "NoTable",
-        "sortColumns": [{"columnName": "A", "ascending": True}],
+        "tableName": TABLE_NONEXISTENT,
+        "sortColumns": [{"column_name": COL_A, "ascending": True}],
     }
-    response = client.post(
-        "/api/column/sort",
-        json=payload,
-    )
+    response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "tableName 'NoTable'は存在しません。" == response_data["message"]
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    expected_msg = f"tableName '{TABLE_NONEXISTENT}'は存在しません。"
+    assert response_data["message"] == expected_msg
 
 
 def test_sort_invalid_column(client, tables_store):
-    # 存在しないカラム名を指定
+    """異常系: 存在しない列名を指定した場合は400エラーになることを検証する"""
+    df_before = tables_store.get_table(TABLE_NAME).table
     payload = {
-        "tableName": "TestTable",
-        "sortColumns": [{"columnName": "Z", "ascending": True}],
+        "tableName": TABLE_NAME,
+        "sortColumns": [{"column_name": COL_NONEXISTENT, "ascending": True}],
     }
-    response = client.post(
-        "/api/column/sort",
-        json=payload,
-    )
+    response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "columnName 'Z'は存在しません。" == response_data["message"]
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    expected_msg = f"columnName '{COL_NONEXISTENT}'は存在しません。"
+    assert response_data["message"] == expected_msg
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
 
 
 def test_sort_empty_columns(client, tables_store):
-    # 空のソート列指定
-    payload = {"tableName": "TestTable", "sortColumns": []}
-    response = client.post(
-        "/api/column/sort",
-        json=payload,
-    )
+    """異常系: sortColumnsが空リストの場合は422エラーになることを検証する"""
+    payload = {"tableName": TABLE_NAME, "sortColumns": []}
+    response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["code"] == "NG"
-    # assert "sortColumns は少なくとも1つの要素を含む必要があります。" == response_data['message']
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == MSG_EMPTY_SORT_COLUMNS
+    assert response_data["details"] == [MSG_EMPTY_SORT_COLUMNS]
+
+
+def test_sort_missing_table_name(client, tables_store):
+    """異常系: tableNameが欠けている場合は422エラーになることを検証する"""
+    payload = {"sortColumns": [{"column_name": COL_A, "ascending": True}]}
+    response = client.post("/api/column/sort", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "tableNameは必須項目です。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_sort_missing_sort_columns(client, tables_store):
+    """異常系: sortColumnsが欠けている場合は422エラーになることを検証する"""
+    payload = {"tableName": TABLE_NAME}
+    response = client.post("/api/column/sort", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "sortColumnsは必須項目です。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
 
 
 def test_sort_missing_column_name(client, tables_store):
-    # columnNameが欠けている
-    payload = {"tableName": "TestTable", "sortColumns": [{"ascending": True}]}
-    response = client.post(
-        "/api/column/sort",
-        json=payload,
-    )
-    # response_data = response.json()
+    """
+    異常系:
+        sortColumns要素にcolumn_nameが欠けている場合は422エラーになることを検証する
+    """
+    payload = {
+        "tableName": TABLE_NAME,
+        "sortColumns": [{"ascending": True}],
+    }
+    response = client.post("/api/column/sort", json=payload)
+    response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert response_data['code'] == 'NG'
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "sortColumns.0.column_nameは必須項目です。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
 
 
 def test_sort_missing_ascending(client, tables_store):
-    # ascendingが欠けている
-    payload = {"tableName": "TestTable", "sortColumns": [{"columnName": "A"}]}
-    response = client.post(
-        "/api/column/sort",
-        json=payload,
-    )
-    # response_data = response.json()
+    """
+    異常系:
+        sortColumns要素にascendingが欠けている場合は422エラーになることを検証する
+    """
+    payload = {
+        "tableName": TABLE_NAME,
+        "sortColumns": [{"column_name": COL_A}],
+    }
+    response = client.post("/api/column/sort", json=payload)
+    response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert response_data["code"] == "NG"
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "sortColumns.0.ascendingは必須項目です。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
 
 
 def test_sort_invalid_ascending_type(client, tables_store):
-    # ascendingがtrue、false以外
+    """異常系: ascendingがnullの場合は422エラーになることを検証する"""
     payload = {
-        "tableName": "TestTable",
-        "sortColumns": [{"columnName": "A", "ascending": "yes"}],
+        "tableName": TABLE_NAME,
+        "sortColumns": [{"column_name": COL_A, "ascending": None}],
     }
-    response = client.post(
-        "/api/column/sort",
-        json=payload,
-    )
-    # response_data = response.json()
+    response = client.post("/api/column/sort", json=payload)
+    response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert response_data["code"] == "NG"
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "sortColumns.0.ascendingは真偽値で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_sort_process_error(client, tables_store):
+    """異常系: update_tableが例外を送出するとき500エラーになることを検証する"""
+    original_update_table = tables_store.update_table
+    try:
+
+        def raise_error(*args, **kwargs):
+            raise RuntimeError("forced error")
+
+        tables_store.update_table = raise_error
+        payload = {
+            "tableName": TABLE_NAME,
+            "sortColumns": [{"column_name": COL_A, "ascending": True}],
+        }
+        response = client.post("/api/column/sort", json=payload)
+        response_data = response.json()
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert response_data["code"] == ErrorCode.SORT_COLUMNS_PROCESS_ERROR
+    finally:
+        tables_store.update_table = original_update_table
