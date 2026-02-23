@@ -45,7 +45,6 @@ class FetchDataToJson:
             requested_count=self.start_row,
             target=self.param_names["start_row"],
         )
-        return None
 
     def execute(self):
         try:
@@ -53,7 +52,7 @@ class FetchDataToJson:
             table = self.tables_store.get_table(self.table_name)
             start_row = int(self.start_row)
             fetch_rows = int(self.fetch_rows)
-            total_rows = table.row_count - 1
+            total_rows = table.row_count
 
             end_row = min(start_row + fetch_rows, total_rows)
 
