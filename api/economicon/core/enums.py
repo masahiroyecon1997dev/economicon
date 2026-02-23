@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ErrorCode(str, Enum):
+class ErrorCode(Enum):
     """エラーコード定義"""
 
     # Columns関連

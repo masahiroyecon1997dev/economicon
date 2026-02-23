@@ -6,9 +6,10 @@ SettingsStoreからロケール設定を取得し、fastapi-babelと統合しま
 
 import gettext as gettext_module
 from pathlib import Path
-from typing import Optional
 
 from fastapi_babel import _ as babel_gettext
+
+from ..services.data.settings_store import SettingsStore
 
 # ロケールディレクトリ
 LOCALE_DIR = Path(__file__).parent.parent / "locales"
@@ -29,7 +30,6 @@ def get_locale_from_settings() -> str:
         str: 現在のロケール("ja", "en"など)
     """
     # 循環インポートを避けるため、関数内でインポート
-    from ..services.data.settings_store import SettingsStore
 
     try:
         settings_manager = SettingsStore()
@@ -41,7 +41,7 @@ def get_locale_from_settings() -> str:
 
 
 def _get_translation(
-    locale: Optional[str] = None,
+    locale: str | None = None,
 ) -> gettext_module.NullTranslations | gettext_module.GNUTranslations:
     """
     指定されたロケールの翻訳オブジェクトを取得
@@ -71,7 +71,7 @@ def _get_translation(
     return _translations[locale]
 
 
-def gettext(message: str, locale: Optional[str] = None) -> str:
+def gettext(message: str, locale: str | None = None) -> str:
     """
     メッセージを翻訳
 
