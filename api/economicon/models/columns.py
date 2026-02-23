@@ -241,9 +241,8 @@ class AddLagLeadColumnRequestBody(BaseRequest):
         int,
         Field(
             title="Periods",
-            ge=1,
-            examples=[1, 2, 3],
-            description="ラグ・リードの期間。例えば、1を指定すると1行前（ラグ）または1行後（リード）の値が新しいカラムに入ります。2を指定すると2行前後の値が入ります。",
+            examples=[-1, -2, 1, 2],
+            description="ラグ・リードの期間。負の値（-1, -2...）はラグ変数、正の値（1, 2...）はリード変数を作成します。例えば、-1を指定すると1行前の値（ラグ1）、1を指定すると1行後の値（リード1）が新しいカラムに入ります。",
         ),
     ]
     group_columns: Annotated[
