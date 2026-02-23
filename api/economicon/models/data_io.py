@@ -9,6 +9,7 @@ from .types import (
     CsvEncoding,
     DirectoryPath,
     ExcelSheetName,
+    ExportFormat,
     FileName,
     FilePath,
     NewTableName,
@@ -90,8 +91,16 @@ class ImportFileRequestBody(BaseRequest):
     ] = None
 
 
-class ExportCsvByPathRequestBody(BaseRequest):
-    """CSVファイルパス指定エクスポートリクエスト"""
+class ExportFileRequestBody(BaseRequest):
+    """ファイルパス指定エクスポートリクエスト（CSV / Excel / Parquet 共通）
+
+    ``format`` に応じて適切なエクスポーターが自動選択され、
+    ファイル拡張子も自動で付与されます。
+
+    - ``csv``     → CSV エクスポーター（separator / include_header が有効）
+    - ``excel``   → Excel エクスポーター（sheet_name / include_header が有効）
+    - ``parquet`` → Parquet エクスポーター
+    """
 
     table_name: Annotated[
         TableName,
@@ -104,75 +113,63 @@ class ExportCsvByPathRequestBody(BaseRequest):
         DirectoryPath,
         Field(
             title="Directory Path",
-            description="出力するCSVファイルのディレクトリの絶対パス（相対パスはサポートされていません）。",
+            description="出力ファイルのディレクトリの絶対パス（相対パスはサポートされていません）。",
         ),
     ]
     file_name: Annotated[
         FileName,
         Field(
             title="File Name",
-            description="出力するCSVファイルのファイル名（拡張子を含む）。同名ファイルが存在する場合は上書きされます。",
+            description=(
+                "出力ファイルのベース名（拡張子なし）。"
+                "同名ファイルが存在する場合は上書きされます。"
+            ),
         ),
     ]
+    format: Annotated[
+        ExportFormat,
+        Field(
+            title="Format",
+            description=(
+                "出力するファイル形式。"
+                "csv / excel / parquet から選択してください。"
+                "選択した形式に応じた拡張子が自動付与されます。"
+            ),
+        ),
+    ]
+    # --- CSV 専用オプション ---
     separator: Annotated[
         Separator,
         Field(
             title="Separator",
-            description="CSV区切り文字。カンマかタブ、もしくは1から10文字の任意の文字列から選択してください。",
+            description=(
+                "CSV 区切り文字（CSV のみ有効）。カンマかタブ、"
+                "もしくは 1〜10 文字の任意の文字列から選択してください。"
+            ),
         ),
-    ]
-
-
-class ExportExcelByPathRequestBody(BaseRequest):
-    """Excelファイルパス指定エクスポートリクエスト"""
-
-    table_name: Annotated[
-        TableName,
+    ] = ","
+    # --- CSV / Excel 共通オプション ---
+    include_header: Annotated[
+        bool,
         Field(
-            title="Table Name",
-            description="エクスポートするテーブル名。ワークスペース内に存在するテーブル名を指定してください。",
+            title="Include Header",
+            description=(
+                "ヘッダ行を含めるか否か（CSV / Excel のみ有効）。"
+                "デフォルトは True（ヘッダあり）。"
+            ),
         ),
-    ]
-    directory_path: Annotated[
-        DirectoryPath,
+    ] = True
+    # --- Excel 専用オプション ---
+    sheet_name: Annotated[
+        ExcelSheetName | None,
         Field(
-            title="Directory Path",
-            description="出力するExcelファイルのディレクトリの絶対パス（相対パスはサポートされていません）。",
+            title="Sheet Name",
+            description=(
+                "出力する Excel シート名（Excel のみ有効）。"
+                "省略または null の場合は 'Sheet1' を使用します。"
+            ),
         ),
-    ]
-    file_name: Annotated[
-        FileName,
-        Field(
-            title="File Name",
-            description="出力するExcelファイルのファイル名（拡張子を含む）。同名ファイルが存在する場合は上書きされます。",
-        ),
-    ]
-
-
-class ExportParquetByPathRequestBody(BaseRequest):
-    """Parquetファイルパス指定エクスポートリクエスト"""
-
-    table_name: Annotated[
-        TableName,
-        Field(
-            title="Table Name",
-            description="エクスポートするテーブル名。ワークスペース内に存在するテーブル名を指定してください。",
-        ),
-    ]
-    directory_path: Annotated[
-        DirectoryPath,
-        Field(
-            title="Directory Path",
-            description="出力するParquetファイルのディレクトリの絶対パス（相対パスはサポートされていません）。",
-        ),
-    ]
-    file_name: Annotated[
-        FileName,
-        Field(
-            title="File Name",
-            description="出力するParquetファイルのファイル名（拡張子を含む）。同名ファイルが存在する場合は上書きされます。",
-        ),
-    ]
+    ] = None
 
 
 # ---------------------------------------------------------------------------
@@ -194,21 +191,9 @@ class ImportFileResult(ImportTableResult):
 
 
 class ExportFileResult(BaseResult):
-    """エクスポート共通レスポンス基底"""
+    """エクスポート共通レスポンス"""
 
     file_path: str = Field(
         title="File Path",
-        description="出力したファイルのフルパス",
+        description="出力したファイルのフルパス（拡張子付き）",
     )
-
-
-class ExportCsvByPathResult(ExportFileResult):
-    """CSV エクスポートレスポンス"""
-
-
-class ExportExcelByPathResult(ExportFileResult):
-    """Excel エクスポートレスポンス"""
-
-
-class ExportParquetByPathResult(ExportFileResult):
-    """Parquet エクスポートレスポンス"""

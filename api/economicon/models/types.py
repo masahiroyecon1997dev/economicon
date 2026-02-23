@@ -209,6 +209,9 @@ CsvEncoding = Literal[
     "shift_jis",
 ]
 
+# エクスポートするファイル形式
+ExportFormat = Literal["csv", "excel", "parquet"]
+
 type DistributionParams = (
     UniformParams
     | ExponentialParams
