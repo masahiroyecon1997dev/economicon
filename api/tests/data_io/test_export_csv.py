@@ -131,6 +131,40 @@ def test_export_csv_no_header(client, prepared_data):
     assert len(test_data) == len(exported_data)
 
 
+def test_export_csv_encoding_shift_jis(client, prepared_data):
+    """
+    Shift-JIS エンコーディングで CSV ファイルをエクスポートするテスト
+    """
+    tables_store, test_output_dir, _ = prepared_data
+    # Shift-JIS で扱える日本語データ
+    jp_data = pl.DataFrame(
+        {
+            "名前": ["山田", "田中", "鈴木"],
+            "年齢": [30, 25, 40],
+        }
+    )
+    tables_store.store_table("JpTable", jp_data)
+    request_data = {
+        "tableName": "JpTable",
+        "directoryPath": test_output_dir,
+        "fileName": "output_sjis",
+        "format": "csv",
+        "encoding": "shift_jis",
+    }
+    response = client.post(URL, data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    output_path = os.path.join(test_output_dir, "output_sjis.csv")
+    assert output_path == response_data["result"]["filePath"]
+    assert os.path.exists(output_path)
+    # CP932 (Shift-JIS) でデコードしてデータを検証
+    with open(output_path, encoding="cp932") as f:
+        content = f.read()
+    assert "名前" in content
+    assert "山田" in content
+
+
 def test_export_csv_table_not_exists(client, prepared_data):
     """
     存在しないテーブル名を指定した場合のテスト
