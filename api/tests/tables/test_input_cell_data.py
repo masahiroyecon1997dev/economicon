@@ -99,7 +99,7 @@ def test_input_cell_data_invalid_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
-    assert "columnName 'Z'は存在しません。" in response_data["message"]
+    assert "columnName 'Z'は存在しません。" == response_data["message"]
 
 
 def test_input_cell_data_invalid_row_over(client, tables_store):
@@ -137,6 +137,7 @@ def test_input_cell_data_invalid_row_string(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert "rowIndexは整数で入力してください。" == response_data["message"]
+    assert ["rowIndexは整数で入力してください。"] == response_data["details"]
 
 
 def test_input_cell_data_empty_table_name(client, tables_store):
@@ -265,3 +266,168 @@ def test_input_cell_data_missing_new_value(client, tables_store):
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
     assert "newValueは必須項目です。" == response_data["message"]
     assert ["newValueは必須項目です。"] == response_data["details"]
+
+
+# ---------------------------------------------------------------------------
+# 意地悪なリクエストテスト
+# ---------------------------------------------------------------------------
+
+
+def test_input_cell_data_tablename_only_spaces(client, tables_store):
+    """
+    tableNameがスペースのみの場合、トリム後に空文字になり422エラーになる
+    """
+    response = client.post(
+        "/api/table/input-cell-data",
+        json={
+            "tableName": "   ",
+            "columnName": "A",
+            "rowIndex": 0,
+            "newValue": 1,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "tableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_input_cell_data_tablename_tab_chars(client, tables_store):
+    """
+    tableNameがタブ文字のみの場合、トリム後に空文字になり422エラーになる
+    """
+    response = client.post(
+        "/api/table/input-cell-data",
+        json={
+            "tableName": "\t",
+            "columnName": "A",
+            "rowIndex": 0,
+            "newValue": 1,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "tableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_input_cell_data_tablename_leading_trailing_spaces(
+    client, tables_store
+):
+    """
+    tableNameの前後スペースはトリムされ、正常に動作する
+    """
+    response = client.post(
+        "/api/table/input-cell-data",
+        json={
+            "tableName": "  TestTable  ",
+            "columnName": "A",
+            "rowIndex": 0,
+            "newValue": 99,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_input_cell_data_tablename_japanese(client, tables_store):
+    """
+    tableNameに日本語を使った場合、型は有効だが存在しないので400になる
+    """
+    response = client.post(
+        "/api/table/input-cell-data",
+        json={
+            "tableName": "日本語テーブル",
+            "columnName": "A",
+            "rowIndex": 0,
+            "newValue": 1,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
+
+
+def test_input_cell_data_tablename_emoji(client, tables_store):
+    """
+    tableNameに絵文字を使った場合、型は有効だが存在しないので400になる
+    """
+    response = client.post(
+        "/api/table/input-cell-data",
+        json={
+            "tableName": "🚀テーブル",
+            "columnName": "A",
+            "rowIndex": 0,
+            "newValue": 1,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
+
+
+def test_input_cell_data_columnname_only_spaces(client, tables_store):
+    """
+    columnNameがスペースのみの場合、トリム後に空文字になり422エラーになる
+    """
+    response = client.post(
+        "/api/table/input-cell-data",
+        json={
+            "tableName": "TestTable",
+            "columnName": "   ",
+            "rowIndex": 0,
+            "newValue": 1,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "columnNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_input_cell_data_columnname_tab_chars(client, tables_store):
+    """
+    columnNameがタブ文字のみの場合、トリム後に空文字になり422エラーになる
+    """
+    response = client.post(
+        "/api/table/input-cell-data",
+        json={
+            "tableName": "TestTable",
+            "columnName": "\t",
+            "rowIndex": 0,
+            "newValue": 1,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "columnNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_input_cell_data_columnname_leading_trailing_spaces(
+    client, tables_store
+):
+    """
+    columnNameの前後スペースはトリムされ、正常に動作する
+    """
+    response = client.post(
+        "/api/table/input-cell-data",
+        json={
+            "tableName": "TestTable",
+            "columnName": "  A  ",
+            "rowIndex": 0,
+            "newValue": 99,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
