@@ -484,9 +484,7 @@ def test_export_parquet_filename_max_length(client, prepared_data):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
-    output_path = os.path.join(
-        test_output_dir, f"{safe_file_name}.parquet"
-    )
+    output_path = os.path.join(test_output_dir, f"{safe_file_name}.parquet")
     assert os.path.exists(output_path)
 
 
