@@ -79,7 +79,8 @@ def test_create_table_with_normal_distribution(client, tables_store):
     assert response_data["code"] == "OK"
     assert response_data["result"]["tableName"] == "NormalTable"
     df = tables_store.get_table("NormalTable").table
-    assert len(df) == 100
+    expected_row_count = 100
+    assert len(df) == expected_row_count
     assert "normal_col" in df.columns
 
 
@@ -95,7 +96,8 @@ def test_create_table_with_uniform_distribution(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("UniformTable").table
-    assert len(df) == 50
+    expected_row_count = 50
+    assert len(df) == expected_row_count
     assert "uniform_col" in df.columns
 
 
@@ -111,7 +113,8 @@ def test_create_table_with_exponential_distribution(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("ExpTable").table
-    assert len(df) == 30
+    expected_row_count = 30
+    assert len(df) == expected_row_count
 
 
 def test_create_table_with_fixed_distribution(client, tables_store):
@@ -126,10 +129,12 @@ def test_create_table_with_fixed_distribution(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FixedTable").table
-    assert len(df) == 10
+    expected_row_count = 10
+    assert len(df) == expected_row_count
     assert "fixed_col" in df.columns
     # 全行が固定値 42.0 であることを確認
-    assert (df["fixed_col"] == 42.0).all()
+    fixed_value = 42.0
+    assert (df["fixed_col"] == fixed_value).all()
 
 
 def test_create_table_with_multiple_columns(client, tables_store):
@@ -144,8 +149,10 @@ def test_create_table_with_multiple_columns(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("MultiTable").table
-    assert len(df) == 20
-    assert len(df.columns) == 3
+    expected_row_count = 20
+    assert len(df) == expected_row_count
+    expected_column_count = 3
+    assert len(df.columns) == expected_column_count
     assert "normal_col" in df.columns
     assert "uniform_col" in df.columns
     assert "exp_col" in df.columns
@@ -409,7 +416,10 @@ def test_n6_table_name_with_tab(client, tables_store):
 
 
 def test_n7_table_name_only_spaces(client, tables_store):
-    """N7: tableNameがスペースのみの場合、トリム後に空になり 422 VALIDATION_ERROR"""
+    """
+    N7:
+        tableNameがスペースのみの場合、トリム後に空になり 422 VALIDATION_ERROR
+    """
     payload = {**_BASE_PAYLOAD, "tableName": "   "}
     response = client.post("/api/table/create-simulation-data", json=payload)
     response_data = response.json()
