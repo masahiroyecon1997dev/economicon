@@ -11,6 +11,7 @@ VALIDATION_ERROR_TEMPLATES = {
     "dict_type": _("{field}は辞書形式で入力してください。"),
     "string_too_short": _("{field}は{min_length}文字以上で入力してください。"),
     "string_too_long": _("{field}は{max_length}文字以内で入力してください。"),
+    "too_short": _("{field}は{min_length}件以上ある必要があります。"),
     "less_than": _("{field}は{lt}未満で入力してください。"),
     "less_than_equal": _("{field}は{le}以下で入力してください。"),
     "greater_than": _("{field}は{gt}より大きい値で入力してください。"),
