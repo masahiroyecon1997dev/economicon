@@ -3,6 +3,7 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from economicon.core.enums import ErrorCode
 from economicon.services.data.tables_store import TablesStore
 from main import app
 
@@ -46,7 +47,7 @@ def test_input_cell_data_success(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("TestTable").table
-    assert df["A"][1] == 99
+    assert df["A"][1] == 99  # noqa: PLR2004
 
 
 def test_input_cell_data_success_with_string(client, tables_store):
@@ -80,7 +81,7 @@ def test_input_cell_data_invalid_table(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
     assert "tableName 'NoTable'は存在しません。" == response_data["message"]
 
 
@@ -97,7 +98,7 @@ def test_input_cell_data_invalid_column(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
     assert "columnName 'Z'は存在しません。" in response_data["message"]
 
 
@@ -114,9 +115,9 @@ def test_input_cell_data_invalid_row_over(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
+    assert response_data["code"] == ErrorCode.ROW_OUT_OF_RANGE
     assert (
-        "rowIndexは0から9の間である必要があります。"
+        "Requested rowIndex (100) exceeds the available rows (9)."
         == response_data["message"]
     )
 
@@ -132,10 +133,10 @@ def test_input_cell_data_invalid_row_string(client, tables_store):
         "/api/table/input-cell-data",
         json=payload,
     )
-    # response_data = response.json()
+    response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert response_data['code'] == 'NG'
-    # assert "rowIndex must be an integer." == response_data['message']
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "rowIndexは整数で入力してください。" == response_data["message"]
 
 
 def test_input_cell_data_empty_table_name(client, tables_store):
@@ -153,8 +154,13 @@ def test_input_cell_data_empty_table_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "tableName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert (
+        "tableNameは1文字以上で入力してください。" == response_data["message"]
+    )
+    assert ["tableNameは1文字以上で入力してください。"] == response_data[
+        "details"
+    ]
 
 
 def test_input_cell_data_empty_column_name(client, tables_store):
@@ -172,8 +178,13 @@ def test_input_cell_data_empty_column_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "columnName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert (
+        "columnNameは1文字以上で入力してください。" == response_data["message"]
+    )
+    assert ["columnNameは1文字以上で入力してください。"] == response_data[
+        "details"
+    ]
 
 
 def test_input_cell_data_negative_row_index(client, tables_store):
@@ -191,8 +202,9 @@ def test_input_cell_data_negative_row_index(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "rowIndex" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "rowIndexは0以上で入力してください。" == response_data["message"]
+    assert ["rowIndexは0以上で入力してください。"] == response_data["details"]
 
 
 def test_input_cell_data_missing_table_name(client, tables_store):
@@ -205,8 +217,9 @@ def test_input_cell_data_missing_table_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "tableName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "tableNameは必須項目です。" == response_data["message"]
+    assert ["tableNameは必須項目です。"] == response_data["details"]
 
 
 def test_input_cell_data_missing_column_name(client, tables_store):
@@ -219,8 +232,9 @@ def test_input_cell_data_missing_column_name(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "columnName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "columnNameは必須項目です。" == response_data["message"]
+    assert ["columnNameは必須項目です。"] == response_data["details"]
 
 
 def test_input_cell_data_missing_row_index(client, tables_store):
@@ -233,8 +247,9 @@ def test_input_cell_data_missing_row_index(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "rowIndex" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "rowIndexは必須項目です。" == response_data["message"]
+    assert ["rowIndexは必須項目です。"] == response_data["details"]
 
 
 def test_input_cell_data_missing_new_value(client, tables_store):
@@ -247,5 +262,6 @@ def test_input_cell_data_missing_new_value(client, tables_store):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "newValue" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "newValueは必須項目です。" == response_data["message"]
+    assert ["newValueは必須項目です。"] == response_data["details"]

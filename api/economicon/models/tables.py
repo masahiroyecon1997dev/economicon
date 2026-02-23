@@ -41,6 +41,23 @@ def _coerce_join_type(v: Any) -> JoinType:
     return v
 
 
+def _coerce_filter_operator_type(v: Any) -> FilterOperatorType:
+    """JSON文字列をFilterOperatorTypeに変換するBeforeValidator"""
+    if isinstance(v, FilterOperatorType):
+        return v
+    if isinstance(v, str):
+        try:
+            return FilterOperatorType(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in FilterOperatorType)
+            raise PydanticCustomError(
+                "literal_error",
+                "conditionは次のいずれかである必要があります: {expected}",
+                {"expected": valid},
+            ) from None
+    return v
+
+
 # ---------------------------------------------------------------------------
 # リクエストボディ
 # ---------------------------------------------------------------------------
@@ -413,12 +430,11 @@ class FilterSingleConditionRequestBody(BaseRequest):
     ]
     condition: Annotated[
         FilterOperatorType,
+        BeforeValidator(_coerce_filter_operator_type),
         Field(
             title="Condition",
             description="フィルタ条件の演算子"
             "（equals, notEquals, greaterThan, lessThan 等）",
-            min_length=1,
-            max_length=50,
         ),
     ]
     is_compare_column: Annotated[
