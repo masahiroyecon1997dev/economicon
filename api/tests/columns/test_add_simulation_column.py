@@ -82,7 +82,7 @@ def test_add_uniform_column_success(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "UniformCol",
+                "columnName": "UniformCol",
                 "distribution": {
                     "type": "uniform",
                     "low": UNIFORM_LOW,
@@ -116,7 +116,7 @@ def test_add_normal_column_success(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "NormalCol",
+                "columnName": "NormalCol",
                 "distribution": {
                     "type": "normal",
                     "loc": NORMAL_LOC,
@@ -143,7 +143,7 @@ def test_add_binomial_column_success(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "BinomialCol",
+                "columnName": "BinomialCol",
                 "distribution": {
                     "type": "binomial",
                     "n": BINOMIAL_N,
@@ -171,7 +171,7 @@ def test_add_exponential_column_success(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "ExponentialCol",
+                "columnName": "ExponentialCol",
                 "distribution": {
                     "type": "exponential",
                     "scale": EXPONENTIAL_SCALE,
@@ -197,7 +197,7 @@ def test_add_gamma_column_success(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "GammaCol",
+                "columnName": "GammaCol",
                 "distribution": {
                     "type": "gamma",
                     "shape": GAMMA_SHAPE,
@@ -220,7 +220,7 @@ def test_add_beta_column_success(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "BetaCol",
+                "columnName": "BetaCol",
                 "distribution": {
                     "type": "beta",
                     "a": BETA_A,
@@ -243,7 +243,7 @@ def test_add_poisson_column_success(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "PoissonCol",
+                "columnName": "PoissonCol",
                 "distribution": {
                     "type": "poisson",
                     "lam": POISSON_LAM,
@@ -265,7 +265,7 @@ def test_add_hypergeometric_column_success(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "HyperGeomCol",
+                "columnName": "HyperGeomCol",
                 "distribution": {
                     "type": "hypergeometric",
                     "N": HYPERGEOMETRIC_POPULATION,
@@ -300,7 +300,7 @@ def test_add_simulation_column_missing_table_name(client, tables_store):
         "/api/column/add-simulation",
         json={
             "simulationColumn": {
-                "column_name": "TestCol",
+                "columnName": "TestCol",
                 "distribution": {
                     "type": "normal",
                     "loc": NORMAL_LOC,
@@ -360,7 +360,7 @@ def test_add_simulation_column_missing_add_position_column(
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "TestCol",
+                "columnName": "TestCol",
                 "distribution": {
                     "type": "normal",
                     "loc": NORMAL_LOC,
@@ -392,7 +392,7 @@ def test_unsupported_distribution(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "TestCol",
+                "columnName": "TestCol",
                 "distribution": {"type": "unsupported"},
             },
             "addPositionColumn": COL_A,
@@ -420,7 +420,7 @@ def test_invalid_uniform_params_low_ge_high(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "TestCol",
+                "columnName": "TestCol",
                 "distribution": {
                     "type": "uniform",
                     "low": invalid_low,
@@ -448,7 +448,7 @@ def test_missing_required_distribution_param(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "TestCol",
+                "columnName": "TestCol",
                 "distribution": {
                     "type": "normal",
                     "loc": NORMAL_LOC,
@@ -476,7 +476,7 @@ def test_invalid_distribution_param_type(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "TestCol",
+                "columnName": "TestCol",
                 "distribution": {
                     "type": "normal",
                     "loc": "invalid",  # float でないと無効
@@ -506,7 +506,7 @@ def test_normal_negative_scale(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "TestCol",
+                "columnName": "TestCol",
                 "distribution": {
                     "type": "normal",
                     "loc": NORMAL_LOC,
@@ -536,7 +536,7 @@ def test_binomial_invalid_p_greater_than_one(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "TestCol",
+                "columnName": "TestCol",
                 "distribution": {
                     "type": "binomial",
                     "n": BINOMIAL_N,
@@ -568,7 +568,7 @@ def test_hypergeometric_invalid_k_exceeds_n(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "TestCol",
+                "columnName": "TestCol",
                 "distribution": {
                     "type": "hypergeometric",
                     "N": invalid_population,
@@ -602,7 +602,7 @@ def test_invalid_table_name(client, tables_store):
         json={
             "tableName": "NoTable",
             "simulationColumn": {
-                "column_name": "SimCol",
+                "columnName": "SimCol",
                 "distribution": {
                     "type": "normal",
                     "loc": NORMAL_LOC,
@@ -631,7 +631,7 @@ def test_duplicate_column_name(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": COL_A,  # 既存の列名
+                "columnName": COL_A,  # 既存の列名
                 "distribution": {
                     "type": "normal",
                     "loc": NORMAL_LOC,
@@ -663,7 +663,7 @@ def test_invalid_position_column(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "SimCol",
+                "columnName": "SimCol",
                 "distribution": {
                     "type": "normal",
                     "loc": NORMAL_LOC,
@@ -698,7 +698,7 @@ def test_add_simulation_column_japanese_column_name(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "GDP成長率",
+                "columnName": "GDP成長率",
                 "distribution": {
                     "type": "uniform",
                     "low": UNIFORM_LOW,
@@ -729,7 +729,7 @@ def test_add_simulation_column_japanese_position_column(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "SimCol",
+                "columnName": "SimCol",
                 "distribution": {
                     "type": "uniform",
                     "low": UNIFORM_LOW,
@@ -754,7 +754,7 @@ def test_add_simulation_column_emoji_column_name(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "🔥",
+                "columnName": "🔥",
                 "distribution": {
                     "type": "uniform",
                     "low": UNIFORM_LOW,
@@ -779,7 +779,7 @@ def test_add_simulation_column_strip_whitespace_position_column(
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "SimCol",
+                "columnName": "SimCol",
                 "distribution": {
                     "type": "uniform",
                     "low": UNIFORM_LOW,
@@ -805,7 +805,7 @@ def test_add_simulation_column_max_length_column_name(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": long_name,
+                "columnName": long_name,
                 "distribution": {
                     "type": "uniform",
                     "low": UNIFORM_LOW,
@@ -828,7 +828,7 @@ def test_add_simulation_column_too_long_column_name(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "x" * 129,
+                "columnName": "x" * 129,
                 "distribution": {
                     "type": "uniform",
                     "low": UNIFORM_LOW,
@@ -842,7 +842,7 @@ def test_add_simulation_column_too_long_column_name(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     expected_msg = (
-        "simulationColumn.column_nameは128文字以内で入力してください。"
+        "simulationColumn.columnNameは128文字以内で入力してください。"
     )
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
@@ -855,7 +855,7 @@ def test_add_simulation_column_tab_char_column_name(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "col\tA",
+                "columnName": "col\tA",
                 "distribution": {
                     "type": "uniform",
                     "low": UNIFORM_LOW,
@@ -869,7 +869,7 @@ def test_add_simulation_column_tab_char_column_name(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     expected_msg = (
-        "simulationColumn.column_nameに使用できない文字が含まれています。"
+        "simulationColumn.columnNameに使用できない文字が含まれています。"
     )
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
@@ -889,7 +889,7 @@ def test_add_simulation_column_uniform_low_equals_high(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "SimCol",
+                "columnName": "SimCol",
                 "distribution": {
                     "type": "uniform",
                     "low": 5.0,
@@ -920,7 +920,7 @@ def test_add_simulation_column_uniform_reversed_range(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "SimCol",
+                "columnName": "SimCol",
                 "distribution": {
                     "type": "uniform",
                     "low": 10.0,
@@ -949,7 +949,7 @@ def test_add_simulation_column_uniform_extreme_wide_range(
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "WideRangeCol",
+                "columnName": "WideRangeCol",
                 "distribution": {
                     "type": "uniform",
                     "low": -1e10,
@@ -973,7 +973,7 @@ def test_add_simulation_column_normal_scale_zero(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "SimCol",
+                "columnName": "SimCol",
                 "distribution": {
                     "type": "normal",
                     "loc": 0.0,
@@ -1002,7 +1002,7 @@ def test_add_simulation_column_normal_near_zero_scale(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "TinyScaleCol",
+                "columnName": "TinyScaleCol",
                 "distribution": {
                     "type": "normal",
                     "loc": 0.0,
@@ -1026,7 +1026,7 @@ def test_add_simulation_column_binomial_probability_zero(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "SimCol",
+                "columnName": "SimCol",
                 "distribution": {
                     "type": "binomial",
                     "n": BINOMIAL_N,
@@ -1056,7 +1056,7 @@ def test_add_simulation_column_binomial_probability_over_one(
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "SimCol",
+                "columnName": "SimCol",
                 "distribution": {
                     "type": "binomial",
                     "n": BINOMIAL_N,
@@ -1086,7 +1086,7 @@ def test_add_simulation_column_hypergeometric_k_exceeds_n(
         json={
             "tableName": TABLE_NAME,
             "simulationColumn": {
-                "column_name": "SimCol",
+                "columnName": "SimCol",
                 "distribution": {
                     "type": "hypergeometric",
                     "N": 5,
