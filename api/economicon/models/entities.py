@@ -1,4 +1,4 @@
-from typing import Annotated, List, Literal, Optional, Union
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
@@ -44,7 +44,7 @@ class RegularizedRegressionParams(BaseModel):
 class BinaryChoiceRegressionParams(BaseModel):
     method: Literal[RegressionMethodType.LOGIT, RegressionMethodType.PROBIT]
     # 正則化のパラメータを追加
-    regularization: Optional[BinaryChoiceRegularization] = None
+    regularization: BinaryChoiceRegularization | None = None
     # 平均限界効果(AME)を計算するかどうかのフラグを追加
     calculate_marginal_effects: bool = Field(
         default=False,
@@ -56,11 +56,11 @@ class BinaryChoiceRegressionParams(BaseModel):
 class TobitParams(BaseModel):
     method: Literal[RegressionMethodType.TOBIT]
     # 打ち切り値を追加
-    left_censoring_limit: Optional[float] = Field(
+    left_censoring_limit: float | None = Field(
         default=0.0,
         description="左側打ち切り値。この値以下のデータが打ち切られていると見なす",
     )
-    right_censoring_limit: Optional[float] = Field(
+    right_censoring_limit: float | None = Field(
         default=None, description="右側打ち切り値"
     )
 
@@ -72,8 +72,8 @@ class InstrumentalVariablesParams(BaseModel):
         description="推定アルゴリズム。過剰識別かつ異分散がある場合はGMMを推奨",
     )
     # 操作変数と内生変数の列名リストを追加
-    instrumental_variables: List[ColumnName]
-    endogenous_variables: List[ColumnName]
+    instrumental_variables: list[ColumnName]
+    endogenous_variables: list[ColumnName]
     # GMMを選択した場合の重み行列の設定（必要なら）
     gmm_weight_matrix: Literal["uncentered", "robust", "hac"] = "robust"
 
@@ -82,20 +82,18 @@ class PanelDataParams(BaseModel):
     method: Literal[RegressionMethodType.FE, RegressionMethodType.RE]
     # 個体ID列と時間列を追加
     entity_id_column: ColumnName = Field(description="個体ID列名")
-    time_column: Optional[ColumnName] = Field(
+    time_column: ColumnName | None = Field(
         default=None, description="時間列名"
     )
 
 
 type RegressionParams = Annotated[
-    Union[
-        OLSParams,
-        RegularizedRegressionParams,
-        BinaryChoiceRegressionParams,
-        InstrumentalVariablesParams,
-        PanelDataParams,
-        TobitParams,
-    ],
+    OLSParams
+    | RegularizedRegressionParams
+    | BinaryChoiceRegressionParams
+    | InstrumentalVariablesParams
+    | PanelDataParams
+    | TobitParams,
     Field(discriminator="method"),
 ]
 
@@ -138,11 +136,9 @@ class HacStandardError(BaseModel):
 
 
 type StandardErrorSettings = Annotated[
-    Union[
-        NonRobustStandardError,
-        RobustStandardError,
-        ClusteredStandardError,
-        HacStandardError,
-    ],
+    NonRobustStandardError
+    | RobustStandardError
+    | ClusteredStandardError
+    | HacStandardError,
     Field(discriminator="method"),
 ]
