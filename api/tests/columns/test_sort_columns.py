@@ -334,10 +334,11 @@ def test_sort_columns_nonexistent_sort_column(client, tables_store):
         "/api/column/sort",
         json={
             "tableName": TABLE_NAME,
-            "sortColumns": [{"column_name": COL_NONEXISTENT, "ascending": True}],
+            "sortColumns": [
+                {"column_name": COL_NONEXISTENT, "ascending": True}
+            ],
         },
     )
-    response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     df_after = tables_store.get_table(TABLE_NAME).table

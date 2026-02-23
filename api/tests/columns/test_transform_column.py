@@ -593,11 +593,18 @@ def test_transform_column_power_exponent_zero(client, tables_store):
 
     df = tables_store.get_table(TABLE_NAME).table
     # x^0 = 1 (ただし 0^0 は 1 として扱う)
-    assert all(v == pytest.approx(1.0, abs=FLOAT_TOLERANCE) for v in df["A_pow0"].to_list())
+    assert all(
+        v == pytest.approx(1.0, abs=FLOAT_TOLERANCE)
+        for v in df["A_pow0"].to_list()
+    )
 
 
 def test_transform_column_power_large_exponent(client, tables_store):
-    """T3: 非常に大きなべき乗指数 (exponent=1000) でも正常に変換される（一部inf許容）"""
+    """
+    T3:
+        非常に大きなべき乗指数 (exponent=1000) でも
+        正常に変換される（一部inf許容）
+    """
     payload = {
         "tableName": TABLE_NAME,
         "sourceColumnName": COL_A,

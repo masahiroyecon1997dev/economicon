@@ -986,8 +986,7 @@ def test_add_simulation_column_normal_scale_zero(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    # Pydantic v2 の discriminated union ではフィールドエラー時にユニオン検証エラーが
-    # 先に報告されるため、"simulationColumn.distribution" がパスに含まれることを検証する
+
     assert "simulationColumn.distribution" in response_data["message"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
@@ -995,7 +994,9 @@ def test_add_simulation_column_normal_scale_zero(client, tables_store):
 
 
 def test_add_simulation_column_normal_near_zero_scale(client, tables_store):
-    """D5: 正規分布で scale=1e-15 (ゼロに非常に近い正の値) でも正常に追加される"""
+    """
+    D5: 正規分布で scale=1e-15 (ゼロに非常に近い正の値) でも正常に追加される
+    """
     response = client.post(
         "/api/column/add-simulation",
         json={
@@ -1038,8 +1039,6 @@ def test_add_simulation_column_binomial_probability_zero(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    # Pydantic v2 の discriminated union ではフィールドエラー時にユニオン検証エラーが
-    # 先に報告されるため、"simulationColumn.distribution" がパスに含まれることを検証する
     assert "simulationColumn.distribution" in response_data["message"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
@@ -1070,8 +1069,6 @@ def test_add_simulation_column_binomial_probability_over_one(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    # Pydantic v2 の discriminated union ではフィールドエラー時にユニオン検証エラーが
-    # 先に報告されるため、"simulationColumn.distribution" がパスに含まれることを検証する
     assert "simulationColumn.distribution" in response_data["message"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
@@ -1103,8 +1100,6 @@ def test_add_simulation_column_hypergeometric_k_exceeds_n(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    # Pydantic v2 の discriminated union ではフィールドエラー時にユニオン検証エラーが
-    # 先に報告されるため、"simulationColumn.distribution" がパスに含まれることを検証する
     assert "simulationColumn.distribution" in response_data["message"]
 
     df_after = tables_store.get_table(TABLE_NAME).table

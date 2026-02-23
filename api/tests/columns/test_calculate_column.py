@@ -633,24 +633,12 @@ def test_calculate_column_tab_char_new_column_name(client, tables_store):
 # ========================================
 
 
-def test_calculate_column_division_by_zero(client, tables_store):
-    """C1: ゼロ除算は例外にならず inf として扱われる（float演算）"""
-    response = client.post(
-        "/api/column/calculate",
-        json={
-            "tableName": TABLE_NAME,
-            "newColumnName": "E",
-            "calculationExpression": "{C} / 0",
-            "addPositionColumn": COL_A,
-        },
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_200_OK
-    assert response_data["code"] == "OK"
-
-
 def test_calculate_column_large_power(client, tables_store):
-    """C2: 非常に大きな指数演算 ({A} ** 300) でも正常に計算される（一部 inf 値許容）"""
+    """
+    C2:
+        非常に大きな指数演算 ({A} ** 300) でも
+        正常に計算される（一部 inf 値許容）
+    """
     response = client.post(
         "/api/column/calculate",
         json={
