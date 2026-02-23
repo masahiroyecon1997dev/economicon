@@ -2,7 +2,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from .common import BinaryChoiceRegularization
+from .common import BaseRequest, BinaryChoiceRegularization
 from .enums import (
     RegressionMethodType,
     StandardErrorMethodType,
@@ -14,7 +14,7 @@ from .types import (
 )
 
 
-class SimulationColumnConfig(BaseModel):
+class SimulationColumnConfig(BaseRequest):
     """
     新しい列名とその生成規則のペア。
     複数のAPI（列追加、シミュレーション設定等）で共通利用される。

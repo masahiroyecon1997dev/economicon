@@ -8,6 +8,7 @@ from .common import (
     BetaParams,
     BinomialParams,
     ExponentialParams,
+    FixedParams,
     GammaParams,
     GeometricParams,
     HypergeometricParams,
@@ -225,6 +226,7 @@ type DistributionParams = (
     | PoissonParams
     | GeometricParams
     | HypergeometricParams
+    | FixedParams
 )
 
 type DistributionConfig = Annotated[

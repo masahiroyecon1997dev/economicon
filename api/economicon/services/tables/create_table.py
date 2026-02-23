@@ -157,7 +157,10 @@ class CreateTable:
             )
 
         # カラム名を置換してから行数調整
-        rename_map = dict(zip(df_raw.columns, self.column_names))
+        rename_map = {
+            old: str(new)
+            for old, new in zip(df_raw.columns, self.column_names, strict=True)
+        }
         df_renamed = df_raw.rename(rename_map)
         return self._adjust_rows(df_renamed)
 
