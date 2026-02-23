@@ -12,8 +12,8 @@ from ..models import (
     ExportExcelByPathResult,
     ExportParquetByPathRequestBody,
     ExportParquetByPathResult,
-    ImportByPathRequestBody,
-    ImportByPathResult,
+    ImportFileRequestBody,
+    ImportFileResult,
     SuccessResponse,
 )
 from ..services.data.dependencies import TablesStoreDep
@@ -21,9 +21,9 @@ from ..services.data.tables_store import TablesStore
 from ..services.data_io.export_csv_by_path import ExportCsvByPath
 from ..services.data_io.export_excel_by_path import ExportExcelByPath
 from ..services.data_io.export_parquet_by_path import ExportParquetByPath
-from ..services.data_io.import_csv_by_path import ImportCsvByPath
-from ..services.data_io.import_excel_by_path import ImportExcelByPath
-from ..services.data_io.import_parquet_by_path import ImportParquetByPath
+from ..services.data_io.import_csv import ImportCsv
+from ..services.data_io.import_excel import ImportExcel
+from ..services.data_io.import_parquet import ImportParquet
 from ..services.operation import run_operation
 from ..utils import create_success_response
 from ..utils.exceptions import ProcessingError
@@ -37,21 +37,21 @@ _PARQUET_EXTENSIONS = {".parquet"}
 
 
 def get_import_api(
-    body: ImportByPathRequestBody,
+    body: ImportFileRequestBody,
     tables_store: TablesStore,
-) -> ImportCsvByPath | ImportExcelByPath | ImportParquetByPath:
+) -> ImportCsv | ImportExcel | ImportParquet:
     """拡張子に基づいて適切なインポート API クラスを返す。
 
     Parameters
     ----------
-    body : ImportByPathRequestBody
+    body : ImportFileRequestBody
         統合インポートリクエストボディ
     tables_store : TablesStore
         テーブルストア
 
     Returns
     -------
-    ImportCsvByPath | ImportExcelByPath | ImportParquetByPath
+    ImportCsv | ImportExcel | ImportParquet
         拡張子に対応するインポーター
 
     Raises
@@ -61,11 +61,11 @@ def get_import_api(
     """
     suffix = Path(body.file_path).suffix.lower()
     if suffix in _CSV_EXTENSIONS:
-        return ImportCsvByPath(body, tables_store)
+        return ImportCsv(body, tables_store)
     if suffix in _EXCEL_EXTENSIONS:
-        return ImportExcelByPath(body, tables_store)
+        return ImportExcel(body, tables_store)
     if suffix in _PARQUET_EXTENSIONS:
-        return ImportParquetByPath(body, tables_store)
+        return ImportParquet(body, tables_store)
     message = _(
         "Unsupported file type: '{suffix}'. "
         "Supported types: .csv, .tsv, .xlsx, .xls, .parquet"
@@ -77,11 +77,11 @@ def get_import_api(
 
 @router.post(
     "/import",
-    response_model=SuccessResponse[ImportByPathResult],
+    response_model=SuccessResponse[ImportFileResult],
 )
 async def import_file(
     request: Request,
-    body: ImportByPathRequestBody,
+    body: ImportFileRequestBody,
     tables_store: TablesStoreDep,
 ):
     """拡張子に基づいてファイルをインポートしてテーブルを作成するエンドポイント
@@ -95,7 +95,7 @@ async def import_file(
     ----------
     request : Request
         FastAPI のリクエストオブジェクト
-    body : ImportByPathRequestBody
+    body : ImportFileRequestBody
         リクエストボディ
     tables_store : TablesStoreDep
         依存注入されたテーブルストア

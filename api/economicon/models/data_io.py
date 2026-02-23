@@ -21,7 +21,7 @@ from .types import (
 # ---------------------------------------------------------------------------
 
 
-class ImportByPathRequestBody(BaseRequest):
+class ImportFileRequestBody(BaseRequest):
     """ファイルパス指定インポートリクエスト（CSV / Excel / Parquet 共通）
 
     拡張子に応じて適切なインポーターが自動選択されます。
@@ -71,7 +71,7 @@ class ImportByPathRequestBody(BaseRequest):
             title="Encoding",
             description=(
                 "CSV ファイルのエンコーディング（CSV / TSV のみ有効）。"
-                "utf8 / utf8-bom / latin1 / ascii / gbk / windows-1252 "
+                "utf8 / latin1 / ascii / gbk / windows-1252 / shift_jis "
                 "から選択してください。"
             ),
         ),
@@ -189,7 +189,7 @@ class ImportTableResult(BaseResult):
     )
 
 
-class ImportByPathResult(ImportTableResult):
+class ImportFileResult(ImportTableResult):
     """ファイルパス指定インポートレスポンス"""
 
 

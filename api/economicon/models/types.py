@@ -199,12 +199,14 @@ FileName = Annotated[
 ]
 
 # Polars の read_csv でサポートされるエンコーディング
+# shift_jis は実装上 MS932 (CP932) として扱われる
 CsvEncoding = Literal[
     "utf8",
     "latin1",
     "ascii",
     "gbk",
     "windows-1252",
+    "shift_jis",
 ]
 
 type DistributionParams = (
