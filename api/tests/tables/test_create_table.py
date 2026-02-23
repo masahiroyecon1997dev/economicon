@@ -242,7 +242,10 @@ def test_n6_table_name_with_tab(client, tables_store):
 
 
 def test_n7_table_name_only_spaces(client, tables_store):
-    """N7: tableNameがスペースのみの場合、トリム後に空になり 422 VALIDATION_ERROR"""
+    """
+    N7:
+    tableNameがスペースのみの場合、トリム後に空になり 422 VALIDATION_ERROR
+    """
     payload = {**_BASE_PAYLOAD, "tableName": "   "}
     response = client.post("/api/table/create", json=payload)
     response_data = response.json()
