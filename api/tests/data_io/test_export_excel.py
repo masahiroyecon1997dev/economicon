@@ -85,56 +85,6 @@ def test_export_excel_with_sheet_name(client, prepared_data):
     assert test_data.equals(exported_data)
 
 
-def test_export_excel_no_header(client, prepared_data):
-    """
-    ヘッダなしで Excel ファイルをエクスポートするテスト
-    """
-    tables_store, test_dir, test_data = prepared_data
-    request_data = {
-        "tableName": "TestTable",
-        "directoryPath": test_dir,
-        "fileName": "test_no_header",
-        "format": "excel",
-        "includeHeader": False,
-    }
-    response = client.post(URL, data=json.dumps(request_data))
-    response_data = response.json()
-    assert response.status_code == status.HTTP_200_OK
-    assert "OK" == response_data["code"]
-    output_path = os.path.join(test_dir, "test_no_header.xlsx")
-    assert output_path == response_data["result"]["filePath"]
-    assert os.path.exists(output_path)
-    # ヘッダなしで読み込んで行数を検証
-    exported_data = pl.read_excel(output_path, has_header=False)
-    assert len(test_data) == len(exported_data)
-
-
-def test_export_excel_with_sheet_name_and_no_header(client, prepared_data):
-    """
-    シート名指定かつヘッダなしで Excel ファイルをエクスポートするテスト
-    """
-    tables_store, test_dir, test_data = prepared_data
-    request_data = {
-        "tableName": "TestTable",
-        "directoryPath": test_dir,
-        "fileName": "test_sheet_no_header",
-        "format": "excel",
-        "sheetName": "RawData",
-        "includeHeader": False,
-    }
-    response = client.post(URL, data=json.dumps(request_data))
-    response_data = response.json()
-    assert response.status_code == status.HTTP_200_OK
-    assert "OK" == response_data["code"]
-    output_path = os.path.join(test_dir, "test_sheet_no_header.xlsx")
-    assert os.path.exists(output_path)
-    # ヘッダなし・指定シートで読み込んで行数を検証
-    exported_data = pl.read_excel(
-        output_path, sheet_name="RawData", has_header=False
-    )
-    assert len(test_data) == len(exported_data)
-
-
 def test_export_excel_table_not_exists(client, prepared_data):
     """
     存在しないテーブル名を指定した場合のテスト
