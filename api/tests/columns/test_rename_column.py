@@ -47,6 +47,7 @@ def test_rename_column_success(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == COL_C
     df_after = tables_store.get_table(TABLE_NAME).table
     assert COL_C in df_after.columns
     assert COL_A not in df_after.columns
@@ -219,6 +220,7 @@ def test_rename_column_japanese_new_column_name(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     assert response_data["result"]["tableName"] == TABLE_NAME
+    assert response_data["result"]["columnName"] == "売上高"
 
     df = tables_store.get_table(TABLE_NAME).table
     assert "売上高" in df.columns
@@ -242,6 +244,7 @@ def test_rename_column_japanese_old_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "Revenue"
 
     df = tables_store.get_table(TABLE_NAME).table
     assert "Revenue" in df.columns
@@ -261,6 +264,7 @@ def test_rename_column_emoji_new_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "🏷️"
 
     df = tables_store.get_table(TABLE_NAME).table
     assert "🏷️" in df.columns
@@ -279,6 +283,7 @@ def test_rename_column_strip_whitespace_old_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == COL_C
 
     df = tables_store.get_table(TABLE_NAME).table
     assert COL_C in df.columns
@@ -300,6 +305,7 @@ def test_rename_column_max_length_new_column_name(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     assert response_data["result"]["tableName"] == TABLE_NAME
+    assert response_data["result"]["columnName"] == long_name
     df = tables_store.get_table(TABLE_NAME).table
     assert long_name in df.columns
 

@@ -30,7 +30,7 @@ class CreateJoinTable:
         self.left_key_column_names = body.left_key_column_names
         # 右テーブルのキー列名リスト
         self.right_key_column_names = body.right_key_column_names
-        # 結合タイプ（inner, left, right, outer）
+        # 結合タイプ（inner, left, right, full）
         self.join_type = body.join_type
         # パラメータ名のマッピング
         self.param_names = {
@@ -82,7 +82,6 @@ class CreateJoinTable:
                 valid_list=right_table_column_name_list,
                 target=self.param_names["right_key_column_names"],
             )
-        return None
 
     def execute(self):
         # テーブル結合処理
@@ -109,7 +108,7 @@ class CreateJoinTable:
                         right_on=self.right_key_column_names,
                         how="right",
                     )
-                case "outer":
+                case "full":
                     # 完全外部結合
                     df = left_df.join(
                         right_df,
