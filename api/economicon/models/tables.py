@@ -1,16 +1,20 @@
 """テーブル操作関連のスキーマ定義"""
 
-from typing import Annotated, Any
+from typing import Annotated, Any, Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from .common import BaseRequest, BaseResult
 from .entities import SimulationColumnConfig
 from .enums import FilterOperatorType, JoinType
 from .types import (
     ColumnName,
+    CsvEncoding,
+    ExcelSheetName,
+    FilePath,
     NewColumnName,
     NewTableName,
+    Separator,
     TableName,
 )
 
@@ -30,13 +34,17 @@ class CreateTableRequestBody(BaseRequest):
         ),
     ]
     table_number_of_rows: Annotated[
-        int,
+        int | None,
         Field(
             title="Table Number Of Rows",
-            description="テーブルの行数",
+            description=(
+                "テーブルの行数。"
+                "file_path が指定されている場合は省略可能（None の場合はファイルの行数を使用）。"
+                "file_path が省略されている場合は必須（1以上の整数）。"
+            ),
             ge=1,
         ),
-    ]
+    ] = None
     column_names: Annotated[
         list[NewColumnName],
         Field(
@@ -45,6 +53,67 @@ class CreateTableRequestBody(BaseRequest):
             min_length=1,
         ),
     ]
+    file_path: Annotated[
+        FilePath | None,
+        Field(
+            title="File Path",
+            description=(
+                "読み込むファイルのパス（CSV / Excel / Parquet）。"
+                "省略時はすべての値が None の空テーブルを作成します。"
+            ),
+        ),
+    ] = None
+    csv_has_header: Annotated[
+        bool,
+        Field(
+            title="CSV Has Header",
+            description=(
+                "CSV ファイルにヘッダ行があるか。"
+                "True: 1 行目をヘッダとして読み飛ばし、2 行目からをデータとする。"
+                "False: 1 行目からデータとして読み込む。"
+                "file_path が CSV の場合のみ有効。"
+            ),
+        ),
+    ] = True
+    csv_separator: Annotated[
+        Separator,
+        Field(
+            title="CSV Separator",
+            description="CSV の区切り文字。file_path が CSV の場合のみ有効。",
+            min_length=1,
+            max_length=10,
+        ),
+    ] = ","
+    csv_encoding: Annotated[
+        CsvEncoding,
+        Field(
+            title="CSV Encoding",
+            description="CSV のエンコーディング。file_path が CSV の場合のみ有効。",
+        ),
+    ] = "utf8"
+    excel_sheet_name: Annotated[
+        ExcelSheetName | None,
+        Field(
+            title="Excel Sheet Name",
+            description=(
+                "読み込むシート名。file_path が Excel の場合のみ有効。"
+                "省略時は先頭シートを読み込みます。"
+            ),
+        ),
+    ] = None
+
+    @model_validator(mode="after")
+    def require_rows_when_no_file(self) -> Self:
+        """file_path が None のとき table_number_of_rows は必須"""
+        if (
+            self.file_path is None
+            and self.table_number_of_rows is None
+        ):
+            raise ValueError(
+                "table_number_of_rows is required "
+                "when file_path is not specified"
+            )
+        return self
 
 
 class RenameTableRequestBody(BaseRequest):
