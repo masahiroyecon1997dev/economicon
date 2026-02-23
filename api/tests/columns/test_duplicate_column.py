@@ -1,154 +1,351 @@
 import polars as pl
 import pytest
-from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.core.enums import ErrorCode
+from economicon.services.data.tables_store import TablesStore
 from main import app
+
+# ========================================
+# 定数
+# ========================================
+
+TABLE_NAME = "TestTable"
+COL_A = "A"
+COL_B = "B"
+COL_C = "C"
+COL_NONEXISTENT = "Z"
+TABLE_NONEXISTENT = "NoTable"
+
+COL_A_COPY = "A_Copy"
+COL_B_DUPLICATE = "B_Duplicate"
+COL_C_CLONE = "C_Clone"
+
+# テーブルの初期値
+DATA_A = [1, 2, 3]
+DATA_B = [4, 5, 6]
+DATA_C = ["x", "y", "z"]
+
+
+# ========================================
+# フィクスチャ
+# ========================================
 
 
 @pytest.fixture
 def client():
-    """TestClientのフィクスチャ"""
-    return TestClient(app)
+    """TestClient のフィクスチャ"""
+    return TestClient(app, raise_server_exceptions=False)
 
 
 @pytest.fixture
-def prepared_data():
-    """TablesStoreのフィクスチャ"""
+def tables_store():
+    """TablesStore のフィクスチャ"""
     manager = TablesStore()
-    # テーブルをクリア
     manager.clear_tables()
-    # テスト用テーブルをセット
-    df = pl.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6], "C": ["x", "y", "z"]})
-    manager.store_table("TestTable", df)
-    yield manager, df
-    # テスト後のクリーンアップ
+    df = pl.DataFrame({COL_A: DATA_A, COL_B: DATA_B, COL_C: DATA_C})
+    manager.store_table(TABLE_NAME, df)
+    yield manager
     manager.clear_tables()
 
 
-def test_duplicate_column_success(client, prepared_data):
-    tables_store, df = prepared_data
-    # 正常に列複製できる
-    payload = {
-        "tableName": "TestTable",
-        "sourceColumnName": "A",
-        "newColumnName": "A_Copy",
-    }
+# ========================================
+# 正常系テスト
+# ========================================
+
+
+def test_duplicate_column_success(client, tables_store):
+    """先頭列を複製すると元列の右隣に挿入される"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
     response = client.post(
         "/api/column/duplicate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "sourceColumnName": COL_A,
+            "newColumnName": COL_A_COPY,
+            "addPositionColumn": COL_A,
+        },
     )
+
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert response_data["result"]["tableName"] == "TestTable"
-    assert response_data["result"]["columnName"] == "A_Copy"
-    # 列が複製されているか確認
-    df = tables_store.get_table("TestTable").table
-    expected_columns = ["A", "A_Copy", "B", "C"]
-    assert df.columns == expected_columns
-    # 複製された列の値が元の列と同じか確認
-    assert df["A"].to_list() == df["A_Copy"].to_list()
-    assert df["A_Copy"].to_list() == [1, 2, 3]
+    assert response_data["result"]["tableName"] == TABLE_NAME
+    assert response_data["result"]["columnName"] == COL_A_COPY
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    # COL_A の右隣に挿入される
+    assert df_after.columns == [COL_A, COL_A_COPY, COL_B, COL_C]
+    # 複製列の値が元と一致する
+    assert df_after[COL_A_COPY].to_list() == df_before[COL_A].to_list()
+    # 既存列のデータは変わらない
+    assert df_after[COL_A].to_list() == df_before[COL_A].to_list()
+    assert df_after[COL_B].to_list() == df_before[COL_B].to_list()
 
 
-def test_duplicate_column_success_middle_column(client, prepared_data):
-    tables_store, df = prepared_data
-    # 中間の列を複製する場合
-    payload = {
-        "tableName": "TestTable",
-        "sourceColumnName": "B",
-        "newColumnName": "B_Duplicate",
-    }
+def test_duplicate_column_success_middle_column(client, tables_store):
+    """中間列を複製すると元列の右隣に挿入される"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
     response = client.post(
         "/api/column/duplicate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "sourceColumnName": COL_B,
+            "newColumnName": COL_B_DUPLICATE,
+            "addPositionColumn": COL_B,
+        },
     )
+
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    # 列の順序が正しいか確認（B の右隣に B_Duplicate が挿入される）
-    df = tables_store.get_table("TestTable").table
-    expected_columns = ["A", "B", "B_Duplicate", "C"]
-    assert df.columns == expected_columns
-    # 複製された列の値が元の列と同じか確認
-    assert df["B"].to_list() == df["B_Duplicate"].to_list()
-    assert df["B_Duplicate"].to_list() == [4, 5, 6]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    # COL_B の右隣に挿入される
+    assert df_after.columns == [COL_A, COL_B, COL_B_DUPLICATE, COL_C]
+    assert df_after[COL_B_DUPLICATE].to_list() == df_before[COL_B].to_list()
 
 
-def test_duplicate_column_success_string_column(client, prepared_data):
-    tables_store, df = prepared_data
-    # 文字列列の複製
-    payload = {
-        "tableName": "TestTable",
-        "sourceColumnName": "C",
-        "newColumnName": "C_Clone",
-    }
+def test_duplicate_column_success_string_column(client, tables_store):
+    """文字列列を複製できる"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
     response = client.post(
         "/api/column/duplicate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "sourceColumnName": COL_C,
+            "newColumnName": COL_C_CLONE,
+            "addPositionColumn": COL_C,
+        },
     )
+
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert response_data["result"]["tableName"] == "TestTable"
-    assert response_data["result"]["columnName"] == "C_Clone"
-    # 複製された文字列列の値が正しいか確認
-    df = tables_store.get_table("TestTable").table
-    assert df["C"].to_list() == df["C_Clone"].to_list()
-    assert df["C_Clone"].to_list() == ["x", "y", "z"]
+    assert response_data["result"]["tableName"] == TABLE_NAME
+    assert response_data["result"]["columnName"] == COL_C_CLONE
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after[COL_C_CLONE].to_list() == df_before[COL_C].to_list()
 
 
-def test_duplicate_column_invalid_table(client, prepared_data):
-    tables_store, df = prepared_data
-    # 存在しないテーブル名
-    payload = {
-        "tableName": "NoTable",
-        "sourceColumnName": "A",
-        "newColumnName": "A_Copy",
-    }
+# ========================================
+# 異常系テスト（Pydantic バリデーション: 422）
+# ========================================
+
+
+def test_duplicate_column_missing_table_name(client, tables_store):
+    """tableName が未指定の場合は 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
     response = client.post(
         "/api/column/duplicate",
-        json=payload,
+        json={
+            "sourceColumnName": COL_A,
+            "newColumnName": COL_A_COPY,
+            "addPositionColumn": COL_A,
+        },
     )
+
+    expected_msg = "tableNameは必須項目です。"
+
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "tableName 'NoTable'は存在しません。" == response_data["message"]
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
 
 
-def test_duplicate_column_invalid_source_column(client, prepared_data):
-    tables_store, df = prepared_data
-    # 存在しないソース列名を指定
-    payload = {
-        "tableName": "TestTable",
-        "sourceColumnName": "Z",
-        "newColumnName": "Z_Copy",
-    }
+def test_duplicate_column_missing_source_column_name(client, tables_store):
+    """sourceColumnName が未指定の場合は 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
     response = client.post(
         "/api/column/duplicate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": COL_A_COPY,
+            "addPositionColumn": COL_A,
+        },
     )
+
+    expected_msg = "sourceColumnNameは必須項目です。"
+
     response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "sourceColumnName 'Z'は存在しません。" == response_data["message"]
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
 
 
-def test_duplicate_column_duplicate_new_column_name(client, prepared_data):
-    tables_store, df = prepared_data
-    # 既存の列名と同じ新列名を指定
-    payload = {
-        "tableName": "TestTable",
-        "sourceColumnName": "A",
-        "newColumnName": "B",  # 既存の列名
-    }
+def test_duplicate_column_missing_new_column_name(client, tables_store):
+    """newColumnName が未指定の場合は 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
     response = client.post(
         "/api/column/duplicate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "sourceColumnName": COL_A,
+            "addPositionColumn": COL_A,
+        },
     )
+
+    expected_msg = "newColumnNameは必須項目です。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_duplicate_column_missing_add_position_column(client, tables_store):
+    """addPositionColumn が未指定の場合は 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/duplicate",
+        json={
+            "tableName": TABLE_NAME,
+            "sourceColumnName": COL_A,
+            "newColumnName": COL_A_COPY,
+        },
+    )
+
+    expected_msg = "addPositionColumnは必須項目です。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+# ========================================
+# 異常系テスト（内部バリデーション: 400）
+# ========================================
+
+
+def test_duplicate_column_invalid_table_name(client, tables_store):
+    """存在しないテーブル名を指定した場合は 400 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/duplicate",
+        json={
+            "tableName": TABLE_NONEXISTENT,
+            "sourceColumnName": COL_A,
+            "newColumnName": COL_A_COPY,
+            "addPositionColumn": COL_A,
+        },
+    )
+
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    print(response_data["message"])
-    assert "newColumnName 'B'は既に存在します。" == response_data["message"]
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert (
+        response_data["message"]
+        == f"tableName '{TABLE_NONEXISTENT}'は存在しません。"
+    )
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_duplicate_column_invalid_source_column(client, tables_store):
+    """存在しないソース列名を指定した場合は 400 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/duplicate",
+        json={
+            "tableName": TABLE_NAME,
+            "sourceColumnName": COL_NONEXISTENT,
+            "newColumnName": f"{COL_NONEXISTENT}_Copy",
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert (
+        response_data["message"]
+        == f"sourceColumnName '{COL_NONEXISTENT}'は存在しません。"
+    )
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_duplicate_column_duplicate_new_column_name(client, tables_store):
+    """既存列名と同じ newColumnName を指定した場合は 400 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/duplicate",
+        json={
+            "tableName": TABLE_NAME,
+            "sourceColumnName": COL_A,
+            "newColumnName": COL_B,  # 既存の列名
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_ALREADY_EXISTS
+    assert (
+        response_data["message"]
+        == f"newColumnName '{COL_B}'は既に存在します。"
+    )
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_duplicate_column_invalid_add_position_column(client, tables_store):
+    """存在しない addPositionColumn を指定した場合は 400 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/duplicate",
+        json={
+            "tableName": TABLE_NAME,
+            "sourceColumnName": COL_A,
+            "newColumnName": COL_A_COPY,
+            "addPositionColumn": COL_NONEXISTENT,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert (
+        response_data["message"]
+        == f"addPositionColumn '{COL_NONEXISTENT}'は存在しません。"
+    )
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
