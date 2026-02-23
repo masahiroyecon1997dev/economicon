@@ -491,3 +491,153 @@ def test_add_dummy_column_with_numeric_target(client, tables_store):
     assert df.columns == ["score", "is_excellent", "name"]
     # 90 の位置のみ 1
     assert df["is_excellent"].to_list() == [0, 1, 0, 1, 0]
+
+
+# ========================================
+# 意地悪な入力テスト (N1-N7: 名前バリエーション)
+# ========================================
+
+
+def test_add_dummy_column_japanese_dummy_column_name(client, tables_store):
+    """N1: 日本語のダミー列名でも正常に追加される"""
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "女性フラグ",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["dummyColumnName"] == "女性フラグ"
+
+    df = tables_store.get_table("TestTable").table
+    assert "女性フラグ" in df.columns
+    assert df["女性フラグ"].to_list() == [0, 1, 1, 0, 0]
+
+
+def test_add_dummy_column_japanese_source_column_name(client, tables_store):
+    """N2: sourceColumnName に日本語列名を指定しても正常に処理される"""
+    tables_store.update_table(
+        "TestTable",
+        pl.DataFrame({"性別": ["male", "female", "female"], "age": [25, 30, 35]}),
+    )
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "性別",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "性別",
+            "targetValue": "female",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("TestTable").table
+    assert "is_female" in df.columns
+    assert df["is_female"].to_list() == [0, 1, 1]
+
+
+def test_add_dummy_column_emoji_dummy_column_name(client, tables_store):
+    """N3: 絵文字のみのダミー列名でも正常に追加される"""
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "👩",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["dummyColumnName"] == "👩"
+
+
+def test_add_dummy_column_strip_whitespace_source_column(client, tables_store):
+    """N4: sourceColumnName の前後スペースは除去されて正常に処理される"""
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "  gender  ",
+            "dummyColumnName": "is_female",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("TestTable").table
+    assert "is_female" in df.columns
+    assert df["is_female"].to_list() == [0, 1, 1, 0, 0]
+
+
+def test_add_dummy_column_max_length_dummy_column_name(client, tables_store):
+    """N5: 128文字（最大長境界値）のダミー列名は正常に追加される"""
+    long_name = "x" * 128
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": long_name,
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["dummyColumnName"] == long_name
+
+
+def test_add_dummy_column_too_long_dummy_column_name(client, tables_store):
+    """N6: 129文字（最大長超過）のダミー列名は422エラーになる"""
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "x" * 129,
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "dummyColumnNameは128文字以内で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_add_dummy_column_tab_char_dummy_column_name(client, tables_store):
+    """N7: タブ文字を含むダミー列名は422エラーになる"""
+    response = client.post(
+        "/api/column/add-dummy",
+        json={
+            "tableName": "TestTable",
+            "sourceColumnName": "gender",
+            "dummyColumnName": "col	A",
+            "addPositionColumn": "gender",
+            "targetValue": "female",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "dummyColumnNameに使用できない文字が含まれています。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]

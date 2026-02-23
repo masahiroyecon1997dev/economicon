@@ -422,3 +422,205 @@ def test_transform_column_process_error(client, tables_store):
         )
     finally:
         tables_store.update_table = original_update_table
+
+
+# ========================================
+# 意地悪な入力テスト (N1-N7: 名前バリエーション)
+# ========================================
+
+
+def test_transform_column_japanese_new_column_name(client, tables_store):
+    """N1: 日本語の新規列名でも正常に変換される"""
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": COL_A,
+        "newColumnName": "対数変換済み",
+        "addPositionColumn": COL_A,
+        "transformMethod": {"method": "log"},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "対数変換済み"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert "対数変換済み" in df.columns
+
+
+def test_transform_column_japanese_source_column(client, tables_store):
+    """N2: 日本語の元列名を参照しても正常に変換される"""
+    tables_store.update_table(
+        TABLE_NAME,
+        pl.DataFrame({"売上高": DATA_A, COL_B: DATA_B, COL_C: DATA_C}),
+    )
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": "売上高",
+        "newColumnName": "売上高_ln",
+        "addPositionColumn": "売上高",
+        "transformMethod": {"method": "log"},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == ["売上高", "売上高_ln", COL_B, COL_C]
+
+
+def test_transform_column_emoji_new_column_name(client, tables_store):
+    """N3: 絵文字のみの新規列名でも正常に変換される"""
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": COL_A,
+        "newColumnName": "📊",
+        "addPositionColumn": COL_A,
+        "transformMethod": {"method": "log"},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "📊"
+
+
+def test_transform_column_strip_whitespace_source_column(client, tables_store):
+    """N4: sourceColumnName の前後スペースは除去されて正常に処理される"""
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": "  A  ",
+        "newColumnName": "A_ln",
+        "addPositionColumn": COL_A,
+        "transformMethod": {"method": "log"},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert "A_ln" in df.columns
+
+
+def test_transform_column_max_length_new_column_name(client, tables_store):
+    """N5: 128文字（最大長境界値）の新規列名は正常に変換される"""
+    long_name = "x" * 128
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": COL_A,
+        "newColumnName": long_name,
+        "addPositionColumn": COL_A,
+        "transformMethod": {"method": "log"},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == long_name
+
+
+def test_transform_column_too_long_new_column_name(client, tables_store):
+    """N6: 129文字（最大長超過）の新規列名は422エラーになる"""
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": COL_A,
+        "newColumnName": "x" * 129,
+        "addPositionColumn": COL_A,
+        "transformMethod": {"method": "log"},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "newColumnNameは128文字以内で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_transform_column_tab_char_new_column_name(client, tables_store):
+    """N7: タブ文字を含む新規列名は422エラーになる"""
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": COL_A,
+        "newColumnName": "col	A",
+        "addPositionColumn": COL_A,
+        "transformMethod": {"method": "log"},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "newColumnNameに使用できない文字が含まれています。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+# ========================================
+# 意地悪な入力テスト (T1-T4: 変換パラメータ極端値)
+# ========================================
+
+
+def test_transform_column_log_tiny_base(client, tables_store):
+    """T1: 非常に小さな対数の底 (log_base=1e-10) でも正常に変換される"""
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": COL_A,
+        "newColumnName": "A_log_tiny",
+        "addPositionColumn": COL_A,
+        "transformMethod": {"method": "log", "log_base": 1e-10},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+
+def test_transform_column_power_exponent_zero(client, tables_store):
+    """T2: べき乗の指数=0 は全ての値が1になるが正常に変換される"""
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": COL_A,
+        "newColumnName": "A_pow0",
+        "addPositionColumn": COL_A,
+        "transformMethod": {"method": "power", "exponent": 0},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    # x^0 = 1 (ただし 0^0 は 1 として扱う)
+    assert all(v == pytest.approx(1.0, abs=FLOAT_TOLERANCE) for v in df["A_pow0"].to_list())
+
+
+def test_transform_column_power_large_exponent(client, tables_store):
+    """T3: 非常に大きなべき乗指数 (exponent=1000) でも正常に変換される（一部inf許容）"""
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": COL_A,
+        "newColumnName": "A_pow1000",
+        "addPositionColumn": COL_A,
+        "transformMethod": {"method": "power", "exponent": 1000},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+
+def test_transform_column_root_tiny_index(client, tables_store):
+    """T4: 非常に小さなルート指数 (root_index=0.001) でも正常に変換される"""
+    payload = {
+        "tableName": TABLE_NAME,
+        "sourceColumnName": COL_A,
+        "newColumnName": "A_root_tiny",
+        "addPositionColumn": COL_A,
+        "transformMethod": {"method": "root", "root_index": 0.001},
+    }
+    response = client.post("/api/column/transform", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"

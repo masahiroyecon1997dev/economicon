@@ -197,3 +197,120 @@ def test_get_column_list_unexpected_exception(client, tables_store):
         assert response_data["code"] == ErrorCode.GET_COLUMN_LIST_PROCESS_ERROR
     finally:
         tables_store.get_schema = original_get_schema
+
+
+# ========================================
+# 意地悪な入力テスト (N1-N7: 名前バリエーション)
+# ========================================
+
+
+def test_get_column_list_japanese_column_names(client, tables_store):
+    """N1: テーブルに日本語列名が含まれていても正常に列リストを返す"""
+    tables_store.update_table(
+        TABLE_NAME,
+        pl.DataFrame({
+            "売上高": DATA_INT,
+            "利益率": DATA_FLOAT,
+            "カテゴリ": DATA_STR,
+        }),
+    )
+    response = client.post(
+        "/api/column/get-list",
+        json={"tableName": TABLE_NAME},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    column_names = [col["name"] for col in response_data["result"]["columnInfoList"]]
+    assert "売上高" in column_names
+    assert "利益率" in column_names
+    assert "カテゴリ" in column_names
+
+
+def test_get_column_list_emoji_column_names(client, tables_store):
+    """N2: テーブルに絵文字列名が含まれていても正常に列リストを返す"""
+    tables_store.update_table(
+        TABLE_NAME,
+        pl.DataFrame({
+            "🔥": DATA_INT,
+            "📊": DATA_FLOAT,
+            "🏷️": DATA_STR,
+        }),
+    )
+    response = client.post(
+        "/api/column/get-list",
+        json={"tableName": TABLE_NAME},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    column_names = [col["name"] for col in response_data["result"]["columnInfoList"]]
+    assert "🔥" in column_names
+
+
+def test_get_column_list_strip_whitespace_table_name(client, tables_store):
+    """N3: tableName の前後スペースは除去されて正常に列リストを返す"""
+    response = client.post(
+        "/api/column/get-list",
+        json={"tableName": f"  {TABLE_NAME}  "},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert len(response_data["result"]["columnInfoList"]) == 3
+
+
+def test_get_column_list_many_columns(client, tables_store):
+    """N4: 多数の列（50列）があるテーブルでも正常に列リストを返す"""
+    many_cols = {f"col_{i}": [i, i + 1, i + 2] for i in range(50)}
+    tables_store.update_table(TABLE_NAME, pl.DataFrame(many_cols))
+
+    response = client.post(
+        "/api/column/get-list",
+        json={"tableName": TABLE_NAME},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert len(response_data["result"]["columnInfoList"]) == 50
+
+
+def test_get_column_list_table_with_spaces_in_name(client, tables_store):
+    """N5: スペースを含むテーブル名でも正常に列リストを返す（strip_whitespace=True）"""
+    manager = tables_store
+    manager.store_table("My Table", pl.DataFrame({"A": [1], "B": [2]}))
+
+    response = client.post(
+        "/api/column/get-list",
+        json={"tableName": "My Table"},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    manager.delete_table("My Table")
+
+
+def test_get_column_list_long_table_name_not_found(client, tables_store):
+    """N6: 非常に長いテーブル名は存在しないため400エラーになる"""
+    response = client.post(
+        "/api/column/get-list",
+        json={"tableName": "x" * 256},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+
+
+def test_get_column_list_empty_table_name(client, tables_store):
+    """N7: tableName が空文字の場合は422エラーになる"""
+    response = client.post(
+        "/api/column/get-list",
+        json={"tableName": ""},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "tableNameは1文字以上で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
