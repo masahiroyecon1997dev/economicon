@@ -2,7 +2,7 @@ import polars as pl
 
 from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
-from ...models import ImportParquetByPathRequestBody
+from ...models import ImportByPathRequestBody
 from ...utils import ProcessingError
 from ...utils.validators import (
     validate_file_path,
@@ -20,7 +20,7 @@ class ImportParquetByPath:
 
     def __init__(
         self,
-        body: ImportParquetByPathRequestBody,
+        body: ImportByPathRequestBody,
         tables_store: TablesStore,
     ):
         # テーブルマネージャーの初期化
@@ -46,7 +46,6 @@ class ImportParquetByPath:
             existing_list=table_name_list,
             target=self.param_names["table_name"],
         )
-        return None
 
     def execute(self):
         # PARQUETファイルのインポート処理

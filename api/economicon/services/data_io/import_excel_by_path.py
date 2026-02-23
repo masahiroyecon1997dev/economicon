@@ -2,7 +2,7 @@ import polars as pl
 
 from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
-from ...models import ImportExcelByPathRequestBody
+from ...models import ImportByPathRequestBody
 from ...utils import ProcessingError
 from ...utils.validators import (
     validate_file_path,
@@ -16,12 +16,12 @@ class ImportExcelByPath:
     Excelファイルパス指定でデータをインポートしてテーブルを作成するAPIクラス
 
     指定されたパスのExcelファイルを解析し、指定されたテーブル名で登録します。
-    シート名を指定できます。
+    sheet_name を指定した場合はそのシートを、省略や null の場合は先頭シートを読み込みます。
     """
 
     def __init__(
         self,
-        body: ImportExcelByPathRequestBody,
+        body: ImportByPathRequestBody,
         tables_store: TablesStore,
     ):
         # テーブルマネージャーの初期化
@@ -30,8 +30,8 @@ class ImportExcelByPath:
         self.file_path = body.file_path
         # テーブル名
         self.table_name = body.table_name
-        # シート名
-        self.sheet_name = body.sheet_name
+        # シート名（None または空文字の場合は先頭シート）
+        self.sheet_name = body.sheet_name or None
         # パラメータ名のマッピング
         self.param_names = {
             "file_path": "filePath",
@@ -51,7 +51,6 @@ class ImportExcelByPath:
             existing_list=table_name_list,
             target=self.param_names["table_name"],
         )
-        return None
 
     def execute(self):
         # Excelファイルのインポート処理
