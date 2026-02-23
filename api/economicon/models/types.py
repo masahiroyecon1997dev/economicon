@@ -1,4 +1,4 @@
-from typing import Annotated, Union
+from typing import Annotated
 
 from pydantic import AfterValidator, Field, StringConstraints
 
@@ -72,7 +72,7 @@ def validate_file_name_chars(v: str) -> str:
         "LPT8",
         "LPT9",
     }
-    base_name = v.split(".")[0].upper()
+    base_name = v.split(".", maxsplit=1)[0].upper()
     if base_name in reserved_names:
         raise ValueError(_(f"'{base_name}' is a reserved system name"))
 
@@ -198,31 +198,27 @@ FileName = Annotated[
     ),
 ]
 
-type DistributionParams = Union[
-    UniformParams,
-    ExponentialParams,
-    NormalParams,
-    GammaParams,
-    BetaParams,
-    WeibullParams,
-    LognormalParams,
-    BinomialParams,
-    BernoulliParams,
-    PoissonParams,
-    GeometricParams,
-    HypergeometricParams,
-]
+type DistributionParams = (
+    UniformParams
+    | ExponentialParams
+    | NormalParams
+    | GammaParams
+    | BetaParams
+    | WeibullParams
+    | LognormalParams
+    | BinomialParams
+    | BernoulliParams
+    | PoissonParams
+    | GeometricParams
+    | HypergeometricParams
+)
 
 type DistributionConfig = Annotated[
     DistributionParams,
     Field(discriminator="type", description="分布設定"),
 ]
 
-type TransformMethodParams = Union[
-    LogParams,
-    PowerParams,
-    RootParams,
-]
+type TransformMethodParams = LogParams | PowerParams | RootParams
 
 type TransformMethodConfig = Annotated[
     TransformMethodParams,

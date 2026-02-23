@@ -1,6 +1,6 @@
 """回帰分析関連のスキーマ定義"""
 
-from typing import Annotated, Any, List
+from typing import Annotated, Any
 
 from pydantic import Field
 
@@ -56,7 +56,7 @@ class RegressionRequestBody(BaseRequest):
         ),
     ]
     explanatory_variables: Annotated[
-        List[ColumnName],
+        list[ColumnName],
         Field(
             title="Explanatory Variables",
             description="説明変数の列名のリスト。テーブル内に存在するカラム名を指定してください。",
@@ -78,7 +78,8 @@ class RegressionRequestBody(BaseRequest):
             alias="missingValueHandling",
             title="Missing Value Handling",
             description="欠損値の処理方法"
-            "（remove: 該当行を削除、ignore: そのまま使用、error: エラーとして扱う）",
+            "（remove: 該当行を削除、ignore: そのまま使用、"
+            "error: エラーとして扱う）",
         ),
     ]
 
@@ -98,7 +99,8 @@ class RegressionRequestBody(BaseRequest):
         Field(
             title="Standard Error Settings",
             description="標準誤差の計算方法設定。"
-            "nonrobust, robust（HC）, cluster, hac（Newey-West）から選択します。",
+            "nonrobust, robust（HC）, cluster, "
+            "hac（Newey-West）から選択します。",
         ),
     ]
 
@@ -120,7 +122,7 @@ class RegressionResult(BaseResult):
 class GetAllAnalysisResultsResult(BaseResult):
     """全分析結果サマリー取得レスポンス"""
 
-    results: List[Any] = Field(
+    results: list[Any] = Field(
         title="Results",
         description="分析結果のサマリーリスト",
     )

@@ -8,44 +8,41 @@ def generate_simulation_data(
 ) -> np.ndarray:
     """指定された分布に従ってシミュレーションデータを生成"""
 
-    # NumPyのランダムジェネレータを使用
     rng = np.random.default_rng()
 
-    match distribution.type:
-        case DistributionType.UNIFORM:
-            return rng.uniform(distribution.low, distribution.high, row_count)
-        case DistributionType.EXPONENTIAL:
-            return rng.exponential(distribution.scale, row_count)
-        case DistributionType.NORMAL:
-            return rng.normal(distribution.loc, distribution.scale, row_count)
-        case DistributionType.GAMMA:
-            return rng.gamma(
-                distribution.shape,
-                distribution.scale,
-                row_count,
-            )
-        case DistributionType.BETA:
-            return rng.beta(distribution.a, distribution.b, row_count)
-        case DistributionType.WEIBULL:
-            return rng.weibull(distribution.a, row_count) * distribution.scale
-        case DistributionType.LOGNORMAL:
-            return rng.lognormal(
-                distribution.mean, distribution.sigma, row_count
-            )
-        case DistributionType.BINOMIAL:
-            return rng.binomial(distribution.n, distribution.p, row_count)
-        case DistributionType.BERNOULLI:
-            return rng.binomial(1, distribution.p, row_count)
-        case DistributionType.POISSON:
-            return rng.poisson(distribution.lam, row_count)
-        case DistributionType.GEOMETRIC:
-            return rng.geometric(distribution.p, row_count)
-        case DistributionType.HYPERGEOMETRIC:
-            return rng.hypergeometric(
-                distribution.K,
-                distribution.N - distribution.K,
-                distribution.n,
-                row_count,
-            )
-        case DistributionType.FIXED:
-            return np.full(row_count, distribution.value)
+    # 各分布の生成ロジックをマッピング
+    generators = {
+        DistributionType.UNIFORM: lambda d: rng.uniform(
+            d.low, d.high, row_count
+        ),
+        DistributionType.EXPONENTIAL: lambda d: rng.exponential(
+            d.scale, row_count
+        ),
+        DistributionType.NORMAL: lambda d: rng.normal(
+            d.loc, d.scale, row_count
+        ),
+        DistributionType.GAMMA: lambda d: rng.gamma(
+            d.shape, d.scale, row_count
+        ),
+        DistributionType.BETA: lambda d: rng.beta(d.a, d.b, row_count),
+        DistributionType.WEIBULL: lambda d: (
+            rng.weibull(d.a, row_count) * d.scale
+        ),
+        DistributionType.LOGNORMAL: lambda d: rng.lognormal(
+            d.mean, d.sigma, row_count
+        ),
+        DistributionType.BINOMIAL: lambda d: rng.binomial(d.n, d.p, row_count),
+        DistributionType.BERNOULLI: lambda d: rng.binomial(1, d.p, row_count),
+        DistributionType.POISSON: lambda d: rng.poisson(d.lam, row_count),
+        DistributionType.GEOMETRIC: lambda d: rng.geometric(d.p, row_count),
+        DistributionType.HYPERGEOMETRIC: lambda d: rng.hypergeometric(
+            d.K, d.N - d.K, d.n, row_count
+        ),
+        DistributionType.FIXED: lambda d: np.full(row_count, d.value),
+    }
+
+    generator = generators.get(distribution.type)
+    if not generator:
+        raise ValueError(f"Unsupported distribution type: {distribution.type}")
+
+    return generator(distribution)
