@@ -2,7 +2,7 @@ import polars as pl
 
 from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
-from ...models import ImportCsvByPathRequestBody
+from ...models import ImportByPathRequestBody
 from ...utils import ProcessingError
 from ...utils.validators import (
     validate_file_path,
@@ -16,12 +16,12 @@ class ImportCsvByPath:
     CSVファイルパス指定でデータをインポートしてテーブルを作成するAPIクラス
 
     指定されたパスのCSVファイルを解析し、指定されたテーブル名で登録します。
-    区切り文字を指定できます。
+    区切り文字とエンコーディングを指定できます。
     """
 
     def __init__(
         self,
-        body: ImportCsvByPathRequestBody,
+        body: ImportByPathRequestBody,
         tables_store: TablesStore,
     ):
         # テーブルマネージャーの初期化
@@ -32,11 +32,14 @@ class ImportCsvByPath:
         self.table_name = body.table_name
         # 区切り文字
         self.separator = body.separator
+        # エンコーディング
+        self.encoding = body.encoding
         # パラメータ名のマッピング
         self.param_names = {
             "file_path": "filePath",
             "table_name": "tableName",
             "separator": "separator",
+            "encoding": "encoding",
         }
 
     def validate(self):
@@ -51,14 +54,15 @@ class ImportCsvByPath:
             existing_list=table_name_list,
             target=self.param_names["table_name"],
         )
-        return None
 
     def execute(self):
         # CSVファイルのインポート処理
         try:
             # CSVファイルをPolarsデータフレームに変換
             df = pl.read_csv(
-                self.file_path, separator=self.separator, encoding="utf8"
+                self.file_path,
+                separator=self.separator,
+                encoding=self.encoding,
             )
 
             # テーブルを作成
