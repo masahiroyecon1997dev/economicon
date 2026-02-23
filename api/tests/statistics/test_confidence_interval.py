@@ -1,9 +1,10 @@
 import numpy as np
 import polars as pl
 import pytest
-from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.services.data.tables_store import TablesStore
 from main import app
 
 

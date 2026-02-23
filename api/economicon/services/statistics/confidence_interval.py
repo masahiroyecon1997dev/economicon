@@ -54,8 +54,6 @@ class ConfidenceInterval:
             target=self.param_names["column_name"],
         )
 
-        return None
-
     def execute(self):
         try:
             table_info = self.tables_store.get_table(self.table_name)
@@ -154,8 +152,10 @@ class ConfidenceInterval:
         """比率の信頼区間を計算（二項分布）"""
         # データを0または1の二項データとして扱う
         unique_vals = np.unique(data)
+        supremum = 2
         if not (
-            len(unique_vals) <= 2 and all(v in [0, 1] for v in unique_vals)
+            len(unique_vals) <= supremum
+            and all(v in [0, 1] for v in unique_vals)
         ):
             raise ProcessingError(
                 error_code=ErrorCode.INVALID_PROPORTION_DATA,
