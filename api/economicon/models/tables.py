@@ -1,6 +1,6 @@
 """テーブル操作関連のスキーマ定義"""
 
-from typing import Annotated, Any, List
+from typing import Annotated, Any
 
 from pydantic import Field
 
@@ -38,7 +38,7 @@ class CreateTableRequestBody(BaseRequest):
         ),
     ]
     column_names: Annotated[
-        List[NewColumnName],
+        list[NewColumnName],
         Field(
             title="Column Names",
             description="テーブルに作成するカラム名のリスト",
@@ -78,7 +78,7 @@ class CreateSimulationDataTableRequestBody(BaseRequest):
         ),
     ]
     simulation_columns: Annotated[
-        List[SimulationColumnConfig],
+        list[SimulationColumnConfig],
         Field(
             title="Simulation Columns",
             description="シミュレーションカラムの設定リスト",
@@ -112,14 +112,14 @@ class CreateJoinTableRequestBody(BaseRequest):
         ),
     ]
     left_key_column_names: Annotated[
-        List[ColumnName],
+        list[ColumnName],
         Field(
             title="Left Key Column Names",
             description="左側テーブルの結合キーカラム名のリスト",
         ),
     ]
     right_key_column_names: Annotated[
-        List[ColumnName],
+        list[ColumnName],
         Field(
             title="Right Key Column Names",
             description="右側テーブルの結合キーカラム名のリスト",
@@ -148,7 +148,7 @@ class CreateUnionTableRequestBody(BaseRequest):
         ),
     ]
     table_names: Annotated[
-        List[TableName],
+        list[TableName],
         Field(
             title="Table Names",
             description="ユニオンするテーブル名のリスト（2テーブル以上）。ワークスペース内に存在するテーブル名を指定してください。",
@@ -156,7 +156,7 @@ class CreateUnionTableRequestBody(BaseRequest):
         ),
     ]
     column_names: Annotated[
-        List[ColumnName],
+        list[ColumnName],
         Field(
             title="Column Names",
             description="ユニオンの対象とするカラム名のリスト。指定されたテーブルすべてに存在するカラム名を指定してください。",
@@ -392,7 +392,7 @@ class RenameTableResult(TableNameResult):
 class GetTableListResult(BaseResult):
     """テーブルリスト取得レスポンス"""
 
-    table_name_list: List[str] = Field(
+    table_name_list: list[str] = Field(
         title="Table Name List",
         description="ワークスペースに存在するテーブル名のリスト",
     )

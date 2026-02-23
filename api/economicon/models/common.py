@@ -1,6 +1,6 @@
 """共通のスキーマ定義"""
 
-from typing import Generic, Literal, TypeVar
+from typing import Literal, TypeVar
 
 from pydantic import (
     BaseModel,
@@ -23,7 +23,7 @@ class BaseResponse(BaseModel):
     code: str = Field(..., description="レスポンスコード (OK/NG)")
 
 
-class SuccessResponse(BaseResponse, Generic[T]):
+class SuccessResponse[T](BaseResponse):
     """成功レスポンスモデル"""
 
     code: str = Field(default="OK", description="レスポンスコード")
@@ -66,7 +66,7 @@ class UniformParams(BaseModel):
     high: float = Field(description="分布の上限")
 
     @model_validator(mode="after")
-    def validate_high(self) -> "UniformParams":
+    def validate_high(self) -> UniformParams:
         if self.low >= self.high:
             raise ValueError(
                 _("For uniform distribution, 'low' must be less than 'high'")
@@ -163,7 +163,7 @@ class HypergeometricParams(BaseModel):
     n: int = Field(gt=0, description="標本サイズ")
 
     @model_validator(mode="after")
-    def validate_high(self) -> "HypergeometricParams":
+    def validate_high(self) -> HypergeometricParams:
         if self.K > self.N:
             raise ValueError(
                 _("For hypergeometric distribution, 'K' must not exceed 'N'")
