@@ -2,7 +2,8 @@
 
 from typing import Annotated, Any
 
-from pydantic import Field
+from pydantic import BeforeValidator, Field, field_validator
+from pydantic_core import PydanticCustomError
 
 from .common import BaseRequest, BaseResult
 from .enums import (
@@ -10,6 +11,32 @@ from .enums import (
     DescriptiveStatisticType,
 )
 from .types import ColumnName, TableName
+
+# ---------------------------------------------------------------------------
+# バリデーション関数
+# ---------------------------------------------------------------------------
+
+
+def _coerce_statistic_type(
+    v: Any,
+) -> ConfidenceIntervalStatisticsType:
+    """JSON文字列をConfidenceIntervalStatisticsTypeに変換するBeforeValidator"""
+    if isinstance(v, ConfidenceIntervalStatisticsType):
+        return v
+    if isinstance(v, str):
+        try:
+            return ConfidenceIntervalStatisticsType(v)
+        except ValueError:
+            valid = ", ".join(
+                e.value for e in ConfidenceIntervalStatisticsType
+            )
+            raise PydanticCustomError(
+                "literal_error",
+                "statisticTypeは次のいずれかである必要があります: {expected}",
+                {"expected": valid},
+            ) from None
+    return v
+
 
 # ---------------------------------------------------------------------------
 # リクエストボディ
@@ -44,6 +71,7 @@ class ConfidenceIntervalRequestBody(BaseRequest):
     ]
     statistic_type: Annotated[
         ConfidenceIntervalStatisticsType,
+        BeforeValidator(_coerce_statistic_type),
         Field(
             title="Statistic Type",
             description="信頼区間を計算する統計量のタイプ。"
@@ -82,6 +110,35 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
             min_length=1,
         ),
     ]
+
+    @field_validator("statistics", mode="before")
+    @classmethod
+    def coerce_statistics(cls, v: Any) -> Any:
+        """JSON文字列をDescriptiveStatisticTypeに変換するfield_validator"""
+        if not isinstance(v, list):
+            return v
+        result = []
+        for item in v:
+            if isinstance(item, DescriptiveStatisticType):
+                result.append(item)
+            elif isinstance(item, str):
+                try:
+                    result.append(DescriptiveStatisticType(item))
+                except ValueError:
+                    valid = ", ".join(
+                        e.value for e in DescriptiveStatisticType
+                    )
+                    raise PydanticCustomError(
+                        "literal_error",
+                        (
+                            "statisticsは次のいずれかである"
+                            "必要があります: {expected}"
+                        ),
+                        {"expected": valid},
+                    ) from None
+            else:
+                result.append(item)
+        return result
 
 
 # ---------------------------------------------------------------------------

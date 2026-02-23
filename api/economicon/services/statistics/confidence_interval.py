@@ -62,6 +62,15 @@ class ConfidenceInterval:
             # 列のデータを取得
             column_data = df[self.column_name].drop_nulls()
 
+            # 空データのチェック
+            if len(column_data) == 0:
+                raise ValidationError(
+                    error_code=ErrorCode.CONFIDENCE_INTERVAL_ERROR,
+                    message=_(
+                        "Column contains no valid data"
+                    ),
+                )
+
             # データを numpy array に変換
             data_array = column_data.to_numpy()
 
@@ -157,7 +166,7 @@ class ConfidenceInterval:
             len(unique_vals) <= supremum
             and all(v in [0, 1] for v in unique_vals)
         ):
-            raise ProcessingError(
+            raise ValidationError(
                 error_code=ErrorCode.INVALID_PROPORTION_DATA,
                 message=_(
                     "For proportion confidence interval, "

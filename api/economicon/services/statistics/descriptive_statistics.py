@@ -64,31 +64,34 @@ class DescriptiveStatistics:
             target=self.param_names["column_names"],
         )
 
-        return None
-
     def execute(self):
         try:
             table_info = self.tables_store.get_table(self.table_name)
             df = table_info.table
 
-            result = {}
-
-            expressions = []
+            stats_result = {}
             for column_name in self.column_name_list:
+                col_stats = {}
                 for stat in self.statistics:
-                    if stat in self.stat_map:
-                        expr = df.select(self.stat_map[stat](column_name))
-                        expressions.append((stat, column_name, expr))
+                    if stat not in self.stat_map:
+                        col_stats[stat.value] = None
+                        continue
+                    try:
+                        expr = self.stat_map[stat](column_name)
+                        val = df.select(expr).to_series(0)[0]
+                        col_stats[stat.value] = val
+                    except Exception:
+                        col_stats[stat.value] = None
+                stats_result[column_name] = col_stats
 
-            # 結果を返す
-            result = {
+            return {
                 "tableName": self.table_name,
-                "statistics": df.select(expressions),
+                "statistics": stats_result,
             }
-            return result
         except Exception as e:
             message = _(
-                "An unexpected error occurred during descriptive statistics processing"
+                "An unexpected error occurred during "
+                "descriptive statistics processing"
             )
             raise ProcessingError(
                 error_code=ErrorCode.DESCRIPTIVE_STATISTICS_ERROR,
