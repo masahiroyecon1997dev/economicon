@@ -49,8 +49,8 @@ from .data_io import (
     ExportExcelByPathResult,
     ExportParquetByPathRequestBody,
     ExportParquetByPathResult,
-    ImportByPathRequestBody,
-    ImportByPathResult,
+    ImportFileRequestBody,
+    ImportFileResult,
 )
 from .entities import (
     BinaryChoiceRegressionParams,
@@ -231,8 +231,8 @@ __all__ = [
     "GetSettingsRequestBody",
     "GetSettingsResult",
     # Data I/O
-    "ImportByPathRequestBody",
-    "ImportByPathResult",
+    "ImportFileRequestBody",
+    "ImportFileResult",
     "ExportCsvByPathRequestBody",
     "ExportCsvByPathResult",
     "ExportExcelByPathRequestBody",
