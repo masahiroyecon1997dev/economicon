@@ -74,7 +74,7 @@ def test_transform_column_log_natural_success(client, tables_store):
     assert df.columns == [COL_A, "A_ln", COL_B, COL_C]
     ln_values = df["A_ln"].to_list()
     expected = [math.log(v) for v in DATA_A]
-    for actual, exp in zip(ln_values, expected):
+    for actual, exp in zip(ln_values, expected, strict=True):
         assert actual == pytest.approx(exp, abs=FLOAT_TOLERANCE)
 
 
@@ -95,7 +95,7 @@ def test_transform_column_log_base2_success(client, tables_store):
     log2_values = df["A_log2"].to_list()
     # log2(1)=0, log2(2)=1, log2(4)=2, log2(8)=3, log2(16)=4
     expected = [0, 1, 2, 3, 4]
-    for actual, exp in zip(log2_values, expected):
+    for actual, exp in zip(log2_values, expected, strict=True):
         assert actual == pytest.approx(exp, abs=FLOAT_TOLERANCE)
 
 
@@ -116,7 +116,8 @@ def test_transform_column_power_square_success(client, tables_store):
     square_values = df["A_square"].to_list()
     # 1^2, 2^2, 4^2, 8^2, 16^2
     expected = [1, 4, 16, 64, 256]
-    assert square_values == expected
+    for actual, exp in zip(square_values, expected, strict=True):
+        assert actual == pytest.approx(exp, abs=FLOAT_TOLERANCE)
 
 
 def test_transform_column_power_cube_success(client, tables_store):
@@ -140,7 +141,10 @@ def test_transform_column_power_cube_success(client, tables_store):
 
 
 def test_transform_column_power_fractional_exponent(client, tables_store):
-    """正常系: 小数指数（exponent=0.5 = 平方根）の累乗変換が成功することを検証する"""
+    """
+    正常系:
+        小数指数（exponent=0.5 = 平方根）の累乗変換が成功することを検証する
+    """
     payload = {
         "tableName": TABLE_NAME,
         "sourceColumnName": COL_A,
@@ -155,7 +159,7 @@ def test_transform_column_power_fractional_exponent(client, tables_store):
     df = tables_store.get_table(TABLE_NAME).table
     sqrt_values = df["A_sqrt"].to_list()
     expected = [v**0.5 for v in DATA_A]
-    for actual, exp in zip(sqrt_values, expected):
+    for actual, exp in zip(sqrt_values, expected, strict=True):
         assert actual == pytest.approx(exp, abs=FLOAT_TOLERANCE)
 
 
@@ -176,7 +180,7 @@ def test_transform_column_root_square_success(client, tables_store):
     sqrt_values = df["A_sqrt"].to_list()
     # sqrt(1)=1, sqrt(2)≈1.41421, sqrt(4)=2, sqrt(8)≈2.82843, sqrt(16)=4
     expected = [v**0.5 for v in DATA_A]
-    for actual, exp in zip(sqrt_values, expected):
+    for actual, exp in zip(sqrt_values, expected, strict=True):
         assert actual == pytest.approx(exp, abs=FLOAT_TOLERANCE)
 
 
@@ -196,7 +200,7 @@ def test_transform_column_root_cubic_success(client, tables_store):
     df = tables_store.get_table(TABLE_NAME).table
     cbrt_values = df["A_cbrt"].to_list()
     expected = [v ** (1 / 3) for v in DATA_A]
-    for actual, exp in zip(cbrt_values, expected):
+    for actual, exp in zip(cbrt_values, expected, strict=True):
         assert actual == pytest.approx(exp, abs=FLOAT_TOLERANCE)
 
 
@@ -217,12 +221,15 @@ def test_transform_column_root_fractional_success(client, tables_store):
     square_values = df["A_square"].to_list()
     # root_index=0.5 → pow(x, 1/0.5) = x^2
     expected = [v**2 for v in DATA_A]
-    for actual, exp in zip(square_values, expected):
+    for actual, exp in zip(square_values, expected, strict=True):
         assert actual == pytest.approx(exp, abs=FLOAT_TOLERANCE)
 
 
 def test_transform_column_invalid_table(client, tables_store):
-    """異常系: 存在しないテーブルを指定した場合は400エラーになることを検証する"""
+    """
+    異常系:
+        存在しないテーブルを指定した場合は400エラーになることを検証する
+    """
     payload = {
         "tableName": TABLE_NONEXISTENT,
         "sourceColumnName": COL_A,
@@ -239,7 +246,10 @@ def test_transform_column_invalid_table(client, tables_store):
 
 
 def test_transform_column_invalid_source_column(client, tables_store):
-    """異常系: 存在しないソース列名を指定した場合は400エラーになることを検証する"""
+    """
+    異常系:
+        存在しないソース列名を指定した場合は400エラーになることを検証する
+    """
     df_before = tables_store.get_table(TABLE_NAME).table
     payload = {
         "tableName": TABLE_NAME,

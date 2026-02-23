@@ -1,3 +1,4 @@
+import io
 import os
 
 from ...core.enums import ErrorCode
@@ -12,6 +13,16 @@ from ..data.tables_store import TablesStore
 
 # 拡張子
 _EXTENSION = ".csv"
+
+# CsvEncoding 値 → Python コーデック名のマッピング
+_ENCODING_MAP = {
+    "utf8": "utf-8",
+    "latin1": "latin-1",
+    "ascii": "ascii",
+    "gbk": "gbk",
+    "windows-1252": "windows-1252",
+    "shift_jis": "cp932",
+}
 
 
 class ExportCsv:
@@ -33,6 +44,7 @@ class ExportCsv:
         # file_name には拡張子を含まない
         self.file_name = body.file_name
         self.separator = body.separator
+        self.encoding = body.encoding
         self.include_header = body.include_header
         self.param_names = {
             "table_name": "tableName",
@@ -64,11 +76,16 @@ class ExportCsv:
                 self.directory_path, self.file_name + _EXTENSION
             )
 
+            # StringIO 経由で書き出し、指定エンコーディングで保存
+            buffer = io.StringIO()
             df.write_csv(
-                file_path,
+                buffer,
                 separator=self.separator,
                 include_header=self.include_header,
             )
+            python_encoding = _ENCODING_MAP.get(self.encoding, self.encoding)
+            with open(file_path, "w", encoding=python_encoding) as f:
+                f.write(buffer.getvalue())
 
             return {"filePath": file_path}
 
