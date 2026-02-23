@@ -1,296 +1,461 @@
+import math
+
 import polars as pl
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from economicon.core.enums import ErrorCode
 from economicon.services.data.tables_store import TablesStore
 from main import app
+
+# ========================================
+# 定数
+# ========================================
+
+TABLE_NAME = "TestTable"
+COL_A = "A"
+COL_B = "B"
+COL_C = "C"
+COL_D = "D"
+COL_TEXT = "text_col"
+
+# テーブルの初期値
+DATA_A = [1, 2, 3]
+DATA_B = [4, 5, 6]
+DATA_C = [10.0, 20.0, 30.0]
+DATA_D = [2.5, 3.5, 4.5]
+DATA_TEXT = ["hello", "world", "test"]
+
+
+# ========================================
+# フィクスチャ
+# ========================================
 
 
 @pytest.fixture
 def client():
-    """TestClientのフィクスチャ"""
-    return TestClient(app)
+    """TestClient のフィクスチャ"""
+    return TestClient(app, raise_server_exceptions=False)
 
 
 @pytest.fixture
 def tables_store():
-    """TablesStoreのフィクスチャ"""
+    """TablesStore のフィクスチャ"""
     manager = TablesStore()
-    # テーブルをクリア
     manager.clear_tables()
-    # テスト用テーブルをセット
     df = pl.DataFrame(
         {
-            "A": [1, 2, 3],
-            "B": [4, 5, 6],
-            "C": [10.0, 20.0, 30.0],
-            "D": [2.5, 3.5, 4.5],
-            "text_col": ["hello", "world", "test"],  # 非数値列
+            COL_A: DATA_A,
+            COL_B: DATA_B,
+            COL_C: DATA_C,
+            COL_D: DATA_D,
+            COL_TEXT: DATA_TEXT,
         }
     )
-    manager.store_table("TestTable", df)
+    manager.store_table(TABLE_NAME, df)
     yield manager
-    # テスト後にクリーンアップ
     manager.clear_tables()
+
+
+# ========================================
+# 正常系テスト
+# ========================================
 
 
 def test_calculate_column_simple_addition(client, tables_store):
-    # 単純な足し算
-    payload = {
-        "tableName": "TestTable",
-        "newColumnName": "E",
-        "calculationExpression": 'pl.col("A") + pl.col("B")',
-    }
+    """単純な足し算で新しい列を追加できる"""
     response = client.post(
         "/api/column/calculate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": COL_A,
+        },
     )
+
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert response_data["result"]["tableName"] == "TestTable"
+    assert response_data["result"]["tableName"] == TABLE_NAME
     assert response_data["result"]["columnName"] == "E"
-    # 計算結果の確認
-    df = tables_store.get_table("TestTable").table
+
+    df = tables_store.get_table(TABLE_NAME).table
     assert "E" in df.columns
-    expected_values = [5, 7, 9]  # [1+4, 2+5, 3+6]
-    assert df["E"].to_list() == expected_values
+    # [1+4, 2+5, 3+6]
+    assert df["E"].to_list() == [5, 7, 9]
+    # 既存データが保持されている
+    assert df[COL_A].to_list() == DATA_A
 
 
 def test_calculate_column_complex_expression(client, tables_store):
-    # 複雑な計算式（四則演算とかっこ）
-    payload = {
-        "tableName": "TestTable",
-        "newColumnName": "F",
-        "calculationExpression": 'pl.col("C")/pl.col("D")+'
-        '(pl.col("A") + pl.col("B"))*2',
-    }
+    """複合演算式（四則演算とかっこ）で新しい列を追加できる"""
     response = client.post(
         "/api/column/calculate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "F",
+            "calculationExpression": "{C} / {D} + ({A} + {B}) * 2",
+            "addPositionColumn": COL_A,
+        },
     )
+
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    # 計算結果の確認
-    df = tables_store.get_table("TestTable").table
+
+    df = tables_store.get_table(TABLE_NAME).table
     assert "F" in df.columns
-    # 期待値: 10.0/2.5+(1+4)*2=4+10=14, 20.0/3.5+(2+5)*2=5.714...+14
-    # =19.714..., 30.0/4.5+(3+6)*2=6.666...+18=24.666...
     result_values = df["F"].to_list()
+    # row0: 10.0/2.5 + (1+4)*2 = 4.0 + 10 = 14.0
     assert abs(result_values[0] - 14.0) < 1e-5
+    # row1: 20.0/3.5 + (2+5)*2 ≈ 5.714... + 14
     assert abs(result_values[1] - 19.714285714285715) < 1e-5
+    # row2: 30.0/4.5 + (3+6)*2 ≈ 6.666... + 18
     assert abs(result_values[2] - 24.666666666666668) < 1e-5
 
 
-def test_calculate_column_with_numbers(client, tables_store):
-    # 列と数値の計算
-    payload = {
-        "tableName": "TestTable",
-        "newColumnName": "G",
-        "calculationExpression": 'pl.col("A") * 5 + 10',
-    }
+def test_calculate_column_with_number(client, tables_store):
+    """列と数値の組み合わせで新しい列を追加できる"""
     response = client.post(
         "/api/column/calculate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "G",
+            "calculationExpression": "{A} * 5 + 10",
+            "addPositionColumn": COL_A,
+        },
     )
+
     assert response.status_code == status.HTTP_200_OK
-    # 計算結果の確認
-    df = tables_store.get_table("TestTable").table
-    expected_values = [15, 20, 25]  # [1*5+10, 2*5+10, 3*5+10]
-    assert df["G"].to_list() == expected_values
+
+    df = tables_store.get_table(TABLE_NAME).table
+    # [1*5+10, 2*5+10, 3*5+10]
+    assert df["G"].to_list() == [15, 20, 25]
 
 
-def test_calculate_column_invalid_table(client, tables_store):
-    # 存在しないテーブル名を参照
-    payload = {
-        "tableName": "NoTable",
-        "newColumnName": "E",
-        "calculationExpression": 'pl.col("A") + pl.col("B")',
-    }
+def test_calculate_column_add_position_right_of_target(client, tables_store):
+    """addPositionColumn の右隣に新しい列が挿入される"""
     response = client.post(
         "/api/column/calculate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "NewCol",
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": COL_C,
+        },
     )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "tableName 'NoTable'は存在しません" in response_data["message"]
+
+    assert response.status_code == status.HTTP_200_OK
+
+    df = tables_store.get_table(TABLE_NAME).table
+    # COL_C の右隣に挿入
+    assert df.columns == [COL_A, COL_B, COL_C, "NewCol", COL_D, COL_TEXT]
 
 
-def test_calculate_column_invalid_column(client, tables_store):
-    # 存在しない列名を参照
-    payload = {
-        "tableName": "TestTable",
-        "newColumnName": "E",
-        "calculationExpression": 'pl.col("A") + pl.col("Z")',
-    }
-    response = client.post(
-        "/api/column/calculate",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    message = "columnName in calculationExpression 'Z'は存在しません。"
-    assert message == response_data["message"]
-
-
-def test_calculate_column_non_numeric_column(client, tables_store):
-    # 非数値列を参照
-    payload = {
-        "tableName": "TestTable",
-        "newColumnName": "E",
-        "calculationExpression": 'pl.col("A") + pl.col("text_col")',
-    }
-    response = client.post(
-        "/api/column/calculate",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    message = (
-        "columnName in calculationExpression 'text_col'は数値ではありません。"
-    )
-    assert message == response_data["message"]
-
-
-def test_calculate_column_empty_expression(client, tables_store):
-    # 空の計算式
-    payload = {
-        "tableName": "TestTable",
-        "newColumnName": "E",
-        "calculationExpression": "",
-    }
-    response = client.post(
-        "/api/column/calculate",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "calculationExpression" in response_data["message"]
-
-
-def test_calculate_column_no_column_reference(client, tables_store):
-    # 列参照がない計算式
-    payload = {
-        "tableName": "TestTable",
-        "newColumnName": "E",
-        "calculationExpression": "5 + 10",
-    }
-    response = client.post(
-        "/api/column/calculate",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    message = "calculationExpressionは少なくとも 1 つの カラムが必要です。"
-    assert message == response_data["message"]
-
-
-def test_calculate_column_duplicate_column_name(client, tables_store):
-    # 既存の列名と同じ新列名
-    payload = {
-        "tableName": "TestTable",
-        "newColumnName": "A",  # 既存の列名
-        "calculationExpression": 'pl.col("B") + pl.col("C")',
-    }
-    response = client.post(
-        "/api/column/calculate",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "newColumnName 'A'は既に存在します" in response_data["message"]
-
-
-def test_calculate_column_invalid_syntax(client, tables_store):
-    # 不正な計算式の構文
-    payload = {
-        "tableName": "TestTable",
-        "newColumnName": "E",
-        "calculationExpression": 'pl.col("A") @ pl.col("B")',  # 不正な演算子
-    }
-    response = client.post(
-        "/api/column/calculate",
-        json=payload,
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_data["code"] == "NG"
-    assert "無効な計算式です" in response_data["message"]
-
-
-def test_calculate_column_division_by_zero_handling(client, tables_store):
-    # ゼロ除算の処理
-    # ゼロを含むテーブルを作成
+def test_calculate_column_division_by_zero(client, tables_store):
+    """ゼロ除算は Polars に従い inf または 0.0 を返す（エラーにならない）"""
     df_zero = pl.DataFrame({"X": [1, 2, 0], "Y": [0, 2, 1]})
     tables_store.store_table("ZeroTable", df_zero)
-    payload = {
-        "tableName": "ZeroTable",
-        "newColumnName": "Z",
-        "calculationExpression": 'pl.col("X") / pl.col("Y")',
-    }
+
     response = client.post(
         "/api/column/calculate",
-        json=payload,
+        json={
+            "tableName": "ZeroTable",
+            "newColumnName": "Z",
+            "calculationExpression": "{X} / {Y}",
+            "addPositionColumn": "X",
+        },
     )
+
     assert response.status_code == status.HTTP_200_OK
-    # ゼロ除算の結果を確認。Polarsはinfまたはnullを返す。
+
     df = tables_store.get_table("ZeroTable").table
     result_values = df["Z"].to_list()
     # 1/0 = inf, 2/2 = 1.0, 0/1 = 0.0
-    import math
-
     assert math.isinf(result_values[0])
     assert result_values[1] == 1.0
     assert result_values[2] == 0.0
 
 
+# ========================================
+# 異常系テスト（Pydantic バリデーション: 422）
+# ========================================
+
+
 def test_calculate_column_missing_table_name(client, tables_store):
-    """必須フィールドtableNameが欠けている場合のテスト"""
-    payload = {
-        "newColumnName": "E",
-        "calculationExpression": 'pl.col("A") + pl.col("B")',
-    }
+    """tableName が未指定の場合は 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
     response = client.post(
         "/api/column/calculate",
-        json=payload,
+        json={
+            "newColumnName": "E",
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": COL_A,
+        },
     )
+
+    expected_msg = "tableNameは必須項目です。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["code"] == "NG"
-    assert "tableName" in response_data["message"]
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
 
 
 def test_calculate_column_missing_new_column_name(client, tables_store):
-    """必須フィールドnewColumnNameが欠けている場合のテスト"""
-    payload = {
-        "tableName": "TestTable",
-        "calculationExpression": 'pl.col("A") + pl.col("B")',
-    }
+    """newColumnName が未指定の場合は 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
     response = client.post(
         "/api/column/calculate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": COL_A,
+        },
     )
+
+    expected_msg = "newColumnNameは必須項目です。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["code"] == "NG"
-    assert "newColumnName" in response_data["message"]
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
 
 
 def test_calculate_column_missing_calculation_expression(client, tables_store):
-    """必須フィールドcalculationExpressionが欠けている場合のテスト"""
-    payload = {"tableName": "TestTable", "newColumnName": "E"}
+    """calculationExpression が未指定の場合は 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
     response = client.post(
         "/api/column/calculate",
-        json=payload,
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "addPositionColumn": COL_A,
+        },
     )
+
+    expected_msg = "calculationExpressionは必須項目です。"
+
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["code"] == "NG"
-    assert "calculationExpression" in response_data["message"]
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_calculate_column_missing_add_position_column(client, tables_store):
+    """addPositionColumn が未指定の場合は 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "{A} + {B}",
+        },
+    )
+
+    expected_msg = "addPositionColumnは必須項目です。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_calculate_column_empty_expression(client, tables_store):
+    """calculationExpression が空文字の場合は 422 を返す（minlength=1 違反）"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "",
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    expected_msg = "calculationExpressionは1文字以上で入力してください。"
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "message" in response_data
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+# ========================================
+# 異常系テスト（内部バリデーション: 400）
+# ========================================
+
+
+def test_calculate_column_invalid_table_name(client, tables_store):
+    """存在しないテーブル名を指定した場合は 400 を返す"""
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": "NoTable",
+            "newColumnName": "E",
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert response_data["message"] == "tableName 'NoTable'は存在しません。"
+
+
+def test_calculate_column_duplicate_column_name(client, tables_store):
+    """既存の列名と同じ newColumnName を指定した場合は 400 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": COL_A,  # 既存の列名
+            "calculationExpression": "{B} + {C}",
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_ALREADY_EXISTS
+    assert (
+        response_data["message"]
+        == f"newColumnName '{COL_A}'は既に存在します。"
+    )
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_calculate_column_invalid_column_in_expression(client, tables_store):
+    """計算式に存在しない列名を指定した場合は 400 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "{A} + {Z}",
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert (
+        response_data["message"]
+        == "columnNameInCalculationExpression 'Z'は存在しません。"
+    )
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_calculate_column_non_numeric_column(client, tables_store):
+    """計算式に非数値列を指定した場合は 400 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "{A} + {text_col}",
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.INVALID_DTYPE
+    assert COL_TEXT in response_data["message"]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_calculate_column_invalid_position_column(client, tables_store):
+    """存在しない addPositionColumn を指定した場合は 400 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": "no_such_col",
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert (
+        response_data["message"]
+        == "addPositionColumn 'no_such_col'は存在しません。"
+    )
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+def test_calculate_column_unsupported_operator(client, tables_store):
+    """サポートされていない演算子（@）を使うと 500 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            # @ 演算子は OPERATOR_MAP 外 → execute 内で例外
+            "calculationExpression": "{A} @ {B}",
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response_data["code"] == ErrorCode.CALCULATE_COLUMN_PROCESS_ERROR
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
