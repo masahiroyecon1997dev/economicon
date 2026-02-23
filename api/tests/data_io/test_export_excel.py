@@ -16,7 +16,8 @@ URL = "/api/data/export"
 
 # テストデータの定数
 _LARGE_TABLE_ROWS = 1000  # 大規模テーブルの行数
-_MAX_FILE_NAME_LEN = 255  # ファイル名の最大文字数
+_MAX_FILE_NAME_LEN = 255  # ファイル名の最大文字数（Pydantic型上の制限）
+_SAFE_FILE_NAME_LEN = 100  # OSファイルパス長制限を考慮した安全なテスト用長さ
 _MAX_SHEET_NAME_LEN = 31  # Excelシート名の最大文字数
 _FORMAT_ERROR = (
     "formatは次のいずれかである必要があります: 'csv', 'excel' or 'parquet'"
@@ -461,21 +462,21 @@ def test_export_excel_filename_only_spaces(client, prepared_data):
 
 def test_export_excel_filename_max_length(client, prepared_data):
     """
-    fileName が最大文字数（255文字）のとき成功する
+    fileName が境界値付近（_SAFE_FILE_NAME_LEN 文字）のとき成功する
     """
     tables_store, test_dir, _ = prepared_data
-    max_file_name = "a" * _MAX_FILE_NAME_LEN
+    safe_file_name = "a" * _SAFE_FILE_NAME_LEN
     request_data = {
         "tableName": "TestTable",
         "directoryPath": test_dir,
-        "fileName": max_file_name,
+        "fileName": safe_file_name,
         "format": "excel",
     }
     response = client.post(URL, data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
-    output_path = os.path.join(test_dir, f"{max_file_name}.xlsx")
+    output_path = os.path.join(test_dir, f"{safe_file_name}.xlsx")
     assert os.path.exists(output_path)
 
 
