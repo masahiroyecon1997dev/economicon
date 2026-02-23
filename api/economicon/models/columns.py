@@ -1,6 +1,6 @@
 """カラム操作関連のスキーマ定義"""
 
-from typing import Annotated, List, Optional
+from typing import Annotated
 
 from pydantic import Field, StringConstraints
 
@@ -42,7 +42,7 @@ class AddColumnRequestBody(BaseRequest):
             description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
         ),
     ]
-    csv_file_path: Optional[FilePath] = None
+    csv_file_path: FilePath | None = None
     csv_has_header: Annotated[
         bool,
         Field(
@@ -163,7 +163,11 @@ class CalculateColumnRequestBody(BaseRequest):
         Field(
             title="Calculation Expression",
             examples=['pl.col("price") * pl.col("quantity")'],
-            description='計算式。数値カラム名をpl.col("price")の形式で指定し、四則演算や関数を組み合わせて計算式を定義してください。例: ({population} / {area}) * 1000',
+            description=(
+                "計算式。数値カラム名をpl.col('price')の形式で指定し、"
+                "四則演算や関数を組み合わせて計算式を定義してください。"
+                "例: ({population} / {area}) * 1000')"
+            ),
         ),
     ]
 
@@ -243,7 +247,7 @@ class AddLagLeadColumnRequestBody(BaseRequest):
         ),
     ]
     group_columns: Annotated[
-        List[ColumnName],
+        list[ColumnName],
         Field(
             title="Group Columns",
             examples=[["city"], ["都市"]],
@@ -287,7 +291,7 @@ class SortColumnsRequestBody(BaseRequest):
         ),
     ]
     sort_columns: Annotated[
-        List[SortInstruction],
+        list[SortInstruction],
         Field(
             title="Sort Instructions",
             description="ソート設定のリスト。ソートするカラム名と昇順・降順の指定を組み合わせて、複数カラムでのソートも可能です。既存カラム名から指定してください。",
@@ -541,7 +545,7 @@ class GetColumnListResult(BaseResult):
             description="カラムリストを取得したテーブル名",
         ),
     ]
-    column_info_list: List[ColumnInfo] = Field(
+    column_info_list: list[ColumnInfo] = Field(
         title="Column Info List",
         description="カラム情報のリスト",
     )
