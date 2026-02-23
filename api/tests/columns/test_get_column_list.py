@@ -264,7 +264,10 @@ def test_get_column_list_strip_whitespace_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert len(response_data["result"]["columnInfoList"]) == 3
+    expected_column_count = 3
+    assert (
+        len(response_data["result"]["columnInfoList"]) == expected_column_count
+    )
 
 
 def test_get_column_list_many_columns(client, tables_store):
@@ -279,11 +282,17 @@ def test_get_column_list_many_columns(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert len(response_data["result"]["columnInfoList"]) == 50
+    expected_column_count = 50
+    assert (
+        len(response_data["result"]["columnInfoList"]) == expected_column_count
+    )
 
 
 def test_get_column_list_table_with_spaces_in_name(client, tables_store):
-    """N5: スペースを含むテーブル名でも正常に列リストを返す（strip_whitespace=True）"""
+    """
+    N5:
+        スペースを含むテーブル名でも正常に列リストを返す（strip_whitespace=True）
+    """
     manager = tables_store
     manager.store_table("My Table", pl.DataFrame({"A": [1], "B": [2]}))
 

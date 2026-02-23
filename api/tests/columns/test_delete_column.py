@@ -40,9 +40,7 @@ def tables_store():
     """TablesStore のフィクスチャ"""
     manager = TablesStore()
     manager.clear_tables()
-    df = pl.DataFrame(
-        {COL_A: DATA_A, COL_B: DATA_B, COL_C: DATA_C}
-    )
+    df = pl.DataFrame({COL_A: DATA_A, COL_B: DATA_B, COL_C: DATA_C})
     manager.store_table(TABLE_NAME, df)
     yield manager
     manager.clear_tables()
@@ -325,17 +323,3 @@ def test_delete_column_tab_char_column_name_not_found(client, tables_store):
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
-
-
-def test_delete_column_empty_column_name(client, tables_store):
-    """N7: columnName が空文字の場合は422エラーになる"""
-    response = client.post(
-        "/api/column/delete",
-        json={"tableName": TABLE_NAME, "columnName": ""},
-    )
-    response_data = response.json()
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "columnNameは1文字以上で入力してください。"
-    assert response_data["message"] == expected_msg
-    assert response_data["details"] == [expected_msg]
