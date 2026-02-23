@@ -470,3 +470,212 @@ def test_calculate_column_unsupported_operator(client, tables_store):
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
+
+
+# ========================================
+# 意地悪な入力テスト (N1-N7: 名前バリエーション)
+# ========================================
+
+
+def test_calculate_column_japanese_new_column_name(client, tables_store):
+    """N1: 日本語の新規列名でも正常に計算列が追加される"""
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "合計値",
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "合計値"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert "合計値" in df.columns
+    assert df["合計値"].to_list() == [5, 7, 9]
+
+
+def test_calculate_column_japanese_formula_reference(client, tables_store):
+    """N2: 数式中で日本語列名（{売上}）を参照しても正常に計算される
+
+    formula_parser の re.sub(r"{(\\w+)}", ...) は Unicode \\w にマッチするため
+    日本語列名も正しく展開される。
+    """
+    tables_store.update_table(
+        TABLE_NAME,
+        pl.DataFrame(
+            {
+                "売上": [100, 200, 300],
+                COL_B: DATA_B,
+                COL_C: DATA_C,
+                COL_D: DATA_D,
+                COL_TEXT: DATA_TEXT,
+            }
+        ),
+    )
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "売上2倍",
+            "calculationExpression": "{売上} * 2",
+            "addPositionColumn": "売上",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df["売上2倍"].to_list() == [200, 400, 600]
+
+
+def test_calculate_column_emoji_new_column_name(client, tables_store):
+    """N3: 絵文字のみの新規列名でも正常に計算列が追加される"""
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "💹",
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "💹"
+
+
+def test_calculate_column_strip_whitespace_position_column(
+    client, tables_store
+):
+    """N4: addPositionColumn の前後スペースは除去されて正常に処理される"""
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": "  A  ",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns[0] == COL_A
+    assert df.columns[1] == "E"
+
+
+def test_calculate_column_max_length_new_column_name(client, tables_store):
+    """N5: 128文字（最大長境界値）の新規列名は正常に追加される"""
+    long_name = "x" * 128
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": long_name,
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == long_name
+
+
+def test_calculate_column_too_long_new_column_name(client, tables_store):
+    """N6: 129文字（最大長超過）の新規列名は422エラーになる"""
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "x" * 129,
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "newColumnNameは128文字以内で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_calculate_column_tab_char_new_column_name(client, tables_store):
+    """N7: タブ文字を含む新規列名は422エラーになる"""
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "col	A",
+            "calculationExpression": "{A} + {B}",
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "newColumnNameに使用できない文字が含まれています。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+# ========================================
+# 意地悪な入力テスト (C1-C3: 計算式パターン)
+# ========================================
+
+
+def test_calculate_column_division_by_zero(client, tables_store):
+    """C1: ゼロ除算は例外にならず inf として扱われる（float演算）"""
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "{C} / 0",
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+
+def test_calculate_column_large_power(client, tables_store):
+    """C2: 非常に大きな指数演算 ({A} ** 300) でも正常に計算される（一部 inf 値許容）"""
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "{A} ** 300",
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+
+def test_calculate_column_constant_expression(client, tables_store):
+    """C3: 列参照なしの定数式でも正常に計算列が追加される"""
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "42 + 0",
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"

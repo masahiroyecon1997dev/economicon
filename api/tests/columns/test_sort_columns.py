@@ -242,3 +242,137 @@ def test_sort_process_error(client, tables_store):
         assert response_data["code"] == ErrorCode.SORT_COLUMNS_PROCESS_ERROR
     finally:
         tables_store.update_table = original_update_table
+
+
+# ========================================
+# 意地悪な入力テスト (N1-N7: 名前バリエーション)
+# ========================================
+
+
+def test_sort_columns_japanese_column_name(client, tables_store):
+    """N1: 日本語の列名を含む SortInstruction でも正常にソートされる"""
+    tables_store.update_table(
+        TABLE_NAME,
+        pl.DataFrame({"売上": [3, 1, 2], COL_B: DATA_B, COL_C: DATA_C}),
+    )
+    response = client.post(
+        "/api/column/sort",
+        json={
+            "tableName": TABLE_NAME,
+            "sortColumns": [{"column_name": "売上", "ascending": True}],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df["売上"].to_list() == [1, 2, 3]
+
+
+def test_sort_columns_emoji_column_name(client, tables_store):
+    """N2: 絵文字の列名を含む SortInstruction でも正常にソートされる"""
+    tables_store.update_table(
+        TABLE_NAME,
+        pl.DataFrame({"🔥": [3, 1, 2], COL_B: DATA_B, COL_C: DATA_C}),
+    )
+    response = client.post(
+        "/api/column/sort",
+        json={
+            "tableName": TABLE_NAME,
+            "sortColumns": [{"column_name": "🔥", "ascending": True}],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df["🔥"].to_list() == [1, 2, 3]
+
+
+def test_sort_columns_strip_whitespace_table_name(client, tables_store):
+    """N3: tableName の前後スペースは除去されて正常にソートされる"""
+    response = client.post(
+        "/api/column/sort",
+        json={
+            "tableName": f"  {TABLE_NAME}  ",
+            "sortColumns": [{"column_name": COL_A, "ascending": True}],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df[COL_A].to_list() == [1, 2, 3]
+
+
+def test_sort_columns_many_sort_keys(client, tables_store):
+    """N4: 多数のソートキー（列数と同じ3つ）を指定しても正常にソートされる"""
+    response = client.post(
+        "/api/column/sort",
+        json={
+            "tableName": TABLE_NAME,
+            "sortColumns": [
+                {"column_name": COL_A, "ascending": True},
+                {"column_name": COL_B, "ascending": False},
+                {"column_name": COL_C, "ascending": True},
+            ],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+
+def test_sort_columns_nonexistent_sort_column(client, tables_store):
+    """N5: 存在しない列名で SortInstruction を指定すると400エラーになる"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/sort",
+        json={
+            "tableName": TABLE_NAME,
+            "sortColumns": [{"column_name": COL_NONEXISTENT, "ascending": True}],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_sort_columns_empty_table_name(client, tables_store):
+    """N6: tableName が空文字の場合は422エラーになる"""
+    response = client.post(
+        "/api/column/sort",
+        json={
+            "tableName": "",
+            "sortColumns": [{"column_name": COL_A, "ascending": True}],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "tableNameは1文字以上で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_sort_columns_empty_sort_column_name(client, tables_store):
+    """N7: SortInstruction の column_name が空文字の場合は422エラーになる"""
+    response = client.post(
+        "/api/column/sort",
+        json={
+            "tableName": TABLE_NAME,
+            "sortColumns": [{"column_name": "", "ascending": True}],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "sortColumns.0.column_nameは1文字以上で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]

@@ -1102,3 +1102,137 @@ def test_add_column_from_csv_invalid_encoding(client, tables_store):
         assert df_after.equals(df_before)
     finally:
         os.unlink(csv_path)
+
+
+# ========================================
+# 意地悪な入力テスト (N1-N7: 名前バリエーション)
+# ========================================
+
+
+def test_add_column_japanese_new_column_name(client, tables_store):
+    """N1: 日本語の新規列名でも正常に空列が追加される"""
+    response = client.post(
+        "/api/column/add",
+        json={
+            "tableName": "TestTable",
+            "newColumnName": "増加率",
+            "addPositionColumn": "A",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "増加率"
+
+    df = tables_store.get_table("TestTable").table
+    assert "増加率" in df.columns
+    assert df["増加率"].to_list() == [None, None, None]
+
+
+def test_add_column_japanese_position_column(client, tables_store):
+    """N2: addPositionColumn に日本語列名を指定しても正常な位置に挿入される"""
+    tables_store.update_table(
+        "TestTable",
+        pl.DataFrame({"売上①": [1, 2, 3], "B": [4, 5, 6]}),
+    )
+    response = client.post(
+        "/api/column/add",
+        json={
+            "tableName": "TestTable",
+            "newColumnName": "C",
+            "addPositionColumn": "売上①",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("TestTable").table
+    assert df.columns == ["売上①", "C", "B"]
+
+
+def test_add_column_emoji_new_column_name(client, tables_store):
+    """N3: 絵文字のみの新規列名でも正常に空列が追加される"""
+    response = client.post(
+        "/api/column/add",
+        json={
+            "tableName": "TestTable",
+            "newColumnName": "📈",
+            "addPositionColumn": "A",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "📈"
+
+
+def test_add_column_strip_whitespace_position_column(client, tables_store):
+    """N4: addPositionColumn の前後スペースは除去されて正常に処理される"""
+    response = client.post(
+        "/api/column/add",
+        json={
+            "tableName": "TestTable",
+            "newColumnName": "C",
+            "addPositionColumn": "  A  ",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("TestTable").table
+    assert df.columns == ["A", "C", "B"]
+
+
+def test_add_column_max_length_new_column_name(client, tables_store):
+    """N5: 128文字（最大長境界値）の新規列名は正常に空列が追加される"""
+    long_name = "x" * 128
+    response = client.post(
+        "/api/column/add",
+        json={
+            "tableName": "TestTable",
+            "newColumnName": long_name,
+            "addPositionColumn": "A",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == long_name
+
+
+def test_add_column_too_long_new_column_name(client, tables_store):
+    """N6: 129文字（最大長超過）の新規列名は422エラーになる"""
+    response = client.post(
+        "/api/column/add",
+        json={
+            "tableName": "TestTable",
+            "newColumnName": "x" * 129,
+            "addPositionColumn": "A",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "newColumnNameは128文字以内で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_add_column_tab_char_new_column_name(client, tables_store):
+    """N7: タブ文字を含む新規列名は422エラーになる"""
+    response = client.post(
+        "/api/column/add",
+        json={
+            "tableName": "TestTable",
+            "newColumnName": "col	A",
+            "addPositionColumn": "A",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "newColumnNameに使用できない文字が含まれています。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]

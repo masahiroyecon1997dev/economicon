@@ -220,3 +220,122 @@ def test_delete_column_invalid_column_name(client, tables_store):
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
+
+
+# ========================================
+# 意地悪な入力テスト (N1-N7: 名前バリエーション)
+# ========================================
+
+
+def test_delete_column_japanese_column_name(client, tables_store):
+    """N1: 日本語の列名でも正常に削除される"""
+    tables_store.update_table(
+        TABLE_NAME,
+        pl.DataFrame({"売上": DATA_A, COL_B: DATA_B, COL_C: DATA_C}),
+    )
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/delete",
+        json={"tableName": TABLE_NAME, "columnName": "売上"},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert "売上" not in df.columns
+    assert len(df.columns) == len(df_before.columns) - 1
+
+
+def test_delete_column_emoji_column_name(client, tables_store):
+    """N2: 絵文字の列名でも正常に削除される"""
+    tables_store.update_table(
+        TABLE_NAME,
+        pl.DataFrame({"🔥": DATA_A, COL_B: DATA_B, COL_C: DATA_C}),
+    )
+    response = client.post(
+        "/api/column/delete",
+        json={"tableName": TABLE_NAME, "columnName": "🔥"},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert "🔥" not in df.columns
+
+
+def test_delete_column_strip_whitespace_column_name(client, tables_store):
+    """N3: columnName の前後スペースは除去されて正常に削除される"""
+    response = client.post(
+        "/api/column/delete",
+        json={"tableName": TABLE_NAME, "columnName": "  A  "},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert COL_A not in df.columns
+
+
+def test_delete_column_strip_whitespace_table_name(client, tables_store):
+    """N4: tableName の前後スペースは除去されて正常に削除される"""
+    response = client.post(
+        "/api/column/delete",
+        json={"tableName": f"  {TABLE_NAME}  ", "columnName": COL_A},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert COL_A not in df.columns
+
+
+def test_delete_column_long_table_name_not_found(client, tables_store):
+    """N5: 非常に長いテーブル名は存在しないため400エラーになる"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/delete",
+        json={"tableName": "x" * 256, "columnName": COL_A},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_delete_column_tab_char_column_name_not_found(client, tables_store):
+    """N6: タブ文字を含む列名は存在しないため400エラーになる"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/delete",
+        json={"tableName": TABLE_NAME, "columnName": "col	A"},
+    )
+    response_data = response.json()
+    # ColumnName 型は pattern なし → strip でも変更なし → DATA_NOT_FOUND になる
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_delete_column_empty_column_name(client, tables_store):
+    """N7: columnName が空文字の場合は422エラーになる"""
+    response = client.post(
+        "/api/column/delete",
+        json={"tableName": TABLE_NAME, "columnName": ""},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "columnNameは1文字以上で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]

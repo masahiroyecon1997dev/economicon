@@ -596,3 +596,232 @@ def test_add_lag_lead_column_multiple_periods(client, tables_store):
     assert df.columns == ["group", "time", "value", "value_lag2"]
     # 最初の2つの値はNone
     assert df["value_lag2"].to_list() == [None, None, 10, 20, 30, 40]
+
+
+# ========================================
+# 意地悪な入力テスト (N1-N7: 名前バリエーション)
+# ========================================
+
+
+def test_add_lag_lead_column_japanese_new_column_name(client, tables_store):
+    """N1: 日本語の新規列名でも正常にラグ列が追加される"""
+    response = client.post(
+        "/api/column/add-lag-lead",
+        json={
+            "tableName": "TestTable",
+            "sourceColumn": "value",
+            "newColumnName": "前期値",
+            "addPositionColumn": "value",
+            "periods": -1,
+            "groupColumns": [],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "前期値"
+
+    df = tables_store.get_table("TestTable").table
+    assert "前期値" in df.columns
+
+
+def test_add_lag_lead_column_japanese_source_column(client, tables_store):
+    """N2: 日本語の元列名を参照しても正常にラグ列が追加される"""
+    tables_store.update_table(
+        "TestTable",
+        pl.DataFrame(
+            {
+                "group": ["A", "A", "A", "B", "B", "B"],
+                "time": [1, 2, 3, 1, 2, 3],
+                "売上高": [10, 20, 30, 40, 50, 60],
+            }
+        ),
+    )
+    response = client.post(
+        "/api/column/add-lag-lead",
+        json={
+            "tableName": "TestTable",
+            "sourceColumn": "売上高",
+            "newColumnName": "売上高_lag1",
+            "addPositionColumn": "売上高",
+            "periods": -1,
+            "groupColumns": [],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("TestTable").table
+    assert "売上高_lag1" in df.columns
+
+
+def test_add_lag_lead_column_emoji_new_column_name(client, tables_store):
+    """N3: 絵文字のみの新規列名でも正常にラグ列が追加される"""
+    response = client.post(
+        "/api/column/add-lag-lead",
+        json={
+            "tableName": "TestTable",
+            "sourceColumn": "value",
+            "newColumnName": "⏮️",
+            "addPositionColumn": "value",
+            "periods": -1,
+            "groupColumns": [],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == "⏮️"
+
+
+def test_add_lag_lead_column_strip_whitespace_source_column(
+    client, tables_store
+):
+    """N4: sourceColumn の前後スペースは除去されて正常に処理される"""
+    response = client.post(
+        "/api/column/add-lag-lead",
+        json={
+            "tableName": "TestTable",
+            "sourceColumn": "  value  ",
+            "newColumnName": "value_lag1",
+            "addPositionColumn": "value",
+            "periods": -1,
+            "groupColumns": [],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+
+def test_add_lag_lead_column_max_length_new_column_name(client, tables_store):
+    """N5: 128文字（最大長境界値）の新規列名は正常に追加される"""
+    long_name = "x" * 128
+    response = client.post(
+        "/api/column/add-lag-lead",
+        json={
+            "tableName": "TestTable",
+            "sourceColumn": "value",
+            "newColumnName": long_name,
+            "addPositionColumn": "value",
+            "periods": -1,
+            "groupColumns": [],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["columnName"] == long_name
+
+
+def test_add_lag_lead_column_too_long_new_column_name(client, tables_store):
+    """N6: 129文字（最大長超過）の新規列名は422エラーになる"""
+    response = client.post(
+        "/api/column/add-lag-lead",
+        json={
+            "tableName": "TestTable",
+            "sourceColumn": "value",
+            "newColumnName": "x" * 129,
+            "addPositionColumn": "value",
+            "periods": -1,
+            "groupColumns": [],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "newColumnNameは128文字以内で入力してください。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_add_lag_lead_column_tab_char_new_column_name(client, tables_store):
+    """N7: タブ文字を含む新規列名は422エラーになる"""
+    response = client.post(
+        "/api/column/add-lag-lead",
+        json={
+            "tableName": "TestTable",
+            "sourceColumn": "value",
+            "newColumnName": "col	A",
+            "addPositionColumn": "value",
+            "periods": -1,
+            "groupColumns": [],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "newColumnNameに使用できない文字が含まれています。"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+# ========================================
+# 意地悪な入力テスト (L1-L3: periods 極端値)
+# ========================================
+
+
+def test_add_lag_lead_column_periods_zero(client, tables_store):
+    """L1: periods=0 はシフトなし（元の値と同じ）でも正常に追加される"""
+    response = client.post(
+        "/api/column/add-lag-lead",
+        json={
+            "tableName": "TestTable",
+            "sourceColumn": "value",
+            "newColumnName": "value_shift0",
+            "addPositionColumn": "value",
+            "periods": 0,
+            "groupColumns": [],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("TestTable").table
+    # shift=0 → 全行が元の値と同じ
+    assert df["value_shift0"].to_list() == [10, 20, 30, 40, 50, 60]
+
+
+def test_add_lag_lead_column_periods_large_positive(client, tables_store):
+    """L2: periods=10000 はデータ行数を超えるため全行 null になるが正常に追加される"""
+    response = client.post(
+        "/api/column/add-lag-lead",
+        json={
+            "tableName": "TestTable",
+            "sourceColumn": "value",
+            "newColumnName": "value_lead_huge",
+            "addPositionColumn": "value",
+            "periods": 10000,
+            "groupColumns": [],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("TestTable").table
+    # 全行 null になる
+    assert all(v is None for v in df["value_lead_huge"].to_list())
+
+
+def test_add_lag_lead_column_periods_large_negative(client, tables_store):
+    """L3: periods=-10000 はデータ行数を超えるため全行 null になるが正常に追加される"""
+    response = client.post(
+        "/api/column/add-lag-lead",
+        json={
+            "tableName": "TestTable",
+            "sourceColumn": "value",
+            "newColumnName": "value_lag_huge",
+            "addPositionColumn": "value",
+            "periods": -10000,
+            "groupColumns": [],
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("TestTable").table
+    assert all(v is None for v in df["value_lag_huge"].to_list())
