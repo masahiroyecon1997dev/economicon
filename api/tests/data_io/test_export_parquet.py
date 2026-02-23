@@ -8,10 +8,18 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from economicon.core.enums import ErrorCode
 from economicon.services.data.tables_store import TablesStore
 from main import app
 
 URL = "/api/data/export"
+
+# テストデータの定数
+_LARGE_TABLE_ROWS = 1000  # 大規模テーブルの行数
+_MAX_FILE_NAME_LEN = 255  # ファイル名の最大文字数
+_FORMAT_ERROR = (
+    "formatは次のいずれかである必要があります: 'csv', 'excel' or 'parquet'"
+)
 
 
 @pytest.fixture
@@ -75,7 +83,9 @@ def test_export_parquet_table_not_exists(client, prepared_data):
     response = client.post(URL, data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "tableName" in response_data["message"]
+    assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
+    msg = "tableName 'NonExistentTable'は存在しません。"
+    assert msg == response_data["message"]
 
 
 def test_export_parquet_invalid_output_directory(client, prepared_data):
@@ -92,7 +102,9 @@ def test_export_parquet_invalid_output_directory(client, prepared_data):
     response = client.post(URL, data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "/non/existent/directory" in response_data["message"]
+    assert ErrorCode.PATH_NOT_FOUND == response_data["code"]
+    msg = "directoryPath '/non/existent/directory'は存在しません。"
+    assert msg == response_data["message"]
 
 
 def test_export_parquet_missing_table_name(client, prepared_data):
@@ -108,7 +120,9 @@ def test_export_parquet_missing_table_name(client, prepared_data):
     response = client.post(URL, data=json.dumps(request_data))
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
-    assert "tableName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "tableNameは必須項目です。" == response_data["message"]
+    assert ["tableNameは必須項目です。"] == response_data["details"]
 
 
 def test_export_parquet_missing_directory_path(client, prepared_data):
@@ -124,7 +138,9 @@ def test_export_parquet_missing_directory_path(client, prepared_data):
     response = client.post(URL, data=json.dumps(request_data))
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
-    assert "directoryPath" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "directoryPathは必須項目です。" == response_data["message"]
+    assert ["directoryPathは必須項目です。"] == response_data["details"]
 
 
 def test_export_parquet_missing_file_name(client, prepared_data):
@@ -140,7 +156,9 @@ def test_export_parquet_missing_file_name(client, prepared_data):
     response = client.post(URL, data=json.dumps(request_data))
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
-    assert "fileName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "fileNameは必須項目です。" == response_data["message"]
+    assert ["fileNameは必須項目です。"] == response_data["details"]
 
 
 def test_export_parquet_missing_format(client, prepared_data):
@@ -156,7 +174,9 @@ def test_export_parquet_missing_format(client, prepared_data):
     response = client.post(URL, data=json.dumps(request_data))
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
-    assert "format" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "formatは必須項目です。" == response_data["message"]
+    assert ["formatは必須項目です。"] == response_data["details"]
 
 
 def test_export_parquet_invalid_json(client, prepared_data):
@@ -201,9 +221,9 @@ def test_export_parquet_large_table(client, prepared_data):
     tables_store, test_output_dir, test_data = prepared_data
     large_data = pl.DataFrame(
         {
-            "id": list(range(1000)),
-            "value": [f"value_{i}" for i in range(1000)],
-            "number": [i * 1.5 for i in range(1000)],
+            "id": list(range(_LARGE_TABLE_ROWS)),
+            "value": [f"value_{i}" for i in range(_LARGE_TABLE_ROWS)],
+            "number": [i * 1.5 for i in range(_LARGE_TABLE_ROWS)],
         }
     )
     tables_store.store_table("LargeTable", large_data)
@@ -222,7 +242,7 @@ def test_export_parquet_large_table(client, prepared_data):
     assert os.path.exists(output_path)
     exported_data = pl.read_parquet(output_path)
     assert large_data.equals(exported_data)
-    assert 1000 == len(exported_data)
+    assert _LARGE_TABLE_ROWS == len(exported_data)
 
 
 def test_export_parquet_special_characters(client, prepared_data):
@@ -300,7 +320,10 @@ def test_export_parquet_empty_table_name(client, prepared_data):
     response = client.post(URL, data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "tableName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "tableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
 
 
 def test_export_parquet_empty_directory_path(client, prepared_data):
@@ -317,7 +340,10 @@ def test_export_parquet_empty_directory_path(client, prepared_data):
     response = client.post(URL, data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "directoryPath" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "directoryPathは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
 
 
 def test_export_parquet_empty_file_name(client, prepared_data):
@@ -334,4 +360,188 @@ def test_export_parquet_empty_file_name(client, prepared_data):
     response = client.post(URL, data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "fileName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "fileNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_export_parquet_tablename_only_spaces(client, prepared_data):
+    """
+    tableName がスペースのみの場合はバリデーションエラーになる
+    """
+    tables_store, test_output_dir, _ = prepared_data
+    request_data = {
+        "tableName": "   ",
+        "directoryPath": test_output_dir,
+        "fileName": "out",
+        "format": "parquet",
+    }
+    response = client.post(URL, data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "tableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_export_parquet_tablename_leading_trailing_spaces(
+    client, prepared_data
+):
+    """
+    tableName の前後スペースはトリムされて既存テーブル名と一致すれば成功する
+    """
+    tables_store, test_output_dir, test_data = prepared_data
+    request_data = {
+        "tableName": "  TestTable  ",
+        "directoryPath": test_output_dir,
+        "fileName": "out_trimmed",
+        "format": "parquet",
+    }
+    response = client.post(URL, data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    output_path = os.path.join(test_output_dir, "out_trimmed.parquet")
+    assert os.path.exists(output_path)
+
+
+def test_export_parquet_tablename_japanese(client, prepared_data):
+    """
+    日本語テーブル名でエクスポートできる
+    """
+    tables_store, test_output_dir, test_data = prepared_data
+    tables_store.store_table("日本語テーブル", test_data)
+    request_data = {
+        "tableName": "日本語テーブル",
+        "directoryPath": test_output_dir,
+        "fileName": "out_jp_table",
+        "format": "parquet",
+    }
+    response = client.post(URL, data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    output_path = os.path.join(test_output_dir, "out_jp_table.parquet")
+    assert os.path.exists(output_path)
+
+
+def test_export_parquet_tablename_emoji(client, prepared_data):
+    """
+    絵文字を含むテーブル名でエクスポートできる
+    """
+    tables_store, test_output_dir, test_data = prepared_data
+    tables_store.store_table("絵文字🎉テーブル", test_data)
+    request_data = {
+        "tableName": "絵文字🎉テーブル",
+        "directoryPath": test_output_dir,
+        "fileName": "out_emoji_table",
+        "format": "parquet",
+    }
+    response = client.post(URL, data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    output_path = os.path.join(test_output_dir, "out_emoji_table.parquet")
+    assert os.path.exists(output_path)
+
+
+def test_export_parquet_filename_only_spaces(client, prepared_data):
+    """
+    fileName がスペースのみの場合はバリデーションエラーになる
+    """
+    tables_store, test_output_dir, _ = prepared_data
+    request_data = {
+        "tableName": "TestTable",
+        "directoryPath": test_output_dir,
+        "fileName": "   ",
+        "format": "parquet",
+    }
+    response = client.post(URL, data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "fileNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_export_parquet_filename_max_length(client, prepared_data):
+    """
+    fileName が最大文字数（255文字）のとき成功する
+    """
+    tables_store, test_output_dir, _ = prepared_data
+    max_file_name = "a" * _MAX_FILE_NAME_LEN
+    request_data = {
+        "tableName": "TestTable",
+        "directoryPath": test_output_dir,
+        "fileName": max_file_name,
+        "format": "parquet",
+    }
+    response = client.post(URL, data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    output_path = os.path.join(test_output_dir, f"{max_file_name}.parquet")
+    assert os.path.exists(output_path)
+
+
+def test_export_parquet_filename_exceeds_max_length(client, prepared_data):
+    """
+    fileName が最大文字数（255文字）を超えた場合はバリデーションエラーになる
+    """
+    tables_store, test_output_dir, _ = prepared_data
+    too_long_file_name = "a" * (_MAX_FILE_NAME_LEN + 1)
+    request_data = {
+        "tableName": "TestTable",
+        "directoryPath": test_output_dir,
+        "fileName": too_long_file_name,
+        "format": "parquet",
+    }
+    response = client.post(URL, data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "fileNameは255文字以内で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_export_parquet_directorypath_only_spaces(client, prepared_data):
+    """
+    directoryPath がスペースのみの場合はバリデーションエラーになる
+    """
+    tables_store, test_output_dir, _ = prepared_data
+    request_data = {
+        "tableName": "TestTable",
+        "directoryPath": "   ",
+        "fileName": "out",
+        "format": "parquet",
+    }
+    response = client.post(URL, data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "directoryPathは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_export_parquet_invalid_format(client, prepared_data):
+    """
+    format に無効な値を指定した場合はバリデーションエラーになる
+    """
+    tables_store, test_output_dir, _ = prepared_data
+    request_data = {
+        "tableName": "TestTable",
+        "directoryPath": test_output_dir,
+        "fileName": "out",
+        "format": "xml",
+    }
+    response = client.post(URL, data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert _FORMAT_ERROR == response_data["message"]
+    assert [_FORMAT_ERROR] == response_data["details"]
