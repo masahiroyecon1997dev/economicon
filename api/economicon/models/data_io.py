@@ -97,8 +97,8 @@ class ExportFileRequestBody(BaseRequest):
     ``format`` に応じて適切なエクスポーターが自動選択され、
     ファイル拡張子も自動で付与されます。
 
-    - ``csv``     → CSV エクスポーター（separator / include_header が有効）
-    - ``excel``   → Excel エクスポーター（sheet_name / include_header が有効）
+    - ``csv``     → CSV エクスポーター（separator / encoding / include_header が有効）
+    - ``excel``   → Excel エクスポーター（sheet_name が有効）
     - ``parquet`` → Parquet エクスポーター
     """
 
@@ -148,13 +148,23 @@ class ExportFileRequestBody(BaseRequest):
             ),
         ),
     ] = ","
-    # --- CSV / Excel 共通オプション ---
+    encoding: Annotated[
+        CsvEncoding,
+        Field(
+            title="Encoding",
+            description=(
+                "CSV ファイルの出力エンコーディング（CSV のみ有効）。"
+                "utf8 / latin1 / ascii / gbk / windows-1252 / shift_jis "
+                "から選択してください。"
+            ),
+        ),
+    ] = "utf8"
     include_header: Annotated[
         bool,
         Field(
             title="Include Header",
             description=(
-                "ヘッダ行を含めるか否か（CSV / Excel のみ有効）。"
+                "ヘッダ行を含めるか否か（CSV のみ有効）。"
                 "デフォルトは True（ヘッダあり）。"
             ),
         ),

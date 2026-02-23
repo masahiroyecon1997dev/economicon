@@ -1,7 +1,5 @@
 import os
 
-import xlsxwriter
-
 from ...core.enums import ErrorCode
 from ...i18n.translation import gettext as _
 from ...models import ExportFileRequestBody
@@ -23,7 +21,7 @@ class ExportExcel:
     テーブルを Excel ファイルにエクスポートする API クラス
 
     指定されたテーブル名のデータを XLSX ファイルとして出力します。
-    ヘッダ有無およびシート名を指定できます。
+    シート名を指定できます。
     """
 
     def __init__(
@@ -36,7 +34,6 @@ class ExportExcel:
         self.directory_path = body.directory_path
         # file_name には拡張子を含まない
         self.file_name = body.file_name
-        self.include_header = body.include_header
         self.sheet_name = body.sheet_name or _DEFAULT_SHEET
         self.param_names = {
             "table_name": "tableName",
@@ -67,17 +64,7 @@ class ExportExcel:
                 self.directory_path, self.file_name + _EXTENSION
             )
 
-            if self.include_header:
-                # ヘッダあり：Polars の write_excel を使用
-                df.write_excel(file_path, worksheet=self.sheet_name)
-            else:
-                # ヘッダなし：xlsxwriter で直接データ行のみ書き込み
-                workbook = xlsxwriter.Workbook(str(file_path))
-                ws = workbook.add_worksheet(self.sheet_name)
-                for row_idx, row_data in enumerate(df.rows()):
-                    for col_idx, value in enumerate(row_data):
-                        ws.write(row_idx, col_idx, value)
-                workbook.close()
+            df.write_excel(file_path, worksheet=self.sheet_name)
 
             return {"filePath": file_path}
 
