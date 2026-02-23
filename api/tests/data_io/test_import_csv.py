@@ -8,8 +8,20 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from economicon.core.enums import ErrorCode
 from economicon.services.data.tables_store import TablesStore
 from main import app
+
+# テストデータの定数
+_SEMCOL_N_COLS = 3  # セミコロン区切りテストの列数
+_SEMCOL_N_ROWS = 2  # セミコロン区切りテストの行数
+_BOM_N_COLS = 2  # BOM テストの列数
+_BOM_N_ROWS = 2  # BOM テストの行数
+_MAX_TABLE_NAME_LEN = 128  # テーブル名の最大文字数
+_ENCODING_ERROR = (
+    "encodingは次のいずれかである必要があります: "
+    "'utf8', 'latin1', 'ascii', 'gbk', 'windows-1252' or 'shift_jis'"
+)
 
 
 @pytest.fixture
@@ -121,8 +133,8 @@ def test_import_csv_custom_separator(client, prepared_data):
         assert "TestSemicolonTable" == response_data["result"]["tableName"]
         # データの検証
         df = tables_store.get_table("TestSemicolonTable").table
-        assert 3 == len(df.columns)
-        assert 2 == len(df)
+        assert _SEMCOL_N_COLS == len(df.columns)
+        assert _SEMCOL_N_ROWS == len(df)
     finally:
         # 一時ファイルを削除
         os.unlink(temp_path)
@@ -164,6 +176,7 @@ def test_import_csv_file_not_exists(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.PATH_NOT_FOUND == response_data["code"]
     message = "filePath '/non/existent/file.csv'は存在しません。"
     assert message == response_data["message"]
 
@@ -185,6 +198,7 @@ def test_import_csv_invalid_file_extension(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert ErrorCode.UNSUPPORTED_FILE_TYPE == response_data["code"]
 
 
 def test_import_csv_missing_file_path(client, prepared_data):
@@ -197,7 +211,9 @@ def test_import_csv_missing_file_path(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
     assert "filePathは必須項目です。" == response_data["message"]
+    assert ["filePathは必須項目です。"] == response_data["details"]
 
 
 def test_import_csv_missing_table_name(client, prepared_data):
@@ -211,7 +227,9 @@ def test_import_csv_missing_table_name(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
     assert "tableNameは必須項目です。" == response_data["message"]
+    assert ["tableNameは必須項目です。"] == response_data["details"]
 
 
 def test_import_csv_duplicate_table_name(client, prepared_data):
@@ -238,6 +256,7 @@ def test_import_csv_duplicate_table_name(client, prepared_data):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.DATA_ALREADY_EXISTS == response_data["code"]
     # テーブル名重複エラーメッセージを確認
     message = "tableName 'DuplicateTable'は既に存在します。"
     assert message == response_data["message"]
@@ -257,8 +276,10 @@ def test_import_csv_empty_separator(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
     message = "separatorは1文字以上で入力してください。"
     assert message == response_data["message"]
+    assert [message] == response_data["details"]
 
 
 def test_import_csv_invalid_json(client, prepared_data):
@@ -313,8 +334,8 @@ def test_import_csv_encoding_utf8bom(client, prepared_data):
     assert "OK" == response_data["code"]
     assert "TestBomTable" == response_data["result"]["tableName"]
     df = tables_store.get_table("TestBomTable").table
-    assert 2 == len(df.columns)
-    assert 2 == len(df)
+    assert _BOM_N_COLS == len(df.columns)
+    assert _BOM_N_ROWS == len(df)
 
 
 def test_import_csv_invalid_encoding(client, prepared_data):
@@ -329,7 +350,11 @@ def test_import_csv_invalid_encoding(client, prepared_data):
         "encoding": "invalid-encoding",
     }
     response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert _ENCODING_ERROR == response_data["message"]
+    assert [_ENCODING_ERROR] == response_data["details"]
 
 
 def test_import_csv_empty_file_path(client, prepared_data):
@@ -340,7 +365,10 @@ def test_import_csv_empty_file_path(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "filePath" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "filePathは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
 
 
 def test_import_csv_empty_table_name(client, prepared_data):
@@ -355,4 +383,160 @@ def test_import_csv_empty_table_name(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "tableName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "tableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_import_csv_tablename_only_spaces(client, prepared_data):
+    """
+    tableNameがスペースのみの場合はトリムされ空文字列になりエラーになる
+    """
+    tables_store, test_dir = prepared_data
+    test_csv = f"{test_dir}/TestDataComma.csv"
+    request_data = {"filePath": test_csv, "tableName": "   ", "separator": ","}
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    expected_msg = "tableNameは1文字以上で入力してください。"
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert expected_msg == response_data["message"]
+    assert [expected_msg] == response_data["details"]
+
+
+def test_import_csv_tablename_only_tabs(client, prepared_data):
+    """
+    tableNameがタブ文字のみの場合はトリムされ空文字列になりエラーになる
+    """
+    tables_store, test_dir = prepared_data
+    test_csv = f"{test_dir}/TestDataComma.csv"
+    request_data = {
+        "filePath": test_csv,
+        "tableName": "\t\t\t",
+        "separator": ",",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    expected_msg = "tableNameは1文字以上で入力してください。"
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert expected_msg == response_data["message"]
+    assert [expected_msg] == response_data["details"]
+
+
+def test_import_csv_tablename_embedded_tab(client, prepared_data):
+    """
+    tableNameにタブ文字が埋め込まれた場合はパターン違反エラーになる
+    """
+    tables_store, test_dir = prepared_data
+    test_csv = f"{test_dir}/TestDataComma.csv"
+    request_data = {
+        "filePath": test_csv,
+        "tableName": "test\ttable",
+        "separator": ",",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    expected_msg = "tableNameに使用できない文字が含まれています。"
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert expected_msg == response_data["message"]
+    assert [expected_msg] == response_data["details"]
+
+
+def test_import_csv_tablename_exceeds_max_length(client, prepared_data):
+    """
+    tableNameが最大文字数（128文字）を超える場合はバリデーションエラーになる
+    """
+    tables_store, test_dir = prepared_data
+    test_csv = f"{test_dir}/TestDataComma.csv"
+    over_limit = "a" * (_MAX_TABLE_NAME_LEN + 1)
+    request_data = {
+        "filePath": test_csv,
+        "tableName": over_limit,
+        "separator": ",",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    expected_msg = (
+        f"tableNameは{_MAX_TABLE_NAME_LEN}文字以内で入力してください。"
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert expected_msg == response_data["message"]
+    assert [expected_msg] == response_data["details"]
+
+
+def test_import_csv_tablename_at_max_length(client, prepared_data):
+    """
+    tableNameがちょうど最大文字数（128文字）の場合は正常にインポートできる
+    """
+    tables_store, test_dir = prepared_data
+    test_csv = f"{test_dir}/TestDataComma.csv"
+    max_length_name = "a" * _MAX_TABLE_NAME_LEN
+    request_data = {
+        "filePath": test_csv,
+        "tableName": max_length_name,
+        "separator": ",",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert max_length_name == response_data["result"]["tableName"]
+
+
+def test_import_csv_tablename_leading_trailing_spaces(client, prepared_data):
+    """
+    tableNameの前後にスペースがある場合はトリムされて正常にインポートできる
+    """
+    tables_store, test_dir = prepared_data
+    test_csv = f"{test_dir}/TestDataComma.csv"
+    request_data = {
+        "filePath": test_csv,
+        "tableName": "  TrimmedCsvTable  ",
+        "separator": ",",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    # スペースはトリムされて保存される
+    assert "TrimmedCsvTable" == response_data["result"]["tableName"]
+
+
+def test_import_csv_tablename_emoji(client, prepared_data):
+    """
+    tableNameに絵文字を使った場合は正常にインポートできる
+    """
+    tables_store, test_dir = prepared_data
+    test_csv = f"{test_dir}/TestDataComma.csv"
+    request_data = {
+        "filePath": test_csv,
+        "tableName": "データ📊テーブル",
+        "separator": ",",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert "データ📊テーブル" == response_data["result"]["tableName"]
+
+
+def test_import_csv_tablename_japanese(client, prepared_data):
+    """
+    tableNameに日本語を使った場合は正常にインポートできる
+    """
+    tables_store, test_dir = prepared_data
+    test_csv = f"{test_dir}/TestDataComma.csv"
+    request_data = {
+        "filePath": test_csv,
+        "tableName": "人口統計データ",
+        "separator": ",",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert "人口統計データ" == response_data["result"]["tableName"]

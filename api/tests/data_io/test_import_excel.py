@@ -9,8 +9,14 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from economicon.core.enums import ErrorCode
 from economicon.services.data.tables_store import TablesStore
 from main import app
+
+# テストデータの定数
+_TEMP_N_COLS = 3  # 一時ファイルテストデータの列数
+_TEMP_N_ROWS = 5  # 一時ファイルテストデータの行数
+_MAX_TABLE_NAME_LEN = 128  # テーブル名の最大文字数
 
 
 @pytest.fixture
@@ -66,11 +72,11 @@ def test_import_excel_large_data(client, prepared_data):
     大きなEXCELファイルをパス指定でインポートするテスト
     """
     tables_store, test_dir = prepared_data
-    N_ROWS = 5000
-    N_COLS = 500
+    n_rows = 5000
+    n_cols = 500
     rng = np.random.default_rng(42)
-    data = rng.integers(0, 100, size=(N_ROWS, N_COLS), dtype=np.int32)
-    column_names = [f"col_{i}" for i in range(N_COLS)]
+    data = rng.integers(0, 100, size=(n_rows, n_cols), dtype=np.int32)
+    column_names = [f"col_{i}" for i in range(n_cols)]
     df_sample = pl.DataFrame(data, schema=column_names)
     df_sample.write_excel(f"{test_dir}/TestDataXlsx.xlsx")
     # APIリクエスト
@@ -128,6 +134,7 @@ def test_import_excel_file_not_exists(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.PATH_NOT_FOUND == response_data["code"]
     message = "filePath '/non/existent/file.parquet'は存在しません。"
     assert message == response_data["message"]
 
@@ -148,6 +155,7 @@ def test_import_excel_invalid_file_extension(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert ErrorCode.UNSUPPORTED_FILE_TYPE == response_data["code"]
 
 
 def test_import_excel_missing_file_path(client, prepared_data):
@@ -159,7 +167,9 @@ def test_import_excel_missing_file_path(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
     assert "filePathは必須項目です。" == response_data["message"]
+    assert ["filePathは必須項目です。"] == response_data["details"]
 
 
 def test_import_excel_missing_table_name(client, prepared_data):
@@ -179,7 +189,9 @@ def test_import_excel_missing_table_name(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
     assert "tableNameは必須項目です。" == response_data["message"]
+    assert ["tableNameは必須項目です。"] == response_data["details"]
 
 
 def test_import_excel_duplicate_table_name(client, prepared_data):
@@ -211,6 +223,7 @@ def test_import_excel_duplicate_table_name(client, prepared_data):
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.DATA_ALREADY_EXISTS == response_data["code"]
     # テーブル名重複エラーメッセージを確認
     message = "tableName 'DuplicateTable'は既に存在します。"
     assert message == response_data["message"]
@@ -257,8 +270,8 @@ def test_import_excel_with_temporary_file(client, prepared_data):
         assert "TestTempExcel" == response_data["result"]["tableName"]
         # データの検証
         df = tables_store.get_table("TestTempExcel").table
-        assert 3 == len(df.columns)
-        assert 5 == len(df)
+        assert _TEMP_N_COLS == len(df.columns)
+        assert _TEMP_N_ROWS == len(df)
         assert temp_data.equals(df)
     finally:
         # 一時ファイルを削除
@@ -273,7 +286,13 @@ def test_import_excel_empty_file_path(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "filePath" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert (
+        "filePathは1文字以上で入力してください。" == response_data["message"]
+    )
+    assert ["filePathは1文字以上で入力してください。"] == response_data[
+        "details"
+    ]
 
 
 def test_import_excel_empty_table_name(client, prepared_data):
@@ -284,4 +303,160 @@ def test_import_excel_empty_table_name(client, prepared_data):
     response = client.post("/api/data/import", data=json.dumps(request_data))
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "tableName" in response_data["message"]
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert (
+        "tableNameは1文字以上で入力してください。" == response_data["message"]
+    )
+    assert ["tableNameは1文字以上で入力してください。"] == response_data[
+        "details"
+    ]
+
+
+def test_import_excel_tablename_only_spaces(client, prepared_data):
+    """
+    tableNameがスペースのみの場合はトリムされ空文字列になりエラーになる
+    """
+    tables_store, test_dir = prepared_data
+    request_data = {
+        "filePath": "/some/path/test.xlsx",
+        "tableName": "   ",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    expected_msg = "tableNameは1文字以上で入力してください。"
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert expected_msg == response_data["message"]
+    assert [expected_msg] == response_data["details"]
+
+
+def test_import_excel_tablename_only_tabs(client, prepared_data):
+    """
+    tableNameがタブ文字のみの場合はトリムされ空文字列になりエラーになる
+    """
+    tables_store, test_dir = prepared_data
+    request_data = {
+        "filePath": "/some/path/test.xlsx",
+        "tableName": "\t\t\t",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    expected_msg = "tableNameは1文字以上で入力してください。"
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert expected_msg == response_data["message"]
+    assert [expected_msg] == response_data["details"]
+
+
+def test_import_excel_tablename_embedded_tab(client, prepared_data):
+    """
+    tableNameにタブ文字が埋め込まれた場合はパターン違反エラーになる
+    """
+    tables_store, test_dir = prepared_data
+    request_data = {
+        "filePath": "/some/path/test.xlsx",
+        "tableName": "test\ttable",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    expected_msg = "tableNameに使用できない文字が含まれています。"
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert expected_msg == response_data["message"]
+    assert [expected_msg] == response_data["details"]
+
+
+def test_import_excel_tablename_exceeds_max_length(client, prepared_data):
+    """
+    tableNameが最大文字数（128文字）を超える場合はバリデーションエラーになる
+    """
+    tables_store, test_dir = prepared_data
+    test_data = pl.DataFrame({"col_1": [1, 2, 3]})
+    test_data.write_excel(f"{test_dir}/MaxTest.xlsx")
+    over_limit = "a" * (_MAX_TABLE_NAME_LEN + 1)
+    request_data = {
+        "filePath": f"{test_dir}/MaxTest.xlsx",
+        "tableName": over_limit,
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    expected_msg = (
+        f"tableNameは{_MAX_TABLE_NAME_LEN}文字以内で入力してください。"
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert expected_msg == response_data["message"]
+    assert [expected_msg] == response_data["details"]
+
+
+def test_import_excel_tablename_at_max_length(client, prepared_data):
+    """
+    tableNameがちょうど最大文字数（128文字）の場合は正常にインポートできる
+    """
+    tables_store, test_dir = prepared_data
+    test_data = pl.DataFrame({"col_1": [1, 2, 3]})
+    test_data.write_excel(f"{test_dir}/MaxNameTest.xlsx")
+    max_length_name = "a" * _MAX_TABLE_NAME_LEN
+    request_data = {
+        "filePath": f"{test_dir}/MaxNameTest.xlsx",
+        "tableName": max_length_name,
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert max_length_name == response_data["result"]["tableName"]
+
+
+def test_import_excel_tablename_leading_trailing_spaces(client, prepared_data):
+    """
+    tableNameの前後にスペースがある場合はトリムされて正常にインポートできる
+    """
+    tables_store, test_dir = prepared_data
+    test_data = pl.DataFrame({"col_1": [1, 2, 3]})
+    test_data.write_excel(f"{test_dir}/TrimTest.xlsx")
+    request_data = {
+        "filePath": f"{test_dir}/TrimTest.xlsx",
+        "tableName": "  TrimmedExcelTable  ",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert "TrimmedExcelTable" == response_data["result"]["tableName"]
+
+
+def test_import_excel_tablename_emoji(client, prepared_data):
+    """
+    tableNameに絵文字を使った場合は正常にインポートできる
+    """
+    tables_store, test_dir = prepared_data
+    test_data = pl.DataFrame({"col_1": [1, 2, 3]})
+    test_data.write_excel(f"{test_dir}/EmojiTest.xlsx")
+    request_data = {
+        "filePath": f"{test_dir}/EmojiTest.xlsx",
+        "tableName": "データ📊テーブル",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert "データ📊テーブル" == response_data["result"]["tableName"]
+
+
+def test_import_excel_tablename_japanese(client, prepared_data):
+    """
+    tableNameに日本語を使った場合は正常にインポートできる
+    """
+    tables_store, test_dir = prepared_data
+    test_data = pl.DataFrame({"col_1": [1, 2, 3]})
+    test_data.write_excel(f"{test_dir}/JpTest.xlsx")
+    request_data = {
+        "filePath": f"{test_dir}/JpTest.xlsx",
+        "tableName": "人口統計データ",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert "人口統計データ" == response_data["result"]["tableName"]
