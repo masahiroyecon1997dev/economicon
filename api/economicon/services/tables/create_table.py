@@ -10,7 +10,6 @@ from ...utils.validators import (
     validate_file_format,
     validate_file_path,
     validate_non_existence,
-    validate_row_count_limit,
 )
 from ..data.tables_store import TablesStore
 
@@ -68,18 +67,7 @@ class CreateTable:
             existing_list=table_name_list,
             target=self.param_names["table_name"],
         )
-        if self.file_path is None:
-            # ファイルなし: 行数制限チェック
-            row_count = (
-                self.tables_store.get_table_row_count(self.table_name) - 1
-            )
-            if self.row_count is not None:
-                validate_row_count_limit(
-                    current_row_count=row_count,
-                    requested_count=self.row_count,
-                    target=self.param_names["row_count"],
-                )
-        else:
+        if self.file_path is not None:
             # ファイルあり: パスの存在と拡張子を検証
             validate_file_path(
                 path_str=self.file_path,
