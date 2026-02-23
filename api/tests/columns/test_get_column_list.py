@@ -70,8 +70,7 @@ def test_get_column_list_success(client, tables_store):
     # スキーマ順にすべての列情報が返る
     df = tables_store.get_table(TABLE_NAME).table
     expected_columns = [
-        {"name": name, "type": str(dtype)}
-        for name, dtype in df.schema.items()
+        {"name": name, "type": str(dtype)} for name, dtype in df.schema.items()
     ]
     assert result["columnInfoList"] == expected_columns
 
@@ -208,11 +207,13 @@ def test_get_column_list_japanese_column_names(client, tables_store):
     """N1: テーブルに日本語列名が含まれていても正常に列リストを返す"""
     tables_store.update_table(
         TABLE_NAME,
-        pl.DataFrame({
-            "売上高": DATA_INT,
-            "利益率": DATA_FLOAT,
-            "カテゴリ": DATA_STR,
-        }),
+        pl.DataFrame(
+            {
+                "売上高": DATA_INT,
+                "利益率": DATA_FLOAT,
+                "カテゴリ": DATA_STR,
+            }
+        ),
     )
     response = client.post(
         "/api/column/get-list",
@@ -221,7 +222,9 @@ def test_get_column_list_japanese_column_names(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    column_names = [col["name"] for col in response_data["result"]["columnInfoList"]]
+    column_names = [
+        col["name"] for col in response_data["result"]["columnInfoList"]
+    ]
     assert "売上高" in column_names
     assert "利益率" in column_names
     assert "カテゴリ" in column_names
@@ -231,11 +234,13 @@ def test_get_column_list_emoji_column_names(client, tables_store):
     """N2: テーブルに絵文字列名が含まれていても正常に列リストを返す"""
     tables_store.update_table(
         TABLE_NAME,
-        pl.DataFrame({
-            "🔥": DATA_INT,
-            "📊": DATA_FLOAT,
-            "🏷️": DATA_STR,
-        }),
+        pl.DataFrame(
+            {
+                "🔥": DATA_INT,
+                "📊": DATA_FLOAT,
+                "🏷️": DATA_STR,
+            }
+        ),
     )
     response = client.post(
         "/api/column/get-list",
@@ -244,7 +249,9 @@ def test_get_column_list_emoji_column_names(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    column_names = [col["name"] for col in response_data["result"]["columnInfoList"]]
+    column_names = [
+        col["name"] for col in response_data["result"]["columnInfoList"]
+    ]
     assert "🔥" in column_names
 
 
