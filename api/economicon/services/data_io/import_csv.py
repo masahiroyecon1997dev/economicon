@@ -33,7 +33,9 @@ class ImportCsv:
         # 区切り文字
         self.separator = body.separator
         # エンコーディング
-        self.encoding = body.encoding
+        self.encoding = (
+            "cp932" if body.encoding == "shift_jis" else body.encoding
+        )
         # パラメータ名のマッピング
         self.param_names = {
             "file_path": "filePath",
