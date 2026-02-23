@@ -1,10 +1,53 @@
 import pytest
-from economicon.services.data.tables_store import TablesStore
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from economicon.core.enums import ErrorCode
+from economicon.services.data.tables_store import TablesStore
 from main import app
 
+# ─────────────────────────────────────────────────────────────
+# 定数
+# ─────────────────────────────────────────────────────────────
+MAX_TABLE_NAME_LENGTH = 128
 
+# ベースペイロード（正常系共通）
+_BASE_PAYLOAD: dict = {
+    "tableName": "TestTable",
+    "rowCount": 5,
+    "simulationColumns": [
+        {
+            "columnName": "col1",
+            "distribution": {"type": "normal", "loc": 0.0, "scale": 1.0},
+        }
+    ],
+}
+
+# 単独カラム設定（正規分布）
+_COL_NORMAL = {
+    "columnName": "normal_col",
+    "distribution": {"type": "normal", "loc": 0.0, "scale": 1.0},
+}
+# 単独カラム設定（一様分布）
+_COL_UNIFORM = {
+    "columnName": "uniform_col",
+    "distribution": {"type": "uniform", "low": 0.0, "high": 10.0},
+}
+# 単独カラム設定（指数分布）
+_COL_EXP = {
+    "columnName": "exp_col",
+    "distribution": {"type": "exponential", "scale": 2.0},
+}
+# 単独カラム設定（固定値）
+_COL_FIXED = {
+    "columnName": "fixed_col",
+    "distribution": {"type": "fixed", "value": 42.0},
+}
+
+
+# ─────────────────────────────────────────────────────────────
+# フィクスチャ
+# ─────────────────────────────────────────────────────────────
 @pytest.fixture
 def client():
     """TestClientのフィクスチャ"""
@@ -15,440 +58,366 @@ def client():
 def tables_store():
     """TablesStoreのフィクスチャ"""
     manager = TablesStore()
-    # テスト前にテーブルをクリア
     manager.clear_tables()
     yield manager
-    # テスト後のクリーンアップ
     manager.clear_tables()
 
 
-def test_create_table_with_distribution_columns(client, tables_store):
-    """分布データ列を持つテーブル作成のテスト"""
-
-    # テスト用の列設定
-    column_settings = [
-        {
-            "columnName": "normal_col",
-            "dataType": "distribution",
-            "distributionType": "normal",
-            "distributionParams": {"loc": 0, "scale": 1},
-        },
-        {
-            "columnName": "uniform_col",
-            "dataType": "distribution",
-            "distributionType": "uniform",
-            "distributionParams": {"low": 0, "high": 10},
-        },
-    ]
+# ─────────────────────────────────────────────────────────────
+# 正常系：各分布タイプ
+# ─────────────────────────────────────────────────────────────
+def test_create_table_with_normal_distribution(client, tables_store):
+    """正規分布カラムを持つテーブルを正常に作成できる"""
     payload = {
-        "tableName": "test_table",
-        "tableNumberOfRows": 100,
-        "columnSettings": column_settings,
+        "tableName": "NormalTable",
+        "rowCount": 100,
+        "simulationColumns": [_COL_NORMAL],
     }
     response = client.post("/api/table/create-simulation-data", json=payload)
-
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert response_data["result"]["tableName"] == "test_table"
-
-    # store_tableに渡されたDataFrameの確認
-    assert "test_table" in tables_store.get_table_name_list()
-    columns = tables_store.get_column_name_list("test_table")
-    assert "normal_col" in columns
-    assert "uniform_col" in columns
-    df = tables_store.get_table("test_table").table
-    assert len(columns) == 2
+    assert response_data["result"]["tableName"] == "NormalTable"
+    df = tables_store.get_table("NormalTable").table
     assert len(df) == 100
+    assert "normal_col" in df.columns
 
 
-def test_create_table_with_fixed_columns(client, tables_store):
-    """固定値列を持つテーブル作成のテスト"""
-
-    # テスト用の列設定
-    column_settings = [
-        {"columnName": "fixed_col_1", "dataType": "fixed", "fixedValue": 42},
-        {
-            "columnName": "fixed_col_2",
-            "dataType": "fixed",
-            "fixedValue": "constant_string",
-        },
-    ]
-
+def test_create_table_with_uniform_distribution(client, tables_store):
+    """一様分布カラムを持つテーブルを正常に作成できる"""
     payload = {
-        "tableName": "fixed_table",
-        "tableNumberOfRows": 50,
-        "columnSettings": column_settings,
+        "tableName": "UniformTable",
+        "rowCount": 50,
+        "simulationColumns": [_COL_UNIFORM],
     }
-
     response = client.post("/api/table/create-simulation-data", json=payload)
-
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert response_data["result"]["tableName"] == "fixed_table"
-
-    # テーブルの確認
-    assert "fixed_table" in tables_store.get_table_name_list()
-    columns = tables_store.get_column_name_list("fixed_table")
-    assert "fixed_col_1" in columns
-    assert "fixed_col_2" in columns
-    df = tables_store.get_table("fixed_table").table
+    df = tables_store.get_table("UniformTable").table
     assert len(df) == 50
-
-    # 固定値の確認
-    assert (df["fixed_col_1"] == 42).all()
-    assert (df["fixed_col_2"] == "constant_string").all()
+    assert "uniform_col" in df.columns
 
 
-def test_create_table_with_mixed_columns(client, tables_store):
-    """分布データ列と固定値列の混合テーブル作成のテスト"""
-
-    # テスト用の列設定
-    column_settings = [
-        {
-            "columnName": "exponential_col",
-            "dataType": "distribution",
-            "distributionType": "exponential",
-            "distributionParams": {"scale": 2.0},
-        },
-        {"columnName": "fixed_id", "dataType": "fixed", "fixedValue": 1},
-    ]
-
+def test_create_table_with_exponential_distribution(client, tables_store):
+    """指数分布カラムを持つテーブルを正常に作成できる"""
     payload = {
-        "tableName": "mixed_table",
-        "tableNumberOfRows": 30,
-        "columnSettings": column_settings,
+        "tableName": "ExpTable",
+        "rowCount": 30,
+        "simulationColumns": [_COL_EXP],
     }
-
     response = client.post("/api/table/create-simulation-data", json=payload)
-
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert response_data["result"]["tableName"] == "mixed_table"
-
-    # テーブルの確認
-    assert "mixed_table" in tables_store.get_table_name_list()
-    columns = tables_store.get_column_name_list("mixed_table")
-    assert "exponential_col" in columns
-    assert "fixed_id" in columns
-    df = tables_store.get_table("mixed_table").table
+    df = tables_store.get_table("ExpTable").table
     assert len(df) == 30
-    assert len(df.columns) == 2
-
-    # 固定値の確認
-    assert (df["fixed_id"] == 1).all()
 
 
-def test_validation_error_duplicate_table_name(client, tables_store):
-    """重複するテーブル名のバリデーションエラーテスト"""
-
-    # 既存のテーブルを作成
-    existing_payload = {
-        "tableName": "existing_table",
-        "tableNumberOfRows": 10,
-        "columnSettings": [
-            {"columnName": "test_col", "dataType": "fixed", "fixedValue": 1}
-        ],
+def test_create_table_with_fixed_distribution(client, tables_store):
+    """固定値カラムを持つテーブルを正常に作成できる"""
+    payload = {
+        "tableName": "FixedTable",
+        "rowCount": 10,
+        "simulationColumns": [_COL_FIXED],
     }
-    client.post("/api/table/create-simulation-data", json=existing_payload)
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    df = tables_store.get_table("FixedTable").table
+    assert len(df) == 10
+    assert "fixed_col" in df.columns
+    # 全行が固定値 42.0 であることを確認
+    assert (df["fixed_col"] == 42.0).all()
 
-    # 同じ名前のテーブルを再度作成しようとする
-    duplicate_payload = {
-        "tableName": "existing_table",
-        "tableNumberOfRows": 10,
-        "columnSettings": [
-            {"columnName": "test_col2", "dataType": "fixed", "fixedValue": 2}
-        ],
+
+def test_create_table_with_multiple_columns(client, tables_store):
+    """複数カラムを持つテーブルを正常に作成できる"""
+    payload = {
+        "tableName": "MultiTable",
+        "rowCount": 20,
+        "simulationColumns": [_COL_NORMAL, _COL_UNIFORM, _COL_EXP],
     }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    df = tables_store.get_table("MultiTable").table
+    assert len(df) == 20
+    assert len(df.columns) == 3
+    assert "normal_col" in df.columns
+    assert "uniform_col" in df.columns
+    assert "exp_col" in df.columns
 
+
+# ─────────────────────────────────────────────────────────────
+# 異常系 400：重複テーブル名
+# ─────────────────────────────────────────────────────────────
+def test_create_simulation_data_table_duplicate_table_name(
+    client, tables_store
+):
+    """既存テーブル名と重複する場合は 400 DATA_ALREADY_EXISTS"""
+    # 先に作成
+    client.post("/api/table/create-simulation-data", json=_BASE_PAYLOAD)
+    # 同じ名前で再作成
     response = client.post(
-        "/api/table/create-simulation-data", json=duplicate_payload
+        "/api/table/create-simulation-data", json=_BASE_PAYLOAD
     )
-
+    response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.DATA_ALREADY_EXISTS
+    assert (
+        response_data["message"] == "tableName 'TestTable'は既に存在します。"
+    )
+    assert "details" not in response_data
 
 
-def test_validation_error_invalid_num_rows(client, tables_store):
-    """無効な行数のバリデーションエラーテスト"""
-
-    payload = {
-        "tableName": "test_table",
-        "tableNumberOfRows": 0,  # 無効な行数
-        "columnSettings": [
-            {"columnName": "test_col", "dataType": "fixed", "fixedValue": 1}
-        ],
-    }
-
-    response = client.post("/api/table/create-simulation-data", json=payload)
-
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-
-
-def test_validation_error_empty_column_settings(client, tables_store):
-    """空の列設定のバリデーションエラーテスト"""
-
-    payload = {
-        "tableName": "test_table",
-        "tableNumberOfRows": 10,
-        "columnSettings": [],  # 空の列設定
-    }
-
-    response = client.post("/api/table/create-simulation-data", json=payload)
-
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-
-
-def test_validation_error_missing_column_name(client, tables_store):
-    """列名が不足している場合のバリデーションエラーテスト"""
-
-    payload = {
-        "tableName": "test_table",
-        "tableNumberOfRows": 10,
-        "columnSettings": [
-            {
-                "dataType": "fixed",
-                "fixedValue": 1,
-                # 'columnName' が不足
-            }
-        ],
-    }
-
-    response = client.post("/api/table/create-simulation-data", json=payload)
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-def test_validation_error_invalid_data_type(client, tables_store):
-    """無効なデータタイプのバリデーションエラーテスト"""
-
-    payload = {
-        "tableName": "test_table",
-        "tableNumberOfRows": 10,
-        "columnSettings": [
-            {
-                "columnName": "test_col",
-                "dataType": "invalid_type",  # 無効なデータタイプ
-                "fixedValue": 1,
-            }
-        ],
-    }
-
-    response = client.post("/api/table/create-simulation-data", json=payload)
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-def test_validation_error_missing_distribution_params(client, tables_store):
-    """分布パラメータが不足している場合のバリデーションエラーテスト"""
-
-    payload = {
-        "tableName": "test_table",
-        "tableNumberOfRows": 10,
-        "columnSettings": [
-            {
-                "columnName": "test_col",
-                "dataType": "distribution",
-                "distributionType": "normal",
-                # 'distributionParams' が不足
-            }
-        ],
-    }
-
-    response = client.post("/api/table/create-simulation-data", json=payload)
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-def test_validation_error_missing_fixed_value(client, tables_store):
-    """固定値が不足している場合のバリデーションエラーテスト"""
-
-    payload = {
-        "tableName": "test_table",
-        "tableNumberOfRows": 10,
-        "columnSettings": [
-            {
-                "columnName": "test_col",
-                "dataType": "fixed",
-                # 'fixedValue' が不足
-            }
-        ],
-    }
-
-    response = client.post("/api/table/create-simulation-data", json=payload)
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-def test_validation_error_invalid_distribution_type(client, tables_store):
-    """無効な分布タイプのバリデーションエラーテスト"""
-
-    payload = {
-        "tableName": "test_table",
-        "tableNumberOfRows": 10,
-        "columnSettings": [
-            {
-                "columnName": "test_col",
-                "dataType": "distribution",
-                "distributionType": "invalid_distribution",  # 無効な分布タイプ
-                "distributionParams": {"param1": 1},
-            }
-        ],
-    }
-
-    response = client.post("/api/table/create-simulation-data", json=payload)
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-def test_validation_error_invalid_distribution_params(client, tables_store):
-    """無効な分布パラメータのバリデーションエラーテスト"""
-
-    payload = {
-        "tableName": "test_table",
-        "tableNumberOfRows": 10,
-        "columnSettings": [
-            {
-                "columnName": "test_col",
-                "dataType": "distribution",
-                "distributionType": "normal",
-                "distributionParams": {"invalidParam": 1},  # 無効なパラメータ
-            }
-        ],
-    }
-
-    response = client.post("/api/table/create-simulation-data", json=payload)
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-# Pydanticバリデーションテスト
-
-
+# ─────────────────────────────────────────────────────────────
+# 異常系 422：Pydanticバリデーションエラー（空・0値）
+# ─────────────────────────────────────────────────────────────
 def test_create_simulation_data_table_pydantic_empty_table_name(
     client, tables_store
 ):
-    """
-    tableNameが空文字列の場合はバリデーションエラーになる
-    """
-    payload = {
-        "tableName": "",
-        "tableNumberOfRows": 10,
-        "columnSettings": [
-            {"columnName": "test_col", "dataType": "fixed", "fixedValue": 1}
-        ],
-    }
-    response = client.post(
-        "/api/table/create-simulation-data",
-        json=payload,
-    )
+    """tableNameが空文字列の場合は 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "tableName": ""}
+    response = client.post("/api/table/create-simulation-data", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "tableName" in response_data["message"]
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert (
+        response_data["message"] == "tableNameは1文字以上で入力してください。"
+    )
+    assert response_data["details"] == [
+        "tableNameは1文字以上で入力してください。"
+    ]
 
 
-def test_create_simulation_data_table_pydantic_negative_number_of_rows(
+def test_create_simulation_data_table_pydantic_zero_row_count(
     client, tables_store
 ):
-    """
-    tableNumberOfRowsが負の場合はバリデーションエラーになる
-    """
-    payload = {
-        "tableName": "TestTable",
-        "tableNumberOfRows": -1,
-        "columnSettings": [
-            {"columnName": "test_col", "dataType": "fixed", "fixedValue": 1}
-        ],
-    }
-    response = client.post(
-        "/api/table/create-simulation-data",
-        json=payload,
-    )
+    """rowCountが0の場合は 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "rowCount": 0}
+    response = client.post("/api/table/create-simulation-data", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "tableNumberOfRows" in response_data["message"]
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == "rowCountは1以上で入力してください。"
+    assert response_data["details"] == ["rowCountは1以上で入力してください。"]
 
 
-def test_create_simulation_data_table_pydantic_empty_column_settings(
+def test_create_simulation_data_table_pydantic_negative_row_count(
     client, tables_store
 ):
-    """
-    columnSettingsが空の場合はバリデーションエラーになる
-    """
-    payload = {
-        "tableName": "TestTable",
-        "tableNumberOfRows": 10,
-        "columnSettings": [],
-    }
-    response = client.post(
-        "/api/table/create-simulation-data",
-        json=payload,
-    )
+    """rowCountが負の場合は 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "rowCount": -1}
+    response = client.post("/api/table/create-simulation-data", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "List should have at least 1 item" in response_data["message"]
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == "rowCountは1以上で入力してください。"
+    assert response_data["details"] == ["rowCountは1以上で入力してください。"]
 
 
+def test_create_simulation_data_table_pydantic_empty_simulation_columns(
+    client, tables_store
+):
+    """simulationColumnsが空リストの場合は 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "simulationColumns": []}
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert (
+        response_data["message"]
+        == "simulationColumnsは1件以上ある必要があります。"
+    )
+    assert response_data["details"] == [
+        "simulationColumnsは1件以上ある必要があります。"
+    ]
+
+
+# ─────────────────────────────────────────────────────────────
+# 異常系 422：Pydanticバリデーションエラー（必須項目欠損）
+# ─────────────────────────────────────────────────────────────
 def test_create_simulation_data_table_pydantic_missing_table_name(
     client, tables_store
 ):
-    """
-    tableNameが欠損している場合はバリデーションエラーになる
-    """
-    payload = {
-        "tableNumberOfRows": 10,
-        "columnSettings": [
-            {"columnName": "test_col", "dataType": "fixed", "fixedValue": 1}
-        ],
-    }
-    response = client.post(
-        "/api/table/create-simulation-data",
-        json=payload,
-    )
+    """tableNameが欠損している場合は 422 VALIDATION_ERROR"""
+    payload = {k: v for k, v in _BASE_PAYLOAD.items() if k != "tableName"}
+    response = client.post("/api/table/create-simulation-data", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "tableName" in response_data["message"]
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == "tableNameは必須項目です。"
+    assert response_data["details"] == ["tableNameは必須項目です。"]
 
 
-def test_create_simulation_data_table_pydantic_missing_number_of_rows(
+def test_create_simulation_data_table_pydantic_missing_row_count(
     client, tables_store
 ):
-    """
-    tableNumberOfRowsが欠損している場合はバリデーションエラーになる
-    """
-    payload = {
-        "tableName": "TestTable",
-        "columnSettings": [
-            {"columnName": "test_col", "dataType": "fixed", "fixedValue": 1}
-        ],
-    }
-    response = client.post(
-        "/api/table/create-simulation-data",
-        json=payload,
-    )
+    """rowCountが欠損している場合は 422 VALIDATION_ERROR"""
+    payload = {k: v for k, v in _BASE_PAYLOAD.items() if k != "rowCount"}
+    response = client.post("/api/table/create-simulation-data", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "tableNumberOfRows" in response_data["message"]
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == "rowCountは必須項目です。"
+    assert response_data["details"] == ["rowCountは必須項目です。"]
 
 
-def test_create_simulation_data_table_pydantic_missing_column_settings(
+def test_create_simulation_data_table_pydantic_missing_simulation_columns(
     client, tables_store
 ):
-    """
-    columnSettingsが欠損している場合はバリデーションエラーになる
-    """
-    payload = {"tableName": "TestTable", "tableNumberOfRows": 10}
-    response = client.post(
-        "/api/table/create-simulation-data",
-        json=payload,
-    )
+    """simulationColumnsが欠損している場合は 422 VALIDATION_ERROR"""
+    payload = {
+        k: v for k, v in _BASE_PAYLOAD.items() if k != "simulationColumns"
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert "NG" == response_data["code"]
-    assert "columnSettings" in response_data["message"]
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == "simulationColumnsは必須項目です。"
+    assert response_data["details"] == ["simulationColumnsは必須項目です。"]
+
+
+def test_create_simulation_data_table_pydantic_missing_column_name(
+    client, tables_store
+):
+    """columnNameが欠損している場合は 422 VALIDATION_ERROR"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "simulationColumns": [
+            {"distribution": {"type": "normal", "loc": 0.0, "scale": 1.0}}
+        ],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert (
+        response_data["message"]
+        == "simulationColumns.0.columnNameは必須項目です。"
+    )
+    assert response_data["details"] == [
+        "simulationColumns.0.columnNameは必須項目です。"
+    ]
+
+
+def test_create_simulation_data_table_pydantic_missing_distribution(
+    client, tables_store
+):
+    """distributionが欠損している場合は 422 VALIDATION_ERROR"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "simulationColumns": [{"columnName": "col1"}],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert (
+        response_data["message"]
+        == "simulationColumns.0.distributionは必須項目です。"
+    )
+    assert response_data["details"] == [
+        "simulationColumns.0.distributionは必須項目です。"
+    ]
+
+
+def test_create_simulation_data_table_pydantic_invalid_distribution_type(
+    client, tables_store
+):
+    """無効な distribution.type の場合は 422 VALIDATION_ERROR"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "simulationColumns": [
+            {"columnName": "col1", "distribution": {"type": "invalid_type"}}
+        ],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    # メッセージはPydanticの判別ユニオンエラーをそのまま使用
+    assert "invalid_type" in response_data["message"]
+
+
+# ─────────────────────────────────────────────────────────────
+# 意地悪テスト（N1-N7）
+# ─────────────────────────────────────────────────────────────
+def test_n1_table_name_japanese(client, tables_store):
+    """N1: tableNameに日本語を使っても正常処理される"""
+    payload = {**_BASE_PAYLOAD, "tableName": "シミュレーションテーブル"}
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["code"] == "OK"
+
+
+def test_n2_table_name_emoji(client, tables_store):
+    """N2: tableNameに絵文字を使っても正常処理される"""
+    payload = {**_BASE_PAYLOAD, "tableName": "SimTable🎲"}
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["code"] == "OK"
+
+
+def test_n3_table_name_surrounding_spaces(client, tables_store):
+    """N3: tableNameの前後スペースはトリムされ正常処理される"""
+    payload = {**_BASE_PAYLOAD, "tableName": "  TestTable  "}
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["code"] == "OK"
+
+
+def test_n4_table_name_max_length(client, tables_store):
+    """N4: tableNameが最大文字数（128文字）でも正常処理される"""
+    payload = {**_BASE_PAYLOAD, "tableName": "a" * MAX_TABLE_NAME_LENGTH}
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["code"] == "OK"
+
+
+def test_n5_table_name_exceeds_max_length(client, tables_store):
+    """N5: tableNameが最大文字数を超えると 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "tableName": "a" * (MAX_TABLE_NAME_LENGTH + 1)}
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = (
+        f"tableNameは{MAX_TABLE_NAME_LENGTH}文字以内で入力してください。"
+    )
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_n6_table_name_with_tab(client, tables_store):
+    """N6: tableNameにタブ文字が含まれると 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "tableName": "Sim\tTable"}
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert (
+        response_data["message"]
+        == "tableNameに使用できない文字が含まれています。"
+    )
+    assert response_data["details"] == [
+        "tableNameに使用できない文字が含まれています。"
+    ]
+
+
+def test_n7_table_name_only_spaces(client, tables_store):
+    """N7: tableNameがスペースのみの場合、トリム後に空になり 422 VALIDATION_ERROR"""
+    payload = {**_BASE_PAYLOAD, "tableName": "   "}
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert (
+        response_data["message"] == "tableNameは1文字以上で入力してください。"
+    )
+    assert response_data["details"] == [
+        "tableNameは1文字以上で入力してください。"
+    ]
