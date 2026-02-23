@@ -841,7 +841,9 @@ def test_add_simulation_column_too_long_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "simulationColumn.column_nameは128文字以内で入力してください。"
+    expected_msg = (
+        "simulationColumn.column_nameは128文字以内で入力してください。"
+    )
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
 
@@ -866,7 +868,9 @@ def test_add_simulation_column_tab_char_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "simulationColumn.column_nameに使用できない文字が含まれています。"
+    expected_msg = (
+        "simulationColumn.column_nameに使用できない文字が含まれています。"
+    )
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
 
@@ -898,7 +902,9 @@ def test_add_simulation_column_uniform_low_equals_high(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "Value error, 一様分布では、\'low\'は\'high\'より小さい必要があります"
+    expected_msg = (
+        "Value error, 一様分布では、'low'は'high'より小さい必要があります"
+    )
     assert expected_msg in response_data["message"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
@@ -927,7 +933,7 @@ def test_add_simulation_column_uniform_reversed_range(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "一様分布では、\'low\'は\'high\'より小さい必要があります"
+    expected_msg = "一様分布では、'low'は'high'より小さい必要があります"
     assert expected_msg in response_data["message"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
