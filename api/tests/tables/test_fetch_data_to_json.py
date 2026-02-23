@@ -13,7 +13,11 @@ test_data = pl.DataFrame(
     {"column1": [1, 2, 3, 4, 5], "column2": ["a", "b", "c", "d", "e"]}
 )
 # テーブルの行数
-TOTAL_ROWS = 5
+_TOTAL_ROWS = 5
+# テーブル行数を超えた取得に使用する行数（テーブルは5行）
+_FETCH_BEYOND_ROWS = 10
+# fetchRows の最大値
+_MAX_FETCH_ROWS = 10000
 
 
 @pytest.fixture
@@ -52,7 +56,7 @@ def test_fetch_data_to_json_success(client, tables_store):
     assert response_data["code"] == "OK"
     assert response_data["result"]["tableName"] == table_name
     # メタ情報の確認
-    assert response_data["result"]["totalRows"] == TOTAL_ROWS
+    assert response_data["result"]["totalRows"] == _TOTAL_ROWS
     assert response_data["result"]["startRow"] == start_row
     assert response_data["result"]["endRow"] == start_row + fetch_rows
     # データの内容を確認
@@ -97,6 +101,7 @@ def test_fetch_data_to_json_invalid_start_row_range(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert "startRowは0以上で入力してください。" == response_data["message"]
+    assert ["startRowは0以上で入力してください。"] == response_data["details"]
 
 
 def test_fetch_data_to_json_invalid_fetch_rows(client, tables_store):
@@ -115,6 +120,7 @@ def test_fetch_data_to_json_invalid_fetch_rows(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert "fetchRowsは1以上で入力してください。" == response_data["message"]
+    assert ["fetchRowsは1以上で入力してください。"] == response_data["details"]
 
 
 def test_fetch_data_to_json_missing_table_name(client, tables_store):
@@ -133,13 +139,13 @@ def test_fetch_data_to_json_missing_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert (
-        "tableNameは1文字以上で入力してください。" == response_data["message"]
-    )
+    msg = "tableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
 
 
 def test_fetch_data_to_json_missing_start_row(client, tables_store):
-    # 異常系テスト: 必須パラメータが不足している場合（startRow）
+    # 異常系テスト: startRow に文字列を渡した場合（型エラー）
     start_row = ""
     fetch_rows = 6
     response = client.post(
@@ -150,13 +156,15 @@ def test_fetch_data_to_json_missing_start_row(client, tables_store):
             "fetchRows": fetch_rows,
         },
     )
-    # response_data = response.json()
+    response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert "startRow is required." == response_data['message']
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "startRowは整数で入力してください。" == response_data["message"]
+    assert ["startRowは整数で入力してください。"] == response_data["details"]
 
 
 def test_fetch_data_to_json_missing_fetch_rows(client, tables_store):
-    # 異常系テスト: 必須パラメータが不足している場合（fetchRows）
+    # 異常系テスト: fetchRows に文字列を渡した場合（型エラー）
     start_row = 1
     fetch_rows = ""
     response = client.post(
@@ -167,15 +175,18 @@ def test_fetch_data_to_json_missing_fetch_rows(client, tables_store):
             "fetchRows": fetch_rows,
         },
     )
-    # response_data = response.json()
+    response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    # assert "fetchRows is required." == response_data['message']
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    assert "fetchRowsは整数で入力してください。" == response_data["message"]
+    assert ["fetchRowsは整数で入力してください。"] == response_data["details"]
 
 
 def test_fetch_data_to_json_fetch_beyond_table(client, tables_store):
     # 正常系テスト: テーブルの行数を超える取得行数
     start_row = 2
-    fetch_rows = 10  # テーブルは5行なので3行目から最後までの3行を取得
+    # テーブルは5行なので3行目から最後までの3行を取得
+    fetch_rows = _FETCH_BEYOND_ROWS
     response = client.post(
         "/api/table/fetch-data-to-json",
         json={
@@ -188,9 +199,9 @@ def test_fetch_data_to_json_fetch_beyond_table(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     # メタ情報の確認
-    assert response_data["result"]["totalRows"] == TOTAL_ROWS
+    assert response_data["result"]["totalRows"] == _TOTAL_ROWS
     assert response_data["result"]["startRow"] == start_row
-    assert response_data["result"]["endRow"] == TOTAL_ROWS  # 最後の行
+    assert response_data["result"]["endRow"] == _TOTAL_ROWS  # 最後の行
     # データの内容を確認（3行目から最後まで）
     data = response_data["result"]["data"]
     expected_data = test_data[2:5].write_json()
@@ -298,3 +309,127 @@ def test_fetch_data_to_json_pydantic_missing_fetch_rows(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
     assert response_data["result"]["tableName"] == table_name
+
+
+# ---------------------------------------------------------------------------
+# 意地悪なリクエストテスト
+# ---------------------------------------------------------------------------
+
+
+def test_fetch_data_to_json_tablename_only_spaces(client, tables_store):
+    """
+    tableNameがスペースのみの場合、トリム後に空文字になり422エラーになる
+    """
+    payload = {"tableName": "   ", "startRow": 0, "fetchRows": 3}
+    response = client.post("/api/table/fetch-data-to-json", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "tableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_fetch_data_to_json_tablename_tab_chars(client, tables_store):
+    """
+    tableNameがタブ文字のみの場合、トリム後に空文字になり422エラーになる
+    """
+    payload = {"tableName": "\t", "startRow": 0, "fetchRows": 3}
+    response = client.post("/api/table/fetch-data-to-json", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "tableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_fetch_data_to_json_tablename_leading_trailing_spaces(
+    client, tables_store
+):
+    """
+    tableNameの前後スペースはトリムされ、正常に取得できる
+    """
+    payload = {
+        "tableName": f"  {table_name}  ",
+        "startRow": 0,
+        "fetchRows": 3,
+    }
+    response = client.post("/api/table/fetch-data-to-json", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert response_data["result"]["tableName"] == table_name
+
+
+def test_fetch_data_to_json_tablename_tab_leading_trailing(
+    client, tables_store
+):
+    """
+    tableNameの前後タブ文字はトリムされ、正常に取得できる
+    """
+    payload = {
+        "tableName": f"\t{table_name}\t",
+        "startRow": 0,
+        "fetchRows": 3,
+    }
+    response = client.post("/api/table/fetch-data-to-json", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert response_data["result"]["tableName"] == table_name
+
+
+def test_fetch_data_to_json_tablename_japanese(client, tables_store):
+    """
+    tableNameに日本語を使った場合、型は有効だが存在しないので400になる
+    """
+    payload = {"tableName": "日本語テーブル名", "startRow": 0, "fetchRows": 3}
+    response = client.post("/api/table/fetch-data-to-json", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
+
+
+def test_fetch_data_to_json_tablename_emoji(client, tables_store):
+    """
+    tableNameに絵文字を使った場合、型は有効だが存在しないので400になる
+    """
+    payload = {"tableName": "🚀table", "startRow": 0, "fetchRows": 3}
+    response = client.post("/api/table/fetch-data-to-json", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
+
+
+def test_fetch_data_to_json_fetch_rows_max(client, tables_store):
+    """
+    fetchRowsが最大値（10000）のとき正常に取得できる
+    """
+    payload = {
+        "tableName": table_name,
+        "startRow": 0,
+        "fetchRows": _MAX_FETCH_ROWS,
+    }
+    response = client.post("/api/table/fetch-data-to-json", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_fetch_data_to_json_fetch_rows_exceeds_max(client, tables_store):
+    """
+    fetchRowsが最大値を超えた場合422エラーになる
+    """
+    payload = {
+        "tableName": table_name,
+        "startRow": 0,
+        "fetchRows": _MAX_FETCH_ROWS + 1,
+    }
+    response = client.post("/api/table/fetch-data-to-json", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = f"fetchRowsは{_MAX_FETCH_ROWS}以下で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]

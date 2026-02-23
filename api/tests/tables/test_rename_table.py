@@ -11,6 +11,8 @@ from main import app
 _OLD_TABLE = "OldTable"
 _NEW_TABLE = "NewTable"
 _BASE_PAYLOAD = {"oldTableName": _OLD_TABLE, "newTableName": _NEW_TABLE}
+# newTableName の最大文字数
+_MAX_TABLE_NAME_LEN = 128
 
 
 @pytest.fixture
@@ -151,3 +153,206 @@ def test_rename_table_missing_new_table_name(client, tables_store):
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
     assert "newTableNameは必須項目です。" == response_data["message"]
     assert ["newTableNameは必須項目です。"] == response_data["details"]
+
+
+# ---------------------------------------------------------------------------
+# 意地悪なリクエストテスト
+# ---------------------------------------------------------------------------
+
+
+def test_rename_table_old_tablename_only_spaces(client, tables_store):
+    """
+    oldTableNameがスペースのみの場合、トリム後に空文字になり422エラーになる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": "   ", "newTableName": _NEW_TABLE},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "oldTableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_rename_table_old_tablename_tab_chars(client, tables_store):
+    """
+    oldTableNameがタブ文字のみの場合、トリム後に空文字になり422エラーになる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": "\t", "newTableName": _NEW_TABLE},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "oldTableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_rename_table_old_tablename_leading_trailing_spaces(
+    client, tables_store
+):
+    """
+    oldTableNameの前後スペースはトリムされ、正常にリネームできる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": f"  {_OLD_TABLE}  ", "newTableName": _NEW_TABLE},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_rename_table_old_tablename_leading_trailing_tabs(
+    client, tables_store
+):
+    """
+    oldTableNameの前後タブはトリムされ、正常にリネームできる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={
+            "oldTableName": f"\t{_OLD_TABLE}\t",
+            "newTableName": _NEW_TABLE,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_rename_table_old_tablename_japanese(client, tables_store):
+    """
+    oldTableNameに日本語を使った場合、型は有効だが存在しないので400になる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": "日本語テーブル", "newTableName": _NEW_TABLE},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
+
+
+def test_rename_table_old_tablename_emoji(client, tables_store):
+    """
+    oldTableNameに絵文字を使った場合、型は有効だが存在しないので400になる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": "🚀table", "newTableName": _NEW_TABLE},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
+
+
+def test_rename_table_new_tablename_only_spaces(client, tables_store):
+    """
+    newTableNameがスペースのみの場合、トリム後に空文字になり422エラーになる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": _OLD_TABLE, "newTableName": "   "},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "newTableNameは1文字以上で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_rename_table_new_tablename_max_length(client, tables_store):
+    """
+    newTableNameが最大文字数（128文字）のとき正常にリネームできる
+    """
+    max_name = "a" * _MAX_TABLE_NAME_LEN
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": _OLD_TABLE, "newTableName": max_name},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_rename_table_new_tablename_exceeds_max_length(client, tables_store):
+    """
+    newTableNameが最大文字数を超えた場合422エラーになる
+    """
+    over_name = "a" * (_MAX_TABLE_NAME_LEN + 1)
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": _OLD_TABLE, "newTableName": over_name},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = f"newTableNameは{_MAX_TABLE_NAME_LEN}文字以内で入力してください。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_rename_table_new_tablename_tab_in_middle(client, tables_store):
+    """
+    newTableNameにタブ文字が含まれる場合、パターンエラーで422になる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": _OLD_TABLE, "newTableName": "New\tTable"},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    msg = "newTableNameに使用できない文字が含まれています。"
+    assert msg == response_data["message"]
+    assert [msg] == response_data["details"]
+
+
+def test_rename_table_new_tablename_leading_trailing_spaces(
+    client, tables_store
+):
+    """
+    newTableNameの前後スペースはトリムされ、正常にリネームできる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={
+            "oldTableName": _OLD_TABLE,
+            "newTableName": f"  {_NEW_TABLE}  ",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_rename_table_new_tablename_japanese(client, tables_store):
+    """
+    newTableNameに日本語を使った場合、正常にリネームできる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": _OLD_TABLE, "newTableName": "日本語テーブル"},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+
+
+def test_rename_table_new_tablename_emoji(client, tables_store):
+    """
+    newTableNameに絵文字を使った場合、正常にリネームできる
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={"oldTableName": _OLD_TABLE, "newTableName": "🚀テーブル"},
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
