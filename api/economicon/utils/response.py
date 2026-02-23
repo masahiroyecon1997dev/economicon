@@ -1,6 +1,6 @@
 """FastAPI用レスポンス作成ヘルパー関数"""
 
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, TypeVar
 
 from fastapi.responses import JSONResponse, Response
 
@@ -31,19 +31,17 @@ def create_success_binary_response(
 def create_error_response(
     *,
     status_code: int,
-    error_code: str,  # error_code に統一
+    error_code: str,  # str または ErrorCode Enum
     message: str,
-    details: Optional[List[str]] = None,  # バリデーションエラー用を統合
-    exception: Optional[
-        Exception
-    ] = None,  # 文字列より Exception オブジェクトを受け取る方がロギングに有利
+    details: list[str] | None = None,  # バリデーションエラー用を統合
+    exception: Exception | None = None,
 ) -> JSONResponse:
     """
     エラーレスポンスを作成
     バリデーションエラー(422)や業務エラー(400)、システムエラー(500)で共用
     """
     log_error(message=message, error_code=error_code)
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "code": error_code,
         "message": message,
     }

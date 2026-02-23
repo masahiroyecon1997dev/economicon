@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ErrorCode(Enum):
+class ErrorCode(StrEnum):
     """エラーコード定義"""
 
     # Columns関連
