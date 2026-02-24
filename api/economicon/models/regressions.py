@@ -2,7 +2,7 @@
 
 from typing import Annotated, Any
 
-from pydantic import Field
+from pydantic import BeforeValidator, Field
 
 from economicon.models.common import BaseRequest, BaseResult
 from economicon.models.entities import RegressionParams, StandardErrorSettings
@@ -10,6 +10,14 @@ from economicon.models.enums import (
     MissingValueHandlingType,
 )
 from economicon.models.types import ColumnName, TableName
+
+
+def _coerce_missing_value_handling(v: object) -> MissingValueHandlingType:
+    """文字列を MissingValueHandlingType に変換する（strict モード対応）"""
+    if isinstance(v, str):
+        return MissingValueHandlingType(v)
+    return v  # type: ignore[return-value]
+
 
 # ---------------------------------------------------------------------------
 # リクエストボディ
@@ -73,6 +81,7 @@ class RegressionRequestBody(BaseRequest):
     ]
     missing_value_handling: Annotated[
         MissingValueHandlingType,
+        BeforeValidator(_coerce_missing_value_handling),
         Field(
             default=MissingValueHandlingType.REMOVE,
             alias="missingValueHandling",

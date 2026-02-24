@@ -140,3 +140,14 @@ def test_lasso_calculate_se_true(client, tables_store):
     for p in params:
         # 標準誤差があればfloat、なければNoneを許容
         assert "standardError" in p
+
+
+def test_lasso_calculate_se_without_const(client, tables_store):
+    """calculate_se=True + has_const=False のブートストラップパスを確認"""
+    output = _get_output(
+        client, lasso_payload(calculate_se=True, has_const=False)
+    )
+    params = output["parameters"]
+    assert len(params) == _N_PARAMS_NO_CONST
+    for p in params:
+        assert "standardError" in p

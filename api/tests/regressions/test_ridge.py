@@ -143,3 +143,23 @@ def test_ridge_no_zero_coefficients(client, tables_store):
     for p in var_params:
         # 完全にゼロにはなりにくい（軽い検証）
         assert isinstance(p["coefficientScaled"], float)
+
+
+def test_ridge_calculate_se_true(client, tables_store):
+    """calculateSe=TrueでRidgeがstandardErrorを返すことを確認"""
+    output = _get_output(client, ridge_payload(calculate_se=True))
+    params = output["parameters"]
+    assert len(params) == _N_PARAMS_WITH_CONST
+    for p in params:
+        assert "standardError" in p
+
+
+def test_ridge_calculate_se_without_const(client, tables_store):
+    """calculate_se=True + has_const=False のブートストラップパスを確認"""
+    output = _get_output(
+        client, ridge_payload(calculate_se=True, has_const=False)
+    )
+    params = output["parameters"]
+    assert len(params) == _N_PARAMS_NO_CONST
+    for p in params:
+        assert "standardError" in p
