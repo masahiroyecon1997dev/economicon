@@ -41,7 +41,7 @@ def test_sort_single_column_ascending(client, tables_store):
     # SortInstruction は BaseModel なので JSON キーは snake_case
     payload = {
         "tableName": TABLE_NAME,
-        "sortColumns": [{"column_name": COL_A, "ascending": True}],
+        "sortColumns": [{"columnName": COL_A, "ascending": True}],
     }
     response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
@@ -58,7 +58,7 @@ def test_sort_single_column_descending(client, tables_store):
     """正常系: 単一列で降順ソートできることを検証する"""
     payload = {
         "tableName": TABLE_NAME,
-        "sortColumns": [{"column_name": COL_A, "ascending": False}],
+        "sortColumns": [{"columnName": COL_A, "ascending": False}],
     }
     response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
@@ -83,8 +83,8 @@ def test_sort_multiple_columns(client, tables_store):
     payload = {
         "tableName": TABLE_NAME,
         "sortColumns": [
-            {"column_name": COL_A, "ascending": True},
-            {"column_name": COL_B, "ascending": False},
+            {"columnName": COL_A, "ascending": True},
+            {"columnName": COL_B, "ascending": False},
         ],
     }
     response = client.post("/api/column/sort", json=payload)
@@ -104,7 +104,7 @@ def test_sort_invalid_table(client, tables_store):
     """
     payload = {
         "tableName": TABLE_NONEXISTENT,
-        "sortColumns": [{"column_name": COL_A, "ascending": True}],
+        "sortColumns": [{"columnName": COL_A, "ascending": True}],
     }
     response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
@@ -119,7 +119,7 @@ def test_sort_invalid_column(client, tables_store):
     df_before = tables_store.get_table(TABLE_NAME).table
     payload = {
         "tableName": TABLE_NAME,
-        "sortColumns": [{"column_name": COL_NONEXISTENT, "ascending": True}],
+        "sortColumns": [{"columnName": COL_NONEXISTENT, "ascending": True}],
     }
     response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
@@ -145,7 +145,7 @@ def test_sort_empty_columns(client, tables_store):
 
 def test_sort_missing_table_name(client, tables_store):
     """異常系: tableNameが欠けている場合は422エラーになることを検証する"""
-    payload = {"sortColumns": [{"column_name": COL_A, "ascending": True}]}
+    payload = {"sortColumns": [{"columnName": COL_A, "ascending": True}]}
     response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -170,7 +170,7 @@ def test_sort_missing_sort_columns(client, tables_store):
 def test_sort_missing_column_name(client, tables_store):
     """
     異常系:
-        sortColumns要素にcolumn_nameが欠けている場合は422エラーになることを検証する
+        sortColumns要素にcolumnNameが欠けている場合は422エラーになることを検証する
     """
     payload = {
         "tableName": TABLE_NAME,
@@ -180,7 +180,7 @@ def test_sort_missing_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "sortColumns.0.column_nameは必須項目です。"
+    expected_msg = "sortColumns.0.columnNameは必須項目です。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
 
@@ -192,7 +192,7 @@ def test_sort_missing_ascending(client, tables_store):
     """
     payload = {
         "tableName": TABLE_NAME,
-        "sortColumns": [{"column_name": COL_A}],
+        "sortColumns": [{"columnName": COL_A}],
     }
     response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
@@ -207,7 +207,7 @@ def test_sort_invalid_ascending_type(client, tables_store):
     """異常系: ascendingがnullの場合は422エラーになることを検証する"""
     payload = {
         "tableName": TABLE_NAME,
-        "sortColumns": [{"column_name": COL_A, "ascending": None}],
+        "sortColumns": [{"columnName": COL_A, "ascending": None}],
     }
     response = client.post("/api/column/sort", json=payload)
     response_data = response.json()
@@ -229,7 +229,7 @@ def test_sort_process_error(client, tables_store):
         tables_store.update_table = raise_error
         payload = {
             "tableName": TABLE_NAME,
-            "sortColumns": [{"column_name": COL_A, "ascending": True}],
+            "sortColumns": [{"columnName": COL_A, "ascending": True}],
         }
         response = client.post("/api/column/sort", json=payload)
         response_data = response.json()
@@ -254,7 +254,7 @@ def test_sort_columns_japanese_column_name(client, tables_store):
         "/api/column/sort",
         json={
             "tableName": TABLE_NAME,
-            "sortColumns": [{"column_name": "売上", "ascending": True}],
+            "sortColumns": [{"columnName": "売上", "ascending": True}],
         },
     )
     response_data = response.json()
@@ -275,7 +275,7 @@ def test_sort_columns_emoji_column_name(client, tables_store):
         "/api/column/sort",
         json={
             "tableName": TABLE_NAME,
-            "sortColumns": [{"column_name": "🔥", "ascending": True}],
+            "sortColumns": [{"columnName": "🔥", "ascending": True}],
         },
     )
     response_data = response.json()
@@ -292,7 +292,7 @@ def test_sort_columns_strip_whitespace_table_name(client, tables_store):
         "/api/column/sort",
         json={
             "tableName": f"  {TABLE_NAME}  ",
-            "sortColumns": [{"column_name": COL_A, "ascending": True}],
+            "sortColumns": [{"columnName": COL_A, "ascending": True}],
         },
     )
     response_data = response.json()
@@ -310,9 +310,9 @@ def test_sort_columns_many_sort_keys(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "sortColumns": [
-                {"column_name": COL_A, "ascending": True},
-                {"column_name": COL_B, "ascending": False},
-                {"column_name": COL_C, "ascending": True},
+                {"columnName": COL_A, "ascending": True},
+                {"columnName": COL_B, "ascending": False},
+                {"columnName": COL_C, "ascending": True},
             ],
         },
     )
@@ -330,7 +330,7 @@ def test_sort_columns_nonexistent_sort_column(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "sortColumns": [
-                {"column_name": COL_NONEXISTENT, "ascending": True}
+                {"columnName": COL_NONEXISTENT, "ascending": True}
             ],
         },
     )
@@ -346,7 +346,7 @@ def test_sort_columns_empty_table_name(client, tables_store):
         "/api/column/sort",
         json={
             "tableName": "",
-            "sortColumns": [{"column_name": COL_A, "ascending": True}],
+            "sortColumns": [{"columnName": COL_A, "ascending": True}],
         },
     )
     response_data = response.json()
@@ -358,17 +358,17 @@ def test_sort_columns_empty_table_name(client, tables_store):
 
 
 def test_sort_columns_empty_sort_column_name(client, tables_store):
-    """N7: SortInstruction の column_name が空文字の場合は422エラーになる"""
+    """N7: SortInstruction の columnName が空文字の場合は422エラーになる"""
     response = client.post(
         "/api/column/sort",
         json={
             "tableName": TABLE_NAME,
-            "sortColumns": [{"column_name": "", "ascending": True}],
+            "sortColumns": [{"columnName": "", "ascending": True}],
         },
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "sortColumns.0.column_nameは1文字以上で入力してください。"
+    expected_msg = "sortColumns.0.columnNameは1文字以上で入力してください。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]

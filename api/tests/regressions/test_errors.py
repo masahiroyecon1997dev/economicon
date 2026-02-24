@@ -105,9 +105,7 @@ class TestValidationError422:
         data = resp.json()
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert data["code"] == ErrorCode.VALIDATION_ERROR
-        assert (
-            "analysis.fe.entity_id_columnは必須項目です。" in data["message"]
-        )
+        assert "analysis.fe.entityIdColumnは必須項目です。" in data["message"]
 
     def test_missing_endogenous_variables_for_iv(self, client, tables_store):
         """IV モデルで endogenousVariables が欠如の場合は 422"""
@@ -117,7 +115,7 @@ class TestValidationError422:
             "explanatoryVariables": ["x1"],
             "analysis": {
                 "method": "iv",
-                "instrumental_variables": ["x2"],
+                "endogenousVariables": ["x2"],
             },
             "standardError": {"method": "nonrobust"},
         }
@@ -134,7 +132,7 @@ class TestValidationError422:
             "explanatoryVariables": ["x1"],
             "analysis": {
                 "method": "iv",
-                "endogenous_variables": ["x2"],
+                "endogenousVariables": ["x2"],
             },
             "standardError": {"method": "nonrobust"},
         }
@@ -143,7 +141,7 @@ class TestValidationError422:
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert data["code"] == ErrorCode.VALIDATION_ERROR
         assert (
-            "analysis.iv.instrumental_variablesは必須項目です。"
+            "analysis.iv.instrumentalVariablesは必須項目です。"
             in data["message"]
         )
 
@@ -202,7 +200,7 @@ class TestDataNotFound400:
 
     def test_nonexistent_time_column_for_fe(self, client, tables_store):
         """FE モデルで存在しない timeColumn を指定した場合は 400"""
-        payload = fe_payload(time_col="nonexistent_time")
+        payload = fe_payload(time_col="nonexistentime")
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
