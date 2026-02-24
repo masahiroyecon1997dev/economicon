@@ -1,5 +1,5 @@
+import { getEconomiconAPI } from "../../api/endpoints";
 import type { TableInfoType } from "../../types/commonTypes";
-import { fetchDataToJson, getColumnList } from "../api/endpoints";
 
 export const getTableInfo = async (
   tableName: string,
@@ -7,18 +7,19 @@ export const getTableInfo = async (
   fetchRows: number = 100,
 ): Promise<TableInfoType> => {
   try {
-    const resFetchDataToJson = await fetchDataToJson(
+    const api = getEconomiconAPI();
+    const resFetchDataToJson = await api.fetchDataToJson({
       tableName,
       startRow,
       fetchRows,
-    );
+    });
     if (resFetchDataToJson.code !== "OK") {
-      throw new Error(resFetchDataToJson.message);
+      throw new Error("データの取得に失敗しました");
     }
     const data = JSON.parse(resFetchDataToJson.result.data);
-    const resColumnList = await getColumnList(tableName);
+    const resColumnList = await api.getColumnList({ tableName });
     if (resColumnList.code !== "OK") {
-      throw new Error(resColumnList.message);
+      throw new Error("カラム情報の取得に失敗しました");
     }
     const {
       totalRows,

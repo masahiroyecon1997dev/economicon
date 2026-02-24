@@ -4,8 +4,8 @@ import { startTransition, useActionState, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { getEconomiconAPI } from "../../api/endpoints";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
-import { calculateColumn } from "../../lib/api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableListStore } from "../../stores/tableList";
@@ -20,8 +20,12 @@ import { PageLayout } from "../templates/PageLayout";
 const createCalculationSchema = (t: (key: string) => string) =>
   z.object({
     tableName: z.string().min(1, t("ValidationMessages.TableNameSelect")),
-    newColumnName: z.string().min(1, t("ValidationMessages.NewColumnNameRequired")),
-    calculationExpression: z.string().min(1, t("ValidationMessages.CalculationExpressionRequired")),
+    newColumnName: z
+      .string()
+      .min(1, t("ValidationMessages.NewColumnNameRequired")),
+    calculationExpression: z
+      .string()
+      .min(1, t("ValidationMessages.CalculationExpressionRequired")),
   });
 
 type CalculationFormData = z.infer<ReturnType<typeof createCalculationSchema>>;
@@ -31,10 +35,11 @@ export const Calculation = () => {
   const tableList = useTableListStore((state) => state.tableList);
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
 
-  const { selectedTableName, setSelectedTableName, columnList } = useTableColumnLoader({
-    numericOnly: true,
-    autoLoadOnMount: true,
-  });
+  const { selectedTableName, setSelectedTableName, columnList } =
+    useTableColumnLoader({
+      numericOnly: true,
+      autoLoadOnMount: true,
+    });
 
   const {
     register,
@@ -63,25 +68,31 @@ export const Calculation = () => {
 
   const handleCalculationAction = async (
     _prevState: ActionState,
-    formData: FormData
+    formData: FormData,
   ): Promise<ActionState> => {
     const tableName = formData.get("tableName") as string;
     const newColumnName = formData.get("newColumnName") as string;
-    const calculationExpression = formData.get("calculationExpression") as string;
+    const calculationExpression = formData.get(
+      "calculationExpression",
+    ) as string;
 
     try {
-      const response = await calculateColumn({
+      const response = await getEconomiconAPI().calculateColumn({
         tableName,
         newColumnName,
+        addPositionColumn: "", // 追加位置未指定（末尾に追加）
         calculationExpression,
       });
 
       if (response.code === "OK") {
-        await showMessageDialog(t("Common.OK"), t("CalculationView.CalculationSuccess"));
+        await showMessageDialog(
+          t("Common.OK"),
+          t("CalculationView.CalculationSuccess"),
+        );
         setCurrentView("DataPreview");
         return { success: true };
       } else {
-        await showMessageDialog(t("Error.Error"), response.message);
+        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
         return { success: false };
       }
     } catch (error) {
@@ -155,20 +166,42 @@ export const Calculation = () => {
   };
 
   const filteredColumns = columnList.filter((column) =>
-    column.name.toLowerCase().includes(filterValue.toLowerCase())
+    column.name.toLowerCase().includes(filterValue.toLowerCase()),
   );
 
-  const getTypeColor = (type: string): { bg: string; text: string; label: string } => {
+  const getTypeColor = (
+    type: string,
+  ): { bg: string; text: string; label: string } => {
     if (type.includes("Int") || type.includes("UInt")) {
-      return { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-300", label: "#" };
+      return {
+        bg: "bg-blue-100 dark:bg-blue-900/30",
+        text: "text-blue-700 dark:text-blue-300",
+        label: "#",
+      };
     } else if (type.includes("Float")) {
-      return { bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-700 dark:text-green-300", label: "1.2" };
+      return {
+        bg: "bg-green-100 dark:bg-green-900/30",
+        text: "text-green-700 dark:text-green-300",
+        label: "1.2",
+      };
     } else if (type.includes("Utf8") || type.includes("String")) {
-      return { bg: "bg-purple-100 dark:bg-purple-900/30", text: "text-purple-700 dark:text-purple-300", label: "ABC" };
+      return {
+        bg: "bg-purple-100 dark:bg-purple-900/30",
+        text: "text-purple-700 dark:text-purple-300",
+        label: "ABC",
+      };
     } else if (type.includes("Date") || type.includes("Datetime")) {
-      return { bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-700 dark:text-orange-300", label: "DATE" };
+      return {
+        bg: "bg-orange-100 dark:bg-orange-900/30",
+        text: "text-orange-700 dark:text-orange-300",
+        label: "DATE",
+      };
     } else {
-      return { bg: "bg-gray-100 dark:bg-gray-900/30", text: "text-gray-700 dark:text-gray-300", label: "?" };
+      return {
+        bg: "bg-gray-100 dark:bg-gray-900/30",
+        text: "text-gray-700 dark:text-gray-300",
+        label: "?",
+      };
     }
   };
 
@@ -179,9 +212,21 @@ export const Calculation = () => {
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Hidden fields for FormData */}
-        <input type="hidden" {...register("tableName")} value={selectedTableName} />
-        <input type="hidden" {...register("newColumnName")} value={newColumnName} />
-        <input type="hidden" {...register("calculationExpression")} value={calculationExpression} />
+        <input
+          type="hidden"
+          {...register("tableName")}
+          value={selectedTableName}
+        />
+        <input
+          type="hidden"
+          {...register("newColumnName")}
+          value={newColumnName}
+        />
+        <input
+          type="hidden"
+          {...register("calculationExpression")}
+          value={calculationExpression}
+        />
 
         <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-color overflow-hidden">
           <div className="p-4 border-b border-border-color grid grid-cols-1 md:grid-cols-2 gap-4 bg-neutral-50/50 dark:bg-neutral-800/30">
@@ -211,7 +256,11 @@ export const Calculation = () => {
               <InputText
                 id="new-column-name"
                 value={newColumnName}
-                change={(e) => setValue("newColumnName", e.target.value, { shouldValidate: true })}
+                change={(e) =>
+                  setValue("newColumnName", e.target.value, {
+                    shouldValidate: true,
+                  })
+                }
                 placeholder={t("CalculationView.NewColumnNamePlaceholder")}
                 error={errors.newColumnName?.message}
                 disabled={isPending}
@@ -279,7 +328,9 @@ export const Calculation = () => {
                     title={t("CalculationView.ClearAll")}
                     disabled={isPending}
                   >
-                    <span className="material-symbols-outlined text-[20px]"><Eraser /></span>
+                    <span className="material-symbols-outlined text-[20px]">
+                      <Eraser />
+                    </span>
                   </button>
                 </div>
               </div>
@@ -289,7 +340,11 @@ export const Calculation = () => {
                   className="w-full h-full p-4 font-mono text-sm text-text-main dark:text-neutral-300 bg-transparent border-none resize-none focus:ring-0 leading-relaxed"
                   placeholder={t("CalculationView.FormulaPlaceholder")}
                   value={calculationExpression}
-                  onChange={(e) => setValue("calculationExpression", e.target.value, { shouldValidate: true })}
+                  onChange={(e) =>
+                    setValue("calculationExpression", e.target.value, {
+                      shouldValidate: true,
+                    })
+                  }
                   disabled={isPending}
                 ></textarea>
                 {errors.calculationExpression?.message && (
@@ -298,7 +353,9 @@ export const Calculation = () => {
                   </p>
                 )}
                 <div className="absolute bottom-0 right-0 left-0 px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-t border-border-color text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px]"><Info /></span>
+                  <span className="material-symbols-outlined text-[16px]">
+                    <Info />
+                  </span>
                   <span>{t("CalculationView.FormulaHelp")}</span>
                 </div>
               </div>
@@ -306,7 +363,9 @@ export const Calculation = () => {
             <div className="w-full lg:w-72 flex flex-col bg-neutral-50 dark:bg-surface-dark">
               <div className="p-3 border-b border-border-color">
                 <h3 className="text-sm text-gray-700 font-semibold dark:text-white flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px] text-primary"><Columns3 size={18} strokeWidth={1.2} /></span>
+                  <span className="material-symbols-outlined text-[18px] text-primary">
+                    <Columns3 size={18} strokeWidth={1.2} />
+                  </span>
                   {t("CalculationView.AvailableColumns")}
                 </h3>
                 <div className="mt-2">
@@ -329,7 +388,9 @@ export const Calculation = () => {
                       disabled={isPending}
                     >
                       <div className="flex items-center gap-2 overflow-hidden">
-                        <span className={`px-1.5 py-0.5 rounded ${typeColor.bg} text-[10px] font-bold ${typeColor.text} font-mono`}>
+                        <span
+                          className={`px-1.5 py-0.5 rounded ${typeColor.bg} text-[10px] font-bold ${typeColor.text} font-mono`}
+                        >
                           {typeColor.label}
                         </span>
                         <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 font-mono truncate">
@@ -354,7 +415,7 @@ export const Calculation = () => {
               : t("CalculationView.ExecuteCalculation")
           }
           onCancel={handleCancel}
-          onSelect={() => { }}
+          onSelect={() => {}}
           onSelectType="submit"
         />
       </form>

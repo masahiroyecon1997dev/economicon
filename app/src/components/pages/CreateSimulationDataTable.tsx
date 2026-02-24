@@ -4,15 +4,19 @@ import { startTransition, useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { getEconomiconAPI } from "../../api/endpoints";
+import type { SimulationColumnConfig } from "../../api/model";
 import { DISTRIBUTION_OPTIONS } from "../../constants/app";
-import { createSimulationDataTable } from "../../lib/api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { getTableInfo } from "../../lib/utils/internal";
 import { validateDistributionParam } from "../../lib/utils/validation";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
 import { useTableListStore } from "../../stores/tableList";
-import type { DistributionType, SimulationColumnSetting } from "../../types/commonTypes";
+import type {
+  DistributionType,
+  SimulationColumnSetting,
+} from "../../types/commonTypes";
 import { InputText } from "../atoms/Input/InputText";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
 import { FormField } from "../molecules/Form/FormField";
@@ -29,9 +33,9 @@ type SimulationFormData = z.infer<ReturnType<typeof createSimulationSchema>>;
 
 export const CreateSimulationDataTable = () => {
   const { t } = useTranslation();
-  const setCurrentView = useCurrentPageStore(state => state.setCurrentView);
-  const addTableName = useTableListStore(state => state.addTableName);
-  const addTableInfo = useTableInfosStore(state => state.addTableInfo);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const addTableName = useTableListStore((state) => state.addTableName);
+  const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
 
   const {
     register,
@@ -51,17 +55,21 @@ export const CreateSimulationDataTable = () => {
   const numRows = watch("numRows");
 
   const COLUMN_SETTINGS_DEFAULT: SimulationColumnSetting = {
-    id: '1',
-    columnName: '',
-    dataType: 'distribution',
-    distributionType: 'uniform',
+    id: "1",
+    columnName: "",
+    dataType: "distribution",
+    distributionType: "uniform",
     distributionParams: { low: 0, high: 10 },
-    fixedValue: '',
-    errorMessage: { columnName: undefined, distributionParams: undefined, fixedValue: undefined },
+    fixedValue: "",
+    errorMessage: {
+      columnName: undefined,
+      distributionParams: undefined,
+      fixedValue: undefined,
+    },
   };
 
   const [columns, setColumns] = useState<SimulationColumnSetting[]>([
-    COLUMN_SETTINGS_DEFAULT
+    COLUMN_SETTINGS_DEFAULT,
   ]);
 
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
@@ -72,7 +80,7 @@ export const CreateSimulationDataTable = () => {
 
   const handleSimulationAction = async (
     _prevState: ActionState,
-    formData: FormData
+    formData: FormData,
   ): Promise<ActionState> => {
     const tableName = formData.get("tableName") as string;
     const numRows = parseInt(formData.get("numRows") as string);
@@ -81,7 +89,7 @@ export const CreateSimulationDataTable = () => {
 
     // カラムのバリデーション
     let hasError = false;
-    const validatedColumns = columns.map(col => {
+    const validatedColumns = columns.map((col) => {
       const errors: {
         columnName: string | undefined;
         distributionParams: Record<string, string | undefined> | undefined;
@@ -98,7 +106,10 @@ export const CreateSimulationDataTable = () => {
       }
 
       if (col.dataType === "distribution") {
-        const paramsError = validateDistributionParam(col.distributionType, col.distributionParams);
+        const paramsError = validateDistributionParam(
+          col.distributionType,
+          col.distributionParams,
+        );
         if (paramsError !== undefined) {
           hasError = true;
         }
@@ -108,102 +119,150 @@ export const CreateSimulationDataTable = () => {
 
     if (hasError) {
       setColumns(validatedColumns);
-      await showMessageDialog(t("Error.Error"), t("ValidationMessages.FixValidationErrors"));
+      await showMessageDialog(
+        t("Error.Error"),
+        t("ValidationMessages.FixValidationErrors"),
+      );
       return { success: false };
     }
 
     try {
-      const columnSettings = columns.map(col => {
-        if (col.dataType === 'distribution') {
-          const distributionParams: Record<string, number> = {};
-          switch (col.distributionType) {
-            case 'uniform':
-              distributionParams['low'] = col.distributionParams?.low;
-              distributionParams['high'] = col.distributionParams?.high;
-              break;
-            case 'exponential':
-              distributionParams['scale'] = col.distributionParams?.rate;
-              break;
-            case 'normal':
-              distributionParams['loc'] = col.distributionParams?.mean;
-              distributionParams['scale'] = col.distributionParams?.deviation;
-              break;
-            case 'gamma':
-              distributionParams['shape'] = col.distributionParams?.shape;
-              distributionParams['scale'] = col.distributionParams?.scale;
-              break;
-            case 'beta':
-              distributionParams['a'] = col.distributionParams?.alpha;
-              distributionParams['b'] = col.distributionParams?.beta;
-              break;
-            case 'weibull':
-              distributionParams['a'] = col.distributionParams?.shape;
-              distributionParams['scale'] = col.distributionParams?.scale;
-              break;
-            case 'lognormal':
-              distributionParams['mean'] = col.distributionParams?.logMean;
-              distributionParams['sigma'] = col.distributionParams?.logSD;
-              break;
-            case 'binomial':
-              distributionParams['n'] = col.distributionParams?.trials;
-              distributionParams['p'] = col.distributionParams?.probability;
-              break;
-            case 'bernoulli':
-              distributionParams['p'] = col.distributionParams?.probability;
-              break;
-            case 'poisson':
-              distributionParams['lam'] = col.distributionParams?.lambda;
-              break;
-            case 'geometric':
-              distributionParams['p'] = col.distributionParams?.probability;
-              break;
-            case 'hypergeometric':
-              distributionParams['N'] = col.distributionParams?.populationSize;
-              distributionParams['K'] = col.distributionParams?.numberOfSuccesses;
-              distributionParams['n'] = col.distributionParams?.sampleSize;
-              break;
-            default:
-              break;
-          }
+      // SimulationColumnConfig型（分布判別union）にマッピング
+      const simulationColumns: SimulationColumnConfig[] = columns.map((col) => {
+        if (col.dataType === "fixed") {
           return {
             columnName: col.columnName.trim(),
-            dataType: col.dataType,
-            distributionType: col.distributionType,
-            distributionParams: distributionParams,
-          }
-        } else {
-          return {
-            columnName: col.columnName.trim(),
-            dataType: col.dataType,
-            fixedValue: col.fixedValue,
-          }
+            distribution: {
+              type: "fixed" as const,
+              value: Number(col.fixedValue),
+            },
+          };
+        }
+        // 分布型: distributionTypeが typeフィールドになる
+        const p = col.distributionParams;
+        switch (col.distributionType) {
+          case "uniform":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: {
+                type: "uniform" as const,
+                low: p.low,
+                high: p.high,
+              },
+            };
+          case "exponential":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: { type: "exponential" as const, scale: p.rate },
+            };
+          case "normal":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: {
+                type: "normal" as const,
+                loc: p.mean,
+                scale: p.deviation,
+              },
+            };
+          case "gamma":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: {
+                type: "gamma" as const,
+                shape: p.shape,
+                scale: p.scale,
+              },
+            };
+          case "beta":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: { type: "beta" as const, a: p.alpha, b: p.beta },
+            };
+          case "weibull":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: {
+                type: "weibull" as const,
+                a: p.shape,
+                scale: p.scale,
+              },
+            };
+          case "lognormal":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: {
+                type: "lognormal" as const,
+                mean: p.logMean,
+                sigma: p.logSD,
+              },
+            };
+          case "binomial":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: {
+                type: "binomial" as const,
+                n: p.trials,
+                p: p.probability,
+              },
+            };
+          case "bernoulli":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: { type: "bernoulli" as const, p: p.probability },
+            };
+          case "poisson":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: { type: "poisson" as const, lam: p.lambda },
+            };
+          case "geometric":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: { type: "geometric" as const, p: p.probability },
+            };
+          case "hypergeometric":
+            return {
+              columnName: col.columnName.trim(),
+              distribution: {
+                type: "hypergeometric" as const,
+                bigN: p.populationSize,
+                n: p.sampleSize,
+                bigK: p.numberOfSuccesses,
+              },
+            };
+          default:
+            return {
+              columnName: col.columnName.trim(),
+              distribution: { type: "uniform" as const, low: 0, high: 1 },
+            };
         }
       });
 
-      const requestBody = {
+      const response = await getEconomiconAPI().createSimulationDataTable({
         tableName: tableName.trim(),
-        tableNumberOfRows: numRows,
-        columnSettings: columnSettings
-      };
+        rowCount: numRows,
+        simulationColumns,
+      });
 
-      const response = await createSimulationDataTable(requestBody);
-
-      if (response.code === 'OK') {
+      if (response.code === "OK") {
         const resTableInfo = await getTableInfo(response.result.tableName);
         addTableName(response.result.tableName);
         addTableInfo(resTableInfo);
-        setCurrentView('DataPreview');
+        setCurrentView("DataPreview");
         return { success: true };
       } else {
-        await showMessageDialog(t('Error.Error'), response.message || t('CreateSimulationDataTableView.TableCreationFailed'));
+        await showMessageDialog(
+          t("Error.Error"),
+          t("CreateSimulationDataTableView.TableCreationFailed"),
+        );
         return { success: false };
       }
     } catch (error) {
-      let errorMessage = t('CreateSimulationDataTableView.TableCreationError');
+      let errorMessage = t("CreateSimulationDataTableView.TableCreationError");
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      await showMessageDialog(t('Error.Error'), errorMessage);
+      await showMessageDialog(t("Error.Error"), errorMessage);
       return { success: false };
     }
   };
@@ -221,26 +280,32 @@ export const CreateSimulationDataTable = () => {
   };
 
   const removeColumn = (id: string) => {
-    setColumns(columns.filter(col => col.id !== id));
+    setColumns(columns.filter((col) => col.id !== id));
   };
 
-  const updateColumn = (id: string, updates: Partial<SimulationColumnSetting>) => {
-    setColumns(columns.map(col =>
-      col.id === id ? { ...col, ...updates } : col
-    ));
+  const updateColumn = (
+    id: string,
+    updates: Partial<SimulationColumnSetting>,
+  ) => {
+    setColumns(
+      columns.map((col) => (col.id === id ? { ...col, ...updates } : col)),
+    );
   };
 
-  const handleDataTypeChange = (id: string, dataType: 'distribution' | 'fixed') => {
+  const handleDataTypeChange = (
+    id: string,
+    dataType: "distribution" | "fixed",
+  ) => {
     const updates: Partial<SimulationColumnSetting> = {
       dataType: dataType,
     };
 
-    if (dataType === 'distribution') {
-      updates.distributionType = 'uniform';
+    if (dataType === "distribution") {
+      updates.distributionType = "uniform";
       updates.distributionParams = { low: 0, high: 10 };
       delete updates.fixedValue;
     } else {
-      updates.fixedValue = '';
+      updates.fixedValue = "";
       delete updates.distributionType;
       delete updates.distributionParams;
     }
@@ -248,47 +313,87 @@ export const CreateSimulationDataTable = () => {
     updateColumn(id, updates);
   };
 
-  const handleDistributionTypeChange = (id: string, distributionType: DistributionType) => {
-    const distOption = DISTRIBUTION_OPTIONS.find(d => d.value === distributionType);
+  const handleDistributionTypeChange = (
+    id: string,
+    distributionType: DistributionType,
+  ) => {
+    const distOption = DISTRIBUTION_OPTIONS.find(
+      (d) => d.value === distributionType,
+    );
     if (!distOption) return;
 
     const defaultParams: Record<string, number> = {};
-    distOption.params.forEach(param => {
+    distOption.params.forEach((param) => {
       switch (param) {
-        case 'low': defaultParams[param] = 0; break;
-        case 'high': defaultParams[param] = 10; break;
-        case 'mean': defaultParams[param] = 0; break;
-        case 'deviation': defaultParams[param] = 1; break;
-        case 'rate': defaultParams[param] = 1; break;
-        case 'scale': defaultParams[param] = 1; break;
-        case 'alpha': defaultParams[param] = 2; break;
-        case 'beta': defaultParams[param] = 2; break;
-        case 'logMean': defaultParams[param] = 0; break;
-        case 'logSD': defaultParams[param] = 1; break;
-        case 'trials': defaultParams[param] = 10; break;
-        case 'probability': defaultParams[param] = 0.5; break;
-        case 'populationSize': defaultParams[param] = 20; break;
-        case 'numberOfSuccesses': defaultParams[param] = 5; break;
-        case 'sampleSize': defaultParams[param] = 10; break;
-        default: defaultParams[param] = 1;
+        case "low":
+          defaultParams[param] = 0;
+          break;
+        case "high":
+          defaultParams[param] = 10;
+          break;
+        case "mean":
+          defaultParams[param] = 0;
+          break;
+        case "deviation":
+          defaultParams[param] = 1;
+          break;
+        case "rate":
+          defaultParams[param] = 1;
+          break;
+        case "scale":
+          defaultParams[param] = 1;
+          break;
+        case "alpha":
+          defaultParams[param] = 2;
+          break;
+        case "beta":
+          defaultParams[param] = 2;
+          break;
+        case "logMean":
+          defaultParams[param] = 0;
+          break;
+        case "logSD":
+          defaultParams[param] = 1;
+          break;
+        case "trials":
+          defaultParams[param] = 10;
+          break;
+        case "probability":
+          defaultParams[param] = 0.5;
+          break;
+        case "populationSize":
+          defaultParams[param] = 20;
+          break;
+        case "numberOfSuccesses":
+          defaultParams[param] = 5;
+          break;
+        case "sampleSize":
+          defaultParams[param] = 10;
+          break;
+        default:
+          defaultParams[param] = 1;
       }
     });
 
     updateColumn(id, {
       distributionType: distributionType,
-      distributionParams: defaultParams
+      distributionParams: defaultParams,
     });
   };
 
-  const handleDistributionParamChange = (id: string, param: string, value: number) => {
-    const column = columns.find(col => col.id === id);
+  const handleDistributionParamChange = (
+    id: string,
+    param: string,
+    value: number,
+  ) => {
+    const column = columns.find((col) => col.id === id);
     if (!column?.distributionParams) return;
 
     updateColumn(id, {
       distributionParams: {
         ...column.distributionParams,
-        [param]: value
-      }
+        [param]: value,
+      },
     });
   };
 
@@ -303,34 +408,40 @@ export const CreateSimulationDataTable = () => {
   };
 
   const handleCancel = () => {
-    setCurrentView('ImportDataFile');
+    setCurrentView("ImportDataFile");
   };
 
   const getColumnSummary = (column: SimulationColumnSetting): string => {
-    if (column.dataType === 'fixed') {
-      return `${column.columnName || t('CreateSimulationDataTableView.NotSet')} - ${t('Common.Constant')}: ${column.fixedValue || t('CreateSimulationDataTableView.NotSet')}`;
+    if (column.dataType === "fixed") {
+      return `${column.columnName || t("CreateSimulationDataTableView.NotSet")} - ${t("Common.Constant")}: ${column.fixedValue || t("CreateSimulationDataTableView.NotSet")}`;
     }
 
-    const distOption = DISTRIBUTION_OPTIONS.find(d => d.value === column.distributionType);
+    const distOption = DISTRIBUTION_OPTIONS.find(
+      (d) => d.value === column.distributionType,
+    );
     if (!distOption) {
-      return `${column.columnName || t('CreateSimulationDataTableView.NotSet')} - ${t('Common.Distribution')}`;
+      return `${column.columnName || t("CreateSimulationDataTableView.NotSet")} - ${t("Common.Distribution")}`;
     }
 
     const paramsStr = distOption.params
-      .map(param => `${param}=${column.distributionParams?.[param] ?? '?'}`)
-      .join(', ');
+      .map((param) => `${param}=${column.distributionParams?.[param] ?? "?"}`)
+      .join(", ");
 
-    return `${column.columnName || t('CreateSimulationDataTableView.NotSet')} - ${t(distOption.label)} (${paramsStr})`;
+    return `${column.columnName || t("CreateSimulationDataTableView.NotSet")} - ${t(distOption.label)} (${paramsStr})`;
   };
 
   return (
     <PageLayout
       title={t("CreateSimulationDataTableView.CreateNewDataTable")}
-      description={t("CreateSimulationDataTableView.DefineYourTableNameAndRows")}
+      description={t(
+        "CreateSimulationDataTableView.DefineYourTableNameAndRows",
+      )}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700">
-          <h2 className="text-main dark:text-white text-base font-bold leading-tight mb-4">{t("CreateSimulationDataTableView.TableSettings")}</h2>
+          <h2 className="text-main dark:text-white text-base font-bold leading-tight mb-4">
+            {t("CreateSimulationDataTableView.TableSettings")}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               label={t("CreateSimulationDataTableView.TableName")}
@@ -339,8 +450,14 @@ export const CreateSimulationDataTable = () => {
               <InputText
                 id="table-name"
                 value={tableName}
-                change={(e) => setValue("tableName", e.target.value, { shouldValidate: true })}
-                placeholder={t("CreateSimulationDataTableView.TableNamePlaceholder")}
+                change={(e) =>
+                  setValue("tableName", e.target.value, {
+                    shouldValidate: true,
+                  })
+                }
+                placeholder={t(
+                  "CreateSimulationDataTableView.TableNamePlaceholder",
+                )}
                 error={errors.tableName?.message}
                 disabled={isPending}
                 {...register("tableName")}
@@ -355,7 +472,11 @@ export const CreateSimulationDataTable = () => {
                 id="row-count"
                 type="number"
                 value={numRows.toString()}
-                change={(e) => setValue("numRows", parseInt(e.target.value) || 0, { shouldValidate: true })}
+                change={(e) =>
+                  setValue("numRows", parseInt(e.target.value) || 0, {
+                    shouldValidate: true,
+                  })
+                }
                 placeholder="1000"
                 error={errors.numRows?.message}
                 disabled={isPending}
@@ -366,7 +487,9 @@ export const CreateSimulationDataTable = () => {
         </div>
         <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-main dark:text-white text-base font-bold leading-tight">{t('CreateSimulationDataTableView.ColumnSettings')}</h2>
+            <h2 className="text-main dark:text-white text-base font-bold leading-tight">
+              {t("CreateSimulationDataTableView.ColumnSettings")}
+            </h2>
             <button
               type="button"
               onClick={addColumn}
@@ -392,10 +515,10 @@ export const CreateSimulationDataTable = () => {
                     onClick={() => setEditingColumnId(column.id)}
                     className="flex items-center gap-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                     disabled={isPending}
-                    aria-label={t('Common.Edit')}
+                    aria-label={t("Common.Edit")}
                   >
                     <Edit2 size={16} />
-                    {t('Common.Edit')}
+                    {t("Common.Edit")}
                   </button>
                   {columns.length > 1 && (
                     <button
@@ -403,7 +526,7 @@ export const CreateSimulationDataTable = () => {
                       onClick={() => removeColumn(column.id)}
                       className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={isPending}
-                      aria-label={t('Common.Delete')}
+                      aria-label={t("Common.Delete")}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -414,14 +537,14 @@ export const CreateSimulationDataTable = () => {
           </div>
         </div>
         <ActionButtonBar
-          cancelText={t('Common.Cancel')}
+          cancelText={t("Common.Cancel")}
           selectText={
             isPending
-              ? t('CreateSimulationDataTableView.CreatingTable')
-              : t('CreateSimulationDataTableView.Submit')
+              ? t("CreateSimulationDataTableView.CreatingTable")
+              : t("CreateSimulationDataTableView.Submit")
           }
           onCancel={handleCancel}
-          onSelect={() => { }}
+          onSelect={() => {}}
           onSelectType="submit"
         />
       </form>
@@ -429,8 +552,8 @@ export const CreateSimulationDataTable = () => {
       {editingColumnId && (
         <SimulationColumnEditDialog
           isOpen={!!editingColumnId}
-          column={columns.find(col => col.id === editingColumnId)!}
-          index={columns.findIndex(col => col.id === editingColumnId)}
+          column={columns.find((col) => col.id === editingColumnId)!}
+          index={columns.findIndex((col) => col.id === editingColumnId)}
           distributionOptions={DISTRIBUTION_OPTIONS}
           onUpdate={updateColumn}
           onDataTypeChange={handleDataTypeChange}
@@ -442,14 +565,16 @@ export const CreateSimulationDataTable = () => {
           }}
           onClose={() => setEditingColumnId(null)}
           canRemove={columns.length > 1}
-          error={columns.find(col => col.id === editingColumnId)?.errorMessage || {
-            columnName: undefined,
-            distributionParams: undefined,
-            fixedValue: undefined
-          }}
+          error={
+            columns.find((col) => col.id === editingColumnId)?.errorMessage || {
+              columnName: undefined,
+              distributionParams: undefined,
+              fixedValue: undefined,
+            }
+          }
           disabled={isPending}
         />
       )}
     </PageLayout>
   );
-}
+};
