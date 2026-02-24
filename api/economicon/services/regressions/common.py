@@ -294,19 +294,19 @@ def extract_statsmodels_params(
         param_dict = {
             "variable": name,
             "coefficient": float(model_result.params[i]),
-            "standardError": float(model_result.bse[i]),
-            "pValue": float(model_result.pvalues[i]),
+            "standardError": None if np.isnan(model_result.bse[i]) else float(model_result.bse[i]),
+            "pValue": None if np.isnan(model_result.pvalues[i]) else float(model_result.pvalues[i]),
         }
 
         # t値またはz値
         if hasattr(model_result, "tvalues"):
-            param_dict["tValue"] = float(model_result.tvalues[i])
+            param_dict["tValue"] = None if np.isnan(model_result.tvalues[i]) else float(model_result.tvalues[i])
 
         # 信頼区間
         if hasattr(model_result, "conf_int"):
             conf_int = model_result.conf_int()
-            param_dict["confidenceIntervalLower"] = float(conf_int[i, 0])
-            param_dict["confidenceIntervalUpper"] = float(conf_int[i, 1])
+            param_dict["confidenceIntervalLower"] = None if np.isnan(conf_int[i, 0]) else float(conf_int[i, 0])
+            param_dict["confidenceIntervalUpper"] = None if np.isnan(conf_int[i, 1]) else float(conf_int[i, 1])
 
         params_info.append(param_dict)
 
