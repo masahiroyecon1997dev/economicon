@@ -9,8 +9,8 @@ from main import app  # FastAPIインスタンスがあるファイル
 
 def generate_spec():
     openapi_schema = get_openapi(
-        title="My API",
-        version="1.0.0",
+        title="Economicon API",
+        version="0.1.0",
         routes=app.routes,
     )
 
