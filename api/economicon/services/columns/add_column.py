@@ -25,17 +25,17 @@ class AddColumn:
 
     def __init__(
         self,
-        AddColumnRequestBody: AddColumnRequestBody,
+        body: AddColumnRequestBody,
         tables_store: TablesStore,
     ):
         self.tables_store = tables_store
-        self.table_name = AddColumnRequestBody.table_name
-        self.new_column_name = AddColumnRequestBody.new_column_name
-        self.add_position_column = AddColumnRequestBody.add_position_column
-        self.csv_file_path = AddColumnRequestBody.csv_file_path
-        self.csv_has_header = AddColumnRequestBody.csv_has_header
-        self.csv_strict_row_count = AddColumnRequestBody.csv_strict_row_count
-        self.separator = AddColumnRequestBody.separator
+        self.table_name = body.table_name
+        self.new_column_name = body.new_column_name
+        self.add_position_column = body.add_position_column
+        self.csv_file_path = body.csv_file_path
+        self.csv_has_header = body.csv_has_header
+        self.csv_strict_row_count = body.csv_strict_row_count
+        self.separator = body.separator
         self.param_names = {
             "table_name": "tableName",
             "new_column_name": "newColumnName",
@@ -174,7 +174,8 @@ class AddColumn:
                     message=message,
                 )
 
-            # 最初の列を取得（列名はnew_column_nameを使うため、CSVの1列目だけ取得）
+            # 最初の列を取得
+            # （列名はnew_column_nameを使うため、CSVの1列目だけ取得）
             if df_csv.width == 0:
                 message = _("The CSV file does not contain any columns.")
                 raise ProcessingError(
