@@ -4,6 +4,7 @@
 各回帰モデルのフィッティングロジックを提供する純粋関数群
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -83,9 +84,6 @@ def fit_probit(
     model = sm.Probit(y_data, x_data, missing=missing)
     result = model.fit()
     return result
-
-
-from dataclasses import dataclass
 
 
 @dataclass
@@ -357,7 +355,8 @@ def fit_lasso(
         params_original = coef_original
 
     result._results.params = params_original
-    # bse は CachedProperty のためキャッシュをクリアして normalized_cov_params で設定
+    # bse は CachedProperty のためキャッシュをクリアして
+    # normalized_cov_params で設定
     n_params = len(params_original)
     cache = getattr(result._results, "_cache", {})
     for key in ("bse", "tvalues", "pvalues"):
@@ -460,7 +459,8 @@ def fit_ridge(
         params_original = coef_original
 
     result._results.params = params_original
-    # bse は CachedProperty のためキャッシュをクリアして normalized_cov_params で設定
+    # bse は CachedProperty のためキャッシュをクリアして
+    # normalized_cov_params で設定
     n_params = len(params_original)
     cache = getattr(result._results, "_cache", {})
     for key in ("bse", "tvalues", "pvalues"):
