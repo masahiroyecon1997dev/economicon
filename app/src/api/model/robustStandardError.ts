@@ -9,5 +9,5 @@ import type { RobustStandardErrorMethod } from './robustStandardErrorMethod';
 
 export interface RobustStandardError {
   method: RobustStandardErrorMethod;
-  hc_type?: RobustStandardErrorHcType;
+  hcType?: RobustStandardErrorHcType;
 }

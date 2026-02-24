@@ -11,8 +11,8 @@ import type { InstrumentalVariablesParamsMethod } from './instrumentalVariablesP
 export interface InstrumentalVariablesParams {
   method: InstrumentalVariablesParamsMethod;
   /** 推定アルゴリズム。過剰識別かつ異分散がある場合はGMMを推奨 */
-  iv_method?: InstrumentalVariablesParamsIvMethod;
-  instrumental_variables: string[];
-  endogenous_variables: string[];
-  gmm_weight_matrix?: InstrumentalVariablesParamsGmmWeightMatrix;
+  ivMethod?: InstrumentalVariablesParamsIvMethod;
+  instrumentalVariables: string[];
+  endogenousVariables: string[];
+  gmmWeightMatrix?: InstrumentalVariablesParamsGmmWeightMatrix;
 }

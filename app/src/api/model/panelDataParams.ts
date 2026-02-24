@@ -12,7 +12,7 @@ export interface PanelDataParams {
    * 個体ID列名
    * @minLength 1
    */
-  entity_id_column: string;
+  entityIdColumn: string;
   /** 時間列名 */
-  time_column?: string | null;
+  timeColumn?: string | null;
 }

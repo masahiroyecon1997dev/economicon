@@ -16,5 +16,5 @@ export interface HacStandardError {
   /** カーネルの種類 */
   kernel?: string;
   /** 小標本補正を行うか */
-  use_correction?: boolean;
+  useCorrection?: boolean;
 }

@@ -555,7 +555,7 @@ JSONResponse
 export const SortColumnsBody = zod.object({
   "tableName": zod.string().min(1).describe('操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。'),
   "sortColumns": zod.array(zod.object({
-  "column_name": zod.string().min(1).describe('カラム名'),
+  "columnName": zod.string().min(1).describe('カラム名'),
   "ascending": zod.boolean()
 })).min(1).describe('ソート設定のリスト。ソートするカラム名と昇順・降順の指定を組み合わせて、複数カラムでのソートも可能です。既存カラム名から指定してください。')
 }).describe('カラムソートリクエスト')

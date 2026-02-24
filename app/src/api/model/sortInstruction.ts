@@ -10,6 +10,6 @@ export interface SortInstruction {
    * カラム名
    * @minLength 1
    */
-  column_name: string;
+  columnName: string;
   ascending: boolean;
 }

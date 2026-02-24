@@ -1341,7 +1341,7 @@
         }
       }
     },
-    "/api/setting/settings": {
+    "/api/setting": {
       "get": {
         "tags": [
           "setting"
@@ -1994,9 +1994,9 @@
             "title": "Groups",
             "description": "\u30af\u30e9\u30b9\u30bf\u30fc\u3092\u69cb\u6210\u3059\u308b\u5217\u540d"
           },
-          "use_correction": {
+          "useCorrection": {
             "type": "boolean",
-            "title": "Use Correction",
+            "title": "Usecorrection",
             "description": "\u5c0f\u6a19\u672c\u88dc\u6b63\u3092\u884c\u3046\u304b",
             "default": true
           }
@@ -3496,9 +3496,9 @@
             "description": "\u30ab\u30fc\u30cd\u30eb\u306e\u7a2e\u985e",
             "default": "bartlett"
           },
-          "use_correction": {
+          "useCorrection": {
             "type": "boolean",
-            "title": "Use Correction",
+            "title": "Usecorrection",
             "description": "\u5c0f\u6a19\u672c\u88dc\u6b63\u3092\u884c\u3046\u304b",
             "default": true
           }
@@ -3710,17 +3710,17 @@
             ],
             "title": "Method"
           },
-          "iv_method": {
+          "ivMethod": {
             "type": "string",
             "enum": [
               "2sls",
               "gmm"
             ],
-            "title": "Iv Method",
+            "title": "Ivmethod",
             "description": "\u63a8\u5b9a\u30a2\u30eb\u30b4\u30ea\u30ba\u30e0\u3002\u904e\u5270\u8b58\u5225\u304b\u3064\u7570\u5206\u6563\u304c\u3042\u308b\u5834\u5408\u306fGMM\u3092\u63a8\u5968",
             "default": "2sls"
           },
-          "instrumental_variables": {
+          "instrumentalVariables": {
             "items": {
               "type": "string",
               "minLength": 1,
@@ -3732,9 +3732,9 @@
               ]
             },
             "type": "array",
-            "title": "Instrumental Variables"
+            "title": "Instrumentalvariables"
           },
-          "endogenous_variables": {
+          "endogenousVariables": {
             "items": {
               "type": "string",
               "minLength": 1,
@@ -3746,24 +3746,24 @@
               ]
             },
             "type": "array",
-            "title": "Endogenous Variables"
+            "title": "Endogenousvariables"
           },
-          "gmm_weight_matrix": {
+          "gmmWeightMatrix": {
             "type": "string",
             "enum": [
               "uncentered",
               "robust",
               "hac"
             ],
-            "title": "Gmm Weight Matrix",
+            "title": "Gmmweightmatrix",
             "default": "robust"
           }
         },
         "type": "object",
         "required": [
           "method",
-          "instrumental_variables",
-          "endogenous_variables"
+          "instrumentalVariables",
+          "endogenousVariables"
         ],
         "title": "InstrumentalVariablesParams"
       },
@@ -3909,7 +3909,7 @@
             ],
             "title": "Method"
           },
-          "entity_id_column": {
+          "entityIdColumn": {
             "type": "string",
             "minLength": 1,
             "title": "Column Name",
@@ -3919,7 +3919,7 @@
               "\u4eba\u53e3"
             ]
           },
-          "time_column": {
+          "timeColumn": {
             "anyOf": [
               {
                 "type": "string",
@@ -3935,14 +3935,14 @@
                 "type": "null"
               }
             ],
-            "title": "Time Column",
+            "title": "Timecolumn",
             "description": "\u6642\u9593\u5217\u540d"
           }
         },
         "type": "object",
         "required": [
           "method",
-          "entity_id_column"
+          "entityIdColumn"
         ],
         "title": "PanelDataParams"
       },
@@ -4287,7 +4287,7 @@
             "title": "Method",
             "default": "robust"
           },
-          "hc_type": {
+          "hcType": {
             "type": "string",
             "enum": [
               "HC0",
@@ -4295,7 +4295,7 @@
               "HC2",
               "HC3"
             ],
-            "title": "Hc Type",
+            "title": "Hctype",
             "default": "HC1"
           }
         },
@@ -4398,7 +4398,7 @@
       },
       "SortInstruction": {
         "properties": {
-          "column_name": {
+          "columnName": {
             "type": "string",
             "minLength": 1,
             "title": "Column Name",
@@ -4415,7 +4415,7 @@
         },
         "type": "object",
         "required": [
-          "column_name",
+          "columnName",
           "ascending"
         ],
         "title": "SortInstruction"
@@ -5099,7 +5099,7 @@
             "const": "tobit",
             "title": "Method"
           },
-          "left_censoring_limit": {
+          "leftCensoringLimit": {
             "anyOf": [
               {
                 "type": "number"
@@ -5108,11 +5108,11 @@
                 "type": "null"
               }
             ],
-            "title": "Left Censoring Limit",
+            "title": "Leftcensoringlimit",
             "description": "\u5de6\u5074\u6253\u3061\u5207\u308a\u5024\u3002\u3053\u306e\u5024\u4ee5\u4e0b\u306e\u30c7\u30fc\u30bf\u304c\u6253\u3061\u5207\u3089\u308c\u3066\u3044\u308b\u3068\u898b\u306a\u3059",
             "default": 0.0
           },
-          "right_censoring_limit": {
+          "rightCensoringLimit": {
             "anyOf": [
               {
                 "type": "number"
@@ -5121,7 +5121,7 @@
                 "type": "null"
               }
             ],
-            "title": "Right Censoring Limit",
+            "title": "Rightcensoringlimit",
             "description": "\u53f3\u5074\u6253\u3061\u5207\u308a\u5024"
           }
         },
