@@ -139,7 +139,7 @@ def fe_payload(  # noqa: PLR0913
     }
     if time_col:
         analysis["timeColumn"] = time_col
-    se = {"method": se_method}
+    se: dict[str, str | list[str]] = {"method": se_method}
     if se_method == "cluster":
         se["groups"] = [entity_col]
     return {
