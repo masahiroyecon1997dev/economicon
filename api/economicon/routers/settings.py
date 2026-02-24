@@ -13,7 +13,7 @@ from economicon.utils import create_success_response
 router = APIRouter(prefix="/setting", tags=["setting"])
 
 
-@router.get("/settings", response_model=SuccessResponse[GetSettingsResult])
+@router.get("", response_model=SuccessResponse[GetSettingsResult])
 async def get_settings(
     request: Request,
     settings_store: SettingsStoreDep,
