@@ -4,7 +4,7 @@
 各回帰モデルのフィッティングロジックを提供する純粋関数群
 """
 
-from typing import Any, Tuple
+from typing import Any
 
 import numpy as np
 import statsmodels.api as sm
@@ -16,7 +16,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
-from .common import LINEARMODELS_COV_TYPE_MAP, remove_const_column
+from economicon.services.regressions.common import (
+    LINEARMODELS_COV_TYPE_MAP,
+    remove_const_column,
+)
 
 
 def fit_ols(
@@ -250,7 +253,7 @@ def fit_lasso(
     missing: str,
     calculate_se: bool = False,
     bootstrap_iterations: int = 1000,
-) -> Tuple[RegressionResultsWrapper, np.ndarray]:
+) -> tuple[RegressionResultsWrapper, np.ndarray]:
     """
     Lassoモデルのフィッティング（Pipeline使用、両係数を返す）
 
@@ -324,7 +327,9 @@ def fit_lasso(
             )
 
             if has_const:
-                bootstrap_coefs[i] = np.hstack(([boot_intercept_original], boot_coef_original))
+                bootstrap_coefs[i] = np.hstack(
+                    ([boot_intercept_original], boot_coef_original)
+                )
             else:
                 bootstrap_coefs[i] = boot_coef_original
 
@@ -356,7 +361,7 @@ def fit_ridge(
     missing: str,
     calculate_se: bool = False,
     bootstrap_iterations: int = 1000,
-) -> Tuple[RegressionResultsWrapper, np.ndarray]:
+) -> tuple[RegressionResultsWrapper, np.ndarray]:
     """
     Ridgeモデルのフィッティング（Pipeline使用、両係数を返す）
 
@@ -430,7 +435,9 @@ def fit_ridge(
             )
 
             if has_const:
-                bootstrap_coefs[i] = np.hstack(([boot_intercept_original], boot_coef_original))
+                bootstrap_coefs[i] = np.hstack(
+                    ([boot_intercept_original], boot_coef_original)
+                )
             else:
                 bootstrap_coefs[i] = boot_coef_original
 

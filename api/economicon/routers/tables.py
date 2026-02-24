@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..models import (
+from economicon.models import (
     ClearTablesResult,
     CreateJoinTableRequestBody,
     CreateJoinTableResult,
@@ -27,24 +27,26 @@ from ..models import (
     RenameTableResult,
     SuccessResponse,
 )
-from ..services.data.dependencies import TablesStoreDep
-from ..services.operation import run_operation
-from ..services.tables.clear_tables import ClearTables
-from ..services.tables.create_join_table import CreateJoinTable
-from ..services.tables.create_simulation_data_table import (
+from economicon.services.data.dependencies import TablesStoreDep
+from economicon.services.operation import run_operation
+from economicon.services.tables.clear_tables import ClearTables
+from economicon.services.tables.create_join_table import CreateJoinTable
+from economicon.services.tables.create_simulation_data_table import (
     CreateSimulationDataTable,
 )
-from ..services.tables.create_table import CreateTable
-from ..services.tables.create_union_table import CreateUnionTable
-from ..services.tables.delete_table import DeleteTable
-from ..services.tables.duplicate_table import DuplicateTable
-from ..services.tables.fetch_data_to_arrow import FetchDataToArrow
-from ..services.tables.fetch_data_to_json import FetchDataToJson
-from ..services.tables.filter_single_condition import FilterSingleCondition
-from ..services.tables.get_table_list import GetTableList
-from ..services.tables.input_cell_data import InputCellData
-from ..services.tables.rename_table import RenameTable
-from ..utils import (
+from economicon.services.tables.create_table import CreateTable
+from economicon.services.tables.create_union_table import CreateUnionTable
+from economicon.services.tables.delete_table import DeleteTable
+from economicon.services.tables.duplicate_table import DuplicateTable
+from economicon.services.tables.fetch_data_to_arrow import FetchDataToArrow
+from economicon.services.tables.fetch_data_to_json import FetchDataToJson
+from economicon.services.tables.filter_single_condition import (
+    FilterSingleCondition,
+)
+from economicon.services.tables.get_table_list import GetTableList
+from economicon.services.tables.input_cell_data import InputCellData
+from economicon.services.tables.rename_table import RenameTable
+from economicon.utils import (
     create_success_binary_response,
     create_success_response,
 )

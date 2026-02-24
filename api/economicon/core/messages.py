@@ -1,4 +1,4 @@
-from ..i18n import _  # i18nにある翻訳関数をインポート
+from economicon.i18n import _  # i18nにある翻訳関数をインポート
 
 # Pydanticエラータイプと日本語テンプレートのマッピング
 VALIDATION_ERROR_TEMPLATES = {

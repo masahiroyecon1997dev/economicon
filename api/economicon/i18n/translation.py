@@ -9,7 +9,7 @@ from pathlib import Path
 
 from fastapi_babel import _ as babel_gettext
 
-from ..services.data.settings_store import SettingsStore
+from economicon.services.data.settings_store import SettingsStore
 
 # ロケールディレクトリ
 LOCALE_DIR = Path(__file__).parent.parent / "locales"

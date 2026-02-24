@@ -1,9 +1,12 @@
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import FetchDataToJsonRequestBody
-from ...utils import ProcessingError
-from ...utils.validators import validate_existence, validate_row_count_limit
-from ..data.tables_store import TablesStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import FetchDataToJsonRequestBody
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
+from economicon.utils.validators import (
+    validate_existence,
+    validate_row_count_limit,
+)
 
 
 class FetchDataToJson:

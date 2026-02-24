@@ -1,8 +1,8 @@
-from typing import Any, Dict
+from typing import Any
 
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import (
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import (
     BinaryChoiceRegressionParams,
     InstrumentalVariablesParams,
     OLSParams,
@@ -12,12 +12,10 @@ from ...models import (
     RegularizedRegressionParams,
     TobitParams,
 )
-from ...utils import ProcessingError
-from ...utils.validators import validate_existence, validate_numeric_types
-from ..data.analysis_result import AnalysisResult
-from ..data.analysis_result_store import AnalysisResultStore
-from ..data.tables_store import TablesStore
-from .common import (
+from economicon.services.data.analysis_result import AnalysisResult
+from economicon.services.data.analysis_result_store import AnalysisResultStore
+from economicon.services.data.tables_store import TablesStore
+from economicon.services.regressions.common import (
     MISSING_HANDLING_MAP,
     extract_linearmodels_params,
     extract_statsmodels_params,
@@ -26,7 +24,7 @@ from .common import (
     prepare_panel_dataframe,
     prepare_tobit_dataframe,
 )
-from .fitters import (
+from economicon.services.regressions.fitters import (
     fit_fe,
     fit_iv,
     fit_lasso,
@@ -37,7 +35,14 @@ from .fitters import (
     fit_ridge,
     fit_tobit,
 )
-from .standard_errors import apply_standard_errors
+from economicon.services.regressions.standard_errors import (
+    apply_standard_errors,
+)
+from economicon.utils import ProcessingError
+from economicon.utils.validators import (
+    validate_existence,
+    validate_numeric_types,
+)
 
 
 class Regression:
@@ -178,7 +183,6 @@ class Regression:
                         columns=self.analysis.endogenous_variables,
                         target=self.param_names["endogenous_variables"],
                     )
-        return None
 
     def execute(self):
         try:
@@ -324,7 +328,13 @@ class Regression:
                     calculate_se = self.analysis.calculate_se
                     bootstrap_iterations = self.analysis.bootstrap_iterations
                     model_result, coef_scaled = fit_lasso(
-                        y_data, x_data, self.has_const, alpha, missing, calculate_se, bootstrap_iterations
+                        y_data,
+                        x_data,
+                        self.has_const,
+                        alpha,
+                        missing,
+                        calculate_se,
+                        bootstrap_iterations,
                     )
                     analysis_result = self._format_regularized_result(
                         model_result, coef_scaled
@@ -336,7 +346,13 @@ class Regression:
                     calculate_se = self.analysis.calculate_se
                     bootstrap_iterations = self.analysis.bootstrap_iterations
                     model_result, coef_scaled = fit_ridge(
-                        y_data, x_data, self.has_const, alpha, missing, calculate_se, bootstrap_iterations
+                        y_data,
+                        x_data,
+                        self.has_const,
+                        alpha,
+                        missing,
+                        calculate_se,
+                        bootstrap_iterations,
                     )
                     analysis_result = self._format_regularized_result(
                         model_result, coef_scaled
@@ -365,9 +381,9 @@ class Regression:
             raise ProcessingError(
                 error_code=ErrorCode.REGRESSION_PROCESS_ERROR,
                 message=f"Unexpected error: {str(e)}",
-            )
+            ) from e
 
-    def _format_result(self, model_result: Any) -> Dict:
+    def _format_result(self, model_result: Any) -> dict:
         """
         分析結果を JSON 形式にフォーマット
 
@@ -386,7 +402,7 @@ class Regression:
         params_info = extract_statsmodels_params(model_result, param_names)
 
         # モデル統計情報
-        model_stats: Dict[str, Any] = {"nObservations": int(model_result.nobs)}
+        model_stats: dict[str, Any] = {"nObservations": int(model_result.nobs)}
 
         # 線形モデルの統計量
         if hasattr(model_result, "rsquared"):
@@ -423,7 +439,7 @@ class Regression:
 
     def _format_regularized_result(
         self, model_result: Any, coef_scaled: Any
-    ) -> Dict:
+    ) -> dict:
         """
         正則化回帰（Lasso/Ridge）の結果をJSON形式にフォーマット
 
@@ -454,7 +470,7 @@ class Regression:
 
     def _tobit_format_result(
         self, model_result, left_censoring_limit, right_censoring_limit
-    ) -> Dict:
+    ) -> dict:
         """
         Tobit モデルの結果を JSON 形式にフォーマット
 
@@ -473,7 +489,7 @@ class Regression:
         params_info = extract_statsmodels_params(model_result, param_names)
 
         # モデル統計情報
-        model_stats: Dict[str, Any] = {
+        model_stats: dict[str, Any] = {
             "nObservations": int(model_result.nobs),
             "logLikelihood": float(model_result.llf),
         }
@@ -485,7 +501,7 @@ class Regression:
             model_stats["BIC"] = float(model_result.bic)
 
         # 診断結果 (diagnostics)
-        diagnostics: Dict[str, Any] = {
+        diagnostics: dict[str, Any] = {
             "censoringLimits": {
                 "left": left_censoring_limit,
                 "right": right_censoring_limit,
@@ -513,7 +529,7 @@ class Regression:
 
     def _iv_format_result(
         self, model_result, endogenous_variables, instrumental_variables
-    ) -> Dict:
+    ) -> dict:
         """
         IV モデルの結果を JSON 形式にフォーマット
 
@@ -530,13 +546,13 @@ class Regression:
         params_info = extract_linearmodels_params(model_result, all_vars)
 
         # モデル統計情報
-        model_stats: Dict[str, Any] = {
+        model_stats: dict[str, Any] = {
             "nObservations": int(model_result.nobs),
             "R2": float(model_result.rsquared),
         }
 
         # 診断結果 (diagnostics)
-        diagnostics: Dict[str, Any] = {}
+        diagnostics: dict[str, Any] = {}
 
         # 内生性の検定 (Wu-Hausman test)
         if hasattr(model_result, "wu_hausman"):
@@ -573,7 +589,8 @@ class Regression:
                         diagnostics["firstStage"][endog_var] = {
                             "fStatistic": float(fs_result.f_stat.stat),
                             "pValue": float(fs_result.f_stat.pval),
-                            "description": "First-stage F-test for weak instruments",
+                            "description": "First-stage F-test for "
+                            "weak instruments",
                         }
             except Exception:
                 pass
@@ -592,7 +609,7 @@ class Regression:
 
         return result
 
-    def _fe_format_result(self, model_result, entity_id_column) -> Dict:
+    def _fe_format_result(self, model_result, entity_id_column) -> dict:
         """
         固定効果モデルの結果を JSON 形式にフォーマット
 
@@ -610,7 +627,7 @@ class Regression:
         )
 
         # モデル統計情報と診断結果
-        model_stats: Dict[str, Any] = {
+        model_stats: dict[str, Any] = {
             "nObservations": int(model_result.nobs),
             "nEntities": int(model_result.entity_info["total"]),
             "R2Within": float(model_result.rsquared),
@@ -621,7 +638,7 @@ class Regression:
         }
 
         # 診断結果 (diagnostics)
-        diagnostics: Dict[str, Any] = {
+        diagnostics: dict[str, Any] = {
             "rsquaredWithin": float(model_result.rsquared),
             "rsquaredBetween": float(model_result.rsquared_between),
             "rsquaredOverall": float(model_result.rsquared_overall),
@@ -649,7 +666,7 @@ class Regression:
 
         return result
 
-    def _re_format_result(self, model_result, entity_id_column) -> Dict:
+    def _re_format_result(self, model_result, entity_id_column) -> dict:
         """
         変量効果モデルの結果を JSON 形式にフォーマット
 
@@ -667,7 +684,7 @@ class Regression:
         )
 
         # モデル統計情報と診断結果
-        model_stats: Dict[str, Any] = {
+        model_stats: dict[str, Any] = {
             "nObservations": int(model_result.nobs),
             "R2Within": float(model_result.rsquared),
             "R2Between": float(model_result.rsquared_between),
@@ -675,7 +692,7 @@ class Regression:
         }
 
         # 診断結果 (diagnostics)
-        diagnostics: Dict[str, Any] = {
+        diagnostics: dict[str, Any] = {
             "rsquaredWithin": float(model_result.rsquared),
             "rsquaredBetween": float(model_result.rsquared_between),
             "rsquaredOverall": float(model_result.rsquared_overall),

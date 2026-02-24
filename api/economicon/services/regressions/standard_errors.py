@@ -6,7 +6,7 @@
 
 from typing import Any
 
-from ...models import (
+from economicon.models import (
     ClusteredStandardError,
     HacStandardError,
     RobustStandardError,

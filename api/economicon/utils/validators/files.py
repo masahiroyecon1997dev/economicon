@@ -3,8 +3,7 @@ from pathlib import Path
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-
-from ..exceptions import ValidationError
+from economicon.utils.exceptions import ValidationError
 
 
 def _validate_path_base(

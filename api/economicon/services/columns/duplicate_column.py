@@ -1,11 +1,14 @@
 import polars as pl
 
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import DuplicateColumnRequestBody
-from ...utils import ProcessingError
-from ...utils.validators import validate_existence, validate_non_existence
-from ..data.tables_store import TablesStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import DuplicateColumnRequestBody
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
+from economicon.utils.validators import (
+    validate_existence,
+    validate_non_existence,
+)
 
 
 class DuplicateColumn:
@@ -63,7 +66,6 @@ class DuplicateColumn:
             valid_list=column_name_list,
             target=self.param_names["add_position_column"],
         )
-        return None
 
     def execute(self):
         try:

@@ -4,8 +4,7 @@ import polars as pl
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-
-from ..exceptions import ValidationError
+from economicon.utils.exceptions import ValidationError
 
 
 def validate_existence(

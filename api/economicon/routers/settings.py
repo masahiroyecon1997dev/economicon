@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..models import (
+from economicon.models import (
     GetSettingsResult,
     SuccessResponse,
 )
-from ..services.data.dependencies import SettingsStoreDep
-from ..services.operation import run_operation
-from ..services.settings.get_settings import GetSettings
-from ..utils import create_success_response
+from economicon.services.data.dependencies import SettingsStoreDep
+from economicon.services.operation import run_operation
+from economicon.services.settings.get_settings import GetSettings
+from economicon.utils import create_success_response
 
 router = APIRouter(prefix="/setting", tags=["setting"])
 

@@ -1,12 +1,12 @@
 import polars as pl
 
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import CreateSimulationDataTableRequestBody
-from ...utils import ProcessingError
-from ...utils.algorithms import generate_simulation_data
-from ...utils.validators import validate_non_existence
-from ..data.tables_store import TablesStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import CreateSimulationDataTableRequestBody
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
+from economicon.utils.algorithms import generate_simulation_data
+from economicon.utils.validators import validate_non_existence
 
 
 class CreateSimulationDataTable:
@@ -41,7 +41,6 @@ class CreateSimulationDataTable:
             existing_list=table_name_list,
             target=self.param_names["table_name"],
         )
-        return None
 
     def execute(self):
         try:

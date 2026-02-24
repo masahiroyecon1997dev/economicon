@@ -7,7 +7,7 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..models import (
+from economicon.models import (
     ClearAllAnalysisResultsResult,
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
@@ -15,17 +15,20 @@ from ..models import (
     RegressionResult,
     SuccessResponse,
 )
-from ..models.regressions import RegressionRequestBody
-from ..services.data.dependencies import AnalysisResultStoreDep, TablesStoreDep
-from ..services.operation import run_operation
-from ..services.regressions.regression import Regression
-from ..services.regressions.result import (
+from economicon.models.regressions import RegressionRequestBody
+from economicon.services.data.dependencies import (
+    AnalysisResultStoreDep,
+    TablesStoreDep,
+)
+from economicon.services.operation import run_operation
+from economicon.services.regressions.regression import Regression
+from economicon.services.regressions.result import (
     ClearAllAnalysisResults,
     DeleteAnalysisResult,
     GetAllAnalysisResults,
     GetAnalysisResult,
 )
-from ..utils import (
+from economicon.utils import (
     create_success_response,
 )
 

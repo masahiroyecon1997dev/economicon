@@ -2,9 +2,9 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from .analysis_result_store import AnalysisResultStore
-from .settings_store import SettingsStore
-from .tables_store import TablesStore
+from economicon.services.data.analysis_result_store import AnalysisResultStore
+from economicon.services.data.settings_store import SettingsStore
+from economicon.services.data.tables_store import TablesStore
 
 
 def get_tables_store() -> TablesStore:

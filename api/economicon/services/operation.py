@@ -1,6 +1,6 @@
-from typing import Dict, Optional, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
-from ..utils.validators.common import ValidationError
+from economicon.utils.validators.common import ValidationError
 
 
 @runtime_checkable
@@ -10,7 +10,7 @@ class DataOperation(Protocol):
     validate()とexecute()メソッドを持つクラスはこのProtocolに適合します。
     """
 
-    def validate(self) -> Optional[ValidationError]:
+    def validate(self) -> ValidationError | None:
         """
         操作のバリデーションを実行します。
 
@@ -20,7 +20,7 @@ class DataOperation(Protocol):
         """
         ...
 
-    def execute(self) -> Optional[Dict | bytes]:
+    def execute(self) -> dict | bytes | None:
         """
         操作を実行します。
 
@@ -31,7 +31,7 @@ class DataOperation(Protocol):
         ...
 
 
-def run_operation(operation: DataOperation) -> Optional[Dict | bytes]:
+def run_operation(operation: DataOperation) -> dict | bytes | None:
     """
     DataOperationプロトコルに適合するオブジェクトを受け取り、
     validateとexecuteを順次実行します。

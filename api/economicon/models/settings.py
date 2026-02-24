@@ -4,7 +4,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from .common import BaseRequest, BaseResult
+from economicon.models.common import BaseRequest, BaseResult
 
 
 class GetSettingsRequestBody(BaseRequest):

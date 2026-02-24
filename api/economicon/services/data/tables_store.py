@@ -1,9 +1,8 @@
 import threading
-from typing import Dict, List
 
 import polars as pl
 
-from .table_info import TableInfo
+from economicon.services.data.table_info import TableInfo
 
 
 class TablesStore:
@@ -20,7 +19,7 @@ class TablesStore:
     def __init__(self):
         # 初期化が一度だけ行われるようにする
         if not hasattr(self, "_initialized"):
-            self._tables: Dict[str, TableInfo] = {}
+            self._tables: dict[str, TableInfo] = {}
             self._lock = threading.RLock()
             self._initialized = True
 
@@ -38,7 +37,7 @@ class TablesStore:
             else:
                 raise KeyError(f"Table '{table_name}' does not exist.")
 
-    def get_column_name_list(self, table_name: str) -> List[str]:
+    def get_column_name_list(self, table_name: str) -> list[str]:
         with self._lock:
             table_info = self._tables.get(table_name)
             if table_info:
@@ -78,7 +77,7 @@ class TablesStore:
             del self._tables[table_name]
             return table_name
 
-    def get_table_name_list(self) -> List[str]:
+    def get_table_name_list(self) -> list[str]:
         with self._lock:
             return list(self._tables.keys())
 

@@ -6,11 +6,10 @@ import os
 import platform
 import threading
 from pathlib import Path
-from typing import Optional
 
 import yaml
 
-from .settings_info import SettingsInfo
+from economicon.services.data.settings_info import SettingsInfo
 
 
 class SettingsStore:
@@ -36,7 +35,7 @@ class SettingsStore:
     def __init__(self):
         # 初期化が一度だけ行われるようにする
         if not hasattr(self, "_initialized"):
-            self._settings: Optional[SettingsInfo] = None
+            self._settings: SettingsInfo | None = None
             self._lock = threading.RLock()
             self._initialized = True
 
@@ -137,7 +136,7 @@ class SettingsStore:
 
             # 設定ファイルを読み込み
             try:
-                with open(settings_file_path, "r", encoding="utf-8") as f:
+                with open(settings_file_path, encoding="utf-8") as f:
                     user_settings = yaml.safe_load(f)
 
                 # デフォルト設定とマージ（ユーザー設定を優先）
@@ -218,12 +217,12 @@ class SettingsStore:
 
     def update_settings(
         self,
-        os_name: Optional[str] = None,
-        language: Optional[str] = None,
-        last_opened_path: Optional[str] = None,
-        theme: Optional[str] = None,
-        encoding: Optional[str] = None,
-        log_path: Optional[str] = None,
+        os_name: str | None = None,
+        language: str | None = None,
+        last_opened_path: str | None = None,
+        theme: str | None = None,
+        encoding: str | None = None,
+        log_path: str | None = None,
     ) -> None:
         """
         設定を更新する（指定された項目のみ）
