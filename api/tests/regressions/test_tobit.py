@@ -6,7 +6,7 @@ from fastapi import status
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
-    tobit_payload,
+    TobitPayload,
 )
 
 # 左側打ち切り限界
@@ -36,7 +36,7 @@ def _get_output(client, payload):
 
 def test_tobit_success(client, tables_store):
     """Tobit回帰が200またはエラーを返すことを確認"""
-    resp = _post_tobit(client, tobit_payload())
+    resp = _post_tobit(client, TobitPayload().build())
     # py4etrics が利用可能かどうかで結果が変わりうる
     assert resp.status_code in (
         status.HTTP_200_OK,
@@ -50,7 +50,7 @@ def test_tobit_success(client, tables_store):
 
 def test_tobit_censoring_limits_in_diagnostics(client, tables_store):
     """diagnostics に censoringLimits が含まれることを確認"""
-    resp = _post_tobit(client, tobit_payload())
+    resp = _post_tobit(client, TobitPayload().build())
     if resp.status_code != status.HTTP_200_OK:
         pytest.skip("py4etrics が利用不可のためスキップ")
 
@@ -66,7 +66,7 @@ def test_tobit_censoring_limits_in_diagnostics(client, tables_store):
 
 def test_tobit_response_structure(client, tables_store):
     """Tobit結果の基本構造を確認"""
-    resp = _post_tobit(client, tobit_payload())
+    resp = _post_tobit(client, TobitPayload().build())
     if resp.status_code != status.HTTP_200_OK:
         pytest.skip("py4etrics が利用不可のためスキップ")
 
@@ -86,7 +86,7 @@ def test_tobit_response_structure(client, tables_store):
 
 def test_tobit_sigma_in_diagnostics(client, tables_store):
     """diagnostics に sigma が含まれることを確認"""
-    resp = _post_tobit(client, tobit_payload())
+    resp = _post_tobit(client, TobitPayload().build())
     if resp.status_code != status.HTTP_200_OK:
         pytest.skip("py4etrics が利用不可のためスキップ")
 
@@ -101,7 +101,8 @@ def test_tobit_sigma_in_diagnostics(client, tables_store):
 def test_tobit_right_censoring_none(client, tables_store):
     """rightCensoringLimit=None でも動作することを確認"""
     resp = _post_tobit(
-        client, tobit_payload(left=_LEFT_CENSORING_LIMIT, right=None)
+        client,
+        TobitPayload(left=_LEFT_CENSORING_LIMIT, right=None).build(),
     )
     if resp.status_code != status.HTTP_200_OK:
         pytest.skip("py4etrics が利用不可のためスキップ")
@@ -114,7 +115,7 @@ def test_tobit_right_censoring_none(client, tables_store):
 
 def test_tobit_log_likelihood_present(client, tables_store):
     """modelStatistics に logLikelihood が含まれることを確認"""
-    resp = _post_tobit(client, tobit_payload())
+    resp = _post_tobit(client, TobitPayload().build())
     if resp.status_code != status.HTTP_200_OK:
         pytest.skip("py4etrics が利用不可のためスキップ")
 
@@ -128,10 +129,10 @@ def test_tobit_right_censoring_specified(client, tables_store):
     """rightCensoringLimit 指定時に右打ち切り処理が機能することを確認"""
     resp = _post_tobit(
         client,
-        tobit_payload(
+        TobitPayload(
             left=_LEFT_CENSORING_LIMIT,
             right=_RIGHT_CENSORING_LIMIT,
-        ),
+        ).build(),
     )
     if resp.status_code != status.HTTP_200_OK:
         pytest.skip("py4etrics が利用不可のためスキップ")

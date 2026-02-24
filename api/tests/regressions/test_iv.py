@@ -9,8 +9,8 @@ from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     TABLE_IV,
     URL_REGRESSION,
+    IvPayload,
     generate_all_data,
-    iv_payload,
 )
 
 # 数値比較の許容誤差
@@ -32,7 +32,7 @@ def _get_output(client, payload):
 
 def test_iv_success(client, tables_store):
     """IV回帰が200を返しresultIdを含むことを確認"""
-    resp = client.post(URL_REGRESSION, json=iv_payload())
+    resp = client.post(URL_REGRESSION, json=IvPayload().build())
     assert resp.status_code == status.HTTP_200_OK
     data = resp.json()
     assert data["code"] == "OK"
@@ -41,7 +41,7 @@ def test_iv_success(client, tables_store):
 
 def test_iv_response_structure(client, tables_store):
     """regressionOutputにIV専用キーが含まれることを確認"""
-    output = _get_output(client, iv_payload())
+    output = _get_output(client, IvPayload().build())
     model_stats = output["modelStatistics"]
 
     assert "R2" in model_stats
@@ -78,7 +78,7 @@ def test_iv_coefficients_numerical(client, tables_store):
         df[["z1", "z2"]],
     ).fit(cov_type="unadjusted")
 
-    params = _get_output(client, iv_payload())["parameters"]
+    params = _get_output(client, IvPayload().build())["parameters"]
     expected_params = model_result.params  # [const, x1, x2_endog]
 
     for i, (exp_coef, param) in enumerate(
@@ -91,14 +91,14 @@ def test_iv_coefficients_numerical(client, tables_store):
 
 def test_iv_endogenous_variables_in_parameters(client, tables_store):
     """内生変数 x2_endog がパラメータに含まれることを確認"""
-    params = _get_output(client, iv_payload())["parameters"]
+    params = _get_output(client, IvPayload().build())["parameters"]
     var_names = [p["variable"] for p in params]
     assert "x2_endog" in var_names
 
 
 def test_iv_diagnostics_present(client, tables_store):
     """diagnosticsにIV検定統計量が少なくとも1つ含まれることを確認"""
-    output = _get_output(client, iv_payload())
+    output = _get_output(client, IvPayload().build())
     diagnostics = output["diagnostics"]
 
     has_diag = any(
@@ -110,7 +110,7 @@ def test_iv_diagnostics_present(client, tables_store):
 
 def test_iv_first_stage_for_endogenous(client, tables_store):
     """firstStageに内生変数のF統計量が含まれることを確認（存在する場合）"""
-    output = _get_output(client, iv_payload())
+    output = _get_output(client, IvPayload().build())
     diagnostics = output["diagnostics"]
 
     if "firstStage" not in diagnostics:
@@ -127,7 +127,7 @@ def test_iv_first_stage_for_endogenous(client, tables_store):
 
 def test_iv_r2_is_float(client, tables_store):
     """R2がfloatであることを確認"""
-    model_stats = _get_output(client, iv_payload())["modelStatistics"]
+    model_stats = _get_output(client, IvPayload().build())["modelStatistics"]
     assert isinstance(model_stats["R2"], float)
 
 

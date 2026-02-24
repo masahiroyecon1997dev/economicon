@@ -10,7 +10,7 @@ from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
     URL_RESULTS,
-    ols_payload,
+    OlsPayload,
 )
 
 _EXPECTED_R_SQUARED = 0.95
@@ -139,7 +139,7 @@ def test_singleton_pattern(result_store):
 def test_get_all_results_api(client, tables_store):
     """GET /results が全結果サマリーを返すことを確認"""
     # OLSの実行で結果を作成
-    client.post(URL_REGRESSION, json=ols_payload())
+    client.post(URL_REGRESSION, json=OlsPayload().build())
 
     resp = client.get(URL_RESULTS)
     assert resp.status_code == status.HTTP_200_OK
@@ -151,7 +151,7 @@ def test_get_all_results_api(client, tables_store):
 
 def test_get_result_by_id_api(client, tables_store):
     """GET /results/{id} が指定結果の詳細を返すことを確認"""
-    resp_reg = client.post(URL_REGRESSION, json=ols_payload())
+    resp_reg = client.post(URL_REGRESSION, json=OlsPayload().build())
     result_id = resp_reg.json()["result"]["resultId"]
 
     resp = client.get(f"{URL_RESULTS}/{result_id}")
@@ -166,7 +166,7 @@ def test_get_result_by_id_api(client, tables_store):
 
 def test_delete_result_by_id_api(client, tables_store):
     """DELETE /results/{id} が結果を削除し deletedResultId を返すことを確認"""
-    resp_reg = client.post(URL_REGRESSION, json=ols_payload())
+    resp_reg = client.post(URL_REGRESSION, json=OlsPayload().build())
     result_id = resp_reg.json()["result"]["resultId"]
 
     resp = client.delete(f"{URL_RESULTS}/{result_id}")
@@ -182,8 +182,8 @@ def test_delete_result_by_id_api(client, tables_store):
 
 def test_clear_all_results_api(client, tables_store):
     """DELETE /results が全結果を削除することを確認"""
-    client.post(URL_REGRESSION, json=ols_payload())
-    client.post(URL_REGRESSION, json=ols_payload())
+    client.post(URL_REGRESSION, json=OlsPayload().build())
+    client.post(URL_REGRESSION, json=OlsPayload().build())
 
     resp = client.delete(URL_RESULTS)
     assert resp.status_code == status.HTTP_200_OK

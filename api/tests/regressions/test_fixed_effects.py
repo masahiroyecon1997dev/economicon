@@ -7,7 +7,7 @@ from linearmodels.panel import PanelOLS
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
-    fe_payload,
+    FePayload,
     generate_all_data,
 )
 
@@ -36,7 +36,7 @@ def _get_output(client, payload):
 
 def test_fe_success(client, tables_store):
     """固定効果モデルが200を返しresultIdを含むことを確認"""
-    resp = client.post(URL_REGRESSION, json=fe_payload())
+    resp = client.post(URL_REGRESSION, json=FePayload().build())
     assert resp.status_code == status.HTTP_200_OK
     data = resp.json()
     assert data["code"] == "OK"
@@ -45,7 +45,7 @@ def test_fe_success(client, tables_store):
 
 def test_fe_response_structure(client, tables_store):
     """regressionOutputに固定効果専用キーが含まれることを確認"""
-    output = _get_output(client, fe_payload())
+    output = _get_output(client, FePayload().build())
     model_stats = output["modelStatistics"]
 
     for key in (
@@ -86,7 +86,7 @@ def test_fe_coefficients_numerical(client, tables_store):
         df["y"], df[["x1", "x2"]], entity_effects=True
     ).fit(cov_type="unadjusted")
 
-    params = _get_output(client, fe_payload())["parameters"]
+    params = _get_output(client, FePayload().build())["parameters"]
     expected = model_result.params
 
     for i, (exp_coef, param) in enumerate(zip(expected, params, strict=False)):
@@ -98,13 +98,13 @@ def test_fe_coefficients_numerical(client, tables_store):
 def test_fe_n_entities(client, tables_store):
     """nEntitiesがデータのエンティティ数と一致することを確認"""
     # PanelDataは10エンティティ
-    model_stats = _get_output(client, fe_payload())["modelStatistics"]
+    model_stats = _get_output(client, FePayload().build())["modelStatistics"]
     assert model_stats["nEntities"] == _N_ENTITIES
 
 
 def test_fe_r2_within_range(client, tables_store):
     """R2Within・R2Between・R2Overallが0以上1以下であることを確認"""
-    model_stats = _get_output(client, fe_payload())["modelStatistics"]
+    model_stats = _get_output(client, FePayload().build())["modelStatistics"]
     for key in ("R2Within", "R2Between", "R2Overall"):
         val = model_stats[key]
         # R2はマイナスになりうる（プーリングOLSを基準にした場合）
@@ -113,7 +113,7 @@ def test_fe_r2_within_range(client, tables_store):
 
 def test_fe_diagnostics_f_pooled(client, tables_store):
     """diagnostics に fPooled が含まれることを確認"""
-    output = _get_output(client, fe_payload())
+    output = _get_output(client, FePayload().build())
     diagnostics = output["diagnostics"]
     assert "fPooled" in diagnostics
     fp = diagnostics["fPooled"]
@@ -123,7 +123,7 @@ def test_fe_diagnostics_f_pooled(client, tables_store):
 
 def test_fe_clustered_se(client, tables_store):
     """クラスタロバスト標準誤差付きFEが成功することを確認"""
-    payload = fe_payload(se_method="cluster")
+    payload = FePayload(se_method="cluster").build()
     resp = client.post(URL_REGRESSION, json=payload)
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json()["code"] == "OK"
@@ -131,13 +131,13 @@ def test_fe_clustered_se(client, tables_store):
 
 def test_fe_coefficient_sign_x1_positive(client, tables_store):
     """x1の係数が正（設計値 1.5）であることを確認"""
-    params = _get_output(client, fe_payload())["parameters"]
+    params = _get_output(client, FePayload().build())["parameters"]
     coef_map = {p["variable"]: p["coefficient"] for p in params}
     assert coef_map["x1"] > 0.0
 
 
 def test_fe_coefficient_sign_x2_negative(client, tables_store):
     """x2の係数が負（設計値 -0.8）であることを確認"""
-    params = _get_output(client, fe_payload())["parameters"]
+    params = _get_output(client, FePayload().build())["parameters"]
     coef_map = {p["variable"]: p["coefficient"] for p in params}
     assert coef_map["x2"] < 0.0

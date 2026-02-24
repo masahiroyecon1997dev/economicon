@@ -7,9 +7,9 @@ from fastapi import status
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
+    LogitPayload,
+    ProbitPayload,
     generate_all_data,
-    logit_payload,
-    probit_payload,
 )
 
 # 数値比較の許容誤差
@@ -41,7 +41,7 @@ def _get_output(client, payload):
 
 def test_probit_success(client, tables_store):
     """Probit回帰が200を返しresultIdを含むことを確認"""
-    resp = client.post(URL_REGRESSION, json=probit_payload())
+    resp = client.post(URL_REGRESSION, json=ProbitPayload().build())
     assert resp.status_code == status.HTTP_200_OK
     data = resp.json()
     assert data["code"] == "OK"
@@ -50,7 +50,7 @@ def test_probit_success(client, tables_store):
 
 def test_probit_response_structure(client, tables_store):
     """regressionOutputに必須キーが含まれることを確認"""
-    output = _get_output(client, probit_payload())
+    output = _get_output(client, ProbitPayload().build())
     model_stats = output["modelStatistics"]
 
     for key in ("pseudoRSquared", "logLikelihood"):
@@ -77,7 +77,7 @@ def test_probit_coefficients_numerical(client, tables_store):
     x_mat = sm.add_constant(np.column_stack([x1, x2]))
     sm_result = sm.Probit(y_binary, x_mat).fit(disp=False)
 
-    params = _get_output(client, probit_payload())["parameters"]
+    params = _get_output(client, ProbitPayload().build())["parameters"]
 
     for i, exp_coef in enumerate(sm_result.params):
         assert abs(params[i]["coefficient"] - exp_coef) < _ABS_TOL, (
@@ -87,13 +87,17 @@ def test_probit_coefficients_numerical(client, tables_store):
 
 def test_probit_pseudo_r2_range(client, tables_store):
     """pseudoRSquaredが0以上1未満であることを確認"""
-    model_stats = _get_output(client, probit_payload())["modelStatistics"]
+    model_stats = _get_output(client, ProbitPayload().build())[
+        "modelStatistics"
+    ]
     assert 0.0 <= model_stats["pseudoRSquared"] < 1.0
 
 
 def test_probit_log_likelihood_negative(client, tables_store):
     """logLikelihoodが負値（≤0）であることを確認"""
-    model_stats = _get_output(client, probit_payload())["modelStatistics"]
+    model_stats = _get_output(client, ProbitPayload().build())[
+        "modelStatistics"
+    ]
     assert model_stats["logLikelihood"] <= 0.0
 
 
@@ -103,14 +107,16 @@ def test_probit_log_likelihood_numerical(client, tables_store):
     x_mat = sm.add_constant(np.column_stack([x1, x2]))
     sm_result = sm.Probit(y_binary, x_mat).fit(disp=False)
 
-    model_stats = _get_output(client, probit_payload())["modelStatistics"]
+    model_stats = _get_output(client, ProbitPayload().build())[
+        "modelStatistics"
+    ]
     assert abs(model_stats["logLikelihood"] - sm_result.llf) < _ABS_TOL
 
 
 def test_probit_vs_logit_coefficient_magnitude(client, tables_store):
     """Probitの係数の絶対値はLogit係数の約0.55倍になることを確認（規則の目安）"""
-    logit_params = _get_output(client, logit_payload())["parameters"]
-    probit_params = _get_output(client, probit_payload())["parameters"]
+    logit_params = _get_output(client, LogitPayload().build())["parameters"]
+    probit_params = _get_output(client, ProbitPayload().build())["parameters"]
 
     # const以外の係数で比較
     for lp, pp in zip(logit_params[1:], probit_params[1:], strict=False):
@@ -129,12 +135,14 @@ def test_probit_pseudo_r2_numerical(client, tables_store):
     x_mat = sm.add_constant(np.column_stack([x1, x2]))
     sm_result = sm.Probit(y_binary, x_mat).fit(disp=False)
 
-    model_stats = _get_output(client, probit_payload())["modelStatistics"]
+    model_stats = _get_output(client, ProbitPayload().build())[
+        "modelStatistics"
+    ]
     assert abs(model_stats["pseudoRSquared"] - sm_result.prsquared) < _ABS_TOL
 
 
 def test_probit_pvalues_range(client, tables_store):
     """p値が0以上1以下であることを確認"""
-    params = _get_output(client, probit_payload())["parameters"]
+    params = _get_output(client, ProbitPayload().build())["parameters"]
     for p in params:
         assert 0.0 <= p["pValue"] <= 1.0

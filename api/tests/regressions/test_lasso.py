@@ -9,8 +9,8 @@ from sklearn.preprocessing import StandardScaler
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
+    LassoPayload,
     generate_all_data,
-    lasso_payload,
 )
 
 # sklearn との数値比較の許容誤差
@@ -41,7 +41,7 @@ def _get_output(client, payload):
 
 def test_lasso_success(client, tables_store):
     """Lasso回帰が200を返しresultIdを含むことを確認"""
-    resp = client.post(URL_REGRESSION, json=lasso_payload())
+    resp = client.post(URL_REGRESSION, json=LassoPayload().build())
     assert resp.status_code == status.HTTP_200_OK
     data = resp.json()
     assert data["code"] == "OK"
@@ -50,7 +50,7 @@ def test_lasso_success(client, tables_store):
 
 def test_lasso_response_structure(client, tables_store):
     """regressionOutputに必須キーが含まれることを確認"""
-    output = _get_output(client, lasso_payload())
+    output = _get_output(client, LassoPayload().build())
     params = output["parameters"]
     assert len(params) == _N_PARAMS_WITH_CONST  # const, x1, x2
 
@@ -61,14 +61,14 @@ def test_lasso_response_structure(client, tables_store):
 
 def test_lasso_const_coefficient_scaled_is_none(client, tables_store):
     """定数項の coefficientScaled が None であることを確認"""
-    params = _get_output(client, lasso_payload())["parameters"]
+    params = _get_output(client, LassoPayload().build())["parameters"]
     const_param = next(p for p in params if p["variable"] == "const")
     assert const_param["coefficientScaled"] is None
 
 
 def test_lasso_variable_coefficient_scaled_is_float(client, tables_store):
     """変数の coefficientScaled が float であることを確認"""
-    params = _get_output(client, lasso_payload())["parameters"]
+    params = _get_output(client, LassoPayload().build())["parameters"]
     for p in params:
         if p["variable"] != "const":
             assert isinstance(p["coefficientScaled"], float), (
@@ -86,7 +86,7 @@ def test_lasso_coefficients_scaled_numerical(client, tables_store):
     lasso_step = model.named_steps["lasso"]
     expected_scaled = lasso_step.coef_  # [x1_scaled, x2_scaled]
 
-    params = _get_output(client, lasso_payload(alpha=_ALPHA_DEFAULT))[
+    params = _get_output(client, LassoPayload(alpha=_ALPHA_DEFAULT).build())[
         "parameters"
     ]
     var_params = [p for p in params if p["variable"] != "const"]
@@ -101,7 +101,7 @@ def test_lasso_coefficients_scaled_numerical(client, tables_store):
 
 def test_lasso_large_alpha_sparsity(client, tables_store):
     """大きなalphaでLassoがスパース性を発揮することを確認"""
-    params = _get_output(client, lasso_payload(alpha=_ALPHA_LARGE))[
+    params = _get_output(client, LassoPayload(alpha=_ALPHA_LARGE).build())[
         "parameters"
     ]
     var_params = [p for p in params if p["variable"] != "const"]
@@ -111,7 +111,7 @@ def test_lasso_large_alpha_sparsity(client, tables_store):
     scaled_coefs = [abs(p["coefficientScaled"]) for p in var_params]
     # alpha=10 では係数が小さくなるはず（alpha=0.1 と比較）
     small_alpha_params = _get_output(
-        client, lasso_payload(alpha=_ALPHA_DEFAULT)
+        client, LassoPayload(alpha=_ALPHA_DEFAULT).build()
     )["parameters"]
     small_var_params = [
         p for p in small_alpha_params if p["variable"] != "const"
@@ -126,7 +126,7 @@ def test_lasso_large_alpha_sparsity(client, tables_store):
 
 def test_lasso_without_constant(client, tables_store):
     """hasConst=FalseでLassoが動作することを確認"""
-    output = _get_output(client, lasso_payload(has_const=False))
+    output = _get_output(client, LassoPayload(has_const=False).build())
     params = output["parameters"]
     assert len(params) == _N_PARAMS_NO_CONST  # x1, x2 のみ
     names = [p["variable"] for p in params]
@@ -135,7 +135,7 @@ def test_lasso_without_constant(client, tables_store):
 
 def test_lasso_calculate_se_true(client, tables_store):
     """calculateSe=TrueでLassoがstandardErrorを返すことを確認"""
-    output = _get_output(client, lasso_payload(calculate_se=True))
+    output = _get_output(client, LassoPayload(calculate_se=True).build())
     params = output["parameters"]
     for p in params:
         # 標準誤差があればfloat、なければNoneを許容
@@ -145,7 +145,8 @@ def test_lasso_calculate_se_true(client, tables_store):
 def test_lasso_calculate_se_without_const(client, tables_store):
     """calculate_se=True + has_const=False のブートストラップパスを確認"""
     output = _get_output(
-        client, lasso_payload(calculate_se=True, has_const=False)
+        client,
+        LassoPayload(calculate_se=True, has_const=False).build(),
     )
     params = output["parameters"]
     assert len(params) == _N_PARAMS_NO_CONST
