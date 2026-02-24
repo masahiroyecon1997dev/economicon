@@ -169,7 +169,7 @@ class Regression:
                     )
                     validate_numeric_types(
                         schema=df_schema,
-                        columns=self.time_column,
+                        columns=self.analysis.time_column,
                         target=self.param_names["time_column"],
                     )
             case InstrumentalVariablesParams():
@@ -225,7 +225,9 @@ class Regression:
                 )
 
             execute_method = self._execution_map[analysis_type]
-            analysis_result = execute_method(df, y_data, x_data, missing)
+            analysis_result = execute_method(
+                df=df, y_data=y_data, x_data=x_data, missing=missing
+            )
 
             # 分析結果をストアに保存
             analysis_result = AnalysisResult(
@@ -250,7 +252,11 @@ class Regression:
                 message=f"Unexpected error: {str(e)}",
             ) from e
 
-    def _execute_ols(self, df, y_data, x_data, missing):
+    def _execute_ols(self, *, df, y_data, x_data, missing):
+        if not isinstance(self.analysis, OLSParams):
+            raise ValueError(
+                _("Invalid analysis parameters for OLS regression")
+            )
         model_result = fit_ols(y_data, x_data, missing)
         model_result = apply_standard_errors(
             model_result,
@@ -258,7 +264,11 @@ class Regression:
         )
         return self._format_result(model_result)
 
-    def _execute_binary_choice(self, df, y_data, x_data, missing):
+    def _execute_binary_choice(self, *, df, y_data, x_data, missing):
+        if not isinstance(self.analysis, BinaryChoiceRegressionParams):
+            raise ValueError(
+                _("Invalid analysis parameters for binary choice regression")
+            )
         if self.analysis.method == RegressionMethodType.LOGIT:
             model_result = fit_logit(y_data, x_data, missing)
         elif self.analysis.method == RegressionMethodType.PROBIT:
@@ -274,7 +284,11 @@ class Regression:
         )
         return self._format_result(model_result)
 
-    def _execute_tobit(self, df, y_data, x_data, missing):
+    def _execute_tobit(self, *, df, y_data, x_data, missing):
+        if not isinstance(self.analysis, TobitParams):
+            raise ValueError(
+                _("Invalid analysis parameters for Tobit regression")
+            )
         df_pandas = prepare_tobit_dataframe(
             df,
             self.dependent_variable,
@@ -296,7 +310,11 @@ class Regression:
             self.analysis.right_censoring_limit,
         )
 
-    def _execute_panel(self, df, y_data, x_data, missing):
+    def _execute_panel(self, *, df, y_data, x_data, missing):
+        if not isinstance(self.analysis, PanelDataParams):
+            raise ValueError(
+                _("Invalid analysis parameters for panel data regression")
+            )
         panel_data_config = PanelDataConfig(
             dependent_variable=self.dependent_variable,
             explanatory_variables=self.explanatory_variables,
@@ -333,10 +351,10 @@ class Regression:
                 _("Specified regression method is not supported")
             )
 
-    def _execute_iv(self, df, y_data, x_data, missing):
-        if self.analysis.method == RegressionMethodType.FEIV:
-            raise NotImplementedError(
-                _("FEIV regression is not yet implemented")
+    def _execute_iv(self, *, df, y_data, x_data, missing):
+        if not isinstance(self.analysis, InstrumentalVariablesParams):
+            raise ValueError(
+                _("Invalid analysis parameters for IV regression")
             )
 
         iv_data_config = IvDataConfig(
@@ -370,7 +388,11 @@ class Regression:
             self.analysis.instrumental_variables,
         )
 
-    def _execute_regularized(self, df, y_data, x_data, missing):
+    def _execute_regularized(self, *, df, y_data, x_data, missing):
+        if not isinstance(self.analysis, RegularizedRegressionParams):
+            raise ValueError(
+                _("Invalid analysis parameters for regularized regression")
+            )
         alpha = self.analysis.alpha
         calculate_se = self.analysis.calculate_se
         bootstrap_iterations = self.analysis.bootstrap_iterations
