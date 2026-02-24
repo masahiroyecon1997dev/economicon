@@ -1,6 +1,7 @@
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 
 from economicon.models.common import BaseRequest, BinaryChoiceRegularization
 from economicon.models.enums import (
@@ -53,7 +54,6 @@ class RegularizedRegressionParams(BaseModel):
     )
 
 
-
 class BinaryChoiceRegressionParams(BaseModel):
     method: Literal[RegressionMethodType.LOGIT, RegressionMethodType.PROBIT]
     # 正則化のパラメータを追加
@@ -67,6 +67,11 @@ class BinaryChoiceRegressionParams(BaseModel):
 
 
 class TobitParams(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+    )
+
     method: Literal[RegressionMethodType.TOBIT]
     # 打ち切り値を追加
     left_censoring_limit: float | None = Field(

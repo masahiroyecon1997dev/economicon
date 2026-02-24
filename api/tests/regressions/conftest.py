@@ -27,6 +27,7 @@ TABLE_PANEL = "PanelData"
 TABLE_IV = "IVData"
 TABLE_TOBIT = "TobitData"
 TABLE_STRING = "StringData"
+TABLE_NAN = "NaNData"
 
 # エンドポイント
 URL_REGRESSION = "/api/analysis/regression"
@@ -225,12 +226,13 @@ def lasso_payload(  # noqa: PLR0913
     }
 
 
-def ridge_payload(
+def ridge_payload(  # noqa: PLR0913
     table=TABLE_BASIC,
     dep="y_linear",
     expl=None,
     alpha=0.5,
     has_const=True,
+    calculate_se=False,
 ):
     """Ridgeリクエストペイロードを生成"""
     if expl is None:
@@ -243,6 +245,7 @@ def ridge_payload(
         "analysis": {
             "method": "ridge",
             "alpha": alpha,
+            "calculateSe": calculate_se,
         },
         "standardError": {"method": "nonrobust"},
     }
@@ -403,6 +406,17 @@ def tables_store():
         }
     )
     manager.store_table(TABLE_STRING, df_string)
+
+    # --- NaNData (欠損値処理検証用) ---
+    x_nan = [1.0, 2.0, None, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+    df_nan = pl.DataFrame(
+        {
+            "y": [2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0],
+            "x1": x_nan,
+            "x2": [0.5, 1.0, 1.5, 2.0, None, 3.0, 3.5, 4.0, 4.5, 5.0],
+        }
+    )
+    manager.store_table(TABLE_NAN, df_nan)
 
     yield manager
     manager.clear_tables()

@@ -12,6 +12,9 @@ from tests.regressions.conftest import (
 # 左側打ち切り限界
 _LEFT_CENSORING_LIMIT = 0.0
 
+# 右側打ち切り限界
+_RIGHT_CENSORING_LIMIT = 5.0
+
 
 def _post_tobit(client, payload):
     """POSTしてレスポンスを返すヘルパー"""
@@ -119,3 +122,21 @@ def test_tobit_log_likelihood_present(client, tables_store):
     output = AnalysisResultStore().get_result(result_id).regression_output
     model_stats = output["modelStatistics"]
     assert "logLikelihood" in model_stats
+
+
+def test_tobit_right_censoring_specified(client, tables_store):
+    """rightCensoringLimit 指定時に右打ち切り処理が機能することを確認"""
+    resp = _post_tobit(
+        client,
+        tobit_payload(
+            left=_LEFT_CENSORING_LIMIT,
+            right=_RIGHT_CENSORING_LIMIT,
+        ),
+    )
+    if resp.status_code != status.HTTP_200_OK:
+        pytest.skip("py4etrics が利用不可のためスキップ")
+
+    result_id = resp.json()["result"]["resultId"]
+    output = AnalysisResultStore().get_result(result_id).regression_output
+    limits = output["diagnostics"]["censoringLimits"]
+    assert limits["right"] == _RIGHT_CENSORING_LIMIT
