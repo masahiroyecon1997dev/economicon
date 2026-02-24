@@ -3,8 +3,12 @@ AnalysisResultStore のテスト
 """
 
 import pytest
+
 from economicon.services.data.analysis_result import AnalysisResult
 from economicon.services.data.analysis_result_store import AnalysisResultStore
+
+_EXPECTED_R_SQUARED = 0.95
+_EXPECTED_RESULT_COUNT = 2
 
 
 @pytest.fixture
@@ -43,7 +47,7 @@ def test_get_result_returns_saved_result(result_store, sample_result):
     assert retrieved.name == "Test Analysis"
     assert retrieved.description == "Test Description"
     assert retrieved.table_name == "test_table"
-    assert retrieved.regression_output["r_squared"] == 0.95
+    assert retrieved.regression_output["r_squared"] == _EXPECTED_R_SQUARED
 
 
 def test_get_result_raises_key_error_for_nonexistent_id(result_store):
@@ -68,7 +72,7 @@ def test_get_all_summaries_returns_list(result_store, sample_result):
 
     summaries = result_store.get_all_summaries()
 
-    assert len(summaries) == 2
+    assert len(summaries) == _EXPECTED_RESULT_COUNT
     assert all("id" in s for s in summaries)
     assert all("name" in s for s in summaries)
     assert all("description" in s for s in summaries)
