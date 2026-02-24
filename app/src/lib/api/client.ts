@@ -1,7 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
 
-const BASE_API_PREFIX = "/api";
-
 /**
  * Tauri経由でAPIリクエストを行うクライアント
  */
@@ -36,13 +34,9 @@ export const client = {
     // Uint8Array (Vec<u8>) に変換
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    // Tauriコマンド呼び出し
-    // URLには /api を付与
-    const fullPath = `${BASE_API_PREFIX}${path}`;
-
     // upload_file コマンドの引数仕様に合わせて呼び出し
     const response = await invoke<T>("upload_file", {
-      path: fullPath,
+      path: path,
       fileData: Array.from(uint8Array), // Rust側で Vec<u8> として受け取るため配列化
       fileName: file.name,
     });
@@ -72,18 +66,16 @@ const invokeRequest = async <T>(
   body?: unknown,
   query?: unknown,
 ): Promise<{ data: T }> => {
-  const fullPath = `${BASE_API_PREFIX}${path}`;
-
   try {
     const response = await invoke<T>("proxy_request", {
       method,
-      path: fullPath,
+      path: path,
       body,
       query,
     });
     return { data: response };
   } catch (error) {
-    console.error(`API Request Failed: ${method} ${fullPath}`, error);
+    console.error(`API Request Failed: ${method} ${path}`, error);
     throw error;
   }
 };
@@ -97,18 +89,16 @@ const invokeBinaryRequest = async <T>(
   body?: unknown,
   query?: unknown,
 ): Promise<{ data: T }> => {
-  const fullPath = `${BASE_API_PREFIX}${path}`;
-
   try {
     const response = await invoke<T>("fetch_binary", {
       method,
-      path: fullPath,
+      path: path,
       body,
       query,
     });
     return { data: response };
   } catch (error) {
-    console.error(`API Request Failed: ${method} ${fullPath}`, error);
+    console.error(`API Request Failed: ${method} ${path}`, error);
     throw error;
   }
 };
