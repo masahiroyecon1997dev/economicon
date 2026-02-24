@@ -35,6 +35,7 @@ export const App = () => {
       try {
         // 設定を取得
         const resGetSettings = await api.getSettings();
+        console.log("GetSettings response:", resGetSettings);
         if (resGetSettings.code !== "OK") {
           if (isMounted) {
             await showMessageDialog(
