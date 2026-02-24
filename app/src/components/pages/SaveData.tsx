@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { exportCsvByPath, exportExcelByPath, exportParquetByPath, getFiles } from "../../lib/api/endpoints";
+import { getEconomiconAPI } from "../../api/endpoints";
+import type { ExportFileRequestBodyFormat } from "../../api/model";
+import { getFiles } from "../../lib/api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useFilesStore } from "../../stores/files";
@@ -8,7 +10,11 @@ import { useLoadingStore } from "../../stores/loading";
 import { useSettingsStore } from "../../stores/settings";
 import { useTableInfosStore } from "../../stores/tableInfos";
 import { useTableListStore } from "../../stores/tableList";
-import type { FileType, SortDirection, SortField } from "../../types/commonTypes";
+import type {
+  FileType,
+  SortDirection,
+  SortField,
+} from "../../types/commonTypes";
 import { InputText } from "../atoms/Input/InputText";
 import { Select, SelectItem } from "../atoms/Input/Select";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
@@ -18,7 +24,7 @@ import { NavigationSearchBar } from "../molecules/Navigation/NavigationSearchBar
 import { FileListTable } from "../molecules/Table/FileListTable";
 import { PageLayout } from "../templates/PageLayout";
 
-type FileFormat = 'csv' | 'excel' | 'parquet';
+type FileFormat = "csv" | "excel" | "parquet";
 
 export const SaveData = () => {
   const { t } = useTranslation();
@@ -33,29 +39,36 @@ export const SaveData = () => {
 
   const { setLoading, clearLoading } = useLoadingStore();
 
-  const [selectedTableName, setSelectedTableName] = useState(activeTableName || '');
-  const [fileName, setFileName] = useState(activeTableName || '');
-  const [fileFormat, setFileFormat] = useState<FileFormat>('csv');
+  const [selectedTableName, setSelectedTableName] = useState(
+    activeTableName || "",
+  );
+  const [fileName, setFileName] = useState(activeTableName || "");
+  const [fileFormat, setFileFormat] = useState<FileFormat>("csv");
   const [searchValue, setSearchValue] = useState("");
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-  const [errorMessage, setErrorMessage] = useState<{ tableName?: string; fileName?: string }>({});
+  const [errorMessage, setErrorMessage] = useState<{
+    tableName?: string;
+    fileName?: string;
+  }>({});
 
   const fileFormatOptions = [
-    { value: 'csv', label: 'CSV (.csv)' },
-    { value: 'excel', label: 'Excel (.xlsx)' },
-    { value: 'parquet', label: 'Parquet (.parquet)' },
+    { value: "csv", label: "CSV (.csv)" },
+    { value: "excel", label: "Excel (.xlsx)" },
+    { value: "parquet", label: "Parquet (.parquet)" },
   ];
 
   const getPathSegments = () => {
     if (!directoryPath) return [];
-    const separator = pathSeparator || '/';
-    return directoryPath.split(separator).filter(segment => segment.length > 0);
+    const separator = pathSeparator || "/";
+    return directoryPath
+      .split(separator)
+      .filter((segment) => segment.length > 0);
   };
 
   const buildPathUpToIndex = (index: number) => {
     const segments = getPathSegments();
-    const separator = pathSeparator || '/';
+    const separator = pathSeparator || "/";
 
     if (index < 0) {
       return separator;
@@ -64,10 +77,10 @@ export const SaveData = () => {
     const selectedSegments = segments.slice(0, index + 1);
     let path = selectedSegments.join(separator);
 
-    if (osName === 'Windows') {
+    if (osName === "Windows") {
       path += separator;
-    } else if (separator === '/') {
-      path = '/' + path;
+    } else if (separator === "/") {
+      path = "/" + path;
     }
 
     return path;
@@ -76,14 +89,11 @@ export const SaveData = () => {
   const changeDirectory = async (newPath: string) => {
     setLoading(true, t("Loading.Loading"));
     try {
-      const response = await getFiles(newPath);
-      if (response.code === "OK") {
-        setFiles(response.result);
-      } else {
-        await showMessageDialog(t('Error.Error'), response.message);
-      }
+      // getFilesはFilesTypeを直接返す（エラー時は例外をスロー）
+      const files = await getFiles(newPath);
+      setFiles(files);
     } catch {
-      await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
+      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
     } finally {
       clearLoading();
     }
@@ -104,21 +114,19 @@ export const SaveData = () => {
 
   const handleFileClick = async (file: FileType) => {
     if (!file.isFile) {
-      const separator = pathSeparator || '/';
-      const newPath = directoryPath === separator
-        ? separator + file.name
-        : directoryPath + separator + file.name;
+      const separator = pathSeparator || "/";
+      const newPath =
+        directoryPath === separator
+          ? separator + file.name
+          : directoryPath + separator + file.name;
 
       setLoading(true, t("Loading.Loading"));
       try {
-        const response = await getFiles(newPath);
-        if (response.code === "OK") {
-          setFiles(response.result);
-        } else {
-          await showMessageDialog(t('Error.Error'), response.message);
-        }
+        // getFilesはFilesTypeを直接返す（エラー時は例外をスロー）
+        const files = await getFiles(newPath);
+        setFiles(files);
       } catch {
-        await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
+        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
       } finally {
         clearLoading();
       }
@@ -128,12 +136,12 @@ export const SaveData = () => {
   const validateInput = (): boolean => {
     const errors: { tableName?: string; fileName?: string } = {};
 
-    if (!selectedTableName || selectedTableName.trim() === '') {
-      errors.tableName = t('ValidationMessages.TableNameRequired');
+    if (!selectedTableName || selectedTableName.trim() === "") {
+      errors.tableName = t("ValidationMessages.TableNameRequired");
     }
 
-    if (!fileName || fileName.trim() === '') {
-      errors.fileName = t('ValidationMessages.FileNameRequired');
+    if (!fileName || fileName.trim() === "") {
+      errors.fileName = t("ValidationMessages.FileNameRequired");
     }
 
     setErrorMessage(errors);
@@ -142,14 +150,14 @@ export const SaveData = () => {
 
   const getFileExtension = (): string => {
     switch (fileFormat) {
-      case 'csv':
-        return '.csv';
-      case 'excel':
-        return '.xlsx';
-      case 'parquet':
-        return '.parquet';
+      case "csv":
+        return ".csv";
+      case "excel":
+        return ".xlsx";
+      case "parquet":
+        return ".parquet";
       default:
-        return '';
+        return "";
     }
   };
 
@@ -158,65 +166,58 @@ export const SaveData = () => {
       return;
     }
 
-    setLoading(true, t('SaveDataView.SavingFile'));
+    setLoading(true, t("SaveDataView.SavingFile"));
 
     try {
       const fullFileName = fileName.endsWith(getFileExtension())
         ? fileName
         : fileName + getFileExtension();
 
-      let response;
+      // formatマッピング（FileFormat → ExportFileRequestBodyFormat）
+      const formatMap: Record<FileFormat, ExportFileRequestBodyFormat> = {
+        csv: "csv",
+        excel: "excel",
+        parquet: "parquet",
+      };
 
-      switch (fileFormat) {
-        case 'csv':
-          response = await exportCsvByPath({
-            tableName: selectedTableName,
-            directoryPath: directoryPath,
-            fileName: fullFileName,
-            separator: ',',
-          });
-          break;
-        case 'excel':
-          response = await exportExcelByPath({
-            tableName: selectedTableName,
-            directoryPath: directoryPath,
-            fileName: fullFileName,
-            sheetName: 'Sheet1',
-          });
-          break;
-        case 'parquet':
-          response = await exportParquetByPath({
-            tableName: selectedTableName,
-            directoryPath: directoryPath,
-            fileName: fullFileName,
-          });
-          break;
-      }
+      const response = await getEconomiconAPI().exportFile({
+        tableName: selectedTableName,
+        directoryPath: directoryPath,
+        fileName: fullFileName,
+        format: formatMap[fileFormat],
+        separator: fileFormat === "csv" ? "," : undefined,
+        sheetName: fileFormat === "excel" ? "Sheet1" : undefined,
+      });
 
-      if (response.code === 'OK') {
-        await showMessageDialog(t('Common.OK'), t('SaveDataView.SaveSuccess', { path: response.result.filePath }));
-        setCurrentView('DataPreview');
+      if (response.code === "OK") {
+        await showMessageDialog(
+          t("Common.OK"),
+          t("SaveDataView.SaveSuccess", { path: response.result.filePath }),
+        );
+        setCurrentView("DataPreview");
         clearLoading();
       } else {
-        await showMessageDialog(t('Error.Error'), response.message);
+        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
       }
     } catch {
-      await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
+      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
     } finally {
       clearLoading();
     }
   };
 
   const hadleCancelNoTables = async () => {
-    setCurrentView('ImportDataFile');
+    setCurrentView("ImportDataFile");
   };
 
   const handleCancel = () => {
-    setCurrentView('DataPreview');
+    setCurrentView("DataPreview");
   };
 
-  const filteredFiles = files.filter(file => {
-    const matchesSearch = file.name.toLowerCase().includes(searchValue.toLowerCase());
+  const filteredFiles = files.filter((file) => {
+    const matchesSearch = file.name
+      .toLowerCase()
+      .includes(searchValue.toLowerCase());
     return matchesSearch;
   });
 
@@ -227,58 +228,62 @@ export const SaveData = () => {
       return a.isFile ? 1 : -1;
     }
 
-    let aValue: string | number = '';
-    let bValue: string | number = '';
+    let aValue: string | number = "";
+    let bValue: string | number = "";
 
     switch (sortField) {
-      case 'name':
+      case "name":
         aValue = a.name.toLowerCase();
         bValue = b.name.toLowerCase();
         break;
-      case 'size':
-        aValue = a.isFile ? (a.size || 0) : 0;
-        bValue = b.isFile ? (b.size || 0) : 0;
+      case "size":
+        aValue = a.isFile ? a.size || 0 : 0;
+        bValue = b.isFile ? b.size || 0 : 0;
         break;
-      case 'modifiedTime':
+      case "modifiedTime":
         aValue = a.isFile ? new Date(a.modifiedTime).getTime() : 0;
         bValue = b.isFile ? new Date(b.modifiedTime).getTime() : 0;
         break;
     }
 
     if (aValue < bValue) {
-      return sortDirection === 'asc' ? -1 : 1;
+      return sortDirection === "asc" ? -1 : 1;
     }
     if (aValue > bValue) {
-      return sortDirection === 'asc' ? 1 : -1;
+      return sortDirection === "asc" ? 1 : -1;
     }
     return 0;
   });
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      if (sortDirection === 'asc') {
-        setSortDirection('desc');
-      } else if (sortDirection === 'desc') {
+      if (sortDirection === "asc") {
+        setSortDirection("desc");
+      } else if (sortDirection === "desc") {
         setSortField(null);
         setSortDirection(null);
       } else {
-        setSortDirection('asc');
+        setSortDirection("asc");
       }
     } else {
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
   return (
     <PageLayout
       title={t("SaveDataView.Title")}
-      description={tableNameList.length === 0 ? t("SaveDataView.NoTablesImported") : t("SaveDataView.Description")}
+      description={
+        tableNameList.length === 0
+          ? t("SaveDataView.NoTablesImported")
+          : t("SaveDataView.Description")
+      }
     >
       {tableNameList.length === 0 ? (
         <div className="flex flex-col justify-center h-full gap-4">
           <CancelButtonBar
-            cancelText={t('Common.Cancel')}
+            cancelText={t("Common.Cancel")}
             onCancel={hadleCancelNoTables}
           />
         </div>
@@ -286,12 +291,14 @@ export const SaveData = () => {
         <>
           <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto">
             <div className="flex flex-col gap-3">
-              <h2 className="text-lg font-bold text-black">{t("SaveDataView.SelectDirectory")}</h2>
+              <h2 className="text-lg font-bold text-black">
+                {t("SaveDataView.SelectDirectory")}
+              </h2>
               <NavigationSearchBar
                 pathSegments={getPathSegments()}
                 searchValue={searchValue}
                 searchPlaceholder={t("ImportDataFileView.SearchPlaceholder")}
-                upDirectoryTitle={t('ImportDataFileView.GoUpDirectory')}
+                upDirectoryTitle={t("ImportDataFileView.GoUpDirectory")}
                 onUpDirectory={goUpDirectory}
                 onBreadcrumbClick={handleBreadcrumbClick}
                 onSearchChange={setSearchValue}
@@ -302,9 +309,9 @@ export const SaveData = () => {
               <FileListTable
                 files={sortedFiles}
                 onFileClick={handleFileClick}
-                fileNameHeader={t('ImportDataFileView.FileNameHeader')}
-                sizeHeader={t('ImportDataFileView.SizeHeader')}
-                lastModifiedHeader={t('ImportDataFileView.LastModifiedHeader')}
+                fileNameHeader={t("ImportDataFileView.FileNameHeader")}
+                sizeHeader={t("ImportDataFileView.SizeHeader")}
+                lastModifiedHeader={t("ImportDataFileView.LastModifiedHeader")}
                 maxHeight="200px"
                 sortField={sortField}
                 sortDirection={sortDirection}
@@ -313,7 +320,9 @@ export const SaveData = () => {
             </div>
 
             <div className="bg-white dark:bg-gray-800/50 p-3 rounded-lg border border-border-color dark:border-gray-700 shrink-0">
-              <h2 className="text-main dark:text-white text-base font-bold mb-2">{t("SaveDataView.FileSettings")}</h2>
+              <h2 className="text-main dark:text-white text-base font-bold mb-2">
+                {t("SaveDataView.FileSettings")}
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <FormField
                   label={t("SaveDataView.TableName")}
@@ -327,7 +336,7 @@ export const SaveData = () => {
                       setFileName(value);
                     }}
                   >
-                    {tableNameList.map(tableName => (
+                    {tableNameList.map((tableName) => (
                       <SelectItem key={tableName} value={tableName}>
                         {tableName}
                       </SelectItem>
@@ -355,9 +364,11 @@ export const SaveData = () => {
                   <Select
                     id="file-format"
                     value={fileFormat}
-                    onValueChange={(value) => setFileFormat(value as FileFormat)}
+                    onValueChange={(value) =>
+                      setFileFormat(value as FileFormat)
+                    }
                   >
-                    {fileFormatOptions.map(option => (
+                    {fileFormatOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -368,13 +379,12 @@ export const SaveData = () => {
             </div>
           </div>
           <ActionButtonBar
-            cancelText={t('Common.Cancel')}
-            selectText={t('SaveDataView.Save')}
+            cancelText={t("Common.Cancel")}
+            selectText={t("SaveDataView.Save")}
             onCancel={handleCancel}
             onSelect={handleSave}
           />
         </>
-
       )}
     </PageLayout>
   );

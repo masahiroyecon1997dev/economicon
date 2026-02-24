@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { getFiles, getSettings, getTableList } from "./lib/api/endpoints";
+import { getEconomiconAPI } from "./api/endpoints";
+import { getFiles } from "./lib/api/endpoints";
 import { showMessageDialog } from "./lib/dialog/message";
 import { useCurrentPageStore } from "./stores/currentView";
 import { useLoadingStore } from "./stores/loading";
 import { useSettingsStore } from "./stores/settings";
 import { useTableListStore } from "./stores/tableList";
+import type { SettingsType } from "./types/commonTypes";
 
 import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
 import { MessageDialog } from "./components/molecules/Modal/MessageDialog";
@@ -29,39 +31,48 @@ export const App = () => {
     let isMounted = true;
 
     const initialize = async () => {
+      const api = getEconomiconAPI();
       try {
         // 設定を取得
-        const resGetSettings = await getSettings();
+        const resGetSettings = await api.getSettings();
         if (resGetSettings.code !== "OK") {
           if (isMounted) {
-            await showMessageDialog(t("Error.Error"), resGetSettings.message);
+            await showMessageDialog(
+              t("Error.Error"),
+              t("Error.UnexpectedError"),
+            );
           }
           return;
         }
-        // ファイル一覧を取得
-        const resGetFiles = await getFiles(
-          resGetSettings.result.defaultFolderPath,
-        );
-        if (resGetFiles.code !== "OK") {
-          if (isMounted) {
-            await showMessageDialog(t("Error.Error"), resGetFiles.message);
-          }
-          return;
-        }
+        // GetSettingsResultをアプリのSettingsType形式にマッピング
+        const apiSettings = resGetSettings.result;
+        const settings: SettingsType = {
+          osName: apiSettings.osName,
+          defaultFolderPath: apiSettings.lastOpenedPath,
+          displayRows: 100,
+          appLanguage: apiSettings.language,
+          encoding: apiSettings.encoding,
+          pathSeparator: apiSettings.osName === "Windows" ? "\\" : "/",
+        };
+        // ファイル一覧をTauriコマンドで直接取得（Pythonサーバー非経由）
+        const files = await getFiles(settings.defaultFolderPath);
         // テーブル名一覧を取得
-        const resGetTableNames = await getTableList();
+        const resGetTableNames = await api.getTableList();
         if (resGetTableNames.code !== "OK") {
           if (isMounted) {
-            await showMessageDialog(t("Error.Error"), resGetTableNames.message);
+            await showMessageDialog(
+              t("Error.Error"),
+              t("Error.UnexpectedError"),
+            );
           }
           return;
         }
         // 全て成功した場合のみストアを更新
         if (isMounted) {
-          setSettings(resGetSettings.result);
+          setSettings(settings);
           setCurrentView("ImportDataFile");
           setTableList(resGetTableNames.result.tableNameList);
-          setFiles(resGetFiles.result);
+          setFiles(files);
         }
       } catch (error) {
         console.error("App initialization error:", error);

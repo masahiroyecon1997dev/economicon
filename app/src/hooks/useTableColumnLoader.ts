@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getColumnList } from "../lib/api/endpoints";
+import { getEconomiconAPI } from "../api/endpoints";
 import { showMessageDialog } from "../lib/dialog/message";
 import { useLoadingStore } from "../stores/loading";
 import { useTableInfosStore } from "../stores/tableInfos";
@@ -28,14 +28,16 @@ export const useTableColumnLoader = (
     const loadColumnList = async (tableName: string) => {
       setLoading(true, t("Loading.Loading"));
       try {
-        const response = await getColumnList(
+        const api = getEconomiconAPI();
+        const response = await api.getColumnList({
           tableName,
-          numericOnly ? "true" : undefined,
-        );
+          // isNumberOnlyはbooleanに変更（旧APIはstring型"true"/"false"だったが新APIはbool）
+          isNumberOnly: numericOnly ? true : undefined,
+        });
         if (response.code === "OK") {
           setColumnList(response.result.columnInfoList);
         } else {
-          await showMessageDialog(t("Error.Error"), response.message);
+          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
         }
       } catch {
         await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));

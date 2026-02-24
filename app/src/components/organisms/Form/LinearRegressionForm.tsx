@@ -3,8 +3,8 @@ import { startTransition, useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { getEconomiconAPI } from "../../../api/endpoints";
 import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
-import { linearRegression } from "../../../lib/api/endpoints";
 import { showMessageDialog } from "../../../lib/dialog/message";
 import { useRegressionResultsStore } from "../../../stores/regressionResults";
 import { useTableListStore } from "../../../stores/tableList";
@@ -16,7 +16,9 @@ import { FormField } from "../../molecules/Form/FormField";
 const createRegressionSchema = (t: (key: string) => string) =>
   z.object({
     tableName: z.string().min(1, t("ValidationMessages.TableNameSelect")),
-    dependentVariable: z.string().min(1, t("ValidationMessages.DependentVariableRequired")),
+    dependentVariable: z
+      .string()
+      .min(1, t("ValidationMessages.DependentVariableRequired")),
     explanatoryVariables: z
       .array(z.string())
       .min(1, t("ValidationMessages.ExplanatoryVariablesRequired")),
@@ -41,7 +43,9 @@ export const LinearRegressionForm = ({
       autoLoadOnMount: true,
     });
   const addResult = useRegressionResultsStore((state) => state.addResult);
-  const resultsCount = useRegressionResultsStore((state) => state.results.length);
+  const resultsCount = useRegressionResultsStore(
+    (state) => state.results.length,
+  );
 
   const handleTableChange = async (value: string) => {
     setSelectedTableName(value);
@@ -65,7 +69,9 @@ export const LinearRegressionForm = ({
   });
 
   const [dependentVariable, setDependentVariable] = useState("");
-  const [explanatoryVariables, setExplanatoryVariables] = useState<string[]>([]);
+  const [explanatoryVariables, setExplanatoryVariables] = useState<string[]>(
+    [],
+  );
 
   type ActionState = {
     success: boolean;
@@ -73,34 +79,43 @@ export const LinearRegressionForm = ({
 
   const handleRegressionAction = async (
     _prevState: ActionState,
-    formData: FormData
+    formData: FormData,
   ): Promise<ActionState> => {
     const tableName = formData.get("tableName") as string;
     const dependentVariable = formData.get("dependentVariable") as string;
-    const explanatoryVariablesStr = formData.get("explanatoryVariables") as string;
+    const explanatoryVariablesStr = formData.get(
+      "explanatoryVariables",
+    ) as string;
     const explanatoryVariables = explanatoryVariablesStr
       ? explanatoryVariablesStr.split(",")
       : [];
 
     try {
-      const response = await linearRegression({
+      const api = getEconomiconAPI();
+      // 新APIはOLS固定。analysis/standardErrorフィールドが必須
+      const regressionResponse = await api.regression({
         tableName,
         dependentVariable,
         explanatoryVariables,
+        analysis: { method: "ols" },
+        standardError: { method: "nonrobust" },
       });
 
-      if (response.code === "OK" && response.result) {
-        addResult(response.result);
-        const newResultIndex = resultsCount;
-        onAnalysisComplete?.(newResultIndex);
-        return { success: true };
-      } else {
-        await showMessageDialog(
-          t("Error.Error"),
-          response.message || t("Error.UnexpectedError")
-        );
-        return { success: false };
+      if (regressionResponse.code === "OK" && regressionResponse.result) {
+        // 結果はサーバー側に保存される。resultIdで取得して既存ストアへ格納
+        const { resultId } = regressionResponse.result;
+        const resultResponse = await api.getAnalysisResult(resultId);
+        if (resultResponse.code === "OK" && resultResponse.result) {
+          // result.resultは unknown 型のためキャスト
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          addResult(resultResponse.result.result as any);
+          const newResultIndex = resultsCount;
+          onAnalysisComplete?.(newResultIndex);
+          return { success: true };
+        }
       }
+      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+      return { success: false };
     } catch (error) {
       let errorMessage = t("Error.UnexpectedError");
       if (error instanceof Error) {
@@ -138,7 +153,9 @@ export const LinearRegressionForm = ({
     const formData = new FormData();
     formData.append("tableName", data.tableName);
     formData.append("dependentVariable", data.dependentVariable);
-    data.explanatoryVariables.forEach(v => formData.append("explanatoryVariables", v));
+    data.explanatoryVariables.forEach((v) =>
+      formData.append("explanatoryVariables", v),
+    );
     // ここで直接 action を叩く
     startTransition(() => {
       submitAction(formData);
@@ -146,10 +163,7 @@ export const LinearRegressionForm = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-4"
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       {/* Hidden fields for FormData */}
       <input type="hidden" name="tableName" value={selectedTableName} />
       <input type="hidden" name="dependentVariable" value={dependentVariable} />
@@ -164,7 +178,10 @@ export const LinearRegressionForm = ({
         <h2 className="mb-2 text-sm font-bold leading-tight text-text-heading">
           {t("LinearRegressionForm.SelectDataTable")}
         </h2>
-        <FormField label={t("LinearRegressionForm.DataTable")} htmlFor="data-table">
+        <FormField
+          label={t("LinearRegressionForm.DataTable")}
+          htmlFor="data-table"
+        >
           <Select
             id="data-table"
             {...register("tableName")}
@@ -202,7 +219,9 @@ export const LinearRegressionForm = ({
           />
           <VariableSelectorField
             label={t("LinearRegressionForm.ExplanatoryVariables")}
-            description={t("LinearRegressionForm.ExplanatoryVariablesDescription")}
+            description={t(
+              "LinearRegressionForm.ExplanatoryVariablesDescription",
+            )}
             mode="multiple"
             columns={columnList}
             selectedValues={explanatoryVariables}
@@ -243,7 +262,7 @@ export const LinearRegressionForm = ({
             : t("LinearRegressionForm.RunAnalysis")
         }
         onCancel={onCancel}
-        onSelect={() => { }}
+        onSelect={() => {}}
         onSelectType="submit"
       />
     </form>
