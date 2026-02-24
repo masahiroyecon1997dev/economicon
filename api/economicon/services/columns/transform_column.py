@@ -106,7 +106,10 @@ class TransformColumn:
             else:
                 raise ProcessingError(
                     error_code=ErrorCode.TRANSFORM_METHOD_ERROR,
-                    message=f"Unsupported transform method: {self.transform_method}",
+                    message=(
+                        "Unsupported transform method: "
+                        f"{self.transform_method}"
+                    ),
                     detail=str(self.transform_method),
                 )
 
@@ -129,7 +132,8 @@ class TransformColumn:
             return result
         except Exception as e:
             message = _(
-                "An unexpected error occurred during column transformation processing"
+                "An unexpected error occurred during column "
+                "transformation processing"
             )
             raise ProcessingError(
                 error_code=ErrorCode.TRANSFORM_COLUMN_PROCESS_ERROR,

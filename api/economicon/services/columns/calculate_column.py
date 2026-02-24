@@ -35,7 +35,9 @@ class CalculateColumn:
             "table_name": "tableName",
             "new_column_name": "newColumnName",
             "calculation_expression": "calculationExpression",
-            "column_name_in_calculation_expression": "columnNameInCalculationExpression",
+            "column_name_in_calculation_expression": (
+                "columnNameInCalculationExpression"
+            ),
             "add_position_column": "addPositionColumn",
         }
 
