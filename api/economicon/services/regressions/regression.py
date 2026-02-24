@@ -25,6 +25,9 @@ from economicon.services.regressions.common import (
     prepare_tobit_dataframe,
 )
 from economicon.services.regressions.fitters import (
+    IVInput,
+    RegularizedRegressionInput,
+    TobitInput,
     fit_fe,
     fit_iv,
     fit_lasso,
@@ -91,6 +94,14 @@ class Regression:
             "endogenous_variables": "endogenousVariables",
             "left_censoring_limit": "leftCensoringLimit",
             "right_censoring_limit": "rightCensoringLimit",
+        }
+        self._execution_map = {
+            OLSParams: self._execute_ols,
+            BinaryChoiceRegressionParams: self._execute_binary_choice,
+            TobitParams: self._execute_tobit,
+            PanelDataParams: self._execute_panel,
+            InstrumentalVariablesParams: self._execute_iv,
+            RegularizedRegressionParams: self._execute_regularized,
         }
 
     def validate(self):
@@ -205,163 +216,14 @@ class Regression:
             )
 
             # モデルのフィット
-            analysis_result = None
-            match self.analysis:
-                case OLSParams():
-                    model_result = fit_ols(y_data, x_data, missing)
-                    model_result = apply_standard_errors(
-                        model_result,
-                        self.standard_error,
-                    )
-                    analysis_result = self._format_result(model_result)
-                case BinaryChoiceRegressionParams(
-                    method=RegressionMethodType.LOGIT
-                ):
-                    model_result = fit_logit(y_data, x_data, missing)
-                    model_result = apply_standard_errors(
-                        model_result,
-                        self.standard_error,
-                    )
-                    analysis_result = self._format_result(model_result)
-                case BinaryChoiceRegressionParams(
-                    method=RegressionMethodType.PROBIT
-                ):
-                    model_result = fit_probit(y_data, x_data, missing)
-                    model_result = apply_standard_errors(
-                        model_result, self.standard_error
-                    )
-                    analysis_result = self._format_result(model_result)
-                case TobitParams():
-                    df_pandas = prepare_tobit_dataframe(
-                        df,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        missing,
-                    )
-                    model_result = fit_tobit(
-                        df_pandas,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        self.has_const,
-                        self.analysis.left_censoring_limit,
-                        self.analysis.right_censoring_limit,
-                    )
-                    analysis_result = self._tobit_format_result(
-                        model_result,
-                        self.analysis.left_censoring_limit,
-                        self.analysis.right_censoring_limit,
-                    )
-                case PanelDataParams(method=RegressionMethodType.FE):
-                    df_pandas = prepare_panel_dataframe(
-                        df,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        self.analysis.entity_id_column,
-                        missing,
-                        self.analysis.time_column,
-                    )
-                    model_result = fit_fe(
-                        df_pandas,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        self.standard_error.method,
-                    )
-                    analysis_result = self._fe_format_result(
-                        model_result, self.analysis.entity_id_column
-                    )
-                case PanelDataParams(method=RegressionMethodType.RE):
-                    df_pandas = prepare_panel_dataframe(
-                        df,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        self.analysis.entity_id_column,
-                        missing,
-                        self.analysis.time_column,
-                    )
-                    model_result = fit_re(
-                        df_pandas,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        self.standard_error.method,
-                    )
-                    analysis_result = self._re_format_result(
-                        model_result, self.analysis.entity_id_column
-                    )
-                case InstrumentalVariablesParams(
-                    method=RegressionMethodType.IV
-                ):
-                    df_pandas = prepare_iv_dataframe(
-                        df,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        self.analysis.endogenous_variables,
-                        self.analysis.instrumental_variables,
-                        missing,
-                    )
-                    model_result = fit_iv(
-                        df_pandas,
-                        self.dependent_variable,
-                        self.explanatory_variables,
-                        self.analysis.endogenous_variables,
-                        self.analysis.instrumental_variables,
-                        self.standard_error.method,
-                        has_const=self.has_const,
-                    )
-                    model_result = apply_standard_errors(
-                        model_result,
-                        self.standard_error,
-                    )
-                    analysis_result = self._iv_format_result(
-                        model_result,
-                        self.analysis.endogenous_variables,
-                        self.analysis.instrumental_variables,
-                    )
-                case InstrumentalVariablesParams(
-                    method=RegressionMethodType.FEIV
-                ):
-                    raise NotImplementedError(
-                        _("FEIV regression is not yet implemented")
-                    )
-                case RegularizedRegressionParams(
-                    method=RegressionMethodType.LASSO
-                ):
-                    alpha = self.analysis.alpha
-                    calculate_se = self.analysis.calculate_se
-                    bootstrap_iterations = self.analysis.bootstrap_iterations
-                    model_result, coef_scaled = fit_lasso(
-                        y_data,
-                        x_data,
-                        self.has_const,
-                        alpha,
-                        missing,
-                        calculate_se,
-                        bootstrap_iterations,
-                    )
-                    analysis_result = self._format_regularized_result(
-                        model_result, coef_scaled
-                    )
-                case RegularizedRegressionParams(
-                    method=RegressionMethodType.RIDGE
-                ):
-                    alpha = self.analysis.alpha
-                    calculate_se = self.analysis.calculate_se
-                    bootstrap_iterations = self.analysis.bootstrap_iterations
-                    model_result, coef_scaled = fit_ridge(
-                        y_data,
-                        x_data,
-                        self.has_const,
-                        alpha,
-                        missing,
-                        calculate_se,
-                        bootstrap_iterations,
-                    )
-                    analysis_result = self._format_regularized_result(
-                        model_result, coef_scaled
-                    )
-                case _:
-                    raise NotImplementedError(
-                        _("Specified regression method is not supported")
-                    )
+            analysis_type = type(self.analysis)
+            if analysis_type not in self._execution_map:
+                raise NotImplementedError(
+                    _("Specified regression method is not supported")
+                )
+
+            execute_method = self._execution_map[analysis_type]
+            analysis_result = execute_method(df, y_data, x_data, missing)
 
             # 分析結果をストアに保存
             analysis_result = AnalysisResult(
@@ -378,11 +240,153 @@ class Regression:
             }
             # IDのみを返却
             return result
+        except ProcessingError:
+            raise
         except Exception as e:
             raise ProcessingError(
                 error_code=ErrorCode.REGRESSION_PROCESS_ERROR,
                 message=f"Unexpected error: {str(e)}",
             ) from e
+
+    def _execute_ols(self, df, y_data, x_data, missing):
+        model_result = fit_ols(y_data, x_data, missing)
+        model_result = apply_standard_errors(
+            model_result,
+            self.standard_error,
+        )
+        return self._format_result(model_result)
+
+    def _execute_binary_choice(self, df, y_data, x_data, missing):
+        if self.analysis.method == RegressionMethodType.LOGIT:
+            model_result = fit_logit(y_data, x_data, missing)
+        elif self.analysis.method == RegressionMethodType.PROBIT:
+            model_result = fit_probit(y_data, x_data, missing)
+        else:
+            raise NotImplementedError(
+                _("Specified regression method is not supported")
+            )
+
+        model_result = apply_standard_errors(
+            model_result,
+            self.standard_error,
+        )
+        return self._format_result(model_result)
+
+    def _execute_tobit(self, df, y_data, x_data, missing):
+        df_pandas = prepare_tobit_dataframe(
+            df,
+            self.dependent_variable,
+            self.explanatory_variables,
+            missing,
+        )
+        data_input = TobitInput(
+            df_pandas=df_pandas,
+            dependent_variable=self.dependent_variable,
+            explanatory_variables=self.explanatory_variables,
+            has_const=self.has_const,
+            left_censoring_limit=self.analysis.left_censoring_limit,
+            right_censoring_limit=self.analysis.right_censoring_limit,
+        )
+        model_result = fit_tobit(data_input)
+        return self._tobit_format_result(
+            model_result,
+            self.analysis.left_censoring_limit,
+            self.analysis.right_censoring_limit,
+        )
+
+    def _execute_panel(self, df, y_data, x_data, missing):
+        df_pandas = prepare_panel_dataframe(
+            df,
+            self.dependent_variable,
+            self.explanatory_variables,
+            self.analysis.entity_id_column,
+            missing,
+            self.analysis.time_column,
+        )
+        if self.analysis.method == RegressionMethodType.FE:
+            model_result = fit_fe(
+                df_pandas,
+                self.dependent_variable,
+                self.explanatory_variables,
+                self.standard_error.method,
+            )
+            return self._fe_format_result(
+                model_result, self.analysis.entity_id_column
+            )
+        elif self.analysis.method == RegressionMethodType.RE:
+            model_result = fit_re(
+                df_pandas,
+                self.dependent_variable,
+                self.explanatory_variables,
+                self.standard_error.method,
+            )
+            return self._re_format_result(
+                model_result, self.analysis.entity_id_column
+            )
+        else:
+            raise NotImplementedError(
+                _("Specified regression method is not supported")
+            )
+
+    def _execute_iv(self, df, y_data, x_data, missing):
+        if self.analysis.method == RegressionMethodType.FEIV:
+            raise NotImplementedError(
+                _("FEIV regression is not yet implemented")
+            )
+
+        df_pandas = prepare_iv_dataframe(
+            df,
+            self.dependent_variable,
+            self.explanatory_variables,
+            self.analysis.endogenous_variables,
+            self.analysis.instrumental_variables,
+            missing,
+        )
+        data_input = IVInput(
+            df_pandas=df_pandas,
+            dependent_variable=self.dependent_variable,
+            explanatory_variables=self.explanatory_variables,
+            endogenous_variables=self.analysis.endogenous_variables,
+            instrumental_variables=self.analysis.instrumental_variables,
+            standard_error_method=self.standard_error.method,
+            has_const=self.has_const,
+        )
+        model_result = fit_iv(data_input)
+        model_result = apply_standard_errors(
+            model_result,
+            self.standard_error,
+        )
+        return self._iv_format_result(
+            model_result,
+            self.analysis.endogenous_variables,
+            self.analysis.instrumental_variables,
+        )
+
+    def _execute_regularized(self, df, y_data, x_data, missing):
+        alpha = self.analysis.alpha
+        calculate_se = self.analysis.calculate_se
+        bootstrap_iterations = self.analysis.bootstrap_iterations
+
+        data_input = RegularizedRegressionInput(
+            y_data=y_data,
+            x_data=x_data,
+            has_const=self.has_const,
+            alpha=alpha,
+            missing=missing,
+            calculate_se=calculate_se,
+            bootstrap_iterations=bootstrap_iterations,
+        )
+
+        if self.analysis.method == RegressionMethodType.LASSO:
+            model_result, coef_scaled = fit_lasso(data_input)
+        elif self.analysis.method == RegressionMethodType.RIDGE:
+            model_result, coef_scaled = fit_ridge(data_input)
+        else:
+            raise NotImplementedError(
+                _("Specified regression method is not supported")
+            )
+
+        return self._format_regularized_result(model_result, coef_scaled)
 
     def _format_result(self, model_result: Any) -> dict:
         """

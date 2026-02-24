@@ -47,7 +47,8 @@ def test_input_cell_data_success(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("TestTable").table
-    assert df["A"][1] == 99  # noqa: PLR2004
+    expected_value = 99
+    assert df["A"][1] == expected_value
 
 
 def test_input_cell_data_success_with_string(client, tables_store):
