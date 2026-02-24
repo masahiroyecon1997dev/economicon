@@ -1,12 +1,3 @@
-export type SettingsType = {
-  osName: string;
-  defaultFolderPath: string;
-  displayRows: number;
-  appLanguage: string;
-  encoding: string;
-  pathSeparator: string;
-};
-
 export type FileType = {
   name: string;
   isFile: boolean;
