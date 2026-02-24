@@ -47,18 +47,8 @@ class SettingsStore:
         Returns:
             dict: デフォルト設定の辞書
         """
-        os_system = platform.system()
-        os_name = "Windows"
-
-        if os_system == "Windows":
-            os_name = "Windows"
-        elif os_system == "Darwin" or os_system == "MacOs":
-            os_name = "macOS"
-        elif os_system == "Linux":
-            os_name = "Linux"
 
         return {
-            "os_name": os_name,
             "general": {
                 "language": "ja",
                 "last_opened_path": str(Path.home()).replace(os.sep, "/"),
@@ -216,7 +206,6 @@ class SettingsStore:
 
     def update_settings(
         self,
-        os_name: str | None = None,
         language: str | None = None,
         last_opened_path: str | None = None,
         theme: str | None = None,
