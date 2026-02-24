@@ -1,9 +1,10 @@
-import * as RadixTabs from '@radix-ui/react-tabs';
+import * as RadixTabs from "@radix-ui/react-tabs";
 import { UploadCloud } from "lucide-react";
 import { useCallback, useState } from "react";
-import { useDropzone } from 'react-dropzone';
+import { useDropzone } from "react-dropzone";
 import { useTranslation } from "react-i18next";
-import { getFiles, importCsvByPath, importExcelByPath, importParquetByPath } from "../../lib/api/endpoints";
+import { getEconomiconAPI } from "../../api/endpoints";
+import { getFiles } from "../../lib/api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
@@ -12,7 +13,12 @@ import { useLoadingStore } from "../../stores/loading";
 import { useSettingsStore } from "../../stores/settings";
 import { useTableInfosStore } from "../../stores/tableInfos";
 import { useTableListStore } from "../../stores/tableList";
-import type { FileType, SortDirection, SortField, TauriFile } from "../../types/commonTypes";
+import type {
+  FileType,
+  SortDirection,
+  SortField,
+  TauriFile,
+} from "../../types/commonTypes";
 import { CancelButtonBar } from "../molecules/ActionBar/CancelButtonBar";
 import { NavigationSearchBar } from "../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../molecules/Table/FileListTable";
@@ -38,8 +44,10 @@ export const ImportDataFile = () => {
 
   // Dialog State
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [selectedFileInfo, setSelectedFileInfo] = useState<{ path: string; name: string } | null>(null);
-
+  const [selectedFileInfo, setSelectedFileInfo] = useState<{
+    path: string;
+    name: string;
+  } | null>(null);
 
   // ドロップゾーンのonDropハンドラ
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -51,7 +59,6 @@ export const ImportDataFile = () => {
       // 型定義にはないので any キャストを使用、または @types/react-dropzoneの内容を確認
       const filePath = (file as TauriFile).path;
       if (filePath) {
-
         setSelectedFileInfo({ path: filePath, name: file.name });
         setIsImportDialogOpen(true);
       } else {
@@ -68,20 +75,23 @@ export const ImportDataFile = () => {
     noClick: true, // クリックでファイル選択ダイアログを開かない（今回はD&D専用エリアとするため）
     multiple: false,
     accept: {
-      'text/csv': ['.csv'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-      'application/vnd.ms-excel': ['.xls'],
+      "text/csv": [".csv"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+        ".xlsx",
+      ],
+      "application/vnd.ms-excel": [".xls"],
       // parquetはMIMEタイプが決まっていないことが多いので拡張子で
-      'application/octet-stream': ['.parquet']
-    }
+      "application/octet-stream": [".parquet"],
+    },
   });
-
 
   // ファイルパスを分割するヘルパー関数
   const getPathSegments = () => {
     if (!directoryPath) return [];
     const separator = pathSeparator || "/";
-    return directoryPath.split(separator).filter((segment) => segment.length > 0);
+    return directoryPath
+      .split(separator)
+      .filter((segment) => segment.length > 0);
   };
 
   // 指定したインデックスまでのパスを構築するヘルパー関数
@@ -100,9 +110,9 @@ export const ImportDataFile = () => {
   const changeDirectory = async (newPath: string) => {
     setLoading(true, t("Loading.Loading"));
     try {
-      const response = await getFiles(newPath);
-      if (response.code === "OK") setFiles(response.result);
-      else await showMessageDialog(t("Error.Error"), response.message);
+      // getFilesはFilesTypeを直接返す（エラー時は例外をスロー）
+      const files = await getFiles(newPath);
+      setFiles(files);
     } catch {
       await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
     } finally {
@@ -135,9 +145,9 @@ export const ImportDataFile = () => {
           : directoryPath + separator + file.name;
       setLoading(true, t("Loading.Loading"));
       try {
-        const response = await getFiles(newPath);
-        if (response.code === "OK") setFiles(response.result);
-        else await showMessageDialog(t("Error.Error"), response.message);
+        // getFilesはFilesTypeを直接返す（エラー時は例外をスロー）
+        const files = await getFiles(newPath);
+        setFiles(files);
       } catch {
         await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
       } finally {
@@ -145,47 +155,35 @@ export const ImportDataFile = () => {
       }
     } else {
       setSelectedFileInfo({
-        path: directoryPath + (pathSeparator || '/') + file.name,
-        name: file.name
+        path: directoryPath + (pathSeparator || "/") + file.name,
+        name: file.name,
       });
       setIsImportDialogOpen(true);
     }
   };
 
-  const executeImport = async (settings: { tableName: string; sheetName?: string; separator?: string }) => {
+  const executeImport = async (settings: {
+    tableName: string;
+    sheetName?: string;
+    separator?: string;
+  }) => {
     if (!selectedFileInfo) return;
 
     setLoading(true, t("Loading.Loading"));
     try {
-      let loadTableName = '';
-      const { path, name } = selectedFileInfo;
-      let response;
-      const lowerName = name.toLowerCase();
+      let loadTableName = "";
+      const { path } = selectedFileInfo;
 
-      if (lowerName.endsWith('.csv')) {
-        response = await importCsvByPath({
-          filePath: path,
-          tableName: settings.tableName,
-          separator: settings.separator || ',',
-        });
-      } else if (lowerName.endsWith('.xlsx') || lowerName.endsWith('.xls')) {
-        response = await importExcelByPath({
-          filePath: path,
-          tableName: settings.tableName,
-          sheetName: settings.sheetName || '',
-        });
-      } else if (lowerName.endsWith('.parquet')) {
-        response = await importParquetByPath({
-          filePath: path,
-          tableName: settings.tableName,
-        });
-      } else {
-        await showMessageDialog(t('Error.Error'), t('ImportDataFileView.UnsupportedFileType'));
-        return;
-      }
+      // 新APIは拡張子る自動判定し、CSV/Excel/Parquetを共用の1エンドポイントで処理
+      const response = await getEconomiconAPI().importFile({
+        filePath: path,
+        tableName: settings.tableName,
+        separator: settings.separator,
+        sheetName: settings.sheetName,
+      });
 
       if (response && response.code !== "OK") {
-        await showMessageDialog(t('Error.Error'), response.message);
+        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
         return;
       }
 
@@ -196,18 +194,16 @@ export const ImportDataFile = () => {
         addTableInfo(resTableInfo);
         setCurrentView("DataPreview");
       }
-
     } catch (e: unknown) {
       console.error(e);
-      await showMessageDialog(t('Error.Error'), t('Error.UnexpectedError'));
+      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
     } finally {
       clearLoading();
     }
   };
 
-
   const filteredFiles = files.filter((file) =>
-    file.name.toLowerCase().includes(searchValue.toLowerCase())
+    file.name.toLowerCase().includes(searchValue.toLowerCase()),
   );
 
   const sortedFiles = [...filteredFiles].sort((a, b) => {
@@ -236,7 +232,13 @@ export const ImportDataFile = () => {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
+      setSortDirection(
+        sortDirection === "asc"
+          ? "desc"
+          : sortDirection === "desc"
+            ? null
+            : "asc",
+      );
       if (sortDirection === "desc") setSortField(null);
     } else {
       setSortField(field);
@@ -258,20 +260,23 @@ export const ImportDataFile = () => {
         onImport={executeImport}
       />
 
-      <RadixTabs.Root defaultValue="dragDrop" className="flex w-full flex-col gap-4">
+      <RadixTabs.Root
+        defaultValue="dragDrop"
+        className="flex w-full flex-col gap-4"
+      >
         <RadixTabs.List className="flex w-full border-b border-gray-200">
           <RadixTabs.Trigger
             value="dragDrop"
             className="group relative flex h-9 items-center justify-center px-4 text-sm font-medium text-gray-500 hover:text-gray-700 data-[state=active]:font-semibold data-[state=active]:text-gray-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
           >
-            {t('ImportDataFileView.DragAndDropTab')}
+            {t("ImportDataFileView.DragAndDropTab")}
             <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-gray-900 opacity-0 transition-opacity group-data-[state=active]:opacity-100" />
           </RadixTabs.Trigger>
           <RadixTabs.Trigger
             value="fileSelect"
             className="group relative flex h-9 items-center justify-center px-4 text-sm font-medium text-gray-500 hover:text-gray-700 data-[state=active]:font-semibold data-[state=active]:text-gray-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
           >
-            {t('ImportDataFileView.FileSelectTab')}
+            {t("ImportDataFileView.FileSelectTab")}
             <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-gray-900 opacity-0 transition-opacity group-data-[state=active]:opacity-100" />
           </RadixTabs.Trigger>
         </RadixTabs.List>
@@ -279,21 +284,31 @@ export const ImportDataFile = () => {
         <RadixTabs.Content value="dragDrop" className="flex-1 outline-none">
           <div
             {...getRootProps()}
-            className={`flex h-100 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400 bg-gray-50"
-              }`}
+            className={`flex h-100 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
+              isDragActive
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300 hover:border-gray-400 bg-gray-50"
+            }`}
           >
             <input {...getInputProps()} />
-            <UploadCloud className={`mb-4 h-16 w-16 ${isDragActive ? "text-blue-500" : "text-gray-400"}`} />
+            <UploadCloud
+              className={`mb-4 h-16 w-16 ${isDragActive ? "text-blue-500" : "text-gray-400"}`}
+            />
             <h3 className="mb-2 text-lg font-semibold text-gray-700">
-              {isDragActive ? t('ImportDataFileView.DragDropAreaTitleActive') : t('ImportDataFileView.DragDropAreaTitle')}
+              {isDragActive
+                ? t("ImportDataFileView.DragDropAreaTitleActive")
+                : t("ImportDataFileView.DragDropAreaTitle")}
             </h3>
             <p className="text-sm text-gray-500">
-              {t('ImportDataFileView.DragDropAreaDescription')}
+              {t("ImportDataFileView.DragDropAreaDescription")}
             </p>
           </div>
         </RadixTabs.Content>
 
-        <RadixTabs.Content value="fileSelect" className="flex flex-col gap-1.5 md:gap-3 shrink-0 outline-none">
+        <RadixTabs.Content
+          value="fileSelect"
+          className="flex flex-col gap-1.5 md:gap-3 shrink-0 outline-none"
+        >
           <NavigationSearchBar
             pathSegments={getPathSegments()}
             searchValue={searchValue}
