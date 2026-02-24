@@ -3402,11 +3402,6 @@
       },
       "GetSettingsResult": {
         "properties": {
-          "osName": {
-            "type": "string",
-            "title": "OS Name",
-            "description": "\u5b9f\u884c\u74b0\u5883\u306eOS\u540d\uff08Windows / macOS / Linux\uff09"
-          },
           "language": {
             "type": "string",
             "title": "Language",
@@ -3435,7 +3430,6 @@
         },
         "type": "object",
         "required": [
-          "osName",
           "language",
           "lastOpenedPath",
           "theme",

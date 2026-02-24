@@ -1,18 +1,17 @@
+import type { GetSettingsResult } from "@/api/model";
 import { create } from "zustand";
-import type { SettingsType } from "../types/commonTypes";
 
 export type SettingsActions = {
-  setSettings: (newSettings: SettingsType) => void;
+  setSettings: (newSettings: GetSettingsResult) => void;
 };
-type SettingsStore = SettingsType & SettingsActions;
+type SettingsStore = GetSettingsResult & SettingsActions;
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
-  osName: "",
-  defaultFolderPath: "",
-  displayRows: 0,
-  appLanguage: "",
+  language: "",
+  lastOpenedPath: "",
+  theme: "",
   encoding: "",
-  pathSeparator: "",
+  logPath: "",
   setSettings: (newSettings) => {
     set(newSettings);
   },

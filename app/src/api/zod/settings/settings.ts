@@ -26,7 +26,6 @@ export const getSettingsResponseCodeDefault = `OK`;
 export const GetSettingsResponse = zod.object({
   "code": zod.string().default(getSettingsResponseCodeDefault).describe('レスポンスコード'),
   "result": zod.object({
-  "osName": zod.string().describe('実行環境のOS名（Windows \/ macOS \/ Linux）'),
   "language": zod.string().describe('アプリケーションの表示言語（ja: 日本語, en: 英語）'),
   "lastOpenedPath": zod.string().describe('最後に開いたフォルダパス'),
   "theme": zod.string().describe('アプリケーションのテーマ（light \/ dark）'),

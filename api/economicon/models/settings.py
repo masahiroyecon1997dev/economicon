@@ -16,13 +16,6 @@ class GetSettingsRequestBody(BaseRequest):
 class GetSettingsResult(BaseResult):
     """アプリケーション設定取得レスポンス"""
 
-    os_name: Annotated[
-        str,
-        Field(
-            title="OS Name",
-            description="実行環境のOS名（Windows / macOS / Linux）",
-        ),
-    ]
     language: Annotated[
         str,
         Field(

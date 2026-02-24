@@ -10,7 +10,6 @@ import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useFilesStore } from "../../stores/files";
 import { useLoadingStore } from "../../stores/loading";
-import { useSettingsStore } from "../../stores/settings";
 import { useTableInfosStore } from "../../stores/tableInfos";
 import { useTableListStore } from "../../stores/tableList";
 import type {
@@ -27,11 +26,10 @@ import { PageLayout } from "../templates/PageLayout";
 
 export const ImportDataFile = () => {
   const { t } = useTranslation();
+  const pathSeparator = "/";
   const files = useFilesStore((state) => state.files);
   const directoryPath = useFilesStore((state) => state.directoryPath);
   const setFiles = useFilesStore((state) => state.setFiles);
-  const osName = useSettingsStore((state) => state.osName);
-  const pathSeparator = useSettingsStore((state) => state.pathSeparator);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
   const addTableList = useTableListStore((state) => state.addTableName);
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
@@ -88,21 +86,19 @@ export const ImportDataFile = () => {
   // ファイルパスを分割するヘルパー関数
   const getPathSegments = () => {
     if (!directoryPath) return [];
-    const separator = pathSeparator || "/";
     return directoryPath
-      .split(separator)
+      .split(pathSeparator)
       .filter((segment) => segment.length > 0);
   };
 
   // 指定したインデックスまでのパスを構築するヘルパー関数
   const buildPathUpToIndex = (index: number) => {
     const segments = getPathSegments();
-    const separator = pathSeparator || "/";
-    if (index < 0) return separator;
+    if (index < 0) return pathSeparator;
     const selectedSegments = segments.slice(0, index + 1);
-    let path = selectedSegments.join(separator);
-    if (osName === "Windows") path += separator;
-    else if (separator === "/") path = "/" + path;
+    let path = selectedSegments.join(pathSeparator);
+    if (osName === "Windows") path += pathSeparator;
+    else if (pathSeparator === "/") path = "/" + path;
     return path;
   };
 
@@ -138,11 +134,10 @@ export const ImportDataFile = () => {
   // ファイルクリック処理
   const handleFileClick = async (file: FileType) => {
     if (!file.isFile) {
-      const separator = pathSeparator || "/";
       const newPath =
-        directoryPath === separator
-          ? separator + file.name
-          : directoryPath + separator + file.name;
+        directoryPath === pathSeparator
+          ? pathSeparator + file.name
+          : directoryPath + pathSeparator + file.name;
       setLoading(true, t("Loading.Loading"));
       try {
         // getFilesはFilesTypeを直接返す（エラー時は例外をスロー）
@@ -155,7 +150,7 @@ export const ImportDataFile = () => {
       }
     } else {
       setSelectedFileInfo({
-        path: directoryPath + (pathSeparator || "/") + file.name,
+        path: directoryPath + pathSeparator + file.name,
         name: file.name,
       });
       setIsImportDialogOpen(true);

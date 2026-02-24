@@ -9,8 +9,6 @@
  * アプリケーション設定取得レスポンス
  */
 export interface GetSettingsResult {
-  /** 実行環境のOS名（Windows / macOS / Linux） */
-  osName: string;
   /** アプリケーションの表示言語（ja: 日本語, en: 英語） */
   language: string;
   /** 最後に開いたフォルダパス */
