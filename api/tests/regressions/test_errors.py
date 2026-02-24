@@ -7,6 +7,7 @@ from economicon.core.enums import ErrorCode
 from economicon.services.data.tables_store import TablesStore
 from tests.regressions.conftest import (
     TABLE_BASIC,
+    TABLE_NAN,
     TABLE_PANEL,
     TABLE_STRING,
     URL_REGRESSION,
@@ -193,6 +194,15 @@ class TestDataNotFound400:
     def test_nonexistent_entity_id_column_for_fe(self, client, tables_store):
         """FE モデルで存在しない entityIdColumn を指定した場合は 400"""
         payload = fe_payload(entity_col="nonexistent_entity")
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.DATA_NOT_FOUND
+        assert "は存在しません。" in data["message"]
+
+    def test_nonexistent_time_column_for_fe(self, client, tables_store):
+        """FE モデルで存在しない timeColumn を指定した場合は 400"""
+        payload = fe_payload(time_col="nonexistent_time")
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -388,3 +398,41 @@ class TestBoundaryValues:
         data = resp.json()
         assert resp.status_code == status.HTTP_200_OK
         assert data["code"] == "OK"
+
+
+# ─────────────────────────────────────────────
+# 欠損値処理エラーテスト
+# ─────────────────────────────────────────────
+
+
+class TestMissingValueHandling:
+    """欠損値処理モードのテスト"""
+
+    def test_missing_value_error_mode(self, client, tables_store):
+        """missingValueHandling='error'の場合、NaNありデータは 500 を返す"""
+        payload = {
+            "tableName": TABLE_NAN,
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": True,
+            "missingValueHandling": "error",
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
+    def test_missing_value_remove_mode(self, client, tables_store):
+        """missingValueHandling='remove'の場合、NaN行を除去して正常終了する"""
+        payload = {
+            "tableName": TABLE_NAN,
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": True,
+            "missingValueHandling": "remove",
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.json()["code"] == "OK"

@@ -3,9 +3,15 @@ AnalysisResultStore のテスト
 """
 
 import pytest
+from fastapi import status
 
 from economicon.services.data.analysis_result import AnalysisResult
 from economicon.services.data.analysis_result_store import AnalysisResultStore
+from tests.regressions.conftest import (
+    URL_REGRESSION,
+    URL_RESULTS,
+    ols_payload,
+)
 
 _EXPECTED_R_SQUARED = 0.95
 _EXPECTED_RESULT_COUNT = 2
@@ -123,3 +129,66 @@ def test_singleton_pattern(result_store):
     store2 = AnalysisResultStore()
 
     assert store1 is store2
+
+
+# -----------------------------------------------------------
+# API ルーターテスト (GET/DELETE 結果エンドポイント)
+# -----------------------------------------------------------
+
+
+def test_get_all_results_api(client, tables_store):
+    """GET /results が全結果サマリーを返すことを確認"""
+    # OLSの実行で結果を作成
+    client.post(URL_REGRESSION, json=ols_payload())
+
+    resp = client.get(URL_RESULTS)
+    assert resp.status_code == status.HTTP_200_OK
+    data = resp.json()
+    assert data["code"] == "OK"
+    assert "results" in data["result"]
+    assert isinstance(data["result"]["results"], list)
+
+
+def test_get_result_by_id_api(client, tables_store):
+    """GET /results/{id} が指定結果の詳細を返すことを確認"""
+    resp_reg = client.post(URL_REGRESSION, json=ols_payload())
+    result_id = resp_reg.json()["result"]["resultId"]
+
+    resp = client.get(f"{URL_RESULTS}/{result_id}")
+    assert resp.status_code == status.HTTP_200_OK
+    data = resp.json()
+    assert data["code"] == "OK"
+    result = data["result"]
+    assert result["id"] == result_id
+    assert "regressionOutput" in result
+    assert "createdAt" in result
+
+
+def test_delete_result_by_id_api(client, tables_store):
+    """DELETE /results/{id} が結果を削除し deletedResultId を返すことを確認"""
+    resp_reg = client.post(URL_REGRESSION, json=ols_payload())
+    result_id = resp_reg.json()["result"]["resultId"]
+
+    resp = client.delete(f"{URL_RESULTS}/{result_id}")
+    assert resp.status_code == status.HTTP_200_OK
+    data = resp.json()
+    assert data["code"] == "OK"
+    assert data["result"]["deletedResultId"] == result_id
+
+    # 削除後は取得不可になる（KeyError が TestClient 上で例外として伝播する）
+    with pytest.raises(KeyError, match=result_id):
+        client.get(f"{URL_RESULTS}/{result_id}")
+
+
+def test_clear_all_results_api(client, tables_store):
+    """DELETE /results が全結果を削除することを確認"""
+    client.post(URL_REGRESSION, json=ols_payload())
+    client.post(URL_REGRESSION, json=ols_payload())
+
+    resp = client.delete(URL_RESULTS)
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json()["code"] == "OK"
+
+    # 削除後は空になる
+    resp_list = client.get(URL_RESULTS)
+    assert resp_list.json()["result"]["results"] == []
