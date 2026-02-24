@@ -15,7 +15,7 @@ class SettingsInfo:
     _encoding: str
     _log_path: str
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         os_name: str,
         language: str,

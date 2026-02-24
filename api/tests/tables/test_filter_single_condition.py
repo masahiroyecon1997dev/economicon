@@ -59,7 +59,8 @@ def test_filter_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 2  # noqa: PLR2004
+    expected_row_count = 2
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [2, 2]
 
 
@@ -80,7 +81,8 @@ def test_filter_greater_than(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 5  # noqa: PLR2004
+    expected_row_count = 5
+    assert df.shape[0] == expected_row_count
     assert df["B"].to_list() == [11, 12, 30, 40, 40]
 
 
@@ -101,8 +103,10 @@ def test_filter_not_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 8  # noqa: PLR2004
-    assert 2 not in df["A"].to_list()  # noqa: PLR2004
+    expected_row_count = 8
+    assert df.shape[0] == expected_row_count
+    not_expected_value = 2
+    assert not_expected_value not in df["A"].to_list()
 
 
 def test_filter_greater_than_or_equals(client, tables_store):
@@ -122,7 +126,8 @@ def test_filter_greater_than_or_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 3  # noqa: PLR2004
+    expected_row_count = 3
+    assert df.shape[0] == expected_row_count
     assert df["B"].to_list() == [30, 40, 40]
 
 
@@ -143,7 +148,8 @@ def test_filter_less_than(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 4  # noqa: PLR2004
+    expected_row_count = 4
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [1, 2, 1, 2]
 
 
@@ -164,7 +170,8 @@ def test_filter_less_than_or_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 7  # noqa: PLR2004
+    expected_row_count = 7
+    assert df.shape[0] == expected_row_count
     assert df["B"].to_list() == [11, 12, 1, 2, 3, 10, 2]
 
 
@@ -186,7 +193,8 @@ def test_filter_equals_compare_column(client, tables_store):
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
     # A==Cとなる行
-    assert df.shape[0] == 3  # noqa: PLR2004
+    expected_row_count = 3
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [1, 6, 7]
     assert df["C"].to_list() == [1, 6, 7]
 
@@ -209,7 +217,8 @@ def test_filter_greater_than_compare_column(client, tables_store):
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
     # B>Cとなる行
-    assert df.shape[0] == 3  # noqa: PLR2004
+    expected_row_count = 3
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [2, 5, 3]
     assert df["C"].to_list() == [1, 4, 2]
 
@@ -232,7 +241,8 @@ def test_filter_less_than_or_equals_compare_column(client, tables_store):
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
     # A<=C
-    assert df.shape[0] == 7  # noqa: PLR2004
+    expected_row_count = 7
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [1, 3, 4, 6, 7, 1, 2]
     assert df["C"].to_list() == [1, 4, 8, 6, 7, 2, 3]
 

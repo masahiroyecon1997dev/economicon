@@ -18,7 +18,7 @@ def settings_manager():
     # 設定マネージャーが初期化されていることを確認
     settings_manager = SettingsStore()
     settings_manager.load_settings()
-    yield settings_manager
+    yield settings_manager  # noqa: PLR0913
 
 
 def test_get_settings_success(client, settings_manager):
