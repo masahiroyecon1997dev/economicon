@@ -10,7 +10,7 @@ from economicon.services.operation import run_operation
 from economicon.services.settings.get_settings import GetSettings
 from economicon.utils import create_success_response
 
-router = APIRouter(prefix="/setting", tags=["setting"])
+router = APIRouter(prefix="/settings", tags=["settings"])
 
 
 @router.get("", response_model=SuccessResponse[GetSettingsResult])
