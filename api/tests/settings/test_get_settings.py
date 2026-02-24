@@ -18,7 +18,7 @@ def settings_manager():
     # 設定マネージャーが初期化されていることを確認
     settings_manager = SettingsStore()
     settings_manager.load_settings()
-    yield settings_manager  # noqa: PLR0913
+    return settings_manager
 
 
 def test_get_settings_success(client, settings_manager):
@@ -29,7 +29,6 @@ def test_get_settings_success(client, settings_manager):
     assert response_data["code"] == "OK"
     # 必須フィールドの存在確認
     result = response_data["result"]
-    assert "osName" in result
     assert "language" in result
     assert "lastOpenedPath" in result
     assert "theme" in result
@@ -52,7 +51,6 @@ def test_settings_info_properties(client, settings_manager):
     """設定情報のプロパティアクセステスト"""
     settings_info = settings_manager.get_settings()
     # プロパティが正しく取得できることを確認
-    assert settings_info.os_name is not None
     assert settings_info.language == "ja"
     assert settings_info.last_opened_path is not None
     assert settings_info.theme == "light"
@@ -65,7 +63,6 @@ def test_settings_info_to_dict(client, settings_manager):
     settings_info = settings_manager.get_settings()
     settings_dict = settings_info.to_dict()
     # キャメルケースのキーが存在することを確認
-    assert "osName" in settings_dict
     assert "language" in settings_dict
     assert "lastOpenedPath" in settings_dict
     assert "theme" in settings_dict

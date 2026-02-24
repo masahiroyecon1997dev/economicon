@@ -8,7 +8,6 @@ class SettingsInfo:
     アプリケーション設定情報を保持するデータクラス
     """
 
-    _os_name: str
     _language: str
     _last_opened_path: str
     _theme: str
@@ -17,23 +16,17 @@ class SettingsInfo:
 
     def __init__(  # noqa: PLR0913
         self,
-        os_name: str,
         language: str,
         last_opened_path: str,
         theme: str,
         encoding: str,
         log_path: str,
     ):
-        self._os_name = os_name
         self._language = language
         self._last_opened_path = last_opened_path
         self._theme = theme
         self._encoding = encoding
         self._log_path = log_path
-
-    @property
-    def os_name(self) -> str:
-        return self._os_name
 
     @property
     def language(self) -> str:
@@ -63,7 +56,6 @@ class SettingsInfo:
             dict: キャメルケースのキーで設定情報を含む辞書
         """
         return {
-            "osName": self._os_name,
             "language": self._language,
             "lastOpenedPath": self._last_opened_path,
             "theme": self._theme,

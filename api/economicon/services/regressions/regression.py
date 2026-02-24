@@ -17,6 +17,8 @@ from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.regressions.common import (
     MISSING_HANDLING_MAP,
+    IvDataConfig,
+    PanelDataConfig,
     extract_linearmodels_params,
     extract_statsmodels_params,
     prepare_basic_data,
@@ -295,13 +297,16 @@ class Regression:
         )
 
     def _execute_panel(self, df, y_data, x_data, missing):
+        panel_data_config = PanelDataConfig(
+            dependent_variable=self.dependent_variable,
+            explanatory_variables=self.explanatory_variables,
+            entity_id_column=self.analysis.entity_id_column,
+            time_column=self.analysis.time_column,
+            missing=missing,
+        )
         df_pandas = prepare_panel_dataframe(
             df,
-            self.dependent_variable,
-            self.explanatory_variables,
-            self.analysis.entity_id_column,
-            missing,
-            self.analysis.time_column,
+            panel_data_config,
         )
         if self.analysis.method == RegressionMethodType.FE:
             model_result = fit_fe(
@@ -334,13 +339,16 @@ class Regression:
                 _("FEIV regression is not yet implemented")
             )
 
+        iv_data_config = IvDataConfig(
+            dependent_variable=self.dependent_variable,
+            explanatory_variables=self.explanatory_variables,
+            endogenous_variables=self.analysis.endogenous_variables,
+            instrumental_variables=self.analysis.instrumental_variables,
+            missing=missing,
+        )
         df_pandas = prepare_iv_dataframe(
             df,
-            self.dependent_variable,
-            self.explanatory_variables,
-            self.analysis.endogenous_variables,
-            self.analysis.instrumental_variables,
-            missing,
+            iv_data_config,
         )
         data_input = IVInput(
             df_pandas=df_pandas,

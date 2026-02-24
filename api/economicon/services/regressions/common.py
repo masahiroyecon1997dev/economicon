@@ -5,6 +5,7 @@
 """
 
 import gc
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -144,34 +145,44 @@ def prepare_basic_data(
     return y_data, x_data
 
 
+@dataclass
+class PanelDataConfig:
+    dependent_variable: str
+    explanatory_variables: list[str]
+    entity_id_column: str
+    missing: str
+    time_column: str | None = None
+    """
+        dependent_variable: 被説明変数名
+        explanatory_variables: 説明変数名のリスト
+        entity_id_column: 個体ID列名
+        time_column: 時間列名
+        missing: 欠損値処理方法
+    """
+
+
 def prepare_panel_dataframe(
     df_polars: pl.DataFrame,
-    dependent_variable: str,
-    explanatory_variables: list[str],
-    entity_id_column: str,
-    missing: str,
-    time_column: str | None = None,
+    config: PanelDataConfig,
 ) -> Any:
     """
     パネルデータ分析用のDataFrameを準備
 
     Args:
         df_polars: Polars DataFrame
-        dependent_variable: 被説明変数名
-        explanatory_variables: 説明変数名のリスト
-        entity_id_column: 個体ID列名
-        time_column: 時間列名
-        missing: 欠損値処理方法
+        config: PanelDataConfig オブジェクト
 
     Returns:
         MultiIndexが設定されたPandas DataFrame
     """
     # 必要な列を選択
     required_cols = (
-        [dependent_variable] + explanatory_variables + [entity_id_column]
+        [config.dependent_variable]
+        + config.explanatory_variables
+        + [config.entity_id_column]
     )
-    if time_column:
-        required_cols.append(time_column)
+    if config.time_column:
+        required_cols.append(config.time_column)
 
     # Pandas DataFrameに変換（PyArrow拡張配列を使用してメモリ効率向上）
     df = df_polars.select(required_cols).to_pandas(
@@ -183,51 +194,51 @@ def prepare_panel_dataframe(
     gc.collect()
 
     # 欠損値の処理
-    df = handle_missing_values(df, missing)
+    df = handle_missing_values(df, config.missing)
 
     # MultiIndex の設定
-    if time_column:
-        df = df.set_index([entity_id_column, time_column])
+    if config.time_column:
+        df = df.set_index([config.entity_id_column, config.time_column])
     else:
         # 時間列がない場合は自動生成
         # 既存列との衝突を避けるためユニークな名前を使用
         temp_time_col = "__panel_time_idx__"
         while temp_time_col in df.columns:
             temp_time_col += "_"
-        df[temp_time_col] = df.groupby(entity_id_column).cumcount()
-        df = df.set_index([entity_id_column, temp_time_col])
+        df[temp_time_col] = df.groupby(config.entity_id_column).cumcount()
+        df = df.set_index([config.entity_id_column, temp_time_col])
 
     return df
 
 
+@dataclass
+class IvDataConfig:
+    dependent_variable: str
+    explanatory_variables: list[str]
+    endogenous_variables: list[str]
+    instrumental_variables: list[str]
+    missing: str
+
+
 def prepare_iv_dataframe(
     df_polars: pl.DataFrame,
-    dependent_variable: str,
-    explanatory_variables: list[str],
-    endogenous_variables: list[str],
-    instrumental_variables: list[str],
-    missing: str,
+    config: IvDataConfig,
 ) -> Any:
     """
     IV分析用のDataFrameを準備
 
     Args:
         df_polars: Polars DataFrame
-        dependent_variable: 被説明変数名
-        explanatory_variables: 説明変数名のリスト
-        endogenous_variables: 内生変数名のリスト
-        instrumental_variables: 操作変数名のリスト
-        missing: 欠損値処理方法
-
+        config: IvDataConfig オブジェクト
     Returns:
         Pandas DataFrame
     """
     # 必要な列を選択
     required_cols = (
-        [dependent_variable]
-        + explanatory_variables
-        + endogenous_variables
-        + instrumental_variables
+        [config.dependent_variable]
+        + config.explanatory_variables
+        + config.endogenous_variables
+        + config.instrumental_variables
     )
 
     # Pandas DataFrameに変換（PyArrow拡張配列を使用してメモリ効率向上）
@@ -240,7 +251,7 @@ def prepare_iv_dataframe(
     gc.collect()
 
     # 欠損値の処理
-    df = handle_missing_values(df, missing)
+    df = handle_missing_values(df, config.missing)
 
     return df
 
