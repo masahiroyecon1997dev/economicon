@@ -1015,7 +1015,7 @@ const getSettings = (
     
  options?: SecondParameter<typeof customInstance<SuccessResponseGetSettingsResult>>,) => {
       return customInstance<SuccessResponseGetSettingsResult>(
-      {url: `/api/setting`, method: 'GET'
+      {url: `/api/settings`, method: 'GET'
     },
       options);
     }

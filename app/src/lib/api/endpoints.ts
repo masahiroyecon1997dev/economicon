@@ -3,7 +3,6 @@ import { API_ENDPOINTS } from "../../constants/api";
 import type { FilesType, FileType } from "../../types/commonTypes";
 import { client } from "./client";
 
-// Tauri��get_files�R�}���h���Ԃ����X�|���X�^�iRust�̍\���̂ɑΉ��j
 type RustFileItem = {
   name: string;
   isFile: boolean;
@@ -17,11 +16,6 @@ type RustGetFilesResponse = {
   files: RustFileItem[];
 };
 
-/**
- * Tauri��get_files�R�}���h���g�p���ăt�@�C���ꗗ���擾����
- * Python�T�[�o�[���o�R�����ARust������OS�̃t�@�C���V�X�e���ɃA�N�Z�X����
- * �G���[���͗�O���X���[����
- */
 export const getFiles = async (path: string): Promise<FilesType> => {
   const response = await invoke<RustGetFilesResponse>("get_files", {
     directoryPath: path,
@@ -33,7 +27,6 @@ export const getFiles = async (path: string): Promise<FilesType> => {
         name: f.name,
         isFile: f.isFile,
         size: f.size,
-        // modified_time��Unix�^�C���X�^���v(�b)�̂��߁A�~���b�ϊ�����ISO������
         modifiedTime:
           f.modifiedTime != null
             ? new Date(f.modifiedTime * 1000).toISOString()
@@ -43,10 +36,6 @@ export const getFiles = async (path: string): Promise<FilesType> => {
   };
 };
 
-/**
- * Apache Arrow IPC�`���Ńe�[�u���f�[�^���擾����
- * �o�C�i���f�[�^�̂��߁A�ʏ��JSON�v���L�V�ł͂Ȃ�fetch_binary�R�}���h���g�p����
- */
 export const fetchDataToArrow = async (
   tableName: string,
   startRow: number = 0,
@@ -61,6 +50,5 @@ export const fetchDataToArrow = async (
       chunkSize: chunk_size,
     },
   );
-  // Tauri����̃o�C�i���z��(number[])��Uint8Array�ɕϊ�
   return new Uint8Array(response.data);
 };

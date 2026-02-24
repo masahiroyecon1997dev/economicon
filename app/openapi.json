@@ -1341,10 +1341,10 @@
         }
       }
     },
-    "/api/setting": {
+    "/api/settings": {
       "get": {
         "tags": [
-          "setting"
+          "settings"
         ],
         "summary": "Get Settings",
         "description": "\u30a2\u30d7\u30ea\u30b1\u30fc\u30b7\u30e7\u30f3\u8a2d\u5b9a\u3092\u53d6\u5f97\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
