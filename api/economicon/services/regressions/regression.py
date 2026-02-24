@@ -321,8 +321,10 @@ class Regression:
                     method=RegressionMethodType.LASSO
                 ):
                     alpha = self.analysis.alpha
+                    calculate_se = self.analysis.calculate_se
+                    bootstrap_iterations = self.analysis.bootstrap_iterations
                     model_result, coef_scaled = fit_lasso(
-                        y_data, x_data, self.has_const, alpha, missing
+                        y_data, x_data, self.has_const, alpha, missing, calculate_se, bootstrap_iterations
                     )
                     analysis_result = self._format_regularized_result(
                         model_result, coef_scaled
@@ -331,8 +333,10 @@ class Regression:
                     method=RegressionMethodType.RIDGE
                 ):
                     alpha = self.analysis.alpha
+                    calculate_se = self.analysis.calculate_se
+                    bootstrap_iterations = self.analysis.bootstrap_iterations
                     model_result, coef_scaled = fit_ridge(
-                        y_data, x_data, self.has_const, alpha, missing
+                        y_data, x_data, self.has_const, alpha, missing, calculate_se, bootstrap_iterations
                     )
                     analysis_result = self._format_regularized_result(
                         model_result, coef_scaled
