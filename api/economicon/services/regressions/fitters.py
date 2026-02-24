@@ -109,11 +109,11 @@ def fit_tobit(
     """
     # 被説明変数と説明変数を設定
     y = df_pandas[dependent_variable].values
-    X = df_pandas[explanatory_variables].values
+    depns = df_pandas[explanatory_variables].values
 
     # 定数項を追加
     if has_const:
-        X = sm.add_constant(X)
+        depns = sm.add_constant(depns)
 
     cens = np.zeros(len(y))
     if left_censoring_limit is not None:
@@ -127,7 +127,7 @@ def fit_tobit(
     # Tobit モデルの作成とフィット
     model = Tobit(
         y,
-        X,
+        depns,
         cens=cens,
         left=left_censoring_limit,
         right=right_censoring_limit,
@@ -205,7 +205,7 @@ def fit_fe(
     """
     # 被説明変数と説明変数を設定
     y = df_pandas[dependent_variable]
-    X = df_pandas[explanatory_variables]
+    depns = df_pandas[explanatory_variables]
 
     # 標準誤差方法のマッピングを使用
     cov_type = LINEARMODELS_COV_TYPE_MAP.get(
@@ -213,7 +213,7 @@ def fit_fe(
     )
 
     # PanelOLS モデルの作成とフィット
-    model = PanelOLS(y, X, entity_effects=True)
+    model = PanelOLS(y, depns, entity_effects=True)
     result = model.fit(cov_type=cov_type)
 
     return result
@@ -239,7 +239,7 @@ def fit_re(
     """
     # 被説明変数と説明変数を設定
     y = df_pandas[dependent_variable]
-    X = df_pandas[explanatory_variables]
+    depns = df_pandas[explanatory_variables]
 
     # 標準誤差方法のマッピングを使用
     cov_type = LINEARMODELS_COV_TYPE_MAP.get(
@@ -247,7 +247,7 @@ def fit_re(
     )
 
     # RandomEffects モデルの作成とフィット
-    model = RandomEffects(y, X)
+    model = RandomEffects(y, depns)
     result = model.fit(cov_type=cov_type)
 
     return result
