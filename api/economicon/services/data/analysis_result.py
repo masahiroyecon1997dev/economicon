@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 
 class AnalysisResult:
@@ -12,7 +12,7 @@ class AnalysisResult:
     _name: str
     _description: str
     _table_name: str
-    _regression_output: Dict[str, Any]
+    _regression_output: dict[str, Any]
     _created_at: str
 
     def __init__(
@@ -21,7 +21,7 @@ class AnalysisResult:
         name: str,
         description: str,
         table_name: str,
-        regression_output: Dict[str, Any],
+        regression_output: dict[str, Any],
     ):
         self._id = str(uuid.uuid4())
         self._name = name
@@ -47,7 +47,7 @@ class AnalysisResult:
         return self._table_name
 
     @property
-    def regression_output(self) -> Dict[str, Any]:
+    def regression_output(self) -> dict[str, Any]:
         return self._regression_output
 
     @property
@@ -62,7 +62,7 @@ class AnalysisResult:
     def description(self, description: str):
         self._description = description
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         AnalysisResultを辞書形式に変換
         """
@@ -75,7 +75,7 @@ class AnalysisResult:
             "createdAt": self._created_at,
         }
 
-    def to_summary_dict(self) -> Dict[str, str]:
+    def to_summary_dict(self) -> dict[str, str]:
         """
         サマリー情報を辞書形式に変換
         """
