@@ -1,14 +1,14 @@
 import polars as pl
 
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import InputCellDataRequestBody
-from ...utils import ProcessingError
-from ...utils.validators import (
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import InputCellDataRequestBody
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
+from economicon.utils.validators import (
     validate_existence,
     validate_row_count_limit,
 )
-from ..data.tables_store import TablesStore
 
 
 class InputCellData:
@@ -65,7 +65,6 @@ class InputCellData:
             requested_count=self.row_index,
             target=self.param_names["row_index"],
         )
-        return None
 
     def execute(self):
         # セルデータの入力処理

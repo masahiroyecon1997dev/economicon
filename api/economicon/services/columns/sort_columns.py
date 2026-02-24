@@ -1,9 +1,9 @@
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import SortColumnsRequestBody
-from ...utils import ProcessingError
-from ...utils.validators import validate_existence
-from ..data.tables_store import TablesStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import SortColumnsRequestBody
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
+from economicon.utils.validators import validate_existence
 
 
 class SortColumns:
@@ -47,7 +47,6 @@ class SortColumns:
                 valid_list=column_name_list,
                 target=self.param_names["column_name"],
             )
-        return None
 
     def execute(self):
         try:

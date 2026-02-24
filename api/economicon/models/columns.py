@@ -4,10 +4,10 @@ from typing import Annotated
 
 from pydantic import Field, StringConstraints
 
-from .common import BaseRequest, BaseResult
-from .entities import SimulationColumnConfig, SortInstruction
-from .enums import DistributionType
-from .types import (
+from economicon.models.common import BaseRequest, BaseResult
+from economicon.models.entities import SimulationColumnConfig, SortInstruction
+from economicon.models.enums import DistributionType
+from economicon.models.types import (
     ColumnName,
     FilePath,
     NewColumnName,

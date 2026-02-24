@@ -4,12 +4,12 @@ from typing import Annotated, Any
 
 from pydantic import Field
 
-from .common import BaseRequest, BaseResult
-from .entities import RegressionParams, StandardErrorSettings
-from .enums import (
+from economicon.models.common import BaseRequest, BaseResult
+from economicon.models.entities import RegressionParams, StandardErrorSettings
+from economicon.models.enums import (
     MissingValueHandlingType,
 )
-from .types import ColumnName, TableName
+from economicon.models.types import ColumnName, TableName
 
 # ---------------------------------------------------------------------------
 # リクエストボディ

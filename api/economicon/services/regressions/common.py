@@ -5,15 +5,15 @@
 """
 
 import gc
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 import polars as pl
 import statsmodels.api as sm
 
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...utils import ProcessingError
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.utils import ProcessingError
 
 
 def handle_missing_values(df: Any, missing: str) -> Any:
@@ -117,10 +117,10 @@ LINEARMODELS_COV_TYPE_MAP = {
 def prepare_basic_data(
     df: pl.DataFrame,
     dependent_variable: str,
-    explanatory_variables: List[str],
+    explanatory_variables: list[str],
     has_const: bool,
     missing: str,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     基本的な回帰分析用のデータを準備
 
@@ -147,10 +147,10 @@ def prepare_basic_data(
 def prepare_panel_dataframe(
     df_polars: pl.DataFrame,
     dependent_variable: str,
-    explanatory_variables: List[str],
+    explanatory_variables: list[str],
     entity_id_column: str,
     missing: str,
-    time_column: Optional[str] = None,
+    time_column: str | None = None,
 ) -> Any:
     """
     パネルデータ分析用のDataFrameを準備
@@ -203,9 +203,9 @@ def prepare_panel_dataframe(
 def prepare_iv_dataframe(
     df_polars: pl.DataFrame,
     dependent_variable: str,
-    explanatory_variables: List[str],
-    endogenous_variables: List[str],
-    instrumental_variables: List[str],
+    explanatory_variables: list[str],
+    endogenous_variables: list[str],
+    instrumental_variables: list[str],
     missing: str,
 ) -> Any:
     """
@@ -248,7 +248,7 @@ def prepare_iv_dataframe(
 def prepare_tobit_dataframe(
     df_polars: pl.DataFrame,
     dependent_variable: str,
-    explanatory_variables: List[str],
+    explanatory_variables: list[str],
     missing: str,
 ) -> Any:
     """
@@ -294,19 +294,31 @@ def extract_statsmodels_params(
         param_dict = {
             "variable": name,
             "coefficient": float(model_result.params[i]),
-            "standardError": None if np.isnan(model_result.bse[i]) else float(model_result.bse[i]),
-            "pValue": None if np.isnan(model_result.pvalues[i]) else float(model_result.pvalues[i]),
+            "standardError": None
+            if np.isnan(model_result.bse[i])
+            else float(model_result.bse[i]),
+            "pValue": None
+            if np.isnan(model_result.pvalues[i])
+            else float(model_result.pvalues[i]),
         }
 
         # t値またはz値
         if hasattr(model_result, "tvalues"):
-            param_dict["tValue"] = None if np.isnan(model_result.tvalues[i]) else float(model_result.tvalues[i])
+            param_dict["tValue"] = (
+                None
+                if np.isnan(model_result.tvalues[i])
+                else float(model_result.tvalues[i])
+            )
 
         # 信頼区間
         if hasattr(model_result, "conf_int"):
             conf_int = model_result.conf_int()
-            param_dict["confidenceIntervalLower"] = None if np.isnan(conf_int[i, 0]) else float(conf_int[i, 0])
-            param_dict["confidenceIntervalUpper"] = None if np.isnan(conf_int[i, 1]) else float(conf_int[i, 1])
+            param_dict["confidenceIntervalLower"] = (
+                None if np.isnan(conf_int[i, 0]) else float(conf_int[i, 0])
+            )
+            param_dict["confidenceIntervalUpper"] = (
+                None if np.isnan(conf_int[i, 1]) else float(conf_int[i, 1])
+            )
 
         params_info.append(param_dict)
 
@@ -346,8 +358,8 @@ def extract_linearmodels_params(
 
 
 def get_param_names_with_const(
-    explanatory_variables: List[str], has_const: bool
-) -> List[str]:
+    explanatory_variables: list[str], has_const: bool
+) -> list[str]:
     """
     定数項を含むパラメータ名のリストを生成
 

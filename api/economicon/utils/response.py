@@ -4,7 +4,7 @@ from typing import Any, TypeVar
 
 from fastapi.responses import JSONResponse, Response
 
-from .logging import (
+from economicon.utils.logging import (
     log_error,
 )
 

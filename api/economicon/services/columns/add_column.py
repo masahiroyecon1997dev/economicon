@@ -1,12 +1,18 @@
 import polars as pl
 
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import AddColumnRequestBody
-from ...utils import ProcessingError
-from ...utils.validators import validate_existence, validate_non_existence
-from ...utils.validators.files import validate_file_format, validate_file_path
-from ..data.tables_store import TablesStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import AddColumnRequestBody
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
+from economicon.utils.validators import (
+    validate_existence,
+    validate_non_existence,
+)
+from economicon.utils.validators.files import (
+    validate_file_format,
+    validate_file_path,
+)
 
 
 class AddColumn:
@@ -72,7 +78,6 @@ class AddColumn:
                 target=self.param_names["csv_file_path"],
                 allowed_extensions=["csv"],
             )
-        return None
 
     def execute(self):
         try:
@@ -192,16 +197,15 @@ class AddColumn:
                         error_code=ErrorCode.ROW_COUNT_MISMATCH,
                         message=message,
                     )
+                # 非厳密モード：調整する
+                elif row_count > expected_rows:
+                    # 超過分を切り捨て
+                    first_column = first_column[:expected_rows]
                 else:
-                    # 非厳密モード：調整する
-                    if row_count > expected_rows:
-                        # 超過分を切り捨て
-                        first_column = first_column[:expected_rows]
-                    else:
-                        # 不足分をNoneで埋める
-                        first_column = first_column.extend_constant(
-                            None, expected_rows - row_count
-                        )
+                    # 不足分をNoneで埋める
+                    first_column = first_column.extend_constant(
+                        None, expected_rows - row_count
+                    )
 
             return first_column
 

@@ -1,17 +1,16 @@
 import re
-from typing import List
 
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import CalculateColumnRequestBody
-from ...utils import ProcessingError
-from ...utils.algorithms import parse_formula_to_expr
-from ...utils.validators import (
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import CalculateColumnRequestBody
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
+from economicon.utils.algorithms import parse_formula_to_expr
+from economicon.utils.validators import (
     validate_existence,
     validate_non_existence,
     validate_numeric_types,
 )
-from ..data.tables_store import TablesStore
 
 
 class CalculateColumn:
@@ -40,7 +39,7 @@ class CalculateColumn:
             "add_position_column": "addPositionColumn",
         }
 
-    def _extract_column_names(self, expression: str) -> List[str]:
+    def _extract_column_names(self, expression: str) -> list[str]:
         """
         計算式から {column} 形式のカラム名を重複なく抽出する。
         """
@@ -94,7 +93,6 @@ class CalculateColumn:
             columns=referenced_columns,
             target=self.param_names["column_name_in_calculation_expression"],
         )
-        return None
 
     def execute(self):
         try:

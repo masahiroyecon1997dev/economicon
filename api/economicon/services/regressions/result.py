@@ -5,10 +5,10 @@ AnalysisResultStoreへのアクセスをラップし、
 統一されたエラーハンドリングとバリデーションを提供します。
 """
 
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...utils import ProcessingError, ValidationError
-from ..data.analysis_result_store import AnalysisResultStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.services.data.analysis_result_store import AnalysisResultStore
+from economicon.utils import ProcessingError, ValidationError
 
 
 class GetAllAnalysisResults:
@@ -67,7 +67,6 @@ class GetAnalysisResult:
                 error_code=ErrorCode.RESULT_ID_REQUIRED,
                 message=_("Result ID is required"),
             )
-        return None
 
     def execute(self):
         """
@@ -121,7 +120,6 @@ class DeleteAnalysisResult:
                 error_code=ErrorCode.RESULT_ID_REQUIRED,
                 message=_("Result ID is required"),
             )
-        return None
 
     def execute(self):
         """

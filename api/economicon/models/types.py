@@ -2,8 +2,8 @@ from typing import Annotated, Literal
 
 from pydantic import AfterValidator, Field, StringConstraints
 
-from ..i18n.translation import gettext as _
-from .common import (
+from economicon.i18n.translation import gettext as _
+from economicon.models.common import (
     BernoulliParams,
     BetaParams,
     BinomialParams,

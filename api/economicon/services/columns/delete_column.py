@@ -1,9 +1,9 @@
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import DeleteColumnRequestBody
-from ...utils import ProcessingError
-from ...utils.validators import validate_existence
-from ..data.tables_store import TablesStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import DeleteColumnRequestBody
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
+from economicon.utils.validators import validate_existence
 
 
 class DeleteColumn:
@@ -46,7 +46,6 @@ class DeleteColumn:
             valid_list=column_names,
             target=self.param_names["column_names"],
         )
-        return None
 
     def execute(self):
         # 列の削除処理

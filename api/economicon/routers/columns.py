@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..models import (
+from economicon.models import (
     AddColumnRequestBody,
     AddColumnResult,
     AddDummyColumnRequestBody,
@@ -28,20 +28,22 @@ from ..models import (
 )
 
 # 各ビジネスロジック（既存のpython_apis）
-from ..services.columns.add_column import AddColumn
-from ..services.columns.add_dummy_column import AddDummyColumn
-from ..services.columns.add_lag_lead_column import AddLagLeadColumn
-from ..services.columns.add_simulation_column import AddSimulationColumn
-from ..services.columns.calculate_column import CalculateColumn
-from ..services.columns.delete_column import DeleteColumn
-from ..services.columns.duplicate_column import DuplicateColumn
-from ..services.columns.get_column_list import GetColumnList
-from ..services.columns.rename_column import RenameColumn
-from ..services.columns.sort_columns import SortColumns
-from ..services.columns.transform_column import TransformColumn
-from ..services.data.dependencies import TablesStoreDep
-from ..services.operation import run_operation
-from ..utils import create_success_response
+from economicon.services.columns.add_column import AddColumn
+from economicon.services.columns.add_dummy_column import AddDummyColumn
+from economicon.services.columns.add_lag_lead_column import AddLagLeadColumn
+from economicon.services.columns.add_simulation_column import (
+    AddSimulationColumn,
+)
+from economicon.services.columns.calculate_column import CalculateColumn
+from economicon.services.columns.delete_column import DeleteColumn
+from economicon.services.columns.duplicate_column import DuplicateColumn
+from economicon.services.columns.get_column_list import GetColumnList
+from economicon.services.columns.rename_column import RenameColumn
+from economicon.services.columns.sort_columns import SortColumns
+from economicon.services.columns.transform_column import TransformColumn
+from economicon.services.data.dependencies import TablesStoreDep
+from economicon.services.operation import run_operation
+from economicon.utils import create_success_response
 
 # ルーターの定義（ここで共通のprefixとtagをつけておくと便利！）
 router = APIRouter(prefix="/column", tags=["column"])
