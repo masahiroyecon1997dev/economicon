@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
 from economicon.models.common import BaseRequest, BinaryChoiceRegularization
@@ -25,16 +25,16 @@ class SimulationColumnConfig(BaseRequest):
     distribution: DistributionConfig
 
 
-class SortInstruction(BaseModel):
+class SortInstruction(BaseRequest):
     column_name: ColumnName
     ascending: bool
 
 
-class OLSParams(BaseModel):
+class OLSParams(BaseRequest):
     method: Literal[RegressionMethodType.OLS]
 
 
-class RegularizedRegressionParams(BaseModel):
+class RegularizedRegressionParams(BaseRequest):
     method: Literal[RegressionMethodType.LASSO, RegressionMethodType.RIDGE]
     # 正則化のパラメータalphaを追加
     alpha: float = Field(
@@ -54,7 +54,7 @@ class RegularizedRegressionParams(BaseModel):
     )
 
 
-class BinaryChoiceRegressionParams(BaseModel):
+class BinaryChoiceRegressionParams(BaseRequest):
     method: Literal[RegressionMethodType.LOGIT, RegressionMethodType.PROBIT]
     # 正則化のパラメータを追加
     regularization: BinaryChoiceRegularization | None = None
@@ -66,7 +66,7 @@ class BinaryChoiceRegressionParams(BaseModel):
     )
 
 
-class TobitParams(BaseModel):
+class TobitParams(BaseRequest):
     model_config = ConfigDict(
         alias_generator=to_camel,
         populate_by_name=True,
@@ -83,7 +83,7 @@ class TobitParams(BaseModel):
     )
 
 
-class InstrumentalVariablesParams(BaseModel):
+class InstrumentalVariablesParams(BaseRequest):
     method: Literal[RegressionMethodType.IV, RegressionMethodType.FEIV]
     iv_method: Literal["2sls", "gmm"] = Field(
         default="2sls",
@@ -96,7 +96,7 @@ class InstrumentalVariablesParams(BaseModel):
     gmm_weight_matrix: Literal["uncentered", "robust", "hac"] = "robust"
 
 
-class PanelDataParams(BaseModel):
+class PanelDataParams(BaseRequest):
     method: Literal[RegressionMethodType.FE, RegressionMethodType.RE]
     # 個体ID列と時間列を追加
     entity_id_column: ColumnName = Field(description="個体ID列名")
@@ -116,13 +116,13 @@ type RegressionParams = Annotated[
 ]
 
 
-class NonRobustStandardError(BaseModel):
+class NonRobustStandardError(BaseRequest):
     method: Literal[StandardErrorMethodType.NONROBUST] = (
         StandardErrorMethodType.NONROBUST
     )
 
 
-class RobustStandardError(BaseModel):
+class RobustStandardError(BaseRequest):
     method: Literal[StandardErrorMethodType.ROBUST] = (
         StandardErrorMethodType.ROBUST
     )
@@ -130,7 +130,7 @@ class RobustStandardError(BaseModel):
 
 
 # --- 3. クラスター標準誤差 (Clustered) ---
-class ClusteredStandardError(BaseModel):
+class ClusteredStandardError(BaseRequest):
     method: Literal[StandardErrorMethodType.CLUSTER] = (
         StandardErrorMethodType.CLUSTER
     )
@@ -142,7 +142,7 @@ class ClusteredStandardError(BaseModel):
 
 
 # --- 4. 自己相関・異分散低減 (HAC: Newey-West) ---
-class HacStandardError(BaseModel):
+class HacStandardError(BaseRequest):
     method: Literal[StandardErrorMethodType.HAC] = StandardErrorMethodType.HAC
     # 必須：ラグの長さ
     maxlags: int = Field(..., ge=0, description="考慮する最大ラグ数")
