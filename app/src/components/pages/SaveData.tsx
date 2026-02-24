@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { getFiles } from "../../api/bridge/tauri-commands";
 import { getEconomiconAPI } from "../../api/endpoints";
 import type { ExportFileRequestBodyFormat } from "../../api/model";
-import { getFiles } from "../../lib/api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useFilesStore } from "../../stores/files";

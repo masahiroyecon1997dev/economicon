@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { getFiles, getOsInfo } from "./api/bridge/tauri-commands";
 import { getEconomiconAPI } from "./api/endpoints";
-import { getFiles } from "./lib/api/endpoints";
 import { showMessageDialog } from "./lib/dialog/message";
 import { useCurrentPageStore } from "./stores/currentView";
 import { useLoadingStore } from "./stores/loading";
@@ -18,6 +18,7 @@ import { useFilesStore } from "./stores/files";
 export const App = () => {
   const { t } = useTranslation();
   const setSettings = useSettingsStore((state) => state.setSettings);
+  const setOsInfo = useSettingsStore((state) => state.setOsInfo);
   const setTableList = useTableListStore((state) => state.setTableList);
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const setFiles = useFilesStore((state) => state.setFiles);
@@ -32,6 +33,11 @@ export const App = () => {
     const initialize = async () => {
       const api = getEconomiconAPI();
       try {
+        // RustからOS情報を取得（ファイルシステム認識のため最初に取得）
+        const osInfo = await getOsInfo();
+
+        if (isMounted) setOsInfo(osInfo);
+
         // 設定を取得
         const resGetSettings = await api.getSettings();
         if (resGetSettings.code !== "OK") {
@@ -45,9 +51,9 @@ export const App = () => {
         }
         // GetSettingsResultをアプリのSettingsType形式にマッピング
         const apiSettings = resGetSettings.result;
-
         // ファイル一覧をTauriコマンドで直接取得（Pythonサーバー非経由）
         const files = await getFiles(apiSettings.lastOpenedPath);
+        console.log("Fetched files:", files);
         // テーブル名一覧を取得
         const resGetTableNames = await api.getTableList();
         if (resGetTableNames.code !== "OK") {
@@ -79,7 +85,7 @@ export const App = () => {
     return () => {
       isMounted = false;
     };
-  }, [setCurrentView, setFiles, setSettings, setTableList, t]);
+  }, [setCurrentView, setFiles, setOsInfo, setSettings, setTableList, t]);
 
   return (
     <>

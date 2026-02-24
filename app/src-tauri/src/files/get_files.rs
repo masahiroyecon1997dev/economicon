@@ -85,7 +85,7 @@ fn validate_and_prepare(directory_path: &str) -> Result<PathBuf, FileError> {
     }
 
     // 相対パスを絶対パスに変換（正規化）
-    let canonical_path = path.canonicalize().map_err(|e| {
+    let canonical_path = dunce::canonicalize(path).map_err(|e| {
         FileError::CanonicalizationError(format!(
             "Failed to canonicalize path '{}': {}",
             directory_path, e
