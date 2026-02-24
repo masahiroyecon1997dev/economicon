@@ -14,7 +14,7 @@ class SettingsInfo:
     _encoding: str
     _log_path: str
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         language: str,
         last_opened_path: str,
