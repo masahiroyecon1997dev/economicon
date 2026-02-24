@@ -6,12 +6,15 @@ import io
 
 import pyarrow as pa
 
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import FetchDataToArrowRequestBody
-from ...utils import ProcessingError
-from ...utils.validators import validate_existence, validate_row_count_limit
-from ..data.tables_store import TablesStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import FetchDataToArrowRequestBody
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
+from economicon.utils.validators import (
+    validate_existence,
+    validate_row_count_limit,
+)
 
 
 class FetchDataToArrow:
@@ -74,8 +77,6 @@ class FetchDataToArrow:
             requested_count=self.start_row,
             target=self.param_names["start_row"],
         )
-
-        return None
 
     def execute(self):
         """

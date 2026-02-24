@@ -5,8 +5,7 @@ from typing import Any
 import polars as pl
 
 from economicon.i18n.translation import gettext as _
-
-from .config import OPERATOR_MAP
+from economicon.utils.algorithms.config import OPERATOR_MAP
 
 
 def _evaluate_node(node: Any) -> Any:

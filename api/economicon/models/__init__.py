@@ -1,6 +1,6 @@
 """スキーマパッケージ初期化"""
 
-from .columns import (
+from economicon.models.columns import (
     AddColumnRequestBody,
     AddColumnResult,
     AddDummyColumnRequestBody,
@@ -25,7 +25,7 @@ from .columns import (
     TransformColumnRequestBody,
     TransformColumnResult,
 )
-from .common import (
+from economicon.models.common import (
     BaseResponse,
     BernoulliParams,
     BetaParams,
@@ -42,13 +42,13 @@ from .common import (
     UniformParams,
     WeibullParams,
 )
-from .data_io import (
+from economicon.models.data_io import (
     ExportFileRequestBody,
     ExportFileResult,
     ImportFileRequestBody,
     ImportFileResult,
 )
-from .entities import (
+from economicon.models.entities import (
     BinaryChoiceRegressionParams,
     ClusteredStandardError,
     HacStandardError,
@@ -63,7 +63,7 @@ from .entities import (
     StandardErrorSettings,
     TobitParams,
 )
-from .enums import (
+from economicon.models.enums import (
     ConfidenceIntervalStatisticsType,
     DescriptiveStatisticType,
     DistributionType,
@@ -74,7 +74,7 @@ from .enums import (
     StandardErrorMethodType,
     TransformMethodType,
 )
-from .regressions import (
+from economicon.models.regressions import (
     ClearAllAnalysisResultsResult,
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
@@ -82,8 +82,11 @@ from .regressions import (
     RegressionRequestBody,
     RegressionResult,
 )
-from .settings import GetSettingsRequestBody, GetSettingsResult
-from .statistics import (
+from economicon.models.settings import (
+    GetSettingsRequestBody,
+    GetSettingsResult,
+)
+from economicon.models.statistics import (
     ConfidenceIntervalBounds,
     ConfidenceIntervalRequestBody,
     ConfidenceIntervalResult,
@@ -91,7 +94,7 @@ from .statistics import (
     DescriptiveStatisticsResult,
     StatisticValue,
 )
-from .tables import (
+from economicon.models.tables import (
     ClearTablesRequestBody,
     ClearTablesResult,
     CreateJoinTableRequestBody,
@@ -119,7 +122,7 @@ from .tables import (
     RenameTableResult,
     TableNameResult,
 )
-from .types import DistributionConfig, TransformMethodConfig
+from economicon.models.types import DistributionConfig, TransformMethodConfig
 
 __all__ = [
     # Common

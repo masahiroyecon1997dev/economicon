@@ -3,26 +3,26 @@ from pathlib import Path
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..core.enums import ErrorCode
-from ..i18n.translation import gettext as _
-from ..models import (
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import (
     ExportFileRequestBody,
     ExportFileResult,
     ImportFileRequestBody,
     ImportFileResult,
     SuccessResponse,
 )
-from ..services.data.dependencies import TablesStoreDep
-from ..services.data.tables_store import TablesStore
-from ..services.data_io.export_csv import ExportCsv
-from ..services.data_io.export_excel import ExportExcel
-from ..services.data_io.export_parquet import ExportParquet
-from ..services.data_io.import_csv import ImportCsv
-from ..services.data_io.import_excel import ImportExcel
-from ..services.data_io.import_parquet import ImportParquet
-from ..services.operation import run_operation
-from ..utils import create_success_response
-from ..utils.exceptions import ProcessingError
+from economicon.services.data.dependencies import TablesStoreDep
+from economicon.services.data.tables_store import TablesStore
+from economicon.services.data_io.export_csv import ExportCsv
+from economicon.services.data_io.export_excel import ExportExcel
+from economicon.services.data_io.export_parquet import ExportParquet
+from economicon.services.data_io.import_csv import ImportCsv
+from economicon.services.data_io.import_excel import ImportExcel
+from economicon.services.data_io.import_parquet import ImportParquet
+from economicon.services.operation import run_operation
+from economicon.utils import create_success_response
+from economicon.utils.exceptions import ProcessingError
 
 router = APIRouter(prefix="/data", tags=["data"])
 

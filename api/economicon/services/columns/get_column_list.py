@@ -1,9 +1,9 @@
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import GetColumnListRequestBody
-from ...utils import ProcessingError
-from ...utils.validators import validate_existence
-from ..data.tables_store import TablesStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import GetColumnListRequestBody
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
+from economicon.utils.validators import validate_existence
 
 
 class GetColumnList:
@@ -34,7 +34,6 @@ class GetColumnList:
             valid_list=table_name_list,
             target=self.param_names["table_name"],
         )
-        return None
 
     def execute(self):
         try:

@@ -1,13 +1,13 @@
 import numpy as np
 from scipy import stats
 
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...models import ConfidenceIntervalRequestBody
-from ...models.enums import ConfidenceIntervalStatisticsType
-from ...utils import ProcessingError, ValidationError
-from ...utils.validators import validate_existence
-from ..data.tables_store import TablesStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.models import ConfidenceIntervalRequestBody
+from economicon.models.enums import ConfidenceIntervalStatisticsType
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError, ValidationError
+from economicon.utils.validators import validate_existence
 
 
 class ConfidenceInterval:
@@ -66,9 +66,7 @@ class ConfidenceInterval:
             if len(column_data) == 0:
                 raise ValidationError(
                     error_code=ErrorCode.CONFIDENCE_INTERVAL_ERROR,
-                    message=_(
-                        "Column contains no valid data"
-                    ),
+                    message=_("Column contains no valid data"),
                 )
 
             # データを numpy array に変換

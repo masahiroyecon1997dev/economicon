@@ -1,18 +1,22 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from ..models import (
+from economicon.models import (
     ConfidenceIntervalRequestBody,
     ConfidenceIntervalResult,
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticsResult,
     SuccessResponse,
 )
-from ..services.data.dependencies import TablesStoreDep
-from ..services.operation import run_operation
-from ..services.statistics.confidence_interval import ConfidenceInterval
-from ..services.statistics.descriptive_statistics import DescriptiveStatistics
-from ..utils import create_success_response
+from economicon.services.data.dependencies import TablesStoreDep
+from economicon.services.operation import run_operation
+from economicon.services.statistics.confidence_interval import (
+    ConfidenceInterval,
+)
+from economicon.services.statistics.descriptive_statistics import (
+    DescriptiveStatistics,
+)
+from economicon.utils import create_success_response
 
 router = APIRouter(prefix="/statistics", tags=["statistics"])
 

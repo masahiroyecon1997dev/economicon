@@ -1,7 +1,7 @@
-from ...core.enums import ErrorCode
-from ...i18n.translation import gettext as _
-from ...utils import ProcessingError
-from ..data.tables_store import TablesStore
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
+from economicon.services.data.tables_store import TablesStore
+from economicon.utils import ProcessingError
 
 
 class ClearTables:

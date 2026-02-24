@@ -1,7 +1,6 @@
 import threading
-from typing import Dict, List
 
-from .analysis_result import AnalysisResult
+from economicon.services.data.analysis_result import AnalysisResult
 
 
 class AnalysisResultStore:
@@ -21,8 +20,8 @@ class AnalysisResultStore:
 
     def __init__(self):
         # 初期化が一度だけ行われるようにする
-        if not hasattr(self, '_initialized'):
-            self._results: Dict[str, AnalysisResult] = {}
+        if not hasattr(self, "_initialized"):
+            self._results: dict[str, AnalysisResult] = {}
             self._lock = threading.RLock()
             self._initialized = True
 
@@ -62,7 +61,7 @@ class AnalysisResultStore:
                     f"Analysis result with ID '{result_id}' does not exist."
                 )
 
-    def get_all_summaries(self) -> List[Dict[str, str]]:
+    def get_all_summaries(self) -> list[dict[str, str]]:
         """
         すべての分析結果のサマリー情報を取得
 
@@ -72,8 +71,7 @@ class AnalysisResultStore:
         """
         with self._lock:
             return [
-                result.to_summary_dict()
-                for result in self._results.values()
+                result.to_summary_dict() for result in self._results.values()
             ]
 
     def delete_result(self, result_id: str) -> str:

@@ -2,12 +2,12 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from .common import BaseRequest, BinaryChoiceRegularization
-from .enums import (
+from economicon.models.common import BaseRequest, BinaryChoiceRegularization
+from economicon.models.enums import (
     RegressionMethodType,
     StandardErrorMethodType,
 )
-from .types import (
+from economicon.models.types import (
     ColumnName,
     DistributionConfig,
     NewColumnName,

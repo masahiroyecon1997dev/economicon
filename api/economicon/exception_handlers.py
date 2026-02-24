@@ -3,10 +3,10 @@ from fastapi import FastAPI, Request
 from fastapi import status as http_status
 from fastapi.exceptions import RequestValidationError
 
-from .core import get_localized_message
-from .core.enums import ErrorCode
-from .i18n import _
-from .utils import (
+from economicon.core import get_localized_message
+from economicon.core.enums import ErrorCode
+from economicon.i18n import _
+from economicon.utils import (
     ProcessingError,
     ValidationError,
     create_error_response,

@@ -5,12 +5,12 @@ from typing import Annotated, Any
 from pydantic import BeforeValidator, Field, field_validator
 from pydantic_core import PydanticCustomError
 
-from .common import BaseRequest, BaseResult
-from .enums import (
+from economicon.models.common import BaseRequest, BaseResult
+from economicon.models.enums import (
     ConfidenceIntervalStatisticsType,
     DescriptiveStatisticType,
 )
-from .types import ColumnName, TableName
+from economicon.models.types import ColumnName, TableName
 
 # ---------------------------------------------------------------------------
 # バリデーション関数

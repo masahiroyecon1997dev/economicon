@@ -11,8 +11,8 @@ from pydantic import (
 )
 from pydantic.alias_generators import to_camel
 
-from ..i18n.translation import gettext as _
-from .enums import DistributionType, TransformMethodType
+from economicon.i18n.translation import gettext as _
+from economicon.models.enums import DistributionType, TransformMethodType
 
 T = TypeVar("T")
 

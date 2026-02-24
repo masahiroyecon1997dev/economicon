@@ -1,6 +1,6 @@
 from pydantic_core import ErrorDetails
 
-from .messages import VALIDATION_ERROR_TEMPLATES
+from economicon.core.messages import VALIDATION_ERROR_TEMPLATES
 
 
 def get_localized_message(error: ErrorDetails) -> str:
