@@ -11,5 +11,5 @@ export interface ClusteredStandardError {
   /** クラスターを構成する列名 */
   groups: string[];
   /** 小標本補正を行うか */
-  use_correction?: boolean;
+  useCorrection?: boolean;
 }

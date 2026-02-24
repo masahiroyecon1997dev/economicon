@@ -9,7 +9,7 @@ import type { TobitParamsMethod } from './tobitParamsMethod';
 export interface TobitParams {
   method: TobitParamsMethod;
   /** 左側打ち切り値。この値以下のデータが打ち切られていると見なす */
-  left_censoring_limit?: number | null;
+  leftCensoringLimit?: number | null;
   /** 右側打ち切り値 */
-  right_censoring_limit?: number | null;
+  rightCensoringLimit?: number | null;
 }
