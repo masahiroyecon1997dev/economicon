@@ -135,10 +135,10 @@ def fe_payload(  # noqa: PLR0913
         expl = ["x1", "x2"]
     analysis = {
         "method": "fe",
-        "entity_id_column": entity_col,
+        "entityIdColumn": entity_col,
     }
     if time_col:
-        analysis["time_column"] = time_col
+        analysis["timeColumn"] = time_col
     se = {"method": se_method}
     if se_method == "cluster":
         se["groups"] = [entity_col]
@@ -167,7 +167,7 @@ def re_payload(
         "explanatoryVariables": expl,
         "analysis": {
             "method": "re",
-            "entity_id_column": entity_col,
+            "entityIdColumn": entity_col,
         },
         "standardError": {"method": se_method},
     }
@@ -194,8 +194,8 @@ def iv_payload(  # noqa: PLR0913
         "explanatoryVariables": expl,
         "analysis": {
             "method": "iv",
-            "endogenous_variables": endog,
-            "instrumental_variables": instruments,
+            "endogenousVariables": endog,
+            "instrumentalVariables": instruments,
         },
         "standardError": {"method": se_method},
     }
