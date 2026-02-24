@@ -83,33 +83,33 @@ export const RegressionBody = zod.object({
   "calculateMarginalEffects": zod.boolean().default(regressionBodyAnalysisThreeCalculateMarginalEffectsDefault).describe('平均限界効果(AME)を計算するかどうか')
 }),zod.object({
   "method": zod.enum(['feiv', 'iv']),
-  "iv_method": zod.enum(['2sls', 'gmm']).default(regressionBodyAnalysisFourIvMethodDefault).describe('推定アルゴリズム。過剰識別かつ異分散がある場合はGMMを推奨'),
-  "instrumental_variables": zod.array(zod.string().min(1).describe('カラム名')),
-  "endogenous_variables": zod.array(zod.string().min(1).describe('カラム名')),
-  "gmm_weight_matrix": zod.enum(['uncentered', 'robust', 'hac']).default(regressionBodyAnalysisFourGmmWeightMatrixDefault)
+  "ivMethod": zod.enum(['2sls', 'gmm']).default(regressionBodyAnalysisFourIvMethodDefault).describe('推定アルゴリズム。過剰識別かつ異分散がある場合はGMMを推奨'),
+  "instrumentalVariables": zod.array(zod.string().min(1).describe('カラム名')),
+  "endogenousVariables": zod.array(zod.string().min(1).describe('カラム名')),
+  "gmmWeightMatrix": zod.enum(['uncentered', 'robust', 'hac']).default(regressionBodyAnalysisFourGmmWeightMatrixDefault)
 }),zod.object({
   "method": zod.enum(['fe', 're']),
-  "entity_id_column": zod.string().min(1).describe('個体ID列名'),
-  "time_column": zod.union([zod.string().min(1).describe('カラム名'),zod.null()]).optional().describe('時間列名')
+  "entityIdColumn": zod.string().min(1).describe('個体ID列名'),
+  "timeColumn": zod.union([zod.string().min(1).describe('カラム名'),zod.null()]).optional().describe('時間列名')
 }),zod.object({
   "method": zod.enum(['tobit']),
-  "left_censoring_limit": zod.union([zod.number(),zod.null()]).default(regressionBodyAnalysisSixLeftCensoringLimitDefault).describe('左側打ち切り値。この値以下のデータが打ち切られていると見なす'),
-  "right_censoring_limit": zod.union([zod.number(),zod.null()]).optional().describe('右側打ち切り値')
+  "leftCensoringLimit": zod.union([zod.number(),zod.null()]).default(regressionBodyAnalysisSixLeftCensoringLimitDefault).describe('左側打ち切り値。この値以下のデータが打ち切られていると見なす'),
+  "rightCensoringLimit": zod.union([zod.number(),zod.null()]).optional().describe('右側打ち切り値')
 })]),
   "standardError": zod.union([zod.object({
   "method": zod.enum(['nonrobust'])
 }),zod.object({
   "method": zod.enum(['robust']),
-  "hc_type": zod.enum(['HC0', 'HC1', 'HC2', 'HC3']).default(regressionBodyStandardErrorTwoHcTypeDefault)
+  "hcType": zod.enum(['HC0', 'HC1', 'HC2', 'HC3']).default(regressionBodyStandardErrorTwoHcTypeDefault)
 }),zod.object({
   "method": zod.enum(['cluster']),
   "groups": zod.array(zod.string().min(1).describe('カラム名')).describe('クラスターを構成する列名'),
-  "use_correction": zod.boolean().default(regressionBodyStandardErrorThreeUseCorrectionDefault).describe('小標本補正を行うか')
+  "useCorrection": zod.boolean().default(regressionBodyStandardErrorThreeUseCorrectionDefault).describe('小標本補正を行うか')
 }),zod.object({
   "method": zod.enum(['hac']),
   "maxlags": zod.number().min(regressionBodyStandardErrorFourMaxlagsMin).describe('考慮する最大ラグ数'),
   "kernel": zod.string().default(regressionBodyStandardErrorFourKernelDefault).describe('カーネルの種類'),
-  "use_correction": zod.boolean().default(regressionBodyStandardErrorFourUseCorrectionDefault).describe('小標本補正を行うか')
+  "useCorrection": zod.boolean().default(regressionBodyStandardErrorFourUseCorrectionDefault).describe('小標本補正を行うか')
 })])
 }).describe('統合回帰分析リクエスト\n\n全ての回帰分析タイプを単一のエンドポイントで扱うための\n統合スキーマです。')
 
