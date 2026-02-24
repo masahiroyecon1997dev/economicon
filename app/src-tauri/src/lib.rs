@@ -1,4 +1,5 @@
 mod files;
+mod os_info;
 
 use tauri::State;
 use reqwest::Client;
@@ -6,6 +7,7 @@ use serde::{Serialize};
 use std::time::Duration;
 
 use files::{get_files_internal, GetFilesResponse};
+use os_info::{get_os_info_internal, OsInfoResponse};
 
 // HTTPクライアントを保持するState
 struct ClientState {
@@ -134,6 +136,12 @@ async fn get_files(directory_path: String) -> Result<GetFilesResponse, String> {
     get_files_internal(&directory_path).map_err(|e| e.to_string())
 }
 
+// OS情報取得コマンド（同期: ファイルシステムアクセス不要）
+#[tauri::command]
+fn get_os_info() -> OsInfoResponse {
+    get_os_info_internal()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // クライアントの初期化（タイムアウト設定など）
@@ -149,7 +157,8 @@ pub fn run() {
             proxy_request,
             fetch_binary,
             upload_file,
-            get_files
+            get_files,
+            get_os_info
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

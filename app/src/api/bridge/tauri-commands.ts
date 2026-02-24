@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { API_ENDPOINTS } from "../../constants/api";
 import type { FilesType, FileType } from "../../types/commonTypes";
-import { client } from "./client";
+import { client } from "./api-gateway";
 
 type RustFileItem = {
   name: string;
@@ -34,6 +34,13 @@ export const getFiles = async (path: string): Promise<FilesType> => {
       }),
     ),
   };
+};
+
+export const getOsInfo = async (): Promise<{
+  osName: string;
+  pathSeparator: string;
+}> => {
+  return await invoke<{ osName: string; pathSeparator: string }>("get_os_info");
 };
 
 export const fetchDataToArrow = async (
