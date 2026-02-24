@@ -3,13 +3,14 @@ import { UploadCloud } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useTranslation } from "react-i18next";
+import { getFiles } from "../../api/bridge/tauri-commands";
 import { getEconomiconAPI } from "../../api/endpoints";
-import { getFiles } from "../../lib/api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useFilesStore } from "../../stores/files";
 import { useLoadingStore } from "../../stores/loading";
+import { useSettingsStore } from "../../stores/settings";
 import { useTableInfosStore } from "../../stores/tableInfos";
 import { useTableListStore } from "../../stores/tableList";
 import type {
@@ -26,7 +27,8 @@ import { PageLayout } from "../templates/PageLayout";
 
 export const ImportDataFile = () => {
   const { t } = useTranslation();
-  const pathSeparator = "/";
+  const osName = useSettingsStore((state) => state.osName);
+  const pathSeparator = useSettingsStore((state) => state.pathSeparator);
   const files = useFilesStore((state) => state.files);
   const directoryPath = useFilesStore((state) => state.directoryPath);
   const setFiles = useFilesStore((state) => state.setFiles);
@@ -96,10 +98,8 @@ export const ImportDataFile = () => {
     const segments = getPathSegments();
     if (index < 0) return pathSeparator;
     const selectedSegments = segments.slice(0, index + 1);
-    let path = selectedSegments.join(pathSeparator);
-    if (osName === "Windows") path += pathSeparator;
-    else if (pathSeparator === "/") path = "/" + path;
-    return path;
+    const basePath = selectedSegments.join(pathSeparator);
+    return osName === "Windows" ? basePath + pathSeparator : "/" + basePath;
   };
 
   // ディレクトリ変更処理

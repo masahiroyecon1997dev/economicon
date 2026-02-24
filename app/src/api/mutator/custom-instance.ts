@@ -1,5 +1,4 @@
-// src/api/mutator/custom-instance.ts
-import { client } from "../../lib/api/client"; // 既存のclient.tsをインポート
+import { client } from "../bridge/api-gateway"; // 既存のclient.tsをインポート
 
 export const customInstance = async <T>(
   config: {
