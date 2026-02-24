@@ -39,6 +39,19 @@ class RegularizedRegressionParams(BaseModel):
     alpha: float = Field(
         default=1.0, ge=0.0, description="正則化強度のパラメータ"
     )
+    calculate_se: bool = Field(
+        default=False,
+        alias="calculateSe",
+        description="ブートストラップ法による標準誤差を計算するかどうか",
+    )
+    bootstrap_iterations: int = Field(
+        default=1000,
+        ge=100,
+        le=10000,
+        alias="bootstrapIterations",
+        description="ブートストラップ法のイテレーション回数",
+    )
+
 
 
 class BinaryChoiceRegressionParams(BaseModel):

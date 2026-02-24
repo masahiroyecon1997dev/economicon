@@ -248,6 +248,8 @@ def fit_lasso(
     has_const: bool,
     alpha: float,
     missing: str,
+    calculate_se: bool = False,
+    bootstrap_iterations: int = 1000,
 ) -> Tuple[RegressionResultsWrapper, np.ndarray]:
     """
     Lassoモデルのフィッティング（Pipeline使用、両係数を返す）
@@ -294,13 +296,54 @@ def fit_lasso(
     model_ols = sm.OLS(y_data, x_data, missing=missing)
     result = model_ols.fit()
 
+    # ブートストラップによる標準誤差の計算
+    se = None
+    if calculate_se:
+        n_samples = len(y_data)
+        n_params = len(coef_original) + (1 if has_const else 0)
+        bootstrap_coefs = np.zeros((bootstrap_iterations, n_params))
+
+        for i in range(bootstrap_iterations):
+            indices = np.random.choice(n_samples, n_samples, replace=True)
+            y_boot = y_data[indices]
+            x_boot = x_data_sklearn[indices]
+
+            boot_model = make_pipeline(StandardScaler(), Lasso(alpha=alpha))
+            boot_model.fit(x_boot, y_boot)
+
+            boot_scaler = boot_model.named_steps["standardscaler"]
+            boot_lasso = boot_model.named_steps["lasso"]
+
+            boot_coef_scaled = boot_lasso.coef_
+            boot_intercept_scaled = boot_lasso.intercept_
+            boot_coef_original = boot_coef_scaled / boot_scaler.scale_
+            boot_intercept_original = (
+                np.mean(y_boot)
+                - np.dot(boot_coef_original, boot_scaler.mean_)
+                + boot_intercept_scaled
+            )
+
+            if has_const:
+                bootstrap_coefs[i] = np.hstack(([boot_intercept_original], boot_coef_original))
+            else:
+                bootstrap_coefs[i] = boot_coef_original
+
+        se = np.std(bootstrap_coefs, axis=0)
+
     # Lasso の係数で上書き（元のスケール）
     if has_const:
-        result._results.params = np.hstack(
-            ([intercept_original], coef_original)  # type: ignore
-        )
+        params_original = np.hstack(([intercept_original], coef_original))
     else:
-        result._results.params = coef_original
+        params_original = coef_original
+
+    result._results.params = params_original
+    if calculate_se and se is not None:
+        result._results.bse = se
+    else:
+        result._results.bse = np.full_like(params_original, np.nan)
+
+    result._results.tvalues = np.full_like(params_original, np.nan)
+    result._results.pvalues = np.full_like(params_original, np.nan)
 
     return result, coef_scaled
 
@@ -311,6 +354,8 @@ def fit_ridge(
     has_const: bool,
     alpha: float,
     missing: str,
+    calculate_se: bool = False,
+    bootstrap_iterations: int = 1000,
 ) -> Tuple[RegressionResultsWrapper, np.ndarray]:
     """
     Ridgeモデルのフィッティング（Pipeline使用、両係数を返す）
@@ -357,12 +402,53 @@ def fit_ridge(
     model_ols = sm.OLS(y_data, x_data, missing=missing)
     result = model_ols.fit()
 
+    # ブートストラップによる標準誤差の計算
+    se = None
+    if calculate_se:
+        n_samples = len(y_data)
+        n_params = len(coef_original) + (1 if has_const else 0)
+        bootstrap_coefs = np.zeros((bootstrap_iterations, n_params))
+
+        for i in range(bootstrap_iterations):
+            indices = np.random.choice(n_samples, n_samples, replace=True)
+            y_boot = y_data[indices]
+            x_boot = x_data_sklearn[indices]
+
+            boot_model = make_pipeline(StandardScaler(), Ridge(alpha=alpha))
+            boot_model.fit(x_boot, y_boot)
+
+            boot_scaler = boot_model.named_steps["standardscaler"]
+            boot_ridge = boot_model.named_steps["ridge"]
+
+            boot_coef_scaled = boot_ridge.coef_
+            boot_intercept_scaled = boot_ridge.intercept_
+            boot_coef_original = boot_coef_scaled / boot_scaler.scale_
+            boot_intercept_original = (
+                np.mean(y_boot)
+                - np.dot(boot_coef_original, boot_scaler.mean_)
+                + boot_intercept_scaled
+            )
+
+            if has_const:
+                bootstrap_coefs[i] = np.hstack(([boot_intercept_original], boot_coef_original))
+            else:
+                bootstrap_coefs[i] = boot_coef_original
+
+        se = np.std(bootstrap_coefs, axis=0)
+
     # Ridge の係数で上書き（元のスケール）
     if has_const:
-        result._results.params = np.hstack(
-            ([intercept_original], coef_original)  # type: ignore
-        )
+        params_original = np.hstack(([intercept_original], coef_original))
     else:
-        result._results.params = coef_original
+        params_original = coef_original
+
+    result._results.params = params_original
+    if calculate_se and se is not None:
+        result._results.bse = se
+    else:
+        result._results.bse = np.full_like(params_original, np.nan)
+
+    result._results.tvalues = np.full_like(params_original, np.nan)
+    result._results.pvalues = np.full_like(params_original, np.nan)
 
     return result, coef_scaled
