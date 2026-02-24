@@ -164,7 +164,6 @@ class SettingsStore:
 
             # SettingsInfoオブジェクトを作成
             self._settings = SettingsInfo(
-                os_name=settings.get("os_name", default_settings["os_name"]),
                 language=general.get("language", defaults_general["language"]),
                 last_opened_path=general.get(
                     "last_opened_path", defaults_general["last_opened_path"]
@@ -243,7 +242,6 @@ class SettingsStore:
 
             current = self._settings
             self._settings = SettingsInfo(
-                os_name=os_name if os_name is not None else current.os_name,
                 language=language
                 if language is not None
                 else current.language,
@@ -274,7 +272,6 @@ class SettingsStore:
             settings_file_path = self._get_settings_file_path()
 
             settings_dict = {
-                "os_name": self._settings.os_name,
                 "general": {
                     "language": self._settings.language,
                     "last_opened_path": self._settings.last_opened_path,
@@ -297,4 +294,4 @@ class SettingsStore:
                         allow_unicode=True,
                     )
             except Exception as e:
-                raise RuntimeError(f"Failed to save settings: {e}")
+                raise RuntimeError(f"Failed to save settings: {e}") from e

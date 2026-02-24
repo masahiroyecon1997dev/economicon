@@ -90,7 +90,8 @@ class CreateUnionTable:
             return result
         except Exception as e:
             message = _(
-                "An unexpected error occurred during union table creation processing"
+                "An unexpected error occurred during "
+                "union table creation processing"
             )
             raise ProcessingError(
                 error_code=ErrorCode.UNION_TABLE_CREATION_ERROR,

@@ -70,7 +70,8 @@ class CreateSimulationDataTable:
 
         except Exception as e:
             message = _(
-                "An unexpected error occurred during creating simulation data table"
+                "An unexpected error occurred during "
+                "creating simulation data table"
             )
             raise ProcessingError(
                 error_code=ErrorCode.CREATE_SIMULATION_DATA_TABLE_ERROR,
