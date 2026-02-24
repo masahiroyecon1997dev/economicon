@@ -137,13 +137,14 @@ def fit_tobit(
     return result
 
 
-def fit_iv(
+def fit_iv(  # noqa: PLR0913
     df_pandas: Any,
     dependent_variable: str,
     explanatory_variables: list[str],
     endogenous_variables: list[str],
     instrumental_variables: list[str],
     standard_error_method: str,
+    has_const: bool = True,
 ) -> Any:
     """
     IVモデルのフィッティング (linearmodels を使用)
@@ -155,13 +156,20 @@ def fit_iv(
         endogenous_variables: 内生変数名のリスト
         instrumental_variables: 操作変数名のリスト
         standard_error_method: 標準誤差計算方法
+        has_const: 定数項を追加するかどうか
 
     Returns:
         linearmodels の IV2SLS 回帰結果
     """
     # 被説明変数、外生変数、内生変数、操作変数を設定
     dependent = df_pandas[dependent_variable]
-    exog = df_pandas[explanatory_variables] if explanatory_variables else None
+    exog_raw = (
+        df_pandas[explanatory_variables] if explanatory_variables else None
+    )
+    if has_const and exog_raw is not None:
+        exog = sm.add_constant(exog_raw)
+    else:
+        exog = exog_raw
     endog = df_pandas[endogenous_variables] if endogenous_variables else None
     instruments = df_pandas[instrumental_variables]
 
@@ -289,11 +297,7 @@ def fit_lasso(
 
     # 元のスケールに戻す
     coef_original = coef_scaled / scaler.scale_
-    intercept_original = (
-        np.mean(y_data)
-        - np.dot(coef_original, scaler.mean_)
-        + intercept_scaled
-    )
+    intercept_original = intercept_scaled - np.dot(coef_original, scaler.mean_)
 
     # statsmodels 形式で再構築（統計量を取得するため）
     model_ols = sm.OLS(y_data, x_data, missing=missing)
@@ -320,10 +324,8 @@ def fit_lasso(
             boot_coef_scaled = boot_lasso.coef_
             boot_intercept_scaled = boot_lasso.intercept_
             boot_coef_original = boot_coef_scaled / boot_scaler.scale_
-            boot_intercept_original = (
-                np.mean(y_boot)
-                - np.dot(boot_coef_original, boot_scaler.mean_)
-                + boot_intercept_scaled
+            boot_intercept_original = boot_intercept_scaled - np.dot(
+                boot_coef_original, boot_scaler.mean_
             )
 
             if has_const:
@@ -342,13 +344,18 @@ def fit_lasso(
         params_original = coef_original
 
     result._results.params = params_original
+    # bse は CachedProperty のためキャッシュをクリアして normalized_cov_params で設定
+    n_params = len(params_original)
+    cache = getattr(result._results, "_cache", {})
+    for key in ("bse", "tvalues", "pvalues"):
+        cache.pop(key, None)
     if calculate_se and se is not None:
-        result._results.bse = se
+        scale = result._results.scale
+        result._results.normalized_cov_params = np.diag(se**2 / scale)
     else:
-        result._results.bse = np.full_like(params_original, np.nan)
-
-    result._results.tvalues = np.full_like(params_original, np.nan)
-    result._results.pvalues = np.full_like(params_original, np.nan)
+        result._results.normalized_cov_params = np.full(
+            (n_params, n_params), np.nan
+        )
 
     return result, coef_scaled
 
@@ -397,11 +404,7 @@ def fit_ridge(
 
     # 元のスケールに戻す
     coef_original = coef_scaled / scaler.scale_
-    intercept_original = (
-        np.mean(y_data)
-        - np.dot(coef_original, scaler.mean_)
-        + intercept_scaled
-    )
+    intercept_original = intercept_scaled - np.dot(coef_original, scaler.mean_)
 
     # statsmodels 形式で再構築（統計量を取得するため）
     model_ols = sm.OLS(y_data, x_data, missing=missing)
@@ -428,10 +431,8 @@ def fit_ridge(
             boot_coef_scaled = boot_ridge.coef_
             boot_intercept_scaled = boot_ridge.intercept_
             boot_coef_original = boot_coef_scaled / boot_scaler.scale_
-            boot_intercept_original = (
-                np.mean(y_boot)
-                - np.dot(boot_coef_original, boot_scaler.mean_)
-                + boot_intercept_scaled
+            boot_intercept_original = boot_intercept_scaled - np.dot(
+                boot_coef_original, boot_scaler.mean_
             )
 
             if has_const:
@@ -450,12 +451,17 @@ def fit_ridge(
         params_original = coef_original
 
     result._results.params = params_original
+    # bse は CachedProperty のためキャッシュをクリアして normalized_cov_params で設定
+    n_params = len(params_original)
+    cache = getattr(result._results, "_cache", {})
+    for key in ("bse", "tvalues", "pvalues"):
+        cache.pop(key, None)
     if calculate_se and se is not None:
-        result._results.bse = se
+        scale = result._results.scale
+        result._results.normalized_cov_params = np.diag(se**2 / scale)
     else:
-        result._results.bse = np.full_like(params_original, np.nan)
-
-    result._results.tvalues = np.full_like(params_original, np.nan)
-    result._results.pvalues = np.full_like(params_original, np.nan)
+        result._results.normalized_cov_params = np.full(
+            (n_params, n_params), np.nan
+        )
 
     return result, coef_scaled

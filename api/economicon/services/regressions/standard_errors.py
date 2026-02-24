@@ -31,9 +31,16 @@ def apply_standard_errors(
     # nonrobustの場合は何も調整せずそのまま返す
     match standard_error_settings:
         case RobustStandardError():
-            model_result = model_result.get_robustcov_results(
-                cov_type=standard_error_settings.hc_type
-            )
+            try:
+                model_result = model_result.get_robustcov_results(
+                    cov_type=standard_error_settings.hc_type
+                )
+            except AttributeError:
+                # Logit/Probit など DiscreteResults はモデルを再フィット
+                model_result = model_result.model.fit(
+                    cov_type=standard_error_settings.hc_type,
+                    disp=False,
+                )
 
         case ClusteredStandardError():
             model_result = model_result.get_robustcov_results(

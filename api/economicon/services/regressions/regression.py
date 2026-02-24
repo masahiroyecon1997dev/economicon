@@ -134,7 +134,7 @@ class Regression:
         )
 
         # 分析手法ごとの追加検証
-        match self.analysis.method:
+        match self.analysis:
             case PanelDataParams():
                 # 固定効果分析の場合、個体IDと時間列の検証
                 if self.analysis.entity_id_column:
@@ -305,6 +305,7 @@ class Regression:
                         self.analysis.endogenous_variables,
                         self.analysis.instrumental_variables,
                         self.standard_error.method,
+                        has_const=self.has_const,
                     )
                     model_result = apply_standard_errors(
                         model_result,
