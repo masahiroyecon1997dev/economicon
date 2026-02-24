@@ -11,8 +11,8 @@ from tests.regressions.conftest import (
     TABLE_PANEL,
     TABLE_STRING,
     URL_REGRESSION,
-    fe_payload,
-    ols_payload,
+    FePayload,
+    OlsPayload,
 )
 
 # ─────────────────────────────────────────────
@@ -52,7 +52,7 @@ class TestValidationError422:
 
     def test_empty_table_name(self, client, tables_store):
         """tableName が空文字の場合は 422 を返す"""
-        payload = ols_payload(table="")
+        payload = OlsPayload(table="").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -61,7 +61,7 @@ class TestValidationError422:
 
     def test_whitespace_only_table_name(self, client, tables_store):
         """tableName が空白のみの場合は 422 を返す（strip後に空文字）"""
-        payload = ols_payload(table="   ")
+        payload = OlsPayload(table="   ").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -70,7 +70,7 @@ class TestValidationError422:
 
     def test_tab_only_table_name(self, client, tables_store):
         """tableName がタブのみの場合は 422 を返す（strip後に空文字）"""
-        payload = ols_payload(table="\t")
+        payload = OlsPayload(table="\t").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -156,7 +156,7 @@ class TestDataNotFound400:
 
     def test_nonexistent_table(self, client, tables_store):
         """存在しないテーブル名で 400 を返す"""
-        payload = ols_payload(table="NonExistentTable")
+        payload = OlsPayload(table="NonExistentTable").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -167,7 +167,7 @@ class TestDataNotFound400:
 
     def test_nonexistent_dependent_variable(self, client, tables_store):
         """存在しない目的変数で 400 を返す"""
-        payload = ols_payload(dep="nonexistent_y")
+        payload = OlsPayload(dep="nonexistent_y").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -179,7 +179,7 @@ class TestDataNotFound400:
 
     def test_nonexistent_explanatory_variable(self, client, tables_store):
         """存在しない説明変数で 400 を返す"""
-        payload = ols_payload(expl=["nonexistent_x"])
+        payload = OlsPayload(expl=["nonexistent_x"]).build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -191,7 +191,7 @@ class TestDataNotFound400:
 
     def test_nonexistent_entity_id_column_for_fe(self, client, tables_store):
         """FE モデルで存在しない entityIdColumn を指定した場合は 400"""
-        payload = fe_payload(entity_col="nonexistent_entity")
+        payload = FePayload(entity_col="nonexistent_entity").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -200,7 +200,7 @@ class TestDataNotFound400:
 
     def test_nonexistent_time_column_for_fe(self, client, tables_store):
         """FE モデルで存在しない timeColumn を指定した場合は 400"""
-        payload = fe_payload(time_col="nonexistentime")
+        payload = FePayload(time_col="nonexistentime").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -209,7 +209,7 @@ class TestDataNotFound400:
 
     def test_kanji_table_name_not_found(self, client, tables_store):
         """存在しない漢字テーブル名で 400、エラーメッセージに漢字を含む"""
-        payload = ols_payload(table=_TABLE_KANJI)
+        payload = OlsPayload(table=_TABLE_KANJI).build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -242,11 +242,11 @@ class TestDataNotFound400:
             ),
         )
         # テーブルには存在しない _COL_KANJI_Y を目的変数に指定
-        payload = ols_payload(
+        payload = OlsPayload(
             table=_TABLE_KANJI,
             dep=_COL_KANJI_Y,
             expl=[_COL_KANJI_X],
-        )
+        ).build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -265,11 +265,11 @@ class TestInvalidDtype400:
 
     def test_string_column_as_dependent_variable(self, client, tables_store):
         """文字列カラムを目的変数に指定した場合は 400"""
-        payload = ols_payload(
+        payload = OlsPayload(
             table=TABLE_STRING,
             dep="name",
             expl=["score"],
-        )
+        ).build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -278,11 +278,11 @@ class TestInvalidDtype400:
 
     def test_string_column_as_explanatory_variable(self, client, tables_store):
         """文字列カラムを説明変数に指定した場合は 400"""
-        payload = ols_payload(
+        payload = OlsPayload(
             table=TABLE_STRING,
             dep="score",
             expl=["name"],
-        )
+        ).build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -344,11 +344,11 @@ class TestBoundaryValues:
                 }
             ),
         )
-        payload = ols_payload(
+        payload = OlsPayload(
             table=_TABLE_KANJI,
             dep=_COL_KANJI_EXISTING,
             expl=[_COL_KANJI_X, _COL_KANJI_Y],
-        )
+        ).build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_200_OK
@@ -366,11 +366,11 @@ class TestBoundaryValues:
                 }
             ),
         )
-        payload = ols_payload(
+        payload = OlsPayload(
             table=_SHORT_TABLE,
             dep="y",
             expl=["x"],
-        )
+        ).build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_200_OK
@@ -382,7 +382,7 @@ class TestBoundaryValues:
         TableName は NAME_PATTERN を持たないため絵文字も通過する。
         登録されていなければ 400 DATA_NOT_FOUND となる。
         """
-        payload = ols_payload(table="🎉売上テーブル集計")
+        payload = OlsPayload(table="🎉売上テーブル集計").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -391,7 +391,7 @@ class TestBoundaryValues:
     def test_leading_trailing_space_is_stripped(self, client, tables_store):
         """前後スペース付きテーブル名は strip されて正常参照できる"""
         # TABLE_BASIC は既に tables_store で登録済み
-        payload = ols_payload(table=f"  {TABLE_BASIC}  ")
+        payload = OlsPayload(table=f"  {TABLE_BASIC}  ").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
         assert resp.status_code == status.HTTP_200_OK

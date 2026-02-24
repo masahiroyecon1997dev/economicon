@@ -1,5 +1,7 @@
 """回帰分析テスト共通フィクスチャ"""
 
+from dataclasses import dataclass, field
+
 import numpy as np
 import polars as pl
 import pytest
@@ -35,220 +37,254 @@ URL_RESULTS = "/api/analysis/results"
 
 
 # -----------------------------------------------------------
-# 標準ペイロードビルダー
+# 標準ペイロードビルダー（dataclass）
 # -----------------------------------------------------------
 
 
-def ols_payload(
-    table=TABLE_BASIC,
-    dep="y_linear",
-    expl=None,
-    *,
-    has_const=True,
-    se_method="nonrobust",
-    **se_kwargs,
-):
-    """OLSリクエストペイロードを生成"""
-    if expl is None:
-        expl = ["x1", "x2"]
-    se = {"method": se_method, **se_kwargs}
-    payload = {
-        "tableName": table,
-        "dependentVariable": dep,
-        "explanatoryVariables": expl,
-        "hasConst": has_const,
-        "analysis": {"method": "ols"},
-        "standardError": se,
-    }
-    return payload
+@dataclass
+class OlsPayload:
+    """OLSリクエストペイロード"""
+
+    table: str = TABLE_BASIC
+    dep: str = "y_linear"
+    expl: list[str] = field(
+        default_factory=lambda: ["x1", "x2"]
+    )
+    has_const: bool = True
+    se_method: str = "nonrobust"
+    se_extra: dict = field(default_factory=dict)
+
+    def build(self) -> dict:
+        """リクエストペイロード辞書を構築する"""
+        se = {"method": self.se_method, **self.se_extra}
+        return {
+            "tableName": self.table,
+            "dependentVariable": self.dep,
+            "explanatoryVariables": self.expl,
+            "hasConst": self.has_const,
+            "analysis": {"method": "ols"},
+            "standardError": se,
+        }
 
 
-def logit_payload(
-    table=TABLE_BASIC,
-    dep="y_binary",
-    expl=None,
-    se_method="nonrobust",
-):
-    """Logitリクエストペイロードを生成"""
-    if expl is None:
-        expl = ["x1", "x2"]
-    return {
-        "tableName": table,
-        "dependentVariable": dep,
-        "explanatoryVariables": expl,
-        "analysis": {"method": "logit"},
-        "standardError": {"method": se_method},
-    }
+@dataclass
+class LogitPayload:
+    """Logitリクエストペイロード"""
+
+    table: str = TABLE_BASIC
+    dep: str = "y_binary"
+    expl: list[str] = field(
+        default_factory=lambda: ["x1", "x2"]
+    )
+    se_method: str = "nonrobust"
+
+    def build(self) -> dict:
+        """リクエストペイロード辞書を構築する"""
+        return {
+            "tableName": self.table,
+            "dependentVariable": self.dep,
+            "explanatoryVariables": self.expl,
+            "analysis": {"method": "logit"},
+            "standardError": {"method": self.se_method},
+        }
 
 
-def probit_payload(
-    table=TABLE_BASIC,
-    dep="y_binary",
-    expl=None,
-    se_method="nonrobust",
-):
-    """Probitリクエストペイロードを生成"""
-    if expl is None:
-        expl = ["x1", "x2"]
-    return {
-        "tableName": table,
-        "dependentVariable": dep,
-        "explanatoryVariables": expl,
-        "analysis": {"method": "probit"},
-        "standardError": {"method": se_method},
-    }
+@dataclass
+class ProbitPayload:
+    """Probitリクエストペイロード"""
+
+    table: str = TABLE_BASIC
+    dep: str = "y_binary"
+    expl: list[str] = field(
+        default_factory=lambda: ["x1", "x2"]
+    )
+    se_method: str = "nonrobust"
+
+    def build(self) -> dict:
+        """リクエストペイロード辞書を構築する"""
+        return {
+            "tableName": self.table,
+            "dependentVariable": self.dep,
+            "explanatoryVariables": self.expl,
+            "analysis": {"method": "probit"},
+            "standardError": {"method": self.se_method},
+        }
 
 
-def tobit_payload(
-    table=TABLE_TOBIT,
-    dep="y",
-    expl=None,
-    left=0.0,
-    right=None,
-):
-    """Tobitリクエストペイロードを生成"""
-    if expl is None:
-        expl = ["x"]
-    return {
-        "tableName": table,
-        "dependentVariable": dep,
-        "explanatoryVariables": expl,
-        "analysis": {
-            "method": "tobit",
-            "leftCensoringLimit": left,
-            "rightCensoringLimit": right,
-        },
-        "standardError": {"method": "nonrobust"},
-    }
+@dataclass
+class TobitPayload:
+    """Tobitリクエストペイロード"""
+
+    table: str = TABLE_TOBIT
+    dep: str = "y"
+    expl: list[str] = field(default_factory=lambda: ["x"])
+    left: float = 0.0
+    right: float | None = None
+
+    def build(self) -> dict:
+        """リクエストペイロード辞書を構築する"""
+        return {
+            "tableName": self.table,
+            "dependentVariable": self.dep,
+            "explanatoryVariables": self.expl,
+            "analysis": {
+                "method": "tobit",
+                "leftCensoringLimit": self.left,
+                "rightCensoringLimit": self.right,
+            },
+            "standardError": {"method": "nonrobust"},
+        }
 
 
-def fe_payload(  # noqa: PLR0913
-    table=TABLE_PANEL,
-    dep="y",
-    expl=None,
-    entity_col="entity_id",
-    time_col=None,
-    se_method="nonrobust",
-):
-    """固定効果モデルリクエストペイロードを生成"""
-    if expl is None:
-        expl = ["x1", "x2"]
-    analysis = {
-        "method": "fe",
-        "entityIdColumn": entity_col,
-    }
-    if time_col:
-        analysis["timeColumn"] = time_col
-    se: dict[str, str | list[str]] = {"method": se_method}
-    if se_method == "cluster":
-        se["groups"] = [entity_col]
-    return {
-        "tableName": table,
-        "dependentVariable": dep,
-        "explanatoryVariables": expl,
-        "analysis": analysis,
-        "standardError": se,
-    }
+@dataclass
+class FePayload:
+    """固定効果モデルリクエストペイロード"""
+
+    table: str = TABLE_PANEL
+    dep: str = "y"
+    expl: list[str] = field(
+        default_factory=lambda: ["x1", "x2"]
+    )
+    entity_col: str = "entity_id"
+    time_col: str | None = None
+    se_method: str = "nonrobust"
+
+    def build(self) -> dict:
+        """リクエストペイロード辞書を構築する"""
+        analysis: dict = {
+            "method": "fe",
+            "entityIdColumn": self.entity_col,
+        }
+        if self.time_col:
+            analysis["timeColumn"] = self.time_col
+        se: dict[str, str | list[str]] = {
+            "method": self.se_method
+        }
+        if self.se_method == "cluster":
+            se["groups"] = [self.entity_col]
+        return {
+            "tableName": self.table,
+            "dependentVariable": self.dep,
+            "explanatoryVariables": self.expl,
+            "analysis": analysis,
+            "standardError": se,
+        }
 
 
-def re_payload(
-    table=TABLE_PANEL,
-    dep="y",
-    expl=None,
-    entity_col="entity_id",
-    se_method="nonrobust",
-):
-    """変量効果モデルリクエストペイロードを生成"""
-    if expl is None:
-        expl = ["x1", "x2"]
-    return {
-        "tableName": table,
-        "dependentVariable": dep,
-        "explanatoryVariables": expl,
-        "analysis": {
-            "method": "re",
-            "entityIdColumn": entity_col,
-        },
-        "standardError": {"method": se_method},
-    }
+@dataclass
+class RePayload:
+    """変量効果モデルリクエストペイロード"""
+
+    table: str = TABLE_PANEL
+    dep: str = "y"
+    expl: list[str] = field(
+        default_factory=lambda: ["x1", "x2"]
+    )
+    entity_col: str = "entity_id"
+    se_method: str = "nonrobust"
+
+    def build(self) -> dict:
+        """リクエストペイロード辞書を構築する"""
+        return {
+            "tableName": self.table,
+            "dependentVariable": self.dep,
+            "explanatoryVariables": self.expl,
+            "analysis": {
+                "method": "re",
+                "entityIdColumn": self.entity_col,
+            },
+            "standardError": {"method": self.se_method},
+        }
 
 
-def iv_payload(  # noqa: PLR0913
-    table=TABLE_IV,
-    dep="y",
-    expl=None,
-    endog=None,
-    instruments=None,
-    se_method="nonrobust",
-):
-    """操作変数法リクエストペイロードを生成"""
-    if expl is None:
-        expl = ["x1"]
-    if endog is None:
-        endog = ["x2_endog"]
-    if instruments is None:
-        instruments = ["z1", "z2"]
-    return {
-        "tableName": table,
-        "dependentVariable": dep,
-        "explanatoryVariables": expl,
-        "analysis": {
-            "method": "iv",
-            "endogenousVariables": endog,
-            "instrumentalVariables": instruments,
-        },
-        "standardError": {"method": se_method},
-    }
+@dataclass
+class IvPayload:
+    """操作変数法リクエストペイロード"""
+
+    table: str = TABLE_IV
+    dep: str = "y"
+    expl: list[str] = field(
+        default_factory=lambda: ["x1"]
+    )
+    endog: list[str] = field(
+        default_factory=lambda: ["x2_endog"]
+    )
+    instruments: list[str] = field(
+        default_factory=lambda: ["z1", "z2"]
+    )
+    se_method: str = "nonrobust"
+
+    def build(self) -> dict:
+        """リクエストペイロード辞書を構築する"""
+        return {
+            "tableName": self.table,
+            "dependentVariable": self.dep,
+            "explanatoryVariables": self.expl,
+            "analysis": {
+                "method": "iv",
+                "endogenousVariables": self.endog,
+                "instrumentalVariables": self.instruments,
+            },
+            "standardError": {"method": self.se_method},
+        }
 
 
-def lasso_payload(  # noqa: PLR0913
-    table=TABLE_BASIC,
-    dep="y_linear",
-    expl=None,
-    alpha=0.1,
-    has_const=True,
-    calculate_se=False,
-):
-    """Lassoリクエストペイロードを生成"""
-    if expl is None:
-        expl = ["x1", "x2"]
-    return {
-        "tableName": table,
-        "dependentVariable": dep,
-        "explanatoryVariables": expl,
-        "hasConst": has_const,
-        "analysis": {
-            "method": "lasso",
-            "alpha": alpha,
-            "calculateSe": calculate_se,
-        },
-        "standardError": {"method": "nonrobust"},
-    }
+@dataclass
+class LassoPayload:
+    """Lassoリクエストペイロード"""
+
+    table: str = TABLE_BASIC
+    dep: str = "y_linear"
+    expl: list[str] = field(
+        default_factory=lambda: ["x1", "x2"]
+    )
+    alpha: float = 0.1
+    has_const: bool = True
+    calculate_se: bool = False
+
+    def build(self) -> dict:
+        """リクエストペイロード辞書を構築する"""
+        return {
+            "tableName": self.table,
+            "dependentVariable": self.dep,
+            "explanatoryVariables": self.expl,
+            "hasConst": self.has_const,
+            "analysis": {
+                "method": "lasso",
+                "alpha": self.alpha,
+                "calculateSe": self.calculate_se,
+            },
+            "standardError": {"method": "nonrobust"},
+        }
 
 
-def ridge_payload(  # noqa: PLR0913
-    table=TABLE_BASIC,
-    dep="y_linear",
-    expl=None,
-    alpha=0.5,
-    has_const=True,
-    calculate_se=False,
-):
-    """Ridgeリクエストペイロードを生成"""
-    if expl is None:
-        expl = ["x1", "x2"]
-    return {
-        "tableName": table,
-        "dependentVariable": dep,
-        "explanatoryVariables": expl,
-        "hasConst": has_const,
-        "analysis": {
-            "method": "ridge",
-            "alpha": alpha,
-            "calculateSe": calculate_se,
-        },
-        "standardError": {"method": "nonrobust"},
-    }
+@dataclass
+class RidgePayload:
+    """Ridgeリクエストペイロード"""
+
+    table: str = TABLE_BASIC
+    dep: str = "y_linear"
+    expl: list[str] = field(
+        default_factory=lambda: ["x1", "x2"]
+    )
+    alpha: float = 0.5
+    has_const: bool = True
+    calculate_se: bool = False
+
+    def build(self) -> dict:
+        """リクエストペイロード辞書を構築する"""
+        return {
+            "tableName": self.table,
+            "dependentVariable": self.dep,
+            "explanatoryVariables": self.expl,
+            "hasConst": self.has_const,
+            "analysis": {
+                "method": "ridge",
+                "alpha": self.alpha,
+                "calculateSe": self.calculate_se,
+            },
+            "standardError": {"method": "nonrobust"},
+        }
 
 
 # -----------------------------------------------------------

@@ -10,8 +10,8 @@ from sklearn.preprocessing import StandardScaler
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
+    RidgePayload,
     generate_all_data,
-    ridge_payload,
 )
 
 # sklearn/statsmodels との数値比較の許容誤差
@@ -45,7 +45,7 @@ def _get_output(client, payload):
 
 def test_ridge_success(client, tables_store):
     """Ridge回帰が200を返しresultIdを含むことを確認"""
-    resp = client.post(URL_REGRESSION, json=ridge_payload())
+    resp = client.post(URL_REGRESSION, json=RidgePayload().build())
     assert resp.status_code == status.HTTP_200_OK
     data = resp.json()
     assert data["code"] == "OK"
@@ -54,7 +54,7 @@ def test_ridge_success(client, tables_store):
 
 def test_ridge_response_structure(client, tables_store):
     """regressionOutputに必須キーが含まれることを確認"""
-    output = _get_output(client, ridge_payload())
+    output = _get_output(client, RidgePayload().build())
     params = output["parameters"]
     assert len(params) == _N_PARAMS_WITH_CONST  # const, x1, x2
 
@@ -65,14 +65,14 @@ def test_ridge_response_structure(client, tables_store):
 
 def test_ridge_const_coefficient_scaled_is_none(client, tables_store):
     """定数項の coefficientScaled が None であることを確認"""
-    params = _get_output(client, ridge_payload())["parameters"]
+    params = _get_output(client, RidgePayload().build())["parameters"]
     const_param = next(p for p in params if p["variable"] == "const")
     assert const_param["coefficientScaled"] is None
 
 
 def test_ridge_variable_coefficient_scaled_is_float(client, tables_store):
     """変数の coefficientScaled が float であることを確認"""
-    params = _get_output(client, ridge_payload())["parameters"]
+    params = _get_output(client, RidgePayload().build())["parameters"]
     for p in params:
         if p["variable"] != "const":
             assert isinstance(p["coefficientScaled"], float), (
@@ -90,7 +90,7 @@ def test_ridge_coefficients_scaled_numerical(client, tables_store):
     ridge_step = model.named_steps["ridge"]
     expected_scaled = ridge_step.coef_  # [x1_scaled, x2_scaled]
 
-    params = _get_output(client, ridge_payload(alpha=_ALPHA_DEFAULT))[
+    params = _get_output(client, RidgePayload(alpha=_ALPHA_DEFAULT).build())[
         "parameters"
     ]
     var_params = [p for p in params if p["variable"] != "const"]
@@ -110,9 +110,9 @@ def test_ridge_small_alpha_approaches_ols(client, tables_store):
     ols_result = sm.OLS(y_linear, x_mat).fit()
     ols_params = ols_result.params  # [const, x1, x2]
 
-    ridge_params = _get_output(client, ridge_payload(alpha=_ALPHA_TINY))[
-        "parameters"
-    ]
+    ridge_params = _get_output(
+        client, RidgePayload(alpha=_ALPHA_TINY).build()
+    )["parameters"]
 
     pairs = zip(ols_params, ridge_params, strict=False)
     for i, (ols_c, rp) in enumerate(pairs):
@@ -125,7 +125,7 @@ def test_ridge_small_alpha_approaches_ols(client, tables_store):
 
 def test_ridge_without_constant(client, tables_store):
     """hasConst=FalseでRidgeが動作することを確認"""
-    output = _get_output(client, ridge_payload(has_const=False))
+    output = _get_output(client, RidgePayload(has_const=False).build())
     params = output["parameters"]
     assert len(params) == _N_PARAMS_NO_CONST
     names = [p["variable"] for p in params]
@@ -134,7 +134,7 @@ def test_ridge_without_constant(client, tables_store):
 
 def test_ridge_no_zero_coefficients(client, tables_store):
     """RidgeはLassoと異なりスパース化しないことを確認（係数がゼロにならない）"""
-    params = _get_output(client, ridge_payload(alpha=_ALPHA_DEFAULT))[
+    params = _get_output(client, RidgePayload(alpha=_ALPHA_DEFAULT).build())[
         "parameters"
     ]
     var_params = [p for p in params if p["variable"] != "const"]
@@ -147,7 +147,7 @@ def test_ridge_no_zero_coefficients(client, tables_store):
 
 def test_ridge_calculate_se_true(client, tables_store):
     """calculateSe=TrueでRidgeがstandardErrorを返すことを確認"""
-    output = _get_output(client, ridge_payload(calculate_se=True))
+    output = _get_output(client, RidgePayload(calculate_se=True).build())
     params = output["parameters"]
     assert len(params) == _N_PARAMS_WITH_CONST
     for p in params:
@@ -157,7 +157,8 @@ def test_ridge_calculate_se_true(client, tables_store):
 def test_ridge_calculate_se_without_const(client, tables_store):
     """calculate_se=True + has_const=False のブートストラップパスを確認"""
     output = _get_output(
-        client, ridge_payload(calculate_se=True, has_const=False)
+        client,
+        RidgePayload(calculate_se=True, has_const=False).build(),
     )
     params = output["parameters"]
     assert len(params) == _N_PARAMS_NO_CONST
