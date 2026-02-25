@@ -92,7 +92,7 @@ def test_add_dummy_column_missing_table_name(client, tables_store):
         },
     )
 
-    expected_msg = "tableNameは必須項目です。"
+    expected_msg = "tableNameは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -119,7 +119,7 @@ def test_add_dummy_column_missing_source_column_name(client, tables_store):
         },
     )
 
-    expected_msg = "sourceColumnNameは必須項目です。"
+    expected_msg = "sourceColumnNameは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -146,7 +146,7 @@ def test_add_dummy_column_missing_dummy_column_name(client, tables_store):
         },
     )
 
-    expected_msg = "dummyColumnNameは必須項目です。"
+    expected_msg = "dummyColumnNameは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -173,7 +173,7 @@ def test_add_dummy_column_missing_add_position_column(client, tables_store):
         },
     )
 
-    expected_msg = "addPositionColumnは必須項目です。"
+    expected_msg = "addPositionColumnは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -200,7 +200,7 @@ def test_add_dummy_column_missing_target_value(client, tables_store):
         },
     )
 
-    expected_msg = "targetValueは必須項目です。"
+    expected_msg = "targetValueは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT

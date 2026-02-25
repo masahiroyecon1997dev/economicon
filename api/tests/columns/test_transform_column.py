@@ -353,7 +353,7 @@ def test_transform_column_missing_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "tableNameは必須項目です。"
+    expected_msg = "tableNameは必須です。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
 
@@ -373,7 +373,7 @@ def test_transform_column_missing_source_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "sourceColumnNameは必須項目です。"
+    expected_msg = "sourceColumnNameは必須です。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
 
@@ -393,7 +393,7 @@ def test_transform_column_missing_add_position_column(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "addPositionColumnは必須項目です。"
+    expected_msg = "addPositionColumnは必須です。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
 

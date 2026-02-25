@@ -168,8 +168,8 @@ def test_import_parquet_missing_file_path(client, prepared_data):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "filePathは必須項目です。" == response_data["message"]
-    assert ["filePathは必須項目です。"] == response_data["details"]
+    assert "filePathは必須です。" == response_data["message"]
+    assert ["filePathは必須です。"] == response_data["details"]
 
 
 def test_import_parquet_missing_table_name(client, prepared_data):
@@ -190,8 +190,8 @@ def test_import_parquet_missing_table_name(client, prepared_data):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "tableNameは必須項目です。" == response_data["message"]
-    assert ["tableNameは必須項目です。"] == response_data["details"]
+    assert "tableNameは必須です。" == response_data["message"]
+    assert ["tableNameは必須です。"] == response_data["details"]
 
 
 def test_import_parquet_duplicate_table_name(client, prepared_data):

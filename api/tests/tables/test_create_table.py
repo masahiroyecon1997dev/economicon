@@ -151,8 +151,8 @@ def test_create_table_pydantic_missing_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "tableNameは必須項目です。"
-    assert response_data["details"] == ["tableNameは必須項目です。"]
+    assert response_data["message"] == "tableNameは必須です。"
+    assert response_data["details"] == ["tableNameは必須です。"]
 
 
 def test_create_table_pydantic_missing_row_count(client, tables_store):
@@ -173,8 +173,8 @@ def test_create_table_pydantic_missing_column_names(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "columnNamesは必須項目です。"
-    assert response_data["details"] == ["columnNamesは必須項目です。"]
+    assert response_data["message"] == "columnNamesは必須です。"
+    assert response_data["details"] == ["columnNamesは必須です。"]
 
 
 # ─────────────────────────────────────────────────────────────

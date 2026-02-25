@@ -147,8 +147,8 @@ def test_export_excel_missing_table_name(client, prepared_data):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "tableNameは必須項目です。" == response_data["message"]
-    assert ["tableNameは必須項目です。"] == response_data["details"]
+    assert "tableNameは必須です。" == response_data["message"]
+    assert ["tableNameは必須です。"] == response_data["details"]
 
 
 def test_export_excel_missing_directory_path(client, prepared_data):
@@ -165,8 +165,8 @@ def test_export_excel_missing_directory_path(client, prepared_data):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "directoryPathは必須項目です。" == response_data["message"]
-    assert ["directoryPathは必須項目です。"] == response_data["details"]
+    assert "directoryPathは必須です。" == response_data["message"]
+    assert ["directoryPathは必須です。"] == response_data["details"]
 
 
 def test_export_excel_missing_file_name(client, prepared_data):
@@ -183,8 +183,8 @@ def test_export_excel_missing_file_name(client, prepared_data):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "fileNameは必須項目です。" == response_data["message"]
-    assert ["fileNameは必須項目です。"] == response_data["details"]
+    assert "fileNameは必須です。" == response_data["message"]
+    assert ["fileNameは必須です。"] == response_data["details"]
 
 
 def test_export_excel_missing_format(client, prepared_data):
@@ -201,8 +201,8 @@ def test_export_excel_missing_format(client, prepared_data):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "formatは必須項目です。" == response_data["message"]
-    assert ["formatは必須項目です。"] == response_data["details"]
+    assert "formatは必須です。" == response_data["message"]
+    assert ["formatは必須です。"] == response_data["details"]
 
 
 def test_export_excel_invalid_json(client, prepared_data):

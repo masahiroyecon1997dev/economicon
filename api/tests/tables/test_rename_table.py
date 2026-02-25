@@ -135,8 +135,8 @@ def test_rename_table_missing_old_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "oldTableNameは必須項目です。" == response_data["message"]
-    assert ["oldTableNameは必須項目です。"] == response_data["details"]
+    assert "oldTableNameは必須です。" == response_data["message"]
+    assert ["oldTableNameは必須です。"] == response_data["details"]
 
 
 def test_rename_table_missing_new_table_name(client, tables_store):
@@ -151,8 +151,8 @@ def test_rename_table_missing_new_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "newTableNameは必須項目です。" == response_data["message"]
-    assert ["newTableNameは必須項目です。"] == response_data["details"]
+    assert "newTableNameは必須です。" == response_data["message"]
+    assert ["newTableNameは必須です。"] == response_data["details"]
 
 
 # ---------------------------------------------------------------------------
