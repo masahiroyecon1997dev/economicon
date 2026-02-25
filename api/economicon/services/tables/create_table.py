@@ -130,27 +130,26 @@ class CreateTable:
                 message=message,
             )
 
-        # カラム数チェック
-        if df_raw.width != len(self.column_names):
-            message = _(
-                "Column count mismatch: file has {file_cols} columns, "
-                "but {requested_cols} column names were specified."
-            ).format(
-                file_cols=df_raw.width,
-                requested_cols=len(self.column_names),
-            )
-            raise ProcessingError(
-                error_code=ErrorCode.COLUMN_COUNT_MISMATCH,
-                message=message,
-            )
+        n_file = df_raw.width
+        n_spec = len(self.column_names)
+        n_rename = min(n_file, n_spec)
 
-        # カラム名を置換してから行数調整
-        rename_map = {
-            old: str(new)
-            for old, new in zip(df_raw.columns, self.column_names, strict=True)
-        }
-        df_renamed = df_raw.rename(rename_map)
-        return self._adjust_rows(df_renamed)
+        # 指定カラム数分のみリネーム（少ない場合は残列名をそのまま保持）
+        rename_map = dict(
+            zip(
+                df_raw.columns[:n_rename],
+                [str(c) for c in self.column_names[:n_rename]],
+                strict=True,
+            )
+        )
+        df = df_raw.rename(rename_map)
+
+        # 指定カラム数がファイル列数より多い → 超過分をNone列として追加
+        if n_spec > n_file:
+            extras = [str(c) for c in self.column_names[n_file:]]
+            df = df.with_columns([pl.lit(None).alias(name) for name in extras])
+
+        return self._adjust_rows(df)
 
     def _read_csv(self, path: str) -> pl.DataFrame:
         """CSVファイルを読み込む"""
@@ -169,7 +168,7 @@ class CreateTable:
             return pl.read_excel(
                 path,
                 sheet_name=sheet,
-                read_options={"has_header": self.has_header},
+                has_header=self.has_header,
             )
         return pl.read_excel(path)
 
