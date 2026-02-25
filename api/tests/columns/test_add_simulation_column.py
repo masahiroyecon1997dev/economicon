@@ -47,6 +47,23 @@ HYPERGEOMETRIC_POPULATION = 100
 HYPERGEOMETRIC_SUCCESS_STATES = 30
 HYPERGEOMETRIC_DRAWS = 10
 
+# ワイブル分布
+WEIBULL_A = 1.5
+WEIBULL_SCALE = 1.0
+
+# 対数正規分布
+LOGNORMAL_MEAN = 0.0
+LOGNORMAL_SIGMA = 1.0
+
+# ベルヌーイ分布
+BERNOULLI_P = 0.5
+
+# 幾何分布
+GEOMETRIC_P = 0.3
+
+# 固定値
+FIXED_VALUE = 42.0
+
 
 # ========================================
 # フィクスチャ
@@ -285,6 +302,148 @@ def test_add_hypergeometric_column_success(client, tables_store):
     # 超幾何分布: [0, min(K, n)] の範囲
     maximum = min(HYPERGEOMETRIC_SUCCESS_STATES, HYPERGEOMETRIC_DRAWS)
     assert all(0 <= v <= maximum for v in df["HyperGeomCol"])
+
+
+def test_add_weibull_column_success(client, tables_store):
+    """ワイブル分布の列追加が正常に動作する"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "WeibullCol",
+                "distribution": {
+                    "type": "weibull",
+                    "a": WEIBULL_A,
+                    "scale": WEIBULL_SCALE,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["distributionType"] == "weibull"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == [COL_A, "WeibullCol", COL_B]
+    assert len(df["WeibullCol"]) == ROW_COUNT
+    # ワイブル分布は非負
+    assert all(v >= 0 for v in df["WeibullCol"])
+
+
+def test_add_lognormal_column_success(client, tables_store):
+    """対数正規分布の列追加が正常に動作する"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "LognormalCol",
+                "distribution": {
+                    "type": "lognormal",
+                    "mean": LOGNORMAL_MEAN,
+                    "sigma": LOGNORMAL_SIGMA,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["distributionType"] == "lognormal"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == [COL_A, "LognormalCol", COL_B]
+    assert len(df["LognormalCol"]) == ROW_COUNT
+    # 対数正規分布は正値
+    assert all(v > 0 for v in df["LognormalCol"])
+
+
+def test_add_bernoulli_column_success(client, tables_store):
+    """ベルヌーイ分布の列追加が正常に動作する"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "BernoulliCol",
+                "distribution": {
+                    "type": "bernoulli",
+                    "p": BERNOULLI_P,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["distributionType"] == "bernoulli"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == [COL_A, "BernoulliCol", COL_B]
+    assert len(df["BernoulliCol"]) == ROW_COUNT
+    # ベルヌーイ分布は 0 または 1
+    assert all(v in (0, 1) for v in df["BernoulliCol"])
+
+
+def test_add_geometric_column_success(client, tables_store):
+    """幾何分布の列追加が正常に動作する"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "GeometricCol",
+                "distribution": {
+                    "type": "geometric",
+                    "p": GEOMETRIC_P,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["distributionType"] == "geometric"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == [COL_A, "GeometricCol", COL_B]
+    assert len(df["GeometricCol"]) == ROW_COUNT
+    # 幾何分布は 1 以上の整数
+    assert all(v >= 1 for v in df["GeometricCol"])
+
+
+def test_add_fixed_column_success(client, tables_store):
+    """固定値カラムの追加が正常に動作する"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "FixedCol",
+                "distribution": {
+                    "type": "fixed",
+                    "value": FIXED_VALUE,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["distributionType"] == "fixed"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == [COL_A, "FixedCol", COL_B]
+    assert len(df["FixedCol"]) == ROW_COUNT
+    # 全行が固定値であることを確認
+    assert all(v == FIXED_VALUE for v in df["FixedCol"])
 
 
 # ========================================
