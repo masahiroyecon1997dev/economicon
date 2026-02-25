@@ -66,7 +66,7 @@ class CreateJoinTable:
             target=self.param_names["right_table_name"],
         )
         # 左テーブルのキー列の存在チェック
-        left_table_column_name_list = TablesStore().get_column_name_list(
+        left_table_column_name_list = self.tables_store.get_column_name_list(
             self.left_table_name
         )
         for left_key_column_name in self.left_key_column_names:
@@ -76,7 +76,7 @@ class CreateJoinTable:
                 target=self.param_names["left_key_column_names"],
             )
         # 右テーブルのキー列の存在チェック
-        right_table_column_name_list = TablesStore().get_column_name_list(
+        right_table_column_name_list = self.tables_store.get_column_name_list(
             self.right_table_name
         )
         for right_key_column_name in self.right_key_column_names:
