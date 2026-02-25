@@ -36,7 +36,10 @@ def generate_simulation_data(
         DistributionType.POISSON: lambda d: rng.poisson(d.lam, row_count),
         DistributionType.GEOMETRIC: lambda d: rng.geometric(d.p, row_count),
         DistributionType.HYPERGEOMETRIC: lambda d: rng.hypergeometric(
-            d.K, d.N - d.K, d.n, row_count
+            d.success_count,
+            d.population_size - d.success_count,
+            d.sample_size,
+            row_count,
         ),
         DistributionType.FIXED: lambda d: np.full(row_count, d.value),
     }

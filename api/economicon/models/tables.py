@@ -104,19 +104,19 @@ class CreateTableRequestBody(BaseRequest):
             ),
         ),
     ] = None
-    csv_has_header: Annotated[
+    has_header: Annotated[
         bool,
         Field(
-            title="CSV Has Header",
+            title="Has Header",
             description=(
-                "CSV ファイルにヘッダ行があるか。"
+                "CSV/ Excel ファイルにヘッダ行があるか。"
                 "True: 1 行目をヘッダとして読み飛ばし、"
                 "2 行目からをデータとする。"
                 "False: 1 行目からデータとして読み込む。"
-                "file_path が CSV の場合のみ有効。"
+                "file_path が CSV または Excel の場合のみ有効。"
             ),
         ),
-    ] = True
+    ] = False
     csv_separator: Annotated[
         Separator,
         Field(

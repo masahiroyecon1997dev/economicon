@@ -268,9 +268,9 @@ def test_add_hypergeometric_column_success(client, tables_store):
                 "columnName": "HyperGeomCol",
                 "distribution": {
                     "type": "hypergeometric",
-                    "N": HYPERGEOMETRIC_POPULATION,
-                    "K": HYPERGEOMETRIC_SUCCESS_STATES,
-                    "n": HYPERGEOMETRIC_DRAWS,
+                    "populationSize": HYPERGEOMETRIC_POPULATION,
+                    "successCount": HYPERGEOMETRIC_SUCCESS_STATES,
+                    "sampleSize": HYPERGEOMETRIC_DRAWS,
                 },
             },
             "addPositionColumn": COL_A,
