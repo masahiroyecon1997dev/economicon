@@ -438,14 +438,12 @@ class FilterSingleConditionRequestBody(BaseRequest):
         ),
     ]
     is_compare_column: Annotated[
-        str,
+        bool,
         Field(
             title="Is Compare Column",
             description="比較対象がカラムかどうか。"
-            '"true": compareValue をカラム名として解釈、'
-            '"false": 定数値として解釈。',
-            min_length=1,
-            max_length=10,
+            "true: compareValue をカラム名として解釈、"
+            "false: 定数値として解釈。",
         ),
     ]
     compare_value: Annotated[
