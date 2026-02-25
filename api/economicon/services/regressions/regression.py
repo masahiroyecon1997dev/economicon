@@ -7,6 +7,7 @@ from economicon.models import (
     InstrumentalVariablesParams,
     OLSParams,
     PanelDataParams,
+    PanelIvParams,
     RegressionMethodType,
     RegressionRequestBody,
     RegularizedRegressionParams,
@@ -104,6 +105,7 @@ class Regression:
             PanelDataParams: self._execute_panel,
             InstrumentalVariablesParams: self._execute_iv,
             RegularizedRegressionParams: self._execute_regularized,
+            PanelIvParams: self._execute_panel_iv,
         }
 
     def validate(self):
@@ -417,6 +419,11 @@ class Regression:
             )
 
         return self._format_regularized_result(model_result, coef_scaled)
+
+    def _execute_panel_iv(self, *, df, y_data, x_data, missing):
+        raise NotImplementedError(
+            _("Specified regression method is not supported")
+        )
 
     def _format_result(self, model_result: Any) -> dict:
         """

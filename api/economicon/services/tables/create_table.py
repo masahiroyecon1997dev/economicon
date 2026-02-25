@@ -48,7 +48,7 @@ class CreateTable:
         self.row_count = body.row_count
         self.column_names = body.column_names
         self.file_path = body.file_path
-        self.csv_has_header = body.csv_has_header
+        self.has_header = body.has_header
         self.csv_separator = body.csv_separator
         self.csv_encoding = body.csv_encoding
         self.excel_sheet_name = body.excel_sheet_name
@@ -159,14 +159,18 @@ class CreateTable:
             path,
             separator=self.csv_separator,
             encoding=encoding,
-            has_header=self.csv_has_header,
+            has_header=self.has_header,
         )
 
     def _read_excel(self, path: str) -> pl.DataFrame:
         """Excelファイルを読み込む"""
         sheet = self.excel_sheet_name or None
         if sheet:
-            return pl.read_excel(path, sheet_name=sheet)
+            return pl.read_excel(
+                path,
+                sheet_name=sheet,
+                read_options={"has_header": self.has_header},
+            )
         return pl.read_excel(path)
 
     def _read_parquet(self, path: str) -> pl.DataFrame:
