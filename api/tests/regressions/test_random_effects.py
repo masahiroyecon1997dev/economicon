@@ -1,5 +1,7 @@
 """変量効果回帰テスト"""
 
+from typing import cast
+
 import pandas as pd
 from fastapi import status
 from linearmodels.panel import RandomEffects
@@ -237,8 +239,8 @@ def test_re_full_numerical_validation(client, tables_store):
     # --- parameters ---
     for var in ["x1", "x2"]:
         p = p_map[var]
-        ci_lower = float(ci.loc[var, "lower"])
-        ci_upper = float(ci.loc[var, "upper"])
+        ci_lower = float(cast(float, ci.loc[var, "lower"]))
+        ci_upper = float(cast(float, ci.loc[var, "upper"]))
         assert abs(p["coefficient"] - float(ref.params[var])) < _ABS_TOL
         assert abs(p["standardError"] - float(ref.std_errors[var])) < _ABS_TOL
         assert abs(p["tValue"] - float(ref.tstats[var])) < _ABS_TOL
