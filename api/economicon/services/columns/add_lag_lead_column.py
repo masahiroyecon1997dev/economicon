@@ -73,7 +73,7 @@ class AddLagLeadColumn:
         )
 
         # グループ列の存在確認
-        if self.group_columns or len(self.group_columns) > 0:
+        if self.group_columns:
             validate_existence(
                 value=self.group_columns,
                 valid_list=column_name_list,
