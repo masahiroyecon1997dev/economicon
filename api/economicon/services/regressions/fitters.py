@@ -136,6 +136,37 @@ def fit_tobit(data_input: TobitInput) -> Any:
     return result
 
 
+def fit_tobit_null(data_input: TobitInput) -> Any:
+    """
+    LR検定用の帰無モデル（定数項のみ）をフィット
+
+    完全モデルと同じ打ち切り設定を使用する。
+
+    Args:
+        data_input: TobitInput データクラス（被説明変数と打ち切り設定を使用）
+
+    Returns:
+        py4etrics の Tobit 回帰結果（定数項のみ）
+    """
+    y = data_input.df_pandas[data_input.dependent_variable].values
+    X_null = np.ones((len(y), 1))  # 定数項のみ
+
+    cens = np.zeros(len(y))
+    if data_input.left_censoring_limit is not None:
+        cens[y <= data_input.left_censoring_limit] = -1
+    if data_input.right_censoring_limit is not None:
+        cens[y >= data_input.right_censoring_limit] = 1
+
+    model = Tobit(
+        y,
+        X_null,
+        cens=cens,
+        left=data_input.left_censoring_limit,
+        right=data_input.right_censoring_limit,
+    )  # type: ignore
+    return model.fit(disp=False)
+
+
 @dataclass
 class IVInput:
     df_pandas: Any
@@ -211,8 +242,9 @@ def fit_fe(
     depns = df_pandas[explanatory_variables]
 
     # 標準誤差方法のマッピングを使用
+    # 未知のキーは unadjusted にフォールバック
     cov_type = LINEARMODELS_COV_TYPE_MAP.get(
-        standard_error_method, "clustered"
+        standard_error_method, "unadjusted"
     )
 
     # PanelOLS モデルの作成とフィット
@@ -246,8 +278,9 @@ def fit_re(
     depns = df_pandas[explanatory_variables]
 
     # 標準誤差方法のマッピングを使用
+    # 未知のキーは unadjusted にフォールバック
     cov_type = LINEARMODELS_COV_TYPE_MAP.get(
-        standard_error_method, "clustered"
+        standard_error_method, "unadjusted"
     )
 
     # RandomEffects モデルの作成とフィット
