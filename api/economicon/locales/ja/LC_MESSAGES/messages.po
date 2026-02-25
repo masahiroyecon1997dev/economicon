@@ -611,83 +611,6 @@ msgstr "超幾何分布では、'n'は'N'を超えてはいけません"
 msgid "Dependent variable cannot be included in explanatory variables"
 msgstr "被説明変数を説明変数に含めることはできません。"
 
-# Pydantic バリデーションエラーメッセージ
-msgid "ValidationError.FieldRequired"
-msgstr "必須フィールドです"
-
-msgid "ValidationError.StringTypeExpected"
-msgstr "文字列型が必要です"
-
-msgid "ValidationError.IntTypeExpected"
-msgstr "整数型が必要です"
-
-msgid "ValidationError.FloatTypeExpected"
-msgstr "浮動小数点型が必要です"
-
-msgid "ValidationError.BoolTypeExpected"
-msgstr "真偽値型が必要です"
-
-msgid "ValidationError.ListTypeExpected"
-msgstr "リスト型が必要です"
-
-msgid "ValidationError.DictTypeExpected"
-msgstr "辞書型が必要です"
-
-msgid "ValidationError.ValueError"
-msgstr "値エラー"
-
-msgid "ValidationError.TypeError"
-msgstr "型エラー"
-
-msgid "ValidationError.AssertionError"
-msgstr "アサーションエラー"
-
-msgid "ValidationError.LessThan"
-msgstr "指定された値より小さい値が必要です"
-
-msgid "ValidationError.LessThanEqual"
-msgstr "指定された値以下の値が必要です"
-
-msgid "ValidationError.GreaterThan"
-msgstr "指定された値より大きい値が必要です"
-
-msgid "ValidationError.GreaterThanEqual"
-msgstr "指定された値以上の値が必要です"
-
-msgid "ValidationError.StringTooShort"
-msgstr "文字列が短すぎます"
-
-msgid "ValidationError.StringTooLong"
-msgstr "文字列が長すぎます"
-
-msgid "ValidationError.InvalidEnum"
-msgstr "無効な列挙値です"
-
-msgid "ValidationError.LiteralError"
-msgstr "無効なリテラル値です"
-
-# Pydantic V2 デフォルトメッセージ
-msgid "Field required"
-msgstr "必須フィールドです"
-
-msgid "Input should be a valid string"
-msgstr "文字列を入力してください"
-
-msgid "Input should be a valid integer"
-msgstr "整数を入力してください"
-
-msgid "Input should be a valid number"
-msgstr "数値を入力してください"
-
-msgid "Input should be a valid boolean"
-msgstr "真偽値を入力してください"
-
-msgid "Input should be a valid list"
-msgstr "リストを入力してください"
-
-msgid "Input should be a valid dictionary"
-msgstr "辞書を入力してください"
-
 # フィールド名の翻訳
 msgid "Field.tableName"
 msgstr "テーブル名"
@@ -759,41 +682,24 @@ msgstr "{field}は{min_length}文字以上で入力してください。"
 msgid "{field} must be at most {max_length} characters"
 msgstr "{field}は{max_length}文字以内で入力してください。"
 
-msgid "{field} must be less than {limit}"
-msgstr "{field}は{limit}未満で入力してください。"
-
-msgid "{field} must be less than or equal to {limit}"
-msgstr "{field}は{limit}以下で入力してください。"
-
-msgid "{field} must be greater than {limit}"
-msgstr "{field}は{limit}より大きい値で入力してください。"
-
-msgid "{field} must be greater than or equal to {limit}"
-msgstr "{field}は{limit}以上で入力してください。"
-
 msgid "{field} must be one of: {expected}"
 msgstr "{field}は次のいずれかである必要があります: {expected}"
 
 msgid "{field} has an invalid value"
 msgstr "{field}の値が無効です。"
 
-#, python-brace-format
 msgid "{field} must have at least {min_length} items"
 msgstr "{field}は{min_length}件以上ある必要があります。"
 
-#, python-brace-format
 msgid "{field} must be less than {lt}"
 msgstr "{field}は{lt}未満で入力してください。"
 
-#, python-brace-format
 msgid "{field} must be less than or equal to {le}"
 msgstr "{field}は{le}以下で入力してください。"
 
-#, python-brace-format
 msgid "{field} must be greater than {gt}"
 msgstr "{field}は{gt}より大きい値で入力してください。"
 
-#, python-brace-format
 msgid "{field} must be greater than or equal to {ge}"
 msgstr "{field}は{ge}以上で入力してください。"
 
@@ -814,6 +720,3 @@ msgstr "{} '{}'は空です。"
 #, python-brace-format
 msgid "Row count mismatch: CSV has {csv_rows} rows, but table has {expected_rows} rows."
 msgstr "行数の不一致: CSVには{csv_rows}行ありますが、テーブルには{expected_rows}行あります。"
-
-#~ msgid "standard_error_methodmust be one of: , "
-#~ msgstr "standard_error_method は次のいずれかである必要があります: , "
