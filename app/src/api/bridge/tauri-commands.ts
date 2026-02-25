@@ -81,6 +81,18 @@ export const getOsInfo = async (): Promise<{
   return await invoke<{ osName: string; pathSeparator: string }>("get_os_info");
 };
 
+/**
+ * Rust 側で起動時に生成された認証トークンを取得する。
+ *
+ * アプリの初期化フェーズ（App.tsx の useEffect）で呼び出し、
+ * このトークン取得が完了するまで API リクエストを発生させないよう制御する。
+ * トークン自体は Rust プロキシが X-Auth-Token ヘッダーとして自動付与するため、
+ * React 側でヘッダーを手動設定する必要はない。
+ */
+export const getAuthToken = async (): Promise<string> => {
+  return await invoke<string>("get_auth_token");
+};
+
 export const fetchDataToArrow = async (
   tableName: string,
   startRow: number = 0,

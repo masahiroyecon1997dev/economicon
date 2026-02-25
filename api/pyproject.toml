@@ -22,6 +22,7 @@ dependencies = [
     "py4etrics>=0.1.9",
     "scikit-learn>=1.8.0",
     "loguru>=0.7.3",
+    "pydantic-settings>=2.0.0",
 ]
 [tool.setuptools.packages.find]
 where = ["."]

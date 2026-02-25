@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { getFiles, getOsInfo } from "./api/bridge/tauri-commands";
+import { getAuthToken, getFiles, getOsInfo } from "./api/bridge/tauri-commands";
 import { getEconomiconAPI } from "./api/endpoints";
 import { showMessageDialog } from "./lib/dialog/message";
 import { useCurrentPageStore } from "./stores/currentView";
@@ -33,6 +33,13 @@ export const App = () => {
     const initialize = async () => {
       const api = getEconomiconAPI();
       try {
+        // 認証トークンを取得する。
+        // Rust 側で起動時に生成されたトークンが確認できるまで後続の
+        // API リクエストをブロックする。トークン自体は Rust プロキシが
+        // X-Auth-Token ヘッダーとして自動付与するため、React 側での
+        // ヘッダー設定は不要。
+        await getAuthToken();
+
         // RustからOS情報を取得（ファイルシステム認識のため最初に取得）
         const osInfo = await getOsInfo();
 
