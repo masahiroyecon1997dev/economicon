@@ -32,7 +32,7 @@ def _coerce_statistic_type(
             )
             raise PydanticCustomError(
                 "literal_error",
-                "statisticTypeは次のいずれかである必要があります: {expected}",
+                "statisticType must be one of: {expected}",
                 {"expected": valid},
             ) from None
     return v
@@ -130,10 +130,7 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
                     )
                     raise PydanticCustomError(
                         "literal_error",
-                        (
-                            "statisticsは次のいずれかである"
-                            "必要があります: {expected}"
-                        ),
+                        "statistics must be one of: {expected}",
                         {"expected": valid},
                     ) from None
             else:

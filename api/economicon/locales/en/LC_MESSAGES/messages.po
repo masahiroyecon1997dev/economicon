@@ -790,6 +790,32 @@ msgid "{field} has an invalid value"
 msgstr "{field} has an invalid value."
 
 #, python-brace-format
+msgid "{field} must have at least {min_length} items"
+msgstr "{field} must have at least {min_length} items."
+
+#, python-brace-format
+msgid "{field} must be less than {lt}"
+msgstr "{field} must be less than {lt}."
+
+#, python-brace-format
+msgid "{field} must be less than or equal to {le}"
+msgstr "{field} must be less than or equal to {le}."
+
+#, python-brace-format
+msgid "{field} must be greater than {gt}"
+msgstr "{field} must be greater than {gt}."
+
+#, python-brace-format
+msgid "{field} must be greater than or equal to {ge}"
+msgstr "{field} must be greater than or equal to {ge}."
+
+msgid "{field} has an invalid type"
+msgstr "{field} has an invalid type."
+
+msgid "{field} contains invalid characters"
+msgstr "{field} contains invalid characters."
+
+#, python-brace-format
 msgid "{} '{}' does not have {} permission."
 msgstr "{} '{}' does not have {} permission."
 

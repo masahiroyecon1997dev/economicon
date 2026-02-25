@@ -46,7 +46,7 @@ class TestValidationError422:
         }
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
-        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
         assert "tableNameは必須項目です。" in data["message"]
 
@@ -55,7 +55,7 @@ class TestValidationError422:
         payload = OlsPayload(table="").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
-        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
         assert "tableNameは1文字以上で入力してください。" in data["message"]
 
@@ -64,7 +64,7 @@ class TestValidationError422:
         payload = OlsPayload(table="   ").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
-        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
         assert "tableNameは1文字以上で入力してください。" in data["message"]
 
@@ -73,7 +73,7 @@ class TestValidationError422:
         payload = OlsPayload(table="\t").build()
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
-        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
         assert "tableNameは1文字以上で入力してください。" in data["message"]
 
@@ -88,7 +88,7 @@ class TestValidationError422:
         }
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
-        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
         assert "analysisは必須項目です。" in data["message"]
 
@@ -103,7 +103,7 @@ class TestValidationError422:
         }
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
-        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
         assert "analysis.fe.entityIdColumnは必須項目です。" in data["message"]
 
@@ -121,7 +121,7 @@ class TestValidationError422:
         }
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
-        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
 
     def test_missing_instrumental_variables_for_iv(self, client, tables_store):
@@ -138,7 +138,7 @@ class TestValidationError422:
         }
         resp = client.post(URL_REGRESSION, json=payload)
         data = resp.json()
-        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
         assert (
             "analysis.iv.instrumentalVariablesは必須項目です。"

@@ -35,7 +35,7 @@ def _coerce_join_type(v: Any) -> JoinType:
             valid = ", ".join(e.value for e in JoinType)
             raise PydanticCustomError(
                 "literal_error",
-                "joinTypeは次のいずれかである必要があります: {expected}",
+                "joinType must be one of: {expected}",
                 {"expected": valid},
             ) from None
     return v
@@ -52,7 +52,7 @@ def _coerce_filter_operator_type(v: Any) -> FilterOperatorType:
             valid = ", ".join(e.value for e in FilterOperatorType)
             raise PydanticCustomError(
                 "literal_error",
-                "conditionは次のいずれかである必要があります: {expected}",
+                "condition must be one of: {expected}",
                 {"expected": valid},
             ) from None
     return v
