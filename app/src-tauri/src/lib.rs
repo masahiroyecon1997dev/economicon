@@ -5,6 +5,7 @@ use tauri::State;
 use reqwest::Client;
 use serde::{Serialize};
 use std::time::Duration;
+use uuid::Uuid;
 
 use files::{get_files_internal, GetFilesResponse, FileError};
 use os_info::{get_os_info_internal, OsInfoResponse};
@@ -12,6 +13,11 @@ use os_info::{get_os_info_internal, OsInfoResponse};
 // HTTPクライアントを保持するState
 struct ClientState {
     client: Client,
+}
+
+// 起動時に生成した認証トークンを保持するState（アプリライフサイクル中にメモリ内で保持）
+struct AuthTokenState {
+    token: String,
 }
 
 // 共通のエラーレスポンス型
@@ -36,6 +42,7 @@ impl From<String> for ApiError {
 #[tauri::command]
 async fn proxy_request(
     state: State<'_, ClientState>,
+    auth: State<'_, AuthTokenState>,
     method: String,
     path: String,
     body: Option<serde_json::Value>,
@@ -51,6 +58,9 @@ async fn proxy_request(
         "DELETE" => state.client.delete(&url),
         _ => return Err(ApiError { message: format!("Unsupported method: {}", method) }),
     };
+
+    // 認証トークンをヘッダーに付与
+    request_builder = request_builder.header("X-Auth-Token", &auth.token);
 
     if let Some(q) = query {
         request_builder = request_builder.query(&q);
@@ -72,6 +82,7 @@ async fn proxy_request(
 #[tauri::command]
 async fn fetch_binary(
     state: State<'_, ClientState>,
+    auth: State<'_, AuthTokenState>,
     method: String,
     path: String,
     body: Option<serde_json::Value>,
@@ -86,6 +97,9 @@ async fn fetch_binary(
         "DELETE" => state.client.delete(&url),
         _ => return Err(ApiError { message: format!("Unsupported method: {}", method) }),
     };
+
+    // 認証トークンをヘッダーに付与
+    request_builder = request_builder.header("X-Auth-Token", &auth.token);
 
     if let Some(q) = query {
         request_builder = request_builder.query(&q);
@@ -108,6 +122,7 @@ async fn fetch_binary(
 #[tauri::command]
 async fn upload_file(
     state: State<'_, ClientState>,
+    auth: State<'_, AuthTokenState>,
     path: String,
     file_data: Vec<u8>,
     file_name: String,
@@ -121,13 +136,22 @@ async fn upload_file(
     let form = reqwest::multipart::Form::new()
         .part("file", part); // Python側が "file" キーを期待していると仮定
 
+    // 認証トークンをヘッダーに付与
     let response = state.client.post(&url)
+        .header("X-Auth-Token", &auth.token)
         .multipart(form)
         .send()
         .await?;
 
     let json_response: serde_json::Value = response.json().await?;
     Ok(json_response)
+}
+
+/// 起動時に生成した認証トークンをフロントエンドへ返すコマンド。
+/// React の初期化フェーズで呼び出し、取得完了まで API リクエストをブロックするために使用する。
+#[tauri::command]
+fn get_auth_token(auth: State<'_, AuthTokenState>) -> String {
+    auth.token.clone()
 }
 
 // ファイル一覧取得用コマンド
@@ -144,6 +168,19 @@ fn get_os_info() -> OsInfoResponse {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // 起動時に予測不可能なUUID v4トークンを1回だけ生成する
+    // このトークンはプロセスのライフサイクル中メモリ内に保持され、
+    // FastAPIサイドカーへは環境変数 ECONOMICOM_API_AUTH_TOKEN として引き継がれる
+    let auth_token = Uuid::new_v4().to_string();
+
+    // サイドカー（FastAPI）が環境変数を参照できるよう、現プロセスに設定する
+    // Tauriがサイドカーを起動する際、子プロセスは親の環境変数を継承する
+    // SAFETY: tauri::Builder::default() を呼ぶ前に設定することで
+    //         マルチスレッド下での競合を回避する
+    unsafe {
+        std::env::set_var("ECONOMICOM_API_AUTH_TOKEN", &auth_token);
+    }
+
     // クライアントの初期化（タイムアウト設定など）
     let client = Client::builder()
         .timeout(Duration::from_secs(300)) // 分析処理など時間がかかる場合を考慮
@@ -152,13 +189,15 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(ClientState { client }) // Stateを登録
+        .manage(ClientState { client })
+        .manage(AuthTokenState { token: auth_token }) // 生成したトークンをStateとして登録
         .invoke_handler(tauri::generate_handler![
             proxy_request,
             fetch_binary,
             upload_file,
             get_files,
-            get_os_info
+            get_os_info,
+            get_auth_token
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
