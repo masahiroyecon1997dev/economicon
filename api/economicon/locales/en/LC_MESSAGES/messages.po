@@ -30,22 +30,12 @@ msgstr ""
 msgid "An unexpected error occurred during adding dummy column processing"
 msgstr ""
 
-#: economicon/services/add_lag_lead_column.py:63
-#, fuzzy
-msgid "periods must be an integer"
-msgstr "{} must be an integer."
-
 #: economicon/services/add_lag_lead_column.py:106
 msgid "An unexpected error occurred during adding lag/lead column processing"
 msgstr ""
 
 #: economicon/services/add_simulation_column.py:99
 msgid "An unexpected error occurred during adding simulation column processing"
-msgstr ""
-
-#: economicon/services/calculate_column.py:107
-#, python-brace-format
-msgid "Invalid calculation expression: {}"
 msgstr ""
 
 #: economicon/services/calculate_column.py:119
@@ -56,76 +46,12 @@ msgstr ""
 msgid "An unexpected error occurred during clearing tables processing"
 msgstr ""
 
-#: economicon/services/confidence_interval.py:74
-#, fuzzy
-msgid "confidenceLevel must be a number"
-msgstr "{} must be a number."
-
-#: economicon/services/confidence_interval.py:77
-#, fuzzy
-msgid "confidenceLevel must be between 0 and 1"
-msgstr "{} must be between {} and {}."
-
-#: economicon/services/confidence_interval.py:93
-#, fuzzy
-msgid "Column contains no valid data"
-msgstr "{} contains invalid characters."
-
-#: economicon/services/confidence_interval.py:116
-msgid "Unsupported statistic type"
-msgstr ""
-
 #: economicon/services/confidence_interval.py:138
 msgid "An unexpected error occurred during confidence interval processing"
 msgstr ""
 
-#: economicon/services/confidence_interval.py:181
-msgid "For proportion confidence interval, data must contain only 0 and 1 values"
-msgstr ""
-
 #: economicon/services/create_join_table.py:161
 msgid "An unexpected error occurred during join table creation processing"
-msgstr ""
-
-#: economicon/services/create_simulation_data_table.py:53
-#, fuzzy
-msgid "The number of rows must be a positive integer."
-msgstr "{} must be a positive integer."
-
-#: economicon/services/create_simulation_data_table.py:59
-#, fuzzy
-msgid "Column settings must be a list."
-msgstr "{} must be a list."
-
-#: economicon/services/create_simulation_data_table.py:64
-msgid "At least one column setting is required."
-msgstr ""
-
-#: economicon/services/create_simulation_data_table.py:88
-#, fuzzy
-msgid "Column name is required."
-msgstr "{} is required."
-
-#: economicon/services/create_simulation_data_table.py:102
-#, fuzzy
-msgid "Data type is required."
-msgstr "{} is required."
-
-#: economicon/services/create_simulation_data_table.py:108
-#, fuzzy
-msgid "Data type must be 'distribution' or 'fixed'."
-msgstr "{} must be 'true' or 'false'."
-
-#: economicon/services/create_simulation_data_table.py:115
-msgid "Distribution type is required for distribution data."
-msgstr ""
-
-#: economicon/services/create_simulation_data_table.py:126
-msgid "Distribution parameters are required for distribution data."
-msgstr ""
-
-#: economicon/services/create_simulation_data_table.py:139
-msgid "Fixed value is required for fixed data."
 msgstr ""
 
 #: economicon/services/create_simulation_data_table.py:183
@@ -148,16 +74,6 @@ msgstr ""
 msgid "An unexpected error occurred during table deletion processing"
 msgstr ""
 
-#: economicon/services/descriptive_statistics.py:64
-#, fuzzy
-msgid "statistics is required"
-msgstr "{} is required."
-
-#: economicon/services/descriptive_statistics.py:69
-#, python-brace-format
-msgid "statistics '{}'はサポートされていません。利用可能: {}"
-msgstr ""
-
 #: economicon/services/descriptive_statistics.py:148
 msgid "An unexpected error occurred during descriptive statistics processing"
 msgstr ""
@@ -168,19 +84,6 @@ msgstr ""
 
 #: economicon/services/duplicate_table.py:64
 msgid "An unexpected error occurred during table duplication processing"
-msgstr ""
-
-#: economicon/services/export_csv_by_path.py:92
-#: economicon/services/export_excel_by_path.py:82
-#: economicon/services/export_parquet_by_path.py:82
-#, fuzzy, python-brace-format
-msgid "Table does not exist: {}"
-msgstr "{} does not exist: {}"
-
-#: economicon/services/export_csv_by_path.py:95
-#: economicon/services/export_excel_by_path.py:85
-#: economicon/services/export_parquet_by_path.py:85
-msgid "Permission denied: Cannot write to the specified path."
 msgstr ""
 
 #: economicon/services/export_csv_by_path.py:99
@@ -195,34 +98,8 @@ msgstr ""
 msgid "An unexpected error occurred during PARQUET export processing"
 msgstr ""
 
-#: economicon/services/fetch_data_to_json.py:85
-msgid "An unexpected error during "
-msgstr ""
-
-#: economicon/services/filter_single_condition.py:160
-msgid "Invalid condition specified"
-msgstr ""
-
 #: economicon/services/filter_single_condition.py:170
 msgid "An unexpected error occurred during filter processing"
-msgstr ""
-
-#: economicon/services/fixed_effects_estimation.py:97
-msgid "Entity ID column cannot be the same as dependent variable"
-msgstr ""
-
-#: economicon/services/fixed_effects_estimation.py:102
-msgid "Entity ID column cannot be included in explanatory variables"
-msgstr ""
-
-#: economicon/services/fixed_effects_estimation.py:131
-msgid "No valid observations after removing missing values"
-msgstr ""
-
-#: economicon/services/fixed_effects_estimation.py:143
-msgid ""
-"No entities with multiple observations found. Fixed effects requires "
-"multiple time periods per entity."
 msgstr ""
 
 #: economicon/services/fixed_effects_estimation.py:257
@@ -245,47 +122,9 @@ msgstr ""
 msgid "An unexpected error during getting table name list."
 msgstr ""
 
-#: economicon/services/import_csv_by_file.py:38
-#: economicon/services/import_excel_by_file.py:39
-#: economicon/services/import_parquet_by_file.py:38
-#: economicon/services/import_tsv_by_file.py:38
-msgid "File data or file name is missing"
-msgstr ""
-
-#: economicon/services/import_csv_by_file.py:45
-#, fuzzy
-msgid "File must be a CSV file"
-msgstr "{} must be a string."
-
-#: economicon/services/import_csv_by_file.py:71
-msgid "The uploaded CSV file is empty or contains no valid data."
-msgstr ""
-
-#: economicon/services/import_csv_by_file.py:75
-#: economicon/services/import_csv_by_path.py:81
-msgid "Failed to parse CSV file: Invalid format or encoding."
-msgstr ""
-
 #: economicon/services/import_csv_by_file.py:79
 #: economicon/services/import_csv_by_path.py:85
 msgid "An unexpected error occurred during CSV processing"
-msgstr ""
-
-#: economicon/services/import_csv_by_path.py:78
-msgid "The CSV file is empty or contains no valid data."
-msgstr ""
-
-#: economicon/services/import_excel_by_file.py:47
-msgid "File must be an Excel file"
-msgstr ""
-
-#: economicon/services/import_excel_by_file.py:72
-msgid "The uploaded EXCEL file is empty or contains no valid data."
-msgstr ""
-
-#: economicon/services/import_excel_by_file.py:76
-#: economicon/services/import_excel_by_path.py:84
-msgid "Failed to parse EXCEL file: Invalid format or encoding."
 msgstr ""
 
 #: economicon/services/import_excel_by_file.py:80
@@ -293,43 +132,9 @@ msgstr ""
 msgid "An unexpected error occurred during EXCEL processing"
 msgstr ""
 
-#: economicon/services/import_excel_by_path.py:81
-msgid "The EXCEL file is empty or contains no valid data."
-msgstr ""
-
-#: economicon/services/import_parquet_by_file.py:45
-msgid "File must be a Parquet file"
-msgstr ""
-
-#: economicon/services/import_parquet_by_file.py:70
-msgid "The uploaded PARQUET file is empty or contains no valid data."
-msgstr ""
-
-#: economicon/services/import_parquet_by_file.py:74
-#: economicon/services/import_parquet_by_path.py:70
-msgid "Failed to parse PARQUET file: Invalid format or encoding."
-msgstr ""
-
 #: economicon/services/import_parquet_by_file.py:78
 #: economicon/services/import_parquet_by_path.py:74
 msgid "An unexpected error occurred during PARQUET processing"
-msgstr ""
-
-#: economicon/services/import_parquet_by_path.py:67
-msgid "The PARQUET file is empty or contains no valid data."
-msgstr ""
-
-#: economicon/services/import_tsv_by_file.py:46
-#, fuzzy
-msgid "File must be a TSV file"
-msgstr "{} must be a string."
-
-#: economicon/services/import_tsv_by_file.py:73
-msgid "The uploaded TSV file is empty or contains no valid data."
-msgstr ""
-
-#: economicon/services/import_tsv_by_file.py:77
-msgid "Failed to parse TSV file: Invalid format or encoding."
 msgstr ""
 
 #: economicon/services/import_tsv_by_file.py:81
@@ -364,266 +169,36 @@ msgstr ""
 msgid "An unexpected error occurred during column sorting processing"
 msgstr ""
 
-#: economicon/services/transform_column.py:66
-#, python-brace-format
-msgid "transformMethodの'{}'は無効です。有効なメソッド: {}"
-msgstr ""
-
-#: economicon/services/transform_column.py:73
-msgid "logBaseは1ではない正の数でなければなりません"
-msgstr ""
-
-#: economicon/services/transform_column.py:78
-msgid "exponentは数値でなければなりません"
-msgstr ""
-
-#: economicon/services/transform_column.py:85
-msgid "rootIndexは0以外の数値でなければなりません"
-msgstr ""
-
 #: economicon/services/transform_column.py:145
 msgid "An unexpected error occurred during column transformation processing"
-msgstr ""
-
-#: economicon/services/variable_effects_estimation.py:99
-#, python-brace-format
-msgid "{}は次のいずれかである必要があります: {}"
 msgstr ""
 
 #: economicon/services/variable_effects_estimation.py:208
 msgid "An unexpected error occurred during variable effects estimation processing"
 msgstr ""
 
-#: economicon/utils/validator/common_validators.py:25
-#: economicon/utils/validator/common_validators.py:196
-#, python-brace-format
-msgid "{} is required."
-msgstr "{} is required."
-
-#: economicon/utils/validator/common_validators.py:33
-#, python-brace-format
-msgid "{} must be 'true' or 'false'."
-msgstr "{} must be 'true' or 'false'."
-
-#: economicon/utils/validator/common_validators.py:47
-#, python-brace-format
-msgid "{} must be a number."
-msgstr "{} must be a number."
-
-#: economicon/utils/validator/common_validators.py:60
-#, python-brace-format
-msgid "{} must be an integer."
-msgstr "{} must be an integer."
-
-#: economicon/utils/validator/common_validators.py:72
-#: economicon/utils/validator/common_validators.py:78
-#, python-brace-format
-msgid "{} must be a positive integer."
-msgstr "{} must be a positive integer."
-
-#: economicon/utils/validator/common_validators.py:85
-#, python-brace-format
-msgid "{} must be a string."
-msgstr "{} must be a string."
-
-#: economicon/utils/validator/common_validators.py:93
-#, python-brace-format
-msgid "{} must be a list."
-msgstr "{} must be a list."
-
-#: economicon/utils/validator/common_validators.py:107
-#, python-brace-format
-msgid "{} must be with at least {} {}."
-msgstr "{} must be with at least {} {}."
-
-#: economicon/utils/validator/common_validators.py:120
-#: economicon/utils/validator/common_validators.py:217
 #, python-brace-format
 msgid "{} '{}' does not exist."
 msgstr "{} '{}' does not exist."
 
-#: economicon/utils/validator/common_validators.py:137
-#, python-brace-format
-msgid "{} must be at least {} characters long."
-msgstr "{} must be at least {} characters long."
-
-#: economicon/utils/validator/common_validators.py:142
-#, python-brace-format
-msgid "{} must be at most {} characters long."
-msgstr "{} must be at most {} characters long."
-
-#: economicon/utils/validator/common_validators.py:154
-#, python-brace-format
-msgid "{} contains invalid characters."
-msgstr "{} contains invalid characters."
-
-#: economicon/utils/validator/common_validators.py:170
-#: economicon/utils/validator/common_validators.py:175
-#, python-brace-format
-msgid "{} must be between {} and {}."
-msgstr "{} must be between {} and {}."
-
-#: economicon/utils/validator/common_validators.py:188
-#, python-brace-format
-msgid "{} is invalid value."
-msgstr "{} is invalid value."
-
-#: economicon/utils/validator/common_validators.py:229
 #, python-brace-format
 msgid "{} '{}' already exists."
 msgstr "{} '{}' already exists."
-
-#: economicon/utils/validator/common_validators.py:242
-#, python-brace-format
-msgid "{} '{}' is not supported. Supported {}: {}"
-msgstr "{} '{}' is not supported. Supported {}: {}"
-
-#: economicon/utils/validator/common_validators.py:256
-#, python-brace-format
-msgid "{} does not exist: {}"
-msgstr "{} does not exist: {}"
-
-#: economicon/utils/validator/common_validators.py:268
-#, python-brace-format
-msgid "ディレクトリが存在しません: {}"
-msgstr ""
-
-#: economicon/utils/validator/common_validators.py:276
-#, python-brace-format
-msgid "{} is not readable: {}"
-msgstr "{} is not readable: {}"
-
-#: economicon/utils/validator/common_validators.py:288
-#, python-brace-format
-msgid "{} '{}' is not numeric."
-msgstr "{} '{}' is not numeric."
-
-#: economicon/utils/validator/file_validator.py:47
-msgid "No file uploaded."
-msgstr ""
-
-#: economicon/utils/validator/file_validators.py:32
-#, python-brace-format
-msgid "パスがディレクトリではありません: {}"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:35
-msgid "Uniform distribution requires 'low' and 'high' parameters"
-msgstr ""
 
 #: economicon/utils/validator/statistics_validators.py:40
 msgid "For uniform distribution, 'low' must be less than 'high'"
 msgstr ""
 
-#: economicon/utils/validator/statistics_validators.py:44
-msgid "Exponential distribution requires 'scale' parameter"
+msgid "For proportion confidence interval, data must contain only 0 and 1 values"
 msgstr ""
 
-#: economicon/utils/validator/statistics_validators.py:48
-msgid "For exponential distribution, 'scale' must be positive"
+msgid "The CSV file is empty or contains no valid data."
 msgstr ""
 
-#: economicon/utils/validator/statistics_validators.py:52
-msgid "Normal distribution requires 'loc' and 'scale' parameters"
+msgid "Column contains no valid data"
 msgstr ""
 
-#: economicon/utils/validator/statistics_validators.py:57
-msgid "For normal distribution, 'scale' must be positive"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:61
-msgid "Gamma distribution requires 'shape' and 'scale' parameters"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:66
-msgid "For gamma distribution, 'shape' and 'scale' must be positive"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:71
-msgid "Beta distribution requires 'a' and 'b' parameters"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:76
-msgid "For beta distribution, 'a' and 'b' must be positive"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:80
-msgid "Weibull distribution requires 'a' and 'scale' parameters"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:84
-msgid "For weibull distribution, 'a' must be positive"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:88
-msgid "For weibull distribution, 'scale' must be positive"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:92
-msgid "Lognormal distribution requires 'mean' and 'sigma' parameters"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:97
-msgid "For lognormal distribution, 'sigma' must be positive"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:101
-msgid "Binomial distribution requires 'n' and 'p' parameters"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:106
-msgid "For binomial distribution, 'n' must be positive"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:109
-msgid "For binomial distribution, 'p' must be between 0 and 1"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:113
-msgid "Bernoulli distribution requires 'p' parameter"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:117
-msgid "For bernoulli distribution, 'p' must be between 0 and 1"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:121
-msgid "Poisson distribution requires 'lam' parameter"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:125
-msgid "For poisson distribution, 'lam' must be positive"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:129
-msgid "Geometric distribution requires 'p' parameter"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:133
-msgid "For geometric distribution, 'p' must be between 0 and 1 (exclusive of 0)"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:138
-msgid "Hypergeometric distribution requires 'N', 'K', and 'n' parameters"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:144
-msgid "For hypergeometric distribution, 'N', 'K', and 'n' must be positive"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:148
-msgid "For hypergeometric distribution, 'K' must not exceed 'N'"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:152
-msgid "For hypergeometric distribution, 'n' must not exceed 'N'"
-msgstr ""
-
-#: economicon/utils/validator/statistics_validators.py:198
-msgid "Dependent variable cannot be included in explanatory variables"
-msgstr ""
-
-# Field name translations
+# Translate field name
 msgid "Field.tableName"
 msgstr "Table Name"
 
