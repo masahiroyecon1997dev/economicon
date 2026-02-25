@@ -71,7 +71,6 @@ Economicon
 - polarsの列の型変換
 - 因果推論系（DID, RDD, RCTなど）
 - 統計検定機能（Z 検定、t 検定、F 検定）
-- LazyFrameへの変更
 
 ## インストーラ作成
 
