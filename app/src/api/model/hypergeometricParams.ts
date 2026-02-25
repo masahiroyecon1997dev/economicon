@@ -15,15 +15,15 @@ export interface HypergeometricParams {
    * 母集団サイズ
    * @exclusiveMinimum 0
    */
-  N: number;
+  populationSize: number;
   /**
    * 成功要素数
    * @exclusiveMinimum 0
    */
-  K: number;
+  successCount: number;
   /**
    * 標本サイズ
    * @exclusiveMinimum 0
    */
-  n: number;
+  sampleSize: number;
 }

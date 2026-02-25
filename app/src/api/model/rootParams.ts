@@ -15,5 +15,5 @@ export interface RootParams {
    * ルートの指数 (省略時は平方根)
    * @exclusiveMinimum 0
    */
-  root_index?: number;
+  rootIndex?: number;
 }

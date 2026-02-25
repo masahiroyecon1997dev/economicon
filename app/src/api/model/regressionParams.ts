@@ -8,7 +8,8 @@ import type { BinaryChoiceRegressionParams } from './binaryChoiceRegressionParam
 import type { InstrumentalVariablesParams } from './instrumentalVariablesParams';
 import type { OLSParams } from './oLSParams';
 import type { PanelDataParams } from './panelDataParams';
+import type { PanelIvParams } from './panelIvParams';
 import type { RegularizedRegressionParams } from './regularizedRegressionParams';
 import type { TobitParams } from './tobitParams';
 
-export type RegressionParams = OLSParams | RegularizedRegressionParams | BinaryChoiceRegressionParams | InstrumentalVariablesParams | PanelDataParams | TobitParams;
+export type RegressionParams = OLSParams | RegularizedRegressionParams | BinaryChoiceRegressionParams | InstrumentalVariablesParams | PanelDataParams | TobitParams | PanelIvParams;

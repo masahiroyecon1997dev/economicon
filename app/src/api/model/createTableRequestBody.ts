@@ -26,8 +26,8 @@ export interface CreateTableRequestBody {
   columnNames: string[];
   /** 読み込むファイルのパス（CSV / Excel / Parquet）。省略時はすべての値が None の空テーブルを作成します。 */
   filePath?: string | null;
-  /** CSV ファイルにヘッダ行があるか。True: 1 行目をヘッダとして読み飛ばし、2 行目からをデータとする。False: 1 行目からデータとして読み込む。file_path が CSV の場合のみ有効。 */
-  csvHasHeader?: boolean;
+  /** CSV/ Excel ファイルにヘッダ行があるか。True: 1 行目をヘッダとして読み飛ばし、2 行目からをデータとする。False: 1 行目からデータとして読み込む。file_path が CSV または Excel の場合のみ有効。 */
+  hasHeader?: boolean;
   /**
    * CSV の区切り文字。file_path が CSV の場合のみ有効。
    * @minLength 1
