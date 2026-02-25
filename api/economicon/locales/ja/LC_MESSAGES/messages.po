@@ -733,79 +733,79 @@ msgstr "フィルタ条件"
 
 # 動的バリデーションメッセージテンプレート
 msgid "{field} is required"
-msgstr "{field} は必須です。"
+msgstr "{field}は必須です。"
 
 msgid "{field} must be a string"
-msgstr "{field} は文字列である必要があります。"
+msgstr "{field}は文字列で入力してください。"
 
 msgid "{field} must be an integer"
-msgstr "{field} は整数である必要があります。"
+msgstr "{field}は整数で入力してください。"
 
 msgid "{field} must be a number"
-msgstr "{field} は数値である必要があります。"
+msgstr "{field}は数値で入力してください。"
 
 msgid "{field} must be a boolean"
-msgstr "{field} は真偽値である必要があります。"
+msgstr "{field}は真偽値で入力してください。"
 
 msgid "{field} must be a list"
-msgstr "{field} はリストである必要があります。"
+msgstr "{field}はリストで入力してください。"
 
 msgid "{field} must be a dictionary"
-msgstr "{field} は辞書である必要があります。"
+msgstr "{field}は辞書で入力してください。"
 
 msgid "{field} must be at least {min_length} characters"
-msgstr "{field} は{min_length}文字以上である必要があります。"
+msgstr "{field}は{min_length}文字以上で入力してください。"
 
 msgid "{field} must be at most {max_length} characters"
-msgstr "{field} は{max_length}文字以下である必要があります。"
+msgstr "{field}は{max_length}文字以内で入力してください。"
 
 msgid "{field} must be less than {limit}"
-msgstr "{field} は{limit}未満である必要があります。"
+msgstr "{field}は{limit}未満で入力してください。"
 
 msgid "{field} must be less than or equal to {limit}"
-msgstr "{field} は{limit}以下である必要があります。"
+msgstr "{field}は{limit}以下で入力してください。"
 
 msgid "{field} must be greater than {limit}"
-msgstr "{field} は{limit}より大きい必要があります。"
+msgstr "{field}は{limit}より大きい値で入力してください。"
 
 msgid "{field} must be greater than or equal to {limit}"
-msgstr "{field} は{limit}以上である必要があります。"
+msgstr "{field}は{limit}以上で入力してください。"
 
 msgid "{field} must be one of: {expected}"
-msgstr "{field} は次のいずれかである必要があります: {expected}。"
+msgstr "{field}は次のいずれかである必要があります: {expected}"
 
 msgid "{field} has an invalid value"
-msgstr "{field} の値が無効です。"
+msgstr "{field}の値が無効です。"
 
 #, python-brace-format
 msgid "{field} must have at least {min_length} items"
-msgstr "{field} は{min_length}件以上ある必要があります。"
+msgstr "{field}は{min_length}件以上ある必要があります。"
 
 #, python-brace-format
 msgid "{field} must be less than {lt}"
-msgstr "{field} は{lt}未満である必要があります。"
+msgstr "{field}は{lt}未満で入力してください。"
 
 #, python-brace-format
 msgid "{field} must be less than or equal to {le}"
-msgstr "{field} は{le}以下である必要があります。"
+msgstr "{field}は{le}以下で入力してください。"
 
 #, python-brace-format
 msgid "{field} must be greater than {gt}"
-msgstr "{field} は{gt}より大きい必要があります。"
+msgstr "{field}は{gt}より大きい値で入力してください。"
 
 #, python-brace-format
 msgid "{field} must be greater than or equal to {ge}"
-msgstr "{field} は{ge}以上である必要があります。"
+msgstr "{field}は{ge}以上で入力してください。"
 
 msgid "{field} has an invalid type"
-msgstr "{field} のタイプが正しくありません。"
+msgstr "{field}のタイプが正しくありません。"
 
 msgid "{field} contains invalid characters"
-msgstr "{field} に使用できない文字が含まれています。"
+msgstr "{field}に使用できない文字が含まれています。"
 
 #, python-brace-format
 msgid "{} '{}' does not have {} permission."
-msgstr "{} '{}'には{}権限がありません。"
+msgstr "{}'{}'には{}権限がありません。"
 
 #, python-brace-format
 msgid "{} '{}' is empty."

@@ -315,8 +315,8 @@ def test_create_join_table_pydantic_missing_join_table_name(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "joinTableNameは必須項目です。"
-    assert response_data["details"] == ["joinTableNameは必須項目です。"]
+    assert response_data["message"] == "joinTableNameは必須です。"
+    assert response_data["details"] == ["joinTableNameは必須です。"]
 
 
 def test_create_join_table_pydantic_missing_left_table_name(
@@ -328,8 +328,8 @@ def test_create_join_table_pydantic_missing_left_table_name(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "leftTableNameは必須項目です。"
-    assert response_data["details"] == ["leftTableNameは必須項目です。"]
+    assert response_data["message"] == "leftTableNameは必須です。"
+    assert response_data["details"] == ["leftTableNameは必須です。"]
 
 
 def test_create_join_table_pydantic_missing_right_table_name(
@@ -341,8 +341,8 @@ def test_create_join_table_pydantic_missing_right_table_name(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "rightTableNameは必須項目です。"
-    assert response_data["details"] == ["rightTableNameは必須項目です。"]
+    assert response_data["message"] == "rightTableNameは必須です。"
+    assert response_data["details"] == ["rightTableNameは必須です。"]
 
 
 def test_create_join_table_pydantic_missing_left_key_column_names(
@@ -356,8 +356,8 @@ def test_create_join_table_pydantic_missing_left_key_column_names(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "leftKeyColumnNamesは必須項目です。"
-    assert response_data["details"] == ["leftKeyColumnNamesは必須項目です。"]
+    assert response_data["message"] == "leftKeyColumnNamesは必須です。"
+    assert response_data["details"] == ["leftKeyColumnNamesは必須です。"]
 
 
 def test_create_join_table_pydantic_missing_right_key_column_names(
@@ -371,8 +371,8 @@ def test_create_join_table_pydantic_missing_right_key_column_names(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "rightKeyColumnNamesは必須項目です。"
-    assert response_data["details"] == ["rightKeyColumnNamesは必須項目です。"]
+    assert response_data["message"] == "rightKeyColumnNamesは必須です。"
+    assert response_data["details"] == ["rightKeyColumnNamesは必須です。"]
 
 
 def test_invalid_join_type(client, tables_store):

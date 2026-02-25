@@ -161,7 +161,7 @@ def test_add_lag_lead_column_missing_table_name(client, tables_store):
         },
     )
 
-    expected_msg = "tableNameは必須項目です。"
+    expected_msg = "tableNameは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -189,7 +189,7 @@ def test_add_lag_lead_column_missing_source_column(client, tables_store):
         },
     )
 
-    expected_msg = "sourceColumnは必須項目です。"
+    expected_msg = "sourceColumnは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -217,7 +217,7 @@ def test_add_lag_lead_column_missing_new_column_name(client, tables_store):
         },
     )
 
-    expected_msg = "newColumnNameは必須項目です。"
+    expected_msg = "newColumnNameは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -245,7 +245,7 @@ def test_add_lag_lead_column_missing_add_position_column(client, tables_store):
         },
     )
 
-    expected_msg = "addPositionColumnは必須項目です。"
+    expected_msg = "addPositionColumnは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -273,7 +273,7 @@ def test_add_lag_lead_column_missing_periods(client, tables_store):
         },
     )
 
-    expected_msg = "periodsは必須項目です。"
+    expected_msg = "periodsは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT

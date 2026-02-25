@@ -356,8 +356,8 @@ def test_create_simulation_data_table_pydantic_missing_table_name(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "tableNameは必須項目です。"
-    assert response_data["details"] == ["tableNameは必須項目です。"]
+    assert response_data["message"] == "tableNameは必須です。"
+    assert response_data["details"] == ["tableNameは必須です。"]
 
 
 def test_create_simulation_data_table_pydantic_missing_row_count(
@@ -369,8 +369,8 @@ def test_create_simulation_data_table_pydantic_missing_row_count(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "rowCountは必須項目です。"
-    assert response_data["details"] == ["rowCountは必須項目です。"]
+    assert response_data["message"] == "rowCountは必須です。"
+    assert response_data["details"] == ["rowCountは必須です。"]
 
 
 def test_create_simulation_data_table_pydantic_missing_simulation_columns(
@@ -384,8 +384,8 @@ def test_create_simulation_data_table_pydantic_missing_simulation_columns(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "simulationColumnsは必須項目です。"
-    assert response_data["details"] == ["simulationColumnsは必須項目です。"]
+    assert response_data["message"] == "simulationColumnsは必須です。"
+    assert response_data["details"] == ["simulationColumnsは必須です。"]
 
 
 def test_create_simulation_data_table_pydantic_missing_column_name(
@@ -404,10 +404,10 @@ def test_create_simulation_data_table_pydantic_missing_column_name(
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert (
         response_data["message"]
-        == "simulationColumns.0.columnNameは必須項目です。"
+        == "simulationColumns.0.columnNameは必須です。"
     )
     assert response_data["details"] == [
-        "simulationColumns.0.columnNameは必須項目です。"
+        "simulationColumns.0.columnNameは必須です。"
     ]
 
 
@@ -425,10 +425,10 @@ def test_create_simulation_data_table_pydantic_missing_distribution(
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert (
         response_data["message"]
-        == "simulationColumns.0.distributionは必須項目です。"
+        == "simulationColumns.0.distributionは必須です。"
     )
     assert response_data["details"] == [
-        "simulationColumns.0.distributionは必須項目です。"
+        "simulationColumns.0.distributionは必須です。"
     ]
 
 

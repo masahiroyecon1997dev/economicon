@@ -146,8 +146,8 @@ def test_duplicate_table_pydantic_missing_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "tableNameは必須項目です。"
-    assert response_data["details"] == ["tableNameは必須項目です。"]
+    assert response_data["message"] == "tableNameは必須です。"
+    assert response_data["details"] == ["tableNameは必須です。"]
 
 
 def test_duplicate_table_pydantic_missing_new_table_name(client, tables_store):
@@ -157,8 +157,8 @@ def test_duplicate_table_pydantic_missing_new_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "newTableNameは必須項目です。"
-    assert response_data["details"] == ["newTableNameは必須項目です。"]
+    assert response_data["message"] == "newTableNameは必須です。"
+    assert response_data["details"] == ["newTableNameは必須です。"]
 
 
 # ─────────────────────────────────────────────────────────────

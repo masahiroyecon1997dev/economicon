@@ -497,7 +497,7 @@ def test_confidence_interval_missing_table_name(client, tables_store):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == "VALIDATION_ERROR"
-    assert "tableNameは必須項目です。" in response_data["message"]
+    assert "tableNameは必須です。" in response_data["message"]
 
 
 def test_confidence_interval_missing_column_name(client, tables_store):
@@ -512,7 +512,7 @@ def test_confidence_interval_missing_column_name(client, tables_store):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == "VALIDATION_ERROR"
-    assert "columnNameは必須項目です。" in response_data["message"]
+    assert "columnNameは必須です。" in response_data["message"]
 
 
 def test_confidence_interval_missing_confidence_level(client, tables_store):
@@ -527,7 +527,7 @@ def test_confidence_interval_missing_confidence_level(client, tables_store):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == "VALIDATION_ERROR"
-    assert "confidenceLevelは必須項目です。" in response_data["message"]
+    assert "confidenceLevelは必須です。" in response_data["message"]
 
 
 def test_confidence_interval_missing_statistic_type(client, tables_store):
@@ -542,7 +542,7 @@ def test_confidence_interval_missing_statistic_type(client, tables_store):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == "VALIDATION_ERROR"
-    assert "statisticTypeは必須項目です。" in response_data["message"]
+    assert "statisticTypeは必須です。" in response_data["message"]
 
 
 def test_confidence_interval_empty_table_name(client, tables_store):

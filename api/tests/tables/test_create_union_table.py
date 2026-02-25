@@ -295,8 +295,8 @@ def test_pydantic_missing_union_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "unionTableNameは必須項目です。"
-    assert response_data["details"] == ["unionTableNameは必須項目です。"]
+    assert response_data["message"] == "unionTableNameは必須です。"
+    assert response_data["details"] == ["unionTableNameは必須です。"]
 
 
 def test_pydantic_missing_table_names(client, tables_store):
@@ -306,8 +306,8 @@ def test_pydantic_missing_table_names(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "tableNamesは必須項目です。"
-    assert response_data["details"] == ["tableNamesは必須項目です。"]
+    assert response_data["message"] == "tableNamesは必須です。"
+    assert response_data["details"] == ["tableNamesは必須です。"]
 
 
 def test_pydantic_missing_column_names(client, tables_store):
@@ -317,8 +317,8 @@ def test_pydantic_missing_column_names(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert response_data["message"] == "columnNamesは必須項目です。"
-    assert response_data["details"] == ["columnNamesは必須項目です。"]
+    assert response_data["message"] == "columnNamesは必須です。"
+    assert response_data["details"] == ["columnNamesは必須です。"]
 
 
 # ─────────────────────────────────────────────────────────────

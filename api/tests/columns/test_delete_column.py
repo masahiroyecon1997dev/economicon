@@ -88,7 +88,7 @@ def test_delete_column_missing_table_name(client, tables_store):
         json={"columnName": COL_A},
     )
 
-    expected_msg = "tableNameは必須項目です。"
+    expected_msg = "tableNameは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -110,7 +110,7 @@ def test_delete_column_missing_column_name(client, tables_store):
         json={"tableName": TABLE_NAME},
     )
 
-    expected_msg = "columnNameは必須項目です。"
+    expected_msg = "columnNameは必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT

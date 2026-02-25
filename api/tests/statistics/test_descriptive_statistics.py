@@ -103,9 +103,7 @@ def test_descriptive_statistics_success_numeric(client, tables_store):
     )
 
 
-def test_descriptive_statistics_numerical_via_describe(
-    client, tables_store
-):
+def test_descriptive_statistics_numerical_via_describe(client, tables_store):
     """polars describe()との数値照合"""
     payload = {
         "tableName": _TABLE_NUMERIC,
@@ -275,9 +273,7 @@ def test_descriptive_statistics_invalid_table(client, tables_store):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == "DATA_NOT_FOUND"
-    assert (
-        response_data["message"] == "tableName 'NoTable'は存在しません。"
-    )
+    assert response_data["message"] == "tableName 'NoTable'は存在しません。"
 
 
 def test_descriptive_statistics_invalid_column(client, tables_store):
@@ -292,9 +288,7 @@ def test_descriptive_statistics_invalid_column(client, tables_store):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == "DATA_NOT_FOUND"
-    assert (
-        response_data["message"] == "columnName 'Z'は存在しません。"
-    )
+    assert response_data["message"] == "columnName 'Z'は存在しません。"
 
 
 # -----------------------------------------------------------
@@ -317,9 +311,7 @@ def test_descriptive_statistics_invalid_statistic(client, tables_store):
     assert _STATISTICS_ERROR in response_data["message"]
 
 
-def test_descriptive_statistics_old_std_value_is_invalid(
-    client, tables_store
-):
+def test_descriptive_statistics_old_std_value_is_invalid(client, tables_store):
     """旧値'std'はVALIDATION_ERRORになる（正しくは'std_dev'）"""
     payload = {
         "tableName": _TABLE_NUMERIC,
@@ -347,14 +339,11 @@ def test_descriptive_statistics_empty_statistics_list(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == "VALIDATION_ERROR"
     assert (
-        "statisticsは1件以上ある必要があります。"
-        in response_data["message"]
+        "statisticsは1件以上ある必要があります。" in response_data["message"]
     )
 
 
-def test_descriptive_statistics_empty_column_name_list(
-    client, tables_store
-):
+def test_descriptive_statistics_empty_column_name_list(client, tables_store):
     """空のcolumnNameListはVALIDATION_ERRORになる"""
     payload = {
         "tableName": _TABLE_NUMERIC,
@@ -385,8 +374,7 @@ def test_descriptive_statistics_empty_table_name(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == "VALIDATION_ERROR"
     assert (
-        "tableNameは1文字以上で入力してください。"
-        in response_data["message"]
+        "tableNameは1文字以上で入力してください。" in response_data["message"]
     )
 
 
@@ -405,8 +393,7 @@ def test_descriptive_statistics_whitespace_only_table_name(
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == "VALIDATION_ERROR"
     assert (
-        "tableNameは1文字以上で入力してください。"
-        in response_data["message"]
+        "tableNameは1文字以上で入力してください。" in response_data["message"]
     )
 
 
@@ -432,12 +419,10 @@ def test_descriptive_statistics_missing_table_name(client, tables_store):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == "VALIDATION_ERROR"
-    assert "tableNameは必須項目です。" in response_data["message"]
+    assert "tableNameは必須です。" in response_data["message"]
 
 
-def test_descriptive_statistics_missing_column_name_list(
-    client, tables_store
-):
+def test_descriptive_statistics_missing_column_name_list(client, tables_store):
     """columnNameListが欠損している場合はVALIDATION_ERRORになる"""
     payload = {"tableName": _TABLE_NUMERIC, "statistics": [_STAT_MEAN]}
     response = client.post(URL, json=payload)
@@ -445,7 +430,7 @@ def test_descriptive_statistics_missing_column_name_list(
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == "VALIDATION_ERROR"
-    assert "columnNameListは必須項目です。" in response_data["message"]
+    assert "columnNameListは必須です。" in response_data["message"]
 
 
 def test_descriptive_statistics_missing_statistics(client, tables_store):
@@ -456,4 +441,4 @@ def test_descriptive_statistics_missing_statistics(client, tables_store):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == "VALIDATION_ERROR"
-    assert "statisticsは必須項目です。" in response_data["message"]
+    assert "statisticsは必須です。" in response_data["message"]
