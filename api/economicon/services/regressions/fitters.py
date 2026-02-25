@@ -268,209 +268,212 @@ class RegularizedRegressionInput:
     bootstrap_iterations: int = 1000
 
 
+@dataclass
+class RegularizedResult:
+    """
+    正則化回帰（Lasso/Ridge）の結果を保持するデータクラス
+
+    - bootstrap_ci_lower / bootstrap_ci_upper:
+        calculate_se=True 時のパーセンタイル法 95% CI
+        (params_original と同順 — 定数項を含む)
+    - bootstrap_se: Ridge のみ。ブートストラップ標準偏差
+    - selection_rate: Lasso のみ。変数が非ゼロとなった
+        ブートストラップの割合。定数項ご除く n_features 次元
+    """
+
+    params_original: np.ndarray  # 元スケールの係数（定数項を含む）
+    coef_scaled: np.ndarray  # 標準化後の係数（定数項なし）
+    r2: float  # 訓練データ R²
+    n_obs: int  # 観測数
+    has_const: bool  # 定数項フラグ
+    bootstrap_ci_lower: np.ndarray | None = None
+    bootstrap_ci_upper: np.ndarray | None = None
+    bootstrap_se: np.ndarray | None = None  # Ridge 用
+    selection_rate: np.ndarray | None = None  # Lasso 用
+
+
 def fit_lasso(
     data_input: RegularizedRegressionInput,
-) -> tuple[RegressionResultsWrapper, np.ndarray]:
+) -> RegularizedResult:
     """
-    Lassoモデルのフィッティング（Pipeline使用、両係数を返す）
+    Lasso モデルのフィッティング
 
-    make_pipelineで標準化とLassoを統合し、変数のスケールに依存しない正則化を実現。
-    元のスケールの係数と標準化後の係数の両方を返すことで、
-    実務的解釈（元のスケール）と変数間比較（標準化後）の両方を可能にする。
+    - R²: 訓練データでの model.score()
+    - calculate_se=True 時はブートストラップを実行し、
+      パーセンタイル法 95% CI と選択率（Selection Rate）を返す。
+      SE は Lasso の点質量問題（Knight & Fu, 2000）により None。
+    - t 値・ p 値は理論的根拠なしのため常に None。
 
     Args:
-        data_input: RegularizedRegressionInputデータクラス
+        data_input: RegularizedRegressionInput データクラス
 
     Returns:
-        result: statsmodels互換の回帰結果（元のスケールの係数）
-        coef_scaled: 標準化後の係数（変数間の相対的重要度比較用）
+        RegularizedResult
     """
-    # x_dataに定数項が含まれている場合は除去
     x_data_sklearn = remove_const_column(
         data_input.x_data, data_input.has_const
     )
 
-    # Pipelineで標準化＋Lasso
     model = make_pipeline(StandardScaler(), Lasso(alpha=data_input.alpha))
     model.fit(x_data_sklearn, data_input.y_data)
+    r2 = float(model.score(x_data_sklearn, data_input.y_data))
 
-    # 各ステップを取得
     scaler = model.named_steps["standardscaler"]
     lasso = model.named_steps["lasso"]
 
-    # 標準化後の係数（変数間比較用）
     coef_scaled = lasso.coef_
     intercept_scaled = lasso.intercept_
-
-    # 元のスケールに戻す
     coef_original = coef_scaled / scaler.scale_
     intercept_original = intercept_scaled - np.dot(coef_original, scaler.mean_)
 
-    # statsmodels 形式で再構築（統計量を取得するため）
-    model_ols = sm.OLS(
-        data_input.y_data, data_input.x_data, missing=data_input.missing
-    )
-    result = model_ols.fit()
+    if data_input.has_const:
+        params_original = np.hstack(([intercept_original], coef_original))
+    else:
+        params_original = coef_original
 
-    # ブートストラップによる標準誤差の計算
-    se = None
+    bootstrap_ci_lower: np.ndarray | None = None
+    bootstrap_ci_upper: np.ndarray | None = None
+    selection_rate: np.ndarray | None = None
+
     if data_input.calculate_se:
         n_samples = len(data_input.y_data)
-        n_params = len(coef_original) + (1 if data_input.has_const else 0)
+        n_params = len(params_original)
         bootstrap_coefs = np.zeros((data_input.bootstrap_iterations, n_params))
 
         for i in range(data_input.bootstrap_iterations):
-            indices = np.random.choice(n_samples, n_samples, replace=True)
-            y_boot = data_input.y_data[indices]
-            x_boot = x_data_sklearn[indices]
+            idx = np.random.choice(n_samples, n_samples, replace=True)
+            y_boot = data_input.y_data[idx]
+            x_boot = x_data_sklearn[idx]
 
             boot_model = make_pipeline(
                 StandardScaler(), Lasso(alpha=data_input.alpha)
             )
             boot_model.fit(x_boot, y_boot)
 
-            boot_scaler = boot_model.named_steps["standardscaler"]
-            boot_lasso = boot_model.named_steps["lasso"]
-
-            boot_coef_scaled = boot_lasso.coef_
-            boot_intercept_scaled = boot_lasso.intercept_
-            boot_coef_original = boot_coef_scaled / boot_scaler.scale_
-            boot_intercept_original = boot_intercept_scaled - np.dot(
-                boot_coef_original, boot_scaler.mean_
-            )
+            boot_sc = boot_model.named_steps["standardscaler"]
+            boot_las = boot_model.named_steps["lasso"]
+            boot_coef_sc = boot_las.coef_
+            boot_int_sc = boot_las.intercept_
+            boot_coef = boot_coef_sc / boot_sc.scale_
+            boot_int = boot_int_sc - np.dot(boot_coef, boot_sc.mean_)
 
             if data_input.has_const:
-                bootstrap_coefs[i] = np.hstack(
-                    ([boot_intercept_original], boot_coef_original)
-                )
+                bootstrap_coefs[i] = np.hstack(([boot_int], boot_coef))
             else:
-                bootstrap_coefs[i] = boot_coef_original
+                bootstrap_coefs[i] = boot_coef
 
-        se = np.std(bootstrap_coefs, axis=0)
+        _ci_alpha = 0.05
+        bootstrap_ci_lower = np.percentile(
+            bootstrap_coefs, _ci_alpha / 2 * 100, axis=0
+        )
+        bootstrap_ci_upper = np.percentile(
+            bootstrap_coefs, (1 - _ci_alpha / 2) * 100, axis=0
+        )
+        # 選択率: 係数が非ゼロになったブートストラップの割合
+        # 定数項は除外し n_features 次元で返す
+        coef_cols = (
+            bootstrap_coefs[:, 1:] if data_input.has_const else bootstrap_coefs
+        )
+        selection_rate = np.mean(coef_cols != 0, axis=0)
 
-    # Lasso の係数で上書き（元のスケール）
+    return RegularizedResult(
+        params_original=params_original,
+        coef_scaled=coef_scaled,
+        r2=r2,
+        n_obs=len(data_input.y_data),
+        has_const=data_input.has_const,
+        bootstrap_ci_lower=bootstrap_ci_lower,
+        bootstrap_ci_upper=bootstrap_ci_upper,
+        selection_rate=selection_rate,
+    )
+
+
+def fit_ridge(
+    data_input: RegularizedRegressionInput,
+) -> RegularizedResult:
+    """
+    Ridge モデルのフィッティング
+
+    - R²: 訓練データでの model.score()
+    - calculate_se=True 時はブートストラップを実行し、
+      様本分布の標準偏差（bootstrap_se）と
+      パーセンタイル法 95% CI を返す。
+    - t 値・ p 値は理論的根拠なしのため常に None。
+
+    Args:
+        data_input: RegularizedRegressionInput データクラス
+
+    Returns:
+        RegularizedResult
+    """
+    x_data_sklearn = remove_const_column(
+        data_input.x_data, data_input.has_const
+    )
+
+    model = make_pipeline(StandardScaler(), Ridge(alpha=data_input.alpha))
+    model.fit(x_data_sklearn, data_input.y_data)
+    r2 = float(model.score(x_data_sklearn, data_input.y_data))
+
+    scaler = model.named_steps["standardscaler"]
+    ridge = model.named_steps["ridge"]
+
+    coef_scaled = ridge.coef_
+    intercept_scaled = ridge.intercept_
+    coef_original = coef_scaled / scaler.scale_
+    intercept_original = intercept_scaled - np.dot(coef_original, scaler.mean_)
+
     if data_input.has_const:
         params_original = np.hstack(([intercept_original], coef_original))
     else:
         params_original = coef_original
 
-    result._results.params = params_original
-    # bse は CachedProperty のためキャッシュをクリアして
-    # normalized_cov_params で設定
-    n_params = len(params_original)
-    cache = getattr(result._results, "_cache", {})
-    for key in ("bse", "tvalues", "pvalues"):
-        cache.pop(key, None)
-    if data_input.calculate_se and se is not None:
-        scale = result._results.scale
-        result._results.normalized_cov_params = np.diag(se**2 / scale)
-    else:
-        result._results.normalized_cov_params = np.full(
-            (n_params, n_params), np.nan
-        )
+    bootstrap_ci_lower: np.ndarray | None = None
+    bootstrap_ci_upper: np.ndarray | None = None
+    bootstrap_se: np.ndarray | None = None
 
-    return result, coef_scaled
-
-
-def fit_ridge(
-    data_input: RegularizedRegressionInput,
-) -> tuple[RegressionResultsWrapper, np.ndarray]:
-    """
-    Ridgeモデルのフィッティング（Pipeline使用、両係数を返す）
-
-    make_pipelineで標準化とRidgeを統合し、変数のスケールに依存しない正則化を実現。
-    元のスケールの係数と標準化後の係数の両方を返すことで、
-    実務的解釈（元のスケール）と変数間比較（標準化後）の両方を可能にする。
-
-    Args:
-        data_input: RegularizedRegressionInputデータクラス
-
-    Returns:
-        result: statsmodels互換の回帰結果（元のスケールの係数）
-        coef_scaled: 標準化後の係数（変数間の相対的重要度比較用）
-    """
-    # x_dataに定数項が含まれている場合は除去
-    x_data_sklearn = remove_const_column(
-        data_input.x_data, data_input.has_const
-    )
-
-    # Pipelineで標準化＋Ridge
-    model = make_pipeline(StandardScaler(), Ridge(alpha=data_input.alpha))
-    model.fit(x_data_sklearn, data_input.y_data)
-
-    # 各ステップを取得
-    scaler = model.named_steps["standardscaler"]
-    ridge = model.named_steps["ridge"]
-
-    # 標準化後の係数（変数間比較用）
-    coef_scaled = ridge.coef_
-    intercept_scaled = ridge.intercept_
-
-    # 元のスケールに戻す
-    coef_original = coef_scaled / scaler.scale_
-    intercept_original = intercept_scaled - np.dot(coef_original, scaler.mean_)
-
-    # statsmodels 形式で再構築（統計量を取得するため）
-    model_ols = sm.OLS(
-        data_input.y_data, data_input.x_data, missing=data_input.missing
-    )
-    result = model_ols.fit()
-
-    # ブートストラップによる標準誤差の計算
-    se = None
     if data_input.calculate_se:
         n_samples = len(data_input.y_data)
-        n_params = len(coef_original) + (1 if data_input.has_const else 0)
+        n_params = len(params_original)
         bootstrap_coefs = np.zeros((data_input.bootstrap_iterations, n_params))
 
         for i in range(data_input.bootstrap_iterations):
-            indices = np.random.choice(n_samples, n_samples, replace=True)
-            y_boot = data_input.y_data[indices]
-            x_boot = x_data_sklearn[indices]
+            idx = np.random.choice(n_samples, n_samples, replace=True)
+            y_boot = data_input.y_data[idx]
+            x_boot = x_data_sklearn[idx]
 
             boot_model = make_pipeline(
                 StandardScaler(), Ridge(alpha=data_input.alpha)
             )
             boot_model.fit(x_boot, y_boot)
 
-            boot_scaler = boot_model.named_steps["standardscaler"]
-            boot_ridge = boot_model.named_steps["ridge"]
-
-            boot_coef_scaled = boot_ridge.coef_
-            boot_intercept_scaled = boot_ridge.intercept_
-            boot_coef_original = boot_coef_scaled / boot_scaler.scale_
-            boot_intercept_original = boot_intercept_scaled - np.dot(
-                boot_coef_original, boot_scaler.mean_
-            )
+            boot_sc = boot_model.named_steps["standardscaler"]
+            boot_rid = boot_model.named_steps["ridge"]
+            boot_coef_sc = boot_rid.coef_
+            boot_int_sc = boot_rid.intercept_
+            boot_coef = boot_coef_sc / boot_sc.scale_
+            boot_int = boot_int_sc - np.dot(boot_coef, boot_sc.mean_)
 
             if data_input.has_const:
-                bootstrap_coefs[i] = np.hstack(
-                    ([boot_intercept_original], boot_coef_original)
-                )
+                bootstrap_coefs[i] = np.hstack(([boot_int], boot_coef))
             else:
-                bootstrap_coefs[i] = boot_coef_original
+                bootstrap_coefs[i] = boot_coef
 
-        se = np.std(bootstrap_coefs, axis=0)
-
-    # Ridge の係数で上書き（元のスケール）
-    if data_input.has_const:
-        params_original = np.hstack(([intercept_original], coef_original))
-    else:
-        params_original = coef_original
-
-    result._results.params = params_original
-    # bse は CachedProperty のためキャッシュをクリアして
-    # normalized_cov_params で設定
-    n_params = len(params_original)
-    cache = getattr(result._results, "_cache", {})
-    for key in ("bse", "tvalues", "pvalues"):
-        cache.pop(key, None)
-    if data_input.calculate_se and se is not None:
-        scale = result._results.scale
-        result._results.normalized_cov_params = np.diag(se**2 / scale)
-    else:
-        result._results.normalized_cov_params = np.full(
-            (n_params, n_params), np.nan
+        bootstrap_se = np.std(bootstrap_coefs, axis=0)
+        _ci_alpha = 0.05
+        bootstrap_ci_lower = np.percentile(
+            bootstrap_coefs, _ci_alpha / 2 * 100, axis=0
+        )
+        bootstrap_ci_upper = np.percentile(
+            bootstrap_coefs, (1 - _ci_alpha / 2) * 100, axis=0
         )
 
-    return result, coef_scaled
+    return RegularizedResult(
+        params_original=params_original,
+        coef_scaled=coef_scaled,
+        r2=r2,
+        n_obs=len(data_input.y_data),
+        has_const=data_input.has_const,
+        bootstrap_ci_lower=bootstrap_ci_lower,
+        bootstrap_ci_upper=bootstrap_ci_upper,
+        bootstrap_se=bootstrap_se,
+    )

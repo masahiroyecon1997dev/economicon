@@ -30,6 +30,7 @@ from economicon.services.regressions.common import (
 from economicon.services.regressions.fitters import (
     IVInput,
     RegularizedRegressionInput,
+    RegularizedResult,
     TobitInput,
     fit_fe,
     fit_iv,
@@ -410,15 +411,15 @@ class Regression:
         )
 
         if self.analysis.method == RegressionMethodType.LASSO:
-            model_result, coef_scaled = fit_lasso(data_input)
+            reg_result = fit_lasso(data_input)
         elif self.analysis.method == RegressionMethodType.RIDGE:
-            model_result, coef_scaled = fit_ridge(data_input)
+            reg_result = fit_ridge(data_input)
         else:
             raise NotImplementedError(
                 _("Specified regression method is not supported")
             )
 
-        return self._format_regularized_result(model_result, coef_scaled)
+        return self._format_regularized_result(reg_result)
 
     def _execute_panel_iv(self, *, df, y_data, x_data, missing):
         raise NotImplementedError(
@@ -480,35 +481,89 @@ class Regression:
         return result
 
     def _format_regularized_result(
-        self, model_result: Any, coef_scaled: Any
+        self, reg_result: RegularizedResult
     ) -> dict:
         """
-        正則化回帰（Lasso/Ridge）の結果をJSON形式にフォーマット
+        正則化回帰（Lasso/Ridge）の結果を JSON 形式にフォーマット
 
-        元のスケールの係数に加えて、標準化後の係数も返す。
-        標準化後の係数は変数間の相対的重要度の比較に使用できる。
+        - R²: 訓練データでの sklearn model.score()
+        - adjustedR2, fValue, fProbability, tValue, pValue: None
+          （正則化回帰には理論的根拠なし）
+        - Ridge: bootstrapSE + 95% パーセンタイル CI
+        - Lasso: selectionRate + 95% パーセンタイル CI、SE は None
+          （点質量問題により過小評価されるため）
 
         Args:
-            model_result: statsmodels の回帰結果オブジェクト
-            coef_scaled: 標準化後の係数配列
+            reg_result: RegularizedResult データクラス
 
         Returns:
             フォーマット済みの結果辞書
         """
-        # 基本的なフォーマットを取得
-        result = self._format_result(model_result)
+        param_names = (
+            ["const"] if reg_result.has_const else []
+        ) + self.explanatory_variables
 
-        # 各パラメータに標準化後の係数を追加
-        for i, param in enumerate(result["parameters"]):
-            if param["variable"] == "const":
-                # 定数項は標準化しないのでNone
-                param["coefficientScaled"] = None
-            else:
-                # 定数項を除いたインデックス
-                idx = i - 1 if self.has_const else i
-                param["coefficientScaled"] = float(coef_scaled[idx])
+        params_info: list[dict[str, Any]] = []
+        for i, name in enumerate(param_names):
+            is_const = name == "const"
+            # coef_scaled / selection_rate の添字
+            # （定数項を除く n_features 次元）
+            var_idx = (i - 1) if reg_result.has_const else i
 
-        return result
+            param_dict: dict[str, Any] = {
+                "variable": name,
+                "coefficient": float(reg_result.params_original[i]),
+                "coefficientScaled": (
+                    None
+                    if is_const
+                    else float(reg_result.coef_scaled[var_idx])
+                ),
+                # Ridge: bootstrap 標準偏差、Lasso: None
+                "standardError": (
+                    None
+                    if (reg_result.bootstrap_se is None or is_const)
+                    else float(reg_result.bootstrap_se[i])
+                ),
+                # 正則化回帰では t/p 値は無意味
+                "tValue": None,
+                "pValue": None,
+                # calculate_se=True 時: パーセンタイル法 95% CI
+                "confidenceIntervalLower": (
+                    None
+                    if reg_result.bootstrap_ci_lower is None
+                    else float(reg_result.bootstrap_ci_lower[i])
+                ),
+                "confidenceIntervalUpper": (
+                    None
+                    if reg_result.bootstrap_ci_upper is None
+                    else float(reg_result.bootstrap_ci_upper[i])
+                ),
+            }
+
+            # Lasso のみ: 選択率（定数項を除く）
+            if reg_result.selection_rate is not None and not is_const:
+                param_dict["selectionRate"] = float(
+                    reg_result.selection_rate[var_idx]
+                )
+
+            params_info.append(param_dict)
+
+        model_stats: dict[str, Any] = {
+            "nObservations": reg_result.n_obs,
+            "R2": reg_result.r2,
+            "adjustedR2": None,
+            "fValue": None,
+            "fProbability": None,
+        }
+
+        return {
+            "tableName": self.table_name,
+            "dependentVariable": self.dependent_variable,
+            "explanatoryVariables": self.explanatory_variables,
+            "regressionResult": None,
+            "parameters": params_info,
+            "modelStatistics": model_stats,
+        }
 
     def _tobit_format_result(
         self, model_result, left_censoring_limit, right_censoring_limit
