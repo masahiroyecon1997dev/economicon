@@ -141,3 +141,112 @@ def test_fe_coefficient_sign_x2_negative(client, tables_store):
     params = _get_output(client, FePayload().build())["parameters"]
     coef_map = {p["variable"]: p["coefficient"] for p in params}
     assert coef_map["x2"] < 0.0
+
+
+# -----------------------------------------------------------
+# 標準誤差マッピング検証テスト
+# LINEARMODELS_COV_TYPE_MAP のキーが正しく linearmodels に渡されることを確認
+# -----------------------------------------------------------
+
+
+def test_fe_robust_se_matches_linearmodels(client, tables_store):
+    """
+    robust SE 付き FE の標準誤差が linearmodels (PanelOLS, cov_type='robust')
+    の値と一致することを確認。
+
+    旧バグ: LINEARMODELS_COV_TYPE_MAP に "robust" キーが存在しなかったため
+    cov_type が 'unadjusted' にフォールバックしていた。
+    このテストは旧バグ下では失敗する。
+    """
+    _, panel, _ = generate_all_data()
+    entity_ids, time_ids, x1p, x2p, y_p = panel
+
+    df = pd.DataFrame(
+        {
+            "entity_id": entity_ids.astype(float),
+            "time_id": time_ids.astype(float),
+            "y": y_p,
+            "x1": x1p,
+            "x2": x2p,
+        }
+    )
+    df = df.set_index(["entity_id", "time_id"])
+    expected = PanelOLS(df["y"], df[["x1", "x2"]], entity_effects=True).fit(
+        cov_type="robust"
+    )
+
+    payload = FePayload(se_method="robust").build()
+    params = _get_output(client, payload)["parameters"]
+    se_map = {p["variable"]: p["standardError"] for p in params}
+
+    for i, var in enumerate(["x1", "x2"]):
+        expected_se = float(expected.std_errors.iloc[i])
+        assert abs(se_map[var] - expected_se) < _ABS_TOL, (
+            f"FE robust SE [{var}]: API={se_map[var]!r} "
+            f"!= linearmodels={expected_se!r}"
+        )
+
+
+def test_fe_robust_se_differs_from_nonrobust(client, tables_store):
+    """
+    robust SE が nonrobust SE と異なることを確認。
+
+    旧バグ下では "robust" が "unadjusted" にフォールバックするため
+    両者が一致してしまい、このテストは失敗する。
+    """
+    se_nonrobust = [
+        p["standardError"]
+        for p in _get_output(client, FePayload(se_method="nonrobust").build())[
+            "parameters"
+        ]
+    ]
+    se_robust = [
+        p["standardError"]
+        for p in _get_output(client, FePayload(se_method="robust").build())[
+            "parameters"
+        ]
+    ]
+    assert se_nonrobust != se_robust, (
+        "robust SE が nonrobust SE と同一:"
+        " LINEARMODELS_COV_TYPE_MAP のマッピングが"
+        "正しく機能していない可能性がある"
+    )
+
+
+def test_fe_cluster_se_matches_linearmodels(client, tables_store):
+    """
+    cluster SE 付き FE の標準誤差が linearmodels
+    (PanelOLS, cov_type='clustered') の値と一致することを確認。
+
+    旧バグ: LINEARMODELS_COV_TYPE_MAP に "cluster" キーが存在しなかったため
+    cov_type が 'unadjusted' にフォールバックしていた。
+    このテストは旧バグ下では失敗する。
+    """
+    _, panel, _ = generate_all_data()
+    entity_ids, time_ids, x1p, x2p, y_p = panel
+
+    df = pd.DataFrame(
+        {
+            "entity_id": entity_ids.astype(float),
+            "time_id": time_ids.astype(float),
+            "y": y_p,
+            "x1": x1p,
+            "x2": x2p,
+        }
+    )
+    df = df.set_index(["entity_id", "time_id"])
+    # PanelOLS + cov_type='clustered': entity でクラスタリング（デフォルト）
+    expected = PanelOLS(df["y"], df[["x1", "x2"]], entity_effects=True).fit(
+        cov_type="clustered"
+    )
+
+    payload = FePayload(se_method="cluster").build()
+    params = _get_output(client, payload)["parameters"]
+    se_map = {p["variable"]: p["standardError"] for p in params}
+
+    for i, var in enumerate(["x1", "x2"]):
+        expected_se = float(expected.std_errors.iloc[i])
+        assert abs(se_map[var] - expected_se) < _ABS_TOL, (
+            f"FE cluster SE [{var}]: API={se_map[var]!r} "
+            f"!= linearmodels={expected_se!r}"
+        )

@@ -76,7 +76,7 @@ def test_iv_coefficients_numerical(client, tables_store):
         x_exog,
         df[["x2_endog"]],
         df[["z1", "z2"]],
-    ).fit(cov_type="unadjusted")
+    ).fit(cov_type="unadjusted")  # nonrobust → unadjusted
 
     params = _get_output(client, IvPayload().build())["parameters"]
     expected_params = model_result.params  # [const, x1, x2_endog]
@@ -129,6 +129,85 @@ def test_iv_r2_is_float(client, tables_store):
     """R2がfloatであることを確認"""
     model_stats = _get_output(client, IvPayload().build())["modelStatistics"]
     assert isinstance(model_stats["R2"], float)
+
+
+# -----------------------------------------------------------
+# 標準誤差マッピング検証テスト
+# -----------------------------------------------------------
+
+
+def test_iv_robust_se_matches_linearmodels(client, tables_store):
+    """
+    robust SE 付き IV の標準誤差が linearmodels (IV2SLS, cov_type='robust')
+    の値と一致することを確認。
+
+    注意: _iv_format_result は param_names に const を含めないため、
+    API が返す SE[0], SE[1] は linearmodels の std_errors.iloc[0], iloc[1]
+    (iloc順: const, x1) に対応する。名前ではなく位置ベースで比較する。
+
+    旧バグ: LINEARMODELS_COV_TYPE_MAP に "robust" キーが存在しなかったため
+    cov_type が 'unadjusted' にフォールバックしていた。
+    このテストは旧バグ下では失敗する。
+    """
+    _, _, iv = generate_all_data()
+    x1_iv, x2_endog, z1, z2, y_iv = iv
+
+    df = pd.DataFrame(
+        {
+            "y": y_iv,
+            "x1": x1_iv,
+            "x2_endog": x2_endog,
+            "z1": z1,
+            "z2": z2,
+        }
+    )
+    x_exog = sm.add_constant(df[["x1"]])
+    expected = IV2SLS(
+        df["y"],
+        x_exog,
+        df[["x2_endog"]],
+        df[["z1", "z2"]],
+    ).fit(cov_type="robust")
+
+    payload = IvPayload(se_method="robust").build()
+    params = _get_output(client, payload)["parameters"]
+
+    # API params (len=2) は linearmodels std_errors (len=3, const 含む) の
+    # iloc[0], iloc[1] に対応
+    # （_iv_format_result の param_names が const を省く挙動）
+    for i, param in enumerate(params):
+        api_se = param["standardError"]
+        expected_se = float(expected.std_errors.iloc[i])
+        assert abs(api_se - expected_se) < _ABS_TOL, (
+            f"IV robust SE [{param['variable']!r}] (iloc={i}): "
+            f"API={api_se!r} != linearmodels={expected_se!r}"
+        )
+
+
+def test_iv_robust_se_differs_from_nonrobust(client, tables_store):
+    """
+    robust SE が nonrobust SE と異なることを確認。
+
+    旧バグ下では "robust" が "unadjusted" にフォールバックするため
+    両者が一致してしまい、このテストは失敗する。
+    """
+    se_nonrobust = [
+        p["standardError"]
+        for p in _get_output(client, IvPayload(se_method="nonrobust").build())[
+            "parameters"
+        ]
+    ]
+    se_robust = [
+        p["standardError"]
+        for p in _get_output(client, IvPayload(se_method="robust").build())[
+            "parameters"
+        ]
+    ]
+    assert se_nonrobust != se_robust, (
+        "IV robust SE が nonrobust SE と同一:"
+        " LINEARMODELS_COV_TYPE_MAP のマッピングが"
+        "正しく機能していない可能性がある"
+    )
 
 
 # -----------------------------------------------------------
