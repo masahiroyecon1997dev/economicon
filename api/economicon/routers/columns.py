@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from economicon.models import (
+    COMMON_ERROR_RESPONSES,
     AddColumnRequestBody,
     AddColumnResult,
     AddDummyColumnRequestBody,
@@ -46,7 +47,11 @@ from economicon.services.operation import run_operation
 from economicon.utils import create_success_response
 
 # ルーターの定義（ここで共通のprefixとtagをつけておくと便利！）
-router = APIRouter(prefix="/column", tags=["column"])
+router = APIRouter(
+    prefix="/column",
+    tags=["column"],
+    responses=COMMON_ERROR_RESPONSES,
+)
 
 
 @router.post("/add", response_model=SuccessResponse[AddColumnResult])

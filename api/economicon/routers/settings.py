@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from economicon.models import (
+    COMMON_ERROR_RESPONSES,
     GetSettingsResult,
     SuccessResponse,
 )
@@ -10,7 +11,11 @@ from economicon.services.operation import run_operation
 from economicon.services.settings.get_settings import GetSettings
 from economicon.utils import create_success_response
 
-router = APIRouter(prefix="/settings", tags=["settings"])
+router = APIRouter(
+    prefix="/settings",
+    tags=["settings"],
+    responses=COMMON_ERROR_RESPONSES,
+)
 
 
 @router.get("", response_model=SuccessResponse[GetSettingsResult])

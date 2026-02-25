@@ -6,6 +6,7 @@ from fastapi import status as http_status
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import (
+    COMMON_ERROR_RESPONSES,
     ExportFileRequestBody,
     ExportFileResult,
     ImportFileRequestBody,
@@ -24,7 +25,11 @@ from economicon.services.operation import run_operation
 from economicon.utils import create_success_response
 from economicon.utils.exceptions import ProcessingError
 
-router = APIRouter(prefix="/data", tags=["data"])
+router = APIRouter(
+    prefix="/data",
+    tags=["data"],
+    responses=COMMON_ERROR_RESPONSES,
+)
 
 # サポートする拡張子と対応するインポーター
 _CSV_EXTENSIONS = {".csv", ".tsv"}

@@ -2,6 +2,7 @@
 
 from typing import Literal, TypeVar
 
+from fastapi import status as _http_status
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -33,8 +34,11 @@ class SuccessResponse[T](BaseResponse):
 class ErrorResponse(BaseResponse):
     """エラーレスポンスモデル"""
 
-    code: str = Field(default="NG", description="レスポンスコード")
+    code: str = Field(..., description="エラーコード")
     message: str = Field(..., description="エラーメッセージ")
+    details: list[str] | None = Field(
+        None, description="バリデーションエラーの詳細リスト"
+    )
 
 
 class BaseRequest(BaseModel):
@@ -239,3 +243,20 @@ class RootParams(BaseRequest):
 class BinaryChoiceRegularization(BaseRequest):
     type: Literal["l1", "l2"] = "l1"
     alpha: float = Field(default=1.0, ge=0.0)
+
+
+# OpenAPI エラーレスポンス定義（全ルーターで共用）
+COMMON_ERROR_RESPONSES: dict = {
+    _http_status.HTTP_400_BAD_REQUEST: {
+        "model": ErrorResponse,
+        "description": "バリデーション/データ整合性エラー",
+    },
+    _http_status.HTTP_422_UNPROCESSABLE_CONTENT: {
+        "model": ErrorResponse,
+        "description": "リクエストボディの形式エラー",
+    },
+    _http_status.HTTP_500_INTERNAL_SERVER_ERROR: {
+        "model": ErrorResponse,
+        "description": "サーバー内部エラー",
+    },
+}
