@@ -20,12 +20,15 @@ type FileErrorResponse = {
 
 /** Tauri の get_files コマンド固有のエラークラス */
 export class TauriFileError extends Error {
-  constructor(
-    public readonly errorType: FileErrorType,
-    public readonly originalMessage: string,
-  ) {
+  public readonly errorType: FileErrorType;
+  public readonly originalMessage: string;
+  constructor(errorType: FileErrorType, originalMessage: string) {
     super(originalMessage);
+    this.errorType = errorType;
+    this.originalMessage = originalMessage;
     this.name = "TauriFileError";
+
+    Object.setPrototypeOf(this, TauriFileError.prototype);
   }
 }
 
