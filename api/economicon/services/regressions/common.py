@@ -100,20 +100,24 @@ STATSMODELS_COV_TYPE_MAP = {
 
 # 標準誤差タイプのマッピング（linearmodels用）
 # パネルデータ分析（FE/RE）やIV分析で使用
+# キーは StandardErrorMethodType の文字列値に対応する:
+#   nonrobust → "nonrobust", robust → "robust",
+#   hac       → "hac",      cluster → "cluster"
+#
 # - unadjusted: 通常の標準誤差
 # - robust: White型頑健標準誤差（HC0相当）
+#   注意: linearmodels は HC1/HC2/HC3 を個別にサポートしないため
+#         RobustStandardError の hc_type にかかわらず
+#         HC0 相当にフォールバック。
 # - kernel: Newey-West型（HAC）
 # - clustered: クラスター頑健標準誤差
-# 注意: linearmodels は HC1/HC2/HC3 を個別にサポートしないため
-#       すべて "robust" (HC0 相当) にフォールバックする。
 LINEARMODELS_COV_TYPE_MAP = {
     "nonrobust": "unadjusted",
-    "hc0": "robust",
-    "hc1": "robust",
-    "hc2": "robust",
-    "hc3": "robust",
+    "robust": "robust",
     "hac": "kernel",
-    "clustered": "clustered",
+    # キー: enum値 "cluster"
+    # 値: linearmodels 引数 "clustered"
+    "cluster": "clustered",
 }
 
 
