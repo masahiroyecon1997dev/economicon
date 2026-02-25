@@ -149,7 +149,7 @@ def fit_tobit_null(data_input: TobitInput) -> Any:
         py4etrics の Tobit 回帰結果（定数項のみ）
     """
     y = data_input.df_pandas[data_input.dependent_variable].values
-    X_null = np.ones((len(y), 1))  # 定数項のみ
+    x_null = np.ones((len(y), 1))  # 定数項のみ
 
     cens = np.zeros(len(y))
     if data_input.left_censoring_limit is not None:
@@ -159,7 +159,7 @@ def fit_tobit_null(data_input: TobitInput) -> Any:
 
     model = Tobit(
         y,
-        X_null,
+        x_null,
         cens=cens,
         left=data_input.left_censoring_limit,
         right=data_input.right_censoring_limit,
