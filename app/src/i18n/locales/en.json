@@ -125,6 +125,7 @@
   },
   "Error": {
     "Error": "Error",
-    "UnexpectedError": "An unexpected error occurred."
+    "UnexpectedError": "An unexpected error occurred.",
+    "DirectoryNotFound": "The folder could not be found. It may have been deleted or moved."
   }
 }
