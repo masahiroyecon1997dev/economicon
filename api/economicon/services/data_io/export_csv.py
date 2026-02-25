@@ -1,6 +1,7 @@
 import io
 import os
 
+from economicon.core.encodings import PYTHON_ENCODING_MAP
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import ExportFileRequestBody
@@ -13,16 +14,6 @@ from economicon.utils.validators import (
 
 # 拡張子
 _EXTENSION = ".csv"
-
-# CsvEncoding 値 → Python コーデック名のマッピング
-_ENCODING_MAP = {
-    "utf8": "utf-8",
-    "latin1": "latin-1",
-    "ascii": "ascii",
-    "gbk": "gbk",
-    "windows-1252": "windows-1252",
-    "shift_jis": "cp932",
-}
 
 
 class ExportCsv:
@@ -76,16 +67,27 @@ class ExportCsv:
                 self.directory_path, self.file_name + _EXTENSION
             )
 
-            # StringIO 経由で書き出し、指定エンコーディングで保存
-            buffer = io.StringIO()
-            df.write_csv(
-                buffer,
-                separator=self.separator,
-                include_header=self.include_header,
-            )
-            python_encoding = _ENCODING_MAP.get(self.encoding, self.encoding)
-            with open(file_path, "w", encoding=python_encoding) as f:
-                f.write(buffer.getvalue())
+            if self.encoding == "utf8":
+                # Polars の write_csv を直接使用（UTF-8 固定）
+                df.write_csv(
+                    file_path,
+                    separator=self.separator,
+                    include_header=self.include_header,
+                )
+            else:
+                # StringIO 経由で書き出し、指定エンコーディングで保存
+                python_encoding = PYTHON_ENCODING_MAP.get(
+                    self.encoding, self.encoding
+                )
+                buffer = io.StringIO()
+                df.write_csv(
+                    buffer,
+                    separator=self.separator,
+                    include_header=self.include_header,
+                )
+
+                with open(file_path, "w", encoding=python_encoding) as f:
+                    f.write(buffer.getvalue())
 
             return {"filePath": file_path}
 
