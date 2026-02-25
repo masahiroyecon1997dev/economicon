@@ -733,7 +733,13 @@ class Regression:
         summary_text = str(model_result.summary)
 
         # パラメータの詳細情報
-        all_vars = self.explanatory_variables + endogenous_variables
+        # 注意: linearmodels は has_const=True 時に const を自動追加するため
+        #       param_names にも const を含める必要がある
+        all_vars = (
+            (["const"] if self.has_const else [])
+            + self.explanatory_variables
+            + endogenous_variables
+        )
         params_info = extract_linearmodels_params(model_result, all_vars)
 
         # モデル統計情報
@@ -758,9 +764,10 @@ class Regression:
                 pass
 
         # 過剰識別制約の検定 (Sargan/Hansen J test)
+        # sargan は呼び出し可能メソッドではなく WaldTestStatistic プロパティ
         if hasattr(model_result, "sargan"):
             try:
-                sargan = model_result.sargan()
+                sargan = model_result.sargan
                 diagnostics["sarganTest"] = {
                     "statistic": float(sargan.stat),
                     "pValue": float(sargan.pval),
@@ -778,8 +785,10 @@ class Regression:
                     if endog_var in first_stage.individual:
                         fs_result = first_stage.individual[endog_var]
                         diagnostics["firstStage"][endog_var] = {
-                            "fStatistic": float(fs_result.f_stat.stat),
-                            "pValue": float(fs_result.f_stat.pval),
+                            # OLSResults の属性は f_statistic
+                            # (f_stat は存在しないため AttributeError になる)
+                            "fStatistic": float(fs_result.f_statistic.stat),
+                            "pValue": float(fs_result.f_statistic.pval),
                             "description": "First-stage F-test for "
                             "weak instruments",
                         }
