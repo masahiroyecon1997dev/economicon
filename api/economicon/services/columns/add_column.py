@@ -1,5 +1,6 @@
 import polars as pl
 
+from economicon.core.encodings import POLARS_ENCODING_MAP
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import AddColumnRequestBody
@@ -13,16 +14,6 @@ from economicon.utils.validators.files import (
     validate_file_format,
     validate_file_path,
 )
-
-# CSV エンコーディングマップ（Polars コーデック対応）
-_ENCODING_MAP: dict[str, str] = {
-    "utf8": "utf8",
-    "latin1": "latin1",
-    "ascii": "ascii",
-    "gbk": "gbk",
-    "windows-1252": "windows-1252",
-    "shift_jis": "cp932",
-}
 
 
 class AddColumn:
@@ -168,7 +159,9 @@ class AddColumn:
                     message=message,
                 )
             # CSVファイルを読み込む
-            encoding = _ENCODING_MAP.get(self.csv_encoding, self.csv_encoding)
+            encoding = POLARS_ENCODING_MAP.get(
+                self.csv_encoding, self.csv_encoding
+            )
             skip_rows = 1 if self.csv_has_header else 0
             df_csv = pl.read_csv(
                 self.csv_file_path,

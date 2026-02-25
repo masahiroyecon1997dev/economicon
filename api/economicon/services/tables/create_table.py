@@ -2,6 +2,7 @@ from pathlib import Path
 
 import polars as pl
 
+from economicon.core.encodings import POLARS_ENCODING_MAP
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import CreateTableRequestBody
@@ -12,16 +13,6 @@ from economicon.utils.validators import (
     validate_file_path,
     validate_non_existence,
 )
-
-# CSV エンコーディングマップ（Polars コーデック対応）
-_ENCODING_MAP: dict[str, str] = {
-    "utf8": "utf8",
-    "latin1": "latin1",
-    "ascii": "ascii",
-    "gbk": "gbk",
-    "windows-1252": "windows-1252",
-    "shift_jis": "cp932",
-}
 
 # ファイルパスが指定された場合に許容する拡張子
 _ALLOWED_EXTENSIONS = ["csv", "xlsx", "xls", "parquet"]
@@ -153,7 +144,9 @@ class CreateTable:
 
     def _read_csv(self, path: str) -> pl.DataFrame:
         """CSVファイルを読み込む"""
-        encoding = _ENCODING_MAP.get(self.csv_encoding, self.csv_encoding)
+        encoding = POLARS_ENCODING_MAP.get(
+            self.csv_encoding, self.csv_encoding
+        )
         return pl.read_csv(
             path,
             separator=self.csv_separator,
