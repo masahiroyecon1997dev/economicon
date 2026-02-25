@@ -9,6 +9,5 @@ export type InstrumentalVariablesParamsMethod = typeof InstrumentalVariablesPara
 
 
 export const InstrumentalVariablesParamsMethod = {
-  feiv: 'feiv',
   iv: 'iv',
 } as const;

@@ -54,7 +54,11 @@ export const regressionBodyAnalysisThreeCalculateMarginalEffectsDefault = false;
 
 export const regressionBodyAnalysisFourGmmWeightMatrixDefault = `robust`;
 
-export const regressionBodyAnalysisSixLeftCensoringLimitDefault = 0;export const regressionBodyStandardErrorTwoHcTypeDefault = `HC1`;
+export const regressionBodyAnalysisSixLeftCensoringLimitDefault = 0;
+
+
+
+export const regressionBodyAnalysisSevenGmmWeightMatrixDefault = `robust`;export const regressionBodyStandardErrorTwoHcTypeDefault = `HC1`;
 export const regressionBodyStandardErrorThreeUseCorrectionDefault = true;export const regressionBodyStandardErrorFourMaxlagsMin = 0;
 
 export const regressionBodyStandardErrorFourKernelDefault = `bartlett`;export const regressionBodyStandardErrorFourUseCorrectionDefault = true;
@@ -82,7 +86,7 @@ export const RegressionBody = zod.object({
 }),zod.null()]).optional(),
   "calculateMarginalEffects": zod.boolean().default(regressionBodyAnalysisThreeCalculateMarginalEffectsDefault).describe('平均限界効果(AME)を計算するかどうか')
 }),zod.object({
-  "method": zod.enum(['feiv', 'iv']),
+  "method": zod.enum(['iv']),
   "ivMethod": zod.enum(['2sls', 'gmm']).default(regressionBodyAnalysisFourIvMethodDefault).describe('推定アルゴリズム。過剰識別かつ異分散がある場合はGMMを推奨'),
   "instrumentalVariables": zod.array(zod.string().min(1).describe('カラム名')),
   "endogenousVariables": zod.array(zod.string().min(1).describe('カラム名')),
@@ -95,6 +99,13 @@ export const RegressionBody = zod.object({
   "method": zod.enum(['tobit']),
   "leftCensoringLimit": zod.union([zod.number(),zod.null()]).default(regressionBodyAnalysisSixLeftCensoringLimitDefault).describe('左側打ち切り値。この値以下のデータが打ち切られていると見なす'),
   "rightCensoringLimit": zod.union([zod.number(),zod.null()]).optional().describe('右側打ち切り値')
+}),zod.object({
+  "method": zod.enum(['feiv']),
+  "entityIdColumn": zod.string().min(1).describe('個体ID列名'),
+  "timeColumn": zod.union([zod.string().min(1).describe('カラム名'),zod.null()]).optional().describe('時間列名'),
+  "instrumentalVariables": zod.array(zod.string().min(1).describe('カラム名')),
+  "endogenousVariables": zod.array(zod.string().min(1).describe('カラム名')),
+  "gmmWeightMatrix": zod.enum(['uncentered', 'robust', 'hac']).default(regressionBodyAnalysisSevenGmmWeightMatrixDefault)
 })]),
   "standardError": zod.union([zod.object({
   "method": zod.enum(['nonrobust'])

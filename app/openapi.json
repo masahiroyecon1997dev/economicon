@@ -68,12 +68,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -110,12 +130,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -152,12 +192,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -194,12 +254,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -236,12 +316,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -278,12 +378,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -320,12 +440,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -362,12 +502,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -404,12 +564,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -446,12 +626,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -488,12 +688,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -530,12 +750,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -572,12 +812,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -614,12 +874,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -656,12 +936,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -698,12 +998,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -740,12 +1060,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -782,12 +1122,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -813,6 +1173,36 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -832,6 +1222,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SuccessResponse_ClearTablesResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -868,12 +1288,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -908,12 +1348,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -950,12 +1410,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -992,12 +1472,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1034,12 +1534,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1065,6 +1585,36 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -1082,6 +1632,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SuccessResponse_ClearAllAnalysisResultsResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1119,12 +1699,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1160,12 +1760,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1202,12 +1822,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1244,12 +1884,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1286,12 +1946,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1328,12 +2008,32 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1356,6 +2056,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SuccessResponse_GetSettingsResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -2362,11 +3092,11 @@
             "title": "File Path",
             "description": "\u8aad\u307f\u8fbc\u3080\u30d5\u30a1\u30a4\u30eb\u306e\u30d1\u30b9\uff08CSV / Excel / Parquet\uff09\u3002\u7701\u7565\u6642\u306f\u3059\u3079\u3066\u306e\u5024\u304c None \u306e\u7a7a\u30c6\u30fc\u30d6\u30eb\u3092\u4f5c\u6210\u3057\u307e\u3059\u3002"
           },
-          "csvHasHeader": {
+          "hasHeader": {
             "type": "boolean",
-            "title": "CSV Has Header",
-            "description": "CSV \u30d5\u30a1\u30a4\u30eb\u306b\u30d8\u30c3\u30c0\u884c\u304c\u3042\u308b\u304b\u3002True: 1 \u884c\u76ee\u3092\u30d8\u30c3\u30c0\u3068\u3057\u3066\u8aad\u307f\u98db\u3070\u3057\u30012 \u884c\u76ee\u304b\u3089\u3092\u30c7\u30fc\u30bf\u3068\u3059\u308b\u3002False: 1 \u884c\u76ee\u304b\u3089\u30c7\u30fc\u30bf\u3068\u3057\u3066\u8aad\u307f\u8fbc\u3080\u3002file_path \u304c CSV \u306e\u5834\u5408\u306e\u307f\u6709\u52b9\u3002",
-            "default": true
+            "title": "Has Header",
+            "description": "CSV/ Excel \u30d5\u30a1\u30a4\u30eb\u306b\u30d8\u30c3\u30c0\u884c\u304c\u3042\u308b\u304b\u3002True: 1 \u884c\u76ee\u3092\u30d8\u30c3\u30c0\u3068\u3057\u3066\u8aad\u307f\u98db\u3070\u3057\u30012 \u884c\u76ee\u304b\u3089\u3092\u30c7\u30fc\u30bf\u3068\u3059\u308b\u3002False: 1 \u884c\u76ee\u304b\u3089\u30c7\u30fc\u30bf\u3068\u3057\u3066\u8aad\u307f\u8fbc\u3080\u3002file_path \u304c CSV \u307e\u305f\u306f Excel \u306e\u5834\u5408\u306e\u307f\u6709\u52b9\u3002",
+            "default": false
           },
           "csvSeparator": {
             "type": "string",
@@ -2898,6 +3628,42 @@
         "title": "DuplicateTableResult",
         "description": "\u30c6\u30fc\u30d6\u30eb\u8907\u88fd\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
+      "ErrorResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30a8\u30e9\u30fc\u30b3\u30fc\u30c9"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "\u30a8\u30e9\u30fc\u30e1\u30c3\u30bb\u30fc\u30b8"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details",
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3\u30a8\u30e9\u30fc\u306e\u8a73\u7d30\u30ea\u30b9\u30c8"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorResponse",
+        "description": "\u30a8\u30e9\u30fc\u30ec\u30b9\u30dd\u30f3\u30b9\u30e2\u30c7\u30eb"
+      },
       "ExponentialParams": {
         "properties": {
           "type": {
@@ -3253,7 +4019,14 @@
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
           "value": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              }
+            ],
             "title": "Value",
             "description": "\u56fa\u5b9a\u5024"
           }
@@ -3457,19 +4230,6 @@
         "title": "GetTableListResult",
         "description": "\u30c6\u30fc\u30d6\u30eb\u30ea\u30b9\u30c8\u53d6\u5f97\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
-      "HTTPValidationError": {
-        "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "type": "array",
-            "title": "Detail"
-          }
-        },
-        "type": "object",
-        "title": "HTTPValidationError"
-      },
       "HacStandardError": {
         "properties": {
           "method": {
@@ -3511,31 +4271,31 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "N": {
+          "populationSize": {
             "type": "integer",
             "exclusiveMinimum": 0.0,
-            "title": "N",
+            "title": "Populationsize",
             "description": "\u6bcd\u96c6\u56e3\u30b5\u30a4\u30ba"
           },
-          "K": {
+          "successCount": {
             "type": "integer",
             "exclusiveMinimum": 0.0,
-            "title": "K",
+            "title": "Successcount",
             "description": "\u6210\u529f\u8981\u7d20\u6570"
           },
-          "n": {
+          "sampleSize": {
             "type": "integer",
             "exclusiveMinimum": 0.0,
-            "title": "N",
+            "title": "Samplesize",
             "description": "\u6a19\u672c\u30b5\u30a4\u30ba"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "N",
-          "K",
-          "n"
+          "populationSize",
+          "successCount",
+          "sampleSize"
         ],
         "title": "HypergeometricParams",
         "description": "\u8d85\u5e7e\u4f55\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -3698,10 +4458,7 @@
         "properties": {
           "method": {
             "type": "string",
-            "enum": [
-              "iv",
-              "feiv"
-            ],
+            "const": "iv",
             "title": "Method"
           },
           "ivMethod": {
@@ -3779,7 +4536,7 @@
             "title": "Method",
             "description": "\u5909\u63db\u65b9\u6cd5"
           },
-          "log_base": {
+          "logBase": {
             "anyOf": [
               {
                 "type": "number",
@@ -3789,7 +4546,7 @@
                 "type": "null"
               }
             ],
-            "title": "Log Base",
+            "title": "Logbase",
             "description": "\u5bfe\u6570\u306e\u5e95 (\u7701\u7565\u6642\u306f\u81ea\u7136\u5bfe\u6570)"
           }
         },
@@ -3940,6 +4697,90 @@
         ],
         "title": "PanelDataParams"
       },
+      "PanelIvParams": {
+        "properties": {
+          "method": {
+            "type": "string",
+            "const": "feiv",
+            "title": "Method"
+          },
+          "entityIdColumn": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u500b\u4f53ID\u5217\u540d",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "timeColumn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "title": "Column Name",
+                "description": "\u30ab\u30e9\u30e0\u540d",
+                "examples": [
+                  "population",
+                  "\u4eba\u53e3"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timecolumn",
+            "description": "\u6642\u9593\u5217\u540d"
+          },
+          "instrumentalVariables": {
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Column Name",
+              "description": "\u30ab\u30e9\u30e0\u540d",
+              "examples": [
+                "population",
+                "\u4eba\u53e3"
+              ]
+            },
+            "type": "array",
+            "title": "Instrumentalvariables"
+          },
+          "endogenousVariables": {
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Column Name",
+              "description": "\u30ab\u30e9\u30e0\u540d",
+              "examples": [
+                "population",
+                "\u4eba\u53e3"
+              ]
+            },
+            "type": "array",
+            "title": "Endogenousvariables"
+          },
+          "gmmWeightMatrix": {
+            "type": "string",
+            "enum": [
+              "uncentered",
+              "robust",
+              "hac"
+            ],
+            "title": "Gmmweightmatrix",
+            "default": "robust"
+          }
+        },
+        "type": "object",
+        "required": [
+          "method",
+          "entityIdColumn",
+          "instrumentalVariables",
+          "endogenousVariables"
+        ],
+        "title": "PanelIvParams"
+      },
       "PoissonParams": {
         "properties": {
           "type": {
@@ -4004,13 +4845,16 @@
           },
           {
             "$ref": "#/components/schemas/TobitParams"
+          },
+          {
+            "$ref": "#/components/schemas/PanelIvParams"
           }
         ],
         "discriminator": {
           "propertyName": "method",
           "mapping": {
             "fe": "#/components/schemas/PanelDataParams",
-            "feiv": "#/components/schemas/InstrumentalVariablesParams",
+            "feiv": "#/components/schemas/PanelIvParams",
             "iv": "#/components/schemas/InstrumentalVariablesParams",
             "lasso": "#/components/schemas/RegularizedRegressionParams",
             "logit": "#/components/schemas/BinaryChoiceRegressionParams",
@@ -4304,10 +5148,10 @@
             "title": "Method",
             "description": "\u5909\u63db\u65b9\u6cd5"
           },
-          "root_index": {
+          "rootIndex": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "Root Index",
+            "title": "Rootindex",
             "description": "\u30eb\u30fc\u30c8\u306e\u6307\u6570 (\u7701\u7565\u6642\u306f\u5e73\u65b9\u6839)",
             "default": 2.0
           }
@@ -5261,46 +6105,6 @@
         ],
         "title": "UniformParams",
         "description": "\u4e00\u69d8\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
-      },
-      "ValidationError": {
-        "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Location"
-          },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
-          }
-        },
-        "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
-        "title": "ValidationError"
       },
       "WeibullParams": {
         "properties": {

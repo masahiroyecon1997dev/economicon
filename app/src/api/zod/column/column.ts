@@ -274,11 +274,11 @@ export const addSimulationColumnBodySimulationColumnDistributionOneOnezeroLamExc
 export const addSimulationColumnBodySimulationColumnDistributionOneOneonePExclusiveMin = 0;
 export const addSimulationColumnBodySimulationColumnDistributionOneOneonePMax = 1;
 
-export const addSimulationColumnBodySimulationColumnDistributionOneOnetwoNExclusiveMin = 0;
+export const addSimulationColumnBodySimulationColumnDistributionOneOnetwoPopulationSizeExclusiveMin = 0;
 
-export const addSimulationColumnBodySimulationColumnDistributionOneOnetwoKExclusiveMin = 0;
+export const addSimulationColumnBodySimulationColumnDistributionOneOnetwoSuccessCountExclusiveMin = 0;
 
-export const addSimulationColumnBodySimulationColumnDistributionOneOnetwoNExclusiveMinOne = 0;
+export const addSimulationColumnBodySimulationColumnDistributionOneOnetwoSampleSizeExclusiveMin = 0;
 
 
 
@@ -329,12 +329,12 @@ export const AddSimulationColumnBody = zod.object({
   "p": zod.number().gt(addSimulationColumnBodySimulationColumnDistributionOneOneonePExclusiveMin).max(addSimulationColumnBodySimulationColumnDistributionOneOneonePMax).describe('成功確率')
 }).describe('幾何分布のパラメータ'),zod.object({
   "type": zod.literal("hypergeometric").describe('分布の種類'),
-  "N": zod.number().gt(addSimulationColumnBodySimulationColumnDistributionOneOnetwoNExclusiveMin).describe('母集団サイズ'),
-  "K": zod.number().gt(addSimulationColumnBodySimulationColumnDistributionOneOnetwoKExclusiveMin).describe('成功要素数'),
-  "n": zod.number().gt(addSimulationColumnBodySimulationColumnDistributionOneOnetwoNExclusiveMinOne).describe('標本サイズ')
+  "populationSize": zod.number().gt(addSimulationColumnBodySimulationColumnDistributionOneOnetwoPopulationSizeExclusiveMin).describe('母集団サイズ'),
+  "successCount": zod.number().gt(addSimulationColumnBodySimulationColumnDistributionOneOnetwoSuccessCountExclusiveMin).describe('成功要素数'),
+  "sampleSize": zod.number().gt(addSimulationColumnBodySimulationColumnDistributionOneOnetwoSampleSizeExclusiveMin).describe('標本サイズ')
 }).describe('超幾何分布のパラメータ'),zod.object({
   "type": zod.literal("fixed").describe('分布の種類'),
-  "value": zod.number().describe('固定値')
+  "value": zod.union([zod.number(),zod.number()]).describe('固定値')
 }).describe('固定値のパラメータ')]).describe('分布設定')
 }).describe('新しい列名とその生成規則のペア。\n複数のAPI（列追加、シミュレーション設定等）で共通利用される。'),
   "addPositionColumn": zod.string().min(1).describe('追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。')
@@ -472,13 +472,13 @@ export const TransformColumnBody = zod.object({
   "addPositionColumn": zod.string().min(1).describe('追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。'),
   "transformMethod": zod.union([zod.object({
   "method": zod.literal("log").describe('変換方法'),
-  "log_base": zod.union([zod.number().gt(transformColumnBodyTransformMethodOneOneLogBaseOneExclusiveMin),zod.null()]).optional().describe('対数の底 (省略時は自然対数)')
+  "logBase": zod.union([zod.number().gt(transformColumnBodyTransformMethodOneOneLogBaseOneExclusiveMin),zod.null()]).optional().describe('対数の底 (省略時は自然対数)')
 }).describe('対数変換のパラメータ'),zod.object({
   "method": zod.literal("power").describe('変換方法'),
   "exponent": zod.number().default(transformColumnBodyTransformMethodOneTwoExponentDefault).describe('べき乗の指数 (省略時は2乗)')
 }).describe('べき乗変換のパラメータ'),zod.object({
   "method": zod.literal("root").describe('変換方法'),
-  "root_index": zod.number().gt(transformColumnBodyTransformMethodOneThreeRootIndexExclusiveMin).default(transformColumnBodyTransformMethodOneThreeRootIndexDefault).describe('ルートの指数 (省略時は平方根)')
+  "rootIndex": zod.number().gt(transformColumnBodyTransformMethodOneThreeRootIndexExclusiveMin).default(transformColumnBodyTransformMethodOneThreeRootIndexDefault).describe('ルートの指数 (省略時は平方根)')
 }).describe('平方根変換のパラメータ')]).describe('変換方法設定')
 }).describe('カラム変換リクエスト')
 

@@ -35,7 +35,7 @@ export const createTableBodyColumnNamesItemRegExp = new RegExp('^[^\\x00-\\x1f\\
 
 export const createTableBodyFilePathOneMax = 1024;
 
-export const createTableBodyCsvHasHeaderDefault = true;export const createTableBodyCsvSeparatorDefault = `,`;
+export const createTableBodyHasHeaderDefault = false;export const createTableBodyCsvSeparatorDefault = `,`;
 export const createTableBodyCsvSeparatorMax = 10;
 
 export const createTableBodyCsvEncodingDefault = `utf8`;export const createTableBodyExcelSheetNameOneMax = 31;
@@ -49,7 +49,7 @@ export const CreateTableBody = zod.object({
   "rowCount": zod.union([zod.number().min(1),zod.null()]).optional().describe('テーブルの行数。file_path が指定されている場合は省略可能（None の場合はファイルの行数を使用）。file_path が省略されている場合は必須（1以上の整数）。'),
   "columnNames": zod.array(zod.string().min(1).max(createTableBodyColumnNamesItemMax).regex(createTableBodyColumnNamesItemRegExp).describe('新しいカラム名')).min(1).describe('テーブルに作成するカラム名のリスト'),
   "filePath": zod.union([zod.string().min(1).max(createTableBodyFilePathOneMax).describe('ファイルのパス'),zod.null()]).optional().describe('読み込むファイルのパス（CSV \/ Excel \/ Parquet）。省略時はすべての値が None の空テーブルを作成します。'),
-  "csvHasHeader": zod.boolean().default(createTableBodyCsvHasHeaderDefault).describe('CSV ファイルにヘッダ行があるか。True: 1 行目をヘッダとして読み飛ばし、2 行目からをデータとする。False: 1 行目からデータとして読み込む。file_path が CSV の場合のみ有効。'),
+  "hasHeader": zod.boolean().default(createTableBodyHasHeaderDefault).describe('CSV\/ Excel ファイルにヘッダ行があるか。True: 1 行目をヘッダとして読み飛ばし、2 行目からをデータとする。False: 1 行目からデータとして読み込む。file_path が CSV または Excel の場合のみ有効。'),
   "csvSeparator": zod.string().min(1).max(createTableBodyCsvSeparatorMax).default(createTableBodyCsvSeparatorDefault).describe('CSV の区切り文字。file_path が CSV の場合のみ有効。'),
   "csvEncoding": zod.enum(['utf8', 'latin1', 'ascii', 'gbk', 'windows-1252', 'shift_jis']).default(createTableBodyCsvEncodingDefault).describe('CSV のエンコーディング。file_path が CSV の場合のみ有効。'),
   "excelSheetName": zod.union([zod.string().min(1).max(createTableBodyExcelSheetNameOneMax).regex(createTableBodyExcelSheetNameOneRegExp).describe('Excelのシート名（31文字以内、使用不可記号あり）'),zod.null()]).optional().describe('読み込むシート名。file_path が Excel の場合のみ有効。省略時は先頭シートを読み込みます。')
@@ -208,11 +208,11 @@ export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOn
 export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOneonePExclusiveMin = 0;
 export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOneonePMax = 1;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoNExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoPopulationSizeExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoKExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoSuccessCountExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoNExclusiveMinOne = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoSampleSizeExclusiveMin = 0;
 
 
 
@@ -264,12 +264,12 @@ export const CreateSimulationDataTableBody = zod.object({
   "p": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOneOneonePExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionOneOneonePMax).describe('成功確率')
 }).describe('幾何分布のパラメータ'),zod.object({
   "type": zod.literal("hypergeometric").describe('分布の種類'),
-  "N": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoNExclusiveMin).describe('母集団サイズ'),
-  "K": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoKExclusiveMin).describe('成功要素数'),
-  "n": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoNExclusiveMinOne).describe('標本サイズ')
+  "populationSize": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoPopulationSizeExclusiveMin).describe('母集団サイズ'),
+  "successCount": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoSuccessCountExclusiveMin).describe('成功要素数'),
+  "sampleSize": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOneOnetwoSampleSizeExclusiveMin).describe('標本サイズ')
 }).describe('超幾何分布のパラメータ'),zod.object({
   "type": zod.literal("fixed").describe('分布の種類'),
-  "value": zod.number().describe('固定値')
+  "value": zod.union([zod.number(),zod.number()]).describe('固定値')
 }).describe('固定値のパラメータ')]).describe('分布設定')
 }).describe('新しい列名とその生成規則のペア。\n複数のAPI（列追加、シミュレーション設定等）で共通利用される。')).min(1).describe('シミュレーションカラムの設定リスト')
 }).describe('シミュレーションデータテーブル作成リクエスト')
