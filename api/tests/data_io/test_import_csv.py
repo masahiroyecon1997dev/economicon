@@ -22,6 +22,11 @@ _ENCODING_ERROR = (
     "encodingは次のいずれかである必要があります: "
     "'utf8', 'latin1', 'ascii', 'gbk', 'windows-1252' or 'shift_jis'"
 )
+_SJIS_EXPECTED_NAMES = ["\u5c71\u7530", "\u7530\u4e2d", "\u9234\u6728"]
+_LATIN1_EXPECTED_CITY = "K\xf6ln"
+_WINDOWS1252_EXPECTED_WORD = "r\xe9sum\xe9"
+_ASCII_EXPECTED_KEY = "hello"
+_CSV_IMPORT_ERROR_MSG = "Failed to parse CSV file: Invalid format or encoding."
 
 
 @pytest.fixture
@@ -540,3 +545,135 @@ def test_import_csv_tablename_japanese(client, prepared_data):
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
     assert "人口統計データ" == response_data["result"]["tableName"]
+
+
+# ─────────────────────────────────────────────────────────────
+# エンコーディングテスト（正常系）
+# ─────────────────────────────────────────────────────────────
+
+
+def test_import_csv_encoding_shift_jis(client, prepared_data):
+    """
+    Shift-JIS エンコードの CSV を encoding: shift_jis で正常インポートでき、
+    日本語の列名・値が正しく復元される
+    """
+    tables_store, test_dir = prepared_data
+    sjis_path = f"{test_dir}/ShiftJis.csv"
+    with open(sjis_path, "wb") as f:
+        f.write("名前,年齢\n山田,30\n田中,25\n鈴木,40\n".encode("shift_jis"))
+    request_data = {
+        "filePath": sjis_path,
+        "tableName": "SjisTable",
+        "separator": ",",
+        "encoding": "shift_jis",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    assert "SjisTable" == response_data["result"]["tableName"]
+    df = tables_store.get_table("SjisTable").table
+    assert df.columns == ["名前", "年齢"]
+    assert df["名前"].to_list() == _SJIS_EXPECTED_NAMES
+
+
+def test_import_csv_encoding_latin1(client, prepared_data):
+    """
+    latin1 エンコードの CSV を encoding: latin1 で正常インポートでき、
+    西欧文字（ウムラウト等）が正しく復元される
+    """
+    tables_store, test_dir = prepared_data
+    latin1_path = f"{test_dir}/Latin1.csv"
+    with open(latin1_path, "wb") as f:
+        f.write(
+            "name,city\nM\xfcller,K\xf6ln\nDupont,Paris\n".encode("latin1")
+        )
+    request_data = {
+        "filePath": latin1_path,
+        "tableName": "Latin1Table",
+        "separator": ",",
+        "encoding": "latin1",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    df = tables_store.get_table("Latin1Table").table
+    assert df.columns == ["name", "city"]
+    assert _LATIN1_EXPECTED_CITY in df["city"].to_list()
+
+
+def test_import_csv_encoding_windows1252(client, prepared_data):
+    """
+    windows-1252 エンコードの CSV を encoding: windows-1252 で正常インポートできる
+    """
+    tables_store, test_dir = prepared_data
+    win1252_path = f"{test_dir}/Win1252.csv"
+    with open(win1252_path, "wb") as f:
+        f.write(
+            "word,meaning\nr\xe9sum\xe9,CV\ncaf\xe9,drinks\n".encode(
+                "windows-1252"
+            )
+        )
+    request_data = {
+        "filePath": win1252_path,
+        "tableName": "Win1252Table",
+        "separator": ",",
+        "encoding": "windows-1252",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    df = tables_store.get_table("Win1252Table").table
+    assert df.columns == ["word", "meaning"]
+    assert _WINDOWS1252_EXPECTED_WORD in df["word"].to_list()
+
+
+def test_import_csv_encoding_ascii(client, prepared_data):
+    """
+    ASCII 範囲のみのデータを encoding: ascii で正常インポートできる
+    """
+    tables_store, test_dir = prepared_data
+    ascii_path = f"{test_dir}/Ascii.csv"
+    with open(ascii_path, "wb") as f:
+        f.write("key,value\nhello,world\nfoo,bar\n".encode("ascii"))
+    request_data = {
+        "filePath": ascii_path,
+        "tableName": "AsciiTable",
+        "separator": ",",
+        "encoding": "ascii",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert "OK" == response_data["code"]
+    df = tables_store.get_table("AsciiTable").table
+    assert df.columns == ["key", "value"]
+    assert _ASCII_EXPECTED_KEY in df["key"].to_list()
+
+
+# ─────────────────────────────────────────────────────────────
+# エンコーディングテスト（異常系）
+# ─────────────────────────────────────────────────────────────
+
+
+def test_import_csv_encoding_mismatch_shift_jis_as_utf8(client, prepared_data):
+    """
+    Shift-JIS ファイルを encoding: utf8 で読み込むとパースエラー（500）になる
+    """
+    tables_store, test_dir = prepared_data
+    sjis_path = f"{test_dir}/ShiftJisMismatch.csv"
+    with open(sjis_path, "wb") as f:
+        f.write("名前,年齢\n山田,30\n".encode("shift_jis"))
+    request_data = {
+        "filePath": sjis_path,
+        "tableName": "MismatchTable",
+        "separator": ",",
+        "encoding": "utf8",
+    }
+    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response_data = response.json()
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert ErrorCode.CSV_IMPORT_ERROR == response_data["code"]
+    assert _CSV_IMPORT_ERROR_MSG == response_data["message"]
