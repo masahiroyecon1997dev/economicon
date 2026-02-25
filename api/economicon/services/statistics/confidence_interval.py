@@ -143,10 +143,10 @@ class ConfidenceInterval:
 
         # Bootstrap法で信頼区間を計算
         bootstrap_medians = []
-        np.random.seed(42)  # 再現性のため
+        rng = np.random.default_rng()
 
         for _index in range(1000):
-            bootstrap_sample = np.random.choice(data, size=n, replace=True)
+            bootstrap_sample = rng.choice(data, size=n, replace=True)
             bootstrap_medians.append(np.median(bootstrap_sample))
 
         alpha = 1 - self.confidence_level
