@@ -9,6 +9,7 @@ from economicon.models.entities import SimulationColumnConfig, SortInstruction
 from economicon.models.enums import DistributionType
 from economicon.models.types import (
     ColumnName,
+    CsvEncoding,
     FilePath,
     NewColumnName,
     Separator,
@@ -65,6 +66,15 @@ class AddColumnRequestBody(BaseRequest):
             max_length=10,
         ),
     ] = ","
+    csv_encoding: Annotated[
+        CsvEncoding,
+        Field(
+            title="CSV Encoding",
+            description=(
+                "CSV のエンコーディング。file_path が CSV の場合のみ有効。"
+            ),
+        ),
+    ] = "utf8"
 
 
 class DeleteColumnRequestBody(BaseRequest):

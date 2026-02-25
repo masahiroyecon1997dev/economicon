@@ -605,7 +605,8 @@ def test_import_csv_encoding_latin1(client, prepared_data):
 
 def test_import_csv_encoding_windows1252(client, prepared_data):
     """
-    windows-1252 エンコードの CSV を encoding: windows-1252 で正常インポートできる
+    windows-1252 エンコードの CSV を
+    encoding: windows-1252 で正常インポートできる
     """
     tables_store, test_dir = prepared_data
     win1252_path = f"{test_dir}/Win1252.csv"
