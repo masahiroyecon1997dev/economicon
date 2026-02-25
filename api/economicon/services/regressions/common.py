@@ -101,9 +101,11 @@ STATSMODELS_COV_TYPE_MAP = {
 # 標準誤差タイプのマッピング（linearmodels用）
 # パネルデータ分析（FE/RE）やIV分析で使用
 # - unadjusted: 通常の標準誤差
-# - robust: White型頑健標準誤差
+# - robust: White型頑健標準誤差（HC0相当）
 # - kernel: Newey-West型（HAC）
 # - clustered: クラスター頑健標準誤差
+# 注意: linearmodels は HC1/HC2/HC3 を個別にサポートしないため
+#       すべて "robust" (HC0 相当) にフォールバックする。
 LINEARMODELS_COV_TYPE_MAP = {
     "nonrobust": "unadjusted",
     "hc0": "robust",
@@ -278,6 +280,10 @@ def prepare_tobit_dataframe(
     required_cols = [dependent_variable] + explanatory_variables
 
     # Pandas DataFrameに変換
+    # 注意: py4etrics.Tobit は内部で NumPy 配列を使用するため、
+    #       use_pyarrow_extension_array=True を指定すると
+    #       ArrowExtensionArray が渡され "unrecognized data structures"
+    #       エラーが発生する。通常の to_pandas() を使用すること。
     df = df_polars.select(required_cols).to_pandas()
 
     # 欠損値の処理
