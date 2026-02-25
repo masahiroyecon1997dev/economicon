@@ -6,7 +6,7 @@ use reqwest::Client;
 use serde::{Serialize};
 use std::time::Duration;
 
-use files::{get_files_internal, GetFilesResponse};
+use files::{get_files_internal, GetFilesResponse, FileError};
 use os_info::{get_os_info_internal, OsInfoResponse};
 
 // HTTPクライアントを保持するState
@@ -132,8 +132,8 @@ async fn upload_file(
 
 // ファイル一覧取得用コマンド
 #[tauri::command]
-async fn get_files(directory_path: String) -> Result<GetFilesResponse, String> {
-    get_files_internal(&directory_path).map_err(|e| e.to_string())
+async fn get_files(directory_path: String) -> Result<GetFilesResponse, FileError> {
+    get_files_internal(&directory_path)
 }
 
 // OS情報取得コマンド（同期: ファイルシステムアクセス不要）

@@ -3,7 +3,7 @@ import { UploadCloud } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useTranslation } from "react-i18next";
-import { getFiles } from "../../api/bridge/tauri-commands";
+import { getFiles, TauriFileError } from "../../api/bridge/tauri-commands";
 import { getEconomiconAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { getTableInfo } from "../../lib/utils/internal";
@@ -106,11 +106,24 @@ export const ImportDataFile = () => {
   const changeDirectory = async (newPath: string) => {
     setLoading(true, t("Loading.Loading"));
     try {
-      // getFilesはFilesTypeを直接返す（エラー時は例外をスロー）
-      const files = await getFiles(newPath);
-      setFiles(files);
-    } catch {
-      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+      const result = await getFiles(newPath);
+      setFiles(result);
+    } catch (e: unknown) {
+      if (e instanceof TauriFileError && e.errorType === "PathNotFound") {
+        // フォルダが削除されていた場合：専用メッセージを表示し、現在ディレクトリを再読み込み
+        await showMessageDialog(t("Error.Error"), t("Error.DirectoryNotFound"));
+        // 現在地そのものが有効な場合はリストを更新して削除済エントリを除去
+        if (directoryPath) {
+          try {
+            const refreshed = await getFiles(directoryPath);
+            setFiles(refreshed);
+          } catch {
+            // 現在地も消えている場合は何もしない（上へボタンで脱出可能）
+          }
+        }
+      } else {
+        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+      }
     } finally {
       clearLoading();
     }
@@ -138,16 +151,7 @@ export const ImportDataFile = () => {
         directoryPath === pathSeparator
           ? pathSeparator + file.name
           : directoryPath + pathSeparator + file.name;
-      setLoading(true, t("Loading.Loading"));
-      try {
-        // getFilesはFilesTypeを直接返す（エラー時は例外をスロー）
-        const files = await getFiles(newPath);
-        setFiles(files);
-      } catch {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
-      } finally {
-        clearLoading();
-      }
+      await changeDirectory(newPath);
     } else {
       setSelectedFileInfo({
         path: directoryPath + pathSeparator + file.name,

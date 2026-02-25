@@ -226,7 +226,8 @@
     "IntegerMore0": "0以上の整数で入力してください。",
     "UnexpectedError": "予期せぬエラーが発生しました。",
     "Unknown": "不明なエラーです。",
-    "UnsupportedFileType": "サポートされていないファイル形式です。"
+    "UnsupportedFileType": "サポートされていないファイル形式です。",
+    "DirectoryNotFound": "フォルダが見つかりません。削除または移動された可能性があります。"
   },
   "ValidationMessages": {
     "FixValidationErrors": "入力エラーがあります。修正してください。",
