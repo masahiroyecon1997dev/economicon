@@ -84,7 +84,7 @@ class TobitParams(BaseRequest):
 
 
 class InstrumentalVariablesParams(BaseRequest):
-    method: Literal[RegressionMethodType.IV, RegressionMethodType.FEIV]
+    method: Literal[RegressionMethodType.IV]
     iv_method: Literal["2sls", "gmm"] = Field(
         default="2sls",
         description="推定アルゴリズム。過剰識別かつ異分散がある場合はGMMを推奨",
@@ -105,13 +105,28 @@ class PanelDataParams(BaseRequest):
     )
 
 
+class PanelIvParams(BaseRequest):
+    method: Literal[RegressionMethodType.FEIV]
+    # 個体ID列と時間列を追加
+    entity_id_column: ColumnName = Field(description="個体ID列名")
+    time_column: ColumnName | None = Field(
+        default=None, description="時間列名"
+    )
+    # 操作変数と内生変数の列名リストを追加
+    instrumental_variables: list[ColumnName]
+    endogenous_variables: list[ColumnName]
+    # GMMを選択した場合の重み行列の設定（必要なら）
+    gmm_weight_matrix: Literal["uncentered", "robust", "hac"] = "robust"
+
+
 type RegressionParams = Annotated[
     OLSParams
     | RegularizedRegressionParams
     | BinaryChoiceRegressionParams
     | InstrumentalVariablesParams
     | PanelDataParams
-    | TobitParams,
+    | TobitParams
+    | PanelIvParams,
     Field(discriminator="method"),
 ]
 
