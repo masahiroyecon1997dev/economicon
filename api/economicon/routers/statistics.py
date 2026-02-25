@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from economicon.models import (
+    COMMON_ERROR_RESPONSES,
     ConfidenceIntervalRequestBody,
     ConfidenceIntervalResult,
     DescriptiveStatisticsRequestBody,
@@ -18,7 +19,11 @@ from economicon.services.statistics.descriptive_statistics import (
 )
 from economicon.utils import create_success_response
 
-router = APIRouter(prefix="/statistics", tags=["statistics"])
+router = APIRouter(
+    prefix="/statistics",
+    tags=["statistics"],
+    responses=COMMON_ERROR_RESPONSES,
+)
 
 
 @router.post(

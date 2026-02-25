@@ -26,6 +26,7 @@ from economicon.models.columns import (
     TransformColumnResult,
 )
 from economicon.models.common import (
+    COMMON_ERROR_RESPONSES,
     BaseResponse,
     BernoulliParams,
     BetaParams,
@@ -130,6 +131,7 @@ __all__ = [
     "BaseResponse",
     "SuccessResponse",
     "ErrorResponse",
+    "COMMON_ERROR_RESPONSES",
     "UniformParams",
     "ExponentialParams",
     "NormalParams",
