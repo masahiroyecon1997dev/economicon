@@ -25,6 +25,11 @@ _BASE_PAYLOAD: dict = {
 _MSG_ROW_REQUIRED = (
     "Value error, row_count is required when file_path is not specified"
 )
+# エンコーディングバリデーションエラーメッセージ
+_ENCODING_ERROR = (
+    "csvEncodingは次のいずれかである必要があります: "
+    "'utf8', 'latin1', 'ascii', 'gbk', 'windows-1252' or 'shift_jis'"
+)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -586,3 +591,110 @@ def test_file_row_count_exact_match(client, tables_store, tmp_path):
     assert resp.status_code == status.HTTP_200_OK
     df = tables_store.get_table("FileTable").table
     assert df.height == _TRIM_ROWS
+
+
+# ─────────────────────────────────────────────────────────────
+# エンコーディングテスト（異常系: 422）
+# ─────────────────────────────────────────────────────────────
+
+
+def test_file_csv_encoding_invalid_value(client, tables_store, tmp_path):
+    """csvEncoding に不正な値を指定すると 422 VALIDATION_ERROR"""
+    csv_file = tmp_path / "sample.csv"
+    csv_file.write_text("1,10\n2,20\n3,30\n", encoding="utf-8")
+    resp = client.post(
+        _URL_CREATE,
+        json=_file_payload(
+            str(csv_file),
+            column_names=["A", "B"],
+            has_header=False,
+        )
+        | {"csvEncoding": "invalid-enc"},
+    )
+    data = resp.json()
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert data["code"] == ErrorCode.VALIDATION_ERROR
+    assert data["message"] == _ENCODING_ERROR
+    assert data["details"] == [_ENCODING_ERROR]
+
+
+# ─────────────────────────────────────────────────────────────
+# エンコーディングテスト（正常系）
+# ─────────────────────────────────────────────────────────────
+
+
+def test_file_csv_encoding_shift_jis_success(client, tables_store, tmp_path):
+    """
+    Shift-JIS エンコードの CSV を csvEncoding=shift_jis
+    で正常に読み込める
+    """
+    csv_file = tmp_path / "sjis.csv"
+    csv_file.write_bytes("山田,10\n田中,20\n鈴木,30\n".encode("shift_jis"))
+    resp = client.post(
+        _URL_CREATE,
+        json=_file_payload(
+            str(csv_file),
+            column_names=["名前", "値"],
+            has_header=False,
+            row_count=3,
+        )
+        | {"csvEncoding": "shift_jis"},
+    )
+    data = resp.json()
+    assert resp.status_code == status.HTTP_200_OK
+    assert data["code"] == "OK"
+    df = tables_store.get_table("FileTable").table
+    assert df["名前"].to_list() == ["山田", "田中", "鈴木"]
+    assert df["値"].to_list() == [10, 20, 30]
+
+
+def test_file_csv_encoding_latin1_success(client, tables_store, tmp_path):
+    """latin1 エンコードの CSV を csvEncoding=latin1 で正常に読み込める"""
+    csv_file = tmp_path / "latin1.csv"
+    csv_file.write_bytes(
+        "K\xf6ln,1\nM\xfcnchen,2\n\xd6stersund,3\n".encode("latin1")
+    )
+    resp = client.post(
+        _URL_CREATE,
+        json=_file_payload(
+            str(csv_file),
+            column_names=["都市", "番号"],
+            has_header=False,
+            row_count=3,
+        )
+        | {"csvEncoding": "latin1"},
+    )
+    data = resp.json()
+    assert resp.status_code == status.HTTP_200_OK
+    assert data["code"] == "OK"
+    df = tables_store.get_table("FileTable").table
+    assert "Köln" in df["都市"].to_list()
+    assert "München" in df["都市"].to_list()
+
+
+def test_file_csv_encoding_mismatch_shift_jis_as_utf8(
+    client, tables_store, tmp_path
+):
+    """
+    Shift-JIS ファイルを csvEncoding=utf8 で読み込むと
+    500 CREATE_TABLE_ERROR
+    """
+    csv_file = tmp_path / "sjis.csv"
+    csv_file.write_bytes("山田,10\n田中,20\n鈴木,30\n".encode("shift_jis"))
+    resp = client.post(
+        _URL_CREATE,
+        json=_file_payload(
+            str(csv_file),
+            column_names=["名前", "値"],
+            has_header=False,
+            row_count=3,
+        )
+        | {"csvEncoding": "utf8"},
+    )
+    data = resp.json()
+    assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert data["code"] == ErrorCode.CREATE_TABLE_ERROR
+    assert (
+        data["message"]
+        == "テーブルの作成処理中に予期しないエラーが発生しました"
+    )

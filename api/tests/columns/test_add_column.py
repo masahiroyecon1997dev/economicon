@@ -1236,3 +1236,99 @@ def test_add_column_tab_char_new_column_name(client, tables_store):
     expected_msg = "newColumnNameに使用できない文字が含まれています。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
+
+
+# ========================================
+# エンコーディングテスト（異常系: 422）
+# ========================================
+
+_ENCODING_ERROR = (
+    "csvEncodingは次のいずれかである必要があります: "
+    "'utf8', 'latin1', 'ascii', 'gbk', 'windows-1252' or 'shift_jis'"
+)
+
+
+def test_add_column_csv_encoding_invalid_value(client, tables_store):
+    """csvEncoding に不正な値を指定すると 422 VALIDATION_ERROR"""
+    response = client.post(
+        "/api/column/add",
+        json={
+            "tableName": "TestTable",
+            "newColumnName": "C",
+            "addPositionColumn": "A",
+            "csvFilePath": "/dummy/path.csv",
+            "csvEncoding": "invalid-enc",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == _ENCODING_ERROR
+    assert response_data["details"] == [_ENCODING_ERROR]
+
+
+# ========================================
+# エンコーディングテスト（正常系）
+# ========================================
+
+
+def test_add_column_csv_encoding_shift_jis_success(client, tables_store):
+    """Shift-JIS エンコードのCSVをcsvEncoding=shift_jisで正常に読み込める"""
+    with tempfile.NamedTemporaryFile(
+        mode="wb", delete=False, suffix=".csv"
+    ) as tmpfile:
+        tmpfile.write("山田\n田中\n鈴木\n".encode("shift_jis"))
+        csv_path = tmpfile.name
+
+    try:
+        response = client.post(
+            "/api/column/add",
+            json={
+                "tableName": "TestTable",
+                "newColumnName": "名前",
+                "addPositionColumn": "A",
+                "csvFilePath": csv_path,
+                "csvHasHeader": False,
+                "csvStrictRowCount": True,
+                "csvEncoding": "shift_jis",
+            },
+        )
+        response_data = response.json()
+        assert response.status_code == status.HTTP_200_OK
+        assert response_data["code"] == "OK"
+        df = tables_store.get_table("TestTable").table
+        assert "名前" in df.columns
+        assert df["名前"].to_list() == ["山田", "田中", "鈴木"]
+    finally:
+        os.unlink(csv_path)
+
+
+def test_add_column_csv_encoding_latin1_success(client, tables_store):
+    """latin1 エンコードのCSVをcsvEncoding=latin1で正常に読み込める"""
+    with tempfile.NamedTemporaryFile(
+        mode="wb", delete=False, suffix=".csv"
+    ) as tmpfile:
+        tmpfile.write("K\xf6ln\nM\xfcnchen\n\xd6stersund\n".encode("latin1"))
+        csv_path = tmpfile.name
+
+    try:
+        response = client.post(
+            "/api/column/add",
+            json={
+                "tableName": "TestTable",
+                "newColumnName": "都市",
+                "addPositionColumn": "A",
+                "csvFilePath": csv_path,
+                "csvHasHeader": False,
+                "csvStrictRowCount": True,
+                "csvEncoding": "latin1",
+            },
+        )
+        response_data = response.json()
+        assert response.status_code == status.HTTP_200_OK
+        assert response_data["code"] == "OK"
+        df = tables_store.get_table("TestTable").table
+        assert "都市" in df.columns
+        assert df["都市"].to_list() == ["Köln", "München", "Östersund"]
+    finally:
+        os.unlink(csv_path)
