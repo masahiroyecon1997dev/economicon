@@ -12,7 +12,7 @@ from tests.regressions.conftest import (
 )
 
 # 数値比較の許容誤差
-_ABS_TOL = 1e-3
+_ABS_TOL = 1e-12
 
 # nObservations 定数（10 エンティティ × 5 期間 = 50）
 _N_OBS = 50
