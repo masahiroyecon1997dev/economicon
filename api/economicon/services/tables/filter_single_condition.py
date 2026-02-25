@@ -69,7 +69,7 @@ class FilterSingleCondition:
             target=self.param_names["column_names"],
         )
         # 比較値がカラムの場合の存在チェック
-        if self.is_compare_column == "true":
+        if self.is_compare_column:
             validate_existence(
                 value=self.compare_value,
                 valid_list=column_names,
@@ -90,7 +90,7 @@ class FilterSingleCondition:
                         pl.col(self.column_name)
                         == (
                             pl.col(self.compare_value)
-                            if self.is_compare_column == "true"
+                            if self.is_compare_column
                             else self.compare_value
                         )
                     )
@@ -100,7 +100,7 @@ class FilterSingleCondition:
                         pl.col(self.column_name)
                         != (
                             pl.col(self.compare_value)
-                            if self.is_compare_column == "true"
+                            if self.is_compare_column
                             else self.compare_value
                         )
                     )
@@ -110,7 +110,7 @@ class FilterSingleCondition:
                         pl.col(self.column_name)
                         > (
                             pl.col(self.compare_value)
-                            if self.is_compare_column == "true"
+                            if self.is_compare_column
                             else self.compare_value
                         )
                     )
@@ -120,7 +120,7 @@ class FilterSingleCondition:
                         pl.col(self.column_name)
                         >= (
                             pl.col(self.compare_value)
-                            if self.is_compare_column == "true"
+                            if self.is_compare_column
                             else self.compare_value
                         )
                     )
@@ -130,7 +130,7 @@ class FilterSingleCondition:
                         pl.col(self.column_name)
                         < (
                             pl.col(self.compare_value)
-                            if self.is_compare_column == "true"
+                            if self.is_compare_column
                             else self.compare_value
                         )
                     )
@@ -140,7 +140,7 @@ class FilterSingleCondition:
                         pl.col(self.column_name)
                         <= (
                             pl.col(self.compare_value)
-                            if self.is_compare_column == "true"
+                            if self.is_compare_column
                             else self.compare_value
                         )
                     )

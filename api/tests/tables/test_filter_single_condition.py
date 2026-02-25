@@ -48,7 +48,7 @@ def test_filter_equals(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "A",
         "condition": "equals",
-        "isCompareColumn": "false",
+        "isCompareColumn": False,
         "compareValue": 2,
     }
     response = client.post(
@@ -70,7 +70,7 @@ def test_filter_greater_than(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "B",
         "condition": "greaterThan",
-        "isCompareColumn": "false",
+        "isCompareColumn": False,
         "compareValue": 10,
     }
     response = client.post(
@@ -92,7 +92,7 @@ def test_filter_not_equals(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "A",
         "condition": "notEquals",
-        "isCompareColumn": "false",
+        "isCompareColumn": False,
         "compareValue": 2,
     }
     response = client.post(
@@ -115,7 +115,7 @@ def test_filter_greater_than_or_equals(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "B",
         "condition": "greaterThanOrEquals",
-        "isCompareColumn": "false",
+        "isCompareColumn": False,
         "compareValue": 30,
     }
     response = client.post(
@@ -137,7 +137,7 @@ def test_filter_less_than(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "A",
         "condition": "lessThan",
-        "isCompareColumn": "false",
+        "isCompareColumn": False,
         "compareValue": 3,
     }
     response = client.post(
@@ -159,7 +159,7 @@ def test_filter_less_than_or_equals(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "B",
         "condition": "lessThanOrEquals",
-        "isCompareColumn": "false",
+        "isCompareColumn": False,
         "compareValue": 12,
     }
     response = client.post(
@@ -181,7 +181,7 @@ def test_filter_equals_compare_column(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "A",
         "condition": "equals",
-        "isCompareColumn": "true",
+        "isCompareColumn": True,
         "compareValue": "C",
     }
     response = client.post(
@@ -205,7 +205,7 @@ def test_filter_greater_than_compare_column(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "A",
         "condition": "greaterThan",
-        "isCompareColumn": "true",
+        "isCompareColumn": True,
         "compareValue": "C",
     }
     response = client.post(
@@ -229,7 +229,7 @@ def test_filter_less_than_or_equals_compare_column(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "A",
         "condition": "lessThanOrEquals",
-        "isCompareColumn": "true",
+        "isCompareColumn": True,
         "compareValue": "C",
     }
     response = client.post(
@@ -253,7 +253,7 @@ def test_filter_invalid_table(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "A",
         "condition": "equals",
-        "isCompareColumn": "false",
+        "isCompareColumn": False,
         "compareValue": 1,
     }
     response = client.post(
@@ -272,7 +272,7 @@ def test_filter_invalid_column(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "Z",
         "condition": "equals",
-        "isCompareColumn": "false",
+        "isCompareColumn": False,
         "compareValue": 1,
     }
     response = client.post(
@@ -291,7 +291,7 @@ def test_filter_invalid_condition(client, tables_store):
         "newTableName": "FilteredTable",
         "columnName": "A",
         "condition": "invalid_condition",
-        "isCompareColumn": "false",
+        "isCompareColumn": False,
         "compareValue": 1,
     }
     response = client.post(
@@ -316,7 +316,7 @@ def test_filter_single_condition_empty_table_name(client, tables_store):
             "newTableName": "FilteredTable",
             "columnName": "A",
             "condition": "equals",
-            "isCompareColumn": "false",
+            "isCompareColumn": False,
             "compareValue": 1,
         },
     )
@@ -342,7 +342,7 @@ def test_filter_single_condition_empty_new_table_name(client, tables_store):
             "newTableName": "",
             "columnName": "A",
             "condition": "equals",
-            "isCompareColumn": "false",
+            "isCompareColumn": False,
             "compareValue": 1,
         },
     )
@@ -369,7 +369,7 @@ def test_filter_single_condition_empty_column_name(client, tables_store):
             "newTableName": "FilteredTable",
             "columnName": "",
             "condition": "equals",
-            "isCompareColumn": "false",
+            "isCompareColumn": False,
             "compareValue": 1,
         },
     )
@@ -395,7 +395,7 @@ def test_filter_single_condition_empty_condition(client, tables_store):
             "newTableName": "FilteredTable",
             "columnName": "A",
             "condition": "",
-            "isCompareColumn": "false",
+            "isCompareColumn": False,
             "compareValue": 1,
         },
     )
@@ -408,7 +408,7 @@ def test_filter_single_condition_empty_condition(client, tables_store):
 
 def test_filter_single_condition_empty_is_compare_column(client, tables_store):
     """
-    isCompareColumnが空文字列の場合はバリデーションエラーになる
+    isCompareColumnに真偽値以外が渡された場合はバリデーションエラーになる
     """
     response = client.post(
         "/api/table/filter-single-condition",
@@ -417,7 +417,7 @@ def test_filter_single_condition_empty_is_compare_column(client, tables_store):
             "newTableName": "FilteredTable",
             "columnName": "A",
             "condition": "equals",
-            "isCompareColumn": "",
+            "isCompareColumn": "not_a_bool",
             "compareValue": 1,
         },
     )
@@ -425,10 +425,10 @@ def test_filter_single_condition_empty_is_compare_column(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
     assert (
-        "isCompareColumnは1文字以上で入力してください。"
+        "isCompareColumnは真偽値で入力してください。"
         == response_data["message"]
     )
-    assert ["isCompareColumnは1文字以上で入力してください。"] == response_data[
+    assert ["isCompareColumnは真偽値で入力してください。"] == response_data[
         "details"
     ]
 
@@ -443,7 +443,7 @@ def test_filter_single_condition_missing_table_name(client, tables_store):
             "newTableName": "FilteredTable",
             "columnName": "A",
             "condition": "equals",
-            "isCompareColumn": "false",
+            "isCompareColumn": False,
             "compareValue": 1,
         },
     )
@@ -464,7 +464,7 @@ def test_filter_single_condition_missing_new_table_name(client, tables_store):
             "tableName": "TestTable",
             "columnName": "A",
             "condition": "equals",
-            "isCompareColumn": "false",
+            "isCompareColumn": False,
             "compareValue": 1,
         },
     )
@@ -485,7 +485,7 @@ def test_filter_single_condition_missing_column_name(client, tables_store):
             "tableName": "TestTable",
             "newTableName": "FilteredTable",
             "condition": "equals",
-            "isCompareColumn": "false",
+            "isCompareColumn": False,
             "compareValue": 1,
         },
     )
@@ -506,7 +506,7 @@ def test_filter_single_condition_missing_condition(client, tables_store):
             "tableName": "TestTable",
             "newTableName": "FilteredTable",
             "columnName": "A",
-            "isCompareColumn": "false",
+            "isCompareColumn": False,
             "compareValue": 1,
         },
     )
@@ -551,7 +551,7 @@ def test_filter_single_condition_missing_compare_value(client, tables_store):
             "newTableName": "FilteredTable",
             "columnName": "A",
             "condition": "equals",
-            "isCompareColumn": "false",
+            "isCompareColumn": False,
         },
     )
     response_data = response.json()
@@ -570,7 +570,7 @@ _BASE_FILTER = {
     "newTableName": "FilteredTable",
     "columnName": "A",
     "condition": "equals",
-    "isCompareColumn": "false",
+    "isCompareColumn": False,
     "compareValue": 1,
 }
 
