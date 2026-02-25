@@ -210,6 +210,86 @@ def test_iv_robust_se_differs_from_nonrobust(client, tables_store):
     )
 
 
+def test_iv_full_numerical_validation(client, tables_store):
+    """
+    IV の全統計量が linearmodels (IV2SLS, cov_type='unadjusted') と
+    一致することを確認。
+    シミュレーションを含まないため許容誤差内の一致が期待される。
+
+    検証内容:
+      - parameters (const/x1/x2_endog):
+          coefficient / standardError / tValue / pValue / CI
+      - modelStatistics: nObservations, R2
+      - diagnostics.wuHausmanTest: statistic, pValue
+      - diagnostics.sarganTest: statistic, pValue
+          (sargan はプロパティのため model_result.sargan で直接取得)
+      - diagnostics.firstStage["x2_endog"]:
+          fStatistic, pValue
+          (OLSResults.f_statistic を使用)
+    """
+    _, _, iv = generate_all_data()
+    x1_iv, x2_endog, z1, z2, y_iv = iv
+
+    df = pd.DataFrame(
+        {
+            "y": y_iv,
+            "x1": x1_iv,
+            "x2_endog": x2_endog,
+            "z1": z1,
+            "z2": z2,
+        }
+    )
+    x_exog = sm.add_constant(df[["x1"]])
+    ref = IV2SLS(
+        df["y"],
+        x_exog,
+        df[["x2_endog"]],
+        df[["z1", "z2"]],
+    ).fit(cov_type="unadjusted")
+
+    output = _get_output(client, IvPayload().build())
+    p_map = {p["variable"]: p for p in output["parameters"]}
+    ms = output["modelStatistics"]
+    diag = output["diagnostics"]
+    ci = ref.conf_int()  # columns: "lower" / "upper"
+
+    # --- parameters (const / x1 / x2_endog) ---
+    for var in ["const", "x1", "x2_endog"]:
+        p = p_map[var]
+        ci_lower = float(ci.loc[var, "lower"])
+        ci_upper = float(ci.loc[var, "upper"])
+        assert abs(p["coefficient"] - float(ref.params[var])) < _ABS_TOL
+        assert abs(p["standardError"] - float(ref.std_errors[var])) < _ABS_TOL
+        assert abs(p["tValue"] - float(ref.tstats[var])) < _ABS_TOL
+        assert abs(p["pValue"] - float(ref.pvalues[var])) < _ABS_TOL
+        assert abs(p["confidenceIntervalLower"] - ci_lower) < _ABS_TOL
+        assert abs(p["confidenceIntervalUpper"] - ci_upper) < _ABS_TOL
+
+    # --- modelStatistics ---
+    assert ms["nObservations"] == int(ref.nobs)
+    assert abs(ms["R2"] - float(ref.rsquared)) < _ABS_TOL
+
+    # --- diagnostics.wuHausmanTest ---
+    wh = ref.wu_hausman()
+    wu = diag["wuHausmanTest"]
+    assert abs(wu["statistic"] - float(wh.stat)) < _ABS_TOL
+    assert abs(wu["pValue"] - float(wh.pval)) < _ABS_TOL
+
+    # --- diagnostics.sarganTest ---
+    # sargan はプロパティ（WaldTestStatistic）であり callable でない
+    sg = diag["sarganTest"]
+    assert abs(sg["statistic"] - float(ref.sargan.stat)) < _ABS_TOL
+    assert abs(sg["pValue"] - float(ref.sargan.pval)) < _ABS_TOL
+
+    # --- diagnostics.firstStage ---
+    fs_api = diag["firstStage"]["x2_endog"]
+    fs_ref = ref.first_stage.individual["x2_endog"]
+    assert (
+        abs(fs_api["fStatistic"] - float(fs_ref.f_statistic.stat)) < _ABS_TOL
+    )
+    assert abs(fs_api["pValue"] - float(fs_ref.f_statistic.pval)) < _ABS_TOL
+
+
 # -----------------------------------------------------------
 # FEIVは未実装
 # -----------------------------------------------------------

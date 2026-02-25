@@ -200,3 +200,59 @@ def test_re_robust_se_differs_from_nonrobust(client, tables_store):
         " LINEARMODELS_COV_TYPE_MAP のマッピングが"
         "正しく機能していない可能性がある"
     )
+
+
+def test_re_full_numerical_validation(client, tables_store):
+    """
+    RE の全統計量が linearmodels (RandomEffects, cov_type='unadjusted') と
+    一致することを確認。
+    シミュレーションを含まないため許容誤差内の一致が期待される。
+
+    検証内容:
+      - parameters: coefficient / standardError / tValue / pValue / CI
+      - modelStatistics: nObservations, R2Within/Between/Overall
+      - diagnostics.theta: 変量効果の重み（全エンティティ平均）
+    """
+    _, panel, _ = generate_all_data()
+    entity_ids, time_ids, x1p, x2p, y_p = panel
+
+    df = pd.DataFrame(
+        {
+            "entity_id": entity_ids.astype(float),
+            "time_id": time_ids.astype(float),
+            "y": y_p,
+            "x1": x1p,
+            "x2": x2p,
+        }
+    ).set_index(["entity_id", "time_id"])
+    # fit_re は exog に const を追加しないため params = ['x1', 'x2']
+    ref = RandomEffects(df["y"], df[["x1", "x2"]]).fit(cov_type="unadjusted")
+
+    output = _get_output(client, RePayload().build())
+    p_map = {p["variable"]: p for p in output["parameters"]}
+    ms = output["modelStatistics"]
+    diag = output["diagnostics"]
+    ci = ref.conf_int()  # columns: "lower" / "upper"
+
+    # --- parameters ---
+    for var in ["x1", "x2"]:
+        p = p_map[var]
+        ci_lower = float(ci.loc[var, "lower"])
+        ci_upper = float(ci.loc[var, "upper"])
+        assert abs(p["coefficient"] - float(ref.params[var])) < _ABS_TOL
+        assert abs(p["standardError"] - float(ref.std_errors[var])) < _ABS_TOL
+        assert abs(p["tValue"] - float(ref.tstats[var])) < _ABS_TOL
+        assert abs(p["pValue"] - float(ref.pvalues[var])) < _ABS_TOL
+        assert abs(p["confidenceIntervalLower"] - ci_lower) < _ABS_TOL
+        assert abs(p["confidenceIntervalUpper"] - ci_upper) < _ABS_TOL
+
+    # --- modelStatistics ---
+    assert ms["nObservations"] == int(ref.nobs)
+    assert abs(ms["R2Within"] - float(ref.rsquared)) < _ABS_TOL
+    assert abs(ms["R2Between"] - float(ref.rsquared_between)) < _ABS_TOL
+    assert abs(ms["R2Overall"] - float(ref.rsquared_overall)) < _ABS_TOL
+
+    # --- diagnostics.theta ---
+    if "theta" in diag:
+        expected_theta = float(ref.theta.values.mean())
+        assert abs(diag["theta"] - expected_theta) < _ABS_TOL
