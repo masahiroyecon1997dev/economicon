@@ -48,7 +48,7 @@ class TestValidationError422:
         data = resp.json()
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
-        assert "tableNameは必須項目です。" in data["message"]
+        assert "tableNameは必須です。" in data["message"]
 
     def test_empty_table_name(self, client, tables_store):
         """tableName が空文字の場合は 422 を返す"""
@@ -90,7 +90,7 @@ class TestValidationError422:
         data = resp.json()
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
-        assert "analysisは必須項目です。" in data["message"]
+        assert "analysisは必須です。" in data["message"]
 
     def test_missing_entity_id_for_fe(self, client, tables_store):
         """固定効果モデルで entityIdColumn が欠如の場合は 422"""
@@ -105,7 +105,7 @@ class TestValidationError422:
         data = resp.json()
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
-        assert "analysis.fe.entityIdColumnは必須項目です。" in data["message"]
+        assert "analysis.fe.entityIdColumnは必須です。" in data["message"]
 
     def test_missing_endogenous_variables_for_iv(self, client, tables_store):
         """IV モデルで endogenousVariables が欠如の場合は 422"""
@@ -141,8 +141,7 @@ class TestValidationError422:
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert data["code"] == ErrorCode.VALIDATION_ERROR
         assert (
-            "analysis.iv.instrumentalVariablesは必須項目です。"
-            in data["message"]
+            "analysis.iv.instrumentalVariablesは必須です。" in data["message"]
         )
 
 

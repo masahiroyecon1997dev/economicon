@@ -150,7 +150,7 @@ def test_sort_missing_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "tableNameは必須項目です。"
+    expected_msg = "tableNameは必須です。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
 
@@ -162,7 +162,7 @@ def test_sort_missing_sort_columns(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "sortColumnsは必須項目です。"
+    expected_msg = "sortColumnsは必須です。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
 
@@ -180,7 +180,7 @@ def test_sort_missing_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "sortColumns.0.columnNameは必須項目です。"
+    expected_msg = "sortColumns.0.columnNameは必須です。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
 
@@ -198,7 +198,7 @@ def test_sort_missing_ascending(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "sortColumns.0.ascendingは必須項目です。"
+    expected_msg = "sortColumns.0.ascendingは必須です。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
 

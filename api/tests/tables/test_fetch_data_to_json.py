@@ -275,8 +275,8 @@ def test_fetch_data_to_json_pydantic_missing_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "tableNameは必須項目です。" == response_data["message"]
-    assert ["tableNameは必須項目です。"] == response_data["details"]
+    assert "tableNameは必須です。" == response_data["message"]
+    assert ["tableNameは必須です。"] == response_data["details"]
 
 
 def test_fetch_data_to_json_pydantic_missing_start_row(client, tables_store):
@@ -291,8 +291,8 @@ def test_fetch_data_to_json_pydantic_missing_start_row(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "startRowは必須項目です。" == response_data["message"]
-    assert ["startRowは必須項目です。"] == response_data["details"]
+    assert "startRowは必須です。" == response_data["message"]
+    assert ["startRowは必須です。"] == response_data["details"]
 
 
 def test_fetch_data_to_json_pydantic_missing_fetch_rows(client, tables_store):

@@ -450,8 +450,8 @@ def test_filter_single_condition_missing_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "tableNameは必須項目です。" == response_data["message"]
-    assert ["tableNameは必須項目です。"] == response_data["details"]
+    assert "tableNameは必須です。" == response_data["message"]
+    assert ["tableNameは必須です。"] == response_data["details"]
 
 
 def test_filter_single_condition_missing_new_table_name(client, tables_store):
@@ -471,8 +471,8 @@ def test_filter_single_condition_missing_new_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "newTableNameは必須項目です。" == response_data["message"]
-    assert ["newTableNameは必須項目です。"] == response_data["details"]
+    assert "newTableNameは必須です。" == response_data["message"]
+    assert ["newTableNameは必須です。"] == response_data["details"]
 
 
 def test_filter_single_condition_missing_column_name(client, tables_store):
@@ -492,8 +492,8 @@ def test_filter_single_condition_missing_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "columnNameは必須項目です。" == response_data["message"]
-    assert ["columnNameは必須項目です。"] == response_data["details"]
+    assert "columnNameは必須です。" == response_data["message"]
+    assert ["columnNameは必須です。"] == response_data["details"]
 
 
 def test_filter_single_condition_missing_condition(client, tables_store):
@@ -513,8 +513,8 @@ def test_filter_single_condition_missing_condition(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "conditionは必須項目です。" == response_data["message"]
-    assert ["conditionは必須項目です。"] == response_data["details"]
+    assert "conditionは必須です。" == response_data["message"]
+    assert ["conditionは必須です。"] == response_data["details"]
 
 
 def test_filter_single_condition_missing_is_compare_column(
@@ -536,8 +536,8 @@ def test_filter_single_condition_missing_is_compare_column(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "isCompareColumnは必須項目です。" == response_data["message"]
-    assert ["isCompareColumnは必須項目です。"] == response_data["details"]
+    assert "isCompareColumnは必須です。" == response_data["message"]
+    assert ["isCompareColumnは必須です。"] == response_data["details"]
 
 
 def test_filter_single_condition_missing_compare_value(client, tables_store):
@@ -557,8 +557,8 @@ def test_filter_single_condition_missing_compare_value(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "compareValueは必須項目です。" == response_data["message"]
-    assert ["compareValueは必須項目です。"] == response_data["details"]
+    assert "compareValueは必須です。" == response_data["message"]
+    assert ["compareValueは必須です。"] == response_data["details"]
 
 
 # ---------------------------------------------------------------------------

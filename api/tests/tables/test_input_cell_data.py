@@ -220,8 +220,8 @@ def test_input_cell_data_missing_table_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "tableNameは必須項目です。" == response_data["message"]
-    assert ["tableNameは必須項目です。"] == response_data["details"]
+    assert "tableNameは必須です。" == response_data["message"]
+    assert ["tableNameは必須です。"] == response_data["details"]
 
 
 def test_input_cell_data_missing_column_name(client, tables_store):
@@ -235,8 +235,8 @@ def test_input_cell_data_missing_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "columnNameは必須項目です。" == response_data["message"]
-    assert ["columnNameは必須項目です。"] == response_data["details"]
+    assert "columnNameは必須です。" == response_data["message"]
+    assert ["columnNameは必須です。"] == response_data["details"]
 
 
 def test_input_cell_data_missing_row_index(client, tables_store):
@@ -250,8 +250,8 @@ def test_input_cell_data_missing_row_index(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "rowIndexは必須項目です。" == response_data["message"]
-    assert ["rowIndexは必須項目です。"] == response_data["details"]
+    assert "rowIndexは必須です。" == response_data["message"]
+    assert ["rowIndexは必須です。"] == response_data["details"]
 
 
 def test_input_cell_data_missing_new_value(client, tables_store):
@@ -265,8 +265,8 @@ def test_input_cell_data_missing_new_value(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
-    assert "newValueは必須項目です。" == response_data["message"]
-    assert ["newValueは必須項目です。"] == response_data["details"]
+    assert "newValueは必須です。" == response_data["message"]
+    assert ["newValueは必須です。"] == response_data["details"]
 
 
 # ---------------------------------------------------------------------------
