@@ -381,10 +381,6 @@ class Regression:
             has_const=self.has_const,
         )
         model_result = fit_iv(data_input)
-        model_result = apply_standard_errors(
-            model_result,
-            self.standard_error,
-        )
         return self._iv_format_result(
             model_result,
             self.analysis.endogenous_variables,
@@ -735,11 +731,7 @@ class Regression:
         }
 
         # 診断結果 (diagnostics)
-        diagnostics: dict[str, Any] = {
-            "rsquaredWithin": float(model_result.rsquared),
-            "rsquaredBetween": float(model_result.rsquared_between),
-            "rsquaredOverall": float(model_result.rsquared_overall),
-        }
+        diagnostics: dict[str, Any] = {}
 
         # 個体効果の有意性検定 (F-test for pooled model)
         if hasattr(model_result, "f_pooled"):
@@ -789,11 +781,7 @@ class Regression:
         }
 
         # 診断結果 (diagnostics)
-        diagnostics: dict[str, Any] = {
-            "rsquaredWithin": float(model_result.rsquared),
-            "rsquaredBetween": float(model_result.rsquared_between),
-            "rsquaredOverall": float(model_result.rsquared_overall),
-        }
+        diagnostics: dict[str, Any] = {}
 
         # theta (変量効果の重み)
         if hasattr(model_result, "theta"):
