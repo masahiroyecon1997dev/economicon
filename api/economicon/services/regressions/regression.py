@@ -1,5 +1,8 @@
 from typing import Any
 
+import numpy as np
+from scipy import stats as spstats
+
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import (
@@ -41,6 +44,7 @@ from economicon.services.regressions.fitters import (
     fit_re,
     fit_ridge,
     fit_tobit,
+    fit_tobit_null,
 )
 from economicon.services.regressions.standard_errors import (
     apply_standard_errors,
@@ -285,7 +289,53 @@ class Regression:
             model_result,
             self.standard_error,
         )
-        return self._format_result(model_result)
+        result = self._format_result(model_result)
+        # 平均限界効果 (AME) の計算
+        if self.analysis.calculate_marginal_effects:
+            result["marginalEffects"] = self._compute_ame(model_result)
+        return result
+
+    def _compute_ame(self, model_result: Any) -> list[dict[str, Any]]:
+        """
+        平均限界効果 (Average Marginal Effects, AME) を計算
+
+        at='overall' でデータ全体の平均を使用する。
+        定数項は結果から除外する（解釈不能なため）。
+
+        Args:
+            model_result: apply_standard_errors 適用後の
+                statsmodels 回帰結果
+
+        Returns:
+            各説明変数の AME 情報辞書のリスト
+        """
+        try:
+            margeff = model_result.get_margeff(at="overall")
+            param_names = (
+                ["const"] if self.has_const else []
+            ) + self.explanatory_variables
+            ci = margeff.conf_int()
+            result_list: list[dict[str, Any]] = []
+            for i, name in enumerate(param_names):
+                if name == "const":
+                    continue  # 定数項は AME に含めない
+                result_list.append(
+                    {
+                        "variable": name,
+                        "marginalEffect": float(margeff.margeff[i]),
+                        "standardError": float(margeff.margeff_se[i]),
+                        "tValue": float(margeff.tvalues[i]),
+                        "pValue": float(margeff.pvalues[i]),
+                        "confidenceIntervalLower": float(ci[i, 0]),
+                        "confidenceIntervalUpper": float(ci[i, 1]),
+                    }
+                )
+            return result_list
+        except Exception as e:
+            raise ProcessingError(
+                error_code=ErrorCode.REGRESSION_PROCESS_ERROR,
+                message=_("Failed to compute average marginal effects"),
+            ) from e
 
     def _execute_tobit(self, *, df, y_data, x_data, missing):
         if not isinstance(self.analysis, TobitParams):
@@ -307,10 +357,28 @@ class Regression:
             right_censoring_limit=self.analysis.right_censoring_limit,
         )
         model_result = fit_tobit(data_input)
+        # LR 検定: 定数項のみのモデルと比較
+        lr_test_result: dict[str, Any] | None = None
+        try:
+            null_result = fit_tobit_null(data_input)
+            n_slopes = len(self.explanatory_variables)
+            lr_stat = 2.0 * (float(model_result.llf) - float(null_result.llf))
+            lr_pvalue = float(spstats.chi2.sf(lr_stat, df=n_slopes))
+            lr_test_result = {
+                "statistic": lr_stat,
+                "pValue": lr_pvalue,
+                "df": n_slopes,
+                "description": (
+                    "Likelihood ratio test vs. constant-only Tobit"
+                ),
+            }
+        except Exception:
+            pass
         return self._tobit_format_result(
             model_result,
             self.analysis.left_censoring_limit,
             self.analysis.right_censoring_limit,
+            lr_test_result=lr_test_result,
         )
 
     def _execute_panel(self, *, df, y_data, x_data, missing):
@@ -562,7 +630,12 @@ class Regression:
         }
 
     def _tobit_format_result(
-        self, model_result, left_censoring_limit, right_censoring_limit
+        self,
+        model_result,
+        left_censoring_limit,
+        right_censoring_limit,
+        *,
+        lr_test_result: dict[str, Any] | None = None,
     ) -> dict:
         """
         Tobit モデルの結果を JSON 形式にフォーマット
@@ -607,6 +680,31 @@ class Regression:
             diagnostics["sigmaDescription"] = (
                 "Standard error of the error term"
             )
+
+        # Wald 検定: 全傾斜係数の同時有意性
+        try:
+            n_params = len(model_result.params)
+            start_idx = 1 if self.has_const else 0
+            n_slopes = n_params - start_idx
+            if n_slopes > 0:
+                # 制約行列 R: 全傾斜係数を選択（計量経済では R と表記）
+                r_matrix = np.eye(n_params)[start_idx:]
+                # scalar=True: 将来のデフォルト動作を明示的に採用
+                wald = model_result.wald_test(r_matrix, scalar=True)
+                diagnostics["waldTest"] = {
+                    "statistic": float(wald.statistic),
+                    "pValue": float(wald.pvalue),
+                    "df": n_slopes,
+                    "description": (
+                        "Wald test for joint significance of slope parameters"
+                    ),
+                }
+        except Exception:
+            pass
+
+        # LR 検定: 定数項のみのモデルと比較
+        if lr_test_result is not None:
+            diagnostics["lrTest"] = lr_test_result
 
         result = {
             "tableName": self.table_name,
