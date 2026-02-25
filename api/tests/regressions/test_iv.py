@@ -1,9 +1,13 @@
 """操作変数法テスト"""
 
+from typing import cast
+
 import pandas as pd
+import pytest
 import statsmodels.api as sm
 from fastapi import status
 from linearmodels.iv import IV2SLS
+from linearmodels.iv.results import IVResults
 
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
@@ -256,8 +260,8 @@ def test_iv_full_numerical_validation(client, tables_store):
     # --- parameters (const / x1 / x2_endog) ---
     for var in ["const", "x1", "x2_endog"]:
         p = p_map[var]
-        ci_lower = float(ci.loc[var, "lower"])
-        ci_upper = float(ci.loc[var, "upper"])
+        ci_lower = float(cast(float, ci.loc[var, "lower"]))
+        ci_upper = float(cast(float, ci.loc[var, "upper"]))
         assert abs(p["coefficient"] - float(ref.params[var])) < _ABS_TOL
         assert abs(p["standardError"] - float(ref.std_errors[var])) < _ABS_TOL
         assert abs(p["tValue"] - float(ref.tstats[var])) < _ABS_TOL
@@ -270,6 +274,9 @@ def test_iv_full_numerical_validation(client, tables_store):
     assert abs(ms["R2"] - float(ref.rsquared)) < _ABS_TOL
 
     # --- diagnostics.wuHausmanTest ---
+    if not isinstance(ref, IVResults):
+        pytest.fail(f"Expected IVResults but got {type(ref).__name__}")
+
     wh = ref.wu_hausman()
     wu = diag["wuHausmanTest"]
     assert abs(wu["statistic"] - float(wh.stat)) < _ABS_TOL
