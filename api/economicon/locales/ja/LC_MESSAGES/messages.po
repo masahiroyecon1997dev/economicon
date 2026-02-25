@@ -778,6 +778,32 @@ msgid "{field} has an invalid value"
 msgstr "{field} の値が無効です。"
 
 #, python-brace-format
+msgid "{field} must have at least {min_length} items"
+msgstr "{field} は{min_length}件以上ある必要があります。"
+
+#, python-brace-format
+msgid "{field} must be less than {lt}"
+msgstr "{field} は{lt}未満である必要があります。"
+
+#, python-brace-format
+msgid "{field} must be less than or equal to {le}"
+msgstr "{field} は{le}以下である必要があります。"
+
+#, python-brace-format
+msgid "{field} must be greater than {gt}"
+msgstr "{field} は{gt}より大きい必要があります。"
+
+#, python-brace-format
+msgid "{field} must be greater than or equal to {ge}"
+msgstr "{field} は{ge}以上である必要があります。"
+
+msgid "{field} has an invalid type"
+msgstr "{field} のタイプが正しくありません。"
+
+msgid "{field} contains invalid characters"
+msgstr "{field} に使用できない文字が含まれています。"
+
+#, python-brace-format
 msgid "{} '{}' does not have {} permission."
 msgstr "{} '{}'には{}権限がありません。"
 
