@@ -43,6 +43,56 @@ _COL_FIXED = {
     "columnName": "fixed_col",
     "distribution": {"type": "fixed", "value": 42.0},
 }
+# 単独カラム設定（ガンマ分布）
+_COL_GAMMA = {
+    "columnName": "gamma_col",
+    "distribution": {"type": "gamma", "shape": 2.0, "scale": 1.0},
+}
+# 単独カラム設定（ベータ分布）
+_COL_BETA = {
+    "columnName": "beta_col",
+    "distribution": {"type": "beta", "a": 2.0, "b": 5.0},
+}
+# 単独カラム設定（ワイブル分布）
+_COL_WEIBULL = {
+    "columnName": "weibull_col",
+    "distribution": {"type": "weibull", "a": 1.5, "scale": 1.0},
+}
+# 単独カラム設定（対数正規分布）
+_COL_LOGNORMAL = {
+    "columnName": "lognormal_col",
+    "distribution": {"type": "lognormal", "mean": 0.0, "sigma": 1.0},
+}
+# 単独カラム設定（二項分布）
+_COL_BINOMIAL = {
+    "columnName": "binomial_col",
+    "distribution": {"type": "binomial", "n": 10, "p": 0.5},
+}
+# 単独カラム設定（ベルヌーイ分布）
+_COL_BERNOULLI = {
+    "columnName": "bernoulli_col",
+    "distribution": {"type": "bernoulli", "p": 0.5},
+}
+# 単独カラム設定（ポアソン分布）
+_COL_POISSON = {
+    "columnName": "poisson_col",
+    "distribution": {"type": "poisson", "lam": 3.0},
+}
+# 単独カラム設定（幾何分布）
+_COL_GEOMETRIC = {
+    "columnName": "geometric_col",
+    "distribution": {"type": "geometric", "p": 0.3},
+}
+# 単独カラム設定（超幾何分布）
+_COL_HYPERGEOMETRIC = {
+    "columnName": "hypergeometric_col",
+    "distribution": {
+        "type": "hypergeometric",
+        "populationSize": 100,
+        "successCount": 30,
+        "sampleSize": 10,
+    },
+}
 
 
 # ─────────────────────────────────────────────────────────────
@@ -156,6 +206,56 @@ def test_create_table_with_multiple_columns(client, tables_store):
     assert "normal_col" in df.columns
     assert "uniform_col" in df.columns
     assert "exp_col" in df.columns
+
+
+def test_create_table_with_all_distributions(client, tables_store):
+    """全 13 分布タイプを含むテーブルを正常に作成できる"""
+    all_cols = [
+        _COL_NORMAL,
+        _COL_UNIFORM,
+        _COL_EXP,
+        _COL_FIXED,
+        _COL_GAMMA,
+        _COL_BETA,
+        _COL_WEIBULL,
+        _COL_LOGNORMAL,
+        _COL_BINOMIAL,
+        _COL_BERNOULLI,
+        _COL_POISSON,
+        _COL_GEOMETRIC,
+        _COL_HYPERGEOMETRIC,
+    ]
+    payload = {
+        "tableName": "AllDistTable",
+        "rowCount": 50,
+        "simulationColumns": all_cols,
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("AllDistTable").table
+    expected_row_count = 50
+    expected_col_count = len(all_cols)
+    assert len(df) == expected_row_count
+    assert len(df.columns) == expected_col_count
+
+    # 各分布の値域を検証
+    fixed_value = 42.0
+    binomial_n = 10
+    bernoulli_upper = 1
+    hypergeometric_max = min(30, 10)  # min(successCount, sampleSize)
+    assert (df["fixed_col"] == fixed_value).all()
+    assert all(v >= 0 for v in df["gamma_col"])
+    assert all(0 <= v <= 1 for v in df["beta_col"])
+    assert all(v >= 0 for v in df["weibull_col"])
+    assert all(v > 0 for v in df["lognormal_col"])
+    assert all(0 <= v <= binomial_n for v in df["binomial_col"])
+    assert all(v in (0, bernoulli_upper) for v in df["bernoulli_col"])
+    assert all(v >= 0 for v in df["poisson_col"])
+    assert all(v >= 1 for v in df["geometric_col"])
+    assert all(0 <= v <= hypergeometric_max for v in df["hypergeometric_col"])
 
 
 # ─────────────────────────────────────────────────────────────
