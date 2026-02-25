@@ -14,6 +14,16 @@ from economicon.utils.validators.files import (
     validate_file_path,
 )
 
+# CSV エンコーディングマップ（Polars コーデック対応）
+_ENCODING_MAP: dict[str, str] = {
+    "utf8": "utf8",
+    "latin1": "latin1",
+    "ascii": "ascii",
+    "gbk": "gbk",
+    "windows-1252": "windows-1252",
+    "shift_jis": "cp932",
+}
+
 
 class AddColumn:
     """
@@ -36,6 +46,7 @@ class AddColumn:
         self.csv_has_header = body.csv_has_header
         self.csv_strict_row_count = body.csv_strict_row_count
         self.separator = body.separator
+        self.csv_encoding = body.csv_encoding
         self.param_names = {
             "table_name": "tableName",
             "new_column_name": "newColumnName",
@@ -157,11 +168,12 @@ class AddColumn:
                     message=message,
                 )
             # CSVファイルを読み込む
+            encoding = _ENCODING_MAP.get(self.csv_encoding, self.csv_encoding)
             skip_rows = 1 if self.csv_has_header else 0
             df_csv = pl.read_csv(
                 self.csv_file_path,
                 separator=self.separator,
-                encoding="utf8",
+                encoding=encoding,
                 skip_rows=skip_rows,
                 has_header=False,
             )
