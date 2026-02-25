@@ -8,6 +8,7 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from economicon.models import (
+    COMMON_ERROR_RESPONSES,
     ClearAllAnalysisResultsResult,
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
@@ -32,7 +33,11 @@ from economicon.utils import (
     create_success_response,
 )
 
-router = APIRouter(prefix="/analysis", tags=["analysis"])
+router = APIRouter(
+    prefix="/analysis",
+    tags=["analysis"],
+    responses=COMMON_ERROR_RESPONSES,
+)
 
 
 @router.post("/regression", response_model=SuccessResponse[RegressionResult])

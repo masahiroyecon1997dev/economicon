@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
 from economicon.models import (
+    COMMON_ERROR_RESPONSES,
     ClearTablesResult,
     CreateJoinTableRequestBody,
     CreateJoinTableResult,
@@ -51,7 +52,11 @@ from economicon.utils import (
     create_success_response,
 )
 
-router = APIRouter(prefix="/table", tags=["table"])
+router = APIRouter(
+    prefix="/table",
+    tags=["table"],
+    responses=COMMON_ERROR_RESPONSES,
+)
 
 
 @router.post("/create", response_model=SuccessResponse[CreateTableResult])
