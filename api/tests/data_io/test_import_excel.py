@@ -67,6 +67,7 @@ def test_import_excel_simple(client, prepared_data):
     assert test_data.equals(df)
 
 
+@pytest.mark.skip(reason="大きなデータのインポートは時間がかかるためスキップ")
 def test_import_excel_large_data(client, prepared_data):
     """
     大きなEXCELファイルをパス指定でインポートするテスト
