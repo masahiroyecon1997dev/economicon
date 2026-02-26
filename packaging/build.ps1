@@ -16,10 +16,10 @@ chcp 65001 | Out-Null
 # --- Python -------------------------------------------------------------------
 # ★ pyproject.toml は requires-python = ">=3.14" を要求していますが、
 #    公式 embeddable package は 3.14 が正式安定版になり次第バージョンを更新してください。
-#    現時点では 3.13 の最新安定版 (3.13.3) を使用する想定です。
+#    現時点では 3.14 の最新安定版 (3.14.3) を使用する想定です。
 #    https://www.python.org/downloads/windows/ で "Windows embeddable package (64-bit)" を確認。
-$PYTHON_VERSION        = "3.13.3"
-# バージョン短縮形: 3.13.3 → 313（._pth ファイル名に使用）
+$PYTHON_VERSION        = "3.14.3"
+# バージョン短縮形: 3.14.3 → 314（._pth ファイル名に使用）
 $PYTHON_VERSION_SHORT  = ($PYTHON_VERSION -split '\.')[0..1] -join ''
 
 # --- アプリ情報 ----------------------------------------------------------------
