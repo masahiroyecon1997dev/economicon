@@ -31,3 +31,6 @@ coverage/
 playwright-report/
 test-results/
 .auth/
+
+# Enbeddable Python package for Release
+src-tauri/resources/python_env/
