@@ -32,7 +32,6 @@ dev = [
     "httpx>=0.28.1",
     "pip-licenses>=5.5.1",
     "pipdeptree>=2.30.0",
-    "pyinstaller>=6.18.0",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "radon>=6.0.1",
