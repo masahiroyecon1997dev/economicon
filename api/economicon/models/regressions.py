@@ -199,8 +199,11 @@ class AddDiagnosticColumnsRequestBody(BaseRequest):
         bool,
         Field(
             default=False,
-            description="True の場合、標準化残差（studentized internal）を追加する。"
-            "OLS/Logit/Probit のみ有効。",
+            description=(
+                "True の場合、標準化残差"
+                "（studentized internal）を追加する。"
+                "OLS/Logit/Probit のみ有効。"
+            ),
         ),
     ] = False
     include_interval: Annotated[
@@ -231,7 +234,8 @@ class AddDiagnosticColumnsRequestBody(BaseRequest):
             alias="binaryResidualType",
             description="Logit/Probit の残差種別。"
             "raw: 生残差 (y - p̂)、"
-            "deviance: デビアンス残差 sign(y-p̂)√(-2[y·log(p̂)+(1-y)·log(1-p̂)])。"
+            "deviance: デビアンス残差"
+            " sign(y-p̂)√(-2[y·log(p̂)+(1-y)·log(1-p̂)])。"
             "OLS などその他のモデルでは無視される。",
         ),
     ] = "raw"
@@ -243,7 +247,8 @@ class AddDiagnosticColumnsRequestBody(BaseRequest):
             alias="tobitFittedType",
             description="Tobit モデルの予測値種別。"
             "latent: 潜在変数の予測値 x'β（デフォルト）、"
-            "observable: 観測値の無条件期待値 E[y|x]（打ち切りを考慮した期待値）。"
+            "observable: 観測値の無条件期待値 E[y|x]"
+            "（打ち切りを考慮した期待値）。"
             "Tobit 以外のモデルでは無視される。",
         ),
     ] = "latent"

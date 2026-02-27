@@ -14,7 +14,9 @@ from tests.regressions.conftest import (
     URL_REGRESSION,
     IvPayload,
     LassoPayload,
+    LogitPayload,
     OlsPayload,
+    ProbitPayload,
     RidgePayload,
 )
 
@@ -208,7 +210,8 @@ def test_missing_row_alignment(client, tables_store):
     """
     欠損値を含むデータで推定後の診断列が正しく join されることを確認
 
-    NaNData には欠損値が含まれるため、推定に使われた行数が元テーブルより少ない。
+    NaNData には欠損値が含まれるため、
+    推定に使われた行数が元テーブルより少ない。
     追加後のテーブルは元の 10 行を保ち、欠損行は null になるべき。
     """
     result_id = _run_regression(
@@ -236,7 +239,7 @@ def test_missing_row_alignment(client, tables_store):
 
     df = TablesStore().get_table(TABLE_NAN).table
     # 元テーブルの行数は 10 行のまま
-    assert df.height == 10
+    assert df.height == 10  # noqa: PLR2004
     # 欠損行に対応する fitted は null になっているはず
     assert df["y_fitted"].null_count() > 0
     # 欠損のない行には有効な値が入っているはず
@@ -282,6 +285,161 @@ def test_tobit_fitted_and_resid(client, tables_store):
 
     df = TablesStore().get_table(TABLE_TOBIT).table
     assert df["y_fitted"].null_count() == 0
+
+
+def test_tobit_observable_fitted(client, tables_store):
+    """
+    Tobit モデルで observable 予測値 E[y|x] が追加されることを確認
+
+    observable E[y|x] は左側打ち切り L=0 の場合、常に ≥ 0 でなければならない。
+    また latent 予測値とは異なる値を返すはずである。
+    """
+    payload = {
+        "tableName": TABLE_TOBIT,
+        "dependentVariable": "y",
+        "explanatoryVariables": ["x"],
+        "hasConst": True,
+        "analysis": {
+            "method": "tobit",
+            "leftCensoringLimit": 0.0,
+            "rightCensoringLimit": None,
+        },
+        "standardError": {"method": "nonrobust"},
+    }
+    result_id = _run_regression(client, payload)
+
+    resp = _add_diagnostic(
+        client,
+        {
+            "tableName": TABLE_TOBIT,
+            "resultId": result_id,
+            "target": "fitted",
+            "tobitFittedType": "observable",
+        },
+    )
+
+    assert resp.status_code == status.HTTP_200_OK, resp.text
+    data = resp.json()
+    assert data["code"] == "OK"
+    added_cols = data["result"]["addedColumns"]
+    assert "y_fitted" in added_cols
+
+    df = TablesStore().get_table(TABLE_TOBIT).table
+    assert df["y_fitted"].null_count() == 0
+    # observable E[y|x] は左側打ち切り L=0 で常に非負
+    assert (df["y_fitted"] >= 0).all()
+
+
+# -----------------------------------------------------------
+# Logit
+# -----------------------------------------------------------
+
+
+def test_logit_fitted_and_residuals(client, tables_store):
+    """Logit モデルから予測値・残差（生残差）が追加されることを確認"""
+    result_id = _run_regression(client, LogitPayload().build())
+
+    resp = _add_diagnostic(
+        client,
+        {
+            "tableName": TABLE_BASIC,
+            "resultId": result_id,
+            "target": "both",
+        },
+    )
+
+    assert resp.status_code == status.HTTP_200_OK, resp.text
+    added_cols = resp.json()["result"]["addedColumns"]
+    assert "y_binary_fitted" in added_cols
+    assert "y_binary_resid" in added_cols
+
+    df = TablesStore().get_table(TABLE_BASIC).table
+    assert df["y_binary_fitted"].null_count() == 0
+    # Logit の fittedvalues は線形予測値 x'β（statsmodels 仕様）
+    assert df["y_binary_fitted"].is_nan().sum() == 0
+
+
+def test_logit_deviance_residuals(client, tables_store):
+    """
+    Logit モデルで deviance 残差が追加されることを確認
+
+    deviance 残差: sign(y - p̂) * sqrt(-2[y*log(p̂) + (1-y)*log(1-p̂)])
+    OLS やデフォルト raw 残差とは異なる値になる。
+    """
+    result_id = _run_regression(client, LogitPayload().build())
+
+    resp = _add_diagnostic(
+        client,
+        {
+            "tableName": TABLE_BASIC,
+            "resultId": result_id,
+            "target": "residual",
+            "binaryResidualType": "deviance",
+        },
+    )
+
+    assert resp.status_code == status.HTTP_200_OK, resp.text
+    data = resp.json()
+    assert data["code"] == "OK"
+    added_cols = data["result"]["addedColumns"]
+    assert "y_binary_resid" in added_cols
+
+    df = TablesStore().get_table(TABLE_BASIC).table
+    assert df["y_binary_resid"].null_count() == 0
+    # deviance 残差は有限値を持つ
+    assert df["y_binary_resid"].is_nan().sum() == 0
+
+
+# -----------------------------------------------------------
+# Probit
+# -----------------------------------------------------------
+
+
+def test_probit_fitted_and_residuals(client, tables_store):
+    """Probit モデルから予測値・残差（生残差）が追加されることを確認"""
+    result_id = _run_regression(client, ProbitPayload().build())
+
+    resp = _add_diagnostic(
+        client,
+        {
+            "tableName": TABLE_BASIC,
+            "resultId": result_id,
+            "target": "both",
+        },
+    )
+
+    assert resp.status_code == status.HTTP_200_OK, resp.text
+    added_cols = resp.json()["result"]["addedColumns"]
+    assert "y_binary_fitted" in added_cols
+    assert "y_binary_resid" in added_cols
+
+    df = TablesStore().get_table(TABLE_BASIC).table
+    assert df["y_binary_fitted"].null_count() == 0
+    # Probit の fittedvalues は線形予測値 x'β（statsmodels 仕様）
+    assert df["y_binary_fitted"].is_nan().sum() == 0
+
+
+def test_probit_deviance_residuals(client, tables_store):
+    """Probit モデルで deviance 残差が追加されることを確認"""
+    result_id = _run_regression(client, ProbitPayload().build())
+
+    resp = _add_diagnostic(
+        client,
+        {
+            "tableName": TABLE_BASIC,
+            "resultId": result_id,
+            "target": "residual",
+            "binaryResidualType": "deviance",
+        },
+    )
+
+    assert resp.status_code == status.HTTP_200_OK, resp.text
+    added_cols = resp.json()["result"]["addedColumns"]
+    assert "y_binary_resid" in added_cols
+
+    df = TablesStore().get_table(TABLE_BASIC).table
+    assert df["y_binary_resid"].null_count() == 0
+    assert df["y_binary_resid"].is_nan().sum() == 0
 
 
 # -----------------------------------------------------------

@@ -54,7 +54,7 @@ def resolve_column_name(existing_cols: list[str], base: str) -> str:
         i += 1
 
 
-def _build_col_names(
+def _build_col_names(  # noqa: PLR0913
     existing_cols: list[str],
     dep_var: str,
     target: Literal["fitted", "residual", "both"],
@@ -105,6 +105,115 @@ def _build_col_names(
     return resolved
 
 
+def _extract_statsmodels_ci(
+    model: object,
+    col_map: dict[str, str],
+    n: int,
+) -> dict[str, pl.Series]:
+    """statsmodels 予測値 95% CI を抽出して Series 辞書で返す。
+
+    Warning#6: statsmodels バージョンにより
+    ``summary_frame()`` のキー名が異なるため動的に判定する。
+    信頼区間の取得に失敗した場合は None 列を返す。
+    """
+    data: dict[str, pl.Series] = {}
+    try:
+        sf = model.get_prediction().summary_frame(  # type: ignore[union-attr]
+            alpha=0.05
+        )
+        lower_key = (
+            "mean_ci_lower" if "mean_ci_lower" in sf.columns else "ci_lower"
+        )
+        upper_key = (
+            "mean_ci_upper" if "mean_ci_upper" in sf.columns else "ci_upper"
+        )
+        if "fitted_lower_95" in col_map:
+            data[col_map["fitted_lower_95"]] = pl.Series(
+                col_map["fitted_lower_95"],
+                sf[lower_key].to_numpy(),
+                dtype=pl.Float64,
+            )
+        if "fitted_upper_95" in col_map:
+            data[col_map["fitted_upper_95"]] = pl.Series(
+                col_map["fitted_upper_95"],
+                sf[upper_key].to_numpy(),
+                dtype=pl.Float64,
+            )
+    except Exception:
+        # 信頼区間が取得できない場合（Logit/Probit 等）は None 列
+        if "fitted_lower_95" in col_map:
+            data[col_map["fitted_lower_95"]] = pl.Series(
+                col_map["fitted_lower_95"],
+                [None] * n,
+                dtype=pl.Float64,
+            )
+        if "fitted_upper_95" in col_map:
+            data[col_map["fitted_upper_95"]] = pl.Series(
+                col_map["fitted_upper_95"],
+                [None] * n,
+                dtype=pl.Float64,
+            )
+    return data
+
+
+def _extract_statsmodels_resid(
+    model: object,
+    col_map: dict[str, str],
+    n: int,
+    residual_type: Literal["raw", "deviance"],
+) -> dict[str, pl.Series]:
+    """statsmodels 残差を抽出して Series 辞書で返す。
+
+    Eco-Note A: ``residual_type="deviance"`` の場合、
+    Logit/Probit の deviance 残差（``model.resid_dev``）を使用する。
+    ``resid_dev`` を持たないモデル（OLS 等）は raw にフォールバック。
+    """
+    data: dict[str, pl.Series] = {}
+    if "resid" in col_map:
+        use_deviance = residual_type == "deviance" and hasattr(
+            model, "resid_dev"
+        )
+        if use_deviance:
+            try:
+                resid = np.asarray(
+                    model.resid_dev,  # type: ignore[union-attr]
+                    dtype=np.float64,
+                )
+            except Exception:
+                resid = np.asarray(
+                    model.resid,  # type: ignore[union-attr]
+                    dtype=np.float64,
+                )
+        elif hasattr(model, "resid"):
+            resid = np.asarray(
+                model.resid,  # type: ignore[union-attr]
+                dtype=np.float64,
+            )
+        else:
+            # Logit/Probit は .resid を持たず .resid_response (y - p̂) を使う
+            resid = np.asarray(
+                model.resid_response,  # type: ignore[union-attr]
+                dtype=np.float64,
+            )
+        data[col_map["resid"]] = pl.Series(
+            col_map["resid"], resid, dtype=pl.Float64
+        )
+    if "resid_std" in col_map:
+        try:
+            resid_std = np.asarray(
+                model.get_influence().resid_studentized_internal,  # type: ignore[union-attr]
+                dtype=np.float64,
+            )
+            data[col_map["resid_std"]] = pl.Series(
+                col_map["resid_std"], resid_std, dtype=pl.Float64
+            )
+        except Exception:
+            data[col_map["resid_std"]] = pl.Series(
+                col_map["resid_std"], [None] * n, dtype=pl.Float64
+            )
+    return data
+
+
 # ---------------------------------------------------------------------------
 # statsmodels（OLS / Logit / Probit）
 # ---------------------------------------------------------------------------
@@ -147,7 +256,7 @@ def _get_statsmodels_row_indices(model: object) -> np.ndarray:
     )
 
 
-def extract_from_statsmodels(
+def extract_from_statsmodels(  # noqa: PLR0913
     model: object,
     dep_var: str,
     existing_cols: list[str],
@@ -198,94 +307,28 @@ def extract_from_statsmodels(
         supports_standardized=True,
     )
 
-    # statsmodels のインデックスを行番号として使用
-    # numpy 配列入力の場合は missing_row_idx から再構築する
     index = _get_statsmodels_row_indices(model)
+    n = len(index)
     data: dict[str, pl.Series] = {
         "__row_idx__": pl.Series("__row_idx__", index, dtype=pl.Int64)
     }
 
     if "fitted" in col_map:
-        fitted = np.asarray(model.fittedvalues, dtype=np.float64)  # type: ignore[union-attr]
+        fitted = np.asarray(
+            model.fittedvalues,  # type: ignore[union-attr]
+            dtype=np.float64,
+        )
         data[col_map["fitted"]] = pl.Series(
             col_map["fitted"], fitted, dtype=pl.Float64
         )
 
     if "fitted_lower_95" in col_map or "fitted_upper_95" in col_map:
-        try:
-            # predict() は summary_frame() が返す DataFrame を利用
-            sf = model.get_prediction().summary_frame(alpha=0.05)  # type: ignore[union-attr]
-            # Warning#6: statsmodels バージョンによりキー名が次のいずれかに変わる
-            lower_key = (
-                "mean_ci_lower"
-                if "mean_ci_lower" in sf.columns
-                else "ci_lower"
-            )
-            upper_key = (
-                "mean_ci_upper"
-                if "mean_ci_upper" in sf.columns
-                else "ci_upper"
-            )
-            if "fitted_lower_95" in col_map:
-                data[col_map["fitted_lower_95"]] = pl.Series(
-                    col_map["fitted_lower_95"],
-                    sf[lower_key].to_numpy(),
-                    dtype=pl.Float64,
-                )
-            if "fitted_upper_95" in col_map:
-                data[col_map["fitted_upper_95"]] = pl.Series(
-                    col_map["fitted_upper_95"],
-                    sf[upper_key].to_numpy(),
-                    dtype=pl.Float64,
-                )
-        except Exception:
-            # 信頼区間が取得できない場合（Logit/Probit 等）は None 列を追加
-            n = len(index)
-            if "fitted_lower_95" in col_map:
-                data[col_map["fitted_lower_95"]] = pl.Series(
-                    col_map["fitted_lower_95"], [None] * n, dtype=pl.Float64
-                )
-            if "fitted_upper_95" in col_map:
-                data[col_map["fitted_upper_95"]] = pl.Series(
-                    col_map["fitted_upper_95"], [None] * n, dtype=pl.Float64
-                )
+        data.update(_extract_statsmodels_ci(model, col_map, n))
 
-    if "resid" in col_map:
-        # Eco-Note A: Logit/Probit では deviance 残差を選択可能
-        # deviance 残差: sign(y - p̂)·sqrt(-2[y·log(p̂) + (1-y)·log(1-p̂)])
-        # statsmodels Logit/Probit は model.resid_dev でアクセス可能。
-        # OLS など resid_dev を持たないモデルでは raw としてフォールバック。
-        use_deviance = residual_type == "deviance" and hasattr(
-            model, "resid_dev"
-        )
-        if use_deviance:
-            try:
-                resid = np.asarray(model.resid_dev, dtype=np.float64)  # type: ignore[union-attr]
-            except Exception:
-                resid = np.asarray(model.resid, dtype=np.float64)  # type: ignore[union-attr]
-        else:
-            resid = np.asarray(model.resid, dtype=np.float64)  # type: ignore[union-attr]
-        data[col_map["resid"]] = pl.Series(
-            col_map["resid"], resid, dtype=pl.Float64
-        )
-
-    if "resid_std" in col_map:
-        try:
-            resid_std = np.asarray(
-                model.get_influence().resid_studentized_internal,  # type: ignore[union-attr]
-                dtype=np.float64,
-            )
-            data[col_map["resid_std"]] = pl.Series(
-                col_map["resid_std"], resid_std, dtype=pl.Float64
-            )
-        except Exception:
-            n = len(index)
-            data[col_map["resid_std"]] = pl.Series(
-                col_map["resid_std"], [None] * n, dtype=pl.Float64
-            )
+    data.update(_extract_statsmodels_resid(model, col_map, n, residual_type))
 
     df = pl.DataFrame(data)
-    added_cols = [v for k, v in col_map.items()]
+    added_cols = list(col_map.values())
     return df, added_cols
 
 
@@ -294,7 +337,7 @@ def extract_from_statsmodels(
 # ---------------------------------------------------------------------------
 
 
-def extract_from_tobit(
+def extract_from_tobit(  # noqa: PLR0913
     model: object,
     dep_var: str,
     existing_cols: list[str],
@@ -341,17 +384,15 @@ def extract_from_tobit(
     Eco-Note B: Tobit の予測値には 2 種類ある:
 
     **latent** (デフォルト):
-        :math:`\\hat{y}^* = x'\\hat{\\beta}` — 潜在変数の線形インデックス。
+        潜在変数の線形インデックス x'β̂。
 
-    **observable** (左側打ち切り L の㉷):
-        :math:`E[y|x] = L\\,\\Phi(-z_L) + x'\\hat\\beta\\,\\Phi(z_L) + \\hat\\sigma\\,\\phi(z_L)`
+    **observable** (左側打ち切り L のみ, z = (x'β̂ - L)/σ̂):
+        E[y|x] = L·Φ(-z) + x'β̂·Φ(z) + σ̂·φ(z)
 
-        where :math:`z_L = (x'\\hat\\beta - L)/\\hat{\\sigma}`
+    **observable** (右側打ち切り U のみ, z = (U - x'β̂)/σ̂):
+        E[y|x] = x'β̂·Φ(z) - σ̂·φ(z) + U·(1-Φ(z))
 
-    **observable** (右側打ち切り U のみ):
-        :math:`E[y|x] = x'\\hat\\beta\\,\\Phi(z_U) - \\hat{\\sigma}\\,\\phi(z_U) + U(1-\\Phi(z_U))`
-
-        where :math:`z_U = (U - x'\\hat\\beta)/\\hat{\\sigma}`
+    両側打ち切りの場合は latent にフォールバックする。
     """
     col_map = _build_col_names(
         existing_cols=existing_cols,
@@ -364,32 +405,38 @@ def extract_from_tobit(
         supports_standardized=False,
     )
 
-    # py4etrics Tobit: .fittedvalues は潜在変数の緻形インデックス x'β を numpy.ndarray で返す
+    # py4etrics Tobit: .fittedvalues は潜在変数の
+    # 線形インデックス x'β を numpy.ndarray で返す
     # .predict() は NotImplementedError を投げるため使用しない
-    latent_arr = np.asarray(model.fittedvalues, dtype=np.float64)  # type: ignore[union-attr]
+    latent_arr = np.asarray(
+        model.fittedvalues,  # type: ignore[union-attr]
+        dtype=np.float64,
+    )
     n = len(latent_arr)
 
     # Eco-Note B: observable モードで打ち切りを考慮した E[y|x] を計算
     # - 片側打ち切りのみ対応（両側は latent にフォールバック）
     if fitted_type == "observable":
-        L = left_censoring_limit
-        U = right_censoring_limit
-        sigma = float(getattr(model, "scale", None) or 1.0)  # type: ignore[union-attr]
-        if L is not None and U is None:
-            # 左側打ち切りのみ: E[y|x] = LΦ(-z_L) + x'βΦ(z_L) + σφ(z_L)
-            z = (latent_arr - L) / sigma
+        left_lim = left_censoring_limit
+        right_lim = right_censoring_limit
+        sigma = float(  # type: ignore[union-attr]
+            getattr(model, "scale", None) or 1.0
+        )
+        if left_lim is not None and right_lim is None:
+            # 左側打ち切りのみ: E[y|x] = L·Φ(-z) + x'β·Φ(z) + σ·φ(z)
+            z = (latent_arr - left_lim) / sigma
             fitted_arr = (
-                L * scipy_norm.cdf(-z)
+                left_lim * scipy_norm.cdf(-z)
                 + latent_arr * scipy_norm.cdf(z)
                 + sigma * scipy_norm.pdf(z)
             )
-        elif U is not None and L is None:
-            # 右側打ち切りのみ: E[y|x] = x'βΦ(z_U) - σφ(z_U) + U(1-Φ(z_U))
-            z = (U - latent_arr) / sigma
+        elif right_lim is not None and left_lim is None:
+            # 右側打ち切りのみ: E[y|x] = x'β·Φ(z) - σ·φ(z) + U·(1-Φ(z))
+            z = (right_lim - latent_arr) / sigma
             fitted_arr = (
                 latent_arr * scipy_norm.cdf(z)
                 - sigma * scipy_norm.pdf(z)
-                + U * scipy_norm.cdf(-z)
+                + right_lim * scipy_norm.cdf(-z)
             )
         else:
             # 両側または情報なし: latent にフォールバック
@@ -401,9 +448,10 @@ def extract_from_tobit(
     else:
         fitted_arr = latent_arr
 
-    # Critical#3: row_indices が提供された場合は元テーブルの欲存除去後の行 ID を使用する
-    # 欲存値除去時に pandas.dropna() が元の整数インデックスを保持するため、
-    # numpy.arange(n) などで代替すると行ズれが発生する。
+    # Critical#3: row_indices が提供された場合は
+    # 元テーブルの欠損除去後の行 ID を使用する。
+    # pandas.dropna() が元の整数インデックスを保持するため、
+    # np.arange(n) で代替すると行ズレが発生する。
     if row_indices is not None:
         index = row_indices.astype(np.int64)
     else:
@@ -446,7 +494,7 @@ def extract_from_tobit(
 # ---------------------------------------------------------------------------
 
 
-def extract_from_linearmodels_panel(
+def extract_from_linearmodels_panel(  # noqa: PLR0913
     model: object,
     dep_var: str,
     entity_id_column: str,
@@ -626,7 +674,7 @@ def extract_from_linearmodels_iv(
         supports_standardized=False,
     )
 
-    # fitted_values は pandas DataFrame（shape: (n, 1), columns: ['fitted_values']）
+    # fitted_values は pandas DataFrame（shape: (n, 1)）
     # または pandas Series として返ることがある（バージョン依存）
     fv_obj = model.fitted_values  # type: ignore[union-attr]
     if hasattr(fv_obj, "squeeze"):

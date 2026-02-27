@@ -22,6 +22,7 @@ from economicon.services.regressions.diagnostics import (
     extract_from_statsmodels,
     extract_from_tobit,
 )
+from economicon.services.regressions.fitters import RegularizedResult
 from economicon.utils import ProcessingError, ValidationError
 from economicon.utils.validators import validate_existence
 
@@ -108,7 +109,7 @@ class AddDiagnosticColumns:
                 error_code=ErrorCode.DATA_NOT_FOUND,
                 message=_("Analysis result not found: resultId = %(id)s")
                 % {"id": self.result_id},
-            )
+            ) from None
 
         # pkl ファイルの存在確認
         if not analysis_result.has_model_file():
@@ -257,8 +258,6 @@ class AddDiagnosticColumns:
         tuple[pl.DataFrame, list[str]]
             (値 DataFrame, 追加される列名リスト)
         """
-        from economicon.services.regressions.fitters import RegularizedResult
-
         if model_type in self._STATSMODELS_TYPES:
             return extract_from_statsmodels(
                 model=raw_model,
@@ -272,7 +271,8 @@ class AddDiagnosticColumns:
             )
 
         if model_type == "tobit":
-            # Eco-Note B: 打ち切り値を regression_output から取得し observable 期待値の計算に使用
+            # Eco-Note B: 打ち切り値を regression_output から取得し
+            # observable 期待値の計算に使用する
             _diag = analysis_result.regression_output.get("diagnostics", {})  # type: ignore[union-attr]
             _cens = (
                 _diag.get("censoringLimits", {})
