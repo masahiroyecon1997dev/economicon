@@ -16,6 +16,9 @@ from economicon.models.regressions import AddDiagnosticColumnsRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.regressions.diagnostics import (
+    DiagnosticExtractOptions,
+    PanelExtractConfig,
+    TobitExtractConfig,
     extract_from_linearmodels_iv,
     extract_from_linearmodels_panel,
     extract_from_sklearn,
@@ -72,9 +75,13 @@ class AddDiagnosticColumns:
         self.include_interval = body.include_interval
         self.fe_type: Literal["total", "within"] = body.fe_type
         # Eco-Note A: Logit/Probit の残差種別
-        self.binary_residual_type = body.binary_residual_type
+        self.binary_residual_type: Literal["raw", "deviance"] = (
+            body.binary_residual_type
+        )
         # Eco-Note B: Tobit の予測値種別
-        self.tobit_fitted_type = body.tobit_fitted_type
+        self.tobit_fitted_type: Literal["latent", "observable"] = (
+            body.tobit_fitted_type
+        )
 
     # ------------------------------------------------------------------
     # バリデーション
@@ -259,13 +266,16 @@ class AddDiagnosticColumns:
             (値 DataFrame, 追加される列名リスト)
         """
         if model_type in self._STATSMODELS_TYPES:
-            return extract_from_statsmodels(
-                model=raw_model,
+            opts = DiagnosticExtractOptions(
                 dep_var=dep_var,
                 existing_cols=existing_cols,
                 target=self.target,
                 standardized=self.standardized,
                 include_interval=self.include_interval,
+            )
+            return extract_from_statsmodels(
+                model=raw_model,
+                options=opts,
                 # Eco-Note A: Logit/Probit 残差種別を渡す
                 residual_type=self.binary_residual_type,
             )
@@ -279,38 +289,53 @@ class AddDiagnosticColumns:
                 if isinstance(_diag, dict)
                 else {}
             )
-            return extract_from_tobit(
-                model=raw_model,
+            opts = DiagnosticExtractOptions(
                 dep_var=dep_var,
                 existing_cols=existing_cols,
                 target=self.target,
+            )
+            tobit_cfg = TobitExtractConfig(
                 row_indices=analysis_result.row_indices,  # type: ignore[union-attr]
                 fitted_type=self.tobit_fitted_type,
                 left_censoring_limit=_cens.get("left"),
                 right_censoring_limit=_cens.get("right"),
             )
+            return extract_from_tobit(
+                model=raw_model,
+                options=opts,
+                tobit_config=tobit_cfg,
+            )
 
         if model_type in ("fe", "re"):
             entity_col = analysis_result.entity_id_column  # type: ignore[union-attr]
             time_col = analysis_result.time_column  # type: ignore[union-attr]
-            return extract_from_linearmodels_panel(
-                model=raw_model,
+            opts = DiagnosticExtractOptions(
                 dep_var=dep_var,
-                entity_id_column=entity_col,
-                time_column=time_col,
                 existing_cols=existing_cols,
                 target=self.target,
                 include_interval=self.include_interval,
+            )
+            panel_cfg = PanelExtractConfig(
+                entity_id_column=entity_col,
+                time_column=time_col,
                 fe_type=self.fe_type,
+            )
+            return extract_from_linearmodels_panel(
+                model=raw_model,
+                options=opts,
+                panel_config=panel_cfg,
             )
 
         if model_type == "iv":
-            return extract_from_linearmodels_iv(
-                model=raw_model,
+            opts = DiagnosticExtractOptions(
                 dep_var=dep_var,
                 existing_cols=existing_cols,
                 target=self.target,
                 include_interval=self.include_interval,
+            )
+            return extract_from_linearmodels_iv(
+                model=raw_model,
+                options=opts,
             )
 
         if model_type in self._SKLEARN_TYPES:
@@ -321,11 +346,14 @@ class AddDiagnosticColumns:
                         "Unexpected model object for regularized regression"
                     ),
                 )
-            return extract_from_sklearn(
-                reg_result=raw_model,
+            opts = DiagnosticExtractOptions(
                 dep_var=dep_var,
                 existing_cols=existing_cols,
                 target=self.target,
+            )
+            return extract_from_sklearn(
+                reg_result=raw_model,
+                options=opts,
             )
 
         raise ProcessingError(
