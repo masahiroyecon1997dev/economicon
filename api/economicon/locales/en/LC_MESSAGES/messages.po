@@ -307,3 +307,11 @@ msgstr "{} '{}' is empty."
 #, python-brace-format
 msgid "Row count mismatch: CSV has {csv_rows} rows, but table has {expected_rows} rows."
 msgstr "Row count mismatch: CSV has {csv_rows} rows, but table has {expected_rows} rows."
+
+#: economicon/services/regressions/common.py
+msgid "Explanatory variable matrix is singular. Perfect multicollinearity detected. Please review your explanatory variable selection."
+msgstr "Explanatory variable matrix is singular. Perfect multicollinearity detected. Please review your explanatory variable selection."
+
+#: economicon/models/tables.py
+msgid "newTableName must differ from oldTableName."
+msgstr "newTableName must differ from oldTableName."

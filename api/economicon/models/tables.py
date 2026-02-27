@@ -5,6 +5,7 @@ from typing import Annotated, Any, Self
 from pydantic import BeforeValidator, Field, model_validator
 from pydantic_core import PydanticCustomError
 
+from economicon.i18n.translation import gettext as _
 from economicon.models.common import BaseRequest, BaseResult
 from economicon.models.entities import SimulationColumnConfig
 from economicon.models.enums import FilterOperatorType, JoinType
@@ -173,10 +174,7 @@ class RenameTableRequestBody(BaseRequest):
         self,
     ) -> RenameTableRequestBody:
         if self.old_table_name == self.new_table_name:
-            raise ValueError(
-                "newTableName には oldTableName と"
-                "異なる名前を指定してください。"
-            )
+            raise ValueError(_("newTableName must differ from oldTableName."))
         return self
 
 

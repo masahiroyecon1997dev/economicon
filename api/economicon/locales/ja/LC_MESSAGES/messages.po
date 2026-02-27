@@ -306,3 +306,11 @@ msgstr "{} '{}'は空です。"
 #, python-brace-format
 msgid "Row count mismatch: CSV has {csv_rows} rows, but table has {expected_rows} rows."
 msgstr "行数の不一致: CSVには{csv_rows}行ありますが、テーブルには{expected_rows}行あります。"
+
+#: economicon/services/regressions/common.py
+msgid "Explanatory variable matrix is singular. Perfect multicollinearity detected. Please review your explanatory variable selection."
+msgstr "説明変数行列が特異です。完全な多重共線性が検出されました。説明変数の組み合わせを見直してください。"
+
+#: economicon/models/tables.py
+msgid "newTableName must differ from oldTableName."
+msgstr "newTableName には oldTableName と異なる名前を指定してください。"
