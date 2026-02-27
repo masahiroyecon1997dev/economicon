@@ -1,3 +1,5 @@
+import datetime
+
 import polars as pl
 import pytest
 from fastapi import status
@@ -75,7 +77,10 @@ def test_cast_column_str_to_float_with_comma(client, tables_store):
 
 
 def test_cast_column_str_to_date(client, tables_store):
-    """正常系 (Date): "2026/02/26" をフォーマット %Y/%m/%d で date 型に変換できること"""
+    """
+    正常系 (Date): "2026/02/26" をフォーマット %Y/%m/%d で
+    date 型に変換できること
+    """
     payload = {
         "tableName": TABLE_NAME,
         "sourceColumnName": COL_B,
@@ -94,8 +99,6 @@ def test_cast_column_str_to_date(client, tables_store):
     df = tables_store.get_table(TABLE_NAME).table
     assert df["B_date"].dtype == pl.Date
     # "2026/02/26" → date(2026, 2, 26)
-    import datetime
-
     assert df["B_date"][0] == datetime.date(2026, 2, 26)
     assert df["B_date"][1] == datetime.date(2025, 1, 1)
     # "invalid" → null (strict=False)
@@ -124,7 +127,10 @@ def test_cast_column_insert_position(client, tables_store):
 
 
 def test_cast_column_int_non_strict_null(client, tables_store):
-    """正常系 (Non-Strict): strict=False のとき不適切な文字列が null になり処理が続行されること"""
+    """
+    正常系 (Non-Strict): strict=False のとき不適切な文字列が
+    null になり処理が続行されること
+    """
     payload = {
         "tableName": TABLE_NAME,
         "sourceColumnName": COL_A,
@@ -154,7 +160,10 @@ def test_cast_column_int_non_strict_null(client, tables_store):
 
 
 def test_cast_column_strict_error(client, tables_store):
-    """異常系 (Strict): strict=True のとき不適切な文字列で 400 エラーが発生すること"""
+    """
+    異常系 (Strict): strict=True のとき不適切な文字列で
+    400 エラーが発生すること
+    """
     payload = {
         "tableName": TABLE_NAME,
         "sourceColumnName": COL_A,
@@ -173,7 +182,10 @@ def test_cast_column_strict_error(client, tables_store):
 
 
 def test_cast_column_strict_date_error(client, tables_store):
-    """異常系 (Strict/Date): strict=True のとき不適切な日付文字列で 400 エラーが発生すること"""
+    """
+    異常系 (Strict/Date): strict=True のとき不適切な日付文字列で
+    400 エラーが発生すること
+    """
     payload = {
         "tableName": TABLE_NAME,
         "sourceColumnName": COL_B,
@@ -239,7 +251,10 @@ def test_cast_column_invalid_position_column(client, tables_store):
 
 
 def test_cast_column_duplicate_column_name(client, tables_store):
-    """異常系: 既存列名と重複する新列名を指定した場合に 400 エラーが発生すること"""
+    """
+    異常系: 既存列名と重複する新列名を指定した場合に
+    400 エラーが発生すること
+    """
     payload = {
         "tableName": TABLE_NAME,
         "sourceColumnName": COL_A,

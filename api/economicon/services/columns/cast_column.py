@@ -12,9 +12,12 @@ from economicon.utils.validators import (
     validate_non_existence,
 )
 
+# polars.type_aliases は Polars 1.0 で非推奨のため独自に定義
+type PolarsDataType = pl.DataType | type[pl.DataType]
+
 # Polars型マッピング（date/datetime は str メソッドで別途処理）
 _SCALAR_TYPE_MAP: dict[
-    Literal["float", "int", "str", "bool"], pl.PolarsDataType
+    Literal["float", "int", "str", "bool"], PolarsDataType
 ] = {
     "float": pl.Float64,
     "int": pl.Int64,
@@ -85,6 +88,71 @@ class CastColumn:
             target=self.PARAM_NAMES["new_column_name"],
         )
 
+    def _cast_error(self) -> ValidationError:
+        """型変換失敗時の ValidationError を生成する"""
+        message = _(
+            "Type conversion failed: column '{}' cannot be cast to '{}'"
+        ).format(self.source_column_name, self.target_type)
+        return ValidationError(
+            error_code=ErrorCode.CAST_COLUMN_TYPE_ERROR,
+            message=message,
+            target=self.PARAM_NAMES["source_column_name"],
+        )
+
+    def _build_scalar_expr(
+        self,
+        df: pl.DataFrame,
+        expr: pl.Expr,
+        dtype: PolarsDataType,
+    ) -> pl.Expr:
+        """スカラー型変換エクスプレッションを構築する"""
+        if self.strict:
+            try:
+                df.select(expr.cast(dtype, strict=True))
+            except Exception as e:
+                raise self._cast_error() from e
+        return expr.cast(dtype, strict=self.strict)
+
+    def _build_temporal_expr(
+        self,
+        df: pl.DataFrame,
+        expr: pl.Expr,
+        kind: Literal["date", "datetime"],
+    ) -> pl.Expr:
+        """日付/日時型変換エクスプレッションを構築する"""
+        if kind == "date":
+            cast_expr = expr.str.to_date(
+                format=self.datetime_format, strict=self.strict
+            )
+        else:
+            cast_expr = expr.str.to_datetime(
+                format=self.datetime_format, strict=self.strict
+            )
+        # strict=True の場合は前処理済み expr で即時評価して例外を確認する
+        if self.strict:
+            try:
+                df.select(cast_expr)
+            except Exception as e:
+                raise self._cast_error() from e
+        return cast_expr
+
+    def _build_expr(self, df: pl.DataFrame, expr: pl.Expr) -> pl.Expr:
+        """型変換エクスプレッションを構築する"""
+        if self.target_type in _SCALAR_TYPE_MAP:
+            return self._build_scalar_expr(
+                df, expr, _SCALAR_TYPE_MAP[self.target_type]
+            )
+        if self.target_type == "date":
+            return self._build_temporal_expr(df, expr, "date")
+        if self.target_type == "datetime":
+            return self._build_temporal_expr(df, expr, "datetime")
+        # Literal 型制約により通常ここには到達しない
+        raise ProcessingError(
+            error_code=ErrorCode.CAST_COLUMN_PROCESS_ERROR,
+            message=_("Unsupported target type: {}").format(self.target_type),
+            detail=str(self.target_type),
+        )
+
     def execute(self):
         table_info = self.tables_store.get_table(self.table_name)
         df = table_info.table
@@ -99,86 +167,7 @@ class CastColumn:
             if self.remove_commas:
                 expr = expr.str.replace_all(",", "")
 
-        # --- 型変換の適用 ---
-        if self.target_type in _SCALAR_TYPE_MAP:
-            # strict=True の場合、Polarsが変換失敗時に例外を送出する。
-            # その例外を捕捉して ValidationError (HTTP 400) に変換する。
-            if self.strict:
-                try:
-                    expr = expr.cast(
-                        _SCALAR_TYPE_MAP[self.target_type], strict=True
-                    )
-                    # Polars はlazyなので即時評価して例外を確認する
-                    df.select(expr)
-                except Exception as e:
-                    message = _(
-                        "Type conversion failed: column '{}' cannot be "
-                        "cast to '{}'"
-                    ).format(self.source_column_name, self.target_type)
-                    raise ValidationError(
-                        error_code=ErrorCode.CAST_COLUMN_TYPE_ERROR,
-                        message=message,
-                        target=self.PARAM_NAMES["source_column_name"],
-                    ) from e
-            else:
-                # strict=False: 変換失敗値を null に置き換える
-                expr = expr.cast(
-                    _SCALAR_TYPE_MAP[self.target_type], strict=False
-                )
-
-        elif self.target_type == "date":
-            if self.strict:
-                try:
-                    df.select(
-                        pl.col(self.source_column_name).str.to_date(
-                            format=self.datetime_format, strict=True
-                        )
-                    )
-                except Exception as e:
-                    message = _(
-                        "Type conversion failed: column '{}' cannot be "
-                        "cast to '{}'"
-                    ).format(self.source_column_name, self.target_type)
-                    raise ValidationError(
-                        error_code=ErrorCode.CAST_COLUMN_TYPE_ERROR,
-                        message=message,
-                        target=self.PARAM_NAMES["source_column_name"],
-                    ) from e
-            expr = expr.str.to_date(
-                format=self.datetime_format, strict=self.strict
-            )
-
-        elif self.target_type == "datetime":
-            if self.strict:
-                try:
-                    df.select(
-                        pl.col(self.source_column_name).str.to_datetime(
-                            format=self.datetime_format, strict=True
-                        )
-                    )
-                except Exception as e:
-                    message = _(
-                        "Type conversion failed: column '{}' cannot be "
-                        "cast to '{}'"
-                    ).format(self.source_column_name, self.target_type)
-                    raise ValidationError(
-                        error_code=ErrorCode.CAST_COLUMN_TYPE_ERROR,
-                        message=message,
-                        target=self.PARAM_NAMES["source_column_name"],
-                    ) from e
-            expr = expr.str.to_datetime(
-                format=self.datetime_format, strict=self.strict
-            )
-
-        else:
-            # Literal 型制約により通常ここには到達しない
-            raise ProcessingError(
-                error_code=ErrorCode.CAST_COLUMN_PROCESS_ERROR,
-                message=_("Unsupported target type: {}").format(
-                    self.target_type
-                ),
-                detail=str(self.target_type),
-            )
+        expr = self._build_expr(df, expr)
 
         # --- 新列の追加と挿入位置の調整 ---
         try:
