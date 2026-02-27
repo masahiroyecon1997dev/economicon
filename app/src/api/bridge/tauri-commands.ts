@@ -93,6 +93,11 @@ export const getAuthToken = async (): Promise<string> => {
   return await invoke<string>("get_auth_token");
 };
 
+/** FastAPI サイドカーが listen しているポート番号を返す */
+export const getApiPort = async (): Promise<number> => {
+  return await invoke<number>("get_api_port");
+};
+
 export const fetchDataToArrow = async (
   tableName: string,
   startRow: number = 0,
