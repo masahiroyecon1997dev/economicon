@@ -1,0 +1,52 @@
+{
+  "ols": {
+    "coefficients": {
+      "(Intercept)": -42.7144,
+      "value": 0.1156,
+      "capital": 0.2307
+    },
+    "std_errors": {
+      "(Intercept)": 9.5117,
+      "value": 0.0058,
+      "capital": 0.0255
+    },
+    "r_squared": 0.8124
+  },
+  "fe": {
+    "coefficients": {
+      "value": 0.1101,
+      "capital": 0.3101
+    },
+    "std_errors": {
+      "value": 0.0119,
+      "capital": 0.0174
+    },
+    "r_squared": [0.7668, 0.7531]
+  },
+  "re": {
+    "coefficients": {
+      "(Intercept)": -57.8344,
+      "value": 0.1098,
+      "capital": 0.3081
+    },
+    "std_errors": {
+      "(Intercept)": 28.8989,
+      "value": 0.0105,
+      "capital": 0.0172
+    },
+    "r_squared": [0.7695, 0.7672]
+  },
+  "iv": {
+    "coefficients": {
+      "(Intercept)": 1536,
+      "fit_capital": -10,
+      "value": 1.25
+    },
+    "std_errors": {
+      "(Intercept)": 15321664395.9807,
+      "fit_capital": 98896691.736,
+      "value": 11071209.991
+    },
+    "r_squared": 0.7343
+  }
+}
