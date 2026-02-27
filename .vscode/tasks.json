@@ -33,6 +33,28 @@
         "reveal": "always",
         "panel": "shared"
       }
+    },
+    {
+      "type": "shell",
+      "command": "cd api; .venv\\Scripts\\ruff check .",
+      "label": "Ruff: Check API",
+      "detail": "Run ruff linter on all Python files under api/",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "cd api; .venv\\Scripts\\pybabel compile -f -d economicon/locales",
+      "label": "Babel: Compile Messages",
+      "detail": "Compile ja/en messages.po to messages.mo under api/economicon/locales",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
     }
   ]
 }
