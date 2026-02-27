@@ -315,3 +315,7 @@ msgstr "Explanatory variable matrix is singular. Perfect multicollinearity detec
 #: economicon/models/tables.py
 msgid "newTableName must differ from oldTableName."
 msgstr "newTableName must differ from oldTableName."
+
+#: economicon/models/columns.py
+msgid "newColumnName must differ from oldColumnName."
+msgstr "newColumnName must differ from oldColumnName."
