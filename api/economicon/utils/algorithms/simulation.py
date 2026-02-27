@@ -41,6 +41,9 @@ def generate_simulation_data(
             d.sample_size,
             row_count,
         ),
+        DistributionType.NEGATIVE_BINOMIAL: lambda d: rng.negative_binomial(
+            d.n, d.p, row_count
+        ),
         DistributionType.FIXED: lambda d: np.full(row_count, d.value),
     }
 

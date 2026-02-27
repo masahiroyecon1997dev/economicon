@@ -14,6 +14,7 @@ class DistributionType(StrEnum):
     POISSON = "poisson"
     GEOMETRIC = "geometric"
     HYPERGEOMETRIC = "hypergeometric"
+    NEGATIVE_BINOMIAL = "negative_binomial"
     FIXED = "fixed"
 
 

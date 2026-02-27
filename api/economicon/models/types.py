@@ -14,6 +14,7 @@ from economicon.models.common import (
     HypergeometricParams,
     LognormalParams,
     LogParams,
+    NegativeBinomialParams,
     NormalParams,
     PoissonParams,
     PowerParams,
@@ -226,6 +227,7 @@ type DistributionParams = (
     | PoissonParams
     | GeometricParams
     | HypergeometricParams
+    | NegativeBinomialParams
     | FixedParams
 )
 

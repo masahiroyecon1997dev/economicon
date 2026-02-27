@@ -93,6 +93,11 @@ _COL_HYPERGEOMETRIC = {
         "sampleSize": 10,
     },
 }
+# 単独カラム設定（負の二項分布）
+_COL_NEG_BINOMIAL = {
+    "columnName": "neg_binomial_col",
+    "distribution": {"type": "negative_binomial", "n": 5, "p": 0.3},
+}
 
 
 # ─────────────────────────────────────────────────────────────
@@ -209,7 +214,7 @@ def test_create_table_with_multiple_columns(client, tables_store):
 
 
 def test_create_table_with_all_distributions(client, tables_store):
-    """全 13 分布タイプを含むテーブルを正常に作成できる"""
+    """全 14 分布タイプを含むテーブルを正常に作成できる"""
     all_cols = [
         _COL_NORMAL,
         _COL_UNIFORM,
@@ -224,6 +229,7 @@ def test_create_table_with_all_distributions(client, tables_store):
         _COL_POISSON,
         _COL_GEOMETRIC,
         _COL_HYPERGEOMETRIC,
+        _COL_NEG_BINOMIAL,
     ]
     payload = {
         "tableName": "AllDistTable",
@@ -256,6 +262,7 @@ def test_create_table_with_all_distributions(client, tables_store):
     assert all(v >= 0 for v in df["poisson_col"])
     assert all(v >= 1 for v in df["geometric_col"])
     assert all(0 <= v <= hypergeometric_max for v in df["hypergeometric_col"])
+    assert all(v >= 0 for v in df["neg_binomial_col"])
 
 
 # ─────────────────────────────────────────────────────────────
@@ -531,3 +538,74 @@ def test_n7_table_name_only_spaces(client, tables_store):
     assert response_data["details"] == [
         "tableNameは1文字以上で入力してください。"
     ]
+
+
+# ─────────────────────────────────────────────────────────────
+# 異常系 422：負の二項分布パラメータバリデーション
+# ─────────────────────────────────────────────────────────────
+
+
+def test_create_table_neg_binomial_probability_zero(client, tables_store):
+    """負の二項分布で p=0 の場合は 422 VALIDATION_ERROR（gt=0 制約）"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "simulationColumns": [
+            {
+                "columnName": "col1",
+                "distribution": {
+                    "type": "negative_binomial",
+                    "n": 5,
+                    "p": 0.0,
+                },
+            }
+        ],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumns" in response_data["message"]
+
+
+def test_create_table_neg_binomial_probability_over_one(client, tables_store):
+    """負の二項分布で p=1.5 の場合は 422 VALIDATION_ERROR（le=1 制約）"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "simulationColumns": [
+            {
+                "columnName": "col1",
+                "distribution": {
+                    "type": "negative_binomial",
+                    "n": 5,
+                    "p": 1.5,
+                },
+            }
+        ],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumns" in response_data["message"]
+
+
+def test_create_table_neg_binomial_n_zero(client, tables_store):
+    """負の二項分布で n=0 の場合は 422 VALIDATION_ERROR（gt=0 制約）"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "simulationColumns": [
+            {
+                "columnName": "col1",
+                "distribution": {
+                    "type": "negative_binomial",
+                    "n": 0,
+                    "p": 0.3,
+                },
+            }
+        ],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumns" in response_data["message"]
