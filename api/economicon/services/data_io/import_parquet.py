@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import polars as pl
 
 from economicon.core.enums import ErrorCode
@@ -18,6 +20,11 @@ class ImportParquet:
     指定されたパスのPARQUETファイルを解析し、指定されたテーブル名で登録します。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "file_path": "filePath",
+        "table_name": "tableName",
+    }
+
     def __init__(
         self,
         body: ImportFileRequestBody,
@@ -29,22 +36,17 @@ class ImportParquet:
         self.file_path = body.file_path
         # テーブル名
         self.table_name = body.table_name
-        # パラメータ名のマッピング
-        self.param_names = {
-            "file_path": "filePath",
-            "table_name": "tableName",
-        }
 
     def validate(self):
         validate_file_path(
-            path_str=self.file_path, target=self.param_names["file_path"]
+            path_str=self.file_path, target=self.PARAM_NAMES["file_path"]
         )
         table_name_list = self.tables_store.get_table_name_list()
         # テーブル名のバリデーション
         validate_non_existence(
             value=self.table_name,
             existing_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
 
     def execute(self):

@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import polars as pl
 
 from economicon.core.enums import ErrorCode
@@ -19,6 +21,12 @@ class CreateUnionTable:
     すべてのテーブルに共通する列名を指定して、それらの行を結合します。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "union_table_name": "unionTableName",
+        "table_names": "tableNames",
+        "column_names": "columnNames",
+    }
+
     def __init__(
         self,
         body: CreateUnionTableRequestBody,
@@ -31,12 +39,6 @@ class CreateUnionTable:
         self.table_names = body.table_names
         # ユニオンする列名リスト
         self.column_names = body.column_names
-        # パラメータ名のマッピング
-        self.param_names = {
-            "union_table_name": "unionTableName",
-            "table_names": "tableNames",
-            "column_names": "columnNames",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -45,13 +47,13 @@ class CreateUnionTable:
         validate_non_existence(
             value=self.union_table_name,
             existing_list=table_name_list,
-            target=self.param_names["union_table_name"],
+            target=self.PARAM_NAMES["union_table_name"],
         )
 
         validate_existence(
             value=self.table_names,
             valid_list=table_name_list,
-            target=self.param_names["table_names"],
+            target=self.PARAM_NAMES["table_names"],
         )
 
         # すべてのテーブルで指定された列が存在することをチェック
@@ -62,7 +64,7 @@ class CreateUnionTable:
             validate_existence(
                 value=self.column_names,
                 valid_list=table_column_name_list,
-                target=self.param_names["column_names"],
+                target=self.PARAM_NAMES["column_names"],
             )
 
     def execute(self):

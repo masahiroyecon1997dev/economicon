@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import ClassVar
 
 import polars as pl
 
@@ -29,6 +30,13 @@ class CreateTable:
     使用します。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "row_count": "rowCount",
+        "column_names": "columnNames",
+        "file_path": "filePath",
+    }
+
     def __init__(
         self,
         body: CreateTableRequestBody,
@@ -43,12 +51,6 @@ class CreateTable:
         self.csv_separator = body.csv_separator
         self.csv_encoding = body.csv_encoding
         self.excel_sheet_name = body.excel_sheet_name
-        self.param_names = {
-            "table_name": "tableName",
-            "row_count": "rowCount",
-            "column_names": "columnNames",
-            "file_path": "filePath",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -56,17 +58,17 @@ class CreateTable:
         validate_non_existence(
             value=self.table_name,
             existing_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         if self.file_path is not None:
             # ファイルあり: パスの存在と拡張子を検証
             validate_file_path(
                 path_str=self.file_path,
-                target=self.param_names["file_path"],
+                target=self.PARAM_NAMES["file_path"],
             )
             validate_file_format(
                 path_str=self.file_path,
-                target=self.param_names["file_path"],
+                target=self.PARAM_NAMES["file_path"],
                 allowed_extensions=_ALLOWED_EXTENSIONS,
             )
 

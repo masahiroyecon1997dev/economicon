@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import RenameColumnRequestBody
@@ -17,6 +19,12 @@ class RenameColumn:
     同じ列名が既に存在する場合はエラーとなります。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "new_column_name": "newColumnName",
+        "old_column_name": "oldColumnName",
+    }
+
     def __init__(
         self,
         body: RenameColumnRequestBody,
@@ -29,12 +37,6 @@ class RenameColumn:
         self.old_column_name = body.old_column_name
         # 変更後の列名
         self.new_column_name = body.new_column_name
-        # パラメータ名のマッピング
-        self.param_names = {
-            "table_name": "tableName",
-            "new_column_name": "newColumnName",
-            "old_column_name": "oldColumnName",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -42,7 +44,7 @@ class RenameColumn:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         column_name_list = self.tables_store.get_column_name_list(
             self.table_name
@@ -51,13 +53,13 @@ class RenameColumn:
         validate_existence(
             value=self.old_column_name,
             valid_list=column_name_list,
-            target=self.param_names["old_column_name"],
+            target=self.PARAM_NAMES["old_column_name"],
         )
         # 変更後の列名が既存の列名と重複しないことを検証
         validate_non_existence(
             value=self.new_column_name,
             existing_list=column_name_list,
-            target=self.param_names["new_column_name"],
+            target=self.PARAM_NAMES["new_column_name"],
         )
 
     def execute(self):

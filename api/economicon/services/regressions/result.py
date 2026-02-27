@@ -5,6 +5,8 @@ AnalysisResultStoreへのアクセスをラップし、
 統一されたエラーハンドリングとバリデーションを提供します。
 """
 
+from typing import ClassVar
+
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.services.data.analysis_result_store import AnalysisResultStore
@@ -18,7 +20,6 @@ class GetAllAnalysisResults:
 
     def __init__(self, result_store: AnalysisResultStore):
         self.result_store = result_store
-        self.param_names = {}
 
     def validate(self):
         """バリデーション（特になし）"""
@@ -51,10 +52,11 @@ class GetAnalysisResult:
     特定の分析結果を取得するサービス
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {"result_id": "resultId"}
+
     def __init__(self, result_id: str, result_store: AnalysisResultStore):
         self.result_store = result_store
         self.result_id = result_id
-        self.param_names = {"result_id": "resultId"}
 
     def validate(self):
         """
@@ -104,10 +106,11 @@ class DeleteAnalysisResult:
     特定の分析結果を削除するサービス
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {"result_id": "resultId"}
+
     def __init__(self, result_id: str, result_store: AnalysisResultStore):
         self.result_store = result_store
         self.result_id = result_id
-        self.param_names = {"result_id": "resultId"}
 
     def validate(self):
         """
@@ -159,7 +162,6 @@ class ClearAllAnalysisResults:
 
     def __init__(self, result_store: AnalysisResultStore):
         self.result_store = result_store
-        self.param_names = {}
 
     def validate(self):
         """バリデーション（特になし）"""

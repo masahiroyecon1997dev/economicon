@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import polars as pl
 
 from economicon.core.enums import ErrorCode
@@ -19,6 +21,15 @@ class FilterSingleCondition:
     新しいテーブルを作成します。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "new_table_name": "newTableName",
+        "table_name": "tableName",
+        "column_names": "columnName",
+        "condition": "condition",
+        "is_compare_column": "isCompareColumn",
+        "compare_value": "compareValue",
+    }
+
     def __init__(
         self,
         body: FilterSingleConditionRequestBody,
@@ -37,15 +48,6 @@ class FilterSingleCondition:
         self.is_compare_column = body.is_compare_column
         # 比較値
         self.compare_value = body.compare_value
-        # パラメータ名のマッピング
-        self.param_names = {
-            "new_table_name": "newTableName",
-            "table_name": "tableName",
-            "column_names": "columnName",
-            "condition": "condition",
-            "is_compare_column": "isCompareColumn",
-            "compare_value": "compareValue",
-        }
 
     def validate(self):
         table_name_list = self.manager.get_table_name_list()
@@ -53,27 +55,27 @@ class FilterSingleCondition:
         validate_non_existence(
             value=self.new_table_name,
             existing_list=table_name_list,
-            target=self.param_names["new_table_name"],
+            target=self.PARAM_NAMES["new_table_name"],
         )
         # 既存テーブル名の存在チェック
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         # カラム名の存在チェック
         column_names = self.manager.get_column_name_list(self.table_name)
         validate_existence(
             value=self.column_name,
             valid_list=column_names,
-            target=self.param_names["column_names"],
+            target=self.PARAM_NAMES["column_names"],
         )
         # 比較値がカラムの場合の存在チェック
         if self.is_compare_column:
             validate_existence(
                 value=self.compare_value,
                 valid_list=column_names,
-                target=self.param_names["compare_value"],
+                target=self.PARAM_NAMES["compare_value"],
             )
 
     def execute(self):

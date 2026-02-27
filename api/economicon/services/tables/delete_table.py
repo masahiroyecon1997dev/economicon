@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import DeleteTableRequestBody
@@ -14,6 +16,10 @@ class DeleteTable:
     削除後、テーブルは復元できません。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+    }
+
     def __init__(
         self,
         body: DeleteTableRequestBody,
@@ -22,8 +28,6 @@ class DeleteTable:
         self.tables_store = tables_store
         # 削除するテーブル名
         self.table_name = body.table_name
-        # パラメータ名のマッピング
-        self.param_names = {"table_name": "tableName"}
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -31,7 +35,7 @@ class DeleteTable:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
 
     def execute(self):

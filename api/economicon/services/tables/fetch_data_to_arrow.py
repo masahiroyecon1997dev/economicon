@@ -3,6 +3,7 @@
 """
 
 import io
+from typing import ClassVar
 
 import pyarrow as pa
 
@@ -26,6 +27,12 @@ class FetchDataToArrow:
     仮想スクロール用に500行単位でのチャンク取得を想定しています。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "start_row": "startRow",
+        "chunk_size": "chunkSize",
+    }
+
     def __init__(
         self,
         body: FetchDataToArrowRequestBody,
@@ -47,11 +54,6 @@ class FetchDataToArrow:
         self.table_name = body.table_name
         self.start_row = body.start_row
         self.chunk_size = body.chunk_size
-        self.param_names = {
-            "table_name": "tableName",
-            "start_row": "startRow",
-            "chunk_size": "chunkSize",
-        }
 
     def validate(self):
         """
@@ -68,14 +70,14 @@ class FetchDataToArrow:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         row_count = self.tables_store.get_table(self.table_name).row_count - 1
         # 開始行番号の妥当性チェック
         validate_row_count_limit(
             current_row_count=row_count,
             requested_count=self.start_row,
-            target=self.param_names["start_row"],
+            target=self.PARAM_NAMES["start_row"],
         )
 
     def execute(self):

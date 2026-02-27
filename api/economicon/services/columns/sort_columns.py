@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import SortColumnsRequestBody
@@ -14,6 +16,13 @@ class SortColumns:
     複数列でのソート、昇順・降順の指定が可能です。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "sort_columns": "sortColumns",
+        "column_name": "columnName",
+        "ascending": "ascending",
+    }
+
     def __init__(
         self,
         body: SortColumnsRequestBody,
@@ -22,12 +31,6 @@ class SortColumns:
         self.tables_store = tables_store
         self.table_name = body.table_name
         self.sort_columns = body.sort_columns
-        self.param_names = {
-            "table_name": "tableName",
-            "sort_columns": "sortColumns",
-            "column_name": "columnName",
-            "ascending": "ascending",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -35,7 +38,7 @@ class SortColumns:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         column_name_list = self.tables_store.get_column_name_list(
             self.table_name
@@ -45,7 +48,7 @@ class SortColumns:
             validate_existence(
                 value=sort_spec.column_name,
                 valid_list=column_name_list,
-                target=self.param_names["column_name"],
+                target=self.PARAM_NAMES["column_name"],
             )
 
     def execute(self):

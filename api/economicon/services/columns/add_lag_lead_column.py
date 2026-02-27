@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import polars as pl
 
 from economicon.core.enums import ErrorCode
@@ -20,6 +22,15 @@ class AddLagLeadColumn:
     グループ内でのラグ・リード変数を作成します。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "source_column_name": "sourceColumn",
+        "new_column_name": "newColumnName",
+        "add_position_column": "addPositionColumn",
+        "periods": "periods",
+        "group_columns": "groupColumns",
+    }
+
     def __init__(
         self,
         body: AddLagLeadColumnRequestBody,
@@ -32,14 +43,6 @@ class AddLagLeadColumn:
         self.add_position_column = body.add_position_column
         self.periods = body.periods
         self.group_columns = body.group_columns or []
-        self.param_names = {
-            "table_name": "tableName",
-            "source_column_name": "sourceColumn",
-            "new_column_name": "newColumnName",
-            "add_position_column": "addPositionColumn",
-            "periods": "periods",
-            "group_columns": "groupColumns",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -47,7 +50,7 @@ class AddLagLeadColumn:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         column_name_list = self.tables_store.get_column_name_list(
             self.table_name
@@ -56,20 +59,20 @@ class AddLagLeadColumn:
         validate_existence(
             value=self.source_column,
             valid_list=column_name_list,
-            target=self.param_names["source_column_name"],
+            target=self.PARAM_NAMES["source_column_name"],
         )
         # 追加する列名が既存の列名と重複しないことを検証
         validate_non_existence(
             value=self.new_column_name,
             existing_list=column_name_list,
-            target=self.param_names["new_column_name"],
+            target=self.PARAM_NAMES["new_column_name"],
         )
 
         # 追加位置の列名が既存の列名の中に存在することを検証
         validate_existence(
             value=self.add_position_column,
             valid_list=column_name_list,
-            target=self.param_names["add_position_column"],
+            target=self.PARAM_NAMES["add_position_column"],
         )
 
         # グループ列の存在確認
@@ -77,7 +80,7 @@ class AddLagLeadColumn:
             validate_existence(
                 value=self.group_columns,
                 valid_list=column_name_list,
-                target=self.param_names["group_columns"],
+                target=self.PARAM_NAMES["group_columns"],
             )
 
     def execute(self):

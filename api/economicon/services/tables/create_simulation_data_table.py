@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import polars as pl
 
 from economicon.core.enums import ErrorCode
@@ -18,6 +20,12 @@ class CreateSimulationDataTable:
     各列は分布に従うランダムデータまたは固定値を持つことができます。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "row_count": "rowCount",
+        "simulation_columns": "simulationColumns",
+    }
+
     def __init__(
         self,
         body: CreateSimulationDataTableRequestBody,
@@ -27,11 +35,6 @@ class CreateSimulationDataTable:
         self.table_name = body.table_name
         self.row_count = body.row_count
         self.simulation_columns = body.simulation_columns
-        self.param_names = {
-            "table_name": "tableName",
-            "row_count": "rowCount",
-            "simulation_columns": "simulationColumns",
-        }
 
     def validate(self):
         # テーブル名の検証
@@ -39,7 +42,7 @@ class CreateSimulationDataTable:
         validate_non_existence(
             value=self.table_name,
             existing_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
 
     def execute(self):
