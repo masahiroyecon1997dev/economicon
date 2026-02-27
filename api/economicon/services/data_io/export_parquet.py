@@ -1,4 +1,5 @@
 import os
+from typing import ClassVar
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
@@ -21,6 +22,12 @@ class ExportParquet:
     指定されたテーブル名のデータを Parquet ファイルとして出力します。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "directory_path": "directoryPath",
+        "file_name": "fileName",
+    }
+
     def __init__(
         self,
         body: ExportFileRequestBody,
@@ -31,11 +38,6 @@ class ExportParquet:
         self.directory_path = body.directory_path
         # file_name には拡張子を含まない
         self.file_name = body.file_name
-        self.param_names = {
-            "table_name": "tableName",
-            "directory_path": "directoryPath",
-            "file_name": "fileName",
-        }
 
     def validate(self):
         # 対象テーブルが存在することを検証
@@ -43,12 +45,12 @@ class ExportParquet:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         # ディレクトリパスのバリデーション
         validate_directory_path(
             path_str=self.directory_path,
-            target=self.param_names["directory_path"],
+            target=self.PARAM_NAMES["directory_path"],
         )
 
     def execute(self):

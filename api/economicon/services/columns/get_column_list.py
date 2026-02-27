@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import GetColumnListRequestBody
@@ -13,6 +15,11 @@ class GetColumnList:
     データベースの指定されたテーブルに存在するすべてのカラム名を取得します。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "is_number_only": "isNumberOnly",
+    }
+
     def __init__(
         self,
         body: GetColumnListRequestBody,
@@ -21,10 +28,6 @@ class GetColumnList:
         self.tables_store = tables_store
         self.table_name = body.table_name
         self.is_number_only = body.is_number_only
-        self.param_names = {
-            "table_name": "tableName",
-            "is_number_only": "isNumberOnly",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -32,7 +35,7 @@ class GetColumnList:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
 
     def execute(self):

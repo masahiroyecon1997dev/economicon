@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import DeleteColumnRequestBody
@@ -14,6 +16,11 @@ class DeleteColumn:
     削除後のテーブルは更新されたデータフレームに置き換えられます。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "column_names": "columnName",
+    }
+
     def __init__(
         self,
         body: DeleteColumnRequestBody,
@@ -24,11 +31,6 @@ class DeleteColumn:
         self.table_name = body.table_name
         # 削除する列名
         self.column_name = body.column_name
-        # パラメータ名のマッピング
-        self.param_names = {
-            "table_name": "tableName",
-            "column_names": "columnName",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -36,7 +38,7 @@ class DeleteColumn:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
 
         column_names = self.tables_store.get_column_name_list(self.table_name)
@@ -44,7 +46,7 @@ class DeleteColumn:
         validate_existence(
             value=self.column_name,
             valid_list=column_names,
-            target=self.param_names["column_names"],
+            target=self.PARAM_NAMES["column_names"],
         )
 
     def execute(self):

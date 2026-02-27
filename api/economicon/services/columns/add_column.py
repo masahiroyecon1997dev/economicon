@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import polars as pl
 
 from economicon.core.encodings import POLARS_ENCODING_MAP
@@ -24,6 +26,14 @@ class AddColumn:
     新しい列は空（None）の値で初期化されます。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "new_column_name": "newColumnName",
+        "add_position_column": "addPositionColumn",
+        "csv_file_path": "csvFilePath",
+        "separator": "separator",
+    }
+
     def __init__(
         self,
         body: AddColumnRequestBody,
@@ -38,13 +48,6 @@ class AddColumn:
         self.csv_strict_row_count = body.csv_strict_row_count
         self.separator = body.separator
         self.csv_encoding = body.csv_encoding
-        self.param_names = {
-            "table_name": "tableName",
-            "new_column_name": "newColumnName",
-            "add_position_column": "addPositionColumn",
-            "csv_file_path": "csvFilePath",
-            "separator": "separator",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -52,7 +55,7 @@ class AddColumn:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         column_name_list = self.tables_store.get_column_name_list(
             self.table_name
@@ -61,23 +64,23 @@ class AddColumn:
         validate_non_existence(
             value=self.new_column_name,
             existing_list=column_name_list,
-            target=self.param_names["new_column_name"],
+            target=self.PARAM_NAMES["new_column_name"],
         )
         # 追加位置の列名が既存の列名の中に存在することを検証
         validate_existence(
             value=self.add_position_column,
             valid_list=column_name_list,
-            target=self.param_names["add_position_column"],
+            target=self.PARAM_NAMES["add_position_column"],
         )
         # CSVファイルパスが指定されている場合の追加バリデーション
         if self.csv_file_path is not None:
             validate_file_path(
                 path_str=self.csv_file_path,
-                target=self.param_names["csv_file_path"],
+                target=self.PARAM_NAMES["csv_file_path"],
             )
             validate_file_format(
                 path_str=self.csv_file_path,
-                target=self.param_names["csv_file_path"],
+                target=self.PARAM_NAMES["csv_file_path"],
                 allowed_extensions=["csv"],
             )
 

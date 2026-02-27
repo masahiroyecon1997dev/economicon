@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import numpy as np
 from scipy import stats
 
@@ -18,6 +20,13 @@ class ConfidenceInterval:
     サポートする統計: 平均、中央値、比率、分散、標準偏差
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "column_name": "columnName",
+        "confidence_level": "confidenceLevel",
+        "statistic_type": "statisticType",
+    }
+
     def __init__(
         self,
         body: ConfidenceIntervalRequestBody,
@@ -28,12 +37,6 @@ class ConfidenceInterval:
         self.column_name = body.column_name
         self.confidence_level = body.confidence_level
         self.statistic_type = body.statistic_type
-        self.param_names = {
-            "table_name": "tableName",
-            "column_name": "columnName",
-            "confidence_level": "confidenceLevel",
-            "statistic_type": "statisticType",
-        }
 
     def validate(self):
         # テーブル名の検証
@@ -41,7 +44,7 @@ class ConfidenceInterval:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
 
         # 列名の検証
@@ -51,7 +54,7 @@ class ConfidenceInterval:
         validate_existence(
             value=self.column_name,
             valid_list=column_name_list,
-            target=self.param_names["column_name"],
+            target=self.PARAM_NAMES["column_name"],
         )
 
     def execute(self):

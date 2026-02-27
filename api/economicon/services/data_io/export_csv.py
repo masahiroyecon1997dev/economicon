@@ -1,5 +1,6 @@
 import io
 import os
+from typing import ClassVar
 
 from economicon.core.encodings import PYTHON_ENCODING_MAP
 from economicon.core.enums import ErrorCode
@@ -24,6 +25,13 @@ class ExportCsv:
     区切り文字およびヘッダ有無を指定できます。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "directory_path": "directoryPath",
+        "file_name": "fileName",
+        "separator": "separator",
+    }
+
     def __init__(
         self,
         body: ExportFileRequestBody,
@@ -37,12 +45,6 @@ class ExportCsv:
         self.separator = body.separator
         self.encoding = body.encoding
         self.include_header = body.include_header
-        self.param_names = {
-            "table_name": "tableName",
-            "directory_path": "directoryPath",
-            "file_name": "fileName",
-            "separator": "separator",
-        }
 
     def validate(self):
         # 対象テーブルが存在することを検証
@@ -50,12 +52,12 @@ class ExportCsv:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         # ディレクトリパスのバリデーション
         validate_directory_path(
             path_str=self.directory_path,
-            target=self.param_names["directory_path"],
+            target=self.PARAM_NAMES["directory_path"],
         )
 
     def execute(self):

@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import CreateJoinTableRequestBody
@@ -17,6 +19,15 @@ class CreateJoinTable:
     内部結合、左結合、右結合、完全外部結合に対応しています。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "joinTableName",
+        "left_table_name": "leftTableName",
+        "right_table_name": "rightTableName",
+        "left_key_column_names": "leftKeyColumnNames",
+        "right_key_column_names": "rightKeyColumnNames",
+        "join_type": "joinType",
+    }
+
     def __init__(
         self,
         body: CreateJoinTableRequestBody,
@@ -35,15 +46,6 @@ class CreateJoinTable:
         self.right_key_column_names = body.right_key_column_names
         # 結合タイプ（inner, left, right, full）
         self.join_type = body.join_type
-        # パラメータ名のマッピング
-        self.param_names = {
-            "table_name": "joinTableName",
-            "left_table_name": "leftTableName",
-            "right_table_name": "rightTableName",
-            "left_key_column_names": "leftKeyColumnNames",
-            "right_key_column_names": "rightKeyColumnNames",
-            "join_type": "joinType",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -51,19 +53,19 @@ class CreateJoinTable:
         validate_non_existence(
             value=self.join_table_name,
             existing_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         # 左テーブルの存在チェック
         validate_existence(
             value=self.left_table_name,
             valid_list=table_name_list,
-            target=self.param_names["left_table_name"],
+            target=self.PARAM_NAMES["left_table_name"],
         )
         # 右テーブルの存在チェック
         validate_existence(
             value=self.right_table_name,
             valid_list=table_name_list,
-            target=self.param_names["right_table_name"],
+            target=self.PARAM_NAMES["right_table_name"],
         )
         # 左テーブルのキー列の存在チェック
         left_table_column_name_list = self.tables_store.get_column_name_list(
@@ -73,7 +75,7 @@ class CreateJoinTable:
             validate_existence(
                 value=left_key_column_name,
                 valid_list=left_table_column_name_list,
-                target=self.param_names["left_key_column_names"],
+                target=self.PARAM_NAMES["left_key_column_names"],
             )
         # 右テーブルのキー列の存在チェック
         right_table_column_name_list = self.tables_store.get_column_name_list(
@@ -83,7 +85,7 @@ class CreateJoinTable:
             validate_existence(
                 value=right_key_column_name,
                 valid_list=right_table_column_name_list,
-                target=self.param_names["right_key_column_names"],
+                target=self.PARAM_NAMES["right_key_column_names"],
             )
 
     def execute(self):

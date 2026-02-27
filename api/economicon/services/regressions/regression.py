@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 from scipy import stats as spstats
@@ -63,6 +63,28 @@ class Regression:
     指定された分析タイプに基づいて、適切な回帰分析を実行します。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "type": "type",
+        "method": "method",
+        "table_name": "tableName",
+        "name": "name",
+        "description": "description",
+        "dependent_variable": "dependentVariable",
+        "explanatory_variables": "explanatoryVariables",
+        "standard_error_method": "standardErrorMethod",
+        "standard_error_params": "standardErrorParams",
+        "hyper_parameters": "hyperParameters",
+        "use_t_distribution": "useTDistribution",
+        "has_const": "hasConst",
+        "missing_value_handling": "missingValueHandling",
+        "entity_id_column": "entityIdColumn",
+        "time_column": "timeColumn",
+        "instrumental_variables": "instrumentalVariables",
+        "endogenous_variables": "endogenousVariables",
+        "left_censoring_limit": "leftCensoringLimit",
+        "right_censoring_limit": "rightCensoringLimit",
+    }
+
     def __init__(
         self,
         body: RegressionRequestBody,
@@ -82,27 +104,6 @@ class Regression:
         self.analysis = body.analysis
         self.standard_error = body.standard_error
 
-        self.param_names = {
-            "type": "type",
-            "method": "method",
-            "table_name": "tableName",
-            "name": "name",
-            "description": "description",
-            "dependent_variable": "dependentVariable",
-            "explanatory_variables": "explanatoryVariables",
-            "standard_error_method": "standardErrorMethod",
-            "standard_error_params": "standardErrorParams",
-            "hyper_parameters": "hyperParameters",
-            "use_t_distribution": "useTDistribution",
-            "has_const": "hasConst",
-            "missing_value_handling": "missingValueHandling",
-            "entity_id_column": "entityIdColumn",
-            "time_column": "timeColumn",
-            "instrumental_variables": "instrumentalVariables",
-            "endogenous_variables": "endogenousVariables",
-            "left_censoring_limit": "leftCensoringLimit",
-            "right_censoring_limit": "rightCensoringLimit",
-        }
         self._execution_map = {
             OLSParams: self._execute_ols,
             BinaryChoiceRegressionParams: self._execute_binary_choice,
@@ -119,7 +120,7 @@ class Regression:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
 
         # 列名リストの取得
@@ -133,24 +134,24 @@ class Regression:
         validate_existence(
             value=self.explanatory_variables,
             valid_list=column_name_list,
-            target=self.param_names["explanatory_variables"],
+            target=self.PARAM_NAMES["explanatory_variables"],
         )
         validate_numeric_types(
             schema=df_schema,
             columns=self.explanatory_variables,
-            target=self.param_names["explanatory_variables"],
+            target=self.PARAM_NAMES["explanatory_variables"],
         )
 
         # 被説明変数の検証
         validate_existence(
             value=self.dependent_variable,
             valid_list=column_name_list,
-            target=self.param_names["dependent_variable"],
+            target=self.PARAM_NAMES["dependent_variable"],
         )
         validate_numeric_types(
             schema=df_schema,
             columns=[self.dependent_variable],
-            target=self.param_names["dependent_variable"],
+            target=self.PARAM_NAMES["dependent_variable"],
         )
 
         # 分析手法ごとの追加検証
@@ -161,23 +162,23 @@ class Regression:
                     validate_existence(
                         value=self.analysis.entity_id_column,
                         valid_list=column_name_list,
-                        target=self.param_names["entity_id_column"],
+                        target=self.PARAM_NAMES["entity_id_column"],
                     )
                     validate_numeric_types(
                         schema=df_schema,
                         columns=self.analysis.entity_id_column,
-                        target=self.param_names["entity_id_column"],
+                        target=self.PARAM_NAMES["entity_id_column"],
                     )
                 if self.analysis.time_column:
                     validate_existence(
                         value=self.analysis.time_column,
                         valid_list=column_name_list,
-                        target=self.param_names["time_column"],
+                        target=self.PARAM_NAMES["time_column"],
                     )
                     validate_numeric_types(
                         schema=df_schema,
                         columns=self.analysis.time_column,
-                        target=self.param_names["time_column"],
+                        target=self.PARAM_NAMES["time_column"],
                     )
             case InstrumentalVariablesParams():
                 # IV分析の場合、操作変数と内生変数の検証
@@ -185,23 +186,23 @@ class Regression:
                     validate_existence(
                         value=self.analysis.instrumental_variables,
                         valid_list=column_name_list,
-                        target=self.param_names["instrumental_variables"],
+                        target=self.PARAM_NAMES["instrumental_variables"],
                     )
                     validate_numeric_types(
                         schema=df_schema,
                         columns=self.analysis.instrumental_variables,
-                        target=self.param_names["instrumental_variables"],
+                        target=self.PARAM_NAMES["instrumental_variables"],
                     )
                 if self.analysis.endogenous_variables:
                     validate_existence(
                         value=self.analysis.endogenous_variables,
                         valid_list=column_name_list,
-                        target=self.param_names["endogenous_variables"],
+                        target=self.PARAM_NAMES["endogenous_variables"],
                     )
                     validate_numeric_types(
                         schema=df_schema,
                         columns=self.analysis.endogenous_variables,
-                        target=self.param_names["endogenous_variables"],
+                        target=self.PARAM_NAMES["endogenous_variables"],
                     )
 
     def execute(self):
