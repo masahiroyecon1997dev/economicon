@@ -241,7 +241,8 @@ class Regression:
             self._last_model_type: str | None = None
             self._last_entity_id_column: str | None = None
             self._last_time_column: str | None = None
-            # Critical#3: Tobit の欲存除去後の行インデックス (診断列追加時の行ズれ防止用)
+            # Critical#3: Tobit の欠損除去後の行インデックス
+            # (診断列追加時の行ズレ防止用)
             self._last_row_indices: np.ndarray | None = None
 
             execute_method = self._execution_map[analysis_type]
@@ -381,7 +382,8 @@ class Regression:
             self.explanatory_variables,
             missing,
         )
-        # Critical#3: dropna() 後の pandas インデックスを保存して診断列追加時の行ズれを防止する
+        # Critical#3: dropna() 後の pandas インデックスを保存
+        # 診断列追加時の行ズレを防止する
         self._last_row_indices = df_pandas.index.to_numpy(dtype=np.int64)
         data_input = TobitInput(
             df_pandas=df_pandas,
@@ -408,7 +410,8 @@ class Regression:
                 ),
             }
         except Exception as _lr_exc:
-            # Warning#9: LR 検定失敗をサイレントに無視するのではなくログに記録する
+            # Warning#9: LR 検定失敗をサイレントに
+            # 無視するのではなくログに記録する
             _logger.warning("Tobit LR test failed: %s", _lr_exc)
         self._last_raw_model = model_result
         self._last_model_type = "tobit"
