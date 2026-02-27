@@ -61,6 +61,17 @@ class ConfidenceIntervalStatisticsType(StrEnum):
     STD = "standard_deviation"
 
 
+class DummyMode(StrEnum):
+    SINGLE = "single"
+    ALL_EXCEPT_BASE = "all_except_base"
+
+
+class NullStrategy(StrEnum):
+    EXCLUDE = "exclude"
+    AS_CATEGORY = "as_category"
+    ERROR = "error"
+
+
 class DescriptiveStatisticType(StrEnum):
     MEAN = "mean"
     MEDIAN = "median"
