@@ -179,8 +179,7 @@ def test_cast_column_strict_error(client, tables_store):
     response_data = response.json()
 
     expected_msg = (
-        f"Type conversion failed: column '{COL_A}' "
-        "cannot be cast to 'int'"
+        f"Type conversion failed: column '{COL_A}' cannot be cast to 'int'"
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.CAST_COLUMN_TYPE_ERROR
@@ -205,8 +204,7 @@ def test_cast_column_strict_date_error(client, tables_store):
     response_data = response.json()
 
     expected_msg = (
-        f"Type conversion failed: column '{COL_B}' "
-        "cannot be cast to 'date'"
+        f"Type conversion failed: column '{COL_B}' cannot be cast to 'date'"
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.CAST_COLUMN_TYPE_ERROR
