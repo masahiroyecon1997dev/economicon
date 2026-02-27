@@ -153,10 +153,11 @@ def prepare_basic_data(
         if np.linalg.matrix_rank(x_data) < x_data.shape[1]:
             raise ProcessingError(
                 error_code=ErrorCode.REGRESSION_SINGULAR_MATRIX_ERROR,
-                message=(
-                    "説明変数行列が特異です。"
-                    "完全な多重共線性が検出されました。"
-                    "説明変数の組み合わせを見直してください。"
+                message=_(
+                    "Explanatory variable matrix is singular."
+                    " Perfect multicollinearity detected."
+                    " Please review your explanatory variable"
+                    " selection."
                 ),
             )
 
