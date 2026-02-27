@@ -78,6 +78,8 @@ class AnalysisResultStore:
         """
         指定されたIDの分析結果を削除
 
+        合わせて保存済み pickle ファイルも削除する。
+
         Args:
             result_id: 削除する結果のID
 
@@ -88,7 +90,10 @@ class AnalysisResultStore:
             KeyError: 指定されたIDの結果が存在しない場合
         """
         with self._lock:
-            if result_id in self._results:
+            result = self._results.get(result_id)
+            if result:
+                # pkl ファイルを先に削除してからメモリから除去
+                result.delete_model_file()
                 del self._results[result_id]
                 return result_id
             else:
@@ -100,9 +105,13 @@ class AnalysisResultStore:
         """
         すべての分析結果を削除
 
+        合わせて保存済み pickle ファイルもすべて削除する。
+
         Returns:
             削除が成功した場合True
         """
         with self._lock:
+            for result in self._results.values():
+                result.delete_model_file()
             self._results.clear()
             return True

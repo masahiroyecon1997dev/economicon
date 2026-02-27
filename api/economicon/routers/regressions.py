@@ -9,6 +9,7 @@ from fastapi import status as http_status
 
 from economicon.models import (
     COMMON_ERROR_RESPONSES,
+    AddDiagnosticColumnsResult,
     ClearAllAnalysisResultsResult,
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
@@ -16,12 +17,18 @@ from economicon.models import (
     RegressionResult,
     SuccessResponse,
 )
-from economicon.models.regressions import RegressionRequestBody
+from economicon.models.regressions import (
+    AddDiagnosticColumnsRequestBody,
+    RegressionRequestBody,
+)
 from economicon.services.data.dependencies import (
     AnalysisResultStoreDep,
     TablesStoreDep,
 )
 from economicon.services.operation import run_operation
+from economicon.services.regressions.add_diagnostic_columns import (
+    AddDiagnosticColumns,
+)
 from economicon.services.regressions.regression import Regression
 from economicon.services.regressions.result import (
     ClearAllAnalysisResults,
@@ -187,6 +194,46 @@ async def clear_all_analysis_results(
     api = ClearAllAnalysisResults(result_store)
     result = run_operation(api)
 
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.post(
+    "/regression/add-diagnostic-columns",
+    response_model=SuccessResponse[AddDiagnosticColumnsResult],
+)
+async def add_diagnostic_columns(
+    request: Request,
+    body: AddDiagnosticColumnsRequestBody,
+    tables_store: TablesStoreDep,
+    result_store: AnalysisResultStoreDep,
+):
+    """
+    推定済みモデルから予測値・残差を抽出してテーブルに列追加する
+
+    指定された分析結果 ID に対応するモデルをロードし、予測値・残差などの
+    診断列を元のテーブルに追加します。
+
+    Parameters
+    ----------
+    request : Request
+        FastAPI のリクエストオブジェクト
+    body : AddDiagnosticColumnsRequestBody
+        - tableName: 追加先テーブル名
+        - resultId: 分析結果の UUID
+        - target: "fitted" / "residual" / "both"
+        - standardized: 標準化残差を含めるか（OLS 系のみ有効）
+        - includeInterval: 95%信頼区間を含めるか
+        - feType: "total" または "within"（FE/RE のみ有効）
+
+    Returns
+    -------
+    JSONResponse
+        追加したテーブル名と列名リスト
+    """
+    api = AddDiagnosticColumns(body, tables_store, result_store)
+    result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
     )

@@ -78,6 +78,8 @@ from economicon.models.enums import (
     TransformMethodType,
 )
 from economicon.models.regressions import (
+    AddDiagnosticColumnsRequestBody,
+    AddDiagnosticColumnsResult,
     ClearAllAnalysisResultsResult,
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
@@ -247,4 +249,6 @@ __all__ = [
     "GetAnalysisResultResult",
     "DeleteAnalysisResultResult",
     "ClearAllAnalysisResultsResult",
+    "AddDiagnosticColumnsRequestBody",
+    "AddDiagnosticColumnsResult",
 ]
