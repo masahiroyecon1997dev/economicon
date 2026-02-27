@@ -594,6 +594,7 @@ def test_unsupported_distribution(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "'unsupported'" in response_data["message"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -626,6 +627,11 @@ def test_invalid_uniform_params_low_ge_high(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = (
+        "Value error, 一様分布では、'low'は'high'より小さい必要があります"
+    )
+    assert response_data["message"] == expected_msg
+    assert expected_msg in response_data["details"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -654,6 +660,11 @@ def test_missing_required_distribution_param(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.normal"
+        ".NormalParams.scaleは必須です。" in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -682,6 +693,12 @@ def test_invalid_distribution_param_type(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.normal"
+        ".NormalParams.locは数値で入力してください。"
+        in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -712,6 +729,12 @@ def test_normal_negative_scale(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.normal"
+        ".NormalParams.scaleは0.0より大きい値で入力してください。"
+        in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -742,6 +765,12 @@ def test_binomial_invalid_p_greater_than_one(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.binomial"
+        ".BinomialParams.pは1.0以下で入力してください。"
+        in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -775,6 +804,12 @@ def test_hypergeometric_invalid_k_exceeds_n(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.hypergeometric"
+        ".function-after[validate_high(), HypergeometricParams]"
+        ".populationSizeは必須です。" in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -1097,7 +1132,8 @@ def test_add_simulation_column_uniform_low_equals_high(client, tables_store):
     expected_msg = (
         "Value error, 一様分布では、'low'は'high'より小さい必要があります"
     )
-    assert expected_msg in response_data["message"]
+    assert response_data["message"] == expected_msg
+    assert expected_msg in response_data["details"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -1125,8 +1161,11 @@ def test_add_simulation_column_uniform_reversed_range(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = "一様分布では、'low'は'high'より小さい必要があります"
-    assert expected_msg in response_data["message"]
+    expected_msg = (
+        "Value error, 一様分布では、'low'は'high'より小さい必要があります"
+    )
+    assert response_data["message"] == expected_msg
+    assert expected_msg in response_data["details"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -1180,6 +1219,11 @@ def test_add_simulation_column_normal_scale_zero(client, tables_store):
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
 
     assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.normal"
+        ".NormalParams.scaleは0.0より大きい値で入力してください。"
+        in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -1232,6 +1276,11 @@ def test_add_simulation_column_binomial_probability_zero(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.binomial"
+        ".BinomialParams.pは0.0より大きい値で入力してください。"
+        in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -1262,6 +1311,11 @@ def test_add_simulation_column_binomial_probability_over_one(
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.binomial"
+        ".BinomialParams.pは1.0以下で入力してください。"
+        in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -1293,6 +1347,11 @@ def test_add_simulation_column_hypergeometric_k_exceeds_n(
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.hypergeometric"
+        ".function-after[validate_high(), HypergeometricParams]"
+        ".populationSizeは必須です。" in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -1326,6 +1385,11 @@ def test_add_simulation_column_negative_binomial_probability_zero(
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.negative_binomial"
+        ".NegativeBinomialParams.pは0.0より大きい値で入力してください。"
+        in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -1356,6 +1420,11 @@ def test_add_simulation_column_negative_binomial_probability_over_one(
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.negative_binomial"
+        ".NegativeBinomialParams.pは1.0以下で入力してください。"
+        in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -1384,6 +1453,11 @@ def test_add_simulation_column_negative_binomial_n_zero(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     assert "simulationColumn.distribution" in response_data["message"]
+    assert (
+        "simulationColumn.distribution.negative_binomial"
+        ".NegativeBinomialParams.nは0より大きい値で入力してください。"
+        in response_data["details"]
+    )
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
