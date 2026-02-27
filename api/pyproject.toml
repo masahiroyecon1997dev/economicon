@@ -72,3 +72,8 @@ ignore = ["E203"]
 [tool.ruff.lint.mccabe]
 # 複雑度のしきい値。10を超えると警告が出るように設定
 max-complexity = 10
+
+[tool.ruff.lint.pylint]
+# AnalysisResult.__init__ 等のエンティティコンストラクタは
+# self + キーワード専用引数 8 個 = 9 パラメータを許容する
+max-args = 9

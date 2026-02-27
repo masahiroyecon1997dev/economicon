@@ -6,6 +6,7 @@
 """
 
 import logging
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
@@ -16,6 +17,41 @@ if TYPE_CHECKING:
     from economicon.services.regressions.fitters import RegularizedResult
 
 _logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# 診断値抽出オプション
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class DiagnosticExtractOptions:
+    """extract_from_* 関数に共通する診断値抽出オプション。"""
+
+    dep_var: str
+    existing_cols: list[str] = field(default_factory=list)
+    target: Literal["fitted", "residual", "both"] = "both"
+    standardized: bool = False
+    include_interval: bool = False
+
+
+@dataclass
+class TobitExtractConfig:
+    """Tobit モデル固有の診断値抽出パラメータ。"""
+
+    row_indices: np.ndarray | None = None
+    fitted_type: Literal["latent", "observable"] = "latent"
+    left_censoring_limit: float | None = None
+    right_censoring_limit: float | None = None
+
+
+@dataclass
+class PanelExtractConfig:
+    """パネルモデル固有の診断値抽出パラメータ。"""
+
+    entity_id_column: str
+    time_column: str
+    fe_type: Literal["total", "within"] = "total"
 
 
 # ---------------------------------------------------------------------------
@@ -54,12 +90,8 @@ def resolve_column_name(existing_cols: list[str], base: str) -> str:
         i += 1
 
 
-def _build_col_names(  # noqa: PLR0913
-    existing_cols: list[str],
-    dep_var: str,
-    target: Literal["fitted", "residual", "both"],
-    standardized: bool,
-    include_interval: bool,
+def _build_col_names(
+    options: DiagnosticExtractOptions,
     supports_interval: bool = False,
     supports_standardized: bool = False,
 ) -> dict[str, str]:
@@ -70,11 +102,7 @@ def _build_col_names(  # noqa: PLR0913
     値は実際にテーブルに追加する列名。
 
     Args:
-        existing_cols: 現在テーブルに存在する列名リスト
-        dep_var: 被説明変数名（列名接頭辞として使用）
-        target: 追加する値の種類
-        standardized: 標準化残差を含めるか
-        include_interval: 95%信頼区間を含めるか
+        options: 共通の診断値抽出オプション
         supports_interval: モデルが信頼区間をサポートするか
         supports_standardized: モデルが標準化残差をサポートするか
 
@@ -84,23 +112,23 @@ def _build_col_names(  # noqa: PLR0913
     resolved: dict[str, str] = {}
     # 作業用に「決定済み列名を追加した仮リスト」を用意し、
     # 同一バッチ内での衝突も回避する。
-    working_cols = list(existing_cols)
+    working_cols = list(options.existing_cols)
 
     def _add(key: str, base: str) -> None:
         name = resolve_column_name(working_cols, base)
         resolved[key] = name
         working_cols.append(name)
 
-    if target in ("fitted", "both"):
-        _add("fitted", f"{dep_var}_fitted")
-        if include_interval and supports_interval:
-            _add("fitted_lower_95", f"{dep_var}_fitted_lower_95")
-            _add("fitted_upper_95", f"{dep_var}_fitted_upper_95")
+    if options.target in ("fitted", "both"):
+        _add("fitted", f"{options.dep_var}_fitted")
+        if options.include_interval and supports_interval:
+            _add("fitted_lower_95", f"{options.dep_var}_fitted_lower_95")
+            _add("fitted_upper_95", f"{options.dep_var}_fitted_upper_95")
 
-    if target in ("residual", "both"):
-        _add("resid", f"{dep_var}_resid")
-        if standardized and supports_standardized:
-            _add("resid_std", f"{dep_var}_resid_std")
+    if options.target in ("residual", "both"):
+        _add("resid", f"{options.dep_var}_resid")
+        if options.standardized and supports_standardized:
+            _add("resid_std", f"{options.dep_var}_resid_std")
 
     return resolved
 
@@ -256,13 +284,9 @@ def _get_statsmodels_row_indices(model: object) -> np.ndarray:
     )
 
 
-def extract_from_statsmodels(  # noqa: PLR0913
+def extract_from_statsmodels(
     model: object,
-    dep_var: str,
-    existing_cols: list[str],
-    target: Literal["fitted", "residual", "both"],
-    standardized: bool,
-    include_interval: bool,
+    options: DiagnosticExtractOptions,
     residual_type: Literal["raw", "deviance"] = "raw",
 ) -> tuple[pl.DataFrame, list[str]]:
     """
@@ -273,16 +297,10 @@ def extract_from_statsmodels(  # noqa: PLR0913
     model:
         ``statsmodels`` の ``RegressionResultsWrapper``
         （または互換の fitted result オブジェクト）。
-    dep_var:
-        被説明変数名。列名接頭辞として使用される。
-    existing_cols:
-        現在テーブルに存在する列名リスト（重複回避用）。
-    target:
-        抽出する値の種類。
-    standardized:
-        標準化残差（studentized internal）を含めるか。
-    include_interval:
-        予測値の 95%信頼区間を含めるか。
+    options:
+        共通の診断値抽出オプション。
+    residual_type:
+        残差種別。``"deviance"`` の場合は Logit/Probit deviance 残差を使用。
 
     Returns
     -------
@@ -298,11 +316,7 @@ def extract_from_statsmodels(  # noqa: PLR0913
     元テーブルとの ``left_join`` キーに使用できる。
     """
     col_map = _build_col_names(
-        existing_cols=existing_cols,
-        dep_var=dep_var,
-        target=target,
-        standardized=standardized,
-        include_interval=include_interval,
+        options,
         supports_interval=True,
         supports_standardized=True,
     )
@@ -337,15 +351,10 @@ def extract_from_statsmodels(  # noqa: PLR0913
 # ---------------------------------------------------------------------------
 
 
-def extract_from_tobit(  # noqa: PLR0913
+def extract_from_tobit(
     model: object,
-    dep_var: str,
-    existing_cols: list[str],
-    target: Literal["fitted", "residual", "both"],
-    row_indices: np.ndarray | None = None,
-    fitted_type: Literal["latent", "observable"] = "latent",
-    left_censoring_limit: float | None = None,
-    right_censoring_limit: float | None = None,
+    options: DiagnosticExtractOptions,
+    tobit_config: TobitExtractConfig | None = None,
 ) -> tuple[pl.DataFrame, list[str]]:
     """
     py4etrics の Tobit 回帰結果から診断値を抽出する。
@@ -354,24 +363,11 @@ def extract_from_tobit(  # noqa: PLR0913
     ----------
     model:
         ``py4etrics.Tobit`` の fitted result オブジェクト。
-    dep_var:
-        被説明変数名。列名接頭辞として使用される。
-    existing_cols:
-        現在テーブルに存在する列名リスト（重複回避用）。
-    target:
-        抽出する値の種類。
-    row_indices:
-        元テーブル上の欲存除去後の行インデックス。
-        Critical#3: None の場合は np.arange(n) で代替（連続データのみ正波）。
-    fitted_type:
-        予測値種別。
-        ``latent``: 潜在変数の予測値 x'β（線形インデックス）。
-        ``observable``: 打ち切りを考慮した無条件期待値 E[y|x]。
-        片側打ち切りのみ対応（両側打ち切り時は latent にフォールバック）。
-    left_censoring_limit:
-        左側打ち切り値（Tobit 推定時の設定値）。
-    right_censoring_limit:
-        右側打ち切り値（Tobit 推定時の設定値）。
+    options:
+        共通の診断値抽出オプション。
+    tobit_config:
+        Tobit 固有パラメータ（row_indices / fitted_type / 打ち切り値）。
+        ``None`` の場合はデフォルト値（latent / 打ち切りなし）を使用。
 
     Returns
     -------
@@ -394,16 +390,14 @@ def extract_from_tobit(  # noqa: PLR0913
 
     両側打ち切りの場合は latent にフォールバックする。
     """
-    col_map = _build_col_names(
-        existing_cols=existing_cols,
-        dep_var=dep_var,
-        target=target,
-        # Tobit は standardized / include_interval 未サポート
-        standardized=False,
-        include_interval=False,
-        supports_interval=False,
-        supports_standardized=False,
+    cfg = tobit_config or TobitExtractConfig()
+    # Tobit は standardized / include_interval 未サポート
+    _opts = DiagnosticExtractOptions(
+        dep_var=options.dep_var,
+        existing_cols=options.existing_cols,
+        target=options.target,
     )
+    col_map = _build_col_names(_opts)
 
     # py4etrics Tobit: .fittedvalues は潜在変数の
     # 線形インデックス x'β を numpy.ndarray で返す
@@ -416,9 +410,9 @@ def extract_from_tobit(  # noqa: PLR0913
 
     # Eco-Note B: observable モードで打ち切りを考慮した E[y|x] を計算
     # - 片側打ち切りのみ対応（両側は latent にフォールバック）
-    if fitted_type == "observable":
-        left_lim = left_censoring_limit
-        right_lim = right_censoring_limit
+    if cfg.fitted_type == "observable":
+        left_lim = cfg.left_censoring_limit
+        right_lim = cfg.right_censoring_limit
         sigma = float(  # type: ignore[union-attr]
             getattr(model, "scale", None) or 1.0
         )
@@ -452,8 +446,8 @@ def extract_from_tobit(  # noqa: PLR0913
     # 元テーブルの欠損除去後の行 ID を使用する。
     # pandas.dropna() が元の整数インデックスを保持するため、
     # np.arange(n) で代替すると行ズレが発生する。
-    if row_indices is not None:
-        index = row_indices.astype(np.int64)
+    if cfg.row_indices is not None:
+        index = cfg.row_indices.astype(np.int64)
     else:
         index = np.arange(n, dtype=np.int64)
 
@@ -469,7 +463,7 @@ def extract_from_tobit(  # noqa: PLR0913
     if "resid" in col_map:
         # .resid = endog - fittedvalues (latent ベース)
         resid_raw = np.asarray(model.resid, dtype=np.float64)  # type: ignore[union-attr]
-        if fitted_type == "observable" and fitted_arr is not latent_arr:
+        if cfg.fitted_type == "observable" and fitted_arr is not latent_arr:
             # observable の場合は視測値 - E[y|x] で残差を再計算
             # endog は model.model.endog または求まる場合は raw 残差を利用
             endog = np.asarray(
@@ -494,15 +488,10 @@ def extract_from_tobit(  # noqa: PLR0913
 # ---------------------------------------------------------------------------
 
 
-def extract_from_linearmodels_panel(  # noqa: PLR0913
+def extract_from_linearmodels_panel(
     model: object,
-    dep_var: str,
-    entity_id_column: str,
-    time_column: str,
-    existing_cols: list[str],
-    target: Literal["fitted", "residual", "both"],
-    include_interval: bool,
-    fe_type: Literal["total", "within"],
+    options: DiagnosticExtractOptions,
+    panel_config: PanelExtractConfig,
 ) -> tuple[pl.DataFrame, list[str]]:
     """
     linearmodels のパネル回帰結果から診断値を抽出する。
@@ -512,21 +501,11 @@ def extract_from_linearmodels_panel(  # noqa: PLR0913
     model:
         ``linearmodels.panel.PanelEffectsResults``
         または ``RandomEffectsResults``。
-    dep_var:
-        被説明変数名。列名接頭辞として使用される。
-    entity_id_column:
-        エンティティ（個体）を識別する列名。結合キーとして使用。
-    time_column:
-        時間を識別する列名。結合キーとして使用。
-    existing_cols:
-        現在テーブルに存在する列名リスト（重複回避用）。
-    target:
-        抽出する値の種類。
-    include_interval:
-        予測値の 95%信頼区間を含めるか。
-    fe_type:
-        "total": 固定効果を含む予測（effects=True）、
-        "within": 固定効果を除いた変動成分（effects=False）。
+    options:
+        共通の診断値抽出オプション。
+    panel_config:
+        パネルモデル固有パラメータ
+        （entity_id_column / time_column / fe_type）。
 
     Returns
     -------
@@ -541,18 +520,20 @@ def extract_from_linearmodels_panel(  # noqa: PLR0913
     ``reset_index()`` して entity / time 列を平坦化してから
     Polars に変換し、元テーブルと 2 キー ``left_join`` する。
     """
+    # standardized は linearmodels では未サポート
+    _opts = DiagnosticExtractOptions(
+        dep_var=options.dep_var,
+        existing_cols=options.existing_cols,
+        target=options.target,
+        include_interval=options.include_interval,
+    )
     col_map = _build_col_names(
-        existing_cols=existing_cols,
-        dep_var=dep_var,
-        target=target,
-        # standardized は linearmodels では未サポート
-        standardized=False,
-        include_interval=include_interval,
+        _opts,
         supports_interval=True,
         supports_standardized=False,
     )
 
-    use_effects = fe_type == "total"
+    use_effects = panel_config.fe_type == "total"
     data_frames: list[pl.DataFrame] = []
 
     # 予測値 DataFrame の骨格を先に作成
@@ -567,7 +548,11 @@ def extract_from_linearmodels_panel(  # noqa: PLR0913
 
         fv_df = fv_series.reset_index()
         # MultiIndex の level 名は通常 entity_col と time_col になる
-        fv_df.columns = [entity_id_column, time_column, col_map["fitted"]]
+        fv_df.columns = [
+            panel_config.entity_id_column,
+            panel_config.time_column,
+            col_map["fitted"],
+        ]
         fv_polars = pl.from_pandas(fv_df).with_columns(
             pl.col(col_map["fitted"]).cast(pl.Float64)
         )
@@ -576,7 +561,11 @@ def extract_from_linearmodels_panel(  # noqa: PLR0913
     if "resid" in col_map:
         rv_series = model.resids  # type: ignore[union-attr]
         rv_df = rv_series.reset_index()
-        rv_df.columns = [entity_id_column, time_column, col_map["resid"]]
+        rv_df.columns = [
+            panel_config.entity_id_column,
+            panel_config.time_column,
+            col_map["resid"],
+        ]
         rv_polars = pl.from_pandas(rv_df).with_columns(
             pl.col(col_map["resid"]).cast(pl.Float64)
         )
@@ -591,8 +580,8 @@ def extract_from_linearmodels_panel(  # noqa: PLR0913
             upper_series = sf["upper_ci"].reset_index()
             if "fitted_lower_95" in col_map:
                 lower_series.columns = [
-                    entity_id_column,
-                    time_column,
+                    panel_config.entity_id_column,
+                    panel_config.time_column,
                     col_map["fitted_lower_95"],
                 ]
                 data_frames.append(
@@ -602,8 +591,8 @@ def extract_from_linearmodels_panel(  # noqa: PLR0913
                 )
             if "fitted_upper_95" in col_map:
                 upper_series.columns = [
-                    entity_id_column,
-                    time_column,
+                    panel_config.entity_id_column,
+                    panel_config.time_column,
                     col_map["fitted_upper_95"],
                 ]
                 data_frames.append(
@@ -622,7 +611,9 @@ def extract_from_linearmodels_panel(  # noqa: PLR0913
     result_df = data_frames[0]
     for other_df in data_frames[1:]:
         result_df = result_df.join(
-            other_df, on=[entity_id_column, time_column], how="left"
+            other_df,
+            on=[panel_config.entity_id_column, panel_config.time_column],
+            how="left",
         )
 
     added_cols = list(col_map.values())
@@ -636,10 +627,7 @@ def extract_from_linearmodels_panel(  # noqa: PLR0913
 
 def extract_from_linearmodels_iv(
     model: object,
-    dep_var: str,
-    existing_cols: list[str],
-    target: Literal["fitted", "residual", "both"],
-    include_interval: bool,
+    options: DiagnosticExtractOptions,
 ) -> tuple[pl.DataFrame, list[str]]:
     """
     linearmodels の IV（2SLS/GMM）回帰結果から診断値を抽出する。
@@ -648,14 +636,9 @@ def extract_from_linearmodels_iv(
     ----------
     model:
         ``linearmodels.iv.results.IVResults`` または互換オブジェクト。
-    dep_var:
-        被説明変数名。列名接頭辞として使用される。
-    existing_cols:
-        現在テーブルに存在する列名リスト（重複回避用）。
-    target:
-        抽出する値の種類。
-    include_interval:
-        予測値の 95%信頼区間を含めるか（IV では通常非対応のためスキップ）。
+    options:
+        共通の診断値抽出オプション。
+        IV では standardized / include_interval は未サポート。
 
     Returns
     -------
@@ -663,13 +646,14 @@ def extract_from_linearmodels_iv(
         - DataFrame: ``__row_idx__`` と解決済み列名を持つ Polars DataFrame。
         - list[str]: 追加された列名のリスト。
     """
+    # IV では standardized / include_interval は未サポート
+    _opts = DiagnosticExtractOptions(
+        dep_var=options.dep_var,
+        existing_cols=options.existing_cols,
+        target=options.target,
+    )
     col_map = _build_col_names(
-        existing_cols=existing_cols,
-        dep_var=dep_var,
-        target=target,
-        # IV では standardized は未サポート
-        standardized=False,
-        include_interval=include_interval,
+        _opts,
         supports_interval=False,
         supports_standardized=False,
     )
@@ -714,9 +698,7 @@ def extract_from_linearmodels_iv(
 
 def extract_from_sklearn(
     reg_result: RegularizedResult,
-    dep_var: str,
-    existing_cols: list[str],
-    target: Literal["fitted", "residual", "both"],
+    options: DiagnosticExtractOptions,
 ) -> tuple[pl.DataFrame, list[str]]:
     """
     sklearn の正則化回帰結果から診断値を抽出する。
@@ -731,10 +713,9 @@ def extract_from_sklearn(
     reg_result:
         ``RegularizedResult`` データクラス。
         ``pipeline``, ``x_data``, ``y_data`` が設定されている必要がある。
-    dep_var:
-        被説明変数名。列名接頭辞として使用される。
-    existing_cols:
-        現在テーブルに存在する列名リスト（重複回避用）。
+    options:
+        共通の診断値抽出オプション。
+        sklearn 正則化回帰では standardized / include_interval は未サポート。
     target:
         抽出する値の種類。
 
@@ -745,12 +726,7 @@ def extract_from_sklearn(
         - list[str]: 追加された列名のリスト。
     """
     col_map = _build_col_names(
-        existing_cols=existing_cols,
-        dep_var=dep_var,
-        target=target,
-        # sklearn 正則化回帰は standardized / include_interval 未サポート
-        standardized=False,
-        include_interval=False,
+        options,
         supports_interval=False,
         supports_standardized=False,
     )

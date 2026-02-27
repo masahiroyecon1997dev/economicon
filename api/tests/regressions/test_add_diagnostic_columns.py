@@ -1,6 +1,7 @@
 """診断列追加テスト（予測値・残差の抽出とテーブル統合）"""
 
 from fastapi import status
+from httpx import Response
 
 from economicon.core.enums import ErrorCode
 from economicon.services.data.analysis_result_store import AnalysisResultStore
@@ -34,10 +35,9 @@ def _run_regression(client, payload: dict) -> str:
     return resp.json()["result"]["resultId"]
 
 
-def _add_diagnostic(client, body: dict) -> dict:
-    """診断列追加エンドポイントを呼び出して result を返すヘルパー"""
-    resp = client.post(URL_ADD_DIAGNOSTIC, json=body)
-    return resp
+def _add_diagnostic(client, body: dict) -> Response:
+    """診断列追加エンドポイントを呼び出して Response を返すヘルパー"""
+    return client.post(URL_ADD_DIAGNOSTIC, json=body)
 
 
 def _get_table_columns(table_name: str) -> list[str]:
