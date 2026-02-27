@@ -13,7 +13,6 @@ class ClearTables:
 
     def __init__(self, tables_store: TablesStore):
         self.tables_store = tables_store
-        self.param_names = {}
 
     def validate(self):
         # パラメータなしのため、バリデーションは不要

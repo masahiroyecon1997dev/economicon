@@ -1,4 +1,5 @@
 import math
+from typing import ClassVar
 
 import polars as pl
 
@@ -22,6 +23,13 @@ class TransformColumn:
     変換方法は対数変換、累乗変換、またはルート変換をサポートします。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "source_column": "sourceColumnName",
+        "new_column": "newColumnName",
+        "transform_method": "transformMethod",
+    }
+
     def __init__(
         self,
         body: TransformColumnRequestBody,
@@ -32,12 +40,6 @@ class TransformColumn:
         self.source_column_name = body.source_column_name
         self.new_column_name = body.new_column_name
         self.transform_method = body.transform_method
-        self.param_names = {
-            "table_name": "tableName",
-            "source_column": "sourceColumnName",
-            "new_column": "newColumnName",
-            "transform_method": "transformMethod",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -45,7 +47,7 @@ class TransformColumn:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         column_name_list = self.tables_store.get_column_name_list(
             self.table_name
@@ -54,13 +56,13 @@ class TransformColumn:
         validate_existence(
             value=self.source_column_name,
             valid_list=column_name_list,
-            target=self.param_names["source_column"],
+            target=self.PARAM_NAMES["source_column"],
         )
         # 変換後の列名が既存の列名と重複しないことを検証
         validate_non_existence(
             value=self.new_column_name,
             existing_list=column_name_list,
-            target=self.param_names["new_column"],
+            target=self.PARAM_NAMES["new_column"],
         )
 
     def execute(self):

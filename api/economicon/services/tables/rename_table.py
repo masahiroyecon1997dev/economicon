@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import RenameTableRequestBody
@@ -17,6 +19,11 @@ class RenameTable:
     同じテーブル名が既に存在する場合はエラーとなります。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "oldTableName",
+        "new_table_name": "newTableName",
+    }
+
     def __init__(
         self,
         body: RenameTableRequestBody,
@@ -27,11 +34,6 @@ class RenameTable:
         self.old_table_name = body.old_table_name
         # 変更後のテーブル名
         self.new_table_name = body.new_table_name
-        # パラメータ名のマッピング
-        self.param_names = {
-            "table_name": "oldTableName",
-            "new_table_name": "newTableName",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -39,13 +41,13 @@ class RenameTable:
         validate_existence(
             value=self.old_table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         # 変更後のテーブル名の重複チェック
         validate_non_existence(
             value=self.new_table_name,
             existing_list=table_name_list,
-            target=self.param_names["new_table_name"],
+            target=self.PARAM_NAMES["new_table_name"],
         )
 
     def execute(self):

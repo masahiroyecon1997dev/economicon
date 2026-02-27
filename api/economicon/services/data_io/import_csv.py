@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import polars as pl
 
 from economicon.core.enums import ErrorCode
@@ -19,6 +21,13 @@ class ImportCsv:
     区切り文字とエンコーディングを指定できます。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "file_path": "filePath",
+        "table_name": "tableName",
+        "separator": "separator",
+        "encoding": "encoding",
+    }
+
     def __init__(
         self,
         body: ImportFileRequestBody,
@@ -36,25 +45,18 @@ class ImportCsv:
         self.encoding = (
             "cp932" if body.encoding == "shift_jis" else body.encoding
         )
-        # パラメータ名のマッピング
-        self.param_names = {
-            "file_path": "filePath",
-            "table_name": "tableName",
-            "separator": "separator",
-            "encoding": "encoding",
-        }
 
     def validate(self):
         # ファイルパスのバリデーション
         validate_file_path(
-            path_str=self.file_path, target=self.param_names["file_path"]
+            path_str=self.file_path, target=self.PARAM_NAMES["file_path"]
         )
         table_name_list = self.tables_store.get_table_name_list()
         # テーブル名のバリデーション
         validate_non_existence(
             value=self.table_name,
             existing_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
 
     def execute(self):

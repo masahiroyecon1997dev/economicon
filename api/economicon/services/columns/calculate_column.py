@@ -1,4 +1,5 @@
 import re
+from typing import ClassVar
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
@@ -21,6 +22,16 @@ class CalculateColumn:
     計算式は列名を<列名>の形式で指定し、四則演算とかっこをサポートします。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "new_column_name": "newColumnName",
+        "calculation_expression": "calculationExpression",
+        "column_name_in_calculation_expression": (
+            "columnNameInCalculationExpression"
+        ),
+        "add_position_column": "addPositionColumn",
+    }
+
     def __init__(
         self,
         body: CalculateColumnRequestBody,
@@ -31,15 +42,6 @@ class CalculateColumn:
         self.new_column_name = body.new_column_name
         self.add_position_column = body.add_position_column
         self.calculation_expression = body.calculation_expression
-        self.param_names = {
-            "table_name": "tableName",
-            "new_column_name": "newColumnName",
-            "calculation_expression": "calculationExpression",
-            "column_name_in_calculation_expression": (
-                "columnNameInCalculationExpression"
-            ),
-            "add_position_column": "addPositionColumn",
-        }
 
     def _extract_column_names(self, expression: str) -> list[str]:
         """
@@ -58,7 +60,7 @@ class CalculateColumn:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
 
         column_name_list = self.tables_store.get_column_name_list(
@@ -68,7 +70,7 @@ class CalculateColumn:
         validate_non_existence(
             value=self.new_column_name,
             existing_list=column_name_list,
-            target=self.param_names["new_column_name"],
+            target=self.PARAM_NAMES["new_column_name"],
         )
 
         referenced_columns = self._extract_column_names(
@@ -78,14 +80,14 @@ class CalculateColumn:
         validate_existence(
             value=referenced_columns,
             valid_list=column_name_list,
-            target=self.param_names["column_name_in_calculation_expression"],
+            target=self.PARAM_NAMES["column_name_in_calculation_expression"],
         )
 
         # 追加位置の列名が既存の列名の中に存在することを検証
         validate_existence(
             value=self.add_position_column,
             valid_list=column_name_list,
-            target=self.param_names["add_position_column"],
+            target=self.PARAM_NAMES["add_position_column"],
         )
 
         df_schema = self.tables_store.get_schema(self.table_name)
@@ -93,7 +95,7 @@ class CalculateColumn:
         validate_numeric_types(
             schema=df_schema,
             columns=referenced_columns,
-            target=self.param_names["column_name_in_calculation_expression"],
+            target=self.PARAM_NAMES["column_name_in_calculation_expression"],
         )
 
     def execute(self):

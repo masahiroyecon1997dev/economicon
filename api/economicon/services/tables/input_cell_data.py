@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import polars as pl
 
 from economicon.core.enums import ErrorCode
@@ -20,6 +22,12 @@ class InputCellData:
     行番号は1から始まると仮定しています。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "column_names": "columnName",
+        "row_index": "rowIndex",
+    }
+
     def __init__(
         self,
         body: InputCellDataRequestBody,
@@ -34,12 +42,6 @@ class InputCellData:
         self.row_index = body.row_index
         # 新しい値
         self.new_value = body.new_value
-        # パラメータ名のマッピング
-        self.param_names = {
-            "table_name": "tableName",
-            "column_names": "columnName",
-            "row_index": "rowIndex",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -47,7 +49,7 @@ class InputCellData:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         column_name_list = self.tables_store.get_column_name_list(
             self.table_name
@@ -56,14 +58,14 @@ class InputCellData:
         validate_existence(
             value=self.column_name,
             valid_list=column_name_list,
-            target=self.param_names["column_names"],
+            target=self.PARAM_NAMES["column_names"],
         )
         row_count = self.tables_store.get_table_row_count(self.table_name) - 1
         # 行インデックスの妥当性チェック
         validate_row_count_limit(
             current_row_count=row_count,
             requested_count=self.row_index,
-            target=self.param_names["row_index"],
+            target=self.PARAM_NAMES["row_index"],
         )
 
     def execute(self):

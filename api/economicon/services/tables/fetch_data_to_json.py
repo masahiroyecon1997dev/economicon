@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import FetchDataToJsonRequestBody
@@ -18,6 +20,12 @@ class FetchDataToJson:
     取得行数がテーブルの行数を超える場合は、テーブルの最後まで取得します。
     """
 
+    PARAM_NAMES: ClassVar[dict[str, str]] = {
+        "table_name": "tableName",
+        "start_row": "startRow",
+        "fetch_rows": "fetchRows",
+    }
+
     def __init__(
         self,
         body: FetchDataToJsonRequestBody,
@@ -27,11 +35,6 @@ class FetchDataToJson:
         self.table_name = body.table_name
         self.start_row = body.start_row
         self.fetch_rows = body.fetch_rows
-        self.param_names = {
-            "table_name": "tableName",
-            "start_row": "startRow",
-            "fetch_rows": "fetchRows",
-        }
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -39,14 +42,14 @@ class FetchDataToJson:
         validate_existence(
             value=self.table_name,
             valid_list=table_name_list,
-            target=self.param_names["table_name"],
+            target=self.PARAM_NAMES["table_name"],
         )
         row_count = self.tables_store.get_table(self.table_name).row_count - 1
         # 開始行番号の妥当性チェック
         validate_row_count_limit(
             current_row_count=row_count,
             requested_count=self.start_row,
-            target=self.param_names["start_row"],
+            target=self.PARAM_NAMES["start_row"],
         )
 
     def execute(self):
