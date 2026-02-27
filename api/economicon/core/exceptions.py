@@ -13,7 +13,20 @@ def get_localized_message(error: ErrorDetails) -> str:
 
     template = VALIDATION_ERROR_TEMPLATES.get(error_type)
     if template:
+        msg = error.get("msg", "")
+        # Pydantic は ValueError のメッセージに "Value error, " を
+        # 自動付与するため除去する
+        if (
+            error_type == "value_error"
+            and isinstance(msg, str)
+            and msg.startswith("Value error, ")
+        ):
+            msg = msg[len("Value error, ") :]
         # ctxの中身、フィールド名、元のメッセージを混ぜてフォーマット
-        format_kwargs = {**ctx, "field": field_name, "msg": error.get("msg")}
+        format_kwargs = {
+            **ctx,
+            "field": field_name,
+            "msg": msg,
+        }
         return template.format(**format_kwargs)
     return error.get("msg", "Validation error")

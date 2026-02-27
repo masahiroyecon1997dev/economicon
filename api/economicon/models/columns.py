@@ -2,11 +2,15 @@
 
 from typing import Annotated
 
-from pydantic import Field, StringConstraints
+from pydantic import Field, StringConstraints, model_validator
 
 from economicon.models.common import BaseRequest, BaseResult
 from economicon.models.entities import SimulationColumnConfig, SortInstruction
-from economicon.models.enums import DistributionType
+from economicon.models.enums import (
+    DistributionType,
+    DummyMode,
+    NullStrategy,
+)
 from economicon.models.types import (
     ColumnName,
     CsvEncoding,
@@ -188,36 +192,114 @@ class AddDummyColumnRequestBody(BaseRequest):
     table_name: Annotated[
         TableName,
         Field(
-            description="操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
+            description=(
+                "操作対象のテーブル名。"
+                "ワークスペースに存在するテーブルの中から指定してください。"
+            )
         ),
     ]
     source_column_name: Annotated[
         ColumnName,
         Field(
-            description="ダミー変数を作成する元となるカラム名。ワークスペースに存在するテーブルの中から指定してください。"
-        ),
-    ]
-    dummy_column_name: Annotated[
-        NewColumnName,
-        Field(
-            description="新しいカラム名。既存のカラム名と重複しない名前を指定してください。"
+            description=(
+                "ダミー変数を作成する元となるカラム名。"
+                "ワークスペースに存在するテーブルの中から指定してください。"
+            )
         ),
     ]
     add_position_column: Annotated[
         ColumnName,
         Field(
-            description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
+            description=(
+                "追加位置のカラム名。指定したカラムの右隣に"
+                "新しいカラムが追加されます。"
+                "既存のカラム名から指定してください。"
+            ),
+        ),
+    ]
+    mode: Annotated[
+        DummyMode,
+        Field(
+            strict=False,
+            title="Mode",
+            description=(
+                "ダミー化モード。"
+                "'single': 特定の1値をダミー化する。"
+                "'all_except_base': 基準値を除いた全カテゴリを"
+                "一括ダミー化する。"
+            ),
+        ),
+    ] = DummyMode.SINGLE
+    dummy_column_name: Annotated[
+        NewColumnName | None,
+        Field(
+            default=None,
+            description=(
+                "新しいカラム名。single モード時は必須。"
+                "all_except_base モードでは無視され、"
+                "{source}_{value} 形式で自動生成されます。"
+            ),
         ),
     ]
     target_value: Annotated[
-        str,
+        str | None,
         StringConstraints(strip_whitespace=True, min_length=1),
         Field(
+            default=None,
             title="Target Value",
             examples=["Tokyo", "東京"],
-            description="列に存在する1にする対象の値。例えば、元の列が都市名で、東京を1、それ以外を0にしたい場合は、'Tokyo'や'東京'を指定してください。",
+            description=(
+                "single モード時のみ必須。列に存在する1にする対象の値。"
+            ),
         ),
     ]
+    drop_base_value: Annotated[
+        str | None,
+        Field(
+            default=None,
+            title="Drop Base Value",
+            examples=["Tokyo", "auto_most_frequent"],
+            description=(
+                "all_except_base モード時のみ必須。"
+                "ダミー化から除外する基準カテゴリ値。"
+                "'auto_most_frequent' を指定すると"
+                "最頻値を自動選択します。"
+            ),
+        ),
+    ]
+    null_strategy: Annotated[
+        NullStrategy,
+        Field(
+            strict=False,
+            title="Null Strategy",
+            description=(
+                "null値（空文字・空白を含む）の扱い。"
+                "'exclude': null を無視してダミーを生成しない。"
+                "'as_category': null を '__null__' カテゴリとして扱う。"
+                "'error': null が存在する場合エラーを返す。"
+            ),
+        ),
+    ] = NullStrategy.EXCLUDE
+
+    @model_validator(mode="after")
+    def _validate_mode_fields(
+        self,
+    ) -> AddDummyColumnRequestBody:
+        if self.mode == DummyMode.SINGLE:
+            if self.target_value is None:
+                raise ValueError(
+                    "targetValue は mode='single' のとき必須です。"
+                )
+            if self.dummy_column_name is None:
+                raise ValueError(
+                    "dummyColumnName は mode='single' のとき必須です。"
+                )
+        elif self.mode == DummyMode.ALL_EXCEPT_BASE:
+            if self.drop_base_value is None:
+                raise ValueError(
+                    "dropBaseValue は mode='all_except_base' のとき必須です。"
+                )
+        return self
 
 
 class AddLagLeadColumnRequestBody(BaseRequest):
@@ -460,11 +542,11 @@ class AddDummyColumnResult(BaseResult):
             description="ダミーカラムを追加したテーブル名",
         ),
     ]
-    dummy_column_name: Annotated[
-        str,
+    added_column_names: Annotated[
+        list[str],
         Field(
-            title="Dummy Column Name",
-            description="追加したダミーカラム名",
+            title="Added Column Names",
+            description="追加したダミーカラム名のリスト",
         ),
     ]
 

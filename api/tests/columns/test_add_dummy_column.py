@@ -55,7 +55,7 @@ def test_add_dummy_column_success(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     assert response_data["result"]["tableName"] == "TestTable"
-    assert response_data["result"]["dummyColumnName"] == "is_female"
+    assert response_data["result"]["addedColumnNames"][0] == "is_female"
 
     df = tables_store.get_table("TestTable").table
     # gender の後に is_female が挿入されている
@@ -146,7 +146,7 @@ def test_add_dummy_column_missing_dummy_column_name(client, tables_store):
         },
     )
 
-    expected_msg = "dummyColumnNameは必須です。"
+    expected_msg = "dummyColumnName は mode='single' のとき必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -200,7 +200,7 @@ def test_add_dummy_column_missing_target_value(client, tables_store):
         },
     )
 
-    expected_msg = "targetValueは必須です。"
+    expected_msg = "targetValue は mode='single' のとき必須です。"
 
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -513,7 +513,7 @@ def test_add_dummy_column_japanese_dummy_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert response_data["result"]["dummyColumnName"] == "女性フラグ"
+    assert response_data["result"]["addedColumnNames"][0] == "女性フラグ"
 
     df = tables_store.get_table("TestTable").table
     assert "女性フラグ" in df.columns
@@ -562,7 +562,7 @@ def test_add_dummy_column_emoji_dummy_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert response_data["result"]["dummyColumnName"] == "👩"
+    assert response_data["result"]["addedColumnNames"][0] == "👩"
 
 
 def test_add_dummy_column_strip_whitespace_source_column(client, tables_store):
@@ -602,7 +602,7 @@ def test_add_dummy_column_max_length_dummy_column_name(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-    assert response_data["result"]["dummyColumnName"] == long_name
+    assert response_data["result"]["addedColumnNames"][0] == long_name
 
 
 def test_add_dummy_column_too_long_dummy_column_name(client, tables_store):
@@ -643,3 +643,405 @@ def test_add_dummy_column_tab_char_dummy_column_name(client, tables_store):
     expected_msg = "dummyColumnNameに使用できない文字が含まれています。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
+
+
+# ========================================
+# all_except_base モード: 基本動作
+# ========================================
+
+
+@pytest.fixture
+def tables_store_prefecture():
+    """都道府県テーブルのフィクスチャ"""
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "prefecture": [
+                "Tokyo",
+                "Osaka",
+                "Nagoya",
+                "Tokyo",
+                "Osaka",
+            ],
+            "value": [10, 20, 30, 40, 50],
+        }
+    )
+    manager.store_table("PrefTable", df)
+    yield manager
+    manager.clear_tables()
+
+
+def test_add_dummy_all_except_base_success(client, tables_store_prefecture):
+    """all_except_base モードで基準値を除く全カテゴリが展開される"""
+    payload = {
+        "tableName": "PrefTable",
+        "sourceColumnName": "prefecture",
+        "addPositionColumn": "prefecture",
+        "mode": "all_except_base",
+        "dropBaseValue": "Tokyo",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    added = response_data["result"]["addedColumnNames"]
+    # Nagoya, Osaka (辞書順; Tokyo は base)
+    assert added == ["prefecture_Nagoya", "prefecture_Osaka"]
+
+    df = tables_store_prefecture.get_table("PrefTable").table
+    # 挿入位置: prefecture の直後
+    assert df.columns == [
+        "prefecture",
+        "prefecture_Nagoya",
+        "prefecture_Osaka",
+        "value",
+    ]
+    assert df["prefecture_Nagoya"].to_list() == [0, 0, 1, 0, 0]
+    assert df["prefecture_Osaka"].to_list() == [0, 1, 0, 0, 1]
+
+
+def test_add_dummy_all_except_base_result_keys(
+    client, tables_store_prefecture
+):
+    """all_except_base モードのレスポンスに tableName と
+    addedColumnNames が含まれる"""
+    payload = {
+        "tableName": "PrefTable",
+        "sourceColumnName": "prefecture",
+        "addPositionColumn": "prefecture",
+        "mode": "all_except_base",
+        "dropBaseValue": "Tokyo",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["result"]["tableName"] == "PrefTable"
+    assert isinstance(response_data["result"]["addedColumnNames"], list)
+
+
+# ========================================
+# 名前衝突テスト
+# ========================================
+
+
+def test_add_dummy_all_except_base_name_collision(client):
+    """prefecture_Tokyo が既に存在するとき、_v2 サフィックスが付く"""
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "prefecture": ["Tokyo", "Osaka", "Nagoya"],
+            "prefecture_Tokyo": [1, 0, 0],  # 衝突するカラム
+            "value": [10, 20, 30],
+        }
+    )
+    manager.store_table("ColTable", df)
+
+    payload = {
+        "tableName": "ColTable",
+        "sourceColumnName": "prefecture",
+        "addPositionColumn": "prefecture",
+        "mode": "all_except_base",
+        "dropBaseValue": "Nagoya",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    added = response_data["result"]["addedColumnNames"]
+    # Osaka は衝突なし, Tokyo は既存と衝突 → _v2
+    assert "prefecture_Osaka" in added
+    assert "prefecture_Tokyo_v2" in added
+    assert "prefecture_Tokyo" not in added
+
+    manager.clear_tables()
+
+
+# ========================================
+# auto_most_frequent テスト
+# ========================================
+
+
+def test_add_dummy_auto_most_frequent(client):
+    """drop_base_value='auto_most_frequent' で最頻値が除外される"""
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "gender": [
+                "male",
+                "male",
+                "male",
+                "female",
+                "other",
+            ],
+            "age": [25, 30, 35, 40, 28],
+        }
+    )
+    manager.store_table("FreqTable", df)
+
+    payload = {
+        "tableName": "FreqTable",
+        "sourceColumnName": "gender",
+        "addPositionColumn": "gender",
+        "mode": "all_except_base",
+        "dropBaseValue": "auto_most_frequent",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    added = response_data["result"]["addedColumnNames"]
+    # male が最頻値 → gender_male は生成されない
+    assert "gender_male" not in added
+    assert "gender_female" in added
+    assert "gender_other" in added
+
+    manager.clear_tables()
+
+
+# ========================================
+# null_strategy テスト
+# ========================================
+
+
+def test_add_dummy_null_strategy_exclude(client):
+    """null_strategy='exclude' で空文字・空白がダミー化されない"""
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "category": ["A", "B", "", " ", "A"],
+            "value": [1, 2, 3, 4, 5],
+        }
+    )
+    manager.store_table("NullTable", df)
+
+    payload = {
+        "tableName": "NullTable",
+        "sourceColumnName": "category",
+        "addPositionColumn": "category",
+        "mode": "all_except_base",
+        "dropBaseValue": "A",
+        "nullStrategy": "exclude",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    added = response_data["result"]["addedColumnNames"]
+    # 空文字・空白は null → 除外 → B のみ生成
+    assert added == ["category_B"]
+    # __null__ ダミーは生成されない
+    assert not any("__null__" in n for n in added)
+
+    manager.clear_tables()
+
+
+def test_add_dummy_null_strategy_error(client):
+    """null_strategy='error' で null があれば 500 エラー"""
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "category": ["A", None, "B"],
+            "value": [1, 2, 3],
+        }
+    )
+    manager.store_table("NullErrTable", df)
+
+    payload = {
+        "tableName": "NullErrTable",
+        "sourceColumnName": "category",
+        "addPositionColumn": "category",
+        "mode": "all_except_base",
+        "dropBaseValue": "A",
+        "nullStrategy": "error",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert (
+        response_data["code"] == ErrorCode.ADD_DUMMY_COLUMN_NULL_VALUES_FOUND
+    )
+
+    manager.clear_tables()
+
+
+def test_add_dummy_null_strategy_as_category(client):
+    """null_strategy='as_category' で __null__ ダミーが生成される"""
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "category": ["A", None, "B", None, "A"],
+            "value": [1, 2, 3, 4, 5],
+        }
+    )
+    manager.store_table("AsCatTable", df)
+
+    payload = {
+        "tableName": "AsCatTable",
+        "sourceColumnName": "category",
+        "addPositionColumn": "category",
+        "mode": "all_except_base",
+        "dropBaseValue": "A",
+        "nullStrategy": "as_category",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    added = response_data["result"]["addedColumnNames"]
+    # null カテゴリのダミーが生成されている
+    # "category___null__" → サニタイズ後 "category_null"
+    assert "category_null" in added
+    assert "category_B" in added
+
+    df_result = manager.get_table("AsCatTable").table
+    # null 行が 1、非 null 行が 0
+    assert df_result["category_null"].to_list() == [0, 1, 0, 1, 0]
+
+    manager.clear_tables()
+
+
+# ========================================
+# 順序保証テスト
+# ========================================
+
+
+def test_add_dummy_column_order_guarantee(client):
+    """追加された n-1 個のカラムが指定位置に辞書順で並ぶ"""
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "id": [1, 2, 3, 4, 5],
+            "city": ["Nagoya", "Tokyo", "Osaka", "Nagoya", "Osaka"],
+            "pop": [100, 200, 150, 110, 160],
+        }
+    )
+    manager.store_table("CityTable", df)
+
+    payload = {
+        "tableName": "CityTable",
+        "sourceColumnName": "city",
+        "addPositionColumn": "city",
+        "mode": "all_except_base",
+        "dropBaseValue": "Tokyo",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    added = response_data["result"]["addedColumnNames"]
+
+    # 辞書順: Nagoya < Osaka (Tokyo は base で除外)
+    assert added == ["city_Nagoya", "city_Osaka"]
+
+    df_result = manager.get_table("CityTable").table
+    # 挿入位置は city の直後
+    assert df_result.columns == [
+        "id",
+        "city",
+        "city_Nagoya",
+        "city_Osaka",
+        "pop",
+    ]
+
+    manager.clear_tables()
+
+
+# ========================================
+# all_except_base モード:
+# Pydantic バリデーション (422)
+# ========================================
+
+
+def test_add_dummy_all_except_base_missing_drop_base_value(
+    client, tables_store
+):
+    """all_except_base モードで dropBaseValue が未指定なら 422"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    payload = {
+        "tableName": "TestTable",
+        "sourceColumnName": "gender",
+        "addPositionColumn": "gender",
+        "mode": "all_except_base",
+        # dropBaseValue を意図的に省略
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "dropBaseValue は mode='all_except_base' のとき必須です。"
+    assert response_data["message"] == expected_msg
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+def test_add_dummy_single_mode_missing_target_value(client, tables_store):
+    """single モードで targetValue が未指定なら 422"""
+    df_before = tables_store.get_table("TestTable").table.clone()
+
+    payload = {
+        "tableName": "TestTable",
+        "sourceColumnName": "gender",
+        "dummyColumnName": "is_female",
+        "addPositionColumn": "gender",
+        "mode": "single",
+        # targetValue を意図的に省略
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "targetValue は mode='single' のとき必須です。"
+    assert response_data["message"] == expected_msg
+
+    df_after = tables_store.get_table("TestTable").table
+    assert df_after.equals(df_before)
+
+
+# ========================================
+# カラム名サニタイズテスト
+# ========================================
+
+
+def test_add_dummy_all_except_base_sanitize_col_name(client):
+    """カテゴリ値にスペースが含まれる場合、_ に置換される"""
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "region": ["East Asia", "West Europe", "East Asia"],
+            "value": [1, 2, 3],
+        }
+    )
+    manager.store_table("RegTable", df)
+
+    payload = {
+        "tableName": "RegTable",
+        "sourceColumnName": "region",
+        "addPositionColumn": "region",
+        "mode": "all_except_base",
+        "dropBaseValue": "East Asia",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    added = response_data["result"]["addedColumnNames"]
+    # "West Europe" → "West_Europe" に置換
+    assert added == ["region_West_Europe"]
+
+    manager.clear_tables()
