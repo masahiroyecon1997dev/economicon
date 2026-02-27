@@ -6,6 +6,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 
 class AnalysisResult:
     """
@@ -25,6 +27,8 @@ class AnalysisResult:
     _model_type: str | None
     _entity_id_column: str | None
     _time_column: str | None
+    # Tobit 欲存値除去後の元テーブル行インデックス（__row_idx__ 結合用）
+    _row_indices: np.ndarray | None
 
     def __init__(
         self,
@@ -36,6 +40,7 @@ class AnalysisResult:
         model_type: str | None = None,
         entity_id_column: str | None = None,
         time_column: str | None = None,
+        row_indices: np.ndarray | None = None,
     ):
         self._id = str(uuid.uuid4())
         self._name = name
@@ -47,6 +52,7 @@ class AnalysisResult:
         self._model_type = model_type
         self._entity_id_column = entity_id_column
         self._time_column = time_column
+        self._row_indices = row_indices
 
     @staticmethod
     def get_tmp_models_dir() -> Path:
@@ -106,6 +112,11 @@ class AnalysisResult:
     @property
     def time_column(self) -> str | None:
         return self._time_column
+
+    @property
+    def row_indices(self) -> np.ndarray | None:
+        """欲存値除去後の元テーブル行インデックス (Tobit 等で使用)"""
+        return self._row_indices
 
     @name.setter
     def name(self, name: str):

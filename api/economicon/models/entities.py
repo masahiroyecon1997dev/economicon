@@ -51,6 +51,12 @@ class RegularizedRegressionParams(BaseRequest):
         le=10000,
         alias="bootstrapIterations",
         description="ブートストラップ法のイテレーション回数",
+    )    # Eco-Note C: 在様固定。None 指定時は推定のたびに結果が変わる
+    random_state: int | None = Field(
+        default=None,
+        alias="randomState",
+        description="ブートストラップの乱数シード。None の場合は固定しない。"
+        "実験の再現性を確保する場合は整数値を指定する。",
     )
 
 
@@ -63,6 +69,15 @@ class BinaryChoiceRegressionParams(BaseRequest):
         default=False,
         alias="calculateMarginalEffects",
         description="平均限界効果(AME)を計算するかどうか",
+    )
+    # Eco-Note A: Logit/Probit の残差種別
+    # raw: 生残差 (y - p̂)、deviance: デビアンス残差
+    binary_residual_type: Literal["raw", "deviance"] = Field(
+        default="raw",
+        alias="binaryResidualType",
+        description="残差種別。"
+        "raw: 生残差 (y - p̂)、"
+        "deviance: デビアンス残差。Logit/Probit のみ有効。",
     )
 
 
