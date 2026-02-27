@@ -314,3 +314,7 @@ msgstr "説明変数行列が特異です。完全な多重共線性が検出さ
 #: economicon/models/tables.py
 msgid "newTableName must differ from oldTableName."
 msgstr "newTableName には oldTableName と異なる名前を指定してください。"
+
+#: economicon/models/columns.py
+msgid "newColumnName must differ from oldColumnName."
+msgstr "newColumnName には oldColumnName と異なる名前を指定してください。"
