@@ -312,6 +312,10 @@ class RegularizedResult:
     - bootstrap_se: Ridge のみ。ブートストラップ標準偏差
     - selection_rate: Lasso のみ。変数が非ゼロとなった
         ブートストラップの割合。定数項ご除く n_features 次元
+    - pipeline: sklearn Pipeline（StandardScaler + Lasso/Ridge）
+        診断列追加時に predict() 再実行用
+    - x_data: 推定時の説明変数（定数項除去済み）
+    - y_data: 推定時の被説明変数（残差計算用）
     """
 
     params_original: np.ndarray  # 元スケールの係数（定数項を含む）
@@ -319,6 +323,9 @@ class RegularizedResult:
     r2: float  # 訓練データ R²
     n_obs: int  # 観測数
     has_const: bool  # 定数項フラグ
+    pipeline: Any  # sklearn Pipeline（predict 再実行用）
+    x_data: np.ndarray  # 推定時の説明変数（定数項除去済み）
+    y_data: np.ndarray  # 推定時の被説明変数（残差計算用）
     bootstrap_ci_lower: np.ndarray | None = None
     bootstrap_ci_upper: np.ndarray | None = None
     bootstrap_se: np.ndarray | None = None  # Ridge 用
@@ -415,6 +422,9 @@ def fit_lasso(
         r2=r2,
         n_obs=len(data_input.y_data),
         has_const=data_input.has_const,
+        pipeline=model,
+        x_data=x_data_sklearn,
+        y_data=data_input.y_data,
         bootstrap_ci_lower=bootstrap_ci_lower,
         bootstrap_ci_upper=bootstrap_ci_upper,
         selection_rate=selection_rate,
@@ -506,6 +516,9 @@ def fit_ridge(
         r2=r2,
         n_obs=len(data_input.y_data),
         has_const=data_input.has_const,
+        pipeline=model,
+        x_data=x_data_sklearn,
+        y_data=data_input.y_data,
         bootstrap_ci_lower=bootstrap_ci_lower,
         bootstrap_ci_upper=bootstrap_ci_upper,
         bootstrap_se=bootstrap_se,

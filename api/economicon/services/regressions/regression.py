@@ -232,8 +232,15 @@ class Regression:
                     _("Specified regression method is not supported")
                 )
 
+            # raw モデル情報を格納するインスタンス変数を初期化
+            # （各 _execute_* メソッド内でセットされる）
+            self._last_raw_model: Any = None
+            self._last_model_type: str | None = None
+            self._last_entity_id_column: str | None = None
+            self._last_time_column: str | None = None
+
             execute_method = self._execution_map[analysis_type]
-            analysis_result = execute_method(
+            regression_output = execute_method(
                 df=df, y_data=y_data, x_data=x_data, missing=missing
             )
 
@@ -242,10 +249,19 @@ class Regression:
                 name=self.result_name or self.dependent_variable,
                 description=self.description,
                 table_name=self.table_name,
-                regression_output=analysis_result,
+                regression_output=regression_output,
+                model_type=self._last_model_type,
+                entity_id_column=self._last_entity_id_column,
+                time_column=self._last_time_column,
             )
 
             result_id = self.result_store.save_result(analysis_result)
+
+            # pickle でモデルをファイルに保存（メモリ節約のため直後に解放）
+            if self._last_raw_model is not None:
+                analysis_result.save_model(self._last_raw_model)
+                del self._last_raw_model
+                self._last_raw_model = None
 
             result = {
                 "resultId": result_id,
@@ -270,6 +286,8 @@ class Regression:
             model_result,
             self.standard_error,
         )
+        self._last_raw_model = model_result
+        self._last_model_type = "ols"
         return self._format_result(model_result)
 
     def _execute_binary_choice(self, *, df, y_data, x_data, missing):
@@ -279,8 +297,10 @@ class Regression:
             )
         if self.analysis.method == RegressionMethodType.LOGIT:
             model_result = fit_logit(y_data, x_data, missing)
+            self._last_model_type = "logit"
         elif self.analysis.method == RegressionMethodType.PROBIT:
             model_result = fit_probit(y_data, x_data, missing)
+            self._last_model_type = "probit"
         else:
             raise NotImplementedError(
                 _("Specified regression method is not supported")
@@ -290,6 +310,7 @@ class Regression:
             model_result,
             self.standard_error,
         )
+        self._last_raw_model = model_result
         result = self._format_result(model_result)
         # 平均限界効果 (AME) の計算
         if self.analysis.calculate_marginal_effects:
@@ -375,6 +396,8 @@ class Regression:
             }
         except Exception:
             pass
+        self._last_raw_model = model_result
+        self._last_model_type = "tobit"
         return self._tobit_format_result(
             model_result,
             self.analysis.left_censoring_limit,
@@ -405,6 +428,10 @@ class Regression:
                 self.explanatory_variables,
                 self.standard_error.method,
             )
+            self._last_raw_model = model_result
+            self._last_model_type = "fe"
+            self._last_entity_id_column = self.analysis.entity_id_column
+            self._last_time_column = self.analysis.time_column
             return self._fe_format_result(
                 model_result, self.analysis.entity_id_column
             )
@@ -415,6 +442,10 @@ class Regression:
                 self.explanatory_variables,
                 self.standard_error.method,
             )
+            self._last_raw_model = model_result
+            self._last_model_type = "re"
+            self._last_entity_id_column = self.analysis.entity_id_column
+            self._last_time_column = self.analysis.time_column
             return self._re_format_result(
                 model_result, self.analysis.entity_id_column
             )
@@ -450,6 +481,8 @@ class Regression:
             has_const=self.has_const,
         )
         model_result = fit_iv(data_input)
+        self._last_raw_model = model_result
+        self._last_model_type = "iv"
         return self._iv_format_result(
             model_result,
             self.analysis.endogenous_variables,
@@ -477,13 +510,16 @@ class Regression:
 
         if self.analysis.method == RegressionMethodType.LASSO:
             reg_result = fit_lasso(data_input)
+            self._last_model_type = "lasso"
         elif self.analysis.method == RegressionMethodType.RIDGE:
             reg_result = fit_ridge(data_input)
+            self._last_model_type = "ridge"
         else:
             raise NotImplementedError(
                 _("Specified regression method is not supported")
             )
 
+        self._last_raw_model = reg_result
         return self._format_regularized_result(reg_result)
 
     def _execute_panel_iv(self, *, df, y_data, x_data, missing):
