@@ -61,6 +61,10 @@ BERNOULLI_P = 0.5
 # 幾何分布
 GEOMETRIC_P = 0.3
 
+# 負の二項分布
+NEG_BINOMIAL_N = 5
+NEG_BINOMIAL_P = 0.3
+
 # 固定値
 FIXED_VALUE = 42.0
 
@@ -444,6 +448,35 @@ def test_add_fixed_column_success(client, tables_store):
     assert len(df["FixedCol"]) == ROW_COUNT
     # 全行が固定値であることを確認
     assert all(v == FIXED_VALUE for v in df["FixedCol"])
+
+
+def test_add_negative_binomial_column_success(client, tables_store):
+    """負の二項分布の列追加が正常に動作する"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "NegBinomialCol",
+                "distribution": {
+                    "type": "negative_binomial",
+                    "n": NEG_BINOMIAL_N,
+                    "p": NEG_BINOMIAL_P,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["distributionType"] == "negative_binomial"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == [COL_A, "NegBinomialCol", COL_B]
+    assert len(df["NegBinomialCol"]) == ROW_COUNT
+    # 負の二項分布は非負整数
+    assert all(v >= 0 for v in df["NegBinomialCol"])
 
 
 # ========================================
@@ -1251,6 +1284,97 @@ def test_add_simulation_column_hypergeometric_k_exceeds_n(
                     "N": 5,
                     "K": 6,
                     "n": 3,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumn.distribution" in response_data["message"]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+# 負の二項分布 (D-NB1 – D-NB3)
+
+
+def test_add_simulation_column_negative_binomial_probability_zero(
+    client, tables_store
+):
+    """D-NB1: 負の二項分布で p=0 は422エラーになる（gt=0 制約）"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SimCol",
+                "distribution": {
+                    "type": "negative_binomial",
+                    "n": NEG_BINOMIAL_N,
+                    "p": 0.0,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumn.distribution" in response_data["message"]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_add_simulation_column_negative_binomial_probability_over_one(
+    client, tables_store
+):
+    """D-NB2: 負の二項分布で p=1.5 は422エラーになる（le=1 制約）"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SimCol",
+                "distribution": {
+                    "type": "negative_binomial",
+                    "n": NEG_BINOMIAL_N,
+                    "p": 1.5,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "simulationColumn.distribution" in response_data["message"]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_add_simulation_column_negative_binomial_n_zero(client, tables_store):
+    """D-NB3: 負の二項分布で n=0 は422エラーになる（gt=0 制約）"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SimCol",
+                "distribution": {
+                    "type": "negative_binomial",
+                    "n": 0,
+                    "p": NEG_BINOMIAL_P,
                 },
             },
             "addPositionColumn": COL_A,

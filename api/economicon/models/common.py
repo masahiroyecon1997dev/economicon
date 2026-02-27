@@ -156,6 +156,20 @@ class GeometricParams(BaseRequest):
     p: float = Field(gt=0, le=1, description="成功確率")
 
 
+class NegativeBinomialParams(BaseRequest):
+    """負の二項分布のパラメータ
+
+    n 回成功するまでに必要な失敗回数をシミュレートする。
+    イベント発生強度の過分散モデリングに広く使われる。
+    """
+
+    type: Literal[DistributionType.NEGATIVE_BINOMIAL] = Field(
+        description="分布の種類"
+    )
+    n: int = Field(gt=0, description="成功回数")
+    p: float = Field(gt=0, le=1, description="成功確率")
+
+
 class HypergeometricParams(BaseRequest):
     """超幾何分布のパラメータ"""
 

@@ -37,6 +37,7 @@ from economicon.models.common import (
     GeometricParams,
     HypergeometricParams,
     LognormalParams,
+    NegativeBinomialParams,
     NormalParams,
     PoissonParams,
     SuccessResponse,
@@ -144,6 +145,7 @@ __all__ = [
     "PoissonParams",
     "GeometricParams",
     "HypergeometricParams",
+    "NegativeBinomialParams",
     # Enums
     "DistributionType",
     "TransformMethodType",
