@@ -22,9 +22,7 @@ _BASE_PAYLOAD: dict = {
 }
 
 # model_validatorのエラーメッセージ（filePath未指定時にrowCountが必須）
-_MSG_ROW_REQUIRED = (
-    "Value error, row_count is required when file_path is not specified"
-)
+_MSG_ROW_REQUIRED = "row_count is required when file_path is not specified"
 # エンコーディングバリデーションエラーメッセージ
 _ENCODING_ERROR = (
     "csvEncodingは次のいずれかである必要があります: "

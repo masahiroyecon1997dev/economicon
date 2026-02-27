@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import tempfile
+from unittest.mock import MagicMock
 
 import polars as pl
 import pytest
@@ -546,3 +547,60 @@ def test_export_parquet_invalid_format(client, prepared_data):
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
     assert _FORMAT_ERROR == response_data["message"]
     assert [_FORMAT_ERROR] == response_data["details"]
+
+
+# ─────────────────────────────────────────────────────────────
+# OSレイヤーI/Oエラーテスト
+# ─────────────────────────────────────────────────────────────
+
+
+def test_export_parquet_permission_denied(client, prepared_data):
+    """
+    書き込み権限エラーが発生した場合は500 PERMISSION_DENIEDを返す
+    """
+    tables_store, test_output_dir, _ = prepared_data
+    table_info = tables_store.get_table("TestTable")
+    original_df = table_info.table
+    mock_df = MagicMock()
+    mock_df.write_parquet.side_effect = PermissionError(
+        "Permission denied: read-only location"
+    )
+    table_info.table = mock_df
+    try:
+        request_data = {
+            "tableName": "TestTable",
+            "directoryPath": test_output_dir,
+            "fileName": "test_perm_error",
+            "format": "parquet",
+        }
+        response = client.post(URL, data=json.dumps(request_data))
+        response_data = response.json()
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert ErrorCode.PERMISSION_DENIED == response_data["code"]
+    finally:
+        table_info.table = original_df
+
+
+def test_export_parquet_io_error(client, prepared_data):
+    """
+    汎用IOErrorが発生した場合は500 PARQUET_EXPORT_ERRORを返す
+    """
+    tables_store, test_output_dir, _ = prepared_data
+    table_info = tables_store.get_table("TestTable")
+    original_df = table_info.table
+    mock_df = MagicMock()
+    mock_df.write_parquet.side_effect = OSError("OS error: file name too long")
+    table_info.table = mock_df
+    try:
+        request_data = {
+            "tableName": "TestTable",
+            "directoryPath": test_output_dir,
+            "fileName": "test_io_error",
+            "format": "parquet",
+        }
+        response = client.post(URL, data=json.dumps(request_data))
+        response_data = response.json()
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert ErrorCode.PARQUET_EXPORT_ERROR == response_data["code"]
+    finally:
+        table_info.table = original_df

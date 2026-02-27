@@ -329,16 +329,16 @@ class TestBoundaryValues:
                         100.0,
                     ],
                     _COL_KANJI_Y: [
-                        5.0,
-                        10.0,
-                        15.0,
-                        20.0,
-                        25.0,
-                        30.0,
-                        35.0,
-                        40.0,
+                        3.0,
+                        9.0,
+                        12.0,
+                        22.0,
+                        31.0,
+                        38.0,
                         45.0,
-                        50.0,
+                        55.0,
+                        62.0,
+                        71.0,
                     ],
                 }
             ),
@@ -421,6 +421,87 @@ class TestMissingValueHandling:
 
     def test_missing_value_remove_mode(self, client, tables_store):
         """missingValueHandling='remove'の場合、NaN行を除去して正常終了する"""
+        payload = {
+            "tableName": TABLE_NAN,
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": True,
+            "missingValueHandling": "remove",
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.json()["code"] == "OK"
+
+
+# ─────────────────────────────────────────────
+# 特異行列・完全多重共線性テスト
+# ─────────────────────────────────────────────
+
+
+class TestSingularMatrix:
+    """完全多重共線性（特異行列）のテスト"""
+
+    def test_perfect_multicollinearity_ols(self, client, tables_store):
+        """x2 = 2 * x1 の完全多重共線性: OLSで500を返す"""
+        store = TablesStore()
+        n = 10
+        x1 = [float(i) for i in range(1, n + 1)]
+        store.store_table(
+            "CollinearData",
+            pl.DataFrame(
+                {
+                    "y": [float(i) * 1.5 for i in range(1, n + 1)],
+                    "x1": x1,
+                    "x2": [v * 2.0 for v in x1],
+                }
+            ),
+        )
+        payload = {
+            "tableName": "CollinearData",
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": True,
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert data["code"] == ErrorCode.REGRESSION_SINGULAR_MATRIX_ERROR
+
+    def test_identical_columns_multicollinearity(self, client, tables_store):
+        """x1 = x2 の完全多重共線性（has_const=False）: 500を返す"""
+        store = TablesStore()
+        x_vals = [float(i) for i in range(1, 11)]
+        store.store_table(
+            "IdenticalColData",
+            pl.DataFrame(
+                {
+                    "y": [2.0 * v + 1.0 for v in x_vals],
+                    "x1": x_vals,
+                    "x2": x_vals,
+                }
+            ),
+        )
+        payload = {
+            "tableName": "IdenticalColData",
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": False,
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert data["code"] == ErrorCode.REGRESSION_SINGULAR_MATRIX_ERROR
+
+    def test_nan_data_bypasses_rank_check(self, client, tables_store):
+        """
+        NaN含むデータはランクチェックをスキップし正常終了する
+        """
         payload = {
             "tableName": TABLE_NAN,
             "dependentVariable": "y",

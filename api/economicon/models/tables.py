@@ -168,6 +168,17 @@ class RenameTableRequestBody(BaseRequest):
         Field(title="New Table Name", description="変更後の新しいテーブル名"),
     ]
 
+    @model_validator(mode="after")
+    def _validate_names_differ(
+        self,
+    ) -> RenameTableRequestBody:
+        if self.old_table_name == self.new_table_name:
+            raise ValueError(
+                "newTableName には oldTableName と"
+                "異なる名前を指定してください。"
+            )
+        return self
+
 
 class CreateSimulationDataTableRequestBody(BaseRequest):
     """シミュレーションデータテーブル作成リクエスト"""

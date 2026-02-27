@@ -356,3 +356,51 @@ def test_rename_table_new_tablename_emoji(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
+
+
+# ---------------------------------------------------------------------------
+# 同名リネームバリデーションテスト
+# ---------------------------------------------------------------------------
+
+
+def test_rename_table_same_name_422(client, tables_store):
+    """
+    Pydanticバリデーション:
+    oldTableNameとnewTableNameが同一の場合は422エラー
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={
+            "oldTableName": _OLD_TABLE,
+            "newTableName": _OLD_TABLE,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    expected_msg = (
+        "newTableName には oldTableName と異なる名前を指定してください。"
+    )
+    assert expected_msg == response_data["message"]
+    assert [expected_msg] == response_data["details"]
+
+
+def test_rename_table_same_name_after_strip_422(client, tables_store):
+    """
+    前後スペースを包む同同名指定も422エラー（strip後に同名）
+    """
+    response = client.post(
+        "/api/table/rename",
+        json={
+            "oldTableName": _OLD_TABLE,
+            "newTableName": f"  {_OLD_TABLE}  ",
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert ErrorCode.VALIDATION_ERROR == response_data["code"]
+    expected_msg = (
+        "newTableName には oldTableName と異なる名前を指定してください。"
+    )
+    assert expected_msg == response_data["message"]
+    assert [expected_msg] == response_data["details"]
