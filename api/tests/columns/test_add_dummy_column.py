@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import polars as pl
 import pytest
 from fastapi import status
@@ -1043,5 +1045,147 @@ def test_add_dummy_all_except_base_sanitize_col_name(client):
     added = response_data["result"]["addedColumnNames"]
     # "West Europe" → "West_Europe" に置換
     assert added == ["region_West_Europe"]
+
+    manager.clear_tables()
+
+
+# ========================================
+# カバレッジ補完テスト
+# ========================================
+
+
+def test_make_unique_name_requires_v3(client):
+    """
+    _v2 まで衝突するとき _v3 が付与される
+
+    _make_unique_name の while ループが 2 回目を実行する
+    ケース（line 43）をカバーする。
+    """
+    manager = TablesStore()
+    manager.clear_tables()
+    # prefecture_Tokyo と prefecture_Tokyo_v2 が既存 → _v3 が必要
+    df = pl.DataFrame(
+        {
+            "prefecture": ["Tokyo", "Osaka", "Nagoya"],
+            "prefecture_Tokyo": [1, 0, 0],
+            "prefecture_Tokyo_v2": [0, 0, 1],
+            "value": [10, 20, 30],
+        }
+    )
+    manager.store_table("TripleCollTable", df)
+
+    payload = {
+        "tableName": "TripleCollTable",
+        "sourceColumnName": "prefecture",
+        "addPositionColumn": "prefecture",
+        "mode": "all_except_base",
+        "dropBaseValue": "Nagoya",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    added = response_data["result"]["addedColumnNames"]
+    assert "prefecture_Osaka" in added
+    # _v2 も衝突するため _v3 が割り当てられる
+    assert "prefecture_Tokyo_v3" in added
+
+    manager.clear_tables()
+
+
+def test_execute_unexpected_exception_returns_500(client, tables_store):
+    """
+    execute() 内で予期しない例外が発生した場合に 500 が返る
+
+    update_table を RuntimeError に差し替えて
+    except Exception as e: ブランチ（line 143-148）をカバーする。
+    """
+    expected_code = ErrorCode.ADD_DUMMY_COLUMN_PROCESS_ERROR
+
+    payload = {
+        "tableName": "TestTable",
+        "sourceColumnName": "gender",
+        "dummyColumnName": "is_male",
+        "addPositionColumn": "gender",
+        "targetValue": "male",
+    }
+    with patch.object(
+        TablesStore,
+        "update_table",
+        side_effect=RuntimeError("forced unexpected error"),
+    ):
+        response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response_data["code"] == expected_code
+
+
+def test_single_mode_null_strategy_error_with_null_returns_500(client):
+    """
+    mode='single', null_strategy='error', ソース列に null あり → 500
+
+    _execute_single の null チェックブランチ（line 160-162）をカバーする。
+    """
+    expected_code = ErrorCode.ADD_DUMMY_COLUMN_NULL_VALUES_FOUND
+
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "category": ["A", None, "B"],
+            "value": [1, 2, 3],
+        }
+    )
+    manager.store_table("NullSingleTable", df)
+
+    payload = {
+        "tableName": "NullSingleTable",
+        "sourceColumnName": "category",
+        "dummyColumnName": "is_a",
+        "addPositionColumn": "category",
+        "targetValue": "A",
+        "nullStrategy": "error",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response_data["code"] == expected_code
+
+    manager.clear_tables()
+
+
+def test_single_mode_null_strategy_error_no_null_returns_200(client):
+    """
+    mode='single', null_strategy='error', ソース列に null なし → 200
+
+    _execute_single の null チェック（line 160）で
+    is_null().any() = False のとき正常処理されるブランチ（160->168）をカバー。
+    """
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "category": ["A", "B", "C"],
+            "value": [1, 2, 3],
+        }
+    )
+    manager.store_table("NoNullTable", df)
+
+    payload = {
+        "tableName": "NoNullTable",
+        "sourceColumnName": "category",
+        "dummyColumnName": "is_a",
+        "addPositionColumn": "category",
+        "targetValue": "A",
+        "nullStrategy": "error",
+    }
+    response = client.post("/api/column/add-dummy", json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert "is_a" in response_data["result"]["addedColumnNames"]
 
     manager.clear_tables()

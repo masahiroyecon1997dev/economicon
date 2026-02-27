@@ -32,7 +32,7 @@ MSG_INVALID_METHOD = (
     " <TransformMethodType.ROOT: 'root'>"
 )
 # value_error はテンプレート "{msg}" のまま（翻訳なし）
-MSG_LOG_BASE_ONE = "Value error, Log base cannot be 1."
+MSG_LOG_BASE_ONE = "Log base cannot be 1."
 
 
 @pytest.fixture

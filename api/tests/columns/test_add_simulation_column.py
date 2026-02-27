@@ -627,9 +627,7 @@ def test_invalid_uniform_params_low_ge_high(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = (
-        "Value error, 一様分布では、'low'は'high'より小さい必要があります"
-    )
+    expected_msg = "一様分布では、'low'は'high'より小さい必要があります"
     assert response_data["message"] == expected_msg
     assert expected_msg in response_data["details"]
 
@@ -1129,9 +1127,7 @@ def test_add_simulation_column_uniform_low_equals_high(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = (
-        "Value error, 一様分布では、'low'は'high'より小さい必要があります"
-    )
+    expected_msg = "一様分布では、'low'は'high'より小さい必要があります"
     assert response_data["message"] == expected_msg
     assert expected_msg in response_data["details"]
 
@@ -1161,9 +1157,7 @@ def test_add_simulation_column_uniform_reversed_range(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    expected_msg = (
-        "Value error, 一様分布では、'low'は'high'より小さい必要があります"
-    )
+    expected_msg = "一様分布では、'low'は'high'より小さい必要があります"
     assert response_data["message"] == expected_msg
     assert expected_msg in response_data["details"]
 

@@ -120,6 +120,17 @@ class RenameColumnRequestBody(BaseRequest):
         ),
     ]
 
+    @model_validator(mode="after")
+    def _validate_names_differ(
+        self,
+    ) -> RenameColumnRequestBody:
+        if self.old_column_name == self.new_column_name:
+            raise ValueError(
+                "newColumnName には oldColumnName と"
+                "異なる名前を指定してください。"
+            )
+        return self
+
 
 class DuplicateColumnRequestBody(BaseRequest):
     """カラム複製リクエスト"""
