@@ -9,11 +9,12 @@ class AnalysisResultStore:
     """
 
     _instance = None
-    _lock: threading.RLock = threading.RLock()
+    # シングルトン生成時の DCL (Double-Checked Locking) 用クラスレベルロック
+    _class_lock: threading.RLock = threading.RLock()
 
     def __new__(cls):
         if cls._instance is None:
-            with cls._lock:
+            with cls._class_lock:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
         return cls._instance

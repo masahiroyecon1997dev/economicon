@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
+import pandas as pd
 import statsmodels.api as sm
 from linearmodels.iv import IV2SLS
 from linearmodels.panel import PanelOLS, RandomEffects
@@ -195,8 +196,16 @@ def fit_iv(data_input: IVInput) -> Any:
         if data_input.explanatory_variables
         else None
     )
-    if data_input.has_const and exog_raw is not None:
-        exog = sm.add_constant(exog_raw)
+    # Warning#4: has_const=True かつ exog_raw=None (外生変数なし) の場合も定数項を追加する
+    if data_input.has_const:
+        if exog_raw is not None:
+            exog = sm.add_constant(exog_raw)
+        else:
+            # 外生変数なし + 定数項のみの設計行列
+            exog = pd.DataFrame(
+                {"const": np.ones(len(data_input.df_pandas))},
+                index=data_input.df_pandas.index,
+            )
     else:
         exog = exog_raw
     endog = (
@@ -248,6 +257,8 @@ def fit_fe(
     )
 
     # PanelOLS モデルの作成とフィット
+    # Warning#7: FE (内部推定) では個体効果が切片を吸収するため has_const は意図的に無視。
+    # 必要な場合は prep 時に time_demeaning されたデータに定数項を追加すること。0
     model = PanelOLS(y, depns, entity_effects=True)
     result = model.fit(cov_type=cov_type)
 
@@ -284,6 +295,8 @@ def fit_re(
     )
 
     # RandomEffects モデルの作成とフィット
+    # Warning#7: RE (ブレイス/GLS 変換) では linearmodels 内部で has_const を考慮済み。
+    # (切片項は 中央化後の変量成分 within + 時間平均 between の合成 として内力に追加される)
     model = RandomEffects(y, depns)
     result = model.fit(cov_type=cov_type)
 
@@ -299,6 +312,8 @@ class RegularizedRegressionInput:
     missing: str
     calculate_se: bool = False
     bootstrap_iterations: int = 1000
+    # Eco-Note C: 在様固定。None 指定時は推定のたびに結果が変わる
+    random_state: int | None = None
 
 
 @dataclass
@@ -379,9 +394,11 @@ def fit_lasso(
         n_samples = len(data_input.y_data)
         n_params = len(params_original)
         bootstrap_coefs = np.zeros((data_input.bootstrap_iterations, n_params))
+        # Eco-Note C: Generator ベースの RNG で在様性を確保
+        rng = np.random.default_rng(data_input.random_state)
 
         for i in range(data_input.bootstrap_iterations):
-            idx = np.random.choice(n_samples, n_samples, replace=True)
+            idx = rng.choice(n_samples, n_samples, replace=True)
             y_boot = data_input.y_data[idx]
             x_boot = x_data_sklearn[idx]
 
@@ -478,9 +495,11 @@ def fit_ridge(
         n_samples = len(data_input.y_data)
         n_params = len(params_original)
         bootstrap_coefs = np.zeros((data_input.bootstrap_iterations, n_params))
+        # Eco-Note C: Generator ベースの RNG で在様性を確保
+        rng = np.random.default_rng(data_input.random_state)
 
         for i in range(data_input.bootstrap_iterations):
-            idx = np.random.choice(n_samples, n_samples, replace=True)
+            idx = rng.choice(n_samples, n_samples, replace=True)
             y_boot = data_input.y_data[idx]
             x_boot = x_data_sklearn[idx]
 

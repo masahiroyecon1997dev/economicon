@@ -1,3 +1,4 @@
+import logging
 from typing import Any, ClassVar
 
 import numpy as np
@@ -54,6 +55,8 @@ from economicon.utils.validators import (
     validate_existence,
     validate_numeric_types,
 )
+
+_logger = logging.getLogger(__name__)
 
 
 class Regression:
@@ -238,6 +241,8 @@ class Regression:
             self._last_model_type: str | None = None
             self._last_entity_id_column: str | None = None
             self._last_time_column: str | None = None
+            # Critical#3: Tobit の欲存除去後の行インデックス (診断列追加時の行ズれ防止用)
+            self._last_row_indices: np.ndarray | None = None
 
             execute_method = self._execution_map[analysis_type]
             regression_output = execute_method(
@@ -253,6 +258,7 @@ class Regression:
                 model_type=self._last_model_type,
                 entity_id_column=self._last_entity_id_column,
                 time_column=self._last_time_column,
+                row_indices=self._last_row_indices,
             )
 
             result_id = self.result_store.save_result(analysis_result)
@@ -338,20 +344,25 @@ class Regression:
             ) + self.explanatory_variables
             ci = margeff.conf_int()
             result_list: list[dict[str, Any]] = []
-            for i, name in enumerate(param_names):
+            # Critical#1: margeff の下標は定数項を含まないため
+            # param_names とは別に ame_idx で管理する。
+            # loop index i をそのまま使うと定数項スキップ時に 1 ずれる。
+            ame_idx = 0
+            for name in param_names:
                 if name == "const":
                     continue  # 定数項は AME に含めない
                 result_list.append(
                     {
                         "variable": name,
-                        "marginalEffect": float(margeff.margeff[i]),
-                        "standardError": float(margeff.margeff_se[i]),
-                        "tValue": float(margeff.tvalues[i]),
-                        "pValue": float(margeff.pvalues[i]),
-                        "confidenceIntervalLower": float(ci[i, 0]),
-                        "confidenceIntervalUpper": float(ci[i, 1]),
+                        "marginalEffect": float(margeff.margeff[ame_idx]),
+                        "standardError": float(margeff.margeff_se[ame_idx]),
+                        "tValue": float(margeff.tvalues[ame_idx]),
+                        "pValue": float(margeff.pvalues[ame_idx]),
+                        "confidenceIntervalLower": float(ci[ame_idx, 0]),
+                        "confidenceIntervalUpper": float(ci[ame_idx, 1]),
                     }
                 )
+                ame_idx += 1
             return result_list
         except Exception as e:
             raise ProcessingError(
@@ -370,6 +381,8 @@ class Regression:
             self.explanatory_variables,
             missing,
         )
+        # Critical#3: dropna() 後の pandas インデックスを保存して診断列追加時の行ズれを防止する
+        self._last_row_indices = df_pandas.index.to_numpy(dtype=np.int64)
         data_input = TobitInput(
             df_pandas=df_pandas,
             dependent_variable=self.dependent_variable,
@@ -394,8 +407,9 @@ class Regression:
                     "Likelihood ratio test vs. constant-only Tobit"
                 ),
             }
-        except Exception:
-            pass
+        except Exception as _lr_exc:
+            # Warning#9: LR 検定失敗をサイレントに無視するのではなくログに記録する
+            _logger.warning("Tobit LR test failed: %s", _lr_exc)
         self._last_raw_model = model_result
         self._last_model_type = "tobit"
         return self._tobit_format_result(
@@ -497,6 +511,8 @@ class Regression:
         alpha = self.analysis.alpha
         calculate_se = self.analysis.calculate_se
         bootstrap_iterations = self.analysis.bootstrap_iterations
+        # Eco-Note C: random_state を渡してブートストラップの再現性を確保
+        random_state = self.analysis.random_state
 
         data_input = RegularizedRegressionInput(
             y_data=y_data,
@@ -506,6 +522,7 @@ class Regression:
             missing=missing,
             calculate_se=calculate_se,
             bootstrap_iterations=bootstrap_iterations,
+            random_state=random_state,
         )
 
         if self.analysis.method == RegressionMethodType.LASSO:
