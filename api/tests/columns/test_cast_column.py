@@ -178,8 +178,13 @@ def test_cast_column_strict_error(client, tables_store):
     response = client.post(ENDPOINT, json=payload)
     response_data = response.json()
 
+    expected_msg = (
+        f"Type conversion failed: column '{COL_A}' "
+        "cannot be cast to 'int'"
+    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.CAST_COLUMN_TYPE_ERROR
+    assert response_data["message"] == expected_msg
 
 
 def test_cast_column_strict_date_error(client, tables_store):
@@ -199,8 +204,13 @@ def test_cast_column_strict_date_error(client, tables_store):
     response = client.post(ENDPOINT, json=payload)
     response_data = response.json()
 
+    expected_msg = (
+        f"Type conversion failed: column '{COL_B}' "
+        "cannot be cast to 'date'"
+    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.CAST_COLUMN_TYPE_ERROR
+    assert response_data["message"] == expected_msg
 
 
 def test_cast_column_invalid_table(client, tables_store):
@@ -217,6 +227,9 @@ def test_cast_column_invalid_table(client, tables_store):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert response_data["message"] == (
+        f"tableName '{TABLE_NONEXISTENT}'は存在しません。"
+    )
 
 
 def test_cast_column_invalid_source_column(client, tables_store):
@@ -233,6 +246,9 @@ def test_cast_column_invalid_source_column(client, tables_store):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert response_data["message"] == (
+        f"sourceColumnName '{COL_NONEXISTENT}'は存在しません。"
+    )
 
 
 def test_cast_column_invalid_position_column(client, tables_store):
@@ -249,6 +265,9 @@ def test_cast_column_invalid_position_column(client, tables_store):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert response_data["message"] == (
+        f"addPositionColumn '{COL_NONEXISTENT}'は存在しません。"
+    )
 
 
 def test_cast_column_duplicate_column_name(client, tables_store):
@@ -268,6 +287,9 @@ def test_cast_column_duplicate_column_name(client, tables_store):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.DATA_ALREADY_EXISTS
+    assert response_data["message"] == (
+        f"newColumnName '{COL_B}'は既に存在します。"
+    )
 
 
 def test_cast_column_invalid_target_type(client, tables_store):
@@ -280,8 +302,16 @@ def test_cast_column_invalid_target_type(client, tables_store):
         "addPositionColumn": COL_A,
     }
     response = client.post(ENDPOINT, json=payload)
+    response_data = response.json()
 
+    expected_msg = (
+        "targetTypeは次のいずれかである必要があります: "
+        "'float', 'int', 'str', 'bool', 'date' or 'datetime'"
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
 
 
 # ========================================
@@ -384,8 +414,13 @@ def test_cast_column_datetime_strict_error(client, tables_store_dt):
     response = client.post(ENDPOINT, json=payload)
     response_data = response.json()
 
+    expected_msg = (
+        f"Type conversion failed: column '{COL_DT}' "
+        "cannot be cast to 'datetime'"
+    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.CAST_COLUMN_TYPE_ERROR
+    assert response_data["message"] == expected_msg
 
 
 def test_cast_column_strict_no_error(client, tables_store):
@@ -427,8 +462,15 @@ def test_cast_column_missing_required_fields(client, tables_store):
         "addPositionColumn": COL_A,
     }
     response = client.post(ENDPOINT, json=payload)
+    response_data = response.json()
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == "tableNameは必須です。"
+    assert response_data["details"] == [
+        "tableNameは必須です。",
+        "sourceColumnNameは必須です。",
+    ]
 
 
 def test_cast_column_whitespace_only_table_name(client, tables_store):
@@ -444,8 +486,13 @@ def test_cast_column_whitespace_only_table_name(client, tables_store):
         "addPositionColumn": COL_A,
     }
     response = client.post(ENDPOINT, json=payload)
+    response_data = response.json()
 
+    expected_msg = "tableNameは1文字以上で入力してください。"
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
 
 
 def test_cast_column_whitespace_only_new_column_name(client, tables_store):
@@ -461,8 +508,13 @@ def test_cast_column_whitespace_only_new_column_name(client, tables_store):
         "addPositionColumn": COL_A,
     }
     response = client.post(ENDPOINT, json=payload)
+    response_data = response.json()
 
+    expected_msg = "newColumnNameは1文字以上で入力してください。"
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
 
 
 def test_cast_column_too_long_new_column_name(client, tables_store):
@@ -475,8 +527,13 @@ def test_cast_column_too_long_new_column_name(client, tables_store):
         "addPositionColumn": COL_A,
     }
     response = client.post(ENDPOINT, json=payload)
+    response_data = response.json()
 
+    expected_msg = f"newColumnNameは{MAX_COL_LEN}文字以内で入力してください。"
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
 
 
 def test_cast_column_control_char_in_new_column_name(client, tables_store):
@@ -492,8 +549,13 @@ def test_cast_column_control_char_in_new_column_name(client, tables_store):
         "addPositionColumn": COL_A,
     }
     response = client.post(ENDPOINT, json=payload)
+    response_data = response.json()
 
+    expected_msg = "newColumnNameに使用できない文字が含まれています。"
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
 
 
 # ========================================
