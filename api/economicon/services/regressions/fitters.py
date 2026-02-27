@@ -196,7 +196,8 @@ def fit_iv(data_input: IVInput) -> Any:
         if data_input.explanatory_variables
         else None
     )
-    # Warning#4: has_const=True かつ exog_raw=None (外生変数なし) の場合も定数項を追加する
+    # Warning#4: has_const=True かつ exog_raw=None
+    # (外生変数なし) の場合も定数項を追加する
     if data_input.has_const:
         if exog_raw is not None:
             exog = sm.add_constant(exog_raw)
@@ -257,8 +258,9 @@ def fit_fe(
     )
 
     # PanelOLS モデルの作成とフィット
-    # Warning#7: FE (内部推定) では個体効果が切片を吸収するため has_const は意図的に無視。
-    # 必要な場合は prep 時に time_demeaning されたデータに定数項を追加すること。0
+    # Warning#7: FE (内部推定) では個体効果が切片を吸収するため
+    # has_const は意図的に無視。
+    # time_demeaning 後に定数項が必要な場合のみ追加すること。
     model = PanelOLS(y, depns, entity_effects=True)
     result = model.fit(cov_type=cov_type)
 
@@ -295,8 +297,9 @@ def fit_re(
     )
 
     # RandomEffects モデルの作成とフィット
-    # Warning#7: RE (ブレイス/GLS 変換) では linearmodels 内部で has_const を考慮済み。
-    # (切片項は 中央化後の変量成分 within + 時間平均 between の合成 として内力に追加される)
+    # Warning#7: RE (ブレイス/GLS 変換) では
+    # linearmodels 内部で has_const を考慮済み。
+    # (切片項は within + between の合成として内部に追加される)
     model = RandomEffects(y, depns)
     result = model.fit(cov_type=cov_type)
 

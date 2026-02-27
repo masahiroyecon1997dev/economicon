@@ -30,7 +30,7 @@ class AnalysisResult:
     # Tobit 欲存値除去後の元テーブル行インデックス（__row_idx__ 結合用）
     _row_indices: np.ndarray | None
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         name: str,
