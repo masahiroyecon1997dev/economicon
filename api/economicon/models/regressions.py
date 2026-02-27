@@ -1,6 +1,6 @@
 """回帰分析関連のスキーマ定義"""
 
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, Field
 
@@ -161,4 +161,80 @@ class ClearAllAnalysisResultsResult(BaseResult):
     message: str = Field(
         title="Message",
         description="処理結果メッセージ",
+    )
+
+
+# ---------------------------------------------------------------------------
+# 診断列追加（予測値・残差）
+# ---------------------------------------------------------------------------
+
+
+class AddDiagnosticColumnsRequestBody(BaseRequest):
+    """
+    推定済みモデルから予測値・残差を抽出してテーブルに列追加するリクエスト
+    """
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="追加先テーブル名。ワークスペース内に存在するテーブル名を"
+            "指定してください。",
+        ),
+    ]
+    result_id: Annotated[
+        str,
+        Field(
+            alias="resultId",
+            description="対象の分析結果 ID（AnalysisResult の UUID）",
+        ),
+    ]
+    target: Annotated[
+        Literal["fitted", "residual", "both"],
+        Field(
+            description="追加する値の種類。"
+            "fitted: 予測値のみ、residual: 残差のみ、both: 両方",
+        ),
+    ]
+    standardized: Annotated[
+        bool,
+        Field(
+            default=False,
+            description="True の場合、標準化残差（studentized internal）を追加する。"
+            "OLS/Logit/Probit のみ有効。",
+        ),
+    ] = False
+    include_interval: Annotated[
+        bool,
+        Field(
+            default=False,
+            alias="includeInterval",
+            description="True の場合、予測値の 95%信頼区間列を追加する。"
+            "OLS/FE/RE/IV で有効。",
+        ),
+    ] = False
+    fe_type: Annotated[
+        Literal["total", "within"],
+        Field(
+            default="total",
+            alias="feType",
+            description="FE/RE モデルの予測値タイプ。"
+            "total: 固定効果を含む予測（effects=True）、"
+            "within: 固定効果を除いた変動成分（effects=False）。"
+            "FE/RE 以外では無視される。",
+        ),
+    ] = "total"
+
+
+class AddDiagnosticColumnsResult(BaseResult):
+    """診断列追加レスポンス"""
+
+    table_name: str = Field(
+        alias="tableName",
+        title="Table Name",
+        description="更新されたテーブル名",
+    )
+    added_columns: list[str] = Field(
+        alias="addedColumns",
+        title="Added Columns",
+        description="追加された列名のリスト",
     )
