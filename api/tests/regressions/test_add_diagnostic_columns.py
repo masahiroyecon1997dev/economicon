@@ -1,9 +1,13 @@
 """診断列追加テスト（予測値・残差の抽出とテーブル統合）"""
 
+from unittest.mock import patch
+
+import polars as pl
 from fastapi import status
 from httpx import Response
 
 from economicon.core.enums import ErrorCode
+from economicon.services.data.analysis_result import AnalysisResult
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from tests.regressions.conftest import (
@@ -772,3 +776,219 @@ def test_fe_key_column_not_in_table(client, tables_store):
     assert resp.status_code == status.HTTP_400_BAD_REQUEST, resp.text
     data = resp.json()
     assert data["code"] == ErrorCode.MODEL_KEY_MISMATCH
+
+
+# -----------------------------------------------------------
+# カバレッジ補完テスト
+# -----------------------------------------------------------
+
+_PATCH_EXTRACT_SM = (
+    "economicon.services.regressions"
+    ".add_diagnostic_columns.extract_from_statsmodels"
+)
+
+
+def test_fe_time_column_not_in_table(client, tables_store):
+    """
+    FE モデルの time_column が対象テーブルに存在しない場合に
+    400 (MODEL_KEY_MISMATCH) が返ることを確認（line 147）
+
+    entity_id は存在するが time_id が存在しないテーブルを使うことで
+    entity_col チェックを通過させ time_col チェックを失敗させる。
+    """
+    # entity_id あり、time_id なし のテーブルを追加
+    manager = TablesStore()
+    entity_only_df = pl.DataFrame(
+        {
+            "entity_id": [1.0, 2.0, 3.0],
+            "y": [10.0, 20.0, 30.0],
+        }
+    )
+    manager.store_table("EntityOnlyTable", entity_only_df)
+
+    result_id = _run_regression(
+        client,
+        {
+            "tableName": TABLE_PANEL,
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": False,
+            "analysis": {
+                "method": "fe",
+                "entityIdColumn": "entity_id",
+                "timeColumn": "time_id",
+            },
+            "standardError": {"method": "nonrobust"},
+        },
+    )
+
+    # 追加先は EntityOnlyTable（entity_id あり、time_id なし）
+    resp = _add_diagnostic(
+        client,
+        {
+            "tableName": "EntityOnlyTable",
+            "resultId": result_id,
+            "target": "fitted",
+        },
+    )
+
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST, resp.text
+    data = resp.json()
+    assert data["code"] == ErrorCode.MODEL_KEY_MISMATCH
+
+
+def test_model_type_none_raises_500(client, tables_store):
+    """
+    model_type が None のとき execute() が 500 を返すことを確認（line 178）
+
+    AnalysisResult を手動生成して model_type=None に設定し、
+    pkl ファイルを保存してから add-diagnostic を呼び出す。
+    """
+    expected_code = ErrorCode.MODEL_TYPE_NOT_SUPPORTED
+
+    result = AnalysisResult(
+        name="test_none_type",
+        description="",
+        table_name=TABLE_BASIC,
+        regression_output={"dependentVariable": "y"},
+        model_type=None,
+    )
+    result.save_model("dummy_model_object")
+    result_store = AnalysisResultStore()
+    result_id = result_store.save_result(result)
+
+    resp = _add_diagnostic(
+        client,
+        {
+            "tableName": TABLE_BASIC,
+            "resultId": result_id,
+            "target": "fitted",
+        },
+    )
+
+    assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR, resp.text
+    data = resp.json()
+    assert data["code"] == expected_code
+
+
+def test_dispatch_extract_empty_cols_returns_ok(client, tables_store):
+    """
+    extract 関数が空の列リストを返した場合に
+    addedColumns=[] で 200 が返ることを確認（line 214）
+    """
+    result_id = _run_regression(client, OlsPayload().build())
+
+    with patch(
+        _PATCH_EXTRACT_SM,
+        return_value=(pl.DataFrame(), []),
+    ):
+        resp = _add_diagnostic(
+            client,
+            {
+                "tableName": TABLE_BASIC,
+                "resultId": result_id,
+                "target": "fitted",
+            },
+        )
+
+    assert resp.status_code == status.HTTP_200_OK, resp.text
+    data = resp.json()
+    assert data["code"] == "OK"
+    assert data["result"]["addedColumns"] == []
+
+
+def test_execute_unexpected_exception_returns_500(client, tables_store):
+    """
+    execute() 内で予期しない例外が発生した場合に
+    500 (ADD_DIAGNOSTIC_COLUMNS_PROCESS_ERROR) が返ることを確認
+    （line 236-239）
+
+    extract_from_statsmodels を RuntimeError に差し替えて
+    except Exception as e: ブランチを通過させる。
+    """
+    expected_code = ErrorCode.ADD_DIAGNOSTIC_COLUMNS_PROCESS_ERROR
+    forced_msg = "forced simulated error"
+
+    result_id = _run_regression(client, OlsPayload().build())
+
+    with patch(
+        _PATCH_EXTRACT_SM,
+        side_effect=RuntimeError(forced_msg),
+    ):
+        resp = _add_diagnostic(
+            client,
+            {
+                "tableName": TABLE_BASIC,
+                "resultId": result_id,
+                "target": "fitted",
+            },
+        )
+
+    assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR, resp.text
+    data = resp.json()
+    assert data["code"] == expected_code
+    # 強制エラーメッセージが detail に含まれないことを確認（情報漏洩防止）
+    assert forced_msg not in data.get("details", "")
+
+
+def test_sklearn_model_wrong_type_raises_500(client, tables_store):
+    """
+    Ridge 回帰の pkl を非 RegularizedResult オブジェクトで上書きし
+    isinstance チェック失敗 → 500 (MODEL_TYPE_NOT_SUPPORTED) を確認
+    （line 343）
+    """
+    expected_code = ErrorCode.MODEL_TYPE_NOT_SUPPORTED
+
+    result_id = _run_regression(client, RidgePayload().build())
+
+    # pkl を非 RegularizedResult で上書き
+    result_store = AnalysisResultStore()
+    analysis_result = result_store.get_result(result_id)
+    analysis_result.save_model("not_a_regularized_result")
+
+    resp = _add_diagnostic(
+        client,
+        {
+            "tableName": TABLE_BASIC,
+            "resultId": result_id,
+            "target": "fitted",
+        },
+    )
+
+    assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR, resp.text
+    data = resp.json()
+    assert data["code"] == expected_code
+
+
+def test_unsupported_model_type_raises_500(client, tables_store):
+    """
+    未知の model_type を持つ AnalysisResult で
+    _dispatch_extract の末尾 raise に到達し
+    500 (MODEL_TYPE_NOT_SUPPORTED) が返ることを確認（line 359）
+    """
+    expected_code = ErrorCode.MODEL_TYPE_NOT_SUPPORTED
+    unknown_type = "unknown_model_xyz"
+
+    result = AnalysisResult(
+        name="test_unsupported",
+        description="",
+        table_name=TABLE_BASIC,
+        regression_output={"dependentVariable": "y"},
+        model_type=unknown_type,
+    )
+    result.save_model("dummy_model_object")
+    result_store = AnalysisResultStore()
+    result_id = result_store.save_result(result)
+
+    resp = _add_diagnostic(
+        client,
+        {
+            "tableName": TABLE_BASIC,
+            "resultId": result_id,
+            "target": "fitted",
+        },
+    )
+
+    assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR, resp.text
+    data = resp.json()
+    assert data["code"] == expected_code

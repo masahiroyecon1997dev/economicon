@@ -344,3 +344,48 @@ def test_rename_column_tab_char_new_column_name(client, tables_store):
     expected_msg = "newColumnNameに使用できない文字が含まれています。"
     assert response_data["message"] == expected_msg
     assert response_data["details"] == [expected_msg]
+
+
+# ========================================
+# 同名リネームバリデーションテスト
+# ========================================
+
+
+def test_rename_column_same_name_422(client, tables_store):
+    """
+    Pydanticバリデーション:
+    oldColumnNameとnewColumnNameが同一の場合は422エラー
+    """
+    payload = {
+        "tableName": TABLE_NAME,
+        "oldColumnName": COL_A,
+        "newColumnName": COL_A,
+    }
+    response = client.post("/api/column/rename", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = (
+        "newColumnName には oldColumnName と異なる名前を指定してください。"
+    )
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_rename_column_same_name_after_strip_422(client, tables_store):
+    """
+    前後スペースを包む同同名指定も422エラー（strip後に同名）
+    """
+    payload = {
+        "tableName": TABLE_NAME,
+        "oldColumnName": COL_A,
+        "newColumnName": f"  {COL_A}  ",
+    }
+    response = client.post("/api/column/rename", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = (
+        "newColumnName には oldColumnName と異なる名前を指定してください。"
+    )
+    assert response_data["message"] == expected_msg

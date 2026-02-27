@@ -148,6 +148,18 @@ def prepare_basic_data(
         # has_constant='skip'で既存の定数列をチェック（通常は存在しないはず）
         x_data = sm.add_constant(x_data, has_constant="skip")
 
+    # 完全多重共線性の検出（NaN行を除外してランクチェック）
+    if not np.isnan(x_data).any():
+        if np.linalg.matrix_rank(x_data) < x_data.shape[1]:
+            raise ProcessingError(
+                error_code=ErrorCode.REGRESSION_SINGULAR_MATRIX_ERROR,
+                message=(
+                    "説明変数行列が特異です。"
+                    "完全な多重共線性が検出されました。"
+                    "説明変数の組み合わせを見直してください。"
+                ),
+            )
+
     return y_data, x_data
 
 
