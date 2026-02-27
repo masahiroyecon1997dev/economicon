@@ -453,8 +453,8 @@ def test_create_simulation_data_table_pydantic_invalid_distribution_type(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    # メッセージはPydanticの判別ユニオンエラーをそのまま使用
-    assert "invalid_type" in response_data["message"]
+    # 判別ユニオンエラー: 'invalid_type' タグが識別子として含まれることを確認
+    assert "Input tag 'invalid_type'" in response_data["message"]
 
 
 # ─────────────────────────────────────────────────────────────
@@ -564,7 +564,12 @@ def test_create_table_neg_binomial_probability_zero(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "simulationColumns" in response_data["message"]
+    assert "simulationColumns.0.distribution" in response_data["message"]
+    assert (
+        "simulationColumns.0.distribution.negative_binomial"
+        ".NegativeBinomialParams.pは0.0より大きい値で入力してください。"
+        in response_data["details"]
+    )
 
 
 def test_create_table_neg_binomial_probability_over_one(client, tables_store):
@@ -586,7 +591,12 @@ def test_create_table_neg_binomial_probability_over_one(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "simulationColumns" in response_data["message"]
+    assert "simulationColumns.0.distribution" in response_data["message"]
+    assert (
+        "simulationColumns.0.distribution.negative_binomial"
+        ".NegativeBinomialParams.pは1.0以下で入力してください。"
+        in response_data["details"]
+    )
 
 
 def test_create_table_neg_binomial_n_zero(client, tables_store):
@@ -608,4 +618,9 @@ def test_create_table_neg_binomial_n_zero(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "simulationColumns" in response_data["message"]
+    assert "simulationColumns.0.distribution" in response_data["message"]
+    assert (
+        "simulationColumns.0.distribution.negative_binomial"
+        ".NegativeBinomialParams.nは0より大きい値で入力してください。"
+        in response_data["details"]
+    )
