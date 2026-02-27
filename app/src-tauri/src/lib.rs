@@ -4,6 +4,7 @@ mod os_info;
 use tauri::State;
 use reqwest::Client;
 use serde::{Serialize};
+use std::net::TcpListener;
 use std::time::Duration;
 use uuid::Uuid;
 
@@ -18,6 +19,22 @@ struct ClientState {
 // 起動時に生成した認証トークンを保持するState（アプリライフサイクル中にメモリ内で保持）
 struct AuthTokenState {
     token: String,
+}
+
+// FastAPI サイドカーが listen するポート番号を保持するState
+struct PortState {
+    port: u16,
+}
+
+/// 指定ポートから順に TcpListener::bind を試し、最初に確保できたポートを返す。
+/// bind に成功した Listener は即 drop し、Python サイドカーが同ポートを取得できるようにする。
+fn find_available_port(starting_from: u16) -> u16 {
+    for port in starting_from..=65535 {
+        if TcpListener::bind(("127.0.0.1", port)).is_ok() {
+            return port;
+        }
+    }
+    panic!("No available port found starting from {}", starting_from);
 }
 
 // 共通のエラーレスポンス型
@@ -43,12 +60,13 @@ impl From<String> for ApiError {
 async fn proxy_request(
     state: State<'_, ClientState>,
     auth: State<'_, AuthTokenState>,
+    port: State<'_, PortState>,
     method: String,
     path: String,
     body: Option<serde_json::Value>,
     query: Option<serde_json::Value>,
 ) -> Result<serde_json::Value, ApiError> {
-    let base_url = "http://127.0.0.1:8000"; // PythonサーバーのURL
+    let base_url = format!("http://127.0.0.1:{}", port.port); // PythonサーバーのURL
     let url = format!("{}{}", base_url, path);
 
     let mut request_builder = match method.to_uppercase().as_str() {
@@ -83,12 +101,13 @@ async fn proxy_request(
 async fn fetch_binary(
     state: State<'_, ClientState>,
     auth: State<'_, AuthTokenState>,
+    port: State<'_, PortState>,
     method: String,
     path: String,
     body: Option<serde_json::Value>,
     query: Option<serde_json::Value>,
 ) -> Result<Vec<u8>, ApiError> {
-    let base_url = "http://127.0.0.1:8000";
+    let base_url = format!("http://127.0.0.1:{}", port.port);
     let url = format!("{}{}", base_url, path);
     let mut request_builder = match method.to_uppercase().as_str() {
         "GET" => state.client.get(&url),
@@ -123,11 +142,12 @@ async fn fetch_binary(
 async fn upload_file(
     state: State<'_, ClientState>,
     auth: State<'_, AuthTokenState>,
+    port: State<'_, PortState>,
     path: String,
     file_data: Vec<u8>,
     file_name: String,
 ) -> Result<serde_json::Value, ApiError> {
-    let base_url = "http://127.0.0.1:8000";
+    let base_url = format!("http://127.0.0.1:{}", port.port);
     let url = format!("{}{}", base_url, path);
 
     let part = reqwest::multipart::Part::bytes(file_data)
@@ -154,6 +174,12 @@ fn get_auth_token(auth: State<'_, AuthTokenState>) -> String {
     auth.token.clone()
 }
 
+/// FastAPI サイドカーが listen しているポート番号をフロントエンドへ返すコマンド。
+#[tauri::command]
+fn get_api_port(port: State<'_, PortState>) -> u16 {
+    port.port
+}
+
 // ファイル一覧取得用コマンド
 #[tauri::command]
 async fn get_files(directory_path: String) -> Result<GetFilesResponse, FileError> {
@@ -173,12 +199,16 @@ pub fn run() {
     // FastAPIサイドカーへは環境変数 ECONOMICOM_API_AUTH_TOKEN として引き継がれる
     let auth_token = Uuid::new_v4().to_string();
 
+    // 8000番から順に空きポートを探す
+    let api_port = find_available_port(8000);
+
     // サイドカー（FastAPI）が環境変数を参照できるよう、現プロセスに設定する
     // Tauriがサイドカーを起動する際、子プロセスは親の環境変数を継承する
     // SAFETY: tauri::Builder::default() を呼ぶ前に設定することで
     //         マルチスレッド下での競合を回避する
     unsafe {
         std::env::set_var("ECONOMICOM_API_AUTH_TOKEN", &auth_token);
+        std::env::set_var("ECONOMICOM_API_PORT", api_port.to_string());
     }
 
     // クライアントの初期化（タイムアウト設定など）
@@ -191,13 +221,15 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(ClientState { client })
         .manage(AuthTokenState { token: auth_token }) // 生成したトークンをStateとして登録
+        .manage(PortState { port: api_port })          // 確保したポート番号をStateとして登録
         .invoke_handler(tauri::generate_handler![
             proxy_request,
             fetch_binary,
             upload_file,
             get_files,
             get_os_info,
-            get_auth_token
+            get_auth_token,
+            get_api_port
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

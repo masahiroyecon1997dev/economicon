@@ -25,6 +25,21 @@ BASE_DIR = Path(__file__).resolve().parent
 # 静的ファイルのディレクトリ
 STATIC_DIR = BASE_DIR / "static"
 
+# Tauri が起動時に確保したポート番号（環境変数 ECONOMICOM_API_PORT で渡される）
+_api_port = int(os.environ.get("ECONOMICOM_API_PORT", "8000"))
+
+# Vite 開発サーバー URL（開発時のみ tauri:// と並んで許可する）
+_dev_server_url = os.environ.get(
+    "VITE_DEV_SERVER_URL", "http://localhost:5173"
+)
+
+# 許可するオリジン一覧（Tauri WebView + 開発サーバーのみに限定）
+_ALLOW_ORIGINS = [
+    _dev_server_url,
+    "tauri://localhost",  # Windows / Linux の Tauri WebView
+    "https://tauri.localhost",  # macOS の Tauri WebView
+]
+
 # Babel設定 - SettingsStoreからロケールを取得する関数を設定
 configs = BabelConfigs(
     ROOT_DIR=str(BASE_DIR),
@@ -48,7 +63,7 @@ async def lifespan(app: FastAPI):
     logger.info("TablesStore has been initialized at startup.")
 
     # ブラウザでアプリを自動的に開く
-    url = "http://127.0.0.1:8000"
+    url = f"http://127.0.0.1:{_api_port}"
     dev_run = os.environ.get("economicon_DEV_RUN", "false").lower()
     if dev_run == "false":
         webbrowser.open(url)
@@ -66,10 +81,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS設定
+# CORS設定（Tauri WebView と開発サーバーのオリジンのみを許可）
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 本番環境では適切に設定してください
+    allow_origins=_ALLOW_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -161,4 +176,4 @@ else:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=_api_port)
