@@ -4,6 +4,7 @@ from typing import Annotated
 
 from pydantic import Field, StringConstraints, model_validator
 
+from economicon.i18n.translation import gettext as _
 from economicon.models.common import BaseRequest, BaseResult
 from economicon.models.entities import SimulationColumnConfig, SortInstruction
 from economicon.models.enums import (
@@ -126,8 +127,7 @@ class RenameColumnRequestBody(BaseRequest):
     ) -> RenameColumnRequestBody:
         if self.old_column_name == self.new_column_name:
             raise ValueError(
-                "newColumnName には oldColumnName と"
-                "異なる名前を指定してください。"
+                _("newColumnName must differ from oldColumnName.")
             )
         return self
 
