@@ -5,13 +5,17 @@
 予測値・残差などの診断値を Polars DataFrame として返す純粋関数群。
 """
 
+import logging
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import polars as pl
+from scipy.stats import norm as scipy_norm
 
 if TYPE_CHECKING:
     from economicon.services.regressions.fitters import RegularizedResult
+
+_logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -150,6 +154,7 @@ def extract_from_statsmodels(
     target: Literal["fitted", "residual", "both"],
     standardized: bool,
     include_interval: bool,
+    residual_type: Literal["raw", "deviance"] = "raw",
 ) -> tuple[pl.DataFrame, list[str]]:
     """
     statsmodels の回帰結果から診断値を抽出する。
@@ -210,16 +215,27 @@ def extract_from_statsmodels(
         try:
             # predict() は summary_frame() が返す DataFrame を利用
             sf = model.get_prediction().summary_frame(alpha=0.05)  # type: ignore[union-attr]
+            # Warning#6: statsmodels バージョンによりキー名が次のいずれかに変わる
+            lower_key = (
+                "mean_ci_lower"
+                if "mean_ci_lower" in sf.columns
+                else "ci_lower"
+            )
+            upper_key = (
+                "mean_ci_upper"
+                if "mean_ci_upper" in sf.columns
+                else "ci_upper"
+            )
             if "fitted_lower_95" in col_map:
                 data[col_map["fitted_lower_95"]] = pl.Series(
                     col_map["fitted_lower_95"],
-                    sf["mean_ci_lower"].to_numpy(),
+                    sf[lower_key].to_numpy(),
                     dtype=pl.Float64,
                 )
             if "fitted_upper_95" in col_map:
                 data[col_map["fitted_upper_95"]] = pl.Series(
                     col_map["fitted_upper_95"],
-                    sf["mean_ci_upper"].to_numpy(),
+                    sf[upper_key].to_numpy(),
                     dtype=pl.Float64,
                 )
         except Exception:
@@ -235,7 +251,20 @@ def extract_from_statsmodels(
                 )
 
     if "resid" in col_map:
-        resid = np.asarray(model.resid, dtype=np.float64)  # type: ignore[union-attr]
+        # Eco-Note A: Logit/Probit では deviance 残差を選択可能
+        # deviance 残差: sign(y - p̂)·sqrt(-2[y·log(p̂) + (1-y)·log(1-p̂)])
+        # statsmodels Logit/Probit は model.resid_dev でアクセス可能。
+        # OLS など resid_dev を持たないモデルでは raw としてフォールバック。
+        use_deviance = residual_type == "deviance" and hasattr(
+            model, "resid_dev"
+        )
+        if use_deviance:
+            try:
+                resid = np.asarray(model.resid_dev, dtype=np.float64)  # type: ignore[union-attr]
+            except Exception:
+                resid = np.asarray(model.resid, dtype=np.float64)  # type: ignore[union-attr]
+        else:
+            resid = np.asarray(model.resid, dtype=np.float64)  # type: ignore[union-attr]
         data[col_map["resid"]] = pl.Series(
             col_map["resid"], resid, dtype=pl.Float64
         )
@@ -270,15 +299,13 @@ def extract_from_tobit(
     dep_var: str,
     existing_cols: list[str],
     target: Literal["fitted", "residual", "both"],
+    row_indices: np.ndarray | None = None,
+    fitted_type: Literal["latent", "observable"] = "latent",
+    left_censoring_limit: float | None = None,
+    right_censoring_limit: float | None = None,
 ) -> tuple[pl.DataFrame, list[str]]:
     """
     py4etrics の Tobit 回帰結果から診断値を抽出する。
-
-    Tobit には ``.fittedvalues`` 属性が存在しないため、
-    ``.predict()`` メソッドで予測値を求める。
-    残差は ``model.endog - model.predict()`` で算出する。
-
-    標準化残差・信頼区間は Tobit では未サポート（None 列として追加されない）。
 
     Parameters
     ----------
@@ -290,12 +317,41 @@ def extract_from_tobit(
         現在テーブルに存在する列名リスト（重複回避用）。
     target:
         抽出する値の種類。
+    row_indices:
+        元テーブル上の欲存除去後の行インデックス。
+        Critical#3: None の場合は np.arange(n) で代替（連続データのみ正波）。
+    fitted_type:
+        予測値種別。
+        ``latent``: 潜在変数の予測値 x'β（線形インデックス）。
+        ``observable``: 打ち切りを考慮した無条件期待値 E[y|x]。
+        片側打ち切りのみ対応（両側打ち切り時は latent にフォールバック）。
+    left_censoring_limit:
+        左側打ち切り値（Tobit 推定時の設定値）。
+    right_censoring_limit:
+        右側打ち切り値（Tobit 推定時の設定値）。
 
     Returns
     -------
     tuple[pl.DataFrame, list[str]]
         - DataFrame: ``__row_idx__`` と解決済み列名を持つ Polars DataFrame。
         - list[str]: 追加された列名のリスト。
+
+    Notes
+    -----
+    Eco-Note B: Tobit の予測値には 2 種類ある:
+
+    **latent** (デフォルト):
+        :math:`\\hat{y}^* = x'\\hat{\\beta}` — 潜在変数の線形インデックス。
+
+    **observable** (左側打ち切り L の㉷):
+        :math:`E[y|x] = L\\,\\Phi(-z_L) + x'\\hat\\beta\\,\\Phi(z_L) + \\hat\\sigma\\,\\phi(z_L)`
+
+        where :math:`z_L = (x'\\hat\\beta - L)/\\hat{\\sigma}`
+
+    **observable** (右側打ち切り U のみ):
+        :math:`E[y|x] = x'\\hat\\beta\\,\\Phi(z_U) - \\hat{\\sigma}\\,\\phi(z_U) + U(1-\\Phi(z_U))`
+
+        where :math:`z_U = (U - x'\\hat\\beta)/\\hat{\\sigma}`
     """
     col_map = _build_col_names(
         existing_cols=existing_cols,
@@ -308,11 +364,50 @@ def extract_from_tobit(
         supports_standardized=False,
     )
 
-    # py4etrics Tobit: .fittedvalues は numpy.ndarray で返る
+    # py4etrics Tobit: .fittedvalues は潜在変数の緻形インデックス x'β を numpy.ndarray で返す
     # .predict() は NotImplementedError を投げるため使用しない
-    fitted_arr = np.asarray(model.fittedvalues, dtype=np.float64)  # type: ignore[union-attr]
-    n = len(fitted_arr)
-    index = np.arange(n, dtype=np.int64)
+    latent_arr = np.asarray(model.fittedvalues, dtype=np.float64)  # type: ignore[union-attr]
+    n = len(latent_arr)
+
+    # Eco-Note B: observable モードで打ち切りを考慮した E[y|x] を計算
+    # - 片側打ち切りのみ対応（両側は latent にフォールバック）
+    if fitted_type == "observable":
+        L = left_censoring_limit
+        U = right_censoring_limit
+        sigma = float(getattr(model, "scale", None) or 1.0)  # type: ignore[union-attr]
+        if L is not None and U is None:
+            # 左側打ち切りのみ: E[y|x] = LΦ(-z_L) + x'βΦ(z_L) + σφ(z_L)
+            z = (latent_arr - L) / sigma
+            fitted_arr = (
+                L * scipy_norm.cdf(-z)
+                + latent_arr * scipy_norm.cdf(z)
+                + sigma * scipy_norm.pdf(z)
+            )
+        elif U is not None and L is None:
+            # 右側打ち切りのみ: E[y|x] = x'βΦ(z_U) - σφ(z_U) + U(1-Φ(z_U))
+            z = (U - latent_arr) / sigma
+            fitted_arr = (
+                latent_arr * scipy_norm.cdf(z)
+                - sigma * scipy_norm.pdf(z)
+                + U * scipy_norm.cdf(-z)
+            )
+        else:
+            # 両側または情報なし: latent にフォールバック
+            _logger.warning(
+                "Tobit observable fitted values not supported for "
+                "double-sided censoring; falling back to latent values."
+            )
+            fitted_arr = latent_arr
+    else:
+        fitted_arr = latent_arr
+
+    # Critical#3: row_indices が提供された場合は元テーブルの欲存除去後の行 ID を使用する
+    # 欲存値除去時に pandas.dropna() が元の整数インデックスを保持するため、
+    # numpy.arange(n) などで代替すると行ズれが発生する。
+    if row_indices is not None:
+        index = row_indices.astype(np.int64)
+    else:
+        index = np.arange(n, dtype=np.int64)
 
     data: dict[str, pl.Series] = {
         "__row_idx__": pl.Series("__row_idx__", index, dtype=pl.Int64)
@@ -324,8 +419,19 @@ def extract_from_tobit(
         )
 
     if "resid" in col_map:
-        # .resid が利用可能（= endog - fittedvalues）
-        resid = np.asarray(model.resid, dtype=np.float64)  # type: ignore[union-attr]
+        # .resid = endog - fittedvalues (latent ベース)
+        resid_raw = np.asarray(model.resid, dtype=np.float64)  # type: ignore[union-attr]
+        if fitted_type == "observable" and fitted_arr is not latent_arr:
+            # observable の場合は視測値 - E[y|x] で残差を再計算
+            # endog は model.model.endog または求まる場合は raw 残差を利用
+            endog = np.asarray(
+                getattr(getattr(model, "model", model), "endog", None)  # type: ignore[union-attr]
+                or model.resid + latent_arr,  # type: ignore[union-attr]
+                dtype=np.float64,
+            )
+            resid = endog - fitted_arr
+        else:
+            resid = resid_raw
         data[col_map["resid"]] = pl.Series(
             col_map["resid"], resid, dtype=pl.Float64
         )

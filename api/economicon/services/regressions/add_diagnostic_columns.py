@@ -51,7 +51,7 @@ class AddDiagnosticColumns:
         "time_column": "timeColumn",
     }
 
-    # OLS / Logit / Probit / Tobit のような statsmodels 系モデルタイプ
+    # OLS / Logit / Probit の statsmodels 系モデルタイプ（Tobit は別分岐）
     _STATSMODELS_TYPES = frozenset({"ols", "logit", "probit"})
     # sklearn 正則化回帰
     _SKLEARN_TYPES = frozenset({"ridge", "lasso"})
@@ -70,6 +70,10 @@ class AddDiagnosticColumns:
         self.standardized = body.standardized
         self.include_interval = body.include_interval
         self.fe_type: Literal["total", "within"] = body.fe_type
+        # Eco-Note A: Logit/Probit の残差種別
+        self.binary_residual_type = body.binary_residual_type
+        # Eco-Note B: Tobit の予測値種別
+        self.tobit_fitted_type = body.tobit_fitted_type
 
     # ------------------------------------------------------------------
     # バリデーション
@@ -263,14 +267,27 @@ class AddDiagnosticColumns:
                 target=self.target,
                 standardized=self.standardized,
                 include_interval=self.include_interval,
+                # Eco-Note A: Logit/Probit 残差種別を渡す
+                residual_type=self.binary_residual_type,
             )
 
         if model_type == "tobit":
+            # Eco-Note B: 打ち切り値を regression_output から取得し observable 期待値の計算に使用
+            _diag = analysis_result.regression_output.get("diagnostics", {})  # type: ignore[union-attr]
+            _cens = (
+                _diag.get("censoringLimits", {})
+                if isinstance(_diag, dict)
+                else {}
+            )
             return extract_from_tobit(
                 model=raw_model,
                 dep_var=dep_var,
                 existing_cols=existing_cols,
                 target=self.target,
+                row_indices=analysis_result.row_indices,  # type: ignore[union-attr]
+                fitted_type=self.tobit_fitted_type,
+                left_censoring_limit=_cens.get("left"),
+                right_censoring_limit=_cens.get("right"),
             )
 
         if model_type in ("fe", "re"):
