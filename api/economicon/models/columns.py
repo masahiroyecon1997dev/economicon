@@ -1,6 +1,6 @@
 """カラム操作関連のスキーマ定義"""
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import Field, StringConstraints, model_validator
 
@@ -431,6 +431,101 @@ class TransformColumnRequestBody(BaseRequest):
     transform_method: TransformMethodConfig
 
 
+class CastColumnRequestBody(BaseRequest):
+    """列型変換リクエスト"""
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            description=(
+                "操作対象のテーブル名。"
+                "ワークスペースに存在するテーブルの中から指定してください。"
+            )
+        ),
+    ]
+    source_column_name: Annotated[
+        ColumnName,
+        Field(
+            description=(
+                "変換元となるカラム名。"
+                "ワークスペースに存在するテーブルの中から指定してください。"
+            )
+        ),
+    ]
+    target_type: Annotated[
+        Literal["float", "int", "str", "bool", "date", "datetime"],
+        Field(
+            title="Target Type",
+            description=(
+                "変換先のデータ型。"
+                "float / int / str / bool / date / datetime から選択。"
+            ),
+        ),
+    ]
+    new_column_name: Annotated[
+        NewColumnName,
+        Field(
+            description=(
+                "新しいカラム名。"
+                "既存のカラム名と重複しない名前を指定してください。"
+            )
+        ),
+    ]
+    add_position_column: Annotated[
+        ColumnName,
+        Field(
+            description=(
+                "追加位置のカラム名。"
+                "指定したカラムの右隣に新しいカラムが追加されます。"
+                "既存のカラム名から指定してください。"
+            ),
+        ),
+    ]
+    cleanup_whitespace: Annotated[
+        bool,
+        Field(
+            title="Cleanup Whitespace",
+            description=(
+                "前後の空白を削除するか。変換元が文字列型の場合のみ有効。"
+            ),
+        ),
+    ] = True
+    remove_commas: Annotated[
+        bool,
+        Field(
+            title="Remove Commas",
+            description=(
+                "カンマ(,)を削除するか。"
+                "数値型変換時に '1,234' → '1234' のような前処理に使用。"
+                "変換元が文字列型の場合のみ有効。"
+            ),
+        ),
+    ] = True
+    datetime_format: Annotated[
+        str | None,
+        Field(
+            default=None,
+            title="Datetime Format",
+            examples=["%Y-%m-%d", "%Y/%m/%d %H:%M:%S"],
+            description=(
+                "date / datetime 変換時のパース書式。"
+                "例: '%Y-%m-%d', '%Y/%m/%d'。"
+                "None の場合は Polars が自動推定します。"
+            ),
+        ),
+    ]
+    strict: Annotated[
+        bool,
+        Field(
+            title="Strict",
+            description=(
+                "True なら変換失敗時に 400 エラーを返す。"
+                "False なら変換失敗した値を null にして処理を続行する。"
+            ),
+        ),
+    ] = False
+
+
 class GetColumnListRequestBody(BaseRequest):
     """カラムリスト取得リクエスト"""
 
@@ -631,6 +726,25 @@ class TransformColumnResult(BaseResult):
         Field(
             title="Column Name",
             description="追加した変換カラム名",
+        ),
+    ]
+
+
+class CastColumnResult(BaseResult):
+    """列型変換レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="型変換カラムを追加したテーブル名",
+        ),
+    ]
+    column_name: Annotated[
+        str,
+        Field(
+            title="Column Name",
+            description="追加した型変換カラム名",
         ),
     ]
 

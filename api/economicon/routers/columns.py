@@ -13,6 +13,8 @@ from economicon.models import (
     AddSimulationColumnResult,
     CalculateColumnRequestBody,
     CalculateColumnResult,
+    CastColumnRequestBody,
+    CastColumnResult,
     DeleteColumnRequestBody,
     DeleteColumnResult,
     DuplicateColumnRequestBody,
@@ -36,6 +38,7 @@ from economicon.services.columns.add_simulation_column import (
     AddSimulationColumn,
 )
 from economicon.services.columns.calculate_column import CalculateColumn
+from economicon.services.columns.cast_column import CastColumn
 from economicon.services.columns.delete_column import DeleteColumn
 from economicon.services.columns.duplicate_column import DuplicateColumn
 from economicon.services.columns.get_column_list import GetColumnList
@@ -380,6 +383,33 @@ async def sort_columns(
     api = SortColumns(body, tables_store)
     result = run_operation(api)
 
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.post("/cast", response_model=SuccessResponse[CastColumnResult])
+async def cast_column(
+    request: Request,
+    body: CastColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
+    """列型変換エンドポイント
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    body : CastColumnRequestBody
+        リクエストボディ
+
+    Returns
+    -------
+    JSONResponse
+        処理結果
+    """
+    api = CastColumn(body, tables_store)
+    result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
     )
