@@ -536,7 +536,14 @@ class StatisticalTestResult(BaseResult):
     )
     df: float | None = Field(
         title="Degrees of Freedom",
-        description="自由度（z 検定では None）",
+        description="自由度（t 検定: 分子自由度、F 検定: df1、z 検定は None）",
+    )
+    df2: float | None = Field(
+        default=None,
+        title="Degrees of Freedom (Denominator)",
+        description=(
+            "分母自由度（F 検定のみ設定。df=分子自由度、df2=分母自由度）"
+        ),
     )
     confidence_interval: ConfidenceIntervalBounds | None = Field(
         title="Confidence Interval",

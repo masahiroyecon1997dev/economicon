@@ -21,6 +21,11 @@ from economicon.utils.validators import validate_existence
 # paired チェック・F 検定分岐で使用する定数
 _TWO_SAMPLES: int = 2
 
+# z 検定の 95% 信頼区間に使用する定数
+# z_crit = norm.ppf(1 - α/2) = norm.ppf(0.975) ≈ 1.95996...
+_ALPHA_95: float = 0.05
+_Z_CRIT_95: float = float(stats.norm.ppf(1.0 - _ALPHA_95 / 2))
+
 
 class StatisticalTest:
     """
@@ -79,15 +84,23 @@ class StatisticalTest:
             )
 
         # 対応あり検定: サンプルサイズ一致チェック
+        # （to_numpy を避け、Polars で列長のみ取得）
         if len(self.samples) == _TWO_SAMPLES and self.options.paired:
-            arrays = self._get_arrays()
-            if len(arrays[0]) != len(arrays[1]):
+            lengths = [
+                len(
+                    self.tables_store.get_table(s.table_name)
+                    .table[s.column_name]
+                    .drop_nulls()
+                )
+                for s in self.samples
+            ]
+            if lengths[0] != lengths[1]:
                 raise ValidationError(
                     error_code=ErrorCode.STATISTICAL_TEST_ERROR,
                     message=_(
                         "Paired test requires equal sample sizes,"
                         " but got {} and {}"
-                    ).format(len(arrays[0]), len(arrays[1])),
+                    ).format(lengths[0], lengths[1]),
                     target="samples",
                 )
 
@@ -244,15 +257,14 @@ class StatisticalTest:
                 )
             )
 
-        # 95% 信頼区間 (z_crit = norm.ppf(0.975))
-        z_crit = 1.959963984540054
+        # 95% 信頼区間（モジュール定数 _Z_CRIT_95 を使用）
         return StatisticalTestResult(
             statistic=float(stat),
             p_value=float(p_val),
             df=None,
             confidence_interval=ConfidenceIntervalBounds(
-                lower=center - z_crit * se,
-                upper=center + z_crit * se,
+                lower=center - _Z_CRIT_95 * se,
+                upper=center + _Z_CRIT_95 * se,
             ),
             effect_size=None,
         ).model_dump(by_alias=True)
@@ -284,6 +296,7 @@ class StatisticalTest:
             statistic=float(f_stat),
             p_value=p_val,
             df=float(df1),
+            df2=float(df2),
             confidence_interval=None,
             effect_size=None,
         ).model_dump(by_alias=True)
@@ -291,12 +304,16 @@ class StatisticalTest:
     def _f_oneway_anova(self, arrays: list[np.ndarray]) -> dict:
         """一元配置分散分析（ANOVA）。効果量として η² を返す。"""
         res = stats.f_oneway(*arrays)
-        dfn = float(len(arrays) - 1)
+        dfn = float(len(arrays) - 1)  # 分子自由度: k - 1
+        dfd = float(  # 分母自由度: N - k
+            sum(len(a) for a in arrays) - len(arrays)
+        )
         eta_sq = self._eta_squared(arrays)
         return StatisticalTestResult(
             statistic=float(res.statistic),
             p_value=float(res.pvalue),
             df=dfn,
+            df2=dfd,
             confidence_interval=None,
             effect_size=eta_sq,
         ).model_dump(by_alias=True)
