@@ -825,3 +825,25 @@ def test_export_csv_io_error(client, prepared_data):
         assert ErrorCode.CSV_EXPORT_ERROR == response_data["code"]
     finally:
         table_info.table = original_df
+
+
+def test_export_csv_saves_last_opened_path(
+    client, prepared_data, settings_store
+):
+    """
+    CSVエクスポート成功後に last_opened_path が設定ファイルへ
+    保存されるテスト
+    """
+    tables_store, test_output_dir, _ = prepared_data
+    request_data = {
+        "tableName": "TestTable",
+        "directoryPath": test_output_dir,
+        "fileName": "test_last_opened",
+        "format": "csv",
+    }
+    response = client.post(URL, json=request_data)
+    assert response.status_code == status.HTTP_200_OK
+    # last_opened_path に出力先ディレクトリが設定されていることを確認
+    expected_path = str(test_output_dir).replace(os.sep, "/")
+    actual_path = settings_store.get_settings().last_opened_path
+    assert expected_path == actual_path
