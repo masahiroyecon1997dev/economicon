@@ -42,6 +42,13 @@
     "NumberOfSuccesses": "成功数",
     "SampleSize": "標本サイズ"
   },
+  "AppBar": {
+    "Minimize": "最小化",
+    "Maximize": "最大化",
+    "Restore": "元のサイズに戻す",
+    "Close": "閉じる",
+    "Help": "ヘルプ"
+  },
   "HeaderMenu": {
     "Title": "Mesatsu",
     "File": "ファイル",
