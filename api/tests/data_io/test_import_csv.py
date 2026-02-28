@@ -1,4 +1,3 @@
-import json
 import os
 import shutil
 import tempfile
@@ -76,7 +75,7 @@ def test_import_csv_comma_separator(client, prepared_data):
         "tableName": "TestCommaTable",
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -100,7 +99,7 @@ def test_import_csv_tab_separator(client, prepared_data):
         "tableName": "TestTabTable",
         "separator": "\t",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -129,9 +128,7 @@ def test_import_csv_custom_separator(client, prepared_data):
             "tableName": "TestSemicolonTable",
             "separator": ";",
         }
-        response = client.post(
-            "/api/data/import", data=json.dumps(request_data)
-        )
+        response = client.post("/api/data/import", json=request_data)
         response_data = response.json()
         assert response.status_code == status.HTTP_200_OK
         assert "OK" == response_data["code"]
@@ -158,7 +155,7 @@ def test_import_csv_default_separator(client, prepared_data):
         "filePath": test_csv_comma,
         "tableName": "TestDefaultSeparator",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -178,7 +175,7 @@ def test_import_csv_file_not_exists(client, prepared_data):
         "tableName": "TestNonExistent",
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert ErrorCode.PATH_NOT_FOUND == response_data["code"]
@@ -200,7 +197,7 @@ def test_import_csv_invalid_file_extension(client, prepared_data):
         "filePath": txt_path,
         "tableName": "TestInvalidExtension",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert ErrorCode.UNSUPPORTED_FILE_TYPE == response_data["code"]
@@ -213,7 +210,7 @@ def test_import_csv_missing_file_path(client, prepared_data):
     """
     tables_store, test_dir = prepared_data
     request_data = {"tableName": "TestMissingPath", "separator": ","}
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -229,7 +226,7 @@ def test_import_csv_missing_table_name(client, prepared_data):
     tables_store, test_dir = prepared_data
     test_csv_comma = f"{test_dir}/TestDataComma.csv"
     request_data = {"filePath": test_csv_comma, "separator": ","}
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -249,16 +246,14 @@ def test_import_csv_duplicate_table_name(client, prepared_data):
         "tableName": "DuplicateTable",
         "separator": ",",
     }
-    client.post("/api/data/import", data=json.dumps(first_request_data))
+    client.post("/api/data/import", json=first_request_data)
     # 同じテーブル名で再度作成を試行
     second_request_data = {
         "filePath": test_csv_comma,
         "tableName": "DuplicateTable",
         "separator": ",",
     }
-    response = client.post(
-        "/api/data/import", data=json.dumps(second_request_data)
-    )
+    response = client.post("/api/data/import", json=second_request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert ErrorCode.DATA_ALREADY_EXISTS == response_data["code"]
@@ -278,7 +273,7 @@ def test_import_csv_empty_separator(client, prepared_data):
         "tableName": "TestEmptySeparator",
         "separator": "",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -292,7 +287,11 @@ def test_import_csv_invalid_json(client, prepared_data):
     不正なJSONを送信した場合のテスト
     FastAPIのバリデーションエラーで422が返る
     """
-    response = client.post("/api/data/import", data="invalid json")
+    response = client.post(
+        "/api/data/import",
+        content=b"invalid json",
+        headers={"Content-Type": "application/json"},
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert "JSON decode error" == response_data["message"]
@@ -311,7 +310,7 @@ def test_import_csv_malformed_csv(client, prepared_data):
         "tableName": "TestMalformed",
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     message = "Failed to parse CSV file: Invalid format or encoding."
@@ -333,7 +332,7 @@ def test_import_csv_encoding_utf8bom(client, prepared_data):
         "separator": ",",
         "encoding": "utf8",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -354,7 +353,7 @@ def test_import_csv_invalid_encoding(client, prepared_data):
         "tableName": "TestInvalidEncoding",
         "encoding": "invalid-encoding",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -367,7 +366,7 @@ def test_import_csv_empty_file_path(client, prepared_data):
     filePathが空文字列の場合はバリデーションエラーになる
     """
     request_data = {"filePath": "", "tableName": "TestTable", "separator": ","}
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -385,7 +384,7 @@ def test_import_csv_empty_table_name(client, prepared_data):
         "tableName": "",
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -401,7 +400,7 @@ def test_import_csv_tablename_only_spaces(client, prepared_data):
     tables_store, test_dir = prepared_data
     test_csv = f"{test_dir}/TestDataComma.csv"
     request_data = {"filePath": test_csv, "tableName": "   ", "separator": ","}
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     expected_msg = "tableNameは1文字以上で入力してください。"
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -421,7 +420,7 @@ def test_import_csv_tablename_only_tabs(client, prepared_data):
         "tableName": "\t\t\t",
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     expected_msg = "tableNameは1文字以上で入力してください。"
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -441,7 +440,7 @@ def test_import_csv_tablename_embedded_tab(client, prepared_data):
         "tableName": "test\ttable",
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     expected_msg = "tableNameに使用できない文字が含まれています。"
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -462,7 +461,7 @@ def test_import_csv_tablename_exceeds_max_length(client, prepared_data):
         "tableName": over_limit,
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     expected_msg = (
         f"tableNameは{_MAX_TABLE_NAME_LEN}文字以内で入力してください。"
@@ -485,7 +484,7 @@ def test_import_csv_tablename_at_max_length(client, prepared_data):
         "tableName": max_length_name,
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -503,7 +502,7 @@ def test_import_csv_tablename_leading_trailing_spaces(client, prepared_data):
         "tableName": "  TrimmedCsvTable  ",
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -522,7 +521,7 @@ def test_import_csv_tablename_emoji(client, prepared_data):
         "tableName": "データ📊テーブル",
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -540,7 +539,7 @@ def test_import_csv_tablename_japanese(client, prepared_data):
         "tableName": "人口統計データ",
         "separator": ",",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -567,7 +566,7 @@ def test_import_csv_encoding_shift_jis(client, prepared_data):
         "separator": ",",
         "encoding": "shift_jis",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -594,7 +593,7 @@ def test_import_csv_encoding_latin1(client, prepared_data):
         "separator": ",",
         "encoding": "latin1",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -622,7 +621,7 @@ def test_import_csv_encoding_windows1252(client, prepared_data):
         "separator": ",",
         "encoding": "windows-1252",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -645,7 +644,7 @@ def test_import_csv_encoding_ascii(client, prepared_data):
         "separator": ",",
         "encoding": "ascii",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -673,7 +672,7 @@ def test_import_csv_encoding_mismatch_shift_jis_as_utf8(client, prepared_data):
         "separator": ",",
         "encoding": "utf8",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert ErrorCode.CSV_IMPORT_ERROR == response_data["code"]
