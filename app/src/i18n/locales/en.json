@@ -60,9 +60,10 @@
     "Description": "Please select a file to import data.",
     "SearchPlaceholder": "Search by file name",
     "GoUpDirectory": "Go up directory",
-    "AllFiles": "All Files",
-    "CsvFiles": "CSV Files",
-    "ExcelFiles": "Excel Files",
+    "AllFiles": "All",
+    "CsvFiles": "CSV",
+    "ExcelFiles": "Excel",
+    "ParquetFiles": "Parquet",
     "FileNameHeader": "File Name",
     "SizeHeader": "Size",
     "LastModifiedHeader": "Last Modified"
