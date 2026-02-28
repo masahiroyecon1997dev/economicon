@@ -92,6 +92,7 @@
     "Description": "ファイルをドラッグ&ドロップまたは選択してデータをインポートしてください。",
     "SearchPlaceholder": "ファイル名で検索",
     "GoUpDirectory": "上位ディレクトリへ移動",
+    "FileTypeFilterLabel": "ファイル種類フィルター",
     "AllFiles": "すべて",
     "CsvFiles": "CSV",
     "ExcelFiles": "Excel",
