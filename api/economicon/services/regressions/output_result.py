@@ -42,11 +42,10 @@ def _get_stars(
     p_value: float | None,
     stars: list[dict[str, Any]],
 ) -> str:
-    """p 値に対応する有意性記号を返す。"""
+    """p 値に対応する有意性記号を返す（stars は閾値昇順ソート済み前提）。"""
     if p_value is None:
         return ""
-    # 閾値の小さい順にチェックする（例: 0.01 → 0.05 → 0.1）
-    for cfg in sorted(stars, key=lambda s: s["threshold"]):
+    for cfg in stars:
         if p_value <= cfg["threshold"]:
             return cfg["symbol"]
     return ""
@@ -108,23 +107,50 @@ class _ResultFormatter:
         stars: list[dict[str, Any]] | None,
         variable_labels: dict[str, str] | None,
         const_at_bottom: bool,
+        variable_order: list[str] | None = None,
     ) -> None:
         self._outputs = outputs
         self._stat_key = stat_key
-        self._stars = stars
+        # 昇順ソートを __init__ で一度だけ実施し
+        # _get_stars での毎回ソートを排除
+        self._stars = (
+            sorted(stars, key=lambda s: s["threshold"])
+            if stars is not None
+            else None
+        )
         self._labels = variable_labels or {}
         self._const_at_bottom = const_at_bottom
+        self._variable_order = variable_order
         self._variables = self._build_variable_order()
         self._first_stage_vars = self._collect_first_stage_vars()
+
+    def _resolve_variable_order(
+        self, all_ordered: list[str], all_seen: set[str]
+    ) -> list[str]:
+        """variable_order 指定がある場合にその優先順序を適用する。"""
+        if not self._variable_order:
+            return list(all_ordered)
+        placed: set[str] = set()
+        ordered: list[str] = []
+        for var in self._variable_order:
+            if var in all_seen and var not in placed:
+                placed.add(var)
+                ordered.append(var)
+        for var in all_ordered:
+            if var not in placed:
+                ordered.append(var)
+        return ordered
 
     def _build_variable_order(self) -> list[str]:
         """
         全モデルの変数の和集合を順序付きで構築する。
 
+        variable_order が指定された場合はその順序を優先し、
+        未指定の変数はその後ろに登場順で追加する。
         定数項は const_at_bottom に応じて先頭または末尾に配置する。
         """
-        seen: set[str] = set()
-        ordered: list[str] = []
+        all_seen: set[str] = set()
+        all_ordered: list[str] = []
         const_found = False
 
         for output in self._outputs:
@@ -132,9 +158,11 @@ class _ResultFormatter:
                 if var == "const":
                     const_found = True
                     continue
-                if var not in seen:
-                    seen.add(var)
-                    ordered.append(var)
+                if var not in all_seen:
+                    all_seen.add(var)
+                    all_ordered.append(var)
+
+        ordered = self._resolve_variable_order(all_ordered, all_seen)
 
         if const_found:
             if self._const_at_bottom:
@@ -178,6 +206,33 @@ class _ResultFormatter:
                 v = o.first_stage_f.get(var)
                 vals.append(_fmt_num(v, decimals=3) if v is not None else "")
             rows.append((label, vals))
+        return rows
+
+    def _collect_stat_rows(self) -> list[tuple[str, list[str]]]:
+        """
+        _MODEL_STAT_KEYS を走査し（ラベル, モデルごとの値リスト）タプルの
+        リストを返す。全モデルで値が存在しない行はスキップする。
+        第一段階 F 統計量行を末尾に結合する。
+        to_text / to_markdown / to_latex の統計行生成で共通利用する。
+        """
+        rows: list[tuple[str, list[str]]] = []
+        for stat_key, stat_label in _MODEL_STAT_KEYS:
+            vals: list[str] = []
+            has_any = False
+            for o in self._outputs:
+                v = o.model_stats.get(stat_key)
+                if v is not None:
+                    has_any = True
+                    vals.append(
+                        str(int(v))
+                        if stat_key == "nObservations"
+                        else _fmt_num(v)
+                    )
+                else:
+                    vals.append("")
+            if has_any:
+                rows.append((stat_label, vals))
+        rows.extend(self._first_stage_stat_items())
         return rows
 
     def _get_label(self, var: str) -> str:
@@ -277,33 +332,11 @@ class _ResultFormatter:
 
     def _text_stat_rows(self, label_w: int, col_w: int) -> list[str]:
         """固定幅テキスト用のモデル統計行リストを返す。"""
-        lines: list[str] = []
-        for stat_key, stat_label in _MODEL_STAT_KEYS:
-            vals: list[str] = []
-            has_any = False
-            for o in self._outputs:
-                v = o.model_stats.get(stat_key)
-                if v is not None:
-                    has_any = True
-                    cell = (
-                        str(int(v))
-                        if stat_key == "nObservations"
-                        else _fmt_num(v)
-                    )
-                    vals.append(cell.center(col_w))
-                else:
-                    vals.append(" " * col_w)
-            if not has_any:
-                continue
-            row = stat_label[: label_w - 2].ljust(label_w)
-            row += "".join(vals)
-            lines.append(row)
-        # 第一段階 F 統計量（IV モデルのみ）
-        for label, vals_raw in self._first_stage_stat_items():
-            row = label[: label_w - 2].ljust(label_w)
-            row += "".join(v.center(col_w) for v in vals_raw)
-            lines.append(row)
-        return lines
+        return [
+            stat_label[: label_w - 2].ljust(label_w)
+            + "".join(v.center(col_w) for v in vals)
+            for stat_label, vals in self._collect_stat_rows()
+        ]
 
     def to_text(self) -> str:
         """固定幅テキスト形式に整形する。"""
@@ -353,26 +386,8 @@ class _ResultFormatter:
         lines.append(sep_row)
 
         # モデル統計行
-        for stat_key, stat_label in _MODEL_STAT_KEYS:
-            vals: list[str] = []
-            has_any = False
-            for o in self._outputs:
-                v = o.model_stats.get(stat_key)
-                if v is not None:
-                    has_any = True
-                    vals.append(
-                        str(int(v))
-                        if stat_key == "nObservations"
-                        else _fmt_num(v)
-                    )
-                else:
-                    vals.append("")
-            if not has_any:
-                continue
+        for stat_label, vals in self._collect_stat_rows():
             lines.append("| " + stat_label + " | " + " | ".join(vals) + " |")
-        # 第一段階 F 統計量（IV モデルのみ）
-        for label, vals_raw in self._first_stage_stat_items():
-            lines.append("| " + label + " | " + " | ".join(vals_raw) + " |")
 
         return "\n".join(lines)
 
@@ -415,26 +430,8 @@ class _ResultFormatter:
         lines.append(r"\hline")
 
         # モデル統計行
-        for stat_key, stat_label in _MODEL_STAT_KEYS:
-            vals: list[str] = []
-            has_any = False
-            for o in self._outputs:
-                v = o.model_stats.get(stat_key)
-                if v is not None:
-                    has_any = True
-                    vals.append(
-                        str(int(v))
-                        if stat_key == "nObservations"
-                        else _fmt_num(v)
-                    )
-                else:
-                    vals.append("")
-            if not has_any:
-                continue
+        for stat_label, vals in self._collect_stat_rows():
             lines.append(stat_label + " & " + " & ".join(vals) + r" \\")
-        # 第一段階 F 統計量（IV モデルのみ）
-        for label, vals_raw in self._first_stage_stat_items():
-            lines.append(label + " & " + " & ".join(vals_raw) + r" \\")
 
         lines.extend(
             [
@@ -467,7 +464,7 @@ class OutputResult:
         result_store: AnalysisResultStore,
     ) -> None:
         self.result_ids = body.result_ids
-        self.format = body.format
+        self.output_format = body.format
         # stat_in_parentheses="none" のとき stat_key=None
         self.stat_key = _STAT_KEY_MAP.get(body.stat_in_parentheses)
         # significance_stars=None のときはデフォルト設定を使用
@@ -482,19 +479,25 @@ class OutputResult:
                 {"threshold": 0.1, "symbol": "*"},
             ]
         self.variable_labels = body.variable_labels
+        self.variable_order = body.variable_order
         self.const_at_bottom = body.const_at_bottom
         self.result_store = result_store
+        # validate() でフェッチした結果をキャッシュし
+        # execute() での二重フェッチを避ける
+        self._fetched: list | None = None
 
     def validate(self) -> None:
         """
         バリデーション
 
         result_ids に含まれる全 ID がストアに存在することを確認する。
+        存在する結果はキャッシュして execute() での二重フェッチを避ける。
         """
         missing: list[str] = []
+        fetched = []
         for rid in self.result_ids:
             try:
-                self.result_store.get_result(rid)
+                fetched.append(self.result_store.get_result(rid))
             except KeyError:
                 missing.append(rid)
 
@@ -507,6 +510,7 @@ class OutputResult:
                 )
                 % {"details": details},
             )
+        self._fetched = fetched
 
     def execute(self) -> dict[str, Any]:
         """
@@ -518,10 +522,11 @@ class OutputResult:
             {"content": str, "format": str}
         """
         try:
-            outputs = [
-                _RegOutput(self.result_store.get_result(rid).regression_output)
-                for rid in self.result_ids
+            # validate() でキャッシュ済みの結果を優先使用（二重フェッチ回避）
+            results = self._fetched or [
+                self.result_store.get_result(rid) for rid in self.result_ids
             ]
+            outputs = [_RegOutput(r.regression_output) for r in results]
 
             formatter = _ResultFormatter(
                 outputs,
@@ -529,9 +534,10 @@ class OutputResult:
                 stars=self.stars,
                 variable_labels=self.variable_labels,
                 const_at_bottom=self.const_at_bottom,
+                variable_order=self.variable_order,
             )
 
-            match self.format:
+            match self.output_format:
                 case "latex":
                     content = formatter.to_latex()
                 case "markdown":
@@ -539,7 +545,7 @@ class OutputResult:
                 case _:
                     content = formatter.to_text()
 
-            return {"content": content, "format": self.format}
+            return {"content": content, "format": self.output_format}
 
         except ValidationError, ProcessingError:
             raise

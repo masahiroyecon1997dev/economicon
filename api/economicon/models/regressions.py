@@ -285,15 +285,6 @@ class StarConfig(BaseModel):
     )
 
 
-def _default_stars() -> list[StarConfig]:
-    """デフォルトの有意性記号設定を返す"""
-    return [
-        StarConfig(threshold=0.01, symbol="***"),
-        StarConfig(threshold=0.05, symbol="**"),
-        StarConfig(threshold=0.1, symbol="*"),
-    ]
-
-
 class OutputResultRequest(BaseRequest):
     """
     推定結果フォーマット出力リクエスト
@@ -360,6 +351,18 @@ class OutputResultRequest(BaseRequest):
             ),
         ),
     ] = True
+    variable_order: Annotated[
+        list[str] | None,
+        Field(
+            default=None,
+            description=(
+                "変数の表示順序を明示的に指定するリスト。"
+                "指定した変数は先頭から順に表示される。"
+                "リストに含まれない変数はその後ろに追加される。"
+                "None の場合は推定結果への登場順を使用。"
+            ),
+        ),
+    ] = None
 
 
 class OutputResultResult(BaseResult):
