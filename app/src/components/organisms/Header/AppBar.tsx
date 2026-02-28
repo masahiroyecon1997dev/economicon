@@ -4,10 +4,11 @@ import {
   HelpCircle,
   Layers,
   Minus,
+  MoreHorizontal,
   Square,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/utils/helpers";
 import { useCurrentPageStore } from "../../../stores/currentView";
@@ -61,6 +62,53 @@ export const AppBar = () => {
   // マウスダウン起点を記録するref（startDragging は mousemove 時に初めて呼び出す）
   // 即 startDragging() するとOSがマウスを捕捉し dblclick イベントが届かなくなるため
   const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null);
+
+  // ナビゲーションオーバーフロー検出
+  // navRef: 実際に表示される nav コンテナ（幅監視対象）
+  // measureRef: 全メニューボタンを invisible で常時レンダリングし幅を計測する隠しコンテナ
+  const navRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState(999);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    const measure = measureRef.current;
+    if (!nav || !measure) return;
+
+    //「…」ボタン自身の幅（px）
+    const OVERFLOW_BTN_W = 36;
+
+    const recalculate = () => {
+      const available = nav.clientWidth;
+      const btns = Array.from(measure.children) as HTMLElement[];
+      let total = 0;
+      let count = 0;
+      for (let i = 0; i < btns.length; i++) {
+        const w = btns[i].getBoundingClientRect().width;
+        const hasMore = i < btns.length - 1;
+        if (hasMore) {
+          // 次のアイテムが存在する:「…」ボタン分の幅を確保した上で収まるか判定
+          if (total + w + OVERFLOW_BTN_W <= available) {
+            total += w;
+            count = i + 1;
+          } else {
+            break;
+          }
+        } else {
+          // 最後のアイテム: 「…」ボタン不要なのでそのまま判定
+          if (total + w <= available) {
+            count = btns.length;
+          }
+        }
+      }
+      setVisibleCount(count);
+    };
+
+    recalculate();
+    const ro = new ResizeObserver(recalculate);
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, []);
 
   const handleMinimize = useCallback(() => getCurrentWindow().minimize(), []);
   const handleToggleMaximize = useCallback(
@@ -246,7 +294,7 @@ export const AppBar = () => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onDoubleClick={handleDoubleClick}
-      className="flex h-11 shrink-0 select-none items-center border-b border-brand-primary-dark bg-brand-primary text-white"
+      className="relative flex h-11 shrink-0 select-none items-center border-b border-brand-primary-dark bg-brand-primary text-white"
     >
       {/* ===== macOS: 左端トラフィックライト ===== */}
       {isMac && (
@@ -298,9 +346,38 @@ export const AppBar = () => {
       </div>
 
       {/* ===== ナビゲーションメニュー ===== */}
-      <nav className="flex items-center gap-0.5">
+
+      {/*
+       * 計測用の不可視コンテナ。
+       * 全メニューボタンを visibility:hidden + pointer-events-none で常時レンダリングし、
+       * ResizeObserver が各ボタンの実幅を測定するために使用する。
+       * absolute 配置なのでレイアウトに影響しない。
+       */}
+      <div
+        ref={measureRef}
+        aria-hidden="true"
+        className="invisible absolute flex pointer-events-none"
+      >
         {menus.map((menu) => (
-          <div key={menu.id} className="relative">
+          <button
+            key={menu.id}
+            type="button"
+            className="flex items-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium"
+          >
+            <span>{menu.menuName}</span>
+            <ChevronDown size={14} />
+          </button>
+        ))}
+      </div>
+
+      {/* 表示用 nav: flex-1 で利用可能幅を占有し、overflow-hidden で折り返しを防ぐ */}
+      <nav
+        ref={navRef}
+        className="flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden"
+      >
+        {/* 表示可能なメニュー */}
+        {menus.slice(0, visibleCount).map((menu) => (
+          <div key={menu.id} className="relative shrink-0">
             <DropdownMenu
               isOpen={menu.isOpen}
               onClose={menu.onClose}
@@ -332,6 +409,54 @@ export const AppBar = () => {
             </DropdownMenu>
           </div>
         ))}
+
+        {/* オーバーフロー時の「…」ボタン */}
+        {visibleCount < menus.length && (
+          <div className="relative shrink-0">
+            <DropdownMenu
+              isOpen={openMenuId === "__overflow__"}
+              onClose={close}
+              position={MENU_POSITION}
+              triggerElement={
+                <button
+                  type="button"
+                  aria-label={t("AppBar.MoreMenus")}
+                  className={cn(
+                    "flex h-8 w-9 items-center justify-center rounded",
+                    "text-white/80 hover:bg-white/10 hover:text-white transition-colors",
+                    "focus:outline-none",
+                  )}
+                >
+                  <MoreHorizontal size={16} aria-hidden="true" />
+                </button>
+              }
+            >
+              {menus.slice(visibleCount).map((menu, menuIdx) => (
+                <Fragment key={menu.id}>
+                  {/* グループ区切り線（最初のグループには不要）*/}
+                  {menuIdx > 0 && (
+                    <div className="my-1 border-t border-gray-100" />
+                  )}
+                  {/* グループ見出し */}
+                  <div className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    {menu.menuName}
+                  </div>
+                  {/* グループ内アイテム */}
+                  {menu.items.map((item, i) => (
+                    <MenuItem
+                      key={item.id}
+                      label={item.label}
+                      variant="default"
+                      isFirst={i === 0}
+                      isLast={i === menu.items.length - 1}
+                      handleSelect={item.handleSelect}
+                    />
+                  ))}
+                </Fragment>
+              ))}
+            </DropdownMenu>
+          </div>
+        )}
       </nav>
 
       {/* ===== 右端: ヘルプ + Windows/Linux ウィンドウ制御 ===== */}

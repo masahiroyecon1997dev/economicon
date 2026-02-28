@@ -18,7 +18,8 @@
     "Maximize": "Maximize",
     "Restore": "Restore",
     "Close": "Close",
-    "Help": "Help"
+    "Help": "Help",
+    "MoreMenus": "More menus"
   },
   "HeaderMenu": {
     "File": "File",
