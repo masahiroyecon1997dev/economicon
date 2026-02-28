@@ -34,7 +34,6 @@ export const CreateSimulationDataTable = () => {
   const addTableName = useTableListStore((state) => state.addTableName);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
 
-
   const COLUMN_SETTINGS_DEFAULT: SimulationColumnSetting = {
     id: "1",
     columnName: "",
@@ -67,181 +66,195 @@ export const CreateSimulationDataTable = () => {
       const tableName = value.tableName;
       const numRows = value.numRows;
 
-    // カラムのバリデーション
-    let hasError = false;
-    const validatedColumns = columns.map((col) => {
-      const errors: {
-        columnName: string | undefined;
-        distributionParams: Record<string, string | undefined> | undefined;
-        fixedValue: string | undefined;
-      } = {
-        columnName: undefined,
-        distributionParams: undefined,
-        fixedValue: undefined,
-      };
+      // カラムのバリデーション
+      let hasError = false;
+      const validatedColumns = columns.map((col) => {
+        const errors: {
+          columnName: string | undefined;
+          distributionParams: Record<string, string | undefined> | undefined;
+          fixedValue: string | undefined;
+        } = {
+          columnName: undefined,
+          distributionParams: undefined,
+          fixedValue: undefined,
+        };
 
-      if (!col.columnName || col.columnName.trim() === "") {
-        errors.columnName = t("ValidationMessages.ColumnNameRequired");
-        hasError = true;
-      }
-
-      if (col.dataType === "distribution") {
-        const paramsError = validateDistributionParam(
-          col.distributionType,
-          col.distributionParams,
-        );
-        if (paramsError !== undefined) {
+        if (!col.columnName || col.columnName.trim() === "") {
+          errors.columnName = t("ValidationMessages.ColumnNameRequired");
           hasError = true;
         }
-      }
-      return { ...col, errorMessage: errors };
-    });
 
-    if (hasError) {
-      setColumns(validatedColumns);
-      await showMessageDialog(
-        t("Error.Error"),
-        t("ValidationMessages.FixValidationErrors"),
-      );
-      return;
-    }
-
-    try {
-      // SimulationColumnConfig型（分布判別union）にマッピング
-      const simulationColumns: SimulationColumnConfig[] = columns.map((col) => {
-        if (col.dataType === "fixed") {
-          return {
-            columnName: col.columnName.trim(),
-            distribution: {
-              type: "fixed" as const,
-              value: Number(col.fixedValue),
-            },
-          };
+        if (col.dataType === "distribution") {
+          const paramsError = validateDistributionParam(
+            col.distributionType,
+            col.distributionParams,
+          );
+          if (paramsError !== undefined) {
+            hasError = true;
+          }
         }
-        // 分布型: distributionTypeが typeフィールドになる
-        const p = col.distributionParams;
-        switch (col.distributionType) {
-          case "uniform":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: {
-                type: "uniform" as const,
-                low: p.low,
-                high: p.high,
-              },
-            };
-          case "exponential":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: { type: "exponential" as const, scale: p.rate },
-            };
-          case "normal":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: {
-                type: "normal" as const,
-                loc: p.mean,
-                scale: p.deviation,
-              },
-            };
-          case "gamma":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: {
-                type: "gamma" as const,
-                shape: p.shape,
-                scale: p.scale,
-              },
-            };
-          case "beta":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: { type: "beta" as const, a: p.alpha, b: p.beta },
-            };
-          case "weibull":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: {
-                type: "weibull" as const,
-                a: p.shape,
-                scale: p.scale,
-              },
-            };
-          case "lognormal":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: {
-                type: "lognormal" as const,
-                mean: p.logMean,
-                sigma: p.logSD,
-              },
-            };
-          case "binomial":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: {
-                type: "binomial" as const,
-                n: p.trials,
-                p: p.probability,
-              },
-            };
-          case "bernoulli":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: { type: "bernoulli" as const, p: p.probability },
-            };
-          case "poisson":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: { type: "poisson" as const, lam: p.lambda },
-            };
-          case "geometric":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: { type: "geometric" as const, p: p.probability },
-            };
-          case "hypergeometric":
-            return {
-              columnName: col.columnName.trim(),
-              distribution: {
-                type: "hypergeometric" as const,
-                bigN: p.populationSize,
-                n: p.sampleSize,
-                bigK: p.numberOfSuccesses,
-              },
-            };
-          default:
-            return {
-              columnName: col.columnName.trim(),
-              distribution: { type: "uniform" as const, low: 0, high: 1 },
-            };
-        }
+        return { ...col, errorMessage: errors };
       });
 
-      const response = await getEconomiconAPI().createSimulationDataTable({
-        tableName: tableName.trim(),
-        rowCount: numRows,
-        simulationColumns,
-      });
-
-      if (response.code === "OK") {
-        const resTableInfo = await getTableInfo(response.result.tableName);
-        addTableName(response.result.tableName);
-        addTableInfo(resTableInfo);
-        setCurrentView("DataPreview");
-      } else {
+      if (hasError) {
+        setColumns(validatedColumns);
         await showMessageDialog(
           t("Error.Error"),
-          t("CreateSimulationDataTableView.TableCreationFailed"),
+          t("ValidationMessages.FixValidationErrors"),
         );
+        return;
       }
-    } catch (error) {
-      let errorMessage = t("CreateSimulationDataTableView.TableCreationError");
-      if (error instanceof Error) {
-        errorMessage = error.message;
+
+      try {
+        // SimulationColumnConfig型（分布判別union）にマッピング
+        const simulationColumns: SimulationColumnConfig[] = columns.map(
+          (col) => {
+            if (col.dataType === "fixed") {
+              return {
+                columnName: col.columnName.trim(),
+                distribution: {
+                  type: "fixed" as const,
+                  value: Number(col.fixedValue),
+                },
+              };
+            }
+            // 分布型: distributionTypeが typeフィールドになる
+            const p = col.distributionParams;
+            switch (col.distributionType) {
+              case "uniform":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: {
+                    type: "uniform" as const,
+                    low: p.low,
+                    high: p.high,
+                  },
+                };
+              case "exponential":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: { type: "exponential" as const, scale: p.rate },
+                };
+              case "normal":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: {
+                    type: "normal" as const,
+                    loc: p.mean,
+                    scale: p.deviation,
+                  },
+                };
+              case "gamma":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: {
+                    type: "gamma" as const,
+                    shape: p.shape,
+                    scale: p.scale,
+                  },
+                };
+              case "beta":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: {
+                    type: "beta" as const,
+                    a: p.alpha,
+                    b: p.beta,
+                  },
+                };
+              case "weibull":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: {
+                    type: "weibull" as const,
+                    a: p.shape,
+                    scale: p.scale,
+                  },
+                };
+              case "lognormal":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: {
+                    type: "lognormal" as const,
+                    mean: p.logMean,
+                    sigma: p.logSD,
+                  },
+                };
+              case "binomial":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: {
+                    type: "binomial" as const,
+                    n: p.trials,
+                    p: p.probability,
+                  },
+                };
+              case "bernoulli":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: {
+                    type: "bernoulli" as const,
+                    p: p.probability,
+                  },
+                };
+              case "poisson":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: { type: "poisson" as const, lam: p.lambda },
+                };
+              case "geometric":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: {
+                    type: "geometric" as const,
+                    p: p.probability,
+                  },
+                };
+              case "hypergeometric":
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: {
+                    type: "hypergeometric" as const,
+                    bigN: p.populationSize,
+                    n: p.sampleSize,
+                    bigK: p.numberOfSuccesses,
+                  },
+                };
+              default:
+                return {
+                  columnName: col.columnName.trim(),
+                  distribution: { type: "uniform" as const, low: 0, high: 1 },
+                };
+            }
+          },
+        );
+
+        const response = await getEconomiconAPI().createSimulationDataTable({
+          tableName: tableName.trim(),
+          rowCount: numRows,
+          simulationColumns,
+        });
+
+        if (response.code === "OK") {
+          const resTableInfo = await getTableInfo(response.result.tableName);
+          addTableName(response.result.tableName);
+          addTableInfo(resTableInfo);
+          setCurrentView("DataPreview");
+        } else {
+          await showMessageDialog(
+            t("Error.Error"),
+            t("CreateSimulationDataTableView.TableCreationFailed"),
+          );
+        }
+      } catch (error) {
+        let errorMessage = t(
+          "CreateSimulationDataTableView.TableCreationError",
+        );
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        await showMessageDialog(t("Error.Error"), errorMessage);
       }
-      await showMessageDialog(t("Error.Error"), errorMessage);
-    }
     },
   });
 
