@@ -47,7 +47,8 @@
     "Maximize": "最大化",
     "Restore": "元のサイズに戻す",
     "Close": "閉じる",
-    "Help": "ヘルプ"
+    "Help": "ヘルプ",
+    "MoreMenus": "その他のメニュー"
   },
   "HeaderMenu": {
     "File": "ファイル",
