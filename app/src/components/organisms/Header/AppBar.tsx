@@ -65,8 +65,22 @@ export const AppBar = () => {
   );
   const handleClose = useCallback(() => getCurrentWindow().close(), []);
 
-  // ダブルクリックで最大化トグル（ドラッグ領域上でのみ有効）
-  const handleDragAreaDoubleClick = useCallback(() => {
+  // ヘッダー上でのマウスダウン: インタラクティブ要素・最大化中を除外して startDragging
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      if (e.button !== 0) return; // 左ボタンのみ
+      if (isMaximized) return; // 最大化中はドラッグしない（Windows 標準動作）
+      const target = e.target as HTMLElement;
+      if (target.closest("button, a, input, select, textarea")) return;
+      getCurrentWindow().startDragging();
+    },
+    [isMaximized],
+  );
+
+  // ヘッダー上でのダブルクリック: インタラクティブ要素上は除外して最大化トグル
+  const handleDoubleClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button, a, input, select, textarea")) return;
     getCurrentWindow().toggleMaximize();
   }, []);
 
@@ -105,12 +119,11 @@ export const AppBar = () => {
   ];
 
   return (
-    // data-tauri-drag-region をバー全体に設定。
-    // Tauri は mousedown イベントのターゲットを確認し、
-    // ボタン・input・select などの要素ではドラッグを開始しない。
+    // onMouseDown で startDragging を呼び出し、ウィンドウ移動を実現。
+    // ボタン等のインタラクティブ要素上では startDragging を呼ばないためクリックも正常に動作する。
     <header
-      data-tauri-drag-region
-      onDoubleClick={handleDragAreaDoubleClick}
+      onMouseDown={handleMouseDown}
+      onDoubleClick={handleDoubleClick}
       className="flex h-11 shrink-0 select-none items-center border-b border-brand-primary-dark bg-brand-primary text-white"
     >
       {/* ===== macOS: 左端トラフィックライト ===== */}
@@ -120,7 +133,7 @@ export const AppBar = () => {
           <button
             type="button"
             onClick={handleClose}
-            aria-label="閉じる"
+            aria-label={t("AppBar.Close")}
             className={cn(
               "size-3 rounded-full bg-red-500",
               "hover:bg-red-400 transition-colors focus:outline-none",
@@ -130,7 +143,7 @@ export const AppBar = () => {
           <button
             type="button"
             onClick={handleMinimize}
-            aria-label="最小化"
+            aria-label={t("AppBar.Minimize")}
             className={cn(
               "size-3 rounded-full bg-yellow-400",
               "hover:bg-yellow-300 transition-colors focus:outline-none",
@@ -140,7 +153,9 @@ export const AppBar = () => {
           <button
             type="button"
             onClick={handleToggleMaximize}
-            aria-label={isMaximized ? "元のサイズに戻す" : "最大化"}
+            aria-label={
+              isMaximized ? t("AppBar.Restore") : t("AppBar.Maximize")
+            }
             className={cn(
               "size-3 rounded-full bg-green-500",
               "hover:bg-green-400 transition-colors focus:outline-none",
@@ -152,7 +167,6 @@ export const AppBar = () => {
       {/* ===== ロゴ + アプリ名（ドラッグ領域の視覚的な起点） ===== */}
       {/* pointer-events-none でクリックを透過させてドラッグ領域として機能させる */}
       <div
-        data-tauri-drag-region
         className={cn(
           "pointer-events-none flex items-center gap-2",
           isMac ? "pl-2 pr-6" : "pl-5 pr-6",
@@ -203,7 +217,7 @@ export const AppBar = () => {
       <div className="ml-auto flex h-full items-center">
         <button
           type="button"
-          aria-label="ヘルプ"
+          aria-label={t("AppBar.Help")}
           className={cn(
             "rounded-full p-2",
             "text-white/60 hover:bg-white/10 hover:text-white transition-colors",
@@ -220,7 +234,7 @@ export const AppBar = () => {
             <button
               type="button"
               onClick={handleMinimize}
-              aria-label="最小化"
+              aria-label={t("AppBar.Minimize")}
               className={cn(
                 "flex h-full w-11 items-center justify-center",
                 "text-white/60 hover:bg-white/10 hover:text-white transition-colors",
@@ -234,7 +248,9 @@ export const AppBar = () => {
             <button
               type="button"
               onClick={handleToggleMaximize}
-              aria-label={isMaximized ? "元のサイズに戻す" : "最大化"}
+              aria-label={
+                isMaximized ? t("AppBar.Restore") : t("AppBar.Maximize")
+              }
               className={cn(
                 "flex h-full w-11 items-center justify-center",
                 "text-white/60 hover:bg-white/10 hover:text-white transition-colors",
@@ -264,7 +280,7 @@ export const AppBar = () => {
             <button
               type="button"
               onClick={handleClose}
-              aria-label="閉じる"
+              aria-label={t("AppBar.Close")}
               className={cn(
                 "flex h-full w-11 items-center justify-center",
                 "text-white/60 hover:bg-red-600 hover:text-white transition-colors",
