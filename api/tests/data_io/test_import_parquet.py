@@ -1,4 +1,3 @@
-import json
 import os
 import shutil
 import tempfile
@@ -57,7 +56,7 @@ def test_import_parquet_simple(client, prepared_data):
         "filePath": f"{test_dir}/TestData.parquet",
         "tableName": "TestSimpleParquet",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -84,7 +83,7 @@ def test_import_parquet_large_data(client, prepared_data):
         "filePath": f"{test_dir}/TestData.parquet",
         "tableName": "TestLargeParquet",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -112,7 +111,7 @@ def test_import_parquet_custom_table_name(client, prepared_data):
         "filePath": f"{test_dir}/Simple.parquet",
         "tableName": "MyCustomParquetTable",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -131,7 +130,7 @@ def test_import_parquet_file_not_exists(client, prepared_data):
         "filePath": "/non/existent/file.parquet",
         "tableName": "TestNonExistent",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert ErrorCode.PATH_NOT_FOUND == response_data["code"]
@@ -152,7 +151,7 @@ def test_import_parquet_invalid_file_extension(client, prepared_data):
         "filePath": txt_path,
         "tableName": "TestInvalidExtension",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert ErrorCode.UNSUPPORTED_FILE_TYPE == response_data["code"]
@@ -164,7 +163,7 @@ def test_import_parquet_missing_file_path(client, prepared_data):
     """
     tables_store, test_dir = prepared_data
     request_data = {"tableName": "TestMissingPath"}
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -186,7 +185,7 @@ def test_import_parquet_missing_table_name(client, prepared_data):
     )
     test_data.write_parquet(f"{test_dir}/Simple.parquet")
     request_data = {"filePath": f"{test_dir}/Simple.parquet"}
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -212,7 +211,7 @@ def test_import_parquet_duplicate_table_name(client, prepared_data):
         "filePath": f"{test_dir}/Simple.parquet",
         "tableName": "DuplicateTable",
     }
-    client.post("/api/data/import", data=json.dumps(first_request_data))
+    client.post("/api/data/import", json=first_request_data)
     # 同じテーブル名で再度作成を試行
     second_request_data = {
         "filePath": f"{test_dir}/Simple.parquet",
@@ -220,7 +219,7 @@ def test_import_parquet_duplicate_table_name(client, prepared_data):
     }
     response = client.post(
         "/api/data/import",
-        data=json.dumps(second_request_data),
+        json=second_request_data,
     )
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -235,7 +234,11 @@ def test_import_parquet_invalid_json(client, prepared_data):
     不正なJSONを送信した場合のテスト
     """
     tables_store, test_dir = prepared_data
-    response = client.post("/api/data/import", data="invalid json")
+    response = client.post(
+        "/api/data/import",
+        content=b"invalid json",
+        headers={"Content-Type": "application/json"},
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert "JSON decode error" == response_data["message"]
@@ -262,9 +265,7 @@ def test_import_parquet_with_temporary_file(client, prepared_data):
     try:
         # APIリクエスト
         request_data = {"filePath": temp_path, "tableName": "TestTempParquet"}
-        response = client.post(
-            "/api/data/import", data=json.dumps(request_data)
-        )
+        response = client.post("/api/data/import", json=request_data)
         response_data = response.json()
         assert response.status_code == status.HTTP_200_OK
         assert "OK" == response_data["code"]
@@ -284,7 +285,7 @@ def test_import_parquet_empty_file_path(client, prepared_data):
     filePathが空文字列の場合はバリデーションエラーになる
     """
     request_data = {"filePath": "", "tableName": "TestTable"}
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -301,7 +302,7 @@ def test_import_parquet_empty_table_name(client, prepared_data):
     tableNameが空文字列の場合はバリデーションエラーになる
     """
     request_data = {"filePath": "/some/path/test.parquet", "tableName": ""}
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -322,7 +323,7 @@ def test_import_parquet_tablename_only_spaces(client, prepared_data):
         "filePath": "/some/path/test.parquet",
         "tableName": "   ",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     expected_msg = "tableNameは1文字以上で入力してください。"
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -340,7 +341,7 @@ def test_import_parquet_tablename_only_tabs(client, prepared_data):
         "filePath": "/some/path/test.parquet",
         "tableName": "\t\t\t",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     expected_msg = "tableNameは1文字以上で入力してください。"
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -358,7 +359,7 @@ def test_import_parquet_tablename_embedded_tab(client, prepared_data):
         "filePath": "/some/path/test.parquet",
         "tableName": "test\ttable",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     expected_msg = "tableNameに使用できない文字が含まれています。"
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -379,7 +380,7 @@ def test_import_parquet_tablename_exceeds_max_length(client, prepared_data):
         "filePath": f"{test_dir}/Simple.parquet",
         "tableName": over_limit,
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     expected_msg = (
         f"tableNameは{_MAX_TABLE_NAME_LEN}文字以内で入力してください。"
@@ -402,7 +403,7 @@ def test_import_parquet_tablename_at_max_length(client, prepared_data):
         "filePath": f"{test_dir}/MaxNameTest.parquet",
         "tableName": max_length_name,
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -422,7 +423,7 @@ def test_import_parquet_tablename_leading_trailing_spaces(
         "filePath": f"{test_dir}/TrimTest.parquet",
         "tableName": "  TrimmedParquetTable  ",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -440,7 +441,7 @@ def test_import_parquet_tablename_emoji(client, prepared_data):
         "filePath": f"{test_dir}/EmojiTest.parquet",
         "tableName": "データ📊テーブル",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -458,7 +459,7 @@ def test_import_parquet_tablename_japanese(client, prepared_data):
         "filePath": f"{test_dir}/JpTest.parquet",
         "tableName": "人口統計データ",
     }
-    response = client.post("/api/data/import", data=json.dumps(request_data))
+    response = client.post("/api/data/import", json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]

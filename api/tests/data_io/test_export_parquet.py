@@ -1,4 +1,3 @@
-import json
 import os
 import shutil
 import tempfile
@@ -60,7 +59,7 @@ def test_export_parquet_success(client, prepared_data):
         "fileName": "test_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -82,7 +81,7 @@ def test_export_parquet_table_not_exists(client, prepared_data):
         "fileName": "test_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
@@ -101,7 +100,7 @@ def test_export_parquet_invalid_output_directory(client, prepared_data):
         "fileName": "test_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert ErrorCode.PATH_NOT_FOUND == response_data["code"]
@@ -119,7 +118,7 @@ def test_export_parquet_missing_table_name(client, prepared_data):
         "fileName": "test_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -137,7 +136,7 @@ def test_export_parquet_missing_directory_path(client, prepared_data):
         "fileName": "test_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -155,7 +154,7 @@ def test_export_parquet_missing_file_name(client, prepared_data):
         "directoryPath": test_output_dir,
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -173,7 +172,7 @@ def test_export_parquet_missing_format(client, prepared_data):
         "directoryPath": test_output_dir,
         "fileName": "test_output",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -186,7 +185,11 @@ def test_export_parquet_invalid_json(client, prepared_data):
     不正な JSON を送信した場合のテスト
     """
     tables_store, test_output_dir, test_data = prepared_data
-    response = client.post(URL, data="invalid json")
+    response = client.post(
+        URL,
+        content=b"invalid json",
+        headers={"Content-Type": "application/json"},
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert "JSON decode error" == response_data["message"]
@@ -205,7 +208,7 @@ def test_export_parquet_empty_table(client, prepared_data):
         "fileName": "empty_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -235,7 +238,7 @@ def test_export_parquet_large_table(client, prepared_data):
         "fileName": "large_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -266,7 +269,7 @@ def test_export_parquet_special_characters(client, prepared_data):
         "fileName": "special_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -297,7 +300,7 @@ def test_export_parquet_different_data_types(client, prepared_data):
         "fileName": "mixed_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -319,7 +322,7 @@ def test_export_parquet_empty_table_name(client, prepared_data):
         "fileName": "test_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -339,7 +342,7 @@ def test_export_parquet_empty_directory_path(client, prepared_data):
         "fileName": "test_output",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -359,7 +362,7 @@ def test_export_parquet_empty_file_name(client, prepared_data):
         "fileName": "",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -379,7 +382,7 @@ def test_export_parquet_tablename_only_spaces(client, prepared_data):
         "fileName": "out",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -401,7 +404,7 @@ def test_export_parquet_tablename_leading_trailing_spaces(
         "fileName": "out_trimmed",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -421,7 +424,7 @@ def test_export_parquet_tablename_japanese(client, prepared_data):
         "fileName": "out_jp_table",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -441,7 +444,7 @@ def test_export_parquet_tablename_emoji(client, prepared_data):
         "fileName": "out_emoji_table",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -460,7 +463,7 @@ def test_export_parquet_filename_only_spaces(client, prepared_data):
         "fileName": "   ",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -481,7 +484,7 @@ def test_export_parquet_filename_max_length(client, prepared_data):
         "fileName": safe_file_name,
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -501,7 +504,7 @@ def test_export_parquet_filename_exceeds_max_length(client, prepared_data):
         "fileName": too_long_file_name,
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -521,7 +524,7 @@ def test_export_parquet_directorypath_only_spaces(client, prepared_data):
         "fileName": "out",
         "format": "parquet",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -541,7 +544,7 @@ def test_export_parquet_invalid_format(client, prepared_data):
         "fileName": "out",
         "format": "xml",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -573,7 +576,7 @@ def test_export_parquet_permission_denied(client, prepared_data):
             "fileName": "test_perm_error",
             "format": "parquet",
         }
-        response = client.post(URL, data=json.dumps(request_data))
+        response = client.post(URL, json=request_data)
         response_data = response.json()
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert ErrorCode.PERMISSION_DENIED == response_data["code"]
@@ -598,7 +601,7 @@ def test_export_parquet_io_error(client, prepared_data):
             "fileName": "test_io_error",
             "format": "parquet",
         }
-        response = client.post(URL, data=json.dumps(request_data))
+        response = client.post(URL, json=request_data)
         response_data = response.json()
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert ErrorCode.PARQUET_EXPORT_ERROR == response_data["code"]

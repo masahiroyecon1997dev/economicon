@@ -1,4 +1,3 @@
-import json
 import os
 import shutil
 import tempfile
@@ -64,7 +63,7 @@ def test_export_csv_default_separator(client, prepared_data):
         "fileName": "test_output",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -87,7 +86,7 @@ def test_export_csv_custom_separator(client, prepared_data):
         "format": "csv",
         "separator": "\t",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -110,7 +109,7 @@ def test_export_csv_semicolon_separator(client, prepared_data):
         "format": "csv",
         "separator": ";",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -133,7 +132,7 @@ def test_export_csv_no_header(client, prepared_data):
         "format": "csv",
         "includeHeader": False,
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -165,7 +164,7 @@ def test_export_csv_encoding_shift_jis(client, prepared_data):
         "format": "csv",
         "encoding": "shift_jis",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -190,7 +189,7 @@ def test_export_csv_table_not_exists(client, prepared_data):
         "fileName": "test_output",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
@@ -209,7 +208,7 @@ def test_export_csv_invalid_output_directory(client, prepared_data):
         "fileName": "test_output",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert ErrorCode.PATH_NOT_FOUND == response_data["code"]
@@ -227,7 +226,7 @@ def test_export_csv_missing_table_name(client, prepared_data):
         "fileName": "test_output",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -244,7 +243,7 @@ def test_export_csv_missing_directory_path(client, prepared_data):
         "fileName": "test_output",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -262,7 +261,7 @@ def test_export_csv_missing_file_name(client, prepared_data):
         "directoryPath": test_output_dir,
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -280,7 +279,7 @@ def test_export_csv_missing_format(client, prepared_data):
         "directoryPath": test_output_dir,
         "fileName": "test_output",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -300,7 +299,7 @@ def test_export_csv_empty_separator(client, prepared_data):
         "format": "csv",
         "separator": "",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -313,7 +312,11 @@ def test_export_csv_invalid_json(client, prepared_data):
     """
     不正な JSON を送信した場合のテスト
     """
-    response = client.post(URL, data="invalid json")
+    response = client.post(
+        URL,
+        content=b"invalid json",
+        headers={"Content-Type": "application/json"},
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert "JSON decode error" == response_data["message"]
@@ -332,7 +335,7 @@ def test_export_csv_empty_table(client, prepared_data):
         "fileName": "empty_output",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -362,7 +365,7 @@ def test_export_csv_large_table(client, prepared_data):
         "fileName": "large_output",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -385,7 +388,7 @@ def test_export_csv_empty_table_name(client, prepared_data):
         "fileName": "test_output",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -405,7 +408,7 @@ def test_export_csv_empty_directory_path(client, prepared_data):
         "fileName": "test_output",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -425,7 +428,7 @@ def test_export_csv_empty_file_name(client, prepared_data):
         "fileName": "",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -445,7 +448,7 @@ def test_export_csv_tablename_only_spaces(client, prepared_data):
         "fileName": "out",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -465,7 +468,7 @@ def test_export_csv_tablename_leading_trailing_spaces(client, prepared_data):
         "fileName": "out_trimmed",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -485,7 +488,7 @@ def test_export_csv_tablename_japanese(client, prepared_data):
         "fileName": "out_jp_table",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -505,7 +508,7 @@ def test_export_csv_tablename_emoji(client, prepared_data):
         "fileName": "out_emoji_table",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -524,7 +527,7 @@ def test_export_csv_filename_only_spaces(client, prepared_data):
         "fileName": "   ",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -545,7 +548,7 @@ def test_export_csv_filename_max_length(client, prepared_data):
         "fileName": safe_file_name,
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -565,7 +568,7 @@ def test_export_csv_filename_exceeds_max_length(client, prepared_data):
         "fileName": too_long_file_name,
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -585,7 +588,7 @@ def test_export_csv_filename_leading_trailing_spaces(client, prepared_data):
         "fileName": "  out_trimmed_fn  ",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -604,7 +607,7 @@ def test_export_csv_filename_japanese(client, prepared_data):
         "fileName": "日本語ファイル",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -623,7 +626,7 @@ def test_export_csv_directorypath_only_spaces(client, prepared_data):
         "fileName": "out",
         "format": "csv",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -643,7 +646,7 @@ def test_export_csv_invalid_format(client, prepared_data):
         "fileName": "out",
         "format": "xml",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -668,7 +671,7 @@ def test_export_csv_invalid_encoding(client, prepared_data):
         "format": "csv",
         "encoding": "invalid-enc",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -693,7 +696,7 @@ def test_export_csv_encoding_utf8_explicit(client, prepared_data):
         "format": "csv",
         "encoding": "utf8",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -723,7 +726,7 @@ def test_export_csv_encoding_latin1(client, prepared_data):
         "format": "csv",
         "encoding": "latin1",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -755,7 +758,7 @@ def test_export_csv_encoding_windows1252(client, prepared_data):
         "format": "csv",
         "encoding": "windows-1252",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -791,7 +794,7 @@ def test_export_csv_permission_denied(client, prepared_data):
             "fileName": "test_perm_error",
             "format": "csv",
         }
-        response = client.post(URL, data=json.dumps(request_data))
+        response = client.post(URL, json=request_data)
         response_data = response.json()
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert ErrorCode.PERMISSION_DENIED == response_data["code"]
@@ -816,7 +819,7 @@ def test_export_csv_io_error(client, prepared_data):
             "fileName": "test_io_error",
             "format": "csv",
         }
-        response = client.post(URL, data=json.dumps(request_data))
+        response = client.post(URL, json=request_data)
         response_data = response.json()
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert ErrorCode.CSV_EXPORT_ERROR == response_data["code"]
