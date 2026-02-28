@@ -14,11 +14,13 @@ from economicon.models import (
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
     GetAnalysisResultResult,
+    OutputResultResult,
     RegressionResult,
     SuccessResponse,
 )
 from economicon.models.regressions import (
     AddDiagnosticColumnsRequestBody,
+    OutputResultRequest,
     RegressionRequestBody,
 )
 from economicon.services.data.dependencies import (
@@ -29,6 +31,7 @@ from economicon.services.operation import run_operation
 from economicon.services.regressions.add_diagnostic_columns import (
     AddDiagnosticColumns,
 )
+from economicon.services.regressions.output_result import OutputResult
 from economicon.services.regressions.regression import Regression
 from economicon.services.regressions.result import (
     ClearAllAnalysisResults,
@@ -233,6 +236,45 @@ async def add_diagnostic_columns(
         追加したテーブル名と列名リスト
     """
     api = AddDiagnosticColumns(body, tables_store, result_store)
+    result = run_operation(api)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.post(
+    "/output-result",
+    response_model=SuccessResponse[OutputResultResult],
+)
+async def output_result(
+    request: Request,
+    body: OutputResultRequest,
+    result_store: AnalysisResultStoreDep,
+):
+    """
+    推定結果をテキスト / Markdown / LaTeX 形式で整形出力する
+
+    指定した分析結果 ID のリストから係数表などを生成します。
+    複数 ID を指定するとモデル比較表を生成します。
+
+    Parameters
+    ----------
+    request : Request
+        FastAPI のリクエストオブジェクト
+    body : OutputResultRequest
+        - resultIds: 出力する分析結果 ID のリスト（1件以上）
+        - format: 出力形式（text / markdown / latex）
+        - statInParentheses: 括弧内統計量（se / t / p / none）
+        - significanceStars: 有意性記号の設定（省略時はデフォルト）
+        - variableLabels: 変数名の表示ラベル辞書
+        - constAtBottom: 定数項を最下部に表示するか
+
+    Returns
+    -------
+    JSONResponse
+        整形済み出力テキストを含む成功レスポンス
+    """
+    api = OutputResult(body, result_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
