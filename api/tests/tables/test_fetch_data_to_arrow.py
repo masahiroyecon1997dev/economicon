@@ -2,6 +2,7 @@
 fetch_data_to_arrow APIのテスト
 """
 
+import base64
 import io
 
 import polars as pl
@@ -78,17 +79,39 @@ def tables_store():
 
 
 # ─────────────────────────────────────────────────────────────
+# ヘルパー
+# ─────────────────────────────────────────────────────────────
+def _decode_arrow_table(response) -> pa.Table:
+    """JSONレスポンスから base64 エンコードされた Arrow データを復元する"""
+    data = response.json()
+    assert data["code"] == "OK"
+    arrow_bytes = base64.b64decode(data["result"]["arrowData"])
+    return pa.ipc.open_file(io.BytesIO(arrow_bytes)).read_all()
+
+
+# ─────────────────────────────────────────────────────────────
 # 正常系
 # ─────────────────────────────────────────────────────────────
 def test_fetch_data_to_arrow_success(client, tables_store):
     """正常系テスト: Arrow形式でデータを取得"""
-    payload = {**_BASE_PAYLOAD, "startRow": 1, "chunkSize": 3}
+    _start_row = 1
+    _chunk_size = 3
+    payload = {
+        **_BASE_PAYLOAD,
+        "startRow": _start_row,
+        "chunkSize": _chunk_size,
+    }
     response = client.post("/api/table/fetch-data-to-arrow", json=payload)
     assert response.status_code == status.HTTP_200_OK
-    assert response.headers["content-type"] == "application/octet-stream"
+    assert "application/json" in response.headers["content-type"]
 
-    reader = pa.ipc.open_file(io.BytesIO(response.content))
-    arrow_table = reader.read_all()
+    result = response.json()["result"]
+    assert result["tableName"] == _TABLE_NAME
+    assert result["startRow"] == _start_row
+    assert result["endRow"] == _start_row + _chunk_size
+    assert result["totalRows"] == len(_SOURCE_DF)
+
+    arrow_table = _decode_arrow_table(response)
     expected_arrow = _SOURCE_DF[1:4].to_arrow()
     assert arrow_table.num_rows == expected_arrow.num_rows
     assert arrow_table.num_columns == expected_arrow.num_columns
@@ -102,11 +125,10 @@ def test_fetch_data_to_arrow_default_chunk_size(client, tables_store):
         json={"tableName": _TABLE_NAME, "startRow": 0},
     )
     assert response.status_code == status.HTTP_200_OK
-    reader = pa.ipc.open_file(io.BytesIO(response.content))
-    expexted_row_count = (
+    expected_row_count = (
         10  # テーブルの行数は10行なので、500指定しても10行のみ取得される
     )
-    assert reader.read_all().num_rows == expexted_row_count
+    assert _decode_arrow_table(response).num_rows == expected_row_count
 
 
 def test_fetch_data_to_arrow_fetch_beyond_table(client, tables_store):
@@ -114,9 +136,8 @@ def test_fetch_data_to_arrow_fetch_beyond_table(client, tables_store):
     payload = {**_BASE_PAYLOAD, "startRow": 7, "chunkSize": _MAX_CHUNK_SIZE}
     response = client.post("/api/table/fetch-data-to-arrow", json=payload)
     assert response.status_code == status.HTTP_200_OK
-    reader = pa.ipc.open_file(io.BytesIO(response.content))
     expected_row_count = 3  # startRow=7で行数10のテーブルなので、残りは3行
-    assert reader.read_all().num_rows == expected_row_count
+    assert _decode_arrow_table(response).num_rows == expected_row_count
 
 
 def test_fetch_data_to_arrow_single_row(client, tables_store):
@@ -124,8 +145,7 @@ def test_fetch_data_to_arrow_single_row(client, tables_store):
     payload = {**_BASE_PAYLOAD, "startRow": 5, "chunkSize": 1}
     response = client.post("/api/table/fetch-data-to-arrow", json=payload)
     assert response.status_code == status.HTTP_200_OK
-    reader = pa.ipc.open_file(io.BytesIO(response.content))
-    assert reader.read_all().num_rows == 1
+    assert _decode_arrow_table(response).num_rows == 1
 
 
 # ─────────────────────────────────────────────────────────────
@@ -272,8 +292,7 @@ def test_n4_chunk_size_min_boundary(client, tables_store):
     payload = {**_BASE_PAYLOAD, "startRow": 0, "chunkSize": 1}
     response = client.post("/api/table/fetch-data-to-arrow", json=payload)
     assert response.status_code == status.HTTP_200_OK
-    reader = pa.ipc.open_file(io.BytesIO(response.content))
-    assert reader.read_all().num_rows == 1
+    assert _decode_arrow_table(response).num_rows == 1
 
 
 def test_n5_chunk_size_max_boundary(client, tables_store):
@@ -281,8 +300,7 @@ def test_n5_chunk_size_max_boundary(client, tables_store):
     payload = {**_BASE_PAYLOAD, "startRow": 0, "chunkSize": _MAX_CHUNK_SIZE}
     response = client.post("/api/table/fetch-data-to-arrow", json=payload)
     assert response.status_code == status.HTTP_200_OK
-    reader = pa.ipc.open_file(io.BytesIO(response.content))
     expected_row_count = (
         10  # テーブルの行数は10行なので、10000指定しても10行のみ取得される
     )
-    assert reader.read_all().num_rows == expected_row_count
+    assert _decode_arrow_table(response).num_rows == expected_row_count
