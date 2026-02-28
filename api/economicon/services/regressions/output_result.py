@@ -20,9 +20,14 @@ _STAT_KEY_MAP: dict[str, str] = {
 }
 
 # モデル統計量: (regression_output キー, 表示ラベル)
+# パネルデータ (FE/RE) は R2Within/Between/Overall を持ち,
+# OLS/IV/Logit 等は R2 を持つ。別キーで区別する。
 _MODEL_STAT_KEYS: list[tuple[str, str]] = [
     ("nObservations", "N"),
     ("R2", "R\u00b2"),
+    ("R2Within", "R\u00b2 (within)"),
+    ("R2Between", "R\u00b2 (between)"),
+    ("R2Overall", "R\u00b2 (overall)"),
     ("adjustedR2", "Adj. R\u00b2"),
     ("fValue", "F"),
     ("fProbability", "F-prob."),
@@ -66,6 +71,13 @@ class _RegOutput:
         self.model_stats: dict[str, Any] = regression_output.get(
             "modelStatistics", {}
         )
+        # IV モデルの第一段階 F 統計量
+        # diagnostics.firstStage: {内生変数名: {fStatistic, pValue, ...}}
+        _diagnostics = regression_output.get("diagnostics", {})
+        _first_stage = _diagnostics.get("firstStage", {})
+        self.first_stage_f: dict[str, float | None] = {
+            var: info.get("fStatistic") for var, info in _first_stage.items()
+        }
 
 
 class _ResultFormatter:
@@ -103,6 +115,7 @@ class _ResultFormatter:
         self._labels = variable_labels or {}
         self._const_at_bottom = const_at_bottom
         self._variables = self._build_variable_order()
+        self._first_stage_vars = self._collect_first_stage_vars()
 
     def _build_variable_order(self) -> list[str]:
         """
@@ -130,6 +143,42 @@ class _ResultFormatter:
                 ordered = ["const"] + ordered
 
         return ordered
+
+    def _collect_first_stage_vars(self) -> list[str]:
+        """
+        全モデルを通じて登場する内生変数の和集合を収集する。
+
+        IV モデルが含まれる場合のみ要素が存在する。
+        第一段階 F 統計量の行を構築するために使用する。
+        """
+        seen: set[str] = set()
+        ordered: list[str] = []
+        for output in self._outputs:
+            for var in output.first_stage_f:
+                if var not in seen:
+                    seen.add(var)
+                    ordered.append(var)
+        return ordered
+
+    def _first_stage_stat_items(
+        self,
+    ) -> list[tuple[str, list[str]]]:
+        """
+        第一段階 F 統計量の（ラベル, モデルごとの値リスト）タプルを返す。
+
+        IV モデルが含まれる場合のみ要素が存在する。
+        第二段階の F 統計量（fValue）と区別するため
+        ラベルを "1st-F: {内生変数名}" とする。
+        """
+        rows: list[tuple[str, list[str]]] = []
+        for var in self._first_stage_vars:
+            label = f"1st-F: {var}"
+            vals: list[str] = []
+            for o in self._outputs:
+                v = o.first_stage_f.get(var)
+                vals.append(_fmt_num(v, decimals=3) if v is not None else "")
+            rows.append((label, vals))
+        return rows
 
     def _get_label(self, var: str) -> str:
         """変数ラベルを返す（未設定は変数名そのまま）。"""
@@ -179,6 +228,10 @@ class _ResultFormatter:
             stat_val = param.get(self._stat_key)
             if stat_val is not None:
                 paren_str = f"({_fmt_num(stat_val)})"
+            else:
+                # 正則化回帰（LASSO/Ridge）など統計量が None の場合は
+                # 括弧行を無言で欠落させず "---" プレースホルダーを表示する
+                paren_str = "---"
 
         return coef_str, paren_str
 
@@ -244,6 +297,11 @@ class _ResultFormatter:
                 continue
             row = stat_label[: label_w - 2].ljust(label_w)
             row += "".join(vals)
+            lines.append(row)
+        # 第一段階 F 統計量（IV モデルのみ）
+        for label, vals_raw in self._first_stage_stat_items():
+            row = label[: label_w - 2].ljust(label_w)
+            row += "".join(v.center(col_w) for v in vals_raw)
             lines.append(row)
         return lines
 
@@ -312,6 +370,9 @@ class _ResultFormatter:
             if not has_any:
                 continue
             lines.append("| " + stat_label + " | " + " | ".join(vals) + " |")
+        # 第一段階 F 統計量（IV モデルのみ）
+        for label, vals_raw in self._first_stage_stat_items():
+            lines.append("| " + label + " | " + " | ".join(vals_raw) + " |")
 
         return "\n".join(lines)
 
@@ -371,6 +432,9 @@ class _ResultFormatter:
             if not has_any:
                 continue
             lines.append(stat_label + " & " + " & ".join(vals) + r" \\")
+        # 第一段階 F 統計量（IV モデルのみ）
+        for label, vals_raw in self._first_stage_stat_items():
+            lines.append(label + " & " + " & ".join(vals_raw) + r" \\")
 
         lines.extend(
             [
