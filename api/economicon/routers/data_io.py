@@ -18,6 +18,7 @@ from economicon.services.data.dependencies import (
     SettingsStoreDep,
     TablesStoreDep,
 )
+from economicon.services.data.settings_store import SettingsStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.data_io.export_csv import ExportCsv
 from economicon.services.data_io.export_excel import ExportExcel
@@ -46,6 +47,27 @@ _EXPORT_FORMAT_MAP = {
     "excel": ExportExcel,
     "parquet": ExportParquet,
 }
+
+
+def _update_last_opened_path(settings_store: SettingsStore, path: str) -> None:
+    """last_opened_path をメモリ上の設定に反映する。
+
+    ファイルへの書き込みはアプリ終了時の lifespan shutdown 内で一括して行う。
+    非クリティカルな処理のため、失敗しても本体レスポンスに影響しない。
+
+    Parameters
+    ----------
+    settings_store : SettingsStore
+        設定ストア
+    path : str
+        保存するパス（ファイルの親ディレクトリまたは出力先ディレクトリ）
+    """
+    try:
+        normalized = path.replace(os.sep, "/")
+        settings_store.update_settings(last_opened_path=normalized)
+        logger.info(f"Updated last_opened_path: {normalized}")
+    except Exception as e:
+        logger.warning(f"Failed to update last_opened_path in settings: {e}")
 
 
 def get_import_api(
@@ -105,7 +127,8 @@ async def import_file(
     - ``.parquet``         → Parquet インポーター
 
     インポート成功後、ファイルの親ディレクトリを
-    ``last_opened_path`` として設定ファイルに保存する。
+    ``last_opened_path`` としてメモリ上の設定に反映する。
+    ファイルへの保存はアプリ終了時に一括して行われる。
 
     Parameters
     ----------
@@ -125,17 +148,7 @@ async def import_file(
     """
     api = get_import_api(body, tables_store)
     result = run_operation(api)
-
-    # インポート成功後、最後に開いたパスを設定ファイルへ保存
-    # 非クリティカルな処理のため、失敗しても本体レスポンスに影響しない
-    try:
-        parent_dir = str(Path(body.file_path).parent).replace(os.sep, "/")
-        settings_store.update_settings(last_opened_path=parent_dir)
-        settings_store.save_settings()
-        logger.info(f"Updated last_opened_path: {parent_dir}")
-    except Exception as e:
-        logger.warning(f"Failed to update last_opened_path in settings: {e}")
-
+    _update_last_opened_path(settings_store, str(Path(body.file_path).parent))
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
     )
@@ -181,7 +194,8 @@ async def export_file(
     - ``parquet`` → Parquet エクスポーター
 
     エクスポート成功後、出力先ディレクトリを
-    ``last_opened_path`` として設定ファイルに保存する。
+    ``last_opened_path`` としてメモリ上の設定に反映する。
+    ファイルへの保存はアプリ終了時に一括して行われる。
 
     Parameters
     ----------
@@ -201,17 +215,7 @@ async def export_file(
     """
     api = get_export_api(body, tables_store)
     result = run_operation(api)
-
-    # エクスポート成功後、出力先ディレクトリを設定ファイルへ保存
-    # 非クリティカルな処理のため、失敗しても本体レスポンスに影響しない
-    try:
-        export_dir = str(body.directory_path).replace(os.sep, "/")
-        settings_store.update_settings(last_opened_path=export_dir)
-        settings_store.save_settings()
-        logger.info(f"Updated last_opened_path: {export_dir}")
-    except Exception as e:
-        logger.warning(f"Failed to update last_opened_path in settings: {e}")
-
+    _update_last_opened_path(settings_store, str(body.directory_path))
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
     )
