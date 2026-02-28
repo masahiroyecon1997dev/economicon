@@ -1,5 +1,7 @@
 """統計的検定 API のテスト"""
 
+from typing import Any
+
 import numpy as np
 import polars as pl
 import pytest
@@ -107,7 +109,7 @@ def test_ttest_1sample_success(client, tables_store):
     assert result["effectSize"] >= 0.0
 
     # scipy との値一致確認
-    res = spstats.ttest_1samp(_GROUP_A, popmean=50.0)
+    res: Any = spstats.ttest_1samp(_GROUP_A, popmean=50.0)
     assert result["statistic"] == pytest.approx(float(res.statistic), rel=1e-5)
     assert result["pValue"] == pytest.approx(float(res.pvalue), rel=1e-5)
 
@@ -132,7 +134,7 @@ def test_ttest_2sample_independent_success(client, tables_store):
     assert result["confidenceInterval"] is not None
     assert result["effectSize"] is not None
 
-    res = spstats.ttest_ind(_GROUP_A, _GROUP_B, equal_var=True)
+    res: Any = spstats.ttest_ind(_GROUP_A, _GROUP_B, equal_var=True)
     assert result["statistic"] == pytest.approx(float(res.statistic), rel=1e-5)
     assert result["pValue"] == pytest.approx(float(res.pvalue), rel=1e-5)
 
@@ -151,7 +153,7 @@ def test_ttest_2sample_welch_success(client, tables_store):
     assert response_data["code"] == "OK"
 
     result = response_data["result"]
-    res = spstats.ttest_ind(_GROUP_A, _GROUP_B, equal_var=False)
+    res: Any = spstats.ttest_ind(_GROUP_A, _GROUP_B, equal_var=False)
     assert result["statistic"] == pytest.approx(float(res.statistic), rel=1e-5)
 
 
@@ -174,7 +176,7 @@ def test_ttest_paired_success(client, tables_store):
     assert result["confidenceInterval"] is not None
     assert result["effectSize"] is not None
 
-    res = spstats.ttest_rel(_GROUP_A, _GROUP_B)
+    res: Any = spstats.ttest_rel(_GROUP_A, _GROUP_B)
     assert result["statistic"] == pytest.approx(float(res.statistic), rel=1e-5)
     assert result["pValue"] == pytest.approx(float(res.pvalue), rel=1e-5)
 
@@ -192,7 +194,9 @@ def test_ttest_one_sided_success(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
 
-    res = spstats.ttest_1samp(_GROUP_A, popmean=45.0, alternative="greater")
+    res: Any = spstats.ttest_1samp(
+        _GROUP_A, popmean=45.0, alternative="greater"
+    )
     result = response_data["result"]
     assert result["statistic"] == pytest.approx(float(res.statistic), rel=1e-5)
     assert result["pValue"] == pytest.approx(float(res.pvalue), rel=1e-5)
@@ -223,7 +227,13 @@ def test_ztest_1sample_success(client, tables_store):
     assert result["confidenceInterval"] is not None
     assert result["effectSize"] is None
 
-    stat, p_val = sm_ztest(_GROUP_A, value=50.0, alternative="two-sided")
+    stat: Any
+    p_val: Any
+    stat, p_val = sm_ztest(
+        _GROUP_A,
+        value=50.0,  # type: ignore[arg-type]
+        alternative="two-sided",  # type: ignore[arg-type]
+    )
     assert result["statistic"] == pytest.approx(float(stat), rel=1e-5)
     assert result["pValue"] == pytest.approx(float(p_val), rel=1e-5)
 
@@ -244,8 +254,13 @@ def test_ztest_2sample_success(client, tables_store):
     result = response_data["result"]
     assert result["df"] is None
 
+    stat: Any
+    p_val: Any
     stat, p_val = sm_ztest(
-        _GROUP_A, _GROUP_B, value=0.0, alternative="two-sided"
+        _GROUP_A,
+        _GROUP_B,
+        value=0.0,  # type: ignore[arg-type]
+        alternative="two-sided",  # type: ignore[arg-type]
     )
     assert result["statistic"] == pytest.approx(float(stat), rel=1e-5)
     assert result["pValue"] == pytest.approx(float(p_val), rel=1e-5)
