@@ -1,7 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useStore } from "@tanstack/react-form";
 import { Edit2, Plus, Trash2 } from "lucide-react";
-import { startTransition, useActionState, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../api/endpoints";
@@ -29,30 +28,12 @@ const createSimulationSchema = (t: (key: string) => string) =>
     numRows: z.number().min(1, t("ValidationMessages.NumRowsMoreThan0")),
   });
 
-type SimulationFormData = z.infer<ReturnType<typeof createSimulationSchema>>;
-
 export const CreateSimulationDataTable = () => {
   const { t } = useTranslation();
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const addTableName = useTableListStore((state) => state.addTableName);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<SimulationFormData>({
-    resolver: zodResolver(createSimulationSchema(t)),
-    defaultValues: {
-      tableName: "",
-      numRows: 1000,
-    },
-  });
-
-  const tableName = watch("tableName");
-  const numRows = watch("numRows");
 
   const COLUMN_SETTINGS_DEFAULT: SimulationColumnSetting = {
     id: "1",
@@ -74,18 +55,17 @@ export const CreateSimulationDataTable = () => {
 
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
 
-  type ActionState = {
-    success: boolean;
-  };
-
-  const handleSimulationAction = async (
-    _prevState: ActionState,
-    formData: FormData,
-  ): Promise<ActionState> => {
-    const tableName = formData.get("tableName") as string;
-    const numRows = parseInt(formData.get("numRows") as string);
-    const columnsJson = formData.get("columns") as string;
-    const columns: SimulationColumnSetting[] = JSON.parse(columnsJson);
+  const form = useForm({
+    defaultValues: {
+      tableName: "",
+      numRows: 1000,
+    },
+    validators: {
+      onSubmit: createSimulationSchema(t),
+    },
+    onSubmit: async ({ value }) => {
+      const tableName = value.tableName;
+      const numRows = value.numRows;
 
     // カラムのバリデーション
     let hasError = false;
@@ -123,7 +103,7 @@ export const CreateSimulationDataTable = () => {
         t("Error.Error"),
         t("ValidationMessages.FixValidationErrors"),
       );
-      return { success: false };
+      return;
     }
 
     try {
@@ -249,13 +229,11 @@ export const CreateSimulationDataTable = () => {
         addTableName(response.result.tableName);
         addTableInfo(resTableInfo);
         setCurrentView("DataPreview");
-        return { success: true };
       } else {
         await showMessageDialog(
           t("Error.Error"),
           t("CreateSimulationDataTableView.TableCreationFailed"),
         );
-        return { success: false };
       }
     } catch (error) {
       let errorMessage = t("CreateSimulationDataTableView.TableCreationError");
@@ -263,13 +241,11 @@ export const CreateSimulationDataTable = () => {
         errorMessage = error.message;
       }
       await showMessageDialog(t("Error.Error"), errorMessage);
-      return { success: false };
     }
-  };
-
-  const [, submitAction, isPending] = useActionState(handleSimulationAction, {
-    success: false,
+    },
   });
+
+  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
   const addColumn = () => {
     const newColumn: SimulationColumnSetting = {
@@ -397,16 +373,6 @@ export const CreateSimulationDataTable = () => {
     });
   };
 
-  const onSubmit = (data: SimulationFormData) => {
-    const formData = new FormData();
-    formData.append("tableName", data.tableName);
-    formData.append("numRows", data.numRows.toString());
-    formData.append("columns", JSON.stringify(columns));
-    startTransition(() => {
-      submitAction(formData);
-    });
-  };
-
   const handleCancel = () => {
     setCurrentView("ImportDataFile");
   };
@@ -437,52 +403,63 @@ export const CreateSimulationDataTable = () => {
         "CreateSimulationDataTableView.DefineYourTableNameAndRows",
       )}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          void form.handleSubmit();
+        }}
+        className="space-y-6"
+      >
         <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700">
           <h2 className="text-main dark:text-white text-base font-bold leading-tight mb-4">
             {t("CreateSimulationDataTableView.TableSettings")}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              label={t("CreateSimulationDataTableView.TableName")}
-              htmlFor="table-name"
-            >
-              <InputText
-                id="table-name"
-                value={tableName}
-                change={(e) =>
-                  setValue("tableName", e.target.value, {
-                    shouldValidate: true,
-                  })
-                }
-                placeholder={t(
-                  "CreateSimulationDataTableView.TableNamePlaceholder",
-                )}
-                error={errors.tableName?.message}
-                disabled={isPending}
-                {...register("tableName")}
-              />
-            </FormField>
+            <form.Field name="tableName">
+              {(field) => (
+                <FormField
+                  label={t("CreateSimulationDataTableView.TableName")}
+                  htmlFor="table-name"
+                  error={field.state.meta.errors[0]?.toString()}
+                >
+                  <InputText
+                    id="table-name"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    placeholder={t(
+                      "CreateSimulationDataTableView.TableNamePlaceholder",
+                    )}
+                    error={field.state.meta.errors[0]?.toString()}
+                    disabled={isSubmitting}
+                  />
+                </FormField>
+              )}
+            </form.Field>
 
-            <FormField
-              label={t("CreateSimulationDataTableView.NumberOfRows")}
-              htmlFor="row-count"
-            >
-              <InputText
-                id="row-count"
-                type="number"
-                value={numRows.toString()}
-                change={(e) =>
-                  setValue("numRows", parseInt(e.target.value) || 0, {
-                    shouldValidate: true,
-                  })
-                }
-                placeholder="1000"
-                error={errors.numRows?.message}
-                disabled={isPending}
-                {...register("numRows")}
-              />
-            </FormField>
+            <form.Field name="numRows">
+              {(field) => (
+                <FormField
+                  label={t("CreateSimulationDataTableView.NumberOfRows")}
+                  htmlFor="row-count"
+                  error={field.state.meta.errors[0]?.toString()}
+                >
+                  <InputText
+                    id="row-count"
+                    type="number"
+                    value={field.state.value.toString()}
+                    onChange={(e) =>
+                      field.handleChange(parseInt(e.target.value) || 0)
+                    }
+                    onBlur={field.handleBlur}
+                    placeholder="1000"
+                    error={field.state.meta.errors[0]?.toString()}
+                    disabled={isSubmitting}
+                  />
+                </FormField>
+              )}
+            </form.Field>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700">
@@ -494,7 +471,7 @@ export const CreateSimulationDataTable = () => {
               type="button"
               onClick={addColumn}
               className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-3 py-1.5 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isPending}
+              disabled={isSubmitting}
             >
               <Plus size={16} />
               {t("CreateSimulationDataTableView.AddColumn")}
@@ -514,7 +491,7 @@ export const CreateSimulationDataTable = () => {
                     type="button"
                     onClick={() => setEditingColumnId(column.id)}
                     className="flex items-center gap-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                    disabled={isPending}
+                    disabled={isSubmitting}
                     aria-label={t("Common.Edit")}
                   >
                     <Edit2 size={16} />
@@ -525,7 +502,7 @@ export const CreateSimulationDataTable = () => {
                       type="button"
                       onClick={() => removeColumn(column.id)}
                       className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={isPending}
+                      disabled={isSubmitting}
                       aria-label={t("Common.Delete")}
                     >
                       <Trash2 size={18} />
@@ -539,7 +516,7 @@ export const CreateSimulationDataTable = () => {
         <ActionButtonBar
           cancelText={t("Common.Cancel")}
           selectText={
-            isPending
+            isSubmitting
               ? t("CreateSimulationDataTableView.CreatingTable")
               : t("CreateSimulationDataTableView.Submit")
           }
@@ -572,7 +549,7 @@ export const CreateSimulationDataTable = () => {
               fixedValue: undefined,
             }
           }
-          disabled={isPending}
+          disabled={isSubmitting}
         />
       )}
     </PageLayout>
