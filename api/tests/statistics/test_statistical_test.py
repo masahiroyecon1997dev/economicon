@@ -288,7 +288,8 @@ def test_ftest_variance_ratio_success(client, tables_store):
     assert result["statistic"] > 0.0
     assert isinstance(result["pValue"], float)
     assert 0.0 <= result["pValue"] <= 1.0
-    assert result["df"] == pytest.approx(_N - 1)
+    assert result["df"] == pytest.approx(_N - 1)  # df1 = n1-1
+    assert result["df2"] == pytest.approx(_N - 1)  # df2 = n2-1
     assert result["confidenceInterval"] is None
     assert result["effectSize"] is None
 
@@ -316,7 +317,8 @@ def test_ftest_anova_success(client, tables_store):
     result = response_data["result"]
     assert isinstance(result["statistic"], float)
     assert result["statistic"] > 0.0
-    assert result["df"] == pytest.approx(2.0)  # k - 1 = 3 - 1
+    assert result["df"] == pytest.approx(2.0)  # df1 = k - 1 = 3 - 1
+    assert result["df2"] == pytest.approx(3 * _N - 3)  # df2 = N - k = 150 - 3
     assert result["confidenceInterval"] is None
     assert result["effectSize"] is not None
     assert 0.0 <= result["effectSize"] <= 1.0
@@ -469,6 +471,7 @@ def test_response_has_all_fields(client, tables_store):
         "statistic",
         "pValue",
         "df",
+        "df2",
         "confidenceInterval",
         "effectSize",
     ):
@@ -476,13 +479,15 @@ def test_response_has_all_fields(client, tables_store):
 
 
 def test_ztest_df_is_none(client, tables_store):
-    """z 検定では df が None になる"""
+    """z 検定では df / df2 がともに None になる"""
     payload = {
         "testType": "z-test",
         "samples": _samples((_TABLE_A, _COL)),
     }
     response = client.post(URL, json=payload)
-    assert response.json()["result"]["df"] is None
+    result = response.json()["result"]
+    assert result["df"] is None
+    assert result["df2"] is None
 
 
 def test_ftest_variance_ratio_ci_is_none(client, tables_store):
