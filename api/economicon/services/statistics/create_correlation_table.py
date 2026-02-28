@@ -1,6 +1,6 @@
 """相関係数テーブル作成サービス"""
 
-from typing import ClassVar
+from typing import ClassVar, cast
 
 import numpy as np
 import polars as pl
@@ -96,14 +96,19 @@ class CreateCorrelationTable:
         xc, yc = x[mask], y[mask]
         if len(xc) < _MIN_VALID_PAIRS:
             return None
+        # 型注釈を先置きし、cast で scipy スタブの _T_co@tuple 型推論を回避する
+        # （[0] インデックスも .statistic も古い scipy スタブでは型が不正確）
+        r: float
         match self.method:
             case CorrelationMethod.PEARSON:
-                r, _ = stats.pearsonr(xc, yc)
+                r = cast(float, stats.pearsonr(xc, yc)[0])
             case CorrelationMethod.SPEARMAN:
-                r, _ = stats.spearmanr(xc, yc)
+                r = cast(float, stats.spearmanr(xc, yc)[0])
             case CorrelationMethod.KENDALL:
-                r, _ = stats.kendalltau(xc, yc)
-        return float(r)
+                r = cast(float, stats.kendalltau(xc, yc)[0])
+            case _:  # 全 Enum を網羅した後の安全弁（到達しない）
+                return None
+        return r
 
     def _compute_matrix(
         self, arrays: list[np.ndarray]
@@ -126,10 +131,17 @@ class CreateCorrelationTable:
             work_arrays = arrays
 
         n = len(work_arrays)
-        return [
-            [self._pair_corr(work_arrays[i], work_arrays[j]) for j in range(n)]
-            for i in range(n)
-        ]
+        # 相関行列は対称行列 (r_ij = r_ji) なので上三角のみ計算し
+        # 反転コピーすることで計算量を O(n²) → O(n(n+1)/2) に削減する。
+        # 対角成分 (r_ii) は定義上 1.0 であるため直接設定する。
+        matrix: list[list[float | None]] = [[None] * n for _ in range(n)]
+        for i in range(n):
+            matrix[i][i] = 1.0  # 対角: 自己相関は常に 1.0
+            for j in range(i + 1, n):
+                val = self._pair_corr(work_arrays[i], work_arrays[j])
+                matrix[i][j] = val
+                matrix[j][i] = val  # 対称コピー
+        return matrix
 
     # ------------------------------------------------------------------
     # メイン実行メソッド
@@ -157,8 +169,10 @@ class CreateCorrelationTable:
                     if self.lower_triangle_only and i < j:
                         # 上三角部分を null に置換（重複情報を排除）
                         matrix[i][j] = None
-                    elif matrix[i][j] is not None:
-                        matrix[i][j] = round(matrix[i][j], self.decimal_places)
+                    elif (val := matrix[i][j]) is not None:
+                        # walrus 演算子でローカル変数に束縛し Pylance の
+                        # コンテナ要素ナローイング制限を回避する
+                        matrix[i][j] = round(val, self.decimal_places)
 
             # Polars DataFrame を構築
             # 1列目: variable_name (String) = 選択された変数名
