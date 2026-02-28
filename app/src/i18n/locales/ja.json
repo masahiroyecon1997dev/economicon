@@ -63,14 +63,20 @@
     "Calculate": "計算",
     "BasicStatistics": "基本統計量",
     "Regression": "回帰分析",
+    "LinearRegressionMenu": "線形回帰",
     "LinearRegression": "線形回帰",
     "LassoRegression": "Lasso回帰",
     "RidgeRegression": "Ridge回帰",
-    "InstrumentalVariables": "操作変数法",
+    "NonlinearRegressionMenu": "非線形回帰",
     "DiscreteModel": "離散選択モデル",
     "LogitAnalysis": "ロジット分析",
     "ProbitAnalysis": "プロビット分析",
-    "TobitAnalysis": "トービット分析"
+    "TobitAnalysis": "トービット分析",
+    "PanelDataMenu": "パネルデータ",
+    "FixedEffect": "固定効果モデル",
+    "RandomEffect": "変量効果モデル",
+    "CausalInferenceMenu": "因果推論",
+    "InstrumentalVariables": "操作変数法"
   },
   "LeftSideMenu": {
     "ImportData": "データ取り込み",

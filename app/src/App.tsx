@@ -8,6 +8,11 @@ import { useLoadingStore } from "./stores/loading";
 import { useSettingsStore } from "./stores/settings";
 import { useTableListStore } from "./stores/tableList";
 
+import {
+  Panel,
+  Group as PanelGroup,
+  Separator as PanelResizeHandle,
+} from "react-resizable-panels";
 import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
 import { MessageDialog } from "./components/molecules/Modal/MessageDialog";
 import { AppBar } from "./components/organisms/Header/AppBar";
@@ -97,10 +102,15 @@ export const App = () => {
     <>
       <div className="flex h-screen flex-col overflow-hidden bg-white">
         <AppBar />
-        <div className="flex flex-1 overflow-hidden">
-          <LeftSideMenu />
-          <MainView />
-        </div>
+        <PanelGroup orientation="horizontal" className="flex-1 overflow-hidden">
+          <Panel defaultSize={256} minSize={160} maxSize={480}>
+            <LeftSideMenu />
+          </Panel>
+          <PanelResizeHandle className="w-1 cursor-col-resize bg-brand-border/50 transition-colors hover:bg-white/20 focus:outline-none" />
+          <Panel className="overflow-hidden">
+            <MainView />
+          </Panel>
+        </PanelGroup>
         <MessageDialog />
       </div>
       <LoadingOverlay isVisible={isLoading} message={loadingMessage} />

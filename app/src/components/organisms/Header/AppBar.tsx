@@ -231,13 +231,13 @@ export const AppBar = () => {
       ],
     },
     {
-      id: "regression",
-      menuName: t("HeaderMenu.Regression"),
-      isOpen: openMenuId === "regression",
+      id: "linear-regression",
+      menuName: t("HeaderMenu.LinearRegressionMenu"),
+      isOpen: openMenuId === "linear-regression",
       onClose: close,
       items: [
         {
-          id: "linear-regression",
+          id: "linear-regression-item",
           label: t("HeaderMenu.LinearRegression"),
           handleSelect: () => {
             setCurrentView("LinearRegressionForm");
@@ -254,17 +254,12 @@ export const AppBar = () => {
           label: t("HeaderMenu.RidgeRegression"),
           handleSelect: () => {},
         },
-        {
-          id: "instrumental-variables",
-          label: t("HeaderMenu.InstrumentalVariables"),
-          handleSelect: () => {},
-        },
       ],
     },
     {
-      id: "discrete-model",
-      menuName: t("HeaderMenu.DiscreteModel"),
-      isOpen: openMenuId === "discrete-model",
+      id: "nonlinear-regression",
+      menuName: t("HeaderMenu.NonlinearRegressionMenu"),
+      isOpen: openMenuId === "nonlinear-regression",
       onClose: close,
       items: [
         {
@@ -284,6 +279,37 @@ export const AppBar = () => {
         },
       ],
     },
+    {
+      id: "panel-data",
+      menuName: t("HeaderMenu.PanelDataMenu"),
+      isOpen: openMenuId === "panel-data",
+      onClose: close,
+      items: [
+        {
+          id: "fixed-effect",
+          label: t("HeaderMenu.FixedEffect"),
+          handleSelect: () => {},
+        },
+        {
+          id: "random-effect",
+          label: t("HeaderMenu.RandomEffect"),
+          handleSelect: () => {},
+        },
+      ],
+    },
+    {
+      id: "causal-inference",
+      menuName: t("HeaderMenu.CausalInferenceMenu"),
+      isOpen: openMenuId === "causal-inference",
+      onClose: close,
+      items: [
+        {
+          id: "instrumental-variables",
+          label: t("HeaderMenu.InstrumentalVariables"),
+          handleSelect: () => {},
+        },
+      ],
+    },
   ];
 
   return (
@@ -294,7 +320,7 @@ export const AppBar = () => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onDoubleClick={handleDoubleClick}
-      className="relative flex h-11 shrink-0 select-none items-center border-b border-brand-primary-dark bg-brand-primary text-white"
+      className="relative flex h-11 shrink-0 select-none items-center border-b border-white/25 bg-brand-primary text-white"
     >
       {/* ===== macOS: 左端トラフィックライト ===== */}
       {isMac && (
