@@ -261,7 +261,7 @@ export const ImportDataFile = () => {
 
       <RadixTabs.Root
         defaultValue="dragDrop"
-        className="flex w-full flex-col gap-4"
+        className="flex flex-1 flex-col gap-2 min-h-0"
       >
         <RadixTabs.List className="flex w-full border-b border-gray-200">
           <RadixTabs.Trigger
@@ -280,10 +280,10 @@ export const ImportDataFile = () => {
           </RadixTabs.Trigger>
         </RadixTabs.List>
 
-        <RadixTabs.Content value="dragDrop" className="flex-1 outline-none">
+        <RadixTabs.Content value="dragDrop" className="shrink-0 outline-none">
           <div
             {...getRootProps()}
-            className={`flex h-100 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
+            className={`flex h-56 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
               isDragActive
                 ? "border-blue-500 bg-blue-50"
                 : "border-gray-300 hover:border-gray-400 bg-gray-50"
@@ -306,7 +306,7 @@ export const ImportDataFile = () => {
 
         <RadixTabs.Content
           value="fileSelect"
-          className="flex flex-col gap-1.5 md:gap-3 shrink-0 outline-none"
+          className="flex flex-1 flex-col gap-2 min-h-0 outline-none"
         >
           <NavigationSearchBar
             pathSegments={getPathSegments()}
@@ -324,7 +324,8 @@ export const ImportDataFile = () => {
             fileNameHeader={t("ImportDataFileView.FileNameHeader")}
             sizeHeader={t("ImportDataFileView.SizeHeader")}
             lastModifiedHeader={t("ImportDataFileView.LastModifiedHeader")}
-            maxHeight="max(200px, calc(100vh - 350px))"
+            maxHeight="100%"
+            className="flex-1 min-h-0"
             sortField={sortField}
             sortDirection={sortDirection}
             onSort={handleSort}
