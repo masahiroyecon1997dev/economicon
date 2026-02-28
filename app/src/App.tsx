@@ -60,7 +60,6 @@ export const App = () => {
         const apiSettings = resGetSettings.result;
         // ファイル一覧をTauriコマンドで直接取得（Pythonサーバー非経由）
         const files = await getFiles(apiSettings.lastOpenedPath);
-        console.log("Fetched files:", files);
         // テーブル名一覧を取得
         const resGetTableNames = await api.getTableList();
         if (resGetTableNames.code !== "OK") {
