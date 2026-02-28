@@ -166,3 +166,53 @@ pub fn get_files_internal(directory_path: &str) -> Result<GetFilesResponse, File
         files,
     })
 }
+
+/// フォールバック先ディレクトリ候補を優先順に返す
+/// ホームディレクトリ → OS固有のルート → 最終的な絶対ルート
+fn get_fallback_directories() -> Vec<PathBuf> {
+    let mut candidates = Vec::new();
+
+    // ホームディレクトリ（USERPROFILE=Windows / HOME=Unix）
+    if let Ok(home) = std::env::var("USERPROFILE").or_else(|_| std::env::var("HOME")) {
+        candidates.push(PathBuf::from(home));
+    }
+
+    // OS固有のルート（コンパイル時に分岐）
+    #[cfg(target_os = "windows")]
+    {
+        candidates.push(PathBuf::from("C:\\Users"));
+        candidates.push(PathBuf::from("C:\\"));
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        candidates.push(PathBuf::from("/home"));
+        candidates.push(PathBuf::from("/"));
+    }
+
+    candidates
+}
+
+/// パスが無効でも必ず有効な `GetFilesResponse` を返すラッパー。
+/// アプリ初期化時や設定が壊れていた場合のフォールバックとして使用する。
+/// 優先順: 指定パス → ホームディレクトリ → OS固有ルート → 空レスポンス（最終手段）
+pub fn get_files_with_fallback(directory_path: &str) -> GetFilesResponse {
+    // まず指定パスを試みる
+    if !directory_path.trim().is_empty() {
+        if let Ok(res) = get_files_internal(directory_path) {
+            return res;
+        }
+    }
+
+    // フォールバック候補を順に試す
+    for fallback in get_fallback_directories() {
+        if let Ok(res) = get_files_internal(fallback.to_string_lossy().as_ref()) {
+            return res;
+        }
+    }
+
+    // 全て失敗した場合（実際にはまず発生しない）は空レスポンスを返す
+    GetFilesResponse {
+        directory_path: String::new(),
+        files: Vec::new(),
+    }
+}
