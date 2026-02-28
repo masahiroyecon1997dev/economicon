@@ -16,7 +16,7 @@ import type { DropmenuPositionType } from "../../../types/commonTypes";
 import { MenuItem } from "../../atoms/Menu/MenuItem";
 import { DropdownMenu } from "../../molecules/Menu/DropdownMenu";
 
-const MENU_POSITION: DropmenuPositionType = "bottom";
+const MENU_POSITION: DropmenuPositionType = "bottom-right";
 
 /**
  * 統合アプリバー
@@ -290,12 +290,11 @@ export const AppBar = () => {
       {/* pointer-events-none でクリックを透過させてドラッグ領域として機能させる */}
       <div
         className={cn(
-          "pointer-events-none flex items-center gap-2",
-          isMac ? "pl-2 pr-6" : "pl-5 pr-6",
+          "pointer-events-none flex items-center",
+          isMac ? "pl-2 pr-4" : "pl-5 pr-4",
         )}
       >
         <Layers size={18} className="text-white/80" aria-hidden="true" />
-        <span className="text-sm font-bold tracking-wide">Economicon</span>
       </div>
 
       {/* ===== ナビゲーションメニュー ===== */}
