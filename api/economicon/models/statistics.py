@@ -8,7 +8,9 @@ from pydantic_core import PydanticCustomError
 from economicon.models.common import BaseRequest, BaseResult
 from economicon.models.enums import (
     ConfidenceIntervalStatisticsType,
+    CorrelationMethod,
     DescriptiveStatisticType,
+    MissingHandlingMethod,
 )
 from economicon.models.types import ColumnName, TableName
 
@@ -33,6 +35,40 @@ def _coerce_statistic_type(
             raise PydanticCustomError(
                 "literal_error",
                 "statisticType must be one of: {expected}",
+                {"expected": valid},
+            ) from None
+    return v
+
+
+def _coerce_correlation_method(v: Any) -> CorrelationMethod:
+    """JSON文字列をCorrelationMethodに変換するBeforeValidator"""
+    if isinstance(v, CorrelationMethod):
+        return v
+    if isinstance(v, str):
+        try:
+            return CorrelationMethod(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in CorrelationMethod)
+            raise PydanticCustomError(
+                "literal_error",
+                "method must be one of: {expected}",
+                {"expected": valid},
+            ) from None
+    return v
+
+
+def _coerce_missing_handling(v: Any) -> MissingHandlingMethod:
+    """JSON文字列をMissingHandlingMethodに変換するBeforeValidator"""
+    if isinstance(v, MissingHandlingMethod):
+        return v
+    if isinstance(v, str):
+        try:
+            return MissingHandlingMethod(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in MissingHandlingMethod)
+            raise PydanticCustomError(
+                "literal_error",
+                "missingHandling must be one of: {expected}",
                 {"expected": valid},
             ) from None
     return v
@@ -204,4 +240,95 @@ class DescriptiveStatisticsResult(BaseResult):
     statistics: Any = Field(
         title="Statistics",
         description="記述統計の計算結果。カラム名と統計量名をキーに持つ辞書型データ。",
+    )
+
+
+# ---------------------------------------------------------------------------
+# 相関係数テーブル作成
+# ---------------------------------------------------------------------------
+
+
+class CreateCorrelationTableRequestBody(BaseRequest):
+    """相関係数テーブル作成リクエスト"""
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            title="Table Name",
+            description="相関係数を計算する元テーブル名。",
+        ),
+    ]
+    column_names: Annotated[
+        list[ColumnName],
+        Field(
+            title="Column Names",
+            description=(
+                "相関係数を計算する対象カラム名のリスト。2列以上を指定してください。"
+            ),
+            min_length=2,
+        ),
+    ]
+    new_table_name: Annotated[
+        TableName,
+        Field(
+            title="New Table Name",
+            description="結果を格納する新規テーブル名。",
+        ),
+    ]
+    method: Annotated[
+        CorrelationMethod,
+        BeforeValidator(_coerce_correlation_method),
+        Field(
+            title="Correlation Method",
+            description=(
+                "相関係数の計算手法。"
+                "pearson: ピアソン積率相関係数（デフォルト）、"
+                "spearman: スピアマン順位相関係数、"
+                "kendall: ケンドールの順位相関係数"
+            ),
+            default=CorrelationMethod.PEARSON,
+        ),
+    ] = CorrelationMethod.PEARSON
+    decimal_places: Annotated[
+        int,
+        Field(
+            title="Decimal Places",
+            description="丸め桁数（1～15、デフォルト: 3）",
+            ge=1,
+            le=15,
+            default=3,
+        ),
+    ] = 3
+    lower_triangle_only: Annotated[
+        bool,
+        Field(
+            title="Lower Triangle Only",
+            description=(
+                "True の場合、上三角部分の値を null に置き換えて返す。"
+                "デフォルト: False。"
+            ),
+            default=False,
+        ),
+    ] = False
+    missing_handling: Annotated[
+        MissingHandlingMethod,
+        BeforeValidator(_coerce_missing_handling),
+        Field(
+            title="Missing Handling",
+            description=(
+                "欠損値の処理方法。"
+                "pairwise: ペア単位で欠損を除外して計算（デフォルト）、"
+                "listwise: 欠損を含む行をすべての列で一括削除してから計算"
+            ),
+            default=MissingHandlingMethod.PAIRWISE,
+        ),
+    ] = MissingHandlingMethod.PAIRWISE
+
+
+class CreateCorrelationTableResult(BaseResult):
+    """相関係数テーブル作成レスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="新規作成された相関係数テーブルの名前。",
     )

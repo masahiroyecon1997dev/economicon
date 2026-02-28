@@ -5,6 +5,8 @@ from economicon.models import (
     COMMON_ERROR_RESPONSES,
     ConfidenceIntervalRequestBody,
     ConfidenceIntervalResult,
+    CreateCorrelationTableRequestBody,
+    CreateCorrelationTableResult,
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticsResult,
     SuccessResponse,
@@ -13,6 +15,9 @@ from economicon.services.data.dependencies import TablesStoreDep
 from economicon.services.operation import run_operation
 from economicon.services.statistics.confidence_interval import (
     ConfidenceInterval,
+)
+from economicon.services.statistics.create_correlation_table import (
+    CreateCorrelationTable,
 )
 from economicon.services.statistics.descriptive_statistics import (
     DescriptiveStatistics,
@@ -82,6 +87,43 @@ async def descriptive_statistics(
     """
     # ビジネスロジックの実行
     api = DescriptiveStatistics(body, tables_store)
+    result = run_operation(api)
+
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.post(
+    "/create-correlation-table",
+    response_model=SuccessResponse[CreateCorrelationTableResult],
+)
+async def create_correlation_table(
+    request: Request,
+    body: CreateCorrelationTableRequestBody,
+    tables_store: TablesStoreDep,
+):
+    """相関係数テーブル作成を行うエンドポイント
+
+    指定されたテーブルの各列間の相関係数行列を計算し、
+    新しいテーブルとして保存します。
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    body : CreateCorrelationTableRequestBody
+        リクエストボディ
+    tables_store : TablesStoreDep
+        テーブルストア依存性
+
+    Returns
+    -------
+    JSONResponse
+        処理結果（新規作成されたテーブル名）
+    """
+    # ビジネスロジックの実行
+    api = CreateCorrelationTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
