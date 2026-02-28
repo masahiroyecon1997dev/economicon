@@ -24,13 +24,11 @@ export const MainView = () => {
       default:
         return <Table />;
     }
-  }
+  };
 
   return (
-    <main className="flex-1 bg-brand-secondary overflow-auto h-full">
-      <div className="p-8">
-        {renderContent()}
-      </div>
+    <main className="flex-1 flex flex-col overflow-hidden h-full bg-brand-secondary">
+      <div className="flex-1 overflow-auto p-4">{renderContent()}</div>
     </main>
   );
-}
+};

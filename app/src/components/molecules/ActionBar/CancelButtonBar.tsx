@@ -5,14 +5,21 @@ type CancelButtonBarProps = {
   onCancel: () => void;
 };
 
-export const CancelButtonBar = ({ cancelText, onCancel }: CancelButtonBarProps) => {
+export const CancelButtonBar = ({
+  cancelText,
+  onCancel,
+}: CancelButtonBarProps) => {
   return (
-    <div className="pt-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
-      <div className="flex justify-end gap-3">
-        <Button onClick={onCancel} variant="outline">
+    <div className="py-1.5 shrink-0 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex justify-end gap-2">
+        <Button
+          onClick={onCancel}
+          variant="outline"
+          className="px-4 py-1.5 text-xs font-medium"
+        >
           {cancelText}
         </Button>
       </div>
     </div>
   );
-}
+};

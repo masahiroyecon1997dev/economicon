@@ -14,14 +14,13 @@ export const PageLayout = ({
   description,
   className,
 }: PageLayoutProps) => {
-
   return (
-    <div className={cn("w-full h-full px-3", className)}>
+    <div className={cn("w-full h-full flex flex-col px-3", className)}>
       {title && description ? (
-        <div className="flex flex-col gap-3 md:gap-6">
+        <div className="flex flex-1 flex-col gap-2 min-h-0">
           <header className="shrink-0">
-            <h1 className="text-xl md:text-2xl font-bold text-black">{title}</h1>
-            <p className="mt-1 md:mt-2 text-xs md:text-sm text-black/60">{description}</p>
+            <h1 className="text-xl font-bold text-black">{title}</h1>
+            <p className="mt-1 text-xs text-black/60">{description}</p>
           </header>
           {children}
         </div>
