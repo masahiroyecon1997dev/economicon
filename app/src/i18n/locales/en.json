@@ -60,6 +60,7 @@
     "Description": "Please select a file to import data.",
     "SearchPlaceholder": "Search by file name",
     "GoUpDirectory": "Go up directory",
+    "FileTypeFilterLabel": "File type filter",
     "AllFiles": "All",
     "CsvFiles": "CSV",
     "ExcelFiles": "Excel",
