@@ -1,4 +1,3 @@
-import json
 import os
 import shutil
 import tempfile
@@ -61,7 +60,7 @@ def test_export_excel_success(client, prepared_data):
         "fileName": "test_output",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -84,7 +83,7 @@ def test_export_excel_with_sheet_name(client, prepared_data):
         "format": "excel",
         "sheetName": "データシート",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -107,7 +106,7 @@ def test_export_excel_table_not_exists(client, prepared_data):
         "fileName": "test_output",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert ErrorCode.DATA_NOT_FOUND == response_data["code"]
@@ -126,7 +125,7 @@ def test_export_excel_invalid_output_directory(client, prepared_data):
         "fileName": "test_output",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert ErrorCode.PATH_NOT_FOUND == response_data["code"]
@@ -144,7 +143,7 @@ def test_export_excel_missing_table_name(client, prepared_data):
         "fileName": "test_output",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -162,7 +161,7 @@ def test_export_excel_missing_directory_path(client, prepared_data):
         "fileName": "test_output",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -180,7 +179,7 @@ def test_export_excel_missing_file_name(client, prepared_data):
         "directoryPath": test_dir,
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -198,7 +197,7 @@ def test_export_excel_missing_format(client, prepared_data):
         "directoryPath": test_dir,
         "fileName": "test_output",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -211,7 +210,11 @@ def test_export_excel_invalid_json(client, prepared_data):
     不正な JSON を送信した場合のテスト
     """
     tables_store, test_dir, test_data = prepared_data
-    response = client.post(URL, data="invalid json")
+    response = client.post(
+        URL,
+        content=b"invalid json",
+        headers={"Content-Type": "application/json"},
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     response_data = response.json()
     assert "JSON decode error" == response_data["message"]
@@ -230,7 +233,7 @@ def test_export_excel_empty_table(client, prepared_data):
         "fileName": "empty_output",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -260,7 +263,7 @@ def test_export_excel_large_table(client, prepared_data):
         "fileName": "large_output",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -291,7 +294,7 @@ def test_export_excel_special_characters_in_data(client, prepared_data):
         "fileName": "special_output",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -313,7 +316,7 @@ def test_export_excel_empty_table_name(client, prepared_data):
         "fileName": "test_output",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -333,7 +336,7 @@ def test_export_excel_empty_directory_path(client, prepared_data):
         "fileName": "test_output",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -353,7 +356,7 @@ def test_export_excel_empty_file_name(client, prepared_data):
         "fileName": "",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -373,7 +376,7 @@ def test_export_excel_tablename_only_spaces(client, prepared_data):
         "fileName": "out",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -393,7 +396,7 @@ def test_export_excel_tablename_leading_trailing_spaces(client, prepared_data):
         "fileName": "out_trimmed",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -413,7 +416,7 @@ def test_export_excel_tablename_japanese(client, prepared_data):
         "fileName": "out_jp_table",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -433,7 +436,7 @@ def test_export_excel_tablename_emoji(client, prepared_data):
         "fileName": "out_emoji_table",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -452,7 +455,7 @@ def test_export_excel_filename_only_spaces(client, prepared_data):
         "fileName": "   ",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -473,7 +476,7 @@ def test_export_excel_filename_max_length(client, prepared_data):
         "fileName": safe_file_name,
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -493,7 +496,7 @@ def test_export_excel_filename_exceeds_max_length(client, prepared_data):
         "fileName": too_long_file_name,
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -513,7 +516,7 @@ def test_export_excel_directorypath_only_spaces(client, prepared_data):
         "fileName": "out",
         "format": "excel",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -533,7 +536,7 @@ def test_export_excel_invalid_format(client, prepared_data):
         "fileName": "out",
         "format": "xml",
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -554,7 +557,7 @@ def test_export_excel_sheetname_max_length(client, prepared_data):
         "format": "excel",
         "sheetName": max_sheet_name,
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
@@ -578,7 +581,7 @@ def test_export_excel_sheetname_exceeds_max_length(client, prepared_data):
         "format": "excel",
         "sheetName": too_long_sheet_name,
     }
-    response = client.post(URL, data=json.dumps(request_data))
+    response = client.post(URL, json=request_data)
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert ErrorCode.VALIDATION_ERROR == response_data["code"]
@@ -611,7 +614,7 @@ def test_export_excel_permission_denied(client, prepared_data):
             "fileName": "test_perm_error",
             "format": "excel",
         }
-        response = client.post(URL, data=json.dumps(request_data))
+        response = client.post(URL, json=request_data)
         response_data = response.json()
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert ErrorCode.PERMISSION_DENIED == response_data["code"]
@@ -636,7 +639,7 @@ def test_export_excel_io_error(client, prepared_data):
             "fileName": "test_io_error",
             "format": "excel",
         }
-        response = client.post(URL, data=json.dumps(request_data))
+        response = client.post(URL, json=request_data)
         response_data = response.json()
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert ErrorCode.EXCEL_EXPORT_ERROR == response_data["code"]
