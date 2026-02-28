@@ -378,6 +378,33 @@ class FetchDataToArrowRequestBody(BaseRequest):
     ]
 
 
+class FetchDataToArrowResult(BaseResult):
+    """テーブルデータ Arrow IPC 形式取得レスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="データを取得したテーブル名",
+    )
+    arrow_data: bytes = Field(
+        title="Arrow Data",
+        description=(
+            "Apache Arrow IPC 形式のバイナリデータ（Base64エンコード）"
+        ),
+    )
+    total_rows: int = Field(
+        title="Total Rows",
+        description="テーブル全体の行数",
+    )
+    start_row: int = Field(
+        title="Start Row",
+        description="取得開始行番号",
+    )
+    end_row: int = Field(
+        title="End Row",
+        description="取得終了行番号",
+    )
+
+
 class GetTableListRequestBody(BaseRequest):
     """テーブルリスト取得リクエスト（パラメータなし）"""
 

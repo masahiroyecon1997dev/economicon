@@ -2,6 +2,7 @@
 テーブルデータをApache Arrow形式で取得するサービス
 """
 
+import base64
 import io
 from typing import ClassVar
 
@@ -110,7 +111,15 @@ class FetchDataToArrow:
             with pa.ipc.new_file(sink, pyarrow_table.schema) as writer:
                 writer.write_table(pyarrow_table)
 
-            return sink.getvalue()
+            total_rows = table.row_count
+            end_row = min(start_row + chunk_size, total_rows)
+            return {
+                "tableName": self.table_name,
+                "arrowData": base64.b64encode(sink.getvalue()).decode("utf-8"),
+                "totalRows": total_rows,
+                "startRow": start_row,
+                "endRow": end_row,
+            }
 
         except Exception as e:
             message = _(
