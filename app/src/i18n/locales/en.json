@@ -21,7 +21,26 @@
     "Help": "Help"
   },
   "HeaderMenu": {
-    "File": "File"
+    "File": "File",
+    "ImportData": "Import",
+    "SaveData": "Save",
+    "Table": "Table",
+    "CreateTable": "Create Table",
+    "JoinTable": "Join",
+    "UnionTable": "Union",
+    "Data": "Data",
+    "DataGeneration": "Data Generation",
+    "Calculate": "Calculate",
+    "BasicStatistics": "Basic Statistics",
+    "Regression": "Regression",
+    "LinearRegression": "Linear Regression",
+    "LassoRegression": "Lasso Regression",
+    "RidgeRegression": "Ridge Regression",
+    "InstrumentalVariables": "Instrumental Variables",
+    "DiscreteModel": "Discrete Model",
+    "LogitAnalysis": "Logit Analysis",
+    "ProbitAnalysis": "Probit Analysis",
+    "TobitAnalysis": "Tobit Analysis"
   },
   "LeftSideMenu": {
     "ImportData": "Import Data",
