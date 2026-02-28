@@ -96,6 +96,8 @@ from economicon.models.regressions import (
 from economicon.models.settings import (
     GetSettingsRequestBody,
     GetSettingsResult,
+    UpdateSettingsRequest,
+    UpdateSettingsResult,
 )
 from economicon.models.statistics import (
     ConfidenceIntervalBounds,
@@ -255,6 +257,8 @@ __all__ = [
     # Settings
     "GetSettingsRequestBody",
     "GetSettingsResult",
+    "UpdateSettingsRequest",
+    "UpdateSettingsResult",
     # Data I/O
     "ImportFileRequestBody",
     "ImportFileResult",
