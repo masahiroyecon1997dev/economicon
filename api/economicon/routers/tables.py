@@ -17,6 +17,7 @@ from economicon.models import (
     DuplicateTableRequestBody,
     DuplicateTableResult,
     FetchDataToArrowRequestBody,
+    FetchDataToArrowResult,
     FetchDataToJsonRequestBody,
     FetchDataToJsonResult,
     FilterSingleConditionRequestBody,
@@ -48,7 +49,6 @@ from economicon.services.tables.get_table_list import GetTableList
 from economicon.services.tables.input_cell_data import InputCellData
 from economicon.services.tables.rename_table import RenameTable
 from economicon.utils import (
-    create_success_binary_response,
     create_success_response,
 )
 
@@ -358,7 +358,10 @@ async def fetch_data_to_json(
     )
 
 
-@router.post("/fetch-data-to-arrow")
+@router.post(
+    "/fetch-data-to-arrow",
+    response_model=SuccessResponse[FetchDataToArrowResult],
+)
 async def fetch_data_to_arrow(
     request: Request,
     body: FetchDataToArrowRequestBody,
@@ -384,12 +387,9 @@ async def fetch_data_to_arrow(
     # ビジネスロジックの実行
     api = FetchDataToArrow(body, tables_store)
     result = run_operation(api)
-    assert isinstance(result, bytes), "FetchDataToArrow must return bytes"
 
-    return create_success_binary_response(
-        status_code=http_status.HTTP_200_OK,
-        binary_data=result,
-        content_type="application/octet-stream",
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
     )
 
 
