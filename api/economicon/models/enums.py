@@ -96,3 +96,14 @@ class FilterOperatorType(StrEnum):
     LESS_THAN = "lessThan"
     GREATER_THAN_OR_EQUALS = "greaterThanOrEquals"
     LESS_THAN_OR_EQUALS = "lessThanOrEquals"
+
+
+class CorrelationMethod(StrEnum):
+    PEARSON = "pearson"
+    SPEARMAN = "spearman"
+    KENDALL = "kendall"
+
+
+class MissingHandlingMethod(StrEnum):
+    PAIRWISE = "pairwise"
+    LISTWISE = "listwise"
