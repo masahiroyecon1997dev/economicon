@@ -16,6 +16,9 @@ from fastapi_babel import Babel, BabelConfigs
 from economicon.exception_handlers import init_exception_handlers
 from economicon.i18n.translation import get_locale_from_settings
 from economicon.routers import api_router
+from economicon.services.data.analysis_result_store import (
+    AnalysisResultStore,
+)
 from economicon.services.data.settings_store import SettingsStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import log_manager, logger
@@ -72,6 +75,9 @@ async def lifespan(app: FastAPI):
     # 必要に応じてクリーンアップ
     tables_store.clear_tables()
     logger.info("Cleanup TablesStore.")
+    analysis_result_store = AnalysisResultStore()
+    analysis_result_store.clear_all()
+    logger.info("Cleanup AnalysisResultStore (tmp model files deleted.)")
 
 
 app = FastAPI(
