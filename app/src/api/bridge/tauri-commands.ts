@@ -45,25 +45,28 @@ type RustGetFilesResponse = {
   files: RustFileItem[];
 };
 
+/** Rust の FileItem → TypeScript の FileType に変換する共通マッパー */
+const mapRustFiles = (response: RustGetFilesResponse): FilesType => ({
+  directoryPath: response.directoryPath,
+  files: response.files.map(
+    (f): FileType => ({
+      name: f.name,
+      isFile: f.isFile,
+      size: f.size,
+      modifiedTime:
+        f.modifiedTime != null
+          ? new Date(f.modifiedTime * 1000).toISOString()
+          : "",
+    }),
+  ),
+});
+
 export const getFiles = async (path: string): Promise<FilesType> => {
   try {
     const response = await invoke<RustGetFilesResponse>("get_files", {
       directoryPath: path,
     });
-    return {
-      directoryPath: response.directoryPath,
-      files: response.files.map(
-        (f): FileType => ({
-          name: f.name,
-          isFile: f.isFile,
-          size: f.size,
-          modifiedTime:
-            f.modifiedTime != null
-              ? new Date(f.modifiedTime * 1000).toISOString()
-              : "",
-        }),
-      ),
-    };
+    return mapRustFiles(response);
   } catch (e: unknown) {
     // Tauri は Err(FileError) を構造化オブジェクトとして throw する
     if (e !== null && typeof e === "object" && "errorType" in e) {
@@ -72,6 +75,18 @@ export const getFiles = async (path: string): Promise<FilesType> => {
     }
     throw e;
   }
+};
+
+/**
+ * エラーを投げない安全版 getFiles。
+ * 指定パスが存在しない・空の場合はホームディレクトリ等へ自動フォールバックする。
+ * アプリ初期化時（lastOpenedPath が消えた場合など）に使用する。
+ */
+export const getFilesSafe = async (path: string): Promise<FilesType> => {
+  const response = await invoke<RustGetFilesResponse>("get_files_safe", {
+    directoryPath: path,
+  });
+  return mapRustFiles(response);
 };
 
 export const getOsInfo = async (): Promise<{
