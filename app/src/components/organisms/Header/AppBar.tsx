@@ -7,7 +7,7 @@ import {
   Square,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/utils/helpers";
 import { useCurrentPageStore } from "../../../stores/currentView";
@@ -22,9 +22,10 @@ const MENU_POSITION: DropmenuPositionType = "bottom";
  * 統合アプリバー
  *
  * TitleBar（ウィンドウ制御） + HeaderMenu（ナビゲーション）を1本に統合。
- * - `data-tauri-drag-region` をバー全体に付与し、ウィンドウドラッグを実現
- * - ボタン・メニュー等のインタラクティブ要素は data-tauri-drag-region を持たないため
- *   マウスダウン時に Tauri のドラッグ検出から外れ、正しくクリックされる
+ * - mousedown で起点を記録し、mousemove の閾値超えで startDragging() を呼び出す
+ *   （mousedown 即呼び出しだと OS がマウスを捕捉して dblclick が届かなくなるため）
+ * - ダブルクリックで最大化 ⇔ 復元をトグル（最大化中でも正しく動作）
+ * - ボタン等のインタラクティブ要素上ではドラッグを開始しない
  * - osName が "macOS" の場合は左端にトラフィックライト、
  *   Windows / Linux は右端に Fluent スタイルのウィンドウ制御を表示
  */
@@ -58,6 +59,10 @@ export const AppBar = () => {
     };
   }, []);
 
+  // マウスダウン起点を記録するref（startDragging は mousemove 時に初めて呼び出す）
+  // 即 startDragging() するとOSがマウスを捕捉し dblclick イベントが届かなくなるため
+  const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null);
+
   const handleMinimize = useCallback(() => getCurrentWindow().minimize(), []);
   const handleToggleMaximize = useCallback(
     () => getCurrentWindow().toggleMaximize(),
@@ -65,22 +70,37 @@ export const AppBar = () => {
   );
   const handleClose = useCallback(() => getCurrentWindow().close(), []);
 
-  // ヘッダー上でのマウスダウン: インタラクティブ要素・最大化中を除外して startDragging
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      if (e.button !== 0) return; // 左ボタンのみ
-      if (isMaximized) return; // 最大化中はドラッグしない（Windows 標準動作）
-      const target = e.target as HTMLElement;
-      if (target.closest("button, a, input, select, textarea")) return;
-      getCurrentWindow().startDragging();
-    },
-    [isMaximized],
-  );
+  // mousedown: 起点を記録するだけ。startDragging() はまだ呼ばない
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("button, a, input, select, textarea")) return;
+    mouseDownPosRef.current = { x: e.clientX, y: e.clientY };
+  }, []);
 
-  // ヘッダー上でのダブルクリック: インタラクティブ要素上は除外して最大化トグル
+  // mousemove: 4px 超の移動を検知して startDragging() を呼び出す
+  // 最大化中でもそのまま呼び出し、OS がウィンドウを復元してから移動する
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (!mouseDownPosRef.current) return;
+    const dx = Math.abs(e.clientX - mouseDownPosRef.current.x);
+    const dy = Math.abs(e.clientY - mouseDownPosRef.current.y);
+    if (dx > 4 || dy > 4) {
+      mouseDownPosRef.current = null;
+      getCurrentWindow().startDragging();
+    }
+  }, []);
+
+  // mouseup: クリックで終わった場合はドラッグ意図をリセット
+  const handleMouseUp = useCallback(() => {
+    mouseDownPosRef.current = null;
+  }, []);
+
+  // ダブルクリック: ドラッグ意図をリセットした上で最大化トグル
+  // 最大化中→復元、通常→最大化、どちらも正しく動作する
   const handleDoubleClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
     if (target.closest("button, a, input, select, textarea")) return;
+    mouseDownPosRef.current = null;
     getCurrentWindow().toggleMaximize();
   }, []);
 
@@ -119,10 +139,12 @@ export const AppBar = () => {
   ];
 
   return (
-    // onMouseDown で startDragging を呼び出し、ウィンドウ移動を実現。
-    // ボタン等のインタラクティブ要素上では startDragging を呼ばないためクリックも正常に動作する。
+    // mousedown で起点を記録 → mousemove の移動量が閾値を超えた時点で startDragging()。
+    // こうすることでダブルクリックイベントが正しく届き、最大化⇔復元が機能する。
     <header
       onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
       onDoubleClick={handleDoubleClick}
       className="flex h-11 shrink-0 select-none items-center border-b border-brand-primary-dark bg-brand-primary text-white"
     >
