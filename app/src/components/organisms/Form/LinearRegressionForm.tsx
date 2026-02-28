@@ -1,6 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { startTransition, useActionState, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useStore } from "@tanstack/react-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../api/endpoints";
@@ -24,8 +22,6 @@ const createRegressionSchema = (t: (key: string) => string) =>
       .min(1, t("ValidationMessages.ExplanatoryVariablesRequired")),
   });
 
-type RegressionFormData = z.infer<ReturnType<typeof createRegressionSchema>>;
-
 type LinearRegressionFormProps = {
   onCancel: () => void;
   onAnalysisComplete?: (resultIndex: number) => void;
@@ -47,157 +43,93 @@ export const LinearRegressionForm = ({
     (state) => state.results.length,
   );
 
-  const handleTableChange = async (value: string) => {
-    setSelectedTableName(value);
-    if (!value) {
-      setColumnList([]);
-    }
-  };
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<RegressionFormData>({
-    resolver: zodResolver(createRegressionSchema(t)),
+  const form = useForm({
     defaultValues: {
       tableName: selectedTableName,
       dependentVariable: "",
-      explanatoryVariables: [],
+      explanatoryVariables: [] as string[],
+    },
+    validators: {
+      onSubmit: createRegressionSchema(t),
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        const api = getEconomiconAPI();
+        const regressionResponse = await api.regression({
+          tableName: value.tableName,
+          dependentVariable: value.dependentVariable,
+          explanatoryVariables: value.explanatoryVariables,
+          analysis: { method: "ols" },
+          standardError: { method: "nonrobust" },
+        });
+
+        if (regressionResponse.code === "OK" && regressionResponse.result) {
+          const { resultId } = regressionResponse.result;
+          const resultResponse = await api.getAnalysisResult(resultId);
+          if (resultResponse.code === "OK" && resultResponse.result) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            addResult(resultResponse.result.result as any);
+            onAnalysisComplete?.(resultsCount);
+            return;
+          }
+        }
+        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("Error.UnexpectedError");
+        await showMessageDialog(t("Error.Error"), errorMessage);
+      }
     },
   });
 
-  const [dependentVariable, setDependentVariable] = useState("");
-  const [explanatoryVariables, setExplanatoryVariables] = useState<string[]>(
-    [],
-  );
-
-  type ActionState = {
-    success: boolean;
-  };
-
-  const handleRegressionAction = async (
-    _prevState: ActionState,
-    formData: FormData,
-  ): Promise<ActionState> => {
-    const tableName = formData.get("tableName") as string;
-    const dependentVariable = formData.get("dependentVariable") as string;
-    const explanatoryVariablesStr = formData.get(
-      "explanatoryVariables",
-    ) as string;
-    const explanatoryVariables = explanatoryVariablesStr
-      ? explanatoryVariablesStr.split(",")
-      : [];
-
-    try {
-      const api = getEconomiconAPI();
-      // 新APIはOLS固定。analysis/standardErrorフィールドが必須
-      const regressionResponse = await api.regression({
-        tableName,
-        dependentVariable,
-        explanatoryVariables,
-        analysis: { method: "ols" },
-        standardError: { method: "nonrobust" },
-      });
-
-      if (regressionResponse.code === "OK" && regressionResponse.result) {
-        // 結果はサーバー側に保存される。resultIdで取得して既存ストアへ格納
-        const { resultId } = regressionResponse.result;
-        const resultResponse = await api.getAnalysisResult(resultId);
-        if (resultResponse.code === "OK" && resultResponse.result) {
-          // result.resultは unknown 型のためキャスト
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          addResult(resultResponse.result.result as any);
-          const newResultIndex = resultsCount;
-          onAnalysisComplete?.(newResultIndex);
-          return { success: true };
-        }
-      }
-      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
-      return { success: false };
-    } catch (error) {
-      let errorMessage = t("Error.UnexpectedError");
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      await showMessageDialog(t("Error.Error"), errorMessage);
-      return { success: false };
-    }
-  };
-
-  const [, submitAction, isPending] = useActionState(handleRegressionAction, {
-    success: false,
-  });
-
-  const handleDependentChange = (value: string) => {
-    setDependentVariable(value);
-    setValue("dependentVariable", value, { shouldValidate: true });
-  };
-
-  const handleExplanatoryChange = (values: string[]) => {
-    setExplanatoryVariables(values);
-    setValue("explanatoryVariables", values, { shouldValidate: true });
-  };
+  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
   const handleTableSelect = (value: string) => {
-    setDependentVariable("");
-    setExplanatoryVariables([]);
-    setValue("tableName", value, { shouldValidate: true });
-    setValue("dependentVariable", "");
-    setValue("explanatoryVariables", []);
-    handleTableChange(value);
-  };
-
-  const onSubmit = (data: RegressionFormData) => {
-    const formData = new FormData();
-    formData.append("tableName", data.tableName);
-    formData.append("dependentVariable", data.dependentVariable);
-    data.explanatoryVariables.forEach((v) =>
-      formData.append("explanatoryVariables", v),
-    );
-    // ここで直接 action を叩く
-    startTransition(() => {
-      submitAction(formData);
-    });
+    setSelectedTableName(value);
+    if (!value) setColumnList([]);
+    form.setFieldValue("tableName", value);
+    form.setFieldValue("dependentVariable", "");
+    form.setFieldValue("explanatoryVariables", []);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      {/* Hidden fields for FormData */}
-      <input type="hidden" name="tableName" value={selectedTableName} />
-      <input type="hidden" name="dependentVariable" value={dependentVariable} />
-      <input
-        type="hidden"
-        name="explanatoryVariables"
-        value={explanatoryVariables.join(",")}
-      />
-
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        void form.handleSubmit();
+      }}
+      className="flex flex-col gap-4"
+    >
       {/* テーブル選択セクション */}
       <div className="rounded-xl border border-border-color bg-white p-3 shadow-sm">
         <h2 className="mb-2 text-sm font-bold leading-tight text-text-heading">
           {t("LinearRegressionForm.SelectDataTable")}
         </h2>
-        <FormField
-          label={t("LinearRegressionForm.DataTable")}
-          htmlFor="data-table"
-        >
-          <Select
-            id="data-table"
-            {...register("tableName")}
-            value={selectedTableName}
-            onValueChange={handleTableSelect}
-            disabled={isPending}
-            error={errors.tableName?.message}
-            placeholder={t("LinearRegressionForm.SelectATable")}
-          >
-            {tableList.map((table, index) => (
-              <SelectItem key={index} value={table}>
-                {table}
-              </SelectItem>
-            ))}
-          </Select>
-        </FormField>
+        <form.Field name="tableName">
+          {(field) => (
+            <FormField
+              label={t("LinearRegressionForm.DataTable")}
+              htmlFor="data-table"
+              error={field.state.meta.errors[0]?.toString()}
+            >
+              <Select
+                id="data-table"
+                value={field.state.value}
+                onValueChange={handleTableSelect}
+                disabled={isSubmitting}
+                error={field.state.meta.errors[0]?.toString()}
+                placeholder={t("LinearRegressionForm.SelectATable")}
+              >
+                {tableList.map((table, index) => (
+                  <SelectItem key={index} value={table}>
+                    {table}
+                  </SelectItem>
+                ))}
+              </Select>
+            </FormField>
+          )}
+        </form.Field>
       </div>
 
       {/* 変数選択セクション */}
@@ -206,58 +138,74 @@ export const LinearRegressionForm = ({
           {t("LinearRegressionForm.SelectVariables")}
         </h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <VariableSelectorField
-            label={t("LinearRegressionForm.DependentVariable")}
-            description={t("LinearRegressionForm.DependentVariableDescription")}
-            mode="single"
-            columns={columnList}
-            selectedValue={dependentVariable}
-            onSingleChange={handleDependentChange}
-            error={errors.dependentVariable?.message}
-            disabled={isPending}
-            name="dependentVariable"
-          />
-          <VariableSelectorField
-            label={t("LinearRegressionForm.ExplanatoryVariables")}
-            description={t(
-              "LinearRegressionForm.ExplanatoryVariablesDescription",
+          <form.Field name="dependentVariable">
+            {(field) => (
+              <VariableSelectorField
+                label={t("LinearRegressionForm.DependentVariable")}
+                description={t(
+                  "LinearRegressionForm.DependentVariableDescription",
+                )}
+                mode="single"
+                columns={columnList}
+                selectedValue={field.state.value}
+                onSingleChange={(v) => field.handleChange(v)}
+                error={field.state.meta.errors[0]?.toString()}
+                disabled={isSubmitting}
+                name="dependentVariable"
+              />
             )}
-            mode="multiple"
-            columns={columnList}
-            selectedValues={explanatoryVariables}
-            onMultipleChange={handleExplanatoryChange}
-            error={errors.explanatoryVariables?.message}
-            disabled={isPending}
-            name="explanatoryVariables"
-          />
-        </div>
-        <div className="mt-4">
-          <label className="mb-1.5 block text-xs font-medium text-brand-text-main">
-            {t("LinearRegressionForm.SelectedExplanatoryVariables")}
-          </label>
-          <div className="flex min-h-11 flex-wrap gap-2 rounded-lg border border-border-color bg-secondary p-2">
-            {explanatoryVariables.length === 0 ? (
-              <span className="text-xs text-brand-text-main/60">
-                {t("LinearRegressionForm.NoVariablesSelected")}
-              </span>
-            ) : (
-              explanatoryVariables.map((variable, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center rounded-md bg-brand-accent px-2 py-1 text-xs text-white"
-                >
-                  {variable}
-                </span>
-              ))
+          </form.Field>
+          <form.Field name="explanatoryVariables">
+            {(field) => (
+              <VariableSelectorField
+                label={t("LinearRegressionForm.ExplanatoryVariables")}
+                description={t(
+                  "LinearRegressionForm.ExplanatoryVariablesDescription",
+                )}
+                mode="multiple"
+                columns={columnList}
+                selectedValues={field.state.value}
+                onMultipleChange={(v) => field.handleChange(v)}
+                error={field.state.meta.errors[0]?.toString()}
+                disabled={isSubmitting}
+                name="explanatoryVariables"
+              />
             )}
-          </div>
+          </form.Field>
         </div>
+
+        {/* 選択済み説明変数タグ */}
+        <form.Subscribe selector={(s) => s.values.explanatoryVariables}>
+          {(explanatoryVariables) => (
+            <div className="mt-4">
+              <label className="mb-1.5 block text-xs font-medium text-brand-text-main">
+                {t("LinearRegressionForm.SelectedExplanatoryVariables")}
+              </label>
+              <div className="flex min-h-11 flex-wrap gap-2 rounded-lg border border-border-color bg-secondary p-2">
+                {explanatoryVariables.length === 0 ? (
+                  <span className="text-xs text-brand-text-main/60">
+                    {t("LinearRegressionForm.NoVariablesSelected")}
+                  </span>
+                ) : (
+                  explanatoryVariables.map((variable, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center rounded-md bg-brand-accent px-2 py-1 text-xs text-white"
+                    >
+                      {variable}
+                    </span>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </form.Subscribe>
       </div>
 
       <ActionButtonBar
         cancelText={t("Common.Cancel")}
         selectText={
-          isPending
+          isSubmitting
             ? t("LinearRegressionForm.Processing")
             : t("LinearRegressionForm.RunAnalysis")
         }
