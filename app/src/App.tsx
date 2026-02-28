@@ -10,8 +10,7 @@ import { useTableListStore } from "./stores/tableList";
 
 import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
 import { MessageDialog } from "./components/molecules/Modal/MessageDialog";
-import { TitleBar } from "./components/molecules/TitleBar";
-import { HeaderMenu } from "./components/organisms/Header/HeaderMenu";
+import { AppBar } from "./components/organisms/Header/AppBar";
 import { LeftSideMenu } from "./components/pages/LeftSideMenu";
 import { MainView } from "./components/pages/MainView";
 import { useFilesStore } from "./stores/files";
@@ -98,8 +97,7 @@ export const App = () => {
   return (
     <>
       <div className="flex h-screen flex-col overflow-hidden bg-white">
-        <TitleBar />
-        <HeaderMenu />
+        <AppBar />
         <div className="flex flex-1 overflow-hidden">
           <LeftSideMenu />
           <MainView />
