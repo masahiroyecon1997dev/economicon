@@ -547,8 +547,8 @@ class OutputResult:
 
             return {"content": content, "format": self.output_format}
 
-        except ValidationError, ProcessingError:
-            raise
+        except (ValidationError, ProcessingError) as e:
+            raise e
         except Exception as e:
             raise ProcessingError(
                 error_code=ErrorCode.OUTPUT_RESULT_ERROR,
