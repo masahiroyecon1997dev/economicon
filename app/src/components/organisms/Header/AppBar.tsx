@@ -34,8 +34,7 @@ export const AppBar = () => {
   const osName = useSettingsStore((s) => s.osName);
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
   const [isMaximized, setIsMaximized] = useState(false);
-  const [isDataMenuOpen, setIsDataMenuOpen] = useState(false);
-  const [isRegressionMenuOpen, setIsRegressionMenuOpen] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const isMac = osName === "macOS";
 
@@ -104,37 +103,138 @@ export const AppBar = () => {
     getCurrentWindow().toggleMaximize();
   }, []);
 
-  const dataMenuItems = [
-    {
-      id: "data-generation",
-      label: t("HeaderMenu.DataGeneration"),
-      handleSelect: () => setCurrentView("CreateSimulationDataTable"),
-    },
-    {
-      id: "calculate",
-      label: t("HeaderMenu.Calculate"),
-      handleSelect: () => setCurrentView("CalculationView"),
-    },
-  ];
-  const regressionMenuItems = [
-    {
-      id: "linear-regression",
-      label: t("HeaderMenu.LinearRegression"),
-      handleSelect: () => setCurrentView("LinearRegressionForm"),
-    },
-  ];
+  const close = () => setOpenMenuId(null);
+
   const menus = [
     {
-      menuName: t("HeaderMenu.Data"),
-      isOpen: isDataMenuOpen,
-      onClose: () => setIsDataMenuOpen(false),
-      items: dataMenuItems,
+      id: "file",
+      menuName: t("HeaderMenu.File"),
+      isOpen: openMenuId === "file",
+      onClose: close,
+      items: [
+        {
+          id: "import",
+          label: t("HeaderMenu.ImportData"),
+          handleSelect: () => {
+            setCurrentView("ImportDataFile");
+            close();
+          },
+        },
+        {
+          id: "save",
+          label: t("HeaderMenu.SaveData"),
+          handleSelect: () => {
+            setCurrentView("SaveData");
+            close();
+          },
+        },
+      ],
     },
     {
-      menuName: t("HeaderMenu.Model"),
-      isOpen: isRegressionMenuOpen,
-      onClose: () => setIsRegressionMenuOpen(false),
-      items: regressionMenuItems,
+      id: "table",
+      menuName: t("HeaderMenu.Table"),
+      isOpen: openMenuId === "table",
+      onClose: close,
+      items: [
+        {
+          id: "create-table",
+          label: t("HeaderMenu.CreateTable"),
+          handleSelect: () => {},
+        },
+        {
+          id: "join-table",
+          label: t("HeaderMenu.JoinTable"),
+          handleSelect: () => {},
+        },
+        {
+          id: "union-table",
+          label: t("HeaderMenu.UnionTable"),
+          handleSelect: () => {},
+        },
+      ],
+    },
+    {
+      id: "data",
+      menuName: t("HeaderMenu.Data"),
+      isOpen: openMenuId === "data",
+      onClose: close,
+      items: [
+        {
+          id: "data-generation",
+          label: t("HeaderMenu.DataGeneration"),
+          handleSelect: () => {
+            setCurrentView("CreateSimulationDataTable");
+            close();
+          },
+        },
+        {
+          id: "calculate",
+          label: t("HeaderMenu.Calculate"),
+          handleSelect: () => {
+            setCurrentView("CalculationView");
+            close();
+          },
+        },
+        {
+          id: "basic-statistics",
+          label: t("HeaderMenu.BasicStatistics"),
+          handleSelect: () => {},
+        },
+      ],
+    },
+    {
+      id: "regression",
+      menuName: t("HeaderMenu.Regression"),
+      isOpen: openMenuId === "regression",
+      onClose: close,
+      items: [
+        {
+          id: "linear-regression",
+          label: t("HeaderMenu.LinearRegression"),
+          handleSelect: () => {
+            setCurrentView("LinearRegressionForm");
+            close();
+          },
+        },
+        {
+          id: "lasso-regression",
+          label: t("HeaderMenu.LassoRegression"),
+          handleSelect: () => {},
+        },
+        {
+          id: "ridge-regression",
+          label: t("HeaderMenu.RidgeRegression"),
+          handleSelect: () => {},
+        },
+        {
+          id: "instrumental-variables",
+          label: t("HeaderMenu.InstrumentalVariables"),
+          handleSelect: () => {},
+        },
+      ],
+    },
+    {
+      id: "discrete-model",
+      menuName: t("HeaderMenu.DiscreteModel"),
+      isOpen: openMenuId === "discrete-model",
+      onClose: close,
+      items: [
+        {
+          id: "logit",
+          label: t("HeaderMenu.LogitAnalysis"),
+          handleSelect: () => {},
+        },
+        {
+          id: "probit",
+          label: t("HeaderMenu.ProbitAnalysis"),
+          handleSelect: () => {},
+        },
+        {
+          id: "tobit",
+          label: t("HeaderMenu.TobitAnalysis"),
+          handleSelect: () => {},
+        },
+      ],
     },
   ];
 
@@ -201,7 +301,7 @@ export const AppBar = () => {
       {/* ===== ナビゲーションメニュー ===== */}
       <nav className="flex items-center gap-0.5">
         {menus.map((menu) => (
-          <div key={menu.menuName} className="relative">
+          <div key={menu.id} className="relative">
             <DropdownMenu
               isOpen={menu.isOpen}
               onClose={menu.onClose}
