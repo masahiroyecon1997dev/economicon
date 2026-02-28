@@ -3,7 +3,11 @@ import { UploadCloud } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useTranslation } from "react-i18next";
-import { getFiles, TauriFileError } from "../../api/bridge/tauri-commands";
+import {
+  getFiles,
+  getFilesSafe,
+  TauriFileError,
+} from "../../api/bridge/tauri-commands";
 import { getEconomiconAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { getTableInfo } from "../../lib/utils/internal";
@@ -118,7 +122,9 @@ export const ImportDataFile = () => {
             const refreshed = await getFiles(directoryPath);
             setFiles(refreshed);
           } catch {
-            // 現在地も消えている場合は何もしない（上へボタンで脱出可能）
+            // 現在地も消えている場合はホームディレクトリへフォールバック
+            const safeFiles = await getFilesSafe("");
+            setFiles(safeFiles);
           }
         }
       } else {

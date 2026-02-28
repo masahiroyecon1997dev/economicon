@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { getAuthToken, getFiles, getOsInfo } from "./api/bridge/tauri-commands";
+import {
+  getAuthToken,
+  getFilesSafe,
+  getOsInfo,
+} from "./api/bridge/tauri-commands";
 import { getEconomiconAPI } from "./api/endpoints";
 import { showMessageDialog } from "./lib/dialog/message";
 import { useCurrentPageStore } from "./stores/currentView";
@@ -64,7 +68,8 @@ export const App = () => {
         // GetSettingsResultをアプリのSettingsType形式にマッピング
         const apiSettings = resGetSettings.result;
         // ファイル一覧をTauriコマンドで直接取得（Pythonサーバー非経由）
-        const files = await getFiles(apiSettings.lastOpenedPath);
+        // getFilesSafe: lastOpenedPath が消えていてもホームディレクトリへフォールバックする
+        const files = await getFilesSafe(apiSettings.lastOpenedPath);
         // テーブル名一覧を取得
         const resGetTableNames = await api.getTableList();
         if (resGetTableNames.code !== "OK") {

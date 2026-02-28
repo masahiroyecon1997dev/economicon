@@ -8,7 +8,7 @@ use std::net::TcpListener;
 use std::time::Duration;
 use uuid::Uuid;
 
-use files::{get_files_internal, GetFilesResponse, FileError};
+use files::{get_files_internal, get_files_with_fallback, GetFilesResponse, FileError};
 use os_info::{get_os_info_internal, OsInfoResponse};
 
 // HTTPクライアントを保持するState
@@ -186,6 +186,14 @@ async fn get_files(directory_path: String) -> Result<GetFilesResponse, FileError
     get_files_internal(&directory_path)
 }
 
+/// エラーを返さない安全版 get_files。
+/// パスが存在しない・空の場合はホームディレクトリ等にフォールバックする。
+/// アプリ初期化時（設定に保存されたパスが消えた場合など）に使用する。
+#[tauri::command]
+fn get_files_safe(directory_path: String) -> GetFilesResponse {
+    get_files_with_fallback(&directory_path)
+}
+
 // OS情報取得コマンド（同期: ファイルシステムアクセス不要）
 #[tauri::command]
 fn get_os_info() -> OsInfoResponse {
@@ -227,6 +235,7 @@ pub fn run() {
             fetch_binary,
             upload_file,
             get_files,
+            get_files_safe,
             get_os_info,
             get_auth_token,
             get_api_port
