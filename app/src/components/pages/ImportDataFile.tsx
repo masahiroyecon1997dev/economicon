@@ -1,4 +1,5 @@
 import * as RadixTabs from "@radix-ui/react-tabs";
+import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { UploadCloud } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -363,27 +364,24 @@ export const ImportDataFile = () => {
             onSearchChange={setSearchValue}
           />
 
-          {/* ファイル種類フィルター ピルUI */}
-          <div
+          {/* ファイル種類フィルター ToggleGroup */}
+          <ToggleGroup.Root
+            type="single"
+            value={fileTypeFilter}
+            onValueChange={(v) => v && setFileTypeFilter(v as FileTypeFilter)}
             className="flex shrink-0 flex-wrap gap-1.5"
-            role="group"
-            aria-label="ファイル種類フィルター"
+            aria-label={t("ImportDataFileView.FileTypeFilterLabel")}
           >
             {FILE_TYPE_FILTERS.map((filter) => (
-              <button
+              <ToggleGroup.Item
                 key={filter.value}
-                type="button"
-                onClick={() => setFileTypeFilter(filter.value)}
-                className={`rounded-full border px-3 py-0.5 text-xs font-medium transition-colors focus:outline-none ${
-                  fileTypeFilter === filter.value
-                    ? "border-brand-primary bg-brand-primary text-white"
-                    : "border-gray-300 bg-white text-gray-600 hover:border-brand-primary/50 hover:bg-brand-primary/5"
-                }`}
+                value={filter.value}
+                className="rounded-full border px-3 py-0.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50 data-[state=on]:border-brand-primary data-[state=on]:bg-brand-primary data-[state=on]:text-white data-[state=off]:border-gray-300 data-[state=off]:bg-white data-[state=off]:text-gray-600 data-[state=off]:hover:border-brand-primary/50 data-[state=off]:hover:bg-brand-primary/5"
               >
                 {t(filter.labelKey)}
-              </button>
+              </ToggleGroup.Item>
             ))}
-          </div>
+          </ToggleGroup.Root>
 
           <FileListTable
             files={sortedFiles}
