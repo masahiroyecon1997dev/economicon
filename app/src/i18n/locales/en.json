@@ -13,6 +13,13 @@
     "UniformDistribution": "Uniform Distribution",
     "NomalDistribution": "Normal Distribution"
   },
+  "AppBar": {
+    "Minimize": "Minimize",
+    "Maximize": "Maximize",
+    "Restore": "Restore",
+    "Close": "Close",
+    "Help": "Help"
+  },
   "HeaderMenu": {
     "File": "File"
   },
