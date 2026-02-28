@@ -171,6 +171,7 @@ async def export_file(
     request: Request,
     body: ExportFileRequestBody,
     tables_store: TablesStoreDep,
+    settings_store: SettingsStoreDep,
 ):
     """format に基づいてテーブルをファイルにエクスポートするエンドポイント
 
@@ -178,6 +179,9 @@ async def export_file(
     - ``csv``     → CSV エクスポーター（separator / include_header が有効）
     - ``excel``   → Excel エクスポーター（sheet_name / include_header が有効）
     - ``parquet`` → Parquet エクスポーター
+
+    エクスポート成功後、出力先ディレクトリを
+    ``last_opened_path`` として設定ファイルに保存する。
 
     Parameters
     ----------
@@ -187,6 +191,8 @@ async def export_file(
         リクエストボディ
     tables_store : TablesStoreDep
         依存注入されたテーブルストア
+    settings_store : SettingsStoreDep
+        依存注入された設定ストア
 
     Returns
     -------
@@ -195,6 +201,16 @@ async def export_file(
     """
     api = get_export_api(body, tables_store)
     result = run_operation(api)
+
+    # エクスポート成功後、出力先ディレクトリを設定ファイルへ保存
+    # 非クリティカルな処理のため、失敗しても本体レスポンスに影響しない
+    try:
+        export_dir = str(body.directory_path).replace(os.sep, "/")
+        settings_store.update_settings(last_opened_path=export_dir)
+        settings_store.save_settings()
+        logger.info(f"Updated last_opened_path: {export_dir}")
+    except Exception as e:
+        logger.warning(f"Failed to update last_opened_path in settings: {e}")
 
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
