@@ -29,6 +29,31 @@ import { FileListTable } from "../molecules/Table/FileListTable";
 import { ImportConfigDialog } from "../organisms/Modal/ImportConfigDialog";
 import { PageLayout } from "../templates/PageLayout";
 
+type FileTypeFilter = "all" | "csv" | "excel" | "parquet";
+
+const FILE_TYPE_FILTERS: {
+  value: FileTypeFilter;
+  labelKey: string;
+  extensions: string[];
+}[] = [
+  { value: "all", labelKey: "ImportDataFileView.AllFiles", extensions: [] },
+  {
+    value: "csv",
+    labelKey: "ImportDataFileView.CsvFiles",
+    extensions: [".csv"],
+  },
+  {
+    value: "excel",
+    labelKey: "ImportDataFileView.ExcelFiles",
+    extensions: [".xlsx", ".xls"],
+  },
+  {
+    value: "parquet",
+    labelKey: "ImportDataFileView.ParquetFiles",
+    extensions: [".parquet"],
+  },
+];
+
 export const ImportDataFile = () => {
   const { t } = useTranslation();
   const osName = useSettingsStore((state) => state.osName);
@@ -45,6 +70,7 @@ export const ImportDataFile = () => {
   const [searchValue, setSearchValue] = useState("");
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [fileTypeFilter, setFileTypeFilter] = useState<FileTypeFilter>("all");
 
   // Dialog State
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
@@ -108,7 +134,8 @@ export const ImportDataFile = () => {
 
   // ディレクトリ変更処理
   const changeDirectory = async (newPath: string) => {
-    setLoading(true, t("Loading.Loading"));
+    // delay: 200ms — 一瞬で完了した場合はローディングを表示しない
+    setLoading(true, t("Loading.Loading"), 200);
     try {
       const result = await getFiles(newPath);
       setFiles(result);
@@ -207,9 +234,21 @@ export const ImportDataFile = () => {
     }
   };
 
-  const filteredFiles = files.filter((file) =>
-    file.name.toLowerCase().includes(searchValue.toLowerCase()),
-  );
+  const filteredFiles = files
+    .filter((file) =>
+      file.name.toLowerCase().includes(searchValue.toLowerCase()),
+    )
+    .filter((file) => {
+      // フォルダは常に表示
+      if (!file.isFile) return true;
+      if (fileTypeFilter === "all") return true;
+      const filterDef = FILE_TYPE_FILTERS.find(
+        (f) => f.value === fileTypeFilter,
+      );
+      if (!filterDef) return true;
+      const lower = file.name.toLowerCase();
+      return filterDef.extensions.some((ext) => lower.endsWith(ext));
+    });
 
   const sortedFiles = [...filteredFiles].sort((a, b) => {
     if (!sortField || !sortDirection) return 0;
@@ -323,6 +362,28 @@ export const ImportDataFile = () => {
             onBreadcrumbClick={handleBreadcrumbClick}
             onSearchChange={setSearchValue}
           />
+
+          {/* ファイル種類フィルター ピルUI */}
+          <div
+            className="flex shrink-0 flex-wrap gap-1.5"
+            role="group"
+            aria-label="ファイル種類フィルター"
+          >
+            {FILE_TYPE_FILTERS.map((filter) => (
+              <button
+                key={filter.value}
+                type="button"
+                onClick={() => setFileTypeFilter(filter.value)}
+                className={`rounded-full border px-3 py-0.5 text-xs font-medium transition-colors focus:outline-none ${
+                  fileTypeFilter === filter.value
+                    ? "border-brand-primary bg-brand-primary text-white"
+                    : "border-gray-300 bg-white text-gray-600 hover:border-brand-primary/50 hover:bg-brand-primary/5"
+                }`}
+              >
+                {t(filter.labelKey)}
+              </button>
+            ))}
+          </div>
 
           <FileListTable
             files={sortedFiles}
