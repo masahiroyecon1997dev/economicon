@@ -1,6 +1,6 @@
 """統計的検定サービス (t-test / z-test / f-test)"""
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import numpy as np
 from scipy import stats
@@ -162,11 +162,11 @@ class StatisticalTest:
 
         if len(arrays) == 1:
             mu = self.options.mu if self.options.mu is not None else 0.0
-            res = stats.ttest_1samp(
+            res: Any = stats.ttest_1samp(
                 arrays[0], popmean=mu, alternative=alt_scipy
             )
             # CI は two-sided で再計算（片側 alternative だと inf になる）
-            ci_res = stats.ttest_1samp(
+            ci_res: Any = stats.ttest_1samp(
                 arrays[0], popmean=mu, alternative="two-sided"
             )
             df = float(res.df)
@@ -222,12 +222,19 @@ class StatisticalTest:
         alt_sm = self.options.alternative.value
 
         if len(arrays) == 1:
-            stat, p_val = sm_ztest(arrays[0], value=mu, alternative=alt_sm)
+            stat, p_val = sm_ztest(
+                arrays[0],
+                value=mu,  # type: ignore[arg-type]
+                alternative=alt_sm,  # type: ignore[arg-type]
+            )
             center = float(np.mean(arrays[0]))
             se = float(np.std(arrays[0], ddof=1) / np.sqrt(len(arrays[0])))
         else:
             stat, p_val = sm_ztest(
-                arrays[0], arrays[1], value=mu, alternative=alt_sm
+                arrays[0],
+                arrays[1],
+                value=mu,  # type: ignore[arg-type]
+                alternative=alt_sm,  # type: ignore[arg-type]
             )
             center = float(np.mean(arrays[0]) - np.mean(arrays[1]))
             se = float(
