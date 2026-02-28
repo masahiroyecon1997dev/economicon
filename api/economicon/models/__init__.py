@@ -92,8 +92,11 @@ from economicon.models.regressions import (
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
     GetAnalysisResultResult,
+    OutputResultRequest,
+    OutputResultResult,
     RegressionRequestBody,
     RegressionResult,
+    StarConfig,
 )
 from economicon.models.settings import (
     GetSettingsRequestBody,
@@ -285,4 +288,7 @@ __all__ = [
     "ClearAllAnalysisResultsResult",
     "AddDiagnosticColumnsRequestBody",
     "AddDiagnosticColumnsResult",
+    "StarConfig",
+    "OutputResultRequest",
+    "OutputResultResult",
 ]

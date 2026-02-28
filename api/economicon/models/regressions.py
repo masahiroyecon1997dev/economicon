@@ -2,7 +2,7 @@
 
 from typing import Annotated, Any, Literal
 
-from pydantic import BeforeValidator, Field
+from pydantic import BaseModel, BeforeValidator, Field
 
 from economicon.models.common import BaseRequest, BaseResult
 from economicon.models.entities import RegressionParams, StandardErrorSettings
@@ -266,4 +266,108 @@ class AddDiagnosticColumnsResult(BaseResult):
         alias="addedColumns",
         title="Added Columns",
         description="追加された列名のリスト",
+    )
+
+
+# ---------------------------------------------------------------------------
+# 推定結果フォーマット出力
+# ---------------------------------------------------------------------------
+
+
+class StarConfig(BaseModel):
+    """有意性記号の設定"""
+
+    threshold: float = Field(
+        description="有意水準の閾値（例: 0.05）",
+    )
+    symbol: str = Field(
+        description="有意性を示す記号（例: '**'）",
+    )
+
+
+def _default_stars() -> list[StarConfig]:
+    """デフォルトの有意性記号設定を返す"""
+    return [
+        StarConfig(threshold=0.01, symbol="***"),
+        StarConfig(threshold=0.05, symbol="**"),
+        StarConfig(threshold=0.1, symbol="*"),
+    ]
+
+
+class OutputResultRequest(BaseRequest):
+    """
+    推定結果フォーマット出力リクエスト
+
+    複数の分析結果を LaTeX / Markdown / Text 形式に整形します。
+    """
+
+    result_ids: Annotated[
+        list[str],
+        Field(
+            min_length=1,
+            description="出力する分析結果 ID のリスト（1件以上）",
+        ),
+    ]
+    format: Annotated[
+        Literal["latex", "markdown", "text"],
+        Field(
+            description=(
+                "出力フォーマット。"
+                "latex: LaTeX tabular、"
+                "markdown: Markdown テーブル、"
+                "text: 固定幅テキスト"
+            ),
+        ),
+    ]
+    stat_in_parentheses: Annotated[
+        Literal["se", "t", "p", "none"],
+        Field(
+            default="se",
+            description=(
+                "括弧内に表示する統計量。"
+                "se: 標準誤差、t: t 値、p: p 値、"
+                "none: 括弧行なし"
+            ),
+        ),
+    ] = "se"
+    significance_stars: Annotated[
+        list[StarConfig] | None,
+        Field(
+            default=None,
+            description=(
+                "有意性記号の設定リスト。"
+                "None の場合はデフォルト設定を使用 "
+                "(0.01:***, 0.05:**, 0.1:*)"
+            ),
+        ),
+    ] = None
+    variable_labels: Annotated[
+        dict[str, str] | None,
+        Field(
+            default=None,
+            description=(
+                "変数名から表示ラベルへのマッピング辞書。"
+                "未設定の変数は変数名をそのまま使用。"
+            ),
+        ),
+    ] = None
+    const_at_bottom: Annotated[
+        bool,
+        Field(
+            default=True,
+            description=(
+                "True の場合、定数項を変数リストの最下部に配置する。"
+            ),
+        ),
+    ] = True
+
+
+class OutputResultResult(BaseResult):
+    """推定結果フォーマット出力レスポンス"""
+
+    content: str = Field(
+        description="フォーマット済み出力テキスト",
+    )
+    format: str = Field(
+        description="出力フォーマット (latex / markdown / text)",
     )
