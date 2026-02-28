@@ -78,6 +78,12 @@ async def lifespan(app: FastAPI):
     analysis_result_store = AnalysisResultStore()
     analysis_result_store.clear_all()
     logger.info("Cleanup AnalysisResultStore (tmp model files deleted.)")
+    # import/export でメモリ上に蹜れた設定変更をファイルに一括保存
+    try:
+        settings_manager.save_settings()
+        logger.info("Settings saved on shutdown.")
+    except Exception as e:
+        logger.warning(f"Failed to save settings on shutdown: {e}")
 
 
 app = FastAPI(
