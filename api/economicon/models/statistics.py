@@ -2,15 +2,17 @@
 
 from typing import Annotated, Any
 
-from pydantic import BeforeValidator, Field, field_validator
+from pydantic import BeforeValidator, Field, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
 from economicon.models.common import BaseRequest, BaseResult
 from economicon.models.enums import (
+    AlternativeHypothesis,
     ConfidenceIntervalStatisticsType,
     CorrelationMethod,
     DescriptiveStatisticType,
     MissingHandlingMethod,
+    StatisticalTestType,
 )
 from economicon.models.types import ColumnName, TableName
 
@@ -331,4 +333,220 @@ class CreateCorrelationTableResult(BaseResult):
     table_name: str = Field(
         title="Table Name",
         description="新規作成された相関係数テーブルの名前。",
+    )
+
+
+# ---------------------------------------------------------------------------
+# 統計検定
+# ---------------------------------------------------------------------------
+
+
+def _coerce_test_type(v: Any) -> StatisticalTestType:
+    """JSON文字列を StatisticalTestType に変換する"""
+    if isinstance(v, StatisticalTestType):
+        return v
+    if isinstance(v, str):
+        try:
+            return StatisticalTestType(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in StatisticalTestType)
+            raise PydanticCustomError(
+                "literal_error",
+                "testType must be one of: {expected}",
+                {"expected": valid},
+            ) from None
+    return v
+
+
+def _coerce_alternative(v: Any) -> AlternativeHypothesis:
+    """JSON文字列を AlternativeHypothesis に変換する"""
+    if isinstance(v, AlternativeHypothesis):
+        return v
+    if isinstance(v, str):
+        try:
+            return AlternativeHypothesis(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in AlternativeHypothesis)
+            raise PydanticCustomError(
+                "literal_error",
+                "alternative must be one of: {expected}",
+                {"expected": valid},
+            ) from None
+    return v
+
+
+# サンプル数バリデーション用定数
+_MIN_F_TEST_SAMPLES: int = 2
+_MAX_TZ_TEST_SAMPLES: int = 2
+
+
+class SampleInput(BaseRequest):
+    """検定に使用する1サンプルの指定（テーブル名・列名のペア）"""
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            title="Table Name",
+            description="サンプルを取得するテーブル名。",
+        ),
+    ]
+    column_name: Annotated[
+        ColumnName,
+        Field(
+            title="Column Name",
+            description="サンプルとして使用する列名。",
+        ),
+    ]
+
+
+class StatisticalTestOptions(BaseRequest):
+    """統計検定のオプション設定"""
+
+    alternative: Annotated[
+        AlternativeHypothesis,
+        BeforeValidator(_coerce_alternative),
+        Field(
+            title="Alternative Hypothesis",
+            description=(
+                "対立仮説の方向。"
+                "two-sided: 両側検定（デフォルト）、"
+                "larger: 右側検定、smaller: 左側検定"
+            ),
+            default=AlternativeHypothesis.TWO_SIDED,
+        ),
+    ] = AlternativeHypothesis.TWO_SIDED
+    mu: Annotated[
+        float | None,
+        BeforeValidator(lambda v: float(v) if v is not None else None),
+        Field(
+            title="Mu",
+            description=("1 群検定における比較基準値（デフォルト: 0.0）"),
+            default=None,
+        ),
+    ] = None
+    paired: Annotated[
+        bool,
+        Field(
+            title="Paired",
+            description=("対応のある検定を行うかどうか（デフォルト: False）"),
+            default=False,
+        ),
+    ] = False
+    equal_var: Annotated[
+        bool,
+        Field(
+            title="Equal Variance",
+            description=(
+                "t 検定で等分散を仮定するかどうか。"
+                "False の場合は Welch の t 検定を使用"
+                "（デフォルト: True）"
+            ),
+            default=True,
+        ),
+    ] = True
+
+
+class StatisticalTestRequestBody(BaseRequest):
+    """統計検定リクエスト"""
+
+    test_type: Annotated[
+        StatisticalTestType,
+        BeforeValidator(_coerce_test_type),
+        Field(
+            title="Test Type",
+            description=(
+                "実行する統計検定の種類。"
+                "t-test: t 検定、z-test: z 検定、"
+                "f-test: F 検定 / ANOVA"
+            ),
+        ),
+    ]
+    samples: Annotated[
+        list[SampleInput],
+        Field(
+            title="Samples",
+            description=(
+                "比較対象となるサンプルのリスト。"
+                "各要素にテーブル名と列名を指定する。"
+            ),
+            min_length=1,
+        ),
+    ]
+    options: Annotated[
+        StatisticalTestOptions,
+        Field(
+            title="Options",
+            description=(
+                "検定オプション（対立仮説・等分散仮定・対応の有無など）"
+            ),
+            default_factory=StatisticalTestOptions,
+        ),
+    ]
+
+    @model_validator(mode="before")
+    @classmethod
+    def set_default_options(cls, values: Any) -> Any:
+        """options が未指定の場合にデフォルトを設定する"""
+        if isinstance(values, dict) and "options" not in values:
+            values["options"] = {}
+        return values
+
+    @model_validator(mode="after")
+    def validate_sample_count(
+        self,
+    ) -> StatisticalTestRequestBody:
+        """
+        検定種別に応じたサンプル数のバリデー
+        ション。
+        """
+        n = len(self.samples)
+        match self.test_type:
+            case StatisticalTestType.F_TEST:
+                if n < _MIN_F_TEST_SAMPLES:
+                    raise ValueError(
+                        f"f-test requires at least"
+                        f" {_MIN_F_TEST_SAMPLES} samples,"
+                        f" but got {n}"
+                    )
+            case StatisticalTestType.T_TEST | StatisticalTestType.Z_TEST:
+                if n > _MAX_TZ_TEST_SAMPLES:
+                    raise ValueError(
+                        f"{self.test_type.value} supports up to"
+                        f" {_MAX_TZ_TEST_SAMPLES} samples,"
+                        f" but got {n}"
+                    )
+        return self
+
+
+# ---------------------------------------------------------------------------
+# 統計検定レスポンス
+# ---------------------------------------------------------------------------
+
+
+class StatisticalTestResult(BaseResult):
+    """統計検定レスポンス"""
+
+    statistic: float = Field(
+        title="Statistic",
+        description="検定統計量（t 値 / Z 値 / F 値）",
+    )
+    p_value: float = Field(
+        title="P Value",
+        description="有意確率（p 値）",
+    )
+    df: float | None = Field(
+        title="Degrees of Freedom",
+        description="自由度（z 検定では None）",
+    )
+    confidence_interval: ConfidenceIntervalBounds | None = Field(
+        title="Confidence Interval",
+        description="95% 信頼区間（F 検定では None）",
+    )
+    effect_size: float | None = Field(
+        title="Effect Size",
+        description=(
+            "効果量"
+            "（t 検定: Cohen's d、ANOVA: η²、"
+            "z 検定・分散比 F 検定では None）"
+        ),
     )

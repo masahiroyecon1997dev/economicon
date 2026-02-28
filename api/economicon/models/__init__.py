@@ -69,6 +69,7 @@ from economicon.models.entities import (
     TobitParams,
 )
 from economicon.models.enums import (
+    AlternativeHypothesis,
     ConfidenceIntervalStatisticsType,
     CorrelationMethod,
     DescriptiveStatisticType,
@@ -81,6 +82,7 @@ from economicon.models.enums import (
     NullStrategy,
     RegressionMethodType,
     StandardErrorMethodType,
+    StatisticalTestType,
     TransformMethodType,
 )
 from economicon.models.regressions import (
@@ -107,6 +109,10 @@ from economicon.models.statistics import (
     CreateCorrelationTableResult,
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticsResult,
+    SampleInput,
+    StatisticalTestOptions,
+    StatisticalTestRequestBody,
+    StatisticalTestResult,
     StatisticValue,
 )
 from economicon.models.tables import (
@@ -173,6 +179,8 @@ __all__ = [
     "FilterOperatorType",
     "CorrelationMethod",
     "MissingHandlingMethod",
+    "AlternativeHypothesis",
+    "StatisticalTestType",
     # Types
     "DistributionConfig",
     "TransformMethodConfig",
@@ -254,6 +262,10 @@ __all__ = [
     "DescriptiveStatisticsResult",
     "CreateCorrelationTableRequestBody",
     "CreateCorrelationTableResult",
+    "SampleInput",
+    "StatisticalTestOptions",
+    "StatisticalTestRequestBody",
+    "StatisticalTestResult",
     # Settings
     "GetSettingsRequestBody",
     "GetSettingsResult",
