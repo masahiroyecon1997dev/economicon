@@ -131,6 +131,19 @@ class CreateCorrelationTable:
             work_arrays = arrays
 
         n = len(work_arrays)
+        # listwise + pearson: BLAS 最適化された np.corrcoef で一括計算する。
+        # spearman / kendall は np.corrcoef 非対応のため
+        # _pair_corr ループを使う。
+        if (
+            self.missing_handling == MissingHandlingMethod.LISTWISE
+            and self.method == CorrelationMethod.PEARSON
+        ):
+            corr_np = np.corrcoef(np.column_stack(work_arrays), rowvar=False)
+            return [
+                [cast(float, corr_np[i, j]) for j in range(n)]
+                for i in range(n)
+            ]
+
         # 相関行列は対称行列 (r_ij = r_ji) なので上三角のみ計算し
         # 反転コピーすることで計算量を O(n²) → O(n(n+1)/2) に削減する。
         # 対角成分 (r_ii) は定義上 1.0 であるため直接設定する。
