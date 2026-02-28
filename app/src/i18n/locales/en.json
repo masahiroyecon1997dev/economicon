@@ -34,14 +34,20 @@
     "Calculate": "Calculate",
     "BasicStatistics": "Basic Statistics",
     "Regression": "Regression",
+    "LinearRegressionMenu": "Linear Regression",
     "LinearRegression": "Linear Regression",
     "LassoRegression": "Lasso Regression",
     "RidgeRegression": "Ridge Regression",
-    "InstrumentalVariables": "Instrumental Variables",
+    "NonlinearRegressionMenu": "Nonlinear Regression",
     "DiscreteModel": "Discrete Model",
     "LogitAnalysis": "Logit Analysis",
     "ProbitAnalysis": "Probit Analysis",
-    "TobitAnalysis": "Tobit Analysis"
+    "TobitAnalysis": "Tobit Analysis",
+    "PanelDataMenu": "Panel Data",
+    "FixedEffect": "Fixed Effect Model",
+    "RandomEffect": "Random Effect Model",
+    "CausalInferenceMenu": "Causal Inference",
+    "InstrumentalVariables": "Instrumental Variables"
   },
   "LeftSideMenu": {
     "ImportData": "Import Data",
