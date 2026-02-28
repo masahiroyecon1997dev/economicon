@@ -107,3 +107,15 @@ class CorrelationMethod(StrEnum):
 class MissingHandlingMethod(StrEnum):
     PAIRWISE = "pairwise"
     LISTWISE = "listwise"
+
+
+class StatisticalTestType(StrEnum):
+    T_TEST = "t-test"
+    Z_TEST = "z-test"
+    F_TEST = "f-test"
+
+
+class AlternativeHypothesis(StrEnum):
+    TWO_SIDED = "two-sided"
+    LARGER = "larger"
+    SMALLER = "smaller"

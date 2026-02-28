@@ -9,6 +9,8 @@ from economicon.models import (
     CreateCorrelationTableResult,
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticsResult,
+    StatisticalTestRequestBody,
+    StatisticalTestResult,
     SuccessResponse,
 )
 from economicon.services.data.dependencies import TablesStoreDep
@@ -21,6 +23,9 @@ from economicon.services.statistics.create_correlation_table import (
 )
 from economicon.services.statistics.descriptive_statistics import (
     DescriptiveStatistics,
+)
+from economicon.services.statistics.statistical_test import (
+    StatisticalTest,
 )
 from economicon.utils import create_success_response
 
@@ -124,6 +129,42 @@ async def create_correlation_table(
     """
     # ビジネスロジックの実行
     api = CreateCorrelationTable(body, tables_store)
+    result = run_operation(api)
+
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.post(
+    "/test",
+    response_model=SuccessResponse[StatisticalTestResult],
+)
+async def statistical_test(
+    request: Request,
+    body: StatisticalTestRequestBody,
+    tables_store: TablesStoreDep,
+):
+    """統計的検定を実行するエンドポイント
+
+    t 検定・z 検定・F 検定（分散比検定 / ANOVA）を実行し、
+    検定統計量・p 値・自由度・信頼区間・効果量を返します。
+
+    Parameters
+    ----------
+    request : Request
+        FastAPI のリクエストオブジェクト
+    body : StatisticalTestRequestBody
+        リクエストボディ
+    tables_store : TablesStoreDep
+        テーブルストア依存性
+
+    Returns
+    -------
+    JSONResponse
+        処理結果
+    """
+    api = StatisticalTest(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(
