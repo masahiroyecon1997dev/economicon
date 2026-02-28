@@ -1,7 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useStore } from "@tanstack/react-form";
 import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
-import { startTransition, useActionState, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../api/endpoints";
@@ -28,8 +27,6 @@ const createCalculationSchema = (t: (key: string) => string) =>
       .min(1, t("ValidationMessages.CalculationExpressionRequired")),
   });
 
-type CalculationFormData = z.infer<ReturnType<typeof createCalculationSchema>>;
-
 export const Calculation = () => {
   const { t } = useTranslation();
   const tableList = useTableListStore((state) => state.tableList);
@@ -41,89 +38,61 @@ export const Calculation = () => {
       autoLoadOnMount: true,
     });
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<CalculationFormData>({
-    resolver: zodResolver(createCalculationSchema(t)),
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [filterValue, setFilterValue] = useState<string>("");
+
+  const form = useForm({
     defaultValues: {
       tableName: selectedTableName,
       newColumnName: "",
       calculationExpression: "",
     },
+    validators: {
+      onSubmit: createCalculationSchema(t),
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        const response = await getEconomiconAPI().calculateColumn({
+          tableName: value.tableName,
+          newColumnName: value.newColumnName,
+          addPositionColumn: "",
+          calculationExpression: value.calculationExpression,
+        });
+
+        if (response.code === "OK") {
+          await showMessageDialog(
+            t("Common.OK"),
+            t("CalculationView.CalculationSuccess"),
+          );
+          setCurrentView("DataPreview");
+        } else {
+          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("Error.UnexpectedError");
+        await showMessageDialog(t("Error.Error"), errorMessage);
+      }
+    },
   });
 
-  const newColumnName = watch("newColumnName");
-  const calculationExpression = watch("calculationExpression");
-  const [filterValue, setFilterValue] = useState<string>("");
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  type ActionState = {
-    success: boolean;
-  };
-
-  const handleCalculationAction = async (
-    _prevState: ActionState,
-    formData: FormData,
-  ): Promise<ActionState> => {
-    const tableName = formData.get("tableName") as string;
-    const newColumnName = formData.get("newColumnName") as string;
-    const calculationExpression = formData.get(
-      "calculationExpression",
-    ) as string;
-
-    try {
-      const response = await getEconomiconAPI().calculateColumn({
-        tableName,
-        newColumnName,
-        addPositionColumn: "", // 追加位置未指定（末尾に追加）
-        calculationExpression,
-      });
-
-      if (response.code === "OK") {
-        await showMessageDialog(
-          t("Common.OK"),
-          t("CalculationView.CalculationSuccess"),
-        );
-        setCurrentView("DataPreview");
-        return { success: true };
-      } else {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
-        return { success: false };
-      }
-    } catch (error) {
-      let errorMessage = t("Error.UnexpectedError");
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      await showMessageDialog(t("Error.Error"), errorMessage);
-      return { success: false };
-    }
-  };
-
-  const [, submitAction, isPending] = useActionState(handleCalculationAction, {
-    success: false,
-  });
+  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
   const handleTableChange = (value: string) => {
     setSelectedTableName(value);
-    setValue("tableName", value, { shouldValidate: true });
-    setValue("newColumnName", "");
-    setValue("calculationExpression", "");
+    form.setFieldValue("tableName", value);
+    form.setFieldValue("newColumnName", "");
+    form.setFieldValue("calculationExpression", "");
   };
 
   const insertAtCursor = (text: string) => {
     if (textareaRef.current) {
       const start = textareaRef.current.selectionStart;
       const end = textareaRef.current.selectionEnd;
-      const before = calculationExpression.substring(0, start);
-      const after = calculationExpression.substring(end);
-      const newText = before + text + after;
-      setValue("calculationExpression", newText, { shouldValidate: true });
+      const current = form.getFieldValue("calculationExpression");
+      const newText =
+        current.substring(0, start) + text + current.substring(end);
+      form.setFieldValue("calculationExpression", newText);
 
       setTimeout(() => {
         if (textareaRef.current) {
@@ -136,34 +105,17 @@ export const Calculation = () => {
     }
   };
 
-  const handleOperatorClick = (operator: string) => {
-    insertAtCursor(operator);
-  };
+  const handleOperatorClick = (operator: string) => insertAtCursor(operator);
 
-  const handleColumnClick = (columnName: string) => {
+  const handleColumnClick = (columnName: string) =>
     insertAtCursor(`pl.col("${columnName}")`);
-  };
 
   const handleClearClick = () => {
-    setValue("calculationExpression", "", { shouldValidate: true });
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
+    form.setFieldValue("calculationExpression", "");
+    textareaRef.current?.focus();
   };
 
-  const handleCancel = () => {
-    setCurrentView("DataPreview");
-  };
-
-  const onSubmit = (data: CalculationFormData) => {
-    const formData = new FormData();
-    formData.append("tableName", data.tableName);
-    formData.append("newColumnName", data.newColumnName);
-    formData.append("calculationExpression", data.calculationExpression);
-    startTransition(() => {
-      submitAction(formData);
-    });
-  };
+  const handleCancel = () => setCurrentView("DataPreview");
 
   const filteredColumns = columnList.filter((column) =>
     column.name.toLowerCase().includes(filterValue.toLowerCase()),
@@ -210,62 +162,62 @@ export const Calculation = () => {
       title={t("CalculationView.Title")}
       description={t("CalculationView.Description")}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Hidden fields for FormData */}
-        <input
-          type="hidden"
-          {...register("tableName")}
-          value={selectedTableName}
-        />
-        <input
-          type="hidden"
-          {...register("newColumnName")}
-          value={newColumnName}
-        />
-        <input
-          type="hidden"
-          {...register("calculationExpression")}
-          value={calculationExpression}
-        />
-
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          void form.handleSubmit();
+        }}
+        className="space-y-4"
+      >
         <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-color overflow-hidden">
           <div className="p-4 border-b border-border-color grid grid-cols-1 md:grid-cols-2 gap-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-            <FormField
-              label={t("CalculationView.TargetTable")}
-              htmlFor="target-table"
-            >
-              <Select
-                id="target-table"
-                value={selectedTableName}
-                onValueChange={handleTableChange}
-                error={errors.tableName?.message}
-                placeholder={t("CalculationView.SelectTable")}
-                disabled={isPending}
-              >
-                {tableList.map((table, index) => (
-                  <SelectItem key={index} value={table}>
-                    {table}
-                  </SelectItem>
-                ))}
-              </Select>
-            </FormField>
-            <FormField
-              label={t("CalculationView.NewColumnName")}
-              htmlFor="new-column-name"
-            >
-              <InputText
-                id="new-column-name"
-                value={newColumnName}
-                change={(e) =>
-                  setValue("newColumnName", e.target.value, {
-                    shouldValidate: true,
-                  })
-                }
-                placeholder={t("CalculationView.NewColumnNamePlaceholder")}
-                error={errors.newColumnName?.message}
-                disabled={isPending}
-              />
-            </FormField>
+            {/* テーブル選択 */}
+            <form.Field name="tableName">
+              {(field) => (
+                <FormField
+                  label={t("CalculationView.TargetTable")}
+                  htmlFor="target-table"
+                  error={field.state.meta.errors[0]?.toString()}
+                >
+                  <Select
+                    id="target-table"
+                    value={field.state.value}
+                    onValueChange={handleTableChange}
+                    error={field.state.meta.errors[0]?.toString()}
+                    placeholder={t("CalculationView.SelectTable")}
+                    disabled={isSubmitting}
+                  >
+                    {tableList.map((table, index) => (
+                      <SelectItem key={index} value={table}>
+                        {table}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </FormField>
+              )}
+            </form.Field>
+
+            {/* 新しい列名 */}
+            <form.Field name="newColumnName">
+              {(field) => (
+                <FormField
+                  label={t("CalculationView.NewColumnName")}
+                  htmlFor="new-column-name"
+                  error={field.state.meta.errors[0]?.toString()}
+                >
+                  <InputText
+                    id="new-column-name"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    placeholder={t("CalculationView.NewColumnNamePlaceholder")}
+                    error={field.state.meta.errors[0]?.toString()}
+                    disabled={isSubmitting}
+                  />
+                </FormField>
+              )}
+            </form.Field>
           </div>
           <div className="flex flex-col lg:flex-row h-125">
             <div className="flex-1 flex flex-col min-w-0 border-b lg:border-b-0 lg:border-r border-border-color">
@@ -277,7 +229,7 @@ export const Calculation = () => {
                   onClick={() => handleOperatorClick("+")}
                   className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Addition")}
-                  disabled={isPending}
+                  disabled={isSubmitting}
                 >
                   +
                 </ExpressionHelperButton>
@@ -285,7 +237,7 @@ export const Calculation = () => {
                   onClick={() => handleOperatorClick("-")}
                   className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Subtraction")}
-                  disabled={isPending}
+                  disabled={isSubmitting}
                 >
                   -
                 </ExpressionHelperButton>
@@ -293,7 +245,7 @@ export const Calculation = () => {
                   onClick={() => handleOperatorClick("*")}
                   className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Multiplication")}
-                  disabled={isPending}
+                  disabled={isSubmitting}
                 >
                   *
                 </ExpressionHelperButton>
@@ -301,7 +253,7 @@ export const Calculation = () => {
                   onClick={() => handleOperatorClick("/")}
                   className="min-w-8 px-2 text-sm"
                   title={t("CalculationView.Division")}
-                  disabled={isPending}
+                  disabled={isSubmitting}
                 >
                   /
                 </ExpressionHelperButton>
@@ -309,14 +261,14 @@ export const Calculation = () => {
                 <ExpressionHelperButton
                   onClick={() => handleOperatorClick("(")}
                   title={t("CalculationView.OpenParenthesis")}
-                  disabled={isPending}
+                  disabled={isSubmitting}
                 >
                   (
                 </ExpressionHelperButton>
                 <ExpressionHelperButton
                   onClick={() => handleOperatorClick(")")}
                   title={t("CalculationView.CloseParenthesis")}
-                  disabled={isPending}
+                  disabled={isSubmitting}
                 >
                   )
                 </ExpressionHelperButton>
@@ -326,7 +278,7 @@ export const Calculation = () => {
                     onClick={handleClearClick}
                     className="text-neutral-400 hover:text-accent transition-colors"
                     title={t("CalculationView.ClearAll")}
-                    disabled={isPending}
+                    disabled={isSubmitting}
                   >
                     <span className="material-symbols-outlined text-[20px]">
                       <Eraser />
@@ -334,24 +286,29 @@ export const Calculation = () => {
                   </button>
                 </div>
               </div>
+
+              {/* 数式エディタ */}
               <div className="flex-1 relative bg-white dark:bg-neutral-900">
-                <textarea
-                  ref={textareaRef}
-                  className="w-full h-full p-4 font-mono text-sm text-text-main dark:text-neutral-300 bg-transparent border-none resize-none focus:ring-0 leading-relaxed"
-                  placeholder={t("CalculationView.FormulaPlaceholder")}
-                  value={calculationExpression}
-                  onChange={(e) =>
-                    setValue("calculationExpression", e.target.value, {
-                      shouldValidate: true,
-                    })
-                  }
-                  disabled={isPending}
-                ></textarea>
-                {errors.calculationExpression?.message && (
-                  <p className="absolute bottom-12 left-4 text-xs text-red-600">
-                    {errors.calculationExpression.message}
-                  </p>
-                )}
+                <form.Field name="calculationExpression">
+                  {(field) => (
+                    <>
+                      <textarea
+                        ref={textareaRef}
+                        className="w-full h-full p-4 font-mono text-sm text-text-main dark:text-neutral-300 bg-transparent border-none resize-none focus:ring-0 leading-relaxed"
+                        placeholder={t("CalculationView.FormulaPlaceholder")}
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        disabled={isSubmitting}
+                      />
+                      {field.state.meta.errors[0] && (
+                        <p className="absolute bottom-12 left-4 text-xs text-red-600">
+                          {field.state.meta.errors[0].toString()}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </form.Field>
                 <div className="absolute bottom-0 right-0 left-0 px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-t border-border-color text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2">
                   <span className="material-symbols-outlined text-[16px]">
                     <Info />
@@ -360,6 +317,8 @@ export const Calculation = () => {
                 </div>
               </div>
             </div>
+
+            {/* カラムリスト */}
             <div className="w-full lg:w-72 flex flex-col bg-neutral-50 dark:bg-surface-dark">
               <div className="p-3 border-b border-border-color">
                 <h3 className="text-sm text-gray-700 font-semibold dark:text-white flex items-center gap-2">
@@ -385,7 +344,7 @@ export const Calculation = () => {
                       type="button"
                       onClick={() => handleColumnClick(column.name)}
                       className="w-full flex items-center justify-between group p-2 rounded hover:bg-white dark:hover:bg-neutral-800 hover:shadow-sm border border-transparent hover:border-border-color transition-all text-left"
-                      disabled={isPending}
+                      disabled={isSubmitting}
                     >
                       <div className="flex items-center gap-2 overflow-hidden">
                         <span
@@ -407,10 +366,11 @@ export const Calculation = () => {
             </div>
           </div>
         </div>
+
         <ActionButtonBar
           cancelText={t("Common.Cancel")}
           selectText={
-            isPending
+            isSubmitting
               ? t("CalculationView.ExecutingCalculation")
               : t("CalculationView.ExecuteCalculation")
           }
