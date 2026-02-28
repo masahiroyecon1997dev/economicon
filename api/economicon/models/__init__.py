@@ -70,11 +70,13 @@ from economicon.models.entities import (
 )
 from economicon.models.enums import (
     ConfidenceIntervalStatisticsType,
+    CorrelationMethod,
     DescriptiveStatisticType,
     DistributionType,
     DummyMode,
     FilterOperatorType,
     JoinType,
+    MissingHandlingMethod,
     MissingValueHandlingType,
     NullStrategy,
     RegressionMethodType,
@@ -99,6 +101,8 @@ from economicon.models.statistics import (
     ConfidenceIntervalBounds,
     ConfidenceIntervalRequestBody,
     ConfidenceIntervalResult,
+    CreateCorrelationTableRequestBody,
+    CreateCorrelationTableResult,
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticsResult,
     StatisticValue,
@@ -164,6 +168,8 @@ __all__ = [
     "DescriptiveStatisticType",
     "JoinType",
     "FilterOperatorType",
+    "CorrelationMethod",
+    "MissingHandlingMethod",
     # Types
     "DistributionConfig",
     "TransformMethodConfig",
@@ -242,6 +248,8 @@ __all__ = [
     "StatisticValue",
     "DescriptiveStatisticsRequestBody",
     "DescriptiveStatisticsResult",
+    "CreateCorrelationTableRequestBody",
+    "CreateCorrelationTableResult",
     # Settings
     "GetSettingsRequestBody",
     "GetSettingsResult",
