@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from fastapi import APIRouter, Request
@@ -13,7 +14,10 @@ from economicon.models import (
     ImportFileResult,
     SuccessResponse,
 )
-from economicon.services.data.dependencies import TablesStoreDep
+from economicon.services.data.dependencies import (
+    SettingsStoreDep,
+    TablesStoreDep,
+)
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.data_io.export_csv import ExportCsv
 from economicon.services.data_io.export_excel import ExportExcel
@@ -22,7 +26,7 @@ from economicon.services.data_io.import_csv import ImportCsv
 from economicon.services.data_io.import_excel import ImportExcel
 from economicon.services.data_io.import_parquet import ImportParquet
 from economicon.services.operation import run_operation
-from economicon.utils import create_success_response
+from economicon.utils import create_success_response, logger
 from economicon.utils.exceptions import ProcessingError
 
 router = APIRouter(
@@ -91,6 +95,7 @@ async def import_file(
     request: Request,
     body: ImportFileRequestBody,
     tables_store: TablesStoreDep,
+    settings_store: SettingsStoreDep,
 ):
     """拡張子に基づいてファイルをインポートしてテーブルを作成するエンドポイント
 
@@ -98,6 +103,9 @@ async def import_file(
     - ``.csv`` / ``.tsv`` → CSV インポーター（separator / encoding が有効）
     - ``.xlsx`` / ``.xls`` → Excel インポーター（sheet_name が有効）
     - ``.parquet``         → Parquet インポーター
+
+    インポート成功後、ファイルの親ディレクトリを
+    ``last_opened_path`` として設定ファイルに保存する。
 
     Parameters
     ----------
@@ -107,6 +115,8 @@ async def import_file(
         リクエストボディ
     tables_store : TablesStoreDep
         依存注入されたテーブルストア
+    settings_store : SettingsStoreDep
+        依存注入された設定ストア
 
     Returns
     -------
@@ -115,6 +125,16 @@ async def import_file(
     """
     api = get_import_api(body, tables_store)
     result = run_operation(api)
+
+    # インポート成功後、最後に開いたパスを設定ファイルへ保存
+    # 非クリティカルな処理のため、失敗しても本体レスポンスに影響しない
+    try:
+        parent_dir = str(Path(body.file_path).parent).replace(os.sep, "/")
+        settings_store.update_settings(last_opened_path=parent_dir)
+        settings_store.save_settings()
+        logger.info(f"Updated last_opened_path: {parent_dir}")
+    except Exception as e:
+        logger.warning(f"Failed to update last_opened_path in settings: {e}")
 
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result

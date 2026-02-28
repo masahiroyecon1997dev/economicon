@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import polars as pl
 import pytest
@@ -677,3 +678,26 @@ def test_import_csv_encoding_mismatch_shift_jis_as_utf8(client, prepared_data):
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert ErrorCode.CSV_IMPORT_ERROR == response_data["code"]
     assert _CSV_IMPORT_ERROR_MSG == response_data["message"]
+
+
+def test_import_csv_saves_last_opened_path(
+    client, prepared_data, settings_store
+):
+    """
+    CSVインポート成功後に last_opened_path が設定ファイルへ
+    保存されるテスト
+    """
+    tables_store, test_dir = prepared_data
+    test_csv = f"{test_dir}/TestLastOpened.csv"
+    pl.DataFrame({"a": [1, 2]}).write_csv(test_csv)
+    request_data = {
+        "filePath": test_csv,
+        "tableName": "TestLastOpenedCsv",
+        "separator": ",",
+    }
+    response = client.post("/api/data/import", json=request_data)
+    assert response.status_code == status.HTTP_200_OK
+    # last_opened_path にファイルの親ディレクトリが設定されていることを確認
+    expected_path = str(Path(test_csv).parent).replace(os.sep, "/")
+    actual_path = settings_store.get_settings().last_opened_path
+    assert expected_path == actual_path

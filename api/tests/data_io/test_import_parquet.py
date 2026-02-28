@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import numpy as np
 import polars as pl
@@ -464,3 +465,25 @@ def test_import_parquet_tablename_japanese(client, prepared_data):
     assert response.status_code == status.HTTP_200_OK
     assert "OK" == response_data["code"]
     assert "人口統計データ" == response_data["result"]["tableName"]
+
+
+def test_import_parquet_saves_last_opened_path(
+    client, prepared_data, settings_store
+):
+    """
+    Parquetインポート成功後に last_opened_path が設定ファイルへ
+    保存されるテスト
+    """
+    tables_store, test_dir = prepared_data
+    test_parquet = f"{test_dir}/TestLastOpened.parquet"
+    pl.DataFrame({"a": [1, 2]}).write_parquet(test_parquet)
+    request_data = {
+        "filePath": test_parquet,
+        "tableName": "TestLastOpenedParquet",
+    }
+    response = client.post("/api/data/import", json=request_data)
+    assert response.status_code == status.HTTP_200_OK
+    # last_opened_path にファイルの親ディレクトリが設定されていることを確認
+    expected_path = str(Path(test_parquet).parent).replace(os.sep, "/")
+    actual_path = settings_store.get_settings().last_opened_path
+    assert expected_path == actual_path
