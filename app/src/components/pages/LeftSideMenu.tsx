@@ -36,7 +36,7 @@ export const LeftSideMenu = () => {
   };
 
   return (
-    <aside className="flex h-full w-full flex-col overflow-hidden bg-brand-primary text-white">
+    <aside className="flex h-full w-full flex-col overflow-hidden bg-brand-primary dark:bg-gray-900 text-white">
       <SectionHeading title={t("LeftSideMenu.Tables")} />
       <div className="flex-1 overflow-y-auto px-4 pb-4">
         <TableNav
