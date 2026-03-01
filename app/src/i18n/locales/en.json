@@ -18,7 +18,7 @@
     "Maximize": "Maximize",
     "Restore": "Restore",
     "Close": "Close",
-    "Help": "Help",
+    "Settings": "Settings",
     "MoreMenus": "More menus"
   },
   "HeaderMenu": {
@@ -288,5 +288,36 @@
     "AddPositionColumn": "Insert after column",
     "AddPositionColumnDesc": "New column will be inserted to the right of the selected column.",
     "Success": "Operation completed successfully."
+  },
+  "SettingsDialog": {
+    "Title": "Settings",
+    "TabsLabel": "Settings categories",
+    "Save": "Save changes",
+    "Saving": "Saving...",
+    "Placeholder": "This section will be available in a future update.",
+    "Tabs": {
+      "Appearance": "Appearance",
+      "General": "General",
+      "Data": "Data",
+      "Log": "Log"
+    },
+    "Theme": {
+      "Label": "Theme",
+      "Description": "Choose the appearance theme for the application.",
+      "Light": "Light",
+      "Dark": "Dark"
+    },
+    "Language": {
+      "Label": "Language",
+      "Ja": "日本語",
+      "En": "English"
+    },
+    "Encoding": {
+      "Label": "File Encoding"
+    },
+    "LogPath": {
+      "Label": "Log file path",
+      "NotSet": "(not set)"
+    }
   }
 }
