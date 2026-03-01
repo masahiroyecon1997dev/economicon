@@ -192,7 +192,10 @@ export const AppBar = () => {
         {
           id: "create-table",
           label: t("HeaderMenu.CreateTable"),
-          handleSelect: () => {},
+          handleSelect: () => {
+            setCurrentView("CreateTable");
+            close();
+          },
         },
         {
           id: "join-table",

@@ -311,6 +311,24 @@
     "SourceColumnName": "Source column",
     "Success": "Operation completed successfully."
   },
+  "CreateTableView": {
+    "Title": "Create Table",
+    "Description": "Create an empty table by specifying a name, row count, and columns.",
+    "TableName": "Table Name",
+    "TableNamePlaceholder": "e.g. my_table",
+    "RowCount": "Row Count",
+    "ColumnsSection": "Column Definition",
+    "ColumnsCount": "{{count}} columns",
+    "NewColumnPlaceholder": "Enter column name and press Enter to add",
+    "AddColumn": "Add",
+    "MoveUp": "Move up",
+    "MoveDown": "Move down",
+    "RemoveColumn": "Remove",
+    "ColumnRequired": "Please add at least one column.",
+    "ColumnNameDuplicate": "A column with the same name already exists.",
+    "ColumnNameInvalidChars": "The column name contains invalid characters.",
+    "Submit": "Create Table"
+  },
   "SettingsDialog": {
     "Title": "Settings",
     "TabsLabel": "Settings categories",
