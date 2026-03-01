@@ -175,9 +175,11 @@ def test_delete_result_by_id_api(client, tables_store):
     assert data["code"] == "OK"
     assert data["result"]["deletedResultId"] == result_id
 
-    # 削除後は取得不可になる（KeyError が TestClient 上で例外として伝播する）
-    with pytest.raises(KeyError, match=result_id):
-        client.get(f"{URL_RESULTS}/{result_id}")
+    # 削除後は取得不可になる（404 Not Found）
+    resp_deleted = client.get(f"{URL_RESULTS}/{result_id}")
+    assert resp_deleted.status_code == status.HTTP_404_NOT_FOUND
+    body = resp_deleted.json()
+    assert body.get("code") == "RESULT_NOT_FOUND"
 
 
 def test_clear_all_results_api(client, tables_store):
