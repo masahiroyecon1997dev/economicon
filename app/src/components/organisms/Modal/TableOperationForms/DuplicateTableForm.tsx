@@ -2,10 +2,10 @@
  * テーブル複製フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
-import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -14,6 +14,7 @@ import {
 import { useTableListStore } from "../../../../stores/tableList";
 import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
+import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
 
 type DuplicateTableFormProps = {
@@ -33,6 +34,8 @@ export const DuplicateTableForm = ({
   const hasControlChars = (s: string) =>
     s.split("").some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127);
 
+  const [apiError, setApiError] = useState<string | null>(null);
+
   const form = useForm({
     defaultValues: { newTableName: `${tableName}_copy` },
     validators: {
@@ -48,6 +51,7 @@ export const DuplicateTableForm = ({
       }),
     },
     onSubmit: async ({ value }) => {
+      setApiError(null);
       try {
         const response = await getEconomiconAPI().duplicateTable({
           tableName,
@@ -60,8 +64,7 @@ export const DuplicateTableForm = ({
           }
           onSuccess();
         } else {
-          await showMessageDialog(
-            t("Error.Error"),
+          setApiError(
             replaceParamNames(
               getResponseErrorMessage(response, t("Error.UnexpectedError")),
               { newTableName: t("DuplicateTableForm.NewTableName") },
@@ -69,8 +72,7 @@ export const DuplicateTableForm = ({
           );
         }
       } catch (error) {
-        await showMessageDialog(
-          t("Error.Error"),
+        setApiError(
           replaceParamNames(
             extractApiErrorMessage(error, t("Error.UnexpectedError")),
             { newTableName: t("DuplicateTableForm.NewTableName") },
@@ -127,6 +129,7 @@ export const DuplicateTableForm = ({
         }}
       </form.Field>
 
+      {apiError && <ErrorAlert message={apiError} />}
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
           {t("Common.Cancel")}

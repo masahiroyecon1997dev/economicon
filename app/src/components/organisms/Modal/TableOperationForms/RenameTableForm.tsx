@@ -2,10 +2,10 @@
  * テーブル名変更フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
-import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -15,6 +15,7 @@ import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
 import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
+import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
 
 type RenameTableFormProps = {
@@ -37,6 +38,8 @@ export const RenameTableForm = ({
   const hasControlChars = (s: string) =>
     s.split("").some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127);
 
+  const [apiError, setApiError] = useState<string | null>(null);
+
   const form = useForm({
     defaultValues: { newTableName: tableName },
     validators: {
@@ -52,6 +55,7 @@ export const RenameTableForm = ({
       }),
     },
     onSubmit: async ({ value }) => {
+      setApiError(null);
       try {
         const response = await getEconomiconAPI().renameTable({
           oldTableName: tableName,
@@ -79,8 +83,7 @@ export const RenameTableForm = ({
           }
           onSuccess();
         } else {
-          await showMessageDialog(
-            t("Error.Error"),
+          setApiError(
             replaceParamNames(
               getResponseErrorMessage(response, t("Error.UnexpectedError")),
               {
@@ -91,8 +94,7 @@ export const RenameTableForm = ({
           );
         }
       } catch (error) {
-        await showMessageDialog(
-          t("Error.Error"),
+        setApiError(
           replaceParamNames(
             extractApiErrorMessage(error, t("Error.UnexpectedError")),
             {
@@ -152,6 +154,7 @@ export const RenameTableForm = ({
         }}
       </form.Field>
 
+      {apiError && <ErrorAlert message={apiError} />}
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
           {t("Common.Cancel")}

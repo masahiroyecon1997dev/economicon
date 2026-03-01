@@ -2,10 +2,10 @@
  * 列複製フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
-import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -13,6 +13,7 @@ import {
 } from "../../../../lib/utils/apiError";
 import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
+import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
 import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
 import type { ColumnOperationFormPropsType } from "./types";
@@ -25,6 +26,8 @@ export const DuplicateColumnForm = ({
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
 
+  const [apiError, setApiError] = useState<string | null>(null);
+
   const form = useForm({
     defaultValues: { newColumnName: `${column.name}_copy` },
     validators: {
@@ -35,6 +38,7 @@ export const DuplicateColumnForm = ({
       }),
     },
     onSubmit: async ({ value }) => {
+      setApiError(null);
       try {
         const response = await getEconomiconAPI().duplicateColumn({
           tableName,
@@ -46,8 +50,7 @@ export const DuplicateColumnForm = ({
           const updatedList = await fetchUpdatedColumnList(tableName);
           onSuccess(updatedList);
         } else {
-          await showMessageDialog(
-            t("Error.Error"),
+          setApiError(
             replaceParamNames(
               getResponseErrorMessage(response, t("Error.UnexpectedError")),
               {
@@ -58,8 +61,7 @@ export const DuplicateColumnForm = ({
           );
         }
       } catch (error) {
-        await showMessageDialog(
-          t("Error.Error"),
+        setApiError(
           replaceParamNames(
             extractApiErrorMessage(error, t("Error.UnexpectedError")),
             {
@@ -122,6 +124,7 @@ export const DuplicateColumnForm = ({
         }}
       </form.Field>
 
+      {apiError && <ErrorAlert message={apiError} />}
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
           {t("Common.Cancel")}
