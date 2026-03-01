@@ -169,6 +169,12 @@ class AnalysisResult:
                 f"Model file not found: '{self._model_path}'"
             )
         with open(path, "rb") as f:
+            # NOTE: pickle.load はデシリアライズ時に任意コードを実行できる形式
+            # だが、ここでロードするファイルは必ず同一プロセスが
+            # get_tmp_models_dir() 配下に書き出した {uuid}.pkl に限定される
+            # ため通常運用でのリスクはない。ただし PC がマルウェアに侵害
+            # されている状況では tmpDir への細工により悪用される可能性がある
+            # 点は認識しておく。
             return pickle.load(f)
 
     def delete_model_file(self) -> None:

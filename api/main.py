@@ -36,12 +36,17 @@ _dev_server_url = os.environ.get(
     "VITE_DEV_SERVER_URL", "http://localhost:5173"
 )
 
-# 許可するオリジン一覧（Tauri WebView + 開発サーバーのみに限定）
+# 開発モードフラグ（economicon_DEV_RUN=true のときのみ dev_server_url を許可）
+_is_dev_mode = os.environ.get("economicon_DEV_RUN", "false").lower() == "true"
+
+# 許可するオリジン一覧
+# Tauri WebView のみ。開発モード時は Vite dev server も追加
 _ALLOW_ORIGINS = [
-    _dev_server_url,
     "tauri://localhost",  # Windows / Linux の Tauri WebView
     "https://tauri.localhost",  # macOS の Tauri WebView
 ]
+if _is_dev_mode:
+    _ALLOW_ORIGINS.append(_dev_server_url)
 
 # Babel設定 - SettingsStoreからロケールを取得する関数を設定
 configs = BabelConfigs(
