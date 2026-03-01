@@ -48,7 +48,7 @@ const OVERSCAN_COUNT = 50;
 // スケルトンセル
 // ---------------------------------------------------------------------------
 const SkeletonCell = () => (
-  <div className="px-6 py-4">
+  <div className="px-3 py-4">
     <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
   </div>
 );
@@ -93,7 +93,7 @@ const EditableCell = ({ value }: { value: TableDataCellType }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [cellValue, setCellValue] = useState<TableDataCellType>(value);
   return (
-    <div className="px-6 py-4">
+    <div className="px-3 py-4 overflow-hidden">
       {isEditing ? (
         <TableInputText
           value={cellValue}
@@ -101,7 +101,9 @@ const EditableCell = ({ value }: { value: TableDataCellType }) => {
           onBlur={() => setIsEditing(false)}
         />
       ) : (
-        <CellContent value={cellValue} onEdit={() => setIsEditing(true)} />
+        <div className="truncate text-sm">
+          <CellContent value={cellValue} onEdit={() => setIsEditing(true)} />
+        </div>
       )}
     </div>
   );
@@ -111,6 +113,9 @@ const EditableCell = ({ value }: { value: TableDataCellType }) => {
 // メインコンポーネント
 // ---------------------------------------------------------------------------
 export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
+  // useReactTable が返す関数はメモ化不可のため React Compiler をスキップ
+  "use no memo";
+
   const { tableName, columnList, totalRows } = tableInfo;
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -156,7 +161,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
           })
           .then(() => {
             // チャンクキャッシュを無効化してデータを再取得
-            invalidateTable(tableName);
+            invalidateTable(tableName, {});
           });
       } else {
         setDialogState({ open: true, operation: op, column: col });
@@ -183,11 +188,12 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
         id: "rowNumber",
         header: "#",
         cell: ({ row }) => (
-          <div className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+          <div className="px-3 py-4 font-medium text-gray-900 whitespace-nowrap">
             {row.index + 1}
           </div>
         ),
         size: 60,
+        enableResizing: false,
       },
     ];
     columnList.forEach((column: ColumnType) => {
@@ -195,6 +201,8 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
       cols.push({
         id: column.name,
         accessorKey: column.name,
+        size: 180,
+        minSize: 80,
         header: () => (
           <div className="group flex items-center gap-1.5 min-w-0">
             <span
@@ -239,7 +247,8 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
     columns,
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: false,
-    enableColumnResizing: false,
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
   });
 
   const { rows } = table.getRowModel();
@@ -289,11 +298,11 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
     return (
       <div className="overflow-hidden rounded-lg border border-brand-border bg-white shadow-sm h-full flex flex-col">
         <table className="w-full text-sm text-left text-gray-500">
-          <thead className="sticky top-0 z-10 text-xs text-gray-700 uppercase bg-gray-50">
+          <thead className="sticky top-0 z-10 text-xs text-gray-700 bg-gray-50">
             <tr>
-              <th className="px-6 py-3">#</th>
+              <th className="px-3 py-3">#</th>
               {columnList.map((col) => (
-                <th key={col.name} className="px-6 py-3">
+                <th key={col.name} className="px-3 py-3">
                   {col.name}
                 </th>
               ))}
@@ -319,11 +328,14 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
       className="overflow-auto rounded-lg border border-brand-border bg-white shadow-sm h-full"
     >
       <div style={{ height: `${totalSize}px`, position: "relative" }}>
-        <table className="w-full text-sm text-left text-gray-500">
+        <table
+          className="text-sm text-left text-gray-500 table-fixed"
+          style={{ width: table.getCenterTotalSize() }}
+        >
           <thead
             ref={setNodeRef}
             className={cn(
-              "sticky top-0 z-10 text-xs text-gray-700 uppercase bg-gray-50",
+              "sticky top-0 z-10 text-xs text-gray-700 bg-gray-50",
               isOver && "bg-gray-500",
             )}
           >
@@ -332,7 +344,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-6 py-3"
+                    className="px-3 py-3 relative select-none overflow-hidden"
                     style={{ width: header.getSize() }}
                     onContextMenu={handleContextMenu}
                   >
@@ -342,6 +354,17 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
+                    {header.column.getCanResize() && (
+                      <div
+                        onMouseDown={header.getResizeHandler()}
+                        onTouchStart={header.getResizeHandler()}
+                        className={cn(
+                          "absolute right-0 top-0 h-full w-1 cursor-col-resize bg-gray-300 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity",
+                          header.column.getIsResizing() &&
+                            "opacity-100 bg-brand-primary",
+                        )}
+                      />
+                    )}
                   </th>
                 ))}
               </tr>

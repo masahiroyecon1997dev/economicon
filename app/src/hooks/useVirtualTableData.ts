@@ -12,10 +12,7 @@
 import { tableFromIPC, type Table as ArrowTable } from "apache-arrow";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchDataToArrow } from "../api/bridge/tauri-commands";
-import {
-  CHUNK_SIZE,
-  useTableChunkStore,
-} from "../stores/tableChunkStore";
+import { CHUNK_SIZE, useTableChunkStore } from "../stores/tableChunkStore";
 import { useTableInfosStore } from "../stores/tableInfos";
 import type { TalbeDataRowType } from "../types/commonTypes";
 
@@ -64,7 +61,7 @@ export const useVirtualTableData = ({
   enabled = true,
 }: UseVirtualTableDataOptions) => {
   // バージョン購読: チャンク追加/クリア時に再レンダーされる
-  useTableChunkStore((s) => s.versions[tableName] ?? 0);
+  const version = useTableChunkStore((s) => s.versions[tableName] ?? 0);
 
   // フライト中チャンクの重複防止（Ref: 再レンダー不要）
   const fetchingChunksRef = useRef<Set<number>>(new Set());
@@ -122,7 +119,7 @@ export const useVirtualTableData = ({
         setIsLoading(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [tableName, enabled],
   );
 
@@ -137,6 +134,23 @@ export const useVirtualTableData = ({
       void fetchChunk(0);
     }
   }, [tableName, enabled, fetchChunk]);
+
+  // ---------------------------------------------------------------------------
+  // バージョン更新時: clearTable 後（chunk 0 が消えた）なら再フェッチ
+  // setChunk によるバージョン更新では chunk 0 が存在するためスキップされる
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (!useTableChunkStore.getState().hasChunk(tableName, 0)) {
+      parsedChunksRef.current.clear();
+      fetchingChunksRef.current.clear();
+      if (enabled) {
+        void fetchChunk(0);
+      }
+    }
+    // version を依存に入れることで clearTable 後の再レンダー時に発火
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [version]);
 
   // ---------------------------------------------------------------------------
   // 行データ取得（VirtualTable から呼ばれる）
