@@ -9,6 +9,7 @@ import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
+  replaceParamNames,
 } from "../../../../lib/utils/apiError";
 import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
@@ -46,13 +47,25 @@ export const RenameColumnForm = ({
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+            replaceParamNames(
+              getResponseErrorMessage(response, t("Error.UnexpectedError")),
+              {
+                newColumnName: t("RenameColumnForm.NewColumnName"),
+                oldColumnName: t("RenameColumnForm.CurrentColumnName"),
+              },
+            ),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          replaceParamNames(
+            extractApiErrorMessage(error, t("Error.UnexpectedError")),
+            {
+              newColumnName: t("RenameColumnForm.NewColumnName"),
+              oldColumnName: t("RenameColumnForm.CurrentColumnName"),
+            },
+          ),
         );
       }
     },

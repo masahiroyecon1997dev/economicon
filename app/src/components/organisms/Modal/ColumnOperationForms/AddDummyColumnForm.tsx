@@ -9,6 +9,7 @@ import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
+  replaceParamNames,
 } from "../../../../lib/utils/apiError";
 import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
@@ -65,13 +66,31 @@ export const AddDummyColumnForm = ({
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+            replaceParamNames(
+              getResponseErrorMessage(response, t("Error.UnexpectedError")),
+              {
+                dummyColumnName: t("AddDummyColumnForm.DummyColumnName"),
+                sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+                targetValue: t("AddDummyColumnForm.TargetValue"),
+                nullStrategy: t("AddDummyColumnForm.NullStrategy"),
+                dropBaseValue: t("AddDummyColumnForm.DropBaseValue"),
+              },
+            ),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          replaceParamNames(
+            extractApiErrorMessage(error, t("Error.UnexpectedError")),
+            {
+              dummyColumnName: t("AddDummyColumnForm.DummyColumnName"),
+              sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+              targetValue: t("AddDummyColumnForm.TargetValue"),
+              nullStrategy: t("AddDummyColumnForm.NullStrategy"),
+              dropBaseValue: t("AddDummyColumnForm.DropBaseValue"),
+            },
+          ),
         );
       }
     },

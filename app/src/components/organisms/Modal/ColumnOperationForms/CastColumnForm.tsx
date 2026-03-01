@@ -9,6 +9,7 @@ import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
+  replaceParamNames,
 } from "../../../../lib/utils/apiError";
 import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
@@ -74,13 +75,27 @@ export const CastColumnForm = ({
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+            replaceParamNames(
+              getResponseErrorMessage(response, t("Error.UnexpectedError")),
+              {
+                newColumnName: t("CastColumnForm.NewColumnName"),
+                sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+                targetType: t("CastColumnForm.TargetType"),
+              },
+            ),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          replaceParamNames(
+            extractApiErrorMessage(error, t("Error.UnexpectedError")),
+            {
+              newColumnName: t("CastColumnForm.NewColumnName"),
+              sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+              targetType: t("CastColumnForm.TargetType"),
+            },
+          ),
         );
       }
     },
