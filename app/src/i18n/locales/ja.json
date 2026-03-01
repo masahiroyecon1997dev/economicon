@@ -442,6 +442,24 @@
     "SourceColumnName": "元の列",
     "Success": "操作が完了しました。"
   },
+  "CreateTableView": {
+    "Title": "テーブル作成",
+    "Description": "テーブル名・行数・列を指定して空のテーブルを作成します。",
+    "TableName": "テーブル名",
+    "TableNamePlaceholder": "例: my_table",
+    "RowCount": "行数",
+    "ColumnsSection": "列の定義",
+    "ColumnsCount": "{{count}} 列",
+    "NewColumnPlaceholder": "列名を入力して Enter で追加",
+    "AddColumn": "追加",
+    "MoveUp": "上に移動",
+    "MoveDown": "下に移動",
+    "RemoveColumn": "削除",
+    "ColumnRequired": "列を 1 つ以上追加してください。",
+    "ColumnNameDuplicate": "同じ名前の列がすでに存在します。",
+    "ColumnNameInvalidChars": "列名に使用できない文字が含まれています。",
+    "Submit": "テーブルを作成"
+  },
   "SettingsDialog": {
     "Title": "設定",
     "TabsLabel": "設定カテゴリ",

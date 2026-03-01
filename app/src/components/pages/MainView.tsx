@@ -1,6 +1,7 @@
 import { useCurrentPageStore } from "../../stores/currentView";
 import { Calculation } from "./Calculation";
 import { CreateSimulationDataTable } from "./CreateSimulationDataTable";
+import { CreateTable } from "./CreateTable";
 import { ImportDataFile } from "./ImportDataFile";
 import { Regression } from "./RegressionView";
 import { SaveData } from "./SaveData";
@@ -13,6 +14,8 @@ export const MainView = () => {
     switch (currentView) {
       case "ImportDataFile":
         return <ImportDataFile />;
+      case "CreateTable":
+        return <CreateTable />;
       case "LinearRegressionForm":
         return <Regression />;
       case "CreateSimulationDataTable":
