@@ -42,7 +42,26 @@ type VirtualTableProps = {
   tableInfo: TableInfoType;
 };
 
-const OVERSCAN_COUNT = 50;
+const OVERSCAN_COUNT = 15;
+
+// ---------------------------------------------------------------------------
+// 列名の描画幅計測（全角文字・半角文字を区別）
+// ---------------------------------------------------------------------------
+const measureColumnName = (name: string): number => {
+  let width = 0;
+  for (const char of name) {
+    const code = char.codePointAt(0) ?? 0;
+    // ひらがな・カタカナ・漢字・全角記号等は半角の約2倍幅
+    const isFullWidth =
+      (code >= 0x3000 && code <= 0x9fff) || // CJK + ひらがな + カタカナ
+      (code >= 0xac00 && code <= 0xd7af) || // ハングル音節
+      (code >= 0xf900 && code <= 0xfaff) || // CJK 互換漢字
+      (code >= 0xff01 && code <= 0xff60) || // 全角英数字・記号
+      (code >= 0xffe0 && code <= 0xffe6); // 全角記号
+    width += isFullWidth ? 13 : 7;
+  }
+  return width;
+};
 
 // ---------------------------------------------------------------------------
 // スケルトンセル
@@ -196,10 +215,9 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
         enableResizing: false,
       },
     ];
-    // 列名の文字数から幅を計算（バッジ+ギャップ+メニュー+パディング ≈ 78px + 文字幅）
-    const HEADER_OVERHEAD = 78;
-    const CHAR_WIDTH = 6.5;
-    const MAX_COL_WIDTH = 220;
+    // 列名の描画幅から幅を計算（バッジ+ギャップ+メニュー+パディング ≈ 68px）
+    const HEADER_OVERHEAD = 68;
+    const MAX_COL_WIDTH = 120;
     const MIN_COL_WIDTH = 72;
 
     columnList.forEach((column: ColumnType) => {
@@ -208,7 +226,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
         MAX_COL_WIDTH,
         Math.max(
           MIN_COL_WIDTH,
-          Math.round(HEADER_OVERHEAD + column.name.length * CHAR_WIDTH),
+          Math.round(HEADER_OVERHEAD + measureColumnName(column.name)),
         ),
       );
       cols.push({
@@ -339,6 +357,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
     <div
       ref={parentRef}
       className="overflow-auto rounded-lg border border-brand-border bg-white shadow-sm h-full"
+      style={{ willChange: "scroll-position" }}
     >
       <div style={{ height: `${totalSize}px`, position: "relative" }}>
         <table

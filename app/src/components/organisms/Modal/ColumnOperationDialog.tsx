@@ -122,9 +122,9 @@ export const ColumnOperationDialog = ({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-gray-900/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:duration-200 data-[state=closed]:duration-150" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-gray-900/40" />
         <Dialog.Content
-          className={`fixed left-1/2 top-[48%] z-50 w-full ${getDialogWidth(operation)} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:slide-in-from-top-6 data-[state=closed]:slide-out-to-top-4 data-[state=open]:duration-200 data-[state=closed]:duration-150`}
+          className={`fixed left-1/2 top-[48%] z-50 w-full ${getDialogWidth(operation)} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-xl overflow-hidden`}
         >
           {/* ヘッダー */}
           <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">

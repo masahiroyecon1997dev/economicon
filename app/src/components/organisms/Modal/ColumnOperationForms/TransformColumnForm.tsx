@@ -197,24 +197,36 @@ export const TransformColumnForm = ({
         )}
       </div>
 
-      <form.Field name="newColumnName">
-        {(field) => (
-          <FormField
-            label={t("TransformColumnForm.NewColumnName")}
-            htmlFor="tf-new-name"
-            error={field.state.meta.errors[0]?.toString()}
-          >
-            <InputText
-              id="tf-new-name"
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              placeholder={t("TransformColumnForm.NewColumnNamePlaceholder")}
-              error={field.state.meta.errors[0]?.toString()}
-              disabled={isSubmitting}
-            />
-          </FormField>
-        )}
+      <form.Field
+        name="newColumnName"
+        validators={{
+          onChange: ({ value }) =>
+            value.trim().length === 0
+              ? t("ValidationMessages.NewColumnNameRequired")
+              : undefined,
+        }}
+      >
+        {(field) => {
+          const errorMsg = field.state.meta.isTouched
+            ? (field.state.meta.errors[0] as string | undefined)
+            : undefined;
+          return (
+            <FormField
+              label={t("TransformColumnForm.NewColumnName")}
+              htmlFor="tf-new-name"
+              error={errorMsg}
+            >
+              <InputText
+                id="tf-new-name"
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                placeholder={t("TransformColumnForm.NewColumnNamePlaceholder")}
+                disabled={isSubmitting}
+              />
+            </FormField>
+          );
+        }}
       </form.Field>
 
       <div className="flex justify-end gap-2 pt-2">

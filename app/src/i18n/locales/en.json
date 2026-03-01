@@ -277,6 +277,7 @@
     "Title": "Add Lag/Lead Column",
     "Periods": "Periods (negative=lag, positive=lead)",
     "PeriodsPlaceholder": "e.g., -1 (lag 1), +1 (lead 1)",
+    "PeriodsError": "Enter a non-zero integer.",
     "GroupColumns": "Group columns (optional)",
     "NewColumnName": "New column name",
     "NewColumnNamePlaceholder": "e.g., lag_1_value",

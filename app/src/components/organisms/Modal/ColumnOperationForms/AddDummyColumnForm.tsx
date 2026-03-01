@@ -108,7 +108,6 @@ export const AddDummyColumnForm = ({
               <FormField
                 label={t("AddDummyColumnForm.TargetValue")}
                 htmlFor="dummy-target-value"
-                error={field.state.meta.errors[0]?.toString()}
               >
                 <InputText
                   id="dummy-target-value"
@@ -116,7 +115,6 @@ export const AddDummyColumnForm = ({
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   placeholder={t("AddDummyColumnForm.TargetValuePlaceholder")}
-                  error={field.state.meta.errors[0]?.toString()}
                   disabled={isSubmitting}
                   autoFocus
                 />
@@ -129,7 +127,6 @@ export const AddDummyColumnForm = ({
               <FormField
                 label={t("AddDummyColumnForm.DummyColumnName")}
                 htmlFor="dummy-col-name"
-                error={field.state.meta.errors[0]?.toString()}
               >
                 <InputText
                   id="dummy-col-name"
@@ -139,7 +136,6 @@ export const AddDummyColumnForm = ({
                   placeholder={t(
                     "AddDummyColumnForm.DummyColumnNamePlaceholder",
                   )}
-                  error={field.state.meta.errors[0]?.toString()}
                   disabled={isSubmitting}
                 />
               </FormField>
