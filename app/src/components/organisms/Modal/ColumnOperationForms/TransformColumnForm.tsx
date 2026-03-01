@@ -2,10 +2,10 @@
  * 変換列追加フォーム（対数・べき乗・累乗根）
  */
 import { useForm, useStore } from "@tanstack/react-form";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
-import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -14,6 +14,7 @@ import {
 import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
+import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
 import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
 import type { ColumnOperationFormPropsType } from "./types";
@@ -27,6 +28,8 @@ export const TransformColumnForm = ({
   onClose,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
+
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -48,6 +51,7 @@ export const TransformColumnForm = ({
       }),
     },
     onSubmit: async ({ value }) => {
+      setApiError(null);
       try {
         let transformMethod;
         if (value.method === "log") {
@@ -78,8 +82,7 @@ export const TransformColumnForm = ({
           const updatedList = await fetchUpdatedColumnList(tableName);
           onSuccess(updatedList);
         } else {
-          await showMessageDialog(
-            t("Error.Error"),
+          setApiError(
             replaceParamNames(
               getResponseErrorMessage(response, t("Error.UnexpectedError")),
               {
@@ -90,8 +93,7 @@ export const TransformColumnForm = ({
           );
         }
       } catch (error) {
-        await showMessageDialog(
-          t("Error.Error"),
+        setApiError(
           replaceParamNames(
             extractApiErrorMessage(error, t("Error.UnexpectedError")),
             {
@@ -250,6 +252,7 @@ export const TransformColumnForm = ({
         }}
       </form.Field>
 
+      {apiError && <ErrorAlert message={apiError} />}
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
           {t("Common.Cancel")}

@@ -4,7 +4,6 @@
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { getEconomiconAPI } from "../../../../api/endpoints";
-import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -14,6 +13,7 @@ import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
 import { Button } from "../../../atoms/Button/Button";
 import { DangerAlert } from "../../../molecules/Alert/DangerAlert";
+import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 
 type DeleteTableFormProps = {
   tableName: string;
@@ -28,6 +28,7 @@ export const DeleteTableForm = ({
 }: DeleteTableFormProps) => {
   const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const setTableList = useTableListStore((s) => s.setTableList);
   const removeTableInfo = useTableInfosStore((s) => s.removeTableInfo);
@@ -36,6 +37,7 @@ export const DeleteTableForm = ({
 
   const handleDelete = async () => {
     setIsSubmitting(true);
+    setApiError(null);
     try {
       const response = await getEconomiconAPI().deleteTable({ tableName });
       if (response.code === "OK") {
@@ -53,16 +55,12 @@ export const DeleteTableForm = ({
         }
         onSuccess();
       } else {
-        await showMessageDialog(
-          t("Error.Error"),
+        setApiError(
           getResponseErrorMessage(response, t("Error.UnexpectedError")),
         );
       }
     } catch (error) {
-      await showMessageDialog(
-        t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
-      );
+      setApiError(extractApiErrorMessage(error, t("Error.UnexpectedError")));
     } finally {
       setIsSubmitting(false);
     }
@@ -77,6 +75,8 @@ export const DeleteTableForm = ({
           components={{ b: <strong /> }}
         />
       </DangerAlert>
+
+      {apiError && <ErrorAlert message={apiError} />}
 
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose} disabled={isSubmitting}>

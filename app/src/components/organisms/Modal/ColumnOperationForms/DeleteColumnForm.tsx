@@ -4,13 +4,13 @@
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { getEconomiconAPI } from "../../../../api/endpoints";
-import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
 import { Button } from "../../../atoms/Button/Button";
 import { DangerAlert } from "../../../molecules/Alert/DangerAlert";
+import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
 import type { ColumnOperationFormPropsType } from "./types";
 
@@ -22,9 +22,11 @@ export const DeleteColumnForm = ({
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const handleDelete = async () => {
     setIsSubmitting(true);
+    setApiError(null);
     try {
       const response = await getEconomiconAPI().deleteColumn({
         tableName,
@@ -34,16 +36,12 @@ export const DeleteColumnForm = ({
         const updatedList = await fetchUpdatedColumnList(tableName);
         onSuccess(updatedList);
       } else {
-        await showMessageDialog(
-          t("Error.Error"),
+        setApiError(
           getResponseErrorMessage(response, t("Error.UnexpectedError")),
         );
       }
     } catch (error) {
-      await showMessageDialog(
-        t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
-      );
+      setApiError(extractApiErrorMessage(error, t("Error.UnexpectedError")));
     } finally {
       setIsSubmitting(false);
     }
@@ -58,6 +56,8 @@ export const DeleteColumnForm = ({
           components={{ b: <strong /> }}
         />
       </DangerAlert>
+
+      {apiError && <ErrorAlert message={apiError} />}
 
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
