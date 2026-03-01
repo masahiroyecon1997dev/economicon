@@ -83,6 +83,7 @@
     "SaveData": "保存",
     "Tables": "テーブル一覧",
     "NoTablesImported": "取り込まれたテーブルはありません。",
+    "MenuRenameTable": "テーブル名を変更",
     "MenuDuplicateTable": "テーブルを複製",
     "MenuDeleteTable": "テーブルを削除"
   },
@@ -353,6 +354,22 @@
     "Warning": "列「{{columnName}}」を削除します。この操作は元に戻せません。",
     "Submit": "削除する",
     "Success": "列を削除しました。"
+  },
+  "RenameTableForm": {
+    "Title": "テーブル名を変更",
+    "NewTableName": "新しいテーブル名",
+    "NewTableNamePlaceholder": "例: my_table",
+    "Submit": "変更"
+  },
+  "DuplicateTableForm": {
+    "Title": "テーブルを複製",
+    "NewTableName": "複製後のテーブル名",
+    "NewTableNamePlaceholder": "例: my_table_copy",
+    "Submit": "複製"
+  },
+  "DeleteTableForm": {
+    "Title": "テーブルを削除",
+    "Warning": "テーブル「<b>{{tableName}}</b>」を削除します。この操作は元に戻せません。"
   },
   "DuplicateColumnForm": {
     "Title": "列を複製",

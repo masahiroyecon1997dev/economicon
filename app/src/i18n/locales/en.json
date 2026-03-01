@@ -52,7 +52,11 @@
   "LeftSideMenu": {
     "ImportData": "Import Data",
     "SaveData": "Save Data",
-    "Tables": "Tables"
+    "Tables": "Tables",
+    "NoTablesImported": "No tables imported.",
+    "MenuRenameTable": "Rename Table",
+    "MenuDuplicateTable": "Duplicate Table",
+    "MenuDeleteTable": "Delete Table"
   },
   "ImportDataFileView": {
     "Title": "Select File",
@@ -219,6 +223,22 @@
     "Warning": "Delete column \"{{columnName}}\"? This action cannot be undone.",
     "Submit": "Delete",
     "Success": "Column deleted successfully."
+  },
+  "RenameTableForm": {
+    "Title": "Rename Table",
+    "NewTableName": "New table name",
+    "NewTableNamePlaceholder": "e.g., my_table",
+    "Submit": "Rename"
+  },
+  "DuplicateTableForm": {
+    "Title": "Duplicate Table",
+    "NewTableName": "New table name",
+    "NewTableNamePlaceholder": "e.g., my_table_copy",
+    "Submit": "Duplicate"
+  },
+  "DeleteTableForm": {
+    "Title": "Delete Table",
+    "Warning": "Delete table \"<b>{{tableName}}</b>\"? This action cannot be undone."
   },
   "DuplicateColumnForm": {
     "Title": "Duplicate Column",
