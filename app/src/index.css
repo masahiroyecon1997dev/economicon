@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+@layer base {
+  button,
+  [role="button"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"],
+  label[for],
+  select {
+    cursor: pointer;
+  }
+}
+
 @theme {
   /* メインのカラー */
   --color-brand-primary: #2c3e50;
