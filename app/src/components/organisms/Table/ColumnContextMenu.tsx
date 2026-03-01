@@ -1,6 +1,9 @@
-/**
- * 列�EチE��ーのコンチE��ストメニューコンポ�EネンチE *
- * - MoreVertical アイコン�E�Eroup-hover で表示�E�を起点に Radix DropdownMenu を開ぁE * - sort_asc / sort_desc は直接 API コール�E�ダイアログなし！E * - そ�E他�E操作�E親コンポ�Eネントへ operation イベントを伝達
+﻿/**
+ * 列ヘッダーのコンテキストメニューコンポーネント
+ *
+ * - MoreVertical アイコン（group-hover で表示）を起点に Radix DropdownMenu を開く
+ * - sort_asc / sort_desc は直接 API コール（ダイアログなし）
+ * - その他の操作は親コンポーネントへ operation イベントを伝達
  */
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
@@ -44,6 +47,7 @@ const menuItemClass = cn(
 const destructiveItemClass = cn(
   menuItemClass,
   "text-red-600 data-[highlighted]:bg-red-50 data-[highlighted]:text-red-700",
+  "dark:data-[highlighted]:bg-red-950 dark:data-[highlighted]:text-red-400",
 );
 
 export const ColumnContextMenu = ({
@@ -82,7 +86,7 @@ export const ColumnContextMenu = ({
             "data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95",
           )}
         >
-          {/* ソーチE*/}
+          {/* ソート */}
           <DropdownMenu.Group className="p-1">
             <DropdownMenu.Label className="px-2 py-1 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
               {column.name}
@@ -107,7 +111,7 @@ export const ColumnContextMenu = ({
 
           <DropdownMenu.Separator className="h-px bg-gray-100 dark:bg-gray-700 mx-1" />
 
-          {/* 列編雁E*/}
+          {/* 列編集 */}
           <DropdownMenu.Group className="p-1">
             <DropdownMenu.Item
               className={menuItemClass}
