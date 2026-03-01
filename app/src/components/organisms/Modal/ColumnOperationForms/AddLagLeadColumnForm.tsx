@@ -9,6 +9,7 @@ import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
+  replaceParamNames,
 } from "../../../../lib/utils/apiError";
 import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
@@ -67,13 +68,29 @@ export const AddLagLeadColumnForm = ({
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+            replaceParamNames(
+              getResponseErrorMessage(response, t("Error.UnexpectedError")),
+              {
+                newColumnName: t("AddLagLeadColumnForm.NewColumnName"),
+                sourceColumn: t("ColumnOperationForm.SourceColumnName"),
+                periods: t("AddLagLeadColumnForm.Periods"),
+                groupColumns: t("AddLagLeadColumnForm.GroupColumns"),
+              },
+            ),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          replaceParamNames(
+            extractApiErrorMessage(error, t("Error.UnexpectedError")),
+            {
+              newColumnName: t("AddLagLeadColumnForm.NewColumnName"),
+              sourceColumn: t("ColumnOperationForm.SourceColumnName"),
+              periods: t("AddLagLeadColumnForm.Periods"),
+              groupColumns: t("AddLagLeadColumnForm.GroupColumns"),
+            },
+          ),
         );
       }
     },

@@ -12,6 +12,7 @@ import {
   getCoreRowModel,
   useReactTable,
   type ColumnDef,
+  type ColumnSizingState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, {
@@ -141,6 +142,9 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   // ドラッグ&ドロップ
   const { isOver, setNodeRef } = useDroppable({ id: "column-droppable" });
 
+  // 列幅の永続化: 列の追加・削除があっても残存列の幅は保持する
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+
   // バージョン購読: チャンク更新時に再レンダー（useVirtualTableData 内でも購読しているが
   // VirtualTable 自体も購読して columns の cell closure を最新化する）
   useTableChunkStore((s) => s.versions[tableName] ?? 0);
@@ -194,6 +198,15 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
     if (prevColumnKeyRef.current && prevColumnKeyRef.current !== key) {
       // 列が変わったらバイナリキャッシュを無効化
       invalidateTable(tableName, { columnList });
+      // 削除された列のサイズキャッシュを除去（残存する列は幅を保持）
+      const activeIds = new Set(columnList.map((c) => c.name));
+      setColumnSizing((prev) => {
+        const next: ColumnSizingState = {};
+        for (const [k, v] of Object.entries(prev)) {
+          if (activeIds.has(k)) next[k] = v;
+        }
+        return next;
+      });
     }
     prevColumnKeyRef.current = key;
   }, [columnList, tableName, invalidateTable]);
@@ -217,7 +230,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
     ];
     // 列名の描画幅から幅を計算（バッジ+ギャップ+メニュー+パディング ≈ 68px）
     const HEADER_OVERHEAD = 68;
-    const MAX_COL_WIDTH = 170;
+    const MAX_COL_WIDTH = 250;
     const MIN_COL_WIDTH = 80;
 
     columnList.forEach((column: ColumnType) => {
@@ -276,6 +289,8 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   const table = useReactTable({
     data: virtualData,
     columns,
+    state: { columnSizing },
+    onColumnSizingChange: setColumnSizing,
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: false,
     enableColumnResizing: true,

@@ -9,6 +9,7 @@ import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
+  replaceParamNames,
 } from "../../../../lib/utils/apiError";
 import { useTableListStore } from "../../../../stores/tableList";
 import { Button } from "../../../atoms/Button/Button";
@@ -61,13 +62,19 @@ export const DuplicateTableForm = ({
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+            replaceParamNames(
+              getResponseErrorMessage(response, t("Error.UnexpectedError")),
+              { newTableName: t("DuplicateTableForm.NewTableName") },
+            ),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          replaceParamNames(
+            extractApiErrorMessage(error, t("Error.UnexpectedError")),
+            { newTableName: t("DuplicateTableForm.NewTableName") },
+          ),
         );
       }
     },
