@@ -109,8 +109,17 @@
     "ImportDialog": {
       "Title": "インポート設定",
       "TableName": "テーブル名",
-      "SheetName": "シート名 (Excelのみ)",
-      "Separator": "区切り文字 (CSVのみ, デフォルト: ,)",
+      "TableNamePlaceholder": "例: population_data",
+      "CsvOptions": "CSV オプション",
+      "Separator": "区切り文字",
+      "SeparatorComma": ", カンマ",
+      "SeparatorTab": "⇥ タブ",
+      "SeparatorOther": "✎ その他",
+      "SeparatorCustomPlaceholder": "1〜10文字で入力",
+      "Encoding": "エンコーディング",
+      "ExcelOptions": "Excel オプション",
+      "SheetName": "シート名（省略時は先頭シート）",
+      "SheetNamePlaceholder": "例: Sheet1",
       "Import": "インポート"
     }
   },
@@ -249,6 +258,13 @@
     "DirectoryNotFound": "フォルダが見つかりません。削除または移動された可能性があります。"
   },
   "ValidationMessages": {
+    "TableNameInvalidChars": "テーブル名に制御文字を含めることはできません。",
+    "TableNameTooLong": "テーブル名は128文字以内で入力してください。",
+    "SeparatorRequired": "区切り文字を入力してください。",
+    "SeparatorTooLong": "区切り文字は10文字以内で入力してください。",
+    "SheetNameTooLong": "シート名は31文字以内で入力してください。",
+    "SheetNameInvalidChars": "シート名に使用できない文字（/ \\ ? * : [ ]）が含まれています。",
+    "SheetNameInvalidQuotes": "シート名の先頭または末尾にアポストロフィは使用できません。",
     "FixValidationErrors": "入力エラーがあります。修正してください。",
     "FileNameRequired": "ファイル名を入力してください。",
     "TableNameRequired": "テーブル名を入力してください。",
