@@ -58,7 +58,6 @@ import type {
   SuccessResponseDuplicateColumnResult,
   SuccessResponseDuplicateTableResult,
   SuccessResponseExportFileResult,
-  SuccessResponseFetchDataToArrowResult,
   SuccessResponseFetchDataToJsonResult,
   SuccessResponseFilterSingleConditionResult,
   SuccessResponseGetAllAnalysisResultsResult,
@@ -707,10 +706,12 @@ const fetchDataToJson = (
     }
   
 /**
- * データをApache Arrow IPC形式で取得するエンドポイント
+ * データをApache Arrow IPC形式の生バイナリで返すエンドポイント
 
 仮想スクロール用のチャンク取得API。
-Apache Arrow IPC形式のバイナリデータ（Base64エンコード）を返します。
+JSON包装なしでArrow IPC形式生バイナリを直接返す。
+メタデータ（totalRows/startRow/endRow/tableName）は
+Arrowスキーマメタデータに埋め込む。
 
 Parameters
 ----------
@@ -721,17 +722,18 @@ body : FetchDataToArrowRequestBody
 
 Returns
 -------
-JSONResponse
-    処理結果（Arrow IPC形式のBase64エンコードされたバイナリを含む）
+Response
+    Arrow IPC形式生バイナリ
  * @summary Fetch Data To Arrow
  */
 const fetchDataToArrow = (
     fetchDataToArrowRequestBody: FetchDataToArrowRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseFetchDataToArrowResult>>,) => {
-      return customInstance<SuccessResponseFetchDataToArrowResult>(
+ options?: SecondParameter<typeof customInstance<Blob>>,) => {
+      return customInstance<Blob>(
       {url: `/api/table/fetch-data-to-arrow`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: fetchDataToArrowRequestBody
+      data: fetchDataToArrowRequestBody,
+        responseType: 'blob'
     },
       options);
     }
