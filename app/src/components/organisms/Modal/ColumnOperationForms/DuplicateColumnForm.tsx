@@ -68,25 +68,40 @@ export const DuplicateColumnForm = ({
         </p>
       </FormField>
 
-      <form.Field name="newColumnName">
-        {(field) => (
-          <FormField
-            label={t("DuplicateColumnForm.NewColumnName")}
-            htmlFor="dup-new-column-name"
-            error={field.state.meta.errors[0]?.toString()}
-          >
-            <InputText
-              id="dup-new-column-name"
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              placeholder={t("DuplicateColumnForm.NewColumnNamePlaceholder")}
-              error={field.state.meta.errors[0]?.toString()}
-              disabled={isSubmitting}
-              autoFocus
-            />
-          </FormField>
-        )}
+      <form.Field
+        name="newColumnName"
+        validators={{
+          onChange: ({ value }) =>
+            value.trim().length === 0
+              ? t("ValidationMessages.NewColumnNameRequired")
+              : undefined,
+        }}
+      >
+        {(field) => {
+          const errorMsg =
+            field.state.meta.isTouched && field.state.meta.errors.length > 0
+              ? ((field.state.meta.errors[0] as unknown as { message?: string })
+                  ?.message ?? String(field.state.meta.errors[0]))
+              : undefined;
+          return (
+            <FormField
+              label={t("DuplicateColumnForm.NewColumnName")}
+              htmlFor="dup-new-column-name"
+              error={errorMsg}
+            >
+              <InputText
+                id="dup-new-column-name"
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                placeholder={t("DuplicateColumnForm.NewColumnNamePlaceholder")}
+                error={errorMsg}
+                disabled={isSubmitting}
+                autoFocus
+              />
+            </FormField>
+          );
+        }}
       </form.Field>
 
       <div className="flex justify-end gap-2 pt-2">
