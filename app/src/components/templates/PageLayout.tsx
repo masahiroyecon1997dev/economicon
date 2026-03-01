@@ -19,8 +19,12 @@ export const PageLayout = ({
       {title && description ? (
         <div className="flex flex-1 flex-col gap-2 min-h-0">
           <header className="shrink-0">
-            <h1 className="text-xl font-bold text-black">{title}</h1>
-            <p className="mt-1 text-xs text-black/60">{description}</p>
+            <h1 className="text-xl font-bold text-black dark:text-gray-100">
+              {title}
+            </h1>
+            <p className="mt-1 text-xs text-black/60 dark:text-gray-400">
+              {description}
+            </p>
           </header>
           {children}
         </div>

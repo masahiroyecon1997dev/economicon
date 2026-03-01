@@ -1,9 +1,12 @@
-import { forwardRef, type ChangeEvent } from 'react';
-import { useTranslation } from 'react-i18next';
+import { forwardRef, type ChangeEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/utils/helpers";
 
 // 1. React標準のinput属性を継承しつつ、既存の独自プロパティ(change等)も許容する
-type InputTextProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> & {
+type InputTextProps = Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "onChange"
+> & {
   // 既存の change プロパティ（互換性のために残す）
   change?: (_event: ChangeEvent<HTMLInputElement>) => void;
   // RHFや標準が使うプロパティ
@@ -15,19 +18,19 @@ export const InputText = forwardRef<HTMLInputElement, InputTextProps>(
   (
     {
       value,
-      change,    // 既存の props
-      onChange,  // registerから渡される props
-      error = '',
+      change, // 既存の props
+      onChange, // registerから渡される props
+      error = "",
       placeholder,
-      type = 'text',
+      type = "text",
       step,
       id,
       name,
       className,
       disabled = false,
-      ...props   // その他の属性（onBlurなど）をまとめる
+      ...props // その他の属性（onBlurなど）をまとめる
     },
-    ref
+    ref,
   ) => {
     const { t } = useTranslation();
 
@@ -46,12 +49,12 @@ export const InputText = forwardRef<HTMLInputElement, InputTextProps>(
           id={id}
           name={name}
           className={cn(
-            "w-full px-2.5 py-1.5 text-sm font-normal text-gray-900 bg-white border rounded-md shadow-sm",
-            "placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-colors duration-200",
+            "w-full px-2.5 py-1.5 text-sm font-normal text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border rounded-md shadow-sm",
+            "placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-colors duration-200",
             error
-              ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-              : "border-gray-300 focus:ring-gray-700 focus:border-gray-700 hover:border-gray-400",
-            className
+              ? "border-red-500 focus:ring-red-500 focus:border-red-500 dark:border-red-500/60"
+              : "border-gray-300 dark:border-gray-600 focus:ring-gray-700 dark:focus:ring-gray-500 focus:border-gray-700 dark:focus:border-gray-500 hover:border-gray-400 dark:hover:border-gray-500",
+            className,
           )}
           value={value}
           onChange={handleOnChange}
@@ -69,7 +72,7 @@ export const InputText = forwardRef<HTMLInputElement, InputTextProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
-InputText.displayName = 'InputText';
+InputText.displayName = "InputText";

@@ -33,6 +33,12 @@ export const App = () => {
   const setFiles = useFilesStore((state) => state.setFiles);
   const { isLoading, loadingMessage } = useLoadingStore();
 
+  // テーマを <html> の class に反映する（Tailwind dark:プレフィックスを有効化）
+  const theme = useSettingsStore((state) => state.theme);
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
+
   useEffect(() => {
     // Strict Mode対応: 初期化が既に実行されている場合はスキップ
     // if (initialized.current) return;
@@ -105,7 +111,7 @@ export const App = () => {
 
   return (
     <>
-      <div className="flex h-screen flex-col overflow-hidden bg-white">
+      <div className="flex h-screen flex-col overflow-hidden bg-white dark:bg-gray-900">
         <AppBar />
         <PanelGroup orientation="horizontal" className="flex-1 overflow-hidden">
           <Panel defaultSize={256} minSize={160} maxSize={480}>
