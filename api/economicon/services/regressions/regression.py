@@ -290,24 +290,12 @@ class Regression:
                 _("Invalid analysis parameters for OLS regression")
             )
         model_result = fit_ols(y_data, x_data, missing)
-        groups_arrays = None
-        if isinstance(self.standard_error, ClusteredStandardError):
-            # statsmodels と同一の欠損値除去マスクを構築し、
-            # クラスター列を numpy 配列として渡す
-            x_nan = (
-                np.isnan(x_data).any(axis=1)
-                if x_data.ndim > 1
-                else np.isnan(x_data)
-            )
-            valid_mask = ~(np.isnan(y_data) | x_nan)
-            groups_arrays = {
-                col: df[col].to_numpy()[valid_mask]
-                for col in self.standard_error.groups
-            }
         model_result = apply_standard_errors(
             model_result,
             self.standard_error,
-            groups_arrays=groups_arrays,
+            groups_arrays=self._build_groups_arrays(
+                df=df, y_data=y_data, x_data=x_data
+            ),
         )
         self._last_raw_model = model_result
         self._last_model_type = "ols"
@@ -329,22 +317,12 @@ class Regression:
                 _("Specified regression method is not supported")
             )
 
-        groups_arrays = None
-        if isinstance(self.standard_error, ClusteredStandardError):
-            x_nan = (
-                np.isnan(x_data).any(axis=1)
-                if x_data.ndim > 1
-                else np.isnan(x_data)
-            )
-            valid_mask = ~(np.isnan(y_data) | x_nan)
-            groups_arrays = {
-                col: df[col].to_numpy()[valid_mask]
-                for col in self.standard_error.groups
-            }
         model_result = apply_standard_errors(
             model_result,
             self.standard_error,
-            groups_arrays=groups_arrays,
+            groups_arrays=self._build_groups_arrays(
+                df=df, y_data=y_data, x_data=x_data
+            ),
         )
         self._last_raw_model = model_result
         result = self._format_result(model_result)
@@ -352,6 +330,37 @@ class Regression:
         if self.analysis.calculate_marginal_effects:
             result["marginalEffects"] = self._compute_ame(model_result)
         return result
+
+    def _build_groups_arrays(
+        self, *, df: Any, y_data: Any, x_data: Any
+    ) -> dict[str, Any] | None:
+        """
+        ClusteredStandardError 用の欠邺除去済みグループ配列辞書を構築する。
+
+        statsmodels の欠邺値除去マスク（yまたはxに NaN を含む行を除去）
+        と同一のマスクを当て、列名 → numpy 配列の辞書を返す。
+        ClusteredStandardError 以外の場合は None を返す。
+
+        Args:
+            df: Polars DataFrame（型刧を含む）
+            y_data: 被説明変数の numpy 配列
+            x_data: 説明変数の numpy 配列（多次元または 1 次元）
+
+        Returns:
+            {``列名``: numpy 配列} 辞書、または None
+        """
+        if not isinstance(self.standard_error, ClusteredStandardError):
+            return None
+        x_nan = (
+            np.isnan(x_data).any(axis=1)
+            if x_data.ndim > 1
+            else np.isnan(x_data)
+        )
+        valid_mask = ~(np.isnan(y_data) | x_nan)
+        return {
+            col: df[col].to_numpy()[valid_mask]
+            for col in self.standard_error.groups
+        }
 
     def _compute_ame(self, model_result: Any) -> list[dict[str, Any]]:
         """
