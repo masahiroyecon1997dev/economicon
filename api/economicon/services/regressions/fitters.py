@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from linearmodels.iv import IV2SLS
+from linearmodels.iv import IV2SLS, IVGMM
 from linearmodels.panel import PanelOLS, RandomEffects
 from py4etrics.tobit import Tobit
 from sklearn.linear_model import Lasso, Ridge
@@ -177,6 +177,8 @@ class IVInput:
     instrumental_variables: list[str]
     standard_error_method: str
     has_const: bool = True
+    iv_method: str = "2sls"
+    gmm_weight_matrix: str = "robust"
 
 
 def fit_iv(data_input: IVInput) -> Any:
@@ -221,8 +223,20 @@ def fit_iv(data_input: IVInput) -> Any:
         data_input.standard_error_method, "unadjusted"
     )
 
-    # IV2SLS モデルの作成とフィット
-    model = IV2SLS(dependent, exog, endog, instruments)
+    # IV 推定モデルの作成とフィット
+    if data_input.iv_method == "gmm":
+        # IVGMM: 重み行列タイプはコンストラクタ引数で指定する
+        # 過導識別・異分散の場合 (over-identified + heteroskedastic) に有効
+        model: IV2SLS | IVGMM = IVGMM(
+            dependent,
+            exog,
+            endog,
+            instruments,
+            weight_type=data_input.gmm_weight_matrix,
+        )
+    else:
+        # デフォルト: IV2SLS
+        model = IV2SLS(dependent, exog, endog, instruments)
     result = model.fit(cov_type=cov_type)
 
     return result

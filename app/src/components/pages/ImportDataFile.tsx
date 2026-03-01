@@ -83,7 +83,6 @@ export const ImportDataFile = () => {
 
   // ドロップゾーンのonDropハンドラ
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    console.log("Dropped file path:");
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
 

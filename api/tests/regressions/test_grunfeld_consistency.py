@@ -414,23 +414,9 @@ class TestGrunfeldOLS:
             err_msg="OLS HC1 SE が statsmodels と不一致",
         )
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason=(
-            "API cluster SE は get_robustcov_results("
-            "groups=<列名の文字列リスト>) を渡すため"
-            " 'object of too small depth' エラーが発生"
-            " (API 内部バグ: 列名を実データ配列に"
-            " 解決する処理が欠落)"
-        ),
-    )
     def test_clustered_by_firm_se(self, client, grunfeld_store, grunfeld_raw):
         """
         firm クラスター標準誤差が statsmodels と一致。
-
-        現状 API は cluster グループの列名を実データに
-        変換せずに get_robustcov_results に渡すため
-        500 エラーになる。バグ修正後に正常化するもの。
         """
         ref = _sm_ols(
             grunfeld_raw,
@@ -694,23 +680,12 @@ class TestGrunfeldIV2SLS:
 class TestGrunfeldIVGMM:
     """IV GMM 結合テスト (Grunfeld データ)"""
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason=(
-            "API は ivMethod='gmm' を受け付けるが "
-            "fitters.fit_iv() は常に IV2SLS を使用し "
-            "IVGMM を実行しない (未実装)。"
-            "バグ修正後にこの xfail を解除すること。"
-        ),
-    )
     def test_coefficients_vs_linearmodels(
         self, client, grunfeld_store, grunfeld_with_iv
     ):
         """
         GMM 係数が linearmodels (IVGMM, weight_type='robust') と
         一致することを確認。
-
-        現状 API は IVGMM 未実装 (ivMethod 無視) のため xfail。
         """
         y = grunfeld_with_iv["inv"]
         exog = sm.add_constant(grunfeld_with_iv[["value"]])
