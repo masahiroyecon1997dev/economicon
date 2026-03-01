@@ -48,8 +48,8 @@ const OVERSCAN_COUNT = 50;
 // スケルトンセル
 // ---------------------------------------------------------------------------
 const SkeletonCell = () => (
-  <div className="px-3 py-4">
-    <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+  <div className="px-3 py-1">
+    <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
   </div>
 );
 
@@ -93,7 +93,7 @@ const EditableCell = ({ value }: { value: TableDataCellType }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [cellValue, setCellValue] = useState<TableDataCellType>(value);
   return (
-    <div className="px-3 py-4 overflow-hidden">
+    <div className="px-3 py-0.5 overflow-hidden">
       {isEditing ? (
         <TableInputText
           value={cellValue}
@@ -101,7 +101,7 @@ const EditableCell = ({ value }: { value: TableDataCellType }) => {
           onBlur={() => setIsEditing(false)}
         />
       ) : (
-        <div className="truncate text-sm">
+        <div className="truncate text-xs text-gray-700">
           <CellContent value={cellValue} onEdit={() => setIsEditing(true)} />
         </div>
       )}
@@ -188,21 +188,34 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
         id: "rowNumber",
         header: "#",
         cell: ({ row }) => (
-          <div className="px-3 py-4 font-medium text-gray-900 whitespace-nowrap">
+          <div className="px-3 py-0.5 font-medium text-gray-400 whitespace-nowrap text-xs">
             {row.index + 1}
           </div>
         ),
-        size: 60,
+        size: 48,
         enableResizing: false,
       },
     ];
+    // 列名の文字数から幅を計算（バッジ+ギャップ+メニュー+パディング ≈ 78px + 文字幅）
+    const HEADER_OVERHEAD = 78;
+    const CHAR_WIDTH = 6.5;
+    const MAX_COL_WIDTH = 220;
+    const MIN_COL_WIDTH = 72;
+
     columnList.forEach((column: ColumnType) => {
       const typeColor = getPolarsTypeColor(column.type);
+      const calculatedSize = Math.min(
+        MAX_COL_WIDTH,
+        Math.max(
+          MIN_COL_WIDTH,
+          Math.round(HEADER_OVERHEAD + column.name.length * CHAR_WIDTH),
+        ),
+      );
       cols.push({
         id: column.name,
         accessorKey: column.name,
-        size: 180,
-        minSize: 80,
+        size: calculatedSize,
+        minSize: MIN_COL_WIDTH,
         header: () => (
           <div className="group flex items-center gap-1.5 min-w-0">
             <span
@@ -259,7 +272,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 56,
+    estimateSize: () => 28,
     overscan: OVERSCAN_COUNT,
   });
 
