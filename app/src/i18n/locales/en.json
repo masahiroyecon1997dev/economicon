@@ -193,5 +193,99 @@
     "SheetNameTooLong": "Sheet name must be 31 characters or fewer.",
     "SheetNameInvalidChars": "Sheet name contains invalid characters (/ \\ ? * : [ ]).",
     "SheetNameInvalidQuotes": "Sheet name must not start or end with an apostrophe."
+  },
+  "ColumnMenu": {
+    "SortAsc": "Sort Ascending",
+    "SortDesc": "Sort Descending",
+    "Rename": "Rename Column",
+    "Duplicate": "Duplicate Column",
+    "Cast": "Cast Type",
+    "Transform": "Add Transform Column",
+    "AddDummy": "Add Dummy Column",
+    "AddLagLead": "Add Lag/Lead Column",
+    "Delete": "Delete Column",
+    "OpenColumnMenu": "Column operations"
+  },
+  "RenameColumnForm": {
+    "Title": "Rename Column",
+    "CurrentColumnName": "Current column name",
+    "NewColumnName": "New column name",
+    "NewColumnNamePlaceholder": "e.g., new_column_name",
+    "Submit": "Rename",
+    "Success": "Column renamed successfully."
+  },
+  "DeleteColumnForm": {
+    "Title": "Delete Column",
+    "Warning": "Delete column \"{{columnName}}\"? This action cannot be undone.",
+    "Submit": "Delete",
+    "Success": "Column deleted successfully."
+  },
+  "DuplicateColumnForm": {
+    "Title": "Duplicate Column",
+    "NewColumnName": "New column name",
+    "NewColumnNamePlaceholder": "e.g., column_copy",
+    "Submit": "Duplicate",
+    "Success": "Column duplicated successfully."
+  },
+  "CastColumnForm": {
+    "Title": "Cast Column Type",
+    "TargetType": "Target type",
+    "NewColumnName": "New column name",
+    "NewColumnNamePlaceholder": "e.g., column_int",
+    "CleanupWhitespace": "Strip leading/trailing whitespace",
+    "RemoveCommas": "Remove commas (1,234 → 1234)",
+    "DatetimeFormat": "Datetime format (blank = auto-detect)",
+    "DatetimeFormatPlaceholder": "e.g., %Y-%m-%d",
+    "Strict": "Error on failure (instead of returning null)",
+    "Submit": "Cast",
+    "Success": "Column cast successfully."
+  },
+  "TransformColumnForm": {
+    "Title": "Add Transform Column",
+    "Method": "Transform method",
+    "MethodLog": "Logarithm",
+    "MethodPower": "Power",
+    "MethodRoot": "Root",
+    "Base": "Base (blank = natural log)",
+    "Exponent": "Exponent",
+    "Degree": "Degree",
+    "NewColumnName": "New column name",
+    "NewColumnNamePlaceholder": "e.g., log_value",
+    "Submit": "Add",
+    "Success": "Transform column added successfully."
+  },
+  "AddDummyColumnForm": {
+    "Title": "Add Dummy Column",
+    "Mode": "Mode",
+    "ModeSingle": "Single value",
+    "ModeAllExceptBase": "All except base",
+    "TargetValue": "Target value",
+    "TargetValuePlaceholder": "e.g., Tokyo",
+    "DummyColumnName": "Dummy column name",
+    "DummyColumnNamePlaceholder": "e.g., is_tokyo",
+    "DropBaseValue": "Base value to exclude",
+    "DropBaseValueAuto": "Auto (most frequent)",
+    "DropBaseValuePlaceholder": "Enter value or auto_most_frequent",
+    "NullStrategy": "Null handling",
+    "NullStrategyExclude": "Ignore",
+    "NullStrategyAsCategory": "Treat as category",
+    "NullStrategyError": "Error if null exists",
+    "Submit": "Add",
+    "Success": "Dummy column added successfully."
+  },
+  "AddLagLeadColumnForm": {
+    "Title": "Add Lag/Lead Column",
+    "Periods": "Periods (negative=lag, positive=lead)",
+    "PeriodsPlaceholder": "e.g., -1 (lag 1), +1 (lead 1)",
+    "GroupColumns": "Group columns (optional)",
+    "NewColumnName": "New column name",
+    "NewColumnNamePlaceholder": "e.g., lag_1_value",
+    "Submit": "Add",
+    "Success": "Lag/lead column added successfully."
+  },
+  "ColumnOperationForm": {
+    "AddPositionColumn": "Insert after column",
+    "AddPositionColumnDesc": "New column will be inserted to the right of the selected column.",
+    "Success": "Operation completed successfully."
   }
 }
