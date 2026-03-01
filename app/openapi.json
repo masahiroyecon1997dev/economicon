@@ -1675,7 +1675,7 @@
           "table"
         ],
         "summary": "Fetch Data To Arrow",
-        "description": "\u30c7\u30fc\u30bf\u3092Apache Arrow IPC\u5f62\u5f0f\u3067\u53d6\u5f97\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u4eee\u60f3\u30b9\u30af\u30ed\u30fc\u30eb\u7528\u306e\u30c1\u30e3\u30f3\u30af\u53d6\u5f97API\u3002\nApache Arrow IPC\u5f62\u5f0f\u306e\u30d0\u30a4\u30ca\u30ea\u30c7\u30fc\u30bf\uff08Base64\u30a8\u30f3\u30b3\u30fc\u30c9\uff09\u3092\u8fd4\u3057\u307e\u3059\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : FetchDataToArrowRequestBody\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c\uff08Arrow IPC\u5f62\u5f0f\u306eBase64\u30a8\u30f3\u30b3\u30fc\u30c9\u3055\u308c\u305f\u30d0\u30a4\u30ca\u30ea\u3092\u542b\u3080\uff09",
+        "description": "\u30c7\u30fc\u30bf\u3092Apache Arrow IPC\u5f62\u5f0f\u306e\u751f\u30d0\u30a4\u30ca\u30ea\u3067\u8fd4\u3059\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u4eee\u60f3\u30b9\u30af\u30ed\u30fc\u30eb\u7528\u306e\u30c1\u30e3\u30f3\u30af\u53d6\u5f97API\u3002\nJSON\u5305\u88c5\u306a\u3057\u3067Arrow IPC\u5f62\u5f0f\u751f\u30d0\u30a4\u30ca\u30ea\u3092\u76f4\u63a5\u8fd4\u3059\u3002\n\u30e1\u30bf\u30c7\u30fc\u30bf\uff08totalRows/startRow/endRow/tableName\uff09\u306f\nArrow\u30b9\u30ad\u30fc\u30de\u30e1\u30bf\u30c7\u30fc\u30bf\u306b\u57cb\u3081\u8fbc\u3080\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : FetchDataToArrowRequestBody\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nResponse\n    Arrow IPC\u5f62\u5f0f\u751f\u30d0\u30a4\u30ca\u30ea",
         "operationId": "fetch_data_to_arrow",
         "parameters": [
           {
@@ -1702,13 +1702,9 @@
         },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Apache Arrow IPC \u30d5\u30a1\u30a4\u30eb\u5f62\u5f0f\u306e\u751f\u30d0\u30a4\u30ca\u30ea\u3002\u30b9\u30ad\u30fc\u30de\u30e1\u30bf\u30c7\u30fc\u30bf\u306b totalRows / startRow / endRow / tableName \u3092\u542b\u3080\u3002",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_FetchDataToArrowResult_"
-                }
-              }
+              "application/vnd.apache.arrow.stream": {}
             }
           },
           "400": {
@@ -5150,46 +5146,6 @@
         "title": "FetchDataToArrowRequestBody",
         "description": "\u30c7\u30fc\u30bfArrow\u53d6\u5f97\u30ea\u30af\u30a8\u30b9\u30c8"
       },
-      "FetchDataToArrowResult": {
-        "properties": {
-          "tableName": {
-            "type": "string",
-            "title": "Table Name",
-            "description": "\u30c7\u30fc\u30bf\u3092\u53d6\u5f97\u3057\u305f\u30c6\u30fc\u30d6\u30eb\u540d"
-          },
-          "arrowData": {
-            "type": "string",
-            "contentMediaType": "application/octet-stream",
-            "title": "Arrow Data",
-            "description": "Apache Arrow IPC \u5f62\u5f0f\u306e\u30d0\u30a4\u30ca\u30ea\u30c7\u30fc\u30bf\uff08Base64\u30a8\u30f3\u30b3\u30fc\u30c9\uff09"
-          },
-          "totalRows": {
-            "type": "integer",
-            "title": "Total Rows",
-            "description": "\u30c6\u30fc\u30d6\u30eb\u5168\u4f53\u306e\u884c\u6570"
-          },
-          "startRow": {
-            "type": "integer",
-            "title": "Start Row",
-            "description": "\u53d6\u5f97\u958b\u59cb\u884c\u756a\u53f7"
-          },
-          "endRow": {
-            "type": "integer",
-            "title": "End Row",
-            "description": "\u53d6\u5f97\u7d42\u4e86\u884c\u756a\u53f7"
-          }
-        },
-        "type": "object",
-        "required": [
-          "tableName",
-          "arrowData",
-          "totalRows",
-          "startRow",
-          "endRow"
-        ],
-        "title": "FetchDataToArrowResult",
-        "description": "\u30c6\u30fc\u30d6\u30eb\u30c7\u30fc\u30bf Arrow IPC \u5f62\u5f0f\u53d6\u5f97\u30ec\u30b9\u30dd\u30f3\u30b9"
-      },
       "FetchDataToJsonRequestBody": {
         "properties": {
           "tableName": {
@@ -7436,25 +7392,6 @@
           "result"
         ],
         "title": "SuccessResponse[ExportFileResult]"
-      },
-      "SuccessResponse_FetchDataToArrowResult_": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
-            "default": "OK"
-          },
-          "result": {
-            "$ref": "#/components/schemas/FetchDataToArrowResult",
-            "description": "\u51e6\u7406\u7d50\u679c"
-          }
-        },
-        "type": "object",
-        "required": [
-          "result"
-        ],
-        "title": "SuccessResponse[FetchDataToArrowResult]"
       },
       "SuccessResponse_FetchDataToJsonResult_": {
         "properties": {
