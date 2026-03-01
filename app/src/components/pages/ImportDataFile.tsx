@@ -1,8 +1,8 @@
 import * as RadixTabs from "@radix-ui/react-tabs";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { UploadCloud } from "lucide-react";
-import { useCallback, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getFiles,
@@ -23,7 +23,6 @@ import type {
   FileType,
   SortDirection,
   SortField,
-  TauriFile,
 } from "../../types/commonTypes";
 import { CancelButtonBar } from "../molecules/ActionBar/CancelButtonBar";
 import { NavigationSearchBar } from "../molecules/Navigation/NavigationSearchBar";
@@ -32,6 +31,8 @@ import { ImportConfigDialog } from "../organisms/Modal/ImportConfigDialog";
 import { PageLayout } from "../templates/PageLayout";
 
 type FileTypeFilter = "all" | "csv" | "excel" | "parquet";
+
+const SUPPORTED_IMPORT_EXTENSIONS = [".csv", ".xlsx", ".xls", ".parquet"];
 
 const FILE_TYPE_FILTERS: {
   value: FileTypeFilter;
@@ -81,40 +82,42 @@ export const ImportDataFile = () => {
     name: string;
   } | null>(null);
 
-  // ドロップゾーンのonDropハンドラ
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
+  // Tauri 2 ネイティブ drag-drop イベント
+  const [isDragActive, setIsDragActive] = useState(false);
 
-      // Tauri環境の場合、Fileオブジェクトに 'path' プロパティが含まれていることが一般的
-      // 型定義にはないので any キャストを使用、または @types/react-dropzoneの内容を確認
-      const filePath = (file as TauriFile).path;
-      if (filePath) {
-        setSelectedFileInfo({ path: filePath, name: file.name });
-        setIsImportDialogOpen(true);
-      } else {
-        // ブラウザなどでpathが取れない場合のフォールバック（今回はTauri前提なのでエラー表示も検討）
-        // TauriのWebViewでpathが取れない場合は、上記のtauri://dropを使うことになりますが、
-        // react-dropzone経由でも通常はpathが取れます。
-        console.warn("File path not found in dropped file object.");
-      }
-    }
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+
+    getCurrentWindow()
+      .onDragDropEvent((event) => {
+        const type = event.payload.type;
+        if (type === "enter" || type === "over") {
+          setIsDragActive(true);
+        } else if (type === "leave") {
+          setIsDragActive(false);
+        } else if (type === "drop") {
+          setIsDragActive(false);
+          const paths = "paths" in event.payload ? event.payload.paths : [];
+          if (paths.length > 0) {
+            const filePath = paths[0];
+            const fileName =
+              filePath.replace(/\\/g, "/").split("/").pop() ?? filePath;
+            const ext = fileName.toLowerCase().match(/\.[^.]+$/)?.[0] ?? "";
+            if (SUPPORTED_IMPORT_EXTENSIONS.includes(ext)) {
+              setSelectedFileInfo({ path: filePath, name: fileName });
+              setIsImportDialogOpen(true);
+            }
+          }
+        }
+      })
+      .then((unlisten) => {
+        cleanup = unlisten;
+      });
+
+    return () => {
+      cleanup?.();
+    };
   }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    noClick: true, // クリックでファイル選択ダイアログを開かない（今回はD&D専用エリアとするため）
-    multiple: false,
-    accept: {
-      "text/csv": [".csv"],
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
-        ".xlsx",
-      ],
-      "application/vnd.ms-excel": [".xls"],
-      // parquetはMIMEタイプが決まっていないことが多いので拡張子で
-      "application/octet-stream": [".parquet"],
-    },
-  });
 
   // ファイルパスを分割するヘルパー関数
   const getPathSegments = () => {
@@ -332,16 +335,16 @@ export const ImportDataFile = () => {
 
         <RadixTabs.Content value="dragDrop" className="shrink-0 outline-none">
           <div
-            {...getRootProps()}
             className={`flex h-56 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
               isDragActive
                 ? "border-blue-500 bg-blue-50"
                 : "border-gray-300 hover:border-gray-400 bg-gray-50"
             }`}
           >
-            <input {...getInputProps()} />
             <UploadCloud
-              className={`mb-4 h-16 w-16 ${isDragActive ? "text-blue-500" : "text-gray-400"}`}
+              className={`mb-4 h-16 w-16 ${
+                isDragActive ? "text-blue-500" : "text-gray-400"
+              }`}
             />
             <h3 className="mb-2 text-lg font-semibold text-gray-700">
               {isDragActive

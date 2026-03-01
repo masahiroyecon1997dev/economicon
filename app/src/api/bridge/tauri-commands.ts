@@ -1,5 +1,4 @@
 import { invoke } from "@tauri-apps/api/core";
-import { API_ENDPOINTS } from "../../constants/api";
 import type { FilesType, FileType } from "../../types/commonTypes";
 import { client } from "./api-gateway";
 
@@ -120,7 +119,7 @@ export const fetchDataToArrow = async (
 ): Promise<Uint8Array> => {
   const response = await client.fetch_binary<number[]>(
     "POST",
-    API_ENDPOINTS.TABLE.FETCH_DATA_TO_ARROW,
+    "/api/table/fetch-data-to-arrow",
     {
       tableName: tableName,
       startRow: startRow,
