@@ -35,68 +35,71 @@ export const getImportFileType = (fileName: string): ImportFileType => {
 };
 
 export const createImportConfigSchema = (t: (key: string) => string) =>
-  z
-    .object({
-      tableName: z
-        .string()
-        .min(1, t("ValidationMessages.TableNameRequired"))
-        .max(128, t("ValidationMessages.TableNameTooLong"))
-        // 制御文字・DEL 禁止 (NAME_PATTERN)
-        .regex(
-          // eslint-disable-next-line no-control-regex
-          new RegExp("^[^\u0000-\u001f\u007f]+$"),
-          t("ValidationMessages.TableNameInvalidChars"),
-        ),
-      // CSV 専用
-      separatorMode: z
-        .enum(["comma", "tab", "other"] as const)
-        .default("comma"),
-      separatorCustom: z.string().default(""),
-      encoding: z.enum(CSV_ENCODINGS).default("utf8"),
-      // Excel 専用
-      sheetName: z.string().default(""),
-    })
-    .superRefine((data, ctx) => {
-      if (data.separatorMode === "other") {
-        if (data.separatorCustom.length === 0) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: t("ValidationMessages.SeparatorRequired"),
-            path: ["separatorCustom"],
-          });
-        } else if (data.separatorCustom.length > 10) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: t("ValidationMessages.SeparatorTooLong"),
-            path: ["separatorCustom"],
-          });
-        }
-      }
-      // Excel シート名の追加バリデーション（入力された場合のみ）
-      if (data.sheetName.length > 0) {
-        if (data.sheetName.length > 31) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: t("ValidationMessages.SheetNameTooLong"),
-            path: ["sheetName"],
-          });
-        }
-        if (/[/\\?*:[\]]/.test(data.sheetName)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: t("ValidationMessages.SheetNameInvalidChars"),
-            path: ["sheetName"],
-          });
-        }
-        if (data.sheetName.startsWith("'") || data.sheetName.endsWith("'")) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: t("ValidationMessages.SheetNameInvalidQuotes"),
-            path: ["sheetName"],
-          });
-        }
-      }
-    });
+  z.object({
+    tableName: z
+      .string()
+      .min(1, t("ValidationMessages.TableNameRequired"))
+      .max(128, t("ValidationMessages.TableNameTooLong"))
+      // 制御文字・DEL 禁止 (NAME_PATTERN)
+      .regex(
+        // eslint-disable-next-line no-control-regex
+        new RegExp("^[^\u0000-\u001f\u007f]+$"),
+        t("ValidationMessages.TableNameInvalidChars"),
+      ),
+    // CSV 専用
+    separatorMode: z.enum(["comma", "tab", "other"] as const).default("comma"),
+    separatorCustom: z.string().default(""),
+    encoding: z.enum(CSV_ENCODINGS).default("utf8"),
+    // Excel 専用
+    sheetName: z.string().default(""),
+  });
+
+/**
+ * テーブル名フィールドのバリデーション (NAME_PATTERN: 制御文字・DEL 禁止)
+ */
+export const validateTableName = (
+  value: string,
+  t: (key: string) => string,
+): string | undefined => {
+  if (!value || value.length === 0)
+    return t("ValidationMessages.TableNameRequired");
+  if (value.length > 128) return t("ValidationMessages.TableNameTooLong");
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001f\u007f]/.test(value))
+    return t("ValidationMessages.TableNameInvalidChars");
+  return undefined;
+};
+
+/**
+ * 区切り文字（その他）フィールドのバリデーション
+ * separatorMode が "other" の場合のみチェックする
+ */
+export const validateSeparatorCustom = (
+  value: string,
+  mode: SeparatorMode,
+  t: (key: string) => string,
+): string | undefined => {
+  if (mode !== "other") return undefined;
+  if (value.length === 0) return t("ValidationMessages.SeparatorRequired");
+  if (value.length > 10) return t("ValidationMessages.SeparatorTooLong");
+  return undefined;
+};
+
+/**
+ * Excel シート名フィールドのバリデーション（省略可能）
+ */
+export const validateSheetName = (
+  value: string,
+  t: (key: string) => string,
+): string | undefined => {
+  if (value.length === 0) return undefined;
+  if (value.length > 31) return t("ValidationMessages.SheetNameTooLong");
+  if (/[/\\?*:[\]]/.test(value))
+    return t("ValidationMessages.SheetNameInvalidChars");
+  if (value.startsWith("'") || value.endsWith("'"))
+    return t("ValidationMessages.SheetNameInvalidQuotes");
+  return undefined;
+};
 
 /** onImport コールバックに渡す設定型 */
 export type ImportConfigSettings = {
