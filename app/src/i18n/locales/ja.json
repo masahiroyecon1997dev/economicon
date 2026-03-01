@@ -47,7 +47,7 @@
     "Maximize": "最大化",
     "Restore": "元のサイズに戻す",
     "Close": "閉じる",
-    "Help": "ヘルプ",
+    "Settings": "設定",
     "MoreMenus": "その他のメニュー"
   },
   "HeaderMenu": {
@@ -422,5 +422,36 @@
     "AddPositionColumn": "追加位置（基準列）",
     "AddPositionColumnDesc": "選択した列の左隣に追加されます。",
     "Success": "操作が完了しました。"
+  },
+  "SettingsDialog": {
+    "Title": "設定",
+    "TabsLabel": "設定カテゴリ",
+    "Save": "変更を保存",
+    "Saving": "保存中…",
+    "Placeholder": "この設定は今後追加される予定です。",
+    "Tabs": {
+      "Appearance": "外観",
+      "General": "一般",
+      "Data": "データ",
+      "Log": "ログ"
+    },
+    "Theme": {
+      "Label": "テーマ",
+      "Description": "アプリケーションの外観テーマを選択してください。",
+      "Light": "ライト",
+      "Dark": "ダーク"
+    },
+    "Language": {
+      "Label": "言語",
+      "Ja": "日本語",
+      "En": "English"
+    },
+    "Encoding": {
+      "Label": "ファイルエンコーディング"
+    },
+    "LogPath": {
+      "Label": "ログファイルのパス",
+      "NotSet": "（未設定）"
+    }
   }
 }

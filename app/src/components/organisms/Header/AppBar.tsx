@@ -1,10 +1,10 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   ChevronDown,
-  HelpCircle,
   Layers,
   Minus,
   MoreHorizontal,
+  Settings,
   Square,
   X,
 } from "lucide-react";
@@ -16,6 +16,7 @@ import { useSettingsStore } from "../../../stores/settings";
 import type { DropmenuPositionType } from "../../../types/commonTypes";
 import { MenuItem } from "../../atoms/Menu/MenuItem";
 import { DropdownMenu } from "../../molecules/Menu/DropdownMenu";
+import { SettingsDialog } from "../Modal/SettingsDialog";
 
 const MENU_POSITION: DropmenuPositionType = "bottom-right";
 
@@ -36,6 +37,7 @@ export const AppBar = () => {
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
   const [isMaximized, setIsMaximized] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const isMac = osName === "macOS";
 
@@ -485,19 +487,24 @@ export const AppBar = () => {
         )}
       </nav>
 
-      {/* ===== 右端: ヘルプ + Windows/Linux ウィンドウ制御 ===== */}
+      {/* ===== 右端: 設定 + Windows/Linux ウィンドウ制御 ===== */}
       <div className="ml-auto flex h-full items-center">
         <button
           type="button"
-          aria-label={t("AppBar.Help")}
+          aria-label={t("AppBar.Settings")}
+          onClick={() => setIsSettingsOpen(true)}
           className={cn(
             "rounded-full p-2",
             "text-white/60 hover:bg-white/10 hover:text-white transition-colors",
             "focus:outline-none",
           )}
         >
-          <HelpCircle size={18} aria-hidden="true" />
+          <Settings size={18} aria-hidden="true" />
         </button>
+        <SettingsDialog
+          open={isSettingsOpen}
+          onOpenChange={setIsSettingsOpen}
+        />
 
         {/* Windows / Linux のみ: 右端ウィンドウ制御ボタン */}
         {!isMac && (
