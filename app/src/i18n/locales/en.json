@@ -67,7 +67,28 @@
     "ParquetFiles": "Parquet",
     "FileNameHeader": "File Name",
     "SizeHeader": "Size",
-    "LastModifiedHeader": "Last Modified"
+    "LastModifiedHeader": "Last Modified",
+    "DragAndDropTab": "Drag & Drop",
+    "FileSelectTab": "Select File",
+    "DragDropAreaTitle": "Drop a file here",
+    "DragDropAreaTitleActive": "Drop it!",
+    "DragDropAreaDescription": "Supported formats: .csv, .xlsx, .xls, .parquet",
+    "ImportDialog": {
+      "Title": "Import Settings",
+      "TableName": "Table Name",
+      "TableNamePlaceholder": "e.g., population_data",
+      "CsvOptions": "CSV Options",
+      "Separator": "Separator",
+      "SeparatorComma": ", Comma",
+      "SeparatorTab": "⇥ Tab",
+      "SeparatorOther": "✎ Other",
+      "SeparatorCustomPlaceholder": "1–10 characters",
+      "Encoding": "Encoding",
+      "ExcelOptions": "Excel Options",
+      "SheetName": "Sheet Name (defaults to first sheet)",
+      "SheetNamePlaceholder": "e.g., Sheet1",
+      "Import": "Import"
+    }
   },
   "SaveDataView": {
     "Title": "Save Data",
@@ -162,5 +183,15 @@
     "Error": "Error",
     "UnexpectedError": "An unexpected error occurred.",
     "DirectoryNotFound": "The folder could not be found. It may have been deleted or moved."
+  },
+  "ValidationMessages": {
+    "TableNameRequired": "Please enter a table name.",
+    "TableNameInvalidChars": "Table name must not contain control characters.",
+    "TableNameTooLong": "Table name must be 128 characters or fewer.",
+    "SeparatorRequired": "Please enter a separator.",
+    "SeparatorTooLong": "Separator must be 10 characters or fewer.",
+    "SheetNameTooLong": "Sheet name must be 31 characters or fewer.",
+    "SheetNameInvalidChars": "Sheet name contains invalid characters (/ \\ ? * : [ ]).",
+    "SheetNameInvalidQuotes": "Sheet name must not start or end with an apostrophe."
   }
 }
