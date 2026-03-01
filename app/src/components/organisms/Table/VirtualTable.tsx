@@ -15,6 +15,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -22,7 +23,9 @@ import React, {
   type ChangeEvent,
 } from "react";
 
+import { getEconomiconAPI } from "../../../api/endpoints";
 import { useVirtualTableData } from "../../../hooks/useVirtualTableData";
+import { getPolarsTypeColor } from "../../../lib/utils/columnTypeColor";
 import { cn } from "../../../lib/utils/helpers";
 import { useTableChunkStore } from "../../../stores/tableChunkStore";
 import { useTableInfosStore } from "../../../stores/tableInfos";
@@ -32,6 +35,8 @@ import type {
   TableInfoType,
   TalbeDataRowType,
 } from "../../../types/commonTypes";
+import { ColumnOperationDialog } from "../Modal/ColumnOperationDialog";
+import { ColumnContextMenu, type ColumnOperation } from "./ColumnContextMenu";
 
 type VirtualTableProps = {
   tableInfo: TableInfoType;
@@ -129,6 +134,37 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   const prevColumnKeyRef = useRef<string>("");
   const invalidateTable = useTableInfosStore((s) => s.invalidateTable);
 
+  // ---------------------------------------------------------------------------
+  // 列操作ダイアログ状態
+  // ---------------------------------------------------------------------------
+  const [dialogState, setDialogState] = useState<{
+    open: boolean;
+    operation: ColumnOperation | null;
+    column: ColumnType | null;
+  }>({ open: false, operation: null, column: null });
+
+  // 列ヘッダーのアクション受信
+  const handleColumnAction = useCallback(
+    (col: ColumnType, op: ColumnOperation) => {
+      if (op === "sort_asc" || op === "sort_desc") {
+        void getEconomiconAPI()
+          .sortColumns({
+            tableName,
+            sortColumns: [
+              { columnName: col.name, ascending: op === "sort_asc" },
+            ],
+          })
+          .then(() => {
+            // チャンクキャッシュを無効化してデータを再取得
+            invalidateTable(tableName);
+          });
+      } else {
+        setDialogState({ open: true, operation: op, column: col });
+      }
+    },
+    [tableName, invalidateTable],
+  );
+
   useEffect(() => {
     const key = columnList.map((c) => c.name).join(",");
     if (prevColumnKeyRef.current && prevColumnKeyRef.current !== key) {
@@ -155,10 +191,28 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
       },
     ];
     columnList.forEach((column: ColumnType) => {
+      const typeColor = getPolarsTypeColor(column.type);
       cols.push({
         id: column.name,
         accessorKey: column.name,
-        header: column.name,
+        header: () => (
+          <div className="group flex items-center gap-1.5 min-w-0">
+            <span
+              className={cn(
+                "shrink-0 px-1 py-0.5 rounded text-[10px] font-bold font-mono leading-none",
+                typeColor.bg,
+                typeColor.text,
+              )}
+            >
+              {typeColor.label}
+            </span>
+            <span className="truncate">{column.name}</span>
+            <ColumnContextMenu
+              column={column}
+              onAction={(op) => handleColumnAction(column, op)}
+            />
+          </div>
+        ),
         cell: ({ row }) => {
           const rowData = getRowData(row.index);
           if (!rowData) return <SkeletonCell />;
@@ -170,7 +224,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
     });
     return cols;
     // getRowData は tableName のみに依存するため、安定している
-  }, [columnList, getRowData]);
+  }, [columnList, getRowData, handleColumnAction]);
 
   // ---------------------------------------------------------------------------
   // テーブルデータ（行数分のプレースホルダー）
@@ -233,7 +287,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   // ---------------------------------------------------------------------------
   if (totalRows === 0) {
     return (
-      <div className="mt-6 overflow-hidden rounded-lg border border-brand-border bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-brand-border bg-white shadow-sm h-full flex flex-col">
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="sticky top-0 z-10 text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
@@ -262,7 +316,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   return (
     <div
       ref={parentRef}
-      className="overflow-auto rounded-lg border border-brand-border bg-white shadow-sm mt-6 max-h-[calc(100vh-280px)]"
+      className="overflow-auto rounded-lg border border-brand-border bg-white shadow-sm h-full"
     >
       <div style={{ height: `${totalSize}px`, position: "relative" }}>
         <table className="w-full text-sm text-left text-gray-500">
@@ -341,6 +395,18 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
           エラー: {error.message}
         </div>
       )}
+
+      <ColumnOperationDialog
+        open={dialogState.open}
+        onOpenChange={(open) => setDialogState((prev) => ({ ...prev, open }))}
+        operation={dialogState.operation}
+        tableName={tableName}
+        column={dialogState.column}
+        onSuccess={(updatedList) => {
+          invalidateTable(tableName, { columnList: updatedList });
+          setDialogState({ open: false, operation: null, column: null });
+        }}
+      />
     </div>
   );
 };
