@@ -1,11 +1,11 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
-import type { ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button } from '../../atoms/Button/Button';
+import * as Dialog from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
+import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "../../atoms/Button/Button";
 
-type ModalProps = {
-  isOpenModal: boolean;
+type DialogProps = {
+  isOpenDialog: boolean;
   children: ReactNode;
   modalTitle: string;
   submitButtonName: string;
@@ -14,19 +14,19 @@ type ModalProps = {
   modalSize: string;
 };
 
-export const Modal = ({
-  isOpenModal,
+export const Dialog = ({
+  isOpenDialog,
   children,
   modalTitle,
   submitButtonName,
   submit,
   close,
   modalSize,
-}: ModalProps) => {
+}: DialogProps) => {
   const { t } = useTranslation();
 
   return (
-    <Dialog.Root open={isOpenModal} onOpenChange={(open) => !open && close()}>
+    <Dialog.Root open={isOpenDialog} onOpenChange={(open) => !open && close()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-gray-900/50 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
         <Dialog.Content
@@ -50,17 +50,15 @@ export const Modal = ({
 
           {/* Content */}
           <Dialog.Description asChild>
-            <div className="p-4 md:p-5 overflow-y-auto">
-              {children}
-            </div>
+            <div className="p-4 md:p-5 overflow-y-auto">{children}</div>
           </Dialog.Description>
 
           {/* Footer */}
           <div className="flex items-center justify-end gap-2 p-4 md:p-5 border-t border-gray-200 rounded-b">
             <Button onClick={close} variant="outline">
-              {t('Common.Cancel')}
+              {t("Common.Cancel")}
             </Button>
-            {submitButtonName !== '' && (
+            {submitButtonName !== "" && (
               <Button onClick={submit} variant="primary">
                 {submitButtonName}
               </Button>
@@ -70,4 +68,4 @@ export const Modal = ({
       </Dialog.Portal>
     </Dialog.Root>
   );
-}
+};

@@ -204,7 +204,7 @@
     "TableCreationFailed": "テーブルの作成に失敗しました。",
     "TableCreationError": "テーブル作成中にエラーが発生しました。"
   },
-  "ImportFileModal": {
+  "ImportFileDialog": {
     "Title": "ファイルを開く",
     "Notation": "15MB以下のcsvファイルのみ",
     "Information": "ファイルをここにドラッグ&ドロップしてください。もしくは、",
@@ -212,12 +212,12 @@
     "OtherChooseFile": "他のファイルを選ぶ",
     "OpenFile": "開く"
   },
-  "SaveFileModal": {
+  "SaveFileDialog": {
     "Title": "テーブルを保存する",
     "TableName": "テーブル名",
     "Download": "ダウンロード"
   },
-  "GenerateDataModal": {
+  "GenerateDataDialog": {
     "Title": "データを作成する",
     "TableName": "テーブル名",
     "numSamples": "サンプル数",
@@ -232,7 +232,7 @@
     "ErrorVariance": "誤差項の分散",
     "Generate": "作成"
   },
-  "LinearRegressionModal": {
+  "LinearRegressionDialog": {
     "Title": "線形回帰分析",
     "TableName": "テーブル名",
     "ColumnName": "列名",
@@ -240,7 +240,7 @@
     "DependentVariable": "被説明変数",
     "Execute": "分析実行"
   },
-  "CalculateModal": {
+  "CalculateDialog": {
     "Title": "計算結果の列を作成する",
     "Execute": "作成"
   },
