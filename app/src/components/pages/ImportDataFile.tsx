@@ -27,7 +27,7 @@ import type {
 import { CancelButtonBar } from "../molecules/ActionBar/CancelButtonBar";
 import { NavigationSearchBar } from "../molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "../molecules/Table/FileListTable";
-import { ImportConfigDialog } from "../organisms/Modal/ImportConfigDialog";
+import { ImportConfigDialog } from "../organisms/Dialog/ImportConfigDialog";
 import { PageLayout } from "../templates/PageLayout";
 
 type FileTypeFilter = "all" | "csv" | "excel" | "parquet";

@@ -36,7 +36,7 @@ import type {
   TableInfoType,
   TalbeDataRowType,
 } from "../../../types/commonTypes";
-import { ColumnOperationDialog } from "../Modal/ColumnOperationDialog";
+import { ColumnOperationDialog } from "../Dialog/ColumnOperationDialog";
 import { ColumnContextMenu, type ColumnOperation } from "./ColumnContextMenu";
 
 type VirtualTableProps = {

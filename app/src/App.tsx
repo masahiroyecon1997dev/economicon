@@ -17,8 +17,8 @@ import {
   Group as PanelGroup,
   Separator as PanelResizeHandle,
 } from "react-resizable-panels";
+import { MessageDialog } from "./components/molecules/Dialog/MessageDialog";
 import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
-import { MessageDialog } from "./components/molecules/Modal/MessageDialog";
 import { AppBar } from "./components/organisms/Header/AppBar";
 import { LeftSideMenu } from "./components/pages/LeftSideMenu";
 import { MainView } from "./components/pages/MainView";
