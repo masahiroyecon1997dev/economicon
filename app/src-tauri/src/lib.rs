@@ -66,6 +66,18 @@ async fn proxy_request(
     body: Option<serde_json::Value>,
     query: Option<serde_json::Value>,
 ) -> Result<serde_json::Value, ApiError> {
+    // パス検証: 必ず "/api/" 始まりであることを確認する。
+    // これによりフロントエンドが侵害された場合でも
+    // "/api/" 以外のエンドポイントへの呼び出しを防ぐ。
+    if !path.starts_with("/api/") {
+        return Err(ApiError {
+            message: format!(
+                "Invalid path '{}': must start with '/api/'",
+                path
+            ),
+        });
+    }
+
     let base_url = format!("http://127.0.0.1:{}", port.port); // PythonサーバーのURL
     let url = format!("{}{}", base_url, path);
 
@@ -107,6 +119,16 @@ async fn fetch_binary(
     body: Option<serde_json::Value>,
     query: Option<serde_json::Value>,
 ) -> Result<Vec<u8>, ApiError> {
+    // パス検証: 必ず "/api/" 始まりであることを確認する。
+    if !path.starts_with("/api/") {
+        return Err(ApiError {
+            message: format!(
+                "Invalid path '{}': must start with '/api/'",
+                path
+            ),
+        });
+    }
+
     let base_url = format!("http://127.0.0.1:{}", port.port);
     let url = format!("{}{}", base_url, path);
     let mut request_builder = match method.to_uppercase().as_str() {
@@ -147,6 +169,16 @@ async fn upload_file(
     file_data: Vec<u8>,
     file_name: String,
 ) -> Result<serde_json::Value, ApiError> {
+    // パス検証: 必ず "/api/" 始まりであることを確認する。
+    if !path.starts_with("/api/") {
+        return Err(ApiError {
+            message: format!(
+                "Invalid path '{}': must start with '/api/'",
+                path
+            ),
+        });
+    }
+
     let base_url = format!("http://127.0.0.1:{}", port.port);
     let url = format!("{}{}", base_url, path);
 
@@ -214,6 +246,9 @@ pub fn run() {
     // Tauriがサイドカーを起動する際、子プロセスは親の環境変数を継承する
     // SAFETY: tauri::Builder::default() を呼ぶ前に設定することで
     //         マルチスレッド下での競合を回避する
+    // NOTE:   set_var は Rust 2024 edition で unsafe に分類された。
+    //         マルチスレッド現境で set_var を呼ぶと getenv との竞合で未定義動作になるリスクがあるが、
+    //         ここではシングルスレッド段階（Builder 起動前）に限定することで安全を確保している。
     unsafe {
         std::env::set_var("ECONOMICOM_API_AUTH_TOKEN", &auth_token);
         std::env::set_var("ECONOMICOM_API_PORT", api_port.to_string());

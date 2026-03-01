@@ -7,6 +7,7 @@ from economicon.utils.validators.common import (
     validate_row_count_limit,
 )
 from economicon.utils.validators.files import (
+    resolve_safe_path,
     validate_directory_path,
     validate_file_format,
     validate_file_path,
@@ -19,6 +20,7 @@ __all__ = [
     "validate_numeric_types",
     "validate_row_count_limit",
     # ファイルパス関連のバリデーション関数
+    "resolve_safe_path",
     "validate_directory_path",
     "validate_file_format",
     "validate_file_path",

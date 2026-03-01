@@ -6,6 +6,34 @@ from economicon.i18n.translation import gettext as _
 from economicon.utils.exceptions import ValidationError
 
 
+def resolve_safe_path(*, path_str: str, target: str) -> Path:
+    """パス文字列を正規化して絶対パスを返す共通ヘルパー。
+
+    ``Path.resolve()`` により ``..`` や余分なセパレータを除去し、
+    シンボリックリンクも解決する。これにより
+    ``../../../etc/passwd`` のようなパストラバーサル文字列を
+    無効化できる。公開バリデータ関数から共通ヘルパーとして呼び出すこと。
+
+    Args:
+        path_str: 検証するパスの文字列
+        target: パラメータ名（エラーメッセージ用、例: "filePath"）
+
+    Returns:
+        正規化された絶対パス（Path オブジェクト）
+
+    Raises:
+        ValidationError: パス文字列が不正で解析不能な場合
+    """
+    try:
+        return Path(path_str).resolve()
+    except (OSError, ValueError) as err:
+        raise ValidationError(
+            error_code=ErrorCode.PATH_NOT_FOUND,
+            target=target,
+            message=_("{} '{}' is not a valid path.").format(target, path_str),
+        ) from err
+
+
 def _validate_path_base(
     *,
     path_str: str,
@@ -24,7 +52,8 @@ def _validate_path_base(
         ValidationError: パスが存在しない、型が違う、または権限がない場合
 
     """
-    path = Path(path_str)
+    # パスを正規化して '..' などのトラバーサル文字列を無効化
+    path = resolve_safe_path(path_str=path_str, target=target)
 
     # 存在チェック
     if not path.exists():
@@ -151,7 +180,11 @@ def validate_file_format(
     Raises:
         ValidationError: 拡張子が許可されていない場合、またはファイルが空の場合
     """
+    # パスを正規化・安全化してから検証する
+    resolved_str = str(resolve_safe_path(path_str=path_str, target=target))
     _validate_file_extension(
-        path_str=path_str, target=target, allowed_extensions=allowed_extensions
+        path_str=resolved_str,
+        target=target,
+        allowed_extensions=allowed_extensions,
     )
-    _validate_file_not_empty(path_str=path_str, target=target)
+    _validate_file_not_empty(path_str=resolved_str, target=target)
