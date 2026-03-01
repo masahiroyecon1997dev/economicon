@@ -78,11 +78,9 @@ export const DuplicateColumnForm = ({
         }}
       >
         {(field) => {
-          const errorMsg =
-            field.state.meta.isTouched && field.state.meta.errors.length > 0
-              ? ((field.state.meta.errors[0] as unknown as { message?: string })
-                  ?.message ?? String(field.state.meta.errors[0]))
-              : undefined;
+          const errorMsg = field.state.meta.isTouched
+            ? (field.state.meta.errors[0] as string | undefined)
+            : undefined;
           return (
             <FormField
               label={t("DuplicateColumnForm.NewColumnName")}
@@ -95,7 +93,6 @@ export const DuplicateColumnForm = ({
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
                 placeholder={t("DuplicateColumnForm.NewColumnNamePlaceholder")}
-                error={errorMsg}
                 disabled={isSubmitting}
                 autoFocus
               />

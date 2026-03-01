@@ -93,49 +93,77 @@ export const AddLagLeadColumnForm = ({
       className="space-y-4"
     >
       <div className="grid grid-cols-2 gap-4">
-        <form.Field name="periods">
-          {(field) => (
-            <FormField
-              label={t("AddLagLeadColumnForm.Periods")}
-              htmlFor="lag-periods"
-              error={field.state.meta.errors[0]?.toString()}
-            >
-              <InputText
-                id="lag-periods"
-                type="number"
-                value={field.state.value}
-                onChange={(e) => {
-                  field.handleChange(e.target.value);
-                  handlePeriodsChange(e.target.value);
-                }}
-                onBlur={field.handleBlur}
-                placeholder={t("AddLagLeadColumnForm.PeriodsPlaceholder")}
-                error={field.state.meta.errors[0]?.toString()}
-                disabled={isSubmitting}
-                autoFocus
-              />
-            </FormField>
-          )}
+        <form.Field
+          name="periods"
+          validators={{
+            onChange: ({ value }) => {
+              const n = parseInt(value, 10);
+              return isNaN(n) || n === 0
+                ? t("AddLagLeadColumnForm.PeriodsError")
+                : undefined;
+            },
+          }}
+        >
+          {(field) => {
+            const periodsError = field.state.meta.isTouched
+              ? (field.state.meta.errors[0] as string | undefined)
+              : undefined;
+            return (
+              <FormField
+                label={t("AddLagLeadColumnForm.Periods")}
+                htmlFor="lag-periods"
+                error={periodsError}
+              >
+                <InputText
+                  id="lag-periods"
+                  type="number"
+                  value={field.state.value}
+                  onChange={(e) => {
+                    field.handleChange(e.target.value);
+                    handlePeriodsChange(e.target.value);
+                  }}
+                  onBlur={field.handleBlur}
+                  placeholder={t("AddLagLeadColumnForm.PeriodsPlaceholder")}
+                  disabled={isSubmitting}
+                  autoFocus
+                />
+              </FormField>
+            );
+          }}
         </form.Field>
 
-        <form.Field name="newColumnName">
-          {(field) => (
-            <FormField
-              label={t("AddLagLeadColumnForm.NewColumnName")}
-              htmlFor="lag-new-name"
-              error={field.state.meta.errors[0]?.toString()}
-            >
-              <InputText
-                id="lag-new-name"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                placeholder={t("AddLagLeadColumnForm.NewColumnNamePlaceholder")}
-                error={field.state.meta.errors[0]?.toString()}
-                disabled={isSubmitting}
-              />
-            </FormField>
-          )}
+        <form.Field
+          name="newColumnName"
+          validators={{
+            onChange: ({ value }) =>
+              value.trim().length === 0
+                ? t("ValidationMessages.NewColumnNameRequired")
+                : undefined,
+          }}
+        >
+          {(field) => {
+            const nameError = field.state.meta.isTouched
+              ? (field.state.meta.errors[0] as string | undefined)
+              : undefined;
+            return (
+              <FormField
+                label={t("AddLagLeadColumnForm.NewColumnName")}
+                htmlFor="lag-new-name"
+                error={nameError}
+              >
+                <InputText
+                  id="lag-new-name"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  placeholder={t(
+                    "AddLagLeadColumnForm.NewColumnNamePlaceholder",
+                  )}
+                  disabled={isSubmitting}
+                />
+              </FormField>
+            );
+          }}
         </form.Field>
       </div>
 
