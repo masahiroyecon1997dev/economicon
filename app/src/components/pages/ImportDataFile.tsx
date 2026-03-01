@@ -11,6 +11,7 @@ import {
 } from "../../api/bridge/tauri-commands";
 import { getEconomiconAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
+import type { ImportConfigSettings } from "../../lib/utils/importSchema";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useFilesStore } from "../../stores/files";
@@ -195,11 +196,7 @@ export const ImportDataFile = () => {
     }
   };
 
-  const executeImport = async (settings: {
-    tableName: string;
-    sheetName?: string;
-    separator?: string;
-  }) => {
+  const executeImport = async (settings: ImportConfigSettings) => {
     if (!selectedFileInfo) return;
 
     setLoading(true, t("Loading.Loading"));
@@ -207,12 +204,20 @@ export const ImportDataFile = () => {
       let loadTableName = "";
       const { path } = selectedFileInfo;
 
-      // 新APIは拡張子る自動判定し、CSV/Excel/Parquetを共用の1エンドポイントで処理
+      // 新APIは拡張子を自動判定し、CSV/Excel/Parquetを共用の1エンドポイントで処理
       const response = await getEconomiconAPI().importFile({
         filePath: path,
         tableName: settings.tableName,
         separator: settings.separator,
         sheetName: settings.sheetName,
+        encoding: settings.encoding as
+          | "utf8"
+          | "latin1"
+          | "ascii"
+          | "gbk"
+          | "windows-1252"
+          | "shift_jis"
+          | undefined,
       });
 
       if (response && response.code !== "OK") {
