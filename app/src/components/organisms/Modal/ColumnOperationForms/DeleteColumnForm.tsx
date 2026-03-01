@@ -1,12 +1,16 @@
 /**
  * 列削除確認フォーム
  */
-import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { getEconomiconAPI } from "../../../../api/endpoints";
 import { showMessageDialog } from "../../../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../../../lib/utils/apiError";
 import { Button } from "../../../atoms/Button/Button";
+import { DangerAlert } from "../../../molecules/Alert/DangerAlert";
 import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
 import type { ColumnOperationFormPropsType } from "./types";
 
@@ -30,12 +34,16 @@ export const DeleteColumnForm = ({
         const updatedList = await fetchUpdatedColumnList(tableName);
         onSuccess(updatedList);
       } else {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+        await showMessageDialog(
+          t("Error.Error"),
+          getResponseErrorMessage(response, t("Error.UnexpectedError")),
+        );
       }
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : t("Error.UnexpectedError");
-      await showMessageDialog(t("Error.Error"), message);
+      await showMessageDialog(
+        t("Error.Error"),
+        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -43,16 +51,13 @@ export const DeleteColumnForm = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
-        <p className="text-sm text-red-700">
-          <Trans
-            i18nKey="DeleteColumnForm.Warning"
-            values={{ columnName: column.name }}
-            components={{ b: <strong /> }}
-          />
-        </p>
-      </div>
+      <DangerAlert>
+        <Trans
+          i18nKey="DeleteColumnForm.Warning"
+          values={{ columnName: column.name }}
+          components={{ b: <strong /> }}
+        />
+      </DangerAlert>
 
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose} disabled={isSubmitting}>

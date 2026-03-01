@@ -33,18 +33,18 @@ export const TableNavItem = ({
       <div
         className={cn(
           // ベーススタイル
-          "group flex items-center gap-1 rounded-md px-3 py-2 cursor-pointer transition-colors",
+          "group flex items-center gap-1 rounded-md px-3 py-2 transition-colors",
           // アクティブ / 非アクティブ
           isActive
             ? "bg-white/20 font-medium text-white hover:bg-white/25"
             : "font-normal text-white/70 hover:bg-white/10 hover:text-white",
         )}
-        onClick={() => onClick(tableName)}
       >
-        {/* テーブル名（省略表示） */}
+        {/* テーブル名（省略表示）: span のみクリック可能にして DropdownMenu との干渉を防ぐ */}
         <span
-          className="flex-1 min-w-0 block truncate text-sm"
+          className="flex-1 min-w-0 block truncate text-sm cursor-pointer"
           title={tableName}
+          onClick={() => onClick(tableName)}
         >
           {tableName}
         </span>

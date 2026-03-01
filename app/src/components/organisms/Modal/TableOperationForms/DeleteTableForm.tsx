@@ -1,15 +1,19 @@
 /**
  * テーブル削除確認フォーム
  */
-import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { getEconomiconAPI } from "../../../../api/endpoints";
 import { showMessageDialog } from "../../../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../../../lib/utils/apiError";
 import { useCurrentPageStore } from "../../../../stores/currentView";
 import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
 import { Button } from "../../../atoms/Button/Button";
+import { DangerAlert } from "../../../molecules/Alert/DangerAlert";
 
 type DeleteTableFormProps = {
   tableName: string;
@@ -49,12 +53,16 @@ export const DeleteTableForm = ({
         }
         onSuccess();
       } else {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+        await showMessageDialog(
+          t("Error.Error"),
+          getResponseErrorMessage(response, t("Error.UnexpectedError")),
+        );
       }
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : t("Error.UnexpectedError");
-      await showMessageDialog(t("Error.Error"), message);
+      await showMessageDialog(
+        t("Error.Error"),
+        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -62,17 +70,13 @@ export const DeleteTableForm = ({
 
   return (
     <div className="space-y-4">
-      {/* 警告バナー */}
-      <div className="flex items-start gap-3 rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 p-4">
-        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
-        <p className="text-sm text-red-700 dark:text-red-400">
-          <Trans
-            i18nKey="DeleteTableForm.Warning"
-            values={{ tableName }}
-            components={{ b: <strong /> }}
-          />
-        </p>
-      </div>
+      <DangerAlert>
+        <Trans
+          i18nKey="DeleteTableForm.Warning"
+          values={{ tableName }}
+          components={{ b: <strong /> }}
+        />
+      </DangerAlert>
 
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
