@@ -34,6 +34,7 @@ TABLE_NAN = "NaNData"
 # エンドポイント
 URL_REGRESSION = "/api/analysis/regression"
 URL_RESULTS = "/api/analysis/results"
+URL_RESULT_DETAIL = "/api/analysis/results/{result_id}"
 
 
 # -----------------------------------------------------------
