@@ -48,9 +48,7 @@ class OlsPayload:
 
     table: str = TABLE_BASIC
     dep: str = "y_linear"
-    expl: list[str] = field(
-        default_factory=lambda: ["x1", "x2"]
-    )
+    expl: list[str] = field(default_factory=lambda: ["x1", "x2"])
     has_const: bool = True
     se_method: str = "nonrobust"
     se_extra: dict = field(default_factory=dict)
@@ -74,9 +72,7 @@ class LogitPayload:
 
     table: str = TABLE_BASIC
     dep: str = "y_binary"
-    expl: list[str] = field(
-        default_factory=lambda: ["x1", "x2"]
-    )
+    expl: list[str] = field(default_factory=lambda: ["x1", "x2"])
     se_method: str = "nonrobust"
 
     def build(self) -> dict:
@@ -96,9 +92,7 @@ class ProbitPayload:
 
     table: str = TABLE_BASIC
     dep: str = "y_binary"
-    expl: list[str] = field(
-        default_factory=lambda: ["x1", "x2"]
-    )
+    expl: list[str] = field(default_factory=lambda: ["x1", "x2"])
     se_method: str = "nonrobust"
 
     def build(self) -> dict:
@@ -143,9 +137,7 @@ class FePayload:
 
     table: str = TABLE_PANEL
     dep: str = "y"
-    expl: list[str] = field(
-        default_factory=lambda: ["x1", "x2"]
-    )
+    expl: list[str] = field(default_factory=lambda: ["x1", "x2"])
     entity_col: str = "entity_id"
     time_col: str | None = None
     se_method: str = "nonrobust"
@@ -158,9 +150,7 @@ class FePayload:
         }
         if self.time_col:
             analysis["timeColumn"] = self.time_col
-        se: dict[str, str | list[str]] = {
-            "method": self.se_method
-        }
+        se: dict[str, str | list[str]] = {"method": self.se_method}
         if self.se_method == "cluster":
             se["groups"] = [self.entity_col]
         return {
@@ -178,9 +168,7 @@ class RePayload:
 
     table: str = TABLE_PANEL
     dep: str = "y"
-    expl: list[str] = field(
-        default_factory=lambda: ["x1", "x2"]
-    )
+    expl: list[str] = field(default_factory=lambda: ["x1", "x2"])
     entity_col: str = "entity_id"
     se_method: str = "nonrobust"
 
@@ -204,15 +192,9 @@ class IvPayload:
 
     table: str = TABLE_IV
     dep: str = "y"
-    expl: list[str] = field(
-        default_factory=lambda: ["x1"]
-    )
-    endog: list[str] = field(
-        default_factory=lambda: ["x2_endog"]
-    )
-    instruments: list[str] = field(
-        default_factory=lambda: ["z1", "z2"]
-    )
+    expl: list[str] = field(default_factory=lambda: ["x1"])
+    endog: list[str] = field(default_factory=lambda: ["x2_endog"])
+    instruments: list[str] = field(default_factory=lambda: ["z1", "z2"])
     se_method: str = "nonrobust"
 
     def build(self) -> dict:
@@ -236,9 +218,7 @@ class LassoPayload:
 
     table: str = TABLE_BASIC
     dep: str = "y_linear"
-    expl: list[str] = field(
-        default_factory=lambda: ["x1", "x2"]
-    )
+    expl: list[str] = field(default_factory=lambda: ["x1", "x2"])
     alpha: float = 0.1
     has_const: bool = True
     calculate_se: bool = False
@@ -265,9 +245,7 @@ class RidgePayload:
 
     table: str = TABLE_BASIC
     dep: str = "y_linear"
-    expl: list[str] = field(
-        default_factory=lambda: ["x1", "x2"]
-    )
+    expl: list[str] = field(default_factory=lambda: ["x1", "x2"])
     alpha: float = 0.5
     has_const: bool = True
     calculate_se: bool = False
