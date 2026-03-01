@@ -47,5 +47,3 @@ def run_operation(operation: DataOperation) -> dict | bytes | None:
     """
     operation.validate()
     return operation.execute()
-    return operation.execute()
-    return operation.execute()
