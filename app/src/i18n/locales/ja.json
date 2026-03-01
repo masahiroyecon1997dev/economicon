@@ -327,5 +327,99 @@
     "SideMenu": "サイドメニュー",
     "MainContent": "メインコンテンツ",
     "TableMenu": "テーブルメニュー"
+  },
+  "ColumnMenu": {
+    "SortAsc": "昇順ソート",
+    "SortDesc": "降順ソート",
+    "Rename": "列名変更",
+    "Duplicate": "列を複製",
+    "Cast": "型変換",
+    "Transform": "変換列を追加",
+    "AddDummy": "ダミー変数を追加",
+    "AddLagLead": "ラグ・リード列を追加",
+    "Delete": "列を削除",
+    "OpenColumnMenu": "列操作メニュー"
+  },
+  "RenameColumnForm": {
+    "Title": "列名を変更",
+    "CurrentColumnName": "現在の列名",
+    "NewColumnName": "新しい列名",
+    "NewColumnNamePlaceholder": "例: new_column_name",
+    "Submit": "変更",
+    "Success": "列名を変更しました。"
+  },
+  "DeleteColumnForm": {
+    "Title": "列を削除",
+    "Warning": "列「{{columnName}}」を削除します。この操作は元に戻せません。",
+    "Submit": "削除する",
+    "Success": "列を削除しました。"
+  },
+  "DuplicateColumnForm": {
+    "Title": "列を複製",
+    "NewColumnName": "複製先の列名",
+    "NewColumnNamePlaceholder": "例: column_copy",
+    "Submit": "複製",
+    "Success": "列を複製しました。"
+  },
+  "CastColumnForm": {
+    "Title": "型変換",
+    "TargetType": "変換先の型",
+    "NewColumnName": "新しい列名",
+    "NewColumnNamePlaceholder": "例: column_int",
+    "CleanupWhitespace": "前後の空白を削除",
+    "RemoveCommas": "カンマを削除（1,234 → 1234）",
+    "DatetimeFormat": "日時フォーマット（空白時は自動推定）",
+    "DatetimeFormatPlaceholder": "例: %Y-%m-%d",
+    "Strict": "失敗時にエラー（無効の場合 null にせず 400 を返す）",
+    "Submit": "変換",
+    "Success": "型変換しました。"
+  },
+  "TransformColumnForm": {
+    "Title": "変換列を追加",
+    "Method": "変換方法",
+    "MethodLog": "対数変換",
+    "MethodPower": "べき乗変換",
+    "MethodRoot": "累乗根変換",
+    "Base": "対数の底（空白時は自然対数）",
+    "Exponent": "べき指数",
+    "Degree": "根の次数",
+    "NewColumnName": "新しい列名",
+    "NewColumnNamePlaceholder": "例: log_value",
+    "Submit": "追加",
+    "Success": "変換列を追加しました。"
+  },
+  "AddDummyColumnForm": {
+    "Title": "ダミー変数を追加",
+    "Mode": "ダミー化モード",
+    "ModeSingle": "単一値をダミー化",
+    "ModeAllExceptBase": "基準値以外すべてをダミー化",
+    "TargetValue": "ダミー化する値",
+    "TargetValuePlaceholder": "例: Tokyo",
+    "DummyColumnName": "ダミー列名",
+    "DummyColumnNamePlaceholder": "例: is_tokyo",
+    "DropBaseValue": "除外する基準値",
+    "DropBaseValueAuto": "自動（最頻値）",
+    "DropBaseValuePlaceholder": "値を入力または auto_most_frequent",
+    "NullStrategy": "NULL値の扱い",
+    "NullStrategyExclude": "無視",
+    "NullStrategyAsCategory": "カテゴリとして扱う",
+    "NullStrategyError": "NULLがある場合エラー",
+    "Submit": "追加",
+    "Success": "ダミー変数を追加しました。"
+  },
+  "AddLagLeadColumnForm": {
+    "Title": "ラグ・リード列を追加",
+    "Periods": "期間（負=ラグ、正=リード）",
+    "PeriodsPlaceholder": "例: -1（ラグ1）、+1（リード1）",
+    "GroupColumns": "グループ化列（省略可能）",
+    "NewColumnName": "新しい列名",
+    "NewColumnNamePlaceholder": "例: lag_1_value",
+    "Submit": "追加",
+    "Success": "ラグ・リード列を追加しました。"
+  },
+  "ColumnOperationForm": {
+    "AddPositionColumn": "追加位置（基準列）",
+    "AddPositionColumnDesc": "選択した列の左隣に追加されます。",
+    "Success": "操作が完了しました。"
   }
 }

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { getEconomiconAPI } from "../../api/endpoints";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../lib/dialog/message";
+import { getPolarsTypeColor } from "../../lib/utils/columnTypeColor";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableListStore } from "../../stores/tableList";
 import { ExpressionHelperButton } from "../atoms/Button/ExpressionHelperButton";
@@ -120,42 +121,6 @@ export const Calculation = () => {
   const filteredColumns = columnList.filter((column) =>
     column.name.toLowerCase().includes(filterValue.toLowerCase()),
   );
-
-  const getTypeColor = (
-    type: string,
-  ): { bg: string; text: string; label: string } => {
-    if (type.includes("Int") || type.includes("UInt")) {
-      return {
-        bg: "bg-blue-100 dark:bg-blue-900/30",
-        text: "text-blue-700 dark:text-blue-300",
-        label: "#",
-      };
-    } else if (type.includes("Float")) {
-      return {
-        bg: "bg-green-100 dark:bg-green-900/30",
-        text: "text-green-700 dark:text-green-300",
-        label: "1.2",
-      };
-    } else if (type.includes("Utf8") || type.includes("String")) {
-      return {
-        bg: "bg-purple-100 dark:bg-purple-900/30",
-        text: "text-purple-700 dark:text-purple-300",
-        label: "ABC",
-      };
-    } else if (type.includes("Date") || type.includes("Datetime")) {
-      return {
-        bg: "bg-orange-100 dark:bg-orange-900/30",
-        text: "text-orange-700 dark:text-orange-300",
-        label: "DATE",
-      };
-    } else {
-      return {
-        bg: "bg-gray-100 dark:bg-gray-900/30",
-        text: "text-gray-700 dark:text-gray-300",
-        label: "?",
-      };
-    }
-  };
 
   return (
     <PageLayout
@@ -337,7 +302,7 @@ export const Calculation = () => {
               </div>
               <div className="flex-1 overflow-y-auto p-2 space-y-1">
                 {filteredColumns.map((column, index) => {
-                  const typeColor = getTypeColor(column.type);
+                  const typeColor = getPolarsTypeColor(column.type);
                   return (
                     <button
                       key={index}

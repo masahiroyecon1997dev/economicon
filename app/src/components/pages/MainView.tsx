@@ -28,7 +28,15 @@ export const MainView = () => {
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden h-full bg-brand-secondary">
-      <div className="flex-1 overflow-auto p-4">{renderContent()}</div>
+      <div
+        className={
+          currentView === "DataPreview"
+            ? "flex-1 overflow-hidden p-4 flex flex-col min-h-0"
+            : "flex-1 overflow-auto p-4"
+        }
+      >
+        {renderContent()}
+      </div>
     </main>
   );
 };

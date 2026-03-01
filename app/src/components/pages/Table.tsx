@@ -8,9 +8,9 @@ export const Table = () => {
   );
 
   return (
-    <div className="max-w-full mx-auto">
+    <div className="h-full flex flex-col min-h-0">
       {/* タブヘッダー */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 shrink-0">
         <nav className="-mb-px flex space-x-1 overflow-x-auto">
           {tableInfos.map((table) => (
             <button
@@ -33,7 +33,7 @@ export const Table = () => {
       {tableInfos.map((table) => (
         <div
           key={table.tableName}
-          className={table.isActive ? "block" : "hidden"}
+          className={table.isActive ? "flex-1 min-h-0" : "hidden"}
         >
           <VirtualTable tableInfo={table} />
         </div>
