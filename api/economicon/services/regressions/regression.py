@@ -8,6 +8,7 @@ from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.models import (
     BinaryChoiceRegressionParams,
+    ClusteredStandardError,
     InstrumentalVariablesParams,
     OLSParams,
     PanelDataParams,
@@ -289,9 +290,24 @@ class Regression:
                 _("Invalid analysis parameters for OLS regression")
             )
         model_result = fit_ols(y_data, x_data, missing)
+        groups_arrays = None
+        if isinstance(self.standard_error, ClusteredStandardError):
+            # statsmodels と同一の欠損値除去マスクを構築し、
+            # クラスター列を numpy 配列として渡す
+            x_nan = (
+                np.isnan(x_data).any(axis=1)
+                if x_data.ndim > 1
+                else np.isnan(x_data)
+            )
+            valid_mask = ~(np.isnan(y_data) | x_nan)
+            groups_arrays = {
+                col: df[col].to_numpy()[valid_mask]
+                for col in self.standard_error.groups
+            }
         model_result = apply_standard_errors(
             model_result,
             self.standard_error,
+            groups_arrays=groups_arrays,
         )
         self._last_raw_model = model_result
         self._last_model_type = "ols"
@@ -313,9 +329,22 @@ class Regression:
                 _("Specified regression method is not supported")
             )
 
+        groups_arrays = None
+        if isinstance(self.standard_error, ClusteredStandardError):
+            x_nan = (
+                np.isnan(x_data).any(axis=1)
+                if x_data.ndim > 1
+                else np.isnan(x_data)
+            )
+            valid_mask = ~(np.isnan(y_data) | x_nan)
+            groups_arrays = {
+                col: df[col].to_numpy()[valid_mask]
+                for col in self.standard_error.groups
+            }
         model_result = apply_standard_errors(
             model_result,
             self.standard_error,
+            groups_arrays=groups_arrays,
         )
         self._last_raw_model = model_result
         result = self._format_result(model_result)
@@ -496,6 +525,8 @@ class Regression:
             instrumental_variables=self.analysis.instrumental_variables,
             standard_error_method=self.standard_error.method,
             has_const=self.has_const,
+            iv_method=self.analysis.iv_method,
+            gmm_weight_matrix=self.analysis.gmm_weight_matrix,
         )
         model_result = fit_iv(data_input)
         self._last_raw_model = model_result
