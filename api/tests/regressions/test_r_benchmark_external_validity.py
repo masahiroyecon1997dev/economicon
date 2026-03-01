@@ -17,8 +17,8 @@ Economicon API が統計的に一致することを検証する。
   Ridge  | R: glmnet      vs API: sklearn Ridge (coefficientScaled)
 
 許容誤差:
-  OLS/FE/RE/IV 係数・SE  atol=1e-8
-  Logit/Probit 係数・SE  atol=1e-6  (MLE 収束差)
+  OLS/FE/RE/IV 係数・SE  atol=1e-10
+  Logit/Probit 係数・SE  atol=1e-5  (MLE 収束差)
   R² (FE/RE)             atol=1e-5  (定義差を考慮)
   Lasso/Ridge scaled     atol=1e-5  (同一目的関数)
   IV 診断統計量           rtol=5e-3  (Wu-Hausman 実装差を許容)
@@ -66,23 +66,21 @@ TABLE_GRUNFELD_IV_EXT = "GrunfeldIVExtData"
 # 許容誤差定数
 # ------------------------------------------------------------------
 
-# OLS / FE / RE / IV: 使用ライブラリが共通の線形代数ルーチンを使用
-_ABS_TOL_LINEAR = 1e-8
+# OLS / FE / RE / IV: 使用ライブラリが共通の線形代数ルーチンを使用。
+# API JSON ラウンドトリップなしのため 1e-10 までたどれる。
+_ABS_TOL_LINEAR = 1e-10
 
 # FE/RE R²: within R² の定義が plm と linearmodels で微妙に異なる場合あり
 _ABS_TOL_R2_PANEL = 1e-5
 
 # OLS R²: lm vs statsmodels は完全一致するはず
-_ABS_TOL_R2_OLS = 1e-8
+_ABS_TOL_R2_OLS = 1e-10
 
 # IV R² (RSS/TSS 定義): AER と linearmodels で一致
 _ABS_TOL_R2_IV = 1e-5
 
 # Logit/Probit: MLE の反復収束差 (Logit/Probit const で ~1e-5 の差)
 _ABS_TOL_GLM = 1e-5
-
-# Probit const SE: R が observed 情報行列、statsmodels が expected を使用
-_ABS_TOL_PROBIT_CONST_SE = 5e-3
 
 # Lasso/Ridge: sklearn/glmnet は同一 (1/(2n))||Xβ-y||² + λ||β||₁ を解く
 _ABS_TOL_REG = 1e-5
@@ -98,6 +96,9 @@ _RTOL_PROBIT_SE = 0.1
 
 # IV 診断統計量: Wu-Hausman 計算方法が AER と linearmodels で根本的に異なる
 _RTOL_IV_DIAG = 5e-3
+
+# IV SE/CI: AER::ivreg と linearmodels の自由度補正差異 ~1% を許容
+_RTOL_IV_SE = 1e-2
 
 # Grunfeld データ構造定数
 _N_OBS = 200
@@ -731,8 +732,9 @@ class TestLogitvsR:
         r_ci: dict[str, dict[str, float]] = r_gold["logit"]["conf_int"]
 
         sample = next(iter(p_map.values()))
-        if "confidenceIntervalLower" not in sample:
-            pytest.skip("API が Logit の信頼区間を返さない")
+        assert "confidenceIntervalLower" in sample, (
+            "Logit: API が confidenceIntervalLower を返さない"
+        )
 
         for var, bounds in r_ci.items():
             p = p_map[var]
@@ -889,8 +891,9 @@ class TestProbitvsR:
         r_ci: dict[str, dict[str, float]] = r_gold["probit"]["conf_int"]
 
         sample = next(iter(p_map.values()))
-        if "confidenceIntervalLower" not in sample:
-            pytest.skip("API が Probit の信頼区間を返さない")
+        assert "confidenceIntervalLower" in sample, (
+            "Probit: API が confidenceIntervalLower を返さない"
+        )
 
         # SE の実装差異が CI = coef ± z*SE に伝播する
         # すべての変数に _RTOL_PROBIT_SE を適用 (最大 ~10% の差異を許容)
@@ -945,6 +948,65 @@ class TestProbitvsR:
             atol=_ABS_TOL_GLM,
             rtol=0,
             err_msg="Probit logLikelihood が R と不一致",
+        )
+
+    def test_aic_bic(
+        self,
+        client: TestClient,
+        grunfeld_store_ext: Any,
+        r_gold: dict[str, Any],
+    ) -> None:
+        """
+        Probit の AIC / BIC が R glm() と一致する。
+
+        llf が R と一致するならば、AIC/BIC も完全に一致するはず。
+        """
+        _, output = _post_and_fetch(client, _glm_payload("probit"))
+        ms = output["modelStatistics"]
+
+        np.testing.assert_allclose(
+            ms["AIC"],
+            r_gold["probit"]["aic"],
+            atol=_ABS_TOL_GLM,
+            rtol=0,
+            err_msg="Probit AIC が R と不一致",
+        )
+        np.testing.assert_allclose(
+            ms["BIC"],
+            r_gold["probit"]["bic"],
+            atol=_ABS_TOL_GLM,
+            rtol=0,
+            err_msg="Probit BIC が R と不一致",
+        )
+
+    def test_lr_statistic_derived(
+        self,
+        client: TestClient,
+        grunfeld_store_ext: Any,
+        r_gold: dict[str, Any],
+    ) -> None:
+        """
+        R の LR 検定統計量 (chi2) を API から再現できることを確認。
+
+        LR stat = 2 * (llf - llf_null)
+        llf が R と一致すれば、R の llf_null と組み合わせた
+        LR stat も一致するはず。
+        """
+        _, output = _post_and_fetch(client, _glm_payload("probit"))
+        api_llf: float = output["modelStatistics"]["logLikelihood"]
+        r_llnull: float = r_gold["probit"]["log_likelihood_null"]
+        r_lr_stat: float = r_gold["probit"]["lr_test"]["statistic"]
+
+        derived_lr = 2.0 * (api_llf - r_llnull)
+        np.testing.assert_allclose(
+            derived_lr,
+            r_lr_stat,
+            atol=1e-4,
+            rtol=0,
+            err_msg=(
+                "Probit 対数尤度から再現した LR 統計量が"
+                " R lr_test.statistic と不一致"
+            ),
         )
 
     def test_logit_probit_ratio_sign_consistent(
@@ -1029,7 +1091,7 @@ class TestIVvsR:
                 p_map[var]["standardError"],
                 r_val,
                 atol=0,
-                rtol=1e-2,
+                rtol=_RTOL_IV_SE,
                 err_msg=f"IV SE [{var!r}] が R と不一致",
             )
 
@@ -1055,14 +1117,14 @@ class TestIVvsR:
                 p["confidenceIntervalLower"],
                 bounds["lower"],
                 atol=0,
-                rtol=1e-2,
+                rtol=_RTOL_IV_SE,
                 err_msg=f"IV CI 下限 [{var!r}] が R と不一致",
             )
             np.testing.assert_allclose(
                 p["confidenceIntervalUpper"],
                 bounds["upper"],
                 atol=0,
-                rtol=1e-2,
+                rtol=_RTOL_IV_SE,
                 err_msg=f"IV CI 上限 [{var!r}] が R と不一致",
             )
 
@@ -1111,32 +1173,6 @@ class TestIVvsR:
         r_pval: float = r_gold["iv"]["wu_hausman"]["p_value"]
 
         # AER と linearmodels の実装差異を考慮し、p < 0.05 の方向のみ検証
-        assert api_pval < _SIGNIFICANCE_LEVEL, (
-            f"API Wu-Hausman p={api_pval:.4f} が有意でない"
-        )
-        assert r_pval < _SIGNIFICANCE_LEVEL
-
-    def test_wu_hausman_significant(
-        self,
-        client: TestClient,
-        grunfeld_store_ext: Any,
-        r_gold: dict[str, Any],
-    ) -> None:
-        """
-        Wu-Hausman 検定が R と同じ有意性判定を示す。
-
-        R では p=0.0004 (< 0.05) → 内生性を棄却できない (endogeneity 存在)。
-        """
-        _, output = _post_and_fetch(client, _iv_payload())
-        diag = output["diagnostics"]
-
-        if "wuHausmanTest" not in diag:
-            pytest.skip("API が wuHausmanTest を返さない")
-
-        api_pval: float = diag["wuHausmanTest"]["pValue"]
-        r_pval: float = r_gold["iv"]["wu_hausman"]["p_value"]
-
-        # 両者とも p < α (有意) であることを確認
         assert api_pval < _SIGNIFICANCE_LEVEL, (
             f"API Wu-Hausman p={api_pval:.4f} が有意でない"
         )
