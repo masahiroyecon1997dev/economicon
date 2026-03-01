@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 from fastapi import status as http_status
 
 from economicon.models import (
@@ -17,7 +17,6 @@ from economicon.models import (
     DuplicateTableRequestBody,
     DuplicateTableResult,
     FetchDataToArrowRequestBody,
-    FetchDataToArrowResult,
     FetchDataToJsonRequestBody,
     FetchDataToJsonResult,
     FilterSingleConditionRequestBody,
@@ -360,17 +359,29 @@ async def fetch_data_to_json(
 
 @router.post(
     "/fetch-data-to-arrow",
-    response_model=SuccessResponse[FetchDataToArrowResult],
+    response_class=Response,
+    responses={
+        200: {
+            "content": {"application/vnd.apache.arrow.stream": {}},
+            "description": (
+                "Apache Arrow IPC ファイル形式の生バイナリ。"
+                "スキーマメタデータに totalRows / startRow / endRow / "
+                "tableName を含む。"
+            ),
+        }
+    },
 )
 async def fetch_data_to_arrow(
     request: Request,
     body: FetchDataToArrowRequestBody,
     tables_store: TablesStoreDep,
-):
-    """データをApache Arrow IPC形式で取得するエンドポイント
+) -> Response:
+    """データをApache Arrow IPC形式の生バイナリで返すエンドポイント
 
     仮想スクロール用のチャンク取得API。
-    Apache Arrow IPC形式のバイナリデータ（Base64エンコード）を返します。
+    JSON包装なしでArrow IPC形式生バイナリを直接返す。
+    メタデータ（totalRows/startRow/endRow/tableName）は
+    Arrowスキーマメタデータに埋め込む。
 
     Parameters
     ----------
@@ -381,15 +392,14 @@ async def fetch_data_to_arrow(
 
     Returns
     -------
-    JSONResponse
-        処理結果（Arrow IPC形式のBase64エンコードされたバイナリを含む）
+    Response
+        Arrow IPC形式生バイナリ
     """
-    # ビジネスロジックの実行
     api = FetchDataToArrow(body, tables_store)
-    result = run_operation(api)
-
-    return create_success_response(
-        status_code=http_status.HTTP_200_OK, response_object=result
+    arrow_bytes: bytes = run_operation(api)
+    return Response(
+        content=arrow_bytes,
+        media_type="application/vnd.apache.arrow.stream",
     )
 
 

@@ -1,11 +1,20 @@
 import { create } from "zustand";
 import type { TableInfoType, TableInfosType } from "../types/commonTypes";
+import { useTableChunkStore } from "./tableChunkStore";
 
 export type TableInfosActions = {
   addTableInfo: (tableInfo: TableInfoType) => void;
   removeTableInfo: (tableName: string) => void;
   updateTableInfo: (tableName: string, tableInfo: TableInfoType) => void;
   activateTableInfo: (tableName: string) => void;
+  /**
+   * テーブルのメタ情報を部分更新する。
+   * 列操作後のキャッシュ無効化と updateTableInfo を原子的に行う。
+   */
+  invalidateTable: (
+    tableName: string,
+    partial: Partial<Pick<TableInfoType, "columnList" | "totalRows">>,
+  ) => void;
 };
 
 type TableInfosStore = {
@@ -16,6 +25,7 @@ type TableInfosStore = {
 export const useTableInfosStore = create<TableInfosStore>((set, get) => ({
   tableInfos: [],
   activeTableName: null,
+
   addTableInfo: (tableInfo) =>
     set(() => {
       const deactivatedInfos = get().tableInfos.map((info) => ({
@@ -30,31 +40,36 @@ export const useTableInfosStore = create<TableInfosStore>((set, get) => ({
     }),
 
   removeTableInfo: (tableName) =>
-    set((state) => {
-      return {
-        tableInfos: state.tableInfos.filter(
-          (info) => info.tableName !== tableName
-        ),
-      };
-    }),
+    set((state) => ({
+      tableInfos: state.tableInfos.filter(
+        (info) => info.tableName !== tableName,
+      ),
+    })),
 
   updateTableInfo: (tableName, tableInfo) =>
-    set((state) => {
-      return {
-        tableInfos: state.tableInfos.map((info) =>
-          info.tableName === tableName ? tableInfo : info
-        ),
-      };
-    }),
+    set((state) => ({
+      tableInfos: state.tableInfos.map((info) =>
+        info.tableName === tableName ? tableInfo : info,
+      ),
+    })),
 
   activateTableInfo: (tableName) =>
-    set((state) => {
-      return {
-        tableInfos: state.tableInfos.map((info) => ({
-          ...info,
-          isActive: info.tableName === tableName,
-        })),
-        activeTableName: tableName,
-      };
-    }),
+    set((state) => ({
+      tableInfos: state.tableInfos.map((info) => ({
+        ...info,
+        isActive: info.tableName === tableName,
+      })),
+      activeTableName: tableName,
+    })),
+
+  invalidateTable: (tableName, partial) => {
+    // バイナリキャッシュを無効化（列変更後に古いデータを捨てる）
+    useTableChunkStore.getState().clearTable(tableName);
+
+    set((state) => ({
+      tableInfos: state.tableInfos.map((info) =>
+        info.tableName === tableName ? { ...info, ...partial } : info,
+      ),
+    }));
+  },
 }));
