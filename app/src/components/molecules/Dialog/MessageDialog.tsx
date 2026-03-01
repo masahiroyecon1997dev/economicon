@@ -2,7 +2,7 @@ import * as RadixDialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
 import { useMessageDialogStore } from "../../../stores/messageDialog";
-import { ErrorModalFooter } from "./ErrorModalFooter";
+import { ErrorDialogFooter } from "./ErrorDialogFooter";
 
 export const MessageDialog = () => {
   const { isOpen, title, message, closeMessageDialog } =
@@ -53,7 +53,7 @@ export const MessageDialog = () => {
           </RadixDialog.Description>
 
           {/* Footer */}
-          <ErrorModalFooter onOk={handleOk} />
+          <ErrorDialogFooter onOk={handleOk} />
         </RadixDialog.Content>
       </RadixDialog.Portal>
     </RadixDialog.Root>

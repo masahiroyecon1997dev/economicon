@@ -19,7 +19,7 @@ import type {
 import { InputText } from "../atoms/Input/InputText";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
 import { FormField } from "../molecules/Form/FormField";
-import { SimulationColumnEditDialog } from "../organisms/Modal/SimulationColumnEditDialog";
+import { SimulationColumnEditDialog } from "../organisms/Dialog/SimulationColumnEditDialog";
 import { PageLayout } from "../templates/PageLayout";
 
 const createSimulationSchema = (t: (key: string) => string) =>

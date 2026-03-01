@@ -16,7 +16,7 @@ import { useSettingsStore } from "../../../stores/settings";
 import type { DropmenuPositionType } from "../../../types/commonTypes";
 import { MenuItem } from "../../atoms/Menu/MenuItem";
 import { DropdownMenu } from "../../molecules/Menu/DropdownMenu";
-import { SettingsDialog } from "../Modal/SettingsDialog";
+import { SettingsDialog } from "../Dialog/SettingsDialog";
 
 const MENU_POSITION: DropmenuPositionType = "bottom-right";
 
@@ -249,72 +249,72 @@ export const AppBar = () => {
             close();
           },
         },
-        {
-          id: "lasso-regression",
-          label: t("HeaderMenu.LassoRegression"),
-          handleSelect: () => {},
-        },
-        {
-          id: "ridge-regression",
-          label: t("HeaderMenu.RidgeRegression"),
-          handleSelect: () => {},
-        },
+        // {
+        //   id: "lasso-regression",
+        //   label: t("HeaderMenu.LassoRegression"),
+        //   handleSelect: () => {},
+        // },
+        // {
+        //   id: "ridge-regression",
+        //   label: t("HeaderMenu.RidgeRegression"),
+        //   handleSelect: () => {},
+        // },
       ],
     },
-    {
-      id: "nonlinear-regression",
-      menuName: t("HeaderMenu.NonlinearRegressionMenu"),
-      isOpen: openMenuId === "nonlinear-regression",
-      onClose: close,
-      items: [
-        {
-          id: "logit",
-          label: t("HeaderMenu.LogitAnalysis"),
-          handleSelect: () => {},
-        },
-        {
-          id: "probit",
-          label: t("HeaderMenu.ProbitAnalysis"),
-          handleSelect: () => {},
-        },
-        {
-          id: "tobit",
-          label: t("HeaderMenu.TobitAnalysis"),
-          handleSelect: () => {},
-        },
-      ],
-    },
-    {
-      id: "panel-data",
-      menuName: t("HeaderMenu.PanelDataMenu"),
-      isOpen: openMenuId === "panel-data",
-      onClose: close,
-      items: [
-        {
-          id: "fixed-effect",
-          label: t("HeaderMenu.FixedEffect"),
-          handleSelect: () => {},
-        },
-        {
-          id: "random-effect",
-          label: t("HeaderMenu.RandomEffect"),
-          handleSelect: () => {},
-        },
-      ],
-    },
-    {
-      id: "causal-inference",
-      menuName: t("HeaderMenu.CausalInferenceMenu"),
-      isOpen: openMenuId === "causal-inference",
-      onClose: close,
-      items: [
-        {
-          id: "instrumental-variables",
-          label: t("HeaderMenu.InstrumentalVariables"),
-          handleSelect: () => {},
-        },
-      ],
-    },
+    // {
+    //   id: "nonlinear-regression",
+    //   menuName: t("HeaderMenu.NonlinearRegressionMenu"),
+    //   isOpen: openMenuId === "nonlinear-regression",
+    //   onClose: close,
+    //   items: [
+    //     {
+    //       id: "logit",
+    //       label: t("HeaderMenu.LogitAnalysis"),
+    //       handleSelect: () => {},
+    //     },
+    //     {
+    //       id: "probit",
+    //       label: t("HeaderMenu.ProbitAnalysis"),
+    //       handleSelect: () => {},
+    //     },
+    //     {
+    //       id: "tobit",
+    //       label: t("HeaderMenu.TobitAnalysis"),
+    //       handleSelect: () => {},
+    //     },
+    //   ],
+    // },
+    // {
+    //   id: "panel-data",
+    //   menuName: t("HeaderMenu.PanelDataMenu"),
+    //   isOpen: openMenuId === "panel-data",
+    //   onClose: close,
+    //   items: [
+    //     {
+    //       id: "fixed-effect",
+    //       label: t("HeaderMenu.FixedEffect"),
+    //       handleSelect: () => {},
+    //     },
+    //     {
+    //       id: "random-effect",
+    //       label: t("HeaderMenu.RandomEffect"),
+    //       handleSelect: () => {},
+    //     },
+    //   ],
+    // },
+    // {
+    //   id: "causal-inference",
+    //   menuName: t("HeaderMenu.CausalInferenceMenu"),
+    //   isOpen: openMenuId === "causal-inference",
+    //   onClose: close,
+    //   items: [
+    //     {
+    //       id: "instrumental-variables",
+    //       label: t("HeaderMenu.InstrumentalVariables"),
+    //       handleSelect: () => {},
+    //     },
+    //   ],
+    // },
   ];
 
   return (

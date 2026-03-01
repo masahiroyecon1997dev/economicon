@@ -3,8 +3,8 @@ import { Copy, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/utils/helpers";
-import type { TableOperation } from "../../organisms/Modal/TableOperationDialog";
-import { TableOperationDialog } from "../../organisms/Modal/TableOperationDialog";
+import type { TableOperation } from "../../organisms/Dialog/TableOperationDialog";
+import { TableOperationDialog } from "../../organisms/Dialog/TableOperationDialog";
 
 type TableNavItemProps = {
   tableName: string;

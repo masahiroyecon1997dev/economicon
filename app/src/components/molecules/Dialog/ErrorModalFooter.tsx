@@ -2,11 +2,11 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "../../atoms/Button/Button";
 
-type ErrorModalFooterProps = {
+type ErrorDialogFooterProps = {
   onOk: () => void;
 };
 
-export const ErrorModalFooter = ({ onOk }: ErrorModalFooterProps) => {
+export const ErrorDialogFooter = ({ onOk }: ErrorDialogFooterProps) => {
   const { t } = useTranslation();
 
   return (
