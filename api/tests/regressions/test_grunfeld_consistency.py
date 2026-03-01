@@ -19,6 +19,8 @@ IV 推定の構成:
   操作変数: value_lag (各 firm 内での value の1期前ラグ)
 """
 
+from typing import Any
+
 import numpy as np
 import pandas as pd
 import polars as pl
@@ -92,10 +94,12 @@ def grunfeld_raw() -> pd.DataFrame:
     列: firm, year, inv, value, capital
     全列を float に変換して返す (TablesStore 互換)。
     """
-    data = get_rdataset("Grunfeld", "plm").data
-    df = data[["firm", "year", "inv", "value", "capital"]].copy()
-    for col in df.columns:
-        df[col] = df[col].astype(float)
+    dataset = get_rdataset("Grunfeld", "plm")
+    assert dataset is not None, "statsmodels Grunfeld dataset not found"
+    data = dataset.data
+    assert data is not None, "Grunfeld dataset.data is None"
+    df: pd.DataFrame = data[["firm", "year", "inv", "value", "capital"]].copy()
+    df = df.astype(float)
     return df.reset_index(drop=True)
 
 
@@ -594,7 +598,7 @@ class TestGrunfeldRidge:
 class TestGrunfeldIV2SLS:
     """IV 2SLS 結合テスト (Grunfeld データ)"""
 
-    def _build_ref(self, grunfeld_with_iv: pd.DataFrame, cov_type: str):
+    def _build_ref(self, grunfeld_with_iv: pd.DataFrame, cov_type: str) -> Any:
         """linearmodels IV2SLS の参照結果を返す"""
         y = grunfeld_with_iv["inv"]
         exog = sm.add_constant(grunfeld_with_iv[["value"]])
@@ -617,7 +621,7 @@ class TestGrunfeldIV2SLS:
 
         np.testing.assert_allclose(
             [p["coefficient"] for p in params],
-            ref.params.values,
+            ref.params.to_numpy(),
             atol=_ABS_TOL,
             rtol=0,
             err_msg="IV 2SLS 係数が linearmodels と不一致",
@@ -633,7 +637,7 @@ class TestGrunfeldIV2SLS:
 
         np.testing.assert_allclose(
             [p["standardError"] for p in params],
-            ref.std_errors.values,
+            ref.std_errors.to_numpy(),
             atol=_ABS_TOL,
             rtol=0,
             err_msg="IV 2SLS SE が linearmodels と不一致",
@@ -708,7 +712,7 @@ class TestGrunfeldIVGMM:
 
         np.testing.assert_allclose(
             [p["coefficient"] for p in params],
-            ref.params.values,
+            ref.params.to_numpy(),
             atol=_ABS_TOL,
             rtol=0,
             err_msg="IV GMM 係数が linearmodels と不一致",
