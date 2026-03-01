@@ -187,9 +187,7 @@ def _post_and_fetch(client, payload: dict) -> tuple[str, dict]:
 
     # HTTP エンドポイント経由で詳細結果を取得
     results_resp = client.get(f"{URL_RESULTS}/{result_id}")
-    assert results_resp.status_code == status.HTTP_200_OK, (
-        results_resp.text
-    )
+    assert results_resp.status_code == status.HTTP_200_OK, results_resp.text
     result_data = results_resp.json()
     assert result_data["code"] == "OK"
 
@@ -365,9 +363,7 @@ class TestGrunfeldOLS:
             err_msg="OLS p 値が statsmodels と不一致",
         )
 
-    def test_model_stats_nonrobust(
-        self, client, grunfeld_store, grunfeld_raw
-    ):
+    def test_model_stats_nonrobust(self, client, grunfeld_store, grunfeld_raw):
         """
         R²・adjR²・F 統計量が statsmodels と一致。
         """
@@ -380,17 +376,13 @@ class TestGrunfeldOLS:
         assert abs(ms["adjustedR2"] - ref.rsquared_adj) < _ABS_TOL
         assert abs(ms["fValue"] - ref.fvalue) < _ABS_TOL
 
-    def test_no_const_coefficients(
-        self, client, grunfeld_store, grunfeld_raw
-    ):
+    def test_no_const_coefficients(self, client, grunfeld_store, grunfeld_raw):
         """
         hasConst=False の係数が statsmodels と一致。
         定数項を含まない 2 パラメータ (value, capital)。
         """
         ref = _sm_ols(grunfeld_raw, has_const=False)
-        _, output = _post_and_fetch(
-            client, _ols_payload(has_const=False)
-        )
+        _, output = _post_and_fetch(client, _ols_payload(has_const=False))
         params = output["parameters"]
 
         assert len(params) == _N_PARAMS_NO_CONST
@@ -432,9 +424,7 @@ class TestGrunfeldOLS:
             " 解決する処理が欠落)"
         ),
     )
-    def test_clustered_by_firm_se(
-        self, client, grunfeld_store, grunfeld_raw
-    ):
+    def test_clustered_by_firm_se(self, client, grunfeld_store, grunfeld_raw):
         """
         firm クラスター標準誤差が statsmodels と一致。
 
@@ -470,9 +460,7 @@ class TestGrunfeldOLS:
             err_msg="OLS cluster SE が statsmodels と不一致",
         )
 
-    def test_hac_newey_west_se(
-        self, client, grunfeld_store, grunfeld_raw
-    ):
+    def test_hac_newey_west_se(self, client, grunfeld_store, grunfeld_raw):
         """
         HAC (Newey-West, maxlags=1) SE が statsmodels と一致。
 
@@ -483,16 +471,18 @@ class TestGrunfeldOLS:
         y = grunfeld_raw["inv"]
         x_mat = sm.add_constant(grunfeld_raw[["value", "capital"]])
         # API と同じ use_correction=True を使用する
-        ref = sm.OLS(y, x_mat).fit().get_robustcov_results(
-            cov_type="hac",
-            maxlags=_HAC_MAXLAGS,
-            use_correction=True,
+        ref = (
+            sm.OLS(y, x_mat)
+            .fit()
+            .get_robustcov_results(
+                cov_type="hac",
+                maxlags=_HAC_MAXLAGS,
+                use_correction=True,
+            )
         )
         _, output = _post_and_fetch(
             client,
-            _ols_payload(
-                se={"method": "hac", "maxlags": _HAC_MAXLAGS}
-            ),
+            _ols_payload(se={"method": "hac", "maxlags": _HAC_MAXLAGS}),
         )
         params = output["parameters"]
 
@@ -504,9 +494,7 @@ class TestGrunfeldOLS:
             err_msg="OLS HAC SE が statsmodels と不一致",
         )
 
-    def test_confidence_intervals(
-        self, client, grunfeld_store, grunfeld_raw
-    ):
+    def test_confidence_intervals(self, client, grunfeld_store, grunfeld_raw):
         """
         95% 信頼区間が statsmodels と一致。
         """
@@ -550,15 +538,11 @@ class TestGrunfeldLasso:
         x_arr = grunfeld_raw[["value", "capital"]].to_numpy()
         y = grunfeld_raw["inv"].to_numpy()
 
-        pipeline = make_pipeline(
-            StandardScaler(), Lasso(alpha=_LASSO_ALPHA)
-        )
+        pipeline = make_pipeline(StandardScaler(), Lasso(alpha=_LASSO_ALPHA))
         pipeline.fit(x_arr, y)
         expected_scaled = pipeline.named_steps["lasso"].coef_
 
-        _, output = _post_and_fetch(
-            client, _lasso_payload(alpha=_LASSO_ALPHA)
-        )
+        _, output = _post_and_fetch(client, _lasso_payload(alpha=_LASSO_ALPHA))
         var_params = [
             p for p in output["parameters"] if p["variable"] != "const"
         ]
@@ -571,17 +555,11 @@ class TestGrunfeldLasso:
             err_msg="Lasso coefficientScaled が sklearn と不一致",
         )
 
-    def test_const_coefficient_scaled_is_none(
-        self, client, grunfeld_store
-    ):
+    def test_const_coefficient_scaled_is_none(self, client, grunfeld_store):
         """定数項の coefficientScaled が None であることを確認"""
-        _, output = _post_and_fetch(
-            client, _lasso_payload(alpha=_LASSO_ALPHA)
-        )
+        _, output = _post_and_fetch(client, _lasso_payload(alpha=_LASSO_ALPHA))
         params = output["parameters"]
-        const_p = next(
-            (p for p in params if p["variable"] == "const"), None
-        )
+        const_p = next((p for p in params if p["variable"] == "const"), None)
         assert const_p is not None, "const パラメータが存在しない"
         assert const_p["coefficientScaled"] is None
 
@@ -604,15 +582,11 @@ class TestGrunfeldRidge:
         x_arr = grunfeld_raw[["value", "capital"]].to_numpy()
         y = grunfeld_raw["inv"].to_numpy()
 
-        pipeline = make_pipeline(
-            StandardScaler(), Ridge(alpha=_RIDGE_ALPHA)
-        )
+        pipeline = make_pipeline(StandardScaler(), Ridge(alpha=_RIDGE_ALPHA))
         pipeline.fit(x_arr, y)
         expected_scaled = pipeline.named_steps["ridge"].coef_
 
-        _, output = _post_and_fetch(
-            client, _ridge_payload(alpha=_RIDGE_ALPHA)
-        )
+        _, output = _post_and_fetch(client, _ridge_payload(alpha=_RIDGE_ALPHA))
         var_params = [
             p for p in output["parameters"] if p["variable"] != "const"
         ]
@@ -652,9 +626,7 @@ class TestGrunfeldIV2SLS:
         内生変数: capital, 操作変数: value_lag
         """
         ref = self._build_ref(grunfeld_with_iv, "unadjusted")
-        _, output = _post_and_fetch(
-            client, _iv_payload(iv_method="2sls")
-        )
+        _, output = _post_and_fetch(client, _iv_payload(iv_method="2sls"))
         params = output["parameters"]
 
         np.testing.assert_allclose(
@@ -665,16 +637,12 @@ class TestGrunfeldIV2SLS:
             err_msg="IV 2SLS 係数が linearmodels と不一致",
         )
 
-    def test_se_nonrobust(
-        self, client, grunfeld_store, grunfeld_with_iv
-    ):
+    def test_se_nonrobust(self, client, grunfeld_store, grunfeld_with_iv):
         """
         2SLS 標準誤差 (nonrobust) が linearmodels と一致。
         """
         ref = self._build_ref(grunfeld_with_iv, "unadjusted")
-        _, output = _post_and_fetch(
-            client, _iv_payload(iv_method="2sls")
-        )
+        _, output = _post_and_fetch(client, _iv_payload(iv_method="2sls"))
         params = output["parameters"]
 
         np.testing.assert_allclose(
@@ -685,15 +653,11 @@ class TestGrunfeldIV2SLS:
             err_msg="IV 2SLS SE が linearmodels と不一致",
         )
 
-    def test_n_observations(
-        self, client, grunfeld_store, grunfeld_with_iv
-    ):
+    def test_n_observations(self, client, grunfeld_store, grunfeld_with_iv):
         """
         nObservations が IV テーブルの行数と一致。
         """
-        _, output = _post_and_fetch(
-            client, _iv_payload(iv_method="2sls")
-        )
+        _, output = _post_and_fetch(client, _iv_payload(iv_method="2sls"))
         ms = output["modelStatistics"]
         assert ms["nObservations"] == _N_OBS_IV
 
@@ -705,14 +669,11 @@ class TestGrunfeldIV2SLS:
         diagnostics.firstStage["capital"]["fStatistic"] を検証。
         """
         ref = self._build_ref(grunfeld_with_iv, "unadjusted")
-        _, output = _post_and_fetch(
-            client, _iv_payload(iv_method="2sls")
-        )
+        _, output = _post_and_fetch(client, _iv_payload(iv_method="2sls"))
         diag = output["diagnostics"]
 
-        if (
-            "firstStage" not in diag
-            or "capital" not in diag.get("firstStage", {})
+        if "firstStage" not in diag or "capital" not in diag.get(
+            "firstStage", {}
         ):
             pytest.skip("firstStage[capital] がレスポンスに含まれない")
 
@@ -721,8 +682,7 @@ class TestGrunfeldIV2SLS:
         expected_f = float(fs_ref.f_statistic.stat)
 
         assert abs(fs_api["fStatistic"] - expected_f) < _ABS_TOL, (
-            f"IV first-stage F: {fs_api['fStatistic']!r}"
-            f" != {expected_f!r}"
+            f"IV first-stage F: {fs_api['fStatistic']!r} != {expected_f!r}"
         )
 
 
@@ -759,9 +719,9 @@ class TestGrunfeldIVGMM:
         instr = grunfeld_with_iv[["value_lag", "capital_lag"]]
 
         # weight_type は IVGMM コンストラクタに指定する
-        ref = IVGMM(
-            y, exog, endog, instr, weight_type="robust"
-        ).fit(cov_type="robust")
+        ref = IVGMM(y, exog, endog, instr, weight_type="robust").fit(
+            cov_type="robust"
+        )
         _, output = _post_and_fetch(
             client,
             _iv_payload(
@@ -785,9 +745,7 @@ class TestGrunfeldIVGMM:
         モデルが exactly identified (操作変数=内生変数=1) のため
         J 統計量は 0 になる可能性があるが、キーが存在することを確認。
         """
-        _, output = _post_and_fetch(
-            client, _iv_payload(iv_method="gmm")
-        )
+        _, output = _post_and_fetch(client, _iv_payload(iv_method="gmm"))
         # J 統計量は over-identified でないと意味がないが
         # exactly identified の場合も diagnostics キーの有無を確認
         diag = output.get("diagnostics", {})
@@ -823,9 +781,7 @@ class TestGrunfeldFE:
         entity_effects=True で定数は吸収される。
         """
         ref = self._build_ref(grunfeld_raw)
-        _, output = _post_and_fetch(
-            client, _panel_payload("fe")
-        )
+        _, output = _post_and_fetch(client, _panel_payload("fe"))
         params = output["parameters"]
 
         assert len(params) == _N_PARAMS_FE
@@ -843,9 +799,7 @@ class TestGrunfeldFE:
         Within-R² が linearmodels と一致。
         """
         ref = self._build_ref(grunfeld_raw)
-        _, output = _post_and_fetch(
-            client, _panel_payload("fe")
-        )
+        _, output = _post_and_fetch(client, _panel_payload("fe"))
         ms = output["modelStatistics"]
 
         assert abs(ms["R2Within"] - float(ref.rsquared)) < _ABS_TOL, (
@@ -854,9 +808,7 @@ class TestGrunfeldFE:
 
     def test_n_entities(self, client, grunfeld_store):
         """nEntities が Grunfeld の 10 企業と一致"""
-        _, output = _post_and_fetch(
-            client, _panel_payload("fe")
-        )
+        _, output = _post_and_fetch(client, _panel_payload("fe"))
         ms = output["modelStatistics"]
         assert ms["nEntities"] == _N_FIRMS
 
@@ -865,9 +817,7 @@ class TestGrunfeldFE:
         FE 標準誤差 (nonrobust) が linearmodels と一致。
         """
         ref = self._build_ref(grunfeld_raw)
-        _, output = _post_and_fetch(
-            client, _panel_payload("fe")
-        )
+        _, output = _post_and_fetch(client, _panel_payload("fe"))
         params = output["parameters"]
         se_map = {p["variable"]: p["standardError"] for p in params}
 
@@ -884,9 +834,7 @@ class TestGrunfeldFE:
         FE クラスター SE (firm) が linearmodels と一致。
         cluster_entity=True は firm, cluster_time=False。
         """
-        ref = self._build_ref(
-            grunfeld_raw, cov_type="clustered"
-        )
+        ref = self._build_ref(grunfeld_raw, cov_type="clustered")
         # linearmodels の cluster_entity=True に相当する
         # API: groups=["firm"] でクラスタリング
         _, output = _post_and_fetch(
@@ -931,9 +879,7 @@ class TestGrunfeldRE:
         RE 係数 (nonrobust) が linearmodels (RandomEffects) と一致。
         """
         ref = self._build_ref(grunfeld_raw)
-        _, output = _post_and_fetch(
-            client, _panel_payload("re")
-        )
+        _, output = _post_and_fetch(client, _panel_payload("re"))
         params = output["parameters"]
         p_map = {p["variable"]: p["coefficient"] for p in params}
 
@@ -948,9 +894,7 @@ class TestGrunfeldRE:
         RE 標準誤差 (nonrobust) が linearmodels と一致。
         """
         ref = self._build_ref(grunfeld_raw)
-        _, output = _post_and_fetch(
-            client, _panel_payload("re")
-        )
+        _, output = _post_and_fetch(client, _panel_payload("re"))
         params = output["parameters"]
         se_map = {p["variable"]: p["standardError"] for p in params}
 
@@ -965,33 +909,25 @@ class TestGrunfeldRE:
         diagnostics の theta が [0, 1] の範囲内であることを確認。
         theta は変量効果変換係数 (準-差分変換の重み)。
         """
-        _, output = _post_and_fetch(
-            client, _panel_payload("re")
-        )
+        _, output = _post_and_fetch(client, _panel_payload("re"))
         diag = output["diagnostics"]
 
         if "theta" not in diag:
             pytest.skip("diagnostics に theta が含まれない")
 
         theta = diag["theta"]
-        assert 0.0 <= theta <= 1.0, (
-            f"RE theta={theta!r} が [0, 1] 範囲外"
-        )
+        assert 0.0 <= theta <= 1.0, f"RE theta={theta!r} が [0, 1] 範囲外"
 
     def test_r2_triplet_present(self, client, grunfeld_store):
         """
         R2Within / R2Between / R2Overall が存在し float であること。
         """
-        _, output = _post_and_fetch(
-            client, _panel_payload("re")
-        )
+        _, output = _post_and_fetch(client, _panel_payload("re"))
         ms = output["modelStatistics"]
 
         for key in ("R2Within", "R2Between", "R2Overall"):
             assert key in ms, f"{key!r} が modelStatistics に存在しない"
-            assert isinstance(ms[key], float), (
-                f"{key!r} がfloat でない"
-            )
+            assert isinstance(ms[key], float), f"{key!r} がfloat でない"
 
     def test_r2_matches_linearmodels(
         self, client, grunfeld_store, grunfeld_raw
@@ -1000,9 +936,7 @@ class TestGrunfeldRE:
         R2Within が linearmodels の rsquared と一致。
         """
         ref = self._build_ref(grunfeld_raw)
-        _, output = _post_and_fetch(
-            client, _panel_payload("re")
-        )
+        _, output = _post_and_fetch(client, _panel_payload("re"))
         ms = output["modelStatistics"]
 
         assert abs(ms["R2Within"] - float(ref.rsquared)) < _ABS_TOL, (
