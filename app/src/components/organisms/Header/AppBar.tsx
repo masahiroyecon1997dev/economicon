@@ -322,7 +322,7 @@ export const AppBar = () => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onDoubleClick={handleDoubleClick}
-      className="relative flex h-11 shrink-0 select-none items-center border-b border-white/25 bg-brand-primary text-white"
+      className="relative flex h-11 shrink-0 select-none items-center border-b border-white/25 dark:border-gray-700 bg-brand-primary dark:bg-gray-900 text-white"
     >
       {/* ===== macOS: 左端トラフィックライト ===== */}
       {isMac && (

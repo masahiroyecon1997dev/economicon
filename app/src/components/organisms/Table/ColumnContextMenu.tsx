@@ -1,9 +1,6 @@
 /**
- * 列ヘッダーのコンテキストメニューコンポーネント
- *
- * - MoreVertical アイコン（group-hover で表示）を起点に Radix DropdownMenu を開く
- * - sort_asc / sort_desc は直接 API コール（ダイアログなし）
- * - その他の操作は親コンポーネントへ operation イベントを伝達
+ * 列�EチE��ーのコンチE��ストメニューコンポ�EネンチE *
+ * - MoreVertical アイコン�E�Eroup-hover で表示�E�を起点に Radix DropdownMenu を開ぁE * - sort_asc / sort_desc は直接 API コール�E�ダイアログなし！E * - そ�E他�E操作�E親コンポ�Eネントへ operation イベントを伝達
  */
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
@@ -38,8 +35,9 @@ type ColumnContextMenuProps = {
 };
 
 const menuItemClass = cn(
-  "flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none cursor-pointer",
-  "data-[highlighted]:bg-gray-100 data-[highlighted]:text-gray-900",
+  "flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-gray-700 dark:text-gray-200 outline-none cursor-pointer",
+  "data-[highlighted]:bg-gray-100 dark:data-[highlighted]:bg-gray-700",
+  "data-[highlighted]:text-gray-900 dark:data-[highlighted]:text-white",
   "data-disabled:pointer-events-none data-disabled:opacity-40",
 );
 
@@ -77,16 +75,16 @@ export const ColumnContextMenu = ({
           align="start"
           sideOffset={4}
           className={cn(
-            "z-50 min-w-50 rounded-md bg-white shadow-lg",
-            "border border-gray-200",
+            "z-50 min-w-50 rounded-md bg-white dark:bg-gray-800 shadow-lg",
+            "border border-gray-200 dark:border-gray-700",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0",
             "data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95",
           )}
         >
-          {/* ソート */}
+          {/* ソーチE*/}
           <DropdownMenu.Group className="p-1">
-            <DropdownMenu.Label className="px-2 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            <DropdownMenu.Label className="px-2 py-1 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
               {column.name}
             </DropdownMenu.Label>
 
@@ -107,9 +105,9 @@ export const ColumnContextMenu = ({
             </DropdownMenu.Item>
           </DropdownMenu.Group>
 
-          <DropdownMenu.Separator className="h-px bg-gray-100 mx-1" />
+          <DropdownMenu.Separator className="h-px bg-gray-100 dark:bg-gray-700 mx-1" />
 
-          {/* 列編集 */}
+          {/* 列編雁E*/}
           <DropdownMenu.Group className="p-1">
             <DropdownMenu.Item
               className={menuItemClass}
@@ -128,7 +126,7 @@ export const ColumnContextMenu = ({
             </DropdownMenu.Item>
           </DropdownMenu.Group>
 
-          <DropdownMenu.Separator className="h-px bg-gray-100 mx-1" />
+          <DropdownMenu.Separator className="h-px bg-gray-100 dark:bg-gray-700 mx-1" />
 
           {/* 列追加系 */}
           <DropdownMenu.Group className="p-1">
@@ -165,7 +163,7 @@ export const ColumnContextMenu = ({
             </DropdownMenu.Item>
           </DropdownMenu.Group>
 
-          <DropdownMenu.Separator className="h-px bg-gray-100 mx-1" />
+          <DropdownMenu.Separator className="h-px bg-gray-100 dark:bg-gray-700 mx-1" />
 
           {/* 削除 */}
           <DropdownMenu.Group className="p-1">
