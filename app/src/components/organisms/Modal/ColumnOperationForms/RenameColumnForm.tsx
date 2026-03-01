@@ -67,25 +67,37 @@ export const RenameColumnForm = ({
         </p>
       </FormField>
 
-      <form.Field name="newColumnName">
-        {(field) => (
-          <FormField
-            label={t("RenameColumnForm.NewColumnName")}
-            htmlFor="new-column-name"
-            error={field.state.meta.errors[0]?.toString()}
-          >
-            <InputText
-              id="new-column-name"
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              placeholder={t("RenameColumnForm.NewColumnNamePlaceholder")}
-              error={field.state.meta.errors[0]?.toString()}
-              disabled={isSubmitting}
-              autoFocus
-            />
-          </FormField>
-        )}
+      <form.Field
+        name="newColumnName"
+        validators={{
+          onChange: ({ value }) =>
+            value.trim().length === 0
+              ? t("ValidationMessages.NewColumnNameRequired")
+              : undefined,
+        }}
+      >
+        {(field) => {
+          const errorMsg = field.state.meta.isTouched
+            ? (field.state.meta.errors[0] as string | undefined)
+            : undefined;
+          return (
+            <FormField
+              label={t("RenameColumnForm.NewColumnName")}
+              htmlFor="new-column-name"
+              error={errorMsg}
+            >
+              <InputText
+                id="new-column-name"
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                placeholder={t("RenameColumnForm.NewColumnNamePlaceholder")}
+                disabled={isSubmitting}
+                autoFocus
+              />
+            </FormField>
+          );
+        }}
       </form.Field>
 
       <div className="flex justify-end gap-2 pt-2">

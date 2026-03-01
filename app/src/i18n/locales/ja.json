@@ -411,6 +411,7 @@
     "Title": "ラグ・リード列を追加",
     "Periods": "期間（負=ラグ、正=リード）",
     "PeriodsPlaceholder": "例: -1（ラグ1）、+1（リード1）",
+    "PeriodsError": "0 以外の整数で入力してください。",
     "GroupColumns": "グループ化列（省略可能）",
     "NewColumnName": "新しい列名",
     "NewColumnNamePlaceholder": "例: lag_1_value",

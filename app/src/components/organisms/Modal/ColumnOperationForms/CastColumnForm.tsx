@@ -120,24 +120,36 @@ export const CastColumnForm = ({
           )}
         </form.Field>
 
-        <form.Field name="newColumnName">
-          {(field) => (
-            <FormField
-              label={t("CastColumnForm.NewColumnName")}
-              htmlFor="cast-new-column-name"
-              error={field.state.meta.errors[0]?.toString()}
-            >
-              <InputText
-                id="cast-new-column-name"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                placeholder={t("CastColumnForm.NewColumnNamePlaceholder")}
-                error={field.state.meta.errors[0]?.toString()}
-                disabled={isSubmitting}
-              />
-            </FormField>
-          )}
+        <form.Field
+          name="newColumnName"
+          validators={{
+            onChange: ({ value }) =>
+              value.trim().length === 0
+                ? t("ValidationMessages.NewColumnNameRequired")
+                : undefined,
+          }}
+        >
+          {(field) => {
+            const errorMsg = field.state.meta.isTouched
+              ? (field.state.meta.errors[0] as string | undefined)
+              : undefined;
+            return (
+              <FormField
+                label={t("CastColumnForm.NewColumnName")}
+                htmlFor="cast-new-column-name"
+                error={errorMsg}
+              >
+                <InputText
+                  id="cast-new-column-name"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  placeholder={t("CastColumnForm.NewColumnNamePlaceholder")}
+                  disabled={isSubmitting}
+                />
+              </FormField>
+            );
+          }}
         </form.Field>
       </div>
 
