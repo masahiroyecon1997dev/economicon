@@ -116,7 +116,7 @@ export const getApiPort = async (): Promise<number> => {
 export const fetchDataToArrow = async (
   tableName: string,
   startRow: number = 0,
-  chunk_size: number = 500,
+  chunkSize: number = 500,
 ): Promise<Uint8Array> => {
   const response = await client.fetch_binary<number[]>(
     "POST",
@@ -124,7 +124,7 @@ export const fetchDataToArrow = async (
     {
       tableName: tableName,
       startRow: startRow,
-      chunkSize: chunk_size,
+      chunkSize: chunkSize,
     },
   );
   return new Uint8Array(response.data);

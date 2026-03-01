@@ -1,44 +1,52 @@
-/**
- * 仮想スクロール用のテーブルデータ管理フック
- * チャンク単位でデータを取得・キャッシュする
+﻿/**
+ * 仮想スクロール用テーブルデータ管理フック（刷新版）
+ *
+ * バイナリキャッシュは Zustand の tableChunkStore で管理し、
+ * パース済み行は useRef の parsedChunksRef でローカルキャッシュする。
+ *
+ * フロー:
+ *   1. マウント時に chunk 0 を無条件フェッチ
+ *   2. Arrow スキーマメタデータから totalRows を取得し tableInfosStore を更新
+ *   3. 仮想スクロール中は prefetchRange で先読みチャンクを取得
  */
-import { tableFromIPC, type Table } from "apache-arrow";
+import { tableFromIPC, type Table as ArrowTable } from "apache-arrow";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchDataToArrow } from "../api/bridge/tauri-commands";
+import {
+  CHUNK_SIZE,
+  useTableChunkStore,
+} from "../stores/tableChunkStore";
+import { useTableInfosStore } from "../stores/tableInfos";
 import type { TalbeDataRowType } from "../types/commonTypes";
 
-const CHUNK_SIZE = 500;
-const MAX_CACHE_CHUNKS = 20; // キャッシュサイズを少し増やす
+// ---------------------------------------------------------------------------
+// Arrow  行データ変換
+// ---------------------------------------------------------------------------
 
-/**
- * Arrow Tableを行オブジェクトの配列に変換
- *
- * @param table Apache Arrowテーブル
- * @returns 行データの配列
- */
-const arrowTableToRows = (table: Table): TalbeDataRowType[] => {
+type ParsedChunk = {
+  /** 同一性比較用（バイトが差し換わったら再パース） */
+  bytes: Uint8Array;
+  rows: TalbeDataRowType[];
+};
+
+const arrowTableToRows = (table: ArrowTable): TalbeDataRowType[] => {
   const rows: TalbeDataRowType[] = [];
   const numRows = table.numRows;
-  const schema = table.schema;
-
+  const fields = table.schema.fields;
   for (let i = 0; i < numRows; i++) {
     const row: TalbeDataRowType = {};
-    for (const field of schema.fields) {
-      const column = table.getChild(field.name);
-      row[field.name] = column?.get(i);
+    for (const field of fields) {
+      const col = table.getChild(field.name);
+      row[field.name] = col?.get(i) ?? null;
     }
     rows.push(row);
   }
-
   return rows;
 };
 
-interface ChunkData {
-  startRow: number;
-  endRow: number;
-  data: TalbeDataRowType[];
-  timestamp: number;
-}
+// ---------------------------------------------------------------------------
+// 型定義
+// ---------------------------------------------------------------------------
 
 interface UseVirtualTableDataOptions {
   tableName: string;
@@ -46,193 +54,135 @@ interface UseVirtualTableDataOptions {
   enabled?: boolean;
 }
 
+// ---------------------------------------------------------------------------
+// フック本体
+// ---------------------------------------------------------------------------
+
 export const useVirtualTableData = ({
   tableName,
+  totalRows,
   enabled = true,
 }: UseVirtualTableDataOptions) => {
-  // チャンクキャッシュ（チャンクインデックス → データ）
-  const [chunks, setChunks] = useState<Map<number, ChunkData>>(new Map());
-  // ロード中のチャンクインデックスのセット
-  const [loadingChunks, setLoadingChunks] = useState<Set<number>>(new Set());
-  // エラー状態
-  const [error, setError] = useState<Error | null>(null);
+  // バージョン購読: チャンク追加/クリア時に再レンダーされる
+  useTableChunkStore((s) => s.versions[tableName] ?? 0);
 
-  // 現在フェッチ中のリクエストを追跡（重複リクエスト防止）
+  // フライト中チャンクの重複防止（Ref: 再レンダー不要）
   const fetchingChunksRef = useRef<Set<number>>(new Set());
 
-  /**
-   * 行インデックスからチャンクインデックスを計算
-   */
-  const getChunkIndex = useCallback((rowIndex: number): number => {
-    return Math.floor(rowIndex / CHUNK_SIZE);
-  }, []);
+  // パース済み行キャッシュ（Ref: バイト参照で陳腐化検知再パース）
+  const parsedChunksRef = useRef<Map<number, ParsedChunk>>(new Map());
 
-  /**
-   * チャンクインデックスから開始行を計算（0-based）
-   */
-  const getChunkStartRow = useCallback((chunkIndex: number): number => {
-    return chunkIndex * CHUNK_SIZE;
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  /**
-   * LRUキャッシュのクリーンアップ
-   */
-  const cleanupCache = useCallback(() => {
-    setChunks((prevChunks) => {
-      if (prevChunks.size <= MAX_CACHE_CHUNKS) {
-        return prevChunks;
-      }
+  // ---------------------------------------------------------------------------
+  // チャンクフェッチ
+  // ---------------------------------------------------------------------------
 
-      // タイムスタンプでソートして古いものから削除
-      const sortedChunks = Array.from(prevChunks.entries()).sort(
-        ([, a], [, b]) => a.timestamp - b.timestamp,
-      );
-
-      const newChunks = new Map<number, ChunkData>();
-      const keepCount = Math.floor(MAX_CACHE_CHUNKS * 0.8); // 80%を保持
-
-      for (
-        let i = sortedChunks.length - keepCount;
-        i < sortedChunks.length;
-        i++
-      ) {
-        const [index, data] = sortedChunks[i];
-        newChunks.set(index, data);
-      }
-
-      return newChunks;
-    });
-  }, []);
-
-  /**
-   * チャンクをフェッチ
-   */
   const fetchChunk = useCallback(
     async (chunkIndex: number) => {
       if (!enabled) return;
+      const { hasChunk, setChunk } = useTableChunkStore.getState();
+      if (hasChunk(tableName, chunkIndex)) return;
+      if (fetchingChunksRef.current.has(chunkIndex)) return;
 
-      // すでにキャッシュされている場合はスキップ
-      if (chunks.has(chunkIndex)) {
-        return;
-      }
-
-      // すでにフェッチ中の場合はスキップ
-      if (fetchingChunksRef.current.has(chunkIndex)) {
-        return;
-      }
+      fetchingChunksRef.current.add(chunkIndex);
+      setIsLoading(true);
 
       try {
-        fetchingChunksRef.current.add(chunkIndex);
-        setLoadingChunks((prev) => new Set(prev).add(chunkIndex));
+        const startRow = chunkIndex * CHUNK_SIZE;
+        const bytes = await fetchDataToArrow(tableName, startRow, CHUNK_SIZE);
 
-        const startRow = getChunkStartRow(chunkIndex);
+        // chunk 0 のメタデータから totalRows を更新（ブートストラップ）
+        if (chunkIndex === 0) {
+          const arrowTable = tableFromIPC(bytes);
+          const meta = arrowTable.schema.metadata;
+          const metaTotalRows = parseInt(meta.get("totalRows") ?? "0", 10);
+          if (metaTotalRows > 0) {
+            const storeState = useTableInfosStore.getState();
+            const currentInfo = storeState.tableInfos.find(
+              (t) => t.tableName === tableName,
+            );
+            if (currentInfo && currentInfo.totalRows !== metaTotalRows) {
+              storeState.updateTableInfo(tableName, {
+                ...currentInfo,
+                totalRows: metaTotalRows,
+              });
+            }
+          }
+        }
 
-        // データをフェッチ
-        const arrowBytes = await fetchDataToArrow(
-          tableName,
-          startRow,
-          CHUNK_SIZE,
-        );
-
-        // Arrow IPCからテーブルを復元
-        const table = tableFromIPC(arrowBytes);
-
-        // Arrow TableをJavaScriptオブジェクトの配列に変換
-        const rows = arrowTableToRows(table);
-
-        // 実際の終了行を計算
-        const endRow = startRow + table.numRows;
-
-        // キャッシュに追加
-        setChunks((prevChunks) => {
-          const newChunks = new Map(prevChunks);
-          newChunks.set(chunkIndex, {
-            startRow,
-            endRow,
-            data: rows,
-            timestamp: Date.now(),
-          });
-          return newChunks;
-        });
-
+        setChunk(tableName, chunkIndex, bytes);
         setError(null);
-        cleanupCache();
       } catch (err) {
         console.error(`Failed to fetch chunk ${chunkIndex}:`, err);
         setError(err instanceof Error ? err : new Error("Unknown error"));
       } finally {
         fetchingChunksRef.current.delete(chunkIndex);
-        setLoadingChunks((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(chunkIndex);
-          return newSet;
-        });
+        setIsLoading(false);
       }
     },
-    [tableName, enabled, chunks, getChunkStartRow, cleanupCache],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tableName, enabled],
   );
 
-  /**
-   * 行インデックスから行データを取得
-   */
+  // ---------------------------------------------------------------------------
+  // tableName 変更時にキャッシュフライトをリセットし chunk 0 を再フェッチ
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    parsedChunksRef.current.clear();
+    fetchingChunksRef.current.clear();
+    if (enabled) {
+      void fetchChunk(0);
+    }
+  }, [tableName, enabled, fetchChunk]);
+
+  // ---------------------------------------------------------------------------
+  // 行データ取得（VirtualTable から呼ばれる）
+  // バイト参照が変わっていればパース済みキャッシュを差し換える
+  // ---------------------------------------------------------------------------
+
   const getRowData = useCallback(
     (rowIndex: number): TalbeDataRowType | undefined => {
-      const chunkIndex = getChunkIndex(rowIndex);
-      const chunk = chunks.get(chunkIndex);
+      const chunkIndex = Math.floor(rowIndex / CHUNK_SIZE);
+      // ストア直読み（購読なし）: 再レンダーはバージョン購読が担う
+      const chunkBytes = useTableChunkStore
+        .getState()
+        .getChunk(tableName, chunkIndex);
+      if (!chunkBytes) return undefined;
 
-      if (!chunk) {
-        return undefined;
+      const cached = parsedChunksRef.current.get(chunkIndex);
+      let rows: TalbeDataRowType[];
+      if (cached && cached.bytes === chunkBytes) {
+        rows = cached.rows;
+      } else {
+        const arrowTable = tableFromIPC(chunkBytes);
+        rows = arrowTableToRows(arrowTable);
+        parsedChunksRef.current.set(chunkIndex, { bytes: chunkBytes, rows });
       }
 
-      // チャンク内でのインデックスを計算（0-based）
-      const indexInChunk = rowIndex - chunk.startRow;
-
-      return chunk.data[indexInChunk];
+      const localIndex = rowIndex - chunkIndex * CHUNK_SIZE;
+      return rows[localIndex];
     },
-    [chunks, getChunkIndex],
+    [tableName],
   );
 
-  /**
-   * 指定範囲の行データを取得（チャンクをプリフェッチ）
-   */
+  // ---------------------------------------------------------------------------
+  // プリフェッチ
+  // ---------------------------------------------------------------------------
+
   const prefetchRange = useCallback(
-    (startIndex: number, endIndex: number) => {
-      if (!enabled) return;
-
-      const startChunk = getChunkIndex(startIndex);
-      const endChunk = getChunkIndex(endIndex);
-
-      // 必要なチャンクをすべてフェッチ
-      for (let i = startChunk; i <= endChunk; i++) {
-        fetchChunk(i);
+    (startRow: number, endRow: number) => {
+      const safeEnd = totalRows > 0 ? Math.min(endRow, totalRows - 1) : endRow;
+      const firstChunk = Math.floor(startRow / CHUNK_SIZE);
+      const lastChunk = Math.floor(safeEnd / CHUNK_SIZE);
+      for (let i = firstChunk; i <= lastChunk; i++) {
+        void fetchChunk(i);
       }
     },
-    [enabled, getChunkIndex, fetchChunk],
+    [fetchChunk, totalRows],
   );
 
-  /**
-   * キャッシュをクリア
-   */
-  const clearCache = useCallback(() => {
-    setChunks(new Map());
-    setLoadingChunks(new Set());
-    setError(null);
-    fetchingChunksRef.current.clear();
-  }, []);
-
-  // テーブル名が変更されたらキャッシュをクリア
-  useEffect(() => {
-    clearCache();
-  }, [tableName, clearCache]);
-
-  return {
-    getRowData,
-    prefetchRange,
-    fetchChunk,
-    clearCache,
-    isLoading: loadingChunks.size > 0,
-    loadingChunks: Array.from(loadingChunks),
-    error,
-    cachedChunks: Array.from(chunks.keys()),
-  };
+  return { getRowData, prefetchRange, isLoading, error };
 };
