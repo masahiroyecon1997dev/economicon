@@ -42,3 +42,17 @@ export const extractApiErrorMessage = (
 
   return fallback;
 };
+
+/**
+ * API エラーメッセージ内のパラメータ名を画面表示名に置換する。
+ *
+ * 例: "newTableName には..." → "新しいテーブル名 には..."
+ */
+export const replaceParamNames = (
+  message: string,
+  paramMap: Record<string, string>,
+): string =>
+  Object.entries(paramMap).reduce(
+    (msg, [param, label]) => msg.replaceAll(param, label),
+    message,
+  );

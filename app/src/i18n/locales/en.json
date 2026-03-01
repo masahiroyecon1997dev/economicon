@@ -226,6 +226,7 @@
   },
   "RenameTableForm": {
     "Title": "Rename Table",
+    "CurrentTableName": "Current table name",
     "NewTableName": "New table name",
     "NewTableNamePlaceholder": "e.g., my_table",
     "Submit": "Rename"
@@ -307,6 +308,7 @@
   "ColumnOperationForm": {
     "AddPositionColumn": "Insert after column",
     "AddPositionColumnDesc": "New column will be inserted to the right of the selected column.",
+    "SourceColumnName": "Source column",
     "Success": "Operation completed successfully."
   },
   "SettingsDialog": {

@@ -9,6 +9,7 @@ import { showMessageDialog } from "../../../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
+  replaceParamNames,
 } from "../../../../lib/utils/apiError";
 import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
@@ -31,6 +32,7 @@ export const RenameTableForm = ({
   const setTableList = useTableListStore((s) => s.setTableList);
   const updateTableInfo = useTableInfosStore((s) => s.updateTableInfo);
   const tableInfos = useTableInfosStore((s) => s.tableInfos);
+  const activeTableName = useTableInfosStore((s) => s.activeTableName);
 
   const hasControlChars = (s: string) =>
     s.split("").some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127);
@@ -68,18 +70,36 @@ export const RenameTableForm = ({
               ...info,
               tableName: value.newTableName,
             });
+            // activeTableName は tableInfos とは別フィールドなので別途更新
+            if (activeTableName === tableName) {
+              useTableInfosStore.setState({
+                activeTableName: value.newTableName,
+              });
+            }
           }
           onSuccess();
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+            replaceParamNames(
+              getResponseErrorMessage(response, t("Error.UnexpectedError")),
+              {
+                newTableName: t("RenameTableForm.NewTableName"),
+                oldTableName: t("RenameTableForm.CurrentTableName"),
+              },
+            ),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          replaceParamNames(
+            extractApiErrorMessage(error, t("Error.UnexpectedError")),
+            {
+              newTableName: t("RenameTableForm.NewTableName"),
+              oldTableName: t("RenameTableForm.CurrentTableName"),
+            },
+          ),
         );
       }
     },

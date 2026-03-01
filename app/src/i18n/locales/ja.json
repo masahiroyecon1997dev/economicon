@@ -357,6 +357,7 @@
   },
   "RenameTableForm": {
     "Title": "テーブル名を変更",
+    "CurrentTableName": "現在のテーブル名",
     "NewTableName": "新しいテーブル名",
     "NewTableNamePlaceholder": "例: my_table",
     "Submit": "変更"
@@ -438,6 +439,7 @@
   "ColumnOperationForm": {
     "AddPositionColumn": "追加位置（基準列）",
     "AddPositionColumnDesc": "選択した列の左隣に追加されます。",
+    "SourceColumnName": "元の列",
     "Success": "操作が完了しました。"
   },
   "SettingsDialog": {

@@ -119,6 +119,9 @@ export const AppBar = () => {
   );
   const handleClose = useCallback(() => getCurrentWindow().close(), []);
 
+  /** ウィンドウ制御ボタンに共通するクラス（cursor-default を強制） */
+  const WIN_CTRL_BTN = "cursor-default focus:outline-none transition-colors";
+
   // mousedown: 起点を記録するだけ。startDragging() はまだ呼ばない
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLElement>) => {
     if (e.button !== 0) return;
@@ -333,8 +336,8 @@ export const AppBar = () => {
             onClick={handleClose}
             aria-label={t("AppBar.Close")}
             className={cn(
-              "size-3 rounded-full bg-red-500",
-              "hover:bg-red-400 transition-colors focus:outline-none",
+              WIN_CTRL_BTN,
+              "size-3 rounded-full bg-red-500 hover:bg-red-400",
             )}
           />
           {/* 最小化（黄） */}
@@ -343,8 +346,8 @@ export const AppBar = () => {
             onClick={handleMinimize}
             aria-label={t("AppBar.Minimize")}
             className={cn(
-              "size-3 rounded-full bg-yellow-400",
-              "hover:bg-yellow-300 transition-colors focus:outline-none",
+              WIN_CTRL_BTN,
+              "size-3 rounded-full bg-yellow-400 hover:bg-yellow-300",
             )}
           />
           {/* 最大化（緑） */}
@@ -355,8 +358,8 @@ export const AppBar = () => {
               isMaximized ? t("AppBar.Restore") : t("AppBar.Maximize")
             }
             className={cn(
-              "size-3 rounded-full bg-green-500",
-              "hover:bg-green-400 transition-colors focus:outline-none",
+              WIN_CTRL_BTN,
+              "size-3 rounded-full bg-green-500 hover:bg-green-400",
             )}
           />
         </div>
@@ -515,9 +518,9 @@ export const AppBar = () => {
               onClick={handleMinimize}
               aria-label={t("AppBar.Minimize")}
               className={cn(
+                WIN_CTRL_BTN,
                 "flex h-full w-11 items-center justify-center",
-                "text-white/60 hover:bg-white/10 hover:text-white transition-colors",
-                "focus:outline-none",
+                "text-white/60 hover:bg-white/10 hover:text-white",
               )}
             >
               <Minus size={14} strokeWidth={1.5} aria-hidden="true" />
@@ -531,9 +534,9 @@ export const AppBar = () => {
                 isMaximized ? t("AppBar.Restore") : t("AppBar.Maximize")
               }
               className={cn(
+                WIN_CTRL_BTN,
                 "flex h-full w-11 items-center justify-center",
-                "text-white/60 hover:bg-white/10 hover:text-white transition-colors",
-                "focus:outline-none",
+                "text-white/60 hover:bg-white/10 hover:text-white",
               )}
             >
               {isMaximized ? (
@@ -561,9 +564,9 @@ export const AppBar = () => {
               onClick={handleClose}
               aria-label={t("AppBar.Close")}
               className={cn(
+                WIN_CTRL_BTN,
                 "flex h-full w-11 items-center justify-center",
-                "text-white/60 hover:bg-red-600 hover:text-white transition-colors",
-                "focus:outline-none",
+                "text-white/60 hover:bg-red-600 hover:text-white",
               )}
             >
               <X size={14} strokeWidth={1.5} aria-hidden="true" />
