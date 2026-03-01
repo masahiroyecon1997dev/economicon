@@ -217,8 +217,8 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
     ];
     // 列名の描画幅から幅を計算（バッジ+ギャップ+メニュー+パディング ≈ 68px）
     const HEADER_OVERHEAD = 68;
-    const MAX_COL_WIDTH = 120;
-    const MIN_COL_WIDTH = 72;
+    const MAX_COL_WIDTH = 170;
+    const MIN_COL_WIDTH = 80;
 
     columnList.forEach((column: ColumnType) => {
       const typeColor = getPolarsTypeColor(column.type);
