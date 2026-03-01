@@ -34,6 +34,7 @@
 
 - **Lint/Format**: Ruffのルール（Pyflakes, pycodestyle, isort, flake8-bugbear等）に従っているか。
 - **型ヒント**: `mypy` 等で静的解析可能な、完全な型ヒントが付与されているか。
+- **Pylanceの活用**: VS CodeのPylance拡張機能を活用して、コードの静的解析や型チェックを行い、品質を向上させる。エラーや警告を無視せず、コードの品質を保つために積極的に対処する。
 
 ---
 
