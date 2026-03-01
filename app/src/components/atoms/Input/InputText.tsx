@@ -50,10 +50,10 @@ export const InputText = forwardRef<HTMLInputElement, InputTextProps>(
           name={name}
           className={cn(
             "w-full px-2.5 py-1.5 text-sm font-normal text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border rounded-md shadow-sm",
-            "placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-colors duration-200",
+            "placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none transition-colors duration-200",
             error
-              ? "border-red-500 focus:ring-red-500 focus:border-red-500 dark:border-red-500/60"
-              : "border-gray-300 dark:border-gray-600 focus:ring-gray-700 dark:focus:ring-gray-500 focus:border-gray-700 dark:focus:border-gray-500 hover:border-gray-400 dark:hover:border-gray-500",
+              ? "border-red-500 focus:ring-2 focus:ring-red-400/40 dark:border-red-500/60"
+              : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 dark:focus:border-brand-accent dark:focus:ring-brand-accent/20",
             className,
           )}
           value={value}
