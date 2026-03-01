@@ -826,6 +826,15 @@ class Regression:
 
         Returns:
             フォーマット済みの結果辞書
+
+        診断検定の制限事項:
+            Wu-Hausman 検定統計量は AER::ivreg (拡張回帰 F 検定) と
+            linearmodels wu_hausman() (ハウスマン型漸近正規化検定) で
+            根本的に分布が異なるため、数値直接比較は有意義ではありません。
+            内生性の存在判断は『有意水準 α=5% で両者とも有意』という
+            方向性の合致でのみ確認できます。
+            標準誤差についても AER と linearmodels で自由度補正の方式が異なり、
+            const SE で最大約 1% の差異が発生することがあります。
         """
         summary_text = str(model_result.summary)
 
@@ -968,6 +977,15 @@ class Regression:
 
         Returns:
             フォーマット済みの結果辞書
+
+        実装差異について:
+            分散成分の推定量は linearmodels の独自アルゴリズムを使用するため、
+            R の plm (Swamy-Arora 推定量) と比較した場合に
+            係数 + SE に最大約 7% 程度の差異が発生することがあります。
+            この差異はバグではなく、分散成分推定量の定義の違いによるものです。
+            両ライブラリとも正当な GLS 推定値ですが、数値的に一致しません。
+            また linearmodels RandomEffects は const を
+            パラメータリストに含めないため、定数項は欠落します。
         """
         summary_text = str(model_result.summary)
 

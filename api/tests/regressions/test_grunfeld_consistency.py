@@ -52,8 +52,8 @@ from tests.regressions.conftest import (
 TABLE_GRUNFELD = "GrunfeldData"
 TABLE_GRUNFELD_IV = "GrunfeldIVData"
 
-# 浮動小数点の許容誤差 (ライブラリ間丸め誤差を考慮)
-_ABS_TOL = 1e-8
+# 浮動小数点の許容誤差 (API JSONラウンドトリップなしのため 1e-10 まで収める)
+_ABS_TOL = 1e-10
 
 # HAC 標準誤差は収束依存のため緩め
 _HAC_ABS_TOL = 1e-6
@@ -160,7 +160,7 @@ def grunfeld_store(
         pl.from_pandas(grunfeld_with_iv),
     )
 
-    yield
+    yield store
 
     store.clear_tables()
     result_store.clear_all()
@@ -981,8 +981,14 @@ def test_results_endpoint_nonexistent_id_no_info_leakage(
     client, grunfeld_store
 ):
     """
-    存在しない result_id アクセスでスタックトレース等が
-    レスポンスに含まれないことを確認 (情報漏洩防止)。
+    存在しない result_id アクセスで HTTP 404 が返り、
+    スタックトレース等がレスポンスに含まれないことを確認 (情報漏洩防止)。
     """
-    with pytest.raises(KeyError):
-        client.get(f"{URL_RESULTS}/nonexistent-grunfeld-uuid")
+    resp = client.get(f"{URL_RESULTS}/nonexistent-grunfeld-uuid")
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+    body = resp.json()
+    # エラーレスポンスに Python 内部実装情報が漏洩していないこと
+    assert "traceback" not in resp.text.lower()
+    assert "KeyError" not in resp.text
+    # エラーコードが "RESULT_NOT_FOUND" であること
+    assert body.get("code") == "RESULT_NOT_FOUND"

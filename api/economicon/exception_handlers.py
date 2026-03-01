@@ -72,6 +72,14 @@ def init_exception_handlers(app: FastAPI):
             message=message,
         )
 
+    @app.exception_handler(KeyError)
+    async def key_error_handler(request: Request, exc: KeyError):
+        return create_error_response(
+            status_code=http_status.HTTP_404_NOT_FOUND,
+            error_code=ErrorCode.RESULT_NOT_FOUND,
+            message=_("The requested resource was not found"),
+        )
+
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception):
         # 予期せぬエラー
