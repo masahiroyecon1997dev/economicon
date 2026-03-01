@@ -68,7 +68,7 @@ const measureColumnName = (name: string): number => {
 // ---------------------------------------------------------------------------
 const SkeletonCell = () => (
   <div className="px-3 py-1">
-    <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
+    <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
   </div>
 );
 
@@ -327,9 +327,9 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   // ---------------------------------------------------------------------------
   if (totalRows === 0) {
     return (
-      <div className="overflow-hidden rounded-lg border border-brand-border bg-white shadow-sm h-full flex flex-col">
-        <table className="w-full text-sm text-left text-gray-500">
-          <thead className="sticky top-0 z-10 text-xs text-gray-700 bg-gray-50">
+      <div className="overflow-hidden rounded-lg border border-brand-border bg-white dark:bg-gray-900 shadow-sm h-full flex flex-col">
+        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+          <thead className="sticky top-0 z-10 text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">
             <tr>
               <th className="px-3 py-3">#</th>
               {columnList.map((col) => (
@@ -342,7 +342,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
         </table>
         <div className="flex items-center justify-center py-12 text-sm text-gray-400">
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-brand-primary" />
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-brand-primary" />
             データを読み込んでいます
           </div>
         </div>
@@ -356,7 +356,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   return (
     <div
       ref={parentRef}
-      className="overflow-auto rounded-lg border border-brand-border bg-white shadow-sm h-full"
+      className="overflow-auto rounded-lg border border-brand-border bg-white dark:bg-gray-900 shadow-sm h-full"
       style={{ willChange: "scroll-position" }}
     >
       <div style={{ height: `${totalSize}px`, position: "relative" }}>
@@ -367,7 +367,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
           <thead
             ref={setNodeRef}
             className={cn(
-              "sticky top-0 z-10 text-xs text-gray-700 bg-gray-50",
+              "sticky top-0 z-10 text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800",
               isOver && "bg-gray-500",
             )}
           >
@@ -391,7 +391,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
                         onMouseDown={header.getResizeHandler()}
                         onTouchStart={header.getResizeHandler()}
                         className={cn(
-                          "absolute right-0 top-0 h-full w-1 cursor-col-resize bg-gray-300 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity",
+                          "absolute right-0 top-0 h-full w-1 cursor-col-resize bg-gray-300 dark:bg-gray-600 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity",
                           header.column.getIsResizing() &&
                             "opacity-100 bg-brand-primary",
                         )}
@@ -413,7 +413,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
               return (
                 <tr
                   key={row.id}
-                  className="bg-white border-b"
+                  className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/70"
                   style={{ height: `${virtualRow.size}px` }}
                   onContextMenu={handleContextMenu}
                 >

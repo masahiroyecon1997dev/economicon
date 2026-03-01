@@ -124,23 +124,25 @@ export const ColumnOperationDialog = ({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-gray-900/40" />
         <Dialog.Content
-          className={`fixed left-1/2 top-[48%] z-50 w-full ${getDialogWidth(operation)} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-xl overflow-hidden`}
+          className={`fixed left-1/2 top-[48%] z-50 w-full ${getDialogWidth(operation)} -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white dark:bg-gray-900 shadow-xl overflow-hidden`}
         >
           {/* ヘッダー */}
-          <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-5 py-4">
             <div>
-              <Dialog.Title className="text-base font-semibold text-gray-900">
+              <Dialog.Title className="text-base font-semibold text-gray-900 dark:text-gray-100">
                 {getDialogTitle(operation, t)}
               </Dialog.Title>
-              <p className="mt-0.5 text-xs text-gray-500 font-mono">
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 font-mono">
                 {column.name}
-                <span className="ml-2 text-gray-400">({column.type})</span>
+                <span className="ml-2 text-gray-400 dark:text-gray-500">
+                  ({column.type})
+                </span>
               </p>
             </div>
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
                 aria-label={t("Common.Close")}
               >
                 <X className="h-4 w-4" />
@@ -150,7 +152,7 @@ export const ColumnOperationDialog = ({
 
           {/* フォーム本体 */}
           <Dialog.Description asChild>
-            <div className="px-5 py-4">{renderForm()}</div>
+            <div className="px-5 py-4 dark:text-gray-200">{renderForm()}</div>
           </Dialog.Description>
         </Dialog.Content>
       </Dialog.Portal>

@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* ===== Class-based dark mode (Tailwind v4) ===== */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  .dark {
+    /* ブランドカラー上書き: bg-brand-secondary 等で参照される CSS 変数を差し替え */
+    --color-brand-secondary: #1a2236;
+    --color-brand-border: #2d3748;
+    --color-brand-text-main: #e2e8f0;
+    --color-brand-primary-light: #2c3e50;
+    color-scheme: dark;
+  }
+}
+
 @layer base {
   button,
   [role="button"],
@@ -177,5 +191,16 @@ body {
   html,
   body {
     @apply h-full w-full overflow-hidden overscroll-none;
+  }
+
+  /* ===== Dark mode: スクロールバー ===== */
+  .dark *::-webkit-scrollbar-track {
+    background: #1a2236;
+  }
+  .dark *::-webkit-scrollbar-thumb {
+    background: #374151;
+  }
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: #4b5563;
   }
 }
