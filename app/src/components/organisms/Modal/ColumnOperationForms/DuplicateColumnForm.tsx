@@ -6,6 +6,10 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
 import { showMessageDialog } from "../../../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../../../lib/utils/apiError";
 import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
 import { FormField } from "../../../molecules/Form/FormField";
@@ -41,12 +45,16 @@ export const DuplicateColumnForm = ({
           const updatedList = await fetchUpdatedColumnList(tableName);
           onSuccess(updatedList);
         } else {
-          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+          );
         }
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : t("Error.UnexpectedError");
-        await showMessageDialog(t("Error.Error"), message);
+        await showMessageDialog(
+          t("Error.Error"),
+          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        );
       }
     },
   });

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 type FormFieldProps = {
   label: string;
@@ -13,7 +13,7 @@ export const FormField = ({
   children,
   error,
   htmlFor,
-  className = ''
+  className = "",
 }: FormFieldProps) => {
   return (
     <div className={`space-y-1 ${className}`}>
@@ -25,9 +25,7 @@ export const FormField = ({
       </label>
       {children}
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">
-          {error}
-        </p>
+        <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">{error}</p>
       )}
     </div>
   );
