@@ -92,11 +92,10 @@ class FetchDataToArrow:
                 b"endRow": str(end_row).encode(),
                 b"tableName": self.table_name.encode(),
             }
-            schema_with_meta = pyarrow_table.schema.with_metadata(meta)
-            pyarrow_table = pyarrow_table.cast(schema_with_meta)
+            pyarrow_table = pyarrow_table.replace_schema_metadata(meta)
 
             sink = io.BytesIO()
-            with pa.ipc.new_file(sink, schema_with_meta) as writer:
+            with pa.ipc.new_file(sink, pyarrow_table.schema) as writer:
                 writer.write_table(pyarrow_table)
 
             return sink.getvalue()

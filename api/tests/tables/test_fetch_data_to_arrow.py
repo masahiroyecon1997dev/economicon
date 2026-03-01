@@ -2,7 +2,6 @@
 fetch_data_to_arrow APIのテスト
 """
 
-import base64
 import io
 
 import polars as pl
@@ -82,11 +81,16 @@ def tables_store():
 # ヘルパー
 # ─────────────────────────────────────────────────────────────
 def _decode_arrow_table(response) -> pa.Table:
-    """JSONレスポンスから base64 エンコードされた Arrow データを復元する"""
-    data = response.json()
-    assert data["code"] == "OK"
-    arrow_bytes = base64.b64decode(data["result"]["arrowData"])
-    return pa.ipc.open_file(io.BytesIO(arrow_bytes)).read_all()
+    """レスポンスのバイナリからArrowテーブルを復元する"""
+    assert response.status_code == status.HTTP_200_OK
+    return pa.ipc.open_file(io.BytesIO(response.content)).read_all()
+
+
+def _get_schema_meta(response) -> dict:
+    """Arrowテーブルのスキーマカスタムメタデータをdecodedな辞書で返す"""
+    table = _decode_arrow_table(response)
+    raw = table.schema.metadata or {}
+    return {k.decode(): v.decode() for k, v in raw.items()}
 
 
 # ─────────────────────────────────────────────────────────────
@@ -103,19 +107,24 @@ def test_fetch_data_to_arrow_success(client, tables_store):
     }
     response = client.post("/api/table/fetch-data-to-arrow", json=payload)
     assert response.status_code == status.HTTP_200_OK
-    assert "application/json" in response.headers["content-type"]
+    assert (
+        "application/vnd.apache.arrow.stream"
+        in response.headers["content-type"]
+    )
 
-    result = response.json()["result"]
-    assert result["tableName"] == _TABLE_NAME
-    assert result["startRow"] == _start_row
-    assert result["endRow"] == _start_row + _chunk_size
-    assert result["totalRows"] == len(_SOURCE_DF)
+    meta = _get_schema_meta(response)
+    assert meta["tableName"] == _TABLE_NAME
+    assert int(meta["startRow"]) == _start_row
+    assert int(meta["endRow"]) == _start_row + _chunk_size
+    assert int(meta["totalRows"]) == len(_SOURCE_DF)
 
     arrow_table = _decode_arrow_table(response)
     expected_arrow = _SOURCE_DF[1:4].to_arrow()
     assert arrow_table.num_rows == expected_arrow.num_rows
     assert arrow_table.num_columns == expected_arrow.num_columns
-    assert arrow_table.schema.equals(expected_arrow.schema)
+    assert arrow_table.schema.equals(
+        expected_arrow.schema, check_metadata=False
+    )
 
 
 def test_fetch_data_to_arrow_default_chunk_size(client, tables_store):

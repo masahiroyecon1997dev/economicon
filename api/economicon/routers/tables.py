@@ -1,3 +1,5 @@
+from typing import cast
+
 from fastapi import APIRouter, Request, Response
 from fastapi import status as http_status
 
@@ -396,7 +398,7 @@ async def fetch_data_to_arrow(
         Arrow IPC形式生バイナリ
     """
     api = FetchDataToArrow(body, tables_store)
-    arrow_bytes: bytes = run_operation(api)
+    arrow_bytes = cast(bytes, run_operation(api))
     return Response(
         content=arrow_bytes,
         media_type="application/vnd.apache.arrow.stream",
