@@ -460,10 +460,12 @@ export const FetchDataToJsonBody = zod.object({
 export const FetchDataToJsonResponse = zod.unknown()
 
 /**
- * データをApache Arrow IPC形式で取得するエンドポイント
+ * データをApache Arrow IPC形式の生バイナリで返すエンドポイント
 
 仮想スクロール用のチャンク取得API。
-Apache Arrow IPC形式のバイナリデータ（Base64エンコード）を返します。
+JSON包装なしでArrow IPC形式生バイナリを直接返す。
+メタデータ（totalRows/startRow/endRow/tableName）は
+Arrowスキーマメタデータに埋め込む。
 
 Parameters
 ----------
@@ -474,8 +476,8 @@ body : FetchDataToArrowRequestBody
 
 Returns
 -------
-JSONResponse
-    処理結果（Arrow IPC形式のBase64エンコードされたバイナリを含む）
+Response
+    Arrow IPC形式生バイナリ
  * @summary Fetch Data To Arrow
  */
 export const FetchDataToArrowHeader = zod.object({
@@ -495,8 +497,6 @@ export const FetchDataToArrowBody = zod.object({
   "startRow": zod.number().min(fetchDataToArrowBodyStartRowMin).describe('取得を開始する行番号（0始まり）'),
   "chunkSize": zod.number().min(1).max(fetchDataToArrowBodyChunkSizeMax).default(fetchDataToArrowBodyChunkSizeDefault).describe('1リクエストで取得する行数（1〜10000、デフォルト500）')
 }).describe('データArrow取得リクエスト')
-
-export const FetchDataToArrowResponse = zod.unknown()
 
 /**
  * セルデータ入力エンドポイント
