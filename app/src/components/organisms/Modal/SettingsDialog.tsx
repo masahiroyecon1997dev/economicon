@@ -20,7 +20,7 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getEconomiconAPI } from "../../../api/endpoints";
 import type { ThemeDefinitionType } from "../../../constants/themes";
@@ -95,7 +95,7 @@ const ThemeCard = ({ theme, isSelected, onClick }: ThemeCardPropsType) => {
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
         isSelected
           ? "border-blue-500 shadow-md"
-          : "border-gray-200 hover:border-gray-300",
+          : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600",
       )}
     >
       {/* ミニUI プレビュー */}
@@ -198,6 +198,31 @@ export const SettingsDialog = ({
   });
   const [isSaving, setIsSaving] = useState(false);
 
+  // ダイアログを開いた時点のテーマを記憶（キャンセル時に元に戻す）
+  const originalThemeRef = useRef(theme);
+  useEffect(() => {
+    if (open) {
+      originalThemeRef.current = theme;
+    }
+  }, [open, theme]);
+
+  /** ダイアログを閉じる際に未保存のライブプレビューを元に戻す */
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      document.documentElement.classList.toggle(
+        "dark",
+        originalThemeRef.current === "dark",
+      );
+    }
+    onOpenChange(nextOpen);
+  };
+
+  /** テーマカード選択: draftを更新し即座に画面にプレビューを反映 */
+  const handleThemeSelect = (themeId: string) => {
+    setDraft((d) => ({ ...d, theme: themeId }));
+    document.documentElement.classList.toggle("dark", themeId === "dark");
+  };
+
   // ダイアログを開くたびに現在の設定で draft を初期化
   useEffect(() => {
     if (open) {
@@ -234,22 +259,22 @@ export const SettingsDialog = ({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-gray-900/40" />
         <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-white shadow-xl"
+          className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-xl"
           aria-describedby={undefined}
         >
           {/* ヘッダー */}
-          <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-            <Dialog.Title className="text-base font-semibold text-gray-900">
+          <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-5 py-4">
+            <Dialog.Title className="text-base font-semibold text-gray-900 dark:text-gray-100">
               {t("SettingsDialog.Title")}
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none"
+                className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
                 aria-label={t("Common.Close")}
               >
                 <X className="h-4 w-4" />
@@ -261,7 +286,7 @@ export const SettingsDialog = ({
           <Tabs.Root defaultValue="appearance" className="flex min-h-100">
             {/* 左サイドバー: タブリスト */}
             <Tabs.List
-              className="flex w-44 shrink-0 flex-col gap-0.5 border-r border-gray-100 bg-gray-50/70 p-3"
+              className="flex w-44 shrink-0 flex-col gap-0.5 border-r border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/60 p-3"
               aria-label={t("SettingsDialog.TabsLabel")}
             >
               {TABS.map((tab) => (
@@ -270,9 +295,9 @@ export const SettingsDialog = ({
                   value={tab.id}
                   className={cn(
                     "flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors",
-                    "text-gray-500 hover:bg-gray-200/60 hover:text-gray-700",
+                    "text-gray-500 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 hover:text-gray-700 dark:hover:text-gray-200",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
-                    "data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm",
+                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100 data-[state=active]:shadow-sm",
                   )}
                 >
                   <tab.Icon size={15} aria-hidden="true" />
@@ -288,10 +313,10 @@ export const SettingsDialog = ({
                 value="appearance"
                 className="flex-1 overflow-y-auto px-6 py-5"
               >
-                <h3 className="text-sm font-semibold text-gray-700">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                   {t("SettingsDialog.Theme.Label")}
                 </h3>
-                <p className="mb-4 mt-1 text-xs text-gray-400">
+                <p className="mb-4 mt-1 text-xs text-gray-400 dark:text-gray-500">
                   {t("SettingsDialog.Theme.Description")}
                 </p>
                 <div className="grid grid-cols-3 gap-3">
@@ -300,7 +325,7 @@ export const SettingsDialog = ({
                       key={thm.id}
                       theme={thm}
                       isSelected={draft.theme === thm.id}
-                      onClick={() => setDraft((d) => ({ ...d, theme: thm.id }))}
+                      onClick={() => handleThemeSelect(thm.id)}
                     />
                   ))}
                 </div>
@@ -313,7 +338,7 @@ export const SettingsDialog = ({
               >
                 {/* 言語 */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700">
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     {t("SettingsDialog.Language.Label")}
                   </h3>
                   <div className="mt-2 flex gap-2">
@@ -328,8 +353,8 @@ export const SettingsDialog = ({
                           "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
                           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
                           draft.language === lang.id
-                            ? "border-blue-500 bg-blue-50 text-blue-700"
-                            : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50",
+                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                            : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700",
                         )}
                       >
                         {t(lang.labelKey)}
@@ -340,7 +365,7 @@ export const SettingsDialog = ({
 
                 {/* エンコーディング */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700">
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     {t("SettingsDialog.Encoding.Label")}
                   </h3>
                   <Select.Root
@@ -351,18 +376,21 @@ export const SettingsDialog = ({
                   >
                     <Select.Trigger
                       className={cn(
-                        "mt-2 flex h-9 w-48 items-center justify-between rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700",
-                        "hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                        "mt-2 flex h-9 w-48 items-center justify-between rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm text-gray-700 dark:text-gray-200",
+                        "hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500",
                       )}
                     >
                       <Select.Value />
                       <Select.Icon>
-                        <ChevronDown size={14} className="text-gray-400" />
+                        <ChevronDown
+                          size={14}
+                          className="text-gray-400 dark:text-gray-500"
+                        />
                       </Select.Icon>
                     </Select.Trigger>
                     <Select.Portal>
                       <Select.Content
-                        className="z-100 overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
+                        className="z-100 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg"
                         position="popper"
                         sideOffset={4}
                       >
@@ -372,9 +400,9 @@ export const SettingsDialog = ({
                               key={enc}
                               value={enc}
                               className={cn(
-                                "flex cursor-pointer items-center rounded px-3 py-1.5 text-sm text-gray-700",
-                                "hover:bg-gray-100 focus:bg-gray-100 focus:outline-none",
-                                "data-[state=checked]:font-medium data-[state=checked]:text-blue-600",
+                                "flex cursor-pointer items-center rounded px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200",
+                                "hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none",
+                                "data-[state=checked]:font-medium data-[state=checked]:text-blue-600 dark:data-[state=checked]:text-blue-400",
                               )}
                             >
                               <Select.ItemText>{enc}</Select.ItemText>
@@ -395,7 +423,7 @@ export const SettingsDialog = ({
                 value="data"
                 className="flex-1 overflow-y-auto px-6 py-5"
               >
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-400 dark:text-gray-500">
                   {t("SettingsDialog.Placeholder")}
                 </p>
               </Tabs.Content>
@@ -405,10 +433,10 @@ export const SettingsDialog = ({
                 value="log"
                 className="flex-1 overflow-y-auto px-6 py-5"
               >
-                <h3 className="text-sm font-semibold text-gray-700">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                   {t("SettingsDialog.LogPath.Label")}
                 </h3>
-                <p className="mt-2 break-all rounded-md bg-gray-50 px-3 py-2 font-mono text-xs text-gray-500">
+                <p className="mt-2 break-all rounded-md bg-gray-50 dark:bg-gray-800 px-3 py-2 font-mono text-xs text-gray-500 dark:text-gray-400">
                   {logPath || t("SettingsDialog.LogPath.NotSet")}
                 </p>
               </Tabs.Content>
@@ -416,10 +444,10 @@ export const SettingsDialog = ({
           </Tabs.Root>
 
           {/* フッター: 保存 / キャンセル */}
-          <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-5 py-3">
+          <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-700 px-5 py-3">
             <Button
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={isSaving}
             >
               {t("Common.Cancel")}
