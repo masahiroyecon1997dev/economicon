@@ -20,8 +20,8 @@
 
 #define MyAppName    "Economicon"
 #define MyAppVersion "0.1.0"
-#define MyAppPublisher "Your Name / Organization"
-#define MyAppURL     "https://github.com/MasahiroYamada1997-1/economicon"
+#define MyAppPublisher "masahiroyecon1997dev"
+#define MyAppURL     "https://github.com/masahiroyecon1997dev/economicon"
 #define MyAppExeName "economicon.exe"
 
 ; ── ソースルート（このファイルのある場所の 1つ上 = リポジトリルート）─────────
@@ -74,7 +74,8 @@ UninstallDisplayName={#MyAppName} {#MyAppVersion}
 ; ── インストール中のウィザード設定 ────────────────────────────────────────────
 WizardStyle=modern
 WizardSizePercent=120
-
+; ライセンス同意ページ（build.ps1 の STEP 6 で生成）─────────────────
+LicenseFile={#SrcRoot}\release\LICENSES.txt
 
 [Languages]
 Name: "japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
@@ -102,15 +103,20 @@ Source: "{#SrcRoot}\app\src-tauri\resources\python_env\*"; \
     Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; ── 3. FastAPI バックエンドコード ────────────────────────────────────────────
-; Tauri の bundle.resources 経由でバイナリ内に含める場合はこのセクションも不要。
-; 単体インストーラーとして Python ソースも配布する場合は有効にする。
-; Source: "{#SrcRoot}\api\main.py"; DestDir: "{app}\api"; Flags: ignoreversion
-; Source: "{#SrcRoot}\api\economicon\*"; \
-;     DestDir: "{app}\api\economicon"; \
-;     Flags: ignoreversion recursesubdirs createallsubdirs
+; Python サイドカー起動に必要な FastAPI アプリケーションコード。
+Source: "{#SrcRoot}\api\main.py"; DestDir: "{app}\api"; Flags: ignoreversion
+Source: "{#SrcRoot}\api\economicon\*"; \
+    DestDir: "{app}\api\economicon"; \
+    Flags: ignoreversion recursesubdirs createallsubdirs
 
-; ── 4. ライセンスファイル（存在する場合）───────────────────────────────────────
-; Source: "{#SrcRoot}\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+; ── 4. ライセンスファイル ──────────────────────────────────────────────
+Source: "{#SrcRoot}\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+
+; ── 5. サードパーティライセンス一覧 ─────────────────────────────────────
+; build.ps1 の STEP 6 で生成されるライセンスファイルを {app}\licenses に配置。
+Source: "{#SrcRoot}\release\licenses\*"; \
+    DestDir: "{app}\licenses"; \
+    Flags: ignoreversion
 
 
 [Icons]
