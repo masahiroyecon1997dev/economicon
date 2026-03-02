@@ -4,6 +4,7 @@
  * Economicon API
  * OpenAPI spec version: 0.1.0
  */
+import type { DescriptiveStatisticsResultStatistics } from './descriptiveStatisticsResultStatistics';
 
 /**
  * 記述統計レスポンス
@@ -11,6 +12,6 @@
 export type DescriptiveStatisticsResult = {
   /** 計算対象のテーブル名 */
   tableName: string;
-  /** 記述統計の計算結果。カラム名と統計量名をキーに持つ辞書型データ。 */
-  statistics: unknown;
+  /** 記述統計の計算結果。カラム名をキー、{統計量名: 値} を値とする辞書型データ。 */
+  statistics: DescriptiveStatisticsResultStatistics;
 };

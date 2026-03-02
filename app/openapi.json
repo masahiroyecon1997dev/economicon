@@ -3521,6 +3521,137 @@
         ],
         "title": "AlternativeHypothesis"
       },
+      "AnalysisResultDetail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "ID",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u4e00\u610f ID"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "\u5206\u6790\u7d50\u679c\u540d"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u8aac\u660e\u30e1\u30e2"
+          },
+          "tableName": {
+            "type": "string",
+            "title": "Table Name",
+            "description": "\u5206\u6790\u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "regressionOutput": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Regression Output",
+            "description": "\u63a8\u5b9a\u7d50\u679c\u306e\u8a73\u7d30\u30c7\u30fc\u30bf\u3002\u624b\u6cd5\uff08OLS / FE / RE / IV / Logit / Probit / Tobit \u7b49\uff09\u306b\u3088\u308a\u542b\u307e\u308c\u308b\u30ad\u30fc\u304c\u7570\u306a\u308b\u3002"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Created At",
+            "description": "\u4f5c\u6210\u65e5\u6642\uff08ISO 8601 \u5f62\u5f0f\uff09"
+          },
+          "modelPath": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Path",
+            "description": "\u4fdd\u5b58\u6e08\u307f\u30e2\u30c7\u30eb\u30d5\u30a1\u30a4\u30eb\u306e\u30d1\u30b9\uff08None \u306e\u5834\u5408\u306f\u672a\u4fdd\u5b58\uff09"
+          },
+          "modelType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Type",
+            "description": "\u30e2\u30c7\u30eb\u306e\u7a2e\u5225\u6587\u5b57\u5217\uff08ols / fe / re / iv \u7b49\uff09"
+          },
+          "entityIdColumn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity ID Column",
+            "description": "\u30d1\u30cd\u30eb\u30c7\u30fc\u30bf\u5206\u6790\u306b\u304a\u3051\u308b\u500b\u4f53 ID \u5217\u540d"
+          },
+          "timeColumn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time Column",
+            "description": "\u30d1\u30cd\u30eb\u30c7\u30fc\u30bf\u5206\u6790\u306b\u304a\u3051\u308b\u6642\u9593\u5217\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "tableName",
+          "regressionOutput",
+          "createdAt",
+          "modelPath",
+          "modelType",
+          "entityIdColumn",
+          "timeColumn"
+        ],
+        "title": "AnalysisResultDetail",
+        "description": "\u5206\u6790\u7d50\u679c\u8a73\u7d30\uff081\u4ef6\u53d6\u5f97\u7528\uff09"
+      },
+      "AnalysisResultSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "ID",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u4e00\u610f ID"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "\u5206\u6790\u7d50\u679c\u540d"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u8aac\u660e\u30e1\u30e2"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Created At",
+            "description": "\u4f5c\u6210\u65e5\u6642\uff08ISO 8601 \u5f62\u5f0f\uff09"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "createdAt"
+        ],
+        "title": "AnalysisResultSummary",
+        "description": "\u5206\u6790\u7d50\u679c\u30b5\u30de\u30ea\u30fc\uff08\u4e00\u89a7\u53d6\u5f97\u7528\u306e\u5404\u8981\u7d20\uff09"
+      },
       "BernoulliParams": {
         "properties": {
           "type": {
@@ -4691,8 +4822,22 @@
             "description": "\u8a08\u7b97\u5bfe\u8c61\u306e\u30c6\u30fc\u30d6\u30eb\u540d"
           },
           "statistics": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            "type": "object",
             "title": "Statistics",
-            "description": "\u8a18\u8ff0\u7d71\u8a08\u306e\u8a08\u7b97\u7d50\u679c\u3002\u30ab\u30e9\u30e0\u540d\u3068\u7d71\u8a08\u91cf\u540d\u3092\u30ad\u30fc\u306b\u6301\u3064\u8f9e\u66f8\u578b\u30c7\u30fc\u30bf\u3002"
+            "description": "\u8a18\u8ff0\u7d71\u8a08\u306e\u8a08\u7b97\u7d50\u679c\u3002\u30ab\u30e9\u30e0\u540d\u3092\u30ad\u30fc\u3001{\u7d71\u8a08\u91cf\u540d: \u5024} \u3092\u5024\u3068\u3059\u308b\u8f9e\u66f8\u578b\u30c7\u30fc\u30bf\u3002"
           }
         },
         "type": "object",
@@ -5394,7 +5539,9 @@
       "GetAllAnalysisResultsResult": {
         "properties": {
           "results": {
-            "items": {},
+            "items": {
+              "$ref": "#/components/schemas/AnalysisResultSummary"
+            },
             "type": "array",
             "title": "Results",
             "description": "\u5206\u6790\u7d50\u679c\u306e\u30b5\u30de\u30ea\u30fc\u30ea\u30b9\u30c8"
@@ -5410,6 +5557,7 @@
       "GetAnalysisResultResult": {
         "properties": {
           "result": {
+            "$ref": "#/components/schemas/AnalysisResultDetail",
             "title": "Result",
             "description": "\u5206\u6790\u7d50\u679c\u306e\u8a73\u7d30\u30c7\u30fc\u30bf"
           }
