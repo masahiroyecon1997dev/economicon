@@ -7,6 +7,7 @@ export const customInstance = async <T>(
     headers?: Record<string, string>;
     params?: Record<string, unknown>; // クエリパラメータ
     data?: unknown; // リクエストボディ
+    responseType?: "blob" | "arraybuffer" | "text"; // バイナリレスポンス用
   },
   _options?: unknown,
 ): Promise<T> => {
