@@ -76,19 +76,22 @@ export type LinearRegressionResultType = {
   parameters: Array<{
     variable: string;
     coefficient: number;
-    standardError: number;
-    pValue: number;
-    tValue: number;
+    standardError: number | null;
+    pValue: number | null;
+    tValue: number | null;
+    confidenceIntervalLower: number | null;
+    confidenceIntervalUpper: number | null;
   }>;
   modelStatistics: {
-    R2: number;
-    adjustedR2: number;
-    AIC: number;
-    BIC: number;
-    fValue: number;
-    fProbability: number;
-    logLikelihood: number;
     nObservations: number;
+    R2?: number;
+    adjustedR2?: number;
+    fValue?: number;
+    fProbability?: number;
+    AIC?: number;
+    BIC?: number;
+    logLikelihood?: number;
+    pseudoRSquared?: number;
   };
 };
 

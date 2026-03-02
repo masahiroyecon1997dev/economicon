@@ -7,18 +7,17 @@ type RegressionResultProps = {
   className?: string;
 };
 
-export const RegressionResult = ({ result, className }: RegressionResultProps) => {
+export const RegressionResult = ({
+  result,
+  className,
+}: RegressionResultProps) => {
   const { t } = useTranslation();
 
-  if (!result) {
-    return (
-      <div className={cn("flex items-center justify-center p-8", className)}>
-        <p className="text-brand-text-main/60">{t("RegressionResult.NoData")}</p>
-      </div>
-    );
-  }
-
-  const formatNumber = (num: number, decimals: number = 4): string => {
+  const formatNumber = (
+    num: number | null | undefined,
+    decimals: number = 4,
+  ): string => {
+    if (num === null || num === undefined) return t("RegressionResult.NA");
     return num.toFixed(decimals);
   };
 
@@ -31,15 +30,23 @@ export const RegressionResult = ({ result, className }: RegressionResultProps) =
         </h3>
         <div className="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
           <div className="flex justify-between">
-            <span className="font-medium text-brand-text-main">{t("RegressionResult.TableName")}:</span>
+            <span className="font-medium text-brand-text-main">
+              {t("RegressionResult.TableName")}:
+            </span>
             <span className="text-brand-text-main">{result.tableName}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-medium text-brand-text-main">{t("RegressionResult.DependentVariable")}:</span>
-            <span className="text-brand-text-main">{result.dependentVariable}</span>
+            <span className="font-medium text-brand-text-main">
+              {t("RegressionResult.DependentVariable")}:
+            </span>
+            <span className="text-brand-text-main">
+              {result.dependentVariable}
+            </span>
           </div>
           <div className="col-span-1 md:col-span-2">
-            <span className="font-medium text-brand-text-main">{t("RegressionResult.ExplanatoryVariables")}:</span>
+            <span className="font-medium text-brand-text-main">
+              {t("RegressionResult.ExplanatoryVariables")}:
+            </span>
             <div className="mt-1 flex flex-wrap gap-1">
               {result.explanatoryVariables.map((variable, index) => (
                 <span
@@ -67,7 +74,9 @@ export const RegressionResult = ({ result, className }: RegressionResultProps) =
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">{t("RegressionResult.AdjustedR2")}</span>
+            <span className="text-xs text-brand-text-main/60">
+              {t("RegressionResult.AdjustedR2")}
+            </span>
             <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.adjustedR2)}
             </span>
@@ -85,25 +94,33 @@ export const RegressionResult = ({ result, className }: RegressionResultProps) =
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">{t("RegressionResult.FValue")}</span>
+            <span className="text-xs text-brand-text-main/60">
+              {t("RegressionResult.FValue")}
+            </span>
             <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.fValue)}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">{t("RegressionResult.FProbability")}</span>
+            <span className="text-xs text-brand-text-main/60">
+              {t("RegressionResult.FProbability")}
+            </span>
             <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.fProbability)}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">{t("RegressionResult.LogLikelihood")}</span>
+            <span className="text-xs text-brand-text-main/60">
+              {t("RegressionResult.LogLikelihood")}
+            </span>
             <span className="font-semibold text-brand-text-main">
               {formatNumber(result.modelStatistics.logLikelihood)}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">{t("RegressionResult.Observations")}</span>
+            <span className="text-xs text-brand-text-main/60">
+              {t("RegressionResult.Observations")}
+            </span>
             <span className="font-semibold text-brand-text-main">
               {result.modelStatistics.nObservations}
             </span>
@@ -135,6 +152,12 @@ export const RegressionResult = ({ result, className }: RegressionResultProps) =
                 <th className="px-3 py-2 text-right font-semibold text-text-heading">
                   {t("RegressionResult.PValue")}
                 </th>
+                <th className="px-3 py-2 text-right font-semibold text-text-heading">
+                  {t("RegressionResult.ConfidenceIntervalLower")}
+                </th>
+                <th className="px-3 py-2 text-right font-semibold text-text-heading">
+                  {t("RegressionResult.ConfidenceIntervalUpper")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -158,16 +181,22 @@ export const RegressionResult = ({ result, className }: RegressionResultProps) =
                   <td
                     className={cn(
                       "px-3 py-2 text-right font-medium",
-                      param.pValue < 0.001
+                      param.pValue !== null && param.pValue < 0.001
                         ? "text-green-600"
-                        : param.pValue < 0.01
+                        : param.pValue !== null && param.pValue < 0.01
                           ? "text-green-500"
-                          : param.pValue < 0.05
+                          : param.pValue !== null && param.pValue < 0.05
                             ? "text-yellow-600"
-                            : "text-brand-text-main"
+                            : "text-brand-text-main",
                     )}
                   >
                     {formatNumber(param.pValue)}
+                  </td>
+                  <td className="px-3 py-2 text-right text-brand-text-main">
+                    {formatNumber(param.confidenceIntervalLower)}
+                  </td>
+                  <td className="px-3 py-2 text-right text-brand-text-main">
+                    {formatNumber(param.confidenceIntervalUpper)}
                   </td>
                 </tr>
               ))}

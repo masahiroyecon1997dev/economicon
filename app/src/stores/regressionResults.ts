@@ -3,8 +3,6 @@ import type { LinearRegressionResultType } from "../types/commonTypes";
 
 export type RegressionResultsActions = {
   addResult: (result: LinearRegressionResultType) => void;
-  clearResults: () => void;
-  removeResult: (index: number) => void;
 };
 
 type RegressionResultsStore = {
@@ -17,11 +15,6 @@ export const useRegressionResultsStore = create<RegressionResultsStore>(
     addResult: (result) =>
       set((state) => ({
         results: [...state.results, result],
-      })),
-    clearResults: () => set({ results: [] }),
-    removeResult: (index) =>
-      set((state) => ({
-        results: state.results.filter((_, i) => i !== index),
       })),
   }),
 );
