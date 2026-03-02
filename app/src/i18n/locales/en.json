@@ -63,7 +63,8 @@
   "Table": {
     "LoadingData": "Loading data",
     "FetchingChunk": "Loading",
-    "FetchError": "Error: {{message}}"
+    "FetchError": "Error: {{message}}",
+    "CloseTab": "Close tab"
   },
   "ImportDataFileView": {
     "Title": "Select File",
