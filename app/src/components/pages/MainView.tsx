@@ -7,6 +7,7 @@ import { JoinTable } from "./JoinTable";
 import { Regression } from "./RegressionView";
 import { SaveData } from "./SaveData";
 import { Table } from "./Table";
+import { UnionTable } from "./UnionTable";
 
 export const MainView = () => {
   const currentView = useCurrentPageStore((state) => state.currentView);
@@ -19,6 +20,8 @@ export const MainView = () => {
         return <CreateTable />;
       case "JoinTable":
         return <JoinTable />;
+      case "UnionTable":
+        return <UnionTable />;
       case "LinearRegressionForm":
         return <Regression />;
       case "CreateSimulationDataTable":
