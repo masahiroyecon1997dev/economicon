@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../api/endpoints";
+import type { StandardErrorSettings } from "../../../api/model";
 import { MissingValueHandlingType } from "../../../api/model";
 import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../../lib/dialog/message";
@@ -47,9 +48,6 @@ export const LinearRegressionForm = ({
       autoLoadOnMount: true,
     });
   const addResult = useRegressionResultsStore((state) => state.addResult);
-  const resultsCount = useRegressionResultsStore(
-    (state) => state.results.length,
-  );
 
   const form = useForm({
     defaultValues: {
@@ -74,7 +72,9 @@ export const LinearRegressionForm = ({
           missingValueHandling:
             value.missingValueHandling as MissingValueHandlingType,
           analysis: { method: "ols" },
-          standardError: { method: value.standardErrorMethod },
+          standardError: {
+            method: value.standardErrorMethod,
+          } as StandardErrorSettings,
         });
 
         if (regressionResponse.code === "OK" && regressionResponse.result) {
@@ -85,7 +85,9 @@ export const LinearRegressionForm = ({
               resultResponse.result.result
                 .regressionOutput as LinearRegressionResultType,
             );
-            onAnalysisComplete?.(resultsCount);
+            const newIndex =
+              useRegressionResultsStore.getState().results.length - 1;
+            onAnalysisComplete?.(newIndex);
             return;
           }
         }
