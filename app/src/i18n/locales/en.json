@@ -58,6 +58,9 @@
     "MenuDuplicateTable": "Duplicate Table",
     "MenuDeleteTable": "Delete Table"
   },
+  "Table": {
+    "LoadingData": "Loading data..."
+  },
   "ImportDataFileView": {
     "Title": "Select File",
     "SelectFile": "Select File",
