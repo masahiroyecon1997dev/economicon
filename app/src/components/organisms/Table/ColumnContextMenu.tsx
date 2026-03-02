@@ -10,6 +10,7 @@ import {
   ArrowDownAZ,
   ArrowUpAZ,
   CopyPlus,
+  Dices,
   FileClock,
   FlipHorizontal,
   MoreVertical,
@@ -30,6 +31,7 @@ export type ColumnOperation =
   | "transform"
   | "addDummy"
   | "addLagLead"
+  | "addSimulation"
   | "delete";
 
 type ColumnContextMenuProps = {
@@ -164,6 +166,14 @@ export const ColumnContextMenu = ({
             >
               <FileClock className="h-4 w-4 text-gray-500 shrink-0" />
               {t("ColumnMenu.AddLagLead")}
+            </DropdownMenu.Item>
+
+            <DropdownMenu.Item
+              className={menuItemClass}
+              onSelect={() => onAction("addSimulation")}
+            >
+              <Dices className="h-4 w-4 text-gray-500 shrink-0" />
+              {t("ColumnMenu.AddSimulation")}
             </DropdownMenu.Item>
           </DropdownMenu.Group>
 

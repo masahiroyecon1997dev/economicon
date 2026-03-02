@@ -11,6 +11,7 @@ import type { ColumnType } from "../../../types/commonTypes";
 import type { ColumnOperation } from "../../organisms/Table/ColumnContextMenu";
 import { AddDummyColumnForm } from "./ColumnOperationForms/AddDummyColumnForm";
 import { AddLagLeadColumnForm } from "./ColumnOperationForms/AddLagLeadColumnForm";
+import { AddSimulationColumnForm } from "./ColumnOperationForms/AddSimulationColumnForm";
 import { CastColumnForm } from "./ColumnOperationForms/CastColumnForm";
 import { DeleteColumnForm } from "./ColumnOperationForms/DeleteColumnForm";
 import { DuplicateColumnForm } from "./ColumnOperationForms/DuplicateColumnForm";
@@ -45,6 +46,8 @@ const getDialogTitle = (
       return t("AddDummyColumnForm.Title");
     case "addLagLead":
       return t("AddLagLeadColumnForm.Title");
+    case "addSimulation":
+      return t("AddSimulationColumnForm.Title");
     default:
       return "";
   }
@@ -57,6 +60,7 @@ const getDialogWidth = (operation: ColumnOperation | null): string => {
     case "transform":
     case "addDummy":
     case "addLagLead":
+    case "addSimulation":
       return "max-w-lg";
     default:
       return "max-w-md";
@@ -114,6 +118,8 @@ export const ColumnOperationDialog = ({
         return <AddDummyColumnForm {...formProps} />;
       case "addLagLead":
         return <AddLagLeadColumnForm {...formProps} />;
+      case "addSimulation":
+        return <AddSimulationColumnForm {...formProps} />;
       default:
         return null;
     }
