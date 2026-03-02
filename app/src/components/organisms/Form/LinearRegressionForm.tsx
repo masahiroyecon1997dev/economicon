@@ -1,10 +1,19 @@
 import { useForm, useStore } from "@tanstack/react-form";
-import { X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../api/endpoints";
+import {
+  MissingValueHandlingType,
+  NonRobustStandardErrorValue,
+  OLSParamsValue,
+  RobustStandardErrorMethod,
+  type StandardErrorSettings,
+} from "../../../api/model";
 import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../../lib/dialog/message";
+import { cn } from "../../../lib/utils/helpers";
 import { useRegressionResultsStore } from "../../../stores/regressionResults";
 import { useTableListStore } from "../../../stores/tableList";
 import { Select, SelectItem } from "../../atoms/Input/Select";
@@ -21,6 +30,9 @@ const createRegressionSchema = (t: (key: string) => string) =>
     explanatoryVariables: z
       .array(z.string())
       .min(1, t("ValidationMessages.ExplanatoryVariablesRequired")),
+    standardErrorMethod: z.string(),
+    hasConst: z.boolean(),
+    missingValueHandling: z.string(),
   });
 
 type LinearRegressionFormProps = {
@@ -49,6 +61,9 @@ export const LinearRegressionForm = ({
       tableName: selectedTableName,
       dependentVariable: "",
       explanatoryVariables: [] as string[],
+      standardErrorMethod: "nonrobust",
+      hasConst: true,
+      missingValueHandling: MissingValueHandlingType.remove as string,
     },
     validators: {
       onSubmit: createRegressionSchema(t),
@@ -56,12 +71,19 @@ export const LinearRegressionForm = ({
     onSubmit: async ({ value }) => {
       try {
         const api = getEconomiconAPI();
+        const standardError: StandardErrorSettings =
+          value.standardErrorMethod === "robust"
+            ? { method: RobustStandardErrorMethod.robust }
+            : NonRobustStandardErrorValue;
         const regressionResponse = await api.regression({
           tableName: value.tableName,
           dependentVariable: value.dependentVariable,
           explanatoryVariables: value.explanatoryVariables,
-          analysis: { method: "ols" },
-          standardError: { method: "nonrobust" },
+          hasConst: value.hasConst,
+          missingValueHandling:
+            value.missingValueHandling as MissingValueHandlingType,
+          analysis: OLSParamsValue,
+          standardError,
         });
 
         if (regressionResponse.code === "OK" && regressionResponse.result) {
@@ -84,6 +106,7 @@ export const LinearRegressionForm = ({
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   const handleTableSelect = (value: string) => {
     setSelectedTableName(value);
@@ -214,6 +237,126 @@ export const LinearRegressionForm = ({
             </div>
           )}
         </form.Subscribe>
+      </div>
+
+      {/* 詳細オプション（アコーディオン） */}
+      <div className="rounded-xl border border-border-color bg-white shadow-sm">
+        <button
+          type="button"
+          onClick={() => setOptionsOpen((v) => !v)}
+          className="flex w-full items-center justify-between px-3 py-2.5 text-left transition-colors hover:bg-secondary/50"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-bold text-text-heading">
+              {t("LinearRegressionForm.AdvancedOptions")}
+            </span>
+            <form.Subscribe selector={(s) => s.values}>
+              {(values) => (
+                <span className="text-xs text-brand-text-main/60">
+                  {t("LinearRegressionForm.AdvancedOptionsSummary", {
+                    se: t(
+                      `LinearRegressionForm.StandardError_${values.standardErrorMethod}`,
+                    ),
+                    const: values.hasConst
+                      ? t("LinearRegressionForm.HasConstYes")
+                      : t("LinearRegressionForm.HasConstNo"),
+                    missing: t(
+                      `LinearRegressionForm.MissingValue_${values.missingValueHandling}`,
+                    ),
+                  })}
+                </span>
+              )}
+            </form.Subscribe>
+          </div>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 shrink-0 text-brand-text-main/60 transition-transform duration-200",
+              optionsOpen && "rotate-180",
+            )}
+          />
+        </button>
+        {optionsOpen && (
+          <div className="border-t border-border-color px-3 pb-4 pt-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {/* 標準誤差 */}
+              <form.Field name="standardErrorMethod">
+                {(field) => (
+                  <FormField
+                    label={t("LinearRegressionForm.StandardErrorMethod")}
+                    htmlFor="standard-error-method"
+                  >
+                    <Select
+                      id="standard-error-method"
+                      value={field.state.value}
+                      onValueChange={(v) => field.handleChange(v)}
+                      disabled={isSubmitting}
+                    >
+                      <SelectItem value="nonrobust">
+                        {t("LinearRegressionForm.StandardError_nonrobust")}
+                      </SelectItem>
+                      <SelectItem value="robust">
+                        {t("LinearRegressionForm.StandardError_robust")}
+                      </SelectItem>
+                    </Select>
+                  </FormField>
+                )}
+              </form.Field>
+
+              {/* 定数項 */}
+              <form.Field name="hasConst">
+                {(field) => (
+                  <FormField
+                    label={t("LinearRegressionForm.HasConst")}
+                    htmlFor="has-const"
+                  >
+                    <Select
+                      id="has-const"
+                      value={field.state.value ? "true" : "false"}
+                      onValueChange={(v) => field.handleChange(v === "true")}
+                      disabled={isSubmitting}
+                    >
+                      <SelectItem value="true">
+                        {t("LinearRegressionForm.HasConstYes")}
+                      </SelectItem>
+                      <SelectItem value="false">
+                        {t("LinearRegressionForm.HasConstNo")}
+                      </SelectItem>
+                    </Select>
+                  </FormField>
+                )}
+              </form.Field>
+
+              {/* 欠損値処理 */}
+              <form.Field name="missingValueHandling">
+                {(field) => (
+                  <FormField
+                    label={t("LinearRegressionForm.MissingValueHandling")}
+                    htmlFor="missing-value-handling"
+                  >
+                    <Select
+                      id="missing-value-handling"
+                      value={field.state.value}
+                      onValueChange={(v) =>
+                        field.handleChange(v as MissingValueHandlingType)
+                      }
+                      disabled={isSubmitting}
+                    >
+                      <SelectItem value={MissingValueHandlingType.remove}>
+                        {t("LinearRegressionForm.MissingValue_remove")}
+                      </SelectItem>
+                      <SelectItem value={MissingValueHandlingType.ignore}>
+                        {t("LinearRegressionForm.MissingValue_ignore")}
+                      </SelectItem>
+                      <SelectItem value={MissingValueHandlingType.error}>
+                        {t("LinearRegressionForm.MissingValue_error")}
+                      </SelectItem>
+                    </Select>
+                  </FormField>
+                )}
+              </form.Field>
+            </div>
+          </div>
+        )}
       </div>
 
       <ActionButtonBar
