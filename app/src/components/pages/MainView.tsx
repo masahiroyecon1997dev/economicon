@@ -3,6 +3,7 @@ import { Calculation } from "./Calculation";
 import { CreateSimulationDataTable } from "./CreateSimulationDataTable";
 import { CreateTable } from "./CreateTable";
 import { ImportDataFile } from "./ImportDataFile";
+import { JoinTable } from "./JoinTable";
 import { Regression } from "./RegressionView";
 import { SaveData } from "./SaveData";
 import { Table } from "./Table";
@@ -16,6 +17,8 @@ export const MainView = () => {
         return <ImportDataFile />;
       case "CreateTable":
         return <CreateTable />;
+      case "JoinTable":
+        return <JoinTable />;
       case "LinearRegressionForm":
         return <Regression />;
       case "CreateSimulationDataTable":

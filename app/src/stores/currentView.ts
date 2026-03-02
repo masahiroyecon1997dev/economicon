@@ -3,6 +3,7 @@ import { create } from "zustand";
 export type CurrentPageValue =
   | "ImportDataFile"
   | "CreateTable"
+  | "JoinTable"
   | "LinearRegressionForm"
   | "CreateSimulationDataTable"
   | "CalculationView"
