@@ -358,7 +358,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
         <div className="flex items-center justify-center py-12 text-sm text-gray-400">
           <div className="flex items-center gap-2">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-brand-primary" />
-            データを読み込んでいます
+             {t("Table.LoadingData")}
           </div>
         </div>
       </div>
