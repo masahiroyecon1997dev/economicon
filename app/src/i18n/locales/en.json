@@ -7,6 +7,8 @@
     "UnexpectedError": "An unexpected error occurred.",
     "Table": "Table",
     "NoColumnsAvailable": "No columns available",
+    "FilterColumns": "Filter columns...",
+    "NoColumnsMatchFilter": "No columns match the filter",
     "OpenSideMenu": "Open Side Menu",
     "CloseSideMenu": "Close Side Menu",
     "Constant": "Constant",

@@ -1,4 +1,5 @@
 import { useForm, useStore } from "@tanstack/react-form";
+import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../api/endpoints";
@@ -190,9 +191,22 @@ export const LinearRegressionForm = ({
                   explanatoryVariables.map((variable, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center rounded-md bg-brand-accent px-2 py-1 text-xs text-white"
+                      className="inline-flex items-center gap-1 rounded-md bg-brand-accent px-2 py-1 text-xs text-white"
                     >
-                      {variable}
+                      <span className="max-w-30 truncate">{variable}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          form.setFieldValue(
+                            "explanatoryVariables",
+                            explanatoryVariables.filter((v) => v !== variable),
+                          )
+                        }
+                        className="rounded-full p-0.5 hover:bg-white/20 focus:outline-none focus:ring-1 focus:ring-white"
+                        aria-label={`Remove ${variable}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
                     </span>
                   ))
                 )}
