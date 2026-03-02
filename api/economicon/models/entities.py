@@ -1,7 +1,6 @@
 from typing import Annotated, Literal
 
-from pydantic import ConfigDict, Field
-from pydantic.alias_generators import to_camel
+from pydantic import Field
 
 from economicon.models.common import BaseRequest, BinaryChoiceRegularization
 from economicon.models.enums import (
@@ -51,7 +50,7 @@ class RegularizedRegressionParams(BaseRequest):
         le=10000,
         alias="bootstrapIterations",
         description="ブートストラップ法のイテレーション回数",
-    )    # Eco-Note C: 在様固定。None 指定時は推定のたびに結果が変わる
+    )  # Eco-Note C: 在様固定。None 指定時は推定のたびに結果が変わる
     random_state: int | None = Field(
         default=None,
         alias="randomState",
@@ -82,11 +81,6 @@ class BinaryChoiceRegressionParams(BaseRequest):
 
 
 class TobitParams(BaseRequest):
-    model_config = ConfigDict(
-        alias_generator=to_camel,
-        populate_by_name=True,
-    )
-
     method: Literal[RegressionMethodType.TOBIT]
     # 打ち切り値を追加
     left_censoring_limit: float | None = Field(
