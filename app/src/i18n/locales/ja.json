@@ -9,6 +9,8 @@
     "ColumnSuffix": "列目",
     "Table": "テーブル",
     "NoColumnsAvailable": "利用可能なカラムがありません",
+    "FilterColumns": "列を絞り込む...",
+    "NoColumnsMatchFilter": "一致する列がありません",
     "OpenSideMenu": "サイドメニューを開く",
     "CloseSideMenu": "サイドメニューを閉じる",
     "Constant": "定数",
