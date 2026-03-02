@@ -386,36 +386,64 @@ try {
     Pop-Location
 }
 
-# ── 5. Rust クレートライセンス（cargo-about） ─────────────────────────────────
-$cargoAboutAvailable = $false
+# ── 5. Rust クレートライセンス（cargo-license） ──────────────────────────────
+$cargoLicenseAvailable = $false
 try {
-    $null = cargo about --version 2>&1
-    $cargoAboutAvailable = ($LASTEXITCODE -eq 0)
+    $null = cargo license --version 2>&1
+    $cargoLicenseAvailable = ($LASTEXITCODE -eq 0)
 } catch {}
 
-if ($cargoAboutAvailable) {
-    Push-Location $APP_DIR
+if ($cargoLicenseAvailable) {
+    Push-Location $TAURI_DIR
     try {
-        $rustOut   = Join-Path $LicensesDir "04_RUST_CRATES_LICENSES.txt"
-        $aboutToml = Join-Path $SCRIPT_DIR "about.toml"
-        $aboutHbs  = Join-Path $SCRIPT_DIR "about.hbs"
-        cargo about generate --config $aboutToml $aboutHbs 2>&1 | `
-            Out-File -FilePath $rustOut -Encoding UTF8
-        Write-Success "Rust クレートライセンス: 04_RUST_CRATES_LICENSES.txt"
+        $rustOut     = Join-Path $LicensesDir "04_RUST_CRATES_LICENSES.txt"
+        $rustJsonTmp = Join-Path $LicensesDir "04_RUST_CRATES_LICENSES.json"
+
+        # JSON 形式で収集（--avoid-dev: dev-dependencies を除外）
+        cargo license --json 2>&1 | Out-File -FilePath $rustJsonTmp -Encoding UTF8
+
+        # JSON → 人間が読めるテキストに変換
+        $crates = Get-Content $rustJsonTmp -Raw | ConvertFrom-Json
+        $sbRust = [System.Text.StringBuilder]::new()
+        $null = $sbRust.AppendLine("================================================================================")
+        $null = $sbRust.AppendLine("  Rust Crate Licenses - Economicon")
+        $null = $sbRust.AppendLine("================================================================================")
+        $null = $sbRust.AppendLine("このファイルは cargo-license によって自動生成されました。")
+        $null = $sbRust.AppendLine("Economicon が依存する Rust クレートのライセンス情報を含みます。")
+        $null = $sbRust.AppendLine("")
+        $null = $sbRust.AppendLine("--------------------------------------------------------------------------------")
+        $null = $sbRust.AppendLine(("{0,-40} {1,-12} {2}" -f "クレート名", "バージョン", "ライセンス"))
+        $null = $sbRust.AppendLine("--------------------------------------------------------------------------------")
+
+        foreach ($c in ($crates | Sort-Object name)) {
+            $repo = if ($c.repository) { "  <$($c.repository)>" } else { "" }
+            $null = $sbRust.AppendLine(("{0,-40} {1,-12} {2}{3}" -f $c.name, $c.version, $c.license, $repo))
+        }
+
+        [System.IO.File]::WriteAllText(
+            $rustOut,
+            $sbRust.ToString(),
+            [System.Text.Encoding]::UTF8
+        )
+
+        # 中間 JSON を削除
+        Remove-Item $rustJsonTmp -Force
+
+        Write-Success "Rust クレートライセンス: 04_RUST_CRATES_LICENSES.txt ($($crates.Count) クレート)"
     } catch {
-        Write-Warn "cargo about の実行に失敗しました: $_"
+        Write-Warn "cargo license の実行に失敗しました: $_"
     } finally {
         Pop-Location
     }
 } else {
-    Write-Warn "cargo-about が見つかりません。Rust クレートのライセンス収集をスキップします。"
-    Write-Warn "  インストール: cargo install cargo-about"
+    Write-Warn "cargo-license が見つかりません。Rust クレートのライセンス収集をスキップします。"
+    Write-Warn "  インストール: cargo install cargo-license"
     @"
 Rust クレートのライセンス情報は以下のコマンドで収集できます:
 
-  cargo install cargo-about
-  cd app
-  cargo about generate --config ..\packaging\about.toml ..\packaging\about.hbs > licenses\04_RUST_CRATES_LICENSES.txt
+  cargo install cargo-license
+  cd app\src-tauri
+  cargo license --json > ..\packaging\04_RUST_CRATES_LICENSES.json
 "@ | Out-File -FilePath (Join-Path $LicensesDir "04_RUST_CRATES_LICENSES_placeholder.txt") -Encoding UTF8
 }
 
