@@ -10,6 +10,7 @@ import { showMessageDialog } from "../../../lib/dialog/message";
 import { cn } from "../../../lib/utils/helpers";
 import { useRegressionResultsStore } from "../../../stores/regressionResults";
 import { useTableListStore } from "../../../stores/tableList";
+import type { LinearRegressionResultType } from "../../../types/commonTypes";
 import { Select, SelectItem } from "../../atoms/Input/Select";
 import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
 import { VariableSelectorField } from "../../molecules/Field/VariableSelectorField";
@@ -80,8 +81,10 @@ export const LinearRegressionForm = ({
           const { resultId } = regressionResponse.result;
           const resultResponse = await api.getAnalysisResult(resultId);
           if (resultResponse.code === "OK" && resultResponse.result) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            addResult(resultResponse.result.result as any);
+            addResult(
+              resultResponse.result.result
+                .regressionOutput as LinearRegressionResultType,
+            );
             onAnalysisComplete?.(resultsCount);
             return;
           }

@@ -1,3 +1,4 @@
+import type { CurrentPageValue } from "../../stores/currentView";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { Calculation } from "./Calculation";
 import { CreateSimulationDataTable } from "./CreateSimulationDataTable";
@@ -10,33 +11,21 @@ import { SaveData } from "./SaveData";
 import { Table } from "./Table";
 import { UnionTable } from "./UnionTable";
 
+const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
+  ImportDataFile: <ImportDataFile />,
+  CreateTable: <CreateTable />,
+  JoinTable: <JoinTable />,
+  UnionTable: <UnionTable />,
+  DescriptiveStatistics: <DescriptiveStatistics />,
+  LinearRegressionForm: <Regression />,
+  CreateSimulationDataTable: <CreateSimulationDataTable />,
+  CalculationView: <Calculation />,
+  SaveData: <SaveData />,
+  DataPreview: <Table />,
+};
+
 export const MainView = () => {
   const currentView = useCurrentPageStore((state) => state.currentView);
-
-  const renderContent = () => {
-    switch (currentView) {
-      case "ImportDataFile":
-        return <ImportDataFile />;
-      case "CreateTable":
-        return <CreateTable />;
-      case "JoinTable":
-        return <JoinTable />;
-      case "UnionTable":
-        return <UnionTable />;
-      case "DescriptiveStatistics":
-        return <DescriptiveStatistics />;
-      case "LinearRegressionForm":
-        return <Regression />;
-      case "CreateSimulationDataTable":
-        return <CreateSimulationDataTable />;
-      case "CalculationView":
-        return <Calculation />;
-      case "SaveData":
-        return <SaveData />;
-      default:
-        return <Table />;
-    }
-  };
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden h-full bg-brand-secondary">
@@ -47,7 +36,7 @@ export const MainView = () => {
             : "flex-1 overflow-auto p-4"
         }
       >
-        {renderContent()}
+        {PAGE_COMPONENTS[currentView]}
       </div>
     </main>
   );

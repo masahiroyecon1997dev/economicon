@@ -21,7 +21,6 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type ChangeEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -75,60 +74,15 @@ const SkeletonCell = () => (
 );
 
 // ---------------------------------------------------------------------------
-// 編集可能セル
+// 読み取り専用セル
 // ---------------------------------------------------------------------------
-const CellContent = ({
-  value,
-  onEdit,
-}: {
-  value: TableDataCellType;
-  onEdit: () => void;
-}) => (
-  <div className="flex items-center justify-between">
-    <span onClick={onEdit}>{String(value ?? "")}</span>
+const ReadOnlyCell = ({ value }: { value: TableDataCellType }) => (
+  <div className="px-3 py-0.5 overflow-hidden">
+    <div className="truncate text-xs text-gray-700 dark:text-gray-300">
+      {String(value ?? "")}
+    </div>
   </div>
 );
-
-const TableInputText = ({
-  value,
-  onChange,
-  onBlur,
-  className,
-}: {
-  value: TableDataCellType;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onBlur: () => void;
-  className?: string;
-}) => (
-  <input
-    type="text"
-    className={cn("w-full rounded border p-1", className)}
-    value={value?.toString() ?? ""}
-    onChange={onChange}
-    onBlur={onBlur}
-    autoFocus
-  />
-);
-
-const EditableCell = ({ value }: { value: TableDataCellType }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [cellValue, setCellValue] = useState<TableDataCellType>(value);
-  return (
-    <div className="px-3 py-0.5 overflow-hidden">
-      {isEditing ? (
-        <TableInputText
-          value={cellValue}
-          onChange={(e) => setCellValue(e.target.value)}
-          onBlur={() => setIsEditing(false)}
-        />
-      ) : (
-        <div className="truncate text-xs text-gray-700">
-          <CellContent value={cellValue} onEdit={() => setIsEditing(true)} />
-        </div>
-      )}
-    </div>
-  );
-};
 
 // ---------------------------------------------------------------------------
 // メインコンポーネント
@@ -271,7 +225,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
           const rowData = getRowData(row.index);
           if (!rowData) return <SkeletonCell />;
           return (
-            <EditableCell value={rowData[column.name] as TableDataCellType} />
+            <ReadOnlyCell value={rowData[column.name] as TableDataCellType} />
           );
         },
       });
@@ -458,13 +412,13 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
       {isLoading && (
         <div className="fixed bottom-4 right-4 z-50 flex items-center gap-1.5 rounded-full bg-brand-primary/90 px-3 py-1.5 text-xs font-medium text-white shadow-md">
           <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-          読み込み中
+          {t("Table.FetchingChunk")}
         </div>
       )}
 
       {error && (
         <div className="fixed bottom-4 right-4 z-50 rounded-full bg-red-500 px-3 py-1.5 text-xs font-medium text-white shadow-md">
-          エラー: {error.message}
+          {t("Table.FetchError", { message: error.message })}
         </div>
       )}
 
