@@ -40,11 +40,38 @@ export const useTableInfosStore = create<TableInfosStore>((set, get) => ({
     }),
 
   removeTableInfo: (tableName) =>
-    set((state) => ({
-      tableInfos: state.tableInfos.filter(
+    set((state) => {
+      const index = state.tableInfos.findIndex(
+        (info) => info.tableName === tableName,
+      );
+      if (index === -1) return {};
+
+      // フロント上のチャンクキャッシュも破棄する
+      useTableChunkStore.getState().clearTable(tableName);
+
+      const filtered = state.tableInfos.filter(
         (info) => info.tableName !== tableName,
-      ),
-    })),
+      );
+      const wasActive = state.tableInfos[index].isActive;
+
+      if (!wasActive || filtered.length === 0) {
+        return {
+          tableInfos: filtered,
+          activeTableName: wasActive ? null : state.activeTableName,
+        };
+      }
+
+      // 削除したタブがアクティブだった場合、隣のタブをアクティブにする
+      const nextIndex = Math.min(index, filtered.length - 1);
+      const nextTable = filtered[nextIndex];
+      return {
+        tableInfos: filtered.map((info) => ({
+          ...info,
+          isActive: info.tableName === nextTable.tableName,
+        })),
+        activeTableName: nextTable.tableName,
+      };
+    }),
 
   updateTableInfo: (tableName, tableInfo) =>
     set((state) => ({
