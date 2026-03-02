@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/utils/helpers";
 import type { ColumnType } from "../../../types/commonTypes";
@@ -51,6 +52,22 @@ export const VariableSelectorField = ({
     }
   };
 
+  const [filterText, setFilterText] = useState("");
+  const lowerFilter = filterText.toLowerCase();
+  const matchesFilter = (col: ColumnType) =>
+    col.name.toLowerCase().includes(lowerFilter);
+  const visibleColumns =
+    mode === "multiple"
+      ? [
+          // 選択済だがフィルタで非表示になる項目を先頭にピン留め
+          ...columns.filter(
+            (col) => selectedValues.includes(col.name) && !matchesFilter(col),
+          ),
+          // フィルタ一致する項目
+          ...columns.filter(matchesFilter),
+        ]
+      : columns.filter(matchesFilter);
+
   return (
     <div className={cn("flex flex-col", className)}>
       <label className="mb-1.5 block text-xs font-medium text-brand-text-main">
@@ -59,28 +76,42 @@ export const VariableSelectorField = ({
       {description && (
         <p className="mb-2 text-xs text-brand-text-main/60">{description}</p>
       )}
+      {columns.length > 0 && (
+        <input
+          type="text"
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+          placeholder={t("Common.FilterColumns")}
+          disabled={disabled}
+          className="mb-1.5 w-full rounded-md border border-border-color bg-white px-2 py-1 text-xs placeholder:text-brand-text-main/40 focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      )}
       <div
         className={cn(
           "h-64 overflow-y-auto rounded-lg border p-2",
           error
             ? "border-red-500 bg-red-50"
-            : "border-border-color bg-secondary"
+            : "border-border-color bg-secondary",
         )}
       >
         {columns.length === 0 ? (
           <p className="p-2 text-xs text-brand-text-main/60">
             {t("Common.NoColumnsAvailable")}
           </p>
+        ) : visibleColumns.length === 0 ? (
+          <p className="p-2 text-xs text-brand-text-main/60">
+            {t("Common.NoColumnsMatchFilter")}
+          </p>
         ) : (
           <ul className="flex flex-col gap-1">
-            {columns.map((column, index) => (
+            {visibleColumns.map((column, index) => (
               <li key={index}>
                 <label
                   className={cn(
                     "flex w-full cursor-pointer items-center gap-3 rounded-md p-2",
                     disabled
                       ? "cursor-not-allowed opacity-50"
-                      : "hover:bg-white"
+                      : "hover:bg-white",
                   )}
                 >
                   {mode === "single" ? (

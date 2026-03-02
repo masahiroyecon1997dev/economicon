@@ -23,6 +23,7 @@ import React, {
   useState,
   type ChangeEvent,
 } from "react";
+import { useTranslation } from "react-i18next";
 
 import { getEconomiconAPI } from "../../../api/endpoints";
 import { useVirtualTableData } from "../../../hooks/useVirtualTableData";
@@ -135,6 +136,7 @@ const EditableCell = ({ value }: { value: TableDataCellType }) => {
 export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   // useReactTable が返す関数はメモ化不可のため React Compiler をスキップ
   "use no memo";
+  const { t } = useTranslation();
 
   const { tableName, columnList, totalRows } = tableInfo;
   const parentRef = useRef<HTMLDivElement>(null);
@@ -358,7 +360,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
         <div className="flex items-center justify-center py-12 text-sm text-gray-400">
           <div className="flex items-center gap-2">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-brand-primary" />
-             {t("Table.LoadingData")}
+            {t("Table.LoadingData")}
           </div>
         </div>
       </div>
