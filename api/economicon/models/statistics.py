@@ -17,7 +17,7 @@ from economicon.models.enums import (
 from economicon.models.types import ColumnName, TableName
 
 # ---------------------------------------------------------------------------
-# バリデーション関数
+# 信頼区間計算
 # ---------------------------------------------------------------------------
 
 
@@ -40,45 +40,6 @@ def _coerce_statistic_type(
                 {"expected": valid},
             ) from None
     return v
-
-
-def _coerce_correlation_method(v: Any) -> CorrelationMethod:
-    """JSON文字列をCorrelationMethodに変換するBeforeValidator"""
-    if isinstance(v, CorrelationMethod):
-        return v
-    if isinstance(v, str):
-        try:
-            return CorrelationMethod(v)
-        except ValueError:
-            valid = ", ".join(e.value for e in CorrelationMethod)
-            raise PydanticCustomError(
-                "literal_error",
-                "method must be one of: {expected}",
-                {"expected": valid},
-            ) from None
-    return v
-
-
-def _coerce_missing_handling(v: Any) -> MissingHandlingMethod:
-    """JSON文字列をMissingHandlingMethodに変換するBeforeValidator"""
-    if isinstance(v, MissingHandlingMethod):
-        return v
-    if isinstance(v, str):
-        try:
-            return MissingHandlingMethod(v)
-        except ValueError:
-            valid = ", ".join(e.value for e in MissingHandlingMethod)
-            raise PydanticCustomError(
-                "literal_error",
-                "missingHandling must be one of: {expected}",
-                {"expected": valid},
-            ) from None
-    return v
-
-
-# ---------------------------------------------------------------------------
-# リクエストボディ
-# ---------------------------------------------------------------------------
 
 
 class ConfidenceIntervalRequestBody(BaseRequest):
@@ -117,6 +78,62 @@ class ConfidenceIntervalRequestBody(BaseRequest):
             "variance: 分散、standard_deviation: 標準偏差）",
         ),
     ]
+
+
+class StatisticValue(BaseResult):
+    """統計量の種別と値"""
+
+    type: str = Field(
+        title="Type",
+        description="統計量のタイプ（mean, median 等）",
+    )
+    value: Any = Field(
+        title="Value",
+        description="統計量の計算値",
+    )
+
+
+class ConfidenceIntervalBounds(BaseResult):
+    """信頼区間の下限・上限"""
+
+    lower: float = Field(
+        title="Lower",
+        description="信頼区間の下限値",
+    )
+    upper: float = Field(
+        title="Upper",
+        description="信頼区間の上限値",
+    )
+
+
+class ConfidenceIntervalResult(BaseResult):
+    """信頼区間計算レスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="計算対象のテーブル名",
+    )
+    column_name: str = Field(
+        title="Column Name",
+        description="計算対象のカラム名",
+    )
+    statistic: StatisticValue = Field(
+        title="Statistic",
+        description="計算した統計量のタイプと値",
+    )
+    confidence_interval: ConfidenceIntervalBounds = Field(
+        title="Confidence Interval",
+        description="信頼区間の下限値と上限値",
+    )
+    confidence_level: float = Field(
+        title="Confidence Level",
+        description="計算に使用した信頼水準",
+    )
+
+
+# ---------------------------------------------------------------------------
+# 記述統計
+# ---------------------------------------------------------------------------
 
 
 class DescriptiveStatisticsRequestBody(BaseRequest):
@@ -176,62 +193,6 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
         return result
 
 
-# ---------------------------------------------------------------------------
-# レスポンス（Result）
-# ---------------------------------------------------------------------------
-
-
-class StatisticValue(BaseResult):
-    """統計量の種別と値"""
-
-    type: str = Field(
-        title="Type",
-        description="統計量のタイプ（mean, median 等）",
-    )
-    value: Any = Field(
-        title="Value",
-        description="統計量の計算値",
-    )
-
-
-class ConfidenceIntervalBounds(BaseResult):
-    """信頼区間の下限・上限"""
-
-    lower: float = Field(
-        title="Lower",
-        description="信頼区間の下限値",
-    )
-    upper: float = Field(
-        title="Upper",
-        description="信頼区間の上限値",
-    )
-
-
-class ConfidenceIntervalResult(BaseResult):
-    """信頼区間計算レスポンス"""
-
-    table_name: str = Field(
-        title="Table Name",
-        description="計算対象のテーブル名",
-    )
-    column_name: str = Field(
-        title="Column Name",
-        description="計算対象のカラム名",
-    )
-    statistic: StatisticValue = Field(
-        title="Statistic",
-        description="計算した統計量のタイプと値",
-    )
-    confidence_interval: ConfidenceIntervalBounds = Field(
-        title="Confidence Interval",
-        description="信頼区間の下限値と上限値",
-    )
-    confidence_level: float = Field(
-        title="Confidence Level",
-        description="計算に使用した信頼水準",
-    )
-
-
 class DescriptiveStatisticsResult(BaseResult):
     """記述統計レスポンス"""
 
@@ -239,15 +200,52 @@ class DescriptiveStatisticsResult(BaseResult):
         title="Table Name",
         description="計算対象のテーブル名",
     )
-    statistics: Any = Field(
+    statistics: dict[str, dict[str, float | None]] = Field(
         title="Statistics",
-        description="記述統計の計算結果。カラム名と統計量名をキーに持つ辞書型データ。",
+        description=(
+            "記述統計の計算結果。"
+            "カラム名をキー、{統計量名: 値} を値とする辞書型データ。"
+        ),
     )
 
 
 # ---------------------------------------------------------------------------
 # 相関係数テーブル作成
 # ---------------------------------------------------------------------------
+
+
+def _coerce_correlation_method(v: Any) -> CorrelationMethod:
+    """JSON文字列をCorrelationMethodに変換するBeforeValidator"""
+    if isinstance(v, CorrelationMethod):
+        return v
+    if isinstance(v, str):
+        try:
+            return CorrelationMethod(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in CorrelationMethod)
+            raise PydanticCustomError(
+                "literal_error",
+                "method must be one of: {expected}",
+                {"expected": valid},
+            ) from None
+    return v
+
+
+def _coerce_missing_handling(v: Any) -> MissingHandlingMethod:
+    """JSON文字列をMissingHandlingMethodに変換するBeforeValidator"""
+    if isinstance(v, MissingHandlingMethod):
+        return v
+    if isinstance(v, str):
+        try:
+            return MissingHandlingMethod(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in MissingHandlingMethod)
+            raise PydanticCustomError(
+                "literal_error",
+                "missingHandling must be one of: {expected}",
+                {"expected": valid},
+            ) from None
+    return v
 
 
 class CreateCorrelationTableRequestBody(BaseRequest):
@@ -516,11 +514,6 @@ class StatisticalTestRequestBody(BaseRequest):
                         f" but got {n}"
                     )
         return self
-
-
-# ---------------------------------------------------------------------------
-# 統計検定レスポンス
-# ---------------------------------------------------------------------------
 
 
 class StatisticalTestResult(BaseResult):
