@@ -302,7 +302,7 @@
     "NotSet": "未設定",
     "TableCreationFailed": "テーブルの作成に失敗しました。",
     "TableCreationError": "テーブル作成中にエラーが発生しました。",
-    "ColumnHasErrors": "一部の列設定にエラーがあります。内蠃を確認してください。",
+    "ColumnHasErrors": "一部の列設定にエラーがあります。内容を確認してください。",
     "HasErrors": "入力エラーあり",
     "CannotRemoveLastColumn": "列は少なくとも1つ必要です。"
   },
