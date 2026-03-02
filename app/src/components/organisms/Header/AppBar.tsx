@@ -208,7 +208,10 @@ export const AppBar = () => {
         {
           id: "union-table",
           label: t("HeaderMenu.UnionTable"),
-          handleSelect: () => {},
+          handleSelect: () => {
+            setCurrentView("UnionTable");
+            close();
+          },
         },
       ],
     },

@@ -4,6 +4,7 @@ export type CurrentPageValue =
   | "ImportDataFile"
   | "CreateTable"
   | "JoinTable"
+  | "UnionTable"
   | "LinearRegressionForm"
   | "CreateSimulationDataTable"
   | "CalculationView"
