@@ -156,7 +156,19 @@
     "SelectedExplanatoryVariables": "選択済み説明変数",
     "NoVariablesSelected": "未選択",
     "Processing": "処理中...",
-    "RunAnalysis": "分析実行"
+    "RunAnalysis": "分析実行",
+    "AdvancedOptions": "詳細オプション",
+    "AdvancedOptionsSummary": "標準誤差: {{se}} | 定数項: {{const}} | 欠損値: {{missing}}",
+    "StandardErrorMethod": "標準誤差の計算方法",
+    "StandardError_nonrobust": "通常 (OLS)",
+    "StandardError_robust": "ロバスト (HC)",
+    "HasConst": "定数項",
+    "HasConstYes": "あり",
+    "HasConstNo": "なし",
+    "MissingValueHandling": "欠損値の処理",
+    "MissingValue_remove": "除外（リストワイズ）",
+    "MissingValue_ignore": "そのまま使用",
+    "MissingValue_error": "エラーとして扱う"
   },
   "RegressionResult": {
     "AnalysisSummary": "分析概要",
