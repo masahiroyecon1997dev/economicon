@@ -87,6 +87,9 @@
     "MenuDuplicateTable": "テーブルを複製",
     "MenuDeleteTable": "テーブルを削除"
   },
+  "Table": {
+    "LoadingData": "データを読み込んでいます"
+  },
   "ImportDataFileView": {
     "Title": "ファイルをインポート",
     "SelectFile": "ファイルを選択",
