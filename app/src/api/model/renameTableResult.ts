@@ -8,7 +8,7 @@
 /**
  * テーブル名変更レスポンス
  */
-export interface RenameTableResult {
+export type RenameTableResult = {
   /** 操作対象または生成されたテーブル名 */
   tableName: string;
-}
+};

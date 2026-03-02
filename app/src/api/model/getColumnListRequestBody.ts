@@ -8,7 +8,7 @@
 /**
  * カラムリスト取得リクエスト
  */
-export interface GetColumnListRequestBody {
+export type GetColumnListRequestBody = {
   /**
    * 操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -16,4 +16,4 @@ export interface GetColumnListRequestBody {
   tableName: string;
   /** 数値カラムのみ取得するかどうか。Trueを指定すると、数値カラムのみが返されます。Falseを指定すると、全てのカラムが返されます。 */
   isNumberOnly?: boolean;
-}
+};

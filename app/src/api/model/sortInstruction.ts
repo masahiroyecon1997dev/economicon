@@ -5,11 +5,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface SortInstruction {
+export type SortInstruction = {
   /**
    * カラム名
    * @minLength 1
    */
   columnName: string;
   ascending: boolean;
-}
+};

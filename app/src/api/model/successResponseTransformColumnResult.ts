@@ -6,9 +6,9 @@
  */
 import type { TransformColumnResult } from './transformColumnResult';
 
-export interface SuccessResponseTransformColumnResult {
+export type SuccessResponseTransformColumnResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: TransformColumnResult;
-}
+};

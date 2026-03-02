@@ -6,9 +6,9 @@
  */
 import type { SortColumnsResult } from './sortColumnsResult';
 
-export interface SuccessResponseSortColumnsResult {
+export type SuccessResponseSortColumnsResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: SortColumnsResult;
-}
+};

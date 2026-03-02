@@ -9,7 +9,7 @@ import type { CastColumnRequestBodyTargetType } from './castColumnRequestBodyTar
 /**
  * 列型変換リクエスト
  */
-export interface CastColumnRequestBody {
+export type CastColumnRequestBody = {
   /**
    * 操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -42,4 +42,4 @@ export interface CastColumnRequestBody {
   datetimeFormat?: string | null;
   /** True なら変換失敗時に 400 エラーを返す。False なら変換失敗した値を null にして処理を続行する。 */
   strict?: boolean;
-}
+};

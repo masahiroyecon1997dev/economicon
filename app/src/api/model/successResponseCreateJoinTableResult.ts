@@ -6,9 +6,9 @@
  */
 import type { CreateJoinTableResult } from './createJoinTableResult';
 
-export interface SuccessResponseCreateJoinTableResult {
+export type SuccessResponseCreateJoinTableResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: CreateJoinTableResult;
-}
+};

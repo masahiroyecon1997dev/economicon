@@ -8,7 +8,7 @@
 /**
  * ラグ・リードカラム追加リクエスト
  */
-export interface AddLagLeadColumnRequestBody {
+export type AddLagLeadColumnRequestBody = {
   /**
    * 操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -35,4 +35,4 @@ export interface AddLagLeadColumnRequestBody {
   periods: number;
   /** ラグ・リードのグループ化に使用するカラムのリスト。指定したカラムの組み合わせごとにラグ・リードが計算されます。例えば、都市ごとにラグ・リードを計算したい場合は、['city']や['都市']を指定してください。複数カラムを指定することもできます。既存カラム名から指定してください。 */
   groupColumns?: string[];
-}
+};

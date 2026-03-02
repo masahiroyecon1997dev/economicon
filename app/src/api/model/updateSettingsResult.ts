@@ -8,7 +8,7 @@
 /**
  * アプリケーション設定更新レスポンス（更新後の全設定を返す）
  */
-export interface UpdateSettingsResult {
+export type UpdateSettingsResult = {
   /** アプリケーションの表示言語（ja: 日本語, en: 英語） */
   language: string;
   /** 最後に開いたフォルダパス */
@@ -19,4 +19,4 @@ export interface UpdateSettingsResult {
   encoding: string;
   /** ログファイルの出力先パス */
   logPath: string;
-}
+};

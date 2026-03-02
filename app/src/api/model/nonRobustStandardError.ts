@@ -6,7 +6,6 @@
  */
 import { NonRobustStandardErrorMethod } from './nonRobustStandardErrorMethod';
 
-export const NonRobustStandardErrorValue = {
-  method: NonRobustStandardErrorMethod,
-} as const;
-export type NonRobustStandardError = typeof NonRobustStandardErrorValue;
+export type NonRobustStandardError = {
+  method: NonRobustStandardErrorMethod;
+};

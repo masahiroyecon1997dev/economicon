@@ -8,7 +8,7 @@
 /**
  * 二項分布のパラメータ
  */
-export interface BinomialParams {
+export type BinomialParams = {
   /** 分布の種類 */
   type: 'binomial';
   /**
@@ -22,4 +22,4 @@ export interface BinomialParams {
    * @exclusiveMinimum 0
    */
   p: number;
-}
+};

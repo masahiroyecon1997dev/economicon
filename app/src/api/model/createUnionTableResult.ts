@@ -8,7 +8,7 @@
 /**
  * ユニオンテーブル作成レスポンス
  */
-export interface CreateUnionTableResult {
+export type CreateUnionTableResult = {
   /** 操作対象または生成されたテーブル名 */
   tableName: string;
-}
+};

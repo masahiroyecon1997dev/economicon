@@ -6,9 +6,9 @@
  */
 import type { GetSettingsResult } from './getSettingsResult';
 
-export interface SuccessResponseGetSettingsResult {
+export type SuccessResponseGetSettingsResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: GetSettingsResult;
-}
+};

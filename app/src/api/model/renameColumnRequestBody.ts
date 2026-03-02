@@ -8,7 +8,7 @@
 /**
  * カラム名変更リクエスト
  */
-export interface RenameColumnRequestBody {
+export type RenameColumnRequestBody = {
   /**
    * カラム名を変更するテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -26,4 +26,4 @@ export interface RenameColumnRequestBody {
    * @pattern ^[^\x00-\x1f\x7f]+$
    */
   newColumnName: string;
-}
+};

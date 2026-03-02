@@ -8,9 +8,9 @@
 /**
  * 列型変換レスポンス
  */
-export interface CastColumnResult {
+export type CastColumnResult = {
   /** 型変換カラムを追加したテーブル名 */
   tableName: string;
   /** 追加した型変換カラム名 */
   columnName: string;
-}
+};

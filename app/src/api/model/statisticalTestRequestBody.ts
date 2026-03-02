@@ -11,7 +11,7 @@ import type { StatisticalTestType } from './statisticalTestType';
 /**
  * 統計検定リクエスト
  */
-export interface StatisticalTestRequestBody {
+export type StatisticalTestRequestBody = {
   /** 実行する統計検定の種類。t-test: t 検定、z-test: z 検定、f-test: F 検定 / ANOVA */
   testType: StatisticalTestType;
   /**
@@ -21,4 +21,4 @@ export interface StatisticalTestRequestBody {
   samples: SampleInput[];
   /** 検定オプション（対立仮説・等分散仮定・対応の有無など） */
   options?: StatisticalTestOptions;
-}
+};

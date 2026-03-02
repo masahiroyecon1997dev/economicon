@@ -9,7 +9,7 @@ import type { JoinType } from './joinType';
 /**
  * 結合テーブル作成リクエスト
  */
-export interface CreateJoinTableRequestBody {
+export type CreateJoinTableRequestBody = {
   /**
    * 結合後に作成される新しいテーブル名。ワークスペース内に存在しない名前を指定してください。
    * @minLength 1
@@ -39,4 +39,4 @@ export interface CreateJoinTableRequestBody {
   rightKeyColumnNames: string[];
   /** 結合タイプ（inner: 内部結合、left: 左外部結合、right: 右外部結合、full: 完全外部結合） */
   joinType?: JoinType;
-}
+};

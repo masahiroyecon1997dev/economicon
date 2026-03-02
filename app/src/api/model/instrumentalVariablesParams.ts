@@ -8,11 +8,11 @@ import type { InstrumentalVariablesParamsGmmWeightMatrix } from './instrumentalV
 import type { InstrumentalVariablesParamsIvMethod } from './instrumentalVariablesParamsIvMethod';
 import { InstrumentalVariablesParamsMethod } from './instrumentalVariablesParamsMethod';
 
-export interface InstrumentalVariablesParams {
+export type InstrumentalVariablesParams = {
   method: InstrumentalVariablesParamsMethod;
   /** 推定アルゴリズム。過剰識別かつ異分散がある場合はGMMを推奨 */
   ivMethod?: InstrumentalVariablesParamsIvMethod;
   instrumentalVariables: string[];
   endogenousVariables: string[];
   gmmWeightMatrix?: InstrumentalVariablesParamsGmmWeightMatrix;
-}
+};

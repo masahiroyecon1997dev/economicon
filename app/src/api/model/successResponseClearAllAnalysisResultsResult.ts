@@ -6,9 +6,9 @@
  */
 import type { ClearAllAnalysisResultsResult } from './clearAllAnalysisResultsResult';
 
-export interface SuccessResponseClearAllAnalysisResultsResult {
+export type SuccessResponseClearAllAnalysisResultsResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: ClearAllAnalysisResultsResult;
-}
+};

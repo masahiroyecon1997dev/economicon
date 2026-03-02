@@ -8,7 +8,7 @@
 /**
  * ベルヌーイ分布のパラメータ
  */
-export interface BernoulliParams {
+export type BernoulliParams = {
   /** 分布の種類 */
   type: 'bernoulli';
   /**
@@ -17,4 +17,4 @@ export interface BernoulliParams {
    * @exclusiveMinimum 0
    */
   p: number;
-}
+};

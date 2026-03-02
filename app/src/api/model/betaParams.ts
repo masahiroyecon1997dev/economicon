@@ -8,7 +8,7 @@
 /**
  * ベータ分布のパラメータ
  */
-export interface BetaParams {
+export type BetaParams = {
   /** 分布の種類 */
   type: 'beta';
   /**
@@ -21,4 +21,4 @@ export interface BetaParams {
    * @exclusiveMinimum 0
    */
   b: number;
-}
+};

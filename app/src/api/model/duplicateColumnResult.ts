@@ -8,9 +8,9 @@
 /**
  * カラム複製レスポンス
  */
-export interface DuplicateColumnResult {
+export type DuplicateColumnResult = {
   /** 複製操作を行ったテーブル名 */
   tableName: string;
   /** 複製後の新しいカラム名 */
   columnName: string;
-}
+};

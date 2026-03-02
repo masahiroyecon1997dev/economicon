@@ -8,9 +8,9 @@
 /**
  * ラグ・リードカラム追加レスポンス
  */
-export interface AddLagLeadColumnResult {
+export type AddLagLeadColumnResult = {
   /** ラグ・リードカラムを追加したテーブル名 */
   tableName: string;
   /** 追加したラグ・リードカラム名 */
   columnName: string;
-}
+};

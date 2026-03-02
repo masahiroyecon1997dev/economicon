@@ -8,9 +8,9 @@
 /**
  * 統計量の種別と値
  */
-export interface StatisticValue {
+export type StatisticValue = {
   /** 統計量のタイプ（mean, median 等） */
   type: string;
   /** 統計量の計算値 */
   value: unknown;
-}
+};

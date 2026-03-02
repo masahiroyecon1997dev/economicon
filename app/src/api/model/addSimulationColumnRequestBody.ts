@@ -9,7 +9,7 @@ import type { SimulationColumnConfig } from './simulationColumnConfig';
 /**
  * シミュレーションカラム追加リクエスト
  */
-export interface AddSimulationColumnRequestBody {
+export type AddSimulationColumnRequestBody = {
   /**
    * 操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -22,4 +22,4 @@ export interface AddSimulationColumnRequestBody {
    * @minLength 1
    */
   addPositionColumn: string;
-}
+};

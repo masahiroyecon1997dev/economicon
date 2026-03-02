@@ -8,7 +8,7 @@
 /**
  * セルデータ入力リクエスト
  */
-export interface InputCellDataRequestBody {
+export type InputCellDataRequestBody = {
   /**
    * セルデータを入力するテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -26,4 +26,4 @@ export interface InputCellDataRequestBody {
   rowIndex: number;
   /** セルに入力する新しい値。カラムのデータ型に合わせた値を指定してください。 */
   newValue: unknown;
-}
+};

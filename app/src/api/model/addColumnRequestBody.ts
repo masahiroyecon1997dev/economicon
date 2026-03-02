@@ -9,7 +9,7 @@ import type { AddColumnRequestBodyCsvEncoding } from './addColumnRequestBodyCsvE
 /**
  * カラム追加リクエスト
  */
-export interface AddColumnRequestBody {
+export type AddColumnRequestBody = {
   /**
    * 列を追加するテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -40,4 +40,4 @@ export interface AddColumnRequestBody {
   separator?: string;
   /** CSV のエンコーディング。file_path が CSV の場合のみ有効。 */
   csvEncoding?: AddColumnRequestBodyCsvEncoding;
-}
+};

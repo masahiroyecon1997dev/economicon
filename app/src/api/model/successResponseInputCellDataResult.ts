@@ -6,9 +6,9 @@
  */
 import type { InputCellDataResult } from './inputCellDataResult';
 
-export interface SuccessResponseInputCellDataResult {
+export type SuccessResponseInputCellDataResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: InputCellDataResult;
-}
+};

@@ -8,7 +8,7 @@
 /**
  * テーブル複製レスポンス
  */
-export interface DuplicateTableResult {
+export type DuplicateTableResult = {
   /** 操作対象または生成されたテーブル名 */
   tableName: string;
-}
+};

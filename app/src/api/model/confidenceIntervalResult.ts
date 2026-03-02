@@ -10,7 +10,7 @@ import type { StatisticValue } from './statisticValue';
 /**
  * 信頼区間計算レスポンス
  */
-export interface ConfidenceIntervalResult {
+export type ConfidenceIntervalResult = {
   /** 計算対象のテーブル名 */
   tableName: string;
   /** 計算対象のカラム名 */
@@ -21,4 +21,4 @@ export interface ConfidenceIntervalResult {
   confidenceInterval: ConfidenceIntervalBounds;
   /** 計算に使用した信頼水準 */
   confidenceLevel: number;
-}
+};

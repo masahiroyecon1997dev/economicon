@@ -6,9 +6,9 @@
  */
 import type { FilterSingleConditionResult } from './filterSingleConditionResult';
 
-export interface SuccessResponseFilterSingleConditionResult {
+export type SuccessResponseFilterSingleConditionResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: FilterSingleConditionResult;
-}
+};

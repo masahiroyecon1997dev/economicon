@@ -9,7 +9,7 @@ import type { DescriptiveStatisticType } from './descriptiveStatisticType';
 /**
  * 記述統計リクエスト
  */
-export interface DescriptiveStatisticsRequestBody {
+export type DescriptiveStatisticsRequestBody = {
   /**
    * 記述統計を計算する対象テーブル名。ワークスペース内に存在するテーブル名を指定してください。
    * @minLength 1
@@ -25,4 +25,4 @@ export interface DescriptiveStatisticsRequestBody {
    * @minItems 1
    */
   statistics: DescriptiveStatisticType[];
-}
+};

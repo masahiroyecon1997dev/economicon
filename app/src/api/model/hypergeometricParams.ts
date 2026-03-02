@@ -8,7 +8,7 @@
 /**
  * 超幾何分布のパラメータ
  */
-export interface HypergeometricParams {
+export type HypergeometricParams = {
   /** 分布の種類 */
   type: 'hypergeometric';
   /**
@@ -26,4 +26,4 @@ export interface HypergeometricParams {
    * @exclusiveMinimum 0
    */
   sampleSize: number;
-}
+};

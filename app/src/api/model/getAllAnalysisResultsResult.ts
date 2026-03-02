@@ -8,7 +8,7 @@
 /**
  * 全分析結果サマリー取得レスポンス
  */
-export interface GetAllAnalysisResultsResult {
+export type GetAllAnalysisResultsResult = {
   /** 分析結果のサマリーリスト */
   results: unknown[];
-}
+};

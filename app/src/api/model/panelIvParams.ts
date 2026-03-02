@@ -7,7 +7,7 @@
 import type { PanelIvParamsGmmWeightMatrix } from './panelIvParamsGmmWeightMatrix';
 import { PanelIvParamsMethod } from './panelIvParamsMethod';
 
-export interface PanelIvParams {
+export type PanelIvParams = {
   method: PanelIvParamsMethod;
   /**
    * 個体ID列名
@@ -19,4 +19,4 @@ export interface PanelIvParams {
   instrumentalVariables: string[];
   endogenousVariables: string[];
   gmmWeightMatrix?: PanelIvParamsGmmWeightMatrix;
-}
+};

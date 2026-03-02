@@ -9,7 +9,7 @@ import type { FilterOperatorType } from './filterOperatorType';
 /**
  * 単一条件フィルタリクエスト
  */
-export interface FilterSingleConditionRequestBody {
+export type FilterSingleConditionRequestBody = {
   /**
    * フィルタ条件を適用するテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -33,4 +33,4 @@ export interface FilterSingleConditionRequestBody {
   isCompareColumn: boolean;
   /** 比較する値またはカラム名。isCompareColumn が "true" の場合はカラム名を指定。 */
   compareValue: unknown;
-}
+};

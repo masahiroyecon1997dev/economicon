@@ -8,7 +8,7 @@
 /**
  * 分析結果詳細取得レスポンス
  */
-export interface GetAnalysisResultResult {
+export type GetAnalysisResultResult = {
   /** 分析結果の詳細データ */
   result: unknown;
-}
+};

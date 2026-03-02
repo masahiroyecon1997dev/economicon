@@ -12,7 +12,7 @@ import type { AddDiagnosticColumnsRequestBodyTobitFittedType } from './addDiagno
 /**
  * 推定済みモデルから予測値・残差を抽出してテーブルに列追加するリクエスト
  */
-export interface AddDiagnosticColumnsRequestBody {
+export type AddDiagnosticColumnsRequestBody = {
   /**
    * 追加先テーブル名。ワークスペース内に存在するテーブル名を指定してください。
    * @minLength 1
@@ -32,4 +32,4 @@ export interface AddDiagnosticColumnsRequestBody {
   binaryResidualType?: AddDiagnosticColumnsRequestBodyBinaryResidualType;
   /** Tobit モデルの予測値種別。latent: 潜在変数の予測値 x'β（デフォルト）、observable: 観測値の無条件期待値 E[y|x]（打ち切りを考慮した期待値）。Tobit 以外のモデルでは無視される。 */
   tobitFittedType?: AddDiagnosticColumnsRequestBodyTobitFittedType;
-}
+};

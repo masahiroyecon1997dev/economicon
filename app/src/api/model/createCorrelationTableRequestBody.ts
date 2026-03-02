@@ -10,7 +10,7 @@ import type { MissingHandlingMethod } from './missingHandlingMethod';
 /**
  * 相関係数テーブル作成リクエスト
  */
-export interface CreateCorrelationTableRequestBody {
+export type CreateCorrelationTableRequestBody = {
   /**
    * 相関係数を計算する元テーブル名。
    * @minLength 1
@@ -38,4 +38,4 @@ export interface CreateCorrelationTableRequestBody {
   lowerTriangleOnly?: boolean;
   /** 欠損値の処理方法。pairwise: ペア単位で欠損を除外して計算（デフォルト）、listwise: 欠損を含む行をすべての列で一括削除してから計算 */
   missingHandling?: MissingHandlingMethod;
-}
+};

@@ -7,7 +7,7 @@
 import type { RobustStandardErrorHcType } from './robustStandardErrorHcType';
 import { RobustStandardErrorMethod } from './robustStandardErrorMethod';
 
-export interface RobustStandardError {
+export type RobustStandardError = {
   method: RobustStandardErrorMethod;
   hcType?: RobustStandardErrorHcType;
-}
+};

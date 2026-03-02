@@ -8,7 +8,7 @@
 /**
  * カラム削除リクエスト
  */
-export interface DeleteColumnRequestBody {
+export type DeleteColumnRequestBody = {
   /**
    * 列を削除するテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -19,4 +19,4 @@ export interface DeleteColumnRequestBody {
    * @minLength 1
    */
   columnName: string;
-}
+};

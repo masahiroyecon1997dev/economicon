@@ -8,7 +8,7 @@
 /**
  * ワイブル分布のパラメータ
  */
-export interface WeibullParams {
+export type WeibullParams = {
   /** 分布の種類 */
   type: 'weibull';
   /**
@@ -21,4 +21,4 @@ export interface WeibullParams {
    * @exclusiveMinimum 0
    */
   scale: number;
-}
+};
