@@ -61,7 +61,9 @@
     "MenuDeleteTable": "Delete Table"
   },
   "Table": {
-    "LoadingData": "Loading data..."
+    "LoadingData": "Loading data",
+    "FetchingChunk": "Loading",
+    "FetchError": "Error: {{message}}"
   },
   "ImportDataFileView": {
     "Title": "Select File",
@@ -238,7 +240,10 @@
     "StandardError": "Standard Error",
     "TValue": "t-value",
     "PValue": "p-value",
-    "RegressionDetails": "Regression Details"
+    "RegressionDetails": "Regression Details",
+    "ConfidenceIntervalLower": "[0.025",
+    "ConfidenceIntervalUpper": "0.975]",
+    "NA": "N/A"
   },
   "RegressionTab": {
     "FormTab": "Analysis Settings",

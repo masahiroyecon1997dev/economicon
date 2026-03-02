@@ -1,13 +1,5 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import {
-  ChevronDown,
-  Layers,
-  Minus,
-  MoreHorizontal,
-  Settings,
-  Square,
-  X,
-} from "lucide-react";
+import { ChevronDown, Layers, MoreHorizontal, Settings } from "lucide-react";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/utils/helpers";
@@ -17,6 +9,7 @@ import type { DropmenuPositionType } from "../../../types/commonTypes";
 import { MenuItem } from "../../atoms/Menu/MenuItem";
 import { DropdownMenu } from "../../molecules/Menu/DropdownMenu";
 import { SettingsDialog } from "../Dialog/SettingsDialog";
+import { WindowControls } from "./WindowControls";
 
 const MENU_POSITION: DropmenuPositionType = "bottom-right";
 
@@ -118,9 +111,6 @@ export const AppBar = () => {
     [],
   );
   const handleClose = useCallback(() => getCurrentWindow().close(), []);
-
-  /** ウィンドウ制御ボタンに共通するクラス（cursor-default を強制） */
-  const WIN_CTRL_BTN = "cursor-default focus:outline-none transition-colors";
 
   // mousedown: 起点を記録するだけ。startDragging() はまだ呼ばない
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -341,40 +331,13 @@ export const AppBar = () => {
     >
       {/* ===== macOS: 左端トラフィックライト ===== */}
       {isMac && (
-        <div className="flex items-center gap-1.5 pl-4 pr-3">
-          {/* 閉じる（赤） */}
-          <button
-            type="button"
-            onClick={handleClose}
-            aria-label={t("AppBar.Close")}
-            className={cn(
-              WIN_CTRL_BTN,
-              "size-3 rounded-full bg-red-500 hover:bg-red-400",
-            )}
-          />
-          {/* 最小化（黄） */}
-          <button
-            type="button"
-            onClick={handleMinimize}
-            aria-label={t("AppBar.Minimize")}
-            className={cn(
-              WIN_CTRL_BTN,
-              "size-3 rounded-full bg-yellow-400 hover:bg-yellow-300",
-            )}
-          />
-          {/* 最大化（緑） */}
-          <button
-            type="button"
-            onClick={handleToggleMaximize}
-            aria-label={
-              isMaximized ? t("AppBar.Restore") : t("AppBar.Maximize")
-            }
-            className={cn(
-              WIN_CTRL_BTN,
-              "size-3 rounded-full bg-green-500 hover:bg-green-400",
-            )}
-          />
-        </div>
+        <WindowControls
+          isMac
+          isMaximized={isMaximized}
+          onMinimize={handleMinimize}
+          onToggleMaximize={handleToggleMaximize}
+          onClose={handleClose}
+        />
       )}
 
       {/* ===== ロゴ + アプリ名（ドラッグ領域の視覚的な起点） ===== */}
@@ -523,67 +486,13 @@ export const AppBar = () => {
 
         {/* Windows / Linux のみ: 右端ウィンドウ制御ボタン */}
         {!isMac && (
-          <div className="ml-1 flex h-full">
-            {/* 最小化 */}
-            <button
-              type="button"
-              onClick={handleMinimize}
-              aria-label={t("AppBar.Minimize")}
-              className={cn(
-                WIN_CTRL_BTN,
-                "flex h-full w-11 items-center justify-center",
-                "text-white/60 hover:bg-white/10 hover:text-white",
-              )}
-            >
-              <Minus size={14} strokeWidth={1.5} aria-hidden="true" />
-            </button>
-
-            {/* 最大化 / 元のサイズに戻す */}
-            <button
-              type="button"
-              onClick={handleToggleMaximize}
-              aria-label={
-                isMaximized ? t("AppBar.Restore") : t("AppBar.Maximize")
-              }
-              className={cn(
-                WIN_CTRL_BTN,
-                "flex h-full w-11 items-center justify-center",
-                "text-white/60 hover:bg-white/10 hover:text-white",
-              )}
-            >
-              {isMaximized ? (
-                // ❐ 二重矩形で「元に戻す」を表現
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="1" width="9" height="9" rx="0.5" />
-                  <path d="M1 4v8.5A0.5 0.5 0 001.5 13H10" />
-                </svg>
-              ) : (
-                <Square size={14} strokeWidth={1.5} aria-hidden="true" />
-              )}
-            </button>
-
-            {/* 閉じる: ホバー時に赤（Windows Fluent 標準） */}
-            <button
-              type="button"
-              onClick={handleClose}
-              aria-label={t("AppBar.Close")}
-              className={cn(
-                WIN_CTRL_BTN,
-                "flex h-full w-11 items-center justify-center",
-                "text-white/60 hover:bg-red-600 hover:text-white",
-              )}
-            >
-              <X size={14} strokeWidth={1.5} aria-hidden="true" />
-            </button>
-          </div>
+          <WindowControls
+            isMac={false}
+            isMaximized={isMaximized}
+            onMinimize={handleMinimize}
+            onToggleMaximize={handleToggleMaximize}
+            onClose={handleClose}
+          />
         )}
       </div>
     </header>
