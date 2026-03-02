@@ -36,7 +36,6 @@ class TableInfo:
 
     @property
     def row_count(self) -> int:
-        # return self._table.select(pl.len()).collect().item()
         return self._table.height
 
     @property
