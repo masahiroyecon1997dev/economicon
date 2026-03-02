@@ -8,7 +8,7 @@ class TableInfo:
     テーブル情報を保持するデータクラス
     """
 
-    _table_id = str
+    _table_id: str
     _table_name: str
     _table: pl.DataFrame
     _description: str = ""
