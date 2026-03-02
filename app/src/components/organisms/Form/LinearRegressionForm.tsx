@@ -4,13 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../api/endpoints";
-import {
-  MissingValueHandlingType,
-  NonRobustStandardErrorValue,
-  OLSParamsValue,
-  RobustStandardErrorMethod,
-  type StandardErrorSettings,
-} from "../../../api/model";
+import { MissingValueHandlingType } from "../../../api/model";
 import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../../lib/dialog/message";
 import { cn } from "../../../lib/utils/helpers";
@@ -71,10 +65,6 @@ export const LinearRegressionForm = ({
     onSubmit: async ({ value }) => {
       try {
         const api = getEconomiconAPI();
-        const standardError: StandardErrorSettings =
-          value.standardErrorMethod === "robust"
-            ? { method: RobustStandardErrorMethod.robust }
-            : NonRobustStandardErrorValue;
         const regressionResponse = await api.regression({
           tableName: value.tableName,
           dependentVariable: value.dependentVariable,
@@ -82,8 +72,8 @@ export const LinearRegressionForm = ({
           hasConst: value.hasConst,
           missingValueHandling:
             value.missingValueHandling as MissingValueHandlingType,
-          analysis: OLSParamsValue,
-          standardError,
+          analysis: { method: "ols" },
+          standardError: { method: value.standardErrorMethod },
         });
 
         if (regressionResponse.code === "OK" && regressionResponse.result) {
