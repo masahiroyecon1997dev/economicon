@@ -240,7 +240,10 @@ export const AppBar = () => {
         {
           id: "basic-statistics",
           label: t("HeaderMenu.BasicStatistics"),
-          handleSelect: () => {},
+          handleSelect: () => {
+            setCurrentView("DescriptiveStatistics");
+            close();
+          },
         },
       ],
     },
