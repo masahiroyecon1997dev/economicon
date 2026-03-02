@@ -30,7 +30,7 @@ const createSimulationSchema = (t: (key: string) => string) =>
     numRows: z.number().min(1, t("ValidationMessages.NumRowsMoreThan0")),
   });
 
-// コンポ�Eネント外に定義してレンダリングごとの再生成を防ぁE
+// コンポーネント外に定義してレンダリングごとの再生成を防ぐ
 const COLUMN_SETTINGS_DEFAULT: SimulationColumnSetting = {
   id: "1",
   columnName: "",
@@ -70,14 +70,13 @@ export const CreateSimulationDataTable = () => {
       numRows: 1000,
     },
     validators: {
-      onChange: createSimulationSchema(t),
       onSubmit: createSimulationSchema(t),
     },
     onSubmit: async ({ value }) => {
       const tableName = value.tableName;
       const numRows = value.numRows;
 
-      // カラムのバリチE�Eション
+      // カラムのバリデーション
       let hasError = false;
       const validatedColumns = columns.map((col) => {
         const errors: {
@@ -118,7 +117,7 @@ export const CreateSimulationDataTable = () => {
       }
 
       try {
-        // SimulationColumnConfig型（�E币E��別union�E�にマッピング
+        // SimulationColumnConfig型（種別 union）にマッピング
         const simulationColumns: SimulationColumnConfig[] = columns.map(
           (col) => {
             if (col.dataType === "fixed") {
@@ -130,7 +129,7 @@ export const CreateSimulationDataTable = () => {
                 },
               };
             }
-            // 刁E��E��: distributionTypeぁEtypeフィールドになめE
+            // 注意: distributionType を type フィールドにマッピング
             const p = col.distributionParams;
             switch (col.distributionType) {
               case "uniform":
@@ -419,60 +418,86 @@ export const CreateSimulationDataTable = () => {
       >
         {/* ── スクロール領域 ── */}
         <div className="flex flex-col gap-4 overflow-y-auto min-h-0 pb-2">
-          {/* チE�Eブル設宁E*/}
+          {/* テーブル設定 */}
           <div className="rounded-xl border border-border-color dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm">
             <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading dark:text-white">
               {t("CreateSimulationDataTableView.TableSettings")}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <form.Field name="tableName">
-                {(field) => (
-                  <FormField
-                    label={t("CreateSimulationDataTableView.TableName")}
-                    htmlFor="table-name"
-                    error={field.state.meta.errors[0]?.toString()}
-                  >
-                    <InputText
-                      id="table-name"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder={t(
-                        "CreateSimulationDataTableView.TableNamePlaceholder",
-                      )}
-                      error={field.state.meta.errors[0]?.toString()}
-                      disabled={isSubmitting}
-                    />
-                  </FormField>
-                )}
+              <form.Field
+                name="tableName"
+                validators={{
+                  onChange: ({ value }) =>
+                    !value.trim()
+                      ? t("ValidationMessages.TableNameRequired")
+                      : undefined,
+                }}
+              >
+                {(field) => {
+                  const errorMsg = field.state.meta.isTouched
+                    ? (field.state.meta.errors[0] as string | undefined)
+                    : undefined;
+                  return (
+                    <FormField
+                      label={t("CreateSimulationDataTableView.TableName")}
+                      htmlFor="table-name"
+                      error={errorMsg}
+                    >
+                      <InputText
+                        id="table-name"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder={t(
+                          "CreateSimulationDataTableView.TableNamePlaceholder",
+                        )}
+                        error={errorMsg}
+                        disabled={isSubmitting}
+                      />
+                    </FormField>
+                  );
+                }}
               </form.Field>
 
-              <form.Field name="numRows">
-                {(field) => (
-                  <FormField
-                    label={t("CreateSimulationDataTableView.NumberOfRows")}
-                    htmlFor="row-count"
-                    error={field.state.meta.errors[0]?.toString()}
-                  >
-                    <InputText
-                      id="row-count"
-                      type="number"
-                      value={field.state.value.toString()}
-                      onChange={(e) =>
-                        field.handleChange(parseInt(e.target.value) || 0)
-                      }
-                      onBlur={field.handleBlur}
-                      placeholder="1000"
-                      error={field.state.meta.errors[0]?.toString()}
-                      disabled={isSubmitting}
-                    />
-                  </FormField>
-                )}
+              <form.Field
+                name="numRows"
+                validators={{
+                  onChange: ({ value }) =>
+                    value < 1
+                      ? t("ValidationMessages.NumRowsMoreThan0")
+                      : undefined,
+                }}
+              >
+                {(field) => {
+                  const errorMsg = field.state.meta.isTouched
+                    ? (field.state.meta.errors[0] as string | undefined)
+                    : undefined;
+                  return (
+                    <FormField
+                      label={t("CreateSimulationDataTableView.NumberOfRows")}
+                      htmlFor="row-count"
+                      error={errorMsg}
+                    >
+                      <InputText
+                        id="row-count"
+                        type="number"
+                        value={field.state.value.toString()}
+                        onChange={(e) =>
+                          field.handleChange(parseInt(e.target.value) || 0)
+                        }
+                        onBlur={field.handleBlur}
+                        placeholder="1000"
+                        error={errorMsg}
+                        disabled={isSubmitting}
+                      />
+                    </FormField>
+                  );
+                }}
               </form.Field>
             </div>
           </div>
 
-          {/* 列設宁E*/}
+          {/* 列設定 */}
           <div className="rounded-xl border border-border-color dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold leading-tight text-text-heading dark:text-white">
@@ -483,6 +508,7 @@ export const CreateSimulationDataTable = () => {
                 variant="outline"
                 onClick={addColumn}
                 disabled={isSubmitting}
+                className="flex items-center gap-1.5 whitespace-nowrap"
               >
                 <Plus className="h-3.5 w-3.5" />
                 {t("CreateSimulationDataTableView.AddColumn")}
@@ -535,7 +561,7 @@ export const CreateSimulationDataTable = () => {
                       )}
                     </div>
 
-                    {/* コンチE��チE*/}
+                    {/* コンテンツ */}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span
@@ -550,7 +576,7 @@ export const CreateSimulationDataTable = () => {
                             t("CreateSimulationDataTableView.NotSet")}
                         </span>
 
-                        {/* 刁E��E/ 固定値バッジ */}
+                        {/* 分布 / 固定値バッジ */}
                         {distOption && (
                           <span className="rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 text-xs font-medium text-indigo-600 dark:text-indigo-400">
                             {t(distOption.label)}
@@ -628,7 +654,7 @@ export const CreateSimulationDataTable = () => {
           </div>
         </div>
 
-        {/* ── アクションバ�E�E�常に最下部�E�E── */}
+        {/* ── アクションバー（常に最下部固定）── */}
         <ActionButtonBar
           cancelText={t("Common.Cancel")}
           selectText={
@@ -644,6 +670,7 @@ export const CreateSimulationDataTable = () => {
 
       {editingColumnId && (
         <SimulationColumnEditDialog
+          key={editingColumnId}
           isOpen={!!editingColumnId}
           column={columns.find((col) => col.id === editingColumnId)!}
           index={columns.findIndex((col) => col.id === editingColumnId)}

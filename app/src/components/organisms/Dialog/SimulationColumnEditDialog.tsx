@@ -1,6 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   DistributionType,
@@ -49,20 +49,20 @@ export const SimulationColumnEditDialog = ({
   const { t } = useTranslation();
   const [editingColumn, setEditingColumn] =
     useState<SimulationColumnSetting>(column);
-
-  useEffect(() => {
-    setEditingColumn(column);
-  }, [column, isOpen]);
+  const [columnNameError, setColumnNameError] = useState<string | undefined>();
 
   const handleCancel = () => {
     setEditingColumn(column);
+    setColumnNameError(undefined);
     onClose();
   };
 
   const handleSave = () => {
     if (!editingColumn.columnName || editingColumn.columnName.trim() === "") {
+      setColumnNameError(t("ValidationMessages.ColumnNameRequired"));
       return;
     }
+    setColumnNameError(undefined);
 
     // 変更があったフィールドのみを親へ反映
     const updates: Partial<SimulationColumnSetting> = {};
@@ -81,15 +81,15 @@ export const SimulationColumnEditDialog = ({
     onClose();
   };
 
-  const isSaveDisabled =
-    !editingColumn.columnName ||
-    editingColumn.columnName.trim() === "" ||
-    disabled;
+  const isSaveDisabled = disabled;
 
   const handleLocalUpdate = (
     _id: string,
     updates: Partial<SimulationColumnSetting>,
   ) => {
+    if ("columnName" in updates) {
+      setColumnNameError(undefined);
+    }
     setEditingColumn((prev) => ({ ...prev, ...updates }));
   };
 
@@ -228,7 +228,10 @@ export const SimulationColumnEditDialog = ({
                 onDataTypeChange={handleLocalDataTypeChange}
                 onDistributionTypeChange={handleLocalDistributionTypeChange}
                 onDistributionParamChange={handleLocalDistributionParamChange}
-                error={error}
+                error={{
+                  ...error,
+                  columnName: columnNameError ?? error.columnName,
+                }}
                 disabled={disabled}
               />
             </div>
