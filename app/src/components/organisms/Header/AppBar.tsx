@@ -1,7 +1,8 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ChevronDown, Layers, MoreHorizontal, Settings } from "lucide-react";
+import { ChevronDown, MoreHorizontal, Settings } from "lucide-react";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import logo from "../../../assets/app-icon.svg";
 import { cn } from "../../../lib/utils/helpers";
 import { useCurrentPageStore } from "../../../stores/currentView";
 import { useSettingsStore } from "../../../stores/settings";
@@ -345,10 +346,14 @@ export const AppBar = () => {
       <div
         className={cn(
           "pointer-events-none flex items-center",
-          isMac ? "pl-2 pr-4" : "pl-5 pr-4",
+          isMac ? "pl-2 pr-4" : "pl-2 pr-0",
         )}
       >
-        <Layers size={18} className="text-white/80" aria-hidden="true" />
+        <img
+          src={logo}
+          className="w-9 h-9 pointer-events-none"
+          alt="economicon logo"
+        />
       </div>
 
       {/* ===== ナビゲーションメニュー ===== */}
