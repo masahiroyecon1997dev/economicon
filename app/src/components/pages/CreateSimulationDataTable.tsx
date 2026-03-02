@@ -1,5 +1,5 @@
 import { useForm, useStore } from "@tanstack/react-form";
-import { Edit2, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Dices, Edit2, Hash, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -7,6 +7,7 @@ import { getEconomiconAPI } from "../../api/endpoints";
 import type { SimulationColumnConfig } from "../../api/model";
 import { DISTRIBUTION_OPTIONS } from "../../constants/app";
 import { showMessageDialog } from "../../lib/dialog/message";
+import { cn } from "../../lib/utils/helpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { validateDistributionParam } from "../../lib/utils/validation";
 import { useCurrentPageStore } from "../../stores/currentView";
@@ -16,6 +17,7 @@ import type {
   DistributionType,
   SimulationColumnSetting,
 } from "../../types/commonTypes";
+import { Button } from "../atoms/Button/Button";
 import { InputText } from "../atoms/Input/InputText";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
 import { FormField } from "../molecules/Form/FormField";
@@ -28,28 +30,36 @@ const createSimulationSchema = (t: (key: string) => string) =>
     numRows: z.number().min(1, t("ValidationMessages.NumRowsMoreThan0")),
   });
 
+// コンポ�Eネント外に定義してレンダリングごとの再生成を防ぁE
+const COLUMN_SETTINGS_DEFAULT: SimulationColumnSetting = {
+  id: "1",
+  columnName: "",
+  dataType: "distribution",
+  distributionType: "uniform",
+  distributionParams: { low: 0, high: 10 },
+  fixedValue: "",
+  errorMessage: {
+    columnName: undefined,
+    distributionParams: undefined,
+    fixedValue: undefined,
+  },
+};
+
+const hasColumnError = (col: SimulationColumnSetting): boolean =>
+  !!(
+    col.errorMessage.columnName ||
+    col.errorMessage.distributionParams ||
+    col.errorMessage.fixedValue
+  );
+
 export const CreateSimulationDataTable = () => {
   const { t } = useTranslation();
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const addTableName = useTableListStore((state) => state.addTableName);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
 
-  const COLUMN_SETTINGS_DEFAULT: SimulationColumnSetting = {
-    id: "1",
-    columnName: "",
-    dataType: "distribution",
-    distributionType: "uniform",
-    distributionParams: { low: 0, high: 10 },
-    fixedValue: "",
-    errorMessage: {
-      columnName: undefined,
-      distributionParams: undefined,
-      fixedValue: undefined,
-    },
-  };
-
   const [columns, setColumns] = useState<SimulationColumnSetting[]>([
-    COLUMN_SETTINGS_DEFAULT,
+    { ...COLUMN_SETTINGS_DEFAULT, id: "1" },
   ]);
 
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
@@ -60,13 +70,14 @@ export const CreateSimulationDataTable = () => {
       numRows: 1000,
     },
     validators: {
+      onChange: createSimulationSchema(t),
       onSubmit: createSimulationSchema(t),
     },
     onSubmit: async ({ value }) => {
       const tableName = value.tableName;
       const numRows = value.numRows;
 
-      // カラムのバリデーション
+      // カラムのバリチE�Eション
       let hasError = false;
       const validatedColumns = columns.map((col) => {
         const errors: {
@@ -90,6 +101,7 @@ export const CreateSimulationDataTable = () => {
             col.distributionParams,
           );
           if (paramsError !== undefined) {
+            errors.distributionParams = paramsError;
             hasError = true;
           }
         }
@@ -106,7 +118,7 @@ export const CreateSimulationDataTable = () => {
       }
 
       try {
-        // SimulationColumnConfig型（分布判別union）にマッピング
+        // SimulationColumnConfig型（�E币E��別union�E�にマッピング
         const simulationColumns: SimulationColumnConfig[] = columns.map(
           (col) => {
             if (col.dataType === "fixed") {
@@ -118,7 +130,7 @@ export const CreateSimulationDataTable = () => {
                 },
               };
             }
-            // 分布型: distributionTypeが typeフィールドになる
+            // 刁E��E��: distributionTypeぁEtypeフィールドになめE
             const p = col.distributionParams;
             switch (col.distributionType) {
               case "uniform":
@@ -215,9 +227,9 @@ export const CreateSimulationDataTable = () => {
                   columnName: col.columnName.trim(),
                   distribution: {
                     type: "hypergeometric" as const,
-                    bigN: p.populationSize,
-                    n: p.sampleSize,
-                    bigK: p.numberOfSuccesses,
+                    populationSize: p.populationSize,
+                    successCount: p.numberOfSuccesses,
+                    sampleSize: p.sampleSize,
                   },
                 };
               default:
@@ -390,25 +402,6 @@ export const CreateSimulationDataTable = () => {
     setCurrentView("ImportDataFile");
   };
 
-  const getColumnSummary = (column: SimulationColumnSetting): string => {
-    if (column.dataType === "fixed") {
-      return `${column.columnName || t("CreateSimulationDataTableView.NotSet")} - ${t("Common.Constant")}: ${column.fixedValue || t("CreateSimulationDataTableView.NotSet")}`;
-    }
-
-    const distOption = DISTRIBUTION_OPTIONS.find(
-      (d) => d.value === column.distributionType,
-    );
-    if (!distOption) {
-      return `${column.columnName || t("CreateSimulationDataTableView.NotSet")} - ${t("Common.Distribution")}`;
-    }
-
-    const paramsStr = distOption.params
-      .map((param) => `${param}=${column.distributionParams?.[param] ?? "?"}`)
-      .join(", ");
-
-    return `${column.columnName || t("CreateSimulationDataTableView.NotSet")} - ${t(distOption.label)} (${paramsStr})`;
-  };
-
   return (
     <PageLayout
       title={t("CreateSimulationDataTableView.CreateNewDataTable")}
@@ -422,110 +415,220 @@ export const CreateSimulationDataTable = () => {
           e.stopPropagation();
           void form.handleSubmit();
         }}
-        className="space-y-6"
+        className="flex flex-col h-full min-h-0 gap-4"
       >
-        <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700">
-          <h2 className="text-main dark:text-white text-base font-bold leading-tight mb-4">
-            {t("CreateSimulationDataTableView.TableSettings")}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <form.Field name="tableName">
-              {(field) => (
-                <FormField
-                  label={t("CreateSimulationDataTableView.TableName")}
-                  htmlFor="table-name"
-                  error={field.state.meta.errors[0]?.toString()}
-                >
-                  <InputText
-                    id="table-name"
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    onBlur={field.handleBlur}
-                    placeholder={t(
-                      "CreateSimulationDataTableView.TableNamePlaceholder",
-                    )}
-                    error={field.state.meta.errors[0]?.toString()}
-                    disabled={isSubmitting}
-                  />
-                </FormField>
-              )}
-            </form.Field>
-
-            <form.Field name="numRows">
-              {(field) => (
-                <FormField
-                  label={t("CreateSimulationDataTableView.NumberOfRows")}
-                  htmlFor="row-count"
-                  error={field.state.meta.errors[0]?.toString()}
-                >
-                  <InputText
-                    id="row-count"
-                    type="number"
-                    value={field.state.value.toString()}
-                    onChange={(e) =>
-                      field.handleChange(parseInt(e.target.value) || 0)
-                    }
-                    onBlur={field.handleBlur}
-                    placeholder="1000"
-                    error={field.state.meta.errors[0]?.toString()}
-                    disabled={isSubmitting}
-                  />
-                </FormField>
-              )}
-            </form.Field>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-border-color dark:border-gray-700">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-main dark:text-white text-base font-bold leading-tight">
-              {t("CreateSimulationDataTableView.ColumnSettings")}
+        {/* ── スクロール領域 ── */}
+        <div className="flex flex-col gap-4 overflow-y-auto min-h-0 pb-2">
+          {/* チE�Eブル設宁E*/}
+          <div className="rounded-xl border border-border-color dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm">
+            <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading dark:text-white">
+              {t("CreateSimulationDataTableView.TableSettings")}
             </h2>
-            <button
-              type="button"
-              onClick={addColumn}
-              className="flex items-center gap-2 rounded-md bg-brand-primary text-white px-3 py-1.5 text-sm font-medium hover:bg-brand-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isSubmitting}
-            >
-              <Plus size={16} />
-              {t("CreateSimulationDataTableView.AddColumn")}
-            </button>
-          </div>
-          <div className="space-y-0 max-h-48 overflow-y-auto">
-            {columns.map((column, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between py-2 px-3 border-t border-gray-300 dark:border-gray-600 first:border-t-0"
-              >
-                <span className="text-sm text-gray-700 dark:text-gray-300 flex-1 mr-4">
-                  {getColumnSummary(column)}
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setEditingColumnId(column.id)}
-                    className="flex items-center gap-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                    disabled={isSubmitting}
-                    aria-label={t("Common.Edit")}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form.Field name="tableName">
+                {(field) => (
+                  <FormField
+                    label={t("CreateSimulationDataTableView.TableName")}
+                    htmlFor="table-name"
+                    error={field.state.meta.errors[0]?.toString()}
                   >
-                    <Edit2 size={16} />
-                    {t("Common.Edit")}
-                  </button>
-                  {columns.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeColumn(column.id)}
-                      className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    <InputText
+                      id="table-name"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      placeholder={t(
+                        "CreateSimulationDataTableView.TableNamePlaceholder",
+                      )}
+                      error={field.state.meta.errors[0]?.toString()}
                       disabled={isSubmitting}
-                      aria-label={t("Common.Delete")}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  )}
-                </div>
+                    />
+                  </FormField>
+                )}
+              </form.Field>
+
+              <form.Field name="numRows">
+                {(field) => (
+                  <FormField
+                    label={t("CreateSimulationDataTableView.NumberOfRows")}
+                    htmlFor="row-count"
+                    error={field.state.meta.errors[0]?.toString()}
+                  >
+                    <InputText
+                      id="row-count"
+                      type="number"
+                      value={field.state.value.toString()}
+                      onChange={(e) =>
+                        field.handleChange(parseInt(e.target.value) || 0)
+                      }
+                      onBlur={field.handleBlur}
+                      placeholder="1000"
+                      error={field.state.meta.errors[0]?.toString()}
+                      disabled={isSubmitting}
+                    />
+                  </FormField>
+                )}
+              </form.Field>
+            </div>
+          </div>
+
+          {/* 列設宁E*/}
+          <div className="rounded-xl border border-border-color dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold leading-tight text-text-heading dark:text-white">
+                {t("CreateSimulationDataTableView.ColumnSettings")}
+              </h2>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addColumn}
+                disabled={isSubmitting}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {t("CreateSimulationDataTableView.AddColumn")}
+              </Button>
+            </div>
+
+            {/* 全列エラー時�Eサマリー */}
+            {columns.some(hasColumnError) && (
+              <div className="mb-3 flex items-center gap-1.5 rounded-md bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-3 py-2">
+                <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
+                <p className="text-xs text-red-600 dark:text-red-400">
+                  {t("CreateSimulationDataTableView.ColumnHasErrors")}
+                </p>
               </div>
-            ))}
+            )}
+
+            <div className="flex flex-col gap-2">
+              {columns.map((column) => {
+                const colHasError = hasColumnError(column);
+                const distOption =
+                  column.dataType === "distribution"
+                    ? DISTRIBUTION_OPTIONS.find(
+                        (d) => d.value === column.distributionType,
+                      )
+                    : null;
+
+                return (
+                  <div
+                    key={column.id}
+                    className={cn(
+                      "flex items-start gap-3 rounded-lg border px-4 py-3 transition-colors",
+                      colHasError
+                        ? "border-red-300 bg-red-50/40 dark:border-red-700 dark:bg-red-950/20"
+                        : "border-gray-200 dark:border-gray-700",
+                    )}
+                  >
+                    {/* アイコン */}
+                    <div
+                      className={cn(
+                        "mt-0.5 rounded-md p-1.5 shrink-0",
+                        column.dataType === "fixed"
+                          ? "bg-amber-50 dark:bg-amber-900/30 text-amber-500"
+                          : "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500",
+                      )}
+                    >
+                      {column.dataType === "fixed" ? (
+                        <Hash className="h-3.5 w-3.5" />
+                      ) : (
+                        <Dices className="h-3.5 w-3.5" />
+                      )}
+                    </div>
+
+                    {/* コンチE��チE*/}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span
+                          className={cn(
+                            "text-sm font-medium",
+                            column.columnName
+                              ? "text-gray-900 dark:text-gray-100"
+                              : "text-gray-400 dark:text-gray-500 italic",
+                          )}
+                        >
+                          {column.columnName ||
+                            t("CreateSimulationDataTableView.NotSet")}
+                        </span>
+
+                        {/* 刁E��E/ 固定値バッジ */}
+                        {distOption && (
+                          <span className="rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                            {t(distOption.label)}
+                          </span>
+                        )}
+                        {column.dataType === "fixed" && (
+                          <span className="rounded-full bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                            {t("Common.Constant")}
+                          </span>
+                        )}
+
+                        {/* エラーバッジ */}
+                        {colHasError && (
+                          <span className="flex items-center gap-0.5 text-xs font-medium text-red-600 dark:text-red-400">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            {t("CreateSimulationDataTableView.HasErrors")}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* パラメータ概要 */}
+                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {column.dataType === "fixed"
+                          ? `${t("Common.Constant")} = ${column.fixedValue || "-"}`
+                          : distOption
+                            ? distOption.params
+                                .map(
+                                  (p) =>
+                                    `${p} = ${column.distributionParams?.[p] ?? "?"}`,
+                                )
+                                .join("  /  ")
+                            : "-"}
+                      </p>
+
+                      {/* columnName エラーをインライン表示 */}
+                      {column.errorMessage.columnName && (
+                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                          {column.errorMessage.columnName}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* アクションボタン */}
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setEditingColumnId(column.id)}
+                        className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSubmitting}
+                        aria-label={t("Common.Edit")}
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeColumn(column.id)}
+                        className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30 dark:hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSubmitting || columns.length <= 1}
+                        aria-label={t("Common.Delete")}
+                        title={
+                          columns.length <= 1
+                            ? t(
+                                "CreateSimulationDataTableView.CannotRemoveLastColumn",
+                              )
+                            : undefined
+                        }
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
+
+        {/* ── アクションバ�E�E�常に最下部�E�E── */}
         <ActionButtonBar
           cancelText={t("Common.Cancel")}
           selectText={

@@ -1,19 +1,29 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import type { DistributionType, SimulationColumnSetting } from '../../../types/commonTypes';
-import { Button } from '../../atoms/Button/Button';
-import { SimulationColumnConfig } from '../Form/SimulationColumnConfig';
+import * as Dialog from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type {
+  DistributionType,
+  SimulationColumnSetting,
+} from "../../../types/commonTypes";
+import { Button } from "../../atoms/Button/Button";
+import { SimulationColumnConfig } from "../Form/SimulationColumnConfig";
 
 type SimulationColumnEditDialogProps = {
   isOpen: boolean;
   column: SimulationColumnSetting;
   index: number;
-  distributionOptions: Array<{ value: DistributionType; label: string; params: string[] }>;
+  distributionOptions: Array<{
+    value: DistributionType;
+    label: string;
+    params: string[];
+  }>;
   onUpdate: (id: string, updates: Partial<SimulationColumnSetting>) => void;
-  onDataTypeChange: (id: string, dataType: 'distribution' | 'fixed') => void;
-  onDistributionTypeChange: (id: string, distributionType: DistributionType) => void;
+  onDataTypeChange: (id: string, dataType: "distribution" | "fixed") => void;
+  onDistributionTypeChange: (
+    id: string,
+    distributionType: DistributionType,
+  ) => void;
   onDistributionParamChange: (id: string, param: string, value: number) => void;
   onRemove: (id: string) => void;
   onClose: () => void;
@@ -37,7 +47,8 @@ export const SimulationColumnEditDialog = ({
   disabled = false,
 }: SimulationColumnEditDialogProps) => {
   const { t } = useTranslation();
-  const [editingColumn, setEditingColumn] = useState<SimulationColumnSetting>(column);
+  const [editingColumn, setEditingColumn] =
+    useState<SimulationColumnSetting>(column);
 
   useEffect(() => {
     setEditingColumn(column);
@@ -49,83 +60,140 @@ export const SimulationColumnEditDialog = ({
   };
 
   const handleSave = () => {
-    if (!editingColumn.columnName || editingColumn.columnName.trim() === '') {
+    if (!editingColumn.columnName || editingColumn.columnName.trim() === "") {
       return;
     }
 
-    Object.keys(editingColumn).forEach(key => {
-      if (key !== 'id' && key !== 'errorMessage') {
-        const value = editingColumn[key as keyof SimulationColumnSetting];
-        if (value !== column[key as keyof SimulationColumnSetting]) {
-          onUpdate(column.id, { [key]: value });
+    // 変更があったフィールドのみを親へ反映
+    const updates: Partial<SimulationColumnSetting> = {};
+    (
+      Object.keys(editingColumn) as Array<keyof SimulationColumnSetting>
+    ).forEach((key) => {
+      if (key !== "id" && key !== "errorMessage") {
+        if (editingColumn[key] !== column[key]) {
+          (updates as Record<string, unknown>)[key] = editingColumn[key];
         }
       }
     });
+    if (Object.keys(updates).length > 0) {
+      onUpdate(column.id, updates);
+    }
     onClose();
   };
 
-  const handleLocalUpdate = (_id: string, updates: Partial<SimulationColumnSetting>) => {
-    setEditingColumn(prev => ({ ...prev, ...updates }));
+  const isSaveDisabled =
+    !editingColumn.columnName ||
+    editingColumn.columnName.trim() === "" ||
+    disabled;
+
+  const handleLocalUpdate = (
+    _id: string,
+    updates: Partial<SimulationColumnSetting>,
+  ) => {
+    setEditingColumn((prev) => ({ ...prev, ...updates }));
   };
 
-  const handleLocalDataTypeChange = (_id: string, dataType: 'distribution' | 'fixed') => {
+  const handleLocalDataTypeChange = (
+    _id: string,
+    dataType: "distribution" | "fixed",
+  ) => {
     const updates: Partial<SimulationColumnSetting> = {
       dataType: dataType,
     };
 
-    if (dataType === 'distribution') {
-      updates.distributionType = 'uniform';
+    if (dataType === "distribution") {
+      updates.distributionType = "uniform";
       updates.distributionParams = { low: 0, high: 10 };
-      updates.fixedValue = '';
+      updates.fixedValue = "";
     } else {
-      updates.fixedValue = '';
+      updates.fixedValue = "";
       updates.distributionType = undefined;
       updates.distributionParams = undefined;
     }
 
-    setEditingColumn(prev => ({ ...prev, ...updates }));
+    setEditingColumn((prev) => ({ ...prev, ...updates }));
   };
 
-  const handleLocalDistributionTypeChange = (_id: string, distributionType: DistributionType) => {
-    const distOption = distributionOptions.find(d => d.value === distributionType);
+  const handleLocalDistributionTypeChange = (
+    _id: string,
+    distributionType: DistributionType,
+  ) => {
+    const distOption = distributionOptions.find(
+      (d) => d.value === distributionType,
+    );
     if (!distOption) return;
 
     const defaultParams: Record<string, number> = {};
-    distOption.params.forEach(param => {
+    distOption.params.forEach((param) => {
       switch (param) {
-        case 'low': defaultParams[param] = 0; break;
-        case 'high': defaultParams[param] = 10; break;
-        case 'mean': defaultParams[param] = 0; break;
-        case 'deviation': defaultParams[param] = 1; break;
-        case 'rate': defaultParams[param] = 1; break;
-        case 'scale': defaultParams[param] = 1; break;
-        case 'alpha': defaultParams[param] = 2; break;
-        case 'beta': defaultParams[param] = 2; break;
-        case 'logMean': defaultParams[param] = 0; break;
-        case 'logSD': defaultParams[param] = 1; break;
-        case 'trials': defaultParams[param] = 10; break;
-        case 'probability': defaultParams[param] = 0.5; break;
-        case 'populationSize': defaultParams[param] = 20; break;
-        case 'numberOfSuccesses': defaultParams[param] = 5; break;
-        case 'sampleSize': defaultParams[param] = 10; break;
-        default: defaultParams[param] = 1;
+        case "low":
+          defaultParams[param] = 0;
+          break;
+        case "high":
+          defaultParams[param] = 10;
+          break;
+        case "mean":
+          defaultParams[param] = 0;
+          break;
+        case "deviation":
+          defaultParams[param] = 1;
+          break;
+        case "rate":
+          defaultParams[param] = 1;
+          break;
+        case "scale":
+          defaultParams[param] = 1;
+          break;
+        case "alpha":
+          defaultParams[param] = 2;
+          break;
+        case "beta":
+          defaultParams[param] = 2;
+          break;
+        case "logMean":
+          defaultParams[param] = 0;
+          break;
+        case "logSD":
+          defaultParams[param] = 1;
+          break;
+        case "trials":
+          defaultParams[param] = 10;
+          break;
+        case "probability":
+          defaultParams[param] = 0.5;
+          break;
+        case "populationSize":
+          defaultParams[param] = 20;
+          break;
+        case "numberOfSuccesses":
+          defaultParams[param] = 5;
+          break;
+        case "sampleSize":
+          defaultParams[param] = 10;
+          break;
+        default:
+          defaultParams[param] = 1;
       }
     });
 
-    setEditingColumn(prev => ({
+    setEditingColumn((prev) => ({
       ...prev,
       distributionType: distributionType,
-      distributionParams: defaultParams
+      distributionParams: defaultParams,
     }));
   };
 
-  const handleLocalDistributionParamChange = (_id: string, param: string, value: number) => {
-    setEditingColumn(prev => ({
+  const handleLocalDistributionParamChange = (
+    _id: string,
+    param: string,
+    value: number,
+  ) => {
+    setEditingColumn((prev) => ({
       ...prev,
       distributionParams: {
         ...prev.distributionParams,
-        [param]: value
-      }
+        [param]: value,
+      },
     }));
   };
 
@@ -137,13 +205,14 @@ export const SimulationColumnEditDialog = ({
           {/* Header */}
           <div className="flex items-center justify-between p-4 md:p-5 border-b border-b-gray-300 dark:border-b-gray-700 rounded-t">
             <Dialog.Title className="text-xl font-semibold text-gray-900 dark:text-white">
-              {t('CreateSimulationDataTableView.EditColumn')} {index + 1}{t('Common.ColumnSuffix')}
+              {t("CreateSimulationDataTableView.EditColumn")} {index + 1}
+              {t("Common.ColumnSuffix")}
             </Dialog.Title>
             <button
               type="button"
               onClick={handleCancel}
               className="text-gray-400 bg-transparent hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
-              aria-label={t('Common.Close')}
+              aria-label={t("Common.Close")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -168,10 +237,14 @@ export const SimulationColumnEditDialog = ({
           {/* Footer */}
           <div className="flex items-center justify-end gap-2 p-4 md:p-5 border-t border-gray-200 dark:border-gray-700 rounded-b">
             <Button onClick={handleCancel} variant="outline">
-              {t('Common.Cancel')}
+              {t("Common.Cancel")}
             </Button>
-            <Button onClick={handleSave} variant="primary">
-              {t('Common.Save')}
+            <Button
+              onClick={handleSave}
+              variant="primary"
+              disabled={isSaveDisabled}
+            >
+              {t("Common.Save")}
             </Button>
           </div>
         </Dialog.Content>
