@@ -449,6 +449,11 @@
     "SourceColumnName": "Source column",
     "Success": "Operation completed successfully."
   },
+  "CreateSimulationDataTableView": {
+    "ColumnHasErrors": "Some column settings have errors. Please review them.",
+    "HasErrors": "Has errors",
+    "CannotRemoveLastColumn": "At least one column is required."
+  },
   "CreateTableView": {
     "Title": "Create Table",
     "Description": "Create an empty table by specifying a name, row count, and columns.",
