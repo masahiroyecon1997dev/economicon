@@ -2,6 +2,7 @@ import { useCurrentPageStore } from "../../stores/currentView";
 import { Calculation } from "./Calculation";
 import { CreateSimulationDataTable } from "./CreateSimulationDataTable";
 import { CreateTable } from "./CreateTable";
+import { DescriptiveStatistics } from "./DescriptiveStatistics";
 import { ImportDataFile } from "./ImportDataFile";
 import { JoinTable } from "./JoinTable";
 import { Regression } from "./RegressionView";
@@ -22,6 +23,8 @@ export const MainView = () => {
         return <JoinTable />;
       case "UnionTable":
         return <UnionTable />;
+      case "DescriptiveStatistics":
+        return <DescriptiveStatistics />;
       case "LinearRegressionForm":
         return <Regression />;
       case "CreateSimulationDataTable":
