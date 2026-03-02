@@ -6,9 +6,9 @@
  */
 import type { CalculateColumnResult } from './calculateColumnResult';
 
-export interface SuccessResponseCalculateColumnResult {
+export type SuccessResponseCalculateColumnResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: CalculateColumnResult;
-}
+};

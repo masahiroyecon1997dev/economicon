@@ -8,7 +8,7 @@
 /**
  * 相関係数テーブル作成レスポンス
  */
-export interface CreateCorrelationTableResult {
+export type CreateCorrelationTableResult = {
   /** 新規作成された相関係数テーブルの名前。 */
   tableName: string;
-}
+};

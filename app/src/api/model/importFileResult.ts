@@ -8,7 +8,7 @@
 /**
  * ファイルパス指定インポートレスポンス
  */
-export interface ImportFileResult {
+export type ImportFileResult = {
   /** インポートによって作成されたテーブル名 */
   tableName: string;
-}
+};

@@ -8,7 +8,7 @@
 /**
  * データArrow取得リクエスト
  */
-export interface FetchDataToArrowRequestBody {
+export type FetchDataToArrowRequestBody = {
   /**
    * データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -25,4 +25,4 @@ export interface FetchDataToArrowRequestBody {
    * @maximum 10000
    */
   chunkSize?: number;
-}
+};

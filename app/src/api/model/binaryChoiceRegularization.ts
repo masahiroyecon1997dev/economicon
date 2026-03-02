@@ -6,8 +6,8 @@
  */
 import type { BinaryChoiceRegularizationType } from './binaryChoiceRegularizationType';
 
-export interface BinaryChoiceRegularization {
+export type BinaryChoiceRegularization = {
   type?: BinaryChoiceRegularizationType;
   /** @minimum 0 */
   alpha?: number;
-}
+};

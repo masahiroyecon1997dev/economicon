@@ -9,7 +9,7 @@ import type { ConfidenceIntervalBounds } from './confidenceIntervalBounds';
 /**
  * 統計検定レスポンス
  */
-export interface StatisticalTestResult {
+export type StatisticalTestResult = {
   /** 検定統計量（t 値 / Z 値 / F 値） */
   statistic: number;
   /** 有意確率（p 値） */
@@ -22,4 +22,4 @@ export interface StatisticalTestResult {
   confidenceInterval: ConfidenceIntervalBounds | null;
   /** 効果量（t 検定: Cohen's d、ANOVA: η²、z 検定・分散比 F 検定では None） */
   effectSize: number | null;
-}
+};

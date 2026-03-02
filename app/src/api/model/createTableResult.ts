@@ -8,7 +8,7 @@
 /**
  * テーブル作成レスポンス
  */
-export interface CreateTableResult {
+export type CreateTableResult = {
   /** 操作対象または生成されたテーブル名 */
   tableName: string;
-}
+};

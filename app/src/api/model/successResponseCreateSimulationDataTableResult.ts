@@ -6,9 +6,9 @@
  */
 import type { CreateSimulationDataTableResult } from './createSimulationDataTableResult';
 
-export interface SuccessResponseCreateSimulationDataTableResult {
+export type SuccessResponseCreateSimulationDataTableResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: CreateSimulationDataTableResult;
-}
+};

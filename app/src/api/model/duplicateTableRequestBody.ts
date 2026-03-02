@@ -8,7 +8,7 @@
 /**
  * テーブル複製リクエスト
  */
-export interface DuplicateTableRequestBody {
+export type DuplicateTableRequestBody = {
   /**
    * 複製元のテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -21,4 +21,4 @@ export interface DuplicateTableRequestBody {
    * @pattern ^[^\x00-\x1f\x7f]+$
    */
   newTableName: string;
-}
+};

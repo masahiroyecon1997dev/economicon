@@ -8,7 +8,7 @@
 /**
  * 全分析結果クリアレスポンス
  */
-export interface ClearAllAnalysisResultsResult {
+export type ClearAllAnalysisResultsResult = {
   /** 処理結果メッセージ */
   message: string;
-}
+};

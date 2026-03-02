@@ -8,7 +8,7 @@
 /**
  * カラム複製リクエスト
  */
-export interface DuplicateColumnRequestBody {
+export type DuplicateColumnRequestBody = {
   /**
    * 操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -31,4 +31,4 @@ export interface DuplicateColumnRequestBody {
    * @minLength 1
    */
   addPositionColumn: string;
-}
+};

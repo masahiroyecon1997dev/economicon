@@ -9,7 +9,7 @@ import type { CreateTableRequestBodyCsvEncoding } from './createTableRequestBody
 /**
  * テーブル作成リクエスト
  */
-export interface CreateTableRequestBody {
+export type CreateTableRequestBody = {
   /**
    * 作成するテーブルの名前。ワークスペース内に存在しない名前を指定してください。
    * @minLength 1
@@ -38,4 +38,4 @@ export interface CreateTableRequestBody {
   csvEncoding?: CreateTableRequestBodyCsvEncoding;
   /** 読み込むシート名。file_path が Excel の場合のみ有効。省略時は先頭シートを読み込みます。 */
   excelSheetName?: string | null;
-}
+};

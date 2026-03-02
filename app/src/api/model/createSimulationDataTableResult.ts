@@ -8,7 +8,7 @@
 /**
  * シミュレーションデータテーブル作成レスポンス
  */
-export interface CreateSimulationDataTableResult {
+export type CreateSimulationDataTableResult = {
   /** 操作対象または生成されたテーブル名 */
   tableName: string;
-}
+};

@@ -6,9 +6,9 @@
  */
 import type { FetchDataToJsonResult } from './fetchDataToJsonResult';
 
-export interface SuccessResponseFetchDataToJsonResult {
+export type SuccessResponseFetchDataToJsonResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: FetchDataToJsonResult;
-}
+};

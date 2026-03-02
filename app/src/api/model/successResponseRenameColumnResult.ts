@@ -6,9 +6,9 @@
  */
 import type { RenameColumnResult } from './renameColumnResult';
 
-export interface SuccessResponseRenameColumnResult {
+export type SuccessResponseRenameColumnResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: RenameColumnResult;
-}
+};

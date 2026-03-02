@@ -8,7 +8,7 @@
 /**
  * セルデータ入力レスポンス
  */
-export interface InputCellDataResult {
+export type InputCellDataResult = {
   /** 操作対象または生成されたテーブル名 */
   tableName: string;
-}
+};

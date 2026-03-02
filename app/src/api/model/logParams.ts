@@ -8,9 +8,9 @@
 /**
  * 対数変換のパラメータ
  */
-export interface LogParams {
+export type LogParams = {
   /** 変換方法 */
   method: 'log';
   /** 対数の底 (省略時は自然対数) */
   logBase?: number | null;
-}
+};

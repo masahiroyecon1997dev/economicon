@@ -8,9 +8,9 @@
 /**
  * カラム計算レスポンス
  */
-export interface CalculateColumnResult {
+export type CalculateColumnResult = {
   /** 計算カラムを追加したテーブル名 */
   tableName: string;
   /** 追加した計算カラム名 */
   columnName: string;
-}
+};

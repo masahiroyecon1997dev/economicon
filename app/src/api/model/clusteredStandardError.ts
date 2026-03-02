@@ -6,10 +6,10 @@
  */
 import { ClusteredStandardErrorMethod } from './clusteredStandardErrorMethod';
 
-export interface ClusteredStandardError {
+export type ClusteredStandardError = {
   method: ClusteredStandardErrorMethod;
   /** クラスターを構成する列名 */
   groups: string[];
   /** 小標本補正を行うか */
   useCorrection?: boolean;
-}
+};

@@ -8,7 +8,7 @@
 /**
  * エクスポート共通レスポンス
  */
-export interface ExportFileResult {
+export type ExportFileResult = {
   /** 出力したファイルのフルパス（拡張子付き） */
   filePath: string;
-}
+};

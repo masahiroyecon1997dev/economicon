@@ -8,7 +8,7 @@
 /**
  * アプリケーション設定取得レスポンス
  */
-export interface GetSettingsResult {
+export type GetSettingsResult = {
   /** アプリケーションの表示言語（ja: 日本語, en: 英語） */
   language: string;
   /** 最後に開いたフォルダパス */
@@ -19,4 +19,4 @@ export interface GetSettingsResult {
   encoding: string;
   /** ログファイルの出力先パス */
   logPath: string;
-}
+};

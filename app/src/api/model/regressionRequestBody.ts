@@ -14,7 +14,7 @@ import type { StandardErrorSettings } from './standardErrorSettings';
 全ての回帰分析タイプを単一のエンドポイントで扱うための
 統合スキーマです。
  */
-export interface RegressionRequestBody {
+export type RegressionRequestBody = {
   /**
    * 分析対象のテーブル名。ワークスペース内に存在するテーブル名を指定してください。
    * @minLength 1
@@ -45,4 +45,4 @@ export interface RegressionRequestBody {
   analysis: RegressionParams;
   /** 標準誤差の計算方法設定。nonrobust, robust（HC）, cluster, hac（Newey-West）から選択します。 */
   standardError: StandardErrorSettings;
-}
+};

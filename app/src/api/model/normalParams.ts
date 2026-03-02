@@ -8,7 +8,7 @@
 /**
  * 正規分布のパラメータ
  */
-export interface NormalParams {
+export type NormalParams = {
   /** 分布の種類 */
   type: 'normal';
   /** 平均 */
@@ -18,4 +18,4 @@ export interface NormalParams {
    * @exclusiveMinimum 0
    */
   scale: number;
-}
+};

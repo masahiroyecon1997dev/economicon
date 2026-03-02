@@ -6,9 +6,9 @@
  */
 import type { UpdateSettingsResult } from './updateSettingsResult';
 
-export interface SuccessResponseUpdateSettingsResult {
+export type SuccessResponseUpdateSettingsResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: UpdateSettingsResult;
-}
+};

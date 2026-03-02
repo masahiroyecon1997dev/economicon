@@ -8,9 +8,9 @@
 /**
  * 固定値のパラメータ
  */
-export interface FixedParams {
+export type FixedParams = {
   /** 分布の種類 */
   type: 'fixed';
   /** 固定値 */
   value: number;
-}
+};

@@ -6,9 +6,9 @@
  */
 import type { RenameTableResult } from './renameTableResult';
 
-export interface SuccessResponseRenameTableResult {
+export type SuccessResponseRenameTableResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: RenameTableResult;
-}
+};

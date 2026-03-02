@@ -8,7 +8,7 @@
 /**
  * カラム削除レスポンス
  */
-export interface DeleteColumnResult {
+export type DeleteColumnResult = {
   /** カラムを削除したテーブル名 */
   tableName: string;
-}
+};

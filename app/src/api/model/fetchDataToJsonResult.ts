@@ -8,7 +8,7 @@
 /**
  * テーブルデータ JSON 形式取得レスポンス
  */
-export interface FetchDataToJsonResult {
+export type FetchDataToJsonResult = {
   /** データを取得したテーブル名 */
   tableName: string;
   /** JSON 文字列形式のテーブルデータ */
@@ -19,4 +19,4 @@ export interface FetchDataToJsonResult {
   startRow: number;
   /** 取得終了行番号 */
   endRow: number;
-}
+};

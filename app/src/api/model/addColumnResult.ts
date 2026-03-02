@@ -8,9 +8,9 @@
 /**
  * カラム追加レスポンス
  */
-export interface AddColumnResult {
+export type AddColumnResult = {
   /** カラムを追加したテーブル名 */
   tableName: string;
   /** 追加したカラム名 */
   columnName: string;
-}
+};

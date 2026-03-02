@@ -6,7 +6,7 @@
  */
 import { HacStandardErrorMethod } from './hacStandardErrorMethod';
 
-export interface HacStandardError {
+export type HacStandardError = {
   method: HacStandardErrorMethod;
   /**
    * 考慮する最大ラグ数
@@ -17,4 +17,4 @@ export interface HacStandardError {
   kernel?: string;
   /** 小標本補正を行うか */
   useCorrection?: boolean;
-}
+};

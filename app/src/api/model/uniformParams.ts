@@ -8,11 +8,11 @@
 /**
  * 一様分布のパラメータ
  */
-export interface UniformParams {
+export type UniformParams = {
   /** 分布の種類 */
   type: 'uniform';
   /** 分布の下限 */
   low: number;
   /** 分布の上限 */
   high: number;
-}
+};

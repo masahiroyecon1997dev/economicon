@@ -8,7 +8,7 @@
 /**
  * 分析結果削除レスポンス
  */
-export interface DeleteAnalysisResultResult {
+export type DeleteAnalysisResultResult = {
   /** 削除した分析結果の ID */
   deletedResultId: string;
-}
+};

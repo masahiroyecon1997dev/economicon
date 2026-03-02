@@ -8,7 +8,7 @@
 /**
  * 対数正規分布のパラメータ
  */
-export interface LognormalParams {
+export type LognormalParams = {
   /** 分布の種類 */
   type: 'lognormal';
   /** 平均 */
@@ -18,4 +18,4 @@ export interface LognormalParams {
    * @exclusiveMinimum 0
    */
   sigma: number;
-}
+};

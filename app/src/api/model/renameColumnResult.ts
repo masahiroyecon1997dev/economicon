@@ -8,9 +8,9 @@
 /**
  * カラム名変更レスポンス
  */
-export interface RenameColumnResult {
+export type RenameColumnResult = {
   /** カラム名を変更したテーブル名 */
   tableName: string;
   /** 変更後のカラム名 */
   columnName: string;
-}
+};

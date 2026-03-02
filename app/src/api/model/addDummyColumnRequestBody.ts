@@ -10,7 +10,7 @@ import type { NullStrategy } from './nullStrategy';
 /**
  * ダミー変数カラム追加リクエスト
  */
-export interface AddDummyColumnRequestBody {
+export type AddDummyColumnRequestBody = {
   /**
    * 操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -36,4 +36,4 @@ export interface AddDummyColumnRequestBody {
   dropBaseValue?: string | null;
   /** null値（空文字・空白を含む）の扱い。'exclude': null を無視してダミーを生成しない。'as_category': null を '__null__' カテゴリとして扱う。'error': null が存在する場合エラーを返す。 */
   nullStrategy?: NullStrategy;
-}
+};

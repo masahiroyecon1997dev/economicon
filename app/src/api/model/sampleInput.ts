@@ -8,7 +8,7 @@
 /**
  * 検定に使用する1サンプルの指定（テーブル名・列名のペア）
  */
-export interface SampleInput {
+export type SampleInput = {
   /**
    * サンプルを取得するテーブル名。
    * @minLength 1
@@ -19,4 +19,4 @@ export interface SampleInput {
    * @minLength 1
    */
   columnName: string;
-}
+};

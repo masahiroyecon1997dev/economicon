@@ -6,9 +6,9 @@
  */
 import type { StatisticalTestResult } from './statisticalTestResult';
 
-export interface SuccessResponseStatisticalTestResult {
+export type SuccessResponseStatisticalTestResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: StatisticalTestResult;
-}
+};

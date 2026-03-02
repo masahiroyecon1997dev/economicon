@@ -6,9 +6,9 @@
  */
 import type { OutputResultResult } from './outputResultResult';
 
-export interface SuccessResponseOutputResultResult {
+export type SuccessResponseOutputResultResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: OutputResultResult;
-}
+};

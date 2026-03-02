@@ -8,11 +8,11 @@
 /**
  * エラーレスポンスモデル
  */
-export interface ErrorResponse {
+export type ErrorResponse = {
   /** エラーコード */
   code: string;
   /** エラーメッセージ */
   message: string;
   /** バリデーションエラーの詳細リスト */
   details?: string[] | null;
-}
+};

@@ -8,9 +8,9 @@
 /**
  * 有意性記号の設定
  */
-export interface StarConfig {
+export type StarConfig = {
   /** 有意水準の閾値（例: 0.05） */
   threshold: number;
   /** 有意性を示す記号（例: '**'） */
   symbol: string;
-}
+};

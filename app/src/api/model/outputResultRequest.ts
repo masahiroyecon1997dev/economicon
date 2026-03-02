@@ -14,7 +14,7 @@ import type { StarConfig } from './starConfig';
 
 複数の分析結果を LaTeX / Markdown / Text 形式に整形します。
  */
-export interface OutputResultRequest {
+export type OutputResultRequest = {
   /**
    * 出力する分析結果 ID のリスト（1件以上）
    * @minItems 1
@@ -32,4 +32,4 @@ export interface OutputResultRequest {
   constAtBottom?: boolean;
   /** 変数の表示順序を明示的に指定するリスト。指定した変数は先頭から順に表示される。リストに含まれない変数はその後ろに追加される。None の場合は推定結果への登場順を使用。 */
   variableOrder?: string[] | null;
-}
+};

@@ -6,7 +6,7 @@
  */
 import type { PanelDataParamsMethod } from './panelDataParamsMethod';
 
-export interface PanelDataParams {
+export type PanelDataParams = {
   method: PanelDataParamsMethod;
   /**
    * 個体ID列名
@@ -15,4 +15,4 @@ export interface PanelDataParams {
   entityIdColumn: string;
   /** 時間列名 */
   timeColumn?: string | null;
-}
+};

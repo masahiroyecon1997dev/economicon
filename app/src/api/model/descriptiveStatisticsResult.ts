@@ -8,9 +8,9 @@
 /**
  * 記述統計レスポンス
  */
-export interface DescriptiveStatisticsResult {
+export type DescriptiveStatisticsResult = {
   /** 計算対象のテーブル名 */
   tableName: string;
   /** 記述統計の計算結果。カラム名と統計量名をキーに持つ辞書型データ。 */
   statistics: unknown;
-}
+};

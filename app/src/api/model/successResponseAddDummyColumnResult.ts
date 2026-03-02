@@ -6,9 +6,9 @@
  */
 import type { AddDummyColumnResult } from './addDummyColumnResult';
 
-export interface SuccessResponseAddDummyColumnResult {
+export type SuccessResponseAddDummyColumnResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: AddDummyColumnResult;
-}
+};

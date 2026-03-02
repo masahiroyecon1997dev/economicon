@@ -8,9 +8,9 @@
 /**
  * 診断列追加レスポンス
  */
-export interface AddDiagnosticColumnsResult {
+export type AddDiagnosticColumnsResult = {
   /** 更新されたテーブル名 */
   tableName: string;
   /** 追加された列名のリスト */
   addedColumns: string[];
-}
+};

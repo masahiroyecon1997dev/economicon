@@ -8,7 +8,7 @@
 /**
  * 単一条件フィルタレスポンス
  */
-export interface FilterSingleConditionResult {
+export type FilterSingleConditionResult = {
   /** 操作対象または生成されたテーブル名 */
   tableName: string;
-}
+};

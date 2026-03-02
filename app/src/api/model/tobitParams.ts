@@ -6,10 +6,10 @@
  */
 import { TobitParamsMethod } from './tobitParamsMethod';
 
-export interface TobitParams {
+export type TobitParams = {
   method: TobitParamsMethod;
   /** 左側打ち切り値。この値以下のデータが打ち切られていると見なす */
   leftCensoringLimit?: number | null;
   /** 右側打ち切り値 */
   rightCensoringLimit?: number | null;
-}
+};

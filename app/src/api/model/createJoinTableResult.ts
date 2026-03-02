@@ -8,7 +8,7 @@
 /**
  * 結合テーブル作成レスポンス
  */
-export interface CreateJoinTableResult {
+export type CreateJoinTableResult = {
   /** 操作対象または生成されたテーブル名 */
   tableName: string;
-}
+};

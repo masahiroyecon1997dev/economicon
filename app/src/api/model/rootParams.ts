@@ -8,7 +8,7 @@
 /**
  * 平方根変換のパラメータ
  */
-export interface RootParams {
+export type RootParams = {
   /** 変換方法 */
   method: 'root';
   /**
@@ -16,4 +16,4 @@ export interface RootParams {
    * @exclusiveMinimum 0
    */
   rootIndex?: number;
-}
+};

@@ -8,7 +8,7 @@
 /**
  * テーブル名変更リクエスト
  */
-export interface RenameTableRequestBody {
+export type RenameTableRequestBody = {
   /**
    * 変更前のテーブル名
    * @minLength 1
@@ -21,4 +21,4 @@ export interface RenameTableRequestBody {
    * @pattern ^[^\x00-\x1f\x7f]+$
    */
   newTableName: string;
-}
+};

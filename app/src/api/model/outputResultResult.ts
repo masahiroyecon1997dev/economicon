@@ -8,9 +8,9 @@
 /**
  * 推定結果フォーマット出力レスポンス
  */
-export interface OutputResultResult {
+export type OutputResultResult = {
   /** フォーマット済み出力テキスト */
   content: string;
   /** 出力フォーマット (latex / markdown / text) */
   format: string;
-}
+};

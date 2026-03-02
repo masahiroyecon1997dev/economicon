@@ -6,9 +6,9 @@
  */
 import type { AddDiagnosticColumnsResult } from './addDiagnosticColumnsResult';
 
-export interface SuccessResponseAddDiagnosticColumnsResult {
+export type SuccessResponseAddDiagnosticColumnsResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: AddDiagnosticColumnsResult;
-}
+};

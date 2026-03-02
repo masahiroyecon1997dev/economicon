@@ -8,9 +8,9 @@
 /**
  * カラム情報
  */
-export interface ColumnInfo {
+export type ColumnInfo = {
   /** カラム名 */
   name: string;
   /** Polarsデータ型（例: Int64, Float64, String） */
   type: string;
-}
+};
