@@ -55,13 +55,14 @@ class TablesStore:
 
     def rename_table(self, old_table_name: str, new_table_name: str) -> str:
         with self._lock:
-            table_info = self._tables.pop(old_table_name)
-            if table_info:
-                table_info.table_name = new_table_name
-                self._tables[new_table_name] = table_info
-                return table_info.table_name
-            else:
+            if old_table_name not in self._tables:
                 raise KeyError(f"Table '{old_table_name}' does not exist.")
+            self._tables = {
+                (new_table_name if k == old_table_name else k): v
+                for k, v in self._tables.items()
+            }
+            self._tables[new_table_name].table_name = new_table_name
+            return new_table_name
 
     def update_table(self, table_name: str, df: pl.DataFrame) -> str:
         with self._lock:

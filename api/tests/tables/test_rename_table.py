@@ -56,6 +56,21 @@ def test_rename_table_success(client, tables_store):
     assert df["B"].to_list() == [3, 4]
 
 
+def test_rename_table_preserves_order(client, tables_store):
+    """順序保持: リネーム後もテーブルリストの挿入順序は変わらない"""
+    df = pl.DataFrame({"x": [1]})
+    tables_store.clear_tables()
+    tables_store.store_table("TableA", df)
+    tables_store.store_table(_OLD_TABLE, df)
+    tables_store.store_table("TableC", df)
+
+    response = client.post("/api/table/rename", json=_BASE_PAYLOAD)
+    assert response.status_code == status.HTTP_200_OK
+
+    name_list = tables_store.get_table_name_list()
+    assert name_list == ["TableA", _NEW_TABLE, "TableC"]
+
+
 # ---------------------------------------------------------------------------
 # 異常系（サービス層）
 # ---------------------------------------------------------------------------
