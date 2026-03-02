@@ -29,15 +29,15 @@ export const Table = () => {
         </nav>
       </div>
 
-      {/* テーブル本体: 非アクティブは hidden でマウント保持 */}
-      {tableInfos.map((table) => (
-        <div
-          key={table.tableName}
-          className={table.isActive ? "flex-1 min-h-0" : "hidden"}
-        >
-          <VirtualTable tableInfo={table} />
-        </div>
-      ))}
+      {/* テーブル本体: アクティブなテーブルのみマウント */}
+      {tableInfos.map(
+        (table) =>
+          table.isActive && (
+            <div key={table.tableName} className="flex-1 min-h-0">
+              <VirtualTable tableInfo={table} />
+            </div>
+          ),
+      )}
     </div>
   );
 };
