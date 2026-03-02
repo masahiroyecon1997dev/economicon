@@ -6,7 +6,7 @@
     </linearGradient>
   </defs>
 
-  <g transform="translate(0, -10)">
+  <g transform="translate(0, -3)">
     <path d="M 25 75 A 30 12 0 1 1 75 75" fill="none" stroke="#92C9FF" stroke-width="5" stroke-linecap="round"/>
     <path d="M 32 82 A 22 9 0 1 1 68 82" fill="none" stroke="#92C9FF" stroke-width="4" stroke-linecap="round" opacity="0.75"/>
     <text x="50" y="65" font-family="Arial, sans-serif" font-size="70" fill="url(#epsGrad)" text-anchor="middle" font-weight="bold">ε</text>
