@@ -88,6 +88,8 @@ from economicon.models.enums import (
 from economicon.models.regressions import (
     AddDiagnosticColumnsRequestBody,
     AddDiagnosticColumnsResult,
+    AnalysisResultDetail,
+    AnalysisResultSummary,
     ClearAllAnalysisResultsResult,
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
@@ -99,6 +101,7 @@ from economicon.models.regressions import (
     StarConfig,
 )
 from economicon.models.settings import (
+    AppSettings,
     GetSettingsRequestBody,
     GetSettingsResult,
     UpdateSettingsRequest,
@@ -270,6 +273,7 @@ __all__ = [
     "StatisticalTestRequestBody",
     "StatisticalTestResult",
     # Settings
+    "AppSettings",
     "GetSettingsRequestBody",
     "GetSettingsResult",
     "UpdateSettingsRequest",
@@ -282,7 +286,9 @@ __all__ = [
     # Regression
     "RegressionRequestBody",
     "RegressionResult",
+    "AnalysisResultSummary",
     "GetAllAnalysisResultsResult",
+    "AnalysisResultDetail",
     "GetAnalysisResultResult",
     "DeleteAnalysisResultResult",
     "ClearAllAnalysisResultsResult",

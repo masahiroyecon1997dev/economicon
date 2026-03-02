@@ -6,15 +6,13 @@ from pydantic import Field
 
 from economicon.models.common import BaseRequest, BaseResult
 
-
-class GetSettingsRequestBody(BaseRequest):
-    """アプリケーション設定取得リクエスト（パラメータなし）"""
-
-    pass
+# ---------------------------------------------------------------------------
+# 共通フィールド基底
+# ---------------------------------------------------------------------------
 
 
-class GetSettingsResult(BaseResult):
-    """アプリケーション設定取得レスポンス"""
+class AppSettings(BaseResult):
+    """アプリケーション設定フィールドの共通モデル"""
 
     language: Annotated[
         str,
@@ -51,6 +49,26 @@ class GetSettingsResult(BaseResult):
             description="ログファイルの出力先パス",
         ),
     ]
+
+
+# ---------------------------------------------------------------------------
+# 設定取得
+# ---------------------------------------------------------------------------
+
+
+class GetSettingsRequestBody(BaseRequest):
+    """アプリケーション設定取得リクエスト（パラメータなし）"""
+
+    pass
+
+
+class GetSettingsResult(AppSettings):
+    """アプリケーション設定取得レスポンス"""
+
+
+# ---------------------------------------------------------------------------
+# 設定更新
+# ---------------------------------------------------------------------------
 
 
 class UpdateSettingsRequest(BaseRequest):
@@ -92,41 +110,5 @@ class UpdateSettingsRequest(BaseRequest):
     ] = None
 
 
-class UpdateSettingsResult(BaseResult):
+class UpdateSettingsResult(AppSettings):
     """アプリケーション設定更新レスポンス（更新後の全設定を返す）"""
-
-    language: Annotated[
-        str,
-        Field(
-            title="Language",
-            description="アプリケーションの表示言語（ja: 日本語, en: 英語）",
-        ),
-    ]
-    last_opened_path: Annotated[
-        str,
-        Field(
-            title="Last Opened Path",
-            description="最後に開いたフォルダパス",
-        ),
-    ]
-    theme: Annotated[
-        str,
-        Field(
-            title="Theme",
-            description="アプリケーションのテーマ（light / dark）",
-        ),
-    ]
-    encoding: Annotated[
-        str,
-        Field(
-            title="Encoding",
-            description="ファイルエンコーディング",
-        ),
-    ]
-    log_path: Annotated[
-        str,
-        Field(
-            title="Log Path",
-            description="ログファイルの出力先パス",
-        ),
-    ]
