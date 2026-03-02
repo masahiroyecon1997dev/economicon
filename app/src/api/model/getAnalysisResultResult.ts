@@ -4,11 +4,12 @@
  * Economicon API
  * OpenAPI spec version: 0.1.0
  */
+import type { AnalysisResultDetail } from './analysisResultDetail';
 
 /**
  * 分析結果詳細取得レスポンス
  */
 export type GetAnalysisResultResult = {
   /** 分析結果の詳細データ */
-  result: unknown;
+  result: AnalysisResultDetail;
 };

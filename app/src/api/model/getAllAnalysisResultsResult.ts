@@ -4,11 +4,12 @@
  * Economicon API
  * OpenAPI spec version: 0.1.0
  */
+import type { AnalysisResultSummary } from './analysisResultSummary';
 
 /**
  * 全分析結果サマリー取得レスポンス
  */
 export type GetAllAnalysisResultsResult = {
   /** 分析結果のサマリーリスト */
-  results: unknown[];
+  results: AnalysisResultSummary[];
 };
