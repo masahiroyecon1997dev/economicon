@@ -8,7 +8,7 @@
 /**
  * ガンマ分布のパラメータ
  */
-export interface GammaParams {
+export type GammaParams = {
   /** 分布の種類 */
   type: 'gamma';
   /**
@@ -21,4 +21,4 @@ export interface GammaParams {
    * @exclusiveMinimum 0
    */
   scale: number;
-}
+};

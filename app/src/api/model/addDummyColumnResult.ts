@@ -8,9 +8,9 @@
 /**
  * ダミー変数カラム追加レスポンス
  */
-export interface AddDummyColumnResult {
+export type AddDummyColumnResult = {
   /** ダミーカラムを追加したテーブル名 */
   tableName: string;
   /** 追加したダミーカラム名のリスト */
   addedColumnNames: string[];
-}
+};

@@ -6,7 +6,6 @@
  */
 import { OLSParamsMethod } from './oLSParamsMethod';
 
-export const OLSParamsValue = {
-  method: OLSParamsMethod,
-} as const;
-export type OLSParams = typeof OLSParamsValue;
+export type OLSParams = {
+  method: OLSParamsMethod;
+};

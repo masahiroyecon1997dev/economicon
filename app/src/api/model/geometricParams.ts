@@ -8,7 +8,7 @@
 /**
  * 幾何分布のパラメータ
  */
-export interface GeometricParams {
+export type GeometricParams = {
   /** 分布の種類 */
   type: 'geometric';
   /**
@@ -17,4 +17,4 @@ export interface GeometricParams {
    * @exclusiveMinimum 0
    */
   p: number;
-}
+};

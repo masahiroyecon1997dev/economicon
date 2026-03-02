@@ -8,10 +8,10 @@
 /**
  * テーブル削除リクエスト
  */
-export interface DeleteTableRequestBody {
+export type DeleteTableRequestBody = {
   /**
    * 削除するテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
    */
   tableName: string;
-}
+};

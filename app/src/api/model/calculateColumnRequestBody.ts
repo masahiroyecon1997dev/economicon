@@ -8,7 +8,7 @@
 /**
  * カラム計算リクエスト
  */
-export interface CalculateColumnRequestBody {
+export type CalculateColumnRequestBody = {
   /**
    * 操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -31,4 +31,4 @@ export interface CalculateColumnRequestBody {
    * @minLength 1
    */
   calculationExpression: string;
-}
+};

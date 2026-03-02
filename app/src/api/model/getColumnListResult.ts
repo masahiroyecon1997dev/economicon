@@ -9,9 +9,9 @@ import type { ColumnInfo } from './columnInfo';
 /**
  * カラムリスト取得レスポンス
  */
-export interface GetColumnListResult {
+export type GetColumnListResult = {
   /** カラムリストを取得したテーブル名 */
   tableName: string;
   /** カラム情報のリスト */
   columnInfoList: ColumnInfo[];
-}
+};

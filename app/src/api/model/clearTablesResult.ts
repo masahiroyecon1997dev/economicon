@@ -8,4 +8,4 @@
 /**
  * 全テーブルクリアレスポンス（データなし）
  */
-export interface ClearTablesResult { [key: string]: unknown }
+export type ClearTablesResult = { [key: string]: unknown };

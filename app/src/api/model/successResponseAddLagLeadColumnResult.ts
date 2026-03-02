@@ -6,9 +6,9 @@
  */
 import type { AddLagLeadColumnResult } from './addLagLeadColumnResult';
 
-export interface SuccessResponseAddLagLeadColumnResult {
+export type SuccessResponseAddLagLeadColumnResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: AddLagLeadColumnResult;
-}
+};

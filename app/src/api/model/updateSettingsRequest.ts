@@ -8,7 +8,7 @@
 /**
  * アプリケーション設定更新リクエスト（すべてのフィールドが省略可能）
  */
-export interface UpdateSettingsRequest {
+export type UpdateSettingsRequest = {
   /** 表示言語。'ja' または 'en' のみ許可。 */
   language?: string | null;
   /** テーマ。'light' または 'dark' のみ許可。 */
@@ -17,4 +17,4 @@ export interface UpdateSettingsRequest {
   encoding?: string | null;
   /** ログファイルの出力先パス */
   logPath?: string | null;
-}
+};

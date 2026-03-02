@@ -9,7 +9,7 @@ import type { SortInstruction } from './sortInstruction';
 /**
  * カラムソートリクエスト
  */
-export interface SortColumnsRequestBody {
+export type SortColumnsRequestBody = {
   /**
    * 操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -20,4 +20,4 @@ export interface SortColumnsRequestBody {
    * @minItems 1
    */
   sortColumns: SortInstruction[];
-}
+};

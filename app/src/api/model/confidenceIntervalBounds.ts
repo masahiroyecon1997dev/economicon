@@ -8,9 +8,9 @@
 /**
  * 信頼区間の下限・上限
  */
-export interface ConfidenceIntervalBounds {
+export type ConfidenceIntervalBounds = {
   /** 信頼区間の下限値 */
   lower: number;
   /** 信頼区間の上限値 */
   upper: number;
-}
+};

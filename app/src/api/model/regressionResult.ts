@@ -8,7 +8,7 @@
 /**
  * 回帰分析実行レスポンス
  */
-export interface RegressionResult {
+export type RegressionResult = {
   /** 保存された分析結果の一意 ID */
   resultId: string;
-}
+};

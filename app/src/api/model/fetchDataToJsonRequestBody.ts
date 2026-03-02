@@ -8,7 +8,7 @@
 /**
  * データJSON取得リクエスト
  */
-export interface FetchDataToJsonRequestBody {
+export type FetchDataToJsonRequestBody = {
   /**
    * データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。
    * @minLength 1
@@ -25,4 +25,4 @@ export interface FetchDataToJsonRequestBody {
    * @maximum 10000
    */
   fetchRows?: number;
-}
+};

@@ -9,11 +9,11 @@ import type { DistributionType } from './distributionType';
 /**
  * シミュレーションカラム追加レスポンス
  */
-export interface AddSimulationColumnResult {
+export type AddSimulationColumnResult = {
   /** シミュレーションカラムを追加したテーブル名 */
   tableName: string;
   /** 追加したシミュレーションカラム名 */
   columnName: string;
   /** 使用した分布タイプ */
   distributionType: DistributionType;
-}
+};

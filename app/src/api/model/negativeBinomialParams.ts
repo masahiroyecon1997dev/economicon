@@ -11,7 +11,7 @@
 n 回成功するまでに必要な失敗回数をシミュレートする。
 イベント発生強度の過分散モデリングに広く使われる。
  */
-export interface NegativeBinomialParams {
+export type NegativeBinomialParams = {
   /** 分布の種類 */
   type: 'negative_binomial';
   /**
@@ -25,4 +25,4 @@ export interface NegativeBinomialParams {
    * @exclusiveMinimum 0
    */
   p: number;
-}
+};

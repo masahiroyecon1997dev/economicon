@@ -6,9 +6,9 @@
  */
 import type { GetTableListResult } from './getTableListResult';
 
-export interface SuccessResponseGetTableListResult {
+export type SuccessResponseGetTableListResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: GetTableListResult;
-}
+};

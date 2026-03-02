@@ -6,9 +6,9 @@
  */
 import type { DeleteColumnResult } from './deleteColumnResult';
 
-export interface SuccessResponseDeleteColumnResult {
+export type SuccessResponseDeleteColumnResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: DeleteColumnResult;
-}
+};

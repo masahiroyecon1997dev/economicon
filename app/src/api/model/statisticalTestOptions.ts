@@ -9,7 +9,7 @@ import type { AlternativeHypothesis } from './alternativeHypothesis';
 /**
  * 統計検定のオプション設定
  */
-export interface StatisticalTestOptions {
+export type StatisticalTestOptions = {
   /** 対立仮説の方向。two-sided: 両側検定（デフォルト）、larger: 右側検定、smaller: 左側検定 */
   alternative?: AlternativeHypothesis;
   /** 1 群検定における比較基準値（デフォルト: 0.0） */
@@ -18,4 +18,4 @@ export interface StatisticalTestOptions {
   paired?: boolean;
   /** t 検定で等分散を仮定するかどうか。False の場合は Welch の t 検定を使用（デフォルト: True） */
   equalVar?: boolean;
-}
+};

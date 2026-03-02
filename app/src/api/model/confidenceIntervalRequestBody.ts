@@ -9,7 +9,7 @@ import type { ConfidenceIntervalStatisticsType } from './confidenceIntervalStati
 /**
  * 信頼区間計算リクエスト
  */
-export interface ConfidenceIntervalRequestBody {
+export type ConfidenceIntervalRequestBody = {
   /**
    * 信頼区間を計算する対象テーブル名。ワークスペース内に存在するテーブル名を指定してください。
    * @minLength 1
@@ -28,4 +28,4 @@ export interface ConfidenceIntervalRequestBody {
   confidenceLevel: number;
   /** 信頼区間を計算する統計量のタイプ。（mean: 平均、median: 中央値、proportion: 割合、variance: 分散、standard_deviation: 標準偏差） */
   statisticType: ConfidenceIntervalStatisticsType;
-}
+};

@@ -8,7 +8,7 @@
 /**
  * カラムソートレスポンス
  */
-export interface SortColumnsResult {
+export type SortColumnsResult = {
   /** ソートを実行したテーブル名 */
   tableName: string;
-}
+};

@@ -9,7 +9,7 @@ import type { SimulationColumnConfig } from './simulationColumnConfig';
 /**
  * シミュレーションデータテーブル作成リクエスト
  */
-export interface CreateSimulationDataTableRequestBody {
+export type CreateSimulationDataTableRequestBody = {
   /**
    * 作成するシミュレーションデータテーブルの名前。ワークスペース内に存在しない名前を指定してください。
    * @minLength 1
@@ -27,4 +27,4 @@ export interface CreateSimulationDataTableRequestBody {
    * @minItems 1
    */
   simulationColumns: SimulationColumnConfig[];
-}
+};

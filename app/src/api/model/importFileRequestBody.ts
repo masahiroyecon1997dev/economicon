@@ -15,7 +15,7 @@ import type { ImportFileRequestBodyEncoding } from './importFileRequestBodyEncod
 - .xlsx / .xls → Excel インポーター（sheet_name が有効）
 - .parquet     → Parquet インポーター
  */
-export interface ImportFileRequestBody {
+export type ImportFileRequestBody = {
   /**
    * インポートするファイルの絶対パス。対応拡張子: .csv, .tsv, .xlsx, .xls, .parquet（相対パスはサポートされていません）。
    * @minLength 1
@@ -39,4 +39,4 @@ export interface ImportFileRequestBody {
   encoding?: ImportFileRequestBodyEncoding;
   /** インポートする Excel シート名（Excel のみ有効）。省略または null の場合は先頭シートを読み込みます。シート名は大文字・小文字を区別します。 */
   sheetName?: string | null;
-}
+};

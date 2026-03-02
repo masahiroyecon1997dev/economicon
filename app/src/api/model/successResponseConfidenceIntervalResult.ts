@@ -6,9 +6,9 @@
  */
 import type { ConfidenceIntervalResult } from './confidenceIntervalResult';
 
-export interface SuccessResponseConfidenceIntervalResult {
+export type SuccessResponseConfidenceIntervalResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: ConfidenceIntervalResult;
-}
+};

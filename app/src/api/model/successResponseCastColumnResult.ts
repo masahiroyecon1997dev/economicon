@@ -6,9 +6,9 @@
  */
 import type { CastColumnResult } from './castColumnResult';
 
-export interface SuccessResponseCastColumnResult {
+export type SuccessResponseCastColumnResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: CastColumnResult;
-}
+};

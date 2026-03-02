@@ -8,7 +8,7 @@
 /**
  * ユニオンテーブル作成リクエスト
  */
-export interface CreateUnionTableRequestBody {
+export type CreateUnionTableRequestBody = {
   /**
    * ユニオン後に作成される新しいテーブル名
    * @minLength 1
@@ -26,4 +26,4 @@ export interface CreateUnionTableRequestBody {
    * @minItems 1
    */
   columnNames: string[];
-}
+};

@@ -9,7 +9,7 @@ import type { TransformMethodConfig } from './transformMethodConfig';
 /**
  * カラム変換リクエスト
  */
-export interface TransformColumnRequestBody {
+export type TransformColumnRequestBody = {
   /**
    * テーブル名
    * @minLength 1
@@ -33,4 +33,4 @@ export interface TransformColumnRequestBody {
    */
   addPositionColumn: string;
   transformMethod: TransformMethodConfig;
-}
+};

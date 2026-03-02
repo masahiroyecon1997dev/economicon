@@ -6,9 +6,9 @@
  */
 import type { CreateCorrelationTableResult } from './createCorrelationTableResult';
 
-export interface SuccessResponseCreateCorrelationTableResult {
+export type SuccessResponseCreateCorrelationTableResult = {
   /** レスポンスコード */
   code?: string;
   /** 処理結果 */
   result: CreateCorrelationTableResult;
-}
+};

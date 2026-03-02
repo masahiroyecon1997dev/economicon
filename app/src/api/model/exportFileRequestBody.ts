@@ -18,7 +18,7 @@ import type { ExportFileRequestBodyFormat } from './exportFileRequestBodyFormat'
 - ``excel``   → Excel エクスポーター（sheet_name が有効）
 - ``parquet`` → Parquet エクスポーター
  */
-export interface ExportFileRequestBody {
+export type ExportFileRequestBody = {
   /**
    * エクスポートするテーブル名。ワークスペース内に存在するテーブル名を指定してください。
    * @minLength 1
@@ -51,4 +51,4 @@ export interface ExportFileRequestBody {
   includeHeader?: boolean;
   /** 出力する Excel シート名（Excel のみ有効）。省略または null の場合は 'Sheet1' を使用します。 */
   sheetName?: string | null;
-}
+};

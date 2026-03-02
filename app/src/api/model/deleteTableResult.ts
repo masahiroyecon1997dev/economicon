@@ -8,7 +8,7 @@
 /**
  * テーブル削除レスポンス
  */
-export interface DeleteTableResult {
+export type DeleteTableResult = {
   /** 操作対象または生成されたテーブル名 */
   tableName: string;
-}
+};

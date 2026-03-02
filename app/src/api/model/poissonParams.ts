@@ -8,7 +8,7 @@
 /**
  * ポアソン分布のパラメータ
  */
-export interface PoissonParams {
+export type PoissonParams = {
   /** 分布の種類 */
   type: 'poisson';
   /**
@@ -16,4 +16,4 @@ export interface PoissonParams {
    * @exclusiveMinimum 0
    */
   lam: number;
-}
+};

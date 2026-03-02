@@ -8,9 +8,9 @@
 /**
  * べき乗変換のパラメータ
  */
-export interface PowerParams {
+export type PowerParams = {
   /** 変換方法 */
   method: 'power';
   /** べき乗の指数 (省略時は2乗) */
   exponent?: number;
-}
+};

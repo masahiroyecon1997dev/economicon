@@ -8,11 +8,11 @@ import type { BinaryChoiceRegressionParamsBinaryResidualType } from './binaryCho
 import type { BinaryChoiceRegressionParamsMethod } from './binaryChoiceRegressionParamsMethod';
 import type { BinaryChoiceRegularization } from './binaryChoiceRegularization';
 
-export interface BinaryChoiceRegressionParams {
+export type BinaryChoiceRegressionParams = {
   method: BinaryChoiceRegressionParamsMethod;
   regularization?: BinaryChoiceRegularization | null;
   /** 平均限界効果(AME)を計算するかどうか */
   calculateMarginalEffects?: boolean;
   /** 残差種別。raw: 生残差 (y - p̂)、deviance: デビアンス残差。Logit/Probit のみ有効。 */
   binaryResidualType?: BinaryChoiceRegressionParamsBinaryResidualType;
-}
+};

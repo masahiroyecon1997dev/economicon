@@ -6,7 +6,7 @@
  */
 import type { RegularizedRegressionParamsMethod } from './regularizedRegressionParamsMethod';
 
-export interface RegularizedRegressionParams {
+export type RegularizedRegressionParams = {
   method: RegularizedRegressionParamsMethod;
   /**
    * 正則化強度のパラメータ
@@ -23,4 +23,4 @@ export interface RegularizedRegressionParams {
   bootstrapIterations?: number;
   /** ブートストラップの乱数シード。None の場合は固定しない。実験の再現性を確保する場合は整数値を指定する。 */
   randomState?: number | null;
-}
+};

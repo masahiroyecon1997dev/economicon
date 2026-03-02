@@ -8,7 +8,7 @@
 /**
  * 指数分布のパラメータ
  */
-export interface ExponentialParams {
+export type ExponentialParams = {
   /** 分布の種類 */
   type: 'exponential';
   /**
@@ -16,4 +16,4 @@ export interface ExponentialParams {
    * @exclusiveMinimum 0
    */
   scale: number;
-}
+};

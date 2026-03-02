@@ -8,7 +8,7 @@
 /**
  * テーブルリスト取得レスポンス
  */
-export interface GetTableListResult {
+export type GetTableListResult = {
   /** ワークスペースに存在するテーブル名のリスト */
   tableNameList: string[];
-}
+};

@@ -8,9 +8,9 @@
 /**
  * カラム変換レスポンス
  */
-export interface TransformColumnResult {
+export type TransformColumnResult = {
   /** 変換カラムを追加したテーブル名 */
   tableName: string;
   /** 追加した変換カラム名 */
   columnName: string;
-}
+};
