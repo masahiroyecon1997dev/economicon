@@ -50,6 +50,7 @@ from tests.regressions.conftest import URL_REGRESSION, URL_RESULTS
 # このファイルから parents[3] = ワークスペースルート
 _BENCHMARK_JSON = (
     Path(__file__).resolve().parents[3]
+    / "Rcode"
     / "tests"
     / "benchmarks"
     / "r_grunfeld_gold.json"
