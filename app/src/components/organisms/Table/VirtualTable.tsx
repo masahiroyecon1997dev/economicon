@@ -185,7 +185,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
       },
     ];
     // 列名の描画幅から幅を計算（バッジ+ギャップ+メニュー+パディング ≈ 68px）
-    const HEADER_OVERHEAD = 68;
+    const HEADER_OVERHEAD = 80;
     const MAX_COL_WIDTH = 250;
     const MIN_COL_WIDTH = 80;
 
