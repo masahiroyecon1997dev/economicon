@@ -200,7 +200,10 @@ export const AppBar = () => {
         {
           id: "join-table",
           label: t("HeaderMenu.JoinTable"),
-          handleSelect: () => {},
+          handleSelect: () => {
+            setCurrentView("JoinTable");
+            close();
+          },
         },
         {
           id: "union-table",
