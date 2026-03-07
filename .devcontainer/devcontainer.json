@@ -5,24 +5,26 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-ceintl.vscode-language-pack-ja",
-        "esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint",
-        "ecmel.vscode-html-css",
-        "bradlc.vscode-tailwindcss",
-        "xabikos.javascriptsnippets",
-        "dsznajder.es7-react-js-snippets",
+        "oderwat.indent-rainbow",
+        "ms-python.debugpy",
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-python.debugpy",
-        "ms-python.flake8",
-        "ms-python.autopep8",
-        "batisteo.vscode-django",
-        "njpwerner.autodocstring",
-        "ms-python.autopep8",
-        "github.copilot",
+        "ms-python.vscode-python-envs",
+        "ms-vscode.cpptools",
+        "christian-kohler.path-intellisense",
+        "pkief.material-icon-theme",
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "tauri-apps.tauri-vscode",
+        "usernamehw.errorlens",
+        "charliermarsh.ruff",
+        "Bradlc.vscode-tailwindcss",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
         "github.copilot-chat",
-        "visualstudioexptteam.vscodeintellicode"
+        "github.vscode-github-actions",
+        "mhutchie.git-graph",
+        "reditorsupport.r"
       ]
     }
   },
