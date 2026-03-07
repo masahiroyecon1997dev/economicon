@@ -1,4 +1,5 @@
 ﻿@import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 /* ===== Class-based dark mode (Tailwind v4) ===== */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -129,28 +130,6 @@
   }
 }
 
-@keyframes dialog-slide-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, calc(-50% - 20px));
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-  }
-}
-
-@keyframes dialog-slide-out {
-  from {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, calc(-50% - 12px));
-  }
-}
-
 /* =============================================================
    .animate-* ユーティリティクラス & スクロールバー非表示
    ============================================================= */
@@ -181,26 +160,6 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-}
-
-/* =============================================================
-   Radix Dialog アニメーション（グローバルスコープ）
-   @layer 外に置くことで @keyframes が確実に参照される。
-   ============================================================= */
-[data-radix-dialog-overlay][data-state="open"] {
-  animation: fade-in 0.2s ease-out;
-}
-
-[data-radix-dialog-overlay][data-state="closed"] {
-  animation: fade-out 0.15s ease-in;
-}
-
-[data-radix-dialog-content][data-state="open"] {
-  animation: dialog-slide-in 0.2s ease-out forwards;
-}
-
-[data-radix-dialog-content][data-state="closed"] {
-  animation: dialog-slide-out 0.15s ease-in forwards;
 }
 
 body {
