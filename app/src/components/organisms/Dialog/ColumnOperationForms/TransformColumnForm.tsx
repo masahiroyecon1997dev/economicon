@@ -2,7 +2,7 @@
  * 変換列追加フォーム（対数・べき乗・累乗根）
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
@@ -23,6 +23,8 @@ type TransformMethod = "log" | "power" | "root";
 export const TransformColumnForm = ({
   tableName,
   column,
+  formId,
+  onIsSubmittingChange,
   onSuccess,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
@@ -105,10 +107,14 @@ export const TransformColumnForm = ({
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+  useEffect(() => {
+    onIsSubmittingChange(isSubmitting);
+  }, [isSubmitting, onIsSubmittingChange]);
   const method = useStore(form.store, (s) => s.values.method);
 
   return (
     <form
+      id={formId}
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
