@@ -179,118 +179,174 @@ export const DescriptiveStatistics = () => {
       title={t("DescriptiveStatistics.Title")}
       description={t("DescriptiveStatistics.Description")}
     >
-      {/* ─── 1. Table selection ────────────────────────────── */}
-      <FormField
-        label={t("DescriptiveStatistics.TableLabel")}
-        error={errors.table}
-      >
-        <Select
-          value={selectedTable}
-          onValueChange={(v) => {
-            setSelectedTable(v);
-            setErrors({});
-          }}
-          placeholder={t("DescriptiveStatistics.SelectTable")}
+      <div className="flex-1 overflow-y-auto min-h-0 space-y-4 pb-2">
+        {/* ─── 1. Table selection ────────────────────────────── */}
+        <FormField
+          label={t("DescriptiveStatistics.TableLabel")}
+          error={errors.table}
         >
-          {tableList.map((name) => (
-            <SelectItem key={name} value={name}>
-              {name}
-            </SelectItem>
-          ))}
-        </Select>
-      </FormField>
-
-      {/* ─── 2. Column selection ───────────────────────────── */}
-      {selectedTable && (
-        <FormField label={t("DescriptiveStatistics.ColumnsLabel")}>
-          {isLoadingCols ? (
-            <p className="text-sm text-brand-text-sub">
-              {t("DescriptiveStatistics.LoadingColumns")}
-            </p>
-          ) : columns.length === 0 ? (
-            <p className="text-sm text-brand-text-sub">
-              {t("DescriptiveStatistics.NoColumns")}
-            </p>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCheckedCols(new Set(columns.map((c) => c.name)))
-                  }
-                  className="text-xs text-brand-accent hover:underline"
-                >
-                  {t("DescriptiveStatistics.SelectAll")}
-                </button>
-                <span className="text-xs text-brand-text-sub">/</span>
-                <button
-                  type="button"
-                  onClick={() => setCheckedCols(new Set())}
-                  className="text-xs text-brand-accent hover:underline"
-                >
-                  {t("DescriptiveStatistics.DeselectAll")}
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {columns.map((col) => (
-                  <button
-                    key={col.name}
-                    type="button"
-                    onClick={() => toggleCol(col.name)}
-                    className={chipClass(checkedCols.has(col.name))}
-                  >
-                    {col.name}
-                  </button>
-                ))}
-              </div>
-              {errors.columns && (
-                <p className="text-xs text-red-500">{errors.columns}</p>
-              )}
-            </div>
-          )}
-        </FormField>
-      )}
-
-      {/* ─── 3. Statistics selection ───────────────────────── */}
-      <FormField label={t("DescriptiveStatistics.StatisticsLabel")}>
-        <div className="space-y-2">
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setCheckedStats(new Set(ALL_STAT_TYPES))}
-              className="text-xs text-brand-accent hover:underline"
-            >
-              {t("DescriptiveStatistics.SelectAll")}
-            </button>
-            <span className="text-xs text-brand-text-sub">/</span>
-            <button
-              type="button"
-              onClick={() => setCheckedStats(new Set())}
-              className="text-xs text-brand-accent hover:underline"
-            >
-              {t("DescriptiveStatistics.DeselectAll")}
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {ALL_STAT_TYPES.map((stat) => (
-              <button
-                key={stat}
-                type="button"
-                onClick={() => toggleStat(stat)}
-                className={chipClass(checkedStats.has(stat))}
-              >
-                {t(`DescriptiveStatistics.Stat_${stat}`)}
-              </button>
+          <Select
+            value={selectedTable}
+            onValueChange={(v) => {
+              setSelectedTable(v);
+              setErrors({});
+            }}
+            placeholder={t("DescriptiveStatistics.SelectTable")}
+          >
+            {tableList.map((name) => (
+              <SelectItem key={name} value={name}>
+                {name}
+              </SelectItem>
             ))}
-          </div>
-          {errors.stats && (
-            <p className="text-xs text-red-500">{errors.stats}</p>
-          )}
-        </div>
-      </FormField>
+          </Select>
+        </FormField>
 
-      {/* ─── 4. Submit ─────────────────────────────────────── */}
+        {/* ─── 2. Column selection ───────────────────────────── */}
+        {selectedTable && (
+          <FormField label={t("DescriptiveStatistics.ColumnsLabel")}>
+            {isLoadingCols ? (
+              <p className="text-sm text-brand-text-sub">
+                {t("DescriptiveStatistics.LoadingColumns")}
+              </p>
+            ) : columns.length === 0 ? (
+              <p className="text-sm text-brand-text-sub">
+                {t("DescriptiveStatistics.NoColumns")}
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCheckedCols(new Set(columns.map((c) => c.name)))
+                    }
+                    className="text-xs text-brand-accent hover:underline"
+                  >
+                    {t("DescriptiveStatistics.SelectAll")}
+                  </button>
+                  <span className="text-xs text-brand-text-sub">/</span>
+                  <button
+                    type="button"
+                    onClick={() => setCheckedCols(new Set())}
+                    className="text-xs text-brand-accent hover:underline"
+                  >
+                    {t("DescriptiveStatistics.DeselectAll")}
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {columns.map((col) => (
+                    <button
+                      key={col.name}
+                      type="button"
+                      onClick={() => toggleCol(col.name)}
+                      className={chipClass(checkedCols.has(col.name))}
+                    >
+                      {col.name}
+                    </button>
+                  ))}
+                </div>
+                {errors.columns && (
+                  <p className="text-xs text-red-500">{errors.columns}</p>
+                )}
+              </div>
+            )}
+          </FormField>
+        )}
+
+        {/* ─── 3. Statistics selection ───────────────────────── */}
+        <FormField label={t("DescriptiveStatistics.StatisticsLabel")}>
+          <div className="space-y-2">
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setCheckedStats(new Set(ALL_STAT_TYPES))}
+                className="text-xs text-brand-accent hover:underline"
+              >
+                {t("DescriptiveStatistics.SelectAll")}
+              </button>
+              <span className="text-xs text-brand-text-sub">/</span>
+              <button
+                type="button"
+                onClick={() => setCheckedStats(new Set())}
+                className="text-xs text-brand-accent hover:underline"
+              >
+                {t("DescriptiveStatistics.DeselectAll")}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {ALL_STAT_TYPES.map((stat) => (
+                <button
+                  key={stat}
+                  type="button"
+                  onClick={() => toggleStat(stat)}
+                  className={chipClass(checkedStats.has(stat))}
+                >
+                  {t(`DescriptiveStatistics.Stat_${stat}`)}
+                </button>
+              ))}
+            </div>
+            {errors.stats && (
+              <p className="text-xs text-red-500">{errors.stats}</p>
+            )}
+          </div>
+        </FormField>
+
+        {/* ─── 4. Submit ─────────────────────────────────────── */}
+        {/* ActionButtonBar は最下部に移動済み */}
+
+        {/* ─── 5. Result table ───────────────────────────────── */}
+        {result && (
+          <div className="space-y-2 pb-4">
+            <h2 className="text-sm font-semibold text-brand-text-main">
+              {t("DescriptiveStatistics.ResultTitle")}
+            </h2>
+            <div className="overflow-x-auto rounded-lg border border-border-color">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="bg-brand-secondary border-b border-border-color">
+                    <th className="px-4 py-2.5 text-left font-medium text-brand-text-sub whitespace-nowrap sticky left-0 bg-brand-secondary">
+                      {t("DescriptiveStatistics.Column")}
+                    </th>
+                    {result.stats.map((stat) => (
+                      <th
+                        key={stat}
+                        className="px-4 py-2.5 text-right font-medium text-brand-text-sub whitespace-nowrap"
+                      >
+                        {t(`DescriptiveStatistics.Stat_${stat}`)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.cols.map((col, i) => (
+                    <tr
+                      key={col}
+                      className={cn(
+                        "border-b border-border-color last:border-0 transition-colors",
+                        i % 2 === 0
+                          ? "bg-white dark:bg-brand-primary"
+                          : "bg-brand-secondary/40",
+                      )}
+                    >
+                      <td className="px-4 py-2 font-medium text-brand-text-main sticky left-0 bg-inherit whitespace-nowrap">
+                        {col}
+                      </td>
+                      {result.stats.map((stat) => (
+                        <td
+                          key={stat}
+                          className="px-4 py-2 text-right font-mono text-brand-text-main tabular-nums"
+                        >
+                          {formatStatValue(result.data[col]?.[stat])}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
       <ActionButtonBar
         cancelText={t("Common.Cancel")}
         selectText={
@@ -301,59 +357,6 @@ export const DescriptiveStatistics = () => {
         onCancel={() => setCurrentView("DataPreview")}
         onSelect={handleSubmit}
       />
-
-      {/* ─── 5. Result table ───────────────────────────────── */}
-      {result && (
-        <div className="mt-4 space-y-2 pb-4">
-          <h2 className="text-sm font-semibold text-brand-text-main">
-            {t("DescriptiveStatistics.ResultTitle")}
-          </h2>
-          <div className="overflow-x-auto rounded-lg border border-border-color">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="bg-brand-secondary border-b border-border-color">
-                  <th className="px-4 py-2.5 text-left font-medium text-brand-text-sub whitespace-nowrap sticky left-0 bg-brand-secondary">
-                    {t("DescriptiveStatistics.Column")}
-                  </th>
-                  {result.stats.map((stat) => (
-                    <th
-                      key={stat}
-                      className="px-4 py-2.5 text-right font-medium text-brand-text-sub whitespace-nowrap"
-                    >
-                      {t(`DescriptiveStatistics.Stat_${stat}`)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {result.cols.map((col, i) => (
-                  <tr
-                    key={col}
-                    className={cn(
-                      "border-b border-border-color last:border-0 transition-colors",
-                      i % 2 === 0
-                        ? "bg-white dark:bg-brand-primary"
-                        : "bg-brand-secondary/40",
-                    )}
-                  >
-                    <td className="px-4 py-2 font-medium text-brand-text-main sticky left-0 bg-inherit whitespace-nowrap">
-                      {col}
-                    </td>
-                    {result.stats.map((stat) => (
-                      <td
-                        key={stat}
-                        className="px-4 py-2 text-right font-mono text-brand-text-main tabular-nums"
-                      >
-                        {formatStatValue(result.data[col]?.[stat])}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </PageLayout>
   );
 };

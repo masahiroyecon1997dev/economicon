@@ -186,7 +186,7 @@ export const JoinTable = () => {
       title={t("JoinTable.Title")}
       description={t("JoinTable.Description")}
     >
-      <div className="flex flex-col gap-4 overflow-auto pb-2">
+      <div className="flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
         {/* ── Section 1: テーブル・結合タイプ ── */}
         <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading">

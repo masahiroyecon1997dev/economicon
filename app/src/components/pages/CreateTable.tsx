@@ -45,6 +45,7 @@ import type {
 } from "../../types/commonTypes";
 import { Button } from "../atoms/Button/Button";
 import { InputText } from "../atoms/Input/InputText";
+import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
 import { ErrorAlert } from "../molecules/Alert/ErrorAlert";
 import { FormField } from "../molecules/Form/FormField";
 import { NavigationSearchBar } from "../molecules/Navigation/NavigationSearchBar";
@@ -869,21 +870,14 @@ export const CreateTable = () => {
         )}
 
         {/*  アクションバー（常に最下部に固定） */}
-        <div className="shrink-0 pt-2 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setCurrentView("DataPreview")}
-              disabled={isSubmitting}
-            >
-              {t("Common.Cancel")}
-            </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? "..." : t("CreateTableView.Submit")}
-            </Button>
-          </div>
-        </div>
+        <ActionButtonBar
+          cancelText={t("Common.Cancel")}
+          selectText={isSubmitting ? "..." : t("CreateTableView.Submit")}
+          onCancel={() => setCurrentView("DataPreview")}
+          onSelect={() => {}}
+          onSelectType="submit"
+          disabled={isSubmitting}
+        />
       </form>
     </PageLayout>
   );
