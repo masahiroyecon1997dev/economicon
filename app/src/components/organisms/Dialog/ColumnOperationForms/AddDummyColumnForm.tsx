@@ -2,7 +2,7 @@
  * ダミー変数追加フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
@@ -24,6 +24,8 @@ type NullStrategy = "exclude" | "as_category" | "error";
 export const AddDummyColumnForm = ({
   tableName,
   column,
+  formId,
+  onIsSubmittingChange,
   onSuccess,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
@@ -97,10 +99,14 @@ export const AddDummyColumnForm = ({
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+  useEffect(() => {
+    onIsSubmittingChange(isSubmitting);
+  }, [isSubmitting, onIsSubmittingChange]);
   const mode = useStore(form.store, (s) => s.values.mode);
 
   return (
     <form
+      id={formId}
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();

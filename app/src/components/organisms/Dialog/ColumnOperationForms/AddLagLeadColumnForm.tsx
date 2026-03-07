@@ -2,7 +2,7 @@
  * ラグ・リード列追加フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
@@ -20,6 +20,8 @@ import type { ColumnOperationFormPropsType } from "./types";
 export const AddLagLeadColumnForm = ({
   tableName,
   column,
+  formId,
+  onIsSubmittingChange,
   onSuccess,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
@@ -97,6 +99,9 @@ export const AddLagLeadColumnForm = ({
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+  useEffect(() => {
+    onIsSubmittingChange(isSubmitting);
+  }, [isSubmitting, onIsSubmittingChange]);
   const periods = useStore(form.store, (s) => s.values.periods);
 
   const handlePeriodsChange = (value: string) => {
@@ -110,6 +115,7 @@ export const AddLagLeadColumnForm = ({
 
   return (
     <form
+      id={formId}
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
