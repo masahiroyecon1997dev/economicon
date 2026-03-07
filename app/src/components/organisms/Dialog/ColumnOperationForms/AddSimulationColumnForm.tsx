@@ -5,7 +5,7 @@
  * 選択した確率分布からランダム値を持つ列をテーブルに追加する。
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
@@ -14,7 +14,6 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
-import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -195,8 +194,9 @@ const buildDistribution = (type: DistributionType, params: ParamValues) => {
 export const AddSimulationColumnForm = ({
   tableName,
   column,
+  formId,
+  onIsSubmittingChange,
   onSuccess,
-  onClose,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
   const [apiError, setApiError] = useState<string | null>(null);
@@ -289,11 +289,15 @@ export const AddSimulationColumnForm = ({
     form.store,
     (s) => s.values.distributionType,
   );
+  useEffect(() => {
+    onIsSubmittingChange(isSubmitting);
+  }, [isSubmitting, onIsSubmittingChange]);
 
   const currentParams = DIST_PARAMS[distributionType];
 
   return (
     <form
+      id={formId}
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -387,15 +391,6 @@ export const AddSimulationColumnForm = ({
       ))}
 
       {apiError && <ErrorAlert message={apiError} />}
-
-      <div className="flex justify-end gap-2 pt-2">
-        <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-          {t("Common.Cancel")}
-        </Button>
-        <Button variant="primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "..." : t("AddSimulationColumnForm.Submit")}
-        </Button>
-      </div>
     </form>
   );
 };

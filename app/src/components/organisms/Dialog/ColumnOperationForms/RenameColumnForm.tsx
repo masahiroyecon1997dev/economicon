@@ -2,7 +2,7 @@
  * 列名変更フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
@@ -11,7 +11,6 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
-import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
@@ -21,8 +20,9 @@ import type { ColumnOperationFormPropsType } from "./types";
 export const RenameColumnForm = ({
   tableName,
   column,
+  formId,
+  onIsSubmittingChange,
   onSuccess,
-  onClose,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
 
@@ -74,9 +74,13 @@ export const RenameColumnForm = ({
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+  useEffect(() => {
+    onIsSubmittingChange(isSubmitting);
+  }, [isSubmitting, onIsSubmittingChange]);
 
   return (
     <form
+      id={formId}
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -124,14 +128,6 @@ export const RenameColumnForm = ({
       </form.Field>
 
       {apiError && <ErrorAlert message={apiError} />}
-      <div className="flex justify-end gap-2 pt-2">
-        <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-          {t("Common.Cancel")}
-        </Button>
-        <Button variant="primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "..." : t("RenameColumnForm.Submit")}
-        </Button>
-      </div>
     </form>
   );
 };
