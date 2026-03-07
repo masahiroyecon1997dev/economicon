@@ -8,7 +8,6 @@
  * - データ / ログ: 将来の拡張スペース
  * - 保存ボタンで PUT /api/settings を呼び出し、成功時に store を更新
  */
-import * as Dialog from "@radix-ui/react-dialog";
 import * as Select from "@radix-ui/react-select";
 import * as Tabs from "@radix-ui/react-tabs";
 import {
@@ -18,7 +17,6 @@ import {
   FileText,
   Palette,
   SlidersHorizontal,
-  X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,7 +26,7 @@ import { THEMES } from "../../../constants/themes";
 import { showMessageDialog } from "../../../lib/dialog/message";
 import { cn } from "../../../lib/utils/helpers";
 import { useSettingsStore } from "../../../stores/settings";
-import { Button } from "../../atoms/Button/Button";
+import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
 
 // ─── 型定義 ──────────────────────────────────────────────────────────────────
 
@@ -259,209 +257,178 @@ export const SettingsDialog = ({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-gray-900/40" />
-        <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-xl"
-          aria-describedby={undefined}
+    <BaseDialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title={t("SettingsDialog.Title")}
+      maxWidth="2xl"
+      footerVariant="confirm"
+      submitLabel={
+        isSaving ? t("SettingsDialog.Saving") : t("SettingsDialog.Save")
+      }
+      onSubmit={() => void handleSave()}
+      isSubmitting={isSaving}
+      isSubmitDisabled={!isDirty || isSaving}
+      contentClassName="p-0"
+    >
+      {/* タブ + コンテンツ */}
+      <Tabs.Root defaultValue="appearance" className="flex min-h-100">
+        {/* 左サイドバー: タブリスト */}
+        <Tabs.List
+          className="flex w-44 shrink-0 flex-col gap-0.5 border-r border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/60 p-3"
+          aria-label={t("SettingsDialog.TabsLabel")}
         >
-          {/* ヘッダー */}
-          <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-5 py-4">
-            <Dialog.Title className="text-base font-semibold text-gray-900 dark:text-gray-100">
-              {t("SettingsDialog.Title")}
-            </Dialog.Title>
-            <Dialog.Close asChild>
-              <button
-                type="button"
-                className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
-                aria-label={t("Common.Close")}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </Dialog.Close>
-          </div>
-
-          {/* タブ + コンテンツ */}
-          <Tabs.Root defaultValue="appearance" className="flex min-h-100">
-            {/* 左サイドバー: タブリスト */}
-            <Tabs.List
-              className="flex w-44 shrink-0 flex-col gap-0.5 border-r border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/60 p-3"
-              aria-label={t("SettingsDialog.TabsLabel")}
+          {TABS.map((tab) => (
+            <Tabs.Trigger
+              key={tab.id}
+              value={tab.id}
+              className={cn(
+                "flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors",
+                "text-gray-500 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 hover:text-gray-700 dark:hover:text-gray-200",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+                "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100 data-[state=active]:shadow-sm",
+              )}
             >
-              {TABS.map((tab) => (
-                <Tabs.Trigger
-                  key={tab.id}
-                  value={tab.id}
+              <tab.Icon size={15} aria-hidden="true" />
+              <span>{t(tab.labelKey)}</span>
+            </Tabs.Trigger>
+          ))}
+        </Tabs.List>
+
+        {/* 右コンテンツエリア */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* ===== 外観タブ ===== */}
+          <Tabs.Content
+            value="appearance"
+            className="flex-1 overflow-y-auto px-6 py-5"
+          >
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              {t("SettingsDialog.Theme.Label")}
+            </h3>
+            <p className="mb-4 mt-1 text-xs text-gray-400 dark:text-gray-500">
+              {t("SettingsDialog.Theme.Description")}
+            </p>
+            <div className="grid grid-cols-3 gap-3">
+              {THEMES.map((thm) => (
+                <ThemeCard
+                  key={thm.id}
+                  theme={thm}
+                  isSelected={draft.theme === thm.id}
+                  onClick={() => handleThemeSelect(thm.id)}
+                />
+              ))}
+            </div>
+          </Tabs.Content>
+
+          {/* ===== 一般タブ ===== */}
+          <Tabs.Content
+            value="general"
+            className="flex-1 space-y-6 overflow-y-auto px-6 py-5"
+          >
+            {/* 言語 */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                {t("SettingsDialog.Language.Label")}
+              </h3>
+              <div className="mt-2 flex gap-2">
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.id}
+                    type="button"
+                    onClick={() =>
+                      setDraft((d) => ({ ...d, language: lang.id }))
+                    }
+                    className={cn(
+                      "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+                      draft.language === lang.id
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700",
+                    )}
+                  >
+                    {t(lang.labelKey)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* エンコーディング */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                {t("SettingsDialog.Encoding.Label")}
+              </h3>
+              <Select.Root
+                value={draft.encoding}
+                onValueChange={(v) => setDraft((d) => ({ ...d, encoding: v }))}
+              >
+                <Select.Trigger
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors",
-                    "text-gray-500 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 hover:text-gray-700 dark:hover:text-gray-200",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
-                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100 data-[state=active]:shadow-sm",
+                    "mt-2 flex h-9 w-48 items-center justify-between rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm text-gray-700 dark:text-gray-200",
+                    "hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500",
                   )}
                 >
-                  <tab.Icon size={15} aria-hidden="true" />
-                  <span>{t(tab.labelKey)}</span>
-                </Tabs.Trigger>
-              ))}
-            </Tabs.List>
-
-            {/* 右コンテンツエリア */}
-            <div className="flex min-w-0 flex-1 flex-col">
-              {/* ===== 外観タブ ===== */}
-              <Tabs.Content
-                value="appearance"
-                className="flex-1 overflow-y-auto px-6 py-5"
-              >
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  {t("SettingsDialog.Theme.Label")}
-                </h3>
-                <p className="mb-4 mt-1 text-xs text-gray-400 dark:text-gray-500">
-                  {t("SettingsDialog.Theme.Description")}
-                </p>
-                <div className="grid grid-cols-3 gap-3">
-                  {THEMES.map((thm) => (
-                    <ThemeCard
-                      key={thm.id}
-                      theme={thm}
-                      isSelected={draft.theme === thm.id}
-                      onClick={() => handleThemeSelect(thm.id)}
+                  <Select.Value />
+                  <Select.Icon>
+                    <ChevronDown
+                      size={14}
+                      className="text-gray-400 dark:text-gray-500"
                     />
-                  ))}
-                </div>
-              </Tabs.Content>
-
-              {/* ===== 一般タブ ===== */}
-              <Tabs.Content
-                value="general"
-                className="flex-1 space-y-6 overflow-y-auto px-6 py-5"
-              >
-                {/* 言語 */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    {t("SettingsDialog.Language.Label")}
-                  </h3>
-                  <div className="mt-2 flex gap-2">
-                    {LANGUAGES.map((lang) => (
-                      <button
-                        key={lang.id}
-                        type="button"
-                        onClick={() =>
-                          setDraft((d) => ({ ...d, language: lang.id }))
-                        }
-                        className={cn(
-                          "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
-                          draft.language === lang.id
-                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
-                            : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700",
-                        )}
-                      >
-                        {t(lang.labelKey)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* エンコーディング */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    {t("SettingsDialog.Encoding.Label")}
-                  </h3>
-                  <Select.Root
-                    value={draft.encoding}
-                    onValueChange={(v) =>
-                      setDraft((d) => ({ ...d, encoding: v }))
-                    }
+                  </Select.Icon>
+                </Select.Trigger>
+                <Select.Portal>
+                  <Select.Content
+                    className="z-100 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg"
+                    position="popper"
+                    sideOffset={4}
                   >
-                    <Select.Trigger
-                      className={cn(
-                        "mt-2 flex h-9 w-48 items-center justify-between rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm text-gray-700 dark:text-gray-200",
-                        "hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500",
-                      )}
-                    >
-                      <Select.Value />
-                      <Select.Icon>
-                        <ChevronDown
-                          size={14}
-                          className="text-gray-400 dark:text-gray-500"
-                        />
-                      </Select.Icon>
-                    </Select.Trigger>
-                    <Select.Portal>
-                      <Select.Content
-                        className="z-100 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg"
-                        position="popper"
-                        sideOffset={4}
-                      >
-                        <Select.Viewport className="p-1">
-                          {ENCODINGS.map((enc) => (
-                            <Select.Item
-                              key={enc}
-                              value={enc}
-                              className={cn(
-                                "flex cursor-pointer items-center rounded px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200",
-                                "hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none",
-                                "data-[state=checked]:font-medium data-[state=checked]:text-blue-600 dark:data-[state=checked]:text-blue-400",
-                              )}
-                            >
-                              <Select.ItemText>{enc}</Select.ItemText>
-                              <Select.ItemIndicator className="ml-auto pl-2">
-                                <Check size={12} className="text-blue-500" />
-                              </Select.ItemIndicator>
-                            </Select.Item>
-                          ))}
-                        </Select.Viewport>
-                      </Select.Content>
-                    </Select.Portal>
-                  </Select.Root>
-                </div>
-              </Tabs.Content>
-
-              {/* ===== データタブ（将来実装） ===== */}
-              <Tabs.Content
-                value="data"
-                className="flex-1 overflow-y-auto px-6 py-5"
-              >
-                <p className="text-sm text-gray-400 dark:text-gray-500">
-                  {t("SettingsDialog.Placeholder")}
-                </p>
-              </Tabs.Content>
-
-              {/* ===== ログタブ ===== */}
-              <Tabs.Content
-                value="log"
-                className="flex-1 overflow-y-auto px-6 py-5"
-              >
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  {t("SettingsDialog.LogPath.Label")}
-                </h3>
-                <p className="mt-2 break-all rounded-md bg-gray-50 dark:bg-gray-800 px-3 py-2 font-mono text-xs text-gray-500 dark:text-gray-400">
-                  {logPath || t("SettingsDialog.LogPath.NotSet")}
-                </p>
-              </Tabs.Content>
+                    <Select.Viewport className="p-1">
+                      {ENCODINGS.map((enc) => (
+                        <Select.Item
+                          key={enc}
+                          value={enc}
+                          className={cn(
+                            "flex cursor-pointer items-center rounded px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200",
+                            "hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none",
+                            "data-[state=checked]:font-medium data-[state=checked]:text-blue-600 dark:data-[state=checked]:text-blue-400",
+                          )}
+                        >
+                          <Select.ItemText>{enc}</Select.ItemText>
+                          <Select.ItemIndicator className="ml-auto pl-2">
+                            <Check size={12} className="text-blue-500" />
+                          </Select.ItemIndicator>
+                        </Select.Item>
+                      ))}
+                    </Select.Viewport>
+                  </Select.Content>
+                </Select.Portal>
+              </Select.Root>
             </div>
-          </Tabs.Root>
+          </Tabs.Content>
 
-          {/* フッター: 保存 / キャンセル */}
-          <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-700 px-5 py-3">
-            <Button
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              disabled={isSaving}
-            >
-              {t("Common.Cancel")}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => void handleSave()}
-              disabled={!isDirty || isSaving}
-            >
-              {isSaving ? t("SettingsDialog.Saving") : t("SettingsDialog.Save")}
-            </Button>
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+          {/* ===== データタブ（将来実装） ===== */}
+          <Tabs.Content
+            value="data"
+            className="flex-1 overflow-y-auto px-6 py-5"
+          >
+            <p className="text-sm text-gray-400 dark:text-gray-500">
+              {t("SettingsDialog.Placeholder")}
+            </p>
+          </Tabs.Content>
+
+          {/* ===== ログタブ ===== */}
+          <Tabs.Content
+            value="log"
+            className="flex-1 overflow-y-auto px-6 py-5"
+          >
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              {t("SettingsDialog.LogPath.Label")}
+            </h3>
+            <p className="mt-2 break-all rounded-md bg-gray-50 dark:bg-gray-800 px-3 py-2 font-mono text-xs text-gray-500 dark:text-gray-400">
+              {logPath || t("SettingsDialog.LogPath.NotSet")}
+            </p>
+          </Tabs.Content>
+        </div>
+      </Tabs.Root>
+    </BaseDialog>
   );
 };
