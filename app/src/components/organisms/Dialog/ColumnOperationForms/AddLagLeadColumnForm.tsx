@@ -11,7 +11,6 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
-import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
@@ -22,7 +21,6 @@ export const AddLagLeadColumnForm = ({
   tableName,
   column,
   onSuccess,
-  onClose,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
 
@@ -222,14 +220,6 @@ export const AddLagLeadColumnForm = ({
       </form.Field>
 
       {apiError && <ErrorAlert message={apiError} />}
-      <div className="flex justify-end gap-2 pt-2">
-        <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-          {t("Common.Cancel")}
-        </Button>
-        <Button variant="primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "..." : t("AddLagLeadColumnForm.Submit")}
-        </Button>
-      </div>
     </form>
   );
 };

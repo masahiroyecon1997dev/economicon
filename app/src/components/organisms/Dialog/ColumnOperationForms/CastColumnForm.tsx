@@ -11,7 +11,6 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
-import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -32,7 +31,6 @@ export const CastColumnForm = ({
   tableName,
   column,
   onSuccess,
-  onClose,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
 
@@ -248,14 +246,6 @@ export const CastColumnForm = ({
       </form.Field>
 
       {apiError && <ErrorAlert message={apiError} />}
-      <div className="flex justify-end gap-2 pt-2">
-        <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-          {t("Common.Cancel")}
-        </Button>
-        <Button variant="primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "..." : t("CastColumnForm.Submit")}
-        </Button>
-      </div>
     </form>
   );
 };

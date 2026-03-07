@@ -2,7 +2,7 @@
  * テーブル名変更フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../../../api/endpoints";
@@ -13,7 +13,6 @@ import {
 } from "../../../../lib/utils/apiError";
 import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
-import { Button } from "../../../atoms/Button/Button";
 import { InputText } from "../../../atoms/Input/InputText";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
@@ -21,13 +20,15 @@ import { FormField } from "../../../molecules/Form/FormField";
 type RenameTableFormProps = {
   tableName: string;
   onSuccess: () => void;
-  onClose: () => void;
+  formId: string;
+  onIsSubmittingChange: (isSubmitting: boolean) => void;
 };
 
 export const RenameTableForm = ({
   tableName,
   onSuccess,
-  onClose,
+  formId,
+  onIsSubmittingChange,
 }: RenameTableFormProps) => {
   const { t } = useTranslation();
   const setTableList = useTableListStore((s) => s.setTableList);
@@ -108,9 +109,13 @@ export const RenameTableForm = ({
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+  useEffect(() => {
+    onIsSubmittingChange(isSubmitting);
+  }, [isSubmitting, onIsSubmittingChange]);
 
   return (
     <form
+      id={formId}
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -155,14 +160,6 @@ export const RenameTableForm = ({
       </form.Field>
 
       {apiError && <ErrorAlert message={apiError} />}
-      <div className="flex justify-end gap-2 pt-2">
-        <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-          {t("Common.Cancel")}
-        </Button>
-        <Button variant="primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "..." : t("RenameTableForm.Submit")}
-        </Button>
-      </div>
     </form>
   );
 };

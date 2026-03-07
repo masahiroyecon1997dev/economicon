@@ -1,7 +1,7 @@
 /**
  * テーブル削除確認フォーム
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { getEconomiconAPI } from "../../../../api/endpoints";
 import {
@@ -11,24 +11,28 @@ import {
 import { useCurrentPageStore } from "../../../../stores/currentView";
 import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
-import { Button } from "../../../atoms/Button/Button";
 import { DangerAlert } from "../../../molecules/Alert/DangerAlert";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 
 type DeleteTableFormProps = {
   tableName: string;
   onSuccess: () => void;
-  onClose: () => void;
+  formId: string;
+  onIsSubmittingChange: (isSubmitting: boolean) => void;
 };
 
 export const DeleteTableForm = ({
   tableName,
   onSuccess,
-  onClose,
+  formId,
+  onIsSubmittingChange,
 }: DeleteTableFormProps) => {
   const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  useEffect(() => {
+    onIsSubmittingChange(isSubmitting);
+  }, [isSubmitting, onIsSubmittingChange]);
 
   const setTableList = useTableListStore((s) => s.setTableList);
   const removeTableInfo = useTableInfosStore((s) => s.removeTableInfo);
@@ -67,7 +71,15 @@ export const DeleteTableForm = ({
   };
 
   return (
-    <div className="space-y-4">
+    <form
+      id={formId}
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        void handleDelete();
+      }}
+      className="space-y-4"
+    >
       <DangerAlert>
         <Trans
           i18nKey="DeleteTableForm.Warning"
@@ -77,20 +89,6 @@ export const DeleteTableForm = ({
       </DangerAlert>
 
       {apiError && <ErrorAlert message={apiError} />}
-
-      <div className="flex justify-end gap-2 pt-2">
-        <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-          {t("Common.Cancel")}
-        </Button>
-        <Button
-          variant="primary"
-          className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 focus-visible:outline-red-600"
-          onClick={handleDelete}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "..." : t("Common.Delete")}
-        </Button>
-      </div>
-    </div>
+    </form>
   );
 };
