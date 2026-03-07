@@ -18,7 +18,9 @@ export const Table = () => {
       <div className="border-b border-gray-200 shrink-0">
         <nav className="-mb-px flex space-x-1 overflow-x-auto">
           {tableInfos.map((table) => (
-            <button
+            <div
+              role="button"
+              tabIndex={0}
               key={table.tableName}
               onClick={() => activateTableInfo(table.tableName)}
               className={cn(
@@ -27,6 +29,11 @@ export const Table = () => {
                   ? "border-brand-primary text-brand-primary"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
               )}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  activateTableInfo(table.tableName);
+                }
+              }}
             >
               {table.tableName}
               <button
@@ -38,7 +45,7 @@ export const Table = () => {
                 }}
                 className={cn(
                   "rounded-full w-4 h-4 flex items-center justify-center transition-colors",
-                  "opacity-0 group-hover:opacity-100",
+                  "opacity-0 group-hover:opacity-100 focus:opacity-100",
                   table.isActive
                     ? "hover:bg-brand-primary/20 text-brand-primary"
                     : "hover:bg-gray-200 text-gray-400 hover:text-gray-600",
@@ -46,7 +53,7 @@ export const Table = () => {
               >
                 <X className="w-2.5 h-2.5" />
               </button>
-            </button>
+            </div>
           ))}
         </nav>
       </div>
