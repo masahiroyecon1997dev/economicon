@@ -312,7 +312,7 @@ export const SaveData = () => {
                 fileNameHeader={t("ImportDataFileView.FileNameHeader")}
                 sizeHeader={t("ImportDataFileView.SizeHeader")}
                 lastModifiedHeader={t("ImportDataFileView.LastModifiedHeader")}
-                maxHeight="200px"
+                maxHeight="10%"
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={handleSort}
