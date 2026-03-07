@@ -88,7 +88,7 @@ export const VariableSelectorField = ({
       )}
       <div
         className={cn(
-          "h-64 overflow-y-auto rounded-lg border p-2",
+          "h-32 overflow-y-auto rounded-lg border p-2",
           error
             ? "border-red-500 bg-red-50"
             : "border-border-color bg-secondary",
@@ -108,7 +108,7 @@ export const VariableSelectorField = ({
               <li key={index}>
                 <label
                   className={cn(
-                    "flex w-full cursor-pointer items-center gap-3 rounded-md p-2",
+                    "flex w-full cursor-pointer items-center gap-3 rounded-md p-1.5",
                     disabled
                       ? "cursor-not-allowed opacity-50"
                       : "hover:bg-white",
