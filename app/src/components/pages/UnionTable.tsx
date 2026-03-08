@@ -12,6 +12,7 @@ import type { ColumnType } from "../../types/commonTypes";
 import { InputText } from "../atoms/Input/InputText";
 import { Select, SelectItem } from "../atoms/Input/Select";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
+import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
 import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
 
@@ -293,36 +294,13 @@ export const UnionTable = () => {
               {t("UnionTable.NoCommonColumns")}
             </p>
           ) : (
-            <div className="flex flex-wrap gap-2">
-              {commonCols.map((col) => {
-                const isChecked = checkedCols.has(col);
-                return (
-                  <label
-                    key={col}
-                    className={cn(
-                      "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors",
-                      isChecked
-                        ? "border-brand-accent bg-brand-accent/5 text-brand-accent"
-                        : "border-border-color bg-secondary text-brand-text-main hover:border-brand-accent/50",
-                      isDisabled && "cursor-not-allowed opacity-50",
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => handleToggleCol(col)}
-                      disabled={isDisabled}
-                      className="h-3.5 w-3.5 rounded border-gray-300 text-brand-accent focus:ring-brand-accent"
-                    />
-                    <span>{col}</span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
-
-          {errors.columns && (
-            <p className="mt-1.5 text-xs text-red-600">{errors.columns}</p>
+            <CheckboxTagGroup
+              items={commonCols.map((c) => ({ value: c, label: c }))}
+              checked={checkedCols}
+              onToggle={handleToggleCol}
+              disabled={isDisabled}
+              error={errors.columns}
+            />
           )}
         </div>
 
