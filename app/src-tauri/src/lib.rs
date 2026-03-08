@@ -1,14 +1,14 @@
 mod files;
 mod os_info;
 
-use tauri::State;
 use reqwest::Client;
-use serde::{Serialize};
+use serde::Serialize;
 use std::net::TcpListener;
 use std::time::Duration;
+use tauri::State;
 use uuid::Uuid;
 
-use files::{get_files_internal, get_files_with_fallback, GetFilesResponse, FileError};
+use files::{get_files_internal, get_files_with_fallback, FileError, GetFilesResponse};
 use os_info::{get_os_info_internal, OsInfoResponse};
 
 // HTTPクライアントを保持するState
@@ -45,7 +45,9 @@ struct ApiError {
 
 impl From<reqwest::Error> for ApiError {
     fn from(err: reqwest::Error) -> Self {
-        ApiError { message: err.to_string() }
+        ApiError {
+            message: err.to_string(),
+        }
     }
 }
 
@@ -71,10 +73,7 @@ async fn proxy_request(
     // "/api/" 以外のエンドポイントへの呼び出しを防ぐ。
     if !path.starts_with("/api/") {
         return Err(ApiError {
-            message: format!(
-                "Invalid path '{}': must start with '/api/'",
-                path
-            ),
+            message: format!("Invalid path '{}': must start with '/api/'", path),
         });
     }
 
@@ -86,7 +85,11 @@ async fn proxy_request(
         "POST" => state.client.post(&url),
         "PUT" => state.client.put(&url),
         "DELETE" => state.client.delete(&url),
-        _ => return Err(ApiError { message: format!("Unsupported method: {}", method) }),
+        _ => {
+            return Err(ApiError {
+                message: format!("Unsupported method: {}", method),
+            })
+        }
     };
 
     // 認証トークンをヘッダーに付与
@@ -122,10 +125,7 @@ async fn fetch_binary(
     // パス検証: 必ず "/api/" 始まりであることを確認する。
     if !path.starts_with("/api/") {
         return Err(ApiError {
-            message: format!(
-                "Invalid path '{}': must start with '/api/'",
-                path
-            ),
+            message: format!("Invalid path '{}': must start with '/api/'", path),
         });
     }
 
@@ -136,7 +136,11 @@ async fn fetch_binary(
         "POST" => state.client.post(&url),
         "PUT" => state.client.put(&url),
         "DELETE" => state.client.delete(&url),
-        _ => return Err(ApiError { message: format!("Unsupported method: {}", method) }),
+        _ => {
+            return Err(ApiError {
+                message: format!("Unsupported method: {}", method),
+            })
+        }
     };
 
     // 認証トークンをヘッダーに付与
@@ -151,10 +155,7 @@ async fn fetch_binary(
     }
     let response = request_builder.send().await?;
 
-    let bytes = response
-        .bytes()
-        .await
-        .map_err(|e| e.to_string())?;
+    let bytes = response.bytes().await.map_err(|e| e.to_string())?;
 
     Ok(bytes.to_vec()) // フロントエンド（JS）へ Uint8Array として渡る
 }
@@ -172,24 +173,21 @@ async fn upload_file(
     // パス検証: 必ず "/api/" 始まりであることを確認する。
     if !path.starts_with("/api/") {
         return Err(ApiError {
-            message: format!(
-                "Invalid path '{}': must start with '/api/'",
-                path
-            ),
+            message: format!("Invalid path '{}': must start with '/api/'", path),
         });
     }
 
     let base_url = format!("http://127.0.0.1:{}", port.port);
     let url = format!("{}{}", base_url, path);
 
-    let part = reqwest::multipart::Part::bytes(file_data)
-        .file_name(file_name.clone());
+    let part = reqwest::multipart::Part::bytes(file_data).file_name(file_name.clone());
 
-    let form = reqwest::multipart::Form::new()
-        .part("file", part); // Python側が "file" キーを期待していると仮定
+    let form = reqwest::multipart::Form::new().part("file", part); // Python側が "file" キーを期待していると仮定
 
     // 認証トークンをヘッダーに付与
-    let response = state.client.post(&url)
+    let response = state
+        .client
+        .post(&url)
         .header("X-Auth-Token", &auth.token)
         .multipart(form)
         .send()
@@ -244,7 +242,7 @@ pub fn run() {
 
     // サイドカー（FastAPI）が環境変数を参照できるよう、現プロセスに設定する
     // Tauriがサイドカーを起動する際、子プロセスは親の環境変数を継承する
-    // SAFETY: tauri::Builder::default() を呼ぶ前に設定することで
+    // SAFETY: tauri::Builder::default() .plugin(tauri_plugin_shell::init()) を呼ぶ前に設定することで
     //         マルチスレッド下での競合を回避する
     // NOTE:   set_var は Rust 2024 edition で unsafe に分類された。
     //         マルチスレッド現境で set_var を呼ぶと getenv との竞合で未定義動作になるリスクがあるが、
@@ -264,7 +262,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(ClientState { client })
         .manage(AuthTokenState { token: auth_token }) // 生成したトークンをStateとして登録
-        .manage(PortState { port: api_port })          // 確保したポート番号をStateとして登録
+        .manage(PortState { port: api_port }) // 確保したポート番号をStateとして登録
         .invoke_handler(tauri::generate_handler![
             proxy_request,
             fetch_binary,

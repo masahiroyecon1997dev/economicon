@@ -32,6 +32,7 @@
     "@tanstack/react-form": "^1.28.3",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.18",
+    "@tauri-apps/plugin-shell": "~2.3.5",
     "apache-arrow": "^21.1.0",
     "clsx": "^2.1.1",
     "i18next": "^25.7.2",
