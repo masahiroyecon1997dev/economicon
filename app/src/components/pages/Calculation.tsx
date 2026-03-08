@@ -1,6 +1,6 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAPI } from "../../api/endpoints";
@@ -23,6 +23,7 @@ const createCalculationSchema = (t: (key: string) => string) =>
     newColumnName: z
       .string()
       .min(1, t("ValidationMessages.NewColumnNameRequired")),
+    addPositionColumn: z.string(),
     calculationExpression: z
       .string()
       .min(1, t("ValidationMessages.CalculationExpressionRequired")),
@@ -46,6 +47,7 @@ export const Calculation = () => {
     defaultValues: {
       tableName: selectedTableName,
       newColumnName: "",
+      addPositionColumn: "",
       calculationExpression: "",
     },
     validators: {
@@ -56,7 +58,7 @@ export const Calculation = () => {
         const response = await getEconomiconAPI().calculateColumn({
           tableName: value.tableName,
           newColumnName: value.newColumnName,
-          addPositionColumn: "",
+          addPositionColumn: value.addPositionColumn,
           calculationExpression: value.calculationExpression,
         });
 
@@ -79,10 +81,22 @@ export const Calculation = () => {
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
+  // columnList が更新されたら末尾列を追加位置のデフォルトとして設定
+  useEffect(() => {
+    if (columnList.length > 0) {
+      form.setFieldValue(
+        "addPositionColumn",
+        columnList[columnList.length - 1].name,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnList]);
+
   const handleTableChange = (value: string) => {
     setSelectedTableName(value);
     form.setFieldValue("tableName", value);
     form.setFieldValue("newColumnName", "");
+    form.setFieldValue("addPositionColumn", "");
     form.setFieldValue("calculationExpression", "");
   };
 
@@ -186,6 +200,33 @@ export const Calculation = () => {
                   </FormField>
                 )}
               </form.Field>
+
+              {/* 追加位置 */}
+              {columnList.length > 0 && (
+                <form.Field name="addPositionColumn">
+                  {(field) => (
+                    <FormField
+                      label={t("CalculationView.InsertPosition")}
+                      htmlFor="insert-position"
+                    >
+                      <Select
+                        id="insert-position"
+                        value={field.state.value}
+                        onValueChange={(v) => field.handleChange(v)}
+                        disabled={isSubmitting}
+                      >
+                        {columnList.map((col, i) => (
+                          <SelectItem key={i} value={col.name}>
+                            {i === columnList.length - 1
+                              ? `${col.name}\u00a0(${t("CalculationView.InsertPositionLast")})`
+                              : col.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </FormField>
+                  )}
+                </form.Field>
+              )}
             </div>
             <div className="flex flex-col lg:flex-row h-125">
               <div className="flex-1 flex flex-col min-w-0 border-b lg:border-b-0 lg:border-r border-border-color">

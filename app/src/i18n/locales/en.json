@@ -281,6 +281,8 @@
     "ExecuteCalculation": "Execute Calculation",
     "ExecutingCalculation": "Executing calculation...",
     "CalculationSuccess": "Calculation completed successfully.",
+    "InsertPosition": "Insert Position",
+    "InsertPositionLast": "end",
     "Validation": {
       "TableNameRequired": "Please select a table.",
       "NewColumnNameRequired": "Please enter a new column name.",

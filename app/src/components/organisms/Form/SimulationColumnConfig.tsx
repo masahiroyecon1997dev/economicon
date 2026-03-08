@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   DistributionType,
@@ -26,11 +26,6 @@ const NumericParamInput = ({
   disabled,
 }: NumericParamInputProps) => {
   const [localValue, setLocalValue] = useState(value?.toString() ?? "");
-
-  // 配布タイプ変更などによる外部からの値変更に追従する
-  useEffect(() => {
-    setLocalValue(value?.toString() ?? "");
-  }, [value]);
 
   return (
     <InputText
@@ -179,7 +174,7 @@ export const SimulationColumnConfig = ({
               <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                 {distOption.params.map((param) => (
                   <FormField
-                    key={param}
+                    key={`${column.distributionType ?? ""}-${param}`}
                     label={getParamLabel(param)}
                     htmlFor={`param-${param}-${column.id}`}
                     error={
