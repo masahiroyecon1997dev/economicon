@@ -234,16 +234,28 @@ export const DescriptiveStatistics = () => {
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {columns.map((col) => (
-                    <button
-                      key={col.name}
-                      type="button"
-                      onClick={() => toggleCol(col.name)}
-                      className={chipClass(checkedCols.has(col.name))}
-                    >
-                      {col.name}
-                    </button>
-                  ))}
+                  {columns.map((col) => {
+                    const isChecked = checkedCols.has(col.name);
+                    return (
+                      <label
+                        key={col.name}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors",
+                          isChecked
+                            ? "border-brand-accent bg-brand-accent/5 text-brand-accent"
+                            : "border-border-color bg-secondary text-brand-text-main hover:border-brand-accent/50",
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleCol(col.name)}
+                          className="h-3.5 w-3.5 rounded border-gray-300 text-brand-accent focus:ring-brand-accent"
+                        />
+                        <span>{col.name}</span>
+                      </label>
+                    );
+                  })}
                 </div>
                 {errors.columns && (
                   <p className="text-xs text-red-500">{errors.columns}</p>
