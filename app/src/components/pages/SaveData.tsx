@@ -289,8 +289,8 @@ export const SaveData = () => {
         </div>
       ) : (
         <>
-          <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto">
-            <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 flex-1 min-h-0">
+            <div className="flex flex-col gap-3 shrink-0">
               <h2 className="text-lg font-bold text-black">
                 {t("SaveDataView.SelectDirectory")}
               </h2>
@@ -307,12 +307,13 @@ export const SaveData = () => {
 
             <div className="flex-1 min-h-0">
               <FileListTable
-                files={sortedFiles}
+                files={sortedFiles.filter((f) => !f.isFile)}
                 onFileClick={handleFileClick}
                 fileNameHeader={t("ImportDataFileView.FileNameHeader")}
                 sizeHeader={t("ImportDataFileView.SizeHeader")}
                 lastModifiedHeader={t("ImportDataFileView.LastModifiedHeader")}
-                maxHeight="10%"
+                maxHeight="100%"
+                className="h-full"
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={handleSort}
