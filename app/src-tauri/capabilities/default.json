@@ -14,7 +14,7 @@
       "identifier": "shell:allow-spawn",
       "allow": [
         {
-          "name": "bin/python",
+          "name": "python",
           "sidecar": true,
           "args": true
         }
