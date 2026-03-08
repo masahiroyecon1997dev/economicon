@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getFiles } from "../../api/bridge/tauri-commands";
+import { getFiles, getFilesSafe } from "../../api/bridge/tauri-commands";
 import { getEconomiconAPI } from "../../api/endpoints";
 import type { ExportFileRequestBodyFormat } from "../../api/model";
 import { showMessageDialog } from "../../lib/dialog/message";
@@ -51,6 +51,20 @@ export const SaveData = () => {
     tableName?: string;
     fileName?: string;
   }>({});
+
+  // マウント時にファイルリストを最新化（画面遷移で表示が古くならないよう）
+  useEffect(() => {
+    if (directoryPath) {
+      getFiles(directoryPath)
+        .then(setFiles)
+        .catch(() => {});
+    } else {
+      getFilesSafe("")
+        .then(setFiles)
+        .catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fileFormatOptions = [
     { value: "csv", label: "CSV (.csv)" },

@@ -119,6 +119,20 @@ export const ImportDataFile = () => {
     };
   }, []);
 
+  // マウント時にファイルリストを最新化（画面遷移で表示が古くならないよう）
+  useEffect(() => {
+    if (directoryPath) {
+      getFiles(directoryPath)
+        .then(setFiles)
+        .catch(() => {});
+    } else {
+      getFilesSafe("")
+        .then(setFiles)
+        .catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ファイルパスを分割するヘルパー関数
   const getPathSegments = () => {
     if (!directoryPath) return [];
