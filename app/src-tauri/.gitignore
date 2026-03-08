@@ -17,4 +17,6 @@ Thumbs.db
 
 # (オプション) ローカルのEmbedded Python環境
 # 環境構築用のスクリプトだけGitに入れ、中身は除外するのが一般的です
-src-tauri/python-env/
+resources/
+bin/
+binaries/

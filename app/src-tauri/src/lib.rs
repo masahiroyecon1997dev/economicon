@@ -6,6 +6,7 @@ use serde::Serialize;
 use std::net::TcpListener;
 use std::time::Duration;
 use tauri::State;
+use tauri::Manager;
 use uuid::Uuid;
 
 use std::sync::Mutex;
@@ -284,19 +285,29 @@ pub fn run() {
                 // "resources/**/*" グロブでバンドルされたファイルは
                 // resource_dir() から "resources/<相対パス>" でアクセスできる
                 let resource_dir = app.path().resource_dir()?;
+
                 let main_py = resource_dir
                     .join("resources")
                     .join("api")
-                    .join("main.py");
+                    .join("main.py")
+                    .to_string_lossy().into_owned();
+
+                let python_env_path = resource_dir
+                    .join("resources")
+                    .join("python_env")
+                    .to_string_lossy().into_owned();
 
                 let auth_token = app.state::<AuthTokenState>().token.clone();
                 let api_port   = app.state::<PortState>().port;
 
-                let main_py_str = main_py.to_string_lossy().into_owned();
                 let (mut rx, child) = app
                     .shell()
-                    .sidecar("bin/python")?
-                    .args([main_py_str])
+                    .sidecar("python")?
+                    .args([&main_py])
+                    .env("PATH", &python_env_path)
+                    .env("PYTHONUNBUFFERED", "1")
+                    .env("PYTHONHOME", &python_env_path)
+                    .env("PYTHONPATH", &python_env_path)
                     .env("ECONOMICOM_API_AUTH_TOKEN", &auth_token)
                     .env("ECONOMICOM_API_PORT", api_port.to_string())
                     .env("ECONOMICON_DEV_RUN", "false")
@@ -307,6 +318,7 @@ pub fn run() {
                 });
 
                 tauri::async_runtime::spawn(async move {
+                    println!("Sidecar spawned successfully!");
                     use tauri_plugin_shell::process::CommandEvent;
                     while let Some(event) = rx.recv().await {
                         match event {
@@ -321,11 +333,13 @@ pub fn run() {
                             }
                             CommandEvent::Terminated(status) => {
                                 log::info!("[python] terminated: {:?}", status);
+                                println!("Python log listener terminated: {:?}", status);
                                 break;
                             }
                             _ => {}
                         }
                     }
+                    println!("--- Python log listener closed ---");
                 });
             }
 

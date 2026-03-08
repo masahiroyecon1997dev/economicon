@@ -43,8 +43,12 @@ $API_DIR       = Join-Path $PROJECT_ROOT "api"
 $APP_DIR       = Join-Path $PROJECT_ROOT "app"
 $TAURI_DIR     = Join-Path $APP_DIR "src-tauri"
 
+# Tauri の externalBin に配置する実行ファイルのディレクトリ
+$BINARIES_DIR = Join-Path $TAURI_DIR "binaries"
+
 # Tauri の bundle.resources に含まれるフォルダ（tauri.conf.json 参照）
-$PYTHON_ENV_DIR  = Join-Path $TAURI_DIR "resources\python_env"
+$RESOURCES_DIR = Join-Path $TAURI_DIR "resources"
+$PYTHON_ENV_DIR  = Join-Path $RESOURCES_DIR "python_env"
 
 # ビルド成果物の集約先
 $RELEASE_DIR   = Join-Path $PROJECT_ROOT "release"
@@ -135,12 +139,18 @@ if (-not $tauriConf.bundle.resources) {
 
 Write-Step "[1/9] Python $PYTHON_VERSION Embedded Package の準備"
 
-# 既存の python_env を削除してクリーンビルド
-if (Test-Path $PYTHON_ENV_DIR) {
-    Write-Info "既存の python_env を削除中..."
-    Remove-Item -Recurse -Force $PYTHON_ENV_DIR
+# 既存の resources を削除してクリーンビルド
+if (Test-Path $RESOURCES_DIR) {
+    Write-Info "既存の resources を削除中..."
+    Remove-Item -Recurse -Force $RESOURCES_DIR
 }
-New-Item -ItemType Directory -Path $PYTHON_ENV_DIR | Out-Null
+New-Item -ItemType Directory -Path $RESOURCES_DIR | Out-Null
+
+# 既存の binaries を削除してクリーンビルド
+if (Test-Path $BINARIES_DIR) {
+    Write-Info "既存の binaries を削除中..."
+    Remove-Item -Recurse -Force $BINARIES_DIR
+}
 
 # ZIP ダウンロード（既存があればスキップ）
 if (-not (Test-Path $PYTHON_EMBED_ZIP)) {
@@ -158,6 +168,7 @@ if (-not (Test-Path $PYTHON_EMBED_ZIP)) {
 }
 
 # ZIP 展開
+New-Item -ItemType Directory -Path $PYTHON_ENV_DIR | Out-Null
 Write-Info "展開中: $PYTHON_ENV_DIR"
 Expand-Archive -Path $PYTHON_EMBED_ZIP -DestinationPath $PYTHON_ENV_DIR -Force
 Write-Success "Embedded Python を展開しました。"
@@ -211,24 +222,16 @@ Write-Success "._pth を更新しました（import site 有効化 + site-packag
 
 Write-Step "[3/9] Python 本体を bin/ へコピー (サイドカー用)"
 
-$BIN_DIR = Join-Path $TAURI_DIR "bin"
-New-Item -ItemType Directory -Path $BIN_DIR -Force | Out-Null
+
+New-Item -ItemType Directory -Path $BINARIES_DIR -Force | Out-Null
 
 # python.exe → python-x86_64-pc-windows-msvc.exe（Tauri externalBin の命名規則に準拠）
 $srcPythonExe = Join-Path $PYTHON_ENV_DIR "python.exe"
-$dstPythonExe = Join-Path $BIN_DIR "python-x86_64-pc-windows-msvc.exe"
+$dstPythonExe = Join-Path $BINARIES_DIR "python-x86_64-pc-windows-msvc.exe"
 Copy-Item $srcPythonExe -Destination $dstPythonExe -Force
-Write-Success "python.exe → bin\python-x86_64-pc-windows-msvc.exe"
+Write-Success "python.exe → binaries\python-x86_64-pc-windows-msvc.exe"
 
-# ._pth / .zip / .dll / .pyd などの付属ファイルも bin/ へコピー
-# NOTE: embedded Python は exe と同じディレクトリにある ._pth を参照して sys.path を構成するため、
-#       exe の隣にこれらのファイルが必要。
-Get-ChildItem $PYTHON_ENV_DIR -File | Where-Object { $_.Name -ne "python.exe" } | ForEach-Object {
-    Copy-Item $_.FullName -Destination $BIN_DIR -Force
-    Write-Info "コピー: $($_.Name) → bin\"
-}
-
-Write-Success "bin/ へのコピー完了。"
+Write-Success "binaries/ へのコピー完了。"
 
 
 # ==============================================================================
