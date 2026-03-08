@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getEconomiconAPI } from "../../api/endpoints";
 import { DescriptiveStatisticType } from "../../api/model";
@@ -9,6 +9,7 @@ import { useTableListStore } from "../../stores/tableList";
 import type { ColumnType } from "../../types/commonTypes";
 import { Select, SelectItem } from "../atoms/Input/Select";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
+import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
 import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
 
@@ -72,6 +73,7 @@ export const DescriptiveStatistics = () => {
   const [checkedStats, setCheckedStats] = useState<
     Set<DescriptiveStatisticType>
   >(new Set(ALL_STAT_TYPES));
+  const resultRef = useRef<HTMLDivElement>(null);
   const [isLoadingCols, setIsLoadingCols] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState<ResultSnapshot | null>(null);
@@ -153,6 +155,14 @@ export const DescriptiveStatistics = () => {
       if (resp.code === "OK") {
         const data = resp.result.statistics as StatisticsMap;
         setResult({ data, cols: orderedCols, stats: orderedStats });
+        setTimeout(
+          () =>
+            resultRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            }),
+          50,
+        );
       }
     } catch {
       await showMessageDialog(
@@ -163,15 +173,6 @@ export const DescriptiveStatistics = () => {
       setIsCalculating(false);
     }
   };
-
-  /* ── Chip helpers ────────────────────────────────────────── */
-  const chipClass = (active: boolean) =>
-    cn(
-      "px-3 py-1 rounded-full text-sm border transition-colors cursor-pointer",
-      active
-        ? "border-brand-accent bg-brand-accent/5 text-brand-accent"
-        : "border-border-color text-brand-text-sub hover:border-brand-accent/60",
-    );
 
   /* ── Render ──────────────────────────────────────────────── */
   return (
@@ -233,33 +234,12 @@ export const DescriptiveStatistics = () => {
                     {t("DescriptiveStatistics.DeselectAll")}
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {columns.map((col) => {
-                    const isChecked = checkedCols.has(col.name);
-                    return (
-                      <label
-                        key={col.name}
-                        className={cn(
-                          "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors",
-                          isChecked
-                            ? "border-brand-accent bg-brand-accent/5 text-brand-accent"
-                            : "border-border-color bg-secondary text-brand-text-main hover:border-brand-accent/50",
-                        )}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleCol(col.name)}
-                          className="h-3.5 w-3.5 rounded border-gray-300 text-brand-accent focus:ring-brand-accent"
-                        />
-                        <span>{col.name}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-                {errors.columns && (
-                  <p className="text-xs text-red-500">{errors.columns}</p>
-                )}
+                <CheckboxTagGroup
+                  items={columns.map((c) => ({ value: c.name, label: c.name }))}
+                  checked={checkedCols}
+                  onToggle={toggleCol}
+                  error={errors.columns}
+                />
               </div>
             )}
           </FormField>
@@ -285,21 +265,15 @@ export const DescriptiveStatistics = () => {
                 {t("DescriptiveStatistics.DeselectAll")}
               </button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {ALL_STAT_TYPES.map((stat) => (
-                <button
-                  key={stat}
-                  type="button"
-                  onClick={() => toggleStat(stat)}
-                  className={chipClass(checkedStats.has(stat))}
-                >
-                  {t(`DescriptiveStatistics.Stat_${stat}`)}
-                </button>
-              ))}
-            </div>
-            {errors.stats && (
-              <p className="text-xs text-red-500">{errors.stats}</p>
-            )}
+            <CheckboxTagGroup
+              items={ALL_STAT_TYPES.map((s) => ({
+                value: s,
+                label: t(`DescriptiveStatistics.Stat_${s}`),
+              }))}
+              checked={checkedStats as Set<string>}
+              onToggle={(v) => toggleStat(v as DescriptiveStatisticType)}
+              error={errors.stats}
+            />
           </div>
         </FormField>
 
@@ -308,7 +282,7 @@ export const DescriptiveStatistics = () => {
 
         {/* ─── 5. Result table ───────────────────────────────── */}
         {result && (
-          <div className="space-y-2 pb-4">
+          <div ref={resultRef} className="space-y-2 pb-4">
             <h2 className="text-sm font-semibold text-brand-text-main">
               {t("DescriptiveStatistics.ResultTitle")}
             </h2>
