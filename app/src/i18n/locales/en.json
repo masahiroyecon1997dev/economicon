@@ -249,9 +249,9 @@
     "StandardError": "Standard Error",
     "TValue": "t-value",
     "PValue": "p-value",
-    "RegressionDetails": "Regression Details",
     "ConfidenceIntervalLower": "[0.025",
     "ConfidenceIntervalUpper": "0.975]",
+    "SignificanceNote": "Significance: *** p<0.001 / ** p<0.01 / * p<0.05",
     "NA": "N/A"
   },
   "RegressionTab": {

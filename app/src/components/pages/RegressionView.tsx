@@ -5,7 +5,12 @@ import { useCurrentPageStore } from "../../stores/currentView";
 import { useRegressionResultsStore } from "../../stores/regressionResults";
 import { LinearRegressionForm } from "../organisms/Form/LinearRegressionForm";
 import { RegressionResult } from "../organisms/Result/RegressionResult";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../organisms/Tab/BaseTab";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../organisms/Tab/BaseTab";
 import { PageLayout } from "../templates/PageLayout";
 
 type RegressionProps = {
@@ -29,7 +34,7 @@ export const Regression = ({ className }: RegressionProps) => {
   return (
     <PageLayout>
       <Tabs
-        className={cn("flex w-full flex-col", className)}
+        className={cn("flex min-h-0 w-full flex-1 flex-col", className)}
         value={activeTab}
         onValueChange={setActiveTab}
       >
@@ -48,8 +53,11 @@ export const Regression = ({ className }: RegressionProps) => {
         </TabsList>
 
         {/* 設定タブコンテンツ */}
-        <TabsContent value="analysis-settings">
-          <div className="mx-auto max-w-4xl pt-6">
+        <TabsContent
+          value="analysis-settings"
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div className="flex min-h-0 flex-1 flex-col pt-4">
             <LinearRegressionForm
               onCancel={handleCancel}
               onAnalysisComplete={handleAnalysisComplete}
@@ -59,8 +67,12 @@ export const Regression = ({ className }: RegressionProps) => {
 
         {/* 結果タブコンテンツ */}
         {results.map((result, index) => (
-          <TabsContent key={`result-${index}`} value={`result-${index}`}>
-            <div className="mx-auto max-w-6xl pt-6">
+          <TabsContent
+            key={`result-${index}`}
+            value={`result-${index}`}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <div className="mx-auto w-full max-w-6xl overflow-y-auto pt-4">
               <RegressionResult result={result} />
             </div>
           </TabsContent>

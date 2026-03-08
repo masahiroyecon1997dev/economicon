@@ -276,7 +276,7 @@
     "PValue": "p値",
     "ConfidenceIntervalLower": "95%CI下限",
     "ConfidenceIntervalUpper": "95%CI上限",
-    "RegressionDetails": "回帰結果詳細",
+    "SignificanceNote": "有意水準: *** p<0.001 / ** p<0.01 / * p<0.05",
     "NA": "N/A"
   },
   "RegressionTab": {
