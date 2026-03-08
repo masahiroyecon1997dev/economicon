@@ -36,18 +36,20 @@ export const RegressionResult = ({
         <h3 className="mb-3 text-base font-bold text-text-heading">
           {t("RegressionResult.AnalysisSummary")}
         </h3>
-        <div className="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
-          <div className="flex justify-between">
-            <span className="font-medium text-brand-text-main">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm md:grid-cols-2">
+          <div className="flex gap-2">
+            <span className="font-medium text-brand-text-main shrink-0">
               {t("RegressionResult.TableName")}:
             </span>
-            <span className="text-brand-text-main">{result.tableName}</span>
+            <span className="text-brand-text-main break-all">
+              {result.tableName}
+            </span>
           </div>
-          <div className="flex justify-between">
-            <span className="font-medium text-brand-text-main">
+          <div className="flex gap-2">
+            <span className="font-medium text-brand-text-main shrink-0">
               {t("RegressionResult.DependentVariable")}:
             </span>
-            <span className="text-brand-text-main">
+            <span className="text-brand-text-main break-all">
               {result.dependentVariable}
             </span>
           </div>
