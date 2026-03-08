@@ -274,12 +274,12 @@ pub fn run() {
         .manage(AuthTokenState { token: auth_token }) // 生成したトークンをStateとして登録
         .manage(PortState { port: api_port })          // 確保したポート番号をStateとして登録
         .setup(|app| {
-            let is_dev_mode = std::env::var("economicon_DEV_RUN")
+            let is_dev_mode = std::env::var("ECONOMICON_DEV_RUN")
                 .map(|v| v.to_lowercase() == "true")
                 .unwrap_or(false);
 
             if is_dev_mode {
-                log::info!("Dev mode (economicon_DEV_RUN=true): skipping sidecar startup.");
+                log::info!("Dev mode (ECONOMICON_DEV_RUN=true): skipping sidecar startup.");
             } else {
                 // "resources/**/*" グロブでバンドルされたファイルは
                 // resource_dir() から "resources/<相対パス>" でアクセスできる
@@ -299,7 +299,7 @@ pub fn run() {
                     .args([main_py_str])
                     .env("ECONOMICOM_API_AUTH_TOKEN", &auth_token)
                     .env("ECONOMICOM_API_PORT", api_port.to_string())
-                    .env("economicon_DEV_RUN", "false")
+                    .env("ECONOMICON_DEV_RUN", "false")
                     .spawn()?;
 
                 app.manage(SidecarState {

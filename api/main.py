@@ -36,8 +36,8 @@ _dev_server_url = os.environ.get(
     "VITE_DEV_SERVER_URL", "http://localhost:5173"
 )
 
-# 開発モードフラグ（economicon_DEV_RUN=true のときのみ dev_server_url を許可）
-_is_dev_mode = os.environ.get("economicon_DEV_RUN", "false").lower() == "true"
+# 開発モードフラグ（ECONOMICON_DEV_RUN=true のときのみ dev_server_url を許可）
+_is_dev_mode = os.environ.get("ECONOMICON_DEV_RUN", "false").lower() == "true"
 
 # 許可するオリジン一覧
 # Tauri WebView のみ。開発モード時は Vite dev server も追加
@@ -72,7 +72,7 @@ async def lifespan(app: FastAPI):
 
     # ブラウザでアプリを自動的に開く
     url = f"http://127.0.0.1:{_api_port}"
-    dev_run = os.environ.get("economicon_DEV_RUN", "false").lower()
+    dev_run = os.environ.get("ECONOMICON_DEV_RUN", "false").lower()
     if dev_run == "false":
         webbrowser.open(url)
     yield  # ここでアプリがリクエストを待ち受ける

@@ -6,7 +6,7 @@ Tauri は起動時に UUID v4 トークンを生成し、環境変数
 このトークンを提示しなければならない。
 
 **開発環境での動作について**:
-``economicon_DEV_RUN=true`` が設定されている場合、トークン検証を
+``ECONOMICON_DEV_RUN=true`` が設定されている場合、トークン検証を
 スキップする。開発時は FastAPI を手動起動するため、Tauri によるトークン
 の受け渡しが行われないためである。
 """
@@ -22,7 +22,7 @@ class AppSettings(BaseSettings):
 
     Tauri が起動時に ``ECONOMICOM_API_AUTH_TOKEN`` を設定するため、
     サイドカーとして起動された FastAPI は自動的にこの値を取得できる。
-    開発環境では ``economicon_DEV_RUN=true`` を設定することで
+    開発環境では ``ECONOMICON_DEV_RUN=true`` を設定することで
     トークン検証をスキップできる。
     """
 
@@ -33,11 +33,11 @@ class AppSettings(BaseSettings):
 
     economicom_api_auth_token: str = ""
     # 開発モードフラグ。true の場合はトークン検証をスキップする
-    economicon_dev_run: str = "false"
+    ECONOMICON_DEV_RUN: str = "false"
 
     @property
     def is_dev_mode(self) -> bool:
-        return self.economicon_dev_run.lower() == "true"
+        return self.ECONOMICON_DEV_RUN.lower() == "true"
 
 
 @cache
@@ -60,7 +60,7 @@ def verify_token(
 ) -> None:
     """全リクエストに対して ``X-Auth-Token`` ヘッダーを検証する依存関数。
 
-    開発環境（``economicon_DEV_RUN=true``）では検証をスキップする。
+    開発環境（``ECONOMICON_DEV_RUN=true``）では検証をスキップする。
 
     Args:
         x_auth_token: リクエストヘッダー ``X-Auth-Token`` の値。
