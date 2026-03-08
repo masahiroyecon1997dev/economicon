@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   DistributionType,
@@ -6,6 +7,50 @@ import type {
 import { InputText } from "../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../atoms/Input/Select";
 import { FormField } from "../../molecules/Form/FormField";
+
+type NumericParamInputProps = {
+  id: string;
+  value: number | undefined;
+  onChange: (value: number) => void;
+  placeholder?: string;
+  error?: string;
+  disabled?: boolean;
+};
+
+const NumericParamInput = ({
+  id,
+  value,
+  onChange,
+  placeholder,
+  error,
+  disabled,
+}: NumericParamInputProps) => {
+  const [localValue, setLocalValue] = useState(value?.toString() ?? "");
+
+  // 配布タイプ変更などによる外部からの値変更に追従する
+  useEffect(() => {
+    setLocalValue(value?.toString() ?? "");
+  }, [value]);
+
+  return (
+    <InputText
+      id={id}
+      type="text"
+      inputMode="decimal"
+      value={localValue}
+      change={(e) => setLocalValue(e.target.value)}
+      onBlur={() => {
+        const n = parseFloat(localValue);
+        if (!isNaN(n)) {
+          onChange(n);
+        }
+      }}
+      placeholder={placeholder}
+      error={error}
+      disabled={disabled}
+    />
+  );
+};
 
 type SimulationColumnConfigProps = {
   column: SimulationColumnSetting;
@@ -137,20 +182,17 @@ export const SimulationColumnConfig = ({
                     key={param}
                     label={getParamLabel(param)}
                     htmlFor={`param-${param}-${column.id}`}
+                    error={
+                      error.distributionParams
+                        ? error.distributionParams[param]
+                        : undefined
+                    }
                   >
-                    <InputText
+                    <NumericParamInput
                       id={`param-${param}-${column.id}`}
-                      type="number"
-                      step="0.01"
-                      value={
-                        column.distributionParams?.[param]?.toString() || ""
-                      }
-                      change={(e) =>
-                        onDistributionParamChange(
-                          column.id,
-                          param,
-                          parseFloat(e.target.value),
-                        )
+                      value={column.distributionParams?.[param]}
+                      onChange={(n) =>
+                        onDistributionParamChange(column.id, param, n)
                       }
                       placeholder={`${getParamLabel(param)}${t("CreateSimulationDataTableView.InputDistributionParameters")}`}
                       error={

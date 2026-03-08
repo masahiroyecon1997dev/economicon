@@ -515,7 +515,7 @@ export const CreateSimulationDataTable = () => {
               </Button>
             </div>
 
-            {/* 全列エラー時�Eサマリー */}
+            {/* 全列エラー時のサマリー */}
             {columns.some(hasColumnError) && (
               <div className="mb-3 flex items-center gap-1.5 rounded-md bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-3 py-2">
                 <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
