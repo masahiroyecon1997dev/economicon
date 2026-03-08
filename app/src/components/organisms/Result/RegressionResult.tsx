@@ -21,10 +21,18 @@ export const RegressionResult = ({
     return num.toFixed(decimals);
   };
 
+  const significanceMarker = (pValue: number | null | undefined): string => {
+    if (pValue === null || pValue === undefined) return "";
+    if (pValue < 0.001) return "***";
+    if (pValue < 0.01) return "**";
+    if (pValue < 0.05) return "*";
+    return "";
+  };
+
   return (
     <div className={cn("flex flex-col gap-4 p-4", className)}>
       {/* 分析概要 */}
-      <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-border-color bg-white p-3 shadow-sm">
         <h3 className="mb-3 text-base font-bold text-text-heading">
           {t("RegressionResult.AnalysisSummary")}
         </h3>
@@ -43,88 +51,6 @@ export const RegressionResult = ({
               {result.dependentVariable}
             </span>
           </div>
-          <div className="col-span-1 md:col-span-2">
-            <span className="font-medium text-brand-text-main">
-              {t("RegressionResult.ExplanatoryVariables")}:
-            </span>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {result.explanatoryVariables.map((variable, index) => (
-                <span
-                  key={index}
-                  className="rounded-md bg-accent px-2 py-0.5 text-xs text-white"
-                >
-                  {variable}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* モデル統計量 */}
-      <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
-        <h3 className="mb-3 text-base font-bold text-text-heading">
-          {t("RegressionResult.ModelStatistics")}
-        </h3>
-        <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">R²</span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.R2)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">
-              {t("RegressionResult.AdjustedR2")}
-            </span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.adjustedR2)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">AIC</span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.AIC)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">BIC</span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.BIC)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">
-              {t("RegressionResult.FValue")}
-            </span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.fValue)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">
-              {t("RegressionResult.FProbability")}
-            </span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.fProbability)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">
-              {t("RegressionResult.LogLikelihood")}
-            </span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.logLikelihood)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">
-              {t("RegressionResult.Observations")}
-            </span>
-            <span className="font-semibold text-brand-text-main">
-              {result.modelStatistics.nObservations}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -135,7 +61,7 @@ export const RegressionResult = ({
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead>
+            <thead className="sticky top-0 z-10">
               <tr className="border-b border-border-color bg-secondary">
                 <th className="px-3 py-2 text-left font-semibold text-text-heading">
                   {t("RegressionResult.Variable")}
@@ -191,6 +117,11 @@ export const RegressionResult = ({
                     )}
                   >
                     {formatNumber(param.pValue)}
+                    {significanceMarker(param.pValue) && (
+                      <span className="ml-1 font-bold">
+                        {significanceMarker(param.pValue)}
+                      </span>
+                    )}
                   </td>
                   <td className="px-3 py-2 text-right text-brand-text-main">
                     {formatNumber(param.confidenceIntervalLower)}
@@ -203,19 +134,81 @@ export const RegressionResult = ({
             </tbody>
           </table>
         </div>
+        <p className="mt-2 text-right text-xs text-brand-text-main/50">
+          {t("RegressionResult.SignificanceNote")}
+        </p>
       </div>
 
-      {/* 回帰結果の詳細 */}
-      {result.regressionResult && (
-        <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
-          <h3 className="mb-3 text-base font-bold text-text-heading">
-            {t("RegressionResult.RegressionDetails")}
-          </h3>
-          <pre className="overflow-x-auto rounded bg-secondary p-3 text-xs text-brand-text-main">
-            {result.regressionResult}
-          </pre>
+      {/* モデル統計量 */}
+      <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
+        <h3 className="mb-3 text-base font-bold text-text-heading">
+          {t("RegressionResult.ModelStatistics")}
+        </h3>
+        {/* R² / 調整済みR² を強調 */}
+        <div className="mb-3 grid grid-cols-2 gap-3">
+          <div className="flex flex-col rounded-lg bg-brand-accent/5 p-3">
+            <span className="text-xs font-medium text-brand-accent/70">R²</span>
+            <span className="mt-0.5 text-2xl font-bold text-brand-accent">
+              {formatNumber(result.modelStatistics.R2)}
+            </span>
+          </div>
+          <div className="flex flex-col rounded-lg bg-brand-accent/5 p-3">
+            <span className="text-xs font-medium text-brand-accent/70">
+              {t("RegressionResult.AdjustedR2")}
+            </span>
+            <span className="mt-0.5 text-2xl font-bold text-brand-accent">
+              {formatNumber(result.modelStatistics.adjustedR2)}
+            </span>
+          </div>
         </div>
-      )}
+        {/* その他の統計量 */}
+        <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
+          <div className="flex flex-col">
+            <span className="text-xs text-brand-text-main/60">AIC</span>
+            <span className="font-semibold text-brand-text-main">
+              {formatNumber(result.modelStatistics.AIC)}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-brand-text-main/60">BIC</span>
+            <span className="font-semibold text-brand-text-main">
+              {formatNumber(result.modelStatistics.BIC)}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-brand-text-main/60">
+              {t("RegressionResult.FValue")}
+            </span>
+            <span className="font-semibold text-brand-text-main">
+              {formatNumber(result.modelStatistics.fValue)}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-brand-text-main/60">
+              {t("RegressionResult.FProbability")}
+            </span>
+            <span className="font-semibold text-brand-text-main">
+              {formatNumber(result.modelStatistics.fProbability)}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-brand-text-main/60">
+              {t("RegressionResult.LogLikelihood")}
+            </span>
+            <span className="font-semibold text-brand-text-main">
+              {formatNumber(result.modelStatistics.logLikelihood)}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-brand-text-main/60">
+              {t("RegressionResult.Observations")}
+            </span>
+            <span className="font-semibold text-brand-text-main">
+              {result.modelStatistics.nObservations}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

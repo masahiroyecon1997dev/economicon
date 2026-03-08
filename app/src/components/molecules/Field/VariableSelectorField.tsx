@@ -70,7 +70,10 @@ export const VariableSelectorField = ({
 
   return (
     <div className={cn("flex flex-col", className)}>
-      <label className="mb-1.5 block text-xs font-medium text-brand-text-main">
+      <label
+        htmlFor={`variable-selector-field-search-${name || "default"}`}
+        className="mb-1.5 block text-xs font-medium text-brand-text-main"
+      >
         {label}
       </label>
       {description && (
@@ -79,6 +82,7 @@ export const VariableSelectorField = ({
       {columns.length > 0 && (
         <input
           type="text"
+          id={`variable-selector-field-search-${name || "default"}`}
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
           placeholder={t("Common.FilterColumns")}
@@ -88,7 +92,7 @@ export const VariableSelectorField = ({
       )}
       <div
         className={cn(
-          "h-32 overflow-y-auto rounded-lg border p-2",
+          "min-h-0 flex-1 overflow-y-auto rounded-lg border p-2",
           error
             ? "border-red-500 bg-red-50"
             : "border-border-color bg-secondary",
@@ -107,6 +111,7 @@ export const VariableSelectorField = ({
             {visibleColumns.map((column, index) => (
               <li key={index}>
                 <label
+                  htmlFor={`variable-selector-field-${column.name}-${name || "default"}`}
                   className={cn(
                     "flex w-full cursor-pointer items-center gap-3 rounded-md p-1.5",
                     disabled
@@ -116,6 +121,7 @@ export const VariableSelectorField = ({
                 >
                   {mode === "single" ? (
                     <input
+                      id={`variable-selector-field-${column.name}-${name || "default"}`}
                       className="h-4 w-4 border-gray-300 text-accent focus:ring-accent"
                       type="radio"
                       name={name || "variable-selector-single"}
@@ -126,6 +132,7 @@ export const VariableSelectorField = ({
                     />
                   ) : (
                     <input
+                      id={`variable-selector-field-${column.name}-${name || "default"}`}
                       className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent"
                       type="checkbox"
                       name={name || "variable-selector-multiple"}
