@@ -431,7 +431,9 @@
     "FilterColumns": "カラムを絞り込み...",
     "ExecuteCalculation": "計算を実行",
     "ExecutingCalculation": "計算を実行中...",
-    "CalculationSuccess": "計算が正常に完了しました。"
+    "CalculationSuccess": "計算が正常に完了しました。",
+    "InsertPosition": "追加位置",
+    "InsertPositionLast": "末尾"
   },
   "AreaLabels": {
     "Header": "ヘッダー",
