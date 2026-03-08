@@ -33,4 +33,4 @@ test-results/
 .auth/
 
 # Enbeddable Python package for Release
-src-tauri/resources/python_env/
+src-tauri/resources/
