@@ -23,7 +23,7 @@
       "cwd": "${workspaceFolder}/api",
       "console": "integratedTerminal",
       "env": {
-        "economicon_DEV_RUN": "true"
+        "ECONOMICON_DEV_RUN": "true"
       }
     },
     {
@@ -35,9 +35,12 @@
       "cwd": "${workspaceFolder}/app",
       "stopAtEntry": false,
       "preLaunchTask": "pnpm: start",
-      "env": {
-        "economicon_DEV_RUN": "true"
-      }
+      "environment": [
+        {
+          "name": "ECONOMICON_DEV_RUN",
+          "value": "true"
+        }
+      ]
     },
     {
       "name": "pytest",
