@@ -38,15 +38,5 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
-  },
-  "plugins": {
-    "shell": {
-      "sidecar": [
-        {
-          "name": "bin/python",
-          "args": true
-        }
-      ]
-    }
   }
 }

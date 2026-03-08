@@ -19,7 +19,8 @@
     "test:e2e:report": "playwright show-report",
     "gen:api": "orval",
     "gen:api:watch": "orval --watch",
-    "gen:all": "cd ../api && .\\.venv\\Scripts\\python.exe gen_openapi.py && cd ../app && pnpm gen:api"
+    "gen:all": "cd ../api && .\\.venv\\Scripts\\python.exe gen_openapi.py && cd ../app && pnpm gen:api",
+    "tauri:dev:debug": "cross-env economicon_DEV_RUN=true tauri dev"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -75,6 +76,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.50.0",
     "vite": "^7.2.7",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.16",
+    "cross-env": "^7.0.6"
   }
 }

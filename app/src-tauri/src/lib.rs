@@ -8,6 +8,10 @@ use std::time::Duration;
 use tauri::State;
 use uuid::Uuid;
 
+use std::sync::Mutex;
+use tauri_plugin_shell::ShellExt;
+use tauri_plugin_shell::process::CommandChild;
+
 use files::{get_files_internal, get_files_with_fallback, FileError, GetFilesResponse};
 use os_info::{get_os_info_internal, OsInfoResponse};
 
@@ -24,6 +28,11 @@ struct AuthTokenState {
 // FastAPI サイドカーが listen するポート番号を保持するState
 struct PortState {
     port: u16,
+}
+
+// 起動したサイドカープロセスを保持するState（終了時に kill するために使用）
+struct SidecarState {
+    child: Mutex<Option<CommandChild>>,
 }
 
 /// 指定ポートから順に TcpListener::bind を試し、最初に確保できたポートを返す。
@@ -259,10 +268,69 @@ pub fn run() {
         .expect("Failed to create HTTP client");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
         .manage(ClientState { client })
         .manage(AuthTokenState { token: auth_token }) // 生成したトークンをStateとして登録
-        .manage(PortState { port: api_port }) // 確保したポート番号をStateとして登録
+        .manage(PortState { port: api_port })          // 確保したポート番号をStateとして登録
+        .setup(|app| {
+            let is_dev_mode = std::env::var("economicon_DEV_RUN")
+                .map(|v| v.to_lowercase() == "true")
+                .unwrap_or(false);
+
+            if is_dev_mode {
+                log::info!("Dev mode (economicon_DEV_RUN=true): skipping sidecar startup.");
+            } else {
+                // "resources/**/*" グロブでバンドルされたファイルは
+                // resource_dir() から "resources/<相対パス>" でアクセスできる
+                let resource_dir = app.path().resource_dir()?;
+                let main_py = resource_dir
+                    .join("resources")
+                    .join("api")
+                    .join("main.py");
+
+                let auth_token = app.state::<AuthTokenState>().token.clone();
+                let api_port   = app.state::<PortState>().port;
+
+                let main_py_str = main_py.to_string_lossy().into_owned();
+                let (mut rx, child) = app
+                    .shell()
+                    .sidecar("bin/python")?
+                    .args([main_py_str])
+                    .env("ECONOMICOM_API_AUTH_TOKEN", &auth_token)
+                    .env("ECONOMICOM_API_PORT", api_port.to_string())
+                    .env("economicon_DEV_RUN", "false")
+                    .spawn()?;
+
+                app.manage(SidecarState {
+                    child: Mutex::new(Some(child)),
+                });
+
+                tauri::async_runtime::spawn(async move {
+                    use tauri_plugin_shell::process::CommandEvent;
+                    while let Some(event) = rx.recv().await {
+                        match event {
+                            CommandEvent::Stdout(line) => {
+                                log::info!("[python] {}", String::from_utf8_lossy(&line));
+                            }
+                            CommandEvent::Stderr(line) => {
+                                log::warn!("[python] {}", String::from_utf8_lossy(&line));
+                            }
+                            CommandEvent::Error(e) => {
+                                log::error!("[python] error: {}", e);
+                            }
+                            CommandEvent::Terminated(status) => {
+                                log::info!("[python] terminated: {:?}", status);
+                                break;
+                            }
+                            _ => {}
+                        }
+                    }
+                });
+            }
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             proxy_request,
             fetch_binary,
@@ -273,6 +341,18 @@ pub fn run() {
             get_auth_token,
             get_api_port
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|handle, event| {
+            // アプリ終了時にサイドカープロセスを kill して孤立プロセスを防ぐ
+            if let tauri::RunEvent::Exit = event {
+                if let Some(state) = handle.try_state::<SidecarState>() {
+                    if let Ok(mut guard) = state.child.lock() {
+                        if let Some(child) = guard.take() {
+                            let _ = child.kill();
+                        }
+                    }
+                }
+            }
+        });
 }
