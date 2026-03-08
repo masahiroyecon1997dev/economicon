@@ -8,8 +8,8 @@
 ;       https://jrsoftware.org/isdl.php
 ;    2. build.ps1 によって下記が生成済みであること
 ;          app\src-tauri\target\release\economicon.exe
-;          app\src-tauri\resources\python_env\**
-;          api\main.py, api\economicon\**
+;          app\src-tauri\resources\runtime\**
+;          main.py
 ;    3. Inno Setup は "release\" フォルダで実行する想定なので
 ;       パスはリポジトリルートからの相対パスで記述しています。
 ;
@@ -95,19 +95,16 @@ Source: "{#SrcRoot}\app\src-tauri\target\release\{#MyAppExeName}"; \
     DestDir: "{app}"; Flags: ignoreversion
 
 ; ── 2. Embedded Python 環境（FastAPI バックエンド実行用）────────────────────────
-; build.ps1 によって app\src-tauri\resources\python_env\ に展開済みのもの。
-; インストール先の {app}\python_env\ に同じ構造でコピーする。
+; build.ps1 によって app\src-tauri\resources\runtime\ に展開済みのもの。
+; インストール先の {app}\runtime\ に同じ構造でコピーする。
 ; NOTE: Tauri の bundle.resources 経由でバイナリに内包する場合はこのセクションは不要になる。
-Source: "{#SrcRoot}\app\src-tauri\resources\python_env\*"; \
-    DestDir: "{app}\python_env"; \
+Source: "{#SrcRoot}\app\src-tauri\resources\runtime\*"; \
+    DestDir: "{app}\runtime"; \
     Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; ── 3. FastAPI バックエンドコード ────────────────────────────────────────────
 ; Python サイドカー起動に必要な FastAPI アプリケーションコード。
-Source: "{#SrcRoot}\api\main.py"; DestDir: "{app}\api"; Flags: ignoreversion
-Source: "{#SrcRoot}\api\economicon\*"; \
-    DestDir: "{app}\api\economicon"; \
-    Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SrcRoot}\main.py"; DestDir: "{app}"; Flags: ignoreversion
 
 ; ── 4. ライセンスファイル ──────────────────────────────────────────────
 Source: "{#SrcRoot}\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
