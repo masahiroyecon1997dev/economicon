@@ -286,15 +286,14 @@ pub fn run() {
                 // resource_dir() から "resources/<相対パス>" でアクセスできる
                 let resource_dir = app.path().resource_dir()?;
 
-                let main_py = resource_dir
+                let main_py_path = resource_dir
                     .join("resources")
-                    .join("api")
                     .join("main.py")
                     .to_string_lossy().into_owned();
 
-                let python_env_path = resource_dir
+                let runime_path = resource_dir
                     .join("resources")
-                    .join("python_env")
+                    .join("runtime") // packaging/build.ps1 で runtime フォルダに展開する前提
                     .to_string_lossy().into_owned();
 
                 let auth_token = app.state::<AuthTokenState>().token.clone();
@@ -303,11 +302,9 @@ pub fn run() {
                 let (mut rx, child) = app
                     .shell()
                     .sidecar("python")?
-                    .args([&main_py])
-                    .env("PATH", &python_env_path)
+                    .args([&main_py_path])
+                    .env("PATH", &runime_path) // PythonのDLLや実行ファイルがあるディレクトリをPATHに追加
                     .env("PYTHONUNBUFFERED", "1")
-                    .env("PYTHONHOME", &python_env_path)
-                    .env("PYTHONPATH", &python_env_path)
                     .env("ECONOMICOM_API_AUTH_TOKEN", &auth_token)
                     .env("ECONOMICOM_API_PORT", api_port.to_string())
                     .env("ECONOMICON_DEV_RUN", "false")
@@ -324,12 +321,15 @@ pub fn run() {
                         match event {
                             CommandEvent::Stdout(line) => {
                                 log::info!("[python] {}", String::from_utf8_lossy(&line));
+                                println!("[python] {}", String::from_utf8_lossy(&line));
                             }
                             CommandEvent::Stderr(line) => {
                                 log::warn!("[python] {}", String::from_utf8_lossy(&line));
+                                println!("[python] {}", String::from_utf8_lossy(&line));
                             }
                             CommandEvent::Error(e) => {
                                 log::error!("[python] error: {}", e);
+                                println!("[python] error: {}", e);
                             }
                             CommandEvent::Terminated(status) => {
                                 log::info!("[python] terminated: {:?}", status);
