@@ -17,6 +17,7 @@ export const ExpressionHelperButton = ({
 }: ExpressionHelperButtonProps) => {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
         "h-8 px-3 flex items-center justify-center rounded",
@@ -26,7 +27,7 @@ export const ExpressionHelperButton = ({
         "hover:bg-neutral-100 hover:border-accent",
         "transition-colors shadow-sm",
         "font-mono text-xs font-medium",
-        className
+        className,
       )}
       title={title}
       disabled={disabled}

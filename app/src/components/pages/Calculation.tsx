@@ -256,10 +256,10 @@ export const Calculation = () => {
                 </div>
 
                 {/* 数式エディタ */}
-                <div className="flex-1 relative bg-white dark:bg-neutral-900">
-                  <form.Field name="calculationExpression">
-                    {(field) => (
-                      <>
+                <form.Field name="calculationExpression">
+                  {(field) => (
+                    <div className="flex-1 flex flex-col min-h-0">
+                      <div className="flex-1 relative bg-white dark:bg-neutral-900">
                         <textarea
                           ref={textareaRef}
                           className="w-full h-full p-4 font-mono text-sm text-text-main dark:text-neutral-300 bg-transparent border-none resize-none focus:ring-0 leading-relaxed"
@@ -269,21 +269,21 @@ export const Calculation = () => {
                           onBlur={field.handleBlur}
                           disabled={isSubmitting}
                         />
-                        {field.state.meta.errors[0] && (
-                          <p className="absolute bottom-12 left-4 text-xs text-red-600">
-                            {field.state.meta.errors[0].toString()}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </form.Field>
-                  <div className="absolute bottom-0 right-0 left-0 px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-t border-border-color text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px]">
-                      <Info />
-                    </span>
-                    <span>{t("CalculationView.FormulaHelp")}</span>
-                  </div>
-                </div>
+                        <div className="absolute bottom-0 right-0 left-0 px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-t border-border-color text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2">
+                          <span className="material-symbols-outlined text-[16px]">
+                            <Info />
+                          </span>
+                          <span>{t("CalculationView.FormulaHelp")}</span>
+                        </div>
+                      </div>
+                      {field.state.meta.errors[0] && (
+                        <p className="px-4 py-1.5 text-xs text-red-600 dark:text-red-400 bg-red-50/60 dark:bg-red-900/10 border-t border-red-200 dark:border-red-800">
+                          {field.state.meta.errors[0].toString()}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </form.Field>
               </div>
 
               {/* カラムリスト */}
