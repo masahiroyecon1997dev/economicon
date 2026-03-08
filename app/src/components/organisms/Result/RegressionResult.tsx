@@ -1,6 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/utils/helpers";
 import type { LinearRegressionResultType } from "../../../types/commonTypes";
+import {
+  HighlightStatCard,
+  ResultSection,
+  StatItem,
+} from "../../molecules/Result/ResultSection";
 
 type RegressionResultProps = {
   result: LinearRegressionResultType;
@@ -32,10 +37,7 @@ export const RegressionResult = ({
   return (
     <div className={cn("flex flex-col gap-4 p-4", className)}>
       {/* 分析概要 */}
-      <div className="rounded-xl border border-border-color bg-white p-3 shadow-sm">
-        <h3 className="mb-3 text-base font-bold text-text-heading">
-          {t("RegressionResult.AnalysisSummary")}
-        </h3>
+      <ResultSection title={t("RegressionResult.AnalysisSummary")}>
         <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm md:grid-cols-2">
           <div className="flex gap-2">
             <span className="font-medium text-brand-text-main shrink-0">
@@ -54,13 +56,10 @@ export const RegressionResult = ({
             </span>
           </div>
         </div>
-      </div>
+      </ResultSection>
 
       {/* 係数テーブル */}
-      <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
-        <h3 className="mb-3 text-base font-bold text-text-heading">
-          {t("RegressionResult.Coefficients")}
-        </h3>
+      <ResultSection title={t("RegressionResult.Coefficients")}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10">
@@ -139,78 +138,47 @@ export const RegressionResult = ({
         <p className="mt-2 text-right text-xs text-brand-text-main/50">
           {t("RegressionResult.SignificanceNote")}
         </p>
-      </div>
+      </ResultSection>
 
       {/* モデル統計量 */}
-      <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
-        <h3 className="mb-3 text-base font-bold text-text-heading">
-          {t("RegressionResult.ModelStatistics")}
-        </h3>
-        {/* R² / 調整済みR² を強調 */}
+      <ResultSection title={t("RegressionResult.ModelStatistics")}>
         <div className="mb-3 grid grid-cols-2 gap-3">
-          <div className="flex flex-col rounded-lg bg-brand-accent/5 p-3">
-            <span className="text-xs font-medium text-brand-accent/70">R²</span>
-            <span className="mt-0.5 text-2xl font-bold text-brand-accent">
-              {formatNumber(result.modelStatistics.R2)}
-            </span>
-          </div>
-          <div className="flex flex-col rounded-lg bg-brand-accent/5 p-3">
-            <span className="text-xs font-medium text-brand-accent/70">
-              {t("RegressionResult.AdjustedR2")}
-            </span>
-            <span className="mt-0.5 text-2xl font-bold text-brand-accent">
-              {formatNumber(result.modelStatistics.adjustedR2)}
-            </span>
-          </div>
+          <HighlightStatCard
+            label="R²"
+            value={formatNumber(result.modelStatistics.R2)}
+          />
+          <HighlightStatCard
+            label={t("RegressionResult.AdjustedR2")}
+            value={formatNumber(result.modelStatistics.adjustedR2)}
+          />
         </div>
-        {/* その他の統計量 */}
         <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">AIC</span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.AIC)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">BIC</span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.BIC)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">
-              {t("RegressionResult.FValue")}
-            </span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.fValue)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">
-              {t("RegressionResult.FProbability")}
-            </span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.fProbability)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">
-              {t("RegressionResult.LogLikelihood")}
-            </span>
-            <span className="font-semibold text-brand-text-main">
-              {formatNumber(result.modelStatistics.logLikelihood)}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-brand-text-main/60">
-              {t("RegressionResult.Observations")}
-            </span>
-            <span className="font-semibold text-brand-text-main">
-              {result.modelStatistics.nObservations}
-            </span>
-          </div>
+          <StatItem
+            label="AIC"
+            value={formatNumber(result.modelStatistics.AIC)}
+          />
+          <StatItem
+            label="BIC"
+            value={formatNumber(result.modelStatistics.BIC)}
+          />
+          <StatItem
+            label={t("RegressionResult.FValue")}
+            value={formatNumber(result.modelStatistics.fValue)}
+          />
+          <StatItem
+            label={t("RegressionResult.FProbability")}
+            value={formatNumber(result.modelStatistics.fProbability)}
+          />
+          <StatItem
+            label={t("RegressionResult.LogLikelihood")}
+            value={formatNumber(result.modelStatistics.logLikelihood)}
+          />
+          <StatItem
+            label={t("RegressionResult.Observations")}
+            value={result.modelStatistics.nObservations}
+          />
         </div>
-      </div>
+      </ResultSection>
     </div>
   );
 };
