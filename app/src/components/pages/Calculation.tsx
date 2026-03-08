@@ -109,7 +109,7 @@ export const Calculation = () => {
   const handleOperatorClick = (operator: string) => insertAtCursor(operator);
 
   const handleColumnClick = (columnName: string) =>
-    insertAtCursor(`pl.col("${columnName}")`);
+    insertAtCursor(`{${columnName}}`);
 
   const handleClearClick = () => {
     form.setFieldValue("calculationExpression", "");
