@@ -34,7 +34,10 @@
       "args": [],
       "cwd": "${workspaceFolder}/app",
       "stopAtEntry": false,
-      "preLaunchTask": "pnpm: start"
+      "preLaunchTask": "pnpm: start",
+      "env": {
+        "economicon_DEV_RUN": "true"
+      }
     },
     {
       "name": "pytest",
