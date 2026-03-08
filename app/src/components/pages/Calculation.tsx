@@ -158,13 +158,13 @@ export const Calculation = () => {
                   <FormField
                     label={t("CalculationView.TargetTable")}
                     htmlFor="target-table"
-                    error={field.state.meta.errors[0]?.toString()}
+                    error={field.state.meta.errors[0]?.message?.toString()}
                   >
                     <Select
                       id="target-table"
                       value={field.state.value}
                       onValueChange={handleTableChange}
-                      error={field.state.meta.errors[0]?.toString()}
+                      error={field.state.meta.errors[0]?.message?.toString()}
                       placeholder={t("CalculationView.SelectTable")}
                       disabled={isSubmitting}
                     >
@@ -184,7 +184,7 @@ export const Calculation = () => {
                   <FormField
                     label={t("CalculationView.NewColumnName")}
                     htmlFor="new-column-name"
-                    error={field.state.meta.errors[0]?.toString()}
+                    error={field.state.meta.errors[0]?.message?.toString()}
                   >
                     <InputText
                       id="new-column-name"
@@ -194,7 +194,7 @@ export const Calculation = () => {
                       placeholder={t(
                         "CalculationView.NewColumnNamePlaceholder",
                       )}
-                      error={field.state.meta.errors[0]?.toString()}
+                      error={field.state.meta.errors[0]?.message?.toString()}
                       disabled={isSubmitting}
                     />
                   </FormField>
