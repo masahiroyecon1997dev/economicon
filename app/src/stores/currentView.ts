@@ -2,7 +2,6 @@ import { create } from "zustand";
 
 export type CurrentPageValue =
   | "ImportDataFile"
-  | "CreateTable"
   | "JoinTable"
   | "UnionTable"
   | "DescriptiveStatistics"
