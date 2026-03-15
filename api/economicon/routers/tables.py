@@ -10,8 +10,6 @@ from economicon.models import (
     CreateJoinTableResult,
     CreateSimulationDataTableRequestBody,
     CreateSimulationDataTableResult,
-    CreateTableRequestBody,
-    CreateTableResult,
     CreateUnionTableRequestBody,
     CreateUnionTableResult,
     DeleteTableRequestBody,
@@ -37,7 +35,6 @@ from economicon.services.tables.create_join_table import CreateJoinTable
 from economicon.services.tables.create_simulation_data_table import (
     CreateSimulationDataTable,
 )
-from economicon.services.tables.create_table import CreateTable
 from economicon.services.tables.create_union_table import CreateUnionTable
 from economicon.services.tables.delete_table import DeleteTable
 from economicon.services.tables.duplicate_table import DuplicateTable
@@ -58,35 +55,6 @@ router = APIRouter(
     tags=["table"],
     responses=COMMON_ERROR_RESPONSES,
 )
-
-
-@router.post("/create", response_model=SuccessResponse[CreateTableResult])
-async def create_table(
-    request: Request,
-    body: CreateTableRequestBody,
-    tables_store: TablesStoreDep,
-):
-    """テーブルを作成するエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : CreateTableRequestBody
-        リクエストボディ
-
-    Returns
-    -------
-    JSONResponse
-        処理結果
-    """
-    # ビジネスロジックの実行
-    api = CreateTable(body, tables_store)
-    result = run_operation(api)
-
-    return create_success_response(
-        status_code=http_status.HTTP_200_OK, response_object=result
-    )
 
 
 @router.post(

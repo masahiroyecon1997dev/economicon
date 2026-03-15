@@ -1,7 +1,6 @@
 """スキーマパッケージ初期化"""
 
 from economicon.models.columns import (
-    AddColumnRequestBody,
     AddColumnResult,
     AddDummyColumnRequestBody,
     AddDummyColumnResult,
@@ -128,7 +127,6 @@ from economicon.models.tables import (
     CreateJoinTableResult,
     CreateSimulationDataTableRequestBody,
     CreateSimulationDataTableResult,
-    CreateTableRequestBody,
     CreateTableResult,
     CreateUnionTableRequestBody,
     CreateUnionTableResult,
@@ -206,8 +204,6 @@ __all__ = [
     "ClusteredStandardError",
     "HacStandardError",
     # Column operations
-    "AddColumnRequestBody",
-    "AddColumnResult",
     "DeleteColumnRequestBody",
     "DeleteColumnResult",
     "RenameColumnRequestBody",
@@ -232,8 +228,6 @@ __all__ = [
     "GetColumnListResult",
     "ColumnInfo",
     # Table operations
-    "CreateTableRequestBody",
-    "CreateTableResult",
     "RenameTableRequestBody",
     "RenameTableResult",
     "CreateSimulationDataTableRequestBody",

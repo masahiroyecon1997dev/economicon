@@ -64,99 +64,6 @@ def _coerce_filter_operator_type(v: Any) -> FilterOperatorType:
 # ---------------------------------------------------------------------------
 
 
-class CreateTableRequestBody(BaseRequest):
-    """テーブル作成リクエスト"""
-
-    table_name: Annotated[
-        NewTableName,
-        Field(
-            title="Table Name",
-            description="作成するテーブルの名前。ワークスペース内に存在しない名前を指定してください。",
-        ),
-    ]
-    row_count: Annotated[
-        int | None,
-        Field(
-            title="Row Count",
-            description=(
-                "テーブルの行数。"
-                "file_path が指定されている場合は省略可能"
-                "（None の場合はファイルの行数を使用）。"
-                "file_path が省略されている場合は必須（1以上の整数）。"
-            ),
-            ge=1,
-        ),
-    ] = None
-    column_names: Annotated[
-        list[NewColumnName],
-        Field(
-            title="Column Names",
-            description="テーブルに作成するカラム名のリスト",
-            min_length=1,
-        ),
-    ]
-    file_path: Annotated[
-        FilePath | None,
-        Field(
-            title="File Path",
-            description=(
-                "読み込むファイルのパス（CSV / Excel / Parquet）。"
-                "省略時はすべての値が None の空テーブルを作成します。"
-            ),
-        ),
-    ] = None
-    has_header: Annotated[
-        bool,
-        Field(
-            title="Has Header",
-            description=(
-                "CSV/ Excel ファイルにヘッダ行があるか。"
-                "True: 1 行目をヘッダとして読み飛ばし、"
-                "2 行目からをデータとする。"
-                "False: 1 行目からデータとして読み込む。"
-                "file_path が CSV または Excel の場合のみ有効。"
-            ),
-        ),
-    ] = False
-    csv_separator: Annotated[
-        Separator,
-        Field(
-            title="CSV Separator",
-            description="CSV の区切り文字。file_path が CSV の場合のみ有効。",
-            min_length=1,
-            max_length=10,
-        ),
-    ] = ","
-    csv_encoding: Annotated[
-        CsvEncoding,
-        Field(
-            title="CSV Encoding",
-            description=(
-                "CSV のエンコーディング。file_path が CSV の場合のみ有効。"
-            ),
-        ),
-    ] = "utf8"
-    excel_sheet_name: Annotated[
-        ExcelSheetName | None,
-        Field(
-            title="Excel Sheet Name",
-            description=(
-                "読み込むシート名。file_path が Excel の場合のみ有効。"
-                "省略時は先頭シートを読み込みます。"
-            ),
-        ),
-    ] = None
-
-    @model_validator(mode="after")
-    def require_rows_when_no_file(self) -> Self:
-        """file_path が None のとき row_count は必須"""
-        if self.file_path is None and self.row_count is None:
-            raise ValueError(
-                "row_count is required when file_path is not specified"
-            )
-        return self
-
-
 class RenameTableRequestBody(BaseRequest):
     """テーブル名変更リクエスト"""
 
@@ -477,10 +384,6 @@ class TableNameResult(BaseResult):
         title="Table Name",
         description="操作対象または生成されたテーブル名",
     )
-
-
-class CreateTableResult(TableNameResult):
-    """テーブル作成レスポンス"""
 
 
 class CreateJoinTableResult(TableNameResult):
