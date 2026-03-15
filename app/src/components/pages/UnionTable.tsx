@@ -126,13 +126,13 @@ export const UnionTable = () => {
   const validate = (): boolean => {
     const next: FormErrors = {};
     if (selectedTables.length < 2) {
-      next.tables = t("UnionTable.ErrorTablesRequired");
+      next.tables = t("UnionTable.ErrorDataRequired");
     }
     if (checkedCols.size === 0) {
       next.columns = t("UnionTable.ErrorColumnsRequired");
     }
     if (!newTableName.trim()) {
-      next.newTableName = t("UnionTable.ErrorNewTableNameRequired");
+      next.newTableName = t("UnionTable.ErrorNewDataNameRequired");
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -183,7 +183,7 @@ export const UnionTable = () => {
         {/* ── Section 1: 対象テーブル ── */}
         <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading">
-            {t("UnionTable.SelectTables")}
+            {t("UnionTable.SelectDataList")}
           </h2>
 
           {/* テーブル追加行 */}
@@ -192,7 +192,7 @@ export const UnionTable = () => {
               <Select
                 value={addingTable}
                 onValueChange={setAddingTable}
-                placeholder={t("UnionTable.SelectTable")}
+                placeholder={t("UnionTable.SelectDataItem")}
                 disabled={isDisabled || availableToAdd.length === 0}
               >
                 {availableToAdd.map((name) => (
@@ -220,7 +220,7 @@ export const UnionTable = () => {
           {/* 選択済みテーブルリスト */}
           {selectedTables.length === 0 ? (
             <p className="rounded-lg border border-dashed border-border-color py-4 text-center text-xs text-brand-text-main/50">
-              {t("UnionTable.NoTablesSelected")}
+              {t("UnionTable.NoDataSelected")}
             </p>
           ) : (
             <ul className="flex flex-col gap-1.5">
@@ -242,7 +242,7 @@ export const UnionTable = () => {
                       "text-brand-text-main/40 hover:bg-red-50 hover:text-red-500",
                       "disabled:cursor-not-allowed disabled:opacity-30",
                     )}
-                    aria-label={t("UnionTable.RemoveTable")}
+                    aria-label={t("UnionTable.RemoveData")}
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -283,7 +283,7 @@ export const UnionTable = () => {
 
           {selectedTables.length < 2 ? (
             <p className="rounded-lg border border-dashed border-border-color py-4 text-center text-xs text-brand-text-main/50">
-              {t("UnionTable.SelectTablesFirst")}
+              {t("UnionTable.SelectDataFirst")}
             </p>
           ) : isLoading ? (
             <p className="rounded-lg border border-dashed border-border-color py-4 text-center text-xs text-brand-text-main/50">
@@ -307,10 +307,10 @@ export const UnionTable = () => {
         {/* ── Section 3: 出力テーブル名 ── */}
         <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading">
-            {t("UnionTable.OutputTable")}
+            {t("UnionTable.OutputData")}
           </h2>
           <FormField
-            label={t("UnionTable.NewTableName")}
+            label={t("UnionTable.NewDataName")}
             htmlFor="union-new-table-name"
             error={errors.newTableName}
           >
@@ -318,7 +318,7 @@ export const UnionTable = () => {
               id="union-new-table-name"
               value={newTableName}
               onChange={(e) => setNewTableName(e.target.value)}
-              placeholder={t("UnionTable.NewTableNamePlaceholder")}
+              placeholder={t("UnionTable.NewDataNamePlaceholder")}
               disabled={isDisabled}
               error={errors.newTableName}
             />

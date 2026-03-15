@@ -19,7 +19,7 @@ import { PageLayout } from "../templates/PageLayout";
 
 const createCalculationSchema = (t: (key: string) => string) =>
   z.object({
-    tableName: z.string().min(1, t("ValidationMessages.TableNameSelect")),
+    tableName: z.string().min(1, t("ValidationMessages.DataNameSelect")),
     newColumnName: z
       .string()
       .min(1, t("ValidationMessages.NewColumnNameRequired")),
@@ -156,7 +156,7 @@ export const Calculation = () => {
               <form.Field name="tableName">
                 {(field) => (
                   <FormField
-                    label={t("CalculationView.TargetTable")}
+                    label={t("CalculationView.TargetData")}
                     htmlFor="target-table"
                     error={field.state.meta.errors[0]?.message?.toString()}
                   >
@@ -165,7 +165,7 @@ export const Calculation = () => {
                       value={field.state.value}
                       onValueChange={handleTableChange}
                       error={field.state.meta.errors[0]?.message?.toString()}
-                      placeholder={t("CalculationView.SelectTable")}
+                      placeholder={t("CalculationView.SelectData")}
                       disabled={isSubmitting}
                     >
                       {tableList.map((table, index) => (

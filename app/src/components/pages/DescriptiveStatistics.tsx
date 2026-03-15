@@ -127,7 +127,7 @@ export const DescriptiveStatistics = () => {
   const handleSubmit = async () => {
     const newErrors: FormErrors = {};
     if (!selectedTable)
-      newErrors.table = t("DescriptiveStatistics.ErrorTableRequired");
+      newErrors.table = t("DescriptiveStatistics.ErrorDataRequired");
     if (checkedCols.size === 0)
       newErrors.columns = t("DescriptiveStatistics.ErrorColumnsRequired");
     if (checkedStats.size === 0)
@@ -183,7 +183,7 @@ export const DescriptiveStatistics = () => {
       <div className="flex-1 overflow-y-auto min-h-0 space-y-4 pb-2">
         {/* ─── 1. Table selection ────────────────────────────── */}
         <FormField
-          label={t("DescriptiveStatistics.TableLabel")}
+          label={t("DescriptiveStatistics.DataLabel")}
           error={errors.table}
         >
           <Select
@@ -192,7 +192,7 @@ export const DescriptiveStatistics = () => {
               setSelectedTable(v);
               setErrors({});
             }}
-            placeholder={t("DescriptiveStatistics.SelectTable")}
+            placeholder={t("DescriptiveStatistics.SelectData")}
           >
             {tableList.map((name) => (
               <SelectItem key={name} value={name}>
