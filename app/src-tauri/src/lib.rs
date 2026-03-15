@@ -13,7 +13,7 @@ use std::sync::Mutex;
 use tauri_plugin_shell::ShellExt;
 use tauri_plugin_shell::process::CommandChild;
 
-use files::{get_files_internal, get_files_with_fallback, FileError, GetFilesResponse};
+use files::{get_files_internal, get_files_with_fallback, check_file_exists_internal, FileError, GetFilesResponse};
 use os_info::{get_os_info_internal, OsInfoResponse};
 
 // HTTPクライアントを保持するState
@@ -226,6 +226,12 @@ async fn get_files(directory_path: String) -> Result<GetFilesResponse, FileError
     get_files_internal(&directory_path)
 }
 
+/// 指定したフルパスにファイルが存在するかどうか（同名ファイルの上書き確認に使用）
+#[tauri::command]
+fn check_file_exists(file_path: String) -> bool {
+    check_file_exists_internal(&file_path)
+}
+
 /// エラーを返さない安全版 get_files。
 /// パスが存在しない・空の場合はホームディレクトリ等にフォールバックする。
 /// アプリ初期化時（設定に保存されたパスが消えた場合など）に使用する。
@@ -353,7 +359,8 @@ pub fn run() {
             get_files_safe,
             get_os_info,
             get_auth_token,
-            get_api_port
+            get_api_port,
+            check_file_exists
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
