@@ -343,7 +343,7 @@ export const AppBar = () => {
       >
         <img
           src={logo}
-          className="w-9 h-9 pointer-events-none"
+          className="w-8 h-8 pointer-events-none"
           alt="economicon logo"
         />
       </div>
