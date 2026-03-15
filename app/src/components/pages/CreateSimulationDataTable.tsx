@@ -26,7 +26,7 @@ import { PageLayout } from "../templates/PageLayout";
 
 const createSimulationSchema = (t: (key: string) => string) =>
   z.object({
-    tableName: z.string().min(1, t("ValidationMessages.TableNameRequired")),
+    tableName: z.string().min(1, t("ValidationMessages.DataNameRequired")),
     numRows: z.number().min(1, t("ValidationMessages.NumRowsMoreThan0")),
   });
 
@@ -254,13 +254,11 @@ export const CreateSimulationDataTable = () => {
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            t("CreateSimulationDataTableView.TableCreationFailed"),
+            t("CreateSimulationDataTableView.DataCreationFailed"),
           );
         }
       } catch (error) {
-        let errorMessage = t(
-          "CreateSimulationDataTableView.TableCreationError",
-        );
+        let errorMessage = t("CreateSimulationDataTableView.DataCreationError");
         if (error instanceof Error) {
           errorMessage = error.message;
         }
@@ -421,7 +419,7 @@ export const CreateSimulationDataTable = () => {
           {/* テーブル設定 */}
           <div className="rounded-xl border border-border-color dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm">
             <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading dark:text-white">
-              {t("CreateSimulationDataTableView.TableSettings")}
+              {t("CreateSimulationDataTableView.DataSettings")}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <form.Field
@@ -429,7 +427,7 @@ export const CreateSimulationDataTable = () => {
                 validators={{
                   onChange: ({ value }) =>
                     !value.trim()
-                      ? t("ValidationMessages.TableNameRequired")
+                      ? t("ValidationMessages.DataNameRequired")
                       : undefined,
                 }}
               >
@@ -439,7 +437,7 @@ export const CreateSimulationDataTable = () => {
                     : undefined;
                   return (
                     <FormField
-                      label={t("CreateSimulationDataTableView.TableName")}
+                      label={t("CreateSimulationDataTableView.DataName")}
                       htmlFor="table-name"
                       error={errorMsg}
                     >
@@ -449,7 +447,7 @@ export const CreateSimulationDataTable = () => {
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
                         placeholder={t(
-                          "CreateSimulationDataTableView.TableNamePlaceholder",
+                          "CreateSimulationDataTableView.DataNamePlaceholder",
                         )}
                         error={errorMsg}
                         disabled={isSubmitting}

@@ -175,9 +175,9 @@ export const AppBar = () => {
       ],
     },
     {
-      id: "table",
-      menuName: t("HeaderMenu.Table"),
-      isOpen: openMenuId === "table",
+      id: "data",
+      menuName: t("HeaderMenu.Data"),
+      isOpen: openMenuId === "data",
       onClose: close,
       items: [
         {
@@ -196,14 +196,6 @@ export const AppBar = () => {
             close();
           },
         },
-      ],
-    },
-    {
-      id: "data",
-      menuName: t("HeaderMenu.Data"),
-      isOpen: openMenuId === "data",
-      onClose: close,
-      items: [
         {
           id: "data-generation",
           label: t("HeaderMenu.DataGeneration"),
@@ -220,6 +212,14 @@ export const AppBar = () => {
             close();
           },
         },
+      ],
+    },
+    {
+      id: "basic-analysis",
+      menuName: t("HeaderMenu.BasicAnalysis"),
+      isOpen: openMenuId === "basic-analysis",
+      onClose: close,
+      items: [
         {
           id: "basic-statistics",
           label: t("HeaderMenu.BasicStatistics"),

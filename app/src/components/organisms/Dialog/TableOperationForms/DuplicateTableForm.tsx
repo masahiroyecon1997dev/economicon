@@ -43,11 +43,11 @@ export const DuplicateTableForm = ({
       onSubmit: z.object({
         newTableName: z
           .string()
-          .min(1, t("ValidationMessages.TableNameRequired"))
-          .max(128, t("ValidationMessages.TableNameTooLong"))
+          .min(1, t("ValidationMessages.DataNameRequired"))
+          .max(128, t("ValidationMessages.DataNameTooLong"))
           .refine(
             (v) => !hasControlChars(v),
-            t("ValidationMessages.TableNameInvalidChars"),
+            t("ValidationMessages.DataNameInvalidChars"),
           ),
       }),
     },
@@ -68,7 +68,7 @@ export const DuplicateTableForm = ({
           setApiError(
             replaceParamNames(
               getResponseErrorMessage(response, t("Error.UnexpectedError")),
-              { newTableName: t("DuplicateTableForm.NewTableName") },
+              { newTableName: t("DuplicateTableForm.NewDataName") },
             ),
           );
         }
@@ -76,7 +76,7 @@ export const DuplicateTableForm = ({
         setApiError(
           replaceParamNames(
             extractApiErrorMessage(error, t("Error.UnexpectedError")),
-            { newTableName: t("DuplicateTableForm.NewTableName") },
+            { newTableName: t("DuplicateTableForm.NewDataName") },
           ),
         );
       }
@@ -102,11 +102,11 @@ export const DuplicateTableForm = ({
         name="newTableName"
         validators={{
           onChange: ({ value }) => {
-            if (!value.trim()) return t("ValidationMessages.TableNameRequired");
+            if (!value.trim()) return t("ValidationMessages.DataNameRequired");
             if (value.length > 128)
-              return t("ValidationMessages.TableNameTooLong");
+              return t("ValidationMessages.DataNameTooLong");
             if (hasControlChars(value))
-              return t("ValidationMessages.TableNameInvalidChars");
+              return t("ValidationMessages.DataNameInvalidChars");
             return undefined;
           },
         }}
@@ -117,7 +117,7 @@ export const DuplicateTableForm = ({
             : undefined;
           return (
             <FormField
-              label={t("DuplicateTableForm.NewTableName")}
+              label={t("DuplicateTableForm.NewDataName")}
               htmlFor="dt-new-name"
               error={errorMsg}
             >
@@ -126,7 +126,7 @@ export const DuplicateTableForm = ({
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder={t("DuplicateTableForm.NewTableNamePlaceholder")}
+                placeholder={t("DuplicateTableForm.NewDataNamePlaceholder")}
                 disabled={isSubmitting}
               />
             </FormField>
