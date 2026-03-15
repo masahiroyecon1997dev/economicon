@@ -41,7 +41,7 @@ export const RegressionResult = ({
         <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm md:grid-cols-2">
           <div className="flex gap-2">
             <span className="font-medium text-brand-text-main shrink-0">
-              {t("RegressionResult.TableName")}:
+              {t("RegressionResult.DataName")}:
             </span>
             <span className="text-brand-text-main break-all">
               {result.tableName}

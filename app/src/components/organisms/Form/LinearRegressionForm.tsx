@@ -26,7 +26,7 @@ import { FormField } from "../../molecules/Form/FormField";
 
 const createRegressionSchema = (t: (key: string) => string) =>
   z.object({
-    tableName: z.string().min(1, t("ValidationMessages.TableNameSelect")),
+    tableName: z.string().min(1, t("ValidationMessages.DataNameSelect")),
     dependentVariable: z
       .string()
       .min(1, t("ValidationMessages.DependentVariableRequired")),
@@ -153,7 +153,7 @@ export const LinearRegressionForm = ({
           {(field) => (
             <div className="flex items-center gap-3">
               <label className="shrink-0 text-xs font-medium text-brand-text-main">
-                {t("LinearRegressionForm.DataTable")}
+                {t("LinearRegressionForm.DataSource")}
               </label>
               <div className="flex-1">
                 <Select
@@ -162,7 +162,7 @@ export const LinearRegressionForm = ({
                   onValueChange={handleTableSelect}
                   disabled={isSubmitting}
                   error={field.state.meta.errors[0]?.toString()}
-                  placeholder={t("LinearRegressionForm.SelectATable")}
+                  placeholder={t("LinearRegressionForm.SelectData")}
                 >
                   {tableList.map((table, index) => (
                     <SelectItem key={index} value={table}>

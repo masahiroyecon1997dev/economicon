@@ -47,11 +47,11 @@ export const RenameTableForm = ({
       onSubmit: z.object({
         newTableName: z
           .string()
-          .min(1, t("ValidationMessages.TableNameRequired"))
-          .max(128, t("ValidationMessages.TableNameTooLong"))
+          .min(1, t("ValidationMessages.DataNameRequired"))
+          .max(128, t("ValidationMessages.DataNameTooLong"))
           .refine(
             (v) => !hasControlChars(v),
-            t("ValidationMessages.TableNameInvalidChars"),
+            t("ValidationMessages.DataNameInvalidChars"),
           ),
       }),
     },
@@ -88,8 +88,8 @@ export const RenameTableForm = ({
             replaceParamNames(
               getResponseErrorMessage(response, t("Error.UnexpectedError")),
               {
-                newTableName: t("RenameTableForm.NewTableName"),
-                oldTableName: t("RenameTableForm.CurrentTableName"),
+                newTableName: t("RenameTableForm.NewDataName"),
+                oldTableName: t("RenameTableForm.CurrentDataName"),
               },
             ),
           );
@@ -99,8 +99,8 @@ export const RenameTableForm = ({
           replaceParamNames(
             extractApiErrorMessage(error, t("Error.UnexpectedError")),
             {
-              newTableName: t("RenameTableForm.NewTableName"),
-              oldTableName: t("RenameTableForm.CurrentTableName"),
+              newTableName: t("RenameTableForm.NewDataName"),
+              oldTableName: t("RenameTableForm.CurrentDataName"),
             },
           ),
         );
@@ -127,11 +127,11 @@ export const RenameTableForm = ({
         name="newTableName"
         validators={{
           onChange: ({ value }) => {
-            if (!value.trim()) return t("ValidationMessages.TableNameRequired");
+            if (!value.trim()) return t("ValidationMessages.DataNameRequired");
             if (value.length > 128)
-              return t("ValidationMessages.TableNameTooLong");
+              return t("ValidationMessages.DataNameTooLong");
             if (hasControlChars(value))
-              return t("ValidationMessages.TableNameInvalidChars");
+              return t("ValidationMessages.DataNameInvalidChars");
             return undefined;
           },
         }}
@@ -142,7 +142,7 @@ export const RenameTableForm = ({
             : undefined;
           return (
             <FormField
-              label={t("RenameTableForm.NewTableName")}
+              label={t("RenameTableForm.NewDataName")}
               htmlFor="rt-new-name"
               error={errorMsg}
             >
@@ -151,7 +151,7 @@ export const RenameTableForm = ({
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder={t("RenameTableForm.NewTableNamePlaceholder")}
+                placeholder={t("RenameTableForm.NewDataNamePlaceholder")}
                 disabled={isSubmitting}
               />
             </FormField>

@@ -38,13 +38,13 @@ export const createImportConfigSchema = (t: (key: string) => string) =>
   z.object({
     tableName: z
       .string()
-      .min(1, t("ValidationMessages.TableNameRequired"))
-      .max(128, t("ValidationMessages.TableNameTooLong"))
+      .min(1, t("ValidationMessages.DataNameRequired"))
+      .max(128, t("ValidationMessages.DataNameTooLong"))
       // 制御文字・DEL 禁止 (NAME_PATTERN)
       .regex(
         // eslint-disable-next-line no-control-regex
         new RegExp("^[^\u0000-\u001f\u007f]+$"),
-        t("ValidationMessages.TableNameInvalidChars"),
+        t("ValidationMessages.DataNameInvalidChars"),
       ),
     // CSV 専用
     separatorMode: z.enum(["comma", "tab", "other"] as const).default("comma"),
@@ -62,11 +62,11 @@ export const validateTableName = (
   t: (key: string) => string,
 ): string | undefined => {
   if (!value || value.length === 0)
-    return t("ValidationMessages.TableNameRequired");
-  if (value.length > 128) return t("ValidationMessages.TableNameTooLong");
+    return t("ValidationMessages.DataNameRequired");
+  if (value.length > 128) return t("ValidationMessages.DataNameTooLong");
   // eslint-disable-next-line no-control-regex
   if (/[\u0000-\u001f\u007f]/.test(value))
-    return t("ValidationMessages.TableNameInvalidChars");
+    return t("ValidationMessages.DataNameInvalidChars");
   return undefined;
 };
 

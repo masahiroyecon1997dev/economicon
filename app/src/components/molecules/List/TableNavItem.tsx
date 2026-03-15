@@ -60,7 +60,7 @@ export const TableNavItem = ({
                 "hover:bg-white/20 data-[state=open]:bg-white/20",
                 "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50",
               )}
-              aria-label={t("AreaLabels.TableMenu")}
+              aria-label={t("AreaLabels.DataMenu")}
               onClick={(e) => e.stopPropagation()}
             >
               <MoreVertical size={14} />
@@ -88,7 +88,7 @@ export const TableNavItem = ({
                 onSelect={() => openDialog("rename")}
               >
                 <Pencil className="w-4 h-4 shrink-0" />
-                <span>{t("LeftSideMenu.MenuRenameTable")}</span>
+                <span>{t("LeftSideMenu.MenuRenameData")}</span>
               </DropdownMenu.Item>
 
               {/* 複製 */}
@@ -101,7 +101,7 @@ export const TableNavItem = ({
                 onSelect={() => openDialog("duplicate")}
               >
                 <Copy className="w-4 h-4 shrink-0" />
-                <span>{t("LeftSideMenu.MenuDuplicateTable")}</span>
+                <span>{t("LeftSideMenu.MenuDuplicateData")}</span>
               </DropdownMenu.Item>
 
               <DropdownMenu.Separator className="h-px bg-gray-100 dark:bg-gray-700 mx-1" />
@@ -116,7 +116,7 @@ export const TableNavItem = ({
                 onSelect={() => openDialog("delete")}
               >
                 <Trash2 className="w-4 h-4 shrink-0" />
-                <span>{t("LeftSideMenu.MenuDeleteTable")}</span>
+                <span>{t("LeftSideMenu.MenuDeleteData")}</span>
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>

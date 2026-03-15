@@ -151,7 +151,7 @@ export const SaveData = () => {
     const errors: { tableName?: string; fileName?: string } = {};
 
     if (!selectedTableName || selectedTableName.trim() === "") {
-      errors.tableName = t("ValidationMessages.TableNameRequired");
+      errors.tableName = t("ValidationMessages.DataNameRequired");
     }
 
     if (!fileName || fileName.trim() === "") {
@@ -290,7 +290,7 @@ export const SaveData = () => {
       title={t("SaveDataView.Title")}
       description={
         tableNameList.length === 0
-          ? t("SaveDataView.NoTablesImported")
+          ? t("SaveDataView.NoDataImported")
           : t("SaveDataView.Description")
       }
     >
@@ -340,7 +340,7 @@ export const SaveData = () => {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <FormField
-                  label={t("SaveDataView.TableName")}
+                  label={t("SaveDataView.DataName")}
                   htmlFor="table-name"
                 >
                   <Select

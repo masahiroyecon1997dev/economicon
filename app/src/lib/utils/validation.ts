@@ -2,7 +2,7 @@ type ValidationResult = string | undefined;
 
 export const validateTableName = (tableName: string): ValidationResult => {
   if (!tableName.trim()) {
-    return "ValidationMessages.TableNameRequired";
+    return "ValidationMessages.DataNameRequired";
   }
   return undefined;
 };
