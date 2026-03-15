@@ -354,14 +354,6 @@ New-Item -ItemType Directory -Path $RELEASE_DIR | Out-Null
 $bundleDir = Join-Path $TAURI_DIR "target\release\bundle"
 $copied    = 0
 
-# MSI
-$msiFiles = Get-ChildItem (Join-Path $bundleDir "msi") -Filter "*.msi" -ErrorAction SilentlyContinue
-foreach ($f in $msiFiles) {
-    Copy-Item $f.FullName -Destination $RELEASE_DIR -Force
-    Write-Info "コピー: $($f.Name) → release\"
-    $copied++
-}
-
 # NSIS exe
 $exeFiles = Get-ChildItem (Join-Path $bundleDir "nsis") -Filter "*.exe" -ErrorAction SilentlyContinue
 foreach ($f in $exeFiles) {
@@ -376,13 +368,6 @@ if ($copied -eq 0) {
     Write-Info $bundleDir
 } else {
     Write-Success "$copied 個の成果物を release/ にコピーしました。"
-}
-
-# Inno Setup 用に installer.iss をコピーしておく（任意）
-$issFile = Join-Path $SCRIPT_DIR "installer.iss"
-if (Test-Path $issFile) {
-    Copy-Item $issFile -Destination $RELEASE_DIR -Force
-    Write-Info "installer.iss → release\ にコピー"
 }
 
 
@@ -403,10 +388,3 @@ Write-Host ""
 Get-ChildItem $RELEASE_DIR | ForEach-Object {
     Write-Host "    $($_.Name)" -ForegroundColor White
 }
-
-Write-Host ""
-Write-Host "  次のステップ（Inno Setup を使う場合）:" -ForegroundColor Yellow
-Write-Host "    1. Inno Setup をインストール: https://jrsoftware.org/isdl.php" -ForegroundColor Gray
-Write-Host "    2. release\installer.iss をカスタマイズ" -ForegroundColor Gray
-Write-Host "    3. iscc release\installer.iss" -ForegroundColor Gray
-Write-Host ""
