@@ -1,7 +1,6 @@
 """スキーマパッケージ初期化"""
 
 from economicon.models.columns import (
-    AddColumnResult,
     AddDummyColumnRequestBody,
     AddDummyColumnResult,
     AddLagLeadColumnRequestBody,
@@ -127,7 +126,6 @@ from economicon.models.tables import (
     CreateJoinTableResult,
     CreateSimulationDataTableRequestBody,
     CreateSimulationDataTableResult,
-    CreateTableResult,
     CreateUnionTableRequestBody,
     CreateUnionTableResult,
     DeleteTableRequestBody,
