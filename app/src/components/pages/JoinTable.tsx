@@ -4,6 +4,10 @@ import { useTranslation } from "react-i18next";
 import { getEconomiconAPI } from "../../api/endpoints";
 import { JoinType } from "../../api/model";
 import { showMessageDialog } from "../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../lib/utils/apiError";
 import { cn } from "../../lib/utils/helpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
@@ -168,12 +172,16 @@ export const JoinTable = () => {
         addTableInfo(tableInfo);
         setCurrentView("DataPreview");
       } else {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+        await showMessageDialog(
+          t("Error.Error"),
+          getResponseErrorMessage(resp, t("Error.UnexpectedError")),
+        );
       }
     } catch (error) {
-      const msg =
-        error instanceof Error ? error.message : t("Error.UnexpectedError");
-      await showMessageDialog(t("Error.Error"), msg);
+      await showMessageDialog(
+        t("Error.Error"),
+        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+      );
     } finally {
       setIsSubmitting(false);
     }
