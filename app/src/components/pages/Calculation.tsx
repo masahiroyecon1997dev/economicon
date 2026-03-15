@@ -6,6 +6,10 @@ import { z } from "zod";
 import { getEconomiconAPI } from "../../api/endpoints";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../lib/utils/apiError";
 import { getPolarsTypeColor } from "../../lib/utils/columnTypeColor";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
@@ -73,12 +77,16 @@ export const Calculation = () => {
           activateTableInfo(value.tableName);
           setCurrentView("DataPreview");
         } else {
-          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+          );
         }
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("Error.UnexpectedError");
-        await showMessageDialog(t("Error.Error"), errorMessage);
+        await showMessageDialog(
+          t("Error.Error"),
+          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        );
       }
     },
   });
