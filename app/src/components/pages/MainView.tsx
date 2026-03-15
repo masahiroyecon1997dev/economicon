@@ -2,7 +2,6 @@ import type { CurrentPageValue } from "../../stores/currentView";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { Calculation } from "./Calculation";
 import { CreateSimulationDataTable } from "./CreateSimulationDataTable";
-import { CreateTable } from "./CreateTable";
 import { DescriptiveStatistics } from "./DescriptiveStatistics";
 import { ImportDataFile } from "./ImportDataFile";
 import { JoinTable } from "./JoinTable";
@@ -13,7 +12,6 @@ import { UnionTable } from "./UnionTable";
 
 const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
   ImportDataFile: <ImportDataFile />,
-  CreateTable: <CreateTable />,
   JoinTable: <JoinTable />,
   UnionTable: <UnionTable />,
   DescriptiveStatistics: <DescriptiveStatistics />,

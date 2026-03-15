@@ -181,14 +181,6 @@ export const AppBar = () => {
       onClose: close,
       items: [
         {
-          id: "create-table",
-          label: t("HeaderMenu.CreateTable"),
-          handleSelect: () => {
-            setCurrentView("CreateTable");
-            close();
-          },
-        },
-        {
           id: "join-table",
           label: t("HeaderMenu.JoinTable"),
           handleSelect: () => {
