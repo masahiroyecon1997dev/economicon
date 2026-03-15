@@ -144,7 +144,9 @@
     "SavingFile": "ファイルを保存中...",
     "SaveSuccess": "ファイルを保存しました: {{path}}",
     "NoActiveData": "保存するデータが選択されていません。",
-    "NoDataImported": "データが取り込まれていません。"
+    "NoDataImported": "データが取り込まれていません。",
+    "OverwriteConfirmTitle": "ファイルの上書き確認",
+    "OverwriteConfirmMessage": "「{{fileName}}」はすでに存在します。上書きしますか？"
   },
   "JoinTable": {
     "Title": "データを結合",

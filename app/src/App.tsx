@@ -17,6 +17,7 @@ import {
   Group as PanelGroup,
   Separator as PanelResizeHandle,
 } from "react-resizable-panels";
+import { ConfirmDialog } from "./components/molecules/Dialog/ConfirmDialog";
 import { MessageDialog } from "./components/molecules/Dialog/MessageDialog";
 import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
 import { AppBar } from "./components/organisms/Header/AppBar";
@@ -163,9 +164,10 @@ export const App = () => {
             <MainView />
           </Panel>
         </PanelGroup>
-        <MessageDialog />
       </div>
       <LoadingOverlay isVisible={isLoading} message={loadingMessage} />
+      <MessageDialog />
+      <ConfirmDialog />
     </>
   );
 };
