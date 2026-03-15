@@ -114,7 +114,9 @@
     "SavingFile": "Saving file...",
     "SaveSuccess": "File saved successfully: {{path}}",
     "NoActiveData": "No active data selected to save.",
-    "NoDataImported": "No data has been imported."
+    "NoDataImported": "No data has been imported.",
+    "OverwriteConfirmTitle": "Overwrite File?",
+    "OverwriteConfirmMessage": "\"{{fileName}}\" already exists. Do you want to overwrite it?"
   },
   "JoinTable": {
     "Title": "Join Data",
