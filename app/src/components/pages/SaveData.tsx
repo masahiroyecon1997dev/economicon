@@ -234,7 +234,7 @@ export const SaveData = () => {
       const response = await getEconomiconAPI().exportFile({
         tableName: selectedTableName,
         directoryPath: directoryPath,
-        fileName: fullFileName,
+        fileName: fileName,
         format: formatMap[fileFormat],
         separator: fileFormat === "csv" ? "," : undefined,
         sheetName: fileFormat === "excel" ? "Sheet1" : undefined,
