@@ -166,5 +166,13 @@
   // Python インタープリターのパス
   "python.defaultInterpreterPath": "${workspaceFolder}/api/.venv/Scripts/python.exe",
   // Python 型チェックモード
-  "python.analysis.typeCheckingMode": "standard"
+  "python.analysis.typeCheckingMode": "standard",
+
+  /* Vitest (VS Code Test Explorer) */
+  // app/ サブディレクトリの vite.config.ts を Vitest の設定ファイルとして指定
+  "vitest.rootConfig": "${workspaceFolder}/app/vite.config.ts",
+  // fnm 管理の node.exe を明示指定（fnm_multishells の一時パスは VS Code から見えないため）
+  "vitest.nodeEnv": {
+    "PATH": "${env:PATH}"
+  }
 }
