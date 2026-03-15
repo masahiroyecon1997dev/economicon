@@ -87,19 +87,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
   export const getEconomiconAPI = () => {
 /**
- * ルートエンドポイント
- * @summary Root
- */
-const root = (
-    
- options?: SecondParameter<typeof customInstance<unknown>>,) => {
-      return customInstance<unknown>(
-      {url: `/`, method: 'GET'
-    },
-      options);
-    }
-  
-/**
  * ヘルスチェック
  * @summary Health Check
  */
@@ -107,7 +94,7 @@ const healthCheck = (
     
  options?: SecondParameter<typeof customInstance<unknown>>,) => {
       return customInstance<unknown>(
-      {url: `/health`, method: 'GET'
+      {url: `/api/health`, method: 'GET'
     },
       options);
     }
@@ -1240,8 +1227,7 @@ const updateSettings = (
       options);
     }
   
-return {root,healthCheck,addColumn,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,createTable,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,inputCellData,filterSingleCondition,regression,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,addDiagnosticColumns,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings}};
-export type RootResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['root']>>>
+return {healthCheck,addColumn,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,createTable,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,inputCellData,filterSingleCondition,regression,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,addDiagnosticColumns,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings}};
 export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['healthCheck']>>>
 export type AddColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['addColumn']>>>
 export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['addDummyColumn']>>>
