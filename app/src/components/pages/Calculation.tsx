@@ -7,7 +7,9 @@ import { getEconomiconAPI } from "../../api/endpoints";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { getPolarsTypeColor } from "../../lib/utils/columnTypeColor";
+import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
+import { useTableInfosStore } from "../../stores/tableInfos";
 import { useTableListStore } from "../../stores/tableList";
 import { ExpressionHelperButton } from "../atoms/Button/ExpressionHelperButton";
 import { InputText } from "../atoms/Input/InputText";
@@ -33,6 +35,7 @@ export const Calculation = () => {
   const { t } = useTranslation();
   const tableList = useTableListStore((state) => state.tableList);
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const { invalidateTable, activateTableInfo } = useTableInfosStore();
 
   const { selectedTableName, setSelectedTableName, columnList } =
     useTableColumnLoader({
@@ -63,10 +66,11 @@ export const Calculation = () => {
         });
 
         if (response.code === "OK") {
-          await showMessageDialog(
-            t("Common.OK"),
-            t("CalculationView.CalculationSuccess"),
-          );
+          const updatedTableInfo = await getTableInfo(value.tableName);
+          invalidateTable(value.tableName, {
+            columnList: updatedTableInfo.columnList,
+          });
+          activateTableInfo(value.tableName);
           setCurrentView("DataPreview");
         } else {
           await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
