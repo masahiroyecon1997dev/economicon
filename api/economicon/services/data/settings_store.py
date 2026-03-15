@@ -73,9 +73,11 @@ class SettingsStore:
             Path: ログディレクトリのパス
         """
         os_system = platform.system()
+        # WindowsではAppData/Local/economicon/logs、
+        # macOS/Linuxではホームディレクトリ/.economicon/logs
         if os_system == "Windows":
             appdata = os.getenv("APPDATA") or str(
-                Path.home() / "AppData" / "Roaming"
+                Path.home() / "AppData" / "Local"
             )
             logs_dir = Path(appdata) / "economicon" / "logs"
         else:
@@ -94,7 +96,7 @@ class SettingsStore:
         os_system = platform.system()
 
         if os_system == "Windows":
-            # WindowsではAppData/Roaming/economicon/配下に配置
+            # Windowsでは設定ファイルはAppData/Roaming/economicon/配下に配置
             appdata = os.getenv("APPDATA") or str(
                 Path.home() / "AppData" / "Roaming"
             )
