@@ -8,12 +8,6 @@ import * as zod from 'zod';
 
 
 /**
- * ルートエンドポイント
- * @summary Root
- */
-export const RootResponse = zod.unknown()
-
-/**
  * ヘルスチェック
  * @summary Health Check
  */
