@@ -18,7 +18,7 @@ from economicon.models.types import (
 )
 
 # ---------------------------------------------------------------------------
-# リクエストボディ
+# ファイルインポート
 # ---------------------------------------------------------------------------
 
 
@@ -89,6 +89,20 @@ class ImportFileRequestBody(BaseRequest):
             ),
         ),
     ] = None
+
+
+class ImportFileResult(BaseResult):
+    """ファイルパス指定インポートレスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="インポートによって作成されたテーブル名",
+    )
+
+
+# ---------------------------------------------------------------------------
+# ファイルエクスポート
+# ---------------------------------------------------------------------------
 
 
 class ExportFileRequestBody(BaseRequest):
@@ -181,24 +195,6 @@ class ExportFileRequestBody(BaseRequest):
             ),
         ),
     ] = None
-
-
-# ---------------------------------------------------------------------------
-# レスポンス（Result）
-# ---------------------------------------------------------------------------
-
-
-class ImportTableResult(BaseResult):
-    """インポート共通レスポンス基底"""
-
-    table_name: str = Field(
-        title="Table Name",
-        description="インポートによって作成されたテーブル名",
-    )
-
-
-class ImportFileResult(ImportTableResult):
-    """ファイルパス指定インポートレスポンス"""
 
 
 class ExportFileResult(BaseResult):

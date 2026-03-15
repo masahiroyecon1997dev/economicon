@@ -55,7 +55,21 @@ def _coerce_filter_operator_type(v: Any) -> FilterOperatorType:
 
 
 # ---------------------------------------------------------------------------
-# リクエストボディ
+# 共通レスポンス基底
+# ---------------------------------------------------------------------------
+
+
+class TableNameResult(BaseResult):
+    """テーブル名のみを返す共通レスポンス基底"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="操作対象または生成されたテーブル名",
+    )
+
+
+# ---------------------------------------------------------------------------
+# テーブル名変更
 # ---------------------------------------------------------------------------
 
 
@@ -78,6 +92,15 @@ class RenameTableRequestBody(BaseRequest):
         if self.old_table_name == self.new_table_name:
             raise ValueError(_("newTableName must differ from oldTableName."))
         return self
+
+
+class RenameTableResult(TableNameResult):
+    """テーブル名変更レスポンス"""
+
+
+# ---------------------------------------------------------------------------
+# シミュレーションデータテーブル作成
+# ---------------------------------------------------------------------------
 
 
 class CreateSimulationDataTableRequestBody(BaseRequest):
@@ -105,6 +128,15 @@ class CreateSimulationDataTableRequestBody(BaseRequest):
             min_length=1,
         ),
     ]
+
+
+class CreateSimulationDataTableResult(TableNameResult):
+    """シミュレーションデータテーブル作成レスポンス"""
+
+
+# ---------------------------------------------------------------------------
+# 結合テーブル作成
+# ---------------------------------------------------------------------------
 
 
 class CreateJoinTableRequestBody(BaseRequest):
@@ -160,6 +192,15 @@ class CreateJoinTableRequestBody(BaseRequest):
     ]
 
 
+class CreateJoinTableResult(TableNameResult):
+    """結合テーブル作成レスポンス"""
+
+
+# ---------------------------------------------------------------------------
+# ユニオンテーブル作成
+# ---------------------------------------------------------------------------
+
+
 class CreateUnionTableRequestBody(BaseRequest):
     """ユニオンテーブル作成リクエスト"""
 
@@ -188,10 +229,28 @@ class CreateUnionTableRequestBody(BaseRequest):
     ]
 
 
+class CreateUnionTableResult(TableNameResult):
+    """ユニオンテーブル作成レスポンス"""
+
+
+# ---------------------------------------------------------------------------
+# 全テーブルクリア
+# ---------------------------------------------------------------------------
+
+
 class ClearTablesRequestBody(BaseRequest):
     """テーブルクリアリクエスト（パラメータなし）"""
 
     pass
+
+
+class ClearTablesResult(BaseResult):
+    """全テーブルクリアレスポンス（データなし）"""
+
+
+# ---------------------------------------------------------------------------
+# テーブル複製
+# ---------------------------------------------------------------------------
 
 
 class DuplicateTableRequestBody(BaseRequest):
@@ -211,6 +270,15 @@ class DuplicateTableRequestBody(BaseRequest):
     ]
 
 
+class DuplicateTableResult(TableNameResult):
+    """テーブル複製レスポンス"""
+
+
+# ---------------------------------------------------------------------------
+# テーブル削除
+# ---------------------------------------------------------------------------
+
+
 class DeleteTableRequestBody(BaseRequest):
     """テーブル削除リクエスト"""
 
@@ -220,6 +288,15 @@ class DeleteTableRequestBody(BaseRequest):
             description="削除するテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
         ),
     ]
+
+
+class DeleteTableResult(TableNameResult):
+    """テーブル削除レスポンス"""
+
+
+# ---------------------------------------------------------------------------
+# データJSON取得
+# ---------------------------------------------------------------------------
 
 
 class FetchDataToJsonRequestBody(BaseRequest):
@@ -251,6 +328,36 @@ class FetchDataToJsonRequestBody(BaseRequest):
     ]
 
 
+class FetchDataToJsonResult(BaseResult):
+    """テーブルデータ JSON 形式取得レスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="データを取得したテーブル名",
+    )
+    data: str = Field(
+        title="Data",
+        description="JSON 文字列形式のテーブルデータ",
+    )
+    total_rows: int = Field(
+        title="Total Rows",
+        description="テーブル全体の行数",
+    )
+    start_row: int = Field(
+        title="Start Row",
+        description="取得開始行番号",
+    )
+    end_row: int = Field(
+        title="End Row",
+        description="取得終了行番号",
+    )
+
+
+# ---------------------------------------------------------------------------
+# データArrow取得
+# ---------------------------------------------------------------------------
+
+
 class FetchDataToArrowRequestBody(BaseRequest):
     """データArrow取得リクエスト"""
 
@@ -280,10 +387,56 @@ class FetchDataToArrowRequestBody(BaseRequest):
     ]
 
 
+class FetchDataToArrowResult(BaseResult):
+    """テーブルデータ Arrow IPC 形式取得レスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="データを取得したテーブル名",
+    )
+    arrow_data: bytes = Field(
+        title="Arrow Data",
+        description=(
+            "Apache Arrow IPC 形式のバイナリデータ（Base64エンコード）"
+        ),
+    )
+    total_rows: int = Field(
+        title="Total Rows",
+        description="テーブル全体の行数",
+    )
+    start_row: int = Field(
+        title="Start Row",
+        description="取得開始行番号",
+    )
+    end_row: int = Field(
+        title="End Row",
+        description="取得終了行番号",
+    )
+
+
+# ---------------------------------------------------------------------------
+# テーブルリスト取得
+# ---------------------------------------------------------------------------
+
+
 class GetTableListRequestBody(BaseRequest):
     """テーブルリスト取得リクエスト（パラメータなし）"""
 
     pass
+
+
+class GetTableListResult(BaseResult):
+    """テーブルリスト取得レスポンス"""
+
+    table_name_list: list[str] = Field(
+        title="Table Name List",
+        description="ワークスペースに存在するテーブル名のリスト",
+    )
+
+
+# ---------------------------------------------------------------------------
+# セルデータ入力
+# ---------------------------------------------------------------------------
 
 
 class InputCellDataRequestBody(BaseRequest):
@@ -316,6 +469,15 @@ class InputCellDataRequestBody(BaseRequest):
             description="セルに入力する新しい値。カラムのデータ型に合わせた値を指定してください。",
         ),
     ]
+
+
+class InputCellDataResult(TableNameResult):
+    """セルデータ入力レスポンス"""
+
+
+# ---------------------------------------------------------------------------
+# 単一条件フィルタ
+# ---------------------------------------------------------------------------
 
 
 class FilterSingleConditionRequestBody(BaseRequest):
@@ -365,113 +527,6 @@ class FilterSingleConditionRequestBody(BaseRequest):
             'isCompareColumn が "true" の場合はカラム名を指定。',
         ),
     ]
-
-
-# ---------------------------------------------------------------------------
-# レスポンス（Result）
-# ---------------------------------------------------------------------------
-
-
-class TableNameResult(BaseResult):
-    """テーブル名のみを返す共通レスポンス基底"""
-
-    table_name: str = Field(
-        title="Table Name",
-        description="操作対象または生成されたテーブル名",
-    )
-
-
-class CreateJoinTableResult(TableNameResult):
-    """結合テーブル作成レスポンス"""
-
-
-class CreateUnionTableResult(TableNameResult):
-    """ユニオンテーブル作成レスポンス"""
-
-
-class CreateSimulationDataTableResult(TableNameResult):
-    """シミュレーションデータテーブル作成レスポンス"""
-
-
-class DeleteTableResult(TableNameResult):
-    """テーブル削除レスポンス"""
-
-
-class DuplicateTableResult(TableNameResult):
-    """テーブル複製レスポンス"""
-
-
-class RenameTableResult(TableNameResult):
-    """テーブル名変更レスポンス"""
-
-
-class GetTableListResult(BaseResult):
-    """テーブルリスト取得レスポンス"""
-
-    table_name_list: list[str] = Field(
-        title="Table Name List",
-        description="ワークスペースに存在するテーブル名のリスト",
-    )
-
-
-class ClearTablesResult(BaseResult):
-    """全テーブルクリアレスポンス（データなし）"""
-
-
-class FetchDataToArrowResult(BaseResult):
-    """テーブルデータ Arrow IPC 形式取得レスポンス"""
-
-    table_name: str = Field(
-        title="Table Name",
-        description="データを取得したテーブル名",
-    )
-    arrow_data: bytes = Field(
-        title="Arrow Data",
-        description=(
-            "Apache Arrow IPC 形式のバイナリデータ（Base64エンコード）"
-        ),
-    )
-    total_rows: int = Field(
-        title="Total Rows",
-        description="テーブル全体の行数",
-    )
-    start_row: int = Field(
-        title="Start Row",
-        description="取得開始行番号",
-    )
-    end_row: int = Field(
-        title="End Row",
-        description="取得終了行番号",
-    )
-
-
-class FetchDataToJsonResult(BaseResult):
-    """テーブルデータ JSON 形式取得レスポンス"""
-
-    table_name: str = Field(
-        title="Table Name",
-        description="データを取得したテーブル名",
-    )
-    data: str = Field(
-        title="Data",
-        description="JSON 文字列形式のテーブルデータ",
-    )
-    total_rows: int = Field(
-        title="Total Rows",
-        description="テーブル全体の行数",
-    )
-    start_row: int = Field(
-        title="Start Row",
-        description="取得開始行番号",
-    )
-    end_row: int = Field(
-        title="End Row",
-        description="取得終了行番号",
-    )
-
-
-class InputCellDataResult(TableNameResult):
-    """セルデータ入力レスポンス"""
 
 
 class FilterSingleConditionResult(TableNameResult):
