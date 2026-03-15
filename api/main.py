@@ -2,15 +2,12 @@
 
 import os
 import time
-import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
 from fastapi.routing import APIRoute
-from fastapi.staticfiles import StaticFiles
 from fastapi_babel import Babel, BabelConfigs
 
 from economicon.exception_handlers import init_exception_handlers
@@ -25,8 +22,6 @@ from economicon.utils import log_manager, logger
 
 # ベースディレクトリ
 BASE_DIR = Path(__file__).resolve().parent
-# 静的ファイルのディレクトリ
-STATIC_DIR = BASE_DIR / "static"
 
 # Tauri が起動時に確保したポート番号（環境変数 ECONOMICOM_API_PORT で渡される）
 _api_port = int(os.environ.get("ECONOMICOM_API_PORT", "8000"))
@@ -70,11 +65,6 @@ async def lifespan(app: FastAPI):
     tables_store = TablesStore()
     logger.info("TablesStore has been initialized at startup.")
 
-    # ブラウザでアプリを自動的に開く
-    url = f"http://127.0.0.1:{_api_port}"
-    dev_run = os.environ.get("ECONOMICON_DEV_RUN", "false").lower()
-    if dev_run == "false":
-        webbrowser.open(url)
     yield  # ここでアプリがリクエストを待ち受ける
     # --- 終了時の処理 ---
     # 必要に応じてクリーンアップ
@@ -146,20 +136,7 @@ async def combined_middleware(request: Request, call_next):
     return response
 
 
-@app.get("/")
-async def root():
-    """ルートエンドポイント"""
-    index_path = STATIC_DIR / "index.html"
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    else:
-        # ファイルがない場合はJSONメッセージなどを返す
-        return JSONResponse(
-            content={"message": ("No index.html found in static folder.")}
-        )
-
-
-@app.get("/health")
+@app.get("/api/health")
 async def health_check():
     """ヘルスチェック"""
     return {"status": "ok"}
@@ -183,13 +160,6 @@ def use_route_names_as_operation_ids(app: FastAPI) -> None:
 
 use_route_names_as_operation_ids(app)
 
-# フォルダが存在するかチェック
-# 存在すればフロントリソースをマウント
-if os.path.exists(STATIC_DIR):
-    app.mount("/", StaticFiles(directory=STATIC_DIR), name="static")
-    logger.info(f"'{STATIC_DIR}' directory found. Mounted at /static")
-else:
-    logger.info(f"'{STATIC_DIR}' directory not found. Skipping mount.")
 if __name__ == "__main__":
     import uvicorn
 
