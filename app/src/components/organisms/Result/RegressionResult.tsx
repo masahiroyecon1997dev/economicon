@@ -1,11 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/utils/helpers";
 import type { LinearRegressionResultType } from "../../../types/commonTypes";
-import {
-  HighlightStatCard,
-  ResultSection,
-  StatItem,
-} from "../../molecules/Result/ResultSection";
+import { ResultSection, StatItem } from "../../molecules/Result/ResultSection";
 
 type RegressionResultProps = {
   result: LinearRegressionResultType;
@@ -142,17 +138,15 @@ export const RegressionResult = ({
 
       {/* モデル統計量 */}
       <ResultSection title={t("RegressionResult.ModelStatistics")}>
-        <div className="mb-3 grid grid-cols-2 gap-3">
-          <HighlightStatCard
+        <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
+          <StatItem
             label="R²"
             value={formatNumber(result.modelStatistics.R2)}
           />
-          <HighlightStatCard
+          <StatItem
             label={t("RegressionResult.AdjustedR2")}
             value={formatNumber(result.modelStatistics.adjustedR2)}
           />
-        </div>
-        <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
           <StatItem
             label="AIC"
             value={formatNumber(result.modelStatistics.AIC)}
