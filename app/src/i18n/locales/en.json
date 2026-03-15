@@ -289,7 +289,11 @@
     }
   },
   "Loading": {
-    "Loading": "Loading..."
+    "Loading": "Loading...",
+    "Launching": "Launching...",
+    "ConnectingServer": "Connecting to server...",
+    "Processing": "Processing...",
+    "ServerTimeout": "Could not connect to the server. Please restart the app."
   },
   "Error": {
     "Error": "Error",
