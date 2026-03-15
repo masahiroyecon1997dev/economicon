@@ -49,8 +49,8 @@ export const App = () => {
 
     // FastAPI サイドカーが起動するまで最大30秒ポーリングする
     const waitForServer = async (api: ReturnType<typeof getEconomiconAPI>) => {
-      const MAX_RETRIES = 60; // 500ms × 60 = 30秒
-      const INTERVAL_MS = 500;
+      const MAX_RETRIES = 60; // 1000ms × 60 = 60秒
+      const INTERVAL_MS = 1000;
       for (let i = 0; i < MAX_RETRIES; i++) {
         try {
           await api.healthCheck();
