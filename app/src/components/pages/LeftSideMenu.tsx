@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { showMessageDialog } from "../../lib/dialog/message";
+import { extractApiErrorMessage } from "../../lib/utils/apiError";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
@@ -29,9 +30,10 @@ export const LeftSideMenu = () => {
       }
       setCurrentView("DataPreview");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : t("Error.UnexpectedError");
-      await showMessageDialog(t("Error.Error"), message);
+      await showMessageDialog(
+        t("Error.Error"),
+        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+      );
     }
   };
 

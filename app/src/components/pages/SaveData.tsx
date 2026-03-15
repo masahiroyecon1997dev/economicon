@@ -9,6 +9,10 @@ import { getEconomiconAPI } from "../../api/endpoints";
 import type { ExportFileRequestBodyFormat } from "../../api/model";
 import { showConfirmDialog } from "../../lib/dialog/confirm";
 import { showMessageDialog } from "../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../lib/utils/apiError";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useFilesStore } from "../../stores/files";
 import { useLoadingStore } from "../../stores/loading";
@@ -244,10 +248,16 @@ export const SaveData = () => {
         setCurrentView("DataPreview");
         clearLoading();
       } else {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+        await showMessageDialog(
+          t("Error.Error"),
+          getResponseErrorMessage(response, t("Error.UnexpectedError")),
+        );
       }
-    } catch {
-      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+    } catch (error) {
+      await showMessageDialog(
+        t("Error.Error"),
+        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+      );
     } finally {
       clearLoading();
     }

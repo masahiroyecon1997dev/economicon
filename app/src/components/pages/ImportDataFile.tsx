@@ -11,6 +11,10 @@ import {
 } from "../../api/bridge/tauri-commands";
 import { getEconomiconAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../lib/utils/apiError";
 import type { ImportConfigSettings } from "../../lib/utils/importSchema";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
@@ -173,7 +177,10 @@ export const ImportDataFile = () => {
           }
         }
       } else {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+        await showMessageDialog(
+          t("Error.Error"),
+          extractApiErrorMessage(e, t("Error.UnexpectedError")),
+        );
       }
     } finally {
       clearLoading();
@@ -237,7 +244,10 @@ export const ImportDataFile = () => {
       });
 
       if (response && response.code !== "OK") {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+        await showMessageDialog(
+          t("Error.Error"),
+          getResponseErrorMessage(response, t("Error.UnexpectedError")),
+        );
         return;
       }
 
@@ -250,7 +260,10 @@ export const ImportDataFile = () => {
       }
     } catch (e: unknown) {
       console.error(e);
-      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+      await showMessageDialog(
+        t("Error.Error"),
+        extractApiErrorMessage(e, t("Error.UnexpectedError")),
+      );
     } finally {
       clearLoading();
     }

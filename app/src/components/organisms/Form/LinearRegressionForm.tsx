@@ -14,6 +14,10 @@ import {
 } from "../../../api/model";
 import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../../lib/utils/apiError";
 import { cn } from "../../../lib/utils/helpers";
 import { useRegressionResultsStore } from "../../../stores/regressionResults";
 import { useTableListStore } from "../../../stores/tableList";
@@ -116,12 +120,24 @@ export const LinearRegressionForm = ({
             onAnalysisComplete?.(newIndex);
             return;
           }
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(resultResponse, t("Error.UnexpectedError")),
+          );
+        } else {
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(
+              regressionResponse,
+              t("Error.UnexpectedError"),
+            ),
+          );
         }
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("Error.UnexpectedError");
-        await showMessageDialog(t("Error.Error"), errorMessage);
+        await showMessageDialog(
+          t("Error.Error"),
+          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        );
       }
     },
   });

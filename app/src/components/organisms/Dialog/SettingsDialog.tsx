@@ -24,6 +24,10 @@ import { getEconomiconAPI } from "../../../api/endpoints";
 import type { ThemeDefinitionType } from "../../../constants/themes";
 import { THEMES } from "../../../constants/themes";
 import { showMessageDialog } from "../../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../../lib/utils/apiError";
 import { cn } from "../../../lib/utils/helpers";
 import { useSettingsStore } from "../../../stores/settings";
 import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
@@ -245,12 +249,16 @@ export const SettingsDialog = ({
         setSettings(response.result);
         onOpenChange(false);
       } else {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+        await showMessageDialog(
+          t("Error.Error"),
+          getResponseErrorMessage(response, t("Error.UnexpectedError")),
+        );
       }
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : t("Error.UnexpectedError");
-      await showMessageDialog(t("Error.Error"), message);
+      await showMessageDialog(
+        t("Error.Error"),
+        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+      );
     } finally {
       setIsSaving(false);
     }
