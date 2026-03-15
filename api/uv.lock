@@ -71,7 +71,6 @@ dev = [
     { name = "pytest-cov" },
     { name = "radon" },
     { name = "ruff" },
-    { name = "wooldridge" },
 ]
 
 [package.metadata]
@@ -105,7 +104,6 @@ dev = [
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "radon", specifier = ">=6.0.1" },
     { name = "ruff", specifier = ">=0.15.0" },
-    { name = "wooldridge", specifier = ">=0.5.0" },
 ]
 
 [[package]]
@@ -1072,18 +1070,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/b3/8f/705086c9d734d3b663af0e9bb3d4de6578d08f46b1b101c2442fd9aecaa2/win32_setctime-1.2.0.tar.gz", hash = "sha256:ae1fdf948f5640aae05c511ade119313fb6a30d7eabe25fef9764dca5873c4c0", size = 4867, upload-time = "2024-12-07T15:28:28.314Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e1/07/c6fe3ad3e685340704d314d765b7912993bcb8dc198f0e7a89382d37974b/win32_setctime-1.2.0-py3-none-any.whl", hash = "sha256:95d644c4e708aba81dc3704a116d8cbc974d70b3bdb8be1d150e36be6e9d1390", size = 4083, upload-time = "2024-12-07T15:28:26.465Z" },
-]
-
-[[package]]
-name = "wooldridge"
-version = "0.5.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pandas" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c1/50/b5402e55b36107557e7c836673ba0956103dc1886b1cc411f53d26186655/wooldridge-0.5.0.tar.gz", hash = "sha256:8875639fddc8fb1d1b93b34d5872864d8db03e1e80cade9146e6d0d5725e7b4d", size = 5446490, upload-time = "2025-11-16T13:47:24.471Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/68/7b/ef00b71eaae90f32032a5e4dde3ccd98b0a6698df6391b2166c5cd2ee9f9/wooldridge-0.5.0-py3-none-any.whl", hash = "sha256:bd45afcd423cfa6288f48c9e4bc4b85e0cf4baf0462ee40c56c909b6a9b03724", size = 5487254, upload-time = "2025-11-16T13:47:23.171Z" },
 ]
 
 [[package]]
