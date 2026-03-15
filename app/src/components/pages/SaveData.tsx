@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getFiles, getFilesSafe } from "../../api/bridge/tauri-commands";
+import {
+  checkFileExists,
+  getFiles,
+  getFilesSafe,
+} from "../../api/bridge/tauri-commands";
 import { getEconomiconAPI } from "../../api/endpoints";
 import type { ExportFileRequestBodyFormat } from "../../api/model";
+import { showConfirmDialog } from "../../lib/dialog/confirm";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useFilesStore } from "../../stores/files";
@@ -128,6 +133,7 @@ export const SaveData = () => {
 
   const handleFileClick = async (file: FileType) => {
     if (!file.isFile) {
+      // フォルダクリック→ディレクトリ移動
       const separator = pathSeparator || "/";
       const newPath =
         directoryPath === separator
@@ -144,6 +150,17 @@ export const SaveData = () => {
       } finally {
         clearLoading();
       }
+    } else {
+      // ファイルクリック→拡張子なしのベース名を保存ファイル名にセット
+      const dotIndex = file.name.lastIndexOf(".");
+      const baseName = dotIndex > 0 ? file.name.slice(0, dotIndex) : file.name;
+      const ext =
+        dotIndex > 0 ? file.name.slice(dotIndex + 1).toLowerCase() : "";
+      setFileName(baseName);
+      // 拡張子がサポートファーマットなら fileFormat も連動
+      if (ext === "csv") setFileFormat("csv");
+      else if (ext === "xlsx" || ext === "xls") setFileFormat("excel");
+      else if (ext === "parquet") setFileFormat("parquet");
     }
   };
 
@@ -180,13 +197,29 @@ export const SaveData = () => {
       return;
     }
 
+    const fullFileName = fileName.endsWith(getFileExtension())
+      ? fileName
+      : fileName + getFileExtension();
+
+    // 保存先ディレクトリの同名ファイルを Rust 経由でチェック
+    const separator = pathSeparator || "/";
+    const fullPath =
+      directoryPath && directoryPath !== separator
+        ? directoryPath + separator + fullFileName
+        : (directoryPath || "") + fullFileName;
+
+    const exists = await checkFileExists(fullPath);
+    if (exists) {
+      const confirmed = await showConfirmDialog(
+        t("SaveDataView.OverwriteConfirmTitle"),
+        t("SaveDataView.OverwriteConfirmMessage", { fileName: fullFileName }),
+      );
+      if (!confirmed) return;
+    }
+
     setLoading(true, t("SaveDataView.SavingFile"));
 
     try {
-      const fullFileName = fileName.endsWith(getFileExtension())
-        ? fileName
-        : fileName + getFileExtension();
-
       // formatマッピング（FileFormat → ExportFileRequestBodyFormat）
       const formatMap: Record<FileFormat, ExportFileRequestBodyFormat> = {
         csv: "csv",
@@ -321,7 +354,7 @@ export const SaveData = () => {
 
             <div className="flex-1 min-h-0">
               <FileListTable
-                files={sortedFiles.filter((f) => !f.isFile)}
+                files={sortedFiles}
                 onFileClick={handleFileClick}
                 fileNameHeader={t("ImportDataFileView.FileNameHeader")}
                 sizeHeader={t("ImportDataFileView.SizeHeader")}
