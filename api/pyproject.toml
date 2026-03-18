@@ -76,3 +76,6 @@ max-complexity = 10
 # AnalysisResult.__init__ 等のエンティティコンストラクタは
 # self + キーワード専用引数 8 個 = 9 パラメータを許容する
 max-args = 9
+
+[tool.deptry.per_rule_ignores]
+DEP003 = ["pydantic_core"]
