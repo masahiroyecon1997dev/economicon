@@ -38,7 +38,7 @@
     "Beta": "βパラメータ",
     "LogMean": "対数平均",
     "LogStandardDeviation": "対数標準偏差",
-    "Trials": "試行回数",
+    "NumberOfTrials": "試行回数",
     "Probability": "成功確率",
     "PopulationSize": "母集団サイズ",
     "NumberOfSuccesses": "成功数",
@@ -65,25 +65,10 @@
     "BasicStatistics": "基本統計量",
     "Regression": "回帰分析",
     "LinearRegressionMenu": "線形回帰",
-    "OrdinaryLeastSquares": "最小二乗法",
-    "LassoRegression": "Lasso回帰",
-    "RidgeRegression": "Ridge回帰",
-    "NonlinearRegressionMenu": "非線形回帰",
-    "DiscreteModel": "離散選択モデル",
-    "LogitAnalysis": "ロジット分析",
-    "ProbitAnalysis": "プロビット分析",
-    "TobitAnalysis": "トービット分析",
-    "PanelDataMenu": "パネルデータ",
-    "FixedEffect": "固定効果モデル",
-    "RandomEffect": "変量効果モデル",
-    "CausalInferenceMenu": "因果推論",
-    "InstrumentalVariables": "操作変数法"
+    "OrdinaryLeastSquares": "最小二乗法"
   },
   "LeftSideMenu": {
-    "ImportData": "データ取り込み",
-    "SaveData": "保存",
     "DataList": "データ一覧",
-    "NoDataImported": "取り込まれたデータはありません。",
     "MenuRenameData": "データ名を変更",
     "MenuDuplicateData": "データを複製",
     "MenuDeleteData": "データを削除"
@@ -143,7 +128,6 @@
     "Save": "保存",
     "SavingFile": "ファイルを保存中...",
     "SaveSuccess": "ファイルを保存しました: {{path}}",
-    "NoActiveData": "保存するデータが選択されていません。",
     "NoDataImported": "データが取り込まれていません。",
     "OverwriteConfirmTitle": "ファイルの上書き確認",
     "OverwriteConfirmMessage": "「{{fileName}}」はすでに存在します。上書きしますか？"
@@ -233,19 +217,12 @@
     "DependentVariableDescription": "分析対象となる変数を1つ選択",
     "ExplanatoryVariables": "説明変数",
     "ExplanatoryVariablesDescription": "予測に使用する変数を複数選択可能",
-    "SelectedExplanatoryVariables": "選択済み説明変数",
-    "NoVariablesSelected": "未選択",
     "Processing": "処理中...",
     "RunAnalysis": "分析実行",
     "AdvancedOptions": "詳細オプション",
     "AdvancedOptionsSummary": "標準誤差: {{se}} | 定数項: {{const}} | 欠損値: {{missing}}",
     "StandardErrorMethod": "標準誤差の計算方法",
     "StandardError_nonrobust": "通常 (OLS)",
-    "StandardError_robust": "ロバスト (HC)",
-    "StandardError_HC0": "HC0 (ロバスト)",
-    "StandardError_HC1": "HC1 (ロバスト)",
-    "StandardError_HC2": "HC2 (ロバスト)",
-    "StandardError_HC3": "HC3 (ロバスト)",
     "StandardError_hac": "HAC (系列相関・不均一分散)",
     "StandardError_cluster": "クラスター",
     "HacMaxlags": "最大ラグ数",
@@ -262,7 +239,6 @@
     "AnalysisSummary": "分析概要",
     "DataName": "データ名",
     "DependentVariable": "被説明変数",
-    "ExplanatoryVariables": "説明変数",
     "ModelStatistics": "モデル統計量",
     "AdjustedR2": "調整済みR²",
     "FValue": "F値",
@@ -282,7 +258,6 @@
   },
   "RegressionTab": {
     "FormTab": "分析設定",
-    "NoResultsAvailable": "分析結果がありません",
     "ResultLabel": "結果 {{number}}",
     "DeleteResult": "結果を削除"
   },
@@ -293,8 +268,6 @@
     "DataName": "データ名",
     "DataNamePlaceholder": "データ名を入力してください。",
     "NumberOfRows": "行数",
-    "NumberOfRowsPlaceholder": "1000",
-    "Columns": "列の設定",
     "ColumnSettings": "列の設定",
     "AddColumn": "列を追加",
     "ColumnName": "列名",
@@ -305,8 +278,7 @@
     "InputFixedValue": "固定値を入力してください。",
     "Distribution": "確率分布",
     "InputDistributionParameters": "を入力してください。",
-    "Parameters": "パラメータ",
-    "CreatingData": "シミュレーションデータを作成",
+    "CreatingTable": "シミュレーションデータを作成",
     "Submit": "データを作成",
     "EditColumn": "列の編集",
     "NotSet": "未設定",
@@ -315,46 +287,6 @@
     "ColumnHasErrors": "一部の列設定にエラーがあります。内容を確認してください。",
     "HasErrors": "入力エラーあり",
     "CannotRemoveLastColumn": "列は少なくとも1つ必要です。"
-  },
-  "ImportFileDialog": {
-    "Title": "ファイルを開く",
-    "Notation": "15MB以下のcsvファイルのみ",
-    "Information": "ファイルをここにドラッグ&ドロップしてください。もしくは、",
-    "ChooseFile": "ファイルを選ぶ",
-    "OtherChooseFile": "他のファイルを選ぶ",
-    "OpenFile": "開く"
-  },
-  "SaveFileDialog": {
-    "Title": "データを保存する",
-    "DataName": "データ名",
-    "Download": "ダウンロード"
-  },
-  "GenerateDataDialog": {
-    "Title": "データを作成する",
-    "DataName": "データ名",
-    "numSamples": "サンプル数",
-    "Setting": "データの設定",
-    "AddColumn": "列を追加",
-    "ColumnName": "列名",
-    "DataType": "データ形式",
-    "Coefficient": "係数",
-    "Min": "最小値",
-    "Max": "最大値",
-    "ErrorMean": "誤差項の平均",
-    "ErrorVariance": "誤差項の分散",
-    "Generate": "作成"
-  },
-  "LinearRegressionDialog": {
-    "Title": "線形回帰分析",
-    "DataName": "データ名",
-    "ColumnName": "列名",
-    "ExplanatoryVariable": "説明変数",
-    "DependentVariable": "被説明変数",
-    "Execute": "分析実行"
-  },
-  "CalculateDialog": {
-    "Title": "計算結果の列を作成する",
-    "Execute": "作成"
   },
   "Loading": {
     "Loading": "読み込み中...",
@@ -365,13 +297,7 @@
   },
   "Error": {
     "Error": "エラー",
-    "Required": "入力してください。",
-    "Number": "数値で入力してください。",
-    "MaxLength20": "20文字以内で入力してください。",
-    "IntegerMore0": "0以上の整数で入力してください。",
     "UnexpectedError": "予期せぬエラーが発生しました。",
-    "Unknown": "不明なエラーです。",
-    "UnsupportedFileType": "サポートされていないファイル形式です。",
     "DirectoryNotFound": "フォルダが見つかりません。削除または移動された可能性があります。"
   },
   "ValidationMessages": {
@@ -383,16 +309,7 @@
     "SheetNameInvalidChars": "シート名に使用できない文字（/ \\ ? * : [ ]）が含まれています。",
     "SheetNameInvalidQuotes": "シート名の先頭または末尾にアポストロフィは使用できません。",
     "FixValidationErrors": "入力エラーがあります。修正してください。",
-    "FileNameRequired": "ファイル名を入力してください。",
-    "DataNameRequired": "データ名を入力してください。",
-    "DataNameSelect": "データを選択してください",
-    "NumRowsRequired": "行数を入力してください。",
-    "NumRowsInteger": "行数は整数で入力してください。",
-    "NumRowsMoreThan0": "行数は0以上の整数で入力してください。",
-    "AtLeastOneColumn": "少なくとも1つの列を追加してください。",
     "ColumnNameRequired": "列名を入力してください。",
-    "FixedValueRequired": "固定値を入力してください。",
-    "FixedValueNumber": "固定値は数値で入力してください。",
     "UniformParamLowHigh": "一様分布の最小値は最大値より小さくなければなりません。",
     "ExponentialParamRate": "レートパラメータは正の数でなければなりません。",
     "NormalParamStdDeviation": "標準偏差は正の数でなければなりません。",
@@ -408,9 +325,7 @@
     "BernoulliParamProbability": "成功確率は0から1の間の数でなければなりません。",
     "PoissonParamLambda": "レートパラメータは0以上の数でなければなりません。",
     "GeometricParamProbability": "成功確率は0から1の間の数でなければなりません。",
-    "HypergeometricParamPopulationSize": "母集団サイズは0以上の整数でなければなりません。",
-    "HypergeometricParamNumberOfSuccesses": "成功数は0以上の整数でなければなりません。",
-    "HypergeometricParamSampleSize": "標本サイズは0以上の整数でなければなりません。",
+    "HypergeometricParamValues": "超幾何分布のパラメータが不正です。母集団サイズ・成功数・標本サイズを確認してください。",
     "DependentVariableRequired": "被説明変数を選択してください",
     "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください",
     "NewColumnNameRequired": "新しいカラム名を入力してください。",
@@ -442,9 +357,6 @@
     "InsertPositionLast": "末尾"
   },
   "AreaLabels": {
-    "Header": "ヘッダー",
-    "SideMenu": "サイドメニュー",
-    "MainContent": "メインコンテンツ",
     "DataMenu": "データメニュー"
   },
   "ColumnMenu": {
@@ -465,14 +377,12 @@
     "CurrentColumnName": "現在の列名",
     "NewColumnName": "新しい列名",
     "NewColumnNamePlaceholder": "例: new_column_name",
-    "Submit": "変更",
-    "Success": "列名を変更しました。"
+    "Submit": "変更"
   },
   "DeleteColumnForm": {
     "Title": "列を削除",
     "Warning": "列「{{columnName}}」を削除します。この操作は元に戻せません。",
-    "Submit": "削除する",
-    "Success": "列を削除しました。"
+    "Submit": "削除する"
   },
   "RenameTableForm": {
     "Title": "データ名を変更",
@@ -495,8 +405,7 @@
     "Title": "列を複製",
     "NewColumnName": "複製先の列名",
     "NewColumnNamePlaceholder": "例: column_copy",
-    "Submit": "複製",
-    "Success": "列を複製しました。"
+    "Submit": "複製"
   },
   "CastColumnForm": {
     "Title": "型変換",
@@ -508,8 +417,7 @@
     "DatetimeFormat": "日時フォーマット（空白時は自動推定）",
     "DatetimeFormatPlaceholder": "例: %Y-%m-%d",
     "Strict": "失敗時にエラー（無効の場合 null にせず 400 を返す）",
-    "Submit": "変換",
-    "Success": "型変換しました。"
+    "Submit": "変換"
   },
   "TransformColumnForm": {
     "Title": "変換列を追加",
@@ -522,8 +430,7 @@
     "Degree": "根の次数",
     "NewColumnName": "新しい列名",
     "NewColumnNamePlaceholder": "例: log_value",
-    "Submit": "追加",
-    "Success": "変換列を追加しました。"
+    "Submit": "追加"
   },
   "AddDummyColumnForm": {
     "Title": "ダミー変数を追加",
@@ -541,8 +448,7 @@
     "NullStrategyExclude": "無視",
     "NullStrategyAsCategory": "カテゴリとして扱う",
     "NullStrategyError": "NULLがある場合エラー",
-    "Submit": "追加",
-    "Success": "ダミー変数を追加しました。"
+    "Submit": "追加"
   },
   "AddSimulationColumnForm": {
     "Title": "シミュレーション列を追加",
@@ -579,8 +485,7 @@
     "SuccessCount": "成功要素数",
     "SampleSize": "標本サイズ",
     "Value": "固定値",
-    "Submit": "追加",
-    "Success": "シミュレーション列を追加しました。"
+    "Submit": "追加"
   },
   "AddLagLeadColumnForm": {
     "Title": "ラグ・リード列を追加",
@@ -590,55 +495,10 @@
     "GroupColumns": "グループ化列（省略可能）",
     "NewColumnName": "新しい列名",
     "NewColumnNamePlaceholder": "例: lag_1_value",
-    "Submit": "追加",
-    "Success": "ラグ・リード列を追加しました。"
+    "Submit": "追加"
   },
   "ColumnOperationForm": {
-    "AddPositionColumn": "追加位置（基準列）",
-    "AddPositionColumnDesc": "選択した列の左隣に追加されます。",
-    "SourceColumnName": "元の列",
-    "Success": "操作が完了しました。"
-  },
-  "CreateTableView": {
-    "Title": "データ作成",
-    "Description": "データ名・行数・列を指定して空のデータを作成します。",
-    "DataName": "データ名",
-    "DataNamePlaceholder": "例: my_table",
-    "RowCount": "行数",
-    "RowCountOptional": "（任意・省略するとファイルの行数を使用）",
-    "ColumnsSection": "列の定義",
-    "ColumnsCount": "{{count}} 列",
-    "ColumnsEmpty": "列が未登録です。下の入力から追加してください。",
-    "NewColumnPlaceholder": "列名を入力して Enter で追加",
-    "AddColumn": "追加",
-    "MoveUp": "上に移動",
-    "MoveDown": "下に移動",
-    "RemoveColumn": "削除",
-    "ColumnRequired": "列を 1 つ以上追加してください。",
-    "ColumnNameDuplicate": "同じ名前の列がすでに存在します。",
-    "ColumnNameInvalidChars": "列名に使用できない文字が含まれています。",
-    "Submit": "データを作成",
-    "FileSection": "ファイルから読み込む（任意）",
-    "FileSectionDescription": "ファイルを添付すると、そのデータでテーブルを初期化します。列名はファイルの構造に合わせて入力してください。",
-    "FileSelected": "選択済みファイル",
-    "RemoveFile": "解除",
-    "FileOptions": "ファイル読み込み設定",
-    "HasHeader": "ヘッダ行あり（1行目をカラム名として読み飛ばす）",
-    "CsvSeparator": "区切り文字",
-    "SeparatorComma": ", カンマ",
-    "SeparatorTab": "⇥ タブ",
-    "SeparatorOther": "✎ その他",
-    "SeparatorCustomPlaceholder": "1〜10文字で入力",
-    "Encoding": "エンコーディング",
-    "ExcelSheetName": "シート名（省略時は先頭シート）",
-    "ExcelSheetNamePlaceholder": "例: Sheet1",
-    "DragAndDropTab": "ドラッグ＆ドロップ",
-    "FileSelectTab": "ファイル選択",
-    "DragDropAreaTitle": "ファイルをここにドラッグ＆ドロップ",
-    "DragDropAreaTitleActive": "ドロップしてください",
-    "DragDropAreaDescription": "サポート形式: .csv, .xlsx, .xls, .parquet",
-    "SearchPlaceholder": "ファイル名で検索",
-    "GoUpDirectory": "上位ディレクトリへ移動"
+    "SourceColumnName": "元の列"
   },
   "SettingsDialog": {
     "Title": "設定",
