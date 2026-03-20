@@ -93,7 +93,7 @@ export const Calculation = () => {
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
-  // columnList が更新されたら末尾列を追加位置のデフォルトとして設定
+  // columnList が更新されたら末尾列を追加位置のチE��ォルトとして設宁E
   useEffect(() => {
     if (columnList.length > 0) {
       form.setFieldValue(
@@ -164,14 +164,14 @@ export const Calculation = () => {
         <div className="flex-1 overflow-y-auto min-h-0">
           <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-color overflow-hidden">
             <div className="p-4 border-b border-border-color grid grid-cols-1 md:grid-cols-2 gap-4 bg-neutral-50/50 dark:bg-neutral-800/30">
-              {/* テーブル選択 */}
+              {/* チE�Eブル選抁E*/}
               <form.Field name="tableName">
                 {(field) => (
                   <FormField
                     label={t("CalculationView.TargetData")}
                     htmlFor="target-table"
                     error={
-                      (field.state.meta.errors[0] as any)?.message ??
+                      (field.state.meta.errors[0] as { message?: string })?.message ??
                       field.state.meta.errors[0]?.toString()
                     }
                   >
@@ -180,7 +180,7 @@ export const Calculation = () => {
                       value={field.state.value}
                       onValueChange={handleTableChange}
                       error={
-                        (field.state.meta.errors[0] as any)?.message ??
+                        (field.state.meta.errors[0] as { message?: string })?.message ??
                         field.state.meta.errors[0]?.toString()
                       }
                       placeholder={t("CalculationView.SelectData")}
@@ -203,7 +203,7 @@ export const Calculation = () => {
                     label={t("CalculationView.NewColumnName")}
                     htmlFor="new-column-name"
                     error={
-                      (field.state.meta.errors[0] as any)?.message ??
+                      (field.state.meta.errors[0] as { message?: string })?.message ??
                       field.state.meta.errors[0]?.toString()
                     }
                   >
@@ -216,7 +216,7 @@ export const Calculation = () => {
                         "CalculationView.NewColumnNamePlaceholder",
                       )}
                       error={
-                        (field.state.meta.errors[0] as any)?.message ??
+                        (field.state.meta.errors[0] as { message?: string })?.message ??
                         field.state.meta.errors[0]?.toString()
                       }
                       disabled={isSubmitting}
@@ -320,7 +320,7 @@ export const Calculation = () => {
                   </div>
                 </div>
 
-                {/* 数式エディタ */}
+                {/* 数式エチE��タ */}
                 <form.Field name="calculationExpression">
                   {(field) => (
                     <div className="flex-1 flex flex-col min-h-0">
@@ -346,7 +346,7 @@ export const Calculation = () => {
                       </div>
                       {field.state.meta.errors[0] && (
                         <p className="px-4 py-1.5 text-xs text-red-600 dark:text-red-400 bg-red-50/60 dark:bg-red-900/10 border-t border-red-200 dark:border-red-800">
-                          {(field.state.meta.errors[0] as any)?.message ??
+                          {(field.state.meta.errors[0] as { message?: string })?.message ??
                             field.state.meta.errors[0]?.toString()}
                         </p>
                       )}
@@ -355,7 +355,7 @@ export const Calculation = () => {
                 </form.Field>
               </div>
 
-              {/* カラムリスト */}
+              {/* カラムリスチE*/}
               <div className="w-full lg:w-72 flex flex-col bg-neutral-50 dark:bg-surface-dark">
                 <div className="p-3 border-b border-border-color">
                   <h3 className="text-sm text-gray-700 font-semibold dark:text-white flex items-center gap-2">
