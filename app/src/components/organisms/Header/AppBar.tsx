@@ -2,6 +2,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ChevronDown, MoreHorizontal, Settings } from "lucide-react";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { getEconomiconAPI } from "../../../api/endpoints";
 import logo from "../../../assets/app-icon.svg";
 import { cn } from "../../../lib/utils/helpers";
 import { useCurrentPageStore } from "../../../stores/currentView";
@@ -131,6 +132,31 @@ export const AppBar = () => {
       mouseDownPosRef.current = null;
       getCurrentWindow().startDragging();
     }
+  }, []);
+
+  // アプリ終了時クリーンアップ
+  // CloseRequested を横取りして /api/shutdown を呼んでから destroy() する。
+  // destroy() は CloseRequested を再発火しないため無限ループにならない。
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    getCurrentWindow()
+      .onCloseRequested(async (event) => {
+        event.preventDefault();
+        try {
+          await getEconomiconAPI().shutdown();
+        } catch {
+          // シャットダウン API が失敗しても確実に閉じる
+        }
+        await getCurrentWindow().destroy();
+      })
+      .then((fn) => {
+        unlisten = fn;
+      });
+
+    return () => {
+      unlisten?.();
+    };
   }, []);
 
   // mouseup: クリックで終わった場合はドラッグ意図をリセット
