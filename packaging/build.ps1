@@ -51,7 +51,7 @@ $RESOURCES_DIR = Join-Path $TAURI_DIR "resources"
 $RUNTIME_DIR  = Join-Path $RESOURCES_DIR "runtime"
 
 # ビルド成果物の集約先
-$RELEASE_DIR   = Join-Path $PROJECT_ROOT "release"
+$RELEASE_DIR   = Join-Path $SCRIPT_DIR "release"
 
 # --- Python Embeddable Package ダウンロード URL --------------------------------
 $PYTHON_EMBED_URL = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
@@ -358,7 +358,7 @@ $copied    = 0
 $exeFiles = Get-ChildItem (Join-Path $bundleDir "nsis") -Filter "*.exe" -ErrorAction SilentlyContinue
 foreach ($f in $exeFiles) {
     Copy-Item $f.FullName -Destination $RELEASE_DIR -Force
-    Write-Info "コピー: $($f.Name) → release\"
+    Write-Info "コピー: $($f.Name) → $RELEASE_DIR"
     $copied++
 }
 
@@ -367,7 +367,7 @@ if ($copied -eq 0) {
     Write-Warn "MSI / NSIS 成果物が見つかりませんでした。bundle ディレクトリを確認してください:"
     Write-Info $bundleDir
 } else {
-    Write-Success "$copied 個の成果物を release/ にコピーしました。"
+    Write-Success "$copied 個の成果物を $RELEASE_DIR にコピーしました。"
 }
 
 

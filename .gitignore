@@ -26,6 +26,3 @@ htmlcov/
 .env
 .env.local
 .env.*.local
-
-# Build files
-release/
