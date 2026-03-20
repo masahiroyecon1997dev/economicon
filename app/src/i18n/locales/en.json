@@ -36,7 +36,7 @@
     "BasicStatistics": "Basic Statistics",
     "Regression": "Regression",
     "LinearRegressionMenu": "Linear Regression",
-    "LinearRegression": "Linear Regression",
+    "OrdinaryLeastSquares": "Ordinary Least Squares",
     "LassoRegression": "Lasso Regression",
     "RidgeRegression": "Ridge Regression",
     "NonlinearRegressionMenu": "Nonlinear Regression",
