@@ -112,9 +112,10 @@ export const LinearRegressionForm = ({
             // TypeScript生成型より1段浅いネスト
             const detail =
               resultResponse.result as unknown as AnalysisResultDetail;
-            addResult(
-              detail.regressionOutput as unknown as LinearRegressionResultType,
-            );
+            addResult({
+              ...(detail.regressionOutput as unknown as LinearRegressionResultType),
+              resultId: detail.id,
+            });
             const newIndex =
               useRegressionResultsStore.getState().results.length - 1;
             onAnalysisComplete?.(newIndex);
