@@ -403,8 +403,8 @@ def _to_statsmodels_alpha(
         1/(2n)||y-Xβ||² + α·[L1_wt·||β||₁ + (1-L1_wt)/2·||β||²]
 
     glmnet (R) 規約:
-        Lasso: 1/n||y-Xβ||² + λ||β||₁  → α_sm = λ/2
-        Ridge: 1/n||y-Xβ||² + λ||β||²  → α_sm = λ  (直接一致)
+        Lasso: 1/(2n)||y-Xβ||² + λ||β||₁  → α_sm = λ  (直接一致)
+        Ridge: 1/(2n)||y-Xβ||² + λ||β||²  → α_sm = λ  (直接一致)
 
     sklearn 規約:
         Lasso: 1/(2n)||y-Xβ||² + α||β||₁ → α_sm = α (同一式)
@@ -426,7 +426,7 @@ def _to_statsmodels_alpha(
         else:
             return float(alpha_user) / n_samples  # sklearn Ridge → statsmodels
     elif is_lasso:  # glmnet (default)
-        return float(alpha_user) / 2.0  # glmnet λ = 2 * statsmodels α
+        return float(alpha_user)  # glmnet λ = statsmodels α (直接一致)
     else:
         return float(alpha_user)  # glmnet λ = statsmodels α (直接一致)
 
@@ -476,7 +476,7 @@ def fit_lasso(  # noqa: PLR0915
     Lasso モデルのフィッティング（statsmodels 座標降下法 elastic_net 使用）
 
     Eco-Note D: alpha 変換規約
-        glmnet λ（デフォルト）→ statsmodels α = λ / 2
+        glmnet λ（デフォルト）→ statsmodels α = λ（直接一致）
         sklearn  α            → statsmodels α = α（同一式）
 
     - R²: 手動計算 (1 - SS_res / SS_tot)
@@ -514,7 +514,7 @@ def fit_lasso(  # noqa: PLR0915
     sm_model = sm.OLS(data_input.y_data, x_sm, missing=data_input.missing)
     result = sm_model.fit_regularized(
         method="elastic_net",
-        alpha=alpha_arr,
+        alpha=alpha_arr,  # type: ignore[arg-type]
         L1_wt=1.0,
         maxiter=data_input.max_iter,
     )
@@ -563,7 +563,7 @@ def fit_lasso(  # noqa: PLR0915
             )
             boot_result = sm.OLS(y_boot, x_boot_sm).fit_regularized(
                 method="elastic_net",
-                alpha=boot_alpha_arr,
+                alpha=boot_alpha_arr,  # type: ignore[arg-type]
                 L1_wt=1.0,
                 maxiter=data_input.max_iter,
             )
@@ -657,7 +657,7 @@ def fit_ridge(  # noqa: PLR0915
     sm_model = sm.OLS(data_input.y_data, x_sm, missing=data_input.missing)
     result = sm_model.fit_regularized(
         method="elastic_net",
-        alpha=alpha_arr,
+        alpha=alpha_arr,  # type: ignore[arg-type]
         L1_wt=0.0,
         maxiter=data_input.max_iter,
     )
@@ -706,7 +706,7 @@ def fit_ridge(  # noqa: PLR0915
             )
             boot_result = sm.OLS(y_boot, x_boot_sm).fit_regularized(
                 method="elastic_net",
-                alpha=boot_alpha_arr,
+                alpha=boot_alpha_arr,  # type: ignore[arg-type]
                 L1_wt=0.0,
                 maxiter=data_input.max_iter,
             )
