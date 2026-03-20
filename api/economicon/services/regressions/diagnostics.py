@@ -1,7 +1,7 @@
 """
 回帰診断列の抽出ユーティリティ
 
-推定済みモデルオブジェクト（statsmodels / linearmodels / sklearn）から
+推定済みモデルオブジェクト（statsmodels / linearmodels / 正則化回帰）から
 予測値・残差などの診断値を Polars DataFrame として返す純粋関数群。
 """
 
@@ -696,15 +696,15 @@ def extract_from_linearmodels_iv(
 # ---------------------------------------------------------------------------
 
 
-def extract_from_sklearn(
+def extract_from_regularized(
     reg_result: RegularizedResult,
     options: DiagnosticExtractOptions,
 ) -> tuple[pl.DataFrame, list[str]]:
     """
-    sklearn の正則化回帰結果から診断値を抽出する。
+    正則化回帰（Lasso/Ridge）の結果から診断値を抽出する。
 
-    ``RegularizedResult.pipeline.predict(x_data)`` で予測値を再計算する。
-    残差は ``y_data - predicted`` で算出する。
+    ``RegularizedResult.fittedvalues`` を予測値としてそのまま使用する。
+    残差は ``y_data - fittedvalues`` で算出する。
 
     標準化残差・信頼区間は正則化回帰では未サポート。
 
@@ -712,12 +712,10 @@ def extract_from_sklearn(
     ----------
     reg_result:
         ``RegularizedResult`` データクラス。
-        ``pipeline``, ``x_data``, ``y_data`` が設定されている必要がある。
+        ``fittedvalues``, ``y_data`` が設定されている必要がある。
     options:
         共通の診断値抽出オプション。
-        sklearn 正則化回帰では standardized / include_interval は未サポート。
-    target:
-        抽出する値の種類。
+        正則化回帰では standardized / include_interval は未サポート。
 
     Returns
     -------
@@ -731,9 +729,7 @@ def extract_from_sklearn(
         supports_standardized=False,
     )
 
-    fitted_values = reg_result.pipeline.predict(reg_result.x_data).astype(
-        np.float64
-    )
+    fitted_values = np.asarray(reg_result.fittedvalues, dtype=np.float64)
     n = len(fitted_values)
     index = np.arange(n, dtype=np.int64)
 

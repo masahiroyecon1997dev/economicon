@@ -39,6 +39,31 @@ class RegularizedRegressionParams(BaseRequest):
     alpha: float = Field(
         default=1.0, ge=0.0, description="正則化強度のパラメータ"
     )
+    # Eco-Note D: alpha_convention により alpha の解釈が変わる。
+    # "glmnet" (デフォルト): R の glmnet パッケージの λ に相当。
+    #   Lasso: 1/n*||y-Xβ||² + λ*||β||₁  → statsmodels α = λ/2
+    #   Ridge: 1/n*||y-Xβ||² + λ*||β||²  → statsmodels α = λ
+    # "sklearn": scikit-learn の alpha に相当。
+    #   Lasso: statsmodels α = α_sk (同一式)
+    #   Ridge: statsmodels α = α_sk / n (n はサンプル数)
+    alpha_convention: Literal["glmnet", "sklearn"] = Field(
+        default="glmnet",
+        alias="alphaConvention",
+        description=(
+            "alpha の規約。"
+            "'glmnet': R の glmnet パッケージ準拠"
+            "（計量経済学・統計学のデフォルト）。"
+            "'sklearn': scikit-learn 準拠。"
+        ),
+    )
+    max_iter: int = Field(
+        default=1000,
+        ge=1,
+        le=100000,
+        alias="maxIter",
+        description="座標降下法の最大反復回数。"
+        "収束しない場合は増やしてください。",
+    )
     calculate_se: bool = Field(
         default=False,
         alias="calculateSe",
