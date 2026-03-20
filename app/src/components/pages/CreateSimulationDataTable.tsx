@@ -100,7 +100,11 @@ export const CreateSimulationDataTable = () => {
             col.distributionParams,
           );
           if (paramsError !== undefined) {
-            errors.distributionParams = paramsError;
+            const translatedErrors: Record<string, string | undefined> = {};
+            for (const [k, v] of Object.entries(paramsError)) {
+              translatedErrors[k] = v ? t(v) : undefined;
+            }
+            errors.distributionParams = translatedErrors;
             hasError = true;
           }
         }

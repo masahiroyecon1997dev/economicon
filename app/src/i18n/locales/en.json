@@ -3,8 +3,10 @@
     "Cancel": "Cancel",
     "OK": "OK",
     "Delete": "Delete",
-    "Error": "Error",
-    "UnexpectedError": "An unexpected error occurred.",
+    "Edit": "Edit",
+    "Save": "Save",
+    "Close": "Close",
+    "ColumnSuffix": " (column)",
     "Data": "Data",
     "NoColumnsAvailable": "No columns available",
     "FilterColumns": "Filter columns...",
@@ -12,8 +14,35 @@
     "OpenSideMenu": "Open Side Menu",
     "CloseSideMenu": "Close Side Menu",
     "Constant": "Constant",
+    "Distribution": "Distribution",
     "UniformDistribution": "Uniform Distribution",
-    "NomalDistribution": "Normal Distribution"
+    "NomalDistribution": "Normal Distribution",
+    "ExponentialDistribution": "Exponential Distribution",
+    "GammaDistribution": "Gamma Distribution",
+    "BetaDistribution": "Beta Distribution",
+    "WeibullDistribution": "Weibull Distribution",
+    "LognormalDistribution": "Log-Normal Distribution",
+    "BinomialDistribution": "Binomial Distribution",
+    "BernoulliDistribution": "Bernoulli Distribution",
+    "PoissonDistribution": "Poisson Distribution",
+    "GeometricDistribution": "Geometric Distribution",
+    "HypergeometricDistribution": "Hypergeometric Distribution",
+    "MinValue": "Min Value",
+    "MaxValue": "Max Value",
+    "Mean": "Mean",
+    "StandardDeviation": "Standard Deviation",
+    "Rate": "Rate",
+    "Shape": "Shape",
+    "Scale": "Scale",
+    "Alpha": "Alpha",
+    "Beta": "Beta",
+    "LogMean": "Log Mean",
+    "LogStandardDeviation": "Log Std Dev",
+    "NumberOfTrials": "Number of Trials",
+    "Probability": "Probability",
+    "PopulationSize": "Population Size",
+    "NumberOfSuccesses": "Number of Successes",
+    "SampleSize": "Sample Size"
   },
   "AppBar": {
     "Minimize": "Minimize",
@@ -36,25 +65,10 @@
     "BasicStatistics": "Basic Statistics",
     "Regression": "Regression",
     "LinearRegressionMenu": "Linear Regression",
-    "OrdinaryLeastSquares": "Ordinary Least Squares",
-    "LassoRegression": "Lasso Regression",
-    "RidgeRegression": "Ridge Regression",
-    "NonlinearRegressionMenu": "Nonlinear Regression",
-    "DiscreteModel": "Discrete Model",
-    "LogitAnalysis": "Logit Analysis",
-    "ProbitAnalysis": "Probit Analysis",
-    "TobitAnalysis": "Tobit Analysis",
-    "PanelDataMenu": "Panel Data",
-    "FixedEffect": "Fixed Effect Model",
-    "RandomEffect": "Random Effect Model",
-    "CausalInferenceMenu": "Causal Inference",
-    "InstrumentalVariables": "Instrumental Variables"
+    "OrdinaryLeastSquares": "Ordinary Least Squares"
   },
   "LeftSideMenu": {
-    "ImportData": "Import Data",
-    "SaveData": "Save Data",
     "DataList": "Data List",
-    "NoDataImported": "No data imported.",
     "MenuRenameData": "Rename Data",
     "MenuDuplicateData": "Duplicate Data",
     "MenuDeleteData": "Delete Data"
@@ -79,6 +93,7 @@
     "FileNameHeader": "File Name",
     "SizeHeader": "Size",
     "LastModifiedHeader": "Last Modified",
+    "FileListTableTitle": "File List",
     "DragAndDropTab": "Drag & Drop",
     "FileSelectTab": "Select File",
     "DragDropAreaTitle": "Drop a file here",
@@ -113,7 +128,6 @@
     "Save": "Save",
     "SavingFile": "Saving file...",
     "SaveSuccess": "File saved successfully: {{path}}",
-    "NoActiveData": "No active data selected to save.",
     "NoDataImported": "No data has been imported.",
     "OverwriteConfirmTitle": "Overwrite File?",
     "OverwriteConfirmMessage": "\"{{fileName}}\" already exists. Do you want to overwrite it?"
@@ -203,19 +217,12 @@
     "DependentVariableDescription": "Select one target variable for analysis",
     "ExplanatoryVariables": "Explanatory Variables",
     "ExplanatoryVariablesDescription": "Select multiple variables for prediction",
-    "SelectedExplanatoryVariables": "Selected Explanatory Variables",
-    "NoVariablesSelected": "None selected",
     "Processing": "Processing...",
     "RunAnalysis": "Run Analysis",
     "AdvancedOptions": "Advanced Options",
     "AdvancedOptionsSummary": "SE: {{se}} | Constant: {{const}} | Missing: {{missing}}",
     "StandardErrorMethod": "Standard Error Method",
     "StandardError_nonrobust": "Non-robust (OLS)",
-    "StandardError_robust": "Robust (HC)",
-    "StandardError_HC0": "HC0 (Robust)",
-    "StandardError_HC1": "HC1 (Robust)",
-    "StandardError_HC2": "HC2 (Robust)",
-    "StandardError_HC3": "HC3 (Robust)",
     "StandardError_hac": "HAC (Autocorrelation/Heteroskedasticity)",
     "StandardError_cluster": "Cluster",
     "HacMaxlags": "Max Lags",
@@ -226,18 +233,12 @@
     "MissingValueHandling": "Missing Value Handling",
     "MissingValue_remove": "Remove (Listwise)",
     "MissingValue_ignore": "Ignore",
-    "MissingValue_error": "Error",
-    "Validation": {
-      "TableNameRequired": "Please select a table",
-      "DependentVariableRequired": "Please select a dependent variable",
-      "ExplanatoryVariablesRequired": "Please select at least one explanatory variable"
-    }
+    "MissingValue_error": "Error"
   },
   "RegressionResult": {
     "AnalysisSummary": "Analysis Summary",
     "DataName": "Data Name",
     "DependentVariable": "Dependent Variable",
-    "ExplanatoryVariables": "Explanatory Variables",
     "ModelStatistics": "Model Statistics",
     "AdjustedR2": "Adjusted R²",
     "FValue": "F-value",
@@ -257,7 +258,6 @@
   },
   "RegressionTab": {
     "FormTab": "Analysis Settings",
-    "NoResultsAvailable": "No results available",
     "ResultLabel": "Result {{number}}",
     "DeleteResult": "Delete result"
   },
@@ -284,12 +284,7 @@
     "ExecutingCalculation": "Executing calculation...",
     "CalculationSuccess": "Calculation completed successfully.",
     "InsertPosition": "Insert Position",
-    "InsertPositionLast": "end",
-    "Validation": {
-      "TableNameRequired": "Please select a table.",
-      "NewColumnNameRequired": "Please enter a new column name.",
-      "CalculationExpressionRequired": "Please enter a calculation expression."
-    }
+    "InsertPositionLast": "end"
   },
   "Loading": {
     "Loading": "Loading...",
@@ -304,14 +299,35 @@
     "DirectoryNotFound": "The folder could not be found. It may have been deleted or moved."
   },
   "ValidationMessages": {
-    "TableNameRequired": "Please enter a data name.",
-    "TableNameInvalidChars": "Data name must not contain control characters.",
-    "TableNameTooLong": "Data name must be 128 characters or fewer.",
+    "DataNameInvalidChars": "Data name must not contain control characters.",
+    "DataNameTooLong": "Data name must be 128 characters or fewer.",
     "SeparatorRequired": "Please enter a separator.",
     "SeparatorTooLong": "Separator must be 10 characters or fewer.",
     "SheetNameTooLong": "Sheet name must be 31 characters or fewer.",
     "SheetNameInvalidChars": "Sheet name contains invalid characters (/ \\ ? * : [ ]).",
-    "SheetNameInvalidQuotes": "Sheet name must not start or end with an apostrophe."
+    "SheetNameInvalidQuotes": "Sheet name must not start or end with an apostrophe.",
+    "FixValidationErrors": "There are input errors. Please fix them.",
+    "ColumnNameRequired": "Please enter a column name.",
+    "UniformParamLowHigh": "The minimum of a uniform distribution must be less than the maximum.",
+    "ExponentialParamRate": "The rate parameter must be a positive number.",
+    "NormalParamStdDeviation": "The standard deviation must be a positive number.",
+    "GammaParamShape": "The shape parameter must be a positive number.",
+    "GammaParamScale": "The scale parameter must be a positive number.",
+    "BetaParamAlpha": "The alpha parameter must be a positive number.",
+    "BetaParamBeta": "The beta parameter must be a positive number.",
+    "WeibullParamShape": "The shape parameter must be a positive number.",
+    "WeibullParamScale": "The scale parameter must be a positive number.",
+    "LognormalParamLogStdDeviation": "The log standard deviation must be a positive number.",
+    "BinomialParamTrials": "The number of trials must be a non-negative integer.",
+    "BinomialParamProbability": "The success probability must be between 0 and 1.",
+    "BernoulliParamProbability": "The success probability must be between 0 and 1.",
+    "PoissonParamLambda": "The rate parameter must be a non-negative number.",
+    "GeometricParamProbability": "The success probability must be between 0 and 1.",
+    "HypergeometricParamValues": "Invalid hypergeometric distribution parameters. Check population size, number of successes, and sample size.",
+    "DependentVariableRequired": "Please select a dependent variable.",
+    "ExplanatoryVariablesRequired": "Please select at least one explanatory variable.",
+    "NewColumnNameRequired": "Please enter a new column name.",
+    "CalculationExpressionRequired": "Please enter a calculation expression."
   },
   "ColumnMenu": {
     "SortAsc": "Sort Ascending",
@@ -331,14 +347,12 @@
     "CurrentColumnName": "Current column name",
     "NewColumnName": "New column name",
     "NewColumnNamePlaceholder": "e.g., new_column_name",
-    "Submit": "Rename",
-    "Success": "Column renamed successfully."
+    "Submit": "Rename"
   },
   "DeleteColumnForm": {
     "Title": "Delete Column",
     "Warning": "Delete column \"{{columnName}}\"? This action cannot be undone.",
-    "Submit": "Delete",
-    "Success": "Column deleted successfully."
+    "Submit": "Delete"
   },
   "RenameTableForm": {
     "Title": "Rename Data",
@@ -361,8 +375,7 @@
     "Title": "Duplicate Column",
     "NewColumnName": "New column name",
     "NewColumnNamePlaceholder": "e.g., column_copy",
-    "Submit": "Duplicate",
-    "Success": "Column duplicated successfully."
+    "Submit": "Duplicate"
   },
   "CastColumnForm": {
     "Title": "Cast Column Type",
@@ -374,8 +387,7 @@
     "DatetimeFormat": "Datetime format (blank = auto-detect)",
     "DatetimeFormatPlaceholder": "e.g., %Y-%m-%d",
     "Strict": "Error on failure (instead of returning null)",
-    "Submit": "Cast",
-    "Success": "Column cast successfully."
+    "Submit": "Cast"
   },
   "TransformColumnForm": {
     "Title": "Add Transform Column",
@@ -388,8 +400,7 @@
     "Degree": "Degree",
     "NewColumnName": "New column name",
     "NewColumnNamePlaceholder": "e.g., log_value",
-    "Submit": "Add",
-    "Success": "Transform column added successfully."
+    "Submit": "Add"
   },
   "AddDummyColumnForm": {
     "Title": "Add Dummy Column",
@@ -407,8 +418,7 @@
     "NullStrategyExclude": "Ignore",
     "NullStrategyAsCategory": "Treat as category",
     "NullStrategyError": "Error if null exists",
-    "Submit": "Add",
-    "Success": "Dummy column added successfully."
+    "Submit": "Add"
   },
   "AddSimulationColumnForm": {
     "Title": "Add Simulation Column",
@@ -445,8 +455,7 @@
     "SuccessCount": "Success count",
     "SampleSize": "Sample size",
     "Value": "Value",
-    "Submit": "Add",
-    "Success": "Simulation column added successfully."
+    "Submit": "Add"
   },
   "AddLagLeadColumnForm": {
     "Title": "Add Lag/Lead Column",
@@ -456,60 +465,39 @@
     "GroupColumns": "Group columns (optional)",
     "NewColumnName": "New column name",
     "NewColumnNamePlaceholder": "e.g., lag_1_value",
-    "Submit": "Add",
-    "Success": "Lag/lead column added successfully."
+    "Submit": "Add"
   },
   "ColumnOperationForm": {
-    "AddPositionColumn": "Insert after column",
-    "AddPositionColumnDesc": "New column will be inserted to the right of the selected column.",
-    "SourceColumnName": "Source column",
-    "Success": "Operation completed successfully."
+    "SourceColumnName": "Source column"
   },
   "CreateSimulationDataTableView": {
+    "CreateNewDataTable": "Create New Data Table",
+    "DefineYourTableNameAndRows": "Define the table name and row count, then add and configure columns to generate your dataset.",
+    "DataSettings": "Data Settings",
+    "DataName": "Data Name",
+    "DataNamePlaceholder": "Enter a data name",
+    "NumberOfRows": "Number of Rows",
+    "ColumnSettings": "Column Settings",
+    "AddColumn": "Add Column",
+    "ColumnName": "Column Name",
+    "InputColumnName": "Enter a column name",
+    "DataType": "Data Type",
+    "DistributionType": "Distribution Type",
+    "FixedValue": "Fixed Value",
+    "InputFixedValue": "Enter a fixed value",
+    "InputDistributionParameters": " (enter a value)",
+    "CreatingTable": "Creating data...",
+    "Submit": "Create Data",
+    "EditColumn": "Edit Column",
+    "NotSet": "Not set",
+    "DataCreationFailed": "Data creation failed.",
+    "DataCreationError": "An error occurred while creating data.",
     "ColumnHasErrors": "Some column settings have errors. Please review them.",
     "HasErrors": "Has errors",
     "CannotRemoveLastColumn": "At least one column is required."
   },
-  "CreateTableView": {
-    "Title": "Create Table",
-    "Description": "Create an empty table by specifying a name, row count, and columns.",
-    "TableName": "Table Name",
-    "TableNamePlaceholder": "e.g. my_table",
-    "RowCount": "Row Count",
-    "RowCountOptional": "(Optional — uses file row count if omitted)",
-    "ColumnsSection": "Column Definition",
-    "ColumnsCount": "{{count}} columns",
-    "ColumnsEmpty": "No columns added yet. Use the input below to add columns.",
-    "NewColumnPlaceholder": "Enter column name and press Enter to add",
-    "AddColumn": "Add",
-    "MoveUp": "Move up",
-    "MoveDown": "Move down",
-    "RemoveColumn": "Remove",
-    "ColumnRequired": "Please add at least one column.",
-    "ColumnNameDuplicate": "A column with the same name already exists.",
-    "ColumnNameInvalidChars": "The column name contains invalid characters.",
-    "Submit": "Create Table",
-    "FileSection": "Load from File (Optional)",
-    "FileSectionDescription": "Attach a file to initialize the table with its data. Specify column names matching the file structure.",
-    "FileSelected": "Selected File",
-    "RemoveFile": "Remove",
-    "FileOptions": "File loading settings",
-    "HasHeader": "Has header row (skip first row as column names)",
-    "CsvSeparator": "Separator",
-    "SeparatorComma": ", Comma",
-    "SeparatorTab": "⇥ Tab",
-    "SeparatorOther": "✎ Other",
-    "SeparatorCustomPlaceholder": "1–10 characters",
-    "Encoding": "Encoding",
-    "ExcelSheetName": "Sheet Name (defaults to first sheet)",
-    "ExcelSheetNamePlaceholder": "e.g., Sheet1",
-    "DragAndDropTab": "Drag & Drop",
-    "FileSelectTab": "Select File",
-    "DragDropAreaTitle": "Drop a file here",
-    "DragDropAreaTitleActive": "Drop it!",
-    "DragDropAreaDescription": "Supported formats: .csv, .xlsx, .xls, .parquet",
-    "SearchPlaceholder": "Search by file name",
-    "GoUpDirectory": "Go up directory"
+  "AreaLabels": {
+    "DataMenu": "Data Menu"
   },
   "SettingsDialog": {
     "Title": "Settings",
