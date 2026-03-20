@@ -2,24 +2,38 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Playwright E2Eテスト設定
+ *
+ * ## 実行前提
+ * E2Eテストは Tauri サイドカー（Python FastAPI）が起動した状態で実施する。
+ * 別ターミナルで `pnpm tauri:dev:debug` を起動（ECONOMICON_DEV_RUN=true）し、
+ * アプリが http://localhost:5173 で応答できる状態にしてからテストを実行すること。
+ *
+ * ## 環境変数
+ * - ECONOMICON_TEST_SAMPLE_DIR: サンプルファイルが格納されたディレクトリの絶対パス
+ *   例: C:\Users\masak\Desktop\repos\economicon\sample
+ *
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
   testDir: "./e2e",
-  // 並列実行の設定
-  fullyParallel: true,
-  // CI環境でのみfailOnConsoleErrorを有効化
+  // E2Eテストはストーリー順に実行するため直列（workerは1）
+  fullyParallel: false,
+  // CI環境でのみ forbidOnly を有効化
   forbidOnly: !!process.env.CI,
-  // リトライ回数（CI環境では2回、ローカルでは0回）
-  retries: process.env.CI ? 2 : 0,
-  // 並列ワーカー数（CI環境では1、ローカルではCPUコア数の半分）
-  workers: process.env.CI ? 1 : undefined,
+  // リトライ回数（CI環境では1回、ローカルでは0回）
+  retries: process.env.CI ? 1 : 0,
+  // サイドカー起動を待つため直列実行
+  workers: 1,
   // レポート設定
   reporter: "html",
 
   use: {
-    // ベースURL ポート: 1420 (Tauri Default)
-    baseURL: "http://localhost:1420",
+    // ベースURL ポート: 5173 (Vite dev server)
+    baseURL: "http://localhost:5173",
+    // E2Eは実際の操作タイムアウトを長めに設定（サイドカー応答待機）
+    actionTimeout: 30_000,
+    // アサーションタイムアウト
+    expect: { timeout: 30_000 },
     // スクリーンショットを失敗時のみ撮影
     screenshot: "only-on-failure",
     // ビデオを失敗時のみ録画
@@ -33,21 +47,15 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
-    },
   ],
 
   // 開発サーバーの自動起動設定
+  // Tauri サイドカーが必要なため、通常は事前に `pnpm tauri:dev:debug` を起動しておく。
+  // reuseExistingServer: true により、起動済みサーバーがあれば再利用する。
   webServer: {
     command: "pnpm run dev",
-    // ベースURL ポート: 1420 (Tauri Default)
-    port: 1420,
-    reuseExistingServer: !process.env.CI,
+    port: 5173,
+    reuseExistingServer: true,
+    timeout: 30_000,
   },
 });
