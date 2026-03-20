@@ -64,6 +64,9 @@ async def lifespan(app: FastAPI):
     logger.info("SettingsStore has been initialized at startup.")
     tables_store = TablesStore()
     logger.info("TablesStore has been initialized at startup.")
+    # 前回セッションで孤立した pkl ファイルをフォールバック削除
+    AnalysisResultStore().clear_all()
+    logger.info("Startup fallback: orphaned analysis result files cleared.")
 
     yield  # ここでアプリがリクエストを待ち受ける
     # --- 終了時の処理 ---
