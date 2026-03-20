@@ -264,7 +264,7 @@ export const AppBar = () => {
       items: [
         {
           id: "linear-regression-item",
-          label: t("HeaderMenu.LinearRegression"),
+          label: t("HeaderMenu.OrdinaryLeastSquares"),
           handleSelect: () => {
             setCurrentView("LinearRegressionForm");
             close();

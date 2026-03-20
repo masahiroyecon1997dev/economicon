@@ -65,7 +65,7 @@
     "BasicStatistics": "基本統計量",
     "Regression": "回帰分析",
     "LinearRegressionMenu": "線形回帰",
-    "LinearRegression": "線形回帰",
+    "OrdinaryLeastSquares": "最小二乗法",
     "LassoRegression": "Lasso回帰",
     "RidgeRegression": "Ridge回帰",
     "NonlinearRegressionMenu": "非線形回帰",
