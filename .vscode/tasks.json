@@ -92,6 +92,18 @@
         "reveal": "always",
         "panel": "shared"
       }
+    },
+    {
+      "type": "shell",
+      "command": "cd api; .venv\\Scripts\\pytest",
+      "label": "Pytest: Run",
+      "detail": "Run pytest with coverage on api/tests (settings from pyproject.toml)",
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
     }
   ]
 }
