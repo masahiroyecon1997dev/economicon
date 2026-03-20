@@ -69,6 +69,7 @@ export type DropmenuPositionType =
   | "top-right";
 
 export type LinearRegressionResultType = {
+  resultId: string;
   tableName: string;
   dependentVariable: string;
   explanatoryVariables: string[];
