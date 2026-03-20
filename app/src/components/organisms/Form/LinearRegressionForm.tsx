@@ -178,8 +178,10 @@ export const LinearRegressionForm = ({
                   value={field.state.value}
                   onValueChange={handleTableSelect}
                   disabled={isSubmitting}
-                  error={field.state.meta.errors[0]?.toString()}
-                  placeholder={t("LinearRegressionForm.SelectData")}
+                  error={
+                    (field.state.meta.errors[0] as any)?.message ??
+                    field.state.meta.errors[0]?.toString()
+                  }
                 >
                   {tableList.map((table, index) => (
                     <SelectItem key={index} value={table}>
@@ -190,7 +192,8 @@ export const LinearRegressionForm = ({
               </div>
               {field.state.meta.errors[0] && (
                 <p className="shrink-0 text-xs text-red-600">
-                  {field.state.meta.errors[0].toString()}
+                  {(field.state.meta.errors[0] as any)?.message ??
+                    field.state.meta.errors[0]?.toString()}
                 </p>
               )}
             </div>
@@ -220,7 +223,10 @@ export const LinearRegressionForm = ({
                     columns={columnList}
                     selectedValue={field.state.value}
                     onSingleChange={(v) => field.handleChange(v)}
-                    error={field.state.meta.errors[0]?.toString()}
+                    error={
+                      (field.state.meta.errors[0] as any)?.message ??
+                      field.state.meta.errors[0]?.toString()
+                    }
                     disabled={isSubmitting}
                     name="dependentVariable"
                     className="flex min-h-0 w-[33%] flex-col"
@@ -243,7 +249,10 @@ export const LinearRegressionForm = ({
                     columns={columnList}
                     selectedValues={field.state.value}
                     onMultipleChange={(v) => field.handleChange(v)}
-                    error={field.state.meta.errors[0]?.toString()}
+                    error={
+                      (field.state.meta.errors[0] as any)?.message ??
+                      field.state.meta.errors[0]?.toString()
+                    }
                     disabled={isSubmitting}
                     name="explanatoryVariables"
                     className="flex min-h-0 flex-1 flex-col"
