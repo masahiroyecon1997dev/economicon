@@ -27,13 +27,14 @@ export default defineConfig({
   // レポート設定
   reporter: "html",
 
+  // アサーションタイムアウト（use の外側・トップレベルに設定する）
+  expect: { timeout: 30_000 },
+
   use: {
     // ベースURL ポート: 5173 (Vite dev server)
     baseURL: "http://localhost:5173",
     // E2Eは実際の操作タイムアウトを長めに設定（サイドカー応答待機）
     actionTimeout: 30_000,
-    // アサーションタイムアウト
-    expect: { timeout: 30_000 },
     // スクリーンショットを失敗時のみ撮影
     screenshot: "only-on-failure",
     // ビデオを失敗時のみ録画
