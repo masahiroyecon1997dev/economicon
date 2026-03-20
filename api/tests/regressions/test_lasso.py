@@ -78,16 +78,16 @@ def test_lasso_variable_coefficient_scaled_is_float(client, tables_store):
 
 
 def test_lasso_coefficients_scaled_numerical(client, tables_store):
-    """coefficientScaled が sklearn Lasso(alpha/2) の結果と一致することを確認
+    """coefficientScaled が sklearn Lasso(alpha) の結果と一致することを確認
 
-    Eco-Note D: glmnet 規約 λ → sklearn 変換：α_sk = λ / 2
-    （Lasso は statsmodels と sklearn で同一式のため直接比較可能）
+    Eco-Note D: glmnet λ = statsmodels α = sklearn α（全て同一式）
+    1/(2n)||y-Xβ||² + λ||β||₁ の係数はいずれも同値。
     """
     (x1, x2, y_linear, _), _, _ = generate_all_data()
     x_no_const = np.column_stack([x1, x2])  # 定数項なし
 
-    # glmnet λ=0.1 → sklearn Lasso α = 0.1 / 2 = 0.05
-    sklearn_alpha = _ALPHA_DEFAULT / 2
+    # glmnet λ=0.1 = sklearn α=0.1（同一目的関数）
+    sklearn_alpha = _ALPHA_DEFAULT
     model = make_pipeline(StandardScaler(), Lasso(alpha=sklearn_alpha))
     model.fit(x_no_const, y_linear)
     lasso_step = model.named_steps["lasso"]
@@ -182,11 +182,13 @@ def _build_sm_lasso_reference(
     x_scaled = (x_no_const - x_mean) / x_scale
     x_sm = sm.add_constant(x_scaled, has_constant="add")
 
-    alpha_sm = alpha_glmnet / 2.0
+    alpha_sm = alpha_glmnet  # glmnet λ = statsmodels α（直接一致）
     alpha_arr = np.array([0.0] + [alpha_sm] * n_features, dtype=np.float64)
 
     result = sm.OLS(y, x_sm).fit_regularized(
-        method="elastic_net", alpha=alpha_arr, L1_wt=1.0
+        method="elastic_net",
+        alpha=alpha_arr,  # type: ignore[arg-type]
+        L1_wt=1.0,
     )
     return np.asarray(result.params[1:], dtype=np.float64)
 
@@ -194,7 +196,7 @@ def _build_sm_lasso_reference(
 def test_lasso_statsmodels_consistency(client, tables_store):
     """statsmodels fit_regularized(L1_wt=1.0) と係数が一致することを確認
 
-    Eco-Note D: glmnet λ → statsmodels α = λ/2。
+    Eco-Note D: glmnet λ = statsmodels α（直接一致）。
     API の alpha はデフォルト glmnet 規約を使用する。
     """
     (x1, x2, y_linear, _), _, _ = generate_all_data()
@@ -219,15 +221,15 @@ def test_lasso_statsmodels_consistency(client, tables_store):
 
 
 def test_lasso_sklearn_r2_consistency(client, tables_store):
-    """R² が sklearn Lasso(alpha/2).score() と数値的に一致することを確認
+    """R² が sklearn Lasso(alpha).score() と数値的に一致することを確認
 
-    Eco-Note D: statsmodels にはない R² を sklearn で検証する。
-    glmnet λ → sklearn α = λ/2 に変換して比較する。
+    Eco-Note D: glmnet λ = sklearn α = statsmodels α（同一目的関数）。
+    R² もそのまま一致する。
     """
     (x1, x2, y_linear, _), _, _ = generate_all_data()
     x_no_const = np.column_stack([x1, x2])
 
-    sklearn_alpha = _ALPHA_DEFAULT / 2
+    sklearn_alpha = _ALPHA_DEFAULT
     model = make_pipeline(StandardScaler(), Lasso(alpha=sklearn_alpha))
     model.fit(x_no_const, y_linear)
     expected_r2 = float(model.score(x_no_const, y_linear))
