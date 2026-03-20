@@ -75,10 +75,10 @@ class SettingsStore:
         # WindowsではAppData/Local/economicon/logs、
         # macOS/Linuxではホームディレクトリ/.economicon/logs
         if os_system == "Windows":
-            appdata = os.getenv("APPDATA") or str(
+            localappdata = os.getenv("LOCALAPPDATA") or str(
                 Path.home() / "AppData" / "Local"
             )
-            logs_dir = Path(appdata) / "economicon" / "logs"
+            logs_dir = Path(localappdata) / "economicon" / "logs"
         else:
             logs_dir = Path.home() / ".economicon" / "logs"
         logs_dir.mkdir(parents=True, exist_ok=True)
