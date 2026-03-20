@@ -552,6 +552,8 @@ class Regression:
                 _("Invalid analysis parameters for regularized regression")
             )
         alpha = self.analysis.alpha
+        alpha_convention = self.analysis.alpha_convention
+        max_iter = self.analysis.max_iter
         calculate_se = self.analysis.calculate_se
         bootstrap_iterations = self.analysis.bootstrap_iterations
         # Eco-Note C: random_state を渡してブートストラップの再現性を確保
@@ -566,6 +568,8 @@ class Regression:
             calculate_se=calculate_se,
             bootstrap_iterations=bootstrap_iterations,
             random_state=random_state,
+            max_iter=max_iter,
+            alpha_convention=alpha_convention,
         )
 
         if self.analysis.method == RegressionMethodType.LASSO:
@@ -647,12 +651,13 @@ class Regression:
         """
         正則化回帰（Lasso/Ridge）の結果を JSON 形式にフォーマット
 
-        - R²: 訓練データでの sklearn model.score()
+        - R²: 手動計算 (1 - SS_res/SS_tot)
         - adjustedR2, fValue, fProbability, tValue, pValue: None
           （正則化回帰には理論的根拠なし）
         - Ridge: bootstrapSE + 95% パーセンタイル CI
         - Lasso: selectionRate + 95% パーセンタイル CI、SE は None
           （点質量問題により過小評価されるため）
+        - converged=False 時は warnings に収束失敗メッセージを追加
 
         Args:
             reg_result: RegularizedResult データクラス
@@ -717,6 +722,17 @@ class Regression:
             "fProbability": None,
         }
 
+        # 収束失敗時の警告メッセージ
+        warnings_list: list[str] = []
+        if not reg_result.converged:
+            warnings_list.append(
+                _(
+                    "収束しませんでした。計算結果は参考値です。"
+                    "正則化パラメータ alpha を調整するか、"
+                    "反復回数（maxIter）を増やしてください。"
+                )
+            )
+
         return {
             "tableName": self.table_name,
             "dependentVariable": self.dependent_variable,
@@ -724,6 +740,7 @@ class Regression:
             "regressionResult": None,
             "parameters": params_info,
             "modelStatistics": model_stats,
+            "warnings": warnings_list,
         }
 
     def _tobit_format_result(

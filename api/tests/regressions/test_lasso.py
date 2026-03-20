@@ -1,6 +1,7 @@
 """Lasso回帰テスト"""
 
 import numpy as np
+import statsmodels.api as sm
 from fastapi import status
 from sklearn.linear_model import Lasso
 from sklearn.pipeline import make_pipeline
@@ -13,10 +14,10 @@ from tests.regressions.conftest import (
     generate_all_data,
 )
 
-# sklearn との数値比較の許容誤差
+# statsmodels / sklearn 数値比較の許容誤差
 _ABS_TOL = 1e-5
 
-# Lasso デフォルト alpha
+# Lasso デフォルト alpha（glmnet 規約）
 _ALPHA_DEFAULT = 0.1
 # スパース性確認用の大きな alpha
 _ALPHA_LARGE = 10.0
@@ -77,11 +78,17 @@ def test_lasso_variable_coefficient_scaled_is_float(client, tables_store):
 
 
 def test_lasso_coefficients_scaled_numerical(client, tables_store):
-    """coefficientScaledがsklearnのLasso Pipeline結果と一致することを確認"""
+    """coefficientScaled が sklearn Lasso(alpha/2) の結果と一致することを確認
+
+    Eco-Note D: glmnet 規約 λ → sklearn 変換：α_sk = λ / 2
+    （Lasso は statsmodels と sklearn で同一式のため直接比較可能）
+    """
     (x1, x2, y_linear, _), _, _ = generate_all_data()
     x_no_const = np.column_stack([x1, x2])  # 定数項なし
 
-    model = make_pipeline(StandardScaler(), Lasso(alpha=_ALPHA_DEFAULT))
+    # glmnet λ=0.1 → sklearn Lasso α = 0.1 / 2 = 0.05
+    sklearn_alpha = _ALPHA_DEFAULT / 2
+    model = make_pipeline(StandardScaler(), Lasso(alpha=sklearn_alpha))
     model.fit(x_no_const, y_linear)
     lasso_step = model.named_steps["lasso"]
     expected_scaled = lasso_step.coef_  # [x1_scaled, x2_scaled]
@@ -152,3 +159,127 @@ def test_lasso_calculate_se_without_const(client, tables_store):
     assert len(params) == _N_PARAMS_NO_CONST
     for p in params:
         assert "standardError" in p
+
+
+# -----------------------------------------------------------
+# statsmodels 参照テスト（正確な一致検証）
+# -----------------------------------------------------------
+
+
+def _build_sm_lasso_reference(
+    x_no_const: np.ndarray,
+    y: np.ndarray,
+    alpha_glmnet: float,
+) -> np.ndarray:
+    """
+    statsmodels fit_regularized で Lasso を直接解いて standardized 係数を返す。
+    glmnet λ → statsmodels α = λ/2 に変換する。
+    """
+    n_features = x_no_const.shape[1]
+    x_mean = x_no_const.mean(axis=0)
+    x_scale = x_no_const.std(axis=0, ddof=0)
+    x_scale = np.where(x_scale == 0.0, 1.0, x_scale)
+    x_scaled = (x_no_const - x_mean) / x_scale
+    x_sm = sm.add_constant(x_scaled, has_constant="add")
+
+    alpha_sm = alpha_glmnet / 2.0
+    alpha_arr = np.array([0.0] + [alpha_sm] * n_features, dtype=np.float64)
+
+    result = sm.OLS(y, x_sm).fit_regularized(
+        method="elastic_net", alpha=alpha_arr, L1_wt=1.0
+    )
+    return np.asarray(result.params[1:], dtype=np.float64)
+
+
+def test_lasso_statsmodels_consistency(client, tables_store):
+    """statsmodels fit_regularized(L1_wt=1.0) と係数が一致することを確認
+
+    Eco-Note D: glmnet λ → statsmodels α = λ/2。
+    API の alpha はデフォルト glmnet 規約を使用する。
+    """
+    (x1, x2, y_linear, _), _, _ = generate_all_data()
+    x_no_const = np.column_stack([x1, x2])
+
+    expected_scaled = _build_sm_lasso_reference(
+        x_no_const, y_linear, _ALPHA_DEFAULT
+    )
+
+    params = _get_output(client, LassoPayload(alpha=_ALPHA_DEFAULT).build())[
+        "parameters"
+    ]
+    var_params = [p for p in params if p["variable"] != "const"]
+
+    for i, (exp, param) in enumerate(
+        zip(expected_scaled, var_params, strict=False)
+    ):
+        assert abs(param["coefficientScaled"] - exp) < _ABS_TOL, (
+            f"Lasso statsmodels coef_scaled[{i}]:"
+            f" {param['coefficientScaled']!r} != {exp!r}"
+        )
+
+
+def test_lasso_sklearn_r2_consistency(client, tables_store):
+    """R² が sklearn Lasso(alpha/2).score() と数値的に一致することを確認
+
+    Eco-Note D: statsmodels にはない R² を sklearn で検証する。
+    glmnet λ → sklearn α = λ/2 に変換して比較する。
+    """
+    (x1, x2, y_linear, _), _, _ = generate_all_data()
+    x_no_const = np.column_stack([x1, x2])
+
+    sklearn_alpha = _ALPHA_DEFAULT / 2
+    model = make_pipeline(StandardScaler(), Lasso(alpha=sklearn_alpha))
+    model.fit(x_no_const, y_linear)
+    expected_r2 = float(model.score(x_no_const, y_linear))
+
+    output = _get_output(client, LassoPayload(alpha=_ALPHA_DEFAULT).build())
+    api_r2 = output["modelStatistics"]["R2"]
+
+    assert abs(api_r2 - expected_r2) < _ABS_TOL, (
+        f"Lasso R²: API={api_r2!r} != sklearn={expected_r2!r}"
+    )
+
+
+def test_lasso_warnings_field_present(client, tables_store):
+    """レスポンスに warnings フィールドが含まれることを確認"""
+    output = _get_output(client, LassoPayload().build())
+    assert "warnings" in output, (
+        "regressionOutput に 'warnings' フィールドがない"
+    )
+    assert isinstance(output["warnings"], list)
+
+
+def test_lasso_convergence_warning_on_low_maxiter(client, tables_store):
+    """maxIter=1 のとき warnings に収束失敗メッセージが含まれることを確認"""
+    payload = LassoPayload(alpha=_ALPHA_DEFAULT).build()
+    payload["analysis"]["maxIter"] = 1  # 収束不可能な反復回数
+    output = _get_output(client, payload)
+    assert len(output["warnings"]) > 0, "maxIter=1 で収束失敗警告が出るはず"
+
+
+def test_lasso_sklearn_convention(client, tables_store):
+    """alphaConvention='sklearn' で sklearn Lasso(alpha) と係数が一致する
+
+    sklearn 規約: α_sm = α_sk (Lasso は同一式)
+    """
+    (x1, x2, y_linear, _), _, _ = generate_all_data()
+    x_no_const = np.column_stack([x1, x2])
+
+    sklearn_alpha = _ALPHA_DEFAULT  # sklearn 規約ではそのまま使用
+    model = make_pipeline(StandardScaler(), Lasso(alpha=sklearn_alpha))
+    model.fit(x_no_const, y_linear)
+    lasso_step = model.named_steps["lasso"]
+    expected_scaled = lasso_step.coef_
+
+    payload = LassoPayload(alpha=_ALPHA_DEFAULT).build()
+    payload["analysis"]["alphaConvention"] = "sklearn"
+    params = _get_output(client, payload)["parameters"]
+    var_params = [p for p in params if p["variable"] != "const"]
+
+    for i, (exp, param) in enumerate(
+        zip(expected_scaled, var_params, strict=False)
+    ):
+        assert abs(param["coefficientScaled"] - exp) < _ABS_TOL, (
+            f"Lasso sklearn convention coef_scaled[{i}]:"
+            f" {param['coefficientScaled']!r} != {exp!r}"
+        )
