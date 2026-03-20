@@ -1,4 +1,10 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAPI } from "../../../api/endpoints";
@@ -6,6 +12,16 @@ import { showMessageDialog } from "../../../lib/dialog/message";
 import { useRegressionResultsStore } from "../../../stores/regressionResults";
 import { useTableListStore } from "../../../stores/tableList";
 import { LinearRegressionForm } from "./LinearRegressionForm";
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+/** type="submit" ボタンは JSDOM で form の submit イベントを発火しないため直接 fireEvent.submit を使う */
+const submitForm = async () => {
+  await act(async () => {
+    fireEvent.submit(document.querySelector("form")!);
+  });
+};
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -27,37 +43,56 @@ vi.mock("../../../lib/dialog/message", () => ({
   showMessageDialog: vi.fn().mockResolvedValue(undefined),
 }));
 
-// VariableSelectorField は表示が複雑なのでスタブ化
+// VariableSelectorField はスタブ化（error prop も表示し、single/multiple を mode で切り替える）
 vi.mock("../../molecules/Field/VariableSelectorField", () => ({
   VariableSelectorField: ({
     label,
-    onAdd,
+    mode,
+    selectedValues = [],
+    onSingleChange,
+    onMultipleChange,
+    error,
   }: {
     label: string;
-    selected: string[];
-    onAdd: (v: string) => void;
-    onRemove: (v: string) => void;
-    options: { value: string; label: string }[];
+    mode: "single" | "multiple";
+    selectedValues?: string[];
+    selectedValue?: string;
+    onSingleChange?: (value: string) => void;
+    onMultipleChange?: (values: string[]) => void;
+    error?: string;
   }) => (
     <div>
       <span>{label}</span>
-      <button type="button" onClick={() => onAdd("price")}>
+      {error && <p role="alert">{error}</p>}
+      <button
+        type="button"
+        onClick={() => {
+          if (mode === "single") {
+            onSingleChange?.("price");
+          } else {
+            onMultipleChange?.([...selectedValues, "price"]);
+          }
+        }}
+      >
         add-variable
       </button>
     </div>
   ),
 }));
 
+// テストごとに selectedTableName を変えられるよう vi.hoisted でミュータブルな状態を作る
+const mockTableLoader = vi.hoisted(() => ({
+  selectedTableName: "sales",
+  setSelectedTableName: vi.fn(),
+  columnList: [
+    { name: "price", type: "Float64" },
+    { name: "quantity", type: "Int64" },
+  ],
+  setColumnList: vi.fn(),
+}));
+
 vi.mock("../../../hooks/useTableColumnLoader", () => ({
-  useTableColumnLoader: () => ({
-    selectedTableName: "sales",
-    setSelectedTableName: vi.fn(),
-    columnList: [
-      { name: "price", type: "Float64" },
-      { name: "quantity", type: "Int64" },
-    ],
-    setColumnList: vi.fn(),
-  }),
+  useTableColumnLoader: () => ({ ...mockTableLoader }),
 }));
 
 // ---------------------------------------------------------------------------
@@ -107,6 +142,15 @@ const onAnalysisComplete = vi.fn();
 // ---------------------------------------------------------------------------
 beforeEach(() => {
   vi.clearAllMocks();
+  Object.assign(mockTableLoader, {
+    selectedTableName: "sales",
+    setSelectedTableName: vi.fn(),
+    columnList: [
+      { name: "price", type: "Float64" },
+      { name: "quantity", type: "Int64" },
+    ],
+    setColumnList: vi.fn(),
+  });
   vi.mocked(getEconomiconAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales"] });
   useRegressionResultsStore.setState({ results: [] });
@@ -115,21 +159,11 @@ beforeEach(() => {
 describe("LinearRegressionForm", () => {
   describe("バリデーション", () => {
     it("テーブル未選択でサブミット → DataNameSelectエラーが表示される", async () => {
-      // useTableColumnLoader を「selectedTableName = ''」でオーバーライド
-      vi.doMock("../../../hooks/useTableColumnLoader", () => ({
-        useTableColumnLoader: () => ({
-          selectedTableName: "",
-          setSelectedTableName: vi.fn(),
-          columnList: [],
-          setColumnList: vi.fn(),
-        }),
-      }));
+      mockTableLoader.selectedTableName = "";
+      mockTableLoader.columnList = [];
 
-      const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
-
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
         expect(
@@ -139,11 +173,8 @@ describe("LinearRegressionForm", () => {
     });
 
     it("目的変数未選択でサブミット → DependentVariableRequiredエラーが表示される", async () => {
-      const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
-
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
         expect(
@@ -153,7 +184,6 @@ describe("LinearRegressionForm", () => {
     });
 
     it("説明変数が0件でサブミット → ExplanatoryVariablesRequiredエラーが表示される", async () => {
-      const user = userEvent.setup();
       render(
         <LinearRegressionForm
           onCancel={onCancel}
@@ -161,8 +191,13 @@ describe("LinearRegressionForm", () => {
         />,
       );
 
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
-      await user.click(submitBtn);
+      // 目的変数のみ設定して説明変数は空のまま
+      const [depAddBtn] = screen.getAllByRole("button", {
+        name: "add-variable",
+      });
+      await userEvent.setup().click(depAddBtn);
+
+      await submitForm();
 
       await waitFor(() => {
         expect(
@@ -191,20 +226,13 @@ describe("LinearRegressionForm", () => {
         />,
       );
 
-      // 目的変数を設定（Field直接操作）
-      const depSelect = screen.getByRole("combobox", {
-        name: /DependentVariable|目的変数/i,
+      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
+        name: "add-variable",
       });
-      await user.click(depSelect);
-      const depOption = await screen.findByRole("option", { name: "price" });
-      await user.click(depOption);
+      await user.click(depAddBtn);
+      await user.click(expAddBtn);
 
-      // 説明変数を追加（スタブボタン）
-      const addBtn = screen.getByRole("button", { name: "add-variable" });
-      await user.click(addBtn);
-
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
         expect(onAnalysisComplete).toHaveBeenCalledWith(0);
@@ -224,19 +252,13 @@ describe("LinearRegressionForm", () => {
       const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      // 目的変数・説明変数を設定
-      const depSelect = screen.getByRole("combobox", {
-        name: /DependentVariable|目的変数/i,
+      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
+        name: "add-variable",
       });
-      await user.click(depSelect);
-      const depOption = await screen.findByRole("option", { name: "price" });
-      await user.click(depOption);
+      await user.click(depAddBtn);
+      await user.click(expAddBtn);
 
-      const addBtn = screen.getByRole("button", { name: "add-variable" });
-      await user.click(addBtn);
-
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
@@ -260,18 +282,13 @@ describe("LinearRegressionForm", () => {
       const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      const depSelect = screen.getByRole("combobox", {
-        name: /DependentVariable|目的変数/i,
+      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
+        name: "add-variable",
       });
-      await user.click(depSelect);
-      const depOption = await screen.findByRole("option", { name: "price" });
-      await user.click(depOption);
+      await user.click(depAddBtn);
+      await user.click(expAddBtn);
 
-      const addBtn = screen.getByRole("button", { name: "add-variable" });
-      await user.click(addBtn);
-
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
@@ -287,18 +304,13 @@ describe("LinearRegressionForm", () => {
       const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      const depSelect = screen.getByRole("combobox", {
-        name: /DependentVariable|目的変数/i,
+      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
+        name: "add-variable",
       });
-      await user.click(depSelect);
-      const depOption = await screen.findByRole("option", { name: "price" });
-      await user.click(depOption);
+      await user.click(depAddBtn);
+      await user.click(expAddBtn);
 
-      const addBtn = screen.getByRole("button", { name: "add-variable" });
-      await user.click(addBtn);
-
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(

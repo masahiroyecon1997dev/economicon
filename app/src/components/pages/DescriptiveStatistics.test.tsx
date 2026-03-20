@@ -59,7 +59,7 @@ describe("DescriptiveStatistics フォーム", () => {
       render(<DescriptiveStatistics />);
 
       const submitBtn = screen.getByRole("button", {
-        name: /実行|Execute|DescriptiveStatistics/i,
+        name: "DescriptiveStatistics.RunCalculation",
       });
       await user.click(submitBtn);
 
@@ -94,7 +94,7 @@ describe("DescriptiveStatistics フォーム", () => {
       await user.click(deselectAllBtn);
 
       const submitBtn = screen.getByRole("button", {
-        name: /実行|Execute/i,
+        name: "DescriptiveStatistics.RunCalculation",
       });
       await user.click(submitBtn);
 
@@ -129,7 +129,9 @@ describe("DescriptiveStatistics フォーム", () => {
         expect(screen.getByText("price")).toBeInTheDocument(),
       );
 
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
+      const submitBtn = screen.getByRole("button", {
+        name: "DescriptiveStatistics.RunCalculation",
+      });
       await user.click(submitBtn);
 
       await waitFor(() =>
@@ -146,11 +148,14 @@ describe("DescriptiveStatistics フォーム", () => {
       expect(screen.getByText("24.5000")).toBeInTheDocument();
     });
 
-    it("null値は '—' として表示される", async () => {
+    it("null値は '—' として表示される（'null' 文字列は表示されない）", async () => {
       await setupWithResult({
         price: { [DescriptiveStatisticType.mean]: null },
       });
-      expect(screen.getByText("—")).toBeInTheDocument();
+      // null は "—" でレンダリングされる（他の未指定統計量も "—" になるため getAllByText を使用）
+      const dashCells = screen.getAllByText("—");
+      expect(dashCells.length).toBeGreaterThan(0);
+      expect(screen.queryByText("null")).not.toBeInTheDocument();
     });
 
     it("mode が配列値の場合はカンマ区切りで表示される", async () => {
@@ -192,7 +197,9 @@ describe("DescriptiveStatistics フォーム", () => {
         expect(screen.getByText("price")).toBeInTheDocument(),
       );
 
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
+      const submitBtn = screen.getByRole("button", {
+        name: "DescriptiveStatistics.RunCalculation",
+      });
       await user.click(submitBtn);
 
       await waitFor(() => {

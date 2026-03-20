@@ -170,13 +170,19 @@ export const Calculation = () => {
                   <FormField
                     label={t("CalculationView.TargetData")}
                     htmlFor="target-table"
-                    error={field.state.meta.errors[0]?.message?.toString()}
+                    error={
+                      (field.state.meta.errors[0] as any)?.message ??
+                      field.state.meta.errors[0]?.toString()
+                    }
                   >
                     <Select
                       id="target-table"
                       value={field.state.value}
                       onValueChange={handleTableChange}
-                      error={field.state.meta.errors[0]?.message?.toString()}
+                      error={
+                        (field.state.meta.errors[0] as any)?.message ??
+                        field.state.meta.errors[0]?.toString()
+                      }
                       placeholder={t("CalculationView.SelectData")}
                       disabled={isSubmitting}
                     >
@@ -196,7 +202,10 @@ export const Calculation = () => {
                   <FormField
                     label={t("CalculationView.NewColumnName")}
                     htmlFor="new-column-name"
-                    error={field.state.meta.errors[0]?.message?.toString()}
+                    error={
+                      (field.state.meta.errors[0] as any)?.message ??
+                      field.state.meta.errors[0]?.toString()
+                    }
                   >
                     <InputText
                       id="new-column-name"
@@ -206,7 +215,10 @@ export const Calculation = () => {
                       placeholder={t(
                         "CalculationView.NewColumnNamePlaceholder",
                       )}
-                      error={field.state.meta.errors[0]?.message?.toString()}
+                      error={
+                        (field.state.meta.errors[0] as any)?.message ??
+                        field.state.meta.errors[0]?.toString()
+                      }
                       disabled={isSubmitting}
                     />
                   </FormField>
@@ -315,6 +327,9 @@ export const Calculation = () => {
                       <div className="flex-1 relative bg-white dark:bg-neutral-900">
                         <textarea
                           ref={textareaRef}
+                          aria-label={t(
+                            "CalculationView.CalculationExpression",
+                          )}
                           className="w-full h-full p-4 font-mono text-sm text-text-main dark:text-neutral-300 bg-transparent border-none resize-none focus:ring-0 leading-relaxed"
                           placeholder={t("CalculationView.FormulaPlaceholder")}
                           value={field.state.value}
@@ -331,7 +346,8 @@ export const Calculation = () => {
                       </div>
                       {field.state.meta.errors[0] && (
                         <p className="px-4 py-1.5 text-xs text-red-600 dark:text-red-400 bg-red-50/60 dark:bg-red-900/10 border-t border-red-200 dark:border-red-800">
-                          {field.state.meta.errors[0].toString()}
+                          {(field.state.meta.errors[0] as any)?.message ??
+                            field.state.meta.errors[0]?.toString()}
                         </p>
                       )}
                     </div>
