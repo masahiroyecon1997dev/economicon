@@ -4,6 +4,7 @@
  * Economicon API
  * OpenAPI spec version: 0.1.0
  */
+import type { RegularizedRegressionParamsAlphaConvention } from './regularizedRegressionParamsAlphaConvention';
 import type { RegularizedRegressionParamsMethod } from './regularizedRegressionParamsMethod';
 
 export type RegularizedRegressionParams = {
@@ -13,6 +14,14 @@ export type RegularizedRegressionParams = {
    * @minimum 0
    */
   alpha?: number;
+  /** alpha の規約。'glmnet': R の glmnet パッケージ準拠（計量経済学・統計学のデフォルト）。'sklearn': scikit-learn 準拠。 */
+  alphaConvention?: RegularizedRegressionParamsAlphaConvention;
+  /**
+   * 座標降下法の最大反復回数。収束しない場合は増やしてください。
+   * @minimum 1
+   * @maximum 100000
+   */
+  maxIter?: number;
   /** ブートストラップ法による標準誤差を計算するかどうか */
   calculateSe?: boolean;
   /**
