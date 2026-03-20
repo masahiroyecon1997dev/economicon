@@ -258,7 +258,8 @@
   "RegressionTab": {
     "FormTab": "Analysis Settings",
     "NoResultsAvailable": "No results available",
-    "ResultLabel": "Result {{number}}"
+    "ResultLabel": "Result {{number}}",
+    "DeleteResult": "Delete result"
   },
   "CalculationView": {
     "Title": "Add Column with Calculation",

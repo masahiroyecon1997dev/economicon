@@ -18,6 +18,7 @@ vi.mock("react-i18next", () => ({
 const buildResult = (
   overrides: Partial<LinearRegressionResultType> = {},
 ): LinearRegressionResultType => ({
+  resultId: "test-result-id",
   tableName: "sales",
   dependentVariable: "price",
   explanatoryVariables: ["quantity"],

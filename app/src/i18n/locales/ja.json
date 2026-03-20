@@ -283,7 +283,8 @@
   "RegressionTab": {
     "FormTab": "分析設定",
     "NoResultsAvailable": "分析結果がありません",
-    "ResultLabel": "結果 {{number}}"
+    "ResultLabel": "結果 {{number}}",
+    "DeleteResult": "結果を削除"
   },
   "CreateSimulationDataTableView": {
     "CreateNewDataTable": "新しいデータテーブルを作成",
