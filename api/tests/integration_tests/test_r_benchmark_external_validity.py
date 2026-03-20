@@ -83,8 +83,9 @@ _ABS_TOL_R2_IV = 1e-5
 # Logit/Probit: MLE の反復収束差 (Logit/Probit const で ~1e-5 の差)
 _ABS_TOL_GLM = 1e-5
 
-# Lasso/Ridge: sklearn/glmnet は同一 (1/(2n))||Xβ-y||² + λ||β||₁ を解く
-_ABS_TOL_REG = 1e-5
+# Lasso/Ridge: glmnet (R) と statsmodels elastic_net は同一目的関数を解くが
+# 座標降下の収束判定基準が異なるため ~1e-3 程度の数値差が生じる
+_ABS_TOL_REG = 2e-3
 
 # RE R² within: plm と linearmodels でR²within の定義が少し異なる
 _ABS_TOL_R2_RE = 5e-3
@@ -341,6 +342,9 @@ def _ridge_payload() -> dict[str, Any]:
             "method": "ridge",
             "alpha": _RIDGE_ALPHA,
             "calculateSe": False,
+            # R Gold standard は sklearn Ridge(alpha=1.0) 相当
+            # glmnet lambda = 1.0/n = 0.005
+            "alphaConvention": "sklearn",
         },
         "standardError": {"method": "nonrobust"},
     }
