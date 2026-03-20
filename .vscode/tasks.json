@@ -55,6 +55,43 @@
         "reveal": "always",
         "panel": "shared"
       }
+    },
+    {
+      "type": "shell",
+      "command": "cd app; pnpm run test",
+      "label": "Vitest: Run",
+      "detail": "Run Vitest unit/integration tests",
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "cd app; pnpm run test:ui",
+      "label": "Vitest: UI",
+      "detail": "Run Vitest with web UI (--ui)",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "cd app; pnpm run test:coverage",
+      "label": "Vitest: Coverage",
+      "detail": "Run Vitest with coverage report (--coverage)",
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
     }
   ]
 }
