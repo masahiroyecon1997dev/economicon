@@ -293,9 +293,9 @@
   "Loading": {
     "Loading": "Loading...",
     "Launching": "Launching...",
-    "ConnectingServer": "Connecting to server...",
+    "ConnectingServer": "Starting up...",
     "Processing": "Processing...",
-    "ServerTimeout": "Could not connect to the server. Please restart the app."
+    "ServerTimeout": "The local server failed to start. Please restart the app."
   },
   "Error": {
     "Error": "Error",
