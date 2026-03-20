@@ -338,7 +338,7 @@ export const SaveData = () => {
       }
     >
       {tableNameList.length === 0 ? (
-        <div className="flex flex-col justify-center h-full gap-4">
+        <div className="flex flex-col justify-end h-full gap-4">
           <CancelButtonBar
             cancelText={t("Common.Cancel")}
             onCancel={hadleCancelNoTables}
