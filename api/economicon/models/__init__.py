@@ -107,6 +107,7 @@ from economicon.models.settings import (
     UpdateSettingsRequest,
     UpdateSettingsResult,
 )
+from economicon.models.shutdown import ShutdownResult
 from economicon.models.statistics import (
     ConfidenceIntervalBounds,
     ConfidenceIntervalRequestBody,
@@ -278,6 +279,8 @@ __all__ = [
     "GetSettingsResult",
     "UpdateSettingsRequest",
     "UpdateSettingsResult",
+    # Shutdown
+    "ShutdownResult",
     # Data I/O
     "ImportFileRequestBody",
     "ImportFileResult",

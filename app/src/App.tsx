@@ -1,3 +1,4 @@
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -6,6 +7,7 @@ import {
   getOsInfo,
 } from "./api/bridge/tauri-commands";
 import { getEconomiconAPI } from "./api/endpoints";
+import { customInstance } from "./api/mutator/custom-instance";
 import { showMessageDialog } from "./lib/dialog/message";
 import { useCurrentPageStore } from "./stores/currentView";
 import { useLoadingStore } from "./stores/loading";
@@ -150,6 +152,34 @@ export const App = () => {
     setTableList,
     t,
   ]);
+
+  // アプリ終了時クリーンアップ
+  // CloseRequested を横取りして /api/shutdown を呼んでから destroy() する。
+  // destroy() は CloseRequested を再発火しないため無限ループにならない。
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    getCurrentWindow()
+      .onCloseRequested(async (event) => {
+        event.preventDefault();
+        try {
+          await customInstance<unknown>({
+            url: "/api/shutdown",
+            method: "POST",
+          });
+        } catch {
+          // シャットダウン API が失敗しても確実に閉じる
+        }
+        await getCurrentWindow().destroy();
+      })
+      .then((fn) => {
+        unlisten = fn;
+      });
+
+    return () => {
+      unlisten?.();
+    };
+  }, []);
 
   return (
     <>
