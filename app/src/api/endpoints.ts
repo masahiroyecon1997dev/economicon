@@ -71,6 +71,7 @@ import type {
   SuccessResponseRegressionResult,
   SuccessResponseRenameColumnResult,
   SuccessResponseRenameTableResult,
+  SuccessResponseShutdownResult,
   SuccessResponseSortColumnsResult,
   SuccessResponseStatisticalTestResult,
   SuccessResponseTransformColumnResult,
@@ -1227,7 +1228,37 @@ const updateSettings = (
       options);
     }
   
-return {healthCheck,addColumn,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,createTable,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,inputCellData,filterSingleCondition,regression,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,addDiagnosticColumns,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings}};
+/**
+ * アプリ終了前クリーンアップエンドポイント
+
+フロントエンドの CloseRequested ハンドラから呼び出される。
+分析結果ファイルの削除と設定の保存を行う。
+
+Parameters
+----------
+request : Request
+    FastAPIのリクエストオブジェクト
+analysis_result_store : AnalysisResultStoreDep
+    依存注入された分析結果ストア
+settings_store : SettingsStoreDep
+    依存注入された設定ストア
+
+Returns
+-------
+JSONResponse
+    処理結果
+ * @summary Shutdown
+ */
+const shutdown = (
+    
+ options?: SecondParameter<typeof customInstance<SuccessResponseShutdownResult>>,) => {
+      return customInstance<SuccessResponseShutdownResult>(
+      {url: `/api/shutdown`, method: 'POST'
+    },
+      options);
+    }
+  
+return {healthCheck,addColumn,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,createTable,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,inputCellData,filterSingleCondition,regression,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,addDiagnosticColumns,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
 export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['healthCheck']>>>
 export type AddColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['addColumn']>>>
 export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['addDummyColumn']>>>
@@ -1269,3 +1300,4 @@ export type CreateCorrelationTableResult = NonNullable<Awaited<ReturnType<Return
 export type StatisticalTestResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['statisticalTest']>>>
 export type GetSettingsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['getSettings']>>>
 export type UpdateSettingsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['updateSettings']>>>
+export type ShutdownResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAPI>['shutdown']>>>
