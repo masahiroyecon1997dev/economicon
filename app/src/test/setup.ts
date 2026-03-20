@@ -40,6 +40,13 @@ beforeAll(() => {
     }
   } as unknown as typeof PointerEvent;
 
+  // Radix UI が内部で使用するポインターキャプチャ API のポリフィル
+  window.HTMLElement.prototype.hasPointerCapture = vi.fn();
+  window.HTMLElement.prototype.setPointerCapture = vi.fn();
+  window.HTMLElement.prototype.releasePointerCapture = vi.fn();
+  // Radix UI Select が選択肢のスクロール時に使用する API のポリフィル
+  window.HTMLElement.prototype.scrollIntoView = vi.fn();
+
   global.DOMRect = class DOMRect {
     x: number;
     y: number;

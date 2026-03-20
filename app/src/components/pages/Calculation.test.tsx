@@ -1,4 +1,10 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAPI } from "../../api/endpoints";
@@ -7,6 +13,15 @@ import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
 import { useTableListStore } from "../../stores/tableList";
 import { Calculation } from "./Calculation";
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+const submitForm = async () => {
+  await act(async () => {
+    fireEvent.submit(document.querySelector("form")!);
+  });
+};
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -75,13 +90,8 @@ beforeEach(() => {
 describe("Calculation フォーム", () => {
   describe("バリデーション", () => {
     it("新列名が空のままサブミットするとバリデーションエラーが表示される", async () => {
-      const user = userEvent.setup();
       render(<Calculation />);
-
-      const submitBtn = screen.getByRole("button", {
-        name: /ValidationMessages.ExecuteCalculation|実行|Execute/i,
-      });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
         expect(
@@ -94,16 +104,12 @@ describe("Calculation フォーム", () => {
       const user = userEvent.setup();
       render(<Calculation />);
 
-      // 列名を入力して計算式は空のままサブミット
       const newColInput = screen.getByRole("textbox", {
         name: /NewColumnName|新しい列名/i,
       });
       await user.type(newColInput, "result_col");
 
-      const submitBtn = screen.getByRole("button", {
-        name: /実行|Execute/i,
-      });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
         expect(
@@ -129,12 +135,12 @@ describe("Calculation フォーム", () => {
       });
       await user.type(textarea, "price * 2");
 
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
-        expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+        expect(mockApi.calculateColumn).toHaveBeenCalledTimes(1);
       });
+      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
       expect(vi.mocked(showMessageDialog)).not.toHaveBeenCalled();
     });
   });
@@ -158,8 +164,7 @@ describe("Calculation フォーム", () => {
       });
       await user.type(textarea, "price * 2");
 
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
@@ -186,8 +191,7 @@ describe("Calculation フォーム", () => {
       });
       await user.type(textarea, "price * 2");
 
-      const submitBtn = screen.getByRole("button", { name: /実行|Execute/i });
-      await user.click(submitBtn);
+      await submitForm();
 
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
