@@ -107,50 +107,55 @@
     },
     {
       "type": "shell",
-      "command": "cd app; pnpm run tauri:dev:debug",
-      "label": "Tauri: Dev with Sidecar",
-      "detail": "Start Tauri dev + Python sidecar (ECONOMICON_DEV_RUN=true). E2Eテスト前に起動しておく",
-      "group": "test",
+      "command": "pnpm run dev",
+      "label": "Economicon: Vite Dev",
+      "detail": "Run Vite development server for Economicon app for E2E testing",
+      "options": {
+        "cwd": "${workspaceFolder}/app"
+      },
       "isBackground": true,
       "problemMatcher": {
         "owner": "custom",
-        "pattern": { "regexp": "^$" },
+        "pattern": { "regexp": "^.*$" },
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "Compiling",
-          "endsPattern": "localhost:5173"
+          "beginsPattern": ".*VITE.*",
+          "endsPattern": ".*ready in.*"
         }
+      }
+    },
+    {
+      "type": "shell",
+      "command": "$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9222'; .\\src-tauri\\target\\debug\\Economicon.exe",
+      "label": "Economicon: App (Debug Port)",
+      "detail": "Run Economicon app with debug port for E2E testing",
+      "options": {
+        "cwd": "${workspaceFolder}/app"
       },
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated"
-      }
-    },
-    {
-      "type": "shell",
-      "command": "cd app; pnpm run test:e2e",
-      "label": "Playwright: E2E",
-      "detail": "Run Playwright E2E tests (Tauri sidecar を自動起動してからテスト実行)",
-      "group": "test",
-      "dependsOn": ["Tauri: Dev with Sidecar"],
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared"
-      }
-    },
-    {
-      "type": "shell",
-      "command": "cd app; pnpm run test:e2e:ui",
-      "label": "Playwright: E2E (UI mode)",
-      "detail": "Run Playwright E2E tests with interactive UI (Tauri sidecar を自動起動)",
-      "group": "test",
+      "dependsOn": ["Economicon: Vite Dev"],
       "isBackground": true,
-      "dependsOn": ["Tauri: Dev with Sidecar"],
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated"
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": { "regexp": "^.*$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": ".*" // アプリは即座に次へ進ませる
+        }
+      }
+    },
+    {
+      "type": "shell",
+      "command": "pnpm run test:e2e:ui",
+      "label": "Economicon: Run E2E UI",
+      "detail": "Run E2E tests with web UI (playwright --ui)",
+      "options": {
+        "cwd": "${workspaceFolder}/app"
+      },
+      "dependsOn": ["Economicon: App (Debug Port)"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
       }
     }
   ]
