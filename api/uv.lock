@@ -38,77 +38,6 @@ wheels = [
 ]
 
 [[package]]
-name = "api"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "fastapi" },
-    { name = "fastapi-babel" },
-    { name = "fastexcel" },
-    { name = "linearmodels" },
-    { name = "loguru" },
-    { name = "numpy" },
-    { name = "pandas" },
-    { name = "polars" },
-    { name = "py4etrics" },
-    { name = "pyarrow" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "scipy" },
-    { name = "statsmodels" },
-    { name = "uvicorn", extra = ["standard"] },
-    { name = "xlsxwriter" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "coverage" },
-    { name = "deptry" },
-    { name = "httpx" },
-    { name = "pip-licenses" },
-    { name = "pipdeptree" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "radon" },
-    { name = "ruff" },
-    { name = "scikit-learn" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi", specifier = ">=0.128.7" },
-    { name = "fastapi-babel", specifier = ">=1.0.0" },
-    { name = "fastexcel", specifier = ">=0.19.0" },
-    { name = "linearmodels", specifier = ">=7.0" },
-    { name = "loguru", specifier = ">=0.7.3" },
-    { name = "numpy", specifier = ">=2.4.2" },
-    { name = "pandas", specifier = ">=3.0.1" },
-    { name = "polars", specifier = ">=1.38.1" },
-    { name = "py4etrics", specifier = ">=0.1.9" },
-    { name = "pyarrow", specifier = ">=8.0.0" },
-    { name = "pydantic", specifier = ">=2.12.5" },
-    { name = "pydantic-settings", specifier = ">=2.0.0" },
-    { name = "scipy", specifier = ">=1.16.3" },
-    { name = "statsmodels", specifier = ">=0.14.6" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.40.0" },
-    { name = "xlsxwriter", specifier = ">=3.2.9" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "coverage", specifier = ">=7.13.4" },
-    { name = "deptry", specifier = ">=0.24.0" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "pip-licenses", specifier = ">=5.5.1" },
-    { name = "pipdeptree", specifier = ">=2.30.0" },
-    { name = "pytest", specifier = ">=9.0.2" },
-    { name = "pytest-cov", specifier = ">=7.0.0" },
-    { name = "radon", specifier = ">=6.0.1" },
-    { name = "ruff", specifier = ">=0.15.0" },
-    { name = "scikit-learn", specifier = ">=1.8.0" },
-]
-
-[[package]]
 name = "babel"
 version = "2.18.0"
 source = { registry = "https://pypi.org/simple" }
@@ -206,6 +135,77 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/1b/08/0eac3c72a9fd79a043cc492f3ba350c47a7be2160288353218b2c8c1bf3a/deptry-0.24.0-cp39-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:92bd8d331a5a6f8e6247436bc6fe384bcf86a8d69fe33442d195996fb9b20547", size = 2023832, upload-time = "2025-11-09T00:31:36.381Z" },
     { url = "https://files.pythonhosted.org/packages/35/e4/23dcbc505f6f35c70ba68015774cf891ceda080331d7fd6d75e84ada9f73/deptry-0.24.0-cp39-abi3-win_amd64.whl", hash = "sha256:94b354848130d45e16d3a3039ae8177bce33828f62028c4ff8f2e1b04f7182ba", size = 1631631, upload-time = "2025-11-09T00:31:47.108Z" },
     { url = "https://files.pythonhosted.org/packages/39/69/6ec1e18e27dd6f80e4fb6c5fc05a6527242ff83b81c0711d0ba470e9a144/deptry-0.24.0-cp39-abi3-win_arm64.whl", hash = "sha256:ea58709e5f3aa77c0737d8fb76166b7703201cf368fbbb14072ccda968b6703a", size = 1550504, upload-time = "2025-11-09T00:31:45.988Z" },
+]
+
+[[package]]
+name = "economiconappapi"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "fastapi" },
+    { name = "fastapi-babel" },
+    { name = "fastexcel" },
+    { name = "linearmodels" },
+    { name = "loguru" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "polars" },
+    { name = "py4etrics" },
+    { name = "pyarrow" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "scipy" },
+    { name = "statsmodels" },
+    { name = "uvicorn", extra = ["standard"] },
+    { name = "xlsxwriter" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "coverage" },
+    { name = "deptry" },
+    { name = "httpx" },
+    { name = "pip-licenses" },
+    { name = "pipdeptree" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "radon" },
+    { name = "ruff" },
+    { name = "scikit-learn" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi", specifier = ">=0.128.7" },
+    { name = "fastapi-babel", specifier = ">=1.0.0" },
+    { name = "fastexcel", specifier = ">=0.19.0" },
+    { name = "linearmodels", specifier = ">=7.0" },
+    { name = "loguru", specifier = ">=0.7.3" },
+    { name = "numpy", specifier = ">=2.4.2" },
+    { name = "pandas", specifier = ">=3.0.1" },
+    { name = "polars", specifier = ">=1.38.1" },
+    { name = "py4etrics", specifier = ">=0.1.9" },
+    { name = "pyarrow", specifier = ">=8.0.0" },
+    { name = "pydantic", specifier = ">=2.12.5" },
+    { name = "pydantic-settings", specifier = ">=2.0.0" },
+    { name = "scipy", specifier = ">=1.16.3" },
+    { name = "statsmodels", specifier = ">=0.14.6" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.40.0" },
+    { name = "xlsxwriter", specifier = ">=3.2.9" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "coverage", specifier = ">=7.13.4" },
+    { name = "deptry", specifier = ">=0.24.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "pip-licenses", specifier = ">=5.5.1" },
+    { name = "pipdeptree", specifier = ">=2.30.0" },
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "pytest-cov", specifier = ">=7.0.0" },
+    { name = "radon", specifier = ">=6.0.1" },
+    { name = "ruff", specifier = ">=0.15.0" },
+    { name = "scikit-learn", specifier = ">=1.8.0" },
 ]
 
 [[package]]
