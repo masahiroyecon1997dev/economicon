@@ -90,10 +90,10 @@
     "CsvFiles": "CSV",
     "ExcelFiles": "Excel",
     "ParquetFiles": "Parquet",
+    "FileListTableTitle": "File List",
     "FileNameHeader": "File Name",
     "SizeHeader": "Size",
     "LastModifiedHeader": "Last Modified",
-    "FileListTableTitle": "File List",
     "DragAndDropTab": "Drag & Drop",
     "FileSelectTab": "Select File",
     "DragDropAreaTitle": "Drop a file here",
@@ -299,6 +299,7 @@
     "DirectoryNotFound": "The folder could not be found. It may have been deleted or moved."
   },
   "ValidationMessages": {
+    "DataNameRequired": "Please enter a data name.",
     "DataNameInvalidChars": "Data name must not contain control characters.",
     "DataNameTooLong": "Data name must be 128 characters or fewer.",
     "SeparatorRequired": "Please enter a separator.",
@@ -485,6 +486,7 @@
     "DistributionType": "Distribution Type",
     "FixedValue": "Fixed Value",
     "InputFixedValue": "Enter a fixed value",
+    "Distribution": "Probability Distribution",
     "InputDistributionParameters": " (enter a value)",
     "CreatingTable": "Creating data...",
     "Submit": "Create Data",
