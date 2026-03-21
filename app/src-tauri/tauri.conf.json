@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "economicon",
+  "productName": "Economicon",
   "version": "0.1.0",
   "identifier": "com.economicon.app.v1",
   "build": {
@@ -19,7 +19,8 @@
         "fullscreen": false,
         "decorations": false,
         "dragDropEnabled": true,
-        "zoomHotkeysEnabled": false
+        "zoomHotkeysEnabled": false,
+        "devtools": true
       }
     ],
     "security": {
