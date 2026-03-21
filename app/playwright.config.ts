@@ -1,4 +1,4 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig } from "@playwright/test";
 
 /**
  * Playwright E2Eテスト設定
@@ -31,8 +31,6 @@ export default defineConfig({
   expect: { timeout: 30_000 },
 
   use: {
-    // ベースURL ポート: 5173 (Vite dev server)
-    baseURL: "http://localhost:5173",
     // E2Eは実際の操作タイムアウトを長めに設定（サイドカー応答待機）
     actionTimeout: 30_000,
     // スクリーンショットを失敗時のみ撮影
@@ -45,8 +43,7 @@ export default defineConfig({
 
   projects: [
     {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      name: "tauri",
     },
   ],
 

@@ -11,6 +11,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 // ---------------------------------------------------------------------------
 // 定数
@@ -20,6 +21,11 @@ import path from "node:path";
  * サンプルデータフォルダのパス。
  * 環境変数 ECONOMICON_TEST_SAMPLE_DIR が設定されていない場合はデフォルト値を使用。
  */
+// 現在のファイルの絶対パスを取得
+
+const __filename = fileURLToPath(import.meta.url);
+// 現在のディレクトリパスを取得
+const __dirname = path.dirname(__filename);
 export const SAMPLE_DIR =
   process.env.ECONOMICON_TEST_SAMPLE_DIR ??
   path.resolve(__dirname, "../../sample");
