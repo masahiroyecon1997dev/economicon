@@ -16,7 +16,7 @@ export const DISTRIBUTION_OPTIONS: Array<{
   },
   {
     value: "normal",
-    label: "Common.NomalDistribution",
+    label: "Common.NormalDistribution",
     params: ["mean", "deviation"],
   },
   {
