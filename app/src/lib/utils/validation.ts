@@ -14,13 +14,6 @@ export const validateNumRows = (numRows: number): ValidationResult => {
   return undefined;
 };
 
-export const validateNumColumns = (numColumns: number): ValidationResult => {
-  if (numColumns < 1) {
-    return "ValidationMessages.AtLeastOneColumn";
-  }
-  return undefined;
-};
-
 export const validateColumnName = (columnName: string): ValidationResult => {
   if (!columnName.trim()) {
     return "ValidationMessages.ColumnNameRequired";
