@@ -20,6 +20,7 @@
     "github.vscode-github-actions",
     "mhutchie.git-graph",
     "reditorsupport.r",
-    "vitest.explorer"
+    "vitest.explorer",
+    "ms-playwright.playwright"
   ]
 }
