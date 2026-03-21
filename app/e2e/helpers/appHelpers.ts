@@ -12,7 +12,6 @@ import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
 // ---------------------------------------------------------------------------
 // 定数
 // ---------------------------------------------------------------------------
@@ -93,6 +92,7 @@ export async function navigateToSampleDir(page: Page): Promise<void> {
   // Windows: "C:\Users\..." → ["C:", "Users", ...]
   // Unix:    "/home/..." → ["home", ...]
   const sep: string = path.sep;
+  console.log(`SAMPLE_DIR: ${SAMPLE_DIR}, sep: ${sep}`);
   const segments = SAMPLE_DIR.split(sep).filter((s: string) => s.length > 0);
 
   // ブレッドクラム取得（現在のパスを読み取る）
@@ -203,9 +203,7 @@ export async function openColumnMenu(
   page: Page,
   columnName: string,
 ): Promise<void> {
-  const header = page
-    .getByRole("columnheader", { name: columnName, exact: true })
-    .first();
+  const header = page.getByRole("columnheader", { name: columnName }).first();
   await expect(header).toBeVisible({ timeout: API_TIMEOUT_MS });
   await header.hover();
 
