@@ -257,7 +257,7 @@
     "NA": "N/A"
   },
   "RegressionTab": {
-    "FormTab": "分析設定",
+    "FormTab": "分析設定(最小二乗法)",
     "ResultLabel": "結果 {{number}}",
     "DeleteResult": "結果を削除"
   },
