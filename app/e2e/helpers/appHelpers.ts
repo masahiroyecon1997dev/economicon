@@ -5,7 +5,7 @@
  * - アプリのデフォルト言語は日本語（ja）
  * - Tauri サイドカー（Python FastAPI）が起動済みであること
  * - 環境変数 ECONOMICON_TEST_SAMPLE_DIR にサンプルファイルのフォルダパスをセットすること
- *   例: C:\Users\masak\Desktop\repos\economicon\sample
+ *   例: C:\Users\<username>\Desktop\repos\economicon\sample
  */
 
 import type { Locator, Page } from "@playwright/test";

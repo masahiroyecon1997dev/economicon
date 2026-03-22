@@ -38,15 +38,15 @@
 
 ```powershell
 # リポジトリのクローン
-git clone https://github.com/MasahiroYamada1997-1/economicon.git
+git clone https://github.com/masahiroyecon1997dev/economicon.git
 cd economicon
 
 # バックエンドのセットアップと起動
-cd ApiServer
+cd api
 uv venv --python 3.14
 .venv\Scripts\Activate.ps1
-uv pip install -r python-requirements\windows-requirements.txt
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uv sync
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
 
 # 別のターミナルでフロントエンドのセットアップと起動
 cd app

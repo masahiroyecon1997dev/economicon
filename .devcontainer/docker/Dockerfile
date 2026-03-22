@@ -1,20 +1,22 @@
 FROM oraclelinux:9
 CMD bash -c "/bin/bash"
 
-LABEL maintainer=masahiro
+LABEL maintainer=xxx
 
 ARG UID=20000
 ARG GID=20000
 
-RUN groupadd -g $GID masahiro \
-    && useradd -m -u $UID -g $GID masahiro
+RUN groupadd -g $GID xxx \
+    && useradd -m -u $UID -g $GID xxx
 
 RUN dnf -y install jq git make tar gzip wget glibc-langpack-ja curl
 RUN dnf install gettext
 
-RUN echo 'root:P@ssw0rd' |chpasswd
-RUN echo 'masahiro:P@ssw0rd' |chpasswd
-RUN echo "masahiro    ALL=(ALL)       ALL" >> /etc/sudoers
+# パスワードはビルド時 ARG で渡す（デフォルト値はダミー。本番 / CI では --build-arg で上書き）
+ARG DEV_PASSWORD=changeme
+RUN echo "root:${DEV_PASSWORD}" | chpasswd
+RUN echo "xxx:${DEV_PASSWORD}" | chpasswd
+RUN echo "xxx    ALL=(ALL)       ALL" >> /etc/sudoers
 
 RUN yum -y update && yum clean all
 
@@ -35,4 +37,4 @@ RUN dnf install nodejs
 RUN npm install -g yarn
 RUN npm install -g typescript
 
-USER masahiro
+USER xxx

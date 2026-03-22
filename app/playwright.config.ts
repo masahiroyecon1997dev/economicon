@@ -10,7 +10,7 @@ import { defineConfig } from "@playwright/test";
  *
  * ## 環境変数
  * - ECONOMICON_TEST_SAMPLE_DIR: サンプルファイルが格納されたディレクトリの絶対パス
- *   例: C:\Users\masak\Desktop\repos\economicon\sample
+ *   例: C:\Users\<username>\Desktop\repos\economicon\sample
  *
  * @see https://playwright.dev/docs/test-configuration
  */
