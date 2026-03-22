@@ -39,7 +39,8 @@ export const Calculation = () => {
   const { t } = useTranslation();
   const tableList = useTableListStore((state) => state.tableList);
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
-  const { invalidateTable, activateTableInfo } = useTableInfosStore();
+  const { tableInfos, addTableInfo, invalidateTable, activateTableInfo } =
+    useTableInfosStore();
 
   const { selectedTableName, setSelectedTableName, columnList } =
     useTableColumnLoader({
@@ -71,10 +72,17 @@ export const Calculation = () => {
 
         if (response.code === "OK") {
           const updatedTableInfo = await getTableInfo(value.tableName);
-          invalidateTable(value.tableName, {
-            columnList: updatedTableInfo.columnList,
-          });
-          activateTableInfo(value.tableName);
+          const alreadyInStore = tableInfos.some(
+            (info) => info.tableName === value.tableName,
+          );
+          if (alreadyInStore) {
+            invalidateTable(value.tableName, {
+              columnList: updatedTableInfo.columnList,
+            });
+            activateTableInfo(value.tableName);
+          } else {
+            addTableInfo(updatedTableInfo);
+          }
           setCurrentView("DataPreview");
         } else {
           await showMessageDialog(
