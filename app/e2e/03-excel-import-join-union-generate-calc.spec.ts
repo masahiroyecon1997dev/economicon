@@ -302,64 +302,55 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
       }),
     ).toBeVisible();
 
-    // ---- データ名を入力 ----
-    const tableNameInput = page
-      .getByLabel(/データ名|Table Name|Data Name/i)
-      .first()
-      .or(page.getByPlaceholder(/データ名を入力|e\.g\., my_table/i));
+    // ---- データ名を入力（id="table-name"）----
+    const tableNameInput = page.getByLabel(/データ名/);
     await tableNameInput.fill(SIMULATION_TABLE_NAME);
 
-    // ---- 行数を入力 ----
-    const rowCountInput = page
-      .getByLabel(/行数|Row Count/i)
-      .first()
-      .or(page.getByPlaceholder(/1000/i));
+    // ---- 行数を入力（id="row-count"）----
+    const rowCountInput = page.getByLabel(/行数/);
     await rowCountInput.fill("100");
 
-    // データ編集
+    // ---- 列設定: 編集ボタン（aria-label="編集"）から列設定ダイアログを開く ----
+    // CreateSimulationDataTable UI はカード形式。列名は編集ダイアログで設定する。
+    const editBtn = page.getByRole("button", { name: "編集" }).first();
+    await expect(editBtn).toBeVisible();
+    await editBtn.click();
 
-    // ---- 列設定: 1 列目の名前と分布を設定 ----
-    // 列名入力
-    const colNameInput = page
-      .getByPlaceholder(/列名を入力|Enter column name/i)
-      .first();
-    if (await colNameInput.isVisible()) {
-      await colNameInput.fill("sim_col_1");
-    } else {
-      // 列の編集ボタン（鉛筆アイコン）をクリックして列設定ダイアログを開く
-      const editBtn = page
-        .getByRole("button", { name: /列の編集|Edit Column/i })
-        .first();
-      if (await editBtn.isVisible()) {
-        await editBtn.click();
-        const colDialog = page.getByRole("dialog");
-        await expect(colDialog).toBeVisible();
+    const colDialog = page.getByRole("dialog");
+    await expect(colDialog).toBeVisible();
 
-        const nameInput = colDialog.getByRole("textbox").first();
-        await nameInput.fill("sim_col_1");
+    // 列名を入力
+    const nameInput = colDialog.getByRole("textbox").first();
+    await nameInput.fill("sim_col_1");
 
-        // 分布: 正規分布を選択
-        const distTrigger = colDialog.getByRole("combobox").first();
-        await distTrigger.click();
-        const normalOption = page.getByRole("option", {
-          name: /正規分布|Normal/i,
-        });
-        await normalOption.waitFor({ state: "visible" });
-        await normalOption.click();
+    // データタイプ: 確率変数を選択
+    const typeTrigger = colDialog.locator(`button[id^="data-type-"]`);
+    await typeTrigger.click();
+    const probabilityOption = page.getByRole("option", {
+      name: /^(確率分布|Probability Distribution)$/i,
+    });
+    await probabilityOption.waitFor({ state: "visible" });
+    await probabilityOption.click();
 
-        await colDialog.getByRole("button", { name: /OK|完了|Done/i }).click();
-        await expect(colDialog).toBeHidden();
-      }
-    }
+    // 分布: 正規分布を選択
+    const distTrigger = colDialog.locator('button[id^="distribution-type-"]');
+    await distTrigger.click();
+    const normalOption = page.getByRole("option", {
+      name: /^(正規分布|Normal)$/i,
+    });
+    await normalOption.waitFor({ state: "visible" });
+    await normalOption.click({ force: true });
 
-    // ---- データを作成 ----
-    await page
-      .getByRole("button", { name: /データを作成|Create Table|Submit/i })
-      .click();
+    // ダイアログを保存（submitLabel = t("Common.Save") = "設定"）
+    await colDialog.getByRole("button", { name: "設定" }).click();
+    await expect(colDialog).toBeHidden();
 
-    // 作成後にテーブルタブが表示されること
+    // ---- データを作成（t("CreateSimulationDataTableView.Submit") = "データを作成"）----
+    await page.getByRole("button", { name: "データを作成" }).click();
+
+    // 作成後にテーブルタブが表示されること（Table.tsx は role="button"）
     await expect(
-      page.getByRole("tab", { name: SIMULATION_TABLE_NAME }),
+      page.getByRole("button", { name: SIMULATION_TABLE_NAME }),
     ).toBeVisible({ timeout: 30_000 });
   });
 
@@ -414,55 +405,34 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
       .or(page.getByPlaceholder(/total_revenue/i));
     await newColInput.fill("calc_result");
 
+    // ---- カラムの追加位置を選択（最後の列の次を選択）----
+    const positionTrigger = page
+      .getByLabel(/追加位置|Insert Position/i)
+      .first()
+      .or(page.getByRole("combobox").nth(1));
+    await positionTrigger.click();
+    const lastOption = page.getByRole("option").last();
+    await lastOption.waitFor({ state: "visible" });
+    await lastOption.click();
+
     // ---- 計算式を入力 ----
-    // 右側の列一覧から最初の列をクリックして式に挿入 or 直接入力
-    const formulaTextarea = page.getByPlaceholder(
-      /計算式を入力|Enter your formula/i,
-    );
-    if (await formulaTextarea.isVisible()) {
-      await formulaTextarea.click();
-      // 利用可能な列の最初の 2 列を取得して掛け算の式を作る
-      const availableCols = page
-        .getByRole("listitem")
-        .or(
-          page
-            .getByRole("button")
-            .filter({ hasText: /^[a-z_\u3040-\u9fff]+$/i }),
-        );
+    // ヘッダーメニューや他の汎用ボタンを誤クリックしないよう、
+    // 計算式テキストエリアに直接入力する方式を使用する。
+    // （列一覧ボタンをクリックする方式は日本語ボタンの誤マッチでドロップダウンが開き
+    //   その透明オーバーレイが「計算を実行」ボタンをブロックするため使用不可）
+    const formulaTextarea = page.getByPlaceholder(/計算式を入力/);
+    await expect(formulaTextarea).toBeVisible();
+    await formulaTextarea.fill("{amount} * 2");
 
-      const firstCol = availableCols.first();
-      if (await firstCol.isVisible()) {
-        await firstCol.click();
-        // 乗算演算子をクリック
-        const multiplyBtn = page.getByRole("button", {
-          name: /乗算|Multiplication|\*/i,
-        });
-        if (await multiplyBtn.isVisible()) {
-          await multiplyBtn.click();
-          await firstCol.click(); // 同じ列で二乗
-        }
-      } else {
-        // 直接入力
-        await formulaTextarea.fill("{value} * 2");
-      }
-    }
-
-    // ---- 計算実行 ----
-    await page
-      .getByRole("button", { name: /計算を実行|Execute Calculation/i })
-      .click();
+    // ---- 計算実行（t("CalculationView.ExecuteCalculation") = "計算を実行"）----
+    await page.getByRole("button", { name: "計算を実行" }).click();
 
     // 成功後 DataPreview に遷移して calc_result 列が表示されること
-    // または計算成功メッセージが表示されること
+    // Calculation.tsx の onSubmit 成功時は setCurrentView("DataPreview") のみ実行
+    // （成功メッセージダイアログは表示されない）
     await expect(
-      page
-        .getByText(/計算が正常に完了|Calculation completed/i)
-        .or(
-          page.getByRole("columnheader", { name: "calc_result", exact: true }),
-        ),
+      page.getByRole("columnheader", { name: "calc_result" }),
     ).toBeVisible({ timeout: 30_000 });
-
-    await closeMessageDialog(page);
   });
 
   // =========================================================================
