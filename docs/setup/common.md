@@ -60,7 +60,7 @@ code --version
 1. **リポジトリのクローン**
 
    ```powershell
-   git clone xxx
+   git clone https://github.com/masahiroyecon1997dev/economicon.git
    cd economicon
    ```
 
