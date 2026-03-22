@@ -1,6 +1,12 @@
 #!/usr/bin/env Rscript
 # =============================================================================
 # generate_r_benchmark.R
+# このスクリプトは、R の Grunfeld データセットを使用して、
+# Python API (Economicon) の結果と比較するためのベンチマークデータを生成します。
+# プロダクトには含まれません。
+# This script is for testing and validation purposes only.
+# It compares the OLS/Lasso results of Economicon with the glmnet package.
+# Not included in the final application distribution.
 #
 # Grunfeld データセットを用いた外的妥当性テスト用 Gold Standard JSON 生成。
 # Python API (Economicon) の結果が R の参照実装と一致するかを検証するための
