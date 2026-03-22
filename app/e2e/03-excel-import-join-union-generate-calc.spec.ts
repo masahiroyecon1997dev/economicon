@@ -57,6 +57,7 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
     playwright,
   }) => {
     const page = await setupTauriApp(playwright);
+    // ファイル選択タブに切り替え
     const fileSelectTab = page.getByRole("tab", {
       name: /ファイル選択|Select File/i,
     });
@@ -67,7 +68,7 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
     // ジョイン1.xlsx をインポート
     await importFile(page, EXCEL_FILE_1, JOIN_LEFT_TABLE);
     await expect(
-      page.getByRole("tab", { name: JOIN_LEFT_TABLE }),
+      page.getByRole("button", { name: JOIN_LEFT_TABLE }),
     ).toBeVisible();
 
     // 一度 Import ビューに戻って 2 件目をインポート
@@ -81,7 +82,7 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
     // ジョイン2.xlsx をインポート
     await importFile(page, EXCEL_FILE_2, JOIN_RIGHT_TABLE);
     await expect(
-      page.getByRole("tab", { name: JOIN_RIGHT_TABLE }),
+      page.getByRole("button", { name: JOIN_RIGHT_TABLE }),
     ).toBeVisible();
   });
 
@@ -100,7 +101,9 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
     await fileSelectTab.click();
     await navigateToSampleDir(page);
     await importFile(page, CSV_FILE_1, UNION_TABLE_1);
-    await expect(page.getByRole("tab", { name: UNION_TABLE_1 })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: UNION_TABLE_1 }),
+    ).toBeVisible();
 
     // ユニオン2.csv をインポート
     await clickHeaderMenu(page, /ファイル|File/i, /^取り込み$|^Import$/);
@@ -110,7 +113,9 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
     await fileSelectTab2.click();
     await navigateToSampleDir(page);
     await importFile(page, CSV_FILE_2, UNION_TABLE_2);
-    await expect(page.getByRole("tab", { name: UNION_TABLE_2 })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: UNION_TABLE_2 }),
+    ).toBeVisible();
   });
 
   // =========================================================================
@@ -196,7 +201,7 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
 
     // 結果テーブルに遷移してタブが表示されること
     await expect(
-      page.getByRole("tab", { name: JOINED_TABLE_NAME }),
+      page.getByRole("button", { name: JOINED_TABLE_NAME }),
     ).toBeVisible({ timeout: 30_000 });
   });
 
@@ -222,28 +227,21 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
     });
     await firstOption.waitFor({ state: "visible" });
     await firstOption.click();
-
-    // 「追加」ボタンで 2 件目を追加
+    // 「追加」ボタンで 1 件目を追加
     const addBtn = page.getByRole("button", { name: /^追加$|^Add$/i });
-    if (await addBtn.isVisible()) {
-      await addBtn.click();
-      // 追加された新しいコンボボックスで 2 件目を選択
-      const secondTrigger = page.getByRole("combobox").last();
-      await secondTrigger.click();
-      const secondOption = page.getByRole("option", {
-        name: UNION_TABLE_2,
-        exact: true,
-      });
-      await secondOption.waitFor({ state: "visible" });
-      await secondOption.click();
-    } else {
-      // 2 コンボとして並んでいる場合
-      const secondTrigger = page.getByRole("combobox").nth(1);
-      await secondTrigger.click();
-      await page
-        .getByRole("option", { name: UNION_TABLE_2, exact: true })
-        .click();
-    }
+    await addBtn.click();
+
+    // 追加された新しいコンボボックスで 2 件目を選択
+    const secondTrigger = page.getByRole("combobox").last();
+    await secondTrigger.click();
+    const secondOption = page.getByRole("option", {
+      name: UNION_TABLE_2,
+      exact: true,
+    });
+    await secondOption.waitFor({ state: "visible" });
+    // 「追加」ボタンで 2 件目を追加
+    await secondOption.click();
+    await addBtn.click();
 
     // 共通列がロードされるまで待機
     await expect(
@@ -280,7 +278,7 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
 
     // 結果タブが表示されること
     await expect(
-      page.getByRole("tab", { name: UNIONED_TABLE_NAME }),
+      page.getByRole("button", { name: UNIONED_TABLE_NAME }),
     ).toBeVisible({ timeout: 30_000 });
   });
 
@@ -317,6 +315,8 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
       .first()
       .or(page.getByPlaceholder(/1000/i));
     await rowCountInput.fill("100");
+
+    // データ編集
 
     // ---- 列設定: 1 列目の名前と分布を設定 ----
     // 列名入力
