@@ -21,5 +21,5 @@ services:
       - ../README.md:/economicon/README.md
     ports:
       - "127.0.0.1:3000:3000"
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     working_dir: /economicon/economicon
