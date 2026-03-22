@@ -250,7 +250,8 @@ export async function openTableContextMenu(
   // サイドバー内のテーブル名 span を hover
   const tableItem = page
     .getByRole("navigation")
-    .getByText(tableName, { exact: true })
+    .locator(`span[title="${tableName}"]`)
+    .filter({ hasText: tableName })
     .first();
   await expect(tableItem).toBeVisible({ timeout: API_TIMEOUT_MS });
   await tableItem.hover();
