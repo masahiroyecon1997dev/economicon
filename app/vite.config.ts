@@ -34,7 +34,11 @@ export default defineConfig({
         license({
           thirdParty: {
             // ライセンス情報を出力するファイルパスを指定
-            output: path.resolve(__dirname, "dist", "LICENSES.txt"),
+            output: path.resolve(
+              __dirname,
+              "dist",
+              "JS-THIRD-PARTY-LICENSES.txt",
+            ),
             // 開発環境の依存関係も含む場合は true に (通常は本番環境のみで十分)
             includePrivate: false,
             // 複数のバージョンのライブラリが使われている場合にも対応
