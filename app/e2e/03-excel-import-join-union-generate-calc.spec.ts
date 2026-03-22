@@ -27,8 +27,8 @@ import {
   closeMessageDialog,
   importFile,
   navigateToSampleDir,
-  waitForAppReady,
 } from "./helpers/appHelpers";
+import { setupTauriApp } from "./helpers/setupHelpers";
 
 // ---------------------------------------------------------------------------
 // テスト用定数
@@ -50,16 +50,13 @@ const SIMULATION_TABLE_NAME = "sim_data";
 // テストスイート
 // ---------------------------------------------------------------------------
 test.describe("03: Excel 取り込み → Join → Union → データ生成 → 計算列", () => {
-  test.beforeEach(async ({ page }) => {
-    await waitForAppReady(page);
-  });
-
   // =========================================================================
   // STEP 1: Excel ファイル 2 件をインポート
   // =========================================================================
   test("Step 1: Excel ファイル（ジョイン1・ジョイン2）をインポートする", async ({
-    page,
+    playwright,
   }) => {
+    const page = await setupTauriApp(playwright);
     const fileSelectTab = page.getByRole("tab", {
       name: /ファイル選択|Select File/i,
     });
@@ -92,8 +89,9 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // STEP 2: CSV ファイル 2 件をインポート
   // =========================================================================
   test("Step 2: CSV ファイル（ユニオン1・ユニオン2）をインポートする", async ({
-    page,
+    playwright,
   }) => {
+    const page = await setupTauriApp(playwright);
     // ユニオン1.csv をインポート
     await clickHeaderMenu(page, /ファイル|File/i, /^取り込み$|^Import$/);
     const fileSelectTab = page.getByRole("tab", {
@@ -118,7 +116,8 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 3: データ → ジョイン
   // =========================================================================
-  test("Step 3: データ → ジョインを実行する", async ({ page }) => {
+  test("Step 3: データ → ジョインを実行する", async ({ playwright }) => {
+    const page = await setupTauriApp(playwright);
     // ヘッダーメニュー: データ → ジョイン
     await clickHeaderMenu(page, /^データ$|^Data$/i, /ジョイン|Join/i);
 
@@ -204,7 +203,8 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 4: データ → ユニオン
   // =========================================================================
-  test("Step 4: データ → ユニオンを実行する", async ({ page }) => {
+  test("Step 4: データ → ユニオンを実行する", async ({ playwright }) => {
+    const page = await setupTauriApp(playwright);
     // ヘッダーメニュー: データ → ユニオン
     await clickHeaderMenu(page, /^データ$|^Data$/i, /ユニオン|Union/i);
 
@@ -287,7 +287,10 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 5: データ → データ生成
   // =========================================================================
-  test("Step 5: データ生成（シミュレーションデータ作成）", async ({ page }) => {
+  test("Step 5: データ生成（シミュレーションデータ作成）", async ({
+    playwright,
+  }) => {
+    const page = await setupTauriApp(playwright);
     // ヘッダーメニュー: データ → データ生成
     await clickHeaderMenu(
       page,
@@ -363,7 +366,8 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 6: データ → 計算列の追加
   // =========================================================================
-  test("Step 6: データ → 計算列を追加する", async ({ page }) => {
+  test("Step 6: データ → 計算列を追加する", async ({ playwright }) => {
+    const page = await setupTauriApp(playwright);
     // ヘッダーメニュー: データ → 計算
     await clickHeaderMenu(page, /^データ$|^Data$/i, /^計算$|^Calculate$/i);
 
@@ -464,7 +468,8 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 7: Excel 形式で保存
   // =========================================================================
-  test("Step 7: Excel 形式で保存する", async ({ page }) => {
+  test("Step 7: Excel 形式で保存する", async ({ playwright }) => {
+    const page = await setupTauriApp(playwright);
     // ヘッダーメニュー: ファイル → 保存
     await clickHeaderMenu(page, /ファイル|File/i, /^保存$|^Save$/);
 
