@@ -1,15 +1,4 @@
-# ==============================================================================
-#  about.toml  -  cargo-about 設定ファイル
-#  用途: Rust クレートのライセンス情報収集に使用する。
-#  参照: https://embarkstudios.github.io/cargo-about/
-#
-#  使用方法（packaging ディレクトリで実行）:
-#    cargo about generate about.hbs > ..\release\licenses\04_RUST_CRATES_LICENSES.txt
-# ==============================================================================
-
-# 許可するライセンス識別子（SPDX）
-[licenses]
-allow = [
+accepted = [
   "MIT",
   "Apache-2.0",
   "Apache-2.0 WITH LLVM-exception",
@@ -24,11 +13,3 @@ allow = [
   "CC0-1.0",
   "0BSD",
 ]
-
-# ライセンス不明クレートを警告のみ（エラーにしない）
-unlicensed = "warn"
-
-# ライセンスファイルが見つからない場合も警告のみ
-[licenses.clarify]
-# 例: クレートに明示的なライセンスファイルがない場合は下記で上書き可能
-# openssl-sys = { expression = "Apache-2.0", license-files = [] }

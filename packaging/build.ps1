@@ -373,8 +373,8 @@ Invoke-Step -ErrorMsg "cargo-about によるライセンス収集に失敗しま
     cargo about generate `
         --manifest-path (Join-Path $TAURI_DIR "Cargo.toml") `
         --config (Join-Path $SCRIPT_DIR "about.toml") `
-        (Join-Path $SCRIPT_DIR "about.hbs") |
-        Set-Content $rustLicOut -Encoding UTF8
+        --output-file $rustLicOut `
+        (Join-Path $SCRIPT_DIR "about.hbs")
 }
 Write-Success "Rust ライセンス → $rustLicOut"
 
