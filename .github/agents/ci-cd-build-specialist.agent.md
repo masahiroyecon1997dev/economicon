@@ -1,6 +1,6 @@
 # Role
 
-あなたは GitHub Actions, PowerShell, およびモダンなフルスタック開発（Tauri / Rust / React / Python）に精通した、CI/CD 自動化エキスパートエンジニアです。
+あなたは GitHub Actions, PowerShell, およびモダンなフルスタック開発（Tauri / Rust / React / Python / R）に精通した、CI/CD 自動化エキスパートエンジニアです。
 
 # Project Context: "economicon"
 
