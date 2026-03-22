@@ -1,18 +1,25 @@
+import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
+import { setupTauriApp } from "./helpers/setupHelpers";
 
 test.describe("ImportDataFileView - ファイル選択画面", () => {
-  test.beforeEach(async ({ page }) => {
-    // テスト前にページをロード
-    await page.goto("/");
+  let page: Page;
 
-    // ImportDataFileViewに遷移（実際のナビゲーションに合わせて調整）
-    // 例: ファイル選択ボタンをクリックするなど
-    // await page.click('button:has-text("ファイルを選択")');
+  test.beforeEach(async ({ playwright }) => {
+    page = await setupTauriApp(playwright);
+    // ファイル一覧テーブルが含まれる "ファイル選択" タブに切り替え
+    const fileSelectTab = page.getByRole("tab", {
+      name: /ファイル選択|Select File/i,
+    });
+    await fileSelectTab.click();
+    await expect(
+      page.getByRole("table", { name: "ファイル一覧" }),
+    ).toBeVisible();
   });
 
-  test("ページタイトルと説明が表示される", async ({ page }) => {
-    // ページにタイトルが表示されることを確認
-    const title = page.getByRole("heading", { name: "ファイルを選択" });
+  test("ページタイトルと説明が表示される", async () => {
+    // タイトル: ImportDataFileView.Title = "ファイルをインポート"
+    const title = page.getByRole("heading", { name: "ファイルをインポート" });
     await expect(title).toBeVisible();
 
     // 説明文が表示されることを確認
@@ -20,8 +27,8 @@ test.describe("ImportDataFileView - ファイル選択画面", () => {
     await expect(description).toBeVisible();
   });
 
-  test("検索ボックスが表示され、入力できる", async ({ page }) => {
-    // 検索ボックスを取得
+  test("検索ボックスが表示され、入力できる", async () => {
+    // 検索ボックスを取得（ImportDataFileView.SearchPlaceholder = "ファイル名で検索"）
     const searchInput = page
       .locator("main")
       .getByPlaceholder("ファイル名で検索")
@@ -35,34 +42,35 @@ test.describe("ImportDataFileView - ファイル選択画面", () => {
 
     // 入力した値が反映されることを確認
     await expect(searchInput).toHaveValue("test");
+
+    // 終わったら検索ボックスをクリアしておく
+    await searchInput.fill("");
   });
 
-  test("上位ディレクトリボタンが表示される", async ({ page }) => {
-    // 上位ディレクトリに移動するボタンを探す
+  test("上位ディレクトリボタンが表示される", async () => {
+    // ImportDataFileView.GoUpDirectory = "上位ディレクトリへ移動"
     const upButton = page.getByRole("button", {
       name: "上位ディレクトリへ移動",
     });
-    // ボタンが表示されることを確認
     await expect(upButton).toBeVisible();
   });
 
-  test("ファイルリストテーブルが表示される", async ({ page }) => {
-    // テーブルが表示されることを確認
+  test("ファイルリストテーブルが表示される", async () => {
+    // ImportDataFileView.FileListTableTitle = "ファイル一覧"
     const table = page.getByRole("table", { name: "ファイル一覧" });
     await expect(table).toBeVisible();
 
-    // テーブルヘッダーが表示されることを確認
+    // ヘッダー列数: ファイル名・サイズ・最終更新日時 の3列
     const headers = table.locator("thead th");
-    await expect(headers).toHaveCount(3); // ファイル名、サイズ、最終更新日時
+    await expect(headers).toHaveCount(3);
   });
 
-  test("ファイル名でソートできる", async ({ page }) => {
-    // ファイル名ヘッダーをクリック
+  test("ファイル名でソートできる", async () => {
     const table = page.getByRole("table", { name: "ファイル一覧" });
     const nameHeader = table.locator("thead th").first();
     await nameHeader.click();
 
-    // ソートアイコンが変化することを確認（昇順）
+    // ソートアイコンが表示される（昇順）
     await expect(nameHeader.locator("svg")).toBeVisible();
 
     // もう一度クリックして降順に
@@ -70,16 +78,10 @@ test.describe("ImportDataFileView - ファイル選択画面", () => {
     await expect(nameHeader.locator("svg")).toBeVisible();
   });
 
-  test.only("ファイルリストが検索でフィルタリングされる", async ({ page }) => {
-    // ページ遷移を待機
-    await page.waitForTimeout(1000);
-
+  test("ファイルリストが検索でフィルタリングされる", async () => {
     const table = page.getByRole("table", { name: "ファイル一覧" });
     // 検索前のファイル数を取得
     const rowsBeforeSearch = await table.locator("tbody tr").count();
-
-    // ページ遷移を待機
-    await page.waitForTimeout(1000);
 
     // 検索ボックスに入力
     const searchInput = page
@@ -88,56 +90,26 @@ test.describe("ImportDataFileView - ファイル選択画面", () => {
       .first();
     await searchInput.fill(".csv");
 
-    // ページ遷移を待機
-    await page.waitForTimeout(1000);
+    // React state 反映を待つ（UI 更新後に件数確認）
+    await expect(table.locator("tbody tr").first()).toBeVisible();
 
     // フィルタリング後のファイル数を取得
     const rowsAfterSearch = await table.locator("tbody tr").count();
 
-    // フィルタリングされていることを確認（CSVファイルのみ表示）
-    // 実際の数は環境に依存するため、変化があることだけを確認
+    // CSV のみ表示されるため件数は減少（またはゼロ）
     expect(rowsAfterSearch).toBeLessThanOrEqual(rowsBeforeSearch);
   });
 
-  test("ディレクトリをクリックすると移動する", async ({ page }) => {
-    // ディレクトリ行を探す（フォルダーアイコンがある行）
-    const directoryRow = page
-      .locator("tbody tr")
-      .filter({
-        has: page.locator("svg.text-yellow-500"),
-      })
-      .first();
-
-    // ディレクトリが存在する場合のみテスト
-    const directoryCount = await directoryRow.count();
-    if (directoryCount > 0) {
-      // ディレクトリをクリック
-      await directoryRow.click();
-
-      // ページ遷移を待機
-      await page.waitForTimeout(500);
-
-      // パンくずリストが更新されることを確認
-      const breadcrumbs = page.locator("button").filter({ hasText: /\// });
-      await expect(breadcrumbs.first()).toBeVisible();
-    }
-  });
-
-  test("パンくずリストから上位ディレクトリに移動できる", async ({ page }) => {
-    // パンくずリストのボタンを探す
+  test("パンくずリストから上位ディレクトリに移動できる", async () => {
     const breadcrumbNav = page.getByRole("navigation", { name: "Breadcrumb" });
     const breadcrumbs = breadcrumbNav.locator("li button");
     const breadcrumbCount = await breadcrumbs.count();
 
-    // パンくずが2つ以上ある場合のみテスト
+    // パンくずが 2 つ以上ある場合のみテスト（ルートディレクトリでは不可）
     if (breadcrumbCount >= 2) {
-      // 最初のパンくずリストアイテムをクリック
-      await breadcrumbs.first().click();
+      // 先頭パンくずをクリックして上位へ
+      await breadcrumbs.nth(-2).click();
 
-      // ページ遷移を待機
-      await page.waitForTimeout(500);
-
-      // ディレクトリが変更されたことを確認
       const newBreadcrumbCount = await breadcrumbNav
         .locator("li button")
         .count();
@@ -145,34 +117,38 @@ test.describe("ImportDataFileView - ファイル選択画面", () => {
     }
   });
 
-  test("キャンセルボタンが表示され、クリックできる", async ({ page }) => {
-    // キャンセルボタンを探す
-    const cancelButton = page.getByRole("button", { name: "cancel" });
+  test("ディレクトリをクリックすると移動する", async () => {
+    const table = page.getByRole("table", { name: "ファイル一覧" });
+    // Lucide <Folder> は "text-yellow-500" クラスを持つ SVG で描画される
+    const directoryRow = table
+      .locator("tbody tr")
+      .filter({ has: page.locator("svg.text-yellow-500") })
+      .first();
 
-    // ボタンが表示されることを確認
-    await expect(cancelButton).toBeVisible();
+    const directoryCount = await directoryRow.count();
+    if (directoryCount > 0) {
+      const breadcrumbNav = page.getByRole("navigation", {
+        name: "Breadcrumb",
+      });
+      const breadcrumbCountBefore = await breadcrumbNav
+        .locator("li button")
+        .count();
 
-    // ボタンがクリック可能であることを確認
-    await expect(cancelButton).toBeEnabled();
+      await directoryRow.click();
+
+      // パンくずリストが増えていることを確認
+      await expect(breadcrumbNav.locator("li button")).toHaveCount(
+        breadcrumbCountBefore + 1,
+        { timeout: 10_000 },
+      );
+    }
   });
 
-  test("エラー処理: APIエラー時にエラーメッセージが表示される", async ({
-    page,
-  }) => {
-    // APIをモックしてエラーレスポンスを返す
-    await page.route("**/api/**", (route) => {
-      route.fulfill({
-        status: 500,
-        contentType: "application/json",
-        body: JSON.stringify({ code: "ERROR", message: "テストエラー" }),
-      });
-    });
+  test("キャンセルボタンが表示され、クリックできる", async () => {
+    // Common.Cancel = "キャンセル"
+    const cancelButton = page.getByRole("button", { name: "キャンセル" });
 
-    // ページをリロード
-    await page.reload();
-
-    // エラーダイアログまたはメッセージが表示されることを確認
-    // 実際の実装に合わせて調整
-    await page.waitForTimeout(1000);
+    await expect(cancelButton).toBeVisible();
+    await expect(cancelButton).toBeEnabled();
   });
 });
