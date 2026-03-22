@@ -257,7 +257,7 @@
     "NA": "N/A"
   },
   "RegressionTab": {
-    "FormTab": "Analysis Settings",
+    "FormTab": "Analysis Settings(OLS)",
     "ResultLabel": "Result {{number}}",
     "DeleteResult": "Delete result"
   },
