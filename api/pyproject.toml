@@ -1,0 +1,82 @@
+[project]
+name = "EconomiconAppAPI"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.128.7",
+    "numpy>=2.4.2",
+    "polars>=1.38.1",
+    "pyarrow>=8.0.0",
+    "scipy>=1.16.3",
+    "statsmodels>=0.14.6",
+    "uvicorn[standard]>=0.40.0",
+    "fastapi-babel>=1.0.0",
+    "linearmodels>=7.0",
+    "py4etrics>=0.1.9",
+    "loguru>=0.7.3",
+    "pydantic-settings>=2.0.0",
+    "pydantic>=2.12.5",
+    "pandas>=3.0.1",
+    "xlsxwriter>=3.2.9",
+    "fastexcel>=0.19.0",
+]
+[tool.setuptools.packages.find]
+where = ["."]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.13.4",
+    "deptry>=0.24.0",
+    "httpx>=0.28.1",
+    "pip-licenses>=5.5.1",
+    "pipdeptree>=2.30.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "radon>=6.0.1",
+    "ruff>=0.15.0",
+    "scikit-learn>=1.8.0",
+]
+
+[tool.pytest.ini_options]
+addopts = "--cov=economicon --cov-report=term-missing"
+testpaths = ["tests"]
+pythonpath = ["."]
+[tool.coverage.run]
+source = ["economicon"]
+omit = ["tests/*"]
+
+[tool.ruff]
+# 1行の最大文字数を79文字に制限
+line-length = 79
+[tool.ruff.format]
+# フォーマッタ実行時にもこの設定を適用
+quote-style = "double"
+indent-style = "space"
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes (デフォルト)
+    "I",   # isort (インポート順序の自動整理)
+    "B",   # flake8-bugbear (バグになりやすい書き方の検知)
+    "C90", # mccabe (関数の複雑度：radonの代わり)
+    "N",   # pep8-naming (変数名やクラス名の命名規則)
+    "UP",  # pyupgrade (古いPython構文の自動修正)
+    "PL",  # Pylint (より深い静的解析)
+    "PT",  # flake8-pytest-style (pytestの書き方)
+]
+# E203 (Whitespace before ':') を無視リストに追加
+ignore = ["E203"]
+[tool.ruff.lint.mccabe]
+# 複雑度のしきい値。10を超えると警告が出るように設定
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+# AnalysisResult.__init__ 等のエンティティコンストラクタは
+# self + キーワード専用引数 8 個 = 9 パラメータを許容する
+max-args = 9
+
+[tool.deptry.per_rule_ignores]
+DEP003 = ["pydantic_core"]

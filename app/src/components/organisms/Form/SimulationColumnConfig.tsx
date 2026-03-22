@@ -1,0 +1,229 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import type {
+  DistributionType,
+  SimulationColumnSetting,
+} from "../../../types/commonTypes";
+import { InputText } from "../../atoms/Input/InputText";
+import { Select, SelectItem } from "../../atoms/Input/Select";
+import { FormField } from "../../molecules/Form/FormField";
+
+type NumericParamInputProps = {
+  id: string;
+  value: number | undefined;
+  onChange: (value: number) => void;
+  placeholder?: string;
+  error?: string;
+  disabled?: boolean;
+};
+
+const NumericParamInput = ({
+  id,
+  value,
+  onChange,
+  placeholder,
+  error,
+  disabled,
+}: NumericParamInputProps) => {
+  const [localValue, setLocalValue] = useState(value?.toString() ?? "");
+
+  return (
+    <InputText
+      id={id}
+      type="text"
+      inputMode="decimal"
+      value={localValue}
+      change={(e) => setLocalValue(e.target.value)}
+      onBlur={() => {
+        const n = parseFloat(localValue);
+        if (!isNaN(n)) {
+          onChange(n);
+        }
+      }}
+      placeholder={placeholder}
+      error={error}
+      disabled={disabled}
+    />
+  );
+};
+
+type SimulationColumnConfigProps = {
+  column: SimulationColumnSetting;
+  distributionOptions: Array<{
+    value: DistributionType;
+    label: string;
+    params: string[];
+  }>;
+  onUpdate: (id: string, updates: Partial<SimulationColumnSetting>) => void;
+  onDataTypeChange: (id: string, dataType: "distribution" | "fixed") => void;
+  onDistributionTypeChange: (
+    id: string,
+    distributionType: DistributionType,
+  ) => void;
+  onDistributionParamChange: (id: string, param: string, value: number) => void;
+  error: {
+    columnName: string | undefined;
+    distributionParams: Record<string, string | undefined> | undefined;
+    fixedValue: string | undefined;
+  };
+  disabled?: boolean;
+};
+
+export const SimulationColumnConfig = ({
+  column,
+  distributionOptions,
+  onUpdate,
+  onDataTypeChange,
+  onDistributionTypeChange,
+  onDistributionParamChange,
+  error,
+  disabled = false,
+}: SimulationColumnConfigProps) => {
+  const { t } = useTranslation();
+  const distOption = column.distributionType
+    ? distributionOptions.find((d) => d.value === column.distributionType)
+    : null;
+
+  const getParamLabel = (param: string): string => {
+    const paramLabels: Record<string, string> = {
+      low: t("Common.MinValue"),
+      high: t("Common.MaxValue"),
+      mean: t("Common.Mean"),
+      deviation: t("Common.StandardDeviation"),
+      rate: t("Common.Rate"),
+      shape: t("Common.Shape"),
+      scale: t("Common.Scale"),
+      alpha: t("Common.Alpha"),
+      beta: t("Common.Beta"),
+      logMean: t("Common.LogMean"),
+      logSD: t("Common.LogStandardDeviation"),
+      trials: t("Common.NumberOfTrials"),
+      probability: t("Common.Probability"),
+      populationSize: t("Common.PopulationSize"),
+      numberOfSuccesses: t("Common.NumberOfSuccesses"),
+      sampleSize: t("Common.SampleSize"),
+    };
+    return paramLabels[param] || param;
+  };
+
+  return (
+    <div className="border border-border-color dark:border-gray-700 rounded-lg p-4 bg-secondary-main dark:bg-gray-900/30 overflow-y-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+        <FormField
+          label={t("CreateSimulationDataTableView.ColumnName")}
+          htmlFor={`column-name-${column.id}`}
+          error={error.columnName}
+        >
+          <InputText
+            id={`column-name-${column.id}`}
+            value={column.columnName}
+            change={(e) => onUpdate(column.id, { columnName: e.target.value })}
+            placeholder={t("CreateSimulationDataTableView.InputColumnName")}
+            error={error.columnName}
+            disabled={disabled}
+          />
+        </FormField>
+
+        <FormField
+          label={t("CreateSimulationDataTableView.DataType")}
+          htmlFor={`data-type-${column.id}`}
+        >
+          <Select
+            id={`data-type-${column.id}`}
+            value={column.dataType}
+            onValueChange={(value) =>
+              onDataTypeChange(column.id, value as "distribution" | "fixed")
+            }
+            disabled={disabled}
+          >
+            <SelectItem value="fixed">{t("Common.Constant")}</SelectItem>
+            <SelectItem value="distribution">
+              {t("Common.Distribution")}
+            </SelectItem>
+          </Select>
+        </FormField>
+
+        {column.dataType === "distribution" && (
+          <>
+            <div className="md:col-span-2">
+              <FormField
+                label={t("CreateSimulationDataTableView.DistributionType")}
+                htmlFor={`distribution-type-${column.id}`}
+              >
+                <Select
+                  id={`distribution-type-${column.id}`}
+                  value={column.distributionType || ""}
+                  onValueChange={(value) =>
+                    onDistributionTypeChange(
+                      column.id,
+                      value as DistributionType,
+                    )
+                  }
+                  disabled={disabled}
+                >
+                  {distributionOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {t(option.label)}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </FormField>
+            </div>
+
+            {distOption && (
+              <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                {distOption.params.map((param) => (
+                  <FormField
+                    key={`${column.distributionType ?? ""}-${param}`}
+                    label={getParamLabel(param)}
+                    htmlFor={`param-${param}-${column.id}`}
+                    error={
+                      error.distributionParams
+                        ? error.distributionParams[param]
+                        : undefined
+                    }
+                  >
+                    <NumericParamInput
+                      id={`param-${param}-${column.id}`}
+                      value={column.distributionParams?.[param]}
+                      onChange={(n) =>
+                        onDistributionParamChange(column.id, param, n)
+                      }
+                      placeholder={`${getParamLabel(param)}${t("CreateSimulationDataTableView.InputDistributionParameters")}`}
+                      error={
+                        error.distributionParams
+                          ? error.distributionParams[param]
+                          : undefined
+                      }
+                      disabled={disabled}
+                    />
+                  </FormField>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {column.dataType === "fixed" && (
+          <div className="md:col-span-2 pt-2">
+            <FormField
+              label={t("CreateSimulationDataTableView.FixedValue")}
+              htmlFor={`fixed-value-${column.id}`}
+            >
+              <InputText
+                id={`fixed-value-${column.id}`}
+                value={column.fixedValue?.toString() || ""}
+                change={(e) =>
+                  onUpdate(column.id, { fixedValue: e.target.value })
+                }
+                placeholder={t("CreateSimulationDataTableView.InputFixedValue")}
+                error={error.fixedValue}
+                disabled={disabled}
+              />
+            </FormField>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,26 @@
+{
+  "recommendations": [
+    "oderwat.indent-rainbow",
+    "ms-python.debugpy",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.vscode-python-envs",
+    "ms-vscode.cpptools",
+    "christian-kohler.path-intellisense",
+    "pkief.material-icon-theme",
+    "rust-lang.rust-analyzer",
+    "tamasfe.even-better-toml",
+    "tauri-apps.tauri-vscode",
+    "usernamehw.errorlens",
+    "charliermarsh.ruff",
+    "Bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "github.copilot-chat",
+    "github.vscode-github-actions",
+    "mhutchie.git-graph",
+    "reditorsupport.r",
+    "vitest.explorer",
+    "ms-playwright.playwright"
+  ]
+}

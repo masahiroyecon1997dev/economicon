@@ -1,0 +1,516 @@
+"""回帰分析エラー処理テスト（422/400/境界値）"""
+
+import polars as pl
+from fastapi import status
+
+from economicon.core.enums import ErrorCode
+from economicon.services.data.tables_store import TablesStore
+from tests.regressions.conftest import (
+    TABLE_BASIC,
+    TABLE_NAN,
+    TABLE_PANEL,
+    TABLE_STRING,
+    URL_REGRESSION,
+    FePayload,
+    OlsPayload,
+)
+
+# ─────────────────────────────────────────────
+# 日本語テーブル名・カラム名（漢字必須）
+# ─────────────────────────────────────────────
+_TABLE_KANJI = "売上高集計表"
+_COL_KANJI_Y = "費用合計額"
+_COL_KANJI_X = "広告宣伝費"
+_COL_KANJI_EXISTING = "売上金額"
+
+# 境界値用定数
+_SHORT_TABLE = "A"
+
+
+# ─────────────────────────────────────────────
+# 422 バリデーションエラー
+# ─────────────────────────────────────────────
+
+
+class TestValidationError422:
+    """Pydantic 422 バリデーションエラーのテスト"""
+
+    def test_missing_table_name(self, client, tables_store):
+        """tableName が欠如している場合は 422 を返す"""
+        payload = {
+            "dependentVariable": "y_linear",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": True,
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert data["code"] == ErrorCode.VALIDATION_ERROR
+        assert "tableNameは必須です。" in data["message"]
+
+    def test_empty_table_name(self, client, tables_store):
+        """tableName が空文字の場合は 422 を返す"""
+        payload = OlsPayload(table="").build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert data["code"] == ErrorCode.VALIDATION_ERROR
+        assert "tableNameは1文字以上で入力してください。" in data["message"]
+
+    def test_whitespace_only_table_name(self, client, tables_store):
+        """tableName が空白のみの場合は 422 を返す（strip後に空文字）"""
+        payload = OlsPayload(table="   ").build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert data["code"] == ErrorCode.VALIDATION_ERROR
+        assert "tableNameは1文字以上で入力してください。" in data["message"]
+
+    def test_tab_only_table_name(self, client, tables_store):
+        """tableName がタブのみの場合は 422 を返す（strip後に空文字）"""
+        payload = OlsPayload(table="\t").build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert data["code"] == ErrorCode.VALIDATION_ERROR
+        assert "tableNameは1文字以上で入力してください。" in data["message"]
+
+    def test_missing_analysis(self, client, tables_store):
+        """analysis が欠如している場合は 422 を返す"""
+        payload = {
+            "tableName": TABLE_BASIC,
+            "dependentVariable": "y_linear",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": True,
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert data["code"] == ErrorCode.VALIDATION_ERROR
+        assert "analysisは必須です。" in data["message"]
+
+    def test_missing_entity_id_for_fe(self, client, tables_store):
+        """固定効果モデルで entityIdColumn が欠如の場合は 422"""
+        payload = {
+            "tableName": TABLE_PANEL,
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "analysis": {"method": "fe"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert data["code"] == ErrorCode.VALIDATION_ERROR
+        assert "analysis.fe.entityIdColumnは必須です。" in data["message"]
+
+    def test_missing_endogenous_variables_for_iv(self, client, tables_store):
+        """IV モデルで endogenousVariables が欠如の場合は 422"""
+        payload = {
+            "tableName": TABLE_BASIC,
+            "dependentVariable": "y_linear",
+            "explanatoryVariables": ["x1"],
+            "analysis": {
+                "method": "iv",
+                "endogenousVariables": ["x2"],
+            },
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert data["code"] == ErrorCode.VALIDATION_ERROR
+
+    def test_missing_instrumental_variables_for_iv(self, client, tables_store):
+        """IV モデルで instrumentalVariables が欠如の場合は 422"""
+        payload = {
+            "tableName": TABLE_BASIC,
+            "dependentVariable": "y_linear",
+            "explanatoryVariables": ["x1"],
+            "analysis": {
+                "method": "iv",
+                "endogenousVariables": ["x2"],
+            },
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+        assert data["code"] == ErrorCode.VALIDATION_ERROR
+        assert (
+            "analysis.iv.instrumentalVariablesは必須です。" in data["message"]
+        )
+
+
+# ─────────────────────────────────────────────
+# 400 DATA_NOT_FOUND エラー
+# ─────────────────────────────────────────────
+
+
+class TestDataNotFound400:
+    """存在しないテーブル・カラム参照の 400 エラーテスト"""
+
+    def test_nonexistent_table(self, client, tables_store):
+        """存在しないテーブル名で 400 を返す"""
+        payload = OlsPayload(table="NonExistentTable").build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.DATA_NOT_FOUND
+        assert (
+            "tableName 'NonExistentTable'は存在しません。" in data["message"]
+        )
+
+    def test_nonexistent_dependent_variable(self, client, tables_store):
+        """存在しない目的変数で 400 を返す"""
+        payload = OlsPayload(dep="nonexistent_y").build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.DATA_NOT_FOUND
+        assert (
+            "dependentVariable 'nonexistent_y'は存在しません。"
+            in data["message"]
+        )
+
+    def test_nonexistent_explanatory_variable(self, client, tables_store):
+        """存在しない説明変数で 400 を返す"""
+        payload = OlsPayload(expl=["nonexistent_x"]).build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.DATA_NOT_FOUND
+        assert (
+            "explanatoryVariables 'nonexistent_x'は存在しません。"
+            in data["message"]
+        )
+
+    def test_nonexistent_entity_id_column_for_fe(self, client, tables_store):
+        """FE モデルで存在しない entityIdColumn を指定した場合は 400"""
+        payload = FePayload(entity_col="nonexistent_entity").build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.DATA_NOT_FOUND
+        assert "は存在しません。" in data["message"]
+
+    def test_nonexistent_time_column_for_fe(self, client, tables_store):
+        """FE モデルで存在しない timeColumn を指定した場合は 400"""
+        payload = FePayload(time_col="nonexistentime").build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.DATA_NOT_FOUND
+        assert "は存在しません。" in data["message"]
+
+    def test_kanji_table_name_not_found(self, client, tables_store):
+        """存在しない漢字テーブル名で 400、エラーメッセージに漢字を含む"""
+        payload = OlsPayload(table=_TABLE_KANJI).build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.DATA_NOT_FOUND
+        assert _TABLE_KANJI in data["message"]
+        assert "は存在しません。" in data["message"]
+
+    def test_kanji_column_name_not_found(self, client, tables_store):
+        """漢字テーブルに存在しない漢字カラムを指定すると 400"""
+        store = TablesStore()
+        store.store_table(
+            _TABLE_KANJI,
+            pl.DataFrame(
+                {
+                    _COL_KANJI_EXISTING: [
+                        100.0,
+                        200.0,
+                        300.0,
+                        400.0,
+                        500.0,
+                    ],
+                    _COL_KANJI_X: [
+                        10.0,
+                        20.0,
+                        30.0,
+                        40.0,
+                        50.0,
+                    ],
+                }
+            ),
+        )
+        # テーブルには存在しない _COL_KANJI_Y を目的変数に指定
+        payload = OlsPayload(
+            table=_TABLE_KANJI,
+            dep=_COL_KANJI_Y,
+            expl=[_COL_KANJI_X],
+        ).build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.DATA_NOT_FOUND
+        assert _COL_KANJI_Y in data["message"]
+        assert "は存在しません。" in data["message"]
+
+
+# ─────────────────────────────────────────────
+# 400 INVALID_DTYPE エラー
+# ─────────────────────────────────────────────
+
+
+class TestInvalidDtype400:
+    """型不一致の 400 エラーテスト"""
+
+    def test_string_column_as_dependent_variable(self, client, tables_store):
+        """文字列カラムを目的変数に指定した場合は 400"""
+        payload = OlsPayload(
+            table=TABLE_STRING,
+            dep="name",
+            expl=["score"],
+        ).build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.INVALID_DTYPE
+        assert "name" in data["message"]
+
+    def test_string_column_as_explanatory_variable(self, client, tables_store):
+        """文字列カラムを説明変数に指定した場合は 400"""
+        payload = OlsPayload(
+            table=TABLE_STRING,
+            dep="score",
+            expl=["name"],
+        ).build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.INVALID_DTYPE
+        assert "name" in data["message"]
+
+
+# ─────────────────────────────────────────────
+# 境界値テスト
+# ─────────────────────────────────────────────
+
+
+class TestBoundaryValues:
+    """境界値・特殊文字テスト"""
+
+    def test_kanji_table_name_is_valid(self, client, tables_store):
+        """漢字テーブル名・漢字カラム名で正常に回帰分析を実行できる"""
+        store = TablesStore()
+        store.store_table(
+            _TABLE_KANJI,
+            pl.DataFrame(
+                {
+                    _COL_KANJI_EXISTING: [
+                        100.0,
+                        200.0,
+                        300.0,
+                        400.0,
+                        500.0,
+                        600.0,
+                        700.0,
+                        800.0,
+                        900.0,
+                        1000.0,
+                    ],
+                    _COL_KANJI_X: [
+                        10.0,
+                        20.0,
+                        30.0,
+                        40.0,
+                        50.0,
+                        60.0,
+                        70.0,
+                        80.0,
+                        90.0,
+                        100.0,
+                    ],
+                    _COL_KANJI_Y: [
+                        3.0,
+                        9.0,
+                        12.0,
+                        22.0,
+                        31.0,
+                        38.0,
+                        45.0,
+                        55.0,
+                        62.0,
+                        71.0,
+                    ],
+                }
+            ),
+        )
+        payload = OlsPayload(
+            table=_TABLE_KANJI,
+            dep=_COL_KANJI_EXISTING,
+            expl=[_COL_KANJI_X, _COL_KANJI_Y],
+        ).build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_200_OK
+        assert data["code"] == "OK"
+
+    def test_single_char_table_name_is_valid(self, client, tables_store):
+        """1 文字のテーブル名は有効（min_length=1）"""
+        store = TablesStore()
+        store.store_table(
+            _SHORT_TABLE,
+            pl.DataFrame(
+                {
+                    "y": [1.0, 2.0, 3.0, 4.0, 5.0],
+                    "x": [2.0, 4.0, 6.0, 8.0, 10.0],
+                }
+            ),
+        )
+        payload = OlsPayload(
+            table=_SHORT_TABLE,
+            dep="y",
+            expl=["x"],
+        ).build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_200_OK
+        assert data["code"] == "OK"
+
+    def test_emoji_table_name_returns_not_found(self, client, tables_store):
+        """絵文字含むテーブル名は 422 にならず DATA_NOT_FOUND を返す
+
+        TableName は NAME_PATTERN を持たないため絵文字も通過する。
+        登録されていなければ 400 DATA_NOT_FOUND となる。
+        """
+        payload = OlsPayload(table="🎉売上テーブル集計").build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert data["code"] == ErrorCode.DATA_NOT_FOUND
+
+    def test_leading_trailing_space_is_stripped(self, client, tables_store):
+        """前後スペース付きテーブル名は strip されて正常参照できる"""
+        # TABLE_BASIC は既に tables_store で登録済み
+        payload = OlsPayload(table=f"  {TABLE_BASIC}  ").build()
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_200_OK
+        assert data["code"] == "OK"
+
+
+# ─────────────────────────────────────────────
+# 欠損値処理エラーテスト
+# ─────────────────────────────────────────────
+
+
+class TestMissingValueHandling:
+    """欠損値処理モードのテスト"""
+
+    def test_missing_value_error_mode(self, client, tables_store):
+        """missingValueHandling='error'の場合、NaNありデータは 500 を返す"""
+        payload = {
+            "tableName": TABLE_NAN,
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": True,
+            "missingValueHandling": "error",
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
+    def test_missing_value_remove_mode(self, client, tables_store):
+        """missingValueHandling='remove'の場合、NaN行を除去して正常終了する"""
+        payload = {
+            "tableName": TABLE_NAN,
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": True,
+            "missingValueHandling": "remove",
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.json()["code"] == "OK"
+
+
+# ─────────────────────────────────────────────
+# 特異行列・完全多重共線性テスト
+# ─────────────────────────────────────────────
+
+
+class TestSingularMatrix:
+    """完全多重共線性（特異行列）のテスト"""
+
+    def test_perfect_multicollinearity_ols(self, client, tables_store):
+        """x2 = 2 * x1 の完全多重共線性: OLSで500を返す"""
+        store = TablesStore()
+        n = 10
+        x1 = [float(i) for i in range(1, n + 1)]
+        store.store_table(
+            "CollinearData",
+            pl.DataFrame(
+                {
+                    "y": [float(i) * 1.5 for i in range(1, n + 1)],
+                    "x1": x1,
+                    "x2": [v * 2.0 for v in x1],
+                }
+            ),
+        )
+        payload = {
+            "tableName": "CollinearData",
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": True,
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert data["code"] == ErrorCode.REGRESSION_SINGULAR_MATRIX_ERROR
+
+    def test_identical_columns_multicollinearity(self, client, tables_store):
+        """x1 = x2 の完全多重共線性（has_const=False）: 500を返す"""
+        store = TablesStore()
+        x_vals = [float(i) for i in range(1, 11)]
+        store.store_table(
+            "IdenticalColData",
+            pl.DataFrame(
+                {
+                    "y": [2.0 * v + 1.0 for v in x_vals],
+                    "x1": x_vals,
+                    "x2": x_vals,
+                }
+            ),
+        )
+        payload = {
+            "tableName": "IdenticalColData",
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": False,
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        data = resp.json()
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert data["code"] == ErrorCode.REGRESSION_SINGULAR_MATRIX_ERROR
+
+    def test_nan_data_bypasses_rank_check(self, client, tables_store):
+        """
+        NaN含むデータはランクチェックをスキップし正常終了する
+        """
+        payload = {
+            "tableName": TABLE_NAN,
+            "dependentVariable": "y",
+            "explanatoryVariables": ["x1", "x2"],
+            "hasConst": True,
+            "missingValueHandling": "remove",
+            "analysis": {"method": "ols"},
+            "standardError": {"method": "nonrobust"},
+        }
+        resp = client.post(URL_REGRESSION, json=payload)
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.json()["code"] == "OK"

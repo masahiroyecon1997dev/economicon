@@ -1,0 +1,162 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "command": "cd app; pnpm run dev",
+      "label": "pnpm: start",
+      "detail": "start-dev-server",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Compiling...",
+          "endsPattern": "Compiled .*"
+        }
+      }
+    },
+    {
+      "type": "shell",
+      "command": "cd app; pnpm run gen:all",
+      "label": "Generate API Client (OpenAPI & Types)",
+      "detail": "Runs pnpm gen:all to regenerate openapi.json and Orval clients",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "cd api; .venv\\Scripts\\ruff check .",
+      "label": "Ruff: Check API",
+      "detail": "Run ruff linter on all Python files under api/",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "cd api; .venv\\Scripts\\pybabel compile -f -d economicon/locales",
+      "label": "Babel: Compile Messages",
+      "detail": "Compile ja/en messages.po to messages.mo under api/economicon/locales",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "cd app; pnpm run test",
+      "label": "Vitest: Run",
+      "detail": "Run Vitest unit/integration tests",
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "cd app; pnpm run test:ui",
+      "label": "Vitest: UI",
+      "detail": "Run Vitest with web UI (--ui)",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "cd app; pnpm run test:coverage",
+      "label": "Vitest: Coverage",
+      "detail": "Run Vitest with coverage report (--coverage)",
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "cd api; .venv\\Scripts\\pytest",
+      "label": "Pytest: Run",
+      "detail": "Run pytest with coverage on api/tests (settings from pyproject.toml)",
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "shell",
+      "command": "pnpm run dev",
+      "label": "Economicon: Vite Dev",
+      "detail": "Run Vite development server for Economicon app for E2E testing",
+      "options": {
+        "cwd": "${workspaceFolder}/app"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": { "regexp": "^.*$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*VITE.*",
+          "endsPattern": ".*ready in.*"
+        }
+      }
+    },
+    {
+      "type": "shell",
+      "command": "$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9222'; .\\src-tauri\\target\\debug\\Economicon.exe",
+      "label": "Economicon: App (Debug Port)",
+      "detail": "Run Economicon app with debug port for E2E testing",
+      "options": {
+        "cwd": "${workspaceFolder}/app"
+      },
+      "dependsOn": ["Economicon: Vite Dev"],
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": { "regexp": "^.*$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": ".*" // アプリは即座に次へ進ませる
+        }
+      }
+    },
+    {
+      "type": "shell",
+      "command": "pnpm run test:e2e:ui",
+      "label": "Economicon: Run E2E UI",
+      "detail": "Run E2E tests with web UI (playwright --ui)",
+      "options": {
+        "cwd": "${workspaceFolder}/app"
+      },
+      "dependsOn": ["Economicon: App (Debug Port)"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    }
+  ]
+}

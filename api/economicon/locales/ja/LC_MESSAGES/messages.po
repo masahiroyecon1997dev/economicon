@@ -1,0 +1,320 @@
+# Japanese translations for economicon.
+# Copyright (C) 2026
+# This file is distributed under the same license as the economicon
+# project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version:  1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-24 23:35+0900\n"
+"PO-Revision-Date: 2026-01-18 12:00+0900\n"
+"Last-Translator: \n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: economicon/exception_handlers.py:34
+msgid "An unexpected error occurred during processing"
+msgstr "処理中に予期しないエラーが発生しました"
+
+#: economicon/services/add_column.py:81
+msgid "An unexpected error occurred during adding column processing"
+msgstr "列の追加処理中に予期しないエラーが発生しました"
+
+#: economicon/services/add_dummy_column.py:81
+msgid "An unexpected error occurred during adding dummy column processing"
+msgstr "ダミー列の追加処理中に予期しないエラーが発生しました"
+
+#: economicon/services/add_lag_lead_column.py:106
+msgid "An unexpected error occurred during adding lag/lead column processing"
+msgstr "ラグ/リード列の追加処理中に予期しないエラーが発生しました"
+
+#: economicon/services/add_simulation_column.py:99
+msgid "An unexpected error occurred during adding simulation column processing"
+msgstr "シミュレーション列の追加処理中に予期しないエラーが発生しました"
+
+#: economicon/services/calculate_column.py:119
+msgid "An unexpected error occurred during column calculation processing"
+msgstr "列の計算処理中に予期しないエラーが発生しました"
+
+#: economicon/services/clear_tables.py:30
+msgid "An unexpected error occurred during clearing tables processing"
+msgstr "テーブルのクリア処理中に予期しないエラーが発生しました"
+
+#: economicon/services/confidence_interval.py:138
+msgid "An unexpected error occurred during confidence interval processing"
+msgstr "信頼区間の処理中に予期しないエラーが発生しました"
+
+#: economicon/services/create_join_table.py:161
+msgid "An unexpected error occurred during join table creation processing"
+msgstr "結合テーブルの作成処理中に予期しないエラーが発生しました"
+
+#: economicon/services/create_simulation_data_table.py:183
+msgid "An unexpected error occurred during creating simulation data table"
+msgstr "シミュレーションデータテーブルの作成中に予期しないエラーが発生しました"
+
+#: economicon/services/create_table.py:77
+msgid "An unexpected error occurred during table creation processing"
+msgstr "テーブルの作成処理中に予期しないエラーが発生しました"
+
+#: economicon/services/create_union_table.py:98
+msgid "An unexpected error occurred during union table creation processing"
+msgstr "結合テーブルの作成処理中に予期しないエラーが発生しました"
+
+#: economicon/services/delete_column.py:68
+msgid "An unexpected error occurred during column deletion processing"
+msgstr "列の削除処理中に予期しないエラーが発生しました"
+
+#: economicon/services/delete_table.py:49
+msgid "An unexpected error occurred during table deletion processing"
+msgstr "テーブルの削除処理中に予期しないエラーが発生しました"
+
+#: economicon/services/descriptive_statistics.py:148
+msgid "An unexpected error occurred during descriptive statistics processing"
+msgstr "記述統計の処理中に予期しないエラーが発生しました"
+
+#: economicon/services/duplicate_column.py:82
+msgid "An unexpected error occurred during duplicating column processing"
+msgstr "列の複製処理中に予期しないエラーが発生しました"
+
+#: economicon/services/duplicate_table.py:64
+msgid "An unexpected error occurred during table duplication processing"
+msgstr "テーブルの複製処理中に予期しないエラーが発生しました"
+
+#: economicon/services/export_csv_by_path.py:99
+msgid "An unexpected error occurred during CSV export processing"
+msgstr "CSVエクスポート処理中に予期しないエラーが発生しました"
+
+#: economicon/services/export_excel_by_path.py:89
+msgid "An unexpected error occurred during EXCEL export processing"
+msgstr "EXCELエクスポート処理中に予期しないエラーが発生しました"
+
+#: economicon/services/export_parquet_by_path.py:89
+msgid "An unexpected error occurred during PARQUET export processing"
+msgstr "PARQUETエクスポート処理中に予期しないエラーが発生しました"
+
+#: economicon/services/filter_single_condition.py:170
+msgid "An unexpected error occurred during filter processing"
+msgstr "フィルタ処理中に予期しないエラーが発生しました"
+
+#: economicon/services/fixed_effects_estimation.py:257
+msgid "An unexpected error occurred during fixed effects estimation processing"
+msgstr "固定効果推定処理中に予期しないエラーが発生しました"
+
+#: economicon/services/get_column_list.py:59
+msgid "An unexpected error during getting column info list."
+msgstr "カラム情報リストの取得中に予期しないエラーが発生しました。"
+
+#: economicon/services/get_files.py:74
+msgid "An unexpected error occurred during listing files processing"
+msgstr "ファイル一覧処理中に予期しないエラーが発生しました"
+
+#: economicon/services/get_settings.py:32
+msgid "An unexpected error occurred during getting settings processing"
+msgstr "設定の取得処理中に予期しないエラーが発生しました"
+
+#: economicon/services/get_table_list.py:34
+msgid "An unexpected error during getting table name list."
+msgstr "テーブル名リストの取得中に予期しないエラーが発生しました。"
+
+#: economicon/services/import_csv_by_file.py:79
+#: economicon/services/import_csv_by_path.py:85
+msgid "An unexpected error occurred during CSV processing"
+msgstr "CSV処理中に予期しないエラーが発生しました。"
+
+#: economicon/services/import_excel_by_file.py:80
+#: economicon/services/import_excel_by_path.py:88
+msgid "An unexpected error occurred during EXCEL processing"
+msgstr "EXCEL処理中に予期しないエラーが発生しました。"
+
+#: economicon/services/import_parquet_by_file.py:78
+#: economicon/services/import_parquet_by_path.py:74
+msgid "An unexpected error occurred during PARQUET processing"
+msgstr "PARQUET処理中に予期しないエラーが発生しました。"
+
+#: economicon/services/import_tsv_by_file.py:81
+msgid "An unexpected error occurred during TSV processing"
+msgstr "TSV処理中に予期しないエラーが発生しました。"
+
+#: economicon/services/input_cell_data.py:92
+msgid "An unexpected error occurred during input cell data processing"
+msgstr "セルデータの入力処理中に予期しないエラーが発生しました"
+
+#: economicon/services/linear_regression.py:134
+msgid "An unexpected error occurred during linear regression processing"
+msgstr "線形回帰処理中に予期しないエラーが発生しました"
+
+#: economicon/services/logistic_regression.py:130
+msgid "An unexpected error occurred during logistic regression processing"
+msgstr "ロジスティック回帰処理中に予期しないエラーが発生しました"
+
+#: economicon/services/probit_regression.py:129
+msgid "An unexpected error occurred during probit regression processing"
+msgstr "プロビット回帰処理中に予期しないエラーが発生しました"
+
+#: economicon/services/rename_column.py:81
+msgid "An unexpected error occurred during renaming column processing"
+msgstr "列名の変更処理中に予期しないエラーが発生しました"
+
+#: economicon/services/rename_table.py:60
+msgid "An unexpected error occurred during table rename processing"
+msgstr "テーブル名の変更処理中に予期しないエラーが発生しました"
+
+#: economicon/services/sort_columns.py:94
+msgid "An unexpected error occurred during column sorting processing"
+msgstr "列のソート処理中に予期しないエラーが発生しました"
+
+#: economicon/services/transform_column.py:145
+msgid "An unexpected error occurred during column transformation processing"
+msgstr "列の変換処理中に予期しないエラーが発生しました"
+
+#: economicon/services/variable_effects_estimation.py:208
+msgid "An unexpected error occurred during variable effects estimation processing"
+msgstr "変動効果推定処理中に予期しないエラーが発生しました"
+
+#, python-brace-format
+msgid "{} '{}' does not exist."
+msgstr "{} '{}'は存在しません。"
+
+#, python-brace-format
+msgid "{} '{}' already exists."
+msgstr "{} '{}'は既に存在します。"
+
+msgid "For uniform distribution, 'low' must be less than 'high'"
+msgstr "一様分布では、'low'は'high'より小さい必要があります"
+
+msgid "For proportion confidence interval, data must contain only 0 and 1 values"
+msgstr "データには0と1の値のみが含まれる必要があります"
+
+msgid "The CSV file is empty or contains no valid data."
+msgstr "CSVファイルが空であるか、有効なデータが含まれていません。"
+
+msgid "Column contains no valid data"
+msgstr "カラムに有効なデータが含まれていません"
+
+# フィールド名の翻訳
+msgid "Field.tableName"
+msgstr "テーブル名"
+
+msgid "Field.type"
+msgstr "分析タイプ"
+
+msgid "Field.method"
+msgstr "計算手法"
+
+msgid "Field.name"
+msgstr "名前"
+
+msgid "Field.description"
+msgstr "説明"
+
+msgid "Field.dependentVariable"
+msgstr "被説明変数"
+
+msgid "Field.explanatoryVariables"
+msgstr "説明変数"
+
+msgid "Field.standardErrorMethod"
+msgstr "標準誤差計算方法"
+
+msgid "Field.confidenceLevel"
+msgstr "信頼水準"
+
+msgid "Field.columnName"
+msgstr "列名"
+
+msgid "Field.newColumnName"
+msgstr "新しい列名"
+
+msgid "Field.dataType"
+msgstr "データ型"
+
+msgid "Field.expression"
+msgstr "計算式"
+
+msgid "Field.filterConditions"
+msgstr "フィルタ条件"
+
+# 動的バリデーションメッセージテンプレート
+msgid "{field} is required"
+msgstr "{field}は必須です。"
+
+msgid "{field} must be a string"
+msgstr "{field}は文字列で入力してください。"
+
+msgid "{field} must be an integer"
+msgstr "{field}は整数で入力してください。"
+
+msgid "{field} must be a number"
+msgstr "{field}は数値で入力してください。"
+
+msgid "{field} must be a boolean"
+msgstr "{field}は真偽値で入力してください。"
+
+msgid "{field} must be a list"
+msgstr "{field}はリストで入力してください。"
+
+msgid "{field} must be a dictionary"
+msgstr "{field}は辞書で入力してください。"
+
+msgid "{field} must be at least {min_length} characters"
+msgstr "{field}は{min_length}文字以上で入力してください。"
+
+msgid "{field} must be at most {max_length} characters"
+msgstr "{field}は{max_length}文字以内で入力してください。"
+
+msgid "{field} must be one of: {expected}"
+msgstr "{field}は次のいずれかである必要があります: {expected}"
+
+msgid "{field} has an invalid value"
+msgstr "{field}の値が無効です。"
+
+msgid "{field} must have at least {min_length} items"
+msgstr "{field}は{min_length}件以上ある必要があります。"
+
+msgid "{field} must be less than {lt}"
+msgstr "{field}は{lt}未満で入力してください。"
+
+msgid "{field} must be less than or equal to {le}"
+msgstr "{field}は{le}以下で入力してください。"
+
+msgid "{field} must be greater than {gt}"
+msgstr "{field}は{gt}より大きい値で入力してください。"
+
+msgid "{field} must be greater than or equal to {ge}"
+msgstr "{field}は{ge}以上で入力してください。"
+
+msgid "{field} has an invalid type"
+msgstr "{field}のタイプが正しくありません。"
+
+msgid "{field} contains invalid characters"
+msgstr "{field}に使用できない文字が含まれています。"
+
+#, python-brace-format
+msgid "{} '{}' does not have {} permission."
+msgstr "{}'{}'には{}権限がありません。"
+
+#, python-brace-format
+msgid "{} '{}' is empty."
+msgstr "{} '{}'は空です。"
+
+#, python-brace-format
+msgid "Row count mismatch: CSV has {csv_rows} rows, but table has {expected_rows} rows."
+msgstr "行数の不一致: CSVには{csv_rows}行ありますが、テーブルには{expected_rows}行あります。"
+
+#: economicon/services/regressions/common.py
+msgid "Explanatory variable matrix is singular. Perfect multicollinearity detected. Please review your explanatory variable selection."
+msgstr "説明変数行列が特異です。完全な多重共線性が検出されました。説明変数の組み合わせを見直してください。"
+
+#: economicon/models/tables.py
+msgid "newTableName must differ from oldTableName."
+msgstr "newTableName には oldTableName と異なる名前を指定してください。"
+
+#: economicon/models/columns.py
+msgid "newColumnName must differ from oldColumnName."
+msgstr "newColumnName には oldColumnName と異なる名前を指定してください。"

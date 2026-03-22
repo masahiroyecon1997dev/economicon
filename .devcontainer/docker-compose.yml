@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 services:
   analysis-api-server:
     build:
@@ -10,8 +10,16 @@ services:
         DEV_ENV: "development"
     tty: true
     volumes:
-      - ../../AnalysisApp:/AnalysisApp
+      - ../.devcontainer:/economicon/.devcontainer
+      - ../.github:/economicon/.github
+      - ../.vscode:/economicon/economicon/.vscode
+      - ../api:/economicon/economiconServer
+      - ../app:/economicon/economicon/app
+      - ../SampleData:/economicon/economicon/SampleData
+      - ../.env:/economicon/economicon/.env
+      - ../.gitignore:/economicon/economicon/.gitignore
+      - ../README.md:/economicon/README.md
     ports:
       - "127.0.0.1:3000:3000"
       - "8000:8000"
-    working_dir: /AnalysisApp/AnalysisApp
+    working_dir: /economicon/economicon

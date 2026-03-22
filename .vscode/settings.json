@@ -1,0 +1,178 @@
+{
+  // デバッグ中に行内に変数値を表示
+  "debug.inlineValues": "on",
+  // デバッグコンソールの表示方法
+  "debug.internalConsoleOptions": "openOnSessionStart",
+  // デバッグビューの表示方法
+  "debug.openDebug": "openOnSessionStart",
+  // テキストコピー時に書式設定を含める
+  "editor.copyWithSyntaxHighlighting": false,
+  // ドラッグアンドドロップで選択範囲のテキストを移動できるようにする
+  "editor.dragAndDrop": false,
+  // 貼り付けを行ったときに自動でフォーマット
+  "editor.formatOnPaste": true,
+  // ファイル保存時に自動でフォーマット
+  "editor.formatOnSave": true,
+  // 入力した行を自動でフォーマット
+  "editor.formatOnType": true,
+  // ミニマップの最大幅
+  "editor.minimap.maxColumn": 60,
+  // ミニマップのスライダーの表示方法
+  "editor.minimap.showSlider": "always",
+  // ミニマップのサイズ
+  "editor.minimap.size": "fit",
+  // 制御文字を表示
+  "editor.renderControlCharacters": true,
+  // エディター上での空白文字の表示方法
+  "editor.renderWhitespace": "all",
+  // 行の折りたたみ記号の表示方法
+  "editor.showFoldingControls": "always",
+  // 1つのタブに相当する半角スペースの数
+  "editor.tabSize": 2,
+  // 単語の区切り文字
+  "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?　、。！？「」【】『』（）",
+  // 行の折り返し表示
+  "editor.wordWrap": "off",
+  // 名前重複時の名前付け規則
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // デフォルトのフォーマッターをPrettierに設定
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    // 保存時にESLintの自動修正を実行
+    "source.organizeImports": "explicit"
+    // importの自動整理
+  },
+  "files.autoSave": "onFocusChange",
+  // フォーカスが外れたときに自動保存
+  "explorer.incrementalNaming": "smart",
+  // 言語に対するファイルの関連付け
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "files.encoding": "utf8",
+  // 改行コードの規定値
+  "files.eol": "\n",
+  // ファイル保存時に行末に改行を挿入
+  "files.insertFinalNewline": true,
+  // ファイル保存時に最終行以降の空行を削除
+  "files.trimFinalNewlines": true,
+  // ファイル保存時に各行の末尾にある半角スペースを削除
+  "files.trimTrailingWhitespace": true,
+  // 監視対象から外すファイル・ディレクトリのパスのパターン
+  "files.watcherExclude": {
+    "**/target/**": true,
+    "**/node_modules/**": true,
+    "**/.venv/**": true,
+    "**/dist/**": true,
+    "**/__pycache__/**": true,
+    "**/src/api/generated/**": true
+  },
+  // 検索対象から外すファイル・ディレクトリのパスのパターン
+  "search.exclude": {
+    "**/target/**": true,
+    "**/node_modules/**": true,
+    "**/.venv/**": true,
+    "**/dist/**": true,
+    "**/__pycache__/**": true,
+    "**/pnpm-lock.yaml": true,
+    "**/src/api/generated/**": true
+  },
+  // 検索ビューの検索結果に行数を併記
+  "search.showLineNumbers": true,
+  // アクティブなターミナルセッションがある場合、終了時に確認を行う
+  "terminal.integrated.confirmOnExit": "never",
+  // ターミナルで選択したテキストをクリップボードにコピー
+  "terminal.integrated.copyOnSelection": true,
+  // エディターのタブのサイズ
+  "workbench.editor.tabSizing": "shrink",
+  // ファイルアイコンテーマ
+  "workbench.iconTheme": "material-icon-theme",
+  // 起動時に表示するエディター
+  "workbench.startupEditor": "readme",
+  /* 各言語、ファイル固有の設定 */
+  "[csv]": {
+    // 行の折り返し表示
+    "editor.wordWrap": "off"
+  },
+  "[json]": {
+    // 既定のフォーマッター
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[log]": {
+    // 行の折り返し表示
+    "editor.wordWrap": "off"
+  },
+  "[python]": {
+    // 1つのタブに相当する半角スペースの数
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.rulers": [79], // 79文字目に縦線を表示
+    "editor.wordWrap": "off",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "always",
+      "source.organizeImports.ruff": "always"
+    }
+  },
+  "[tsv]": {
+    // Tabキーで半角スペースを挿入
+    "editor.insertSpaces": false,
+    // 行の折り返し表示
+    "editor.wordWrap": "off"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    // 既定のフォーマッター（Prettierに統一）
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[toml]": {
+    // 既定のフォーマッター
+    "editor.defaultFormatter": "tamasfe.even-better-toml",
+    // ファイル保存時に自動でフォーマット
+    "editor.formatOnSave": true,
+    // 1つのタブに相当する半角スペースの数
+    "editor.tabSize": 2
+  },
+  "[html]": {
+    // 既定のフォーマッター
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "[rust]": {
+    // 既定のフォーマッター
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    // ファイル保存時に自動でフォーマット
+    "editor.formatOnSave": true
+  },
+  // Rust Analyzerでclippyを使用してチェック
+  "rust-analyzer.check.command": "clippy",
+  // すべての機能を有効化
+  "rust-analyzer.cargo.features": "all",
+  // Python テストの作業ディレクトリ
+  "python.testing.cwd": "${workspaceFolder}/api",
+  // pytest の引数
+  "python.testing.pytestArgs": [],
+  // pytest を有効化
+  "python.testing.pytestEnabled": true,
+  // unittest を無効化
+  "python.testing.unittestEnabled": false,
+  // Python インタープリターのパス
+  "python.defaultInterpreterPath": "${workspaceFolder}/api/.venv/Scripts/python.exe",
+  // Python 型チェックモード
+  "python.analysis.typeCheckingMode": "standard",
+
+  /* Vitest (VS Code Test Explorer) */
+  // app/ サブディレクトリの vite.config.ts を Vitest の設定ファイルとして指定
+  "vitest.rootConfig": "${workspaceFolder}/app/vite.config.ts",
+  // fnm 管理の node.exe を明示指定（fnm_multishells の一時パスは VS Code から見えないため）
+  "vitest.nodeEnv": {
+    "PATH": "${env:PATH}"
+  }
+}

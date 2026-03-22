@@ -1,0 +1,63 @@
+name: FastAPI CI
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: ["dev"]
+  # pull_request:
+  #   branches: ["dev"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "api/python-requirements/ubuntu-requirements.txt"
+      # Python のインストール
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      # システム依存関係のインストール
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libmagic1
+
+      # 依存関係のインストール (uv pip を使用)
+      - name: Install dependencies
+        run: |
+          uv add -r api/python-requirements/ubuntu-requirements.txt
+          uv add flake8 pylint coverage
+
+      # Linterの実行
+      - name: Lint with flake8
+        working-directory: ./api/economicon
+        run: |
+          # uv run を使うことで仮想環境を意識せずに実行可能
+          uv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          uv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      # テストとカバレッジの実行
+      - name: Run tests with coverage
+        working-directory: ./api
+        run: |
+          uv run pytest tests --cov=economicon --cov-report=xml --cov-report=term
+
+      # カバレッジレポートのアップロード
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./api/coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }} # v4以降はトークン推奨
