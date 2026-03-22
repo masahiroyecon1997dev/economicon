@@ -21,8 +21,8 @@ import {
   closeMessageDialog,
   importFile,
   navigateToSampleDir,
-  waitForAppReady,
 } from "./helpers/appHelpers";
+import { setupTauriApp } from "./helpers/setupHelpers";
 
 // ---------------------------------------------------------------------------
 // テスト用定数
@@ -37,14 +37,11 @@ const EXPLANATORY_VARS = ["value", "capital"];
 // テストスイート
 // ---------------------------------------------------------------------------
 test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
-  test.beforeEach(async ({ page }) => {
-    await waitForAppReady(page);
-  });
-
   // =========================================================================
   // STEP 1: Parquet ファイルをインポート
   // =========================================================================
-  test("Step 1: Parquet ファイルをインポートする", async ({ page }) => {
+  test("Step 1: Parquet ファイルをインポートする", async ({ playwright }) => {
+    const page = await setupTauriApp(playwright);
     const fileSelectTab = page.getByRole("tab", {
       name: /ファイル選択|Select File/i,
     });
@@ -56,18 +53,21 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
     await importFile(page, PARQUET_FILE_NAME, TABLE_NAME);
 
     // DataPreview ビューに遷移し、タブにテーブル名が表示されること
-    await expect(page.getByRole("tab", { name: TABLE_NAME })).toBeVisible();
+    await expect(page.getByRole("button", { name: TABLE_NAME })).toBeVisible();
 
     // テーブルヘッダーに invest 列が表示されること
     await expect(
-      page.getByRole("columnheader", { name: DEPENDENT_VAR, exact: true }),
+      page.getByRole("columnheader", { name: DEPENDENT_VAR }),
     ).toBeVisible();
   });
 
   // =========================================================================
   // STEP 2: 基本分析 → 基本統計量
   // =========================================================================
-  test("Step 2: 基本統計量を計算する（mean・std_dev）", async ({ page }) => {
+  test("Step 2: 基本統計量を計算する（mean・std_dev）", async ({
+    playwright,
+  }) => {
+    const page = await setupTauriApp(playwright);
     // 前提: Step 1 でインポート済みのデータが存在すること
     // ヘッダーメニューから BasicAnalysis → BasicStatistics へ遷移
     await clickHeaderMenu(
@@ -143,8 +143,9 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
   // STEP 3: 線形回帰 → 最小二乗法（OLS）
   // =========================================================================
   test("Step 3: 最小二乗法（OLS）を実行して結果を確認する", async ({
-    page,
+    playwright,
   }) => {
+    const page = await setupTauriApp(playwright);
     // ヘッダーメニューから Linear Regression → OLS へ遷移
     await clickHeaderMenu(
       page,
@@ -154,7 +155,9 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
 
     // LinearRegressionForm ビューのタイトルを確認
     await expect(
-      page.getByRole("heading", { name: /線形回帰|Linear Regression/i }),
+      page.getByRole("tab", {
+        name: /分析設定\(最小二乗法\)|Analysis Settings\(OLS\)/i,
+      }),
     ).toBeVisible();
 
     // ---- データ選択 ----
@@ -177,9 +180,9 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
       .locator("div")
       .filter({ hasText: /^被説明変数|Dependent Variable/ })
       .last();
-    const dependentCombobox = dependentSection.getByRole("combobox").first();
-    await dependentCombobox.click();
-    const dependentOption = page.getByRole("option", {
+    const dependentRadio = dependentSection.getByRole("radio").first();
+    await dependentRadio.click();
+    const dependentOption = page.getByRole("radio", {
       name: DEPENDENT_VAR,
       exact: true,
     });
@@ -251,7 +254,8 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
   // =========================================================================
   // STEP 4: Parquet 形式で保存
   // =========================================================================
-  test("Step 4: Parquet 形式で保存する", async ({ page }) => {
+  test("Step 4: Parquet 形式で保存する", async ({ playwright }) => {
+    const page = await setupTauriApp(playwright);
     // ヘッダーメニュー: ファイル → 保存
     await clickHeaderMenu(page, /ファイル|File/i, /^保存$|^Save$/);
 
@@ -278,12 +282,6 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
 
     // 保存
     await page.getByRole("button", { name: /^保存$|^Save$/i }).click();
-
-    // 上書き確認があれば OK
-    const confirmDlg = page.getByRole("dialog");
-    if (await confirmDlg.isVisible()) {
-      await confirmDlg.getByRole("button", { name: /OK|はい/i }).click();
-    }
 
     // 成功メッセージを閉じる
     await closeMessageDialog(page);
