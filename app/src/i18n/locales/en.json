@@ -283,8 +283,8 @@
     "ExecuteCalculation": "Execute Calculation",
     "ExecutingCalculation": "Executing calculation...",
     "CalculationSuccess": "Calculation completed successfully.",
-    "InsertPosition": "Insert Position",
-    "InsertPositionLast": "end"
+    "AddPosition": "Add Position",
+    "AddPositionLast": "end"
   },
   "Loading": {
     "Loading": "Loading...",
