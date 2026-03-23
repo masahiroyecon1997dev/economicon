@@ -1,11 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { cn } from "../../../lib/utils/helpers";
 import type { LinearRegressionResultType } from "../../../types/commonTypes";
-import {
-  HighlightStatCard,
-  ResultSection,
-  StatItem,
-} from "../../molecules/Result/ResultSection";
+import { ResultSection, StatItem } from "../../molecules/Result/ResultSection";
 
 type RegressionResultProps = {
   result: LinearRegressionResultType;
@@ -41,7 +37,7 @@ export const RegressionResult = ({
         <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm md:grid-cols-2">
           <div className="flex gap-2">
             <span className="font-medium text-brand-text-main shrink-0">
-              {t("RegressionResult.TableName")}:
+              {t("RegressionResult.DataName")}:
             </span>
             <span className="text-brand-text-main break-all">
               {result.tableName}
@@ -142,17 +138,15 @@ export const RegressionResult = ({
 
       {/* モデル統計量 */}
       <ResultSection title={t("RegressionResult.ModelStatistics")}>
-        <div className="mb-3 grid grid-cols-2 gap-3">
-          <HighlightStatCard
+        <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
+          <StatItem
             label="R²"
             value={formatNumber(result.modelStatistics.R2)}
           />
-          <HighlightStatCard
+          <StatItem
             label={t("RegressionResult.AdjustedR2")}
             value={formatNumber(result.modelStatistics.adjustedR2)}
           />
-        </div>
-        <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
           <StatItem
             label="AIC"
             value={formatNumber(result.modelStatistics.AIC)}

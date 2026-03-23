@@ -6,8 +6,14 @@ import { z } from "zod";
 import { getEconomiconAPI } from "../../api/endpoints";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../lib/utils/apiError";
 import { getPolarsTypeColor } from "../../lib/utils/columnTypeColor";
+import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
+import { useTableInfosStore } from "../../stores/tableInfos";
 import { useTableListStore } from "../../stores/tableList";
 import { ExpressionHelperButton } from "../atoms/Button/ExpressionHelperButton";
 import { InputText } from "../atoms/Input/InputText";
@@ -19,7 +25,7 @@ import { PageLayout } from "../templates/PageLayout";
 
 const createCalculationSchema = (t: (key: string) => string) =>
   z.object({
-    tableName: z.string().min(1, t("ValidationMessages.TableNameSelect")),
+    tableName: z.string().min(1, t("ValidationMessages.DataNameSelect")),
     newColumnName: z
       .string()
       .min(1, t("ValidationMessages.NewColumnNameRequired")),
@@ -33,10 +39,12 @@ export const Calculation = () => {
   const { t } = useTranslation();
   const tableList = useTableListStore((state) => state.tableList);
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const { tableInfos, addTableInfo, invalidateTable, activateTableInfo } =
+    useTableInfosStore();
 
   const { selectedTableName, setSelectedTableName, columnList } =
     useTableColumnLoader({
-      numericOnly: true,
+      numericOnly: false,
       autoLoadOnMount: true,
     });
 
@@ -63,18 +71,30 @@ export const Calculation = () => {
         });
 
         if (response.code === "OK") {
-          await showMessageDialog(
-            t("Common.OK"),
-            t("CalculationView.CalculationSuccess"),
+          const updatedTableInfo = await getTableInfo(value.tableName);
+          const alreadyInStore = tableInfos.some(
+            (info) => info.tableName === value.tableName,
           );
+          if (alreadyInStore) {
+            invalidateTable(value.tableName, {
+              columnList: updatedTableInfo.columnList,
+            });
+            activateTableInfo(value.tableName);
+          } else {
+            addTableInfo(updatedTableInfo);
+          }
           setCurrentView("DataPreview");
         } else {
-          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+          );
         }
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("Error.UnexpectedError");
-        await showMessageDialog(t("Error.Error"), errorMessage);
+        await showMessageDialog(
+          t("Error.Error"),
+          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        );
       }
     },
   });
@@ -156,16 +176,22 @@ export const Calculation = () => {
               <form.Field name="tableName">
                 {(field) => (
                   <FormField
-                    label={t("CalculationView.TargetTable")}
+                    label={t("CalculationView.TargetData")}
                     htmlFor="target-table"
-                    error={field.state.meta.errors[0]?.message?.toString()}
+                    error={
+                      (field.state.meta.errors[0] as { message?: string })
+                        ?.message ?? field.state.meta.errors[0]?.toString()
+                    }
                   >
                     <Select
                       id="target-table"
                       value={field.state.value}
                       onValueChange={handleTableChange}
-                      error={field.state.meta.errors[0]?.message?.toString()}
-                      placeholder={t("CalculationView.SelectTable")}
+                      error={
+                        (field.state.meta.errors[0] as { message?: string })
+                          ?.message ?? field.state.meta.errors[0]?.toString()
+                      }
+                      placeholder={t("CalculationView.SelectData")}
                       disabled={isSubmitting}
                     >
                       {tableList.map((table, index) => (
@@ -184,7 +210,10 @@ export const Calculation = () => {
                   <FormField
                     label={t("CalculationView.NewColumnName")}
                     htmlFor="new-column-name"
-                    error={field.state.meta.errors[0]?.message?.toString()}
+                    error={
+                      (field.state.meta.errors[0] as { message?: string })
+                        ?.message ?? field.state.meta.errors[0]?.toString()
+                    }
                   >
                     <InputText
                       id="new-column-name"
@@ -194,7 +223,10 @@ export const Calculation = () => {
                       placeholder={t(
                         "CalculationView.NewColumnNamePlaceholder",
                       )}
-                      error={field.state.meta.errors[0]?.message?.toString()}
+                      error={
+                        (field.state.meta.errors[0] as { message?: string })
+                          ?.message ?? field.state.meta.errors[0]?.toString()
+                      }
                       disabled={isSubmitting}
                     />
                   </FormField>
@@ -206,11 +238,11 @@ export const Calculation = () => {
                 <form.Field name="addPositionColumn">
                   {(field) => (
                     <FormField
-                      label={t("CalculationView.InsertPosition")}
-                      htmlFor="insert-position"
+                      label={t("CalculationView.AddPosition")}
+                      htmlFor="add-position"
                     >
                       <Select
-                        id="insert-position"
+                        id="add-position"
                         value={field.state.value}
                         onValueChange={(v) => field.handleChange(v)}
                         disabled={isSubmitting}
@@ -218,7 +250,7 @@ export const Calculation = () => {
                         {columnList.map((col, i) => (
                           <SelectItem key={i} value={col.name}>
                             {i === columnList.length - 1
-                              ? `${col.name}\u00a0(${t("CalculationView.InsertPositionLast")})`
+                              ? `${col.name}\u00a0(${t("CalculationView.AddPositionLast")})`
                               : col.name}
                           </SelectItem>
                         ))}
@@ -303,6 +335,9 @@ export const Calculation = () => {
                       <div className="flex-1 relative bg-white dark:bg-neutral-900">
                         <textarea
                           ref={textareaRef}
+                          aria-label={t(
+                            "CalculationView.CalculationExpression",
+                          )}
                           className="w-full h-full p-4 font-mono text-sm text-text-main dark:text-neutral-300 bg-transparent border-none resize-none focus:ring-0 leading-relaxed"
                           placeholder={t("CalculationView.FormulaPlaceholder")}
                           value={field.state.value}
@@ -319,7 +354,8 @@ export const Calculation = () => {
                       </div>
                       {field.state.meta.errors[0] && (
                         <p className="px-4 py-1.5 text-xs text-red-600 dark:text-red-400 bg-red-50/60 dark:bg-red-900/10 border-t border-red-200 dark:border-red-800">
-                          {field.state.meta.errors[0].toString()}
+                          {(field.state.meta.errors[0] as { message?: string })
+                            ?.message ?? field.state.meta.errors[0]?.toString()}
                         </p>
                       )}
                     </div>

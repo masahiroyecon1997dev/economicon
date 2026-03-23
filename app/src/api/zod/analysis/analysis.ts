@@ -49,6 +49,10 @@ export const regressionBodyMissingValueHandlingDefault = `remove`;
 export const regressionBodyAnalysisTwoAlphaDefault = 1;
 export const regressionBodyAnalysisTwoAlphaMin = 0;
 
+export const regressionBodyAnalysisTwoAlphaConventionDefault = `glmnet`;
+export const regressionBodyAnalysisTwoMaxIterDefault = 1000;
+export const regressionBodyAnalysisTwoMaxIterMax = 100000;
+
 export const regressionBodyAnalysisTwoCalculateSeDefault = false;
 export const regressionBodyAnalysisTwoBootstrapIterationsDefault = 1000;
 export const regressionBodyAnalysisTwoBootstrapIterationsMin = 100;
@@ -93,6 +97,8 @@ export const RegressionBody = zod.object({
 }),zod.object({
   "method": zod.enum(['lasso', 'ridge']),
   "alpha": zod.number().min(regressionBodyAnalysisTwoAlphaMin).default(regressionBodyAnalysisTwoAlphaDefault).describe('正則化強度のパラメータ'),
+  "alphaConvention": zod.enum(['glmnet', 'sklearn']).default(regressionBodyAnalysisTwoAlphaConventionDefault).describe('alpha の規約。\'glmnet\': R の glmnet パッケージ準拠（計量経済学・統計学のデフォルト）。\'sklearn\': scikit-learn 準拠。'),
+  "maxIter": zod.number().min(1).max(regressionBodyAnalysisTwoMaxIterMax).default(regressionBodyAnalysisTwoMaxIterDefault).describe('座標降下法の最大反復回数。収束しない場合は増やしてください。'),
   "calculateSe": zod.boolean().default(regressionBodyAnalysisTwoCalculateSeDefault).describe('ブートストラップ法による標準誤差を計算するかどうか'),
   "bootstrapIterations": zod.number().min(regressionBodyAnalysisTwoBootstrapIterationsMin).max(regressionBodyAnalysisTwoBootstrapIterationsMax).default(regressionBodyAnalysisTwoBootstrapIterationsDefault).describe('ブートストラップ法のイテレーション回数'),
   "randomState": zod.union([zod.number(),zod.null()]).optional().describe('ブートストラップの乱数シード。None の場合は固定しない。実験の再現性を確保する場合は整数値を指定する。')

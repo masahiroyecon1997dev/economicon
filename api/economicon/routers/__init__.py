@@ -6,6 +6,7 @@ from economicon.routers import (
     data_io,
     regressions,
     settings,
+    shutdown,
     statistics,
     tables,
 )
@@ -20,3 +21,4 @@ api_router.include_router(regressions.router)
 api_router.include_router(data_io.router)
 api_router.include_router(statistics.router)
 api_router.include_router(settings.router)
+api_router.include_router(shutdown.router)

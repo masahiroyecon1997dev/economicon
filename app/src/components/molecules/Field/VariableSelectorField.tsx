@@ -92,18 +92,18 @@ export const VariableSelectorField = ({
       )}
       <div
         className={cn(
-          "min-h-0 flex-1 overflow-y-auto rounded-lg border p-2",
+          "min-h-0 flex-1 overflow-y-auto rounded-lg border px-2 py-1",
           error
             ? "border-red-500 bg-red-50"
             : "border-border-color bg-secondary",
         )}
       >
         {columns.length === 0 ? (
-          <p className="p-2 text-xs text-brand-text-main/60">
+          <p className="p-1 text-xs text-brand-text-main/60">
             {t("Common.NoColumnsAvailable")}
           </p>
         ) : visibleColumns.length === 0 ? (
-          <p className="p-2 text-xs text-brand-text-main/60">
+          <p className="p-1 text-xs text-brand-text-main/60">
             {t("Common.NoColumnsMatchFilter")}
           </p>
         ) : (
@@ -113,7 +113,7 @@ export const VariableSelectorField = ({
                 <label
                   htmlFor={`variable-selector-field-${column.name}-${name || "default"}`}
                   className={cn(
-                    "flex w-full cursor-pointer items-center gap-3 rounded-md p-1.5",
+                    "flex w-full cursor-pointer items-center gap-3 rounded-md p-0.5",
                     disabled
                       ? "cursor-not-allowed opacity-50"
                       : "hover:bg-white",

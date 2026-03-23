@@ -2,12 +2,11 @@
 アプリケーション設定を管理するシングルトンマネージャー
 """
 
+import json
 import os
 import platform
 import threading
 from pathlib import Path
-
-import yaml
 
 from economicon.services.data.settings_info import SettingsInfo
 
@@ -23,7 +22,7 @@ class SettingsStore:
     _instance = None
     _lock: threading.RLock = threading.RLock()
 
-    SETTINGS_FILE_NAME = "economicon.config.yml"
+    SETTINGS_FILE_NAME = "economicon.config.json"
 
     def __new__(cls):
         if cls._instance is None:
@@ -73,11 +72,13 @@ class SettingsStore:
             Path: ログディレクトリのパス
         """
         os_system = platform.system()
+        # WindowsではAppData/Local/economicon/logs、
+        # macOS/Linuxではホームディレクトリ/.economicon/logs
         if os_system == "Windows":
-            appdata = os.getenv("APPDATA") or str(
-                Path.home() / "AppData" / "Roaming"
+            localappdata = os.getenv("LOCALAPPDATA") or str(
+                Path.home() / "AppData" / "Local"
             )
-            logs_dir = Path(appdata) / "economicon" / "logs"
+            logs_dir = Path(localappdata) / "economicon" / "logs"
         else:
             logs_dir = Path.home() / ".economicon" / "logs"
         logs_dir.mkdir(parents=True, exist_ok=True)
@@ -94,7 +95,7 @@ class SettingsStore:
         os_system = platform.system()
 
         if os_system == "Windows":
-            # WindowsではAppData/Roaming/economicon/配下に配置
+            # Windowsでは設定ファイルはAppData/Roaming/economicon/配下に配置
             appdata = os.getenv("APPDATA") or str(
                 Path.home() / "AppData" / "Roaming"
             )
@@ -127,7 +128,7 @@ class SettingsStore:
             # 設定ファイルを読み込み
             try:
                 with open(settings_file_path, encoding="utf-8") as f:
-                    user_settings = yaml.safe_load(f)
+                    user_settings = json.load(f)
 
                 # デフォルト設定とマージ（ユーザー設定を優先）
                 settings = default_settings.copy()
@@ -141,8 +142,8 @@ class SettingsStore:
                                 **user_settings[section],
                             }
 
-            except yaml.YAMLError:
-                # YAML解析エラーの場合はデフォルト設定を使用
+            except json.JSONDecodeError, ValueError:
+                # JSON解析エラーの場合はデフォルト設定を使用
                 settings = default_settings
 
             general = settings.get("general", {})
@@ -175,9 +176,7 @@ class SettingsStore:
         """
         try:
             with open(file_path, "w", encoding="utf-8") as f:
-                yaml.dump(
-                    settings, f, default_flow_style=False, allow_unicode=True
-                )
+                json.dump(settings, f, ensure_ascii=False, indent=2)
         except Exception as e:
             print(f"Failed to create default settings file: {e}")
 
@@ -276,11 +275,6 @@ class SettingsStore:
 
             try:
                 with open(settings_file_path, "w", encoding="utf-8") as f:
-                    yaml.dump(
-                        settings_dict,
-                        f,
-                        default_flow_style=False,
-                        allow_unicode=True,
-                    )
+                    json.dump(settings_dict, f, ensure_ascii=False, indent=2)
             except Exception as e:
                 raise RuntimeError(f"Failed to save settings: {e}") from e

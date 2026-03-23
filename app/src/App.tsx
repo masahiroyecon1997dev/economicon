@@ -17,6 +17,7 @@ import {
   Group as PanelGroup,
   Separator as PanelResizeHandle,
 } from "react-resizable-panels";
+import { ConfirmDialog } from "./components/molecules/Dialog/ConfirmDialog";
 import { MessageDialog } from "./components/molecules/Dialog/MessageDialog";
 import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
 import { AppBar } from "./components/organisms/Header/AppBar";
@@ -32,6 +33,7 @@ export const App = () => {
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const setFiles = useFilesStore((state) => state.setFiles);
   const { isLoading, loadingMessage } = useLoadingStore();
+  const { setLoading, clearLoading } = useLoadingStore();
 
   // テーマを <html> の class に反映する（Tailwind dark:プレフィックスを有効化）
   const theme = useSettingsStore((state) => state.theme);
@@ -45,8 +47,25 @@ export const App = () => {
 
     let isMounted = true;
 
+    // FastAPI サイドカーが起動するまで最大30秒ポーリングする
+    const waitForServer = async (api: ReturnType<typeof getEconomiconAPI>) => {
+      const MAX_RETRIES = 60; // 1000ms × 60 = 60秒
+      const INTERVAL_MS = 1000;
+      for (let i = 0; i < MAX_RETRIES; i++) {
+        try {
+          await api.healthCheck();
+          return; // 疎通成功
+        } catch {
+          // まだ起動中 — 少し待って再試行
+          await new Promise((resolve) => setTimeout(resolve, INTERVAL_MS));
+        }
+      }
+      throw new Error("SERVER_TIMEOUT");
+    };
+
     const initialize = async () => {
       const api = getEconomiconAPI();
+      setLoading(true, t("Loading.Launching"));
       try {
         // 認証トークンを取得する。
         // Rust 側で起動時に生成されたトークンが確認できるまで後続の
@@ -60,10 +79,16 @@ export const App = () => {
 
         if (isMounted) setOsInfo(osInfo);
 
+        // FastAPI サーバーが起動するまで待機
+        if (isMounted) setLoading(true, t("Loading.ConnectingServer"));
+        await waitForServer(api);
+
         // 設定を取得
+        if (isMounted) setLoading(true, t("Loading.Processing"));
         const resGetSettings = await api.getSettings();
         if (resGetSettings.code !== "OK") {
           if (isMounted) {
+            clearLoading();
             await showMessageDialog(
               t("Error.Error"),
               t("Error.UnexpectedError"),
@@ -80,6 +105,7 @@ export const App = () => {
         const resGetTableNames = await api.getTableList();
         if (resGetTableNames.code !== "OK") {
           if (isMounted) {
+            clearLoading();
             await showMessageDialog(
               t("Error.Error"),
               t("Error.UnexpectedError"),
@@ -93,11 +119,18 @@ export const App = () => {
           setCurrentView("ImportDataFile");
           setTableList(resGetTableNames.result.tableNameList);
           setFiles(files);
+          clearLoading();
         }
       } catch (error) {
         console.error("App initialization error:", error);
         if (isMounted) {
-          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+          clearLoading();
+          const isTimeout =
+            error instanceof Error && error.message === "SERVER_TIMEOUT";
+          await showMessageDialog(
+            t("Error.Error"),
+            isTimeout ? t("Loading.ServerTimeout") : t("Error.UnexpectedError"),
+          );
         }
       }
     };
@@ -107,7 +140,16 @@ export const App = () => {
     return () => {
       isMounted = false;
     };
-  }, [setCurrentView, setFiles, setOsInfo, setSettings, setTableList, t]);
+  }, [
+    clearLoading,
+    setCurrentView,
+    setFiles,
+    setLoading,
+    setOsInfo,
+    setSettings,
+    setTableList,
+    t,
+  ]);
 
   return (
     <>
@@ -122,9 +164,10 @@ export const App = () => {
             <MainView />
           </Panel>
         </PanelGroup>
-        <MessageDialog />
       </div>
       <LoadingOverlay isVisible={isLoading} message={loadingMessage} />
+      <MessageDialog />
+      <ConfirmDialog />
     </>
   );
 };

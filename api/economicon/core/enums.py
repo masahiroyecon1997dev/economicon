@@ -98,3 +98,6 @@ class ErrorCode(StrEnum):
     # Settings関連
     GET_SETTINGS_ERROR = "GET_SETTINGS_ERROR"
     UPDATE_SETTINGS_ERROR = "UPDATE_SETTINGS_ERROR"
+
+    # Shutdown関連
+    SHUTDOWN_ERROR = "SHUTDOWN_ERROR"

@@ -5,24 +5,7 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/": {
-      "get": {
-        "summary": "Root",
-        "description": "\u30eb\u30fc\u30c8\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8",
-        "operationId": "root",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/health": {
+    "/api/health": {
       "get": {
         "summary": "Health Check",
         "description": "\u30d8\u30eb\u30b9\u30c1\u30a7\u30c3\u30af",
@@ -2940,6 +2923,71 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SuccessResponse_UpdateSettingsResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/shutdown": {
+      "post": {
+        "tags": [
+          "shutdown"
+        ],
+        "summary": "Shutdown",
+        "description": "\u30a2\u30d7\u30ea\u7d42\u4e86\u524d\u30af\u30ea\u30fc\u30f3\u30a2\u30c3\u30d7\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u30d5\u30ed\u30f3\u30c8\u30a8\u30f3\u30c9\u306e CloseRequested \u30cf\u30f3\u30c9\u30e9\u304b\u3089\u547c\u3073\u51fa\u3055\u308c\u308b\u3002\n\u5206\u6790\u7d50\u679c\u30d5\u30a1\u30a4\u30eb\u306e\u524a\u9664\u3068\u8a2d\u5b9a\u306e\u4fdd\u5b58\u3092\u884c\u3046\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nanalysis_result_store : AnalysisResultStoreDep\n    \u4f9d\u5b58\u6ce8\u5165\u3055\u308c\u305f\u5206\u6790\u7d50\u679c\u30b9\u30c8\u30a2\nsettings_store : SettingsStoreDep\n    \u4f9d\u5b58\u6ce8\u5165\u3055\u308c\u305f\u8a2d\u5b9a\u30b9\u30c8\u30a2\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "shutdown",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_ShutdownResult_"
                 }
               }
             }
@@ -6591,6 +6639,24 @@
             "description": "\u6b63\u5247\u5316\u5f37\u5ea6\u306e\u30d1\u30e9\u30e1\u30fc\u30bf",
             "default": 1.0
           },
+          "alphaConvention": {
+            "type": "string",
+            "enum": [
+              "glmnet",
+              "sklearn"
+            ],
+            "title": "Alphaconvention",
+            "description": "alpha \u306e\u898f\u7d04\u3002'glmnet': R \u306e glmnet \u30d1\u30c3\u30b1\u30fc\u30b8\u6e96\u62e0\uff08\u8a08\u91cf\u7d4c\u6e08\u5b66\u30fb\u7d71\u8a08\u5b66\u306e\u30c7\u30d5\u30a9\u30eb\u30c8\uff09\u3002'sklearn': scikit-learn \u6e96\u62e0\u3002",
+            "default": "glmnet"
+          },
+          "maxIter": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "minimum": 1.0,
+            "title": "Maxiter",
+            "description": "\u5ea7\u6a19\u964d\u4e0b\u6cd5\u306e\u6700\u5927\u53cd\u5fa9\u56de\u6570\u3002\u53ce\u675f\u3057\u306a\u3044\u5834\u5408\u306f\u5897\u3084\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "default": 1000
+          },
           "calculateSe": {
             "type": "boolean",
             "title": "Calculatese",
@@ -6813,6 +6879,21 @@
         ],
         "title": "SampleInput",
         "description": "\u691c\u5b9a\u306b\u4f7f\u7528\u3059\u308b1\u30b5\u30f3\u30d7\u30eb\u306e\u6307\u5b9a\uff08\u30c6\u30fc\u30d6\u30eb\u540d\u30fb\u5217\u540d\u306e\u30da\u30a2\uff09"
+      },
+      "ShutdownResult": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "\u30af\u30ea\u30fc\u30f3\u30a2\u30c3\u30d7\u51e6\u7406\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\uff08ok\uff09"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ShutdownResult",
+        "description": "\u30a2\u30d7\u30ea\u7d42\u4e86\u524d\u30af\u30ea\u30fc\u30f3\u30a2\u30c3\u30d7\u306e\u7d50\u679c\u30e2\u30c7\u30eb"
       },
       "SimulationColumnConfig": {
         "properties": {
@@ -7787,6 +7868,25 @@
           "result"
         ],
         "title": "SuccessResponse[RenameTableResult]"
+      },
+      "SuccessResponse_ShutdownResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ShutdownResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[ShutdownResult]"
       },
       "SuccessResponse_SortColumnsResult_": {
         "properties": {

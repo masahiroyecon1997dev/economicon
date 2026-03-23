@@ -1,11 +1,11 @@
-"""
+﻿"""
 回帰分析のフィッター関数
 
 各回帰モデルのフィッティングロジックを提供する純粋関数群
 """
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -13,9 +13,6 @@ import statsmodels.api as sm
 from linearmodels.iv import IV2SLS, IVGMM
 from linearmodels.panel import PanelOLS, RandomEffects
 from py4etrics.tobit import Tobit
-from sklearn.linear_model import Lasso, Ridge
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
 from statsmodels.regression.linear_model import RegressionResultsWrapper
 
 from economicon.services.regressions.common import (
@@ -331,6 +328,10 @@ class RegularizedRegressionInput:
     bootstrap_iterations: int = 1000
     # Eco-Note C: 在様固定。None 指定時は推定のたびに結果が変わる
     random_state: int | None = None
+    max_iter: int = 1000
+    # Eco-Note D: alpha の規約。glmnet (R) または sklearn のどちらに準拠するか
+    # デフォルトは glmnet（計量経済学標準）。
+    alpha_convention: Literal["glmnet", "sklearn"] = "glmnet"
 
 
 @dataclass
@@ -355,26 +356,135 @@ class RegularizedResult:
     r2: float  # 訓練データ R²
     n_obs: int  # 観測数
     has_const: bool  # 定数項フラグ
-    pipeline: Any  # sklearn Pipeline（predict 再実行用）
-    x_data: np.ndarray  # 推定時の説明変数（定数項除去済み）
+    fittedvalues: np.ndarray  # 予測値（診断列追加時に使用）
+    x_data: np.ndarray  # 説明変数（定数項除去済み・ブートストラップ用）
     y_data: np.ndarray  # 推定時の被説明変数（残差計算用）
+    converged: bool = True  # 収束フラグ（警告表示に使用）
     bootstrap_ci_lower: np.ndarray | None = None
     bootstrap_ci_upper: np.ndarray | None = None
     bootstrap_se: np.ndarray | None = None  # Ridge 用
     selection_rate: np.ndarray | None = None  # Lasso 用
 
 
-def fit_lasso(
+def _build_alpha_arr(
+    alpha_sm: float,
+    has_const: bool,
+    n_features: int,
+) -> np.ndarray:
+    """
+    statsmodels fit_regularized 用の alpha 配列を構築する。
+
+    定数項（切片）は正則化の対象外とする（glmnet / sklearn 準拠）。
+    has_const=True の場合、先頭要素を 0.0 にする。
+
+    Args:
+        alpha_sm: statsmodels 規約に変換済みの alpha 値
+        has_const: 定数項フラグ
+        n_features: 説明変数数（定数項を除く）
+
+    Returns:
+        shape (n_features,) or (n_features+1,) の alpha 配列
+    """
+    if has_const:
+        return np.array([0.0] + [alpha_sm] * n_features, dtype=np.float64)
+    return np.full(n_features, alpha_sm, dtype=np.float64)
+
+
+def _to_statsmodels_alpha(
+    alpha_user: float,
+    convention: str,
+    n_samples: int,
+    l1_wt: float,
+) -> float:
+    """
+    パブリック API の alpha を statsmodels 座標降下法規約に変換する。
+
+    statsmodels elastic_net 目的関数（OLS）:
+        1/(2n)||y-Xβ||² + α·[L1_wt·||β||₁ + (1-L1_wt)/2·||β||²]
+
+    glmnet (R) 規約:
+        Lasso: 1/(2n)||y-Xβ||² + λ||β||₁  → α_sm = λ  (直接一致)
+        Ridge: 1/(2n)||y-Xβ||² + λ||β||²  → α_sm = λ  (直接一致)
+
+    sklearn 規約:
+        Lasso: 1/(2n)||y-Xβ||² + α||β||₁ → α_sm = α (同一式)
+        Ridge: ||y-Xβ||² + α||β||²        → α_sm = α/n
+
+    Args:
+        alpha_user: API から受け取った alpha 値
+        convention: "glmnet" または "sklearn"
+        n_samples: サンプルサイズ（Ridge sklearn 変換に使用）
+        l1_wt: 0.0 = Ridge, 1.0 = Lasso
+
+    Returns:
+        statsmodels に渡す alpha 値
+    """
+    is_lasso = l1_wt >= 1.0
+    if convention == "sklearn":
+        if is_lasso:
+            return float(alpha_user)  # sklearn Lasso = statsmodels Lasso
+        else:
+            return float(alpha_user) / n_samples  # sklearn Ridge → statsmodels
+    elif is_lasso:  # glmnet (default)
+        return float(alpha_user)  # glmnet λ = statsmodels α (直接一致)
+    else:
+        return float(alpha_user)  # glmnet λ = statsmodels α (直接一致)
+
+
+def _standardize(
+    x_no_const: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    説明変数を標準化する（ddof=0、sklearn StandardScaler 相当）。
+
+    ゼロ分散の列はスケールを 1.0 として除算エラーを回避する。
+
+    Returns:
+        (x_scaled, x_mean, x_scale)
+    """
+    x_mean = x_no_const.mean(axis=0)
+    x_scale = x_no_const.std(axis=0, ddof=0)
+    x_scale = np.where(x_scale == 0.0, 1.0, x_scale)
+    return (x_no_const - x_mean) / x_scale, x_mean, x_scale
+
+
+def _backscale_params(
+    coef_scaled: np.ndarray,
+    intercept_scaled: float,
+    x_mean: np.ndarray,
+    x_scale: np.ndarray,
+    has_const: bool,
+) -> np.ndarray:
+    """
+    標準化スペースの係数を元スケールに逆変換して params_original を返す。
+
+    変換式:
+        β_orig = β_scaled / σ
+        β₀_orig = β₀_scaled - β_orig · μ
+    """
+    coef_original = coef_scaled / x_scale
+    intercept_original = intercept_scaled - np.dot(coef_original, x_mean)
+    if has_const:
+        return np.hstack(([intercept_original], coef_original))
+    return coef_original
+
+
+def fit_lasso(  # noqa: PLR0915
     data_input: RegularizedRegressionInput,
 ) -> RegularizedResult:
     """
-    Lasso モデルのフィッティング
+    Lasso モデルのフィッティング（statsmodels 座標降下法 elastic_net 使用）
 
-    - R²: 訓練データでの model.score()
+    Eco-Note D: alpha 変換規約
+        glmnet λ（デフォルト）→ statsmodels α = λ（直接一致）
+        sklearn  α            → statsmodels α = α（同一式）
+
+    - R²: 手動計算 (1 - SS_res / SS_tot)
     - calculate_se=True 時はブートストラップを実行し、
       パーセンタイル法 95% CI と選択率（Selection Rate）を返す。
       SE は Lasso の点質量問題（Knight & Fu, 2000）により None。
     - t 値・ p 値は理論的根拠なしのため常に None。
+    - 収束失敗時は converged=False として警告を後段に伝達する。
 
     Args:
         data_input: RegularizedRegressionInput データクラス
@@ -382,33 +492,56 @@ def fit_lasso(
     Returns:
         RegularizedResult
     """
-    x_data_sklearn = remove_const_column(
-        data_input.x_data, data_input.has_const
+    x_no_const = remove_const_column(data_input.x_data, data_input.has_const)
+    n_samples, n_features = x_no_const.shape
+
+    x_scaled, x_mean, x_scale = _standardize(x_no_const)
+
+    x_sm = (
+        sm.add_constant(x_scaled, has_constant="add")
+        if data_input.has_const
+        else x_scaled
     )
 
-    model = make_pipeline(StandardScaler(), Lasso(alpha=data_input.alpha))
-    model.fit(x_data_sklearn, data_input.y_data)
-    r2 = float(model.score(x_data_sklearn, data_input.y_data))
+    alpha_sm = _to_statsmodels_alpha(
+        data_input.alpha,
+        data_input.alpha_convention,
+        n_samples,
+        l1_wt=1.0,
+    )
+    alpha_arr = _build_alpha_arr(alpha_sm, data_input.has_const, n_features)
 
-    scaler = model.named_steps["standardscaler"]
-    lasso = model.named_steps["lasso"]
+    sm_model = sm.OLS(data_input.y_data, x_sm, missing=data_input.missing)
+    result = sm_model.fit_regularized(
+        method="elastic_net",
+        alpha=alpha_arr,  # type: ignore[arg-type]
+        L1_wt=1.0,
+        maxiter=data_input.max_iter,
+    )
+    converged = bool(getattr(result, "converged", True))
 
-    coef_scaled = lasso.coef_
-    intercept_scaled = lasso.intercept_
-    coef_original = coef_scaled / scaler.scale_
-    intercept_original = intercept_scaled - np.dot(coef_original, scaler.mean_)
-
+    params_sm = np.asarray(result.params, dtype=np.float64)
     if data_input.has_const:
-        params_original = np.hstack(([intercept_original], coef_original))
+        intercept_scaled = float(params_sm[0])
+        coef_scaled = params_sm[1:]
     else:
-        params_original = coef_original
+        intercept_scaled = 0.0
+        coef_scaled = params_sm
+
+    params_original = _backscale_params(
+        coef_scaled, intercept_scaled, x_mean, x_scale, data_input.has_const
+    )
+
+    fittedvalues = x_sm @ params_sm
+    ss_res = float(np.sum((data_input.y_data - fittedvalues) ** 2))
+    ss_tot = float(np.sum((data_input.y_data - data_input.y_data.mean()) ** 2))
+    r2 = float(1.0 - ss_res / ss_tot) if ss_tot > 0 else 0.0
 
     bootstrap_ci_lower: np.ndarray | None = None
     bootstrap_ci_upper: np.ndarray | None = None
     selection_rate: np.ndarray | None = None
 
     if data_input.calculate_se:
-        n_samples = len(data_input.y_data)
         n_params = len(params_original)
         bootstrap_coefs = np.zeros((data_input.bootstrap_iterations, n_params))
         # Eco-Note C: Generator ベースの RNG で在様性を確保
@@ -417,24 +550,37 @@ def fit_lasso(
         for i in range(data_input.bootstrap_iterations):
             idx = rng.choice(n_samples, n_samples, replace=True)
             y_boot = data_input.y_data[idx]
-            x_boot = x_data_sklearn[idx]
+            x_boot_no_const = x_no_const[idx]
 
-            boot_model = make_pipeline(
-                StandardScaler(), Lasso(alpha=data_input.alpha)
+            x_boot_sc, boot_mean, boot_scale = _standardize(x_boot_no_const)
+            x_boot_sm = (
+                sm.add_constant(x_boot_sc, has_constant="add")
+                if data_input.has_const
+                else x_boot_sc
             )
-            boot_model.fit(x_boot, y_boot)
-
-            boot_sc = boot_model.named_steps["standardscaler"]
-            boot_las = boot_model.named_steps["lasso"]
-            boot_coef_sc = boot_las.coef_
-            boot_int_sc = boot_las.intercept_
-            boot_coef = boot_coef_sc / boot_sc.scale_
-            boot_int = boot_int_sc - np.dot(boot_coef, boot_sc.mean_)
-
+            boot_alpha_arr = _build_alpha_arr(
+                alpha_sm, data_input.has_const, n_features
+            )
+            boot_result = sm.OLS(y_boot, x_boot_sm).fit_regularized(
+                method="elastic_net",
+                alpha=boot_alpha_arr,  # type: ignore[arg-type]
+                L1_wt=1.0,
+                maxiter=data_input.max_iter,
+            )
+            boot_params_sm = np.asarray(boot_result.params, dtype=np.float64)
             if data_input.has_const:
-                bootstrap_coefs[i] = np.hstack(([boot_int], boot_coef))
+                boot_int_sc = float(boot_params_sm[0])
+                boot_coef_sc = boot_params_sm[1:]
             else:
-                bootstrap_coefs[i] = boot_coef
+                boot_int_sc = 0.0
+                boot_coef_sc = boot_params_sm
+            bootstrap_coefs[i] = _backscale_params(
+                boot_coef_sc,
+                boot_int_sc,
+                boot_mean,
+                boot_scale,
+                data_input.has_const,
+            )
 
         _ci_alpha = 0.05
         bootstrap_ci_lower = np.percentile(
@@ -454,28 +600,34 @@ def fit_lasso(
         params_original=params_original,
         coef_scaled=coef_scaled,
         r2=r2,
-        n_obs=len(data_input.y_data),
+        n_obs=n_samples,
         has_const=data_input.has_const,
-        pipeline=model,
-        x_data=x_data_sklearn,
+        fittedvalues=fittedvalues,
+        x_data=x_no_const,
         y_data=data_input.y_data,
+        converged=converged,
         bootstrap_ci_lower=bootstrap_ci_lower,
         bootstrap_ci_upper=bootstrap_ci_upper,
         selection_rate=selection_rate,
     )
 
 
-def fit_ridge(
+def fit_ridge(  # noqa: PLR0915
     data_input: RegularizedRegressionInput,
 ) -> RegularizedResult:
     """
-    Ridge モデルのフィッティング
+    Ridge モデルのフィッティング（statsmodels 座標降下法 elastic_net 使用）
 
-    - R²: 訓練データでの model.score()
+    Eco-Note D: alpha 変換規約
+        glmnet λ（デフォルト）→ statsmodels α = λ（直接一致）
+        sklearn  α            → statsmodels α = α / n
+
+    - R²: 手動計算 (1 - SS_res / SS_tot)
     - calculate_se=True 時はブートストラップを実行し、
       様本分布の標準偏差（bootstrap_se）と
       パーセンタイル法 95% CI を返す。
     - t 値・ p 値は理論的根拠なしのため常に None。
+    - 収束失敗時は converged=False として警告を後段に伝達する。
 
     Args:
         data_input: RegularizedRegressionInput データクラス
@@ -483,33 +635,56 @@ def fit_ridge(
     Returns:
         RegularizedResult
     """
-    x_data_sklearn = remove_const_column(
-        data_input.x_data, data_input.has_const
+    x_no_const = remove_const_column(data_input.x_data, data_input.has_const)
+    n_samples, n_features = x_no_const.shape
+
+    x_scaled, x_mean, x_scale = _standardize(x_no_const)
+
+    x_sm = (
+        sm.add_constant(x_scaled, has_constant="add")
+        if data_input.has_const
+        else x_scaled
     )
 
-    model = make_pipeline(StandardScaler(), Ridge(alpha=data_input.alpha))
-    model.fit(x_data_sklearn, data_input.y_data)
-    r2 = float(model.score(x_data_sklearn, data_input.y_data))
+    alpha_sm = _to_statsmodels_alpha(
+        data_input.alpha,
+        data_input.alpha_convention,
+        n_samples,
+        l1_wt=0.0,
+    )
+    alpha_arr = _build_alpha_arr(alpha_sm, data_input.has_const, n_features)
 
-    scaler = model.named_steps["standardscaler"]
-    ridge = model.named_steps["ridge"]
+    sm_model = sm.OLS(data_input.y_data, x_sm, missing=data_input.missing)
+    result = sm_model.fit_regularized(
+        method="elastic_net",
+        alpha=alpha_arr,  # type: ignore[arg-type]
+        L1_wt=0.0,
+        maxiter=data_input.max_iter,
+    )
+    converged = bool(getattr(result, "converged", True))
 
-    coef_scaled = ridge.coef_
-    intercept_scaled = ridge.intercept_
-    coef_original = coef_scaled / scaler.scale_
-    intercept_original = intercept_scaled - np.dot(coef_original, scaler.mean_)
-
+    params_sm = np.asarray(result.params, dtype=np.float64)
     if data_input.has_const:
-        params_original = np.hstack(([intercept_original], coef_original))
+        intercept_scaled = float(params_sm[0])
+        coef_scaled = params_sm[1:]
     else:
-        params_original = coef_original
+        intercept_scaled = 0.0
+        coef_scaled = params_sm
+
+    params_original = _backscale_params(
+        coef_scaled, intercept_scaled, x_mean, x_scale, data_input.has_const
+    )
+
+    fittedvalues = x_sm @ params_sm
+    ss_res = float(np.sum((data_input.y_data - fittedvalues) ** 2))
+    ss_tot = float(np.sum((data_input.y_data - data_input.y_data.mean()) ** 2))
+    r2 = float(1.0 - ss_res / ss_tot) if ss_tot > 0 else 0.0
 
     bootstrap_ci_lower: np.ndarray | None = None
     bootstrap_ci_upper: np.ndarray | None = None
     bootstrap_se: np.ndarray | None = None
 
     if data_input.calculate_se:
-        n_samples = len(data_input.y_data)
         n_params = len(params_original)
         bootstrap_coefs = np.zeros((data_input.bootstrap_iterations, n_params))
         # Eco-Note C: Generator ベースの RNG で在様性を確保
@@ -518,24 +693,37 @@ def fit_ridge(
         for i in range(data_input.bootstrap_iterations):
             idx = rng.choice(n_samples, n_samples, replace=True)
             y_boot = data_input.y_data[idx]
-            x_boot = x_data_sklearn[idx]
+            x_boot_no_const = x_no_const[idx]
 
-            boot_model = make_pipeline(
-                StandardScaler(), Ridge(alpha=data_input.alpha)
+            x_boot_sc, boot_mean, boot_scale = _standardize(x_boot_no_const)
+            x_boot_sm = (
+                sm.add_constant(x_boot_sc, has_constant="add")
+                if data_input.has_const
+                else x_boot_sc
             )
-            boot_model.fit(x_boot, y_boot)
-
-            boot_sc = boot_model.named_steps["standardscaler"]
-            boot_rid = boot_model.named_steps["ridge"]
-            boot_coef_sc = boot_rid.coef_
-            boot_int_sc = boot_rid.intercept_
-            boot_coef = boot_coef_sc / boot_sc.scale_
-            boot_int = boot_int_sc - np.dot(boot_coef, boot_sc.mean_)
-
+            boot_alpha_arr = _build_alpha_arr(
+                alpha_sm, data_input.has_const, n_features
+            )
+            boot_result = sm.OLS(y_boot, x_boot_sm).fit_regularized(
+                method="elastic_net",
+                alpha=boot_alpha_arr,  # type: ignore[arg-type]
+                L1_wt=0.0,
+                maxiter=data_input.max_iter,
+            )
+            boot_params_sm = np.asarray(boot_result.params, dtype=np.float64)
             if data_input.has_const:
-                bootstrap_coefs[i] = np.hstack(([boot_int], boot_coef))
+                boot_int_sc = float(boot_params_sm[0])
+                boot_coef_sc = boot_params_sm[1:]
             else:
-                bootstrap_coefs[i] = boot_coef
+                boot_int_sc = 0.0
+                boot_coef_sc = boot_params_sm
+            bootstrap_coefs[i] = _backscale_params(
+                boot_coef_sc,
+                boot_int_sc,
+                boot_mean,
+                boot_scale,
+                data_input.has_const,
+            )
 
         bootstrap_se = np.std(bootstrap_coefs, axis=0)
         _ci_alpha = 0.05
@@ -550,11 +738,12 @@ def fit_ridge(
         params_original=params_original,
         coef_scaled=coef_scaled,
         r2=r2,
-        n_obs=len(data_input.y_data),
+        n_obs=n_samples,
         has_const=data_input.has_const,
-        pipeline=model,
-        x_data=x_data_sklearn,
+        fittedvalues=fittedvalues,
+        x_data=x_no_const,
         y_data=data_input.y_data,
+        converged=converged,
         bootstrap_ci_lower=bootstrap_ci_lower,
         bootstrap_ci_upper=bootstrap_ci_upper,
         bootstrap_se=bootstrap_se,

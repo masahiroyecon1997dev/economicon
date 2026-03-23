@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { showMessageDialog } from "../../lib/dialog/message";
+import { extractApiErrorMessage } from "../../lib/utils/apiError";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
@@ -29,15 +30,16 @@ export const LeftSideMenu = () => {
       }
       setCurrentView("DataPreview");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : t("Error.UnexpectedError");
-      await showMessageDialog(t("Error.Error"), message);
+      await showMessageDialog(
+        t("Error.Error"),
+        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+      );
     }
   };
 
   return (
     <aside className="flex h-full w-full flex-col overflow-hidden bg-brand-primary dark:bg-gray-900 text-white">
-      <SectionHeading title={t("LeftSideMenu.Tables")} />
+      <SectionHeading title={t("LeftSideMenu.DataList")} />
       <div className="flex-1 overflow-y-auto px-4 pb-4">
         <TableNav
           activeTableName={activeTableName}

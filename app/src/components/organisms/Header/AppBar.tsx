@@ -2,6 +2,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ChevronDown, MoreHorizontal, Settings } from "lucide-react";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { getEconomiconAPI } from "../../../api/endpoints";
 import logo from "../../../assets/app-icon.svg";
 import { cn } from "../../../lib/utils/helpers";
 import { useCurrentPageStore } from "../../../stores/currentView";
@@ -133,6 +134,31 @@ export const AppBar = () => {
     }
   }, []);
 
+  // アプリ終了時クリーンアップ
+  // CloseRequested を横取りして /api/shutdown を呼んでから destroy() する。
+  // destroy() は CloseRequested を再発火しないため無限ループにならない。
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    getCurrentWindow()
+      .onCloseRequested(async (event) => {
+        event.preventDefault();
+        try {
+          await getEconomiconAPI().shutdown();
+        } catch {
+          // シャットダウン API が失敗しても確実に閉じる
+        }
+        await getCurrentWindow().destroy();
+      })
+      .then((fn) => {
+        unlisten = fn;
+      });
+
+    return () => {
+      unlisten?.();
+    };
+  }, []);
+
   // mouseup: クリックで終わった場合はドラッグ意図をリセット
   const handleMouseUp = useCallback(() => {
     mouseDownPosRef.current = null;
@@ -175,19 +201,11 @@ export const AppBar = () => {
       ],
     },
     {
-      id: "table",
-      menuName: t("HeaderMenu.Table"),
-      isOpen: openMenuId === "table",
+      id: "data",
+      menuName: t("HeaderMenu.Data"),
+      isOpen: openMenuId === "data",
       onClose: close,
       items: [
-        {
-          id: "create-table",
-          label: t("HeaderMenu.CreateTable"),
-          handleSelect: () => {
-            setCurrentView("CreateTable");
-            close();
-          },
-        },
         {
           id: "join-table",
           label: t("HeaderMenu.JoinTable"),
@@ -204,14 +222,6 @@ export const AppBar = () => {
             close();
           },
         },
-      ],
-    },
-    {
-      id: "data",
-      menuName: t("HeaderMenu.Data"),
-      isOpen: openMenuId === "data",
-      onClose: close,
-      items: [
         {
           id: "data-generation",
           label: t("HeaderMenu.DataGeneration"),
@@ -228,6 +238,14 @@ export const AppBar = () => {
             close();
           },
         },
+      ],
+    },
+    {
+      id: "basic-analysis",
+      menuName: t("HeaderMenu.BasicAnalysis"),
+      isOpen: openMenuId === "basic-analysis",
+      onClose: close,
+      items: [
         {
           id: "basic-statistics",
           label: t("HeaderMenu.BasicStatistics"),
@@ -246,7 +264,7 @@ export const AppBar = () => {
       items: [
         {
           id: "linear-regression-item",
-          label: t("HeaderMenu.LinearRegression"),
+          label: t("HeaderMenu.OrdinaryLeastSquares"),
           handleSelect: () => {
             setCurrentView("LinearRegressionForm");
             close();
@@ -351,7 +369,7 @@ export const AppBar = () => {
       >
         <img
           src={logo}
-          className="w-9 h-9 pointer-events-none"
+          className="w-7 h-7 pointer-events-none"
           alt="economicon logo"
         />
       </div>

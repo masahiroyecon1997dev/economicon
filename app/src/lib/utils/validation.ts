@@ -2,7 +2,7 @@ type ValidationResult = string | undefined;
 
 export const validateTableName = (tableName: string): ValidationResult => {
   if (!tableName.trim()) {
-    return "ValidationMessages.TableNameRequired";
+    return "ValidationMessages.DataNameRequired";
   }
   return undefined;
 };
@@ -10,13 +10,6 @@ export const validateTableName = (tableName: string): ValidationResult => {
 export const validateNumRows = (numRows: number): ValidationResult => {
   if (numRows < 1) {
     return "ValidationMessages.NumRowsMoreThan0";
-  }
-  return undefined;
-};
-
-export const validateNumColumns = (numColumns: number): ValidationResult => {
-  if (numColumns < 1) {
-    return "ValidationMessages.AtLeastOneColumn";
   }
   return undefined;
 };

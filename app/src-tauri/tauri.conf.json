@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "economicon",
+  "productName": "Economicon",
   "version": "0.1.0",
   "identifier": "com.economicon.app.v1",
   "build": {
@@ -19,16 +19,17 @@
         "fullscreen": false,
         "decorations": false,
         "dragDropEnabled": true,
-        "zoomHotkeysEnabled": false
+        "zoomHotkeysEnabled": false,
+        "devtools": true
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' ipc: http://localhost:* ws://localhost:*;"
+      "csp": "default-src 'self'; img-src 'self' asset: https: data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' ipc: http://localhost:* ws://localhost:*;"
     }
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis"],
     "externalBin": ["binaries/python"],
     "resources": ["resources/**/*"],
     "icon": [
@@ -37,6 +38,24 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "allowDowngrades": false,
+      "certificateThumbprint": null,
+      "digestAlgorithm": null,
+      "nsis": {
+        "languages": ["Japanese", "English"],
+        "installerIcon": "icons/icon.ico",
+        "installMode": "perMachine"
+      },
+      "signCommand": null,
+      "timestampUrl": null,
+      "tsp": false,
+      "webviewInstallMode": {
+        "silent": true,
+        "type": "downloadBootstrapper"
+      },
+      "wix": null
+    }
   }
 }

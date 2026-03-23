@@ -14,6 +14,10 @@ import {
 } from "../../../api/model";
 import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../../lib/utils/apiError";
 import { cn } from "../../../lib/utils/helpers";
 import { useRegressionResultsStore } from "../../../stores/regressionResults";
 import { useTableListStore } from "../../../stores/tableList";
@@ -26,7 +30,7 @@ import { FormField } from "../../molecules/Form/FormField";
 
 const createRegressionSchema = (t: (key: string) => string) =>
   z.object({
-    tableName: z.string().min(1, t("ValidationMessages.TableNameSelect")),
+    tableName: z.string().min(1, t("ValidationMessages.DataNameSelect")),
     dependentVariable: z
       .string()
       .min(1, t("ValidationMessages.DependentVariableRequired")),
@@ -105,23 +109,36 @@ export const LinearRegressionForm = ({
           const resultResponse = await api.getAnalysisResult(resultId);
           if (resultResponse.code === "OK" && resultResponse.result) {
             // APIレスポンス構造: { code: "OK", result: AnalysisResultDetail }
-            // TypeScript生成型より1段浅いネスト
+            // TypeScript生成型よりも深くネストされているため unknown キャストを使用
             const detail =
               resultResponse.result as unknown as AnalysisResultDetail;
-            addResult(
-              detail.regressionOutput as unknown as LinearRegressionResultType,
-            );
+            addResult({
+              ...(detail.regressionOutput as unknown as LinearRegressionResultType),
+              resultId: detail.id,
+            });
             const newIndex =
               useRegressionResultsStore.getState().results.length - 1;
             onAnalysisComplete?.(newIndex);
             return;
           }
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(resultResponse, t("Error.UnexpectedError")),
+          );
+        } else {
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(
+              regressionResponse,
+              t("Error.UnexpectedError"),
+            ),
+          );
         }
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("Error.UnexpectedError");
-        await showMessageDialog(t("Error.Error"), errorMessage);
+        await showMessageDialog(
+          t("Error.Error"),
+          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        );
       }
     },
   });
@@ -147,13 +164,13 @@ export const LinearRegressionForm = ({
       }}
       className="flex flex-col gap-3 h-full min-h-0"
     >
-      {/* ── TOP: テーブル選択（全幅・コンパクト） ── */}
+      {/* ── TOP: テーブル選択（幅コンパクト）── */}
       <div className="shrink-0 rounded-xl border border-border-color bg-white px-3 py-2 shadow-sm">
         <form.Field name="tableName">
           {(field) => (
             <div className="flex items-center gap-3">
               <label className="shrink-0 text-xs font-medium text-brand-text-main">
-                {t("LinearRegressionForm.DataTable")}
+                {t("LinearRegressionForm.DataSource")}
               </label>
               <div className="flex-1">
                 <Select
@@ -161,8 +178,10 @@ export const LinearRegressionForm = ({
                   value={field.state.value}
                   onValueChange={handleTableSelect}
                   disabled={isSubmitting}
-                  error={field.state.meta.errors[0]?.toString()}
-                  placeholder={t("LinearRegressionForm.SelectATable")}
+                  error={
+                    (field.state.meta.errors[0] as { message?: string })
+                      ?.message ?? field.state.meta.errors[0]?.toString()
+                  }
                 >
                   {tableList.map((table, index) => (
                     <SelectItem key={index} value={table}>
@@ -173,7 +192,8 @@ export const LinearRegressionForm = ({
               </div>
               {field.state.meta.errors[0] && (
                 <p className="shrink-0 text-xs text-red-600">
-                  {field.state.meta.errors[0].toString()}
+                  {(field.state.meta.errors[0] as { message?: string })
+                    ?.message ?? field.state.meta.errors[0]?.toString()}
                 </p>
               )}
             </div>
@@ -181,9 +201,9 @@ export const LinearRegressionForm = ({
         </form.Field>
       </div>
 
-      {/* ── MIDDLE: 2ペイン（変数選択 + オプション） ── */}
+      {/* ── MIDDLE: 2ペイン（変数選択 + オプション）── */}
       <div className="flex min-h-0 flex-1 gap-3">
-        {/* 左: 変数選択（主役・flex-1） */}
+        {/* 左: 変数選択（主役・flex-1�E�E*/}
         <div className="flex min-h-0 flex-1 flex-col gap-3">
           {/* 変数選択カード */}
           <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border-color bg-white p-3 shadow-sm">
@@ -203,7 +223,10 @@ export const LinearRegressionForm = ({
                     columns={columnList}
                     selectedValue={field.state.value}
                     onSingleChange={(v) => field.handleChange(v)}
-                    error={field.state.meta.errors[0]?.toString()}
+                    error={
+                      (field.state.meta.errors[0] as { message?: string })
+                        ?.message ?? field.state.meta.errors[0]?.toString()
+                    }
                     disabled={isSubmitting}
                     name="dependentVariable"
                     className="flex min-h-0 w-[33%] flex-col"
@@ -226,7 +249,10 @@ export const LinearRegressionForm = ({
                     columns={columnList}
                     selectedValues={field.state.value}
                     onMultipleChange={(v) => field.handleChange(v)}
-                    error={field.state.meta.errors[0]?.toString()}
+                    error={
+                      (field.state.meta.errors[0] as { message?: string })
+                        ?.message ?? field.state.meta.errors[0]?.toString()
+                    }
                     disabled={isSubmitting}
                     name="explanatoryVariables"
                     className="flex min-h-0 flex-1 flex-col"
@@ -237,7 +263,7 @@ export const LinearRegressionForm = ({
           </div>
         </div>
 
-        {/* 右: 詳細オプション（脇役・w-56） */}
+        {/* 右: 詳細オプション（脇役・w-56）*/}
         <div className="flex w-56 shrink-0 flex-col">
           <div className="rounded-xl border border-border-color bg-white shadow-sm">
             <button

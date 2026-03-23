@@ -112,6 +112,15 @@ export const getApiPort = async (): Promise<number> => {
   return await invoke<number>("get_api_port");
 };
 
+/**
+ * 指定したフルパスに通常ファイルが存在するか確認する。
+ * ファイル一覧キャッシュではなく OS に直接問い合わせるため、
+ * 保存直前の上書き確認に使用する。
+ */
+export const checkFileExists = async (filePath: string): Promise<boolean> => {
+  return await invoke<boolean>("check_file_exists", { filePath });
+};
+
 export const fetchDataToArrow = async (
   tableName: string,
   startRow: number = 0,

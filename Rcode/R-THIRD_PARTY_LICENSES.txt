@@ -1,0 +1,42 @@
+# R-Third-Party Licenses for Economicon (Validation Suite)
+
+このファイルは、本プロジェクトの計算精度検証用スクリプト（/Rcode）で使用されているR言語および関連パッケージのライセンス情報をまとめたものです。
+これらのソフトウェアは開発時の検証にのみ使用されており、配布される製品には含まれません。
+
+## 1. R Language Environment
+- **R Language (Base)**
+  - License: GPL-2.0 | GPL-3.0
+  - Purpose: 統計計算およびグラフィックスのための基礎環境。
+
+## 2. R Packages (Used in /Rcode)
+
+### plm (Linear Models for Panel Data)
+- License: GPL-2.0 | GPL-3.0
+- URL: https://CRAN.R-project.org/package=plm
+- Utilization: パネルデータ（固定効果・変量効果モデル）の推定結果の照合用。
+
+### AER (Applied Econometrics with R)
+- License: GPL-2.0 | GPL-3.0
+- URL: https://CRAN.R-project.org/package=AER
+- Utilization: 操作変数法（IV）および基本的な計量経済分析のベンチマーク用。
+
+### glmnet (Lasso and Elastic-Net Regularized Generalized Linear Models)
+- License: GPL-2.0
+- URL: https://CRAN.R-project.org/package=glmnet
+- Utilization: LassoおよびRidge回帰のペナルティ計算と推定値の比較検証用。
+
+### jsonlite (A Robust JSON Web Token Implementation)
+- License: MIT
+- URL: https://CRAN.R-project.org/package=jsonlite
+- Utilization: テストデータおよび検証結果のJSON形式での入出力管理用。
+
+---
+## Notes
+- これらのパッケージの著作権は、それぞれの作者に帰属します。
+- 各ライセンスの全文は、Rの `license()` 関数、または各パッケージのCRANページ（上記URL）を参照してください。
+- 本ディレクトリ（/Rcode）以外の製品ソースコードは、本ライセンスの制約を受けない独立した著作物として管理されています。
+
+---
+## Disclaimer:
+本プロジェクトは、特定の統計手法の正確性を保証するためにRパッケージを使用していますが、R本体および各パッケージの保守・運営とは無関係です。
+万が一、ライセンス表記に不備がある場合は、GitHubのIssueにてお知らせいただければ速やかに対応いたします。

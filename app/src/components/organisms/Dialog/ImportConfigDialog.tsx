@@ -119,7 +119,7 @@ export const ImportConfigDialog = ({
                 htmlFor="import-table-name"
                 className="mb-1.5 block text-sm font-medium text-gray-700"
               >
-                {t("ImportDataFileView.ImportDialog.TableName")}
+                {t("ImportDataFileView.ImportDialog.DataName")}
                 <span className="ml-1 text-red-500">*</span>
               </label>
               <input
@@ -128,7 +128,7 @@ export const ImportConfigDialog = ({
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
                 placeholder={t(
-                  "ImportDataFileView.ImportDialog.TableNamePlaceholder",
+                  "ImportDataFileView.ImportDialog.DataNamePlaceholder",
                 )}
                 className={cn(
                   inputClass,

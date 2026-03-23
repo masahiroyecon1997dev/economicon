@@ -19,6 +19,8 @@
     "github.copilot-chat",
     "github.vscode-github-actions",
     "mhutchie.git-graph",
-    "reditorsupport.r"
+    "reditorsupport.r",
+    "vitest.explorer",
+    "ms-playwright.playwright"
   ]
 }

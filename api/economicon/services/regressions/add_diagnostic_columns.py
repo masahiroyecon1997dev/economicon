@@ -21,7 +21,7 @@ from economicon.services.regressions.diagnostics import (
     TobitExtractConfig,
     extract_from_linearmodels_iv,
     extract_from_linearmodels_panel,
-    extract_from_sklearn,
+    extract_from_regularized,
     extract_from_statsmodels,
     extract_from_tobit,
 )
@@ -57,8 +57,8 @@ class AddDiagnosticColumns:
 
     # OLS / Logit / Probit の statsmodels 系モデルタイプ（Tobit は別分岐）
     _STATSMODELS_TYPES = frozenset({"ols", "logit", "probit"})
-    # sklearn 正則化回帰
-    _SKLEARN_TYPES = frozenset({"ridge", "lasso"})
+    # 正則化回帰（statsmodels Lasso/Ridge）
+    _REGULARIZED_TYPES = frozenset({"ridge", "lasso"})
 
     def __init__(
         self,
@@ -338,7 +338,7 @@ class AddDiagnosticColumns:
                 options=opts,
             )
 
-        if model_type in self._SKLEARN_TYPES:
+        if model_type in self._REGULARIZED_TYPES:
             if not isinstance(raw_model, RegularizedResult):
                 raise ProcessingError(
                     error_code=ErrorCode.MODEL_TYPE_NOT_SUPPORTED,
@@ -351,7 +351,7 @@ class AddDiagnosticColumns:
                 existing_cols=existing_cols,
                 target=self.target,
             )
-            return extract_from_sklearn(
+            return extract_from_regularized(
                 reg_result=raw_model,
                 options=opts,
             )

@@ -4,6 +4,10 @@ import { useTranslation } from "react-i18next";
 import { getEconomiconAPI } from "../../api/endpoints";
 import { JoinType } from "../../api/model";
 import { showMessageDialog } from "../../lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "../../lib/utils/apiError";
 import { cn } from "../../lib/utils/helpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
@@ -135,13 +139,13 @@ export const JoinTable = () => {
   const validate = (): boolean => {
     const next: FormErrors = {};
     if (!leftTable || !rightTable) {
-      next.tables = t("JoinTable.ErrorTableRequired");
+      next.tables = t("JoinTable.ErrorDataRequired");
     }
     if (keyPairs.some((p) => !p.left || !p.right)) {
       next.keyPairs = t("JoinTable.ErrorKeyRequired");
     }
     if (!newTableName.trim()) {
-      next.newTableName = t("JoinTable.ErrorNewTableNameRequired");
+      next.newTableName = t("JoinTable.ErrorNewDataNameRequired");
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -168,12 +172,16 @@ export const JoinTable = () => {
         addTableInfo(tableInfo);
         setCurrentView("DataPreview");
       } else {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+        await showMessageDialog(
+          t("Error.Error"),
+          getResponseErrorMessage(resp, t("Error.UnexpectedError")),
+        );
       }
     } catch (error) {
-      const msg =
-        error instanceof Error ? error.message : t("Error.UnexpectedError");
-      await showMessageDialog(t("Error.Error"), msg);
+      await showMessageDialog(
+        t("Error.Error"),
+        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -190,11 +198,11 @@ export const JoinTable = () => {
         {/* ── Section 1: テーブル・結合タイプ ── */}
         <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading">
-            {t("JoinTable.SelectTables")}
+            {t("JoinTable.SelectData")}
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <FormField
-              label={t("JoinTable.LeftTable")}
+              label={t("JoinTable.LeftData")}
               htmlFor="left-table"
               error={!leftTable ? errors.tables : undefined}
             >
@@ -202,7 +210,7 @@ export const JoinTable = () => {
                 id="left-table"
                 value={leftTable}
                 onValueChange={handleLeftTableChange}
-                placeholder={t("JoinTable.SelectTable")}
+                placeholder={t("JoinTable.SelectDataItem")}
                 disabled={isDisabled}
               >
                 {tableList.map((name) => (
@@ -214,7 +222,7 @@ export const JoinTable = () => {
             </FormField>
 
             <FormField
-              label={t("JoinTable.RightTable")}
+              label={t("JoinTable.RightData")}
               htmlFor="right-table"
               error={!rightTable ? errors.tables : undefined}
             >
@@ -222,7 +230,7 @@ export const JoinTable = () => {
                 id="right-table"
                 value={rightTable}
                 onValueChange={handleRightTableChange}
-                placeholder={t("JoinTable.SelectTable")}
+                placeholder={t("JoinTable.SelectDataItem")}
                 disabled={isDisabled}
               >
                 {tableList.map((name) => (
@@ -274,11 +282,11 @@ export const JoinTable = () => {
           {/* ヘッダー行 */}
           <div className="mb-1 grid grid-cols-[1fr_20px_1fr_32px] gap-2 px-0.5">
             <span className="truncate text-xs font-medium text-brand-text-main/60">
-              {leftTable ? leftTable : t("JoinTable.LeftTable")}
+              {leftTable ? leftTable : t("JoinTable.LeftData")}
             </span>
             <div />
             <span className="truncate text-xs font-medium text-brand-text-main/60">
-              {rightTable ? rightTable : t("JoinTable.RightTable")}
+              {rightTable ? rightTable : t("JoinTable.RightData")}
             </span>
             <div />
           </div>
@@ -357,10 +365,10 @@ export const JoinTable = () => {
         {/* ── Section 3: 出力テーブル名 ── */}
         <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading">
-            {t("JoinTable.OutputTable")}
+            {t("JoinTable.OutputData")}
           </h2>
           <FormField
-            label={t("JoinTable.NewTableName")}
+            label={t("JoinTable.NewDataName")}
             htmlFor="new-table-name"
             error={errors.newTableName}
           >
@@ -368,7 +376,7 @@ export const JoinTable = () => {
               id="new-table-name"
               value={newTableName}
               onChange={(e) => setNewTableName(e.target.value)}
-              placeholder={t("JoinTable.NewTableNamePlaceholder")}
+              placeholder={t("JoinTable.NewDataNamePlaceholder")}
               disabled={isDisabled}
               error={errors.newTableName}
             />
