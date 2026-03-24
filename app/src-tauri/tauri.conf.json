@@ -20,7 +20,7 @@
         "decorations": false,
         "dragDropEnabled": true,
         "zoomHotkeysEnabled": false,
-        "devtools": true
+        "devtools": false
       }
     ],
     "security": {
