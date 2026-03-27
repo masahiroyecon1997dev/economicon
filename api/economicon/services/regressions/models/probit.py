@@ -14,7 +14,7 @@ from economicon.services.regressions.formatters import (
 )
 from economicon.services.regressions.models._base import _RegressionBase
 from economicon.services.regressions.standard_errors import (
-    apply_standard_errors,
+    get_discrete_fit_kwargs,
 )
 from economicon.services.regressions.validators import validate_base_params
 from economicon.utils import ProcessingError
@@ -50,13 +50,14 @@ class ProbitRegression(_RegressionBase):
                 self.has_const,
                 self.missing,
             )
-            model_result = fit_probit(y_data, x_data, self.missing)
-            model_result = apply_standard_errors(
-                model_result,
+            fit_kwargs = get_discrete_fit_kwargs(
                 self.standard_error,
                 groups_arrays=build_groups_arrays(
                     df, y_data, x_data, self.standard_error
                 ),
+            )
+            model_result = fit_probit(
+                y_data, x_data, self.missing, **fit_kwargs
             )
             regression_output = format_statsmodels_result(
                 model_result,
