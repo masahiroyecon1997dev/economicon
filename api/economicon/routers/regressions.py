@@ -7,7 +7,7 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from economicon.models import (
+from economicon.schemas import (
     COMMON_ERROR_RESPONSES,
     AddDiagnosticColumnsResult,
     ClearAllAnalysisResultsResult,
@@ -18,7 +18,7 @@ from economicon.models import (
     RegressionResult,
     SuccessResponse,
 )
-from economicon.models.regressions import (
+from economicon.schemas.regressions import (
     AddDiagnosticColumnsRequestBody,
     OutputResultRequest,
     RegressionRequestBody,
