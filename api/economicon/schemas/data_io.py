@@ -4,8 +4,8 @@ from typing import Annotated
 
 from pydantic import Field
 
-from economicon.models.common import BaseRequest, BaseResult
-from economicon.models.types import (
+from economicon.schemas.common import BaseRequest, BaseResult
+from economicon.schemas.types import (
     CsvEncoding,
     DirectoryPath,
     ExcelSheetName,

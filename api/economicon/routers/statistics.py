@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from economicon.models import (
+from economicon.schemas import (
     COMMON_ERROR_RESPONSES,
     ConfidenceIntervalRequestBody,
     ConfidenceIntervalResult,

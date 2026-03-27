@@ -5,14 +5,14 @@ from typing import Annotated, Literal
 from pydantic import Field, StringConstraints, model_validator
 
 from economicon.i18n.translation import gettext as _
-from economicon.models.common import BaseRequest, BaseResult
-from economicon.models.entities import SimulationColumnConfig, SortInstruction
-from economicon.models.enums import (
+from economicon.schemas.common import BaseRequest, BaseResult
+from economicon.schemas.entities import SimulationColumnConfig, SortInstruction
+from economicon.schemas.enums import (
     DistributionType,
     DummyMode,
     NullStrategy,
 )
-from economicon.models.types import (
+from economicon.schemas.types import (
     ColumnName,
     NewColumnName,
     TableName,

@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, Field, StringConstraints
 
 from economicon.i18n.translation import gettext as _
-from economicon.models.common import (
+from economicon.schemas.common import (
     BernoulliParams,
     BetaParams,
     BinomialParams,

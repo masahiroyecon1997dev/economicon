@@ -5,8 +5,8 @@ from typing import Annotated, Any
 from pydantic import BeforeValidator, Field, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
-from economicon.models.common import BaseRequest, BaseResult
-from economicon.models.enums import (
+from economicon.schemas.common import BaseRequest, BaseResult
+from economicon.schemas.enums import (
     AlternativeHypothesis,
     ConfidenceIntervalStatisticsType,
     CorrelationMethod,
@@ -14,7 +14,7 @@ from economicon.models.enums import (
     MissingHandlingMethod,
     StatisticalTestType,
 )
-from economicon.models.types import ColumnName, TableName
+from economicon.schemas.types import ColumnName, TableName
 
 # ---------------------------------------------------------------------------
 # 信頼区間計算

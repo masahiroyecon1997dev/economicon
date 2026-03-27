@@ -1,6 +1,6 @@
 """スキーマパッケージ初期化"""
 
-from economicon.models.columns import (
+from economicon.schemas.columns import (
     AddDummyColumnRequestBody,
     AddDummyColumnResult,
     AddLagLeadColumnRequestBody,
@@ -25,7 +25,7 @@ from economicon.models.columns import (
     TransformColumnRequestBody,
     TransformColumnResult,
 )
-from economicon.models.common import (
+from economicon.schemas.common import (
     COMMON_ERROR_RESPONSES,
     BaseResponse,
     BernoulliParams,
@@ -44,13 +44,13 @@ from economicon.models.common import (
     UniformParams,
     WeibullParams,
 )
-from economicon.models.data_io import (
+from economicon.schemas.data_io import (
     ExportFileRequestBody,
     ExportFileResult,
     ImportFileRequestBody,
     ImportFileResult,
 )
-from economicon.models.entities import (
+from economicon.schemas.entities import (
     BinaryChoiceRegressionParams,
     ClusteredStandardError,
     HacStandardError,
@@ -66,7 +66,7 @@ from economicon.models.entities import (
     StandardErrorSettings,
     TobitParams,
 )
-from economicon.models.enums import (
+from economicon.schemas.enums import (
     AlternativeHypothesis,
     ConfidenceIntervalStatisticsType,
     CorrelationMethod,
@@ -83,7 +83,7 @@ from economicon.models.enums import (
     StatisticalTestType,
     TransformMethodType,
 )
-from economicon.models.regressions import (
+from economicon.schemas.regressions import (
     AddDiagnosticColumnsRequestBody,
     AddDiagnosticColumnsResult,
     AnalysisResultDetail,
@@ -98,15 +98,15 @@ from economicon.models.regressions import (
     RegressionResult,
     StarConfig,
 )
-from economicon.models.settings import (
+from economicon.schemas.settings import (
     AppSettings,
     GetSettingsRequestBody,
     GetSettingsResult,
     UpdateSettingsRequest,
     UpdateSettingsResult,
 )
-from economicon.models.shutdown import ShutdownResult
-from economicon.models.statistics import (
+from economicon.schemas.shutdown import ShutdownResult
+from economicon.schemas.statistics import (
     ConfidenceIntervalBounds,
     ConfidenceIntervalRequestBody,
     ConfidenceIntervalResult,
@@ -120,7 +120,7 @@ from economicon.models.statistics import (
     StatisticalTestResult,
     StatisticValue,
 )
-from economicon.models.tables import (
+from economicon.schemas.tables import (
     ClearTablesRequestBody,
     ClearTablesResult,
     CreateJoinTableRequestBody,
@@ -147,7 +147,7 @@ from economicon.models.tables import (
     RenameTableResult,
     TableNameResult,
 )
-from economicon.models.types import DistributionConfig, TransformMethodConfig
+from economicon.schemas.types import DistributionConfig, TransformMethodConfig
 
 __all__ = [
     # Common

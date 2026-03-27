@@ -4,7 +4,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from economicon.models.common import BaseRequest, BaseResult
+from economicon.schemas.common import BaseRequest, BaseResult
 
 # ---------------------------------------------------------------------------
 # 共通フィールド基底

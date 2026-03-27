@@ -6,10 +6,10 @@ from pydantic import BeforeValidator, Field, model_validator
 from pydantic_core import PydanticCustomError
 
 from economicon.i18n.translation import gettext as _
-from economicon.models.common import BaseRequest, BaseResult
-from economicon.models.entities import SimulationColumnConfig
-from economicon.models.enums import FilterOperatorType, JoinType
-from economicon.models.types import (
+from economicon.schemas.common import BaseRequest, BaseResult
+from economicon.schemas.entities import SimulationColumnConfig
+from economicon.schemas.enums import FilterOperatorType, JoinType
+from economicon.schemas.types import (
     ColumnName,
     NewTableName,
     TableName,

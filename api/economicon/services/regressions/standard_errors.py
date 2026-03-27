@@ -8,7 +8,7 @@ from typing import Any
 
 import numpy as np
 
-from economicon.models import (
+from economicon.schemas import (
     ClusteredStandardError,
     HacStandardError,
     RobustStandardError,

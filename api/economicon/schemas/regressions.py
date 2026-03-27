@@ -4,12 +4,12 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, BeforeValidator, Field
 
-from economicon.models.common import BaseRequest, BaseResult
-from economicon.models.entities import RegressionParams, StandardErrorSettings
-from economicon.models.enums import (
+from economicon.schemas.common import BaseRequest, BaseResult
+from economicon.schemas.entities import RegressionParams, StandardErrorSettings
+from economicon.schemas.enums import (
     MissingValueHandlingType,
 )
-from economicon.models.types import ColumnName, TableName
+from economicon.schemas.types import ColumnName, TableName
 
 
 def _coerce_missing_value_handling(v: object) -> MissingValueHandlingType:

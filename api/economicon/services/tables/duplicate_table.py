@@ -2,7 +2,7 @@ from typing import ClassVar
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import DuplicateTableRequestBody
+from economicon.schemas import DuplicateTableRequestBody
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError
 from economicon.utils.validators import (

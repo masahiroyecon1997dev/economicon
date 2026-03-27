@@ -1,6 +1,6 @@
 import numpy as np
 
-from economicon.models import DistributionConfig, DistributionType
+from economicon.schemas import DistributionConfig, DistributionType
 
 
 def generate_simulation_data(

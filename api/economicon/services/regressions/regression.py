@@ -6,7 +6,7 @@ from scipy import stats as spstats
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import (
+from economicon.schemas import (
     BinaryChoiceRegressionParams,
     ClusteredStandardError,
     InstrumentalVariablesParams,

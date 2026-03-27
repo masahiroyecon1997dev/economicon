@@ -4,7 +4,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from economicon.models.common import BaseResult
+from economicon.schemas.common import BaseResult
 
 
 class ShutdownResult(BaseResult):

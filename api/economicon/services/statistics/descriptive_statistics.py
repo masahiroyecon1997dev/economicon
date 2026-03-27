@@ -4,7 +4,7 @@ import polars as pl
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import (
+from economicon.schemas import (
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticType,
 )

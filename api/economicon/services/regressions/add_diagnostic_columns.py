@@ -12,7 +12,7 @@ import polars as pl
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models.regressions import AddDiagnosticColumnsRequestBody
+from economicon.schemas.regressions import AddDiagnosticColumnsRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.regressions.diagnostics import (
