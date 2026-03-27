@@ -33,12 +33,9 @@ class OLSParams(BaseRequest):
     method: Literal[RegressionMethodType.OLS]
 
 
-class RegularizedRegressionParams(BaseRequest):
-    method: Literal[RegressionMethodType.LASSO, RegressionMethodType.RIDGE]
-    # 正則化のパラメータalphaを追加
-    alpha: float = Field(
-        default=1.0, ge=0.0, description="正則化強度のパラメータ"
-    )
+class _RegularizedBase(BaseRequest):
+    """Lasso/Ridge 共通フィールド（内部基底クラス）"""
+
     # Eco-Note D: alpha_convention により alpha の解釈が変わる。
     # "glmnet" (デフォルト): R の glmnet パッケージの λ に相当。
     #   Lasso: 1/n*||y-Xβ||² + λ*||β||₁  → statsmodels α = λ/2
@@ -46,6 +43,9 @@ class RegularizedRegressionParams(BaseRequest):
     # "sklearn": scikit-learn の alpha に相当。
     #   Lasso: statsmodels α = α_sk (同一式)
     #   Ridge: statsmodels α = α_sk / n (n はサンプル数)
+    alpha: float = Field(
+        default=1.0, ge=0.0, description="正則化強度のパラメータ"
+    )
     alpha_convention: Literal["glmnet", "sklearn"] = Field(
         default="glmnet",
         alias="alphaConvention",
@@ -61,8 +61,7 @@ class RegularizedRegressionParams(BaseRequest):
         ge=1,
         le=100000,
         alias="maxIter",
-        description="座標降下法の最大反復回数。"
-        "収束しない場合は増やしてください。",
+        description="座標降下法の最大反復回数。収束しない場合は増やしてください。",
     )
     calculate_se: bool = Field(
         default=False,
@@ -75,20 +74,27 @@ class RegularizedRegressionParams(BaseRequest):
         le=10000,
         alias="bootstrapIterations",
         description="ブートストラップ法のイテレーション回数",
-    )  # Eco-Note C: 在様固定。None 指定時は推定のたびに結果が変わる
+    )
+    # Eco-Note C: 乱数固定。None 指定時は推定のたびに結果が変わる
     random_state: int | None = Field(
         default=None,
         alias="randomState",
-        description="ブートストラップの乱数シード。None の場合は固定しない。"
-        "実験の再現性を確保する場合は整数値を指定する。",
+        description="ブートストラップの乱数シード。None の場合は固定しない。",
     )
 
 
-class BinaryChoiceRegressionParams(BaseRequest):
-    method: Literal[RegressionMethodType.LOGIT, RegressionMethodType.PROBIT]
-    # 正則化のパラメータを追加
+class LassoParams(_RegularizedBase):
+    method: Literal[RegressionMethodType.LASSO] = RegressionMethodType.LASSO
+
+
+class RidgeParams(_RegularizedBase):
+    method: Literal[RegressionMethodType.RIDGE] = RegressionMethodType.RIDGE
+
+
+class _BinaryChoiceBase(BaseRequest):
+    """Logit/Probit 共通フィールド（内部基底クラス）"""
+
     regularization: BinaryChoiceRegularization | None = None
-    # 平均限界効果(AME)を計算するかどうかのフラグを追加
     calculate_marginal_effects: bool = Field(
         default=False,
         alias="calculateMarginalEffects",
@@ -99,10 +105,17 @@ class BinaryChoiceRegressionParams(BaseRequest):
     binary_residual_type: Literal["raw", "deviance"] = Field(
         default="raw",
         alias="binaryResidualType",
-        description="残差種別。"
-        "raw: 生残差 (y - p̂)、"
-        "deviance: デビアンス残差。Logit/Probit のみ有効。",
+        description="残差種別。raw: 生残差 (y - p̂)、"
+        "deviance: デビアンス残差。",
     )
+
+
+class LogitParams(_BinaryChoiceBase):
+    method: Literal[RegressionMethodType.LOGIT] = RegressionMethodType.LOGIT
+
+
+class ProbitParams(_BinaryChoiceBase):
+    method: Literal[RegressionMethodType.PROBIT] = RegressionMethodType.PROBIT
 
 
 class TobitParams(BaseRequest):
@@ -130,13 +143,21 @@ class InstrumentalVariablesParams(BaseRequest):
     gmm_weight_matrix: Literal["uncentered", "robust", "hac"] = "robust"
 
 
-class PanelDataParams(BaseRequest):
-    method: Literal[RegressionMethodType.FE, RegressionMethodType.RE]
-    # 個体ID列と時間列を追加
+class _PanelBase(BaseRequest):
+    """FE/RE 共通フィールド（内部基底クラス）"""
+
     entity_id_column: ColumnName = Field(description="個体ID列名")
     time_column: ColumnName | None = Field(
         default=None, description="時間列名"
     )
+
+
+class FEParams(_PanelBase):
+    method: Literal[RegressionMethodType.FE] = RegressionMethodType.FE
+
+
+class REParams(_PanelBase):
+    method: Literal[RegressionMethodType.RE] = RegressionMethodType.RE
 
 
 class PanelIvParams(BaseRequest):
@@ -155,10 +176,13 @@ class PanelIvParams(BaseRequest):
 
 type RegressionParams = Annotated[
     OLSParams
-    | RegularizedRegressionParams
-    | BinaryChoiceRegressionParams
+    | LassoParams
+    | RidgeParams
+    | LogitParams
+    | ProbitParams
     | InstrumentalVariablesParams
-    | PanelDataParams
+    | FEParams
+    | REParams
     | TobitParams
     | PanelIvParams,
     Field(discriminator="method"),
