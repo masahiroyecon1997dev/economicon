@@ -80,6 +80,10 @@ class DescriptiveStatisticType(StrEnum):
     STD_DEV = "std_dev"
     RANGE = "range"
     IQR = "iqr"
+    COUNT = "count"
+    NULL_COUNT = "null_count"
+    NULL_RATIO = "null_ratio"
+    POPULATION_VARIANCE = "population_variance"
 
 
 class JoinType(StrEnum):

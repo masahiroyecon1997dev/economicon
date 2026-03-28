@@ -160,8 +160,11 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
             title="Statistics",
             description="計算する統計量のリスト"
             "（mean: 平均、median: 中央値、mode: 最頻値、"
-            "variance: 分散、std_dev: 標準偏差、"
-            "range: 範囲、iqr: 四分位数範囲）",
+            "variance: 不偏分散、std_dev: 標準偏差、"
+            "range: 範囲、iqr: 四分位数範囲、"
+            "count: 有効サンプル数、null_count: null数、"
+            "null_ratio: null割合、"
+            "population_variance: 母分散）",
             min_length=1,
         ),
     ]
