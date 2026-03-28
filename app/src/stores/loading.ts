@@ -11,7 +11,8 @@ type LoadingActions = {
    * @param isLoading - true: 表示, false: 非表示
    * @param message   - ローディングメッセージ
    * @param delay     - 表示までの遅延 (ms)。この時間内に clearLoading が呼ばれれば
-   *                    ローディングは表示されない。デフォルト 0 = 即時表示。
+   *                    ローディングは表示されない。デフォルト 400ms = 短時間処理での
+   *                    ちらつき防止。即時表示が必要な場合は 0 を明示すること。
    */
   setLoading: (isLoading: boolean, message?: string, delay?: number) => void;
   clearLoading: () => void;
@@ -26,7 +27,7 @@ export const useLoadingStore = create<LoadingStore>((set) => ({
   isLoading: false,
   loadingMessage: "",
 
-  setLoading: (isLoading: boolean, message = "", delay = 0) => {
+  setLoading: (isLoading: boolean, message = "", delay = 400) => {
     // 既存のタイマーをキャンセル
     if (_loadingTimer !== null) {
       clearTimeout(_loadingTimer);
