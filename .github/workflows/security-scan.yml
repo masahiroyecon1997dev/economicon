@@ -30,8 +30,7 @@ jobs:
       - name: Python Dependency Check (pip-audit)
         run: |
           cd api
-          uv venv
-          uv pip install pip-audit
+          uv sync --group dev
           uv run pip-audit
 
       # --- React (pnpm) の設定 ---
@@ -44,13 +43,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24.12.0
-          # cache: "pnpm"
+          cache: "pnpm"
           cache-dependency-path: "app/pnpm-lock.yaml"
+
+      - name: Install React dependencies
+        run: |
+          cd app
+          pnpm install --frozen-lockfile
 
       - name: React Dependency Check (pnpm audit)
         run: |
           cd app
-          # pnpm 10系の audit コマンドを実行
           pnpm audit --audit-level high
 
       # --- Rust (Cargo) の設定 ---
@@ -61,7 +64,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/cargo-audit
-          key: ${{ runner.os }}-cargo-audit
+          key: v1-${{ runner.os }}-cargo-audit
 
       - name: Install cargo-audit
         # キャッシュがない場合のみインストール
@@ -72,5 +75,5 @@ jobs:
 
       - name: Run cargo-audit
         run: |
-          cd src-tauri
+          cd app/src-tauri
           cargo audit
