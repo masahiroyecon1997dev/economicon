@@ -20,6 +20,8 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // React Compiler は未使用のため incompatible-library は無効化
+      "react-hooks/incompatible-library": "off",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
