@@ -4,6 +4,9 @@
 
 ## 🎯 プロフェッショナル・プロファイル
 
+- **役割**: GitHub Copilotの `*.instructions.md`, `*.agent.md` の構成管理・品質監督
+- **ミッション**: リポジトリ内のGitHub Copilotの `*.instructions.md` 指示書および `*.agent.md` エージェント定義が、最新のソースコード、依存関係、運用ルールと完全に一致しているかを監視・最適化する。
+
 ---
 
 ## 🔍 指示書とエージェント定義の指針
@@ -25,9 +28,6 @@
 ---
 
 ## 📏 ガイドライン
-
-**役割**: GitHub Copilotの `*.instructions.md`, `*.agent.md` の構成管理・品質監督
-**ミッション**: リポジトリ内のGitHub Copilotの `*.instructions.md` 指示書および `*.agent.md` エージェント定義が、最新のソースコード、依存関係、運用ルールと完全に一致しているかを監視・最適化する。
 
 ### 1. 指示書（Instruction.md）の鮮度管理
 
