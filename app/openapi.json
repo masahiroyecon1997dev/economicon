@@ -4354,7 +4354,11 @@
           "variance",
           "std_dev",
           "range",
-          "iqr"
+          "iqr",
+          "count",
+          "null_count",
+          "null_ratio",
+          "population_variance"
         ],
         "title": "DescriptiveStatisticType"
       },
@@ -4393,7 +4397,7 @@
             "type": "array",
             "minItems": 1,
             "title": "Statistics",
-            "description": "\u8a08\u7b97\u3059\u308b\u7d71\u8a08\u91cf\u306e\u30ea\u30b9\u30c8\uff08mean: \u5e73\u5747\u3001median: \u4e2d\u592e\u5024\u3001mode: \u6700\u983b\u5024\u3001variance: \u5206\u6563\u3001std_dev: \u6a19\u6e96\u504f\u5dee\u3001range: \u7bc4\u56f2\u3001iqr: \u56db\u5206\u4f4d\u6570\u7bc4\u56f2\uff09"
+            "description": "\u8a08\u7b97\u3059\u308b\u7d71\u8a08\u91cf\u306e\u30ea\u30b9\u30c8\uff08mean: \u5e73\u5747\u3001median: \u4e2d\u592e\u5024\u3001mode: \u6700\u983b\u5024\u3001variance: \u4e0d\u504f\u5206\u6563\u3001std_dev: \u6a19\u6e96\u504f\u5dee\u3001range: \u7bc4\u56f2\u3001iqr: \u56db\u5206\u4f4d\u6570\u7bc4\u56f2\u3001count: \u6709\u52b9\u30b5\u30f3\u30d7\u30eb\u6570\u3001null_count: null\u6570\u3001null_ratio: null\u5272\u5408\u3001population_variance: \u6bcd\u5206\u6563\uff09"
           }
         },
         "type": "object",
@@ -4806,7 +4810,7 @@
                 "type": "string",
                 "maxLength": 31,
                 "minLength": 1,
-                "pattern": "^[^\\/\\\\\\?\\*\\:\\[\\]]+$",
+                "pattern": "^[^/\\\\?*:\\[\\]]+$",
                 "title": "Excel Sheet Name",
                 "description": "Excel\u306e\u30b7\u30fc\u30c8\u540d\uff0831\u6587\u5b57\u4ee5\u5185\u3001\u4f7f\u7528\u4e0d\u53ef\u8a18\u53f7\u3042\u308a\uff09",
                 "examples": [
@@ -5438,7 +5442,7 @@
                 "type": "string",
                 "maxLength": 31,
                 "minLength": 1,
-                "pattern": "^[^\\/\\\\\\?\\*\\:\\[\\]]+$",
+                "pattern": "^[^/\\\\?*:\\[\\]]+$",
                 "title": "Excel Sheet Name",
                 "description": "Excel\u306e\u30b7\u30fc\u30c8\u540d\uff0831\u6587\u5b57\u4ee5\u5185\u3001\u4f7f\u7528\u4e0d\u53ef\u8a18\u53f7\u3042\u308a\uff09",
                 "examples": [
