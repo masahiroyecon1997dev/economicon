@@ -1,25 +1,25 @@
-"""Lasso 正則化回帰モデル"""
+"""Ridge 正則化回帰モデル"""
 
 from economicon.core.enums import ErrorCode
-from economicon.schemas.entities import LassoParams
+from economicon.schemas.entities import RidgeParams
 from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.regressions.common import prepare_basic_data
+from economicon.services.regressions.estimators._base import _RegressionBase
 from economicon.services.regressions.fitters import (
     RegularizedRegressionInput,
-    fit_lasso,
+    fit_ridge,
 )
 from economicon.services.regressions.formatters import (
     format_regularized_result,
 )
-from economicon.services.regressions.models._base import _RegressionBase
 from economicon.services.regressions.validators import validate_base_params
 from economicon.utils import ProcessingError
 
 
-class LassoRegression(_RegressionBase):
-    """Lasso 回帰 DataOperation 実装。"""
+class RidgeRegression(_RegressionBase):
+    """Ridge 回帰 DataOperation 実装。"""
 
     def __init__(
         self,
@@ -28,7 +28,7 @@ class LassoRegression(_RegressionBase):
         result_store: AnalysisResultStore,
     ) -> None:
         super().__init__(body, tables_store, result_store)
-        self.analysis: LassoParams = body.analysis  # type: ignore[assignment]
+        self.analysis: RidgeParams = body.analysis  # type: ignore[assignment]
 
     def validate(self) -> None:
         validate_base_params(
@@ -60,7 +60,7 @@ class LassoRegression(_RegressionBase):
                 max_iter=self.analysis.max_iter,
                 alpha_convention=self.analysis.alpha_convention,
             )
-            reg_result = fit_lasso(data_input)
+            reg_result = fit_ridge(data_input)
             regression_output = format_regularized_result(
                 reg_result,
                 self.table_name,
@@ -68,7 +68,7 @@ class LassoRegression(_RegressionBase):
                 self.explanatory_variables,
             )
             result_id = self._save_result(
-                regression_output, reg_result, "lasso"
+                regression_output, reg_result, "ridge"
             )
             return {"resultId": result_id}
         except ProcessingError:

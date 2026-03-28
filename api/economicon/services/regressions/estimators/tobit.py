@@ -10,6 +10,7 @@ from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.regressions.common import prepare_tobit_dataframe
+from economicon.services.regressions.estimators._base import _RegressionBase
 from economicon.services.regressions.fitters import (
     TobitInput,
     fit_tobit,
@@ -19,7 +20,6 @@ from economicon.services.regressions.formatters import (
     build_tobit_lr_test,
     format_tobit_result,
 )
-from economicon.services.regressions.models._base import _RegressionBase
 from economicon.services.regressions.validators import validate_base_params
 from economicon.utils import ProcessingError
 

@@ -1,7 +1,7 @@
-"""固定効果 (FE) パネル回帰モデル"""
+"""変量効果 (RE) パネル回帰モデル"""
 
 from economicon.core.enums import ErrorCode
-from economicon.schemas.entities import FEParams
+from economicon.schemas.entities import REParams
 from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
@@ -9,9 +9,9 @@ from economicon.services.regressions.common import (
     PanelDataConfig,
     prepare_panel_dataframe,
 )
-from economicon.services.regressions.fitters import fit_fe
-from economicon.services.regressions.formatters import format_fe_result
-from economicon.services.regressions.models._base import _RegressionBase
+from economicon.services.regressions.estimators._base import _RegressionBase
+from economicon.services.regressions.fitters import fit_re
+from economicon.services.regressions.formatters import format_re_result
 from economicon.services.regressions.validators import (
     validate_base_params,
     validate_panel_columns,
@@ -19,8 +19,8 @@ from economicon.services.regressions.validators import (
 from economicon.utils import ProcessingError
 
 
-class FERegression(_RegressionBase):
-    """固定効果パネル回帰 DataOperation 実装。"""
+class RERegression(_RegressionBase):
+    """変量効果パネル回帰 DataOperation 実装。"""
 
     def __init__(
         self,
@@ -29,7 +29,7 @@ class FERegression(_RegressionBase):
         result_store: AnalysisResultStore,
     ) -> None:
         super().__init__(body, tables_store, result_store)
-        self.analysis: FEParams = body.analysis  # type: ignore[assignment]
+        self.analysis: REParams = body.analysis  # type: ignore[assignment]
 
     def validate(self) -> None:
         column_name_list, df_schema = validate_base_params(
@@ -51,13 +51,13 @@ class FERegression(_RegressionBase):
                 missing=self.missing,
             )
             df_pandas = prepare_panel_dataframe(df, panel_data_config)
-            model_result = fit_fe(
+            model_result = fit_re(
                 df_pandas,
                 self.dependent_variable,
                 self.explanatory_variables,
                 self.standard_error.method,
             )
-            regression_output = format_fe_result(
+            regression_output = format_re_result(
                 model_result,
                 self.table_name,
                 self.dependent_variable,
@@ -67,7 +67,7 @@ class FERegression(_RegressionBase):
             result_id = self._save_result(
                 regression_output,
                 model_result,
-                "fe",
+                "re",
                 entity_id_column=self.analysis.entity_id_column,
                 time_column=self.analysis.time_column,
             )

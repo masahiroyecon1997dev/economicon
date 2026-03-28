@@ -1,27 +1,25 @@
-"""Probit 回帰モデル"""
+"""Lasso 正則化回帰モデル"""
 
 from economicon.core.enums import ErrorCode
-from economicon.schemas.entities import ProbitParams
+from economicon.schemas.entities import LassoParams
 from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.regressions.common import prepare_basic_data
-from economicon.services.regressions.fitters import fit_probit
-from economicon.services.regressions.formatters import (
-    build_groups_arrays,
-    compute_ame,
-    format_statsmodels_result,
+from economicon.services.regressions.estimators._base import _RegressionBase
+from economicon.services.regressions.fitters import (
+    RegularizedRegressionInput,
+    fit_lasso,
 )
-from economicon.services.regressions.models._base import _RegressionBase
-from economicon.services.regressions.standard_errors import (
-    get_discrete_fit_kwargs,
+from economicon.services.regressions.formatters import (
+    format_regularized_result,
 )
 from economicon.services.regressions.validators import validate_base_params
 from economicon.utils import ProcessingError
 
 
-class ProbitRegression(_RegressionBase):
-    """Probit 回帰 DataOperation 実装。"""
+class LassoRegression(_RegressionBase):
+    """Lasso 回帰 DataOperation 実装。"""
 
     def __init__(
         self,
@@ -30,7 +28,7 @@ class ProbitRegression(_RegressionBase):
         result_store: AnalysisResultStore,
     ) -> None:
         super().__init__(body, tables_store, result_store)
-        self.analysis: ProbitParams = body.analysis  # type: ignore[assignment]
+        self.analysis: LassoParams = body.analysis  # type: ignore[assignment]
 
     def validate(self) -> None:
         validate_base_params(
@@ -50,28 +48,27 @@ class ProbitRegression(_RegressionBase):
                 self.has_const,
                 self.missing,
             )
-            fit_kwargs = get_discrete_fit_kwargs(
-                self.standard_error,
-                groups_arrays=build_groups_arrays(
-                    df, y_data, x_data, self.standard_error
-                ),
+            data_input = RegularizedRegressionInput(
+                y_data=y_data,
+                x_data=x_data,
+                has_const=self.has_const,
+                alpha=self.analysis.alpha,
+                missing=self.missing,
+                calculate_se=self.analysis.calculate_se,
+                bootstrap_iterations=self.analysis.bootstrap_iterations,
+                random_state=self.analysis.random_state,
+                max_iter=self.analysis.max_iter,
+                alpha_convention=self.analysis.alpha_convention,
             )
-            model_result = fit_probit(
-                y_data, x_data, self.missing, **fit_kwargs
-            )
-            regression_output = format_statsmodels_result(
-                model_result,
+            reg_result = fit_lasso(data_input)
+            regression_output = format_regularized_result(
+                reg_result,
                 self.table_name,
                 self.dependent_variable,
                 self.explanatory_variables,
-                self.has_const,
             )
-            if self.analysis.calculate_marginal_effects:
-                regression_output["marginalEffects"] = compute_ame(
-                    model_result, self.has_const, self.explanatory_variables
-                )
             result_id = self._save_result(
-                regression_output, model_result, "probit"
+                regression_output, reg_result, "lasso"
             )
             return {"resultId": result_id}
         except ProcessingError:

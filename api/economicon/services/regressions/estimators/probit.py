@@ -1,18 +1,18 @@
-"""Logit 回帰モデル"""
+"""Probit 回帰モデル"""
 
 from economicon.core.enums import ErrorCode
-from economicon.schemas.entities import LogitParams
+from economicon.schemas.entities import ProbitParams
 from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.regressions.common import prepare_basic_data
-from economicon.services.regressions.fitters import fit_logit
+from economicon.services.regressions.estimators._base import _RegressionBase
+from economicon.services.regressions.fitters import fit_probit
 from economicon.services.regressions.formatters import (
     build_groups_arrays,
     compute_ame,
     format_statsmodels_result,
 )
-from economicon.services.regressions.models._base import _RegressionBase
 from economicon.services.regressions.standard_errors import (
     get_discrete_fit_kwargs,
 )
@@ -20,8 +20,8 @@ from economicon.services.regressions.validators import validate_base_params
 from economicon.utils import ProcessingError
 
 
-class LogitRegression(_RegressionBase):
-    """Logit 回帰 DataOperation 実装。"""
+class ProbitRegression(_RegressionBase):
+    """Probit 回帰 DataOperation 実装。"""
 
     def __init__(
         self,
@@ -30,7 +30,7 @@ class LogitRegression(_RegressionBase):
         result_store: AnalysisResultStore,
     ) -> None:
         super().__init__(body, tables_store, result_store)
-        self.analysis: LogitParams = body.analysis  # type: ignore[assignment]
+        self.analysis: ProbitParams = body.analysis  # type: ignore[assignment]
 
     def validate(self) -> None:
         validate_base_params(
@@ -56,7 +56,7 @@ class LogitRegression(_RegressionBase):
                     df, y_data, x_data, self.standard_error
                 ),
             )
-            model_result = fit_logit(
+            model_result = fit_probit(
                 y_data, x_data, self.missing, **fit_kwargs
             )
             regression_output = format_statsmodels_result(
@@ -71,7 +71,7 @@ class LogitRegression(_RegressionBase):
                     model_result, self.has_const, self.explanatory_variables
                 )
             result_id = self._save_result(
-                regression_output, model_result, "logit"
+                regression_output, model_result, "probit"
             )
             return {"resultId": result_id}
         except ProcessingError:

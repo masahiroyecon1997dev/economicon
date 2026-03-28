@@ -21,7 +21,7 @@ from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.operation import DataOperation
-from economicon.services.regressions.models import (
+from economicon.services.regressions.estimators import (
     FERegression,
     IVRegression,
     LassoRegression,

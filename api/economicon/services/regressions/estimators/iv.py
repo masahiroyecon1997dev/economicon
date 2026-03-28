@@ -9,9 +9,9 @@ from economicon.services.regressions.common import (
     IvDataConfig,
     prepare_iv_dataframe,
 )
+from economicon.services.regressions.estimators._base import _RegressionBase
 from economicon.services.regressions.fitters import IVInput, fit_iv
 from economicon.services.regressions.formatters import format_iv_result
-from economicon.services.regressions.models._base import _RegressionBase
 from economicon.services.regressions.validators import (
     validate_base_params,
     validate_iv_columns,

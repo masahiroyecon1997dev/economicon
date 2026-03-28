@@ -6,12 +6,12 @@ from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.regressions.common import prepare_basic_data
+from economicon.services.regressions.estimators._base import _RegressionBase
 from economicon.services.regressions.fitters import fit_ols
 from economicon.services.regressions.formatters import (
     build_groups_arrays,
     format_statsmodels_result,
 )
-from economicon.services.regressions.models._base import _RegressionBase
 from economicon.services.regressions.standard_errors import (
     apply_standard_errors,
 )
