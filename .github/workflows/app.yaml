@@ -2,10 +2,14 @@ name: React CI
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches: ["dev"]
-  # pull_request:
-  #   branches: ["dev"]
+  push:
+    branches: ["dev"]
+    paths:
+      - "app/**"
+  pull_request:
+    branches: ["dev"]
+    paths:
+      - "app/**"
 
 jobs:
   unit-test:
@@ -18,7 +22,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "app/pnpm-lock.yaml"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -61,15 +67,21 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-          cache-dependency-glob: "**/uv.loclk"
+          cache-dependency-glob: "api/uv.lock"
 
       - name: Setup Python
         run: uv python install
+
+      - name: Install API dependencies
+        working-directory: ./api
+        run: uv sync
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "app/pnpm-lock.yaml"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -85,8 +97,12 @@ jobs:
         working-directory: ./app
         run: pnpm exec playwright install --with-deps ${{ matrix.project }}
 
-      - name: Wait for Django to be ready
-        run: npx wait-on http://127.0.0.1:8000 --timeout 60000
+      - name: Start FastAPI server
+        working-directory: ./api
+        run: uv run uvicorn main:app --host 127.0.0.1 --port 8000 &
+
+      - name: Wait for FastAPI to be ready
+        run: npx wait-on http://127.0.0.1:8000/docs --timeout 60000
 
       - name: Run Playwright tests
         working-directory: ./app
@@ -110,7 +126,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "app/pnpm-lock.yaml"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

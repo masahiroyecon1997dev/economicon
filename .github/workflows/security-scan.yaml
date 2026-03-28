@@ -1,9 +1,9 @@
 name: "Security Scan"
 
 on:
-  # 1. 1週間に1回（月曜日の午前0時）に実行（現状はなし）
-  # schedule:
-  #   - cron: "0 0 * * 1"
+  # dev ブランチへの PR 時に実行
+  pull_request:
+    branches: ["dev"]
   # 手動での実行を可能にする
   workflow_dispatch:
 
