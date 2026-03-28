@@ -254,6 +254,14 @@ export const AppBar = () => {
             close();
           },
         },
+        {
+          id: "correlation-matrix",
+          label: t("HeaderMenu.CorrelationMatrix"),
+          handleSelect: () => {
+            setCurrentView("CorrelationMatrix");
+            close();
+          },
+        },
       ],
     },
     {
