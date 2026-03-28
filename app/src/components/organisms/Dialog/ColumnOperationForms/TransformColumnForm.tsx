@@ -5,7 +5,7 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -71,7 +71,7 @@ export const TransformColumnForm = ({
           };
         }
 
-        const response = await getEconomiconAPI().transformColumn({
+        const response = await getEconomiconAppAPI().transformColumn({
           tableName,
           sourceColumnName: column.name,
           newColumnName: value.newColumnName,

@@ -5,7 +5,7 @@ import {
   getFilesSafe,
   getOsInfo,
 } from "./api/bridge/tauri-commands";
-import { getEconomiconAPI } from "./api/endpoints";
+import { getEconomiconAppAPI } from "./api/endpoints";
 import { showMessageDialog } from "./lib/dialog/message";
 import { useCurrentPageStore } from "./stores/currentView";
 import { useLoadingStore } from "./stores/loading";
@@ -48,7 +48,9 @@ export const App = () => {
     let isMounted = true;
 
     // FastAPI サイドカーが起動するまで最大30秒ポーリングする
-    const waitForServer = async (api: ReturnType<typeof getEconomiconAPI>) => {
+    const waitForServer = async (
+      api: ReturnType<typeof getEconomiconAppAPI>,
+    ) => {
       const MAX_RETRIES = 60; // 1000ms × 60 = 60秒
       const INTERVAL_MS = 1000;
       for (let i = 0; i < MAX_RETRIES; i++) {
@@ -64,7 +66,7 @@ export const App = () => {
     };
 
     const initialize = async () => {
-      const api = getEconomiconAPI();
+      const api = getEconomiconAppAPI();
       setLoading(true, t("Loading.Launching"));
       try {
         // 認証トークンを取得する。

@@ -5,7 +5,7 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -58,7 +58,7 @@ export const AddLagLeadColumnForm = ({
 
         const periods = parseInt(value.periods, 10);
 
-        const response = await getEconomiconAPI().addLagLeadColumn({
+        const response = await getEconomiconAppAPI().addLagLeadColumn({
           tableName,
           sourceColumn: column.name,
           newColumnName: value.newColumnName,

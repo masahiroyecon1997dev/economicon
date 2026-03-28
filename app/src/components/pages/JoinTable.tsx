@@ -1,7 +1,7 @@
 import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import { JoinType } from "../../api/model";
 import { showMessageDialog } from "../../lib/dialog/message";
 import {
@@ -57,7 +57,7 @@ export const JoinTable = () => {
   const fetchCols = async (tableName: string): Promise<ColumnType[]> => {
     if (!tableName) return [];
     try {
-      const api = getEconomiconAPI();
+      const api = getEconomiconAppAPI();
       const resp = await api.getColumnList({ tableName });
       if (resp.code === "OK") return resp.result.columnInfoList;
     } catch {
@@ -157,7 +157,7 @@ export const JoinTable = () => {
     if (!validate()) return;
     setIsSubmitting(true);
     try {
-      const api = getEconomiconAPI();
+      const api = getEconomiconAppAPI();
       const resp = await api.createJoinTable({
         joinTableName: newTableName.trim(),
         leftTableName: leftTable,

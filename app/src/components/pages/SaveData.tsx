@@ -5,7 +5,7 @@ import {
   getFiles,
   getFilesSafe,
 } from "../../api/bridge/tauri-commands";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import type { ExportFileRequestBodyFormat } from "../../api/model";
 import { showConfirmDialog } from "../../lib/dialog/confirm";
 import { showMessageDialog } from "../../lib/dialog/message";
@@ -231,7 +231,7 @@ export const SaveData = () => {
         parquet: "parquet",
       };
 
-      const response = await getEconomiconAPI().exportFile({
+      const response = await getEconomiconAppAPI().exportFile({
         tableName: selectedTableName,
         directoryPath: directoryPath,
         fileName: fileName,

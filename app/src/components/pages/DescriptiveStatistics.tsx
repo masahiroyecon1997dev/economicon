@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import { DescriptiveStatisticType } from "../../api/model";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { cn } from "../../lib/utils/helpers";
@@ -89,7 +89,7 @@ export const DescriptiveStatistics = () => {
     }
     setIsLoadingCols(true);
     setResult(null);
-    const api = getEconomiconAPI();
+    const api = getEconomiconAppAPI();
     api
       .getColumnList({ tableName: selectedTable })
       .then((resp) => {
@@ -146,7 +146,7 @@ export const DescriptiveStatistics = () => {
 
     setIsCalculating(true);
     try {
-      const api = getEconomiconAPI();
+      const api = getEconomiconAppAPI();
       const resp = await api.descriptiveStatistics({
         tableName: selectedTable,
         columnNameList: orderedCols,

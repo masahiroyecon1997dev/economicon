@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { extractApiErrorMessage } from "../../lib/utils/apiError";
 import { cn } from "../../lib/utils/helpers";
@@ -38,7 +38,7 @@ export const Regression = ({ className }: RegressionProps) => {
 
   const handleDeleteResult = async (resultId: string, index: number) => {
     try {
-      await getEconomiconAPI().deleteAnalysisResult(resultId);
+      await getEconomiconAppAPI().deleteAnalysisResult(resultId);
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),

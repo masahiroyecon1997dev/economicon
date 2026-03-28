@@ -5,7 +5,7 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -54,12 +54,12 @@ export const DuplicateTableForm = ({
     onSubmit: async ({ value }) => {
       setApiError(null);
       try {
-        const response = await getEconomiconAPI().duplicateTable({
+        const response = await getEconomiconAppAPI().duplicateTable({
           tableName,
           newTableName: value.newTableName,
         });
         if (response.code === "OK") {
-          const listRes = await getEconomiconAPI().getTableList();
+          const listRes = await getEconomiconAppAPI().getTableList();
           if (listRes.code === "OK") {
             setTableList(listRes.result.tableNameList);
           }

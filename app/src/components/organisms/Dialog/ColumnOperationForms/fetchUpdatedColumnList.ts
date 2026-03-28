@@ -1,4 +1,4 @@
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import type { ColumnType } from "../../../../types/commonTypes";
 
 /**
@@ -7,7 +7,7 @@ import type { ColumnType } from "../../../../types/commonTypes";
 export const fetchUpdatedColumnList = async (
   tableName: string,
 ): Promise<ColumnType[]> => {
-  const response = await getEconomiconAPI().getColumnList({
+  const response = await getEconomiconAppAPI().getColumnList({
     tableName,
     isNumberOnly: false,
   });

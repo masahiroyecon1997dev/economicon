@@ -8,7 +8,7 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -246,7 +246,7 @@ export const AddSimulationColumnForm = ({
           paramValues[p] = value[p as keyof typeof value] as string;
         }
 
-        const response = await getEconomiconAPI().addSimulationColumn({
+        const response = await getEconomiconAppAPI().addSimulationColumn({
           tableName,
           simulationColumn: {
             columnName: value.columnName,

@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../api/endpoints";
 import type {
   AnalysisResultDetail,
   StandardErrorSettings,
@@ -78,7 +78,7 @@ export const LinearRegressionForm = ({
     },
     onSubmit: async ({ value }) => {
       try {
-        const api = getEconomiconAPI();
+        const api = getEconomiconAppAPI();
         const seMethod = value.standardErrorMethod;
         let standardError: StandardErrorSettings;
         if (seMethod === "hac") {

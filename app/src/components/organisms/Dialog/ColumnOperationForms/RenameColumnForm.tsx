@@ -5,7 +5,7 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -40,7 +40,7 @@ export const RenameColumnForm = ({
     onSubmit: async ({ value }) => {
       setApiError(null);
       try {
-        const response = await getEconomiconAPI().renameColumn({
+        const response = await getEconomiconAppAPI().renameColumn({
           tableName,
           oldColumnName: column.name,
           newColumnName: value.newColumnName,

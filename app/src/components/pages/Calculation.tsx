@@ -3,7 +3,7 @@ import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../lib/dialog/message";
 import {
@@ -63,7 +63,7 @@ export const Calculation = () => {
     },
     onSubmit: async ({ value }) => {
       try {
-        const response = await getEconomiconAPI().calculateColumn({
+        const response = await getEconomiconAppAPI().calculateColumn({
           tableName: value.tableName,
           newColumnName: value.newColumnName,
           addPositionColumn: value.addPositionColumn,

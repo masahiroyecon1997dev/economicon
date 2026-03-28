@@ -1,7 +1,7 @@
 import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import {
   extractApiErrorMessage,
@@ -50,7 +50,7 @@ export const UnionTable = () => {
 
   const fetchColNames = async (tableName: string): Promise<string[]> => {
     try {
-      const api = getEconomiconAPI();
+      const api = getEconomiconAppAPI();
       const resp = await api.getColumnList({ tableName });
       if (resp.code === "OK")
         return resp.result.columnInfoList.map((c: ColumnType) => c.name);
@@ -148,7 +148,7 @@ export const UnionTable = () => {
     if (!validate()) return;
     setIsSubmitting(true);
     try {
-      const api = getEconomiconAPI();
+      const api = getEconomiconAppAPI();
       const resp = await api.createUnionTable({
         unionTableName: newTableName.trim(),
         tableNames: selectedTables.map((t) => t.name),

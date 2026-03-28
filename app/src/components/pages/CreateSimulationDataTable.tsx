@@ -3,7 +3,7 @@ import { AlertCircle, Dices, Edit2, Hash, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import type { SimulationColumnConfig } from "../../api/model";
 import { DISTRIBUTION_OPTIONS } from "../../constants/app";
 import { showMessageDialog } from "../../lib/dialog/message";
@@ -244,7 +244,7 @@ export const CreateSimulationDataTable = () => {
           },
         );
 
-        const response = await getEconomiconAPI().createSimulationDataTable({
+        const response = await getEconomiconAppAPI().createSimulationDataTable({
           tableName: tableName.trim(),
           rowCount: numRows,
           simulationColumns,

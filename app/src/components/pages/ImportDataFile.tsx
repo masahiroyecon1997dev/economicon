@@ -9,7 +9,7 @@ import {
   getFilesSafe,
   TauriFileError,
 } from "../../api/bridge/tauri-commands";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import {
   extractApiErrorMessage,
@@ -228,7 +228,7 @@ export const ImportDataFile = () => {
       const { path } = selectedFileInfo;
 
       // 新APIは拡張子を自動判定し、CSV/Excel/Parquetを共用の1エンドポイントで処理
-      const response = await getEconomiconAPI().importFile({
+      const response = await getEconomiconAppAPI().importFile({
         filePath: path,
         tableName: settings.tableName,
         separator: settings.separator,
