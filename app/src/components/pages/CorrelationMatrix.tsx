@@ -1,6 +1,8 @@
+import { useForm, useStore } from "@tanstack/react-form";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 import { getEconomiconAppAPI } from "../../api/endpoints";
 import { CorrelationMethod, MissingHandlingMethod } from "../../api/model";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
@@ -19,13 +21,22 @@ import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
 
 // ---------------------------------------------------------------------------
-// Types
+// Schema
 // ---------------------------------------------------------------------------
-type FormErrors = {
-  table?: string;
-  columns?: string;
-  newTableName?: string;
-};
+const createCorrelationMatrixSchema = (t: (key: string) => string) =>
+  z.object({
+    tableName: z.string().min(1, t("CorrelationMatrix.ErrorDataRequired")),
+    columnNames: z
+      .array(z.string())
+      .min(2, t("CorrelationMatrix.ErrorColumnsRequired")),
+    newTableName: z
+      .string()
+      .min(1, t("CorrelationMatrix.ErrorOutputNameRequired")),
+    method: z.nativeEnum(CorrelationMethod),
+    decimalPlaces: z.number().min(1).max(15),
+    lowerTriangleOnly: z.boolean(),
+    missingHandling: z.nativeEnum(MissingHandlingMethod),
+  });
 
 // ---------------------------------------------------------------------------
 // Component
@@ -35,95 +46,69 @@ export const CorrelationMatrix = () => {
   const tableList = useTableListStore((s) => s.tableList);
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   // Column loader (numeric only)
   const { selectedTableName, setSelectedTableName, columnList, setColumnList } =
     useTableColumnLoader({ numericOnly: true, autoLoadOnMount: true });
 
-  // Form state
-  const [checkedCols, setCheckedCols] = useState<Set<string>>(new Set());
-  const [newTableName, setNewTableName] = useState("");
-  const [method, setMethod] = useState<CorrelationMethod>(
-    CorrelationMethod.pearson,
-  );
-  const [decimalPlaces, setDecimalPlaces] = useState(3);
-  const [lowerTriangleOnly, setLowerTriangleOnly] = useState(false);
-  const [missingHandling, setMissingHandling] = useState<MissingHandlingMethod>(
-    MissingHandlingMethod.pairwise,
-  );
-  const [optionsOpen, setOptionsOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const form = useForm({
+    defaultValues: {
+      tableName: selectedTableName,
+      columnNames: [] as string[],
+      newTableName: "",
+      method: CorrelationMethod.pearson as CorrelationMethod,
+      decimalPlaces: 3,
+      lowerTriangleOnly: false,
+      missingHandling: MissingHandlingMethod.pairwise as MissingHandlingMethod,
+    },
+    validators: {
+      onSubmit: createCorrelationMatrixSchema(t),
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        const api = getEconomiconAppAPI();
+        const orderedCols = columnList
+          .map((c) => c.name)
+          .filter((n) => value.columnNames.includes(n));
+        const resp = await api.createCorrelationTable({
+          tableName: value.tableName,
+          columnNames: orderedCols,
+          newTableName: value.newTableName.trim(),
+          method: value.method,
+          decimalPlaces: value.decimalPlaces,
+          lowerTriangleOnly: value.lowerTriangleOnly,
+          missingHandling: value.missingHandling,
+        });
+        if (resp.code === "OK") {
+          const tableInfo = await getTableInfo(resp.result.tableName);
+          addTableInfo(tableInfo);
+          setCurrentView("DataPreview");
+        } else {
+          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+        }
+      } catch (error) {
+        await showMessageDialog(
+          t("Error.Error"),
+          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        );
+      }
+    },
+  });
+
+  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
   // Sync column list → check all by default
   useEffect(() => {
-    setCheckedCols(new Set(columnList.map((c) => c.name)));
-  }, [columnList]);
+    form.setFieldValue("columnNames", columnList.map((c) => c.name));
+  }, [columnList, form]);
 
   // Reset columns when table changes
   const handleTableSelect = (value: string) => {
     setSelectedTableName(value);
     if (!value) setColumnList([]);
-    setCheckedCols(new Set());
-    setErrors({});
-  };
-
-  const toggleCol = (name: string) => {
-    setCheckedCols((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      return next;
-    });
-  };
-
-  // ---------------------------------------------------------------------------
-  // Submit
-  // ---------------------------------------------------------------------------
-  const handleSubmit = async () => {
-    const newErrors: FormErrors = {};
-    if (!selectedTableName)
-      newErrors.table = t("CorrelationMatrix.ErrorDataRequired");
-    if (checkedCols.size < 2)
-      newErrors.columns = t("CorrelationMatrix.ErrorColumnsRequired");
-    if (!newTableName.trim())
-      newErrors.newTableName = t("CorrelationMatrix.ErrorOutputNameRequired");
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-    setErrors({});
-    setIsSubmitting(true);
-    try {
-      const api = getEconomiconAppAPI();
-      const orderedCols = columnList
-        .map((c) => c.name)
-        .filter((n) => checkedCols.has(n));
-      const resp = await api.createCorrelationTable({
-        tableName: selectedTableName,
-        columnNames: orderedCols,
-        newTableName: newTableName.trim(),
-        method,
-        decimalPlaces,
-        lowerTriangleOnly,
-        missingHandling,
-      });
-      if (resp.code === "OK") {
-        const tableInfo = await getTableInfo(resp.result.tableName);
-        addTableInfo(tableInfo);
-        setCurrentView("DataPreview");
-      } else {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
-      }
-    } catch (error) {
-      await showMessageDialog(
-        t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    form.setFieldValue("tableName", value);
+    form.setFieldValue("columnNames", []);
   };
 
   // ---------------------------------------------------------------------------
@@ -134,32 +119,49 @@ export const CorrelationMatrix = () => {
       title={t("CorrelationMatrix.Title")}
       description={t("CorrelationMatrix.Description")}
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          void form.handleSubmit();
+        }}
+        className="flex min-h-0 flex-1 flex-col gap-3"
+      >
         {/* ── TOP: テーブル選択（1行コンパクト）── */}
         <div className="shrink-0 rounded-xl border border-border-color bg-white px-3 py-2 shadow-sm dark:bg-gray-800 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <label className="shrink-0 text-xs font-medium text-brand-text-main">
-              {t("CorrelationMatrix.DataLabel")}
-            </label>
-            <div className="flex-1">
-              <Select
-                value={selectedTableName}
-                onValueChange={handleTableSelect}
-                disabled={isSubmitting}
-                placeholder={t("CorrelationMatrix.SelectData")}
-                error={errors.table}
-              >
-                {tableList.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {name}
-                  </SelectItem>
-                ))}
-              </Select>
-            </div>
-            {errors.table && (
-              <p className="shrink-0 text-xs text-red-600">{errors.table}</p>
+          <form.Field name="tableName">
+            {(field) => (
+              <div className="flex items-center gap-3">
+                <label className="shrink-0 text-xs font-medium text-brand-text-main">
+                  {t("CorrelationMatrix.DataLabel")}
+                </label>
+                <div className="flex-1">
+                  <Select
+                    value={field.state.value}
+                    onValueChange={handleTableSelect}
+                    disabled={isSubmitting}
+                    placeholder={t("CorrelationMatrix.SelectData")}
+                    error={
+                      (field.state.meta.errors[0] as { message?: string })
+                        ?.message ?? field.state.meta.errors[0]?.toString()
+                    }
+                  >
+                    {tableList.map((name) => (
+                      <SelectItem key={name} value={name}>
+                        {name}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
+                {field.state.meta.errors[0] && (
+                  <p className="shrink-0 text-xs text-red-600">
+                    {(field.state.meta.errors[0] as { message?: string })
+                      ?.message ?? field.state.meta.errors[0]?.toString()}
+                  </p>
+                )}
+              </div>
             )}
-          </div>
+          </form.Field>
         </div>
 
         {/* ── MIDDLE: 2ペイン（列選択 + オプション）── */}
@@ -175,7 +177,10 @@ export const CorrelationMatrix = () => {
                   <button
                     type="button"
                     onClick={() =>
-                      setCheckedCols(new Set(columnList.map((c) => c.name)))
+                      form.setFieldValue(
+                        "columnNames",
+                        columnList.map((c) => c.name),
+                      )
                     }
                     disabled={isSubmitting}
                     className="text-xs text-brand-accent hover:underline disabled:opacity-50"
@@ -185,7 +190,7 @@ export const CorrelationMatrix = () => {
                   <span className="text-xs text-brand-text-sub">/</span>
                   <button
                     type="button"
-                    onClick={() => setCheckedCols(new Set())}
+                    onClick={() => form.setFieldValue("columnNames", [])}
                     disabled={isSubmitting}
                     className="text-xs text-brand-accent hover:underline disabled:opacity-50"
                   >
@@ -205,16 +210,28 @@ export const CorrelationMatrix = () => {
                   {t("CorrelationMatrix.NoColumns")}
                 </p>
               ) : (
-                <CheckboxTagGroup
-                  items={columnList.map((c) => ({
-                    value: c.name,
-                    label: c.name,
-                  }))}
-                  checked={checkedCols}
-                  onToggle={toggleCol}
-                  disabled={isSubmitting}
-                  error={errors.columns}
-                />
+                <form.Field name="columnNames">
+                  {(field) => (
+                    <CheckboxTagGroup
+                      items={columnList.map((c) => ({
+                        value: c.name,
+                        label: c.name,
+                      }))}
+                      checked={new Set(field.state.value)}
+                      onToggle={(name) => {
+                        const current = new Set(field.state.value);
+                        if (current.has(name)) current.delete(name);
+                        else current.add(name);
+                        field.handleChange([...current]);
+                      }}
+                      disabled={isSubmitting}
+                      error={
+                        (field.state.meta.errors[0] as { message?: string })
+                          ?.message ?? field.state.meta.errors[0]?.toString()
+                      }
+                    />
+                  )}
+                </form.Field>
               )}
             </div>
           </div>
@@ -223,23 +240,26 @@ export const CorrelationMatrix = () => {
           <div className="flex w-56 shrink-0 flex-col gap-3">
             {/* 出力データ名（常時表示・必須）*/}
             <div className="rounded-xl border border-border-color bg-white p-3 shadow-sm dark:bg-gray-800 dark:border-gray-700">
-              <FormField
-                label={t("CorrelationMatrix.OutputDataLabel")}
-                htmlFor="new-table-name"
-                error={errors.newTableName}
-              >
-                <InputText
-                  id="new-table-name"
-                  value={newTableName}
-                  onChange={(e) => {
-                    setNewTableName(e.target.value);
-                    if (errors.newTableName)
-                      setErrors((prev) => ({ ...prev, newTableName: undefined }));
-                  }}
-                  placeholder={t("CorrelationMatrix.OutputDataPlaceholder")}
-                  disabled={isSubmitting}
-                />
-              </FormField>
+              <form.Field name="newTableName">
+                {(field) => (
+                  <FormField
+                    label={t("CorrelationMatrix.OutputDataLabel")}
+                    htmlFor="new-table-name"
+                    error={
+                      (field.state.meta.errors[0] as { message?: string })
+                        ?.message ?? field.state.meta.errors[0]?.toString()
+                    }
+                  >
+                    <InputText
+                      id="new-table-name"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder={t("CorrelationMatrix.OutputDataPlaceholder")}
+                      disabled={isSubmitting}
+                    />
+                  </FormField>
+                )}
+              </form.Field>
             </div>
 
             {/* 詳細オプション（accordion）*/}
@@ -253,13 +273,21 @@ export const CorrelationMatrix = () => {
                   <span className="text-sm font-bold text-text-heading dark:text-gray-100">
                     {t("CorrelationMatrix.AdvancedOptions")}
                   </span>
-                  <span className="text-xs text-brand-text-main/60 dark:text-gray-400">
-                    {t("CorrelationMatrix.AdvancedOptionsSummary", {
-                      method: t(`CorrelationMatrix.Method_${method}`),
-                      places: decimalPlaces,
-                      missing: t(`CorrelationMatrix.Missing_${missingHandling}`),
-                    })}
-                  </span>
+                  <form.Subscribe selector={(s) => s.values}>
+                    {(values) => (
+                      <span className="text-xs text-brand-text-main/60 dark:text-gray-400">
+                        {t("CorrelationMatrix.AdvancedOptionsSummary", {
+                          method: t(
+                            `CorrelationMatrix.Method_${values.method}`,
+                          ),
+                          places: values.decimalPlaces,
+                          missing: t(
+                            `CorrelationMatrix.Missing_${values.missingHandling}`,
+                          ),
+                        })}
+                      </span>
+                    )}
+                  </form.Subscribe>
                 </div>
                 <ChevronDown
                   className={cn(
@@ -273,93 +301,109 @@ export const CorrelationMatrix = () => {
                 <div className="border-t border-border-color px-3 pb-4 pt-3 dark:border-gray-700">
                   <div className="flex flex-col gap-3">
                     {/* 計算手法 */}
-                    <FormField
-                      label={t("CorrelationMatrix.MethodLabel")}
-                      htmlFor="correlation-method"
-                    >
-                      <Select
-                        id="correlation-method"
-                        value={method}
-                        onValueChange={(v) =>
-                          setMethod(v as CorrelationMethod)
-                        }
-                        disabled={isSubmitting}
-                      >
-                        <SelectItem value={CorrelationMethod.pearson}>
-                          {t("CorrelationMatrix.Method_pearson")}
-                        </SelectItem>
-                        <SelectItem value={CorrelationMethod.spearman}>
-                          {t("CorrelationMatrix.Method_spearman")}
-                        </SelectItem>
-                        <SelectItem value={CorrelationMethod.kendall}>
-                          {t("CorrelationMatrix.Method_kendall")}
-                        </SelectItem>
-                      </Select>
-                    </FormField>
+                    <form.Field name="method">
+                      {(field) => (
+                        <FormField
+                          label={t("CorrelationMatrix.MethodLabel")}
+                          htmlFor="correlation-method"
+                        >
+                          <Select
+                            id="correlation-method"
+                            value={field.state.value}
+                            onValueChange={(v) =>
+                              field.handleChange(v as CorrelationMethod)
+                            }
+                            disabled={isSubmitting}
+                          >
+                            <SelectItem value={CorrelationMethod.pearson}>
+                              {t("CorrelationMatrix.Method_pearson")}
+                            </SelectItem>
+                            <SelectItem value={CorrelationMethod.spearman}>
+                              {t("CorrelationMatrix.Method_spearman")}
+                            </SelectItem>
+                            <SelectItem value={CorrelationMethod.kendall}>
+                              {t("CorrelationMatrix.Method_kendall")}
+                            </SelectItem>
+                          </Select>
+                        </FormField>
+                      )}
+                    </form.Field>
 
                     {/* 丸め桁数 */}
-                    <FormField
-                      label={t("CorrelationMatrix.DecimalPlacesLabel")}
-                      htmlFor="decimal-places"
-                    >
-                      <InputText
-                        id="decimal-places"
-                        type="number"
-                        value={decimalPlaces.toString()}
-                        onChange={(e) => {
-                          const v = Math.min(
-                            15,
-                            Math.max(1, parseInt(e.target.value) || 1),
-                          );
-                          setDecimalPlaces(v);
-                        }}
-                        disabled={isSubmitting}
-                      />
-                    </FormField>
+                    <form.Field name="decimalPlaces">
+                      {(field) => (
+                        <FormField
+                          label={t("CorrelationMatrix.DecimalPlacesLabel")}
+                          htmlFor="decimal-places"
+                        >
+                          <InputText
+                            id="decimal-places"
+                            type="number"
+                            value={field.state.value.toString()}
+                            onChange={(e) => {
+                              const v = Math.min(
+                                15,
+                                Math.max(1, parseInt(e.target.value) || 1),
+                              );
+                              field.handleChange(v);
+                            }}
+                            disabled={isSubmitting}
+                          />
+                        </FormField>
+                      )}
+                    </form.Field>
 
                     {/* 下三角のみ */}
-                    <FormField
-                      label={t("CorrelationMatrix.LowerTriangleOnly")}
-                      htmlFor="lower-triangle"
-                    >
-                      <Select
-                        id="lower-triangle"
-                        value={lowerTriangleOnly ? "true" : "false"}
-                        onValueChange={(v) =>
-                          setLowerTriangleOnly(v === "true")
-                        }
-                        disabled={isSubmitting}
-                      >
-                        <SelectItem value="false">
-                          {t("CorrelationMatrix.LowerTriangle_false")}
-                        </SelectItem>
-                        <SelectItem value="true">
-                          {t("CorrelationMatrix.LowerTriangle_true")}
-                        </SelectItem>
-                      </Select>
-                    </FormField>
+                    <form.Field name="lowerTriangleOnly">
+                      {(field) => (
+                        <FormField
+                          label={t("CorrelationMatrix.LowerTriangleOnly")}
+                          htmlFor="lower-triangle"
+                        >
+                          <Select
+                            id="lower-triangle"
+                            value={field.state.value ? "true" : "false"}
+                            onValueChange={(v) =>
+                              field.handleChange(v === "true")
+                            }
+                            disabled={isSubmitting}
+                          >
+                            <SelectItem value="false">
+                              {t("CorrelationMatrix.LowerTriangle_false")}
+                            </SelectItem>
+                            <SelectItem value="true">
+                              {t("CorrelationMatrix.LowerTriangle_true")}
+                            </SelectItem>
+                          </Select>
+                        </FormField>
+                      )}
+                    </form.Field>
 
                     {/* 欠損値処理 */}
-                    <FormField
-                      label={t("CorrelationMatrix.MissingHandlingLabel")}
-                      htmlFor="missing-handling"
-                    >
-                      <Select
-                        id="missing-handling"
-                        value={missingHandling}
-                        onValueChange={(v) =>
-                          setMissingHandling(v as MissingHandlingMethod)
-                        }
-                        disabled={isSubmitting}
-                      >
-                        <SelectItem value={MissingHandlingMethod.pairwise}>
-                          {t("CorrelationMatrix.Missing_pairwise")}
-                        </SelectItem>
-                        <SelectItem value={MissingHandlingMethod.listwise}>
-                          {t("CorrelationMatrix.Missing_listwise")}
-                        </SelectItem>
-                      </Select>
-                    </FormField>
+                    <form.Field name="missingHandling">
+                      {(field) => (
+                        <FormField
+                          label={t("CorrelationMatrix.MissingHandlingLabel")}
+                          htmlFor="missing-handling"
+                        >
+                          <Select
+                            id="missing-handling"
+                            value={field.state.value}
+                            onValueChange={(v) =>
+                              field.handleChange(v as MissingHandlingMethod)
+                            }
+                            disabled={isSubmitting}
+                          >
+                            <SelectItem value={MissingHandlingMethod.pairwise}>
+                              {t("CorrelationMatrix.Missing_pairwise")}
+                            </SelectItem>
+                            <SelectItem value={MissingHandlingMethod.listwise}>
+                              {t("CorrelationMatrix.Missing_listwise")}
+                            </SelectItem>
+                          </Select>
+                        </FormField>
+                      )}
+                    </form.Field>
                   </div>
                 </div>
               )}
@@ -376,10 +420,10 @@ export const CorrelationMatrix = () => {
               : t("CorrelationMatrix.RunCalculation")
           }
           onCancel={() => setCurrentView("DataPreview")}
-          onSelect={handleSubmit}
+          onSelect={() => void form.handleSubmit()}
           disabled={isSubmitting}
         />
-      </div>
+      </form>
     </PageLayout>
   );
 };
