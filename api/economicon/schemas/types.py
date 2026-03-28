@@ -172,7 +172,7 @@ ExcelSheetName = Annotated[
         min_length=1,
         max_length=31,
         # 禁止記号 \ / ? * : [ ] を除外
-        pattern=r"^[^\/\\\?\*\:\[\]]+$",
+        pattern=r"^[^/\\?*:\[\]]+$",
     ),
     # field_validatorの代わりにAfterValidatorでロジックを注入
     AfterValidator(validate_sheet_name_quotes),
