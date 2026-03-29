@@ -11,6 +11,7 @@ import {
   getResponseErrorMessage,
 } from "../../lib/utils/apiError";
 import { getPolarsTypeColor } from "../../lib/utils/columnTypeColor";
+import { extractFieldError } from "../../lib/utils/formHelpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
@@ -178,19 +179,13 @@ export const Calculation = () => {
                   <FormField
                     label={t("CalculationView.TargetData")}
                     htmlFor="target-table"
-                    error={
-                      (field.state.meta.errors[0] as { message?: string })
-                        ?.message ?? field.state.meta.errors[0]?.toString()
-                    }
+                    error={extractFieldError(field.state.meta.errors)}
                   >
                     <Select
                       id="target-table"
                       value={field.state.value}
                       onValueChange={handleTableChange}
-                      error={
-                        (field.state.meta.errors[0] as { message?: string })
-                          ?.message ?? field.state.meta.errors[0]?.toString()
-                      }
+                      error={extractFieldError(field.state.meta.errors)}
                       placeholder={t("CalculationView.SelectData")}
                       disabled={isSubmitting}
                     >
@@ -210,10 +205,7 @@ export const Calculation = () => {
                   <FormField
                     label={t("CalculationView.NewColumnName")}
                     htmlFor="new-column-name"
-                    error={
-                      (field.state.meta.errors[0] as { message?: string })
-                        ?.message ?? field.state.meta.errors[0]?.toString()
-                    }
+                    error={extractFieldError(field.state.meta.errors)}
                   >
                     <InputText
                       id="new-column-name"
@@ -223,10 +215,7 @@ export const Calculation = () => {
                       placeholder={t(
                         "CalculationView.NewColumnNamePlaceholder",
                       )}
-                      error={
-                        (field.state.meta.errors[0] as { message?: string })
-                          ?.message ?? field.state.meta.errors[0]?.toString()
-                      }
+                      error={extractFieldError(field.state.meta.errors)}
                       disabled={isSubmitting}
                     />
                   </FormField>
@@ -352,10 +341,9 @@ export const Calculation = () => {
                           <span>{t("CalculationView.FormulaHelp")}</span>
                         </div>
                       </div>
-                      {field.state.meta.errors[0] && (
+                      {extractFieldError(field.state.meta.errors) && (
                         <p className="px-4 py-1.5 text-xs text-red-600 dark:text-red-400 bg-red-50/60 dark:bg-red-900/10 border-t border-red-200 dark:border-red-800">
-                          {(field.state.meta.errors[0] as { message?: string })
-                            ?.message ?? field.state.meta.errors[0]?.toString()}
+                          {extractFieldError(field.state.meta.errors)}
                         </p>
                       )}
                     </div>
