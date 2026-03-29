@@ -381,6 +381,7 @@
     "AddDummy": "Add Dummy Column",
     "AddLagLead": "Add Lag/Lead Column",
     "AddSimulation": "Add Simulation Column",
+    "Filter": "Filter",
     "Delete": "Delete Column",
     "OpenColumnMenu": "Column operations"
   },
@@ -498,6 +499,32 @@
     "SampleSize": "Sample size",
     "Value": "Value",
     "Submit": "Add"
+  },
+  "FilterColumnForm": {
+    "Title": "Filter",
+    "NewTableName": "New table name",
+    "NewTableNamePlaceholder": "e.g., filtered_data",
+    "TableLabel": "Table name",
+    "ColumnName": "Column",
+    "Operator": "Operator",
+    "CompareValue": "Value",
+    "Condition1": "Condition 1",
+    "Condition2": "Condition 2",
+    "LogicalOperator": "Combine conditions with",
+    "And": "AND (all conditions must match)",
+    "Or": "OR (any condition must match)",
+    "AddCondition": "Add condition",
+    "RemoveCondition": "Remove condition 2",
+    "ConditionValueRequired": "Please enter a comparison value.",
+    "Submit": "Apply filter",
+    "operators": {
+      "equals": "= Equals",
+      "notEquals": "≠ Not equals",
+      "greaterThan": "> Greater than",
+      "greaterThanOrEquals": "≥ Greater than or equal",
+      "lessThan": "< Less than",
+      "lessThanOrEquals": "≤ Less than or equal"
+    }
   },
   "AddLagLeadColumnForm": {
     "Title": "Add Lag/Lead Column",

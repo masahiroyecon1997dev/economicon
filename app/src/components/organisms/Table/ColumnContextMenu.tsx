@@ -12,6 +12,7 @@ import {
   CopyPlus,
   Dices,
   FileClock,
+  Filter,
   FlipHorizontal,
   MoreVertical,
   Sigma,
@@ -32,6 +33,7 @@ export type ColumnOperation =
   | "addDummy"
   | "addLagLead"
   | "addSimulation"
+  | "filter"
   | "delete";
 
 type ColumnContextMenuProps = {
@@ -174,6 +176,19 @@ export const ColumnContextMenu = ({
             >
               <Dices className="h-4 w-4 text-gray-500 shrink-0" />
               {t("ColumnMenu.AddSimulation")}
+            </DropdownMenu.Item>
+          </DropdownMenu.Group>
+
+          <DropdownMenu.Separator className="h-px bg-gray-100 dark:bg-gray-700 mx-1" />
+
+          {/* フィルタ */}
+          <DropdownMenu.Group className="p-1">
+            <DropdownMenu.Item
+              className={menuItemClass}
+              onSelect={() => onAction("filter")}
+            >
+              <Filter className="h-4 w-4 text-gray-500 shrink-0" />
+              {t("ColumnMenu.Filter")}
             </DropdownMenu.Item>
           </DropdownMenu.Group>
 
