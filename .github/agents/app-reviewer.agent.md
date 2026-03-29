@@ -14,6 +14,7 @@
 ### TypeScript・型安全性
 
 - `any`使用禁止。`invoke`結果はZodで型検証すること
+- **Orval生成スキーマの再定義禁止**: `src/api/model/`（型）・`src/api/zod/`（Zodスキーマ）をインポートせず同等の型・スキーマを手書きしている場合は即時修正
 - `enum`禁止。Union `type`または`const`オブジェクトを使う
 - `erasableSyntaxOnly`違反: コンストラクタパラメータプロパティは即時修正
 
@@ -33,6 +34,7 @@
 ### @tanstack/react-form + Zod
 
 - `useForm` + `zodValidator`が正しく連携されているか
+- フォームのバリデーションスキーマに `src/api/zod/` の自動生成Zodスキーマを活用しているか。同等スキーマを手書きしている場合は修正を促す
 - バリデーションエラーが入力の那辺に表示されているか
 - `React Hook Form`の誤混入がないか
 

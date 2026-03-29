@@ -31,6 +31,7 @@ Vitest/Playwrightを用いて計量経済学ツールの品質を担保するシ
 ### TanStack Form + Zod
 
 - Zodバリデーションエラーが正しいフィールドの那辺に表示されることを検証
+- フォームテストでバリデーションをテストする際は `src/api/zod/` の自動生成Zodスキーマをインポートして使う。手書きスキーマで代替しない
 - フォーム送信時の`loading`・`disabled`状態を検証
 
 ### Playwright (E2E)
@@ -53,4 +54,4 @@ Vitest/Playwrightを用いて計量経済学ツールの品質を担保するシ
 ## 🛡 共通品質基準（TypeScript / ESLint）
 
 - ESLint + `typescript-eslint`でエラー・警告ゼロ
-- `any`禁止。mock型は`ReturnType`やZodで導出する
+- `any`禁止。mock型は `src/api/model/` のOrval生成型か `ReturnType` で導出する。手書き型定義の重複禁止
