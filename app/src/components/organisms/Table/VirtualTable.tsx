@@ -15,13 +15,7 @@ import {
   type ColumnSizingState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { getEconomiconAppAPI } from "../../../api/endpoints";
@@ -204,7 +198,10 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
         size: calculatedSize,
         minSize: MIN_COL_WIDTH,
         header: () => (
-          <div className="group flex items-center gap-1.5 min-w-0">
+          <ColumnContextMenu
+            column={column}
+            onAction={(op) => handleColumnAction(column, op)}
+          >
             <span
               className={cn(
                 "shrink-0 px-1 py-0.5 rounded text-[10px] font-bold font-mono leading-none",
@@ -215,11 +212,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
               {typeColor.label}
             </span>
             <span className="truncate">{column.name}</span>
-            <ColumnContextMenu
-              column={column}
-              onAction={(op) => handleColumnAction(column, op)}
-            />
-          </div>
+          </ColumnContextMenu>
         ),
         cell: ({ row }) => {
           const rowData = getRowData(row.index);
@@ -288,11 +281,6 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
     );
   }, [virtualRows, totalRows, prefetchRange]);
 
-  const handleContextMenu = (event: React.MouseEvent) => {
-    event.preventDefault();
-    // TODO: コンテキストメニュー
-  };
-
   // ---------------------------------------------------------------------------
   // ローディング状態（totalRows 未確定）
   // ---------------------------------------------------------------------------
@@ -349,7 +337,6 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
                     key={header.id}
                     className="px-3 py-3 relative select-none overflow-hidden"
                     style={{ width: header.getSize() }}
-                    onContextMenu={handleContextMenu}
                   >
                     {header.isPlaceholder
                       ? null
@@ -386,7 +373,6 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
                   key={row.id}
                   className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/70"
                   style={{ height: `${virtualRow.size}px` }}
-                  onContextMenu={handleContextMenu}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="p-0">
