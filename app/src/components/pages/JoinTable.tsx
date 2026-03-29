@@ -17,6 +17,7 @@ import type { ColumnType } from "../../types/commonTypes";
 import { InputText } from "../atoms/Input/InputText";
 import { Select, SelectItem } from "../atoms/Input/Select";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
+import { SectionCard } from "../molecules/Card/SectionCard";
 import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
 
@@ -194,10 +195,7 @@ export const JoinTable = () => {
     >
       <div className="flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
         {/* ── Section 1: テーブル・結合タイプ ── */}
-        <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading">
-            {t("JoinTable.SelectData")}
-          </h2>
+        <SectionCard title={t("JoinTable.SelectData")}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <FormField
               label={t("JoinTable.LeftData")}
@@ -261,22 +259,20 @@ export const JoinTable = () => {
               </Select>
             </FormField>
           </div>
-        </div>
+        </SectionCard>
 
         {/* ── Section 2: 結合キーペア ── */}
-        <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-bold leading-tight text-text-heading">
-              {t("JoinTable.KeyPairs")}
-            </h2>
-            {autoSuggestApplied && (
+        <SectionCard
+          title={t("JoinTable.KeyPairs")}
+          headerRight={
+            autoSuggestApplied && (
               <span className="flex items-center gap-1 rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-xs font-medium text-brand-accent">
                 <Sparkles className="h-3 w-3" />
                 {t("JoinTable.AutoSuggestApplied")}
               </span>
-            )}
-          </div>
-
+            )
+          }
+        >
           {/* ヘッダー行 */}
           <div className="mb-1 grid grid-cols-[1fr_20px_1fr_32px] gap-2 px-0.5">
             <span className="truncate text-xs font-medium text-brand-text-main/60">
@@ -358,13 +354,10 @@ export const JoinTable = () => {
             <Plus className="h-3.5 w-3.5" />
             {t("JoinTable.AddKeyPair")}
           </button>
-        </div>
+        </SectionCard>
 
         {/* ── Section 3: 出力テーブル名 ── */}
-        <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading">
-            {t("JoinTable.OutputData")}
-          </h2>
+        <SectionCard title={t("JoinTable.OutputData")}>
           <FormField
             label={t("JoinTable.NewDataName")}
             htmlFor="new-table-name"
@@ -379,7 +372,7 @@ export const JoinTable = () => {
               error={errors.newTableName}
             />
           </FormField>
-        </div>
+        </SectionCard>
       </div>
 
       <ActionButtonBar

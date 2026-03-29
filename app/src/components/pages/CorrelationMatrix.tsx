@@ -18,6 +18,7 @@ import { InputText } from "../atoms/Input/InputText";
 import { Select, SelectItem } from "../atoms/Input/Select";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
 import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
+import { SelectAllBar } from "../molecules/Field/SelectAllBar";
 import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
 
@@ -101,7 +102,10 @@ export const CorrelationMatrix = () => {
 
   // Sync column list → check all by default
   useEffect(() => {
-    form.setFieldValue("columnNames", columnList.map((c) => c.name));
+    form.setFieldValue(
+      "columnNames",
+      columnList.map((c) => c.name),
+    );
   }, [columnList, form]);
 
   // Reset columns when table changes
@@ -170,30 +174,18 @@ export const CorrelationMatrix = () => {
                 {t("CorrelationMatrix.ColumnsLabel")}
               </h2>
               {columnList.length > 0 && (
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      form.setFieldValue(
-                        "columnNames",
-                        columnList.map((c) => c.name),
-                      )
-                    }
-                    disabled={isSubmitting}
-                    className="text-xs text-brand-accent hover:underline disabled:opacity-50"
-                  >
-                    {t("CorrelationMatrix.SelectAll")}
-                  </button>
-                  <span className="text-xs text-brand-text-sub">/</span>
-                  <button
-                    type="button"
-                    onClick={() => form.setFieldValue("columnNames", [])}
-                    disabled={isSubmitting}
-                    className="text-xs text-brand-accent hover:underline disabled:opacity-50"
-                  >
-                    {t("CorrelationMatrix.DeselectAll")}
-                  </button>
-                </div>
+                <SelectAllBar
+                  selectAllLabel={t("CorrelationMatrix.SelectAll")}
+                  deselectAllLabel={t("CorrelationMatrix.DeselectAll")}
+                  onSelectAll={() =>
+                    form.setFieldValue(
+                      "columnNames",
+                      columnList.map((c) => c.name),
+                    )
+                  }
+                  onDeselectAll={() => form.setFieldValue("columnNames", [])}
+                  disabled={isSubmitting}
+                />
               )}
             </div>
 

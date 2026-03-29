@@ -10,6 +10,7 @@ import type { ColumnType } from "../../types/commonTypes";
 import { Select, SelectItem } from "../atoms/Input/Select";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
 import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
+import { SelectAllBar } from "../molecules/Field/SelectAllBar";
 import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
 
@@ -219,25 +220,14 @@ export const DescriptiveStatistics = () => {
               </p>
             ) : (
               <div className="space-y-2">
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCheckedCols(new Set(columns.map((c) => c.name)))
-                    }
-                    className="text-xs text-brand-accent hover:underline"
-                  >
-                    {t("DescriptiveStatistics.SelectAll")}
-                  </button>
-                  <span className="text-xs text-brand-text-sub">/</span>
-                  <button
-                    type="button"
-                    onClick={() => setCheckedCols(new Set())}
-                    className="text-xs text-brand-accent hover:underline"
-                  >
-                    {t("DescriptiveStatistics.DeselectAll")}
-                  </button>
-                </div>
+                <SelectAllBar
+                  selectAllLabel={t("DescriptiveStatistics.SelectAll")}
+                  deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
+                  onSelectAll={() =>
+                    setCheckedCols(new Set(columns.map((c) => c.name)))
+                  }
+                  onDeselectAll={() => setCheckedCols(new Set())}
+                />
                 <CheckboxTagGroup
                   items={columns.map((c) => ({ value: c.name, label: c.name }))}
                   checked={checkedCols}
@@ -252,23 +242,12 @@ export const DescriptiveStatistics = () => {
         {/* ─── 3. Statistics selection ───────────────────────── */}
         <FormField label={t("DescriptiveStatistics.StatisticsLabel")}>
           <div className="space-y-2">
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setCheckedStats(new Set(ALL_STAT_TYPES))}
-                className="text-xs text-brand-accent hover:underline"
-              >
-                {t("DescriptiveStatistics.SelectAll")}
-              </button>
-              <span className="text-xs text-brand-text-sub">/</span>
-              <button
-                type="button"
-                onClick={() => setCheckedStats(new Set())}
-                className="text-xs text-brand-accent hover:underline"
-              >
-                {t("DescriptiveStatistics.DeselectAll")}
-              </button>
-            </div>
+            <SelectAllBar
+              selectAllLabel={t("DescriptiveStatistics.SelectAll")}
+              deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
+              onSelectAll={() => setCheckedStats(new Set(ALL_STAT_TYPES))}
+              onDeselectAll={() => setCheckedStats(new Set())}
+            />
             <CheckboxTagGroup
               items={ALL_STAT_TYPES.map((s) => ({
                 value: s,
