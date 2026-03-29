@@ -449,47 +449,6 @@ class GetTableListResult(BaseResult):
 
 
 # ---------------------------------------------------------------------------
-# セルデータ入力
-# ---------------------------------------------------------------------------
-
-
-class InputCellDataRequestBody(BaseRequest):
-    """セルデータ入力リクエスト"""
-
-    table_name: Annotated[
-        TableName,
-        Field(
-            description="セルデータを入力するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
-        ),
-    ]
-    column_name: Annotated[
-        ColumnName,
-        Field(
-            description="セルデータを入力するカラム名。ワークスペースに存在するテーブルの中から指定してください。",
-        ),
-    ]
-    row_index: Annotated[
-        int,
-        Field(
-            title="Row Index",
-            description="更新するセルの行インデックス（0始まり）",
-            ge=0,
-        ),
-    ]
-    new_value: Annotated[
-        Any,
-        Field(
-            title="New Value",
-            description="セルに入力する新しい値。カラムのデータ型に合わせた値を指定してください。",
-        ),
-    ]
-
-
-class InputCellDataResult(TableNameResult):
-    """セルデータ入力レスポンス"""
-
-
-# ---------------------------------------------------------------------------
 # 単一条件フィルタ
 # ---------------------------------------------------------------------------
 

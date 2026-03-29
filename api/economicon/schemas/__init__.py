@@ -144,8 +144,6 @@ from economicon.schemas.tables import (
     FilterSingleConditionResult,
     GetTableListRequestBody,
     GetTableListResult,
-    InputCellDataRequestBody,
-    InputCellDataResult,
     RenameTableRequestBody,
     RenameTableResult,
     TableNameResult,
@@ -254,8 +252,6 @@ __all__ = [
     "GetTableListRequestBody",
     "GetTableListResult",
     "TableNameResult",
-    "InputCellDataRequestBody",
-    "InputCellDataResult",
     "FilterSingleConditionRequestBody",
     "FilterSingleConditionResult",
     # Statistics

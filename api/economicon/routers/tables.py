@@ -22,8 +22,6 @@ from economicon.schemas import (
     FilterSingleConditionRequestBody,
     FilterSingleConditionResult,
     GetTableListResult,
-    InputCellDataRequestBody,
-    InputCellDataResult,
     RenameTableRequestBody,
     RenameTableResult,
     SuccessResponse,
@@ -44,7 +42,6 @@ from economicon.services.tables.filter_single_condition import (
     FilterSingleCondition,
 )
 from economicon.services.tables.get_table_list import GetTableList
-from economicon.services.tables.input_cell_data import InputCellData
 from economicon.services.tables.rename_table import RenameTable
 from economicon.utils import (
     create_success_response,
@@ -370,41 +367,6 @@ async def fetch_data_to_arrow(
     return Response(
         content=arrow_bytes,
         media_type="application/vnd.apache.arrow.stream",
-    )
-
-
-@router.post(
-    "/input-cell-data", response_model=SuccessResponse[InputCellDataResult]
-)
-async def input_cell_data(
-    request: Request,
-    body: InputCellDataRequestBody,
-    tables_store: TablesStoreDep,
-):
-    """セルデータ入力エンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : InputCellDataRequestBody
-        リクエストボディ
-        - tableName: テーブル名
-        - columnName: 列名
-        - rowIndex: 行インデックス
-        - newValue: 新しい値
-
-    Returns
-    -------
-    JSONResponse
-        処理結果
-    """
-    # ビジネスロジックの実行
-    api = InputCellData(body, tables_store)
-    result = run_operation(api)
-
-    return create_success_response(
-        status_code=http_status.HTTP_200_OK, response_object=result
     )
 
 
