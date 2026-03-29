@@ -19,8 +19,8 @@ from economicon.schemas import (
     FetchDataToArrowRequestBody,
     FetchDataToJsonRequestBody,
     FetchDataToJsonResult,
-    FilterSingleConditionRequestBody,
-    FilterSingleConditionResult,
+    FilterRequestBody,
+    FilterResult,
     GetTableListResult,
     RenameTableRequestBody,
     RenameTableResult,
@@ -38,9 +38,7 @@ from economicon.services.tables.delete_table import DeleteTable
 from economicon.services.tables.duplicate_table import DuplicateTable
 from economicon.services.tables.fetch_data_to_arrow import FetchDataToArrow
 from economicon.services.tables.fetch_data_to_json import FetchDataToJson
-from economicon.services.tables.filter_single_condition import (
-    FilterSingleCondition,
-)
+from economicon.services.tables.filter import FilterTable
 from economicon.services.tables.get_table_list import GetTableList
 from economicon.services.tables.rename_table import RenameTable
 from economicon.utils import (
@@ -371,21 +369,21 @@ async def fetch_data_to_arrow(
 
 
 @router.post(
-    "/filter-single-condition",
-    response_model=SuccessResponse[FilterSingleConditionResult],
+    "/filter",
+    response_model=SuccessResponse[FilterResult],
 )
-async def filter_single_condition(
+async def filter_table(
     request: Request,
-    body: FilterSingleConditionRequestBody,
+    body: FilterRequestBody,
     tables_store: TablesStoreDep,
 ):
-    """単一条件フィルタリングを実行するエンドポイント
+    """テーブルフィルタリングを実行するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : FilterSingleConditionRequestBody
+    body : FilterRequestBody
         リクエストボディ
 
     Returns
@@ -394,7 +392,7 @@ async def filter_single_condition(
         処理結果
     """
     # ビジネスロジックの実行
-    api = FilterSingleCondition(body, tables_store)
+    api = FilterTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(

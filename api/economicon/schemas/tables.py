@@ -8,7 +8,11 @@ from pydantic_core import PydanticCustomError
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import BaseRequest, BaseResult
 from economicon.schemas.entities import SimulationColumnConfig
-from economicon.schemas.enums import FilterOperatorType, JoinType
+from economicon.schemas.enums import (
+    FilterOperatorType,
+    JoinType,
+    LogicalOperatorType,
+)
 from economicon.schemas.types import (
     ColumnName,
     NewTableName,
@@ -49,6 +53,23 @@ def _coerce_filter_operator_type(v: Any) -> FilterOperatorType:
             raise PydanticCustomError(
                 "literal_error",
                 "condition must be one of: {expected}",
+                {"expected": valid},
+            ) from None
+    return v
+
+
+def _coerce_logical_operator_type(v: Any) -> LogicalOperatorType:
+    """JSON文字列をLogicalOperatorTypeに変換するBeforeValidator"""
+    if isinstance(v, LogicalOperatorType):
+        return v
+    if isinstance(v, str):
+        try:
+            return LogicalOperatorType(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in LogicalOperatorType)
+            raise PydanticCustomError(
+                "literal_error",
+                "logicalOperator must be one of: {expected}",
                 {"expected": valid},
             ) from None
     return v
@@ -449,29 +470,17 @@ class GetTableListResult(BaseResult):
 
 
 # ---------------------------------------------------------------------------
-# 単一条件フィルタ
+# テーブルフィルタ（複数条件 AND / OR）
 # ---------------------------------------------------------------------------
 
 
-class FilterSingleConditionRequestBody(BaseRequest):
-    """単一条件フィルタリクエスト"""
+class FilterCondition(BaseRequest):
+    """フィルタ条件の1要素"""
 
-    table_name: Annotated[
-        TableName,
-        Field(
-            description="フィルタ条件を適用するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
-        ),
-    ]
-    new_table_name: Annotated[
-        NewTableName,
-        Field(
-            description="フィルタ結果を格納する新しいテーブル名。ワークスペースに存在しない名前を指定してください。",
-        ),
-    ]
     column_name: Annotated[
         ColumnName,
         Field(
-            description="フィルタ条件を適用するカラム名。ワークスペースに存在するテーブルの中から指定してください。",
+            description="フィルタ条件を適用するカラム名。",
         ),
     ]
     condition: Annotated[
@@ -497,10 +506,46 @@ class FilterSingleConditionRequestBody(BaseRequest):
         Field(
             title="Compare Value",
             description="比較する値またはカラム名。"
-            'isCompareColumn が "true" の場合はカラム名を指定。',
+            "isCompareColumn が true の場合はカラム名を指定。",
         ),
     ]
 
 
-class FilterSingleConditionResult(TableNameResult):
-    """単一条件フィルタレスポンス"""
+class FilterRequestBody(BaseRequest):
+    """テーブルフィルタリクエスト（複数条件 AND / OR）"""
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="フィルタ条件を適用するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
+        ),
+    ]
+    new_table_name: Annotated[
+        NewTableName,
+        Field(
+            description="フィルタ結果を格納する新しいテーブル名。ワークスペースに存在しない名前を指定してください。",
+        ),
+    ]
+    logical_operator: Annotated[
+        LogicalOperatorType,
+        BeforeValidator(_coerce_logical_operator_type),
+        Field(
+            default=LogicalOperatorType.AND,
+            title="Logical Operator",
+            description=(
+                "複数条件を結合する論理演算子（and / or）。省略時は and。"
+            ),
+        ),
+    ]
+    conditions: Annotated[
+        list[FilterCondition],
+        Field(
+            title="Conditions",
+            description="フィルタ条件のリスト（1件以上）",
+            min_length=1,
+        ),
+    ]
+
+
+class FilterResult(TableNameResult):
+    """テーブルフィルタレスポンス"""

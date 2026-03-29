@@ -102,6 +102,11 @@ class FilterOperatorType(StrEnum):
     LESS_THAN_OR_EQUALS = "lessThanOrEquals"
 
 
+class LogicalOperatorType(StrEnum):
+    AND = "and"
+    OR = "or"
+
+
 class CorrelationMethod(StrEnum):
     PEARSON = "pearson"
     SPEARMAN = "spearman"
