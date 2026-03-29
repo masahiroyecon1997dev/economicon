@@ -32,6 +32,10 @@ const ALL_STAT_TYPES: DescriptiveStatisticType[] = [
   DescriptiveStatisticType.std_dev,
   DescriptiveStatisticType.range,
   DescriptiveStatisticType.iqr,
+  DescriptiveStatisticType.count,
+  DescriptiveStatisticType.null_count,
+  DescriptiveStatisticType.null_ratio,
+  DescriptiveStatisticType.population_variance,
 ];
 
 // ---------------------------------------------------------------------------
