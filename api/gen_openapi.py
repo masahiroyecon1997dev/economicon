@@ -1,4 +1,4 @@
-﻿# root/api/gen_openapi.py
+# root/api/gen_openapi.py
 import json
 import os
 
