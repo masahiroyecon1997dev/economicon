@@ -1,4 +1,4 @@
-# root/api/gen_openapi.py
+﻿# root/api/gen_openapi.py
 import json
 import os
 
@@ -10,7 +10,7 @@ from main import app  # FastAPIインスタンスがあるファイル
 def generate_spec():
     openapi_schema = get_openapi(
         title="Economicon App API",
-        version="0.1.0",
+        version="0.2.0",
         routes=app.routes,
     )
 
