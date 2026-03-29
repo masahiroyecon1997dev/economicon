@@ -20,8 +20,8 @@ import {
 } from "../../../../lib/utils/apiError";
 import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
-import { Select, SelectItem } from "../../../atoms/Input/Select";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
+import { RadioTagGroup } from "../../../molecules/Field/RadioTagGroup";
 import { FormField } from "../../../molecules/Form/FormField";
 import { RandomSeedField } from "../../../molecules/Form/RandomSeedField";
 import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
@@ -359,24 +359,17 @@ export const AddSimulationColumnForm = ({
       {/* 分布の種類 */}
       <form.Field name="distributionType">
         {(field) => (
-          <FormField
-            label={t("AddSimulationColumnForm.DistributionType")}
-            htmlFor="sim-dist-type"
-          >
-            <Select
-              id="sim-dist-type"
+          <FormField label={t("AddSimulationColumnForm.DistributionType")}>
+            <RadioTagGroup
+              name="sim-dist-type"
+              items={DISTRIBUTION_TYPES.map((dt) => ({
+                value: dt,
+                label: t(`AddSimulationColumnForm.${dt}`),
+              }))}
               value={field.state.value}
-              onValueChange={(v) => {
-                field.handleChange(v as DistributionType);
-              }}
+              onChange={(v) => field.handleChange(v as DistributionType)}
               disabled={isSubmitting}
-            >
-              {DISTRIBUTION_TYPES.map((dt) => (
-                <SelectItem key={dt} value={dt}>
-                  {t(`AddSimulationColumnForm.${dt}`)}
-                </SelectItem>
-              ))}
-            </Select>
+            />
           </FormField>
         )}
       </form.Field>

@@ -3,6 +3,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "../../api/endpoints";
 import { JoinType } from "../../api/model";
+import {
+  createJoinTableBodyJoinTableNameMax,
+  createJoinTableBodyJoinTableNameRegExp,
+} from "../../api/zod/table/table";
 import { showMessageDialog } from "../../lib/dialog/message";
 import {
   extractApiErrorMessage,
@@ -145,6 +149,10 @@ export const JoinTable = () => {
     }
     if (!newTableName.trim()) {
       next.newTableName = t("JoinTable.ErrorNewDataNameRequired");
+    } else if (newTableName.length > createJoinTableBodyJoinTableNameMax) {
+      next.newTableName = t("ValidationMessages.DataNameTooLong");
+    } else if (!createJoinTableBodyJoinTableNameRegExp.test(newTableName)) {
+      next.newTableName = t("ValidationMessages.DataNameInvalidChars");
     }
     setErrors(next);
     return Object.keys(next).length === 0;

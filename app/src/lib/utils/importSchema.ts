@@ -57,22 +57,6 @@ export const createImportConfigSchema = (t: (key: string) => string) =>
   });
 
 /**
- * テーブル名フィールドのバリデーション (NAME_PATTERN: 制御文字・DEL 禁止)
- */
-export const validateTableName = (
-  value: string,
-  t: (key: string) => string,
-): string | undefined => {
-  if (!value || value.length === 0)
-    return t("ValidationMessages.DataNameRequired");
-  if (value.length > 128) return t("ValidationMessages.DataNameTooLong");
-  // eslint-disable-next-line no-control-regex
-  if (/[\u0000-\u001f\u007f]/.test(value))
-    return t("ValidationMessages.DataNameInvalidChars");
-  return undefined;
-};
-
-/**
  * 区切り文字（その他）フィールドのバリデーション
  * separatorMode が "other" の場合のみチェックする
  */

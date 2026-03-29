@@ -2,6 +2,10 @@ import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "../../api/endpoints";
+import {
+  createUnionTableBodyUnionTableNameMax,
+  createUnionTableBodyUnionTableNameRegExp,
+} from "../../api/zod/table/table";
 import { showMessageDialog } from "../../lib/dialog/message";
 import {
   extractApiErrorMessage,
@@ -133,6 +137,10 @@ export const UnionTable = () => {
     }
     if (!newTableName.trim()) {
       next.newTableName = t("UnionTable.ErrorNewDataNameRequired");
+    } else if (newTableName.length > createUnionTableBodyUnionTableNameMax) {
+      next.newTableName = t("ValidationMessages.DataNameTooLong");
+    } else if (!createUnionTableBodyUnionTableNameRegExp.test(newTableName)) {
+      next.newTableName = t("ValidationMessages.DataNameInvalidChars");
     }
     setErrors(next);
     return Object.keys(next).length === 0;
