@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  importFileBodyTableNameMax,
+  importFileBodyTableNameRegExp,
+} from "../../api/zod/data/data";
 
 /**
  * バックエンド api/economicon/models/types.py の制約を移植した
@@ -39,11 +43,9 @@ export const createImportConfigSchema = (t: (key: string) => string) =>
     tableName: z
       .string()
       .min(1, t("ValidationMessages.DataNameRequired"))
-      .max(128, t("ValidationMessages.DataNameTooLong"))
-      // 制御文字・DEL 禁止 (NAME_PATTERN)
+      .max(importFileBodyTableNameMax, t("ValidationMessages.DataNameTooLong"))
       .regex(
-        // eslint-disable-next-line no-control-regex
-        new RegExp("^[^\u0000-\u001f\u007f]+$"),
+        importFileBodyTableNameRegExp,
         t("ValidationMessages.DataNameInvalidChars"),
       ),
     // CSV 専用

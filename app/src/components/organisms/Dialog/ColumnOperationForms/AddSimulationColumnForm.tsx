@@ -10,6 +10,10 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import {
+  addSimulationColumnBodySimulationColumnColumnNameMax,
+  addSimulationColumnBodySimulationColumnColumnNameRegExp,
+} from "../../../../api/zod/column/column";
+import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
@@ -328,7 +332,9 @@ export const AddSimulationColumnForm = ({
         validators={{
           onBlur: z
             .string()
-            .min(1, t("ValidationMessages.NewColumnNameRequired")),
+            .min(1, t("ValidationMessages.NewColumnNameRequired"))
+            .max(addSimulationColumnBodySimulationColumnColumnNameMax)
+            .regex(addSimulationColumnBodySimulationColumnColumnNameRegExp),
         }}
       >
         {(field) => (

@@ -5,6 +5,10 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../api/endpoints";
 import type { SimulationColumnConfig } from "../../api/model";
+import {
+  createSimulationDataTableBodyTableNameMax,
+  createSimulationDataTableBodyTableNameRegExp,
+} from "../../api/zod/table/table";
 import { DISTRIBUTION_OPTIONS } from "../../constants/app";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { extractFieldError } from "../../lib/utils/formHelpers";
@@ -28,7 +32,17 @@ import { PageLayout } from "../templates/PageLayout";
 
 const createSimulationSchema = (t: (key: string) => string) =>
   z.object({
-    tableName: z.string().min(1, t("ValidationMessages.DataNameRequired")),
+    tableName: z
+      .string()
+      .min(1, t("ValidationMessages.DataNameRequired"))
+      .max(
+        createSimulationDataTableBodyTableNameMax,
+        t("ValidationMessages.DataNameTooLong"),
+      )
+      .regex(
+        createSimulationDataTableBodyTableNameRegExp,
+        t("ValidationMessages.DataNameInvalidChars"),
+      ),
     numRows: z.number().min(1, t("ValidationMessages.NumRowsMoreThan0")),
     randomSeed: z
       .string()

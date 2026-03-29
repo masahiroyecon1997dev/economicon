@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { AddLagLeadColumnBody } from "../../../../api/zod/column/column";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -45,18 +46,19 @@ export const AddLagLeadColumnForm = ({
       groupColumns: [] as string[],
     },
     validators: {
-      onSubmit: z.object({
-        periods: z
-          .string()
-          .refine(
-            (v) => !isNaN(parseInt(v, 10)) && parseInt(v, 10) !== 0,
-            "0 以外の整数で入力してください。",
-          ),
-        newColumnName: z
-          .string()
-          .min(1, t("ValidationMessages.NewColumnNameRequired")),
-        groupColumns: z.array(z.string()),
-      }),
+      onSubmit: AddLagLeadColumnBody.pick({ newColumnName: true })
+        .required()
+        .extend(
+          z.object({
+            periods: z
+              .string()
+              .refine(
+                (v) => !isNaN(parseInt(v, 10)) && parseInt(v, 10) !== 0,
+                "0 以外の整数で入力してください。",
+              ),
+            groupColumns: z.array(z.string()),
+          }).shape,
+        ),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
