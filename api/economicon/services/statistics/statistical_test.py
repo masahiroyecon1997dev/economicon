@@ -8,8 +8,8 @@ from statsmodels.stats.weightstats import ztest as sm_ztest
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models.enums import AlternativeHypothesis, StatisticalTestType
-from economicon.models.statistics import (
+from economicon.schemas.enums import AlternativeHypothesis, StatisticalTestType
+from economicon.schemas.statistics import (
     ConfidenceIntervalBounds,
     StatisticalTestRequestBody,
     StatisticalTestResult,

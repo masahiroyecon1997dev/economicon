@@ -7,7 +7,7 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from economicon.models import (
+from economicon.schemas import (
     COMMON_ERROR_RESPONSES,
     AddDiagnosticColumnsResult,
     ClearAllAnalysisResultsResult,
@@ -18,7 +18,7 @@ from economicon.models import (
     RegressionResult,
     SuccessResponse,
 )
-from economicon.models.regressions import (
+from economicon.schemas.regressions import (
     AddDiagnosticColumnsRequestBody,
     OutputResultRequest,
     RegressionRequestBody,
@@ -31,8 +31,8 @@ from economicon.services.operation import run_operation
 from economicon.services.regressions.add_diagnostic_columns import (
     AddDiagnosticColumns,
 )
+from economicon.services.regressions.factory import create_regression
 from economicon.services.regressions.output_result import OutputResult
-from economicon.services.regressions.regression import Regression
 from economicon.services.regressions.result import (
     ClearAllAnalysisResults,
     DeleteAnalysisResult,
@@ -81,7 +81,7 @@ async def regression(
         分析結果またはエラーメッセージ
     """
     # ビジネスロジックの実行
-    api = Regression(body, tables_store, result_store)
+    api = create_regression(body, tables_store, result_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result

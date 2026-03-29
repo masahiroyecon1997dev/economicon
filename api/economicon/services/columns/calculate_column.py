@@ -3,7 +3,7 @@ from typing import ClassVar
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import CalculateColumnRequestBody
+from economicon.schemas import CalculateColumnRequestBody
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError
 from economicon.utils.algorithms import parse_formula_to_expr

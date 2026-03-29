@@ -8,8 +8,8 @@ from scipy import stats
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import CreateCorrelationTableRequestBody
-from economicon.models.enums import CorrelationMethod, MissingHandlingMethod
+from economicon.schemas import CreateCorrelationTableRequestBody
+from economicon.schemas.enums import CorrelationMethod, MissingHandlingMethod
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError
 from economicon.utils.validators import (

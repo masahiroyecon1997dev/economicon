@@ -1,0 +1,56 @@
+name: API Test CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["dev"]
+    paths:
+      - "api/**"
+  pull_request:
+    branches: ["dev"]
+    paths:
+      - "api/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.14"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "api/uv.lock"
+      # Python のインストール
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      # 依存関係のインストール
+      - name: Install dependencies
+        working-directory: ./api
+        run: uv sync --group dev
+
+      # Linterの実行
+      - name: Lint with ruff
+        working-directory: ./api
+        run: uv run ruff check .
+
+      # テストとカバレッジの実行
+      - name: Run tests with coverage
+        working-directory: ./api
+        run: uv run pytest tests --cov=economicon --cov-report=xml --cov-report=term
+
+      # カバレッジレポートのアップロード
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./api/coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }} # v4以降はトークン推奨

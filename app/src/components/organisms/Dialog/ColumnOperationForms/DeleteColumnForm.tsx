@@ -3,7 +3,7 @@
  */
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -31,7 +31,7 @@ export const DeleteColumnForm = ({
     setIsSubmitting(true);
     setApiError(null);
     try {
-      const response = await getEconomiconAPI().deleteColumn({
+      const response = await getEconomiconAppAPI().deleteColumn({
         tableName,
         columnName: column.name,
       });

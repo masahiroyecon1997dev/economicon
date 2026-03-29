@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import { DescriptiveStatisticType } from "../../api/model";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { cn } from "../../lib/utils/helpers";
@@ -10,6 +10,7 @@ import type { ColumnType } from "../../types/commonTypes";
 import { Select, SelectItem } from "../atoms/Input/Select";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
 import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
+import { SelectAllBar } from "../molecules/Field/SelectAllBar";
 import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
 
@@ -32,6 +33,10 @@ const ALL_STAT_TYPES: DescriptiveStatisticType[] = [
   DescriptiveStatisticType.std_dev,
   DescriptiveStatisticType.range,
   DescriptiveStatisticType.iqr,
+  DescriptiveStatisticType.count,
+  DescriptiveStatisticType.null_count,
+  DescriptiveStatisticType.null_ratio,
+  DescriptiveStatisticType.population_variance,
 ];
 
 // ---------------------------------------------------------------------------
@@ -89,7 +94,7 @@ export const DescriptiveStatistics = () => {
     }
     setIsLoadingCols(true);
     setResult(null);
-    const api = getEconomiconAPI();
+    const api = getEconomiconAppAPI();
     api
       .getColumnList({ tableName: selectedTable })
       .then((resp) => {
@@ -146,7 +151,7 @@ export const DescriptiveStatistics = () => {
 
     setIsCalculating(true);
     try {
-      const api = getEconomiconAPI();
+      const api = getEconomiconAppAPI();
       const resp = await api.descriptiveStatistics({
         tableName: selectedTable,
         columnNameList: orderedCols,
@@ -215,25 +220,14 @@ export const DescriptiveStatistics = () => {
               </p>
             ) : (
               <div className="space-y-2">
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCheckedCols(new Set(columns.map((c) => c.name)))
-                    }
-                    className="text-xs text-brand-accent hover:underline"
-                  >
-                    {t("DescriptiveStatistics.SelectAll")}
-                  </button>
-                  <span className="text-xs text-brand-text-sub">/</span>
-                  <button
-                    type="button"
-                    onClick={() => setCheckedCols(new Set())}
-                    className="text-xs text-brand-accent hover:underline"
-                  >
-                    {t("DescriptiveStatistics.DeselectAll")}
-                  </button>
-                </div>
+                <SelectAllBar
+                  selectAllLabel={t("DescriptiveStatistics.SelectAll")}
+                  deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
+                  onSelectAll={() =>
+                    setCheckedCols(new Set(columns.map((c) => c.name)))
+                  }
+                  onDeselectAll={() => setCheckedCols(new Set())}
+                />
                 <CheckboxTagGroup
                   items={columns.map((c) => ({ value: c.name, label: c.name }))}
                   checked={checkedCols}
@@ -248,23 +242,12 @@ export const DescriptiveStatistics = () => {
         {/* ─── 3. Statistics selection ───────────────────────── */}
         <FormField label={t("DescriptiveStatistics.StatisticsLabel")}>
           <div className="space-y-2">
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setCheckedStats(new Set(ALL_STAT_TYPES))}
-                className="text-xs text-brand-accent hover:underline"
-              >
-                {t("DescriptiveStatistics.SelectAll")}
-              </button>
-              <span className="text-xs text-brand-text-sub">/</span>
-              <button
-                type="button"
-                onClick={() => setCheckedStats(new Set())}
-                className="text-xs text-brand-accent hover:underline"
-              >
-                {t("DescriptiveStatistics.DeselectAll")}
-              </button>
-            </div>
+            <SelectAllBar
+              selectAllLabel={t("DescriptiveStatistics.SelectAll")}
+              deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
+              onSelectAll={() => setCheckedStats(new Set(ALL_STAT_TYPES))}
+              onDeselectAll={() => setCheckedStats(new Set())}
+            />
             <CheckboxTagGroup
               items={ALL_STAT_TYPES.map((s) => ({
                 value: s,

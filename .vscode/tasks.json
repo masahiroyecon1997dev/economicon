@@ -157,6 +157,44 @@
         "kind": "test",
         "isDefault": true
       }
+    },
+    {
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File packaging/bump-version.ps1 -Version ${input:newVersion}",
+      "label": "Economicon: Bump Version",
+      "detail": "6つのファイルのバージョンを一括更新する (pyproject.toml / Cargo.toml / package.json / tauri.conf.json / build.ps1 / gen_openapi.py)",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": true
+      }
+    },
+    {
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File packaging/bump-version.ps1 -Version ${input:newVersion} -DryRun",
+      "label": "Economicon: Bump Version (DryRun)",
+      "detail": "変更内容を確認のみ（ファイルは変更されない）",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": true
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "newVersion",
+      "type": "promptString",
+      "description": "新しいバージョン番号を入力してください (例: 0.2.0)",
+      "default": "0.2.0"
     }
   ]
 }

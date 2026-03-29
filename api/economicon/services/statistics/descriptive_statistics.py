@@ -4,7 +4,7 @@ import polars as pl
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import (
+from economicon.schemas import (
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticType,
 )
@@ -32,6 +32,16 @@ class DescriptiveStatistics:
         ),
         DescriptiveStatisticType.IQR: lambda c: (
             pl.col(c).quantile(0.75) - pl.col(c).quantile(0.25)
+        ),
+        DescriptiveStatisticType.COUNT: (lambda c: pl.col(c).count()),
+        DescriptiveStatisticType.NULL_COUNT: (
+            lambda c: pl.col(c).null_count()
+        ),
+        DescriptiveStatisticType.NULL_RATIO: (
+            lambda c: pl.col(c).is_null().mean()
+        ),
+        DescriptiveStatisticType.POPULATION_VARIANCE: (
+            lambda c: pl.col(c).var(ddof=0)
         ),
     }
 

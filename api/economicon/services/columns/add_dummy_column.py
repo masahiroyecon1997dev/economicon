@@ -5,8 +5,8 @@ import polars as pl
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import AddDummyColumnRequestBody
-from economicon.models.enums import DummyMode, NullStrategy
+from economicon.schemas import AddDummyColumnRequestBody
+from economicon.schemas.enums import DummyMode, NullStrategy
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError
 from economicon.utils.validators import (

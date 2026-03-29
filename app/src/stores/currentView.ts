@@ -5,6 +5,7 @@ export type CurrentPageValue =
   | "JoinTable"
   | "UnionTable"
   | "DescriptiveStatistics"
+  | "CorrelationMatrix"
   | "LinearRegressionForm"
   | "CreateSimulationDataTable"
   | "CalculationView"

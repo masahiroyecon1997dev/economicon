@@ -4,13 +4,14 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { DuplicateColumnBody } from "../../../../api/zod/column/column";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
@@ -31,16 +32,12 @@ export const DuplicateColumnForm = ({
   const form = useForm({
     defaultValues: { newColumnName: `${column.name}_copy` },
     validators: {
-      onSubmit: z.object({
-        newColumnName: z
-          .string()
-          .min(1, t("ValidationMessages.NewColumnNameRequired")),
-      }),
+      onSubmit: DuplicateColumnBody.pick({ newColumnName: true }),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
       try {
-        const response = await getEconomiconAPI().duplicateColumn({
+        const response = await getEconomiconAppAPI().duplicateColumn({
           tableName,
           sourceColumnName: column.name,
           newColumnName: value.newColumnName,
@@ -106,7 +103,7 @@ export const DuplicateColumnForm = ({
       >
         {(field) => {
           const errorMsg = field.state.meta.isTouched
-            ? (field.state.meta.errors[0] as string | undefined)
+            ? extractFieldError(field.state.meta.errors)
             : undefined;
           return (
             <FormField

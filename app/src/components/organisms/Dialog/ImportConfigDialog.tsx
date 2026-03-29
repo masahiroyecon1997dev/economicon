@@ -4,6 +4,7 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { extractFieldError } from "../../../lib/utils/formHelpers";
 import { cn } from "../../../lib/utils/helpers";
 import {
   CSV_ENCODINGS,
@@ -137,9 +138,9 @@ export const ImportConfigDialog = ({
                 )}
                 disabled={isSubmitting}
               />
-              {field.state.meta.errors[0] && (
+              {extractFieldError(field.state.meta.errors) && (
                 <p className={errorClass}>
-                  {String(field.state.meta.errors[0])}
+                  {extractFieldError(field.state.meta.errors)}
                 </p>
               )}
             </div>
@@ -215,9 +216,9 @@ export const ImportConfigDialog = ({
                           disabled={isSubmitting}
                           maxLength={10}
                         />
-                        {customField.state.meta.errors[0] && (
+                        {extractFieldError(customField.state.meta.errors) && (
                           <p className={errorClass}>
-                            {String(customField.state.meta.errors[0])}
+                            {extractFieldError(customField.state.meta.errors)}
                           </p>
                         )}
                       </div>
@@ -318,9 +319,9 @@ export const ImportConfigDialog = ({
                     disabled={isSubmitting}
                     maxLength={31}
                   />
-                  {field.state.meta.errors[0] && (
+                  {extractFieldError(field.state.meta.errors) && (
                     <p className={errorClass}>
-                      {String(field.state.meta.errors[0])}
+                      {extractFieldError(field.state.meta.errors)}
                     </p>
                   )}
                 </div>

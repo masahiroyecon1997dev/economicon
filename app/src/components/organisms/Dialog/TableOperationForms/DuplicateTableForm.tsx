@@ -4,13 +4,14 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { DuplicateTableBody } from "../../../../api/zod/table/table";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { useTableListStore } from "../../../../stores/tableList";
 import { InputText } from "../../../atoms/Input/InputText";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -40,26 +41,17 @@ export const DuplicateTableForm = ({
   const form = useForm({
     defaultValues: { newTableName: `${tableName}_copy` },
     validators: {
-      onSubmit: z.object({
-        newTableName: z
-          .string()
-          .min(1, t("ValidationMessages.DataNameRequired"))
-          .max(128, t("ValidationMessages.DataNameTooLong"))
-          .refine(
-            (v) => !hasControlChars(v),
-            t("ValidationMessages.DataNameInvalidChars"),
-          ),
-      }),
+      onSubmit: DuplicateTableBody.pick({ newTableName: true }),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
       try {
-        const response = await getEconomiconAPI().duplicateTable({
+        const response = await getEconomiconAppAPI().duplicateTable({
           tableName,
           newTableName: value.newTableName,
         });
         if (response.code === "OK") {
-          const listRes = await getEconomiconAPI().getTableList();
+          const listRes = await getEconomiconAppAPI().getTableList();
           if (listRes.code === "OK") {
             setTableList(listRes.result.tableNameList);
           }
@@ -113,7 +105,7 @@ export const DuplicateTableForm = ({
       >
         {(field) => {
           const errorMsg = field.state.meta.isTouched
-            ? (field.state.meta.errors[0] as string | undefined)
+            ? extractFieldError(field.state.meta.errors)
             : undefined;
           return (
             <FormField

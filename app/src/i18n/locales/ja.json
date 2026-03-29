@@ -42,7 +42,9 @@
     "Probability": "成功確率",
     "PopulationSize": "母集団サイズ",
     "NumberOfSuccesses": "成功数",
-    "SampleSize": "標本サイズ"
+    "SampleSize": "標本サイズ",
+    "RandomSeed": "乱数シード",
+    "RandomSeedPlaceholder": "省略可（0〜100,000,000）"
   },
   "AppBar": {
     "Minimize": "最小化",
@@ -63,6 +65,7 @@
     "Calculate": "計算",
     "BasicAnalysis": "基本分析",
     "BasicStatistics": "基本統計量",
+    "CorrelationMatrix": "相関行列",
     "Regression": "回帰分析",
     "LinearRegressionMenu": "線形回帰",
     "OrdinaryLeastSquares": "最小二乗法"
@@ -182,6 +185,36 @@
     "ErrorColumnsRequired": "1つ以上の列を選択してください",
     "ErrorNewDataNameRequired": "新しいデータ名を入力してください"
   },
+  "CorrelationMatrix": {
+    "Title": "相関行列",
+    "Description": "数値列を選択し、相関係数の行列を作成します。結果は新しいデータとして保存されます。",
+    "DataLabel": "対象データ",
+    "SelectData": "データを選択",
+    "ColumnsLabel": "対象列（数値）",
+    "NoColumns": "数値列がありません",
+    "SelectAll": "すべて選択",
+    "DeselectAll": "すべて解除",
+    "OutputDataLabel": "出力データ名",
+    "OutputDataPlaceholder": "例: correlation_matrix",
+    "AdvancedOptions": "詳細オプション",
+    "AdvancedOptionsSummary": "手法: {{method}} | {{places}}桁 | 欠損: {{missing}}",
+    "MethodLabel": "計算手法",
+    "Method_pearson": "ピアソン",
+    "Method_spearman": "スピアマン",
+    "Method_kendall": "ケンドール",
+    "DecimalPlacesLabel": "丸め桁数 (1−15)",
+    "LowerTriangleOnly": "下三角のみ",
+    "LowerTriangle_false": "全体",
+    "LowerTriangle_true": "下三角のみ",
+    "MissingHandlingLabel": "欠損値の処理",
+    "Missing_pairwise": "ペアワイズ除外",
+    "Missing_listwise": "リストワイズ除外",
+    "RunCalculation": "作成する",
+    "Processing": "処理中...",
+    "ErrorDataRequired": "データを選択してください",
+    "ErrorColumnsRequired": "2つ以上の列を選択してください",
+    "ErrorOutputNameRequired": "出力データ名を入力してください"
+  },
   "DescriptiveStatistics": {
     "Title": "基本統計量",
     "Description": "データの列を選択し、平均・分散などの基本統計量を計算します。",
@@ -200,6 +233,10 @@
     "Stat_std_dev": "標準偏差",
     "Stat_range": "範囲",
     "Stat_iqr": "四分位範囲",
+    "Stat_count": "有効サンプル数",
+    "Stat_null_count": "null数",
+    "Stat_null_ratio": "null割合",
+    "Stat_population_variance": "母分散",
     "RunCalculation": "計算する",
     "Processing": "処理中...",
     "ResultTitle": "計算結果",
@@ -331,7 +368,8 @@
     "DependentVariableRequired": "被説明変数を選択してください",
     "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください",
     "NewColumnNameRequired": "新しいカラム名を入力してください。",
-    "CalculationExpressionRequired": "計算式を入力してください。"
+    "CalculationExpressionRequired": "計算式を入力してください。",
+    "RandomSeedRange": "乱数シードは0以上1億以下の整数を入力してください。"
   },
   "ColumnMenu": {
     "SortAsc": "昇順ソート",
@@ -343,6 +381,7 @@
     "AddDummy": "ダミー変数を追加",
     "AddLagLead": "ラグ・リード列を追加",
     "AddSimulation": "シミュレーション列を追加",
+    "Filter": "フィルタ",
     "Delete": "列を削除",
     "OpenColumnMenu": "列操作メニュー"
   },
@@ -460,6 +499,32 @@
     "SampleSize": "標本サイズ",
     "Value": "固定値",
     "Submit": "追加"
+  },
+  "FilterColumnForm": {
+    "Title": "フィルタ",
+    "NewTableName": "新しいデータ名",
+    "NewTableNamePlaceholder": "例: filtered_data",
+    "TableLabel": "データ名",
+    "ColumnName": "列",
+    "Operator": "演算子",
+    "CompareValue": "比較値",
+    "Condition1": "条件 1",
+    "Condition2": "条件 2",
+    "LogicalOperator": "条件の結合方法",
+    "And": "AND（すべての条件に一致）",
+    "Or": "OR（いずれかの条件に一致）",
+    "AddCondition": "条件を追加",
+    "RemoveCondition": "条件 2 を削除",
+    "ConditionValueRequired": "比較値を入力してください。",
+    "Submit": "フィルタを適用",
+    "operators": {
+      "equals": "= 等しい",
+      "notEquals": "≠ 等しくない",
+      "greaterThan": "> より大きい",
+      "greaterThanOrEquals": "≥ 以上",
+      "lessThan": "< より小さい",
+      "lessThanOrEquals": "≤ 以下"
+    }
   },
   "AddLagLeadColumnForm": {
     "Title": "ラグ・リード列を追加",

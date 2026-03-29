@@ -10,7 +10,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import { DuplicateColumnForm } from "./DuplicateColumnForm";
 
 // ---------------------------------------------------------------------------
@@ -48,7 +48,7 @@ const defaultProps = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(getEconomiconAPI).mockReturnValue(mockApi as never);
+  vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
 });
 
 // ---------------------------------------------------------------------------

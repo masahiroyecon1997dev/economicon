@@ -5,7 +5,7 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -52,7 +52,7 @@ export const AddDummyColumnForm = ({
     onSubmit: async ({ value }) => {
       setApiError(null);
       try {
-        const response = await getEconomiconAPI().addDummyColumn({
+        const response = await getEconomiconAppAPI().addDummyColumn({
           tableName,
           sourceColumnName: column.name,
           addPositionColumn: column.name,

@@ -22,10 +22,15 @@ _STAT_VARIANCE = "variance"
 _STAT_STD_DEV = "std_dev"
 _STAT_RANGE = "range"
 _STAT_IQR = "iqr"
+_STAT_COUNT = "count"
+_STAT_NULL_COUNT = "null_count"
+_STAT_NULL_RATIO = "null_ratio"
+_STAT_POP_VARIANCE = "population_variance"
 
 _STATISTICS_ERROR = (
     "statisticsは次のいずれかである必要があります: "
-    "mean, median, mode, variance, std_dev, range, iqr"
+    "mean, median, mode, variance, std_dev, range, iqr, "
+    "count, null_count, null_ratio, population_variance"
 )
 
 URL = "/api/statistics/descriptive"
@@ -65,6 +70,21 @@ def tables_store():
     )
     manager.store_table(_TABLE_STRING, df_string)
 
+    yield manager
+    manager.clear_tables()
+
+
+@pytest.fixture
+def tables_store_with_nulls():
+    """null包含データのテーブルストア"""
+    manager = TablesStore()
+    manager.clear_tables()
+    df = pl.DataFrame(
+        {
+            "X": pl.Series([1.0, None, 3.0, None, 5.0], dtype=pl.Float64),
+        }
+    )
+    manager.store_table("TestNulls", df)
     yield manager
     manager.clear_tables()
 
@@ -209,6 +229,101 @@ def test_descriptive_statistics_success_string_mode(client, tables_store):
     result = response_data["result"]
     # name列はAliceかBobが最頻値
     assert result["statistics"]["name"][_STAT_MODE] in ["Alice", "Bob"]
+
+
+def test_descriptive_statistics_count_no_nulls(client, tables_store):
+    """nullなしデータでcount/null_count/null_ratioが正しく返る"""
+    payload = {
+        "tableName": _TABLE_NUMERIC,
+        "columnNameList": ["A"],
+        "statistics": [_STAT_COUNT, _STAT_NULL_COUNT, _STAT_NULL_RATIO],
+    }
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
+    assert response.status_code == status.HTTP_200_OK
+    stats_a = result["statistics"]["A"]
+    _expected_count = 5
+    assert stats_a[_STAT_COUNT] == _expected_count
+    assert stats_a[_STAT_NULL_COUNT] == 0
+    assert stats_a[_STAT_NULL_RATIO] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_descriptive_statistics_count_with_nulls(
+    client, tables_store_with_nulls
+):
+    """null2件データでcount=3, null_count=2, null_ratio≈0.4"""
+    payload = {
+        "tableName": "TestNulls",
+        "columnNameList": ["X"],
+        "statistics": [_STAT_COUNT, _STAT_NULL_COUNT, _STAT_NULL_RATIO],
+    }
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
+    assert response.status_code == status.HTTP_200_OK
+    stats_x = result["statistics"]["X"]
+    _expected_valid = 3
+    _expected_null = 2
+    assert stats_x[_STAT_COUNT] == _expected_valid
+    assert stats_x[_STAT_NULL_COUNT] == _expected_null
+    assert stats_x[_STAT_NULL_RATIO] == pytest.approx(0.4, abs=1e-9)
+
+
+def test_descriptive_statistics_population_variance_numerical(
+    client, tables_store
+):
+    """A=[1..5]で母分散=2.0、不偏分散=2.5の区別を検証"""
+    payload = {
+        "tableName": _TABLE_NUMERIC,
+        "columnNameList": ["A"],
+        "statistics": [_STAT_VARIANCE, _STAT_POP_VARIANCE],
+    }
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
+    assert response.status_code == status.HTTP_200_OK
+    stats_a = result["statistics"]["A"]
+    # 不偏分散 (ddof=1): 10/4 = 2.5
+    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-9)
+    # 母分散 (ddof=0): 10/5 = 2.0
+    assert stats_a[_STAT_POP_VARIANCE] == pytest.approx(2.0, abs=1e-9)
+
+
+def test_descriptive_statistics_null_stats_on_string_column(
+    client, tables_store
+):
+    """count/null_count/null_ratioは文字列列からも正常値を返す"""
+    payload = {
+        "tableName": _TABLE_STRING,
+        "columnNameList": ["name"],
+        "statistics": [_STAT_COUNT, _STAT_NULL_COUNT, _STAT_NULL_RATIO],
+    }
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
+    assert response.status_code == status.HTTP_200_OK
+    stats = result["statistics"]["name"]
+    _expected_str_count = 5
+    assert stats[_STAT_COUNT] == _expected_str_count
+    assert stats[_STAT_NULL_COUNT] == 0
+    assert stats[_STAT_NULL_RATIO] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_descriptive_statistics_pop_variance_on_string_column(
+    client, tables_store
+):
+    """population_varianceは文字列列に対してNoneを返す"""
+    payload = {
+        "tableName": _TABLE_STRING,
+        "columnNameList": ["name"],
+        "statistics": [_STAT_POP_VARIANCE],
+    }
+    response = client.post(URL, json=payload)
+    result = response.json()["result"]
+
+    assert response.status_code == status.HTTP_200_OK
+    assert result["statistics"]["name"][_STAT_POP_VARIANCE] is None
 
 
 def test_descriptive_statistics_string_numeric_stats(client, tables_store):

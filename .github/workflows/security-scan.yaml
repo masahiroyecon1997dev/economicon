@@ -1,0 +1,90 @@
+name: "Security Scan"
+
+on:
+  # dev ブランチへの PR 時に実行
+  pull_request:
+    branches: ["dev"]
+  # 手動での実行を可能にする
+  workflow_dispatch:
+
+jobs:
+  python-audit:
+    name: Python Dependency Check (pip-audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Python Dependency Check (pip-audit)
+        run: |
+          cd api
+          uv sync --group dev
+          uv run pip-audit
+
+  react-audit:
+    name: React Dependency Check (pnpm audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+          cache: "pnpm"
+          cache-dependency-path: "app/pnpm-lock.yaml"
+
+      - name: Install React dependencies
+        working-directory: ./app
+        run: pnpm install --frozen-lockfile
+
+      - name: React Dependency Check (pnpm audit)
+        working-directory: ./app
+        run: pnpm audit --audit-level high
+
+  rust-audit:
+    name: Rust Dependency Check (cargo-audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo-audit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cargo-audit
+          key: v1-${{ runner.os }}-cargo-audit
+
+      - name: Install cargo-audit
+        run: |
+          if ! command -v cargo-audit &> /dev/null; then
+            cargo install cargo-audit
+          fi
+
+      - name: Run cargo-audit
+        working-directory: ./app/src-tauri
+        run: cargo audit

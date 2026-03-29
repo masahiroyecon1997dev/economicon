@@ -1,6 +1,6 @@
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import UpdateSettingsRequest
+from economicon.schemas import UpdateSettingsRequest
 from economicon.services.data.settings_store import SettingsStore
 from economicon.utils import ProcessingError
 

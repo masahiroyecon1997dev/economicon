@@ -45,6 +45,21 @@ export default defineConfig({
     {
       name: "tauri",
     },
+    // CI 環境用: ブラウザテスト（baseURL で Vite dev server を参照）
+    {
+      name: "chromium",
+      use: {
+        browserName: "chromium",
+        baseURL: "http://localhost:5173",
+      },
+    },
+    {
+      name: "firefox",
+      use: {
+        browserName: "firefox",
+        baseURL: "http://localhost:5173",
+      },
+    },
   ],
 
   // 開発サーバーの自動起動設定

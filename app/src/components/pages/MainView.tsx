@@ -1,6 +1,7 @@
 import type { CurrentPageValue } from "../../stores/currentView";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { Calculation } from "./Calculation";
+import { CorrelationMatrix } from "./CorrelationMatrix";
 import { CreateSimulationDataTable } from "./CreateSimulationDataTable";
 import { DescriptiveStatistics } from "./DescriptiveStatistics";
 import { ImportDataFile } from "./ImportDataFile";
@@ -15,6 +16,7 @@ const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
   JoinTable: <JoinTable />,
   UnionTable: <UnionTable />,
   DescriptiveStatistics: <DescriptiveStatistics />,
+  CorrelationMatrix: <CorrelationMatrix />,
   LinearRegressionForm: <Regression />,
   CreateSimulationDataTable: <CreateSimulationDataTable />,
   CalculationView: <Calculation />,

@@ -5,12 +5,13 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -71,7 +72,7 @@ export const TransformColumnForm = ({
           };
         }
 
-        const response = await getEconomiconAPI().transformColumn({
+        const response = await getEconomiconAppAPI().transformColumn({
           tableName,
           sourceColumnName: column.name,
           newColumnName: value.newColumnName,
@@ -235,7 +236,7 @@ export const TransformColumnForm = ({
       >
         {(field) => {
           const errorMsg = field.state.meta.isTouched
-            ? (field.state.meta.errors[0] as string | undefined)
+            ? extractFieldError(field.state.meta.errors)
             : undefined;
           return (
             <FormField

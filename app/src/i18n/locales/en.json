@@ -42,7 +42,9 @@
     "Probability": "Probability",
     "PopulationSize": "Population Size",
     "NumberOfSuccesses": "Number of Successes",
-    "SampleSize": "Sample Size"
+    "SampleSize": "Sample size",
+    "RandomSeed": "Random Seed",
+    "RandomSeedPlaceholder": "Optional (0–100,000,000)"
   },
   "AppBar": {
     "Minimize": "Minimize",
@@ -63,6 +65,7 @@
     "Calculate": "Calculate",
     "BasicAnalysis": "Basic Analysis",
     "BasicStatistics": "Basic Statistics",
+    "CorrelationMatrix": "Correlation Matrix",
     "Regression": "Regression",
     "LinearRegressionMenu": "Linear Regression",
     "OrdinaryLeastSquares": "Ordinary Least Squares"
@@ -182,6 +185,36 @@
     "ErrorColumnsRequired": "Please select at least one column",
     "ErrorNewDataNameRequired": "Please enter a name for the new data"
   },
+  "CorrelationMatrix": {
+    "Title": "Correlation Matrix",
+    "Description": "Select numeric columns to create a correlation coefficient matrix. The result is saved as a new dataset.",
+    "DataLabel": "Target Data",
+    "SelectData": "Select data",
+    "ColumnsLabel": "Target Columns (Numeric)",
+    "NoColumns": "No numeric columns available",
+    "SelectAll": "Select all",
+    "DeselectAll": "Deselect all",
+    "OutputDataLabel": "Output Data Name",
+    "OutputDataPlaceholder": "e.g. correlation_matrix",
+    "AdvancedOptions": "Advanced Options",
+    "AdvancedOptionsSummary": "Method: {{method}} | {{places}} places | Missing: {{missing}}",
+    "MethodLabel": "Correlation Method",
+    "Method_pearson": "Pearson",
+    "Method_spearman": "Spearman",
+    "Method_kendall": "Kendall",
+    "DecimalPlacesLabel": "Decimal Places (1–15)",
+    "LowerTriangleOnly": "Lower Triangle Only",
+    "LowerTriangle_false": "Full matrix",
+    "LowerTriangle_true": "Lower triangle only",
+    "MissingHandlingLabel": "Missing Value Handling",
+    "Missing_pairwise": "Pairwise exclusion",
+    "Missing_listwise": "Listwise exclusion",
+    "RunCalculation": "Create",
+    "Processing": "Processing...",
+    "ErrorDataRequired": "Please select data",
+    "ErrorColumnsRequired": "Please select at least 2 columns",
+    "ErrorOutputNameRequired": "Please enter an output data name"
+  },
   "DescriptiveStatistics": {
     "Title": "Descriptive Statistics",
     "Description": "Select columns from a dataset and calculate basic statistics such as mean, variance, and more.",
@@ -200,6 +233,10 @@
     "Stat_std_dev": "Std Dev",
     "Stat_range": "Range",
     "Stat_iqr": "IQR",
+    "Stat_count": "Count",
+    "Stat_null_count": "Null Count",
+    "Stat_null_ratio": "Null Ratio",
+    "Stat_population_variance": "Population Variance",
     "RunCalculation": "Calculate",
     "Processing": "Processing...",
     "ResultTitle": "Results",
@@ -331,7 +368,8 @@
     "DependentVariableRequired": "Please select a dependent variable.",
     "ExplanatoryVariablesRequired": "Please select at least one explanatory variable.",
     "NewColumnNameRequired": "Please enter a new column name.",
-    "CalculationExpressionRequired": "Please enter a calculation expression."
+    "CalculationExpressionRequired": "Please enter a calculation expression.",
+    "RandomSeedRange": "Random seed must be an integer between 0 and 100,000,000."
   },
   "ColumnMenu": {
     "SortAsc": "Sort Ascending",
@@ -343,6 +381,7 @@
     "AddDummy": "Add Dummy Column",
     "AddLagLead": "Add Lag/Lead Column",
     "AddSimulation": "Add Simulation Column",
+    "Filter": "Filter",
     "Delete": "Delete Column",
     "OpenColumnMenu": "Column operations"
   },
@@ -460,6 +499,32 @@
     "SampleSize": "Sample size",
     "Value": "Value",
     "Submit": "Add"
+  },
+  "FilterColumnForm": {
+    "Title": "Filter",
+    "NewTableName": "New table name",
+    "NewTableNamePlaceholder": "e.g., filtered_data",
+    "TableLabel": "Table name",
+    "ColumnName": "Column",
+    "Operator": "Operator",
+    "CompareValue": "Value",
+    "Condition1": "Condition 1",
+    "Condition2": "Condition 2",
+    "LogicalOperator": "Combine conditions with",
+    "And": "AND (all conditions must match)",
+    "Or": "OR (any condition must match)",
+    "AddCondition": "Add condition",
+    "RemoveCondition": "Remove condition 2",
+    "ConditionValueRequired": "Please enter a comparison value.",
+    "Submit": "Apply filter",
+    "operators": {
+      "equals": "= Equals",
+      "notEquals": "≠ Not equals",
+      "greaterThan": "> Greater than",
+      "greaterThanOrEquals": "≥ Greater than or equal",
+      "lessThan": "< Less than",
+      "lessThanOrEquals": "≤ Less than or equal"
+    }
   },
   "AddLagLeadColumnForm": {
     "Title": "Add Lag/Lead Column",

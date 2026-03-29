@@ -4,7 +4,7 @@ import re
 
 from fastapi import status
 
-from economicon.models.regressions import OutputResultRequest
+from economicon.schemas.regressions import OutputResultRequest
 from economicon.services.data.analysis_result import AnalysisResult
 from economicon.services.data.analysis_result_store import (
     AnalysisResultStore,
