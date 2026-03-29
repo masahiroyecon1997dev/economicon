@@ -195,6 +195,7 @@ export const SimulationColumnConfig = ({
               onBlur={field.handleBlur}
               disabled={disabled}
               autoFocus
+              error={extractFieldError(field.state.meta.errors)}
             />
           </FormField>
         )}
