@@ -73,7 +73,8 @@ def test_filter_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 2
+    expected_row_count = 2  # A==2 の行数
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [2, 2]
 
 
@@ -95,7 +96,8 @@ def test_filter_greater_than(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 5
+    expected_row_count = 5  # B>10 の行数
+    assert df.shape[0] == expected_row_count
     assert df["B"].to_list() == [11, 12, 30, 40, 40]
 
 
@@ -117,8 +119,10 @@ def test_filter_not_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 8
-    assert 2 not in df["A"].to_list()
+    expected_row_count = 8  # A!=2 の行数
+    excluded_value = 2
+    assert df.shape[0] == expected_row_count
+    assert excluded_value not in df["A"].to_list()
 
 
 def test_filter_greater_than_or_equals(client, tables_store):
@@ -139,7 +143,8 @@ def test_filter_greater_than_or_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 3
+    expected_row_count = 3  # B>=30 の行数
+    assert df.shape[0] == expected_row_count
     assert df["B"].to_list() == [30, 40, 40]
 
 
@@ -161,7 +166,8 @@ def test_filter_less_than(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 4
+    expected_row_count = 4  # A<3 の行数
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [1, 2, 1, 2]
 
 
@@ -183,7 +189,8 @@ def test_filter_less_than_or_equals(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 7
+    expected_row_count = 7  # B<=12 の行数
+    assert df.shape[0] == expected_row_count
     assert df["B"].to_list() == [11, 12, 1, 2, 3, 10, 2]
 
 
@@ -210,7 +217,8 @@ def test_filter_equals_compare_column(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 3
+    expected_row_count = 3  # A==C となる行数
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [1, 6, 7]
     assert df["C"].to_list() == [1, 6, 7]
 
@@ -233,7 +241,8 @@ def test_filter_greater_than_compare_column(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 3
+    expected_row_count = 3  # A>C となる行数
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [2, 5, 3]
     assert df["C"].to_list() == [1, 4, 2]
 
@@ -256,7 +265,8 @@ def test_filter_less_than_or_equals_compare_column(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 7
+    expected_row_count = 7  # A<=C となる行数
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [1, 3, 4, 6, 7, 1, 2]
     assert df["C"].to_list() == [1, 4, 8, 6, 7, 2, 3]
 
@@ -306,7 +316,8 @@ def test_filter_and_two_conditions(client, tables_store):
     #  idx7: 1  40 → A>1 F
     #  idx8: 2  10 → B>10 F (10 not > 10)
     #  idx9: 3   2 → B>10 F
-    assert df.shape[0] == 3
+    expected_row_count = 3  # A>1 AND B>10 の行数
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [2, 3, 4]
     assert df["B"].to_list() == [12, 30, 40]
 
@@ -339,7 +350,8 @@ def test_filter_or_two_conditions(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 3
+    expected_row_count = 3  # A==1 OR A==7 の行数
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [1, 7, 1]
 
 
@@ -370,7 +382,8 @@ def test_filter_and_default_logical_operator(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
-    assert df.shape[0] == 3
+    expected_row_count = 3  # A>1 AND B>10（AND デフォルト）の行数
+    assert df.shape[0] == expected_row_count
 
 
 def test_filter_three_conditions_and(client, tables_store):
@@ -408,7 +421,8 @@ def test_filter_three_conditions_and(client, tables_store):
     assert response_data["code"] == "OK"
     df = tables_store.get_table("FilteredTable").table
     # A>1 AND B>10 AND C<5 → idx1(A=2,B=12,C=1) のみ
-    assert df.shape[0] == 2
+    expected_row_count = 2  # 3条件 AND の行数
+    assert df.shape[0] == expected_row_count
     assert df["A"].to_list() == [2, 3]
     assert df["B"].to_list() == [12, 30]
     assert df["C"].to_list() == [1, 4]
