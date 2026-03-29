@@ -68,6 +68,11 @@ NEG_BINOMIAL_P = 0.3
 # 固定値
 FIXED_VALUE = 42.0
 
+# シード値テスト用
+SEED_VALUE = 42
+SEED_VALUE_MAX = 100_000_000
+SEED_VALUE_DATE = 20241231  # YYYYMMDD 形式
+
 
 # ========================================
 # フィクスチャ
@@ -1455,3 +1460,188 @@ def test_add_simulation_column_negative_binomial_n_zero(client, tables_store):
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
+
+
+# ========================================
+# シード値テスト (S1-S6)
+# ========================================
+
+
+def test_add_simulation_column_with_seed_is_reproducible(
+    client, tables_store
+):
+    """S1: 同一シードで追加した2カラムは同じ値を持つ"""
+    # 1回目: seed=42 で SeedColA を追加
+    response1 = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SeedColA",
+                "distribution": {
+                    "type": "normal",
+                    "loc": NORMAL_LOC,
+                    "scale": NORMAL_SCALE,
+                },
+            },
+            "addPositionColumn": COL_A,
+            "randomSeed": SEED_VALUE,
+        },
+    )
+    assert response1.status_code == status.HTTP_200_OK
+
+    # 2回目: 同一シードで SeedColB を追加
+    response2 = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SeedColB",
+                "distribution": {
+                    "type": "normal",
+                    "loc": NORMAL_LOC,
+                    "scale": NORMAL_SCALE,
+                },
+            },
+            "addPositionColumn": COL_A,
+            "randomSeed": SEED_VALUE,
+        },
+    )
+    assert response2.status_code == status.HTTP_200_OK
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df["SeedColA"].to_list() == df["SeedColB"].to_list()
+
+
+def test_add_simulation_column_seed_zero_is_valid(client, tables_store):
+    """S2: randomSeed=0（最小境界値）は正常に受け付けられる"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SeedZeroCol",
+                "distribution": {
+                    "type": "uniform",
+                    "low": UNIFORM_LOW,
+                    "high": UNIFORM_HIGH,
+                },
+            },
+            "addPositionColumn": COL_A,
+            "randomSeed": 0,
+        },
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["code"] == "OK"
+
+
+def test_add_simulation_column_seed_max_is_valid(client, tables_store):
+    """S3: randomSeed=100_000_000（最大境界値）は正常に受け付けられる"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SeedMaxCol",
+                "distribution": {
+                    "type": "uniform",
+                    "low": UNIFORM_LOW,
+                    "high": UNIFORM_HIGH,
+                },
+            },
+            "addPositionColumn": COL_A,
+            "randomSeed": SEED_VALUE_MAX,
+        },
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["code"] == "OK"
+
+
+def test_add_simulation_column_seed_exceeds_max_is_rejected(
+    client, tables_store
+):
+    """S4: randomSeed > 100_000_000 は 422 VALIDATION_ERROR"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SeedOverCol",
+                "distribution": {
+                    "type": "normal",
+                    "loc": NORMAL_LOC,
+                    "scale": NORMAL_SCALE,
+                },
+            },
+            "addPositionColumn": COL_A,
+            "randomSeed": SEED_VALUE_MAX + 1,
+        },
+    )
+    expected_msg = "randomSeedは100000000以下で入力してください。"
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_add_simulation_column_seed_negative_is_rejected(
+    client, tables_store
+):
+    """S5: randomSeed < 0 は 422 VALIDATION_ERROR"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SeedNegCol",
+                "distribution": {
+                    "type": "normal",
+                    "loc": NORMAL_LOC,
+                    "scale": NORMAL_SCALE,
+                },
+            },
+            "addPositionColumn": COL_A,
+            "randomSeed": -1,
+        },
+    )
+    expected_msg = "randomSeedは0以上で入力してください。"
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_add_simulation_column_seed_date_format_is_valid(
+    client, tables_store
+):
+    """S6: 日付形式シード（20241231）は正常に受け付けられる"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SeedDateCol",
+                "distribution": {
+                    "type": "normal",
+                    "loc": NORMAL_LOC,
+                    "scale": NORMAL_SCALE,
+                },
+            },
+            "addPositionColumn": COL_A,
+            "randomSeed": SEED_VALUE_DATE,
+        },
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["code"] == "OK"
