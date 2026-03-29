@@ -45,13 +45,13 @@ export const TransformColumnForm = ({
     validators: {
       onSubmit: TransformColumnBody.pick({ newColumnName: true })
         .required()
-        .merge(
+        .extend(
           z.object({
             method: z.enum(["log", "power", "root"]),
             base: z.string(),
             exponent: z.string(),
             degree: z.string(),
-          }),
+          }).shape,
         ),
     },
     onSubmit: async ({ value }) => {

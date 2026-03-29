@@ -62,7 +62,7 @@ export const CastColumnForm = ({
         strict: true,
       })
         .required()
-        .merge(z.object({ datetimeFormat: z.string() })),
+        .extend(z.object({ datetimeFormat: z.string() }).shape),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);

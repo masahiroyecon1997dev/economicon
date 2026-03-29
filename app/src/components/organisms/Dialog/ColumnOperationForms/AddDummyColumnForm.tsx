@@ -32,21 +32,21 @@ export const AddDummyColumnForm = ({
 
   const form = useForm({
     defaultValues: {
-      mode: "single" as DummyMode,
+      mode: "single" as "single" | "all_except_base",
       targetValue: "",
       dummyColumnName: `is_${column.name}`,
       dropBaseValue: "auto_most_frequent",
-      nullStrategy: "exclude" as NullStrategy,
+      nullStrategy: "exclude" as "exclude" | "as_category" | "error",
     },
     validators: {
       onSubmit: AddDummyColumnBody.pick({ mode: true, nullStrategy: true })
         .required()
-        .merge(
+        .extend(
           z.object({
             dummyColumnName: z.string(),
             targetValue: z.string(),
             dropBaseValue: z.string(),
-          }),
+          }).shape,
         ),
     },
     onSubmit: async ({ value }) => {

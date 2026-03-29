@@ -85,7 +85,7 @@ export const FilterColumnForm = ({
         logicalOperator: true,
       })
         .required()
-        .merge(
+        .extend(
           z.object({
             c1Column: z.string(),
             c1Operator: z.enum([
@@ -107,7 +107,7 @@ export const FilterColumnForm = ({
               "lessThanOrEquals",
             ]),
             c2Value: z.string(),
-          }),
+          }).shape,
         ),
     },
     onSubmit: async ({ value }) => {
