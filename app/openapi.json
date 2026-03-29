@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Economicon App API",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "paths": {
     "/api/health": {
@@ -1573,14 +1573,14 @@
         }
       }
     },
-    "/api/table/input-cell-data": {
+    "/api/table/filter": {
       "post": {
         "tags": [
           "table"
         ],
-        "summary": "Input Cell Data",
-        "description": "\u30bb\u30eb\u30c7\u30fc\u30bf\u5165\u529b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : InputCellDataRequestBody\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n    - tableName: \u30c6\u30fc\u30d6\u30eb\u540d\n    - columnName: \u5217\u540d\n    - rowIndex: \u884c\u30a4\u30f3\u30c7\u30c3\u30af\u30b9\n    - newValue: \u65b0\u3057\u3044\u5024\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
-        "operationId": "input_cell_data",
+        "summary": "Filter Table",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u30d5\u30a3\u30eb\u30bf\u30ea\u30f3\u30b0\u3092\u5b9f\u884c\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : FilterRequestBody\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "filter_table",
         "parameters": [
           {
             "name": "X-Auth-Token",
@@ -1599,7 +1599,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InputCellDataRequestBody"
+                "$ref": "#/components/schemas/FilterRequestBody"
               }
             }
           }
@@ -1610,82 +1610,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_InputCellDataResult_"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/table/filter-single-condition": {
-      "post": {
-        "tags": [
-          "table"
-        ],
-        "summary": "Filter Single Condition",
-        "description": "\u5358\u4e00\u6761\u4ef6\u30d5\u30a3\u30eb\u30bf\u30ea\u30f3\u30b0\u3092\u5b9f\u884c\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : FilterSingleConditionRequestBody\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
-        "operationId": "filter_single_condition",
-        "parameters": [
-          {
-            "name": "X-Auth-Token",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
-              "title": "X-Auth-Token"
-            },
-            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterSingleConditionRequestBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_FilterSingleConditionResult_"
+                  "$ref": "#/components/schemas/SuccessResponse_FilterResult_"
                 }
               }
             }
@@ -3250,6 +3175,20 @@
               "population",
               "\u4eba\u53e3"
             ]
+          },
+          "randomSeed": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100000000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Random Seed",
+            "description": "\u4e71\u6570\u30b7\u30fc\u30c9\u5024\uff080\u4ee5\u4e0a1\u5104\u4ee5\u4e0b\u306e\u6574\u6570\uff09\u3002\u540c\u3058\u30b7\u30fc\u30c9\u3092\u6307\u5b9a\u3059\u308b\u3068\u540c\u3058\u7d50\u679c\u304c\u518d\u73fe\u3055\u308c\u307e\u3059\u3002None \u306e\u5834\u5408\u306f\u6bce\u56de\u7570\u306a\u308b\u7d50\u679c\u306b\u306a\u308a\u307e\u3059\u3002"
           }
         },
         "type": "object",
@@ -4152,6 +4091,20 @@
             "minItems": 1,
             "title": "Simulation Columns",
             "description": "\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u30ab\u30e9\u30e0\u306e\u8a2d\u5b9a\u30ea\u30b9\u30c8"
+          },
+          "randomSeed": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100000000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Random Seed",
+            "description": "\u4e71\u6570\u30b7\u30fc\u30c9\u5024\uff080\u4ee5\u4e0a1\u5104\u4ee5\u4e0b\u306e\u6574\u6570\uff09\u3002\u540c\u3058\u30b7\u30fc\u30c9\u3092\u6307\u5b9a\u3059\u308b\u3068\u540c\u3058\u7d50\u679c\u304c\u518d\u73fe\u3055\u308c\u307e\u3059\u3002None \u306e\u5834\u5408\u306f\u6bce\u56de\u7570\u306a\u308b\u7d50\u679c\u306b\u306a\u308a\u307e\u3059\u3002"
           }
         },
         "type": "object",
@@ -5004,6 +4957,43 @@
         "title": "FetchDataToJsonResult",
         "description": "\u30c6\u30fc\u30d6\u30eb\u30c7\u30fc\u30bf JSON \u5f62\u5f0f\u53d6\u5f97\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
+      "FilterCondition": {
+        "properties": {
+          "columnName": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\u3092\u9069\u7528\u3059\u308b\u30ab\u30e9\u30e0\u540d\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "condition": {
+            "$ref": "#/components/schemas/FilterOperatorType",
+            "title": "Condition",
+            "description": "\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\u306e\u6f14\u7b97\u5b50\uff08equals, notEquals, greaterThan, lessThan \u7b49\uff09"
+          },
+          "isCompareColumn": {
+            "type": "boolean",
+            "title": "Is Compare Column",
+            "description": "\u6bd4\u8f03\u5bfe\u8c61\u304c\u30ab\u30e9\u30e0\u304b\u3069\u3046\u304b\u3002true: compareValue \u3092\u30ab\u30e9\u30e0\u540d\u3068\u3057\u3066\u89e3\u91c8\u3001false: \u5b9a\u6570\u5024\u3068\u3057\u3066\u89e3\u91c8\u3002"
+          },
+          "compareValue": {
+            "title": "Compare Value",
+            "description": "\u6bd4\u8f03\u3059\u308b\u5024\u307e\u305f\u306f\u30ab\u30e9\u30e0\u540d\u3002isCompareColumn \u304c true \u306e\u5834\u5408\u306f\u30ab\u30e9\u30e0\u540d\u3092\u6307\u5b9a\u3002"
+          }
+        },
+        "type": "object",
+        "required": [
+          "columnName",
+          "condition",
+          "isCompareColumn",
+          "compareValue"
+        ],
+        "title": "FilterCondition",
+        "description": "\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\u306e1\u8981\u7d20"
+      },
       "FilterOperatorType": {
         "type": "string",
         "enum": [
@@ -5016,7 +5006,7 @@
         ],
         "title": "FilterOperatorType"
       },
-      "FilterSingleConditionRequestBody": {
+      "FilterRequestBody": {
         "properties": {
           "tableName": {
             "type": "string",
@@ -5040,44 +5030,32 @@
               "\u5e02\u533a\u753a\u6751\u4eba\u53e3\u30c7\u30fc\u30bf"
             ]
           },
-          "columnName": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Column Name",
-            "description": "\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\u3092\u9069\u7528\u3059\u308b\u30ab\u30e9\u30e0\u540d\u3002\u30ef\u30fc\u30af\u30b9\u30da\u30fc\u30b9\u306b\u5b58\u5728\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u306e\u4e2d\u304b\u3089\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
-            "examples": [
-              "population",
-              "\u4eba\u53e3"
-            ]
+          "logicalOperator": {
+            "$ref": "#/components/schemas/LogicalOperatorType",
+            "title": "Logical Operator",
+            "description": "\u8907\u6570\u6761\u4ef6\u3092\u7d50\u5408\u3059\u308b\u8ad6\u7406\u6f14\u7b97\u5b50\uff08and / or\uff09\u3002\u7701\u7565\u6642\u306f and\u3002",
+            "default": "and"
           },
-          "condition": {
-            "$ref": "#/components/schemas/FilterOperatorType",
-            "title": "Condition",
-            "description": "\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\u306e\u6f14\u7b97\u5b50\uff08equals, notEquals, greaterThan, lessThan \u7b49\uff09"
-          },
-          "isCompareColumn": {
-            "type": "boolean",
-            "title": "Is Compare Column",
-            "description": "\u6bd4\u8f03\u5bfe\u8c61\u304c\u30ab\u30e9\u30e0\u304b\u3069\u3046\u304b\u3002true: compareValue \u3092\u30ab\u30e9\u30e0\u540d\u3068\u3057\u3066\u89e3\u91c8\u3001false: \u5b9a\u6570\u5024\u3068\u3057\u3066\u89e3\u91c8\u3002"
-          },
-          "compareValue": {
-            "title": "Compare Value",
-            "description": "\u6bd4\u8f03\u3059\u308b\u5024\u307e\u305f\u306f\u30ab\u30e9\u30e0\u540d\u3002isCompareColumn \u304c \"true\" \u306e\u5834\u5408\u306f\u30ab\u30e9\u30e0\u540d\u3092\u6307\u5b9a\u3002"
+          "conditions": {
+            "items": {
+              "$ref": "#/components/schemas/FilterCondition"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Conditions",
+            "description": "\u30d5\u30a3\u30eb\u30bf\u6761\u4ef6\u306e\u30ea\u30b9\u30c8\uff081\u4ef6\u4ee5\u4e0a\uff09"
           }
         },
         "type": "object",
         "required": [
           "tableName",
           "newTableName",
-          "columnName",
-          "condition",
-          "isCompareColumn",
-          "compareValue"
+          "conditions"
         ],
-        "title": "FilterSingleConditionRequestBody",
-        "description": "\u5358\u4e00\u6761\u4ef6\u30d5\u30a3\u30eb\u30bf\u30ea\u30af\u30a8\u30b9\u30c8"
+        "title": "FilterRequestBody",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u30d5\u30a3\u30eb\u30bf\u30ea\u30af\u30a8\u30b9\u30c8\uff08\u8907\u6570\u6761\u4ef6 AND / OR\uff09"
       },
-      "FilterSingleConditionResult": {
+      "FilterResult": {
         "properties": {
           "tableName": {
             "type": "string",
@@ -5089,8 +5067,8 @@
         "required": [
           "tableName"
         ],
-        "title": "FilterSingleConditionResult",
-        "description": "\u5358\u4e00\u6761\u4ef6\u30d5\u30a3\u30eb\u30bf\u30ec\u30b9\u30dd\u30f3\u30b9"
+        "title": "FilterResult",
+        "description": "\u30c6\u30fc\u30d6\u30eb\u30d5\u30a3\u30eb\u30bf\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
       "FixedParams": {
         "properties": {
@@ -5481,64 +5459,6 @@
         "title": "ImportFileResult",
         "description": "\u30d5\u30a1\u30a4\u30eb\u30d1\u30b9\u6307\u5b9a\u30a4\u30f3\u30dd\u30fc\u30c8\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
-      "InputCellDataRequestBody": {
-        "properties": {
-          "tableName": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Table Name",
-            "description": "\u30bb\u30eb\u30c7\u30fc\u30bf\u3092\u5165\u529b\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d\u3002\u30ef\u30fc\u30af\u30b9\u30da\u30fc\u30b9\u306b\u5b58\u5728\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u306e\u4e2d\u304b\u3089\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
-            "examples": [
-              "population_data",
-              "\u5e02\u533a\u753a\u6751\u4eba\u53e3\u30c7\u30fc\u30bf"
-            ]
-          },
-          "columnName": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Column Name",
-            "description": "\u30bb\u30eb\u30c7\u30fc\u30bf\u3092\u5165\u529b\u3059\u308b\u30ab\u30e9\u30e0\u540d\u3002\u30ef\u30fc\u30af\u30b9\u30da\u30fc\u30b9\u306b\u5b58\u5728\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u306e\u4e2d\u304b\u3089\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
-            "examples": [
-              "population",
-              "\u4eba\u53e3"
-            ]
-          },
-          "rowIndex": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Row Index",
-            "description": "\u66f4\u65b0\u3059\u308b\u30bb\u30eb\u306e\u884c\u30a4\u30f3\u30c7\u30c3\u30af\u30b9\uff080\u59cb\u307e\u308a\uff09"
-          },
-          "newValue": {
-            "title": "New Value",
-            "description": "\u30bb\u30eb\u306b\u5165\u529b\u3059\u308b\u65b0\u3057\u3044\u5024\u3002\u30ab\u30e9\u30e0\u306e\u30c7\u30fc\u30bf\u578b\u306b\u5408\u308f\u305b\u305f\u5024\u3092\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002"
-          }
-        },
-        "type": "object",
-        "required": [
-          "tableName",
-          "columnName",
-          "rowIndex",
-          "newValue"
-        ],
-        "title": "InputCellDataRequestBody",
-        "description": "\u30bb\u30eb\u30c7\u30fc\u30bf\u5165\u529b\u30ea\u30af\u30a8\u30b9\u30c8"
-      },
-      "InputCellDataResult": {
-        "properties": {
-          "tableName": {
-            "type": "string",
-            "title": "Table Name",
-            "description": "\u64cd\u4f5c\u5bfe\u8c61\u307e\u305f\u306f\u751f\u6210\u3055\u308c\u305f\u30c6\u30fc\u30d6\u30eb\u540d"
-          }
-        },
-        "type": "object",
-        "required": [
-          "tableName"
-        ],
-        "title": "InputCellDataResult",
-        "description": "\u30bb\u30eb\u30c7\u30fc\u30bf\u5165\u529b\u30ec\u30b9\u30dd\u30f3\u30b9"
-      },
       "InstrumentalVariablesParams": {
         "properties": {
           "method": {
@@ -5704,6 +5624,14 @@
         ],
         "title": "LogParams",
         "description": "\u5bfe\u6570\u5909\u63db\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
+      },
+      "LogicalOperatorType": {
+        "type": "string",
+        "enum": [
+          "and",
+          "or"
+        ],
+        "title": "LogicalOperatorType"
       },
       "LogitParams": {
         "properties": {
@@ -7334,7 +7262,7 @@
         ],
         "title": "SuccessResponse[FetchDataToJsonResult]"
       },
-      "SuccessResponse_FilterSingleConditionResult_": {
+      "SuccessResponse_FilterResult_": {
         "properties": {
           "code": {
             "type": "string",
@@ -7343,7 +7271,7 @@
             "default": "OK"
           },
           "result": {
-            "$ref": "#/components/schemas/FilterSingleConditionResult",
+            "$ref": "#/components/schemas/FilterResult",
             "description": "\u51e6\u7406\u7d50\u679c"
           }
         },
@@ -7351,7 +7279,7 @@
         "required": [
           "result"
         ],
-        "title": "SuccessResponse[FilterSingleConditionResult]"
+        "title": "SuccessResponse[FilterResult]"
       },
       "SuccessResponse_GetAllAnalysisResultsResult_": {
         "properties": {
@@ -7466,25 +7394,6 @@
           "result"
         ],
         "title": "SuccessResponse[ImportFileResult]"
-      },
-      "SuccessResponse_InputCellDataResult_": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
-            "default": "OK"
-          },
-          "result": {
-            "$ref": "#/components/schemas/InputCellDataResult",
-            "description": "\u51e6\u7406\u7d50\u679c"
-          }
-        },
-        "type": "object",
-        "required": [
-          "result"
-        ],
-        "title": "SuccessResponse[InputCellDataResult]"
       },
       "SuccessResponse_OutputResultResult_": {
         "properties": {
