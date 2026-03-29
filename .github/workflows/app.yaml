@@ -84,6 +84,23 @@ jobs:
         with:
           workspaces: "app/src-tauri -> target"
 
+      - name: Prepare sidecar binary placeholder
+        # tauri.conf.json の externalBin ["binaries/python"] を参照するため、
+        # Tauri ビルド時に binaries/python-x86_64-pc-windows-msvc.exe が必要。
+        # CI では ECONOMICON_DEV_RUN=true でサイドカーを起動しないため、
+        # Embedded Python の python.exe を名前変更してプレースホルダーとして配置する。
+        shell: pwsh
+        run: |
+          $PYTHON_VERSION = "3.14.3"
+          $BINARIES_DIR = "app\src-tauri\binaries"
+          $ZIP = "python_embed_tmp.zip"
+          $EXTRACT = "python_embed_tmp"
+          New-Item -ItemType Directory -Path $BINARIES_DIR -Force | Out-Null
+          Invoke-WebRequest -Uri "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip" -OutFile $ZIP -UseBasicParsing
+          Expand-Archive -Path $ZIP -DestinationPath $EXTRACT -Force
+          Copy-Item "$EXTRACT\python.exe" -Destination "$BINARIES_DIR\python-x86_64-pc-windows-msvc.exe"
+          Remove-Item -Recurse -Force $ZIP, $EXTRACT
+
       - name: Build Tauri debug binary
         # beforeBuildCommand (pnpm build) も自動実行される
         # --no-bundle: NSIS インストーラー生成をスキップしバイナリのみ生成
