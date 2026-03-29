@@ -29,11 +29,13 @@ function Write-Warn    { param([string]$Msg) Write-Host "  ⚠ $Msg" -Foreground
 function Write-Fail    { param([string]$Msg) Write-Host "  ✘ $Msg" -ForegroundColor Red }
 
 # ファイル内の1箇所を置換し、変更有無を返す
+# -UseBOM: $true = UTF-8 with BOM（.ps1 など）、$false = UTF-8 without BOM（既定）
 function Update-FileVersion {
     param(
         [string]$FilePath,
         [string]$Pattern,
-        [string]$Replacement
+        [string]$Replacement,
+        [bool]$UseBOM = $false
     )
 
     $content = [System.IO.File]::ReadAllText($FilePath, [System.Text.Encoding]::UTF8)
@@ -50,7 +52,9 @@ function Update-FileVersion {
         Write-Host "    - $($match.Value)" -ForegroundColor Red
         Write-Host "    + $Replacement" -ForegroundColor Green
     } else {
-        [System.IO.File]::WriteAllText($FilePath, $newContent, [System.Text.Encoding]::UTF8)
+        $enc = if ($UseBOM) { [System.Text.Encoding]::UTF8 }
+               else         { New-Object System.Text.UTF8Encoding($false) }
+        [System.IO.File]::WriteAllText($FilePath, $newContent, $enc)
         Write-Success "$FilePath"
     }
     return $true
@@ -94,6 +98,7 @@ $targets = @(
         # [project] セクション直下の version = "..." のみ対象
         Pattern = '(?m)(?<=^version\s=\s")[^"]+'
         Replace = $Version
+        UseBOM  = $false
     },
     @{
         Label   = "app/src-tauri/Cargo.toml"
@@ -101,6 +106,7 @@ $targets = @(
         # [package] セクション直下の version = "..." のみ対象
         Pattern = '(?m)(?<=^version\s=\s")[^"]+'
         Replace = $Version
+        UseBOM  = $false
     },
     @{
         Label   = "app/package.json"
@@ -108,24 +114,28 @@ $targets = @(
         # ルートの "version": "..." のみ対象（依存パッケージのバージョンは変更しない）
         Pattern = '(?m)(?<="version":\s")[^"]+(?=",?\s*$)'
         Replace = $Version
+        UseBOM  = $false
     },
     @{
         Label   = "app/src-tauri/tauri.conf.json"
         Path    = Join-Path $PROJECT_ROOT "app\src-tauri\tauri.conf.json"
         Pattern = '(?m)(?<="version":\s")[^"]+(?=",?\s*$)'
         Replace = $Version
+        UseBOM  = $false
     },
     @{
         Label   = "packaging/build.ps1"
         Path    = Join-Path $PROJECT_ROOT "packaging\build.ps1"
         Pattern = '(?<=\$APP_VERSION\s+=\s+")[^"]+'
         Replace = $Version
+        UseBOM  = $true   # PowerShell スクリプトは UTF-8 with BOM で保存
     },
     @{
         Label   = "api/gen_openapi.py"
         Path    = Join-Path $PROJECT_ROOT "api\gen_openapi.py"
         Pattern = '(?<=version=")[^"]+'
         Replace = $Version
+        UseBOM  = $false
     }
 )
 
@@ -144,7 +154,7 @@ foreach ($t in $targets) {
         $failCount++
         continue
     }
-    $ok = Update-FileVersion -FilePath $t.Path -Pattern $t.Pattern -Replacement $t.Replace
+    $ok = Update-FileVersion -FilePath $t.Path -Pattern $t.Pattern -Replacement $t.Replace -UseBOM $t.UseBOM
     if ($ok) { $successCount++ } else { $failCount++ }
 }
 
