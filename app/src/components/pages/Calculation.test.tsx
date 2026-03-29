@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
@@ -68,7 +68,7 @@ const mockApi = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(getEconomiconAPI).mockReturnValue(mockApi as never);
+  vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales", "costs"] });
   useTableInfosStore.setState({
     tableInfos: [

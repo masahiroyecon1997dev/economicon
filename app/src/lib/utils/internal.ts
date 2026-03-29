@@ -1,4 +1,4 @@
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import type { TableInfoType } from "../../types/commonTypes";
 
 /**
@@ -11,7 +11,7 @@ import type { TableInfoType } from "../../types/commonTypes";
 export const getTableInfo = async (
   tableName: string,
 ): Promise<TableInfoType> => {
-  const api = getEconomiconAPI();
+  const api = getEconomiconAppAPI();
   const resColumnList = await api.getColumnList({ tableName });
   if (resColumnList.code !== "OK") {
     throw new Error("カラム情報の取得に失敗しました");

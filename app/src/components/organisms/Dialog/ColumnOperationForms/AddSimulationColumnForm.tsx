@@ -8,16 +8,18 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
+import { RandomSeedField } from "../../../molecules/Form/RandomSeedField";
 import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
 import type { ColumnOperationFormPropsType } from "./types";
 
@@ -205,6 +207,7 @@ export const AddSimulationColumnForm = ({
     defaultValues: {
       columnName: `sim_${column.name}`,
       distributionType: "normal" as DistributionType,
+      randomSeed: "",
       // 全パラメータをフラットに保持（使わないものはサブミット時に無視）
       low: "0",
       high: "1",
@@ -240,13 +243,26 @@ export const AddSimulationColumnForm = ({
         }
       }
 
+      // randomSeed バリデーション
+      const rawSeed = value.randomSeed;
+      if (
+        rawSeed !== "" &&
+        (isNaN(Number(rawSeed)) ||
+          !Number.isInteger(Number(rawSeed)) ||
+          Number(rawSeed) < 0 ||
+          Number(rawSeed) > 100_000_000)
+      ) {
+        setApiError(t("ValidationMessages.RandomSeedRange"));
+        return;
+      }
+
       try {
         const paramValues: ParamValues = {};
         for (const p of paramNames) {
           paramValues[p] = value[p as keyof typeof value] as string;
         }
 
-        const response = await getEconomiconAPI().addSimulationColumn({
+        const response = await getEconomiconAppAPI().addSimulationColumn({
           tableName,
           simulationColumn: {
             columnName: value.columnName,
@@ -256,6 +272,7 @@ export const AddSimulationColumnForm = ({
             ),
           },
           addPositionColumn: column.name,
+          randomSeed: value.randomSeed !== "" ? Number(value.randomSeed) : null,
         });
 
         if (response.code === "OK") {
@@ -318,7 +335,7 @@ export const AddSimulationColumnForm = ({
           <FormField
             label={t("AddSimulationColumnForm.ColumnName")}
             htmlFor="sim-column-name"
-            error={field.state.meta.errors[0]?.toString()}
+            error={extractFieldError(field.state.meta.errors)}
           >
             <InputText
               id="sim-column-name"
@@ -389,6 +406,19 @@ export const AddSimulationColumnForm = ({
           )}
         </form.Field>
       ))}
+
+      {/* 乱数シード（省略可） */}
+      <form.Field name="randomSeed">
+        {(field) => (
+          <RandomSeedField
+            id="sim-col-random-seed"
+            value={field.state.value as string}
+            onChange={(v) => field.handleChange(v as never)}
+            onBlur={field.handleBlur}
+            disabled={isSubmitting}
+          />
+        )}
+      </form.Field>
 
       {apiError && <ErrorAlert message={apiError} />}
     </form>

@@ -15,6 +15,7 @@ import { AddSimulationColumnForm } from "./ColumnOperationForms/AddSimulationCol
 import { CastColumnForm } from "./ColumnOperationForms/CastColumnForm";
 import { DeleteColumnForm } from "./ColumnOperationForms/DeleteColumnForm";
 import { DuplicateColumnForm } from "./ColumnOperationForms/DuplicateColumnForm";
+import { FilterColumnForm } from "./ColumnOperationForms/FilterColumnForm";
 import { RenameColumnForm } from "./ColumnOperationForms/RenameColumnForm";
 import { TransformColumnForm } from "./ColumnOperationForms/TransformColumnForm";
 
@@ -48,6 +49,8 @@ const getDialogTitle = (
       return t("AddLagLeadColumnForm.Title");
     case "addSimulation":
       return t("AddSimulationColumnForm.Title");
+    case "filter":
+      return t("FilterColumnForm.Title");
     default:
       return "";
   }
@@ -75,6 +78,8 @@ const getSubmitLabel = (
       return t("AddLagLeadColumnForm.Submit");
     case "addSimulation":
       return t("AddSimulationColumnForm.Submit");
+    case "filter":
+      return t("FilterColumnForm.Submit");
     default:
       return t("Common.OK");
   }
@@ -88,6 +93,7 @@ const getMaxWidth = (operation: ColumnOperation | null): "md" | "lg" => {
     case "addDummy":
     case "addLagLead":
     case "addSimulation":
+    case "filter":
       return "lg";
     default:
       return "md";
@@ -147,6 +153,8 @@ export const ColumnOperationDialog = ({
         return <AddLagLeadColumnForm {...formProps} />;
       case "addSimulation":
         return <AddSimulationColumnForm {...formProps} />;
+      case "filter":
+        return <FilterColumnForm {...formProps} />;
       default:
         return null;
     }

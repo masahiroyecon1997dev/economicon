@@ -4,7 +4,7 @@ import polars as pl
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import CastColumnRequestBody
+from economicon.schemas import CastColumnRequestBody
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError, ValidationError
 from economicon.utils.validators import (

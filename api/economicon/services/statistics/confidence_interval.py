@@ -5,8 +5,8 @@ from scipy import stats
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import ConfidenceIntervalRequestBody
-from economicon.models.enums import ConfidenceIntervalStatisticsType
+from economicon.schemas import ConfidenceIntervalRequestBody
+from economicon.schemas.enums import ConfidenceIntervalStatisticsType
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError, ValidationError
 from economicon.utils.validators import validate_existence

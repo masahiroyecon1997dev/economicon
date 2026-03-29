@@ -9,7 +9,7 @@ import pyarrow as pa
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import FetchDataToArrowRequestBody
+from economicon.schemas import FetchDataToArrowRequestBody
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError
 from economicon.utils.validators import (

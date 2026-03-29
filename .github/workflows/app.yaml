@@ -1,0 +1,166 @@
+name: Frontend Test CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["dev"]
+    paths:
+      - "app/**"
+  pull_request:
+    branches: ["dev"]
+    paths:
+      - "app/**"
+
+jobs:
+  unit-test:
+    name: Unit Tests (Vitest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest-10
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "app/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ./app
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests
+        working-directory: ./app
+        run: pnpm test --run
+
+      - name: Run unit tests with coverage
+        working-directory: ./app
+        run: pnpm test:coverage --run
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./app/coverage/coverage-final.json
+          flags: unittests
+          name: vitest-coverage
+          fail_ci_if_error: false
+
+  e2e-test:
+    name: E2E Tests (Tauri/Windows)
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest-10
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "app/pnpm-lock.yaml"
+
+      - name: Install frontend dependencies
+        working-directory: ./app
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "app/src-tauri -> target"
+
+      - name: Prepare sidecar binary placeholder
+        # tauri.conf.json の externalBin ["binaries/python"] を参照するため、
+        # Tauri ビルド時に binaries/python-x86_64-pc-windows-msvc.exe が必要。
+        # CI では ECONOMICON_DEV_RUN=true でサイドカーを起動しないため、
+        # Embedded Python の python.exe を名前変更してプレースホルダーとして配置する。
+        shell: pwsh
+        run: |
+          $PYTHON_VERSION = "3.14.3"
+          $BINARIES_DIR = "app\src-tauri\binaries"
+          $ZIP = "python_embed_tmp.zip"
+          $EXTRACT = "python_embed_tmp"
+          New-Item -ItemType Directory -Path $BINARIES_DIR -Force | Out-Null
+          Invoke-WebRequest -Uri "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip" -OutFile $ZIP -UseBasicParsing
+          Expand-Archive -Path $ZIP -DestinationPath $EXTRACT -Force
+          Copy-Item "$EXTRACT\python.exe" -Destination "$BINARIES_DIR\python-x86_64-pc-windows-msvc.exe"
+          Remove-Item -Recurse -Force $ZIP, $EXTRACT
+
+      - name: Build Tauri debug binary
+        # beforeBuildCommand (pnpm build) も自動実行される
+        # --no-bundle: NSIS インストーラー生成をスキップしバイナリのみ生成
+        working-directory: ./app
+        run: pnpm exec tauri build --debug --no-bundle
+
+      - name: Install Playwright Chromium
+        working-directory: ./app
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Start Economicon with CDP debug port
+        # ECONOMICON_DEV_RUN=true: Python サイドカー起動をスキップ
+        # WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: WebView2 に CDP ポートを開放させる
+        working-directory: ./app
+        shell: pwsh
+        run: |
+          $env:ECONOMICON_DEV_RUN = "true"
+          $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9222"
+          Start-Process -FilePath ".\src-tauri\target\debug\Economicon.exe" -PassThru
+          # WebView2 が CDP ポートを開放するまで待機
+          Start-Sleep -Seconds 15
+
+      - name: Run E2E tests
+        working-directory: ./app
+        env:
+          ECONOMICON_TEST_SAMPLE_DIR: ${{ github.workspace }}/sample
+        run: pnpm test:e2e --project=tauri
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-tauri
+          path: app/playwright-report/
+          retention-days: 30
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest-10
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "app/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ./app
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        working-directory: ./app
+        run: pnpm lint

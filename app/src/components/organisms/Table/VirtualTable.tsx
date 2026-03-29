@@ -24,7 +24,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 
-import { getEconomiconAPI } from "../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../api/endpoints";
 import { useVirtualTableData } from "../../../hooks/useVirtualTableData";
 import { getPolarsTypeColor } from "../../../lib/utils/columnTypeColor";
 import { cn } from "../../../lib/utils/helpers";
@@ -131,7 +131,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   const handleColumnAction = useCallback(
     (col: ColumnType, op: ColumnOperation) => {
       if (op === "sort_asc" || op === "sort_desc") {
-        void getEconomiconAPI()
+        void getEconomiconAppAPI()
           .sortColumns({
             tableName,
             sortColumns: [

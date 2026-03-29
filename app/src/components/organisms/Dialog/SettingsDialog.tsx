@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAPI } from "../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../api/endpoints";
 import type { ThemeDefinitionType } from "../../../constants/themes";
 import { THEMES } from "../../../constants/themes";
 import { showMessageDialog } from "../../../lib/dialog/message";
@@ -240,7 +240,7 @@ export const SettingsDialog = ({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const response = await getEconomiconAPI().updateSettings({
+      const response = await getEconomiconAppAPI().updateSettings({
         theme: draft.theme,
         language: draft.language,
         encoding: draft.encoding,

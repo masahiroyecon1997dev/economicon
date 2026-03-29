@@ -1,13 +1,13 @@
 import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
 } from "../../lib/utils/apiError";
-import { cn } from "../../lib/utils/helpers";
+import { cn, generateId } from "../../lib/utils/helpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
@@ -16,11 +16,10 @@ import type { ColumnType } from "../../types/commonTypes";
 import { InputText } from "../atoms/Input/InputText";
 import { Select, SelectItem } from "../atoms/Input/Select";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
+import { SectionCard } from "../molecules/Card/SectionCard";
 import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
 import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
-
-const generateId = () => Math.random().toString(36).slice(2, 9);
 
 type TableEntry = { id: string; name: string };
 
@@ -50,7 +49,7 @@ export const UnionTable = () => {
 
   const fetchColNames = async (tableName: string): Promise<string[]> => {
     try {
-      const api = getEconomiconAPI();
+      const api = getEconomiconAppAPI();
       const resp = await api.getColumnList({ tableName });
       if (resp.code === "OK")
         return resp.result.columnInfoList.map((c: ColumnType) => c.name);
@@ -61,7 +60,6 @@ export const UnionTable = () => {
   };
 
   /* ── Recalculate common columns whenever selectedTables changes ── */
-
   useEffect(() => {
     const recalc = async () => {
       if (selectedTables.length === 0) {
@@ -73,13 +71,11 @@ export const UnionTable = () => {
       const allColSets = await Promise.all(
         selectedTables.map((t) => fetchColNames(t.name)),
       );
-      // intersection: columns that appear in every table
       const intersection = allColSets.reduce((acc, cols) => {
         const colSet = new Set(cols);
         return acc.filter((c) => colSet.has(c));
       });
       setCommonCols(intersection);
-      // auto-select all common columns
       setCheckedCols(new Set(intersection));
       setIsLoading(false);
     };
@@ -148,7 +144,7 @@ export const UnionTable = () => {
     if (!validate()) return;
     setIsSubmitting(true);
     try {
-      const api = getEconomiconAPI();
+      const api = getEconomiconAppAPI();
       const resp = await api.createUnionTable({
         unionTableName: newTableName.trim(),
         tableNames: selectedTables.map((t) => t.name),
@@ -189,11 +185,7 @@ export const UnionTable = () => {
     >
       <div className="flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
         {/* ── Section 1: 対象テーブル ── */}
-        <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading">
-            {t("UnionTable.SelectDataList")}
-          </h2>
-
+        <SectionCard title={t("UnionTable.SelectDataList")}>
           {/* テーブル追加行 */}
           <div className="mb-3 flex gap-2">
             <div className="flex-1">
@@ -262,20 +254,14 @@ export const UnionTable = () => {
           {errors.tables && (
             <p className="mt-1.5 text-xs text-red-600">{errors.tables}</p>
           )}
-        </div>
+        </SectionCard>
 
         {/* ── Section 2: ユニオンする列 ── */}
-        <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold leading-tight text-text-heading">
-                {t("UnionTable.SelectColumns")}
-              </h2>
-              <p className="mt-0.5 text-xs text-brand-text-main/60">
-                {t("UnionTable.SelectColumnsDescription")}
-              </p>
-            </div>
-            {commonCols.length > 0 && (
+        <SectionCard
+          title={t("UnionTable.SelectColumns")}
+          description={t("UnionTable.SelectColumnsDescription")}
+          headerRight={
+            commonCols.length > 0 && (
               <button
                 type="button"
                 onClick={handleSelectAll}
@@ -286,9 +272,9 @@ export const UnionTable = () => {
                   ? t("UnionTable.DeselectAll")
                   : t("UnionTable.SelectAll")}
               </button>
-            )}
-          </div>
-
+            )
+          }
+        >
           {selectedTables.length < 2 ? (
             <p className="rounded-lg border border-dashed border-border-color py-4 text-center text-xs text-brand-text-main/50">
               {t("UnionTable.SelectDataFirst")}
@@ -310,13 +296,10 @@ export const UnionTable = () => {
               error={errors.columns}
             />
           )}
-        </div>
+        </SectionCard>
 
         {/* ── Section 3: 出力テーブル名 ── */}
-        <div className="rounded-xl border border-border-color bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading">
-            {t("UnionTable.OutputData")}
-          </h2>
+        <SectionCard title={t("UnionTable.OutputData")}>
           <FormField
             label={t("UnionTable.NewDataName")}
             htmlFor="union-new-table-name"
@@ -331,7 +314,7 @@ export const UnionTable = () => {
               error={errors.newTableName}
             />
           </FormField>
-        </div>
+        </SectionCard>
       </div>
 
       <ActionButtonBar

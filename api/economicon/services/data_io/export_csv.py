@@ -5,7 +5,7 @@ from typing import ClassVar
 from economicon.core.encodings import PYTHON_ENCODING_MAP
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import ExportFileRequestBody
+from economicon.schemas import ExportFileRequestBody
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError
 from economicon.utils.validators import (

@@ -3,15 +3,13 @@ from typing import cast
 from fastapi import APIRouter, Request, Response
 from fastapi import status as http_status
 
-from economicon.models import (
+from economicon.schemas import (
     COMMON_ERROR_RESPONSES,
     ClearTablesResult,
     CreateJoinTableRequestBody,
     CreateJoinTableResult,
     CreateSimulationDataTableRequestBody,
     CreateSimulationDataTableResult,
-    CreateTableRequestBody,
-    CreateTableResult,
     CreateUnionTableRequestBody,
     CreateUnionTableResult,
     DeleteTableRequestBody,
@@ -21,11 +19,9 @@ from economicon.models import (
     FetchDataToArrowRequestBody,
     FetchDataToJsonRequestBody,
     FetchDataToJsonResult,
-    FilterSingleConditionRequestBody,
-    FilterSingleConditionResult,
+    FilterRequestBody,
+    FilterResult,
     GetTableListResult,
-    InputCellDataRequestBody,
-    InputCellDataResult,
     RenameTableRequestBody,
     RenameTableResult,
     SuccessResponse,
@@ -37,17 +33,13 @@ from economicon.services.tables.create_join_table import CreateJoinTable
 from economicon.services.tables.create_simulation_data_table import (
     CreateSimulationDataTable,
 )
-from economicon.services.tables.create_table import CreateTable
 from economicon.services.tables.create_union_table import CreateUnionTable
 from economicon.services.tables.delete_table import DeleteTable
 from economicon.services.tables.duplicate_table import DuplicateTable
 from economicon.services.tables.fetch_data_to_arrow import FetchDataToArrow
 from economicon.services.tables.fetch_data_to_json import FetchDataToJson
-from economicon.services.tables.filter_single_condition import (
-    FilterSingleCondition,
-)
+from economicon.services.tables.filter import FilterTable
 from economicon.services.tables.get_table_list import GetTableList
-from economicon.services.tables.input_cell_data import InputCellData
 from economicon.services.tables.rename_table import RenameTable
 from economicon.utils import (
     create_success_response,
@@ -58,35 +50,6 @@ router = APIRouter(
     tags=["table"],
     responses=COMMON_ERROR_RESPONSES,
 )
-
-
-@router.post("/create", response_model=SuccessResponse[CreateTableResult])
-async def create_table(
-    request: Request,
-    body: CreateTableRequestBody,
-    tables_store: TablesStoreDep,
-):
-    """テーブルを作成するエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : CreateTableRequestBody
-        リクエストボディ
-
-    Returns
-    -------
-    JSONResponse
-        処理結果
-    """
-    # ビジネスロジックの実行
-    api = CreateTable(body, tables_store)
-    result = run_operation(api)
-
-    return create_success_response(
-        status_code=http_status.HTTP_200_OK, response_object=result
-    )
 
 
 @router.post(
@@ -406,56 +369,21 @@ async def fetch_data_to_arrow(
 
 
 @router.post(
-    "/input-cell-data", response_model=SuccessResponse[InputCellDataResult]
+    "/filter",
+    response_model=SuccessResponse[FilterResult],
 )
-async def input_cell_data(
+async def filter_table(
     request: Request,
-    body: InputCellDataRequestBody,
+    body: FilterRequestBody,
     tables_store: TablesStoreDep,
 ):
-    """セルデータ入力エンドポイント
+    """テーブルフィルタリングを実行するエンドポイント
 
     Parameters
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : InputCellDataRequestBody
-        リクエストボディ
-        - tableName: テーブル名
-        - columnName: 列名
-        - rowIndex: 行インデックス
-        - newValue: 新しい値
-
-    Returns
-    -------
-    JSONResponse
-        処理結果
-    """
-    # ビジネスロジックの実行
-    api = InputCellData(body, tables_store)
-    result = run_operation(api)
-
-    return create_success_response(
-        status_code=http_status.HTTP_200_OK, response_object=result
-    )
-
-
-@router.post(
-    "/filter-single-condition",
-    response_model=SuccessResponse[FilterSingleConditionResult],
-)
-async def filter_single_condition(
-    request: Request,
-    body: FilterSingleConditionRequestBody,
-    tables_store: TablesStoreDep,
-):
-    """単一条件フィルタリングを実行するエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : FilterSingleConditionRequestBody
+    body : FilterRequestBody
         リクエストボディ
 
     Returns
@@ -464,7 +392,7 @@ async def filter_single_condition(
         処理結果
     """
     # ビジネスロジックの実行
-    api = FilterSingleCondition(body, tables_store)
+    api = FilterTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(

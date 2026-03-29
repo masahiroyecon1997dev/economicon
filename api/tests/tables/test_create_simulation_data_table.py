@@ -11,6 +11,11 @@ from main import app
 # ─────────────────────────────────────────────────────────────
 MAX_TABLE_NAME_LENGTH = 128
 
+# シード値テスト用
+SEED_VALUE = 42
+SEED_VALUE_MAX = 100_000_000
+SEED_VALUE_DATE = 20241231  # YYYYMMDD 形式
+
 # ベースペイロード（正常系共通）
 _BASE_PAYLOAD: dict = {
     "tableName": "TestTable",
@@ -624,3 +629,139 @@ def test_create_table_neg_binomial_n_zero(client, tables_store):
         ".NegativeBinomialParams.nは0より大きい値で入力してください。"
         in response_data["details"]
     )
+
+
+# ─────────────────────────────────────────────────────────────
+# シード値テスト (S1-S7)
+# ─────────────────────────────────────────────────────────────
+
+
+def test_create_table_with_seed_is_reproducible(client, tables_store):
+    """S1: 同一シード・単一カラムで作成した2テーブルは同じ値を持つ"""
+    col_config = {
+        "columnName": "col_normal",
+        "distribution": {"type": "normal", "loc": 0.0, "scale": 1.0},
+    }
+    row_count = 50
+
+    client.post(
+        "/api/table/create-simulation-data",
+        json={
+            "tableName": "SeedTable1",
+            "rowCount": row_count,
+            "simulationColumns": [col_config],
+            "randomSeed": SEED_VALUE,
+        },
+    )
+    client.post(
+        "/api/table/create-simulation-data",
+        json={
+            "tableName": "SeedTable2",
+            "rowCount": row_count,
+            "simulationColumns": [col_config],
+            "randomSeed": SEED_VALUE,
+        },
+    )
+
+    df1 = tables_store.get_table("SeedTable1").table
+    df2 = tables_store.get_table("SeedTable2").table
+    assert df1["col_normal"].to_list() == df2["col_normal"].to_list()
+
+
+def test_create_table_with_seed_multi_columns_is_reproducible(
+    client, tables_store
+):
+    """S2: 複数カラムも同一シードで同じ値が再現される"""
+    columns = [_COL_NORMAL, _COL_UNIFORM, _COL_EXP]
+    row_count = 30
+
+    client.post(
+        "/api/table/create-simulation-data",
+        json={
+            "tableName": "MultiSeedTable1",
+            "rowCount": row_count,
+            "simulationColumns": columns,
+            "randomSeed": SEED_VALUE,
+        },
+    )
+    client.post(
+        "/api/table/create-simulation-data",
+        json={
+            "tableName": "MultiSeedTable2",
+            "rowCount": row_count,
+            "simulationColumns": columns,
+            "randomSeed": SEED_VALUE,
+        },
+    )
+
+    df1 = tables_store.get_table("MultiSeedTable1").table
+    df2 = tables_store.get_table("MultiSeedTable2").table
+    assert df1.equals(df2)
+
+
+def test_create_table_seed_zero_is_valid(client, tables_store):
+    """S3: randomSeed=0（最小境界値）は正常に受け付けられる"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "tableName": "SeedZeroTable",
+        "randomSeed": 0,
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["code"] == "OK"
+
+
+def test_create_table_seed_max_is_valid(client, tables_store):
+    """S4: randomSeed=100_000_000（最大境界値）は正常に受け付けられる"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "tableName": "SeedMaxTable",
+        "randomSeed": SEED_VALUE_MAX,
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["code"] == "OK"
+
+
+def test_create_table_seed_exceeds_max_is_rejected(client, tables_store):
+    """S5: randomSeed > 100_000_000 は 422 VALIDATION_ERROR"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "tableName": "SeedOverTable",
+        "randomSeed": SEED_VALUE_MAX + 1,
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    expected_msg = "randomSeedは100000000以下で入力してください。"
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_create_table_seed_negative_is_rejected(client, tables_store):
+    """S6: randomSeed < 0 は 422 VALIDATION_ERROR"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "tableName": "SeedNegTable",
+        "randomSeed": -1,
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    expected_msg = "randomSeedは0以上で入力してください。"
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+
+def test_create_table_seed_date_format_is_valid(client, tables_store):
+    """S7: 日付形式シード（20241231）は正常に受け付けられる"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "tableName": "SeedDateTable",
+        "randomSeed": SEED_VALUE_DATE,
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["code"] == "OK"

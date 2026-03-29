@@ -46,6 +46,8 @@ def fit_logit(
     y_data: np.ndarray,
     x_data: np.ndarray,
     missing: str,
+    cov_type: str = "nonrobust",
+    cov_kwds: dict | None = None,
 ) -> RegressionResultsWrapper:
     """
     Logitモデルのフィッティング
@@ -54,12 +56,14 @@ def fit_logit(
         y_data: 被説明変数のデータ
         x_data: 説明変数のデータ
         missing: 欠損値の処理方法 ('none', 'drop', 'raise')
+        cov_type: 標準誤差の種別。statsmodels の fit() に直接渡す。
+        cov_kwds: cov_type 固有の追加引数辞書（groups, maxlags 等）。
 
     Returns:
         statsmodels の Logit 回帰結果
     """
     model = sm.Logit(y_data, x_data, missing=missing)
-    result = model.fit()
+    result = model.fit(cov_type=cov_type, cov_kwds=cov_kwds or {}, disp=False)
     return result
 
 
@@ -67,6 +71,8 @@ def fit_probit(
     y_data: np.ndarray,
     x_data: np.ndarray,
     missing: str,
+    cov_type: str = "nonrobust",
+    cov_kwds: dict | None = None,
 ) -> RegressionResultsWrapper:
     """
     Probitモデルのフィッティング
@@ -75,12 +81,14 @@ def fit_probit(
         y_data: 被説明変数のデータ
         x_data: 説明変数のデータ
         missing: 欠損値の処理方法 ('none', 'drop', 'raise')
+        cov_type: 標準誤差の種別。statsmodels の fit() に直接渡す。
+        cov_kwds: cov_type 固有の追加引数辞書（groups, maxlags 等）。
 
     Returns:
         statsmodels の Probit 回帰結果
     """
     model = sm.Probit(y_data, x_data, missing=missing)
-    result = model.fit()
+    result = model.fit(cov_type=cov_type, cov_kwds=cov_kwds or {}, disp=False)
     return result
 
 

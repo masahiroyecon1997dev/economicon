@@ -8,7 +8,7 @@ from typing import Any, ClassVar
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models.regressions import OutputResultRequest
+from economicon.schemas.regressions import OutputResultRequest
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.utils import ProcessingError, ValidationError
 

@@ -1,3 +1,4 @@
+import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -5,14 +6,15 @@ import {
   getFiles,
   getFilesSafe,
 } from "../../api/bridge/tauri-commands";
-import { getEconomiconAPI } from "../../api/endpoints";
-import type { ExportFileRequestBodyFormat } from "../../api/model";
+import { getEconomiconAppAPI } from "../../api/endpoints";
+import { ExportFileBody } from "../../api/zod/data/data";
 import { showConfirmDialog } from "../../lib/dialog/confirm";
 import { showMessageDialog } from "../../lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
 } from "../../lib/utils/apiError";
+import { extractFieldError } from "../../lib/utils/formHelpers";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useFilesStore } from "../../stores/files";
 import { useLoadingStore } from "../../stores/loading";
@@ -48,18 +50,81 @@ export const SaveData = () => {
 
   const { setLoading, clearLoading } = useLoadingStore();
 
-  const [selectedTableName, setSelectedTableName] = useState(
-    activeTableName || "",
-  );
-  const [fileName, setFileName] = useState(activeTableName || "");
-  const [fileFormat, setFileFormat] = useState<FileFormat>("csv");
   const [searchValue, setSearchValue] = useState("");
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-  const [errorMessage, setErrorMessage] = useState<{
-    tableName?: string;
-    fileName?: string;
-  }>({});
+
+  const form = useForm({
+    defaultValues: {
+      tableName: activeTableName || "",
+      fileName: activeTableName || "",
+      format: "csv" as FileFormat,
+    },
+    validators: {
+      onSubmit: ExportFileBody.pick({
+        tableName: true,
+        fileName: true,
+        format: true,
+      }),
+    },
+    onSubmit: async ({ value }) => {
+      const fullFileName = value.fileName.endsWith(
+        getFileExtension(value.format),
+      )
+        ? value.fileName
+        : value.fileName + getFileExtension(value.format);
+
+      const separator = pathSeparator || "/";
+      const fullPath =
+        directoryPath && directoryPath !== separator
+          ? directoryPath + separator + fullFileName
+          : (directoryPath || "") + fullFileName;
+
+      const exists = await checkFileExists(fullPath);
+      if (exists) {
+        const confirmed = await showConfirmDialog(
+          t("SaveDataView.OverwriteConfirmTitle"),
+          t("SaveDataView.OverwriteConfirmMessage", { fileName: fullFileName }),
+        );
+        if (!confirmed) return;
+      }
+
+      setLoading(true, t("SaveDataView.SavingFile"));
+
+      try {
+        const response = await getEconomiconAppAPI().exportFile({
+          tableName: value.tableName,
+          directoryPath,
+          fileName: value.fileName,
+          format: value.format,
+          separator: value.format === "csv" ? "," : undefined,
+          sheetName: value.format === "excel" ? "Sheet1" : undefined,
+        });
+
+        if (response.code === "OK") {
+          await showMessageDialog(
+            t("Common.OK"),
+            t("SaveDataView.SaveSuccess", { path: response.result.filePath }),
+          );
+          setCurrentView("DataPreview");
+        } else {
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+          );
+        }
+      } catch (error) {
+        await showMessageDialog(
+          t("Error.Error"),
+          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        );
+      } finally {
+        clearLoading();
+      }
+    },
+  });
+
+  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   // マウント時にファイルリストを最新化（画面遷移で表示が古くならないよう）
   useEffect(() => {
@@ -160,30 +225,16 @@ export const SaveData = () => {
       const baseName = dotIndex > 0 ? file.name.slice(0, dotIndex) : file.name;
       const ext =
         dotIndex > 0 ? file.name.slice(dotIndex + 1).toLowerCase() : "";
-      setFileName(baseName);
+      form.setFieldValue("fileName", baseName);
       // 拡張子がサポートファーマットなら fileFormat も連動
-      if (ext === "csv") setFileFormat("csv");
-      else if (ext === "xlsx" || ext === "xls") setFileFormat("excel");
-      else if (ext === "parquet") setFileFormat("parquet");
+      if (ext === "csv") form.setFieldValue("format", "csv");
+      else if (ext === "xlsx" || ext === "xls")
+        form.setFieldValue("format", "excel");
+      else if (ext === "parquet") form.setFieldValue("format", "parquet");
     }
   };
 
-  const validateInput = (): boolean => {
-    const errors: { tableName?: string; fileName?: string } = {};
-
-    if (!selectedTableName || selectedTableName.trim() === "") {
-      errors.tableName = t("ValidationMessages.DataNameRequired");
-    }
-
-    if (!fileName || fileName.trim() === "") {
-      errors.fileName = t("ValidationMessages.FileNameRequired");
-    }
-
-    setErrorMessage(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const getFileExtension = (): string => {
+  const getFileExtension = (fileFormat: FileFormat): string => {
     switch (fileFormat) {
       case "csv":
         return ".csv";
@@ -193,73 +244,6 @@ export const SaveData = () => {
         return ".parquet";
       default:
         return "";
-    }
-  };
-
-  const handleSave = async () => {
-    if (!validateInput()) {
-      return;
-    }
-
-    const fullFileName = fileName.endsWith(getFileExtension())
-      ? fileName
-      : fileName + getFileExtension();
-
-    // 保存先ディレクトリの同名ファイルを Rust 経由でチェック
-    const separator = pathSeparator || "/";
-    const fullPath =
-      directoryPath && directoryPath !== separator
-        ? directoryPath + separator + fullFileName
-        : (directoryPath || "") + fullFileName;
-
-    const exists = await checkFileExists(fullPath);
-    if (exists) {
-      const confirmed = await showConfirmDialog(
-        t("SaveDataView.OverwriteConfirmTitle"),
-        t("SaveDataView.OverwriteConfirmMessage", { fileName: fullFileName }),
-      );
-      if (!confirmed) return;
-    }
-
-    setLoading(true, t("SaveDataView.SavingFile"));
-
-    try {
-      // formatマッピング（FileFormat → ExportFileRequestBodyFormat）
-      const formatMap: Record<FileFormat, ExportFileRequestBodyFormat> = {
-        csv: "csv",
-        excel: "excel",
-        parquet: "parquet",
-      };
-
-      const response = await getEconomiconAPI().exportFile({
-        tableName: selectedTableName,
-        directoryPath: directoryPath,
-        fileName: fileName,
-        format: formatMap[fileFormat],
-        separator: fileFormat === "csv" ? "," : undefined,
-        sheetName: fileFormat === "excel" ? "Sheet1" : undefined,
-      });
-
-      if (response.code === "OK") {
-        await showMessageDialog(
-          t("Common.OK"),
-          t("SaveDataView.SaveSuccess", { path: response.result.filePath }),
-        );
-        setCurrentView("DataPreview");
-        clearLoading();
-      } else {
-        await showMessageDialog(
-          t("Error.Error"),
-          getResponseErrorMessage(response, t("Error.UnexpectedError")),
-        );
-      }
-    } catch (error) {
-      await showMessageDialog(
-        t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
-      );
-    } finally {
-      clearLoading();
     }
   };
 
@@ -346,7 +330,14 @@ export const SaveData = () => {
         </div>
       ) : (
         <>
-          <div className="flex flex-col gap-3 flex-1 min-h-0">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              void form.handleSubmit();
+            }}
+            className="flex flex-col gap-3 flex-1 min-h-0"
+          >
             <div className="flex flex-col gap-3 shrink-0">
               <h2 className="text-lg font-bold text-black">
                 {t("SaveDataView.SelectDirectory")}
@@ -382,65 +373,84 @@ export const SaveData = () => {
                 {t("SaveDataView.FileSettings")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <FormField
-                  label={t("SaveDataView.DataName")}
-                  htmlFor="table-name"
-                >
-                  <Select
-                    id="table-name"
-                    value={selectedTableName}
-                    onValueChange={(value) => {
-                      setSelectedTableName(value);
-                      setFileName(value);
-                    }}
-                  >
-                    {tableNameList.map((tableName) => (
-                      <SelectItem key={tableName} value={tableName}>
-                        {tableName}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                </FormField>
+                <form.Field name="tableName">
+                  {(field) => (
+                    <FormField
+                      label={t("SaveDataView.DataName")}
+                      htmlFor="table-name"
+                      error={extractFieldError(field.state.meta.errors)}
+                    >
+                      <Select
+                        id="table-name"
+                        value={field.state.value}
+                        onValueChange={(value) => {
+                          field.handleChange(value);
+                          form.setFieldValue("fileName", value);
+                        }}
+                        error={extractFieldError(field.state.meta.errors)}
+                        disabled={isSubmitting}
+                      >
+                        {tableNameList.map((tableName) => (
+                          <SelectItem key={tableName} value={tableName}>
+                            {tableName}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </FormField>
+                  )}
+                </form.Field>
 
-                <FormField
-                  label={t("SaveDataView.FileName")}
-                  htmlFor="file-name"
-                >
-                  <InputText
-                    id="file-name"
-                    value={fileName}
-                    change={(e) => setFileName(e.target.value)}
-                    placeholder={t("SaveDataView.FileNamePlaceholder")}
-                    error={errorMessage.fileName}
-                  />
-                </FormField>
+                <form.Field name="fileName">
+                  {(field) => (
+                    <FormField
+                      label={t("SaveDataView.FileName")}
+                      htmlFor="file-name"
+                      error={extractFieldError(field.state.meta.errors)}
+                    >
+                      <InputText
+                        id="file-name"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder={t("SaveDataView.FileNamePlaceholder")}
+                        error={extractFieldError(field.state.meta.errors)}
+                        disabled={isSubmitting}
+                      />
+                    </FormField>
+                  )}
+                </form.Field>
 
-                <FormField
-                  label={t("SaveDataView.FileFormat")}
-                  htmlFor="file-format"
-                >
-                  <Select
-                    id="file-format"
-                    value={fileFormat}
-                    onValueChange={(value) =>
-                      setFileFormat(value as FileFormat)
-                    }
-                  >
-                    {fileFormatOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                </FormField>
+                <form.Field name="format">
+                  {(field) => (
+                    <FormField
+                      label={t("SaveDataView.FileFormat")}
+                      htmlFor="file-format"
+                    >
+                      <Select
+                        id="file-format"
+                        value={field.state.value}
+                        onValueChange={(value) =>
+                          field.handleChange(value as FileFormat)
+                        }
+                        disabled={isSubmitting}
+                      >
+                        {fileFormatOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </FormField>
+                  )}
+                </form.Field>
               </div>
             </div>
-          </div>
+          </form>
           <ActionButtonBar
             cancelText={t("Common.Cancel")}
             selectText={t("SaveDataView.Save")}
             onCancel={handleCancel}
-            onSelect={handleSave}
+            onSelect={() => void form.handleSubmit()}
           />
         </>
       )}

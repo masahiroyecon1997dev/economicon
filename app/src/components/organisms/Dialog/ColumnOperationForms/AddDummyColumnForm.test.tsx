@@ -8,7 +8,7 @@
  */
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import { AddDummyColumnForm } from "./AddDummyColumnForm";
 
 // ---------------------------------------------------------------------------
@@ -45,7 +45,7 @@ const defaultProps = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(getEconomiconAPI).mockReturnValue(mockApi as never);
+  vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
 });
 
 // ---------------------------------------------------------------------------

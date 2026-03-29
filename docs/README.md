@@ -1,26 +1,26 @@
 # economicon
 
-データ分析のための Web アプリケーション。Django バックエンド + React フロントエンドで構成されています。
+データ分析のための Web アプリケーション。FastAPI バックエンド + React フロントエンドで構成されています。
 
 ## 技術スタック
 
 ### バックエンド (Python)
 
 - **Python**: 3.14
-- **フレームワーク**: FastAPI 0.128.0
+- **フレームワーク**: FastAPI 0.128.7+
 - **パッケージマネージャー**: uv
 - **データ処理**: Polars, NumPy, SciPy, statsmodels
-- **ASGI サーバー**: Uvicorn 0.40.0
+- **ASGI サーバー**: Uvicorn 0.40.0+
 - **テスト**: pytest 9.0.2, Coverage
 
 ### フロントエンド (React)
 
-- **Node.js**: 18+ (fnm で管理)
-- **フレームワーク**: React 19.2.3 + TypeScript
-- **ビルドツール**: Vite 7.2.7
+- **Node.js**: 24+ (fnm で管理)
+- **フレームワーク**: React 19 + TypeScript
+- **ビルドツール**: Vite 7
 - **パッケージマネージャー**: pnpm
-- **デスクトップアプリ**: Tauri
-- **スタイリング**: Tailwind CSS 4.1.18
+- **デスクトップアプリ**: Tauri 2
+- **スタイリング**: Tailwind CSS 4
 - **UI コンポーネント**: Radix UI Primitives
 - **状態管理**: Zustand
 - **国際化**: react-i18next
@@ -46,7 +46,7 @@ cd api
 uv venv --python 3.14
 .venv\Scripts\Activate.ps1
 uv sync
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 # 別のターミナルでフロントエンドのセットアップと起動
 cd app

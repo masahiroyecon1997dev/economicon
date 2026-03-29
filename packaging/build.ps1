@@ -10,7 +10,12 @@
 param (
     # 引数がない場合は "build"（インストーラー作成）をデフォルトにする
     [ValidateSet("dev", "build")]
-    [string]$Mode = "build"
+    [string]$Mode = "build",
+
+    # CI モード: GitHub Actions から呼び出す際に指定する
+    # - STEP 0（前提ツール確認・対話的プロンプト）をスキップ
+    # - ツール類は GitHub Actions の Setup ステップで準備済みとみなす
+    [switch]$CI = $false
 )
 
 
@@ -34,7 +39,7 @@ $PYTHON_VERSION_SHORT  = ($PYTHON_VERSION -split '\.')[0..1] -join ''
 
 # --- アプリ情報 ----------------------------------------------------------------
 $APP_NAME    = "economicon"
-$APP_VERSION = "0.1.0"    # tauri.conf.json の version と合わせてください
+$APP_VERSION = "0.2.0"    # tauri.conf.json の version と合わせてください
 
 # --- ディレクトリ --------------------------------------------------------------
 $SCRIPT_DIR    = $PSScriptRoot                          # packaging/
@@ -103,36 +108,41 @@ Write-Info "成果物集約先       : $RELEASE_DIR"
 
 # ==============================================================================
 #  STEP 0: 前提ツールの確認
+#  CI モード時はスキップ（ツール類は GitHub Actions の Setup ステップで準備済み）
 # ==============================================================================
 
-Write-Step "[0/11] 前提ツールの確認"
+if ($CI) {
+    Write-Host "  [CI モード] STEP 0（前提ツール確認）をスキップします。" -ForegroundColor DarkGray
+} else {
+    Write-Step "[0/11] 前提ツールの確認"
 
-$prerequisites = @(
-    @{ Name = "uv";        Command = { uv --version } },
-    @{ Name = "pnpm";      Command = { pnpm --version } },
-    @{ Name = "cargo";     Command = { cargo --version } },
-    @{ Name = "tauri-cli"; Command = { cargo tauri --version } }
-)
+    $prerequisites = @(
+        @{ Name = "uv";        Command = { uv --version } },
+        @{ Name = "pnpm";      Command = { pnpm --version } },
+        @{ Name = "cargo";     Command = { cargo --version } },
+        @{ Name = "tauri-cli"; Command = { cargo tauri --version } }
+    )
 
-foreach ($tool in $prerequisites) {
-    try {
-        $ver = & $tool.Command 2>&1
-        Write-Success "$($tool.Name) : $ver"
-    } catch {
-        Write-Fail "$($tool.Name) が見つかりません。インストール後に再実行してください。"
-        exit 1
+    foreach ($tool in $prerequisites) {
+        try {
+            $ver = & $tool.Command 2>&1
+            Write-Success "$($tool.Name) : $ver"
+        } catch {
+            Write-Fail "$($tool.Name) が見つかりません。インストール後に再実行してください。"
+            exit 1
+        }
     }
-}
 
-# tauri.conf.json に resources が設定されているか警告チェック
-$tauriConf = Get-Content (Join-Path $TAURI_DIR "tauri.conf.json") | ConvertFrom-Json
-if (-not $tauriConf.bundle.resources) {
-    Write-Warn "tauri.conf.json の bundle.resources に runtime の設定がありません。"
-    Write-Warn "下記の設定を tauri.conf.json の bundle セクションに追加してください:"
-    Write-Host '    "resources": { "resources/runtime/**/*": "runtime" }' -ForegroundColor Yellow
-    Write-Host ""
-    $ans = Read-Host "  続行しますか？ [y/N]"
-    if ($ans -ne 'y' -and $ans -ne 'Y') { exit 1 }
+    # tauri.conf.json に resources が設定されているか警告チェック
+    $tauriConf = Get-Content (Join-Path $TAURI_DIR "tauri.conf.json") | ConvertFrom-Json
+    if (-not $tauriConf.bundle.resources) {
+        Write-Warn "tauri.conf.json の bundle.resources に runtime の設定がありません。"
+        Write-Warn "下記の設定を tauri.conf.json の bundle セクションに追加してください:"
+        Write-Host '    "resources": { "resources/runtime/**/*": "runtime" }' -ForegroundColor Yellow
+        Write-Host ""
+        $ans = Read-Host "  続行しますか？ [y/N]"
+        if ($ans -ne 'y' -and $ans -ne 'Y') { exit 1 }
+    }
 }
 
 
@@ -316,18 +326,27 @@ Write-Info "Python ライセンス収集中..."
 
 $pyLicOut = Join-Path $LICENSES_DIR "01_PYTHON_PACKAGES.txt"
 
-# dev グループのパッケージ名一覧（pyproject.toml の dependency-groups.dev に対応）
-$devPackages = @(
-    "coverage", "deptry", "httpx", "pip-licenses", "pipdeptree",
-    "pytest", "pytest-cov", "radon", "ruff", "scikit-learn"
-)
-$ignoreArgs = ($devPackages | ForEach-Object { "--ignore-packages"; $_ })
-
 Push-Location $API_DIR
 try {
+    # pip-licenses は dev グループに含まれる。.venv が未作成 or CI の場合は uv sync を実行する。
+    if (-not (Test-Path ".venv\Scripts\pip-licenses.exe")) {
+        Write-Info "pip-licenses が見つかりません。uv sync を実行します..."
+        Invoke-Step -ErrorMsg "uv sync に失敗しました。" -Block { uv sync }
+    }
+    # 本番依存パッケージ名を uv export --no-dev で動的取得する。
+    # $devPackages のリストを手動管理する必要がなくなり、pyproject.toml の変更に自動追従する。
+    $prodPkgs = (uv export --no-dev --no-hashes --no-annotate -q 2>$null) |
+        Where-Object { $_ -notmatch '^\s*#' -and $_.Trim() -ne '' } |
+        ForEach-Object { ($_ -split '[=<>!;@ ]')[0].Trim() } |
+        Where-Object { $_ -ne '' }
+    if ($prodPkgs.Count -eq 0) {
+        Write-Fail "uv export --no-dev で本番パッケージリストが取得できませんでした。"
+        exit 1
+    }
+    Write-Info "本番パッケージ数: $($prodPkgs.Count)"
     Invoke-Step -ErrorMsg "pip-licenses によるライセンス収集に失敗しました。" -Block {
         & .venv\Scripts\pip-licenses.exe `
-            @ignoreArgs `
+            --packages @prodPkgs `
             --with-license-file `
             --no-license-path `
             --format=plain-vertical `

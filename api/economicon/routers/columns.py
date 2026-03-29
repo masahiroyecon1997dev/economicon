@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Request
 from fastapi import status as http_status
 
-from economicon.models import (
+from economicon.schemas import (
     COMMON_ERROR_RESPONSES,
-    AddColumnRequestBody,
-    AddColumnResult,
     AddDummyColumnRequestBody,
     AddDummyColumnResult,
     AddLagLeadColumnRequestBody,
@@ -31,7 +29,6 @@ from economicon.models import (
 )
 
 # 各ビジネスロジック（既存のpython_apis）
-from economicon.services.columns.add_column import AddColumn
 from economicon.services.columns.add_dummy_column import AddDummyColumn
 from economicon.services.columns.add_lag_lead_column import AddLagLeadColumn
 from economicon.services.columns.add_simulation_column import (
@@ -55,34 +52,6 @@ router = APIRouter(
     tags=["column"],
     responses=COMMON_ERROR_RESPONSES,
 )
-
-
-@router.post("/add", response_model=SuccessResponse[AddColumnResult])
-async def add_column(
-    request: Request,
-    body: AddColumnRequestBody,
-    tables_store: TablesStoreDep,
-):
-    """カラムを追加するエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : AddColumnRequest
-        リクエストボディ
-
-    Returns
-    -------
-    JSONResponse
-        処理結果
-    """
-    # ビジネスロジックの実行
-    api = AddColumn(body, tables_store)
-    result = run_operation(api)
-    return create_success_response(
-        status_code=http_status.HTTP_200_OK, response_object=result
-    )
 
 
 @router.post(

@@ -5,7 +5,7 @@ import {
   getFilesSafe,
   getOsInfo,
 } from "./api/bridge/tauri-commands";
-import { getEconomiconAPI } from "./api/endpoints";
+import { getEconomiconAppAPI } from "./api/endpoints";
 import { showMessageDialog } from "./lib/dialog/message";
 import { useCurrentPageStore } from "./stores/currentView";
 import { useLoadingStore } from "./stores/loading";
@@ -47,13 +47,28 @@ export const App = () => {
 
     let isMounted = true;
 
-    // FastAPI サイドカーが起動するまで最大30秒ポーリングする
-    const waitForServer = async (api: ReturnType<typeof getEconomiconAPI>) => {
-      const MAX_RETRIES = 60; // 1000ms × 60 = 60秒
+    // FastAPI サイドカーが起動するまで最大2分ポーリングする（1秒に1回）
+    const waitForServer = async (
+      api: ReturnType<typeof getEconomiconAppAPI>,
+    ) => {
+      const MAX_RETRIES = 120; // 1秒 × 120 = 2分
       const INTERVAL_MS = 1000;
+      // reqwest クライアントのグローバルタイムアウトは 300 秒だが、ヘルスチェックが
+      // それだけブロックすると全体タイムアウトが大幅に延びる。
+      // JS レベルで 1 回あたり 1 秒のタイムアウトを設けることで
+      // ECONNREFUSED（即時失敗）と TCP ハング（遅延）を統一的に 1 秒で処理する。
+      const HEALTHCHECK_TIMEOUT_MS = 1000;
       for (let i = 0; i < MAX_RETRIES; i++) {
         try {
-          await api.healthCheck();
+          await Promise.race([
+            api.healthCheck(),
+            new Promise<never>((_, reject) =>
+              setTimeout(
+                () => reject(new Error("HealthCheckTimeout")),
+                HEALTHCHECK_TIMEOUT_MS,
+              ),
+            ),
+          ]);
           return; // 疎通成功
         } catch {
           // まだ起動中 — 少し待って再試行
@@ -64,7 +79,7 @@ export const App = () => {
     };
 
     const initialize = async () => {
-      const api = getEconomiconAPI();
+      const api = getEconomiconAppAPI();
       setLoading(true, t("Loading.Launching"));
       try {
         // 認証トークンを取得する。

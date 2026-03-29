@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAPI } from "../api/endpoints";
+import { getEconomiconAppAPI } from "../api/endpoints";
 import { showMessageDialog } from "../lib/dialog/message";
 import { useLoadingStore } from "../stores/loading";
 import { useTableInfosStore } from "../stores/tableInfos";
@@ -28,7 +28,7 @@ export const useTableColumnLoader = (
     const loadColumnList = async (tableName: string) => {
       setLoading(true, t("Loading.Loading"));
       try {
-        const api = getEconomiconAPI();
+        const api = getEconomiconAppAPI();
         const response = await api.getColumnList({
           tableName,
           // isNumberOnlyはbooleanに変更（旧APIはstring型"true"/"false"だったが新APIはbool）

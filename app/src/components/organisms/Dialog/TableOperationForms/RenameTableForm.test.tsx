@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
 import { RenameTableForm } from "./RenameTableForm";
@@ -34,7 +34,7 @@ const defaultProps = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(getEconomiconAPI).mockReturnValue(mockApi as never);
+  vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales", "costs"] });
   useTableInfosStore.setState({
     tableInfos: [

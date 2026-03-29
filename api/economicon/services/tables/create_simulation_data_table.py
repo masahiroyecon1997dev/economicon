@@ -1,10 +1,12 @@
+from collections.abc import Sequence
 from typing import ClassVar
 
+import numpy as np
 import polars as pl
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.models import CreateSimulationDataTableRequestBody
+from economicon.schemas import CreateSimulationDataTableRequestBody
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError
 from economicon.utils.algorithms import generate_simulation_data
@@ -35,6 +37,7 @@ class CreateSimulationDataTable:
         self.table_name = body.table_name
         self.row_count = body.row_count
         self.simulation_columns = body.simulation_columns
+        self.random_seed = body.random_seed
 
     def validate(self):
         # テーブル名の検証
@@ -50,13 +53,26 @@ class CreateSimulationDataTable:
             # 空のテーブルを作成
             df = pl.DataFrame()
 
+            # シード指定時は列ごとに独立した再現性を確保
+            # SeedSequence.spawn() で列数分の独立ストリームを生成する
+            if self.random_seed is not None:
+                ss = np.random.SeedSequence(self.random_seed)
+                child_seeds: Sequence[np.random.SeedSequence | None] = (
+                    ss.spawn(len(self.simulation_columns))
+                )
+            else:
+                child_seeds = [None] * len(self.simulation_columns)
+
             # 各列設定に従ってデータを生成
-            for column in self.simulation_columns:
+            for column, col_seed in zip(
+                self.simulation_columns, child_seeds, strict=True
+            ):
                 column_name = column.column_name
 
                 column_data = generate_simulation_data(
                     column.distribution,
                     self.row_count,
+                    seed=col_seed,
                 )
                 # 列をデータフレームに追加
                 if df.is_empty():

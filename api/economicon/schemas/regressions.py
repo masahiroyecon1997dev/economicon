@@ -1,0 +1,451 @@
+"""回帰分析関連のスキーマ定義"""
+
+from typing import Annotated, Any, Literal
+
+from pydantic import BaseModel, BeforeValidator, Field
+
+from economicon.schemas.common import BaseRequest, BaseResult
+from economicon.schemas.entities import RegressionParams, StandardErrorSettings
+from economicon.schemas.enums import (
+    MissingValueHandlingType,
+)
+from economicon.schemas.types import ColumnName, TableName
+
+
+def _coerce_missing_value_handling(v: object) -> MissingValueHandlingType:
+    """文字列を MissingValueHandlingType に変換する（strict モード対応）"""
+    if isinstance(v, str):
+        return MissingValueHandlingType(v)
+    return v  # type: ignore[return-value]
+
+
+# ---------------------------------------------------------------------------
+# リクエストボディ
+# ---------------------------------------------------------------------------
+
+
+class RegressionRequestBody(BaseRequest):
+    """
+    統合回帰分析リクエスト
+
+    全ての回帰分析タイプを単一のエンドポイントで扱うための
+    統合スキーマです。
+    """
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="分析対象のテーブル名。ワークスペース内に存在するテーブル名を指定してください。"
+        ),
+    ]
+    result_name: Annotated[
+        str,
+        Field(
+            default="",
+            title="Result Name",
+            max_length=128,
+            description="分析結果の名前（省略時は被説明変数名を使用）",
+        ),
+    ]
+    description: Annotated[
+        str,
+        Field(
+            default="",
+            title="Description",
+            max_length=512,
+            description="分析結果の説明メモ",
+        ),
+    ]
+    dependent_variable: Annotated[
+        ColumnName,
+        Field(
+            title="Dependent Variable",
+            description="被説明変数（目的変数）の列名。テーブル内に存在するカラム名を指定してください。",
+        ),
+    ]
+    explanatory_variables: Annotated[
+        list[ColumnName],
+        Field(
+            title="Explanatory Variables",
+            description="説明変数の列名のリスト。テーブル内に存在するカラム名を指定してください。",
+        ),
+    ]
+    has_const: Annotated[
+        bool,
+        Field(
+            default=True,
+            alias="hasConst",
+            title="Has Const",
+            description="定数項を設計行列に追加するかどうか",
+        ),
+    ]
+    missing_value_handling: Annotated[
+        MissingValueHandlingType,
+        BeforeValidator(_coerce_missing_value_handling),
+        Field(
+            default=MissingValueHandlingType.REMOVE,
+            alias="missingValueHandling",
+            title="Missing Value Handling",
+            description="欠損値の処理方法"
+            "（remove: 該当行を削除、ignore: そのまま使用、"
+            "error: エラーとして扱う）",
+        ),
+    ]
+
+    # 統計手法ごとの可変部分
+    analysis: Annotated[
+        RegressionParams,
+        Field(
+            title="Regression Analysis Params",
+            description="回帰分析手法の詳細パラメータ。"
+            "method フィールドで手法（ols, fe, re, iv 等）を指定します。",
+        ),
+    ]
+
+    # 標準誤差の設定
+    standard_error: Annotated[
+        StandardErrorSettings,
+        Field(
+            title="Standard Error Settings",
+            description="標準誤差の計算方法設定。"
+            "nonrobust, robust（HC）, cluster, "
+            "hac（Newey-West）から選択します。",
+        ),
+    ]
+
+
+# ---------------------------------------------------------------------------
+# 回帰分析実行
+# ---------------------------------------------------------------------------
+
+
+class RegressionResult(BaseResult):
+    """回帰分析実行レスポンス"""
+
+    result_id: str = Field(
+        title="Result ID",
+        description="保存された分析結果の一意 ID",
+    )
+
+
+# ---------------------------------------------------------------------------
+# 分析結果管理（GET / DELETE / CLEAR）
+# ---------------------------------------------------------------------------
+
+
+class AnalysisResultSummary(BaseResult):
+    """分析結果サマリー（一覧取得用の各要素）"""
+
+    id: str = Field(
+        title="ID",
+        description="分析結果の一意 ID",
+    )
+    name: str = Field(
+        title="Name",
+        description="分析結果名",
+    )
+    description: str = Field(
+        title="Description",
+        description="分析結果の説明メモ",
+    )
+    created_at: str = Field(
+        title="Created At",
+        description="作成日時（ISO 8601 形式）",
+    )
+
+
+class GetAllAnalysisResultsResult(BaseResult):
+    """全分析結果サマリー取得レスポンス"""
+
+    results: list[AnalysisResultSummary] = Field(
+        title="Results",
+        description="分析結果のサマリーリスト",
+    )
+
+
+class AnalysisResultDetail(BaseResult):
+    """分析結果詳細（1件取得用）"""
+
+    id: str = Field(
+        title="ID",
+        description="分析結果の一意 ID",
+    )
+    name: str = Field(
+        title="Name",
+        description="分析結果名",
+    )
+    description: str = Field(
+        title="Description",
+        description="分析結果の説明メモ",
+    )
+    table_name: str = Field(
+        title="Table Name",
+        description="分析対象テーブル名",
+    )
+    regression_output: dict[str, Any] = Field(
+        title="Regression Output",
+        description=(
+            "推定結果の詳細データ。"
+            "手法（OLS / FE / RE / IV / Logit / Probit / Tobit 等）に"
+            "より含まれるキーが異なる。"
+        ),
+    )
+    created_at: str = Field(
+        title="Created At",
+        description="作成日時（ISO 8601 形式）",
+    )
+    model_path: str | None = Field(
+        title="Model Path",
+        description="保存済みモデルファイルのパス（None の場合は未保存）",
+    )
+    model_type: str | None = Field(
+        title="Model Type",
+        description="モデルの種別文字列（ols / fe / re / iv 等）",
+    )
+    entity_id_column: str | None = Field(
+        title="Entity ID Column",
+        description="パネルデータ分析における個体 ID 列名",
+    )
+    time_column: str | None = Field(
+        title="Time Column",
+        description="パネルデータ分析における時間列名",
+    )
+
+
+class GetAnalysisResultResult(BaseResult):
+    """分析結果詳細取得レスポンス"""
+
+    result: AnalysisResultDetail = Field(
+        title="Result",
+        description="分析結果の詳細データ",
+    )
+
+
+class DeleteAnalysisResultResult(BaseResult):
+    """分析結果削除レスポンス"""
+
+    deleted_result_id: str = Field(
+        title="Deleted Result ID",
+        description="削除した分析結果の ID",
+    )
+
+
+class ClearAllAnalysisResultsResult(BaseResult):
+    """全分析結果クリアレスポンス"""
+
+    message: str = Field(
+        title="Message",
+        description="処理結果メッセージ",
+    )
+
+
+# ---------------------------------------------------------------------------
+# 診断列追加（予測値・残差）
+# ---------------------------------------------------------------------------
+
+
+class AddDiagnosticColumnsRequestBody(BaseRequest):
+    """
+    推定済みモデルから予測値・残差を抽出してテーブルに列追加するリクエスト
+    """
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            description="追加先テーブル名。ワークスペース内に存在するテーブル名を"
+            "指定してください。",
+        ),
+    ]
+    result_id: Annotated[
+        str,
+        Field(
+            alias="resultId",
+            description="対象の分析結果 ID（AnalysisResult の UUID）",
+        ),
+    ]
+    target: Annotated[
+        Literal["fitted", "residual", "both"],
+        Field(
+            description="追加する値の種類。"
+            "fitted: 予測値のみ、residual: 残差のみ、both: 両方",
+        ),
+    ]
+    standardized: Annotated[
+        bool,
+        Field(
+            default=False,
+            description=(
+                "True の場合、標準化残差"
+                "（studentized internal）を追加する。"
+                "OLS/Logit/Probit のみ有効。"
+            ),
+        ),
+    ] = False
+    include_interval: Annotated[
+        bool,
+        Field(
+            default=False,
+            alias="includeInterval",
+            description="True の場合、予測値の 95%信頼区間列を追加する。"
+            "OLS/FE/RE/IV で有効。",
+        ),
+    ] = False
+    fe_type: Annotated[
+        Literal["total", "within"],
+        Field(
+            default="total",
+            alias="feType",
+            description="FE/RE モデルの予測値タイプ。"
+            "total: 固定効果を含む予測（effects=True）、"
+            "within: 固定効果を除いた変動成分（effects=False）。"
+            "FE/RE 以外では無視される。",
+        ),
+    ] = "total"
+    # Eco-Note A: Logit/Probit の残差種別オプション
+    binary_residual_type: Annotated[
+        Literal["raw", "deviance"],
+        Field(
+            default="raw",
+            alias="binaryResidualType",
+            description="Logit/Probit の残差種別。"
+            "raw: 生残差 (y - p̂)、"
+            "deviance: デビアンス残差"
+            " sign(y-p̂)√(-2[y·log(p̂)+(1-y)·log(1-p̂)])。"
+            "OLS などその他のモデルでは無視される。",
+        ),
+    ] = "raw"
+    # Eco-Note B: Tobit の予測値種別オプション
+    tobit_fitted_type: Annotated[
+        Literal["latent", "observable"],
+        Field(
+            default="latent",
+            alias="tobitFittedType",
+            description="Tobit モデルの予測値種別。"
+            "latent: 潜在変数の予測値 x'β（デフォルト）、"
+            "observable: 観測値の無条件期待値 E[y|x]"
+            "（打ち切りを考慮した期待値）。"
+            "Tobit 以外のモデルでは無視される。",
+        ),
+    ] = "latent"
+
+
+class AddDiagnosticColumnsResult(BaseResult):
+    """診断列追加レスポンス"""
+
+    table_name: str = Field(
+        alias="tableName",
+        title="Table Name",
+        description="更新されたテーブル名",
+    )
+    added_columns: list[str] = Field(
+        alias="addedColumns",
+        title="Added Columns",
+        description="追加された列名のリスト",
+    )
+
+
+# ---------------------------------------------------------------------------
+# 推定結果フォーマット出力
+# ---------------------------------------------------------------------------
+
+
+class StarConfig(BaseModel):
+    """有意性記号の設定"""
+
+    threshold: float = Field(
+        description="有意水準の閾値（例: 0.05）",
+    )
+    symbol: str = Field(
+        description="有意性を示す記号（例: '**'）",
+    )
+
+
+class OutputResultRequest(BaseRequest):
+    """
+    推定結果フォーマット出力リクエスト
+
+    複数の分析結果を LaTeX / Markdown / Text 形式に整形します。
+    """
+
+    result_ids: Annotated[
+        list[str],
+        Field(
+            min_length=1,
+            description="出力する分析結果 ID のリスト（1件以上）",
+        ),
+    ]
+    format: Annotated[
+        Literal["latex", "markdown", "text"],
+        Field(
+            description=(
+                "出力フォーマット。"
+                "latex: LaTeX tabular、"
+                "markdown: Markdown テーブル、"
+                "text: 固定幅テキスト"
+            ),
+        ),
+    ]
+    stat_in_parentheses: Annotated[
+        Literal["se", "t", "p", "none"],
+        Field(
+            default="se",
+            description=(
+                "括弧内に表示する統計量。"
+                "se: 標準誤差、t: t 値、p: p 値、"
+                "none: 括弧行なし"
+            ),
+        ),
+    ] = "se"
+    significance_stars: Annotated[
+        list[StarConfig] | None,
+        Field(
+            default=None,
+            description=(
+                "有意性記号の設定リスト。"
+                "None の場合はデフォルト設定を使用 "
+                "(0.01:***, 0.05:**, 0.1:*)"
+            ),
+        ),
+    ] = None
+    variable_labels: Annotated[
+        dict[str, str] | None,
+        Field(
+            default=None,
+            description=(
+                "変数名から表示ラベルへのマッピング辞書。"
+                "未設定の変数は変数名をそのまま使用。"
+            ),
+        ),
+    ] = None
+    const_at_bottom: Annotated[
+        bool,
+        Field(
+            default=True,
+            description=(
+                "True の場合、定数項を変数リストの最下部に配置する。"
+            ),
+        ),
+    ] = True
+    variable_order: Annotated[
+        list[str] | None,
+        Field(
+            default=None,
+            description=(
+                "変数の表示順序を明示的に指定するリスト。"
+                "指定した変数は先頭から順に表示される。"
+                "リストに含まれない変数はその後ろに追加される。"
+                "None の場合は推定結果への登場順を使用。"
+            ),
+        ),
+    ] = None
+
+
+class OutputResultResult(BaseResult):
+    """推定結果フォーマット出力レスポンス"""
+
+    content: str = Field(
+        description="フォーマット済み出力テキスト",
+    )
+    format: str = Field(
+        description="出力フォーマット (latex / markdown / text)",
+    )
