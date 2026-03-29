@@ -12,11 +12,14 @@ import {
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
 import { extractFieldError } from "../../../../lib/utils/formHelpers";
+import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { InputText } from "../../../atoms/Input/InputText";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
 import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
 import type { ColumnOperationFormPropsType } from "./types";
+
+const EMPTY_COLUMNS: { name: string; type: string }[] = [];
 
 export const AddLagLeadColumnForm = ({
   tableName,
@@ -29,11 +32,17 @@ export const AddLagLeadColumnForm = ({
 
   const [apiError, setApiError] = useState<string | null>(null);
 
+  const allColumns = useTableInfosStore(
+    (s) =>
+      s.tableInfos.find((i) => i.tableName === tableName)?.columnList ??
+      EMPTY_COLUMNS,
+  );
+
   const form = useForm({
     defaultValues: {
       periods: "-1",
       newColumnName: `lag1_${column.name}`,
-      groupColumnsRaw: "",
+      groupColumns: [] as string[],
     },
     validators: {
       onSubmit: z.object({
@@ -46,16 +55,13 @@ export const AddLagLeadColumnForm = ({
         newColumnName: z
           .string()
           .min(1, t("ValidationMessages.NewColumnNameRequired")),
-        groupColumnsRaw: z.string(),
+        groupColumns: z.array(z.string()),
       }),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
       try {
-        const groupColumns = value.groupColumnsRaw
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean);
+        const groupColumns = value.groupColumns;
 
         const periods = parseInt(value.periods, 10);
 
@@ -208,20 +214,40 @@ export const AddLagLeadColumnForm = ({
         </p>
       )}
 
-      <form.Field name="groupColumnsRaw">
+      <form.Field name="groupColumns">
         {(field) => (
           <FormField
             label={t("AddLagLeadColumnForm.GroupColumns")}
             htmlFor="lag-group-cols"
           >
-            <InputText
-              id="lag-group-cols"
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              placeholder="例: city, region（カンマ区切り）"
-              disabled={isSubmitting}
-            />
+            <div className="space-y-1 max-h-36 overflow-y-auto rounded-md border border-input bg-background p-2">
+              {allColumns.length === 0 ? (
+                <p className="text-xs text-gray-400">
+                  {t("AddLagLeadColumnForm.NoColumns")}
+                </p>
+              ) : (
+                allColumns.map((col) => (
+                  <label
+                    key={col.name}
+                    className="flex items-center gap-2 text-sm cursor-pointer select-none"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={field.state.value.includes(col.name)}
+                      onChange={(e) => {
+                        const next = e.target.checked
+                          ? [...field.state.value, col.name]
+                          : field.state.value.filter((n) => n !== col.name);
+                        field.handleChange(next);
+                      }}
+                      disabled={isSubmitting}
+                      className="rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
+                    />
+                    {col.name}
+                  </label>
+                ))
+              )}
+            </div>
           </FormField>
         )}
       </form.Field>

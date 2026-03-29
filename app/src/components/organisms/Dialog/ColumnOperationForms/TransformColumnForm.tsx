@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { TransformColumnBody } from "../../../../api/zod/column/column";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
-import { extractFieldError } from "../../../../lib/utils/formHelpers";
+import { createFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -29,6 +30,7 @@ export const TransformColumnForm = ({
   onSuccess,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
+  const tErr = createFieldError(t);
 
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -41,15 +43,16 @@ export const TransformColumnForm = ({
       degree: "2",
     },
     validators: {
-      onSubmit: z.object({
-        method: z.enum(["log", "power", "root"]),
-        newColumnName: z
-          .string()
-          .min(1, t("ValidationMessages.NewColumnNameRequired")),
-        base: z.string(),
-        exponent: z.string(),
-        degree: z.string(),
-      }),
+      onSubmit: TransformColumnBody.pick({ newColumnName: true })
+        .required()
+        .merge(
+          z.object({
+            method: z.enum(["log", "power", "root"]),
+            base: z.string(),
+            exponent: z.string(),
+            degree: z.string(),
+          }),
+        ),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
@@ -236,7 +239,10 @@ export const TransformColumnForm = ({
       >
         {(field) => {
           const errorMsg = field.state.meta.isTouched
-            ? extractFieldError(field.state.meta.errors)
+            ? tErr(
+                field.state.meta.errors,
+                "ValidationMessages.NewColumnNameRequired",
+              )
             : undefined;
           return (
             <FormField

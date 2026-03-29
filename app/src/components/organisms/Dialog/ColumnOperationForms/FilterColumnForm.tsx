@@ -12,12 +12,16 @@ import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import type { FilterOperatorType } from "../../../../api/model";
 import { LogicalOperatorType } from "../../../../api/model";
+import { FilterTableBody } from "../../../../api/zod/table/table";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
-import { extractFieldError } from "../../../../lib/utils/formHelpers";
+import {
+  createFieldError,
+  extractFieldError,
+} from "../../../../lib/utils/formHelpers";
 import { getTableInfo } from "../../../../lib/utils/internal";
 import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
@@ -51,6 +55,7 @@ export const FilterColumnForm = ({
   onSuccess,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
+  const tErr = createFieldError(t);
   const [apiError, setApiError] = useState<string | null>(null);
   const [hasSecondCondition, setHasSecondCondition] = useState(false);
 
@@ -65,13 +70,45 @@ export const FilterColumnForm = ({
   const form = useForm({
     defaultValues: {
       newTableName: `${tableName}_filtered`,
-      logicalOperator: LogicalOperatorType.and,
+      logicalOperator:
+        LogicalOperatorType.and as (typeof LogicalOperatorType)[keyof typeof LogicalOperatorType],
       c1Column: column.name,
       c1Operator: "equals" as FilterOperatorType,
       c1Value: "",
       c2Column: column.name,
       c2Operator: "equals" as FilterOperatorType,
       c2Value: "",
+    },
+    validators: {
+      onSubmit: FilterTableBody.pick({
+        newTableName: true,
+        logicalOperator: true,
+      })
+        .required()
+        .merge(
+          z.object({
+            c1Column: z.string(),
+            c1Operator: z.enum([
+              "equals",
+              "notEquals",
+              "greaterThan",
+              "greaterThanOrEquals",
+              "lessThan",
+              "lessThanOrEquals",
+            ]),
+            c1Value: z.string(),
+            c2Column: z.string(),
+            c2Operator: z.enum([
+              "equals",
+              "notEquals",
+              "greaterThan",
+              "greaterThanOrEquals",
+              "lessThan",
+              "lessThanOrEquals",
+            ]),
+            c2Value: z.string(),
+          }),
+        ),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
@@ -156,7 +193,10 @@ export const FilterColumnForm = ({
       >
         {(field) => {
           const err = field.state.meta.isTouched
-            ? extractFieldError(field.state.meta.errors)
+            ? tErr(
+                field.state.meta.errors,
+                "ValidationMessages.DataNameRequired",
+              )
             : undefined;
           return (
             <FormField
