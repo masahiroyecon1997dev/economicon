@@ -4,8 +4,8 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { RenameTableBody } from "../../../../api/zod/table/table";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -45,16 +45,7 @@ export const RenameTableForm = ({
   const form = useForm({
     defaultValues: { newTableName: tableName },
     validators: {
-      onSubmit: z.object({
-        newTableName: z
-          .string()
-          .min(1, t("ValidationMessages.DataNameRequired"))
-          .max(128, t("ValidationMessages.DataNameTooLong"))
-          .refine(
-            (v) => !hasControlChars(v),
-            t("ValidationMessages.DataNameInvalidChars"),
-          ),
-      }),
+      onSubmit: RenameTableBody.pick({ newTableName: true }),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);

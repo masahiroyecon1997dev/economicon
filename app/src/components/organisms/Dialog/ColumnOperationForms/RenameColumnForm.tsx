@@ -4,8 +4,8 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { RenameColumnBody } from "../../../../api/zod/column/column";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -32,11 +32,7 @@ export const RenameColumnForm = ({
   const form = useForm({
     defaultValues: { newColumnName: "" },
     validators: {
-      onSubmit: z.object({
-        newColumnName: z
-          .string()
-          .min(1, t("ValidationMessages.NewColumnNameRequired")),
-      }),
+      onSubmit: RenameColumnBody.pick({ newColumnName: true }),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
