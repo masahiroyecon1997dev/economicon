@@ -8,6 +8,7 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import type { FilterOperatorType } from "../../../../api/model";
 import { LogicalOperatorType } from "../../../../api/model";
@@ -16,6 +17,7 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { getTableInfo } from "../../../../lib/utils/internal";
 import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
@@ -73,15 +75,6 @@ export const FilterColumnForm = ({
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
-
-      if (!value.c1Value.trim()) {
-        setApiError(t("FilterColumnForm.ConditionValueRequired"));
-        return;
-      }
-      if (hasSecondCondition && !value.c2Value.trim()) {
-        setApiError(t("FilterColumnForm.ConditionValueRequired"));
-        return;
-      }
 
       const conditions: {
         columnName: string;
@@ -158,15 +151,12 @@ export const FilterColumnForm = ({
       <form.Field
         name="newTableName"
         validators={{
-          onChange: ({ value }) =>
-            !value.trim()
-              ? t("ValidationMessages.DataNameRequired")
-              : undefined,
+          onChange: z.string().min(1, t("ValidationMessages.DataNameRequired")),
         }}
       >
         {(field) => {
           const err = field.state.meta.isTouched
-            ? (field.state.meta.errors[0] as string | undefined)
+            ? extractFieldError(field.state.meta.errors)
             : undefined;
           return (
             <FormField
@@ -197,6 +187,7 @@ export const FilterColumnForm = ({
         colId="filter-c1-col"
         opId="filter-c1-op"
         valId="filter-c1-val"
+        required
         allColumns={allColumns}
         form={form}
         isSubmitting={isSubmitting}
@@ -254,6 +245,7 @@ export const FilterColumnForm = ({
             colId="filter-c2-col"
             opId="filter-c2-op"
             valId="filter-c2-val"
+            required={hasSecondCondition}
             allColumns={allColumns}
             form={form}
             isSubmitting={isSubmitting}
@@ -281,6 +273,7 @@ type ConditionBlockProps = {
   colId: string;
   opId: string;
   valId: string;
+  required?: boolean;
   allColumns: { name: string; type: string }[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: any;
@@ -299,6 +292,7 @@ const ConditionBlock = ({
   colId,
   opId,
   valId,
+  required = false,
   allColumns,
   form,
   isSubmitting,
@@ -374,23 +368,44 @@ const ConditionBlock = ({
       </form.Field>
 
       {/* 比較値 */}
-      <form.Field name={valFieldName}>
+      <form.Field
+        name={valFieldName}
+        validators={{
+          onChange: ({ value }: { value: string }) =>
+            required && !value.trim()
+              ? t("FilterColumnForm.ConditionValueRequired")
+              : undefined,
+        }}
+      >
         {(field: {
-          state: { value: string };
+          state: {
+            value: string;
+            meta: { errors: unknown[]; isTouched: boolean };
+          };
           handleChange: (v: string) => void;
           handleBlur: () => void;
-        }) => (
-          <FormField label={t("FilterColumnForm.CompareValue")} htmlFor={valId}>
-            <InputText
-              id={valId}
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              disabled={isSubmitting}
-              autoFocus={autoFocusValue}
-            />
-          </FormField>
-        )}
+        }) => {
+          const errorMsg = field.state.meta.isTouched
+            ? extractFieldError(field.state.meta.errors)
+            : undefined;
+          return (
+            <FormField
+              label={t("FilterColumnForm.CompareValue")}
+              htmlFor={valId}
+              error={errorMsg}
+            >
+              <InputText
+                id={valId}
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                disabled={isSubmitting}
+                autoFocus={autoFocusValue}
+                error={errorMsg}
+              />
+            </FormField>
+          );
+        }}
       </form.Field>
     </div>
   </div>
