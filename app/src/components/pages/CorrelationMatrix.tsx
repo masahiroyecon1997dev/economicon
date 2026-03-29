@@ -2,9 +2,9 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 import { getEconomiconAppAPI } from "../../api/endpoints";
 import { CorrelationMethod, MissingHandlingMethod } from "../../api/model";
+import { CreateCorrelationTableBody } from "../../api/zod/statistics/statistics";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { extractApiErrorMessage } from "../../lib/utils/apiError";
@@ -21,24 +21,6 @@ import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
 import { SelectAllBar } from "../molecules/Field/SelectAllBar";
 import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
-
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
-const createCorrelationMatrixSchema = (t: (key: string) => string) =>
-  z.object({
-    tableName: z.string().min(1, t("CorrelationMatrix.ErrorDataRequired")),
-    columnNames: z
-      .array(z.string())
-      .min(2, t("CorrelationMatrix.ErrorColumnsRequired")),
-    newTableName: z
-      .string()
-      .min(1, t("CorrelationMatrix.ErrorOutputNameRequired")),
-    method: z.nativeEnum(CorrelationMethod),
-    decimalPlaces: z.number().min(1).max(15),
-    lowerTriangleOnly: z.boolean(),
-    missingHandling: z.nativeEnum(MissingHandlingMethod),
-  });
 
 // ---------------------------------------------------------------------------
 // Component
@@ -65,7 +47,7 @@ export const CorrelationMatrix = () => {
       missingHandling: MissingHandlingMethod.pairwise as MissingHandlingMethod,
     },
     validators: {
-      onSubmit: createCorrelationMatrixSchema(t),
+      onSubmit: CreateCorrelationTableBody.required(),
     },
     onSubmit: async ({ value }) => {
       try {
@@ -99,6 +81,10 @@ export const CorrelationMatrix = () => {
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+
+  /** Zod の汎用メッセージをフィールド固有の i18n キーで上書きする（Case C）*/
+  const tErr = (errors: unknown[], i18nKey: string) =>
+    extractFieldError(errors, () => t(i18nKey));
 
   // Sync column list → check all by default
   useEffect(() => {
@@ -146,7 +132,10 @@ export const CorrelationMatrix = () => {
                     onValueChange={handleTableSelect}
                     disabled={isSubmitting}
                     placeholder={t("CorrelationMatrix.SelectData")}
-                    error={extractFieldError(field.state.meta.errors)}
+                    error={tErr(
+                      field.state.meta.errors,
+                      "CorrelationMatrix.ErrorDataRequired",
+                    )}
                   >
                     {tableList.map((name) => (
                       <SelectItem key={name} value={name}>
@@ -155,9 +144,15 @@ export const CorrelationMatrix = () => {
                     ))}
                   </Select>
                 </div>
-                {extractFieldError(field.state.meta.errors) && (
+                {tErr(
+                  field.state.meta.errors,
+                  "CorrelationMatrix.ErrorDataRequired",
+                ) && (
                   <p className="shrink-0 text-xs text-red-600">
-                    {extractFieldError(field.state.meta.errors)}
+                    {tErr(
+                      field.state.meta.errors,
+                      "CorrelationMatrix.ErrorDataRequired",
+                    )}
                   </p>
                 )}
               </div>
@@ -214,7 +209,10 @@ export const CorrelationMatrix = () => {
                         field.handleChange([...current]);
                       }}
                       disabled={isSubmitting}
-                      error={extractFieldError(field.state.meta.errors)}
+                      error={tErr(
+                        field.state.meta.errors,
+                        "CorrelationMatrix.ErrorColumnsRequired",
+                      )}
                     />
                   )}
                 </form.Field>
@@ -231,7 +229,10 @@ export const CorrelationMatrix = () => {
                   <FormField
                     label={t("CorrelationMatrix.OutputDataLabel")}
                     htmlFor="new-table-name"
-                    error={extractFieldError(field.state.meta.errors)}
+                    error={tErr(
+                      field.state.meta.errors,
+                      "CorrelationMatrix.ErrorOutputNameRequired",
+                    )}
                   >
                     <InputText
                       id="new-table-name"
