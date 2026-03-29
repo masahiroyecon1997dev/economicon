@@ -11,6 +11,7 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -235,7 +236,7 @@ export const TransformColumnForm = ({
       >
         {(field) => {
           const errorMsg = field.state.meta.isTouched
-            ? (field.state.meta.errors[0] as string | undefined)
+            ? extractFieldError(field.state.meta.errors)
             : undefined;
           return (
             <FormField

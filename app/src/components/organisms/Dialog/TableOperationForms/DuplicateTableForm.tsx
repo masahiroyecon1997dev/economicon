@@ -11,6 +11,7 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { useTableListStore } from "../../../../stores/tableList";
 import { InputText } from "../../../atoms/Input/InputText";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -113,7 +114,7 @@ export const DuplicateTableForm = ({
       >
         {(field) => {
           const errorMsg = field.state.meta.isTouched
-            ? (field.state.meta.errors[0] as string | undefined)
+            ? extractFieldError(field.state.meta.errors)
             : undefined;
           return (
             <FormField

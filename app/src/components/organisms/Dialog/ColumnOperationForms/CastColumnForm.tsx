@@ -11,6 +11,7 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -129,7 +130,7 @@ export const CastColumnForm = ({
             <FormField
               label={t("CastColumnForm.TargetType")}
               htmlFor="cast-target-type"
-              error={field.state.meta.errors[0]?.toString()}
+              error={extractFieldError(field.state.meta.errors)}
             >
               <Select
                 id="cast-target-type"
@@ -160,7 +161,7 @@ export const CastColumnForm = ({
         >
           {(field) => {
             const errorMsg = field.state.meta.isTouched
-              ? (field.state.meta.errors[0] as string | undefined)
+              ? extractFieldError(field.state.meta.errors)
               : undefined;
             return (
               <FormField

@@ -18,6 +18,7 @@ import {
   extractApiErrorMessage,
   getResponseErrorMessage,
 } from "../../../lib/utils/apiError";
+import { extractFieldError } from "../../../lib/utils/formHelpers";
 import { cn } from "../../../lib/utils/helpers";
 import { useRegressionResultsStore } from "../../../stores/regressionResults";
 import { useTableListStore } from "../../../stores/tableList";
@@ -178,10 +179,7 @@ export const LinearRegressionForm = ({
                   value={field.state.value}
                   onValueChange={handleTableSelect}
                   disabled={isSubmitting}
-                  error={
-                    (field.state.meta.errors[0] as { message?: string })
-                      ?.message ?? field.state.meta.errors[0]?.toString()
-                  }
+                  error={extractFieldError(field.state.meta.errors)}
                 >
                   {tableList.map((table, index) => (
                     <SelectItem key={index} value={table}>
@@ -190,10 +188,9 @@ export const LinearRegressionForm = ({
                   ))}
                 </Select>
               </div>
-              {field.state.meta.errors[0] && (
+              {extractFieldError(field.state.meta.errors) && (
                 <p className="shrink-0 text-xs text-red-600">
-                  {(field.state.meta.errors[0] as { message?: string })
-                    ?.message ?? field.state.meta.errors[0]?.toString()}
+                  {extractFieldError(field.state.meta.errors)}
                 </p>
               )}
             </div>
@@ -223,10 +220,7 @@ export const LinearRegressionForm = ({
                     columns={columnList}
                     selectedValue={field.state.value}
                     onSingleChange={(v) => field.handleChange(v)}
-                    error={
-                      (field.state.meta.errors[0] as { message?: string })
-                        ?.message ?? field.state.meta.errors[0]?.toString()
-                    }
+                    error={extractFieldError(field.state.meta.errors)}
                     disabled={isSubmitting}
                     name="dependentVariable"
                     className="flex min-h-0 w-[33%] flex-col"
@@ -249,10 +243,7 @@ export const LinearRegressionForm = ({
                     columns={columnList}
                     selectedValues={field.state.value}
                     onMultipleChange={(v) => field.handleChange(v)}
-                    error={
-                      (field.state.meta.errors[0] as { message?: string })
-                        ?.message ?? field.state.meta.errors[0]?.toString()
-                    }
+                    error={extractFieldError(field.state.meta.errors)}
                     disabled={isSubmitting}
                     name="explanatoryVariables"
                     className="flex min-h-0 flex-1 flex-col"

@@ -11,6 +11,7 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
 import { InputText } from "../../../atoms/Input/InputText";
@@ -138,7 +139,7 @@ export const RenameTableForm = ({
       >
         {(field) => {
           const errorMsg = field.state.meta.isTouched
-            ? (field.state.meta.errors[0] as string | undefined)
+            ? extractFieldError(field.state.meta.errors)
             : undefined;
           return (
             <FormField

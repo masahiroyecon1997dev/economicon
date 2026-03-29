@@ -11,6 +11,7 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
@@ -106,7 +107,7 @@ export const DuplicateColumnForm = ({
       >
         {(field) => {
           const errorMsg = field.state.meta.isTouched
-            ? (field.state.meta.errors[0] as string | undefined)
+            ? extractFieldError(field.state.meta.errors)
             : undefined;
           return (
             <FormField

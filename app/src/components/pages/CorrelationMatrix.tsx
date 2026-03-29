@@ -8,6 +8,7 @@ import { CorrelationMethod, MissingHandlingMethod } from "../../api/model";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { extractApiErrorMessage } from "../../lib/utils/apiError";
+import { extractFieldError } from "../../lib/utils/formHelpers";
 import { cn } from "../../lib/utils/helpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
@@ -141,10 +142,7 @@ export const CorrelationMatrix = () => {
                     onValueChange={handleTableSelect}
                     disabled={isSubmitting}
                     placeholder={t("CorrelationMatrix.SelectData")}
-                    error={
-                      (field.state.meta.errors[0] as { message?: string })
-                        ?.message ?? field.state.meta.errors[0]?.toString()
-                    }
+                    error={extractFieldError(field.state.meta.errors)}
                   >
                     {tableList.map((name) => (
                       <SelectItem key={name} value={name}>
@@ -153,10 +151,9 @@ export const CorrelationMatrix = () => {
                     ))}
                   </Select>
                 </div>
-                {field.state.meta.errors[0] && (
+                {extractFieldError(field.state.meta.errors) && (
                   <p className="shrink-0 text-xs text-red-600">
-                    {(field.state.meta.errors[0] as { message?: string })
-                      ?.message ?? field.state.meta.errors[0]?.toString()}
+                    {extractFieldError(field.state.meta.errors)}
                   </p>
                 )}
               </div>
@@ -225,10 +222,7 @@ export const CorrelationMatrix = () => {
                         field.handleChange([...current]);
                       }}
                       disabled={isSubmitting}
-                      error={
-                        (field.state.meta.errors[0] as { message?: string })
-                          ?.message ?? field.state.meta.errors[0]?.toString()
-                      }
+                      error={extractFieldError(field.state.meta.errors)}
                     />
                   )}
                 </form.Field>
@@ -245,10 +239,7 @@ export const CorrelationMatrix = () => {
                   <FormField
                     label={t("CorrelationMatrix.OutputDataLabel")}
                     htmlFor="new-table-name"
-                    error={
-                      (field.state.meta.errors[0] as { message?: string })
-                        ?.message ?? field.state.meta.errors[0]?.toString()
-                    }
+                    error={extractFieldError(field.state.meta.errors)}
                   >
                     <InputText
                       id="new-table-name"

@@ -7,6 +7,7 @@ import { getEconomiconAppAPI } from "../../api/endpoints";
 import type { SimulationColumnConfig } from "../../api/model";
 import { DISTRIBUTION_OPTIONS } from "../../constants/app";
 import { showMessageDialog } from "../../lib/dialog/message";
+import { extractFieldError } from "../../lib/utils/formHelpers";
 import { cn } from "../../lib/utils/helpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { validateDistributionParam } from "../../lib/utils/validation";
@@ -446,7 +447,7 @@ export const CreateSimulationDataTable = () => {
               <form.Field name="randomSeed">
                 {(field) => {
                   const errorMsg = field.state.meta.isTouched
-                    ? (field.state.meta.errors[0] as string | undefined)
+                    ? extractFieldError(field.state.meta.errors)
                     : undefined;
                   return (
                     <RandomSeedField
@@ -472,7 +473,7 @@ export const CreateSimulationDataTable = () => {
               >
                 {(field) => {
                   const errorMsg = field.state.meta.isTouched
-                    ? (field.state.meta.errors[0] as string | undefined)
+                    ? extractFieldError(field.state.meta.errors)
                     : undefined;
                   return (
                     <FormField
@@ -507,7 +508,7 @@ export const CreateSimulationDataTable = () => {
               >
                 {(field) => {
                   const errorMsg = field.state.meta.isTouched
-                    ? (field.state.meta.errors[0] as string | undefined)
+                    ? extractFieldError(field.state.meta.errors)
                     : undefined;
                   return (
                     <FormField

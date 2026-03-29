@@ -14,6 +14,7 @@ import {
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
+import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -334,7 +335,7 @@ export const AddSimulationColumnForm = ({
           <FormField
             label={t("AddSimulationColumnForm.ColumnName")}
             htmlFor="sim-column-name"
-            error={field.state.meta.errors[0]?.toString()}
+            error={extractFieldError(field.state.meta.errors)}
           >
             <InputText
               id="sim-column-name"
