@@ -7,7 +7,7 @@ import {
   extractApiErrorMessage,
   getResponseErrorMessage,
 } from "../../lib/utils/apiError";
-import { cn } from "../../lib/utils/helpers";
+import { cn, generateId } from "../../lib/utils/helpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
@@ -19,8 +19,6 @@ import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
 import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
 import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
-
-const generateId = () => Math.random().toString(36).slice(2, 9);
 
 type TableEntry = { id: string; name: string };
 

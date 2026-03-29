@@ -8,7 +8,7 @@ import {
   extractApiErrorMessage,
   getResponseErrorMessage,
 } from "../../lib/utils/apiError";
-import { cn } from "../../lib/utils/helpers";
+import { cn, generateId } from "../../lib/utils/helpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
@@ -21,8 +21,6 @@ import { FormField } from "../molecules/Form/FormField";
 import { PageLayout } from "../templates/PageLayout";
 
 type KeyPair = { id: string; left: string; right: string };
-
-const generateId = () => Math.random().toString(36).slice(2, 9);
 
 type FormErrors = {
   tables?: string;
