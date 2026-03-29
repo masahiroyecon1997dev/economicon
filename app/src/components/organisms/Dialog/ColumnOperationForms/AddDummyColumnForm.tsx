@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { AddDummyColumnBody } from "../../../../api/zod/column/column";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -17,9 +18,6 @@ import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { FormField } from "../../../molecules/Form/FormField";
 import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
 import type { ColumnOperationFormPropsType } from "./types";
-
-type DummyMode = "single" | "all_except_base";
-type NullStrategy = "exclude" | "as_category" | "error";
 
 export const AddDummyColumnForm = ({
   tableName,
@@ -34,20 +32,22 @@ export const AddDummyColumnForm = ({
 
   const form = useForm({
     defaultValues: {
-      mode: "single" as DummyMode,
+      mode: "single" as "single" | "all_except_base",
       targetValue: "",
       dummyColumnName: `is_${column.name}`,
       dropBaseValue: "auto_most_frequent",
-      nullStrategy: "exclude" as NullStrategy,
+      nullStrategy: "exclude" as "exclude" | "as_category" | "error",
     },
     validators: {
-      onSubmit: z.object({
-        mode: z.enum(["single", "all_except_base"]),
-        targetValue: z.string(),
-        dummyColumnName: z.string(),
-        dropBaseValue: z.string(),
-        nullStrategy: z.enum(["exclude", "as_category", "error"]),
-      }),
+      onSubmit: AddDummyColumnBody.pick({ mode: true, nullStrategy: true })
+        .required()
+        .extend(
+          z.object({
+            dummyColumnName: z.string(),
+            targetValue: z.string(),
+            dropBaseValue: z.string(),
+          }).shape,
+        ),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
@@ -120,7 +120,9 @@ export const AddDummyColumnForm = ({
             <Select
               id="dummy-mode"
               value={field.state.value}
-              onValueChange={(v) => field.handleChange(v as DummyMode)}
+              onValueChange={(v) =>
+                field.handleChange(v as "single" | "all_except_base")
+              }
               disabled={isSubmitting}
             >
               <SelectItem value="single">
@@ -207,7 +209,9 @@ export const AddDummyColumnForm = ({
             <Select
               id="dummy-null-strategy"
               value={field.state.value}
-              onValueChange={(v) => field.handleChange(v as NullStrategy)}
+              onValueChange={(v) =>
+                field.handleChange(v as "exclude" | "as_category" | "error")
+              }
               disabled={isSubmitting}
             >
               <SelectItem value="exclude">

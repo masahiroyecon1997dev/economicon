@@ -17,52 +17,45 @@ export const DISTRIBUTION_OPTIONS: Array<{
   {
     value: "normal",
     label: "Common.NormalDistribution",
-    params: ["mean", "deviation"],
+    params: ["loc", "scale"],
   },
   {
     value: "exponential",
     label: "Common.ExponentialDistribution",
-    params: ["rate"],
+    params: ["scale"],
   },
   {
     value: "gamma",
     label: "Common.GammaDistribution",
     params: ["shape", "scale"],
   },
-  {
-    value: "beta",
-    label: "Common.BetaDistribution",
-    params: ["alpha", "beta"],
-  },
+  { value: "beta", label: "Common.BetaDistribution", params: ["a", "b"] },
   {
     value: "weibull",
     label: "Common.WeibullDistribution",
-    params: ["shape", "scale"],
+    params: ["a", "scale"],
   },
   {
     value: "lognormal",
     label: "Common.LognormalDistribution",
-    params: ["logMean", "logSD"],
+    params: ["mean", "sigma"],
   },
   {
     value: "binomial",
     label: "Common.BinomialDistribution",
-    params: ["trials", "probability"],
+    params: ["n", "p"],
   },
-  {
-    value: "bernoulli",
-    label: "Common.BernoulliDistribution",
-    params: ["probability"],
-  },
-  { value: "poisson", label: "Common.PoissonDistribution", params: ["lambda"] },
-  {
-    value: "geometric",
-    label: "Common.GeometricDistribution",
-    params: ["probability"],
-  },
+  { value: "bernoulli", label: "Common.BernoulliDistribution", params: ["p"] },
+  { value: "poisson", label: "Common.PoissonDistribution", params: ["lam"] },
+  { value: "geometric", label: "Common.GeometricDistribution", params: ["p"] },
   {
     value: "hypergeometric",
     label: "Common.HypergeometricDistribution",
-    params: ["populationSize", "numberOfSuccesses", "sampleSize"],
+    params: ["populationSize", "successCount", "sampleSize"],
+  },
+  {
+    value: "negative_binomial",
+    label: "Common.NegativeBinomialDistribution",
+    params: ["n", "p"],
   },
 ];

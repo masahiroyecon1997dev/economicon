@@ -44,14 +44,16 @@ export type DistributionType =
   | "bernoulli"
   | "poisson"
   | "geometric"
-  | "hypergeometric";
+  | "hypergeometric"
+  | "negative_binomial"
+  | "fixed";
 
 export type SimulationColumnSetting = {
   id: string;
   columnName: string;
   dataType: "distribution" | "fixed";
-  distributionType: DistributionType;
-  distributionParams: Record<string, number>;
+  distributionType?: DistributionType;
+  distributionParams?: Record<string, number>;
   fixedValue: string | number;
   errorMessage: {
     columnName: string | undefined;

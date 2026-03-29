@@ -27,6 +27,7 @@
     "PoissonDistribution": "ポアソン分布",
     "GeometricDistribution": "幾何分布",
     "HypergeometricDistribution": "超幾何分布",
+    "NegativeBinomialDistribution": "負の二項分布",
     "MinValue": "最小値",
     "MaxValue": "最大値",
     "Mean": "平均",

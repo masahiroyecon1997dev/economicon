@@ -6,12 +6,16 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { CastColumnBody } from "../../../../api/zod/column/column";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
-import { extractFieldError } from "../../../../lib/utils/formHelpers";
+import {
+  createFieldError,
+  extractFieldError,
+} from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -36,6 +40,7 @@ export const CastColumnForm = ({
   onSuccess,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
+  const tErr = createFieldError(t);
 
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -49,16 +54,15 @@ export const CastColumnForm = ({
       strict: false,
     },
     validators: {
-      onSubmit: z.object({
-        targetType: z.enum(TARGET_TYPES),
-        newColumnName: z
-          .string()
-          .min(1, t("ValidationMessages.NewColumnNameRequired")),
-        cleanupWhitespace: z.boolean(),
-        removeCommas: z.boolean(),
-        datetimeFormat: z.string(),
-        strict: z.boolean(),
-      }),
+      onSubmit: CastColumnBody.pick({
+        targetType: true,
+        newColumnName: true,
+        cleanupWhitespace: true,
+        removeCommas: true,
+        strict: true,
+      })
+        .required()
+        .extend(z.object({ datetimeFormat: z.string() }).shape),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
@@ -161,7 +165,10 @@ export const CastColumnForm = ({
         >
           {(field) => {
             const errorMsg = field.state.meta.isTouched
-              ? extractFieldError(field.state.meta.errors)
+              ? tErr(
+                  field.state.meta.errors,
+                  "ValidationMessages.NewColumnNameRequired",
+                )
               : undefined;
             return (
               <FormField
