@@ -27,6 +27,7 @@
     "PoissonDistribution": "Poisson Distribution",
     "GeometricDistribution": "Geometric Distribution",
     "HypergeometricDistribution": "Hypergeometric Distribution",
+    "NegativeBinomialDistribution": "Negative Binomial Distribution",
     "MinValue": "Min Value",
     "MaxValue": "Max Value",
     "Mean": "Mean",

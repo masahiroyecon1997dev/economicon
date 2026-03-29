@@ -14,11 +14,19 @@ import {
   addSimulationColumnBodySimulationColumnColumnNameRegExp,
 } from "../../../../api/zod/column/column";
 import {
+  buildDistributionFromParams,
+  DIST_PARAM_LABEL_KEYS,
+  DIST_PARAM_SCHEMAS,
+  DIST_PARAMS,
+  DIST_TYPES,
+} from "../../../../constants/simulation";
+import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
 } from "../../../../lib/utils/apiError";
 import { extractFieldError } from "../../../../lib/utils/formHelpers";
+import type { DistributionType } from "../../../../types/commonTypes";
 import { InputText } from "../../../atoms/Input/InputText";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
 import { RadioTagGroup } from "../../../molecules/Field/RadioTagGroup";
@@ -26,173 +34,6 @@ import { FormField } from "../../../molecules/Form/FormField";
 import { RandomSeedField } from "../../../molecules/Form/RandomSeedField";
 import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
 import type { ColumnOperationFormPropsType } from "./types";
-
-// -----------------------------------------------------------------------
-// 型定義
-// -----------------------------------------------------------------------
-type DistributionType =
-  | "uniform"
-  | "exponential"
-  | "normal"
-  | "gamma"
-  | "beta"
-  | "weibull"
-  | "lognormal"
-  | "binomial"
-  | "bernoulli"
-  | "poisson"
-  | "geometric"
-  | "hypergeometric"
-  | "negative_binomial"
-  | "fixed";
-
-const DISTRIBUTION_TYPES: DistributionType[] = [
-  "uniform",
-  "exponential",
-  "normal",
-  "gamma",
-  "beta",
-  "weibull",
-  "lognormal",
-  "binomial",
-  "bernoulli",
-  "poisson",
-  "geometric",
-  "hypergeometric",
-  "negative_binomial",
-  "fixed",
-];
-
-/** 各分布で使用するパラメータ名の一覧 */
-const DIST_PARAMS: Record<DistributionType, string[]> = {
-  uniform: ["low", "high"],
-  exponential: ["scale"],
-  normal: ["loc", "scale"],
-  gamma: ["shape", "scale"],
-  beta: ["a", "b"],
-  weibull: ["a", "scale"],
-  lognormal: ["mean", "sigma"],
-  binomial: ["n", "p"],
-  bernoulli: ["p"],
-  poisson: ["lam"],
-  geometric: ["p"],
-  hypergeometric: ["populationSize", "successCount", "sampleSize"],
-  negative_binomial: ["n", "p"],
-  fixed: ["value"],
-};
-
-/** i18n キー名への対応 */
-const PARAM_LABEL_KEY: Record<string, string> = {
-  low: "AddSimulationColumnForm.Low",
-  high: "AddSimulationColumnForm.High",
-  scale: "AddSimulationColumnForm.Scale",
-  loc: "AddSimulationColumnForm.Loc",
-  shape: "AddSimulationColumnForm.Shape",
-  a: "AddSimulationColumnForm.A",
-  b: "AddSimulationColumnForm.B",
-  mean: "AddSimulationColumnForm.Mean",
-  sigma: "AddSimulationColumnForm.Sigma",
-  n: "AddSimulationColumnForm.N",
-  p: "AddSimulationColumnForm.P",
-  lam: "AddSimulationColumnForm.Lam",
-  populationSize: "AddSimulationColumnForm.PopulationSize",
-  successCount: "AddSimulationColumnForm.SuccessCount",
-  sampleSize: "AddSimulationColumnForm.SampleSize",
-  value: "AddSimulationColumnForm.Value",
-};
-
-// -----------------------------------------------------------------------
-// バリデーション用ヘルパー
-// -----------------------------------------------------------------------
-const gtZeroNum = () =>
-  z
-    .string()
-    .refine(
-      (v) => !isNaN(Number(v)) && Number(v) > 0,
-      "0 より大きい数値を入力してください。",
-    );
-
-const probability = () =>
-  z
-    .string()
-    .refine(
-      (v) => !isNaN(Number(v)) && Number(v) > 0 && Number(v) <= 1,
-      "0 を超え 1 以下の数値を入力してください。",
-    );
-
-const anyNum = () =>
-  z.string().refine((v) => !isNaN(Number(v)), "数値を入力してください。");
-
-const gtZeroInt = () =>
-  z
-    .string()
-    .refine(
-      (v) => !isNaN(Number(v)) && Number(v) > 0 && Number.isInteger(Number(v)),
-      "1 以上の整数を入力してください。",
-    );
-
-const PARAM_SCHEMAS: Record<string, () => z.ZodTypeAny> = {
-  low: anyNum,
-  high: anyNum,
-  scale: gtZeroNum,
-  loc: anyNum,
-  shape: gtZeroNum,
-  a: gtZeroNum,
-  b: gtZeroNum,
-  mean: anyNum,
-  sigma: gtZeroNum,
-  n: gtZeroInt,
-  p: probability,
-  lam: gtZeroNum,
-  populationSize: gtZeroInt,
-  successCount: gtZeroInt,
-  sampleSize: gtZeroInt,
-  value: anyNum,
-};
-
-// -----------------------------------------------------------------------
-// 分布オブジェクト組み立て
-// -----------------------------------------------------------------------
-type ParamValues = Record<string, string>;
-
-const buildDistribution = (type: DistributionType, params: ParamValues) => {
-  const toNum = (k: string) => Number(params[k]);
-  switch (type) {
-    case "uniform":
-      return { type, low: toNum("low"), high: toNum("high") };
-    case "exponential":
-      return { type, scale: toNum("scale") };
-    case "normal":
-      return { type, loc: toNum("loc"), scale: toNum("scale") };
-    case "gamma":
-      return { type, shape: toNum("shape"), scale: toNum("scale") };
-    case "beta":
-      return { type, a: toNum("a"), b: toNum("b") };
-    case "weibull":
-      return { type, a: toNum("a"), scale: toNum("scale") };
-    case "lognormal":
-      return { type, mean: toNum("mean"), sigma: toNum("sigma") };
-    case "binomial":
-      return { type, n: toNum("n"), p: toNum("p") };
-    case "bernoulli":
-      return { type, p: toNum("p") };
-    case "poisson":
-      return { type, lam: toNum("lam") };
-    case "geometric":
-      return { type, p: toNum("p") };
-    case "hypergeometric":
-      return {
-        type,
-        populationSize: toNum("populationSize"),
-        successCount: toNum("successCount"),
-        sampleSize: toNum("sampleSize"),
-      };
-    case "negative_binomial":
-      return { type, n: toNum("n"), p: toNum("p") };
-    case "fixed":
-      return { type, value: toNum("value") };
-  }
-};
 
 // -----------------------------------------------------------------------
 // フォームコンポーネント
@@ -236,12 +77,12 @@ export const AddSimulationColumnForm = ({
       // 現在の分布タイプのパラメータのみバリデーション
       const paramNames = DIST_PARAMS[value.distributionType];
       for (const param of paramNames) {
-        const result = PARAM_SCHEMAS[param]().safeParse(
+        const result = DIST_PARAM_SCHEMAS[param]().safeParse(
           value[param as keyof typeof value],
         );
         if (!result.success) {
           setApiError(
-            `${t(PARAM_LABEL_KEY[param])}: ${result.error.issues[0]?.message ?? t("Error.UnexpectedError")}`,
+            `${t(DIST_PARAM_LABEL_KEYS[param])}: ${result.error.issues[0]?.message ?? t("Error.UnexpectedError")}`,
           );
           return;
         }
@@ -261,18 +102,17 @@ export const AddSimulationColumnForm = ({
       }
 
       try {
-        const paramValues: ParamValues = {};
-        for (const p of paramNames) {
-          paramValues[p] = value[p as keyof typeof value] as string;
-        }
+        const numericParams = Object.fromEntries(
+          paramNames.map((p) => [p, Number(value[p as keyof typeof value])]),
+        );
 
         const response = await getEconomiconAppAPI().addSimulationColumn({
           tableName,
           simulationColumn: {
             columnName: value.columnName,
-            distribution: buildDistribution(
+            distribution: buildDistributionFromParams(
               value.distributionType,
-              paramValues,
+              numericParams,
             ),
           },
           addPositionColumn: column.name,
@@ -362,7 +202,7 @@ export const AddSimulationColumnForm = ({
           <FormField label={t("AddSimulationColumnForm.DistributionType")}>
             <RadioTagGroup
               name="sim-dist-type"
-              items={DISTRIBUTION_TYPES.map((dt) => ({
+              items={DIST_TYPES.map((dt) => ({
                 value: dt,
                 label: t(`AddSimulationColumnForm.${dt}`),
               }))}
@@ -382,7 +222,7 @@ export const AddSimulationColumnForm = ({
         >
           {(field) => (
             <FormField
-              label={t(PARAM_LABEL_KEY[param])}
+              label={t(DIST_PARAM_LABEL_KEYS[param])}
               htmlFor={`sim-param-${param}`}
             >
               <InputText

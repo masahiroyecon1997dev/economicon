@@ -44,11 +44,11 @@ vi.mock("../../lib/utils/internal", () => ({
 vi.mock("../organisms/Dialog/SimulationColumnEditDialog", () => ({
   SimulationColumnEditDialog: ({
     column,
-    onUpdate,
+    onSave,
     onClose,
   }: {
     column: { id: string };
-    onUpdate: (id: string, updates: { columnName: string }) => void;
+    onSave: (id: string, updates: { columnName: string }) => void;
     onClose: () => void;
   }) => (
     <div data-testid="sim-column-edit-dialog">
@@ -56,7 +56,7 @@ vi.mock("../organisms/Dialog/SimulationColumnEditDialog", () => ({
         type="button"
         data-testid="apply-column"
         onClick={() => {
-          onUpdate(column.id, { columnName: "sim_col" });
+          onSave(column.id, { columnName: "sim_col" });
           onClose();
         }}
       >
