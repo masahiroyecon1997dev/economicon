@@ -6,7 +6,7 @@ from economicon.schemas import DistributionConfig, DistributionType
 def generate_simulation_data(
     distribution: DistributionConfig,
     row_count: int,
-    seed: int | None = None,
+    seed: int | np.random.SeedSequence | None = None,
 ) -> np.ndarray:
     """指定された分布に従ってシミュレーションデータを生成"""
 

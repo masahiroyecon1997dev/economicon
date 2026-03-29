@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import ClassVar
 
 import numpy as np
@@ -53,15 +54,12 @@ class CreateSimulationDataTable:
             df = pl.DataFrame()
 
             # シード指定時は列ごとに独立した再現性を確保
-            # 親RNGから列数分の子シードを導出する
+            # SeedSequence.spawn() で列数分の独立ストリームを生成する
             if self.random_seed is not None:
-                parent_rng = np.random.default_rng(self.random_seed)
-                child_seeds: list[int | None] = [
-                    int(s)
-                    for s in parent_rng.integers(
-                        0, 2**31, len(self.simulation_columns)
-                    )
-                ]
+                ss = np.random.SeedSequence(self.random_seed)
+                child_seeds: Sequence[np.random.SeedSequence | None] = (
+                    ss.spawn(len(self.simulation_columns))
+                )
             else:
                 child_seeds = [None] * len(self.simulation_columns)
 
