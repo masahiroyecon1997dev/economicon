@@ -137,7 +137,9 @@ describe("Table コンポーネント", () => {
       const user = userEvent.setup();
       render(<Table />);
 
-      const costsTab = screen.getByText("costs").closest("[role='button']")!;
+      const costsTab = screen
+        .getByText("costs")
+        .closest("[role='button']") as HTMLElement;
       costsTab.focus();
       await user.keyboard("{Enter}");
 

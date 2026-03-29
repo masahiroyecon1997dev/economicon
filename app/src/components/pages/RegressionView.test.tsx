@@ -5,6 +5,7 @@ import { getEconomiconAppAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useRegressionResultsStore } from "../../stores/regressionResults";
+import type { LinearRegressionResultType } from "../../types/commonTypes";
 import { Regression } from "./RegressionView";
 
 // ---------------------------------------------------------------------------
@@ -65,19 +66,30 @@ const mockApi = {
   deleteAnalysisResult: vi.fn(),
 };
 
-const MOCK_RESULT = {
+const MOCK_RESULT: LinearRegressionResultType = {
   resultId: "result-1",
   tableName: "sales",
   dependentVariable: "price",
-  independentVariables: ["quantity"],
-  coefficients: [],
-  rSquared: 0.9,
-  adjustedRSquared: 0.85,
-  fStatistic: 50,
-  pValueF: 0.001,
-  residualStdErr: 1.2,
-  dfResidual: 8,
-  nObs: 10,
+  explanatoryVariables: ["quantity"],
+  regressionResult: "OLS",
+  parameters: [
+    {
+      variable: "quantity",
+      coefficient: 1.5,
+      standardError: 0.12,
+      pValue: 0.001,
+      tValue: 12.5,
+      confidenceIntervalLower: 1.26,
+      confidenceIntervalUpper: 1.74,
+    },
+  ],
+  modelStatistics: {
+    nObservations: 10,
+    R2: 0.9,
+    adjustedR2: 0.85,
+    fValue: 50,
+    fProbability: 0.001,
+  },
 };
 
 beforeEach(() => {
@@ -114,8 +126,8 @@ describe("RegressionView コンポーネント", () => {
       render(<Regression />);
 
       expect(
-        screen.getByText("RegressionTab.ResultLabel{{number}}1"),
-      ).toBeInTheDocument();
+        screen.getAllByRole("button", { name: "RegressionTab.DeleteResult" }),
+      ).toHaveLength(1);
     });
 
     it("複数結果がある場合は対応するタブ数表示される", () => {
@@ -125,11 +137,8 @@ describe("RegressionView コンポーネント", () => {
       render(<Regression />);
 
       expect(
-        screen.getByText("RegressionTab.ResultLabel{{number}}1"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText("RegressionTab.ResultLabel{{number}}2"),
-      ).toBeInTheDocument();
+        screen.getAllByRole("button", { name: "RegressionTab.DeleteResult" }),
+      ).toHaveLength(2);
     });
 
     it("分析完了コールバックで結果タブに切り替わる", async () => {

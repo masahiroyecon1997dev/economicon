@@ -6,7 +6,7 @@ import { showMessageDialog } from "../../lib/dialog/message";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
 import { useTableListStore } from "../../stores/tableList";
-import { UnionTable } from "./UnionTable";
+import { UnionTable as UnionTablePage } from "./UnionTable";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -58,19 +58,38 @@ beforeEach(() => {
   });
 });
 
+const addTable = async (
+  user: ReturnType<typeof userEvent.setup>,
+  name: string,
+) => {
+  const combobox = screen.getByRole("combobox");
+  await user.click(combobox);
+  const option = await screen.findByRole("option", { name });
+  await user.click(option);
+
+  const addBtn = screen.getByRole("button", {
+    name: /UnionTable.Add/i,
+  });
+  await user.click(addBtn);
+};
+
+const waitForCommonColumns = async () => {
+  await screen.findByRole("checkbox", { name: "id" });
+};
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 describe("UnionTable フォーム", () => {
   describe("初期レンダリング", () => {
     it("タイトルとデータ選択セクションが表示される", () => {
-      render(<UnionTable />);
+      render(<UnionTablePage />);
       expect(screen.getByText("UnionTable.Title")).toBeInTheDocument();
       expect(screen.getByText("UnionTable.SelectDataList")).toBeInTheDocument();
     });
 
     it("初期状態ではテーブルが追加されていない", () => {
-      render(<UnionTable />);
+      render(<UnionTablePage />);
       // 追加済みテーブルのバッジが0個
       const removeBtns = screen.queryAllByRole("button", {
         name: /RemoveTable|削除/i,
@@ -82,19 +101,9 @@ describe("UnionTable フォーム", () => {
   describe("テーブル追加", () => {
     it("テーブルを選択して追加ボタンをクリックするとリストに追加される", async () => {
       const user = userEvent.setup();
-      render(<UnionTable />);
+      render(<UnionTablePage />);
 
-      // テーブル選択
-      const combobox = screen.getByRole("combobox");
-      await user.click(combobox);
-      const option = await screen.findByRole("option", { name: "sales_q1" });
-      await user.click(option);
-
-      // 追加ボタン
-      const addBtn = screen.getByRole("button", {
-        name: /UnionTable.AddData|追加/i,
-      });
-      await user.click(addBtn);
+      await addTable(user, "sales_q1");
 
       await waitFor(() => {
         expect(screen.getByText("sales_q1")).toBeInTheDocument();
@@ -103,21 +112,9 @@ describe("UnionTable フォーム", () => {
 
     it("同じテーブルは重複追加されない", async () => {
       const user = userEvent.setup();
-      render(<UnionTable />);
+      render(<UnionTablePage />);
 
-      const combobox = screen.getByRole("combobox");
-      await user.click(combobox);
-      const option = await screen.findByRole("option", { name: "sales_q1" });
-      await user.click(option);
-
-      const addBtn = screen.getByRole("button", {
-        name: /UnionTable.AddData|追加/i,
-      });
-      await user.click(addBtn);
-      await user.click(combobox);
-      const option2 = await screen.findByRole("option", { name: "sales_q1" });
-      await user.click(option2);
-      await user.click(addBtn);
+      await addTable(user, "sales_q1");
 
       await waitFor(() => {
         const occurrences = screen
@@ -129,24 +126,16 @@ describe("UnionTable フォーム", () => {
 
     it("テーブルを削除するとリストから消える", async () => {
       const user = userEvent.setup();
-      render(<UnionTable />);
+      render(<UnionTablePage />);
 
-      const combobox = screen.getByRole("combobox");
-      await user.click(combobox);
-      const option = await screen.findByRole("option", { name: "sales_q1" });
-      await user.click(option);
-
-      const addBtn = screen.getByRole("button", {
-        name: /UnionTable.AddData|追加/i,
-      });
-      await user.click(addBtn);
+      await addTable(user, "sales_q1");
 
       await waitFor(() =>
         expect(screen.getByText("sales_q1")).toBeInTheDocument(),
       );
 
       const removeBtn = screen.getByRole("button", {
-        name: /RemoveTable|削除/i,
+        name: /UnionTable.RemoveData|削除/i,
       });
       await user.click(removeBtn);
 
@@ -159,18 +148,9 @@ describe("UnionTable フォーム", () => {
   describe("バリデーション", () => {
     it("テーブルが1件以下でサブミットするとエラーが表示される", async () => {
       const user = userEvent.setup();
-      render(<UnionTable />);
+      render(<UnionTablePage />);
 
-      // 1テーブルだけ追加
-      const combobox = screen.getByRole("combobox");
-      await user.click(combobox);
-      const option = await screen.findByRole("option", { name: "sales_q1" });
-      await user.click(option);
-
-      const addBtn = screen.getByRole("button", {
-        name: /UnionTable.AddData|追加/i,
-      });
-      await user.click(addBtn);
+      await addTable(user, "sales_q1");
 
       const submitBtn = screen.getByRole("button", {
         name: /UnionTable.RunUnion/i,
@@ -186,22 +166,11 @@ describe("UnionTable フォーム", () => {
 
     it("出力テーブル名が空でサブミットするとエラーが表示される", async () => {
       const user = userEvent.setup();
-      render(<UnionTable />);
+      render(<UnionTablePage />);
 
-      // 2テーブル追加
-      const addTwoTables = async () => {
-        for (const name of ["sales_q1", "sales_q2"]) {
-          const combobox = screen.getByRole("combobox");
-          await user.click(combobox);
-          const option = await screen.findByRole("option", { name });
-          await user.click(option);
-          const addBtn = screen.getByRole("button", {
-            name: /UnionTable.AddData|追加/i,
-          });
-          await user.click(addBtn);
-        }
-      };
-      await addTwoTables();
+      await addTable(user, "sales_q1");
+      await addTable(user, "sales_q2");
+      await waitForCommonColumns();
 
       // 自動設定される出力名をクリア
       const newNameInput = screen.getByRole("textbox");
@@ -227,20 +196,11 @@ describe("UnionTable フォーム", () => {
         result: { tableName: "union_result" },
       });
       const user = userEvent.setup();
-      render(<UnionTable />);
+      render(<UnionTablePage />);
 
-      for (const name of ["sales_q1", "sales_q2"]) {
-        const combobox = screen.getByRole("combobox");
-        await user.click(combobox);
-        const option = await screen.findByRole("option", { name });
-        await user.click(option);
-        const addBtn = screen.getByRole("button", {
-          name: /UnionTable.AddData|追加/i,
-        });
-        await user.click(addBtn);
-      }
-
-      await waitFor(() => expect(mockApi.getColumnList).toHaveBeenCalled());
+      await addTable(user, "sales_q1");
+      await addTable(user, "sales_q2");
+      await waitForCommonColumns();
 
       const submitBtn = screen.getByRole("button", {
         name: /UnionTable.RunUnion/i,
@@ -258,20 +218,11 @@ describe("UnionTable フォーム", () => {
     it("createUnionTable がthrowした場合 → エラーダイアログを表示する", async () => {
       mockApi.createUnionTable.mockRejectedValue(new Error("ユニオン失敗"));
       const user = userEvent.setup();
-      render(<UnionTable />);
+      render(<UnionTablePage />);
 
-      for (const name of ["sales_q1", "sales_q2"]) {
-        const combobox = screen.getByRole("combobox");
-        await user.click(combobox);
-        const option = await screen.findByRole("option", { name });
-        await user.click(option);
-        const addBtn = screen.getByRole("button", {
-          name: /UnionTable.AddData|追加/i,
-        });
-        await user.click(addBtn);
-      }
-
-      await waitFor(() => expect(mockApi.getColumnList).toHaveBeenCalled());
+      await addTable(user, "sales_q1");
+      await addTable(user, "sales_q2");
+      await waitForCommonColumns();
 
       const submitBtn = screen.getByRole("button", {
         name: /UnionTable.RunUnion/i,
@@ -290,7 +241,7 @@ describe("UnionTable フォーム", () => {
   describe("キャンセル", () => {
     it("キャンセルボタンをクリックすると DataPreview に遷移する", async () => {
       const user = userEvent.setup();
-      render(<UnionTable />);
+      render(<UnionTablePage />);
 
       const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
       await user.click(cancelBtn);

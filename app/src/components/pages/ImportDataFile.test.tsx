@@ -1,10 +1,15 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getFiles } from "../../api/bridge/tauri-commands";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useFilesStore } from "../../stores/files";
 import { useSettingsStore } from "../../stores/settings";
 import { ImportDataFile } from "./ImportDataFile";
+
+const { mockFileListTable } = vi.hoisted(() => ({
+  mockFileListTable: vi.fn(),
+}));
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -44,6 +49,18 @@ vi.mock("@tauri-apps/api/window", () => ({
 // ImportConfigDialog は複合コンポーネントなのでスタブ化
 vi.mock("../organisms/Dialog/ImportConfigDialog", () => ({
   ImportConfigDialog: () => <div data-testid="import-config-dialog" />,
+}));
+vi.mock("../molecules/Table/FileListTable", () => ({
+  FileListTable: (props: { files: Array<{ name: string }> }) => {
+    mockFileListTable(props);
+    return (
+      <div data-testid="file-list-table">
+        {props.files.map((file) => (
+          <div key={file.name}>{file.name}</div>
+        ))}
+      </div>
+    );
+  },
 }));
 
 // ---------------------------------------------------------------------------
@@ -129,6 +146,17 @@ describe("ImportDataFile コンポーネント", () => {
 
   describe("ファイルリスト", () => {
     it("ファイルがある場合はファイル名が表示される", async () => {
+      vi.mocked(getFiles).mockResolvedValue({
+        directoryPath: "/tmp",
+        files: [
+          {
+            name: "test.csv",
+            isFile: true,
+            size: 1024,
+            modifiedTime: new Date().toISOString(),
+          },
+        ],
+      });
       useFilesStore.setState({
         files: [
           {
@@ -150,7 +178,12 @@ describe("ImportDataFile コンポーネント", () => {
       await user.click(fileSelectTab);
 
       await waitFor(() => {
-        expect(screen.getByText("test.csv")).toBeInTheDocument();
+        expect(mockFileListTable).toHaveBeenCalled();
+        expect(mockFileListTable.mock.calls.at(-1)?.[0].files).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ name: "test.csv" }),
+          ]),
+        );
       });
     });
   });

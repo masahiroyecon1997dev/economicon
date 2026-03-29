@@ -1,6 +1,12 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { act, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAppAPI } from "../../api/endpoints";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { useCurrentPageStore } from "../../stores/currentView";
@@ -36,8 +42,27 @@ vi.mock("../../lib/utils/internal", () => ({
   }),
 }));
 vi.mock("../organisms/Dialog/SimulationColumnEditDialog", () => ({
-  SimulationColumnEditDialog: () => (
-    <div data-testid="sim-column-edit-dialog" />
+  SimulationColumnEditDialog: ({
+    column,
+    onUpdate,
+    onClose,
+  }: {
+    column: { id: string };
+    onUpdate: (id: string, updates: { columnName: string }) => void;
+    onClose: () => void;
+  }) => (
+    <div data-testid="sim-column-edit-dialog">
+      <button
+        type="button"
+        data-testid="apply-column"
+        onClick={() => {
+          onUpdate(column.id, { columnName: "sim_col" });
+          onClose();
+        }}
+      >
+        ApplyColumn
+      </button>
+    </div>
   ),
 }));
 
@@ -52,6 +77,14 @@ const submitForm = async () => {
   await act(async () => {
     fireEvent.submit(document.querySelector("form")!);
   });
+};
+
+const makeColumnValid = async (user: ReturnType<typeof userEvent.setup>) => {
+  const editBtn = screen.getByRole("button", {
+    name: /Edit|編集/i,
+  });
+  await user.click(editBtn);
+  await user.click(screen.getByTestId("apply-column"));
 };
 
 beforeEach(() => {
@@ -154,6 +187,7 @@ describe("CreateSimulationDataTable フォーム", () => {
         name: /DataName/,
       });
       await user.type(tableNameInput, "sim_table");
+      await makeColumnValid(user);
 
       await submitForm();
 
@@ -175,6 +209,7 @@ describe("CreateSimulationDataTable フォーム", () => {
 
       const tableNameInput = screen.getByRole("textbox", { name: /DataName/ });
       await user.type(tableNameInput, "sim_table");
+      await makeColumnValid(user);
 
       await submitForm();
 
@@ -195,6 +230,7 @@ describe("CreateSimulationDataTable フォーム", () => {
 
       const tableNameInput = screen.getByRole("textbox", { name: /DataName/ });
       await user.type(tableNameInput, "sim_table");
+      await makeColumnValid(user);
 
       await submitForm();
 

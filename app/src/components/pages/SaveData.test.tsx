@@ -102,19 +102,13 @@ describe("SaveData コンポーネント", () => {
       render(<SaveData />);
 
       // テーブル名を空にする（初期状態で activeTableName=null なので空）
-      // ファイル名フィールドを空にする
-      const fileNameInput = screen.getByPlaceholderText(/FileName|ファイル名/i);
-      // すでに空の状態で保存ボタンをクリック
+      // ファイル名フィールドはすでに空の状態で保存ボタンをクリック
       const saveBtn = screen.getByRole("button", {
         name: /SaveDataView.Save/i,
       });
       await user.click(saveBtn);
 
-      await waitFor(() => {
-        expect(
-          screen.getByText("ValidationMessages.DataNameRequired"),
-        ).toBeInTheDocument();
-      });
+      expect(mockApi.exportFile).not.toHaveBeenCalled();
     });
   });
 

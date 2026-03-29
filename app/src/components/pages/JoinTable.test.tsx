@@ -104,9 +104,9 @@ describe("JoinTable フォーム", () => {
       await user.click(submitBtn);
 
       await waitFor(() => {
-        expect(
-          screen.getByText("JoinTable.ErrorDataRequired"),
-        ).toBeInTheDocument();
+        expect(screen.getAllByText("JoinTable.ErrorDataRequired").length).toBe(
+          2,
+        );
       });
     });
 
