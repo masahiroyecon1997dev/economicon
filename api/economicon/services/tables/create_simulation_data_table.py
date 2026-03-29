@@ -1,5 +1,6 @@
 from typing import ClassVar
 
+import numpy as np
 import polars as pl
 
 from economicon.core.enums import ErrorCode
@@ -35,6 +36,7 @@ class CreateSimulationDataTable:
         self.table_name = body.table_name
         self.row_count = body.row_count
         self.simulation_columns = body.simulation_columns
+        self.random_seed = body.random_seed
 
     def validate(self):
         # テーブル名の検証
@@ -50,13 +52,29 @@ class CreateSimulationDataTable:
             # 空のテーブルを作成
             df = pl.DataFrame()
 
+            # シード指定時は列ごとに独立した再現性を確保
+            # 親RNGから列数分の子シードを導出する
+            if self.random_seed is not None:
+                parent_rng = np.random.default_rng(self.random_seed)
+                child_seeds: list[int | None] = [
+                    int(s)
+                    for s in parent_rng.integers(
+                        0, 2**31, len(self.simulation_columns)
+                    )
+                ]
+            else:
+                child_seeds = [None] * len(self.simulation_columns)
+
             # 各列設定に従ってデータを生成
-            for column in self.simulation_columns:
+            for column, col_seed in zip(
+                self.simulation_columns, child_seeds, strict=True
+            ):
                 column_name = column.column_name
 
                 column_data = generate_simulation_data(
                     column.distribution,
                     self.row_count,
+                    seed=col_seed,
                 )
                 # 列をデータフレームに追加
                 if df.is_empty():

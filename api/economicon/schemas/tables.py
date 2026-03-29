@@ -128,6 +128,20 @@ class CreateSimulationDataTableRequestBody(BaseRequest):
             min_length=1,
         ),
     ]
+    random_seed: Annotated[
+        int | None,
+        Field(
+            default=None,
+            ge=0,
+            le=100_000_000,
+            title="Random Seed",
+            description=(
+                "乱数シード値（0以上1億以下の整数）。"
+                "同じシードを指定すると同じ結果が再現されます。"
+                "None の場合は毎回異なる結果になります。"
+            ),
+        ),
+    ]
 
 
 class CreateSimulationDataTableResult(TableNameResult):

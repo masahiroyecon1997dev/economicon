@@ -40,6 +40,7 @@ class AddSimulationColumn:
         self.new_column_name = body.simulation_column.column_name
         self.add_position_column = body.add_position_column
         self.distribution = body.simulation_column.distribution
+        self.random_seed = body.random_seed
 
     def validate(self):
         table_name_list = self.tables_store.get_table_name_list()
@@ -74,7 +75,7 @@ class AddSimulationColumn:
 
             # 分布に従ってデータを生成
             simulation_data = generate_simulation_data(
-                self.distribution, row_count
+                self.distribution, row_count, seed=self.random_seed
             )
 
             # 新しい列をデータフレームに追加

@@ -4,11 +4,13 @@ from economicon.schemas import DistributionConfig, DistributionType
 
 
 def generate_simulation_data(
-    distribution: DistributionConfig, row_count: int
+    distribution: DistributionConfig,
+    row_count: int,
+    seed: int | None = None,
 ) -> np.ndarray:
     """指定された分布に従ってシミュレーションデータを生成"""
 
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(seed)
 
     # 各分布の生成ロジックをマッピング
     generators = {
