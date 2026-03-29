@@ -42,7 +42,9 @@
     "Probability": "Probability",
     "PopulationSize": "Population Size",
     "NumberOfSuccesses": "Number of Successes",
-    "SampleSize": "Sample Size"
+    "SampleSize": "Sample size",
+    "RandomSeed": "Random Seed",
+    "RandomSeedPlaceholder": "Optional (0–100,000,000)"
   },
   "AppBar": {
     "Minimize": "Minimize",
@@ -366,7 +368,8 @@
     "DependentVariableRequired": "Please select a dependent variable.",
     "ExplanatoryVariablesRequired": "Please select at least one explanatory variable.",
     "NewColumnNameRequired": "Please enter a new column name.",
-    "CalculationExpressionRequired": "Please enter a calculation expression."
+    "CalculationExpressionRequired": "Please enter a calculation expression.",
+    "RandomSeedRange": "Random seed must be an integer between 0 and 100,000,000."
   },
   "ColumnMenu": {
     "SortAsc": "Sort Ascending",

@@ -21,6 +21,7 @@ import { Button } from "../atoms/Button/Button";
 import { InputText } from "../atoms/Input/InputText";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
 import { FormField } from "../molecules/Form/FormField";
+import { RandomSeedField } from "../molecules/Form/RandomSeedField";
 import { SimulationColumnEditDialog } from "../organisms/Dialog/SimulationColumnEditDialog";
 import { PageLayout } from "../templates/PageLayout";
 
@@ -28,6 +29,17 @@ const createSimulationSchema = (t: (key: string) => string) =>
   z.object({
     tableName: z.string().min(1, t("ValidationMessages.DataNameRequired")),
     numRows: z.number().min(1, t("ValidationMessages.NumRowsMoreThan0")),
+    randomSeed: z
+      .string()
+      .refine(
+        (v) =>
+          v === "" ||
+          (!isNaN(Number(v)) &&
+            Number.isInteger(Number(v)) &&
+            Number(v) >= 0 &&
+            Number(v) <= 100_000_000),
+        t("ValidationMessages.RandomSeedRange"),
+      ),
   });
 
 // コンポーネント外に定義してレンダリングごとの再生成を防ぐ
@@ -68,6 +80,7 @@ export const CreateSimulationDataTable = () => {
     defaultValues: {
       tableName: "",
       numRows: 1000,
+      randomSeed: "",
     },
     validators: {
       onSubmit: createSimulationSchema(t),
@@ -244,10 +257,14 @@ export const CreateSimulationDataTable = () => {
           },
         );
 
+        const randomSeed =
+          value.randomSeed !== "" ? Number(value.randomSeed) : null;
+
         const response = await getEconomiconAppAPI().createSimulationDataTable({
           tableName: tableName.trim(),
           rowCount: numRows,
           simulationColumns,
+          randomSeed,
         });
 
         if (response.code === "OK") {
@@ -426,6 +443,24 @@ export const CreateSimulationDataTable = () => {
               {t("CreateSimulationDataTableView.DataSettings")}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form.Field name="randomSeed">
+                {(field) => {
+                  const errorMsg = field.state.meta.isTouched
+                    ? (field.state.meta.errors[0] as string | undefined)
+                    : undefined;
+                  return (
+                    <RandomSeedField
+                      id="sim-table-random-seed"
+                      value={field.state.value}
+                      onChange={field.handleChange}
+                      onBlur={field.handleBlur}
+                      disabled={isSubmitting}
+                      error={errorMsg}
+                    />
+                  );
+                }}
+              </form.Field>
+
               <form.Field
                 name="tableName"
                 validators={{

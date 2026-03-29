@@ -42,7 +42,9 @@
     "Probability": "成功確率",
     "PopulationSize": "母集団サイズ",
     "NumberOfSuccesses": "成功数",
-    "SampleSize": "標本サイズ"
+    "SampleSize": "標本サイズ",
+    "RandomSeed": "乱数シード",
+    "RandomSeedPlaceholder": "省略可（0〜100,000,000）"
   },
   "AppBar": {
     "Minimize": "最小化",
@@ -366,7 +368,8 @@
     "DependentVariableRequired": "被説明変数を選択してください",
     "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください",
     "NewColumnNameRequired": "新しいカラム名を入力してください。",
-    "CalculationExpressionRequired": "計算式を入力してください。"
+    "CalculationExpressionRequired": "計算式を入力してください。",
+    "RandomSeedRange": "乱数シードは0以上1億以下の整数を入力してください。"
   },
   "ColumnMenu": {
     "SortAsc": "昇順ソート",
