@@ -125,6 +125,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   const handleColumnAction = useCallback(
     (col: ColumnType, op: ColumnOperation) => {
       if (op === "sort_asc" || op === "sort_desc") {
+        // TODO: async/await に書き換えてもいいのでは？例外処理がかけるようになるし
         void getEconomiconAppAPI()
           .sortColumns({
             tableName,
@@ -178,7 +179,7 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
         enableResizing: false,
       },
     ];
-    // 列名の描画幅から幅を計算（バッジ+ギャップ+メニュー+パディング ≈ 68px）
+    // 列名の描画幅から幅を計算
     const HEADER_OVERHEAD = 70;
     const MAX_COL_WIDTH = 250;
     const MIN_COL_WIDTH = 140;

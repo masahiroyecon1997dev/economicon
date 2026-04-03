@@ -79,6 +79,7 @@ export const AddLagLeadColumnForm = ({
           const updatedList = await fetchUpdatedColumnList(tableName);
           onSuccess(updatedList);
         } else {
+          // TODO: catch 節と共通化する
           setApiError(
             replaceParamNames(
               getResponseErrorMessage(response, t("Error.UnexpectedError")),
