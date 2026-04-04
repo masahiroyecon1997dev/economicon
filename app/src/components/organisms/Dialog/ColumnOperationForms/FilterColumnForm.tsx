@@ -41,17 +41,6 @@ const ALL_OPERATORS: FilterOperatorType[] = [
   "lessThanOrEquals",
 ];
 
-type FilterFormValues = {
-  newTableName: string;
-  logicalOperator: (typeof LogicalOperatorType)[keyof typeof LogicalOperatorType];
-  c1Column: string;
-  c1Operator: FilterOperatorType;
-  c1Value: string;
-  c2Column: string;
-  c2Operator: FilterOperatorType;
-  c2Value: string;
-};
-
 /** 文字列を可能な限り数値に変換してAPIへ送る */
 const toCompareValue = (v: string): string | number => {
   const n = Number(v);
@@ -321,25 +310,9 @@ type ConditionBlockProps = {
   valId: string;
   required?: boolean;
   allColumns: { name: string; type: string }[];
-  form: Pick<
-    ReturnType<
-      typeof useForm<
-        FilterFormValues,
-        unknown,
-        unknown,
-        unknown,
-        unknown,
-        unknown,
-        unknown,
-        unknown,
-        unknown,
-        unknown,
-        unknown,
-        unknown
-      >
-    >,
-    "Field"
-  >;
+  // 型システムが複雑になるため any で受ける
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: any;
   isSubmitting: boolean;
   autoFocusValue: boolean;
   t: (key: string) => string;
