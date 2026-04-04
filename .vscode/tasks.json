@@ -190,24 +190,9 @@
     },
     {
       "type": "shell",
-      "command": "chcp 65001 | Out-Null; pnpm outdated; Write-Host '---'; uv pip list --outdated --format columns; Write-Host '---'; cargo update --dry-run",
+      "command": "chcp 65001 | Out-Null; cd ${workspaceFolder}/app; pnpm outdated; Write-Host '---'; cd ${workspaceFolder}/api; uv pip list --outdated --format columns; Write-Host '---'; cd ${workspaceFolder}/app/src-tauri; cargo update --dry-run",
       "label": "Deps: Check Outdated (All)",
       "detail": "npm / PyPI / crates.io の更新可能パッケージをすべてリストアップ（変更なし）",
-      "options": {
-        "cwd": "${workspaceFolder}/app/src-tauri"
-      },
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "focus": true
-      }
-    },
-    {
-      "type": "shell",
-      "command": "chcp 65001 | Out-Null; uv run python packaging/safe_update_deps.py --mode outdated --days 7",
-      "label": "Deps: Safe Update (Dry Run)",
-      "detail": "リリースから 7 日以上経過した安全なパッケージのみをリストアップ（変更なし）",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -220,7 +205,22 @@
     },
     {
       "type": "shell",
-      "command": "chcp 65001 | Out-Null; uv run python packaging/safe_update_deps.py --mode apply --days 7",
+      "command": "chcp 65001 | Out-Null; uv run python packaging/safe_update_deps.py --mode outdated --days 10",
+      "label": "Deps: Safe Update (Dry Run)",
+      "detail": "リリースから 10 日以上経過した安全なパッケージのみをリストアップ（変更なし）",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": true
+      }
+    },
+    {
+      "type": "shell",
+      "command": "chcp 65001 | Out-Null; uv run python packaging/safe_update_deps.py --mode apply --days 10",
       "label": "Deps: Safe Update (Apply + Verify)",
       "detail": "安全なパッケージを更新し、lock ファイル再生成 → 整合性検証まで一括実行",
       "options": {

@@ -124,5 +124,5 @@ jobs:
         run: |
           python packaging/check_new_packages.py \
             --base-ref "origin/${{ steps.vars.outputs.base_ref }}" \
-            --days 7 \
+            --days 10 \
             --mode error
