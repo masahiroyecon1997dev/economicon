@@ -2,14 +2,14 @@
  * 列名変更フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import { RenameColumnBody } from "../../../../api/zod/column/column";
+import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-  replaceParamNames,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
 import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
@@ -47,33 +47,25 @@ export const RenameColumnForm = ({
           onSuccess(updatedList);
         } else {
           setApiError(
-            replaceParamNames(
-              getResponseErrorMessage(response, t("Error.UnexpectedError")),
-              {
-                newColumnName: t("RenameColumnForm.NewColumnName"),
-                oldColumnName: t("RenameColumnForm.CurrentColumnName"),
-              },
-            ),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError"), {
+              newColumnName: t("RenameColumnForm.NewColumnName"),
+              oldColumnName: t("RenameColumnForm.CurrentColumnName"),
+            }),
           );
         }
       } catch (error) {
         setApiError(
-          replaceParamNames(
-            extractApiErrorMessage(error, t("Error.UnexpectedError")),
-            {
-              newColumnName: t("RenameColumnForm.NewColumnName"),
-              oldColumnName: t("RenameColumnForm.CurrentColumnName"),
-            },
-          ),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError"), {
+            newColumnName: t("RenameColumnForm.NewColumnName"),
+            oldColumnName: t("RenameColumnForm.CurrentColumnName"),
+          }),
         );
       }
     },
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
 
   return (
     <form

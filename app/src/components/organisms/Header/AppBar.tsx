@@ -43,13 +43,11 @@ export const AppBar = () => {
 
     appWindow.isMaximized().then(setIsMaximized);
 
-    appWindow
-      .onResized(async () => {
+    void (async () => {
+      unlisten = await appWindow.onResized(async () => {
         setIsMaximized(await appWindow.isMaximized());
-      })
-      .then((fn) => {
-        unlisten = fn;
       });
+    })();
 
     return () => {
       unlisten?.();
@@ -140,8 +138,8 @@ export const AppBar = () => {
   useEffect(() => {
     let unlisten: (() => void) | undefined;
 
-    getCurrentWindow()
-      .onCloseRequested(async (event) => {
+    void (async () => {
+      unlisten = await getCurrentWindow().onCloseRequested(async (event) => {
         event.preventDefault();
         try {
           await getEconomiconAppAPI().shutdown();
@@ -149,10 +147,8 @@ export const AppBar = () => {
           // シャットダウン API が失敗しても確実に閉じる
         }
         await getCurrentWindow().destroy();
-      })
-      .then((fn) => {
-        unlisten = fn;
       });
+    })();
 
     return () => {
       unlisten?.();

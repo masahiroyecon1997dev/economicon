@@ -445,6 +445,7 @@
     "Degree": "Degree",
     "NewColumnName": "New column name",
     "NewColumnNamePlaceholder": "e.g., log_value",
+    "BasePlaceholder": "e (natural log)",
     "Submit": "Add"
   },
   "AddDummyColumnForm": {

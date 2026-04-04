@@ -5,7 +5,7 @@
  * 選択した確率分布からランダム値を持つ列をテーブルに追加する。
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
@@ -20,10 +20,10 @@ import {
   DIST_PARAMS,
   DIST_TYPES,
 } from "../../../../constants/simulation";
+import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-  replaceParamNames,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
 import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import type { DistributionType } from "../../../../types/commonTypes";
@@ -124,22 +124,16 @@ export const AddSimulationColumnForm = ({
           onSuccess(updatedList);
         } else {
           setApiError(
-            replaceParamNames(
-              getResponseErrorMessage(response, t("Error.UnexpectedError")),
-              {
-                columnName: t("AddSimulationColumnForm.ColumnName"),
-              },
-            ),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError"), {
+              columnName: t("AddSimulationColumnForm.ColumnName"),
+            }),
           );
         }
       } catch (error) {
         setApiError(
-          replaceParamNames(
-            extractApiErrorMessage(error, t("Error.UnexpectedError")),
-            {
-              columnName: t("AddSimulationColumnForm.ColumnName"),
-            },
-          ),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError"), {
+            columnName: t("AddSimulationColumnForm.ColumnName"),
+          }),
         );
       }
     },
@@ -150,9 +144,7 @@ export const AddSimulationColumnForm = ({
     form.store,
     (s) => s.values.distributionType,
   );
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
 
   const currentParams = DIST_PARAMS[distributionType];
 

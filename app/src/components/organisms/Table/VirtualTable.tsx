@@ -121,27 +121,30 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
     column: ColumnType | null;
   }>({ open: false, operation: null, column: null });
 
+  const [sortError, setSortError] = useState<string | null>(null);
+
   // 列ヘッダーのアクション受信
   const handleColumnAction = useCallback(
-    (col: ColumnType, op: ColumnOperation) => {
+    async (col: ColumnType, op: ColumnOperation) => {
       if (op === "sort_asc" || op === "sort_desc") {
-        // TODO: async/await に書き換えてもいいのでは？例外処理がかけるようになるし
-        void getEconomiconAppAPI()
-          .sortColumns({
+        setSortError(null);
+        try {
+          await getEconomiconAppAPI().sortColumns({
             tableName,
             sortColumns: [
               { columnName: col.name, ascending: op === "sort_asc" },
             ],
-          })
-          .then(() => {
-            // チャンクキャッシュを無効化してデータを再取得
-            invalidateTable(tableName, {});
           });
+          // チャンクキャッシュを無効化してデータを再取得
+          invalidateTable(tableName, {});
+        } catch (e) {
+          setSortError(e instanceof Error ? e.message : t("Table.SortError"));
+        }
       } else {
         setDialogState({ open: true, operation: op, column: col });
       }
     },
-    [tableName, invalidateTable],
+    [tableName, invalidateTable, t],
   );
 
   useEffect(() => {
@@ -406,6 +409,12 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
       {error && (
         <div className="fixed bottom-4 right-4 z-50 rounded-full bg-red-500 px-3 py-1.5 text-xs font-medium text-white shadow-md">
           {t("Table.FetchError", { message: error.message })}
+        </div>
+      )}
+
+      {sortError && (
+        <div className="fixed bottom-4 right-4 z-50 rounded-full bg-red-500 px-3 py-1.5 text-xs font-medium text-white shadow-md">
+          {t("Table.SortError")}: {sortError}
         </div>
       )}
 

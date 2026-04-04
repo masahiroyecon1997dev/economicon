@@ -2,15 +2,15 @@
  * 変換列追加フォーム（対数・べき乗・累乗根）
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import { TransformColumnBody } from "../../../../api/zod/column/column";
+import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-  replaceParamNames,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
 import { createFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
@@ -87,33 +87,25 @@ export const TransformColumnForm = ({
           onSuccess(updatedList);
         } else {
           setApiError(
-            replaceParamNames(
-              getResponseErrorMessage(response, t("Error.UnexpectedError")),
-              {
-                newColumnName: t("TransformColumnForm.NewColumnName"),
-                sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
-              },
-            ),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError"), {
+              newColumnName: t("TransformColumnForm.NewColumnName"),
+              sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+            }),
           );
         }
       } catch (error) {
         setApiError(
-          replaceParamNames(
-            extractApiErrorMessage(error, t("Error.UnexpectedError")),
-            {
-              newColumnName: t("TransformColumnForm.NewColumnName"),
-              sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
-            },
-          ),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError"), {
+            newColumnName: t("TransformColumnForm.NewColumnName"),
+            sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+          }),
         );
       }
     },
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
   const method = useStore(form.store, (s) => s.values.method);
 
   return (
@@ -177,7 +169,7 @@ export const TransformColumnForm = ({
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  placeholder="e (自然対数)"
+                  placeholder={t("TransformColumnForm.BasePlaceholder")}
                   disabled={isSubmitting}
                 />
               </FormField>

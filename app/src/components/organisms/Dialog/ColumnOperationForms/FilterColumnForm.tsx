@@ -6,17 +6,17 @@
  */
 import { useForm, useStore } from "@tanstack/react-form";
 import { Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import type { FilterOperatorType } from "../../../../api/model";
 import { LogicalOperatorType } from "../../../../api/model";
 import { FilterTableBody } from "../../../../api/zod/table/table";
+import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-  replaceParamNames,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
 import {
   createFieldError,
@@ -40,6 +40,17 @@ const ALL_OPERATORS: FilterOperatorType[] = [
   "lessThan",
   "lessThanOrEquals",
 ];
+
+type FilterFormValues = {
+  newTableName: string;
+  logicalOperator: (typeof LogicalOperatorType)[keyof typeof LogicalOperatorType];
+  c1Column: string;
+  c1Operator: FilterOperatorType;
+  c1Value: string;
+  c2Column: string;
+  c2Operator: FilterOperatorType;
+  c2Value: string;
+};
 
 /** 文字列を可能な限り数値に変換してAPIへ送る */
 const toCompareValue = (v: string): string | number => {
@@ -153,26 +164,21 @@ export const FilterColumnForm = ({
           onSuccess(allColumns);
         } else {
           setApiError(
-            replaceParamNames(
-              getResponseErrorMessage(response, t("Error.UnexpectedError")),
-              {
-                newTableName: t("FilterColumnForm.NewTableName"),
-                tableName: t("FilterColumnForm.TableLabel"),
-                columnName: t("FilterColumnForm.ColumnName"),
-              },
-            ),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError"), {
+              newTableName: t("FilterColumnForm.NewTableName"),
+              tableName: t("FilterColumnForm.TableLabel"),
+              columnName: t("FilterColumnForm.ColumnName"),
+            }),
           );
         }
       } catch (error) {
-        setApiError(extractApiErrorMessage(error, t("Error.UnexpectedError")));
+        setApiError(buildCaughtErrorMessage(error, t("Error.UnexpectedError")));
       }
     },
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
 
   return (
     <form
@@ -315,8 +321,25 @@ type ConditionBlockProps = {
   valId: string;
   required?: boolean;
   allColumns: { name: string; type: string }[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  form: any;
+  form: Pick<
+    ReturnType<
+      typeof useForm<
+        FilterFormValues,
+        unknown,
+        unknown,
+        unknown,
+        unknown,
+        unknown,
+        unknown,
+        unknown,
+        unknown,
+        unknown,
+        unknown,
+        unknown
+      >
+    >,
+    "Field"
+  >;
   isSubmitting: boolean;
   autoFocusValue: boolean;
   t: (key: string) => string;

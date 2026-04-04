@@ -445,6 +445,7 @@
     "Degree": "根の次数",
     "NewColumnName": "新しい列名",
     "NewColumnNamePlaceholder": "例: log_value",
+    "BasePlaceholder": "e（自然対数）",
     "Submit": "追加"
   },
   "AddDummyColumnForm": {
