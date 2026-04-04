@@ -4,21 +4,27 @@
 各回帰モデルのフィッティングロジックを提供する純粋関数群
 """
 
+from __future__ import annotations
+
+# NOTE（起動速度最適化）: statsmodels / linearmodels / py4etrics / pandas
+# は重量ライブラリのためモジュールレベルの import を排除した。
+# 各フィッター関数の先頭で遅延ロード（関数スコープ import）する。
+# Python は sys.modules でモジュールをキャッシュするため、
+# 2回目以降の呼び出しコストは無視できる。
+# Ruff PLC0415 (import-not-at-top-level) は意図的に抑制している。
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-import pandas as pd
-import statsmodels.api as sm
-from linearmodels.iv import IV2SLS, IVGMM
-from linearmodels.panel import PanelOLS, RandomEffects
-from py4etrics.tobit import Tobit
-from statsmodels.regression.linear_model import RegressionResultsWrapper
 
 from economicon.services.regressions.common import (
     LINEARMODELS_COV_TYPE_MAP,
     remove_const_column,
 )
+
+if TYPE_CHECKING:
+    # 型チェック時のみ import: 実行時は各関数内の遅延ロードで代替する
+    from statsmodels.regression.linear_model import RegressionResultsWrapper
 
 
 def fit_ols(
@@ -37,6 +43,8 @@ def fit_ols(
     Returns:
         statsmodels の OLS 回帰結果
     """
+    import statsmodels.api as sm  # noqa: PLC0415
+
     model = sm.OLS(y_data, x_data, missing=missing)
     result = model.fit()
     return result
@@ -62,6 +70,8 @@ def fit_logit(
     Returns:
         statsmodels の Logit 回帰結果
     """
+    import statsmodels.api as sm  # noqa: PLC0415
+
     model = sm.Logit(y_data, x_data, missing=missing)
     result = model.fit(cov_type=cov_type, cov_kwds=cov_kwds or {}, disp=False)
     return result
@@ -87,6 +97,8 @@ def fit_probit(
     Returns:
         statsmodels の Probit 回帰結果
     """
+    import statsmodels.api as sm  # noqa: PLC0415
+
     model = sm.Probit(y_data, x_data, missing=missing)
     result = model.fit(cov_type=cov_type, cov_kwds=cov_kwds or {}, disp=False)
     return result
@@ -112,6 +124,9 @@ def fit_tobit(data_input: TobitInput) -> Any:
     Returns:
         py4etrics の Tobit 回帰結果
     """
+    import statsmodels.api as sm  # noqa: PLC0415
+    from py4etrics.tobit import Tobit  # noqa: PLC0415
+
     # 被説明変数と説明変数を設定
     y = data_input.df_pandas[data_input.dependent_variable].values
     depns = data_input.df_pandas[data_input.explanatory_variables].values
@@ -154,6 +169,8 @@ def fit_tobit_null(data_input: TobitInput) -> Any:
     Returns:
         py4etrics の Tobit 回帰結果（定数項のみ）
     """
+    from py4etrics.tobit import Tobit  # noqa: PLC0415
+
     y = data_input.df_pandas[data_input.dependent_variable].values
     x_null = np.ones((len(y), 1))  # 定数項のみ
 
@@ -196,6 +213,10 @@ def fit_iv(data_input: IVInput) -> Any:
     Returns:
         linearmodels の IV2SLS 回帰結果
     """
+    import pandas as pd  # noqa: PLC0415
+    import statsmodels.api as sm  # noqa: PLC0415
+    from linearmodels.iv import IV2SLS, IVGMM  # noqa: PLC0415
+
     # 被説明変数、外生変数、内生変数、操作変数を設定
     dependent = data_input.df_pandas[data_input.dependent_variable]
     exog_raw = (
@@ -266,6 +287,8 @@ def fit_fe(
     Returns:
         linearmodels の PanelOLS 回帰結果
     """
+    from linearmodels.panel import PanelOLS  # noqa: PLC0415
+
     # 被説明変数と説明変数を設定
     y = df_pandas[dependent_variable]
     depns = df_pandas[explanatory_variables]
@@ -305,6 +328,8 @@ def fit_re(
     Returns:
         linearmodels の RandomEffects 回帰結果
     """
+    from linearmodels.panel import RandomEffects  # noqa: PLC0415
+
     # 被説明変数と説明変数を設定
     y = df_pandas[dependent_variable]
     depns = df_pandas[explanatory_variables]
@@ -500,6 +525,8 @@ def fit_lasso(  # noqa: PLR0915
     Returns:
         RegularizedResult
     """
+    import statsmodels.api as sm  # noqa: PLC0415
+
     x_no_const = remove_const_column(data_input.x_data, data_input.has_const)
     n_samples, n_features = x_no_const.shape
 
@@ -643,6 +670,8 @@ def fit_ridge(  # noqa: PLR0915
     Returns:
         RegularizedResult
     """
+    import statsmodels.api as sm  # noqa: PLC0415
+
     x_no_const = remove_const_column(data_input.x_data, data_input.has_const)
     n_samples, n_features = x_no_const.shape
 

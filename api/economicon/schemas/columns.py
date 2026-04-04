@@ -211,6 +211,7 @@ class CalculateColumnRequestBody(BaseRequest):
         AST レベルで構文エラー・未サポート操作を検出し 422 として早期に返す。
         循環インポート回避のためローカル import を使用する。
         """
+        # 循環インポート回避のため、ここでローカルインポートする
         from economicon.utils.algorithms import (  # noqa: PLC0415
             validate_formula_syntax,
         )
