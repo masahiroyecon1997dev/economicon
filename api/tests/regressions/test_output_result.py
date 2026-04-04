@@ -1,15 +1,15 @@
-"""推定結果フォーマット出力テスト (POST /api/analysis/output-result)"""
+"""推定結果フォーマット出力テスト (POST /api/analysis/results/output)"""
 
 import re
 
 from fastapi import status
 
-from economicon.schemas.regressions import OutputResultRequest
+from economicon.schemas.results import OutputResultRequest
 from economicon.services.data.analysis_result import AnalysisResult
 from economicon.services.data.analysis_result_store import (
     AnalysisResultStore,
 )
-from economicon.services.regressions.output_result import OutputResult
+from economicon.services.results.output_result import OutputResult
 from tests.regressions.conftest import (
     URL_REGRESSION,
     FePayload,
@@ -19,7 +19,7 @@ from tests.regressions.conftest import (
     OlsPayload,
 )
 
-URL_OUTPUT = "/api/analysis/output-result"
+URL_OUTPUT = "/api/analysis/results/output"
 
 # テスト用定数
 _MISSING_ID_1 = "non-existent-id"
