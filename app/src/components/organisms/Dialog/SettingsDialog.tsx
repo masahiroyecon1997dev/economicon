@@ -185,7 +185,7 @@ export const SettingsDialog = ({
   open,
   onOpenChange,
 }: SettingsDialogPropsType) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const theme = useSettingsStore((s) => s.theme);
   const language = useSettingsStore((s) => s.language);
@@ -200,13 +200,15 @@ export const SettingsDialog = ({
   });
   const [isSaving, setIsSaving] = useState(false);
 
-  // ダイアログを開いた時点のテーマを記憶（キャンセル時に元に戻す）
+  // ダイアログを開いた時点のテーマ・言語を記憶（キャンセル時に元に戻す）
   const originalThemeRef = useRef(theme);
+  const originalLanguageRef = useRef(language);
   useEffect(() => {
     if (open) {
       originalThemeRef.current = theme;
+      originalLanguageRef.current = language;
     }
-  }, [open, theme]);
+  }, [open, theme, language]);
 
   /** ダイアログを閉じる際に未保存のライブプレビューを元に戻す */
   const handleOpenChange = (nextOpen: boolean) => {
@@ -215,6 +217,7 @@ export const SettingsDialog = ({
         "dark",
         originalThemeRef.current === "dark",
       );
+      void i18n.changeLanguage(originalLanguageRef.current);
     }
     onOpenChange(nextOpen);
   };
@@ -223,6 +226,12 @@ export const SettingsDialog = ({
   const handleThemeSelect = (themeId: string) => {
     setDraft((d) => ({ ...d, theme: themeId }));
     document.documentElement.classList.toggle("dark", themeId === "dark");
+  };
+
+  /** 言語ボタン選択: draftを更新し即座に言語をプレビューに反映 */
+  const handleLanguageSelect = (langId: string) => {
+    setDraft((d) => ({ ...d, language: langId }));
+    void i18n.changeLanguage(langId);
   };
 
   // ダイアログを開くたびに現在の設定で draft を初期化
@@ -343,9 +352,7 @@ export const SettingsDialog = ({
                   <button
                     key={lang.id}
                     type="button"
-                    onClick={() =>
-                      setDraft((d) => ({ ...d, language: lang.id }))
-                    }
+                    onClick={() => handleLanguageSelect(lang.id)}
                     className={cn(
                       "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
