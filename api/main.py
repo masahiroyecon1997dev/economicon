@@ -89,6 +89,15 @@ app = FastAPI(
     description="データ分析アプリケーションのAPI",
     version="1.0.0",
     lifespan=lifespan,
+    docs_url=None
+    if not _is_dev_mode
+    else "/docs",  # 開発モードのときのみドキュメントを公開
+    redoc_url=None
+    if not _is_dev_mode
+    else "/redoc",  # 開発モードのときのみドキュメントを公開
+    openapi_url=None
+    if not _is_dev_mode
+    else "/openapi.json",  # 開発モードのときのみ OpenAPI スキーマを公開
 )
 
 # CORS設定（Tauri WebView と開発サーバーのオリジンのみを許可）
