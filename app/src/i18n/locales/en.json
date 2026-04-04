@@ -311,6 +311,7 @@
     "Subtraction": "Subtraction",
     "Multiplication": "Multiplication",
     "Division": "Division",
+    "Power": "Power (Exponentiation)",
     "OpenParenthesis": "Open Parenthesis",
     "CloseParenthesis": "Close Parenthesis",
     "ClearAll": "Clear All",

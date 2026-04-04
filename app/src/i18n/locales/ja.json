@@ -311,6 +311,7 @@
     "Subtraction": "減算",
     "Multiplication": "乗算",
     "Division": "除算",
+    "Power": "累乗（べき乗）",
     "OpenParenthesis": "開きカッコ",
     "CloseParenthesis": "閉じカッコ",
     "ClearAll": "すべてクリア",
