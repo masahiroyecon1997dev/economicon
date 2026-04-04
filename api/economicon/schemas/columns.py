@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field, StringConstraints, model_validator
+from pydantic import Field, StringConstraints, field_validator, model_validator
 
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import BaseRequest, BaseResult
@@ -202,6 +202,21 @@ class CalculateColumnRequestBody(BaseRequest):
             ),
         ),
     ]
+
+    @field_validator("calculation_expression", mode="after")
+    @classmethod
+    def _validate_expression_syntax(cls, v: str) -> str:
+        """計算式の構文を Pydantic バリデーション段階で検証する。
+
+        AST レベルで構文エラー・未サポート操作を検出し 422 として早期に返す。
+        循環インポート回避のためローカル import を使用する。
+        """
+        from economicon.utils.algorithms import (  # noqa: PLC0415
+            validate_formula_syntax,
+        )
+
+        validate_formula_syntax(v)
+        return v
 
 
 class CalculateColumnResult(BaseResult):

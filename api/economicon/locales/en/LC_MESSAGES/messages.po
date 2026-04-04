@@ -319,3 +319,41 @@ msgstr "newTableName must differ from oldTableName."
 #: economicon/models/columns.py
 msgid "newColumnName must differ from oldColumnName."
 msgstr "newColumnName must differ from oldColumnName."
+
+
+#: economicon/utils/algorithms/formula_parser.py
+#, python-brace-format
+msgid "Syntax error in calculation expression: {}"
+msgstr "Syntax error in calculation expression: {}"
+
+#: economicon/utils/algorithms/formula_parser.py
+#, python-brace-format
+msgid "Unsupported syntax in calculation expression: {}"
+msgstr "Unsupported syntax in calculation expression: {}"
+
+#: economicon/utils/algorithms/formula_parser.py
+#, python-brace-format
+msgid "function call '{}'"
+msgstr "function call '{}'"
+
+#: economicon/utils/algorithms/formula_parser.py
+#, python-brace-format
+msgid "operator '{}'"
+msgstr "operator '{}'"
+
+#: economicon/utils/algorithms/formula_parser.py
+msgid "attribute access"
+msgstr "attribute access"
+
+#: economicon/utils/algorithms/formula_parser.py
+msgid "invalid variable reference"
+msgstr "invalid variable reference"
+
+#: economicon/utils/algorithms/formula_parser.py
+#, python-brace-format
+msgid "'{}' syntax"
+msgstr "'{}' syntax"
+
+#: economicon/utils/algorithms/formula_parser.py
+msgid "keyword arguments in function calls"
+msgstr "keyword arguments in function calls"
