@@ -204,6 +204,62 @@ export const RegressionResponse = zod.object({
 })
 
 /**
+ * 推定済みモデルから予測値・残差を抽出してテーブルに列追加する
+
+指定された分析結果 ID に対応するモデルをロードし、予測値・残差などの
+診断列を元のテーブルに追加します。
+
+Parameters
+----------
+request : Request
+    FastAPI のリクエストオブジェクト
+body : AddDiagnosticColumnsRequestBody
+    - tableName: 追加先テーブル名
+    - resultId: 分析結果の UUID
+    - target: "fitted" / "residual" / "both"
+    - standardized: 標準化残差を含めるか（OLS 系のみ有効）
+    - includeInterval: 95%信頼区間を含めるか
+    - feType: "total" または "within"（FE/RE のみ有効）
+
+Returns
+-------
+JSONResponse
+    追加したテーブル名と列名リスト
+ * @summary Add Diagnostic Columns
+ */
+export const AddDiagnosticColumnsHeader = zod.object({
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
+
+export const addDiagnosticColumnsBodyStandardizedDefault = false;
+export const addDiagnosticColumnsBodyIncludeIntervalDefault = false;
+export const addDiagnosticColumnsBodyFeTypeDefault = `total`;
+export const addDiagnosticColumnsBodyBinaryResidualTypeDefault = `raw`;
+export const addDiagnosticColumnsBodyTobitFittedTypeDefault = `latent`;
+
+export const AddDiagnosticColumnsBody = zod.object({
+  "tableName": zod.string().min(1).describe('追加先テーブル名。ワークスペース内に存在するテーブル名を指定してください。'),
+  "resultId": zod.string().describe('対象の分析結果 ID（AnalysisResult の UUID）'),
+  "target": zod.enum(['fitted', 'residual', 'both']).describe('追加する値の種類。fitted: 予測値のみ、residual: 残差のみ、both: 両方'),
+  "standardized": zod.boolean().default(addDiagnosticColumnsBodyStandardizedDefault).describe('True の場合、標準化残差（studentized internal）を追加する。OLS\/Logit\/Probit のみ有効。'),
+  "includeInterval": zod.boolean().default(addDiagnosticColumnsBodyIncludeIntervalDefault).describe('True の場合、予測値の 95%信頼区間列を追加する。OLS\/FE\/RE\/IV で有効。'),
+  "feType": zod.enum(['total', 'within']).default(addDiagnosticColumnsBodyFeTypeDefault).describe('FE\/RE モデルの予測値タイプ。total: 固定効果を含む予測（effects=True）、within: 固定効果を除いた変動成分（effects=False）。FE\/RE 以外では無視される。'),
+  "binaryResidualType": zod.enum(['raw', 'deviance']).default(addDiagnosticColumnsBodyBinaryResidualTypeDefault).describe('Logit\/Probit の残差種別。raw: 生残差 (y - p̂)、deviance: デビアンス残差 sign(y-p̂)√(-2[y·log(p̂)+(1-y)·log(1-p̂)])。OLS などその他のモデルでは無視される。'),
+  "tobitFittedType": zod.enum(['latent', 'observable']).default(addDiagnosticColumnsBodyTobitFittedTypeDefault).describe('Tobit モデルの予測値種別。latent: 潜在変数の予測値 x\'β（デフォルト）、observable: 観測値の無条件期待値 E[y|x]（打ち切りを考慮した期待値）。Tobit 以外のモデルでは無視される。')
+}).describe('推定済みモデルから予測値・残差を抽出してテーブルに列追加するリクエスト')
+
+export const addDiagnosticColumnsResponseCodeDefault = `OK`;
+
+export const AddDiagnosticColumnsResponse = zod.object({
+  "code": zod.string().default(addDiagnosticColumnsResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('更新されたテーブル名'),
+  "addedColumns": zod.array(zod.string()).describe('追加された列名のリスト')
+}).describe('処理結果')
+})
+
+/**
  * すべての分析結果のサマリーを取得
 
 Returns
@@ -326,62 +382,6 @@ export const DeleteAnalysisResultResponse = zod.object({
   "code": zod.string().default(deleteAnalysisResultResponseCodeDefault).describe('レスポンスコード'),
   "result": zod.object({
   "deletedResultId": zod.string().describe('削除した分析結果の ID')
-}).describe('処理結果')
-})
-
-/**
- * 推定済みモデルから予測値・残差を抽出してテーブルに列追加する
-
-指定された分析結果 ID に対応するモデルをロードし、予測値・残差などの
-診断列を元のテーブルに追加します。
-
-Parameters
-----------
-request : Request
-    FastAPI のリクエストオブジェクト
-body : AddDiagnosticColumnsRequestBody
-    - tableName: 追加先テーブル名
-    - resultId: 分析結果の UUID
-    - target: "fitted" / "residual" / "both"
-    - standardized: 標準化残差を含めるか（OLS 系のみ有効）
-    - includeInterval: 95%信頼区間を含めるか
-    - feType: "total" または "within"（FE/RE のみ有効）
-
-Returns
--------
-JSONResponse
-    追加したテーブル名と列名リスト
- * @summary Add Diagnostic Columns
- */
-export const AddDiagnosticColumnsHeader = zod.object({
-  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
-})
-
-
-export const addDiagnosticColumnsBodyStandardizedDefault = false;
-export const addDiagnosticColumnsBodyIncludeIntervalDefault = false;
-export const addDiagnosticColumnsBodyFeTypeDefault = `total`;
-export const addDiagnosticColumnsBodyBinaryResidualTypeDefault = `raw`;
-export const addDiagnosticColumnsBodyTobitFittedTypeDefault = `latent`;
-
-export const AddDiagnosticColumnsBody = zod.object({
-  "tableName": zod.string().min(1).describe('追加先テーブル名。ワークスペース内に存在するテーブル名を指定してください。'),
-  "resultId": zod.string().describe('対象の分析結果 ID（AnalysisResult の UUID）'),
-  "target": zod.enum(['fitted', 'residual', 'both']).describe('追加する値の種類。fitted: 予測値のみ、residual: 残差のみ、both: 両方'),
-  "standardized": zod.boolean().default(addDiagnosticColumnsBodyStandardizedDefault).describe('True の場合、標準化残差（studentized internal）を追加する。OLS\/Logit\/Probit のみ有効。'),
-  "includeInterval": zod.boolean().default(addDiagnosticColumnsBodyIncludeIntervalDefault).describe('True の場合、予測値の 95%信頼区間列を追加する。OLS\/FE\/RE\/IV で有効。'),
-  "feType": zod.enum(['total', 'within']).default(addDiagnosticColumnsBodyFeTypeDefault).describe('FE\/RE モデルの予測値タイプ。total: 固定効果を含む予測（effects=True）、within: 固定効果を除いた変動成分（effects=False）。FE\/RE 以外では無視される。'),
-  "binaryResidualType": zod.enum(['raw', 'deviance']).default(addDiagnosticColumnsBodyBinaryResidualTypeDefault).describe('Logit\/Probit の残差種別。raw: 生残差 (y - p̂)、deviance: デビアンス残差 sign(y-p̂)√(-2[y·log(p̂)+(1-y)·log(1-p̂)])。OLS などその他のモデルでは無視される。'),
-  "tobitFittedType": zod.enum(['latent', 'observable']).default(addDiagnosticColumnsBodyTobitFittedTypeDefault).describe('Tobit モデルの予測値種別。latent: 潜在変数の予測値 x\'β（デフォルト）、observable: 観測値の無条件期待値 E[y|x]（打ち切りを考慮した期待値）。Tobit 以外のモデルでは無視される。')
-}).describe('推定済みモデルから予測値・残差を抽出してテーブルに列追加するリクエスト')
-
-export const addDiagnosticColumnsResponseCodeDefault = `OK`;
-
-export const AddDiagnosticColumnsResponse = zod.object({
-  "code": zod.string().default(addDiagnosticColumnsResponseCodeDefault).describe('レスポンスコード'),
-  "result": zod.object({
-  "tableName": zod.string().describe('更新されたテーブル名'),
-  "addedColumns": zod.array(zod.string()).describe('追加された列名のリスト')
 }).describe('処理結果')
 })
 
