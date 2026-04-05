@@ -41,7 +41,6 @@ describe("useConfirmDialogStore", () => {
       // 2つ目を開く → 1つ目は false で即解決
       showConfirmDialog("Second", "Second message");
 
-      vi.advanceTimersByTime(200);
       const firstResult = await firstPromise;
       expect(firstResult).toBe(false);
     });
