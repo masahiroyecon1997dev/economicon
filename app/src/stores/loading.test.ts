@@ -3,7 +3,7 @@ import { useLoadingStore } from "./loading";
 
 beforeEach(() => {
   vi.useFakeTimers();
-  useLoadingStore.setState({ isLoading: false, loadingMessage: "" });
+  useLoadingStore.getState().clearLoading();
 });
 
 afterEach(() => {
