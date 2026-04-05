@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **信頼区間推定の追加**: 回帰分析の結果に信頼区間を表示する機能を追加
 - **列移動機能の追加**: 列をドラッグ＆ドロップで移動できるようにする機能を追加
+- **回帰分析の結果のコピー機能の追加**: 回帰分析の結果をtext, markdown, latex形式でクリップボードにコピーする機能を追加
 
 ### 🐞 Fixed
 
