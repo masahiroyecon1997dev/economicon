@@ -70,10 +70,10 @@ export const ConfidenceIntervalResult = ({
                 {levelPct}
               </td>
               <td className="px-5 py-3 text-right tabular-nums text-gray-800">
-                {formatNumber(result.confidenceInterval.lower)}
+                {formatNumber(result.confidenceInterval?.lower)}
               </td>
               <td className="px-5 py-3 text-right tabular-nums text-gray-800">
-                {formatNumber(result.confidenceInterval.upper)}
+                {formatNumber(result.confidenceInterval?.upper)}
               </td>
             </tr>
           </tbody>

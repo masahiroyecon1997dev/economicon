@@ -130,11 +130,9 @@ export const ConfidenceIntervalForm = ({
         e.stopPropagation();
         void form.handleSubmit();
       }}
-      className={cn(
-        "flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 pb-2 px-1",
-      )}
+      className="flex flex-col flex-1 min-h-0"
     >
-      <div className="flex flex-col gap-4 max-w-lg">
+      <div className="flex flex-col gap-4 max-w-lg overflow-y-auto flex-1 min-h-0 pb-2 px-1">
         {/* 対象データ */}
         <form.Field name="tableName">
           {(field) => (

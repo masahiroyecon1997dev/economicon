@@ -106,8 +106,8 @@ class ConfidenceInterval:
                     "type": self.statistic_type.value,
                     "value": statistic_value,
                 },
-                "confidence_interval": {"lower": ci_lower, "upper": ci_upper},
-                "confidence_level": self.confidence_level,
+                "confidenceInterval": {"lower": ci_lower, "upper": ci_upper},
+                "confidenceLevel": self.confidence_level,
             }
             return result
 

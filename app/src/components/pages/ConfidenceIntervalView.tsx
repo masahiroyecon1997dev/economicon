@@ -61,17 +61,24 @@ export const ConfidenceIntervalView = ({
               <span>
                 {t("ConfidenceIntervalView.ResultLabel", { number: index + 1 })}
               </span>
-              <button
-                type="button"
+              <span
+                role="button"
+                tabIndex={0}
                 aria-label={t("ConfidenceIntervalView.DeleteResult")}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteResult(result.id, index);
                 }}
-                className="ml-1.5 rounded p-0.5 opacity-60 hover:bg-white/20 hover:opacity-100 transition-opacity"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.stopPropagation();
+                    handleDeleteResult(result.id, index);
+                  }
+                }}
+                className="ml-1.5 rounded p-0.5 opacity-60 hover:bg-white/20 hover:opacity-100 transition-opacity cursor-pointer"
               >
                 <X size={11} aria-hidden="true" />
-              </button>
+              </span>
             </TabsTrigger>
           ))}
         </TabsList>

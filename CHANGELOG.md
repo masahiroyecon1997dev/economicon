@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-04-05
+
+### ✨ Added
+
+- **信頼区間推定の追加**: 回帰分析の結果に信頼区間を表示する機能を追加
+- **列移動機能の追加**: 列をドラッグ＆ドロップで移動できるようにする機能を追加
+
+### 🐞 Fixed
+
+- **言語設定の不具合修正**: 言語設定が反映されない問題を修正
+- **計算のエラー修正**: 計算機能の構文エラーをわかりやすいように修正
+- **UI/UX の改善**:
+  - ダイアログにスクロールを表示するよう修正
+  - ラグ・リード列の追加のグループ化列を選択方式に変更
+  - テーブル操作メニューと列操作メニューを右クリックで開くように修正
+
+[0.3.0]: https://github.com/masahiroyecon1997dev/Economicon/releases/tag/v0.3.0
+
 ## [0.2.0] - 2026-03-29
 
 ### ✨ Added
