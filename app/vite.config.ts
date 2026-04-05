@@ -65,6 +65,18 @@ export default defineConfig({
       "src/lib/**/*.test.ts",
       "src/hooks/**/*.test.ts",
       "src/stores/**/*.test.ts",
+      "src/constants/**/*.test.ts",
     ],
+    coverage: {
+      provider: "v8",
+      include: [
+        "src/stores/**/*.ts",
+        "src/hooks/**/*.ts",
+        "src/constants/**/*.ts",
+        "src/lib/**/*.ts",
+        "src/components/**/*.tsx",
+      ],
+      exclude: ["**/*.test.ts", "**/*.test.tsx", "src/test/**", "src/tests/**"],
+    },
   },
 });
