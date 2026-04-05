@@ -69,12 +69,12 @@ describe("useTableListStore", () => {
       expect(useTableListStore.getState().tableList).toEqual(["tableA"]);
     });
 
-    it("test_removeTableName_onlyFirstOccurrenceRemoved_whenDuplicate", () => {
+    it("test_removeTableName_allOccurrencesRemoved_whenDuplicate", () => {
       useTableListStore.setState({ tableList: ["dup", "dup"] });
       const { removeTableName } = useTableListStore.getState();
       removeTableName("dup");
 
-      // filter は同名を全削除するが仕様通りか確認（実装ではfilterのため全削除）
+      // 実装は filter のため同名を全件削除する
       expect(useTableListStore.getState().tableList).toEqual([]);
     });
   });
