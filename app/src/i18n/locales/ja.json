@@ -293,7 +293,31 @@
     "ConfidenceIntervalLower": "95%CI下限",
     "ConfidenceIntervalUpper": "95%CI上限",
     "SignificanceNote": "有意水準: *** p<0.001 / ** p<0.01 / * p<0.05",
-    "NA": "N/A"
+    "NA": "N/A",
+    "QuickCopyMd": "Markdownをクリップボードにコピー",
+    "OutputDialog": "出力..."
+  },
+  "OutputResultDialog": {
+    "Title": "結果出力",
+    "Format": "フォーマット",
+    "FormatText": "テキスト",
+    "FormatMarkdown": "Markdown",
+    "FormatLatex": "LaTeX",
+    "StatInParentheses": "括弧内統計量",
+    "StatSE": "標準誤差 (SE)",
+    "StatT": "t値",
+    "StatP": "p値",
+    "StatNone": "なし",
+    "ConstAtBottom": "定数項を末尾に表示する",
+    "VariableSettings": "変数設定",
+    "Order": "順序",
+    "OriginalName": "変数名",
+    "DisplayLabel": "表示ラベル（任意）",
+    "Preview": "プレビュー",
+    "Loading": "生成中...",
+    "Error": "出力の生成に失敗しました",
+    "CopyButton": "コピー",
+    "Copied": "コピーしました"
   },
   "RegressionTab": {
     "FormTab": "分析設定(最小二乗法)",

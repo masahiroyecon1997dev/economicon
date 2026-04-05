@@ -1,7 +1,13 @@
+import { Check, Clipboard, FileDown, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { getEconomiconAppAPI } from "../../../api/endpoints";
+import { OutputResultRequestFormat } from "../../../api/model/outputResultRequestFormat";
+import { OutputResultRequestStatInParentheses } from "../../../api/model/outputResultRequestStatInParentheses";
 import { cn } from "../../../lib/utils/helpers";
 import type { LinearRegressionResultType } from "../../../types/commonTypes";
 import { ResultSection, StatItem } from "../../molecules/Result/ResultSection";
+import { OutputResultDialog } from "../Dialog/OutputResultDialog";
 
 type RegressionResultProps = {
   result: LinearRegressionResultType;
@@ -13,6 +19,9 @@ export const RegressionResult = ({
   className,
 }: RegressionResultProps) => {
   const { t } = useTranslation();
+  const [isOutputDialogOpen, setIsOutputDialogOpen] = useState(false);
+  const [isQuickCopying, setIsQuickCopying] = useState(false);
+  const [isQuickCopied, setIsQuickCopied] = useState(false);
 
   const formatNumber = (
     num: number | null | undefined,
@@ -30,10 +39,72 @@ export const RegressionResult = ({
     return "";
   };
 
+  const handleQuickCopy = async () => {
+    setIsQuickCopying(true);
+    try {
+      const response = await getEconomiconAppAPI().outputResult({
+        resultIds: [result.resultId],
+        format: OutputResultRequestFormat.markdown,
+        statInParentheses: OutputResultRequestStatInParentheses.se,
+      });
+      if (response.code === "OK" && response.result) {
+        await navigator.clipboard.writeText(response.result.content);
+        setIsQuickCopied(true);
+        setTimeout(() => setIsQuickCopied(false), 2000);
+      }
+    } finally {
+      setIsQuickCopying(false);
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-4 p-4", className)}>
       {/* 分析概要 */}
       <ResultSection title={t("RegressionResult.AnalysisSummary")}>
+        {/* ── ヘッダー右端: 出力ボタン群 ── */}
+        <div className="mb-3 flex justify-end gap-1.5">
+          <button
+            type="button"
+            onClick={() => void handleQuickCopy()}
+            disabled={isQuickCopying}
+            title={t("RegressionResult.QuickCopyMd")}
+            className={cn(
+              "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+              "border border-gray-300 dark:border-gray-600",
+              "hover:bg-gray-100 dark:hover:bg-gray-700",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              isQuickCopied
+                ? "border-green-500 text-green-600 dark:text-green-400"
+                : "text-gray-600 dark:text-gray-400",
+            )}
+            data-testid="quick-copy-md-btn"
+          >
+            {isQuickCopying ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : isQuickCopied ? (
+              <Check className="h-3.5 w-3.5" />
+            ) : (
+              <Clipboard className="h-3.5 w-3.5" />
+            )}
+            MD
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsOutputDialogOpen(true)}
+            title={t("RegressionResult.OutputDialog")}
+            className={cn(
+              "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+              "border border-gray-300 dark:border-gray-600",
+              "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+            )}
+            data-testid="open-output-dialog-btn"
+          >
+            <FileDown className="h-3.5 w-3.5" />
+            {t("RegressionResult.OutputDialog")}
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm md:grid-cols-2">
           <div className="flex gap-2">
             <span className="font-medium text-brand-text-main shrink-0">
@@ -53,6 +124,13 @@ export const RegressionResult = ({
           </div>
         </div>
       </ResultSection>
+
+      {/* 出力ダイアログ */}
+      <OutputResultDialog
+        open={isOutputDialogOpen}
+        onOpenChange={setIsOutputDialogOpen}
+        result={result}
+      />
 
       {/* 係数テーブル */}
       <ResultSection title={t("RegressionResult.Coefficients")}>

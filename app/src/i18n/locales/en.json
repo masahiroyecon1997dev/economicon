@@ -293,7 +293,31 @@
     "ConfidenceIntervalLower": "[0.025",
     "ConfidenceIntervalUpper": "0.975]",
     "SignificanceNote": "Significance: *** p<0.001 / ** p<0.01 / * p<0.05",
-    "NA": "N/A"
+    "NA": "N/A",
+    "QuickCopyMd": "Copy as Markdown",
+    "OutputDialog": "Export..."
+  },
+  "OutputResultDialog": {
+    "Title": "Export Result",
+    "Format": "Format",
+    "FormatText": "Plain Text",
+    "FormatMarkdown": "Markdown",
+    "FormatLatex": "LaTeX",
+    "StatInParentheses": "Statistic in Parentheses",
+    "StatSE": "Standard Error (SE)",
+    "StatT": "t-value",
+    "StatP": "p-value",
+    "StatNone": "None",
+    "ConstAtBottom": "Place constant at bottom",
+    "VariableSettings": "Variable Settings",
+    "Order": "Order",
+    "OriginalName": "Variable Name",
+    "DisplayLabel": "Display Label (optional)",
+    "Preview": "Preview",
+    "Loading": "Generating...",
+    "Error": "Failed to generate output",
+    "CopyButton": "Copy",
+    "Copied": "Copied!"
   },
   "RegressionTab": {
     "FormTab": "Analysis Settings(OLS)",
