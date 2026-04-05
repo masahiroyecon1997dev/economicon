@@ -51,8 +51,8 @@ export const App = () => {
     const waitForServer = async (
       api: ReturnType<typeof getEconomiconAppAPI>,
     ) => {
-      const MAX_RETRIES = 120; // 1秒 × 120 = 2分
-      const INTERVAL_MS = 1000;
+      const MAX_RETRIES = 100; // ヘルスチェック時間1000ミリ秒×待機時間500ミリ秒 × 100 = 150秒
+      const INTERVAL_MS = 500; // 500ミリ秒ごとに再試行
       // reqwest クライアントのグローバルタイムアウトは 300 秒だが、ヘルスチェックが
       // それだけブロックすると全体タイムアウトが大幅に延びる。
       // JS レベルで 1 回あたり 1 秒のタイムアウトを設けることで
