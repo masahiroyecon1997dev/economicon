@@ -11,10 +11,14 @@ on:
     paths:
       - "app/**"
 
+permissions: {}
+
 jobs:
   unit-test:
     name: Unit Tests (Vitest)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -55,6 +59,8 @@ jobs:
   e2e-test:
     name: E2E Tests (Tauri/Windows)
     runs-on: windows-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -140,6 +146,8 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4

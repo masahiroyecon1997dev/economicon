@@ -7,6 +7,8 @@ on:
   # 手動での実行を可能にする
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   python-audit:
     name: Python Dependency Check (pip-audit)
