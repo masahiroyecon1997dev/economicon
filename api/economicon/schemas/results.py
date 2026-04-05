@@ -60,12 +60,19 @@ class AnalysisResultDetail(BaseResult):
         title="Table Name",
         description="分析対象テーブル名",
     )
-    regression_output: dict[str, Any] = Field(
-        title="Regression Output",
+    result_type: str = Field(
+        title="Result Type",
         description=(
-            "推定結果の詳細データ。"
-            "手法（OLS / FE / RE / IV / Logit / Probit / Tobit 等）に"
-            "より含まれるキーが異なる。"
+            "分析種別文字列"
+            "（regression / confidence_interval /"
+            " descriptive_statistics / statistical_test 等）"
+        ),
+    )
+    result_data: dict[str, Any] = Field(
+        title="Result Data",
+        description=(
+            "分析結果の詳細データ。"
+            "分析種別（result_type）により含まれるキーが異なる。"
         ),
     )
     created_at: str = Field(

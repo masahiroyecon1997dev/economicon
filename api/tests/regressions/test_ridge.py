@@ -35,7 +35,7 @@ def _get_output(client, payload):
     resp = client.post(URL_REGRESSION, json=payload)
     assert resp.status_code == status.HTTP_200_OK, resp.text
     result_id = resp.json()["result"]["resultId"]
-    return AnalysisResultStore().get_result(result_id).regression_output
+    return AnalysisResultStore().get_result(result_id).result_data
 
 
 # -----------------------------------------------------------

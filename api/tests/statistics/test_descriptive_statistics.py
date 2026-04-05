@@ -5,6 +5,9 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from economicon.services.data.analysis_result_store import (
+    AnalysisResultStore,
+)
 from economicon.services.data.tables_store import TablesStore
 from main import app
 
@@ -52,6 +55,7 @@ def tables_store():
     """TablesStoreのフィクスチャ"""
     manager = TablesStore()
     manager.clear_tables()
+    AnalysisResultStore().clear_all()
 
     df_numeric = pl.DataFrame(
         {
@@ -72,6 +76,7 @@ def tables_store():
 
     yield manager
     manager.clear_tables()
+    AnalysisResultStore().clear_all()
 
 
 @pytest.fixture
@@ -113,6 +118,9 @@ def test_descriptive_statistics_success_numeric(client, tables_store):
     assert response_data["code"] == "OK"
 
     result = response_data["result"]
+    assert "resultId" in result
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
     assert result["tableName"] == _TABLE_NUMERIC
     stats_a = result["statistics"]["A"]
     assert stats_a[_STAT_MEAN] == pytest.approx(3.0, abs=1e-5)

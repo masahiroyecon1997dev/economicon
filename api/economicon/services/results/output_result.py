@@ -526,7 +526,7 @@ class OutputResult:
             results = self._fetched or [
                 self.result_store.get_result(rid) for rid in self.result_ids
             ]
-            outputs = [_RegOutput(r.regression_output) for r in results]
+            outputs = [_RegOutput(r.result_data) for r in results]
 
             formatter = _ResultFormatter(
                 outputs,

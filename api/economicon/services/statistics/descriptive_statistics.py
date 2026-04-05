@@ -8,9 +8,13 @@ from economicon.schemas import (
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticType,
 )
+from economicon.services.data.analysis_result import AnalysisResult
+from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError
 from economicon.utils.validators import validate_existence
+
+_RESULT_TYPE = "descriptive_statistics"
 
 
 class DescriptiveStatistics:
@@ -55,8 +59,10 @@ class DescriptiveStatistics:
         self,
         body: DescriptiveStatisticsRequestBody,
         tables_store: TablesStore,
+        result_store: AnalysisResultStore,
     ):
         self.tables_store = tables_store
+        self.result_store = result_store
         self.table_name = body.table_name
         self.column_name_list = body.column_name_list
         self.statistics = body.statistics
@@ -97,10 +103,26 @@ class DescriptiveStatistics:
                         col_stats[stat.value] = None
                 stats_result[column_name] = col_stats
 
-            return {
+            result = {
                 "tableName": self.table_name,
                 "statistics": stats_result,
             }
+
+            # AnalysisResultStore に保存（自動命名: "{table} 記述統計 #{n}"）
+            seq = self.result_store.next_sequence(_RESULT_TYPE)
+            name = _("{table} 記述統計 #{seq}").format(
+                table=self.table_name,
+                seq=seq,
+            )
+            analysis_result = AnalysisResult(
+                name=name,
+                description="",
+                table_name=self.table_name,
+                result_data=result,
+                result_type=_RESULT_TYPE,
+            )
+            result_id = self.result_store.save_result(analysis_result)
+            return {**result, "resultId": result_id}
         except Exception as e:
             message = _(
                 "An unexpected error occurred during "

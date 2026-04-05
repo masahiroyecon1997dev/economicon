@@ -13,7 +13,10 @@ from economicon.schemas import (
     StatisticalTestResult,
     SuccessResponse,
 )
-from economicon.services.data.dependencies import TablesStoreDep
+from economicon.services.data.dependencies import (
+    AnalysisResultStoreDep,
+    TablesStoreDep,
+)
 from economicon.services.operation import run_operation
 from economicon.services.statistics.confidence_interval import (
     ConfidenceInterval,
@@ -44,6 +47,7 @@ async def confidence_interval(
     request: Request,
     body: ConfidenceIntervalRequestBody,
     tables_store: TablesStoreDep,
+    result_store: AnalysisResultStoreDep,
 ):
     """信頼区間計算を行うエンドポイント
 
@@ -60,7 +64,7 @@ async def confidence_interval(
         処理結果
     """
     # ビジネスロジックの実行
-    api = ConfidenceInterval(body, tables_store)
+    api = ConfidenceInterval(body, tables_store, result_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -75,6 +79,7 @@ async def descriptive_statistics(
     request: Request,
     body: DescriptiveStatisticsRequestBody,
     tables_store: TablesStoreDep,
+    result_store: AnalysisResultStoreDep,
 ):
     """記述統計を計算するエンドポイント
 
@@ -91,7 +96,7 @@ async def descriptive_statistics(
         処理結果
     """
     # ビジネスロジックの実行
-    api = DescriptiveStatistics(body, tables_store)
+    api = DescriptiveStatistics(body, tables_store, result_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -144,6 +149,7 @@ async def statistical_test(
     request: Request,
     body: StatisticalTestRequestBody,
     tables_store: TablesStoreDep,
+    result_store: AnalysisResultStoreDep,
 ):
     """統計的検定を実行するエンドポイント
 
@@ -164,7 +170,7 @@ async def statistical_test(
     JSONResponse
         処理結果
     """
-    api = StatisticalTest(body, tables_store)
+    api = StatisticalTest(body, tables_store, result_store)
     result = run_operation(api)
 
     return create_success_response(

@@ -630,7 +630,7 @@ def test_output_result_500_on_malformed_regression_output(
         description="test",
         table_name="dummy",
         # dependentVariable キーが欠落 → _RegOutput.__init__ で KeyError
-        regression_output={"parameters": []},
+        result_data={"parameters": []},
     )
     AnalysisResultStore().save_result(bad)
 

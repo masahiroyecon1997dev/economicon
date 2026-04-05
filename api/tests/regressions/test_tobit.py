@@ -22,11 +22,11 @@ def _post_tobit(client, payload):
 
 
 def _get_output(client, payload):
-    """POSTして regressionOutput を返すヘルパー（200のみ）"""
+    """POSTして result_data を返すヘルパー（200のみ）"""
     resp = _post_tobit(client, payload)
     assert resp.status_code == status.HTTP_200_OK, resp.text
     result_id = resp.json()["result"]["resultId"]
-    return AnalysisResultStore().get_result(result_id).regression_output
+    return AnalysisResultStore().get_result(result_id).result_data
 
 
 # -----------------------------------------------------------
@@ -55,7 +55,7 @@ def test_tobit_censoring_limits_in_diagnostics(client, tables_store):
         pytest.skip("py4etrics が利用不可のためスキップ")
 
     result_id = resp.json()["result"]["resultId"]
-    output = AnalysisResultStore().get_result(result_id).regression_output
+    output = AnalysisResultStore().get_result(result_id).result_data
     diagnostics = output["diagnostics"]
 
     assert "censoringLimits" in diagnostics
@@ -71,7 +71,7 @@ def test_tobit_response_structure(client, tables_store):
         pytest.skip("py4etrics が利用不可のためスキップ")
 
     result_id = resp.json()["result"]["resultId"]
-    output = AnalysisResultStore().get_result(result_id).regression_output
+    output = AnalysisResultStore().get_result(result_id).result_data
 
     assert "parameters" in output
     assert "modelStatistics" in output
@@ -91,7 +91,7 @@ def test_tobit_sigma_in_diagnostics(client, tables_store):
         pytest.skip("py4etrics が利用不可のためスキップ")
 
     result_id = resp.json()["result"]["resultId"]
-    output = AnalysisResultStore().get_result(result_id).regression_output
+    output = AnalysisResultStore().get_result(result_id).result_data
     diagnostics = output["diagnostics"]
 
     if "sigma" in diagnostics:
@@ -108,7 +108,7 @@ def test_tobit_right_censoring_none(client, tables_store):
         pytest.skip("py4etrics が利用不可のためスキップ")
 
     result_id = resp.json()["result"]["resultId"]
-    output = AnalysisResultStore().get_result(result_id).regression_output
+    output = AnalysisResultStore().get_result(result_id).result_data
     limits = output["diagnostics"]["censoringLimits"]
     assert limits["right"] is None
 
@@ -120,7 +120,7 @@ def test_tobit_log_likelihood_present(client, tables_store):
         pytest.skip("py4etrics が利用不可のためスキップ")
 
     result_id = resp.json()["result"]["resultId"]
-    output = AnalysisResultStore().get_result(result_id).regression_output
+    output = AnalysisResultStore().get_result(result_id).result_data
     model_stats = output["modelStatistics"]
     assert "logLikelihood" in model_stats
 
@@ -138,6 +138,6 @@ def test_tobit_right_censoring_specified(client, tables_store):
         pytest.skip("py4etrics が利用不可のためスキップ")
 
     result_id = resp.json()["result"]["resultId"]
-    output = AnalysisResultStore().get_result(result_id).regression_output
+    output = AnalysisResultStore().get_result(result_id).result_data
     limits = output["diagnostics"]["censoringLimits"]
     assert limits["right"] == _RIGHT_CENSORING_LIMIT

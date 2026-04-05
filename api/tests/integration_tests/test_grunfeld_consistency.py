@@ -184,7 +184,7 @@ def _post_and_fetch(client, payload: dict) -> tuple[str, dict]:
 
     Returns
     -------
-    (result_id, regressionOutput)
+    (result_id, resultData)
     """
     resp = client.post(URL_REGRESSION, json=payload)
     assert resp.status_code == status.HTTP_200_OK, resp.text
@@ -199,7 +199,7 @@ def _post_and_fetch(client, payload: dict) -> tuple[str, dict]:
     result_data = results_resp.json()
     assert result_data["code"] == "OK"
 
-    output: dict = result_data["result"]["regressionOutput"]
+    output: dict = result_data["result"]["resultData"]
     return result_id, output
 
 
@@ -966,7 +966,7 @@ def test_grunfeld_ols_idempotent(client, grunfeld_store):
 def test_results_endpoint_required_keys(client, grunfeld_store):
     """
     GET /api/analysis/results/{result_id} の必須キーを検証する。
-    id, name, tableName, regressionOutput が存在すること。
+    id, name, tableName, resultData が存在すること。
     """
     result_id, _ = _post_and_fetch(client, _ols_payload())
 
@@ -974,7 +974,7 @@ def test_results_endpoint_required_keys(client, grunfeld_store):
     assert resp.status_code == status.HTTP_200_OK
 
     result = resp.json()["result"]
-    for key in ("id", "name", "tableName", "regressionOutput"):
+    for key in ("id", "name", "tableName", "resultData"):
         assert key in result, (
             f"GET /results/{{id}} のレスポンスに {key!r} が存在しない"
         )

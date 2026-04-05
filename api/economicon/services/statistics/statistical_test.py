@@ -14,6 +14,8 @@ from economicon.schemas.statistics import (
     StatisticalTestRequestBody,
     StatisticalTestResult,
 )
+from economicon.services.data.analysis_result import AnalysisResult
+from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils.exceptions import ProcessingError, ValidationError
 from economicon.utils.validators import validate_existence
@@ -25,6 +27,8 @@ _TWO_SAMPLES: int = 2
 # z_crit = norm.ppf(1 - α/2) = norm.ppf(0.975) ≈ 1.95996...
 _ALPHA_95: float = 0.05
 _Z_CRIT_95: float = float(stats.norm.ppf(1.0 - _ALPHA_95 / 2))
+
+_RESULT_TYPE = "statistical_test"
 
 
 class StatisticalTest:
@@ -47,8 +51,10 @@ class StatisticalTest:
         self,
         body: StatisticalTestRequestBody,
         tables_store: TablesStore,
+        result_store: AnalysisResultStore,
     ) -> None:
         self.tables_store = tables_store
+        self.result_store = result_store
         self.test_type = body.test_type
         self.samples = body.samples
         self.options = body.options
@@ -123,11 +129,32 @@ class StatisticalTest:
 
             match self.test_type:
                 case StatisticalTestType.T_TEST:
-                    return self._run_ttest(arrays)
+                    result = self._run_ttest(arrays)
                 case StatisticalTestType.Z_TEST:
-                    return self._run_ztest(arrays)
+                    result = self._run_ztest(arrays)
                 case StatisticalTestType.F_TEST:
-                    return self._run_ftest(arrays)
+                    result = self._run_ftest(arrays)
+
+            # AnalysisResultStore に保存
+            # 自動命名: "{test_type}（{n}群） #{seq}"
+            n_samples = len(self.samples)
+            seq = self.result_store.next_sequence(_RESULT_TYPE)
+            name = _("{test_type}（{n}群） #{seq}").format(
+                test_type=self.test_type.value,
+                n=n_samples,
+                seq=seq,
+            )
+            # 複数テーブルにまたがる場合は主テーブル名のみ保存
+            table_name = self.samples[0].table_name
+            analysis_result = AnalysisResult(
+                name=name,
+                description="",
+                table_name=table_name,
+                result_data=result,
+                result_type=_RESULT_TYPE,
+            )
+            result_id = self.result_store.save_result(analysis_result)
+            return {**result, "resultId": result_id}
 
         except ValidationError, ProcessingError:
             raise
@@ -215,6 +242,7 @@ class StatisticalTest:
             )
 
         return StatisticalTestResult(
+            result_id="",
             statistic=float(res.statistic),
             p_value=float(res.pvalue),
             df=df,
@@ -259,6 +287,7 @@ class StatisticalTest:
 
         # 95% 信頼区間（モジュール定数 _Z_CRIT_95 を使用）
         return StatisticalTestResult(
+            result_id="",
             statistic=float(stat),
             p_value=float(p_val),
             df=None,
@@ -293,6 +322,7 @@ class StatisticalTest:
             float(stats.f.sf(f_stat, df1, df2)),
         )
         return StatisticalTestResult(
+            result_id="",
             statistic=float(f_stat),
             p_value=p_val,
             df=float(df1),
@@ -310,6 +340,7 @@ class StatisticalTest:
         )
         eta_sq = self._eta_squared(arrays)
         return StatisticalTestResult(
+            result_id="",
             statistic=float(res.statistic),
             p_value=float(res.pvalue),
             df=dfn,

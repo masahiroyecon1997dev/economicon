@@ -250,7 +250,7 @@ def _post_and_fetch(
 
     Returns
     -------
-    (result_id, regressionOutput)
+    (result_id, resultData)
     """
     resp = client.post(URL_REGRESSION, json=payload)
     assert resp.status_code == status.HTTP_200_OK, resp.text
@@ -262,7 +262,7 @@ def _post_and_fetch(
     assert resp2.status_code == status.HTTP_200_OK, resp2.text
     result_data = resp2.json()
     assert result_data["code"] == "OK", result_data
-    return result_id, result_data["result"]["regressionOutput"]
+    return result_id, result_data["result"]["resultData"]
 
 
 def _ols_payload(se: dict[str, Any] | None = None) -> dict[str, Any]:

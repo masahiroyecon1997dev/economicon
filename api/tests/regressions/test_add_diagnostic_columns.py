@@ -850,7 +850,8 @@ def test_model_type_none_raises_500(client, tables_store):
         name="test_none_type",
         description="",
         table_name=TABLE_BASIC,
-        regression_output={"dependentVariable": "y"},
+        result_data={"dependentVariable": "y"},
+        result_type="regression",
         model_type=None,
     )
     result.save_model("dummy_model_object")
@@ -973,7 +974,8 @@ def test_unsupported_model_type_raises_500(client, tables_store):
         name="test_unsupported",
         description="",
         table_name=TABLE_BASIC,
-        regression_output={"dependentVariable": "y"},
+        result_data={"dependentVariable": "y"},
+        result_type="regression",
         model_type=unknown_type,
     )
     result.save_model("dummy_model_object")

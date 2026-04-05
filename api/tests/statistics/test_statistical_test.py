@@ -11,6 +11,9 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from statsmodels.stats.weightstats import ztest as sm_ztest
 
+from economicon.services.data.analysis_result_store import (
+    AnalysisResultStore,
+)
 from economicon.services.data.tables_store import TablesStore
 from main import app
 
@@ -63,6 +66,7 @@ def tables_store():
     """TablesStore のフィクスチャ"""
     manager = TablesStore()
     manager.clear_tables()
+    AnalysisResultStore().clear_all()
 
     manager.store_table(_TABLE_A, pl.DataFrame({_COL: _GROUP_A}))
     manager.store_table(_TABLE_B, pl.DataFrame({_COL: _GROUP_B}))
@@ -71,6 +75,7 @@ def tables_store():
 
     yield manager
     manager.clear_tables()
+    AnalysisResultStore().clear_all()
 
 
 # -----------------------------------------------------------
@@ -104,6 +109,9 @@ def test_ttest_1sample_success(client, tables_store):
     assert response_data["code"] == "OK"
 
     result = response_data["result"]
+    assert "resultId" in result
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
     assert isinstance(result["statistic"], float)
     assert isinstance(result["pValue"], float)
     assert isinstance(result["df"], float)

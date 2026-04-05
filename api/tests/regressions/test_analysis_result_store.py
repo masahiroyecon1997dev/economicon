@@ -33,7 +33,8 @@ def sample_result():
         name="Test Analysis",
         description="Test Description",
         table_name="test_table",
-        regression_output={"coefficients": [1.0, 2.0, 3.0], "r_squared": 0.95},
+        result_data={"coefficients": [1.0, 2.0, 3.0], "r_squared": 0.95},
+        result_type="regression",
     )
 
 
@@ -53,7 +54,7 @@ def test_get_result_returns_saved_result(result_store, sample_result):
     assert retrieved.name == "Test Analysis"
     assert retrieved.description == "Test Description"
     assert retrieved.table_name == "test_table"
-    assert retrieved.regression_output["r_squared"] == _EXPECTED_R_SQUARED
+    assert retrieved.result_data["r_squared"] == _EXPECTED_R_SQUARED
 
 
 def test_get_result_raises_key_error_for_nonexistent_id(result_store):
@@ -72,7 +73,8 @@ def test_get_all_summaries_returns_list(result_store, sample_result):
         name="Test Analysis 2",
         description="Test Description 2",
         table_name="test_table_2",
-        regression_output={"coefficients": [4.0, 5.0]},
+        result_data={"coefficients": [4.0, 5.0]},
+        result_type="regression",
     )
     result_store.save_result(sample_result2)
 
@@ -112,7 +114,8 @@ def test_clear_all_removes_all_results(result_store, sample_result):
         name="Test Analysis 2",
         description="Test Description 2",
         table_name="test_table_2",
-        regression_output={"coefficients": [4.0, 5.0]},
+        result_data={"coefficients": [4.0, 5.0]},
+        result_type="regression",
     )
     result_store.save_result(sample_result2)
 
@@ -160,7 +163,7 @@ def test_get_result_by_id_api(client, tables_store):
     assert data["code"] == "OK"
     result = data["result"]
     assert result["id"] == result_id
-    assert "regressionOutput" in result
+    assert "resultData" in result
     assert "createdAt" in result
 
 

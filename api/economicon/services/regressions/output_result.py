@@ -8,7 +8,7 @@ from typing import Any, ClassVar
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.schemas.regressions import OutputResultRequest
+from economicon.schemas.results import OutputResultRequest
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.utils import ProcessingError, ValidationError
 
@@ -526,7 +526,7 @@ class OutputResult:
             results = self._fetched or [
                 self.result_store.get_result(rid) for rid in self.result_ids
             ]
-            outputs = [_RegOutput(r.regression_output) for r in results]
+            outputs = [_RegOutput(r.result_data) for r in results]
 
             formatter = _ResultFormatter(
                 outputs,

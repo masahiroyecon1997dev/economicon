@@ -26,11 +26,11 @@ _MIN_X1_COEF = 0.5
 
 
 def _get_output(client, payload):
-    """POSTして regressionOutput を返すヘルパー"""
+    """POSTして result_data を返すヘルパー"""
     resp = client.post(URL_REGRESSION, json=payload)
     assert resp.status_code == status.HTTP_200_OK, resp.text
     result_id = resp.json()["result"]["resultId"]
-    return AnalysisResultStore().get_result(result_id).regression_output
+    return AnalysisResultStore().get_result(result_id).result_data
 
 
 # -----------------------------------------------------------
@@ -81,8 +81,8 @@ def test_ols_result_stored(client, tables_store):
 
     saved = AnalysisResultStore().get_result(result_id)
     assert saved is not None
-    assert "parameters" in saved.regression_output
-    assert "modelStatistics" in saved.regression_output
+    assert "parameters" in saved.result_data
+    assert "modelStatistics" in saved.result_data
 
 
 def test_ols_coefficients_numerical(client, tables_store):

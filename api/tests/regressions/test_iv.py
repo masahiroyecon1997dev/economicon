@@ -22,11 +22,11 @@ _ABS_TOL = 1e-12
 
 
 def _get_output(client, payload):
-    """POSTして regressionOutput を返すヘルパー"""
+    """POSTして result_data を返すヘルパー"""
     resp = client.post(URL_REGRESSION, json=payload)
     assert resp.status_code == status.HTTP_200_OK, resp.text
     result_id = resp.json()["result"]["resultId"]
-    return AnalysisResultStore().get_result(result_id).regression_output
+    return AnalysisResultStore().get_result(result_id).result_data
 
 
 # -----------------------------------------------------------

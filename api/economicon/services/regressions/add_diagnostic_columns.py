@@ -192,7 +192,7 @@ class AddDiagnosticColumns:
                 existing_cols = df.columns
 
                 # 分析結果の被説明変数名を接頭辞として取得
-                dep_var = analysis_result.regression_output.get(
+                dep_var = analysis_result.result_data.get(
                     "dependentVariable", "y"
                 )
 
@@ -283,7 +283,7 @@ class AddDiagnosticColumns:
         if model_type == "tobit":
             # Eco-Note B: 打ち切り値を regression_output から取得し
             # observable 期待値の計算に使用する
-            _diag = analysis_result.regression_output.get("diagnostics", {})  # type: ignore[union-attr]
+            _diag = analysis_result.result_data.get("diagnostics", {})  # type: ignore[union-attr]
             _cens = (
                 _diag.get("censoringLimits", {})
                 if isinstance(_diag, dict)

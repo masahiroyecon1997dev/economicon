@@ -21,13 +21,14 @@ class AnalysisResult:
     _name: str
     _description: str
     _table_name: str
-    _regression_output: dict[str, Any]
+    _result_type: str
+    _result_data: dict[str, Any]
     _created_at: str
     _model_path: str | None
     _model_type: str | None
     _entity_id_column: str | None
     _time_column: str | None
-    # Tobit 欲存値除去後の元テーブル行インデックス（__row_idx__ 結合用）
+    # Tobit 欠損値除去後の元テーブル行インデックス（__row_idx__ 結合用）
     _row_indices: np.ndarray | None
 
     def __init__(
@@ -36,7 +37,8 @@ class AnalysisResult:
         name: str,
         description: str,
         table_name: str,
-        regression_output: dict[str, Any],
+        result_data: dict[str, Any],
+        result_type: str = "regression",
         model_type: str | None = None,
         entity_id_column: str | None = None,
         time_column: str | None = None,
@@ -46,7 +48,8 @@ class AnalysisResult:
         self._name = name
         self._description = description
         self._table_name = table_name
-        self._regression_output = regression_output
+        self._result_type = result_type
+        self._result_data = result_data
         self._created_at = datetime.now().isoformat()
         self._model_path = None
         self._model_type = model_type
@@ -90,8 +93,12 @@ class AnalysisResult:
         return self._table_name
 
     @property
-    def regression_output(self) -> dict[str, Any]:
-        return self._regression_output
+    def result_type(self) -> str:
+        return self._result_type
+
+    @property
+    def result_data(self) -> dict[str, Any]:
+        return self._result_data
 
     @property
     def created_at(self) -> str:
@@ -209,7 +216,8 @@ class AnalysisResult:
             "name": self._name,
             "description": self._description,
             "tableName": self._table_name,
-            "regressionOutput": self._regression_output,
+            "resultType": self._result_type,
+            "resultData": self._result_data,
             "createdAt": self._created_at,
             "modelPath": self._model_path,
             "modelType": self._model_type,

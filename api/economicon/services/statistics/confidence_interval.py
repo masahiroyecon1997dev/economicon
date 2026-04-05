@@ -7,9 +7,13 @@ from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.schemas import ConfidenceIntervalRequestBody
 from economicon.schemas.enums import ConfidenceIntervalStatisticsType
+from economicon.services.data.analysis_result import AnalysisResult
+from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError, ValidationError
 from economicon.utils.validators import validate_existence
+
+_RESULT_TYPE = "confidence_interval"
 
 
 class ConfidenceInterval:
@@ -31,8 +35,10 @@ class ConfidenceInterval:
         self,
         body: ConfidenceIntervalRequestBody,
         tables_store: TablesStore,
+        result_store: AnalysisResultStore,
     ):
         self.tables_store = tables_store
+        self.result_store = result_store
         self.table_name = body.table_name
         self.column_name = body.column_name
         self.confidence_level = body.confidence_level
@@ -109,7 +115,23 @@ class ConfidenceInterval:
                 "confidenceInterval": {"lower": ci_lower, "upper": ci_upper},
                 "confidenceLevel": self.confidence_level,
             }
-            return result
+
+            # AnalysisResultStore に保存（自動命名: "{column} の {stat_type} 信頼区間 #{n}"）
+            seq = self.result_store.next_sequence(_RESULT_TYPE)
+            name = _("{column} の {stat_type} 信頼区間 #{seq}").format(
+                column=self.column_name,
+                stat_type=self.statistic_type.value,
+                seq=seq,
+            )
+            analysis_result = AnalysisResult(
+                name=name,
+                description="",
+                table_name=self.table_name,
+                result_data=result,
+                result_type=_RESULT_TYPE,
+            )
+            result_id = self.result_store.save_result(analysis_result)
+            return {**result, "resultId": result_id}
 
         except ValidationError:
             # ValidationErrorは再発生させる

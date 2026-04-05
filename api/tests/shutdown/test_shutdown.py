@@ -47,7 +47,8 @@ def test_shutdown_clears_analysis_results(client):
         name="test",
         description="test",
         table_name="test_table",
-        regression_output={"coef": {}},
+        result_data={"coef": {}},
+        result_type="regression",
     )
     store.save_result(dummy)
     assert len(store.get_all_summaries()) == 1

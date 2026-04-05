@@ -10,6 +10,9 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from statsmodels.stats.proportion import proportion_confint
 
+from economicon.services.data.analysis_result_store import (
+    AnalysisResultStore,
+)
 from economicon.services.data.tables_store import TablesStore
 from main import app
 
@@ -56,6 +59,7 @@ def tables_store():
     """TablesStoreのフィクスチャ"""
     manager = TablesStore()
     manager.clear_tables()
+    AnalysisResultStore().clear_all()
 
     np.random.seed(_SEED)
     normal_data = np.random.normal(50, 10, _N_SAMPLES)
@@ -86,6 +90,7 @@ def tables_store():
 
     yield manager
     manager.clear_tables()
+    AnalysisResultStore().clear_all()
 
 
 # -----------------------------------------------------------
@@ -118,6 +123,9 @@ def test_confidence_interval_mean_success(client, tables_store):
     assert "lower" in ci
     assert "upper" in ci
     assert ci["lower"] < ci["upper"]
+    assert "resultId" in result
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
 
 
 def test_confidence_interval_mean_numerical(client, tables_store):

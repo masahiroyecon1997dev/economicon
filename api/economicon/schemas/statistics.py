@@ -109,6 +109,10 @@ class ConfidenceIntervalBounds(BaseResult):
 class ConfidenceIntervalResult(BaseResult):
     """信頼区間計算レスポンス"""
 
+    result_id: str = Field(
+        title="Result ID",
+        description="AnalysisResultStore に保存された分析結果の一意 ID",
+    )
     table_name: str = Field(
         title="Table Name",
         description="計算対象のテーブル名",
@@ -199,6 +203,10 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
 class DescriptiveStatisticsResult(BaseResult):
     """記述統計レスポンス"""
 
+    result_id: str = Field(
+        title="Result ID",
+        description="AnalysisResultStore に保存された分析結果の一意 ID",
+    )
     table_name: str = Field(
         title="Table Name",
         description="計算対象のテーブル名",
@@ -522,6 +530,10 @@ class StatisticalTestRequestBody(BaseRequest):
 class StatisticalTestResult(BaseResult):
     """統計検定レスポンス"""
 
+    result_id: str = Field(
+        title="Result ID",
+        description="AnalysisResultStore に保存された分析結果の一意 ID",
+    )
     statistic: float = Field(
         title="Statistic",
         description="検定統計量（t 値 / Z 値 / F 値）",

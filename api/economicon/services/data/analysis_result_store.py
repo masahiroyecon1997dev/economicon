@@ -23,6 +23,8 @@ class AnalysisResultStore:
         # 初期化が一度だけ行われるようにする
         if not hasattr(self, "_initialized"):
             self._results: dict[str, AnalysisResult] = {}
+            # result_type ごとの連番カウンタ（自動命名用）
+            self._counters: dict[str, int] = {}
             self._lock = threading.RLock()
             self._initialized = True
 
@@ -39,6 +41,26 @@ class AnalysisResultStore:
         with self._lock:
             self._results[result.id] = result
             return result.id
+
+    def next_sequence(self, result_type: str) -> int:
+        """
+        指定した result_type の連番をインクリメントして返す。
+
+        同一セッション内で複数回実行したときに
+        名前が重複しないよう連番を付与するために使用する。
+
+        Args:
+            result_type: 分析種別文字列
+                ("regression" / "confidence_interval" /
+                 "descriptive_statistics" / "statistical_test" 等)
+
+        Returns:
+            1 始まりの連番整数
+        """
+        with self._lock:
+            n = self._counters.get(result_type, 0) + 1
+            self._counters[result_type] = n
+            return n
 
     def get_result(self, result_id: str) -> AnalysisResult:
         """
@@ -115,4 +137,5 @@ class AnalysisResultStore:
             for result in self._results.values():
                 result.delete_model_file()
             self._results.clear()
+            self._counters.clear()
             return True
