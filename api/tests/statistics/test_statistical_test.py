@@ -712,12 +712,17 @@ def test_ttest_1sample_numerical(client, tables_store):
     rd = _get_result_data(client, payload)
 
     res: Any = spstats.ttest_1samp(_GROUP_A, popmean=50.0)
-    assert rd["statistic"] == pytest.approx(float(res.statistic), rel=1e-5)
-    assert rd["pValue"] == pytest.approx(float(res.pvalue), rel=1e-5)
-    assert rd["df"] == pytest.approx(_N - 1)
+    ci_res: Any = spstats.ttest_1samp(
+        _GROUP_A, popmean=50.0, alternative="two-sided"
+    )
+    exp_ci = ci_res.confidence_interval(confidence_level=0.95)
+    assert rd["statistic"] == pytest.approx(float(res.statistic), abs=1e-8)
+    assert rd["pValue"] == pytest.approx(float(res.pvalue), abs=1e-8)
+    assert rd["df"] == pytest.approx(_N - 1, abs=1e-8)
     ci = rd["confidenceInterval"]
     assert ci is not None
-    assert ci["lower"] < ci["upper"]
+    assert ci["lower"] == pytest.approx(float(exp_ci.low), abs=1e-8)
+    assert ci["upper"] == pytest.approx(float(exp_ci.high), abs=1e-8)
     assert rd["effectSize"] is not None
     assert rd["effectSize"] >= 0.0
 
@@ -732,16 +737,42 @@ def test_ttest_2sample_independent_numerical(client, tables_store):
     rd = _get_result_data(client, payload)
 
     res: Any = spstats.ttest_ind(_GROUP_A, _GROUP_B, equal_var=True)
-    assert rd["statistic"] == pytest.approx(float(res.statistic), rel=1e-5)
-    assert rd["pValue"] == pytest.approx(float(res.pvalue), rel=1e-5)
+    exp_ci = res.confidence_interval(confidence_level=0.95)
+    assert rd["statistic"] == pytest.approx(float(res.statistic), abs=1e-8)
+    assert rd["pValue"] == pytest.approx(float(res.pvalue), abs=1e-8)
+    # 等分散 pooled df = N_A + N_B - 2
+    assert rd["df"] == pytest.approx(_N + _N - 2, abs=1e-8)
     ci = rd["confidenceInterval"]
     assert ci is not None
-    assert ci["lower"] < ci["upper"]
+    assert ci["lower"] == pytest.approx(float(exp_ci.low), abs=1e-8)
+    assert ci["upper"] == pytest.approx(float(exp_ci.high), abs=1e-8)
     assert rd["effectSize"] is not None
 
 
+def test_ttest_welch_numerical(client, tables_store):
+    """Welch t 検定の statistic/pValue/df/CI が scipy と一致する"""
+    payload = {
+        "testType": "t-test",
+        "samples": _samples((_TABLE_A, _COL), (_TABLE_B, _COL)),
+        "options": {"equalVar": False},
+    }
+    rd = _get_result_data(client, payload)
+
+    res: Any = spstats.ttest_ind(
+        _GROUP_A, _GROUP_B, equal_var=False, alternative="two-sided"
+    )
+    exp_ci = res.confidence_interval(confidence_level=0.95)
+    assert rd["statistic"] == pytest.approx(float(res.statistic), abs=1e-8)
+    assert rd["pValue"] == pytest.approx(float(res.pvalue), abs=1e-8)
+    # Welch df ≠ N_A + N_B - 2
+    assert rd["df"] == pytest.approx(float(res.df), abs=1e-8)
+    ci = rd["confidenceInterval"]
+    assert ci["lower"] == pytest.approx(float(exp_ci.low), abs=1e-8)
+    assert ci["upper"] == pytest.approx(float(exp_ci.high), abs=1e-8)
+
+
 def test_ttest_paired_numerical(client, tables_store):
-    """対応あり t 検定の数値が scipy と一致する"""
+    """対応あり t 検定の statistic/pValue/df/CI が scipy と一致する"""
     payload = {
         "testType": "t-test",
         "samples": _samples((_TABLE_A, _COL), (_TABLE_B, _COL)),
@@ -749,14 +780,18 @@ def test_ttest_paired_numerical(client, tables_store):
     }
     rd = _get_result_data(client, payload)
 
-    res = spstats.ttest_rel(_GROUP_A, _GROUP_B)
-    assert rd["statistic"] == pytest.approx(float(res.statistic), rel=1e-5)
-    assert rd["pValue"] == pytest.approx(float(res.pvalue), rel=1e-5)
-    assert rd["df"] == pytest.approx(_N - 1)
+    res: Any = spstats.ttest_rel(_GROUP_A, _GROUP_B, alternative="two-sided")
+    exp_ci = res.confidence_interval(confidence_level=0.95)
+    assert rd["statistic"] == pytest.approx(float(res.statistic), abs=1e-8)
+    assert rd["pValue"] == pytest.approx(float(res.pvalue), abs=1e-8)
+    assert rd["df"] == pytest.approx(_N - 1, abs=1e-8)
+    ci = rd["confidenceInterval"]
+    assert ci["lower"] == pytest.approx(float(exp_ci.low), abs=1e-8)
+    assert ci["upper"] == pytest.approx(float(exp_ci.high), abs=1e-8)
 
 
 def test_ztest_1sample_numerical(client, tables_store):
-    """1 群 z 検定の数値が statsmodels と一致する"""
+    """1 群 z 検定の statistic/pValue/CI が statsmodels と一致する"""
     payload = {
         "testType": "z-test",
         "samples": _samples((_TABLE_A, _COL)),
@@ -769,10 +804,16 @@ def test_ztest_1sample_numerical(client, tables_store):
         value=50,
         alternative="two-sided",
     )
-    assert rd["statistic"] == pytest.approx(float(stat), rel=1e-5)
-    assert rd["pValue"] == pytest.approx(float(p_val), rel=1e-5)
+    exp_center = float(np.mean(_GROUP_A))
+    exp_se = float(np.std(_GROUP_A, ddof=1) / np.sqrt(len(_GROUP_A)))
+    z_crit = float(spstats.norm.ppf(0.975))
+    assert rd["statistic"] == pytest.approx(float(stat), abs=1e-8)
+    assert rd["pValue"] == pytest.approx(float(p_val), abs=1e-8)
     assert rd["df"] is None
-    assert rd["confidenceInterval"] is not None
+    ci = rd["confidenceInterval"]
+    assert ci is not None
+    assert ci["lower"] == pytest.approx(exp_center - z_crit * exp_se, abs=1e-8)
+    assert ci["upper"] == pytest.approx(exp_center + z_crit * exp_se, abs=1e-8)
     assert rd["effectSize"] is None
 
 
@@ -791,30 +832,48 @@ def test_ztest_2sample_numerical(client, tables_store):
         value=0,
         alternative="two-sided",
     )
-    assert rd["statistic"] == pytest.approx(float(stat), rel=1e-5)
-    assert rd["pValue"] == pytest.approx(float(p_val), rel=1e-5)
+    exp_center = float(np.mean(_GROUP_A) - np.mean(_GROUP_B))
+    exp_se = float(
+        np.sqrt(
+            np.var(_GROUP_A, ddof=1) / len(_GROUP_A)
+            + np.var(_GROUP_B, ddof=1) / len(_GROUP_B)
+        )
+    )
+    z_crit = float(spstats.norm.ppf(0.975))
+    assert rd["statistic"] == pytest.approx(float(stat), abs=1e-8)
+    assert rd["pValue"] == pytest.approx(float(p_val), abs=1e-8)
+    ci = rd["confidenceInterval"]
+    assert ci["lower"] == pytest.approx(exp_center - z_crit * exp_se, abs=1e-8)
+    assert ci["upper"] == pytest.approx(exp_center + z_crit * exp_se, abs=1e-8)
 
 
 def test_ftest_variance_ratio_numerical(client, tables_store):
-    """分散比 F 検定の数値が手計算と一致する"""
+    """分散比 F 検定の statistic/pValue/df が手計算と abs=1e-8 で一致する"""
     payload = {
         "testType": "f-test",
         "samples": _samples((_TABLE_A, _COL), (_TABLE_B, _COL)),
     }
     rd = _get_result_data(client, payload)
 
-    f_expected = float(np.var(_GROUP_A, ddof=1) / np.var(_GROUP_B, ddof=1))
-    assert rd["statistic"] == pytest.approx(f_expected, rel=1e-5)
-    assert rd["statistic"] > 0.0
-    assert 0.0 <= rd["pValue"] <= 1.0
-    assert rd["df"] == pytest.approx(_N - 1)
-    assert rd["df2"] == pytest.approx(_N - 1)
+    var_a = float(np.var(_GROUP_A, ddof=1))
+    var_b = float(np.var(_GROUP_B, ddof=1))
+    f_expected = var_a / var_b
+    df1 = _N - 1
+    df2 = _N - 1
+    p_expected = 2.0 * min(
+        float(spstats.f.cdf(f_expected, df1, df2)),
+        float(spstats.f.sf(f_expected, df1, df2)),
+    )
+    assert rd["statistic"] == pytest.approx(f_expected, abs=1e-8)
+    assert rd["pValue"] == pytest.approx(p_expected, abs=1e-8)
+    assert rd["df"] == pytest.approx(df1, abs=1e-8)
+    assert rd["df2"] == pytest.approx(df2, abs=1e-8)
     assert rd["confidenceInterval"] is None
     assert rd["effectSize"] is None
 
 
 def test_ftest_anova_numerical(client, tables_store):
-    """3 群 ANOVA の数値が scipy と一致し η² が [0, 1] に収まる"""
+    """3群 ANOVA: statistic/pValue/df/η² が scipy・手計算と abs=1e-8 で一致"""
     payload = {
         "testType": "f-test",
         "samples": _samples(
@@ -826,13 +885,24 @@ def test_ftest_anova_numerical(client, tables_store):
     rd = _get_result_data(client, payload)
 
     res = spstats.f_oneway(_GROUP_A, _GROUP_B, _GROUP_C)
-    assert rd["statistic"] == pytest.approx(float(res.statistic), rel=1e-5)
-    assert rd["pValue"] == pytest.approx(float(res.pvalue), rel=1e-5)
-    assert rd["df"] == pytest.approx(2.0)
-    assert rd["df2"] == pytest.approx(3 * _N - 3)
+    # η² 手計算
+    all_data = np.concatenate([_GROUP_A, _GROUP_B, _GROUP_C])
+    grand_mean = float(np.mean(all_data))
+    ss_between = float(
+        sum(
+            len(g) * (float(np.mean(g)) - grand_mean) ** 2
+            for g in [_GROUP_A, _GROUP_B, _GROUP_C]
+        )
+    )
+    ss_total = float(np.sum((all_data - grand_mean) ** 2))
+    eta_sq_expected = ss_between / ss_total
+
+    assert rd["statistic"] == pytest.approx(float(res.statistic), abs=1e-8)
+    assert rd["pValue"] == pytest.approx(float(res.pvalue), abs=1e-8)
+    assert rd["df"] == pytest.approx(2.0, abs=1e-8)
+    assert rd["df2"] == pytest.approx(float(3 * _N - 3), abs=1e-8)
     assert rd["confidenceInterval"] is None
-    assert rd["effectSize"] is not None
-    assert 0.0 <= rd["effectSize"] <= 1.0
+    assert rd["effectSize"] == pytest.approx(eta_sq_expected, abs=1e-8)
 
 
 # -----------------------------------------------------------

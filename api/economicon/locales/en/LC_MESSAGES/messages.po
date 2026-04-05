@@ -357,3 +357,20 @@ msgstr "'{}' syntax"
 #: economicon/utils/algorithms/formula_parser.py
 msgid "keyword arguments in function calls"
 msgstr "keyword arguments in function calls"
+
+# Auto-generated analysis result name formats
+#, python-brace-format
+msgid "{column} の {stat_type} 信頼区間 #{seq}"
+msgstr "{column} {stat_type} confidence interval #{seq}"
+
+#, python-brace-format
+msgid "{table} 記述統計 #{seq}"
+msgstr "{table} descriptive statistics #{seq}"
+
+#, python-brace-format
+msgid "{test_type}（{n}群） #{seq}"
+msgstr "{test_type} ({n}-sample) #{seq}"
+
+#, python-brace-format
+msgid "{model_type}: {dependent} #{seq}"
+msgstr "{model_type}: {dependent} #{seq}"

@@ -1,7 +1,8 @@
-from typing import ClassVar
+from typing import ClassVar, cast
 
 import numpy as np
 from scipy import stats
+from statsmodels.stats.proportion import proportion_confint
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
@@ -183,9 +184,10 @@ class ConfidenceInterval:
 
         return float(median_val), float(ci_lower), float(ci_upper)
 
-    def _calculate_proportion_ci(self, data):
-        """比率の信頼区間を計算（二項分布）"""
-        # データを0または1の二項データとして扱う
+    def _calculate_proportion_ci(
+        self, data: np.ndarray
+    ) -> tuple[float, float, float]:
+        """比率の信頼区間を計算（statsmodels Wilson score）"""
         unique_vals = np.unique(data)
         supremum = 2
         if not (
@@ -201,23 +203,19 @@ class ConfidenceInterval:
             )
 
         n = len(data)
-        successes = np.sum(data)
+        successes = int(np.sum(data))
         proportion = successes / n
-
-        # Wilson score interval（正確な信頼区間）
-        z = stats.norm.ppf((1 + self.confidence_level) / 2)
-        denominator = 1 + z**2 / n
-        center = (proportion + z**2 / (2 * n)) / denominator
-        margin = (
-            z
-            * np.sqrt((proportion * (1 - proportion) + z**2 / (4 * n)) / n)
-            / denominator
+        ci_lower, ci_upper = proportion_confint(
+            successes,
+            n,
+            alpha=1.0 - self.confidence_level,
+            method="wilson",
         )
-
-        ci_lower = max(0, center - margin)
-        ci_upper = min(1, center + margin)
-
-        return float(proportion), float(ci_lower), float(ci_upper)
+        return (
+            float(proportion),
+            float(cast(float, ci_lower)),
+            float(cast(float, ci_upper)),
+        )
 
     def _calculate_variance_ci(self, data):
         """分散の信頼区間を計算（カイ二乗分布）"""

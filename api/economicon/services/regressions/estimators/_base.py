@@ -5,6 +5,7 @@ from typing import ClassVar
 
 import numpy as np
 
+from economicon.i18n.translation import gettext as _
 from economicon.schemas.entities import StandardErrorSettings
 from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result import AnalysisResult
@@ -61,8 +62,17 @@ class _RegressionBase:
         row_indices: np.ndarray | None = None,
     ) -> str:
         """AnalysisResult を生成・保存し result_id を返す。"""
+        if self.result_name:
+            name = self.result_name
+        else:
+            seq = self.result_store.next_sequence("regression")
+            name = _("{model_type}: {dependent} #{seq}").format(
+                model_type=model_type.upper(),
+                dependent=self.dependent_variable,
+                seq=seq,
+            )
         analysis_result = AnalysisResult(
-            name=self.result_name or self.dependent_variable,
+            name=name,
             description=self.description,
             table_name=self.table_name,
             result_data=regression_output,

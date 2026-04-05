@@ -244,10 +244,10 @@ def test_confidence_interval_mean_numerical(client, tables_store):
         scale=float(spstats.sem(data)),
     )
     ci = rd["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-6)
-    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-6)
+    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-8)
+    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-8)
     assert rd["statistic"]["value"] == pytest.approx(
-        float(np.mean(data)), abs=1e-6
+        float(np.mean(data)), abs=1e-8
     )
 
 
@@ -268,7 +268,7 @@ def test_confidence_interval_median_properties(client, tables_store):
     ci = rd["confidenceInterval"]
     assert ci["lower"] < ci["upper"]
     assert ci["lower"] <= expected_median <= ci["upper"]
-    assert rd["statistic"]["value"] == pytest.approx(expected_median, abs=1e-6)
+    assert rd["statistic"]["value"] == pytest.approx(expected_median, abs=1e-8)
 
 
 def test_confidence_interval_proportion_numerical(client, tables_store):
@@ -293,10 +293,10 @@ def test_confidence_interval_proportion_numerical(client, tables_store):
     )
     ci = rd["confidenceInterval"]
     assert ci["lower"] == pytest.approx(
-        float(cast(float, exp_lower)), abs=1e-6
+        float(cast(float, exp_lower)), abs=1e-8
     )
     assert ci["upper"] == pytest.approx(
-        float(cast(float, exp_upper)), abs=1e-6
+        float(cast(float, exp_upper)), abs=1e-8
     )
 
 
@@ -319,9 +319,9 @@ def test_confidence_interval_variance_numerical(client, tables_store):
     exp_lower = (_N_SAMPLES - 1) * var_val / chi2_hi
     exp_upper = (_N_SAMPLES - 1) * var_val / chi2_lo
     ci = rd["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-6)
-    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-6)
-    assert rd["statistic"]["value"] == pytest.approx(var_val, abs=1e-6)
+    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-8)
+    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-8)
+    assert rd["statistic"]["value"] == pytest.approx(var_val, abs=1e-8)
 
 
 def test_confidence_interval_std_numerical(client, tables_store):
@@ -343,8 +343,8 @@ def test_confidence_interval_std_numerical(client, tables_store):
     exp_lower = float(np.sqrt((_N_SAMPLES - 1) * var_val / chi2_hi))
     exp_upper = float(np.sqrt((_N_SAMPLES - 1) * var_val / chi2_lo))
     ci = rd["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-6)
-    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-6)
+    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-8)
+    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-8)
 
 
 def test_confidence_interval_levels_width_ordering(client, tables_store):

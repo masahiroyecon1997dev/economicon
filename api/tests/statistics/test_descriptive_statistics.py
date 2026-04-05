@@ -338,11 +338,11 @@ def test_descriptive_statistics_mean_median_variance_std_numerical(
     rd = _get_result_data(client, payload)
     stats_a = rd["statistics"]["A"]
 
-    assert stats_a[_STAT_MEAN] == pytest.approx(3.0, abs=1e-9)
-    assert stats_a[_STAT_MEDIAN] == pytest.approx(3.0, abs=1e-9)
-    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-9)
+    assert stats_a[_STAT_MEAN] == pytest.approx(3.0, abs=1e-8)
+    assert stats_a[_STAT_MEDIAN] == pytest.approx(3.0, abs=1e-8)
+    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-8)
     assert stats_a[_STAT_STD_DEV] == pytest.approx(
-        1.5811388300841898, abs=1e-5
+        1.5811388300841898, abs=1e-8
     )
 
 
@@ -365,8 +365,8 @@ def test_descriptive_statistics_range_iqr_numerical(client, tables_store):
         ).to_series(0)[0]
     )
     stats_a = rd["statistics"]["A"]
-    assert stats_a[_STAT_RANGE] == pytest.approx(expected_range, abs=1e-6)
-    assert stats_a[_STAT_IQR] == pytest.approx(expected_iqr, abs=1e-6)
+    assert stats_a[_STAT_RANGE] == pytest.approx(expected_range, abs=1e-8)
+    assert stats_a[_STAT_IQR] == pytest.approx(expected_iqr, abs=1e-8)
 
 
 def test_descriptive_statistics_population_variance_distinction(
@@ -381,8 +381,8 @@ def test_descriptive_statistics_population_variance_distinction(
     rd = _get_result_data(client, payload)
     stats_a = rd["statistics"]["A"]
 
-    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-9)
-    assert stats_a[_STAT_POP_VARIANCE] == pytest.approx(2.0, abs=1e-9)
+    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-8)
+    assert stats_a[_STAT_POP_VARIANCE] == pytest.approx(2.0, abs=1e-8)
 
 
 def test_descriptive_statistics_string_mode_result(client, tables_store):
@@ -409,7 +409,7 @@ def test_descriptive_statistics_count_null_result(client, tables_store):
     expected_count = 5
     assert stats_a[_STAT_COUNT] == expected_count
     assert stats_a[_STAT_NULL_COUNT] == 0
-    assert stats_a[_STAT_NULL_RATIO] == pytest.approx(0.0, abs=1e-9)
+    assert stats_a[_STAT_NULL_RATIO] == pytest.approx(0.0, abs=1e-8)
 
 
 def test_descriptive_statistics_multi_column_numerical(client, tables_store):
@@ -427,16 +427,16 @@ def test_descriptive_statistics_multi_column_numerical(client, tables_store):
     std_row = desc.filter(pl.col("statistic") == "std")
 
     assert rd["statistics"]["A"][_STAT_MEAN] == pytest.approx(
-        float(mean_row["A"][0]), abs=1e-6
+        float(mean_row["A"][0]), abs=1e-8
     )
     assert rd["statistics"]["B"][_STAT_MEAN] == pytest.approx(
-        float(mean_row["B"][0]), abs=1e-6
+        float(mean_row["B"][0]), abs=1e-8
     )
     assert rd["statistics"]["A"][_STAT_STD_DEV] == pytest.approx(
-        float(std_row["A"][0]), abs=1e-6
+        float(std_row["A"][0]), abs=1e-8
     )
     assert rd["statistics"]["B"][_STAT_STD_DEV] == pytest.approx(
-        float(std_row["B"][0]), abs=1e-6
+        float(std_row["B"][0]), abs=1e-8
     )
 
 
