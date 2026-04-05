@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import type { TableInfoType } from "../types/commonTypes";
 import { useTableChunkStore } from "./tableChunkStore";
 import { useTableInfosStore } from "./tableInfos";
@@ -102,6 +102,25 @@ describe("useTableInfosStore.removeTableInfo", () => {
     expect(state.activeTableName).toBe("tableB");
   });
 
+  it("test_removeTableInfo_firstActiveTable_activatesNextTable", () => {
+    const { addTableInfo, activateTableInfo, removeTableInfo } =
+      useTableInfosStore.getState();
+    addTableInfo(makeInfo("tableA"));
+    addTableInfo(makeInfo("tableB"));
+    addTableInfo(makeInfo("tableC"));
+
+    activateTableInfo("tableA"); // A をアクティブに切り替え
+    removeTableInfo("tableA"); // index=0 のアクティブなテーブルを削除
+
+    const state = useTableInfosStore.getState();
+    expect(state.tableInfos).toHaveLength(2);
+    // Math.min(0, 1)=0 → filtered[0]=tableB がアクティブになる
+    expect(state.activeTableName).toBe("tableB");
+    expect(
+      state.tableInfos.find((i) => i.tableName === "tableB")?.isActive,
+    ).toBe(true);
+  });
+
   it("test_removeTableInfo_lastTable_clearsActiveTableName", () => {
     const { addTableInfo, removeTableInfo } = useTableInfosStore.getState();
     addTableInfo(makeInfo("tableA"));
@@ -117,12 +136,14 @@ describe("useTableInfosStore.removeTableInfo", () => {
     const { addTableInfo, removeTableInfo } = useTableInfosStore.getState();
     addTableInfo(makeInfo("tableA"));
 
-    const clearTable = vi.spyOn(useTableChunkStore.getState(), "clearTable");
+    // チャンクを事前にキャッシュ
+    useTableChunkStore.getState().setChunk("tableA", 0, new Uint8Array([1, 2, 3]));
+    expect(useTableChunkStore.getState().hasChunk("tableA", 0)).toBe(true);
+
     removeTableInfo("tableA");
-    // clearTable が呼ばれるか（直接スパイは難しいため versions の変化で確認）
-    // スパイより状態変化確認（clearTable が実装内部で呼ばれる）
-    clearTable.mockRestore();
-    expect(useTableInfosStore.getState().tableInfos).toHaveLength(0);
+
+    // テーブル削除後はキャッシュも消えているはず
+    expect(useTableChunkStore.getState().hasChunk("tableA", 0)).toBe(false);
   });
 });
 
