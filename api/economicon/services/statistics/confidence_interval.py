@@ -43,6 +43,8 @@ class ConfidenceInterval:
         self.column_name = body.column_name
         self.confidence_level = body.confidence_level
         self.statistic_type = body.statistic_type
+        self.bootstrap_n_resamples = body.bootstrap_n_resamples
+        self.bootstrap_seed = body.bootstrap_seed
 
     def validate(self):
         # テーブル名の検証
@@ -169,9 +171,9 @@ class ConfidenceInterval:
 
         # Bootstrap法で信頼区間を計算
         bootstrap_medians = []
-        rng = np.random.default_rng()
+        rng = np.random.default_rng(self.bootstrap_seed)
 
-        for _index in range(1000):
+        for _index in range(self.bootstrap_n_resamples):
             bootstrap_sample = rng.choice(data, size=n, replace=True)
             bootstrap_medians.append(np.median(bootstrap_sample))
 

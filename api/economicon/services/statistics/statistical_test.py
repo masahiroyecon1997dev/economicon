@@ -19,11 +19,6 @@ from economicon.utils.validators import validate_existence
 # paired チェック・F 検定分岐で使用する定数
 _TWO_SAMPLES: int = 2
 
-# z 検定の 95% 信頼区間に使用する定数
-# z_crit = norm.ppf(1 - α/2) = norm.ppf(0.975) ≈ 1.95996...
-_ALPHA_95: float = 0.05
-_Z_CRIT_95: float = float(stats.norm.ppf(1.0 - _ALPHA_95 / 2))
-
 _RESULT_TYPE = "statistical_test"
 
 
@@ -206,7 +201,9 @@ class StatisticalTest:
                 arrays[0], popmean=mu, alternative="two-sided"
             )
             df = float(res.df)
-            ci = ci_res.confidence_interval(confidence_level=0.95)
+            ci = ci_res.confidence_interval(
+                confidence_level=self.options.confidence_level
+            )
             effect_size = self._cohen_d_1samp(arrays[0], mu)
 
         elif self.options.paired:
@@ -215,7 +212,9 @@ class StatisticalTest:
                 arrays[0], arrays[1], alternative="two-sided"
             )
             df = float(res.df)
-            ci = ci_res.confidence_interval(confidence_level=0.95)
+            ci = ci_res.confidence_interval(
+                confidence_level=self.options.confidence_level
+            )
             effect_size = self._cohen_d_paired(arrays[0], arrays[1])
 
         else:
@@ -232,7 +231,9 @@ class StatisticalTest:
                 alternative="two-sided",
             )
             df = float(res.df)
-            ci = ci_res.confidence_interval(confidence_level=0.95)
+            ci = ci_res.confidence_interval(
+                confidence_level=self.options.confidence_level
+            )
             effect_size = self._cohen_d_2samp(
                 arrays[0], arrays[1], self.options.equal_var
             )
@@ -245,6 +246,7 @@ class StatisticalTest:
                 "lower": float(ci.low),
                 "upper": float(ci.high),
             },
+            "confidenceLevel": self.options.confidence_level,
             "effectSize": effect_size,
         }
 
@@ -281,15 +283,19 @@ class StatisticalTest:
                 )
             )
 
-        # 95% 信頼区間（モジュール定数 _Z_CRIT_95 を使用）
+        # 信頼区間（options.confidence_level に基づく z 臨界値を使用）
+        z_crit = float(
+            stats.norm.ppf(1.0 - (1.0 - self.options.confidence_level) / 2)
+        )
         return {
             "statistic": float(stat),
             "pValue": float(p_val),
             "df": None,
             "confidenceInterval": {
-                "lower": center - _Z_CRIT_95 * se,
-                "upper": center + _Z_CRIT_95 * se,
+                "lower": center - z_crit * se,
+                "upper": center + z_crit * se,
             },
+            "confidenceLevel": self.options.confidence_level,
             "effectSize": None,
         }
 

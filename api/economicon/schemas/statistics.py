@@ -78,6 +78,33 @@ class ConfidenceIntervalRequestBody(BaseRequest):
             "variance: 分散、standard_deviation: 標準偏差）",
         ),
     ]
+    bootstrap_n_resamples: Annotated[
+        int,
+        Field(
+            title="Bootstrap N Resamples",
+            description=(
+                "Bootstrap 法（中央値 CI）のリサンプリング回数。"
+                "statisticType が median のときのみ有効。"
+                "（デフォルト: 1000、100〜100000）"
+            ),
+            ge=100,
+            le=100_000,
+            default=1000,
+        ),
+    ] = 1000
+    bootstrap_seed: Annotated[
+        int | None,
+        Field(
+            title="Bootstrap Seed",
+            description=(
+                "Bootstrap 法の乱数シード。"
+                "None の場合は毎回異なる結果になる。"
+                "再現性が必要な場合に整数を指定してください。"
+                "（デフォルト: None）"
+            ),
+            default=None,
+        ),
+    ] = None
 
 
 class ConfidenceIntervalResult(BaseResult):
@@ -408,6 +435,20 @@ class StatisticalTestOptions(BaseRequest):
             default=True,
         ),
     ] = True
+    confidence_level: Annotated[
+        float,
+        Field(
+            title="Confidence Level",
+            description=(
+                "検定結果に付与する信頼区間の信頼水準。"
+                "例: 0.95 = 95%信頼区間（デフォルト: 0.95）。"
+                "t 検定・z 検定に適用。f 検定は信頼区間なし。"
+            ),
+            gt=0.0,
+            lt=1.0,
+            default=0.95,
+        ),
+    ] = 0.95
 
 
 class StatisticalTestRequestBody(BaseRequest):
