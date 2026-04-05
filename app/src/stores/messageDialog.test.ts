@@ -76,17 +76,28 @@ describe("useMessageDialogStore", () => {
       expect(() => closeMessageDialog()).not.toThrow();
     });
 
-    it("test_closeMessageDialog_resolvesOnlyAfterDelay", async () => {
+    it("test_closeMessageDialog_doesNotResolveBeforeTimerFires", async () => {
       const { showMessageDialog, closeMessageDialog } =
         useMessageDialogStore.getState();
       const promise = showMessageDialog("T", "M");
 
       closeMessageDialog();
 
-      // 100ms の setTimeout 内なのでまだ pending のはず
-      // ただし Promise の pending 確認は難しいため time advance 後に resolved を確認
-      vi.advanceTimersByTime(100);
-      await expect(promise).resolves.toBeUndefined();
+      // タイマー発火前はまだ resolved ではない
+      let resolved = false;
+      void promise.then(() => {
+        resolved = true;
+      });
+
+      vi.advanceTimersByTime(99);
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(resolved).toBe(false);
+
+      // タイマー発火後は resolved になる
+      vi.advanceTimersByTime(1);
+      await promise;
+      expect(resolved).toBe(true);
     });
   });
 });
