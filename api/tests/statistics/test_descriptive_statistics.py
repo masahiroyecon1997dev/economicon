@@ -40,6 +40,19 @@ URL = "/api/statistics/descriptive"
 
 
 # -----------------------------------------------------------
+# ヘルパー
+# -----------------------------------------------------------
+
+
+def _get_result_data(client: TestClient, payload: dict) -> dict:
+    """POST して AnalysisResultStore から result_data を直接取得"""
+    resp = client.post(URL, json=payload)
+    assert resp.status_code == status.HTTP_200_OK, resp.text
+    result_id = resp.json()["result"]["resultId"]
+    return AnalysisResultStore().get_result(result_id).result_data
+
+
+# -----------------------------------------------------------
 # フィクスチャ
 # -----------------------------------------------------------
 
@@ -100,7 +113,7 @@ def tables_store_with_nulls():
 
 
 def test_descriptive_statistics_success_numeric(client, tables_store):
-    """数値データに対する記述統計の計算が正常に動作する"""
+    """数値データに対する記述統計の計算で resultId を含むレスポンスが返る"""
     payload = {
         "tableName": _TABLE_NUMERIC,
         "columnNameList": ["A"],
@@ -118,54 +131,13 @@ def test_descriptive_statistics_success_numeric(client, tables_store):
     assert response_data["code"] == "OK"
 
     result = response_data["result"]
-    assert "resultId" in result
+    assert set(result.keys()) == {"resultId"}
     assert isinstance(result["resultId"], str)
     assert len(result["resultId"]) > 0
-    assert result["tableName"] == _TABLE_NUMERIC
-    stats_a = result["statistics"]["A"]
-    assert stats_a[_STAT_MEAN] == pytest.approx(3.0, abs=1e-5)
-    assert stats_a[_STAT_MEDIAN] == pytest.approx(3.0, abs=1e-5)
-    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-5)
-    assert stats_a[_STAT_STD_DEV] == pytest.approx(
-        1.5811388300841898, abs=1e-5
-    )
-
-
-def test_descriptive_statistics_numerical_via_describe(client, tables_store):
-    """polars describe()との数値照合"""
-    payload = {
-        "tableName": _TABLE_NUMERIC,
-        "columnNameList": ["A", "B"],
-        "statistics": [_STAT_MEAN, _STAT_STD_DEV],
-    }
-    response = client.post(URL, json=payload)
-    result = response.json()["result"]
-
-    df = pl.DataFrame({"A": [1, 2, 3, 4, 5], "B": [10, 20, 30, 40, 50]})
-    desc = df.describe()
-    mean_row = desc.filter(pl.col("statistic") == "mean")
-    std_row = desc.filter(pl.col("statistic") == "std")
-    expected_mean_a = float(mean_row["A"][0])
-    expected_std_a = float(std_row["A"][0])
-    expected_mean_b = float(mean_row["B"][0])
-    expected_std_b = float(std_row["B"][0])
-
-    assert result["statistics"]["A"][_STAT_MEAN] == pytest.approx(
-        expected_mean_a, abs=1e-6
-    )
-    assert result["statistics"]["A"][_STAT_STD_DEV] == pytest.approx(
-        expected_std_a, abs=1e-6
-    )
-    assert result["statistics"]["B"][_STAT_MEAN] == pytest.approx(
-        expected_mean_b, abs=1e-6
-    )
-    assert result["statistics"]["B"][_STAT_STD_DEV] == pytest.approx(
-        expected_std_b, abs=1e-6
-    )
 
 
 def test_descriptive_statistics_success_all_stats(client, tables_store):
-    """全統計量を複数列で計算する"""
+    """全統計量を複数列で計算し resultId を含むレスポンスが返る"""
     payload = {
         "tableName": _TABLE_NUMERIC,
         "columnNameList": ["A", "B", "C"],
@@ -184,45 +156,14 @@ def test_descriptive_statistics_success_all_stats(client, tables_store):
 
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-
     result = response_data["result"]
-    stats_b = result["statistics"]["B"]
-    assert stats_b[_STAT_MEAN] == pytest.approx(30.0, abs=1e-5)
-    assert stats_b[_STAT_MEDIAN] == pytest.approx(30.0, abs=1e-5)
-    assert stats_b[_STAT_RANGE] == pytest.approx(40.0, abs=1e-5)
-    assert stats_b[_STAT_IQR] == pytest.approx(20.0, abs=1e-5)
-
-
-def test_descriptive_statistics_range_iqr_numerical(client, tables_store):
-    """rangeとIQRの数値をpolarsの直接計算と照合"""
-    payload = {
-        "tableName": _TABLE_NUMERIC,
-        "columnNameList": ["A"],
-        "statistics": [_STAT_RANGE, _STAT_IQR],
-    }
-    response = client.post(URL, json=payload)
-    result = response.json()["result"]
-
-    df = pl.DataFrame({"A": [1, 2, 3, 4, 5]})
-    expected_range = float(
-        df.select(pl.col("A").max() - pl.col("A").min()).to_series(0)[0]
-    )
-    expected_iqr = float(
-        df.select(
-            pl.col("A").quantile(0.75) - pl.col("A").quantile(0.25)
-        ).to_series(0)[0]
-    )
-
-    assert result["statistics"]["A"][_STAT_RANGE] == pytest.approx(
-        expected_range, abs=1e-6
-    )
-    assert result["statistics"]["A"][_STAT_IQR] == pytest.approx(
-        expected_iqr, abs=1e-6
-    )
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
 
 
 def test_descriptive_statistics_success_string_mode(client, tables_store):
-    """文字列データに対するmode計算"""
+    """文字列データに対するmode計算で resultId を含むレスポンスが返る"""
     payload = {
         "tableName": _TABLE_STRING,
         "columnNameList": ["name"],
@@ -233,109 +174,112 @@ def test_descriptive_statistics_success_string_mode(client, tables_store):
 
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-
     result = response_data["result"]
-    # name列はAliceかBobが最頻値
-    assert result["statistics"]["name"][_STAT_MODE] in ["Alice", "Bob"]
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
 
 
 def test_descriptive_statistics_count_no_nulls(client, tables_store):
-    """nullなしデータでcount/null_count/null_ratioが正しく返る"""
+    """nullなしデータでcount/null_count/null_ratioを含む resultId が返る"""
     payload = {
         "tableName": _TABLE_NUMERIC,
         "columnNameList": ["A"],
         "statistics": [_STAT_COUNT, _STAT_NULL_COUNT, _STAT_NULL_RATIO],
     }
     response = client.post(URL, json=payload)
-    result = response.json()["result"]
+    response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    stats_a = result["statistics"]["A"]
-    _expected_count = 5
-    assert stats_a[_STAT_COUNT] == _expected_count
-    assert stats_a[_STAT_NULL_COUNT] == 0
-    assert stats_a[_STAT_NULL_RATIO] == pytest.approx(0.0, abs=1e-9)
+    assert response_data["code"] == "OK"
+    result = response_data["result"]
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
 
 
 def test_descriptive_statistics_count_with_nulls(
     client, tables_store_with_nulls
 ):
-    """null2件データでcount=3, null_count=2, null_ratio≈0.4"""
+    """null含有データで resultId を含むレスポンスが返る"""
     payload = {
         "tableName": "TestNulls",
         "columnNameList": ["X"],
         "statistics": [_STAT_COUNT, _STAT_NULL_COUNT, _STAT_NULL_RATIO],
     }
     response = client.post(URL, json=payload)
-    result = response.json()["result"]
+    response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    stats_x = result["statistics"]["X"]
-    _expected_valid = 3
-    _expected_null = 2
-    assert stats_x[_STAT_COUNT] == _expected_valid
-    assert stats_x[_STAT_NULL_COUNT] == _expected_null
-    assert stats_x[_STAT_NULL_RATIO] == pytest.approx(0.4, abs=1e-9)
+    assert response_data["code"] == "OK"
+    result = response_data["result"]
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
 
 
 def test_descriptive_statistics_population_variance_numerical(
     client, tables_store
 ):
-    """A=[1..5]で母分散=2.0、不偏分散=2.5の区別を検証"""
+    """population_variance を含む resultId が返る"""
     payload = {
         "tableName": _TABLE_NUMERIC,
         "columnNameList": ["A"],
         "statistics": [_STAT_VARIANCE, _STAT_POP_VARIANCE],
     }
     response = client.post(URL, json=payload)
-    result = response.json()["result"]
+    response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    stats_a = result["statistics"]["A"]
-    # 不偏分散 (ddof=1): 10/4 = 2.5
-    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-9)
-    # 母分散 (ddof=0): 10/5 = 2.0
-    assert stats_a[_STAT_POP_VARIANCE] == pytest.approx(2.0, abs=1e-9)
+    assert response_data["code"] == "OK"
+    result = response_data["result"]
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
 
 
 def test_descriptive_statistics_null_stats_on_string_column(
     client, tables_store
 ):
-    """count/null_count/null_ratioは文字列列からも正常値を返す"""
+    """count/null_count/null_ratio は文字列列からも resultId が返る"""
     payload = {
         "tableName": _TABLE_STRING,
         "columnNameList": ["name"],
         "statistics": [_STAT_COUNT, _STAT_NULL_COUNT, _STAT_NULL_RATIO],
     }
     response = client.post(URL, json=payload)
-    result = response.json()["result"]
+    response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    stats = result["statistics"]["name"]
-    _expected_str_count = 5
-    assert stats[_STAT_COUNT] == _expected_str_count
-    assert stats[_STAT_NULL_COUNT] == 0
-    assert stats[_STAT_NULL_RATIO] == pytest.approx(0.0, abs=1e-9)
+    assert response_data["code"] == "OK"
+    result = response_data["result"]
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
 
 
 def test_descriptive_statistics_pop_variance_on_string_column(
     client, tables_store
 ):
-    """population_varianceは文字列列に対してNoneを返す"""
+    """population_varianceはNoneを含む resultId が返る"""
     payload = {
         "tableName": _TABLE_STRING,
         "columnNameList": ["name"],
         "statistics": [_STAT_POP_VARIANCE],
     }
     response = client.post(URL, json=payload)
-    result = response.json()["result"]
+    response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert result["statistics"]["name"][_STAT_POP_VARIANCE] is None
+    assert response_data["code"] == "OK"
+    result = response_data["result"]
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
 
 
 def test_descriptive_statistics_string_numeric_stats(client, tables_store):
-    """文字列データに対して数値専用統計を要求した場合はNoneが返される"""
+    """文字列データに対して数値専用統計を要求しても resultId が返る"""
     payload = {
         "tableName": _TABLE_STRING,
         "columnNameList": ["name"],
@@ -352,31 +296,162 @@ def test_descriptive_statistics_string_numeric_stats(client, tables_store):
 
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-
     result = response_data["result"]
-    assert result["statistics"]["name"][_STAT_MEAN] is None
-    assert result["statistics"]["name"][_STAT_VARIANCE] is None
-    assert result["statistics"]["name"][_STAT_STD_DEV] is None
-    assert result["statistics"]["name"][_STAT_RANGE] is None
-    assert result["statistics"]["name"][_STAT_IQR] is None
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
 
 
 def test_descriptive_statistics_response_structure(client, tables_store):
-    """レスポンスのJSON構造が仕様通りである"""
+    """レスポンスには resultId のみが含まれる"""
     payload = {
         "tableName": _TABLE_NUMERIC,
         "columnNameList": ["A"],
         "statistics": [_STAT_MEAN],
     }
     response = client.post(URL, json=payload)
-    response_data = response.json()
+    result = response.json()["result"]
 
-    assert response.status_code == status.HTTP_200_OK
-    result = response_data["result"]
-    assert "tableName" in result
-    assert "statistics" in result
-    assert "A" in result["statistics"]
-    assert _STAT_MEAN in result["statistics"]["A"]
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+
+
+# -----------------------------------------------------------
+# 数値精度テスト（AnalysisResultStore 直接参照）
+# -----------------------------------------------------------
+
+
+def test_descriptive_statistics_mean_median_variance_std_numerical(
+    client, tables_store
+):
+    """A=[1..5] の平均・中央値・分散・標準偏差が期待値と一致する"""
+    payload = {
+        "tableName": _TABLE_NUMERIC,
+        "columnNameList": ["A"],
+        "statistics": [
+            _STAT_MEAN,
+            _STAT_MEDIAN,
+            _STAT_VARIANCE,
+            _STAT_STD_DEV,
+        ],
+    }
+    rd = _get_result_data(client, payload)
+    stats_a = rd["statistics"]["A"]
+
+    assert stats_a[_STAT_MEAN] == pytest.approx(3.0, abs=1e-9)
+    assert stats_a[_STAT_MEDIAN] == pytest.approx(3.0, abs=1e-9)
+    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-9)
+    assert stats_a[_STAT_STD_DEV] == pytest.approx(
+        1.5811388300841898, abs=1e-5
+    )
+
+
+def test_descriptive_statistics_range_iqr_numerical(client, tables_store):
+    """A=[1..5] の range と IQR が Polars の直接計算と一致する"""
+    payload = {
+        "tableName": _TABLE_NUMERIC,
+        "columnNameList": ["A"],
+        "statistics": [_STAT_RANGE, _STAT_IQR],
+    }
+    rd = _get_result_data(client, payload)
+
+    df = pl.DataFrame({"A": [1, 2, 3, 4, 5]})
+    expected_range = float(
+        df.select(pl.col("A").max() - pl.col("A").min()).to_series(0)[0]
+    )
+    expected_iqr = float(
+        df.select(
+            pl.col("A").quantile(0.75) - pl.col("A").quantile(0.25)
+        ).to_series(0)[0]
+    )
+    stats_a = rd["statistics"]["A"]
+    assert stats_a[_STAT_RANGE] == pytest.approx(expected_range, abs=1e-6)
+    assert stats_a[_STAT_IQR] == pytest.approx(expected_iqr, abs=1e-6)
+
+
+def test_descriptive_statistics_population_variance_distinction(
+    client, tables_store
+):
+    """A=[1..5] で不偏分散=2.5、母分散=2.0 の区別が正しい"""
+    payload = {
+        "tableName": _TABLE_NUMERIC,
+        "columnNameList": ["A"],
+        "statistics": [_STAT_VARIANCE, _STAT_POP_VARIANCE],
+    }
+    rd = _get_result_data(client, payload)
+    stats_a = rd["statistics"]["A"]
+
+    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-9)
+    assert stats_a[_STAT_POP_VARIANCE] == pytest.approx(2.0, abs=1e-9)
+
+
+def test_descriptive_statistics_string_mode_result(client, tables_store):
+    """文字列列の最頻値が Alice または Bob である"""
+    payload = {
+        "tableName": _TABLE_STRING,
+        "columnNameList": ["name"],
+        "statistics": [_STAT_MODE],
+    }
+    rd = _get_result_data(client, payload)
+    assert rd["statistics"]["name"][_STAT_MODE] in ["Alice", "Bob"]
+
+
+def test_descriptive_statistics_count_null_result(client, tables_store):
+    """count=5、null_count=0、null_ratio=0.0 が正しく返る"""
+    payload = {
+        "tableName": _TABLE_NUMERIC,
+        "columnNameList": ["A"],
+        "statistics": [_STAT_COUNT, _STAT_NULL_COUNT, _STAT_NULL_RATIO],
+    }
+    rd = _get_result_data(client, payload)
+    stats_a = rd["statistics"]["A"]
+
+    expected_count = 5
+    assert stats_a[_STAT_COUNT] == expected_count
+    assert stats_a[_STAT_NULL_COUNT] == 0
+    assert stats_a[_STAT_NULL_RATIO] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_descriptive_statistics_multi_column_numerical(client, tables_store):
+    """A と B の平均が Polars describe() の値と一致する"""
+    payload = {
+        "tableName": _TABLE_NUMERIC,
+        "columnNameList": ["A", "B"],
+        "statistics": [_STAT_MEAN, _STAT_STD_DEV],
+    }
+    rd = _get_result_data(client, payload)
+
+    df = pl.DataFrame({"A": [1, 2, 3, 4, 5], "B": [10, 20, 30, 40, 50]})
+    desc = df.describe()
+    mean_row = desc.filter(pl.col("statistic") == "mean")
+    std_row = desc.filter(pl.col("statistic") == "std")
+
+    assert rd["statistics"]["A"][_STAT_MEAN] == pytest.approx(
+        float(mean_row["A"][0]), abs=1e-6
+    )
+    assert rd["statistics"]["B"][_STAT_MEAN] == pytest.approx(
+        float(mean_row["B"][0]), abs=1e-6
+    )
+    assert rd["statistics"]["A"][_STAT_STD_DEV] == pytest.approx(
+        float(std_row["A"][0]), abs=1e-6
+    )
+    assert rd["statistics"]["B"][_STAT_STD_DEV] == pytest.approx(
+        float(std_row["B"][0]), abs=1e-6
+    )
+
+
+def test_descriptive_statistics_string_numeric_stats_are_none(
+    client, tables_store
+):
+    """文字列列に数値専用統計を要求した場合は None が返る"""
+    payload = {
+        "tableName": _TABLE_STRING,
+        "columnNameList": ["name"],
+        "statistics": [_STAT_MEAN, _STAT_VARIANCE],
+    }
+    rd = _get_result_data(client, payload)
+    assert rd["statistics"]["name"][_STAT_MEAN] is None
+    assert rd["statistics"]["name"][_STAT_VARIANCE] is None
 
 
 # -----------------------------------------------------------

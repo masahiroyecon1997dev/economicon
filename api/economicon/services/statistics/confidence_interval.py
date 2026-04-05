@@ -116,7 +116,8 @@ class ConfidenceInterval:
                 "confidenceLevel": self.confidence_level,
             }
 
-            # AnalysisResultStore に保存（自動命名: "{column} の {stat_type} 信頼区間 #{n}"）
+            # AnalysisResultStore に保存
+            # （自動命名: "{column} の {stat_type} 信頼区間 #{n}"）
             seq = self.result_store.next_sequence(_RESULT_TYPE)
             name = _("{column} の {stat_type} 信頼区間 #{seq}").format(
                 column=self.column_name,
@@ -131,7 +132,7 @@ class ConfidenceInterval:
                 result_type=_RESULT_TYPE,
             )
             result_id = self.result_store.save_result(analysis_result)
-            return {**result, "resultId": result_id}
+            return {"resultId": result_id}
 
         except ValidationError:
             # ValidationErrorは再発生させる

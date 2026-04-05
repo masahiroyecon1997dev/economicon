@@ -9,11 +9,7 @@ from statsmodels.stats.weightstats import ztest as sm_ztest
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.enums import AlternativeHypothesis, StatisticalTestType
-from economicon.schemas.statistics import (
-    ConfidenceIntervalBounds,
-    StatisticalTestRequestBody,
-    StatisticalTestResult,
-)
+from economicon.schemas.statistics import StatisticalTestRequestBody
 from economicon.services.data.analysis_result import AnalysisResult
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
@@ -154,7 +150,7 @@ class StatisticalTest:
                 result_type=_RESULT_TYPE,
             )
             result_id = self.result_store.save_result(analysis_result)
-            return {**result, "resultId": result_id}
+            return {"resultId": result_id}
 
         except ValidationError, ProcessingError:
             raise
@@ -241,16 +237,16 @@ class StatisticalTest:
                 arrays[0], arrays[1], self.options.equal_var
             )
 
-        return StatisticalTestResult(
-            result_id="",
-            statistic=float(res.statistic),
-            p_value=float(res.pvalue),
-            df=df,
-            confidence_interval=ConfidenceIntervalBounds(
-                lower=float(ci.low), upper=float(ci.high)
-            ),
-            effect_size=effect_size,
-        ).model_dump(by_alias=True)
+        return {
+            "statistic": float(res.statistic),
+            "pValue": float(res.pvalue),
+            "df": df,
+            "confidenceInterval": {
+                "lower": float(ci.low),
+                "upper": float(ci.high),
+            },
+            "effectSize": effect_size,
+        }
 
     def _run_ztest(self, arrays: list[np.ndarray]) -> dict:
         """
@@ -286,17 +282,16 @@ class StatisticalTest:
             )
 
         # 95% 信頼区間（モジュール定数 _Z_CRIT_95 を使用）
-        return StatisticalTestResult(
-            result_id="",
-            statistic=float(stat),
-            p_value=float(p_val),
-            df=None,
-            confidence_interval=ConfidenceIntervalBounds(
-                lower=center - _Z_CRIT_95 * se,
-                upper=center + _Z_CRIT_95 * se,
-            ),
-            effect_size=None,
-        ).model_dump(by_alias=True)
+        return {
+            "statistic": float(stat),
+            "pValue": float(p_val),
+            "df": None,
+            "confidenceInterval": {
+                "lower": center - _Z_CRIT_95 * se,
+                "upper": center + _Z_CRIT_95 * se,
+            },
+            "effectSize": None,
+        }
 
     def _run_ftest(self, arrays: list[np.ndarray]) -> dict:
         """
@@ -321,15 +316,14 @@ class StatisticalTest:
             float(stats.f.cdf(f_stat, df1, df2)),
             float(stats.f.sf(f_stat, df1, df2)),
         )
-        return StatisticalTestResult(
-            result_id="",
-            statistic=float(f_stat),
-            p_value=p_val,
-            df=float(df1),
-            df2=float(df2),
-            confidence_interval=None,
-            effect_size=None,
-        ).model_dump(by_alias=True)
+        return {
+            "statistic": float(f_stat),
+            "pValue": p_val,
+            "df": float(df1),
+            "df2": float(df2),
+            "confidenceInterval": None,
+            "effectSize": None,
+        }
 
     def _f_oneway_anova(self, arrays: list[np.ndarray]) -> dict:
         """一元配置分散分析（ANOVA）。効果量として η² を返す。"""
@@ -339,15 +333,14 @@ class StatisticalTest:
             sum(len(a) for a in arrays) - len(arrays)
         )
         eta_sq = self._eta_squared(arrays)
-        return StatisticalTestResult(
-            result_id="",
-            statistic=float(res.statistic),
-            p_value=float(res.pvalue),
-            df=dfn,
-            df2=dfd,
-            confidence_interval=None,
-            effect_size=eta_sq,
-        ).model_dump(by_alias=True)
+        return {
+            "statistic": float(res.statistic),
+            "pValue": float(res.pvalue),
+            "df": dfn,
+            "df2": dfd,
+            "confidenceInterval": None,
+            "effectSize": eta_sq,
+        }
 
     # ------------------------------------------------------------------ #
     # 効果量計算                                                            #

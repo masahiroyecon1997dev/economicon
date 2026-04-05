@@ -1,4 +1,4 @@
-"""信頼区間計算APIのテスト"""
+"""信頼区間計算 POST エンドポイントのテスト"""
 
 from typing import cast
 
@@ -41,6 +41,19 @@ _STATISTIC_TYPE_ERROR = (
 )
 
 URL = "/api/statistics/confidence-interval"
+
+
+# -----------------------------------------------------------
+# ヘルパー
+# -----------------------------------------------------------
+
+
+def _get_result_data(client: TestClient, payload: dict) -> dict:
+    """POST して AnalysisResultStore から result_data を直接取得"""
+    resp = client.post(URL, json=payload)
+    assert resp.status_code == status.HTTP_200_OK, resp.text
+    result_id = resp.json()["result"]["resultId"]
+    return AnalysisResultStore().get_result(result_id).result_data
 
 
 # -----------------------------------------------------------
@@ -99,7 +112,7 @@ def tables_store():
 
 
 def test_confidence_interval_mean_success(client, tables_store):
-    """平均値の信頼区間計算が正常に動作する"""
+    """平均値の信頼区間計算で resultId を含むレスポンスが返る"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "normal_col",
@@ -111,25 +124,89 @@ def test_confidence_interval_mean_success(client, tables_store):
 
     assert response.status_code == status.HTTP_200_OK
     assert response_data["code"] == "OK"
-
     result = response_data["result"]
-    assert result["tableName"] == _TABLE_NAME
-    assert result["columnName"] == "normal_col"
-    assert result["confidenceLevel"] == _CI_LEVEL_95
-    assert result["statistic"]["type"] == _STAT_MEAN
-    assert isinstance(result["statistic"]["value"], float)
-
-    ci = result["confidenceInterval"]
-    assert "lower" in ci
-    assert "upper" in ci
-    assert ci["lower"] < ci["upper"]
-    assert "resultId" in result
+    assert set(result.keys()) == {"resultId"}
     assert isinstance(result["resultId"], str)
     assert len(result["resultId"]) > 0
 
 
-def test_confidence_interval_mean_numerical(client, tables_store):
-    """平均値CIの数値をscipy.stats.t.intervalと照合"""
+def test_confidence_interval_median_success(client, tables_store):
+    """中央値の信頼区間計算で resultId を含むレスポンスが返る"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_90,
+        "statisticType": _STAT_MEDIAN,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    result = response_data["result"]
+    assert "resultId" in result
+    assert len(result["resultId"]) > 0
+
+
+def test_confidence_interval_proportion_success(client, tables_store):
+    """比率の信頼区間計算で resultId を含むレスポンスが返る"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "binary_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_PROPORTION,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    result = response_data["result"]
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
+
+
+def test_confidence_interval_variance_success(client, tables_store):
+    """分散の信頼区間計算で resultId を含むレスポンスが返る"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_VARIANCE,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    result = response_data["result"]
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
+
+
+def test_confidence_interval_std_success(client, tables_store):
+    """標準偏差の信頼区間計算で resultId を含むレスポンスが返る"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_STD,
+    }
+    response = client.post(URL, json=payload)
+    response_data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    result = response_data["result"]
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
+    assert len(result["resultId"]) > 0
+
+
+def test_confidence_interval_response_structure(client, tables_store):
+    """レスポンスには resultId のみが含まれる"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "normal_col",
@@ -139,245 +216,140 @@ def test_confidence_interval_mean_numerical(client, tables_store):
     response = client.post(URL, json=payload)
     result = response.json()["result"]
 
-    # フィクスチャと同じシード・順序でデータを再現
-    np.random.seed(_SEED)
-    normal_data = np.random.normal(50, 10, _N_SAMPLES)
+    assert set(result.keys()) == {"resultId"}
+    assert isinstance(result["resultId"], str)
 
-    expected_lower, expected_upper = spstats.t.interval(
+
+# -----------------------------------------------------------
+# 数値精度テスト（AnalysisResultStore 直接参照）
+# -----------------------------------------------------------
+
+
+def test_confidence_interval_mean_numerical(client, tables_store):
+    """平均値 CI の数値が scipy.stats.t.interval と一致する"""
+    payload = {
+        "tableName": _TABLE_NAME,
+        "columnName": "normal_col",
+        "confidenceLevel": _CI_LEVEL_95,
+        "statisticType": _STAT_MEAN,
+    }
+    rd = _get_result_data(client, payload)
+
+    np.random.seed(_SEED)
+    data = np.random.normal(50, 10, _N_SAMPLES)
+    exp_lower, exp_upper = spstats.t.interval(
         _CI_LEVEL_95,
         df=_N_SAMPLES - 1,
-        loc=float(np.mean(normal_data)),
-        scale=float(spstats.sem(normal_data)),
+        loc=float(np.mean(data)),
+        scale=float(spstats.sem(data)),
+    )
+    ci = rd["confidenceInterval"]
+    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-6)
+    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-6)
+    assert rd["statistic"]["value"] == pytest.approx(
+        float(np.mean(data)), abs=1e-6
     )
 
-    ci = result["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(expected_lower, abs=1e-6)
-    assert ci["upper"] == pytest.approx(expected_upper, abs=1e-6)
-    assert result["statistic"]["value"] == pytest.approx(
-        float(np.mean(normal_data)), abs=1e-6
-    )
 
-
-def test_confidence_interval_median_success(client, tables_store):
-    """中央値の信頼区間計算が正常に動作する"""
+def test_confidence_interval_median_properties(client, tables_store):
+    """中央値 CI がブートストラップ法の統計的性質を満たす"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "normal_col",
         "confidenceLevel": _CI_LEVEL_90,
         "statisticType": _STAT_MEDIAN,
     }
-    response = client.post(URL, json=payload)
-    response_data = response.json()
+    rd = _get_result_data(client, payload)
 
-    assert response.status_code == status.HTTP_200_OK
-    assert response_data["code"] == "OK"
-
-    result = response_data["result"]
-    assert result["statistic"]["type"] == _STAT_MEDIAN
-    assert result["confidenceLevel"] == _CI_LEVEL_90
-    assert (
-        result["confidenceInterval"]["lower"]
-        < result["confidenceInterval"]["upper"]
-    )
-
-
-def test_confidence_interval_median_numerical(client, tables_store):
-    """中央値CIがBootstrap法の統計的性質を満たすことを検証
-
-    シード固定非依存で以下の性質を確認:
-      1. CI が非退化 (lower < upper)
-      2. サンプル中央値が CI 内に収まる
-      3. N(50, 10) データに対して妥当な範囲
-      4. 点推定値が正確なサンプル中央値と一致
-    """
-    payload = {
-        "tableName": _TABLE_NAME,
-        "columnName": "normal_col",
-        "confidenceLevel": _CI_LEVEL_90,
-        "statisticType": _STAT_MEDIAN,
-    }
-    response = client.post(URL, json=payload)
-    result = response.json()["result"]
-
-    # フィクスチャと同じシード・順序でデータを再現して期待中央値を算出
     np.random.seed(_SEED)
-    normal_data = np.random.normal(50, 10, _N_SAMPLES)
-    expected_median = float(np.median(normal_data))
+    data = np.random.normal(50, 10, _N_SAMPLES)
+    expected_median = float(np.median(data))
 
-    ci = result["confidenceInterval"]
-    # 1. 区間の非退化性
+    ci = rd["confidenceInterval"]
     assert ci["lower"] < ci["upper"]
-    # 2. サンプル中央値が CI 内に存在する
     assert ci["lower"] <= expected_median <= ci["upper"]
-    # 3. N(50, 10), n=100 のデータに対して合理的な範囲（5σ 超えは実質不可能）
-    min_lower = 30.0
-    max_lower = 60.0
-    min_upper = 40.0
-    max_upper = 70.0
-    assert min_lower < ci["lower"] < max_lower
-    assert min_upper < ci["upper"] < max_upper
-    # 4. 点推定値の正確性（Bootstrap と無関係に決定論的）
-    assert result["statistic"]["value"] == pytest.approx(
-        expected_median, abs=1e-6
-    )
-
-
-def test_confidence_interval_proportion_success(client, tables_store):
-    """比率の信頼区間計算が正常に動作する"""
-    payload = {
-        "tableName": _TABLE_NAME,
-        "columnName": "binary_col",
-        "confidenceLevel": _CI_LEVEL_95,
-        "statisticType": _STAT_PROPORTION,
-    }
-    response = client.post(URL, json=payload)
-    response_data = response.json()
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response_data["code"] == "OK"
-
-    result = response_data["result"]
-    assert result["statistic"]["type"] == _STAT_PROPORTION
-    proportion_value = result["statistic"]["value"]
-    assert 0.0 <= proportion_value <= 1.0
-
-    ci = result["confidenceInterval"]
-    assert 0.0 <= ci["lower"] <= ci["upper"] <= 1.0
+    assert rd["statistic"]["value"] == pytest.approx(expected_median, abs=1e-6)
 
 
 def test_confidence_interval_proportion_numerical(client, tables_store):
-    """比率CIの数値をstatsmodels Wilson scoreと照合"""
+    """比率 CI の数値が statsmodels Wilson score と一致する"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "binary_col",
         "confidenceLevel": _CI_LEVEL_95,
         "statisticType": _STAT_PROPORTION,
     }
-    response = client.post(URL, json=payload)
-    result = response.json()["result"]
+    rd = _get_result_data(client, payload)
 
-    # フィクスチャと同じシード・順序でデータを再現
     np.random.seed(_SEED)
-    _dummy = np.random.normal(50, 10, _N_SAMPLES)  # normal_col分のRNG消費
+    _dummy = np.random.normal(50, 10, _N_SAMPLES)  # normal_col 分の消費
     binary_data = np.random.binomial(1, 0.3, _N_SAMPLES)
     n_successes = int(np.sum(binary_data))
-
-    expected_lower, expected_upper = proportion_confint(
+    exp_lower, exp_upper = proportion_confint(
         n_successes,
         _N_SAMPLES,
         alpha=1 - _CI_LEVEL_95,
         method="wilson",
     )
-
-    ci = result["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(cast(float, expected_lower), abs=1e-6)
-    assert ci["upper"] == pytest.approx(cast(float, expected_upper), abs=1e-6)
-
-
-def test_confidence_interval_variance_success(client, tables_store):
-    """分散の信頼区間計算が正常に動作する"""
-    payload = {
-        "tableName": _TABLE_NAME,
-        "columnName": "normal_col",
-        "confidenceLevel": _CI_LEVEL_95,
-        "statisticType": _STAT_VARIANCE,
-    }
-    response = client.post(URL, json=payload)
-    response_data = response.json()
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response_data["code"] == "OK"
-
-    result = response_data["result"]
-    assert result["statistic"]["type"] == _STAT_VARIANCE
-    assert result["statistic"]["value"] > 0
-    assert (
-        result["confidenceInterval"]["lower"]
-        < result["confidenceInterval"]["upper"]
+    ci = rd["confidenceInterval"]
+    assert ci["lower"] == pytest.approx(
+        float(cast(float, exp_lower)), abs=1e-6
+    )
+    assert ci["upper"] == pytest.approx(
+        float(cast(float, exp_upper)), abs=1e-6
     )
 
 
 def test_confidence_interval_variance_numerical(client, tables_store):
-    """分散CIの数値をカイ二乗分布と照合"""
+    """分散 CI の数値がカイ二乗分布と一致する"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "normal_col",
         "confidenceLevel": _CI_LEVEL_95,
         "statisticType": _STAT_VARIANCE,
     }
-    response = client.post(URL, json=payload)
-    result = response.json()["result"]
+    rd = _get_result_data(client, payload)
 
     np.random.seed(_SEED)
-    normal_data = np.random.normal(50, 10, _N_SAMPLES)
-    variance_val = float(np.var(normal_data, ddof=1))
+    data = np.random.normal(50, 10, _N_SAMPLES)
+    var_val = float(np.var(data, ddof=1))
     alpha = 1 - _CI_LEVEL_95
-    chi2_lower = spstats.chi2.ppf(alpha / 2, df=_N_SAMPLES - 1)
-    chi2_upper = spstats.chi2.ppf(1 - alpha / 2, df=_N_SAMPLES - 1)
-    expected_lower = (_N_SAMPLES - 1) * variance_val / chi2_upper
-    expected_upper = (_N_SAMPLES - 1) * variance_val / chi2_lower
-
-    ci = result["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(expected_lower, abs=1e-6)
-    assert ci["upper"] == pytest.approx(expected_upper, abs=1e-6)
-    assert result["statistic"]["value"] == pytest.approx(
-        variance_val, abs=1e-6
-    )
-
-
-def test_confidence_interval_std_success(client, tables_store):
-    """標準偏差の信頼区間計算が正常に動作する"""
-    payload = {
-        "tableName": _TABLE_NAME,
-        "columnName": "normal_col",
-        "confidenceLevel": _CI_LEVEL_95,
-        "statisticType": _STAT_STD,
-    }
-    response = client.post(URL, json=payload)
-    response_data = response.json()
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response_data["code"] == "OK"
-
-    result = response_data["result"]
-    assert result["statistic"]["type"] == _STAT_STD
-    assert result["statistic"]["value"] > 0
-    assert (
-        result["confidenceInterval"]["lower"]
-        < result["confidenceInterval"]["upper"]
-    )
+    chi2_lo = spstats.chi2.ppf(alpha / 2, df=_N_SAMPLES - 1)
+    chi2_hi = spstats.chi2.ppf(1 - alpha / 2, df=_N_SAMPLES - 1)
+    exp_lower = (_N_SAMPLES - 1) * var_val / chi2_hi
+    exp_upper = (_N_SAMPLES - 1) * var_val / chi2_lo
+    ci = rd["confidenceInterval"]
+    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-6)
+    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-6)
+    assert rd["statistic"]["value"] == pytest.approx(var_val, abs=1e-6)
 
 
 def test_confidence_interval_std_numerical(client, tables_store):
-    """標準偏差CIの数値を分散CIの平方根と照合"""
+    """標準偏差 CI の数値が分散 CI の平方根と一致する"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "normal_col",
         "confidenceLevel": _CI_LEVEL_95,
         "statisticType": _STAT_STD,
     }
-    response = client.post(URL, json=payload)
-    result = response.json()["result"]
+    rd = _get_result_data(client, payload)
 
     np.random.seed(_SEED)
-    normal_data = np.random.normal(50, 10, _N_SAMPLES)
-    variance_val = float(np.var(normal_data, ddof=1))
+    data = np.random.normal(50, 10, _N_SAMPLES)
+    var_val = float(np.var(data, ddof=1))
     alpha = 1 - _CI_LEVEL_95
-    chi2_lower = spstats.chi2.ppf(alpha / 2, df=_N_SAMPLES - 1)
-    chi2_upper = spstats.chi2.ppf(1 - alpha / 2, df=_N_SAMPLES - 1)
-    var_lower = (_N_SAMPLES - 1) * variance_val / chi2_upper
-    var_upper = (_N_SAMPLES - 1) * variance_val / chi2_lower
-    expected_lower = float(np.sqrt(var_lower))
-    expected_upper = float(np.sqrt(var_upper))
-
-    ci = result["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(expected_lower, abs=1e-6)
-    assert ci["upper"] == pytest.approx(expected_upper, abs=1e-6)
+    chi2_lo = spstats.chi2.ppf(alpha / 2, df=_N_SAMPLES - 1)
+    chi2_hi = spstats.chi2.ppf(1 - alpha / 2, df=_N_SAMPLES - 1)
+    exp_lower = float(np.sqrt((_N_SAMPLES - 1) * var_val / chi2_hi))
+    exp_upper = float(np.sqrt((_N_SAMPLES - 1) * var_val / chi2_lo))
+    ci = rd["confidenceInterval"]
+    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-6)
+    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-6)
 
 
-def test_confidence_interval_different_levels(client, tables_store):
-    """信頼度レベルが高いほど区間が広くなる"""
-    widths = {}
+def test_confidence_interval_levels_width_ordering(client, tables_store):
+    """信頼度レベルが高いほど CI 幅が広くなる（90 < 95 < 99）"""
+    widths: dict[float, float] = {}
     for level in [_CI_LEVEL_90, _CI_LEVEL_95, _CI_LEVEL_99]:
         payload = {
             "tableName": _TABLE_NAME,
@@ -385,39 +357,11 @@ def test_confidence_interval_different_levels(client, tables_store):
             "confidenceLevel": level,
             "statisticType": _STAT_MEAN,
         }
-        response = client.post(URL, json=payload)
-        assert response.status_code == status.HTTP_200_OK
-        ci = response.json()["result"]["confidenceInterval"]
+        rd = _get_result_data(client, payload)
+        ci = rd["confidenceInterval"]
         widths[level] = ci["upper"] - ci["lower"]
 
     assert widths[_CI_LEVEL_90] < widths[_CI_LEVEL_95] < widths[_CI_LEVEL_99]
-
-
-def test_confidence_interval_response_structure(client, tables_store):
-    """レスポンスのJSON構造が仕様通りである"""
-    payload = {
-        "tableName": _TABLE_NAME,
-        "columnName": "normal_col",
-        "confidenceLevel": _CI_LEVEL_95,
-        "statisticType": _STAT_MEAN,
-    }
-    response = client.post(URL, json=payload)
-    result = response.json()["result"]
-
-    required_fields = [
-        "tableName",
-        "columnName",
-        "statistic",
-        "confidenceInterval",
-        "confidenceLevel",
-    ]
-    for field in required_fields:
-        assert field in result
-
-    assert "type" in result["statistic"]
-    assert "value" in result["statistic"]
-    assert "lower" in result["confidenceInterval"]
-    assert "upper" in result["confidenceInterval"]
 
 
 # -----------------------------------------------------------

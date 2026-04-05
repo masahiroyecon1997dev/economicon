@@ -115,7 +115,6 @@ from economicon.schemas.settings import (
 )
 from economicon.schemas.shutdown import ShutdownResult
 from economicon.schemas.statistics import (
-    ConfidenceIntervalBounds,
     ConfidenceIntervalRequestBody,
     ConfidenceIntervalResult,
     CreateCorrelationTableRequestBody,
@@ -126,7 +125,6 @@ from economicon.schemas.statistics import (
     StatisticalTestOptions,
     StatisticalTestRequestBody,
     StatisticalTestResult,
-    StatisticValue,
 )
 from economicon.schemas.tables import (
     ClearTablesRequestBody,
@@ -267,8 +265,6 @@ __all__ = [
     # Statistics
     "ConfidenceIntervalRequestBody",
     "ConfidenceIntervalResult",
-    "ConfidenceIntervalBounds",
-    "StatisticValue",
     "DescriptiveStatisticsRequestBody",
     "DescriptiveStatisticsResult",
     "CreateCorrelationTableRequestBody",

@@ -80,58 +80,18 @@ class ConfidenceIntervalRequestBody(BaseRequest):
     ]
 
 
-class StatisticValue(BaseResult):
-    """統計量の種別と値"""
-
-    type: str = Field(
-        title="Type",
-        description="統計量のタイプ（mean, median 等）",
-    )
-    value: Any = Field(
-        title="Value",
-        description="統計量の計算値",
-    )
-
-
-class ConfidenceIntervalBounds(BaseResult):
-    """信頼区間の下限・上限"""
-
-    lower: float = Field(
-        title="Lower",
-        description="信頼区間の下限値",
-    )
-    upper: float = Field(
-        title="Upper",
-        description="信頼区間の上限値",
-    )
-
-
 class ConfidenceIntervalResult(BaseResult):
-    """信頼区間計算レスポンス"""
+    """
+    信頼区間計算レスポンス。
+    詳細は GET /api/analysis/results/{resultId} で取得できる
+    """
 
     result_id: str = Field(
         title="Result ID",
-        description="AnalysisResultStore に保存された分析結果の一意 ID",
-    )
-    table_name: str = Field(
-        title="Table Name",
-        description="計算対象のテーブル名",
-    )
-    column_name: str = Field(
-        title="Column Name",
-        description="計算対象のカラム名",
-    )
-    statistic: StatisticValue = Field(
-        title="Statistic",
-        description="計算した統計量のタイプと値",
-    )
-    confidence_interval: ConfidenceIntervalBounds = Field(
-        title="Confidence Interval",
-        description="信頼区間の下限値と上限値",
-    )
-    confidence_level: float = Field(
-        title="Confidence Level",
-        description="計算に使用した信頼水準",
+        description=(
+            "分析結果の一意 ID。"
+            "詳細は GET /api/analysis/results/{resultId} で取得可能。"
+        ),
     )
 
 
@@ -201,21 +161,16 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
 
 
 class DescriptiveStatisticsResult(BaseResult):
-    """記述統計レスポンス"""
+    """
+    記述統計レスポンス。
+    詳細は GET /api/analysis/results/{resultId} で取得できる
+    """
 
     result_id: str = Field(
         title="Result ID",
-        description="AnalysisResultStore に保存された分析結果の一意 ID",
-    )
-    table_name: str = Field(
-        title="Table Name",
-        description="計算対象のテーブル名",
-    )
-    statistics: dict[str, dict[str, float | None]] = Field(
-        title="Statistics",
         description=(
-            "記述統計の計算結果。"
-            "カラム名をキー、{統計量名: 値} を値とする辞書型データ。"
+            "分析結果の一意 ID。"
+            "詳細は GET /api/analysis/results/{resultId} で取得可能。"
         ),
     )
 
@@ -528,40 +483,15 @@ class StatisticalTestRequestBody(BaseRequest):
 
 
 class StatisticalTestResult(BaseResult):
-    """統計検定レスポンス"""
+    """
+    統計検定レスポンス。
+    詳細は GET /api/analysis/results/{resultId} で取得できる
+    """
 
     result_id: str = Field(
         title="Result ID",
-        description="AnalysisResultStore に保存された分析結果の一意 ID",
-    )
-    statistic: float = Field(
-        title="Statistic",
-        description="検定統計量（t 値 / Z 値 / F 値）",
-    )
-    p_value: float = Field(
-        title="P Value",
-        description="有意確率（p 値）",
-    )
-    df: float | None = Field(
-        title="Degrees of Freedom",
-        description="自由度（t 検定: 分子自由度、F 検定: df1、z 検定は None）",
-    )
-    df2: float | None = Field(
-        default=None,
-        title="Degrees of Freedom (Denominator)",
         description=(
-            "分母自由度（F 検定のみ設定。df=分子自由度、df2=分母自由度）"
-        ),
-    )
-    confidence_interval: ConfidenceIntervalBounds | None = Field(
-        title="Confidence Interval",
-        description="95% 信頼区間（F 検定では None）",
-    )
-    effect_size: float | None = Field(
-        title="Effect Size",
-        description=(
-            "効果量"
-            "（t 検定: Cohen's d、ANOVA: η²、"
-            "z 検定・分散比 F 検定では None）"
+            "分析結果の一意 ID。"
+            "詳細は GET /api/analysis/results/{resultId} で取得可能。"
         ),
     )

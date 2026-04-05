@@ -122,7 +122,7 @@ class DescriptiveStatistics:
                 result_type=_RESULT_TYPE,
             )
             result_id = self.result_store.save_result(analysis_result)
-            return {**result, "resultId": result_id}
+            return {"resultId": result_id}
         except Exception as e:
             message = _(
                 "An unexpected error occurred during "
