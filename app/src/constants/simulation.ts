@@ -7,6 +7,27 @@
 import { z } from "zod";
 import type { DistributionType } from "../types/commonTypes";
 
+/** 連続分布タイプ */
+export const CONTINUOUS_DIST_TYPES: DistributionType[] = [
+  "uniform",
+  "exponential",
+  "normal",
+  "gamma",
+  "beta",
+  "weibull",
+  "lognormal",
+];
+
+/** 離散分布タイプ */
+export const DISCRETE_DIST_TYPES: DistributionType[] = [
+  "binomial",
+  "bernoulli",
+  "poisson",
+  "geometric",
+  "hypergeometric",
+  "negative_binomial",
+];
+
 /** すべての分布タイプ（表示順） */
 export const DIST_TYPES: DistributionType[] = [
   "uniform",

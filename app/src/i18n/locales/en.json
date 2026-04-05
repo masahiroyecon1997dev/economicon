@@ -603,6 +603,9 @@
     "SuccessCount": "Success count",
     "SampleSize": "Sample size",
     "Value": "Value",
+    "TabContinuous": "Continuous",
+    "TabDiscrete": "Discrete",
+    "TabFixed": "Fixed Value",
     "Submit": "Add"
   },
   "FilterColumnForm": {

@@ -603,6 +603,9 @@
     "SuccessCount": "成功要素数",
     "SampleSize": "標本サイズ",
     "Value": "固定値",
+    "TabContinuous": "連続分布",
+    "TabDiscrete": "離散分布",
+    "TabFixed": "固定値",
     "Submit": "追加"
   },
   "FilterColumnForm": {
