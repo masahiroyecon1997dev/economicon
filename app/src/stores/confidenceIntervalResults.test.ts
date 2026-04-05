@@ -1,4 +1,4 @@
-import type { ConfidenceIntervalResult } from "@/api/model";
+import type { ConfidenceIntervalResultData } from "@/stores/confidenceIntervalResults";
 import { useConfidenceIntervalResultsStore } from "@/stores/confidenceIntervalResults";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -6,8 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Helpers
 // --------------------------------------------------------------------------
 const makeResult = (
-  overrides: Partial<ConfidenceIntervalResult> = {},
-): ConfidenceIntervalResult => ({
+  overrides: Partial<ConfidenceIntervalResultData> = {},
+): ConfidenceIntervalResultData => ({
   tableName: "sales",
   columnName: "price",
   statistic: { type: "mean", value: 120.5 },

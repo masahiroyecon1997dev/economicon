@@ -161,16 +161,21 @@ export const DescriptiveStatistics = () => {
         statistics: orderedStats,
       });
       if (resp.code === "OK") {
-        const data = resp.result.statistics as StatisticsMap;
-        setResult({ data, cols: orderedCols, stats: orderedStats });
-        setTimeout(
-          () =>
-            resultRef.current?.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            }),
-          50,
-        );
+        const { resultId } = resp.result;
+        const detailResp = await api.getAnalysisResult(resultId);
+        if (detailResp.code === "OK") {
+          const data = detailResp.result.result.resultData
+            .statistics as StatisticsMap;
+          setResult({ data, cols: orderedCols, stats: orderedStats });
+          setTimeout(
+            () =>
+              resultRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              }),
+            50,
+          );
+        }
       }
     } catch {
       await showMessageDialog(

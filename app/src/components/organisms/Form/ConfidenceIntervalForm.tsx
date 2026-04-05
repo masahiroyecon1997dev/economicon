@@ -10,7 +10,10 @@ import { showMessageDialog } from "@/lib/dialog/message";
 import { extractApiErrorMessage } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
-import { useConfidenceIntervalResultsStore } from "@/stores/confidenceIntervalResults";
+import {
+  useConfidenceIntervalResultsStore,
+  type ConfidenceIntervalResultData,
+} from "@/stores/confidenceIntervalResults";
 import { useTableListStore } from "@/stores/tableList";
 import { useForm, useStore } from "@tanstack/react-form";
 import { Info } from "lucide-react";
@@ -105,11 +108,18 @@ export const ConfidenceIntervalForm = ({
           confidenceLevel,
         });
         if (response.code === "OK" && response.result) {
-          addResult(response.result);
-          const newIndex =
-            useConfidenceIntervalResultsStore.getState().results.length - 1;
-          onAnalysisComplete?.(newIndex);
-          return;
+          const { resultId } = response.result;
+          const detailResponse = await api.getAnalysisResult(resultId);
+          if (detailResponse.code === "OK") {
+            addResult(
+              detailResponse.result.result
+                .resultData as ConfidenceIntervalResultData,
+            );
+            const newIndex =
+              useConfidenceIntervalResultsStore.getState().results.length - 1;
+            onAnalysisComplete?.(newIndex);
+            return;
+          }
         }
         await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
       } catch (error) {

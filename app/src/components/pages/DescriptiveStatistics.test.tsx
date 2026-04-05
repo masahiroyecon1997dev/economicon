@@ -43,6 +43,7 @@ const COLUMNS = [
 const mockApi = {
   getColumnList: vi.fn(),
   descriptiveStatistics: vi.fn(),
+  getAnalysisResult: vi.fn(),
 };
 
 beforeEach(() => {
@@ -116,7 +117,11 @@ describe("DescriptiveStatistics フォーム", () => {
       });
       mockApi.descriptiveStatistics.mockResolvedValue({
         code: "OK",
-        result: { statistics },
+        result: { resultId: "test-result-id" },
+      });
+      mockApi.getAnalysisResult.mockResolvedValue({
+        code: "OK",
+        result: { result: { resultData: { statistics } } },
       });
 
       const user = userEvent.setup();
@@ -201,6 +206,39 @@ describe("DescriptiveStatistics フォーム", () => {
       mockApi.descriptiveStatistics.mockRejectedValue(
         new Error("サーバーエラー"),
       );
+
+      const user = userEvent.setup();
+      render(<DescriptiveStatistics />);
+
+      const selectTrigger = screen.getByRole("combobox");
+      await user.click(selectTrigger);
+      const option = await screen.findByRole("option", { name: "sales" });
+      await user.click(option);
+
+      await waitFor(() =>
+        expect(screen.getByText("price")).toBeInTheDocument(),
+      );
+
+      const submitBtn = screen.getByRole("button", {
+        name: "DescriptiveStatistics.RunCalculation",
+      });
+      await user.click(submitBtn);
+
+      await waitFor(() => {
+        expect(vi.mocked(showMessageDialog)).toHaveBeenCalled();
+      });
+    });
+
+    it("getAnalysisResult がthrowした場合 → エラーダイアログを表示する", async () => {
+      mockApi.getColumnList.mockResolvedValue({
+        code: "OK",
+        result: { columnInfoList: [{ name: "price", type: "Float64" }] },
+      });
+      mockApi.descriptiveStatistics.mockResolvedValue({
+        code: "OK",
+        result: { resultId: "test-result-id" },
+      });
+      mockApi.getAnalysisResult.mockRejectedValue(new Error("詳細取得エラー"));
 
       const user = userEvent.setup();
       render(<DescriptiveStatistics />);

@@ -1,12 +1,20 @@
 import { create } from "zustand";
-import type { ConfidenceIntervalResult } from "../api/model";
 
-export type ConfidenceIntervalResultEntry = ConfidenceIntervalResult & {
+// GET /api/analysis/results/{id} の resultData に格納される信頼区間の計算結果
+export type ConfidenceIntervalResultData = {
+  tableName: string;
+  columnName: string;
+  statistic: { type: string; value: number };
+  confidenceInterval: { lower: number; upper: number };
+  confidenceLevel: number;
+};
+
+export type ConfidenceIntervalResultEntry = ConfidenceIntervalResultData & {
   id: string;
 };
 
 type ConfidenceIntervalResultsActions = {
-  addResult: (result: ConfidenceIntervalResult) => void;
+  addResult: (result: ConfidenceIntervalResultData) => void;
   removeResult: (id: string) => void;
 };
 
@@ -19,10 +27,7 @@ export const useConfidenceIntervalResultsStore =
     results: [],
     addResult: (result) =>
       set((state) => ({
-        results: [
-          ...state.results,
-          { ...result, id: crypto.randomUUID() },
-        ],
+        results: [...state.results, { ...result, id: crypto.randomUUID() }],
       })),
     removeResult: (id) =>
       set((state) => ({

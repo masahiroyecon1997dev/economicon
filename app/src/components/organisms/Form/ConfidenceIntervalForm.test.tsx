@@ -1,4 +1,10 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAppAPI } from "../../../api/endpoints";
 import { showMessageDialog } from "../../../lib/dialog/message";
@@ -50,14 +56,25 @@ vi.mock("../../../hooks/useTableColumnLoader", () => ({
 // ---------------------------------------------------------------------------
 // Fixture
 // ---------------------------------------------------------------------------
-const CI_RESPONSE = {
+const CI_POST_RESPONSE = {
   code: "OK",
   result: {
-    tableName: "sales",
-    columnName: "price",
-    statistic: { type: "mean", value: 120.5 },
-    confidenceInterval: { lower: 115.0, upper: 126.0 },
-    confidenceLevel: 0.95,
+    resultId: "test-ci-result-id",
+  },
+};
+
+const CI_DETAIL_RESPONSE = {
+  code: "OK",
+  result: {
+    result: {
+      resultData: {
+        tableName: "sales",
+        columnName: "price",
+        statistic: { type: "mean", value: 120.5 },
+        confidenceInterval: { lower: 115.0, upper: 126.0 },
+        confidenceLevel: 0.95,
+      },
+    },
   },
 };
 
@@ -70,7 +87,8 @@ beforeEach(() => {
   useTableListStore.setState({ tableList: ["sales", "orders"] });
 
   vi.mocked(getEconomiconAppAPI).mockReturnValue({
-    confidenceInterval: vi.fn().mockResolvedValue(CI_RESPONSE),
+    confidenceInterval: vi.fn().mockResolvedValue(CI_POST_RESPONSE),
+    getAnalysisResult: vi.fn().mockResolvedValue(CI_DETAIL_RESPONSE),
   } as unknown as ReturnType<typeof getEconomiconAppAPI>);
 });
 
@@ -80,9 +98,7 @@ beforeEach(() => {
 describe("ConfidenceIntervalForm", () => {
   describe("フォームレンダリング", () => {
     it("test_render_showsDataLabel", () => {
-      render(
-        <ConfidenceIntervalForm onCancel={vi.fn()} />,
-      );
+      render(<ConfidenceIntervalForm onCancel={vi.fn()} />);
       expect(
         screen.getByText("ConfidenceIntervalView.DataLabel"),
       ).toBeInTheDocument();
@@ -127,6 +143,7 @@ describe("ConfidenceIntervalForm", () => {
       useTableListStore.setState({ tableList: [] });
       vi.mocked(getEconomiconAppAPI).mockReturnValue({
         confidenceInterval: vi.fn(),
+        getAnalysisResult: vi.fn(),
       } as unknown as ReturnType<typeof getEconomiconAppAPI>);
 
       render(<ConfidenceIntervalForm onCancel={vi.fn()} />);
@@ -145,9 +162,7 @@ describe("ConfidenceIntervalForm", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(
-            "ConfidenceIntervalView.ErrorStatisticTypeRequired",
-          ),
+          screen.getByText("ConfidenceIntervalView.ErrorStatisticTypeRequired"),
         ).toBeInTheDocument();
       });
     });
@@ -193,7 +208,7 @@ describe("ConfidenceIntervalForm", () => {
       vi.spyOn(
         vi.mocked(getEconomiconAppAPI)(),
         "confidenceInterval",
-      ).mockResolvedValue(CI_RESPONSE);
+      ).mockResolvedValue(CI_POST_RESPONSE);
 
       await submitForm();
 

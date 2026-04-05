@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Economicon App API",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "paths": {
     "/api/health": {
@@ -3333,11 +3333,16 @@
             "title": "Table Name",
             "description": "\u5206\u6790\u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d"
           },
-          "regressionOutput": {
+          "resultType": {
+            "type": "string",
+            "title": "Result Type",
+            "description": "\u5206\u6790\u7a2e\u5225\u6587\u5b57\u5217\uff08regression / confidence_interval / descriptive_statistics / statistical_test \u7b49\uff09"
+          },
+          "resultData": {
             "additionalProperties": true,
             "type": "object",
-            "title": "Regression Output",
-            "description": "\u63a8\u5b9a\u7d50\u679c\u306e\u8a73\u7d30\u30c7\u30fc\u30bf\u3002\u624b\u6cd5\uff08OLS / FE / RE / IV / Logit / Probit / Tobit \u7b49\uff09\u306b\u3088\u308a\u542b\u307e\u308c\u308b\u30ad\u30fc\u304c\u7570\u306a\u308b\u3002"
+            "title": "Result Data",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u8a73\u7d30\u30c7\u30fc\u30bf\u3002\u5206\u6790\u7a2e\u5225\uff08result_type\uff09\u306b\u3088\u308a\u542b\u307e\u308c\u308b\u30ad\u30fc\u304c\u7570\u306a\u308b\u3002"
           },
           "createdAt": {
             "type": "string",
@@ -3399,7 +3404,8 @@
           "name",
           "description",
           "tableName",
-          "regressionOutput",
+          "resultType",
+          "resultData",
           "createdAt",
           "modelPath",
           "modelType",
@@ -3825,27 +3831,6 @@
         "title": "ColumnInfo",
         "description": "\u30ab\u30e9\u30e0\u60c5\u5831"
       },
-      "ConfidenceIntervalBounds": {
-        "properties": {
-          "lower": {
-            "type": "number",
-            "title": "Lower",
-            "description": "\u4fe1\u983c\u533a\u9593\u306e\u4e0b\u9650\u5024"
-          },
-          "upper": {
-            "type": "number",
-            "title": "Upper",
-            "description": "\u4fe1\u983c\u533a\u9593\u306e\u4e0a\u9650\u5024"
-          }
-        },
-        "type": "object",
-        "required": [
-          "lower",
-          "upper"
-        ],
-        "title": "ConfidenceIntervalBounds",
-        "description": "\u4fe1\u983c\u533a\u9593\u306e\u4e0b\u9650\u30fb\u4e0a\u9650"
-      },
       "ConfidenceIntervalRequestBody": {
         "properties": {
           "tableName": {
@@ -3893,42 +3878,18 @@
       },
       "ConfidenceIntervalResult": {
         "properties": {
-          "tableName": {
+          "resultId": {
             "type": "string",
-            "title": "Table Name",
-            "description": "\u8a08\u7b97\u5bfe\u8c61\u306e\u30c6\u30fc\u30d6\u30eb\u540d"
-          },
-          "columnName": {
-            "type": "string",
-            "title": "Column Name",
-            "description": "\u8a08\u7b97\u5bfe\u8c61\u306e\u30ab\u30e9\u30e0\u540d"
-          },
-          "statistic": {
-            "$ref": "#/components/schemas/StatisticValue",
-            "title": "Statistic",
-            "description": "\u8a08\u7b97\u3057\u305f\u7d71\u8a08\u91cf\u306e\u30bf\u30a4\u30d7\u3068\u5024"
-          },
-          "confidenceInterval": {
-            "$ref": "#/components/schemas/ConfidenceIntervalBounds",
-            "title": "Confidence Interval",
-            "description": "\u4fe1\u983c\u533a\u9593\u306e\u4e0b\u9650\u5024\u3068\u4e0a\u9650\u5024"
-          },
-          "confidenceLevel": {
-            "type": "number",
-            "title": "Confidence Level",
-            "description": "\u8a08\u7b97\u306b\u4f7f\u7528\u3057\u305f\u4fe1\u983c\u6c34\u6e96"
+            "title": "Result ID",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u4e00\u610f ID\u3002\u8a73\u7d30\u306f GET /api/analysis/results/{resultId} \u3067\u53d6\u5f97\u53ef\u80fd\u3002"
           }
         },
         "type": "object",
         "required": [
-          "tableName",
-          "columnName",
-          "statistic",
-          "confidenceInterval",
-          "confidenceLevel"
+          "resultId"
         ],
         "title": "ConfidenceIntervalResult",
-        "description": "\u4fe1\u983c\u533a\u9593\u8a08\u7b97\u30ec\u30b9\u30dd\u30f3\u30b9"
+        "description": "\u4fe1\u983c\u533a\u9593\u8a08\u7b97\u30ec\u30b9\u30dd\u30f3\u30b9\u3002\n\u8a73\u7d30\u306f GET /api/analysis/results/{resultId} \u3067\u53d6\u5f97\u3067\u304d\u308b"
       },
       "ConfidenceIntervalStatisticsType": {
         "type": "string",
@@ -4439,37 +4400,18 @@
       },
       "DescriptiveStatisticsResult": {
         "properties": {
-          "tableName": {
+          "resultId": {
             "type": "string",
-            "title": "Table Name",
-            "description": "\u8a08\u7b97\u5bfe\u8c61\u306e\u30c6\u30fc\u30d6\u30eb\u540d"
-          },
-          "statistics": {
-            "additionalProperties": {
-              "additionalProperties": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "type": "object"
-            },
-            "type": "object",
-            "title": "Statistics",
-            "description": "\u8a18\u8ff0\u7d71\u8a08\u306e\u8a08\u7b97\u7d50\u679c\u3002\u30ab\u30e9\u30e0\u540d\u3092\u30ad\u30fc\u3001{\u7d71\u8a08\u91cf\u540d: \u5024} \u3092\u5024\u3068\u3059\u308b\u8f9e\u66f8\u578b\u30c7\u30fc\u30bf\u3002"
+            "title": "Result ID",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u4e00\u610f ID\u3002\u8a73\u7d30\u306f GET /api/analysis/results/{resultId} \u3067\u53d6\u5f97\u53ef\u80fd\u3002"
           }
         },
         "type": "object",
         "required": [
-          "tableName",
-          "statistics"
+          "resultId"
         ],
         "title": "DescriptiveStatisticsResult",
-        "description": "\u8a18\u8ff0\u7d71\u8a08\u30ec\u30b9\u30dd\u30f3\u30b9"
+        "description": "\u8a18\u8ff0\u7d71\u8a08\u30ec\u30b9\u30dd\u30f3\u30b9\u3002\n\u8a73\u7d30\u306f GET /api/analysis/results/{resultId} \u3067\u53d6\u5f97\u3067\u304d\u308b"
       },
       "DistributionConfig": {
         "oneOf": [
@@ -6844,26 +6786,6 @@
         "title": "StarConfig",
         "description": "\u6709\u610f\u6027\u8a18\u53f7\u306e\u8a2d\u5b9a"
       },
-      "StatisticValue": {
-        "properties": {
-          "type": {
-            "type": "string",
-            "title": "Type",
-            "description": "\u7d71\u8a08\u91cf\u306e\u30bf\u30a4\u30d7\uff08mean, median \u7b49\uff09"
-          },
-          "value": {
-            "title": "Value",
-            "description": "\u7d71\u8a08\u91cf\u306e\u8a08\u7b97\u5024"
-          }
-        },
-        "type": "object",
-        "required": [
-          "type",
-          "value"
-        ],
-        "title": "StatisticValue",
-        "description": "\u7d71\u8a08\u91cf\u306e\u7a2e\u5225\u3068\u5024"
-      },
       "StatisticalTestOptions": {
         "properties": {
           "alternative": {
@@ -6933,75 +6855,18 @@
       },
       "StatisticalTestResult": {
         "properties": {
-          "statistic": {
-            "type": "number",
-            "title": "Statistic",
-            "description": "\u691c\u5b9a\u7d71\u8a08\u91cf\uff08t \u5024 / Z \u5024 / F \u5024\uff09"
-          },
-          "pValue": {
-            "type": "number",
-            "title": "P Value",
-            "description": "\u6709\u610f\u78ba\u7387\uff08p \u5024\uff09"
-          },
-          "df": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Degrees of Freedom",
-            "description": "\u81ea\u7531\u5ea6\uff08t \u691c\u5b9a: \u5206\u5b50\u81ea\u7531\u5ea6\u3001F \u691c\u5b9a: df1\u3001z \u691c\u5b9a\u306f None\uff09"
-          },
-          "df2": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Degrees of Freedom (Denominator)",
-            "description": "\u5206\u6bcd\u81ea\u7531\u5ea6\uff08F \u691c\u5b9a\u306e\u307f\u8a2d\u5b9a\u3002df=\u5206\u5b50\u81ea\u7531\u5ea6\u3001df2=\u5206\u6bcd\u81ea\u7531\u5ea6\uff09"
-          },
-          "confidenceInterval": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ConfidenceIntervalBounds"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Confidence Interval",
-            "description": "95% \u4fe1\u983c\u533a\u9593\uff08F \u691c\u5b9a\u3067\u306f None\uff09"
-          },
-          "effectSize": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Effect Size",
-            "description": "\u52b9\u679c\u91cf\uff08t \u691c\u5b9a: Cohen's d\u3001ANOVA: \u03b7\u00b2\u3001z \u691c\u5b9a\u30fb\u5206\u6563\u6bd4 F \u691c\u5b9a\u3067\u306f None\uff09"
+          "resultId": {
+            "type": "string",
+            "title": "Result ID",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u4e00\u610f ID\u3002\u8a73\u7d30\u306f GET /api/analysis/results/{resultId} \u3067\u53d6\u5f97\u53ef\u80fd\u3002"
           }
         },
         "type": "object",
         "required": [
-          "statistic",
-          "pValue",
-          "df",
-          "confidenceInterval",
-          "effectSize"
+          "resultId"
         ],
         "title": "StatisticalTestResult",
-        "description": "\u7d71\u8a08\u691c\u5b9a\u30ec\u30b9\u30dd\u30f3\u30b9"
+        "description": "\u7d71\u8a08\u691c\u5b9a\u30ec\u30b9\u30dd\u30f3\u30b9\u3002\n\u8a73\u7d30\u306f GET /api/analysis/results/{resultId} \u3067\u53d6\u5f97\u3067\u304d\u308b"
       },
       "StatisticalTestType": {
         "type": "string",
