@@ -14,3 +14,16 @@ export const extractFieldError = (
   const raw = (e as { message?: string })?.message ?? String(e);
   return mapFn ? mapFn(raw) : raw;
 };
+
+/**
+ * i18n キー固定のエラーマッパーを生成するファクトリ。
+ * コンポーネント内で `const tErr = createFieldError(t)` として使う。
+ *
+ * @example
+ *   const tErr = createFieldError(t);
+ *   tErr(field.state.meta.errors, "ValidationMessages.NewColumnNameRequired")
+ */
+export const createFieldError =
+  (t: (key: string) => string) =>
+  (errors: unknown[], i18nKey: string): string | undefined =>
+    extractFieldError(errors, () => t(i18nKey));

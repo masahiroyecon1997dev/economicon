@@ -8,11 +8,11 @@ import { extractFieldError } from "../../../lib/utils/formHelpers";
 import { cn } from "../../../lib/utils/helpers";
 import {
   CSV_ENCODINGS,
+  createImportConfigSchema,
   getImportFileType,
   resolveImportSettings,
   validateSeparatorCustom,
   validateSheetName,
-  validateTableName,
   type ImportConfigSettings,
 } from "../../../lib/utils/importSchema";
 import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
@@ -35,6 +35,8 @@ export const ImportConfigDialog = ({
   const fileType = fileInfo ? getImportFileType(fileInfo.name) : "other";
   const isCsv = fileType === "csv";
   const isExcel = fileType === "excel";
+
+  const importSchema = createImportConfigSchema(t);
 
   const form = useForm({
     defaultValues: {
@@ -110,8 +112,8 @@ export const ImportConfigDialog = ({
         <form.Field
           name="tableName"
           validators={{
-            onChange: ({ value }) => validateTableName(value, t),
-            onSubmit: ({ value }) => validateTableName(value, t),
+            onChange: importSchema.shape.tableName,
+            onSubmit: importSchema.shape.tableName,
           }}
         >
           {(field) => (

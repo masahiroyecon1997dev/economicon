@@ -2,8 +2,8 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 import { getEconomiconAppAPI } from "../../api/endpoints";
+import { CalculateColumnBody } from "../../api/zod/column/column";
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../lib/dialog/message";
 import {
@@ -11,7 +11,7 @@ import {
   getResponseErrorMessage,
 } from "../../lib/utils/apiError";
 import { getPolarsTypeColor } from "../../lib/utils/columnTypeColor";
-import { extractFieldError } from "../../lib/utils/formHelpers";
+import { createFieldError } from "../../lib/utils/formHelpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
@@ -24,20 +24,9 @@ import { FormField } from "../molecules/Form/FormField";
 import { SearchInput } from "../molecules/Form/SearchInput";
 import { PageLayout } from "../templates/PageLayout";
 
-const createCalculationSchema = (t: (key: string) => string) =>
-  z.object({
-    tableName: z.string().min(1, t("ValidationMessages.DataNameSelect")),
-    newColumnName: z
-      .string()
-      .min(1, t("ValidationMessages.NewColumnNameRequired")),
-    addPositionColumn: z.string(),
-    calculationExpression: z
-      .string()
-      .min(1, t("ValidationMessages.CalculationExpressionRequired")),
-  });
-
 export const Calculation = () => {
   const { t } = useTranslation();
+  const tErr = createFieldError(t);
   const tableList = useTableListStore((state) => state.tableList);
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const { tableInfos, addTableInfo, invalidateTable, activateTableInfo } =
@@ -60,7 +49,12 @@ export const Calculation = () => {
       calculationExpression: "",
     },
     validators: {
-      onSubmit: createCalculationSchema(t),
+      onSubmit: CalculateColumnBody.pick({
+        tableName: true,
+        newColumnName: true,
+        addPositionColumn: true,
+        calculationExpression: true,
+      }).required(),
     },
     onSubmit: async ({ value }) => {
       try {
@@ -175,51 +169,63 @@ export const Calculation = () => {
             <div className="p-4 border-b border-border-color grid grid-cols-1 md:grid-cols-2 gap-4 bg-neutral-50/50 dark:bg-neutral-800/30">
               {/* テーブル選択 */}
               <form.Field name="tableName">
-                {(field) => (
-                  <FormField
-                    label={t("CalculationView.TargetData")}
-                    htmlFor="target-table"
-                    error={extractFieldError(field.state.meta.errors)}
-                  >
-                    <Select
-                      id="target-table"
-                      value={field.state.value}
-                      onValueChange={handleTableChange}
-                      error={extractFieldError(field.state.meta.errors)}
-                      placeholder={t("CalculationView.SelectData")}
-                      disabled={isSubmitting}
+                {(field) => {
+                  const err = tErr(
+                    field.state.meta.errors,
+                    "ValidationMessages.DataNameSelect",
+                  );
+                  return (
+                    <FormField
+                      label={t("CalculationView.TargetData")}
+                      htmlFor="target-table"
+                      error={err}
                     >
-                      {tableList.map((table, index) => (
-                        <SelectItem key={index} value={table}>
-                          {table}
-                        </SelectItem>
-                      ))}
-                    </Select>
-                  </FormField>
-                )}
+                      <Select
+                        id="target-table"
+                        value={field.state.value}
+                        onValueChange={handleTableChange}
+                        error={err}
+                        placeholder={t("CalculationView.SelectData")}
+                        disabled={isSubmitting}
+                      >
+                        {tableList.map((table, index) => (
+                          <SelectItem key={index} value={table}>
+                            {table}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </FormField>
+                  );
+                }}
               </form.Field>
 
               {/* 新しい列名 */}
               <form.Field name="newColumnName">
-                {(field) => (
-                  <FormField
-                    label={t("CalculationView.NewColumnName")}
-                    htmlFor="new-column-name"
-                    error={extractFieldError(field.state.meta.errors)}
-                  >
-                    <InputText
-                      id="new-column-name"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder={t(
-                        "CalculationView.NewColumnNamePlaceholder",
-                      )}
-                      error={extractFieldError(field.state.meta.errors)}
-                      disabled={isSubmitting}
-                    />
-                  </FormField>
-                )}
+                {(field) => {
+                  const err = tErr(
+                    field.state.meta.errors,
+                    "ValidationMessages.NewColumnNameRequired",
+                  );
+                  return (
+                    <FormField
+                      label={t("CalculationView.NewColumnName")}
+                      htmlFor="new-column-name"
+                      error={err}
+                    >
+                      <InputText
+                        id="new-column-name"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder={t(
+                          "CalculationView.NewColumnNamePlaceholder",
+                        )}
+                        error={err}
+                        disabled={isSubmitting}
+                      />
+                    </FormField>
+                  );
+                }}
               </form.Field>
 
               {/* 追加位置 */}
@@ -287,6 +293,14 @@ export const Calculation = () => {
                   >
                     /
                   </ExpressionHelperButton>
+                  <ExpressionHelperButton
+                    onClick={() => handleOperatorClick("**")}
+                    className="min-w-8 px-2 text-sm font-mono"
+                    title={t("CalculationView.Power")}
+                    disabled={isSubmitting}
+                  >
+                    **
+                  </ExpressionHelperButton>
                   <div className="w-px h-6 bg-border-color mx-1"></div>
                   <ExpressionHelperButton
                     onClick={() => handleOperatorClick("(")}
@@ -319,35 +333,43 @@ export const Calculation = () => {
 
                 {/* 数式エディタ */}
                 <form.Field name="calculationExpression">
-                  {(field) => (
-                    <div className="flex-1 flex flex-col min-h-0">
-                      <div className="flex-1 relative bg-white dark:bg-neutral-900">
-                        <textarea
-                          ref={textareaRef}
-                          aria-label={t(
-                            "CalculationView.CalculationExpression",
-                          )}
-                          className="w-full h-full p-4 font-mono text-sm text-text-main dark:text-neutral-300 bg-transparent border-none resize-none focus:ring-0 leading-relaxed"
-                          placeholder={t("CalculationView.FormulaPlaceholder")}
-                          value={field.state.value}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          onBlur={field.handleBlur}
-                          disabled={isSubmitting}
-                        />
-                        <div className="absolute bottom-0 right-0 left-0 px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-t border-border-color text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[16px]">
-                            <Info />
-                          </span>
-                          <span>{t("CalculationView.FormulaHelp")}</span>
+                  {(field) => {
+                    const err = tErr(
+                      field.state.meta.errors,
+                      "ValidationMessages.CalculationExpressionRequired",
+                    );
+                    return (
+                      <div className="flex-1 flex flex-col min-h-0">
+                        <div className="flex-1 relative bg-white dark:bg-neutral-900">
+                          <textarea
+                            ref={textareaRef}
+                            aria-label={t(
+                              "CalculationView.CalculationExpression",
+                            )}
+                            className="w-full h-full p-4 font-mono text-sm text-text-main dark:text-neutral-300 bg-transparent border-none resize-none focus:ring-0 leading-relaxed"
+                            placeholder={t(
+                              "CalculationView.FormulaPlaceholder",
+                            )}
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            disabled={isSubmitting}
+                          />
+                          <div className="absolute bottom-0 right-0 left-0 px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-t border-border-color text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[16px]">
+                              <Info />
+                            </span>
+                            <span>{t("CalculationView.FormulaHelp")}</span>
+                          </div>
                         </div>
+                        {err && (
+                          <p className="px-4 py-1.5 text-xs text-red-600 dark:text-red-400 bg-red-50/60 dark:bg-red-900/10 border-t border-red-200 dark:border-red-800">
+                            {err}
+                          </p>
+                        )}
                       </div>
-                      {extractFieldError(field.state.meta.errors) && (
-                        <p className="px-4 py-1.5 text-xs text-red-600 dark:text-red-400 bg-red-50/60 dark:bg-red-900/10 border-t border-red-200 dark:border-red-800">
-                          {extractFieldError(field.state.meta.errors)}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                    );
+                  }}
                 </form.Field>
               </div>
 

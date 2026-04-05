@@ -6,6 +6,7 @@ export type CurrentPageValue =
   | "UnionTable"
   | "DescriptiveStatistics"
   | "CorrelationMatrix"
+  | "ConfidenceIntervalView"
   | "LinearRegressionForm"
   | "CreateSimulationDataTable"
   | "CalculationView"

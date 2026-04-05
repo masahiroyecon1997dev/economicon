@@ -450,7 +450,7 @@ def test_calculate_column_invalid_position_column(client, tables_store):
 
 
 def test_calculate_column_unsupported_operator(client, tables_store):
-    """サポートされていない演算子（@）を使うと 500 を返す"""
+    """サポートされていない演算子（@）を使うと 422 を返す"""
     df_before = tables_store.get_table(TABLE_NAME).table.clone()
 
     response = client.post(
@@ -458,15 +458,100 @@ def test_calculate_column_unsupported_operator(client, tables_store):
         json={
             "tableName": TABLE_NAME,
             "newColumnName": "E",
-            # @ 演算子は OPERATOR_MAP 外 → execute 内で例外
+            # @ 演算子は OPERATOR_MAP 外 → Pydantic field_validator で 422
             "calculationExpression": "{A} @ {B}",
             "addPositionColumn": COL_A,
         },
     )
 
     response_data = response.json()
-    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-    assert response_data["code"] == ErrorCode.CALCULATE_COLUMN_PROCESS_ERROR
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "計算式に未サポートの構文が含まれています: 演算子 '@'"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+# ========================================
+# 異常系テスト（構文バリデーション: 422）
+# ========================================
+
+
+def test_calculate_column_syntax_error_unbalanced_parens(client, tables_store):
+    """括弧が閉じられていない場合は 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "({A} + {B}",
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"].startswith("計算式の構文エラー:")
+    assert len(response_data["details"]) == 1
+    assert response_data["details"][0].startswith("計算式の構文エラー:")
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_calculate_column_syntax_error_function_call(client, tables_store):
+    """未サポートの関数呼び出しを使うと 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "abs({A})",
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = (
+        "計算式に未サポートの構文が含まれています: 関数呼び出し 'abs'"
+    )
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
+
+    df_after = tables_store.get_table(TABLE_NAME).table
+    assert df_after.equals(df_before)
+
+
+def test_calculate_column_syntax_error_modulo_operator(client, tables_store):
+    """未サポートの演算子（%）を使うと 422 を返す"""
+    df_before = tables_store.get_table(TABLE_NAME).table.clone()
+
+    response = client.post(
+        "/api/column/calculate",
+        json={
+            "tableName": TABLE_NAME,
+            "newColumnName": "E",
+            "calculationExpression": "{A} % {B}",
+            "addPositionColumn": COL_A,
+        },
+    )
+
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    expected_msg = "計算式に未サポートの構文が含まれています: 演算子 '%'"
+    assert response_data["message"] == expected_msg
+    assert response_data["details"] == [expected_msg]
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)

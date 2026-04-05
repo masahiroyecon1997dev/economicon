@@ -6,18 +6,22 @@
  */
 import { useForm, useStore } from "@tanstack/react-form";
 import { Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import type { FilterOperatorType } from "../../../../api/model";
 import { LogicalOperatorType } from "../../../../api/model";
+import { FilterTableBody } from "../../../../api/zod/table/table";
+import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-  replaceParamNames,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
-import { extractFieldError } from "../../../../lib/utils/formHelpers";
+import {
+  createFieldError,
+  extractFieldError,
+} from "../../../../lib/utils/formHelpers";
 import { getTableInfo } from "../../../../lib/utils/internal";
 import { useTableInfosStore } from "../../../../stores/tableInfos";
 import { useTableListStore } from "../../../../stores/tableList";
@@ -51,6 +55,7 @@ export const FilterColumnForm = ({
   onSuccess,
 }: ColumnOperationFormPropsType) => {
   const { t } = useTranslation();
+  const tErr = createFieldError(t);
   const [apiError, setApiError] = useState<string | null>(null);
   const [hasSecondCondition, setHasSecondCondition] = useState(false);
 
@@ -65,13 +70,45 @@ export const FilterColumnForm = ({
   const form = useForm({
     defaultValues: {
       newTableName: `${tableName}_filtered`,
-      logicalOperator: LogicalOperatorType.and,
+      logicalOperator:
+        LogicalOperatorType.and as (typeof LogicalOperatorType)[keyof typeof LogicalOperatorType],
       c1Column: column.name,
       c1Operator: "equals" as FilterOperatorType,
       c1Value: "",
       c2Column: column.name,
       c2Operator: "equals" as FilterOperatorType,
       c2Value: "",
+    },
+    validators: {
+      onSubmit: FilterTableBody.pick({
+        newTableName: true,
+        logicalOperator: true,
+      })
+        .required()
+        .extend(
+          z.object({
+            c1Column: z.string(),
+            c1Operator: z.enum([
+              "equals",
+              "notEquals",
+              "greaterThan",
+              "greaterThanOrEquals",
+              "lessThan",
+              "lessThanOrEquals",
+            ]),
+            c1Value: z.string(),
+            c2Column: z.string(),
+            c2Operator: z.enum([
+              "equals",
+              "notEquals",
+              "greaterThan",
+              "greaterThanOrEquals",
+              "lessThan",
+              "lessThanOrEquals",
+            ]),
+            c2Value: z.string(),
+          }).shape,
+        ),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
@@ -116,26 +153,21 @@ export const FilterColumnForm = ({
           onSuccess(allColumns);
         } else {
           setApiError(
-            replaceParamNames(
-              getResponseErrorMessage(response, t("Error.UnexpectedError")),
-              {
-                newTableName: t("FilterColumnForm.NewTableName"),
-                tableName: t("FilterColumnForm.TableLabel"),
-                columnName: t("FilterColumnForm.ColumnName"),
-              },
-            ),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError"), {
+              newTableName: t("FilterColumnForm.NewTableName"),
+              tableName: t("FilterColumnForm.TableLabel"),
+              columnName: t("FilterColumnForm.ColumnName"),
+            }),
           );
         }
       } catch (error) {
-        setApiError(extractApiErrorMessage(error, t("Error.UnexpectedError")));
+        setApiError(buildCaughtErrorMessage(error, t("Error.UnexpectedError")));
       }
     },
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
 
   return (
     <form
@@ -156,7 +188,10 @@ export const FilterColumnForm = ({
       >
         {(field) => {
           const err = field.state.meta.isTouched
-            ? extractFieldError(field.state.meta.errors)
+            ? tErr(
+                field.state.meta.errors,
+                "ValidationMessages.DataNameRequired",
+              )
             : undefined;
           return (
             <FormField
@@ -275,6 +310,7 @@ type ConditionBlockProps = {
   valId: string;
   required?: boolean;
   allColumns: { name: string; type: string }[];
+  // 型システムが複雑になるため any で受ける
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: any;
   isSubmitting: boolean;

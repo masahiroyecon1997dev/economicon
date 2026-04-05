@@ -56,3 +56,25 @@ export const replaceParamNames = (
     (msg, [param, label]) => msg.replaceAll(param, label),
     message,
   );
+
+/**
+ * code !== "OK" の else ブロック用エラーメッセージ構築ヘルパー。
+ * getResponseErrorMessage + replaceParamNames を合成する。
+ */
+export const buildResponseErrorMessage = (
+  response: unknown,
+  fallback: string,
+  paramMap: Record<string, string> = {},
+): string =>
+  replaceParamNames(getResponseErrorMessage(response, fallback), paramMap);
+
+/**
+ * catch ブロック用エラーメッセージ構築ヘルパー。
+ * extractApiErrorMessage + replaceParamNames を合成する。
+ */
+export const buildCaughtErrorMessage = (
+  error: unknown,
+  fallback: string,
+  paramMap: Record<string, string> = {},
+): string =>
+  replaceParamNames(extractApiErrorMessage(error, fallback), paramMap);

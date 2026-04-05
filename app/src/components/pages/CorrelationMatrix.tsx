@@ -8,7 +8,7 @@ import { CreateCorrelationTableBody } from "../../api/zod/statistics/statistics"
 import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { extractApiErrorMessage } from "../../lib/utils/apiError";
-import { extractFieldError } from "../../lib/utils/formHelpers";
+import { createFieldError } from "../../lib/utils/formHelpers";
 import { cn } from "../../lib/utils/helpers";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
@@ -83,8 +83,7 @@ export const CorrelationMatrix = () => {
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
   /** Zod の汎用メッセージをフィールド固有の i18n キーで上書きする（Case C）*/
-  const tErr = (errors: unknown[], i18nKey: string) =>
-    extractFieldError(errors, () => t(i18nKey));
+  const tErr = createFieldError(t);
 
   // Sync column list → check all by default
   useEffect(() => {

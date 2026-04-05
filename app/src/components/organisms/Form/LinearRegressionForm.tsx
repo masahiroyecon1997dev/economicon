@@ -42,7 +42,7 @@ const createRegressionSchema = (t: (key: string) => string) =>
     hacMaxlags: z.number().min(0),
     clusterGroups: z.array(z.string()),
     hasConst: z.boolean(),
-    missingValueHandling: z.string(),
+    missingValueHandling: z.enum(["ignore", "remove", "error"]),
   });
 
 type LinearRegressionFormProps = {
@@ -72,7 +72,10 @@ export const LinearRegressionForm = ({
       hacMaxlags: 1,
       clusterGroups: [] as string[],
       hasConst: true,
-      missingValueHandling: MissingValueHandlingType.remove as string,
+      missingValueHandling: MissingValueHandlingType.remove as
+        | "ignore"
+        | "remove"
+        | "error",
     },
     validators: {
       onSubmit: createRegressionSchema(t),

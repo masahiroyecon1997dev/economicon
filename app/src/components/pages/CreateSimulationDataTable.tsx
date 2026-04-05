@@ -5,19 +5,20 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../api/endpoints";
 import type { SimulationColumnConfig } from "../../api/model";
+import {
+  createSimulationDataTableBodyTableNameMax,
+  createSimulationDataTableBodyTableNameRegExp,
+} from "../../api/zod/table/table";
 import { DISTRIBUTION_OPTIONS } from "../../constants/app";
+import { buildDistributionFromParams } from "../../constants/simulation";
 import { showMessageDialog } from "../../lib/dialog/message";
 import { extractFieldError } from "../../lib/utils/formHelpers";
 import { cn } from "../../lib/utils/helpers";
 import { getTableInfo } from "../../lib/utils/internal";
-import { validateDistributionParam } from "../../lib/utils/validation";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
 import { useTableListStore } from "../../stores/tableList";
-import type {
-  DistributionType,
-  SimulationColumnSetting,
-} from "../../types/commonTypes";
+import type { SimulationColumnSetting } from "../../types/commonTypes";
 import { Button } from "../atoms/Button/Button";
 import { InputText } from "../atoms/Input/InputText";
 import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
@@ -28,7 +29,17 @@ import { PageLayout } from "../templates/PageLayout";
 
 const createSimulationSchema = (t: (key: string) => string) =>
   z.object({
-    tableName: z.string().min(1, t("ValidationMessages.DataNameRequired")),
+    tableName: z
+      .string()
+      .min(1, t("ValidationMessages.DataNameRequired"))
+      .max(
+        createSimulationDataTableBodyTableNameMax,
+        t("ValidationMessages.DataNameTooLong"),
+      )
+      .regex(
+        createSimulationDataTableBodyTableNameRegExp,
+        t("ValidationMessages.DataNameInvalidChars"),
+      ),
     numRows: z.number().min(1, t("ValidationMessages.NumRowsMoreThan0")),
     randomSeed: z
       .string()
@@ -90,39 +101,22 @@ export const CreateSimulationDataTable = () => {
       const tableName = value.tableName;
       const numRows = value.numRows;
 
-      // カラムのバリデーション
+      // カラムのバリデーション（列名の空チェックのみ。パラメータはダイアログ保存時に検証済み）
       let hasError = false;
       const validatedColumns = columns.map((col) => {
-        const errors: {
-          columnName: string | undefined;
-          distributionParams: Record<string, string | undefined> | undefined;
-          fixedValue: string | undefined;
-        } = {
-          columnName: undefined,
-          distributionParams: undefined,
-          fixedValue: undefined,
+        const columnName =
+          !col.columnName || col.columnName.trim() === ""
+            ? t("ValidationMessages.ColumnNameRequired")
+            : undefined;
+        if (columnName) hasError = true;
+        return {
+          ...col,
+          errorMessage: {
+            columnName,
+            distributionParams: undefined,
+            fixedValue: undefined,
+          },
         };
-
-        if (!col.columnName || col.columnName.trim() === "") {
-          errors.columnName = t("ValidationMessages.ColumnNameRequired");
-          hasError = true;
-        }
-
-        if (col.dataType === "distribution") {
-          const paramsError = validateDistributionParam(
-            col.distributionType,
-            col.distributionParams,
-          );
-          if (paramsError !== undefined) {
-            const translatedErrors: Record<string, string | undefined> = {};
-            for (const [k, v] of Object.entries(paramsError)) {
-              translatedErrors[k] = v ? t(v) : undefined;
-            }
-            errors.distributionParams = translatedErrors;
-            hasError = true;
-          }
-        }
-        return { ...col, errorMessage: errors };
       });
 
       if (hasError) {
@@ -135,127 +129,16 @@ export const CreateSimulationDataTable = () => {
       }
 
       try {
-        // SimulationColumnConfig型（種別 union）にマッピング
         const simulationColumns: SimulationColumnConfig[] = columns.map(
-          (col) => {
-            if (col.dataType === "fixed") {
-              return {
-                columnName: col.columnName.trim(),
-                distribution: {
-                  type: "fixed" as const,
-                  value: Number(col.fixedValue),
-                },
-              };
-            }
-            // 注意: distributionType を type フィールドにマッピング
-            const p = col.distributionParams;
-            switch (col.distributionType) {
-              case "uniform":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: {
-                    type: "uniform" as const,
-                    low: p.low,
-                    high: p.high,
-                  },
-                };
-              case "exponential":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: { type: "exponential" as const, scale: p.rate },
-                };
-              case "normal":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: {
-                    type: "normal" as const,
-                    loc: p.mean,
-                    scale: p.deviation,
-                  },
-                };
-              case "gamma":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: {
-                    type: "gamma" as const,
-                    shape: p.shape,
-                    scale: p.scale,
-                  },
-                };
-              case "beta":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: {
-                    type: "beta" as const,
-                    a: p.alpha,
-                    b: p.beta,
-                  },
-                };
-              case "weibull":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: {
-                    type: "weibull" as const,
-                    a: p.shape,
-                    scale: p.scale,
-                  },
-                };
-              case "lognormal":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: {
-                    type: "lognormal" as const,
-                    mean: p.logMean,
-                    sigma: p.logSD,
-                  },
-                };
-              case "binomial":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: {
-                    type: "binomial" as const,
-                    n: p.trials,
-                    p: p.probability,
-                  },
-                };
-              case "bernoulli":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: {
-                    type: "bernoulli" as const,
-                    p: p.probability,
-                  },
-                };
-              case "poisson":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: { type: "poisson" as const, lam: p.lambda },
-                };
-              case "geometric":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: {
-                    type: "geometric" as const,
-                    p: p.probability,
-                  },
-                };
-              case "hypergeometric":
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: {
-                    type: "hypergeometric" as const,
-                    populationSize: p.populationSize,
-                    successCount: p.numberOfSuccesses,
-                    sampleSize: p.sampleSize,
-                  },
-                };
-              default:
-                return {
-                  columnName: col.columnName.trim(),
-                  distribution: { type: "uniform" as const, low: 0, high: 1 },
-                };
-            }
-          },
+          (col) => ({
+            columnName: col.columnName.trim(),
+            distribution: buildDistributionFromParams(
+              col.dataType === "fixed" ? "fixed" : col.distributionType!,
+              col.dataType === "fixed"
+                ? { value: Number(col.fixedValue) }
+                : col.distributionParams!,
+            ) as SimulationColumnConfig["distribution"],
+          }),
         );
 
         const randomSeed =
@@ -310,111 +193,6 @@ export const CreateSimulationDataTable = () => {
     setColumns(
       columns.map((col) => (col.id === id ? { ...col, ...updates } : col)),
     );
-  };
-
-  const handleDataTypeChange = (
-    id: string,
-    dataType: "distribution" | "fixed",
-  ) => {
-    const updates: Partial<SimulationColumnSetting> = {
-      dataType: dataType,
-    };
-
-    if (dataType === "distribution") {
-      updates.distributionType = "uniform";
-      updates.distributionParams = { low: 0, high: 10 };
-      delete updates.fixedValue;
-    } else {
-      updates.fixedValue = "";
-      delete updates.distributionType;
-      delete updates.distributionParams;
-    }
-
-    updateColumn(id, updates);
-  };
-
-  const handleDistributionTypeChange = (
-    id: string,
-    distributionType: DistributionType,
-  ) => {
-    const distOption = DISTRIBUTION_OPTIONS.find(
-      (d) => d.value === distributionType,
-    );
-    if (!distOption) return;
-
-    const defaultParams: Record<string, number> = {};
-    distOption.params.forEach((param) => {
-      switch (param) {
-        case "low":
-          defaultParams[param] = 0;
-          break;
-        case "high":
-          defaultParams[param] = 10;
-          break;
-        case "mean":
-          defaultParams[param] = 0;
-          break;
-        case "deviation":
-          defaultParams[param] = 1;
-          break;
-        case "rate":
-          defaultParams[param] = 1;
-          break;
-        case "scale":
-          defaultParams[param] = 1;
-          break;
-        case "alpha":
-          defaultParams[param] = 2;
-          break;
-        case "beta":
-          defaultParams[param] = 2;
-          break;
-        case "logMean":
-          defaultParams[param] = 0;
-          break;
-        case "logSD":
-          defaultParams[param] = 1;
-          break;
-        case "trials":
-          defaultParams[param] = 10;
-          break;
-        case "probability":
-          defaultParams[param] = 0.5;
-          break;
-        case "populationSize":
-          defaultParams[param] = 20;
-          break;
-        case "numberOfSuccesses":
-          defaultParams[param] = 5;
-          break;
-        case "sampleSize":
-          defaultParams[param] = 10;
-          break;
-        default:
-          defaultParams[param] = 1;
-      }
-    });
-
-    updateColumn(id, {
-      distributionType: distributionType,
-      distributionParams: defaultParams,
-    });
-  };
-
-  const handleDistributionParamChange = (
-    id: string,
-    param: string,
-    value: number,
-  ) => {
-    const column = columns.find((col) => col.id === id);
-    if (!column?.distributionParams) return;
-
-    updateColumn(id, {
-      distributionParams: {
-        ...column.distributionParams,
-        [param]: value,
-      },
-    });
   };
 
   const handleCancel = () => {
@@ -712,24 +490,13 @@ export const CreateSimulationDataTable = () => {
           isOpen={!!editingColumnId}
           column={columns.find((col) => col.id === editingColumnId)!}
           index={columns.findIndex((col) => col.id === editingColumnId)}
-          distributionOptions={DISTRIBUTION_OPTIONS}
-          onUpdate={updateColumn}
-          onDataTypeChange={handleDataTypeChange}
-          onDistributionTypeChange={handleDistributionTypeChange}
-          onDistributionParamChange={handleDistributionParamChange}
+          onSave={updateColumn}
           onRemove={(id) => {
             removeColumn(id);
             setEditingColumnId(null);
           }}
           onClose={() => setEditingColumnId(null)}
           canRemove={columns.length > 1}
-          error={
-            columns.find((col) => col.id === editingColumnId)?.errorMessage || {
-              columnName: undefined,
-              distributionParams: undefined,
-              fixedValue: undefined,
-            }
-          }
           disabled={isSubmitting}
         />
       )}
