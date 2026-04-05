@@ -27,7 +27,7 @@ describe("app constants", () => {
 
   describe("DISTRIBUTION_OPTIONS", () => {
     it("test_distributionOptions_hasExpectedLength", () => {
-      expect(DISTRIBUTION_OPTIONS.length).toBeGreaterThan(0);
+      expect(DISTRIBUTION_OPTIONS.length).toBe(13);
     });
 
     it("test_distributionOptions_eachHasValueLabelParams", () => {
@@ -41,8 +41,7 @@ describe("app constants", () => {
     it("test_distributionOptions_normalDistribution", () => {
       const normal = DISTRIBUTION_OPTIONS.find((o) => o.value === "normal");
       expect(normal).toBeDefined();
-      expect(normal?.params).toContain("loc");
-      expect(normal?.params).toContain("scale");
+      expect(normal?.params).toEqual(["loc", "scale"]);
     });
 
     it("test_distributionOptions_uniformDistribution", () => {
