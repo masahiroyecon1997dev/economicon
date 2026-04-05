@@ -635,3 +635,47 @@ export const CastColumnResponse = zod.object({
 }).describe('処理結果')
 })
 
+/**
+ * 列を指定した位置に移動するエンドポイント
+
+Parameters
+----------
+request : Request
+    FastAPIのリクエストオブジェクト
+body : MoveColumnRequestBody
+    リクエストボディ
+    - tableName: テーブル名
+    - columnName: 移動する列名
+    - anchorColumnName: 挿入基準列名（null のとき末尾に移動）
+
+Returns
+-------
+JSONResponse
+    処理結果
+ * @summary Move Column
+ */
+export const MoveColumnHeader = zod.object({
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
+
+
+
+
+
+export const MoveColumnBody = zod.object({
+  "tableName": zod.string().min(1).describe('操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。'),
+  "columnName": zod.string().min(1).describe('移動する列名。既存の列名から指定してください。'),
+  "anchorColumnName": zod.union([zod.string().min(1).describe('カラム名'),zod.null()]).optional().describe('挿入基準列名。指定した列の直前に移動列を挿入します。null を指定した場合は末尾に移動します。')
+}).describe('列移動リクエスト')
+
+export const moveColumnResponseCodeDefault = `OK`;
+
+export const MoveColumnResponse = zod.object({
+  "code": zod.string().default(moveColumnResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('列を移動したテーブル名'),
+  "columnNames": zod.array(zod.string()).describe('移動後の全列名リスト（順序付き）')
+}).describe('処理結果')
+})
+

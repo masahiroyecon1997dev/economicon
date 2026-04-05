@@ -81,7 +81,8 @@
     "LoadingData": "Loading data",
     "FetchingChunk": "Loading",
     "FetchError": "Error: {{message}}",
-    "CloseTab": "Close tab"
+    "CloseTab": "Close tab",
+    "MoveColumnError": "Failed to move column"
   },
   "ImportDataFileView": {
     "Title": "Select File",

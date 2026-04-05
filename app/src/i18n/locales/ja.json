@@ -81,7 +81,8 @@
     "LoadingData": "データを読み込んでいます",
     "FetchingChunk": "読み込み中",
     "FetchError": "エラー: {{message}}",
-    "CloseTab": "タブを閉じる"
+    "CloseTab": "タブを閉じる",
+    "MoveColumnError": "列の移動に失敗しました"
   },
   "ImportDataFileView": {
     "Title": "ファイルをインポート",

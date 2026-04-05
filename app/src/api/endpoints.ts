@@ -27,6 +27,7 @@ import type {
   FilterRequestBody,
   GetColumnListRequestBody,
   ImportFileRequestBody,
+  MoveColumnRequestBody,
   OutputResultRequest,
   RegressionRequestBody,
   RenameColumnRequestBody,
@@ -61,6 +62,7 @@ import type {
   SuccessResponseGetSettingsResult,
   SuccessResponseGetTableListResult,
   SuccessResponseImportFileResult,
+  SuccessResponseMoveColumnResult,
   SuccessResponseOutputResultResult,
   SuccessResponseRegressionResult,
   SuccessResponseRenameColumnResult,
@@ -392,6 +394,36 @@ const castColumn = (
       {url: `/api/column/cast`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: castColumnRequestBody
+    },
+      options);
+    }
+
+/**
+ * 列を指定した位置に移動するエンドポイント
+
+Parameters
+----------
+request : Request
+    FastAPIのリクエストオブジェクト
+body : MoveColumnRequestBody
+    リクエストボディ
+    - tableName: テーブル名
+    - columnName: 移動する列名
+    - anchorColumnName: 挿入基準列名（null のとき末尾に移動）
+
+Returns
+-------
+JSONResponse
+    処理結果
+ * @summary Move Column
+ */
+const moveColumn = (
+    moveColumnRequestBody: MoveColumnRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseMoveColumnResult>>,) => {
+      return customInstance<SuccessResponseMoveColumnResult>(
+      {url: `/api/column/move`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: moveColumnRequestBody
     },
       options);
     }
@@ -1167,7 +1199,7 @@ const shutdown = (
       options);
     }
 
-return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,filterTable,regression,addDiagnosticColumns,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
+return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,filterTable,regression,addDiagnosticColumns,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
 export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['healthCheck']>>>
 export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDummyColumn']>>>
 export type DeleteColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteColumn']>>>
@@ -1180,6 +1212,7 @@ export type TransformColumnResult = NonNullable<Awaited<ReturnType<ReturnType<ty
 export type GetColumnListResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getColumnList']>>>
 export type SortColumnsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['sortColumns']>>>
 export type CastColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['castColumn']>>>
+export type MoveColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['moveColumn']>>>
 export type CreateJoinTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createJoinTable']>>>
 export type CreateUnionTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createUnionTable']>>>
 export type CreateSimulationDataTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createSimulationDataTable']>>>

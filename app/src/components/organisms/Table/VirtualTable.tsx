@@ -6,7 +6,20 @@
  * - 列リスト変更時にチャンクキャッシュを自動無効化
  * - totalRows=0 の間はローディング表示し、chunk 0 到着後に表示切替
  */
-import { useDroppable } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import {
   flexRender,
   getCoreRowModel,
@@ -19,6 +32,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { getEconomiconAppAPI } from "../../../api/endpoints";
+import { useDragColumnReorder } from "../../../hooks/useDragColumnReorder";
 import { useVirtualTableData } from "../../../hooks/useVirtualTableData";
 import { getPolarsTypeColor } from "../../../lib/utils/columnTypeColor";
 import { cn } from "../../../lib/utils/helpers";
@@ -30,6 +44,7 @@ import type {
   TableInfoType,
   TalbeDataRowType,
 } from "../../../types/commonTypes";
+import { DraggableColumnHeader } from "../../molecules/Table/DraggableColumnHeader";
 import { ColumnOperationDialog } from "../Dialog/ColumnOperationDialog";
 import { ColumnContextMenu, type ColumnOperation } from "./ColumnContextMenu";
 
@@ -89,11 +104,23 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   const { tableName, columnList, totalRows } = tableInfo;
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // ドラッグ&ドロップ
-  const { isOver, setNodeRef } = useDroppable({ id: "column-droppable" });
-
   // 列幅の永続化: 列の追加・削除があっても残存列の幅は保持する
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+
+  // ドラッグ&ドロップ（列移動）
+  const {
+    activeColumnId,
+    dragErrorKey,
+    onDragStart,
+    onDragEnd,
+    clearDragError,
+  } = useDragColumnReorder({ tableName, columnList });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+  );
 
   // バージョン購読: チャンク更新時に再レンダー（useVirtualTableData 内でも購読しているが
   // VirtualTable 自体も購読して columns の cell closure を最新化する）
@@ -122,6 +149,16 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   }>({ open: false, operation: null, column: null });
 
   const [sortError, setSortError] = useState<string | null>(null);
+
+  // DndContext イベントハンドラー（useCallback で安定化）
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => onDragStart(event),
+    [onDragStart],
+  );
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => onDragEnd(event),
+    [onDragEnd],
+  );
 
   // 列ヘッダーのアクション受信
   const handleColumnAction = useCallback(
@@ -202,21 +239,23 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
         size: calculatedSize,
         minSize: MIN_COL_WIDTH,
         header: () => (
-          <ColumnContextMenu
-            column={column}
-            onAction={(op) => handleColumnAction(column, op)}
-          >
-            <span
-              className={cn(
-                "shrink-0 px-1 py-0.5 rounded text-[10px] font-bold font-mono leading-none",
-                typeColor.bg,
-                typeColor.text,
-              )}
+          <DraggableColumnHeader id={column.name}>
+            <ColumnContextMenu
+              column={column}
+              onAction={(op) => handleColumnAction(column, op)}
             >
-              {typeColor.label}
-            </span>
-            <span className="truncate">{column.name}</span>
-          </ColumnContextMenu>
+              <span
+                className={cn(
+                  "shrink-0 px-1 py-0.5 rounded text-[10px] font-bold font-mono leading-none",
+                  typeColor.bg,
+                  typeColor.text,
+                )}
+              >
+                {typeColor.label}
+              </span>
+              <span className="truncate">{column.name}</span>
+            </ColumnContextMenu>
+          </DraggableColumnHeader>
         ),
         cell: ({ row }) => {
           const rowData = getRowData(row.index);
@@ -316,119 +355,149 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   // ---------------------------------------------------------------------------
   // 通常レンダリング
   // ---------------------------------------------------------------------------
+
+  // SortableContext に渡す ID リスト（# 列は除外）
+  const sortableIds = columnList.map((c) => c.name);
+
+  // ドラッグ中の列の情報（DragOverlay 表示用）
+  const activeColumn = activeColumnId
+    ? columnList.find((c) => c.name === activeColumnId)
+    : null;
+
   return (
-    <div
-      ref={parentRef}
-      className="overflow-auto rounded-lg border border-brand-border bg-white dark:bg-gray-900 shadow-sm h-full"
-      style={{ willChange: "scroll-position" }}
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
-      <div style={{ height: `${totalSize}px`, position: "relative" }}>
-        <table
-          className="text-sm text-left text-gray-500 table-fixed"
-          style={{ width: table.getCenterTotalSize() }}
-        >
-          <thead
-            ref={setNodeRef}
-            className={cn(
-              "sticky top-0 z-10 text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800",
-              isOver && "bg-gray-500",
-            )}
+      <div
+        ref={parentRef}
+        className="overflow-auto rounded-lg border border-brand-border bg-white dark:bg-gray-900 shadow-sm h-full"
+        style={{ willChange: "scroll-position" }}
+      >
+        <div style={{ height: `${totalSize}px`, position: "relative" }}>
+          <table
+            className="text-sm text-left text-gray-500 table-fixed"
+            style={{ width: table.getCenterTotalSize() }}
           >
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="px-3 py-3 relative select-none overflow-hidden"
-                    style={{ width: header.getSize() }}
+            <thead className="sticky top-0 z-10 text-xs text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  <SortableContext
+                    items={sortableIds}
+                    strategy={horizontalListSortingStrategy}
                   >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="px-3 py-3 relative select-none overflow-hidden"
+                        style={{ width: header.getSize() }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                        {header.column.getCanResize() && (
+                          <div
+                            onMouseDown={header.getResizeHandler()}
+                            onTouchStart={header.getResizeHandler()}
+                            className={cn(
+                              "absolute right-0 top-0 h-full w-1 cursor-col-resize bg-gray-300 dark:bg-gray-600 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity",
+                              header.column.getIsResizing() &&
+                                "opacity-100 bg-brand-primary",
+                            )}
+                          />
                         )}
-                    {header.column.getCanResize() && (
-                      <div
-                        onMouseDown={header.getResizeHandler()}
-                        onTouchStart={header.getResizeHandler()}
-                        className={cn(
-                          "absolute right-0 top-0 h-full w-1 cursor-col-resize bg-gray-300 dark:bg-gray-600 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity",
-                          header.column.getIsResizing() &&
-                            "opacity-100 bg-brand-primary",
-                        )}
-                      />
-                    )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {paddingTop > 0 && (
-              <tr>
-                <td style={{ height: `${paddingTop}px` }} />
-              </tr>
-            )}
-            {virtualRows.map((virtualRow) => {
-              const row = rows[virtualRow.index];
-              return (
-                <tr
-                  key={row.id}
-                  className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/70"
-                  style={{ height: `${virtualRow.size}px` }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-0">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </td>
-                  ))}
+                      </th>
+                    ))}
+                  </SortableContext>
                 </tr>
-              );
-            })}
-            {paddingBottom > 0 && (
-              <tr>
-                <td style={{ height: `${paddingBottom}px` }} />
-              </tr>
-            )}
-          </tbody>
-        </table>
+              ))}
+            </thead>
+            <tbody>
+              {paddingTop > 0 && (
+                <tr>
+                  <td style={{ height: `${paddingTop}px` }} />
+                </tr>
+              )}
+              {virtualRows.map((virtualRow) => {
+                const row = rows[virtualRow.index];
+                return (
+                  <tr
+                    key={row.id}
+                    className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/70"
+                    style={{ height: `${virtualRow.size}px` }}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="p-0">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+              {paddingBottom > 0 && (
+                <tr>
+                  <td style={{ height: `${paddingBottom}px` }} />
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* ローディングインジケーター（チャンク取得中） */}
+        {isLoading && (
+          <div className="fixed bottom-4 right-4 z-50 flex items-center gap-1.5 rounded-full bg-brand-primary/90 px-3 py-1.5 text-xs font-medium text-white shadow-md">
+            <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            {t("Table.FetchingChunk")}
+          </div>
+        )}
+
+        {error && (
+          <div className="fixed bottom-4 right-4 z-50 rounded-full bg-red-500 px-3 py-1.5 text-xs font-medium text-white shadow-md">
+            {t("Table.FetchError", { message: error.message })}
+          </div>
+        )}
+
+        {(sortError ?? dragErrorKey) && (
+          <div
+            className="fixed bottom-4 right-4 z-50 rounded-full bg-red-500 px-3 py-1.5 text-xs font-medium text-white shadow-md cursor-pointer"
+            onClick={() => {
+              setSortError(null);
+              clearDragError();
+            }}
+          >
+            {sortError ?? (dragErrorKey ? t(dragErrorKey) : null)}
+          </div>
+        )}
+
+        <ColumnOperationDialog
+          open={dialogState.open}
+          onOpenChange={(open) => setDialogState((prev) => ({ ...prev, open }))}
+          operation={dialogState.operation}
+          tableName={tableName}
+          column={dialogState.column}
+          onSuccess={(updatedList) => {
+            invalidateTable(tableName, { columnList: updatedList });
+            setDialogState({ open: false, operation: null, column: null });
+          }}
+        />
       </div>
 
-      {/* ローディングインジケーター（チャンク取得中） */}
-      {isLoading && (
-        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-1.5 rounded-full bg-brand-primary/90 px-3 py-1.5 text-xs font-medium text-white shadow-md">
-          <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-          {t("Table.FetchingChunk")}
-        </div>
-      )}
-
-      {error && (
-        <div className="fixed bottom-4 right-4 z-50 rounded-full bg-red-500 px-3 py-1.5 text-xs font-medium text-white shadow-md">
-          {t("Table.FetchError", { message: error.message })}
-        </div>
-      )}
-
-      {sortError && (
-        <div className="fixed bottom-4 right-4 z-50 rounded-full bg-red-500 px-3 py-1.5 text-xs font-medium text-white shadow-md">
-          {t("Table.SortError")}: {sortError}
-        </div>
-      )}
-
-      <ColumnOperationDialog
-        open={dialogState.open}
-        onOpenChange={(open) => setDialogState((prev) => ({ ...prev, open }))}
-        operation={dialogState.operation}
-        tableName={tableName}
-        column={dialogState.column}
-        onSuccess={(updatedList) => {
-          invalidateTable(tableName, { columnList: updatedList });
-          setDialogState({ open: false, operation: null, column: null });
-        }}
-      />
-    </div>
+      {/* ドラッグ中のゴーストヘッダー */}
+      <DragOverlay>
+        {activeColumn && (
+          <div className="flex items-center gap-1 px-3 py-3 rounded shadow-lg bg-white dark:bg-gray-800 border border-brand-border text-xs font-semibold text-gray-700 dark:text-gray-200 opacity-90 cursor-grabbing">
+            <span className="truncate">{activeColumn.name}</span>
+          </div>
+        )}
+      </DragOverlay>
+    </DndContext>
   );
 };
