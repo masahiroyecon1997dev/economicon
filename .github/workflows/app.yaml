@@ -55,6 +55,7 @@ jobs:
           flags: unittests
           name: vitest-coverage
           fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   e2e-test:
     name: E2E Tests (Tauri/Windows)
@@ -89,6 +90,15 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: "app/src-tauri -> target"
+
+      - name: Create resources placeholder
+        # resources/ は .gitignore で除外されているため CI では存在しない。
+        # tauri.conf.json の "resources": ["resources/**/*"] がビルド時に検証するため
+        # ダミーファイルを置いてエラーを防ぐ。
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path "app\src-tauri\resources" -Force | Out-Null
+          Set-Content -Path "app\src-tauri\resources\.gitkeep" -Value ""
 
       - name: Prepare sidecar binary placeholder
         # tauri.conf.json の externalBin ["binaries/python"] を参照するため、

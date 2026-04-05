@@ -121,6 +121,12 @@ def release_date_pypi(name: str, version: str) -> datetime | None:
     return min(times) if times else None
 
 
+def _major_version(version: str) -> int | None:
+    """バージョン文字列からメジャー番号を返す。パース失敗時は None。"""
+    m = re.match(r"(\d+)", version.lstrip("v^~"))
+    return int(m.group(1)) if m else None
+
+
 def release_date_crates(name: str, version: str) -> datetime | None:
     data = fetch_json(
         f"https://crates.io/api/v1/crates/{name}/{version}",
@@ -256,6 +262,22 @@ def check_freshness(
         name = item["name"]
         latest = item["latest"]
         current = item["current"]
+
+        # メジャーバージョンアップは安全でないためスキップ
+        cur_major = _major_version(current)
+        lat_major = _major_version(latest)
+        if cur_major is not None and lat_major is not None and lat_major > cur_major:
+            results.append(
+                (
+                    name,
+                    current,
+                    latest,
+                    False,
+                    "unknown",
+                    f"メジャーバージョンアップのためスキップ (v{cur_major} → v{lat_major})",
+                )
+            )
+            continue
 
         if ecosystem == "npm":
             rel = release_date_npm(name, latest)
