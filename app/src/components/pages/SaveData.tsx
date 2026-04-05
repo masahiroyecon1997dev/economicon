@@ -451,6 +451,7 @@ export const SaveData = () => {
             selectText={t("SaveDataView.Save")}
             onCancel={handleCancel}
             onSelect={() => void form.handleSubmit()}
+            isLoading={isSubmitting}
           />
         </>
       )}

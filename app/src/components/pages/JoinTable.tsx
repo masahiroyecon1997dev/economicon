@@ -390,6 +390,7 @@ export const JoinTable = () => {
         }
         onCancel={() => setCurrentView("DataPreview")}
         onSelect={handleSubmit}
+        isLoading={isSubmitting}
       />
     </PageLayout>
   );

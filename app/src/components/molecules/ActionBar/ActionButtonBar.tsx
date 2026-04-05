@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { Button } from "../../atoms/Button/Button";
 
 type ActionButtonBarProps = {
@@ -7,6 +8,7 @@ type ActionButtonBarProps = {
   onSelect: () => void;
   onSelectType?: "button" | "submit" | "reset";
   disabled?: boolean;
+  isLoading?: boolean;
 };
 
 export const ActionButtonBar = ({
@@ -16,6 +18,7 @@ export const ActionButtonBar = ({
   onSelect,
   onSelectType = "button",
   disabled,
+  isLoading,
 }: ActionButtonBarProps) => {
   return (
     <div className="py-2 shrink-0 border-t border-gray-200 dark:border-gray-700">
@@ -24,7 +27,7 @@ export const ActionButtonBar = ({
           onClick={onCancel}
           variant="outline"
           className="px-4 py-1.5"
-          disabled={disabled}
+          disabled={disabled || isLoading}
         >
           {cancelText}
         </Button>
@@ -32,9 +35,15 @@ export const ActionButtonBar = ({
           onClick={onSelect}
           variant="primary"
           type={onSelectType}
-          className="px-4 py-1.5"
-          disabled={disabled}
+          className="inline-flex items-center px-4 py-1.5"
+          disabled={disabled || isLoading}
         >
+          {isLoading && (
+            <Loader2
+              className="mr-1.5 h-3.5 w-3.5 animate-spin"
+              aria-hidden="true"
+            />
+          )}
           {selectText}
         </Button>
       </div>

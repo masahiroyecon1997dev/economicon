@@ -332,6 +332,7 @@ export const UnionTable = () => {
         }
         onCancel={() => setCurrentView("DataPreview")}
         onSelect={handleSubmit}
+        isLoading={isSubmitting}
       />
     </PageLayout>
   );

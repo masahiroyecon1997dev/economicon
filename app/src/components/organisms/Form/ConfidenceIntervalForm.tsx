@@ -337,6 +337,7 @@ export const ConfidenceIntervalForm = ({
         onSelect={() => {}}
         onSelectType="submit"
         disabled={isSubmitting}
+        isLoading={isSubmitting}
       />
 
       {/* 統計量説明ダイアログ */}

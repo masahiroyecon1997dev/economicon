@@ -433,6 +433,7 @@ export const Calculation = () => {
           onCancel={handleCancel}
           onSelect={() => {}}
           onSelectType="submit"
+          isLoading={isSubmitting}
         />
       </form>
     </PageLayout>

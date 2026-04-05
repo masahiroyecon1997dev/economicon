@@ -74,6 +74,7 @@
   },
   "LeftSideMenu": {
     "DataList": "Data List",
+    "EmptyState": "No data.\nImport a file to get started.",
     "MenuRenameData": "Rename Data",
     "MenuDuplicateData": "Duplicate Data",
     "MenuDeleteData": "Delete Data"
@@ -83,7 +84,8 @@
     "FetchingChunk": "Loading",
     "FetchError": "Error: {{message}}",
     "CloseTab": "Close tab",
-    "MoveColumnError": "Failed to move column"
+    "MoveColumnError": "Failed to move column",
+    "EmptyState": "No data loaded. Please import a file to get started."
   },
   "ImportDataFileView": {
     "Title": "Select File",

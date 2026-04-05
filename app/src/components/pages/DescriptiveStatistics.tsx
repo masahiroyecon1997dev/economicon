@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "../../api/endpoints";
@@ -83,6 +84,7 @@ export const DescriptiveStatistics = () => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState<ResultSnapshot | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [statsOpen, setStatsOpen] = useState(true);
 
   /* ── Fetch columns when table changes ────────────────────── */
   useEffect(() => {
@@ -247,26 +249,47 @@ export const DescriptiveStatistics = () => {
           </FormField>
         )}
 
-        {/* ─── 3. Statistics selection ───────────────────────── */}
-        <FormField label={t("DescriptiveStatistics.StatisticsLabel")}>
-          <div className="space-y-2">
-            <SelectAllBar
-              selectAllLabel={t("DescriptiveStatistics.SelectAll")}
-              deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
-              onSelectAll={() => setCheckedStats(new Set(ALL_STAT_TYPES))}
-              onDeselectAll={() => setCheckedStats(new Set())}
+        {/* ─── 3. Statistics selection (accordion) ───────────────────── */}
+        <div className="space-y-1">
+          <button
+            type="button"
+            onClick={() => setStatsOpen((v) => !v)}
+            className="flex w-full items-center justify-between py-0.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-accent transition-colors"
+          >
+            <span>{t("DescriptiveStatistics.StatisticsLabel")}</span>
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 text-brand-text-main/60 transition-transform duration-200",
+                statsOpen && "rotate-180",
+              )}
             />
-            <CheckboxTagGroup
-              items={ALL_STAT_TYPES.map((s) => ({
-                value: s,
-                label: t(`DescriptiveStatistics.Stat_${s}`),
-              }))}
-              checked={checkedStats as Set<string>}
-              onToggle={(v) => toggleStat(v as DescriptiveStatisticType)}
-              error={errors.stats}
-            />
-          </div>
-        </FormField>
+          </button>
+          {statsOpen && (
+            <div className="space-y-2">
+              <SelectAllBar
+                selectAllLabel={t("DescriptiveStatistics.SelectAll")}
+                deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
+                onSelectAll={() => setCheckedStats(new Set(ALL_STAT_TYPES))}
+                onDeselectAll={() => setCheckedStats(new Set())}
+              />
+              <CheckboxTagGroup
+                items={ALL_STAT_TYPES.map((s) => ({
+                  value: s,
+                  label: t(`DescriptiveStatistics.Stat_${s}`),
+                }))}
+                checked={checkedStats as Set<string>}
+                onToggle={(v) => toggleStat(v as DescriptiveStatisticType)}
+                error={errors.stats}
+                columns={3}
+              />
+            </div>
+          )}
+          {!statsOpen && errors.stats && (
+            <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">
+              {errors.stats}
+            </p>
+          )}
+        </div>
 
         {/* ─── 4. Submit ─────────────────────────────────────── */}
         {/* ActionButtonBar は最下部に移動済み */}
@@ -302,10 +325,17 @@ export const DescriptiveStatistics = () => {
                         "border-b border-border-color last:border-0 transition-colors",
                         i % 2 === 0
                           ? "bg-white dark:bg-brand-primary"
-                          : "bg-brand-secondary/40",
+                          : "bg-brand-secondary",
                       )}
                     >
-                      <td className="px-4 py-2 font-medium text-brand-text-main sticky left-0 bg-inherit whitespace-nowrap">
+                      <td
+                        className={cn(
+                          "px-4 py-2 font-medium text-brand-text-main sticky left-0 whitespace-nowrap",
+                          i % 2 === 0
+                            ? "bg-white dark:bg-brand-primary"
+                            : "bg-brand-secondary",
+                        )}
+                      >
                         {col}
                       </td>
                       {result.stats.map((stat) => (
@@ -333,6 +363,8 @@ export const DescriptiveStatistics = () => {
         }
         onCancel={() => setCurrentView("DataPreview")}
         onSelect={handleSubmit}
+        disabled={isCalculating}
+        isLoading={isCalculating}
       />
     </PageLayout>
   );

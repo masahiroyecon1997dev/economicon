@@ -117,7 +117,7 @@ export const LinearRegressionForm = ({
             const detail =
               resultResponse.result as unknown as AnalysisResultDetail;
             addResult({
-              ...(detail.regressionOutput as unknown as LinearRegressionResultType),
+              ...(detail.resultData as unknown as LinearRegressionResultType),
               resultId: detail.id,
             });
             const newIndex =
@@ -477,6 +477,7 @@ export const LinearRegressionForm = ({
         onCancel={onCancel}
         onSelect={() => {}}
         onSelectType="submit"
+        isLoading={isSubmitting}
       />
     </form>
   );

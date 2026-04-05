@@ -59,6 +59,11 @@ export const Table = () => {
       </div>
 
       {/* テーブル本体: アクティブなテーブルのみマウント */}
+      {tableInfos.length === 0 && (
+        <div className="flex-1 flex flex-col items-center justify-center text-brand-text-sub">
+          <p className="text-sm">{t("Table.EmptyState")}</p>
+        </div>
+      )}
       {tableInfos.map(
         (table) =>
           table.isActive && (

@@ -405,6 +405,7 @@ export const CorrelationMatrix = () => {
           onCancel={() => setCurrentView("DataPreview")}
           onSelect={() => void form.handleSubmit()}
           disabled={isSubmitting}
+          isLoading={isSubmitting}
         />
       </form>
     </PageLayout>

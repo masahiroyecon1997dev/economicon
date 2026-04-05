@@ -481,6 +481,7 @@ export const CreateSimulationDataTable = () => {
           onCancel={handleCancel}
           onSelect={() => {}}
           onSelectType="submit"
+          isLoading={isSubmitting}
         />
       </form>
 

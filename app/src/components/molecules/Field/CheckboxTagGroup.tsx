@@ -11,6 +11,7 @@ type CheckboxTagGroupProps = {
   onToggle: (value: string) => void;
   disabled?: boolean;
   error?: string;
+  columns?: 2 | 3 | 4;
 };
 
 export const CheckboxTagGroup = ({
@@ -19,10 +20,20 @@ export const CheckboxTagGroup = ({
   onToggle,
   disabled = false,
   error,
+  columns,
 }: CheckboxTagGroupProps) => {
+  const containerClass =
+    columns === 4
+      ? "grid grid-cols-4 gap-2"
+      : columns === 3
+        ? "grid grid-cols-3 gap-2"
+        : columns === 2
+          ? "grid grid-cols-2 gap-2"
+          : "flex flex-wrap gap-2";
+
   return (
     <div>
-      <div className="flex flex-wrap gap-2">
+      <div className={containerClass}>
         {items.map((item) => {
           const isChecked = checked.has(item.value);
           return (

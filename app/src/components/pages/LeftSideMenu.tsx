@@ -4,6 +4,7 @@ import { extractApiErrorMessage } from "../../lib/utils/apiError";
 import { getTableInfo } from "../../lib/utils/internal";
 import { useCurrentPageStore } from "../../stores/currentView";
 import { useTableInfosStore } from "../../stores/tableInfos";
+import { useTableListStore } from "../../stores/tableList";
 import { SectionHeading } from "../atoms/List/SectionHeading";
 import { TableNav } from "../molecules/List/TableNav";
 
@@ -16,6 +17,7 @@ export const LeftSideMenu = () => {
     (state) => state.activateTableInfo,
   );
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const tableList = useTableListStore((state) => state.tableList);
 
   const clickTableName = async (tableName: string) => {
     try {
@@ -41,6 +43,11 @@ export const LeftSideMenu = () => {
     <aside className="flex h-full w-full flex-col overflow-hidden bg-brand-primary dark:bg-gray-900 text-white">
       <SectionHeading title={t("LeftSideMenu.DataList")} />
       <div className="flex-1 overflow-y-auto px-4 pb-4">
+        {tableList.length === 0 && (
+          <p className="mt-2 text-xs text-white/40 leading-relaxed whitespace-pre-line">
+            {t("LeftSideMenu.EmptyState")}
+          </p>
+        )}
         <TableNav
           activeTableName={activeTableName}
           onTableClick={clickTableName}
