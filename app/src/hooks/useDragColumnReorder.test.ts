@@ -84,18 +84,29 @@ describe("useDragColumnReorder", () => {
       expect(result.current.activeColumnId).toBe("colA");
     });
 
-    it("test_onDragStart_clearsDragErrorKey", () => {
+    it("test_onDragStart_clearsDragErrorKey", async () => {
+      useTableInfosStore.setState({
+        tableInfos: [
+          { tableName: "tableA", columnList: COLUMNS, totalRows: 3, isActive: true },
+        ],
+        activeTableName: "tableA",
+      });
+      mockMoveColumn.mockResolvedValueOnce({ code: "NG" });
+
       const { result } = renderHook(() =>
         useDragColumnReorder({ tableName: "tableA", columnList: COLUMNS }),
       );
 
       // まずエラーを発生させる
-      mockMoveColumn.mockResolvedValueOnce({ code: "NG" });
+      await act(async () => {
+        await result.current.onDragEnd(makeDragEnd("colA", "colC"));
+      });
+      expect(result.current.dragErrorKey).toBe("Table.MoveColumnError");
+
+      // onDragStart でエラーがクリアされることを確認
       act(() => {
         result.current.onDragStart(makeDragStart("colA"));
       });
-
-      // dragErrorKey がクリアされていること
       expect(result.current.dragErrorKey).toBeNull();
     });
   });
@@ -208,6 +219,72 @@ describe("useDragColumnReorder", () => {
       });
 
       expect(result.current.dragErrorKey).toBe("Table.MoveColumnError");
+    });
+
+    it("test_onDragEnd_apiReturnsNG_rollsBackColumnList", async () => {
+      mockMoveColumn.mockResolvedValueOnce({ code: "NG" });
+
+      useTableInfosStore.setState({
+        tableInfos: [
+          {
+            tableName: "tableA",
+            columnList: COLUMNS,
+            totalRows: 3,
+            isActive: true,
+          },
+        ],
+        activeTableName: "tableA",
+      });
+
+      const { result } = renderHook(() =>
+        useDragColumnReorder({ tableName: "tableA", columnList: COLUMNS }),
+      );
+
+      await act(async () => {
+        await result.current.onDragEnd(makeDragEnd("colA", "colC"));
+      });
+
+      // API 失敗後は楽観的更新の前の列順にロールバックされる
+      const restoredColumns =
+        useTableInfosStore.getState().tableInfos[0].columnList;
+      expect(restoredColumns.map((c) => c.name)).toEqual([
+        "colA",
+        "colB",
+        "colC",
+      ]);
+    });
+
+    it("test_onDragEnd_apiThrows_rollsBackColumnList", async () => {
+      mockMoveColumn.mockRejectedValueOnce(new Error("network error"));
+
+      useTableInfosStore.setState({
+        tableInfos: [
+          {
+            tableName: "tableA",
+            columnList: COLUMNS,
+            totalRows: 3,
+            isActive: true,
+          },
+        ],
+        activeTableName: "tableA",
+      });
+
+      const { result } = renderHook(() =>
+        useDragColumnReorder({ tableName: "tableA", columnList: COLUMNS }),
+      );
+
+      await act(async () => {
+        await result.current.onDragEnd(makeDragEnd("colA", "colC"));
+      });
+
+      // 通信エラー後もロールバックされる
+      const restoredColumns =
+        useTableInfosStore.getState().tableInfos[0].columnList;
+      expect(restoredColumns.map((c) => c.name)).toEqual([
+        "colA",
+        "colB",
+        "colC",
+      ]);
     });
 
     it("test_onDragEnd_unknownColumnId_doesNotCallAPI", async () => {
