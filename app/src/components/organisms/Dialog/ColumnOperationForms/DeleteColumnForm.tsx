@@ -1,12 +1,13 @@
 /**
  * 列削除確認フォーム
  */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
 import { DangerAlert } from "../../../molecules/Alert/DangerAlert";
 import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
@@ -23,9 +24,7 @@ export const DeleteColumnForm = ({
   const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
 
   const handleDelete = async () => {
     setIsSubmitting(true);
@@ -40,11 +39,11 @@ export const DeleteColumnForm = ({
         onSuccess(updatedList);
       } else {
         setApiError(
-          getResponseErrorMessage(response, t("Error.UnexpectedError")),
+          buildResponseErrorMessage(response, t("Error.UnexpectedError")),
         );
       }
     } catch (error) {
-      setApiError(extractApiErrorMessage(error, t("Error.UnexpectedError")));
+      setApiError(buildCaughtErrorMessage(error, t("Error.UnexpectedError")));
     } finally {
       setIsSubmitting(false);
     }

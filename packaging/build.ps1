@@ -39,7 +39,7 @@ $PYTHON_VERSION_SHORT  = ($PYTHON_VERSION -split '\.')[0..1] -join ''
 
 # --- アプリ情報 ----------------------------------------------------------------
 $APP_NAME    = "economicon"
-$APP_VERSION = "0.2.0"    # tauri.conf.json の version と合わせてください
+$APP_VERSION = "0.3.0"    # tauri.conf.json の version と合わせてください
 
 # --- ディレクトリ --------------------------------------------------------------
 $SCRIPT_DIR    = $PSScriptRoot                          # packaging/
@@ -64,6 +64,13 @@ $LICENSES_DIR  = Join-Path $RESOURCES_DIR "THIRD-PARTY-LICENSES"
 # --- Python Embeddable Package ダウンロード URL --------------------------------
 $PYTHON_EMBED_URL = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
 $PYTHON_EMBED_ZIP = Join-Path $SCRIPT_DIR "python_embed_tmp.zip"
+
+# --- Python Embeddable Package SHA-256 ハッシュ値 ----------------------------
+# ★ $PYTHON_VERSION を更新した際は必ずこの値も更新してください。
+#    確認方法:
+#      1. https://www.python.org/downloads/release/python-<ver>/ を開く
+#      2. 取得した SHA-256 値（64 桁の16進数）を下記に貼り付ける
+$PYTHON_EMBED_SHA256 = "ad4961a479dedbeb7c7d113253f8db1b1935586b73c27488712beec4f2c894e6"
 
 # ==============================================================================
 #  ユーティリティ関数
@@ -180,6 +187,23 @@ if (-not (Test-Path $PYTHON_EMBED_ZIP)) {
     Write-Info "既存の ZIP を再利用: $PYTHON_EMBED_ZIP"
 }
 
+# --- SHA-256 ハッシュ検証 ---
+# プレースホルダーのまま実行しようとした場合は即座に失敗させる
+if ($PYTHON_EMBED_SHA256 -eq "REPLACEME_SHA256") {
+    Write-Fail "SHA-256 ハッシュが設定されていません。"
+    Write-Fail "build.ps1 の \$PYTHON_EMBED_SHA256 を実際のハッシュ値に更新してください。"
+    exit 1
+}
+$actualHash = (Get-FileHash $PYTHON_EMBED_ZIP -Algorithm SHA256).Hash
+if ($actualHash.ToUpper() -ne $PYTHON_EMBED_SHA256.ToUpper()) {
+    Write-Fail "SHA-256 ハッシュが一致しません！ファイルが破損または改ざんされている可能性があります。"
+    Write-Fail "  期待値 : $PYTHON_EMBED_SHA256"
+    Write-Fail "  実際値 : $actualHash"
+    Remove-Item -Force $PYTHON_EMBED_ZIP -ErrorAction SilentlyContinue
+    exit 1
+}
+Write-Success "SHA-256 ハッシュを確認しました。"
+
 # ZIP 展開
 New-Item -ItemType Directory -Path $RUNTIME_DIR | Out-Null
 Write-Info "展開中: $RUNTIME_DIR"
@@ -258,24 +282,39 @@ New-Item -ItemType Directory -Path $sitePackagesDir -Force | Out-Null
 
 Write-Info "インストール先: $sitePackagesDir"
 Write-Info "Python バージョン指定: $PYTHON_VERSION"
-Write-Info "依存定義: $API_DIR\pyproject.toml"
+Write-Info "依存定義: $API_DIR\uv.lock（--frozen で固定）"
 Write-Host ""
 
+$reqFileTmp = Join-Path $SCRIPT_DIR "_requirements_prod_tmp.txt"
 Push-Location $API_DIR
 try {
-    # uv pip install で pyproject.toml の本番依存のみを
-    # embedded Python の site-packages へ直接展開する。
-    # --no-dev    : dev グループ（pytest, ruff 等）を除外
+    # uv export --frozen で uv.lock のバージョンを厳守しつつ、
+    # --no-dev で dependency-groups の dev（pytest, ruff 等）を除外した
+    # 一時 requirements ファイルを生成する。
+    Invoke-Step -ErrorMsg "uv export に失敗しました。" -Block {
+        uv export `
+            --frozen `
+            --no-dev `
+            --no-hashes `
+            --no-annotate `
+            --quiet `
+            --output-file $reqFileTmp
+    }
+    Write-Info "requirements ファイル生成: $reqFileTmp"
+
+    # 生成した requirements を使って site-packages へインストールする。
+    # バージョンは uv.lock で完全に固定されているため勝手な最新取得は発生しない。
     # --no-cache  : キャッシュを使わずクリーンインストール
     Invoke-Step -ErrorMsg "uv によるパッケージインストールに失敗しました。" -Block {
         uv pip install `
             --python $PYTHON_VERSION `
             --target $sitePackagesDir `
             --no-cache `
-            -r pyproject.toml
+            -r $reqFileTmp
     }
 } finally {
     Pop-Location
+    Remove-Item $reqFileTmp -Force -ErrorAction SilentlyContinue
 }
 
 Write-Success "パッケージを site-packages へインストールしました。"

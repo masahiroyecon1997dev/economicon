@@ -318,3 +318,40 @@ msgstr "newTableName には oldTableName と異なる名前を指定してくだ
 #: economicon/models/columns.py
 msgid "newColumnName must differ from oldColumnName."
 msgstr "newColumnName には oldColumnName と異なる名前を指定してください。"
+
+#: economicon/utils/algorithms/formula_parser.py
+#, python-brace-format
+msgid "Syntax error in calculation expression: {}"
+msgstr "計算式の構文エラー: {}"
+
+#: economicon/utils/algorithms/formula_parser.py
+#, python-brace-format
+msgid "Unsupported syntax in calculation expression: {}"
+msgstr "計算式に未サポートの構文が含まれています: {}"
+
+#: economicon/utils/algorithms/formula_parser.py
+#, python-brace-format
+msgid "function call '{}'"
+msgstr "関数呼び出し '{}'"
+
+#: economicon/utils/algorithms/formula_parser.py
+#, python-brace-format
+msgid "operator '{}'"
+msgstr "演算子 '{}'"
+
+#: economicon/utils/algorithms/formula_parser.py
+msgid "attribute access"
+msgstr "属性アクセス"
+
+#: economicon/utils/algorithms/formula_parser.py
+msgid "invalid variable reference"
+msgstr "無効な変数参照"
+
+#: economicon/utils/algorithms/formula_parser.py
+#, python-brace-format
+msgid "'{}' syntax"
+msgstr "'{}' 構文"
+
+#: economicon/utils/algorithms/formula_parser.py
+msgid "keyword arguments in function calls"
+msgstr "関数呼び出しへのキーワード引数"

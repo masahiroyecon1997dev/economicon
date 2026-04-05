@@ -95,19 +95,22 @@ export const DescriptiveStatistics = () => {
     setIsLoadingCols(true);
     setResult(null);
     const api = getEconomiconAppAPI();
-    api
-      .getColumnList({ tableName: selectedTable })
-      .then((resp) => {
+    void (async () => {
+      try {
+        const resp = await api.getColumnList({ tableName: selectedTable });
         if (resp.code === "OK") {
           setColumns(resp.result.columnInfoList);
           setCheckedCols(
             new Set(resp.result.columnInfoList.map((c: ColumnType) => c.name)),
           );
         }
-      })
-      .catch(() => {})
-      .finally(() => setIsLoadingCols(false));
-  }, [selectedTable]);
+      } catch {
+        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+      } finally {
+        setIsLoadingCols(false);
+      }
+    })();
+  }, [selectedTable, t]);
 
   /* ── Toggle helpers ──────────────────────────────────────── */
   const toggleCol = (name: string) => {

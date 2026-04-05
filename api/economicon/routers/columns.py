@@ -19,6 +19,8 @@ from economicon.schemas import (
     DuplicateColumnResult,
     GetColumnListRequestBody,
     GetColumnListResult,
+    MoveColumnRequestBody,
+    MoveColumnResult,
     RenameColumnRequestBody,
     RenameColumnResult,
     SortColumnsRequestBody,
@@ -39,6 +41,7 @@ from economicon.services.columns.cast_column import CastColumn
 from economicon.services.columns.delete_column import DeleteColumn
 from economicon.services.columns.duplicate_column import DuplicateColumn
 from economicon.services.columns.get_column_list import GetColumnList
+from economicon.services.columns.move_column import MoveColumn
 from economicon.services.columns.rename_column import RenameColumn
 from economicon.services.columns.sort_columns import SortColumns
 from economicon.services.columns.transform_column import TransformColumn
@@ -378,6 +381,36 @@ async def cast_column(
         処理結果
     """
     api = CastColumn(body, tables_store)
+    result = run_operation(api)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.post("/move", response_model=SuccessResponse[MoveColumnResult])
+async def move_column(
+    request: Request,
+    body: MoveColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
+    """列を指定した位置に移動するエンドポイント
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    body : MoveColumnRequestBody
+        リクエストボディ
+        - tableName: テーブル名
+        - columnName: 移動する列名
+        - anchorColumnName: 挿入基準列名（null のとき末尾に移動）
+
+    Returns
+    -------
+    JSONResponse
+        処理結果
+    """
+    api = MoveColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result

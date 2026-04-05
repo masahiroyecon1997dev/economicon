@@ -8,6 +8,12 @@ const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    // `@` を `src` ディレクトリへのエイリアスとして設定
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
+  },
 
   // Tauri CLI出力を見やすくするための設定
   clearScreen: false,
@@ -53,6 +59,12 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",
     css: true,
-    include: ["src/components/**/**/*.test.tsx", "src/function/**/*.test.ts"],
+    include: [
+      "src/components/**/**/*.test.tsx",
+      "src/function/**/*.test.ts",
+      "src/lib/**/*.test.ts",
+      "src/hooks/**/*.test.ts",
+      "src/stores/**/*.test.ts",
+    ],
   },
 });

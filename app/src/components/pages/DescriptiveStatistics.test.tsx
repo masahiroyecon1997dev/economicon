@@ -10,15 +10,17 @@ import { DescriptiveStatistics } from "./DescriptiveStatistics";
 // ---------------------------------------------------------------------------
 // Mocks
 // ---------------------------------------------------------------------------
+const fixedT = (key: string, opts?: Record<string, string>) => {
+  if (!opts) return key;
+  return Object.entries(opts).reduce(
+    (s, [k, v]) => s.replace(`{{${k}}}`, v),
+    key,
+  );
+};
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key: string, opts?: Record<string, string>) => {
-      if (!opts) return key;
-      return Object.entries(opts).reduce(
-        (s, [k, v]) => s.replace(`{{${k}}}`, v),
-        key,
-      );
-    },
+    t: fixedT,
   }),
 }));
 
@@ -176,6 +178,21 @@ describe("DescriptiveStatistics フォーム", () => {
   });
 
   describe("API失敗時", () => {
+    it("getColumnList がthrowした場合 → エラーダイアログを表示する", async () => {
+      mockApi.getColumnList.mockRejectedValue(new Error("ネットワークエラー"));
+      const user = userEvent.setup();
+      render(<DescriptiveStatistics />);
+
+      const selectTrigger = screen.getByRole("combobox");
+      await user.click(selectTrigger);
+      const option = await screen.findByRole("option", { name: "sales" });
+      await user.click(option);
+
+      await waitFor(() => {
+        expect(vi.mocked(showMessageDialog)).toHaveBeenCalled();
+      });
+    });
+
     it("descriptiveStatistics がthrowした場合 → エラーダイアログを表示する", async () => {
       mockApi.getColumnList.mockResolvedValue({
         code: "OK",

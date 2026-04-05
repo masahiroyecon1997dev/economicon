@@ -2,15 +2,15 @@
  * ダミー変数追加フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import { AddDummyColumnBody } from "../../../../api/zod/column/column";
+import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-  replaceParamNames,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
 import { InputText } from "../../../atoms/Input/InputText";
 import { Select, SelectItem } from "../../../atoms/Input/Select";
@@ -69,39 +69,31 @@ export const AddDummyColumnForm = ({
           onSuccess(updatedList);
         } else {
           setApiError(
-            replaceParamNames(
-              getResponseErrorMessage(response, t("Error.UnexpectedError")),
-              {
-                dummyColumnName: t("AddDummyColumnForm.DummyColumnName"),
-                sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
-                targetValue: t("AddDummyColumnForm.TargetValue"),
-                nullStrategy: t("AddDummyColumnForm.NullStrategy"),
-                dropBaseValue: t("AddDummyColumnForm.DropBaseValue"),
-              },
-            ),
-          );
-        }
-      } catch (error) {
-        setApiError(
-          replaceParamNames(
-            extractApiErrorMessage(error, t("Error.UnexpectedError")),
-            {
+            buildResponseErrorMessage(response, t("Error.UnexpectedError"), {
               dummyColumnName: t("AddDummyColumnForm.DummyColumnName"),
               sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
               targetValue: t("AddDummyColumnForm.TargetValue"),
               nullStrategy: t("AddDummyColumnForm.NullStrategy"),
               dropBaseValue: t("AddDummyColumnForm.DropBaseValue"),
-            },
-          ),
+            }),
+          );
+        }
+      } catch (error) {
+        setApiError(
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError"), {
+            dummyColumnName: t("AddDummyColumnForm.DummyColumnName"),
+            sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+            targetValue: t("AddDummyColumnForm.TargetValue"),
+            nullStrategy: t("AddDummyColumnForm.NullStrategy"),
+            dropBaseValue: t("AddDummyColumnForm.DropBaseValue"),
+          }),
         );
       }
     },
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
   const mode = useStore(form.store, (s) => s.values.mode);
 
   return (

@@ -2,15 +2,15 @@
  * ラグ・リード列追加フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import { AddLagLeadColumnBody } from "../../../../api/zod/column/column";
+import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-  replaceParamNames,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
 import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { useTableInfosStore } from "../../../../stores/tableInfos";
@@ -80,37 +80,29 @@ export const AddLagLeadColumnForm = ({
           onSuccess(updatedList);
         } else {
           setApiError(
-            replaceParamNames(
-              getResponseErrorMessage(response, t("Error.UnexpectedError")),
-              {
-                newColumnName: t("AddLagLeadColumnForm.NewColumnName"),
-                sourceColumn: t("ColumnOperationForm.SourceColumnName"),
-                periods: t("AddLagLeadColumnForm.Periods"),
-                groupColumns: t("AddLagLeadColumnForm.GroupColumns"),
-              },
-            ),
-          );
-        }
-      } catch (error) {
-        setApiError(
-          replaceParamNames(
-            extractApiErrorMessage(error, t("Error.UnexpectedError")),
-            {
+            buildResponseErrorMessage(response, t("Error.UnexpectedError"), {
               newColumnName: t("AddLagLeadColumnForm.NewColumnName"),
               sourceColumn: t("ColumnOperationForm.SourceColumnName"),
               periods: t("AddLagLeadColumnForm.Periods"),
               groupColumns: t("AddLagLeadColumnForm.GroupColumns"),
-            },
-          ),
+            }),
+          );
+        }
+      } catch (error) {
+        setApiError(
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError"), {
+            newColumnName: t("AddLagLeadColumnForm.NewColumnName"),
+            sourceColumn: t("ColumnOperationForm.SourceColumnName"),
+            periods: t("AddLagLeadColumnForm.Periods"),
+            groupColumns: t("AddLagLeadColumnForm.GroupColumns"),
+          }),
         );
       }
     },
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
   const periods = useStore(form.store, (s) => s.values.periods);
 
   const handlePeriodsChange = (value: string) => {

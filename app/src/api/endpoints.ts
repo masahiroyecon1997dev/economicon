@@ -27,6 +27,7 @@ import type {
   FilterRequestBody,
   GetColumnListRequestBody,
   ImportFileRequestBody,
+  MoveColumnRequestBody,
   OutputResultRequest,
   RegressionRequestBody,
   RenameColumnRequestBody,
@@ -61,6 +62,7 @@ import type {
   SuccessResponseGetSettingsResult,
   SuccessResponseGetTableListResult,
   SuccessResponseImportFileResult,
+  SuccessResponseMoveColumnResult,
   SuccessResponseOutputResultResult,
   SuccessResponseRegressionResult,
   SuccessResponseRenameColumnResult,
@@ -392,6 +394,36 @@ const castColumn = (
       {url: `/api/column/cast`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: castColumnRequestBody
+    },
+      options);
+    }
+
+/**
+ * 列を指定した位置に移動するエンドポイント
+
+Parameters
+----------
+request : Request
+    FastAPIのリクエストオブジェクト
+body : MoveColumnRequestBody
+    リクエストボディ
+    - tableName: テーブル名
+    - columnName: 移動する列名
+    - anchorColumnName: 挿入基準列名（null のとき末尾に移動）
+
+Returns
+-------
+JSONResponse
+    処理結果
+ * @summary Move Column
+ */
+const moveColumn = (
+    moveColumnRequestBody: MoveColumnRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseMoveColumnResult>>,) => {
+      return customInstance<SuccessResponseMoveColumnResult>(
+      {url: `/api/column/move`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: moveColumnRequestBody
     },
       options);
     }
@@ -729,6 +761,41 @@ const regression = (
     }
 
 /**
+ * 推定済みモデルから予測値・残差を抽出してテーブルに列追加する
+
+指定された分析結果 ID に対応するモデルをロードし、予測値・残差などの
+診断列を元のテーブルに追加します。
+
+Parameters
+----------
+request : Request
+    FastAPI のリクエストオブジェクト
+body : AddDiagnosticColumnsRequestBody
+    - tableName: 追加先テーブル名
+    - resultId: 分析結果の UUID
+    - target: "fitted" / "residual" / "both"
+    - standardized: 標準化残差を含めるか（OLS 系のみ有効）
+    - includeInterval: 95%信頼区間を含めるか
+    - feType: "total" または "within"（FE/RE のみ有効）
+
+Returns
+-------
+JSONResponse
+    追加したテーブル名と列名リスト
+ * @summary Add Diagnostic Columns
+ */
+const addDiagnosticColumns = (
+    addDiagnosticColumnsRequestBody: AddDiagnosticColumnsRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseAddDiagnosticColumnsResult>>,) => {
+      return customInstance<SuccessResponseAddDiagnosticColumnsResult>(
+      {url: `/api/analysis/regression/add-diagnostic-columns`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: addDiagnosticColumnsRequestBody
+    },
+      options);
+    }
+
+/**
  * すべての分析結果のサマリーを取得
 
 Returns
@@ -815,41 +882,6 @@ const deleteAnalysisResult = (
     }
 
 /**
- * 推定済みモデルから予測値・残差を抽出してテーブルに列追加する
-
-指定された分析結果 ID に対応するモデルをロードし、予測値・残差などの
-診断列を元のテーブルに追加します。
-
-Parameters
-----------
-request : Request
-    FastAPI のリクエストオブジェクト
-body : AddDiagnosticColumnsRequestBody
-    - tableName: 追加先テーブル名
-    - resultId: 分析結果の UUID
-    - target: "fitted" / "residual" / "both"
-    - standardized: 標準化残差を含めるか（OLS 系のみ有効）
-    - includeInterval: 95%信頼区間を含めるか
-    - feType: "total" または "within"（FE/RE のみ有効）
-
-Returns
--------
-JSONResponse
-    追加したテーブル名と列名リスト
- * @summary Add Diagnostic Columns
- */
-const addDiagnosticColumns = (
-    addDiagnosticColumnsRequestBody: AddDiagnosticColumnsRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseAddDiagnosticColumnsResult>>,) => {
-      return customInstance<SuccessResponseAddDiagnosticColumnsResult>(
-      {url: `/api/analysis/regression/add-diagnostic-columns`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: addDiagnosticColumnsRequestBody
-    },
-      options);
-    }
-
-/**
  * 推定結果をテキスト / Markdown / LaTeX 形式で整形出力する
 
 指定した分析結果 ID のリストから係数表などを生成します。
@@ -877,7 +909,7 @@ const outputResult = (
     outputResultRequest: OutputResultRequest,
  options?: SecondParameter<typeof customInstance<SuccessResponseOutputResultResult>>,) => {
       return customInstance<SuccessResponseOutputResultResult>(
-      {url: `/api/analysis/output-result`, method: 'POST',
+      {url: `/api/analysis/results/output`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: outputResultRequest
     },
@@ -1167,7 +1199,7 @@ const shutdown = (
       options);
     }
 
-return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,filterTable,regression,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,addDiagnosticColumns,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
+return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,filterTable,regression,addDiagnosticColumns,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
 export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['healthCheck']>>>
 export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDummyColumn']>>>
 export type DeleteColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteColumn']>>>
@@ -1180,6 +1212,7 @@ export type TransformColumnResult = NonNullable<Awaited<ReturnType<ReturnType<ty
 export type GetColumnListResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getColumnList']>>>
 export type SortColumnsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['sortColumns']>>>
 export type CastColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['castColumn']>>>
+export type MoveColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['moveColumn']>>>
 export type CreateJoinTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createJoinTable']>>>
 export type CreateUnionTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createUnionTable']>>>
 export type CreateSimulationDataTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createSimulationDataTable']>>>
@@ -1192,11 +1225,11 @@ export type FetchDataToJsonResult = NonNullable<Awaited<ReturnType<ReturnType<ty
 export type FetchDataToArrowResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['fetchDataToArrow']>>>
 export type FilterTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['filterTable']>>>
 export type RegressionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['regression']>>>
+export type AddDiagnosticColumnsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDiagnosticColumns']>>>
 export type GetAllAnalysisResultsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getAllAnalysisResults']>>>
 export type ClearAllAnalysisResultsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['clearAllAnalysisResults']>>>
 export type GetAnalysisResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getAnalysisResult']>>>
 export type DeleteAnalysisResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteAnalysisResult']>>>
-export type AddDiagnosticColumnsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDiagnosticColumns']>>>
 export type OutputResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['outputResult']>>>
 export type ImportFileResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['importFile']>>>
 export type ExportFileResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['exportFile']>>>

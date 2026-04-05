@@ -2,14 +2,14 @@
  * 列複製フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import { DuplicateColumnBody } from "../../../../api/zod/column/column";
+import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-  replaceParamNames,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
 import { extractFieldError } from "../../../../lib/utils/formHelpers";
 import { InputText } from "../../../atoms/Input/InputText";
@@ -48,33 +48,25 @@ export const DuplicateColumnForm = ({
           onSuccess(updatedList);
         } else {
           setApiError(
-            replaceParamNames(
-              getResponseErrorMessage(response, t("Error.UnexpectedError")),
-              {
-                newColumnName: t("DuplicateColumnForm.NewColumnName"),
-                sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
-              },
-            ),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError"), {
+              newColumnName: t("DuplicateColumnForm.NewColumnName"),
+              sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+            }),
           );
         }
       } catch (error) {
         setApiError(
-          replaceParamNames(
-            extractApiErrorMessage(error, t("Error.UnexpectedError")),
-            {
-              newColumnName: t("DuplicateColumnForm.NewColumnName"),
-              sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
-            },
-          ),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError"), {
+            newColumnName: t("DuplicateColumnForm.NewColumnName"),
+            sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+          }),
         );
       }
     },
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
 
   return (
     <form

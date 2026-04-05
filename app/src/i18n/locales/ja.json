@@ -67,6 +67,7 @@
     "BasicAnalysis": "基本分析",
     "BasicStatistics": "基本統計量",
     "CorrelationMatrix": "相関行列",
+    "ConfidenceInterval": "信頼区間",
     "Regression": "回帰分析",
     "LinearRegressionMenu": "線形回帰",
     "OrdinaryLeastSquares": "最小二乗法"
@@ -81,7 +82,8 @@
     "LoadingData": "データを読み込んでいます",
     "FetchingChunk": "読み込み中",
     "FetchError": "エラー: {{message}}",
-    "CloseTab": "タブを閉じる"
+    "CloseTab": "タブを閉じる",
+    "MoveColumnError": "列の移動に失敗しました"
   },
   "ImportDataFileView": {
     "Title": "ファイルをインポート",
@@ -292,12 +294,110 @@
     "ConfidenceIntervalLower": "95%CI下限",
     "ConfidenceIntervalUpper": "95%CI上限",
     "SignificanceNote": "有意水準: *** p<0.001 / ** p<0.01 / * p<0.05",
-    "NA": "N/A"
+    "NA": "N/A",
+    "QuickCopyMd": "Markdownをクリップボードにコピー",
+    "OutputDialog": "出力..."
+  },
+  "OutputResultDialog": {
+    "Title": "結果出力",
+    "Format": "フォーマット",
+    "FormatText": "テキスト",
+    "FormatMarkdown": "Markdown",
+    "FormatLatex": "LaTeX",
+    "StatInParentheses": "括弧内統計量",
+    "StatSE": "標準誤差 (SE)",
+    "StatT": "t値",
+    "StatP": "p値",
+    "StatNone": "なし",
+    "ConstAtBottom": "定数項を末尾に表示する",
+    "VariableSettings": "変数設定",
+    "Order": "順序",
+    "OriginalName": "変数名",
+    "DisplayLabel": "表示ラベル（任意）",
+    "Preview": "プレビュー",
+    "Loading": "生成中...",
+    "Error": "出力の生成に失敗しました",
+    "CopyButton": "コピー",
+    "Copied": "コピーしました"
   },
   "RegressionTab": {
     "FormTab": "分析設定(最小二乗法)",
     "ResultLabel": "結果 {{number}}",
     "DeleteResult": "結果を削除"
+  },
+  "ConfidenceIntervalView": {
+    "Title": "信頼区間",
+    "Description": "列と統計量タイプ、信頼水準を選択して信頼区間を計算します。",
+    "FormTab": "分析設定（信頼区間）",
+    "ResultLabel": "結果 {{number}}",
+    "DeleteResult": "結果を削除",
+    "DataLabel": "対象データ",
+    "SelectData": "データを選択",
+    "ColumnLabel": "対象列",
+    "SelectColumn": "列を選択",
+    "StatisticTypeLabel": "統計量タイプ",
+    "SelectStatisticType": "タイプを選択",
+    "StatisticTypeInfoLabel": "統計量の説明を表示",
+    "StatisticType_mean": "平均（t分布）",
+    "StatisticType_median": "中央値（ブートストラップ）",
+    "StatisticType_proportion": "比率（Wilson区間）",
+    "StatisticType_variance": "分散（カイ二乗）",
+    "StatisticType_standard_deviation": "標準偏差",
+    "ConfidenceLevelLabel": "信頼水準",
+    "ConfidenceLevelModeSelect": "和表から選択",
+    "ConfidenceLevelModeManual": "手動入力",
+    "ConfidenceLevel_090": "90%",
+    "ConfidenceLevel_095": "95%",
+    "ConfidenceLevel_099": "99%",
+    "ConfidenceLevelManualPlaceholder": "0より大きく1未満の小数",
+    "RunCalculation": "計算する",
+    "Processing": "処理中...",
+    "ErrorDataRequired": "データを選択してください",
+    "ErrorColumnRequired": "列を選択してください",
+    "ErrorStatisticTypeRequired": "統計量タイプを選択してください",
+    "ErrorConfidenceLevelInvalid": "信頼水準は0より大きく1未満の値を入力してください",
+    "ResultTableName": "データ名",
+    "ResultColumnName": "列名",
+    "ResultStatistic": "統計量",
+    "ResultStatisticValue": "点推定値",
+    "ResultConfidenceLevel": "信頼水準",
+    "ResultConfidenceInterval": "信頼区間",
+    "ResultLower": "下限",
+    "ResultUpper": "上限"
+  },
+  "StatisticsInfo": {
+    "FormulaLabel": "計算式",
+    "AssumptionsLabel": "前提条件・注意",
+    "mean": {
+      "Title": "平均の信頼区間（t 分布）",
+      "Description": "標本平均 x̄ を点推定値とし、t 分布を用いて母平均 μ の信頼区間を計算します。標本が正規分布（または大標本）から得られている場合に適用できます。",
+      "Formula": "x̄ ± t(α/2, n-1) × (s / √n)",
+      "Assumptions": "データが独立同一分布に従うこと。標本数が少ない場合は正規分布に近いことが望ましい。"
+    },
+    "median": {
+      "Title": "中央値の信頼区間（ブートストラップ）",
+      "Description": "ブートストラップ法（1,000 回再サンプリング）で中央値の信頼区間を推定します。分布形状への仮定が不要なノンパラメトリックな手法です。",
+      "Formula": "再サンプリング中央値分布の α/2 パーセンタイル ～ (1-α/2) パーセンタイル",
+      "Assumptions": "データが元の母集団の代表的な標本であること。標本数が小さい場合は区間の精度が下がる。"
+    },
+    "proportion": {
+      "Title": "比率の信頼区間（Wilson スコア区間）",
+      "Description": "二値データ（0 または 1 のみ）の成功割合 p̂ に対して、Wilson スコア区間を計算します。Wald 区間より小標本での被覆率が良好です。列の値が 0 と 1 のみであることが必要です。",
+      "Formula": "(p̂ + z²/2n ± z√(p̂(1-p̂)/n + z²/4n²)) / (1 + z²/n)",
+      "Assumptions": "列の値が 0 または 1（二値）のみであること。それ以外の値を含む場合は API エラーが返される。"
+    },
+    "variance": {
+      "Title": "分散の信頼区間（カイ二乗分布）",
+      "Description": "標本分散 s² を点推定値とし、カイ二乗分布を用いて母分散 σ² の信頼区間を計算します。データが正規分布に従う場合に正確な区間が得られます。",
+      "Formula": "[ (n-1)s² / χ²(α/2, n-1),  (n-1)s² / χ²(1-α/2, n-1) ]",
+      "Assumptions": "データが正規分布に従うこと。正規性から大きく外れる場合は区間の信頼性が低下する。"
+    },
+    "standard_deviation": {
+      "Title": "標準偏差の信頼区間",
+      "Description": "分散の信頼区間の平方根として標準偏差の信頼区間を算出します。分散の信頼区間と同じ前提条件（正規分布仮定）が適用されます。",
+      "Formula": "[ √(分散CIの下限), √(分散CIの上限) ]",
+      "Assumptions": "データが正規分布に従うこと（分散 CI の前提と同様）。"
+    }
   },
   "CalculationView": {
     "Title": "計算式でカラムを追加",
@@ -311,6 +411,7 @@
     "Subtraction": "減算",
     "Multiplication": "乗算",
     "Division": "除算",
+    "Power": "累乗（べき乗）",
     "OpenParenthesis": "開きカッコ",
     "CloseParenthesis": "閉じカッコ",
     "ClearAll": "すべてクリア",
@@ -444,6 +545,7 @@
     "Degree": "根の次数",
     "NewColumnName": "新しい列名",
     "NewColumnNamePlaceholder": "例: log_value",
+    "BasePlaceholder": "e（自然対数）",
     "Submit": "追加"
   },
   "AddDummyColumnForm": {

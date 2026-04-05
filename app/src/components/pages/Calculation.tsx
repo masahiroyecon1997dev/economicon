@@ -293,6 +293,14 @@ export const Calculation = () => {
                   >
                     /
                   </ExpressionHelperButton>
+                  <ExpressionHelperButton
+                    onClick={() => handleOperatorClick("**")}
+                    className="min-w-8 px-2 text-sm font-mono"
+                    title={t("CalculationView.Power")}
+                    disabled={isSubmitting}
+                  >
+                    **
+                  </ExpressionHelperButton>
                   <div className="w-px h-6 bg-border-color mx-1"></div>
                   <ExpressionHelperButton
                     onClick={() => handleOperatorClick("(")}

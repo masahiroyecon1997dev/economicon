@@ -5,6 +5,7 @@ from economicon.routers import (
     columns,
     data_io,
     regressions,
+    results,
     settings,
     shutdown,
     statistics,
@@ -18,6 +19,7 @@ api_router = APIRouter(dependencies=[Depends(verify_token)])
 api_router.include_router(columns.router)
 api_router.include_router(tables.router)
 api_router.include_router(regressions.router)
+api_router.include_router(results.router)
 api_router.include_router(data_io.router)
 api_router.include_router(statistics.router)
 api_router.include_router(settings.router)

@@ -67,6 +67,7 @@
     "BasicAnalysis": "Basic Analysis",
     "BasicStatistics": "Basic Statistics",
     "CorrelationMatrix": "Correlation Matrix",
+    "ConfidenceInterval": "Confidence Interval",
     "Regression": "Regression",
     "LinearRegressionMenu": "Linear Regression",
     "OrdinaryLeastSquares": "Ordinary Least Squares"
@@ -81,7 +82,8 @@
     "LoadingData": "Loading data",
     "FetchingChunk": "Loading",
     "FetchError": "Error: {{message}}",
-    "CloseTab": "Close tab"
+    "CloseTab": "Close tab",
+    "MoveColumnError": "Failed to move column"
   },
   "ImportDataFileView": {
     "Title": "Select File",
@@ -292,12 +294,110 @@
     "ConfidenceIntervalLower": "[0.025",
     "ConfidenceIntervalUpper": "0.975]",
     "SignificanceNote": "Significance: *** p<0.001 / ** p<0.01 / * p<0.05",
-    "NA": "N/A"
+    "NA": "N/A",
+    "QuickCopyMd": "Copy as Markdown",
+    "OutputDialog": "Export..."
+  },
+  "OutputResultDialog": {
+    "Title": "Export Result",
+    "Format": "Format",
+    "FormatText": "Plain Text",
+    "FormatMarkdown": "Markdown",
+    "FormatLatex": "LaTeX",
+    "StatInParentheses": "Statistic in Parentheses",
+    "StatSE": "Standard Error (SE)",
+    "StatT": "t-value",
+    "StatP": "p-value",
+    "StatNone": "None",
+    "ConstAtBottom": "Place constant at bottom",
+    "VariableSettings": "Variable Settings",
+    "Order": "Order",
+    "OriginalName": "Variable Name",
+    "DisplayLabel": "Display Label (optional)",
+    "Preview": "Preview",
+    "Loading": "Generating...",
+    "Error": "Failed to generate output",
+    "CopyButton": "Copy",
+    "Copied": "Copied!"
   },
   "RegressionTab": {
     "FormTab": "Analysis Settings(OLS)",
     "ResultLabel": "Result {{number}}",
     "DeleteResult": "Delete result"
+  },
+  "ConfidenceIntervalView": {
+    "Title": "Confidence Interval",
+    "Description": "Select a column, statistic type, and confidence level to compute the confidence interval.",
+    "FormTab": "Analysis Settings (CI)",
+    "ResultLabel": "Result {{number}}",
+    "DeleteResult": "Delete result",
+    "DataLabel": "Target Data",
+    "SelectData": "Select data",
+    "ColumnLabel": "Target Column",
+    "SelectColumn": "Select column",
+    "StatisticTypeLabel": "Statistic Type",
+    "SelectStatisticType": "Select type",
+    "StatisticTypeInfoLabel": "Show statistic description",
+    "StatisticType_mean": "Mean (t-dist)",
+    "StatisticType_median": "Median (Bootstrap)",
+    "StatisticType_proportion": "Proportion (Wilson)",
+    "StatisticType_variance": "Variance (Chi-squared)",
+    "StatisticType_standard_deviation": "Std Deviation",
+    "ConfidenceLevelLabel": "Confidence Level",
+    "ConfidenceLevelModeSelect": "Select from table",
+    "ConfidenceLevelModeManual": "Manual input",
+    "ConfidenceLevel_090": "90%",
+    "ConfidenceLevel_095": "95%",
+    "ConfidenceLevel_099": "99%",
+    "ConfidenceLevelManualPlaceholder": "Decimal between 0 and 1 (exclusive)",
+    "RunCalculation": "Calculate",
+    "Processing": "Processing...",
+    "ErrorDataRequired": "Please select data",
+    "ErrorColumnRequired": "Please select a column",
+    "ErrorStatisticTypeRequired": "Please select a statistic type",
+    "ErrorConfidenceLevelInvalid": "Confidence level must be a value between 0 and 1 (exclusive)",
+    "ResultTableName": "Data Name",
+    "ResultColumnName": "Column",
+    "ResultStatistic": "Statistic",
+    "ResultStatisticValue": "Point Estimate",
+    "ResultConfidenceLevel": "Confidence Level",
+    "ResultConfidenceInterval": "Confidence Interval",
+    "ResultLower": "Lower",
+    "ResultUpper": "Upper"
+  },
+  "StatisticsInfo": {
+    "FormulaLabel": "Formula",
+    "AssumptionsLabel": "Assumptions & Notes",
+    "mean": {
+      "Title": "Confidence Interval for the Mean (t-distribution)",
+      "Description": "Computes a confidence interval for the population mean μ using the sample mean x̄ as a point estimate. Applies when data come from a normal distribution or the sample size is large.",
+      "Formula": "x̄ ± t(α/2, n-1) × (s / √n)",
+      "Assumptions": "Data are i.i.d. For small samples the distribution should be approximately normal."
+    },
+    "median": {
+      "Title": "Confidence Interval for the Median (Bootstrap)",
+      "Description": "Estimates the confidence interval for the median using the Bootstrap method (1,000 resamples). This is a non-parametric approach that requires no distributional assumptions.",
+      "Formula": "α/2 to (1-α/2) percentile of the bootstrap median distribution",
+      "Assumptions": "Data should be a representative sample of the population. Accuracy decreases for very small samples."
+    },
+    "proportion": {
+      "Title": "Confidence Interval for a Proportion (Wilson Score)",
+      "Description": "Computes the Wilson score interval for the success proportion p̂ of binary data (0 or 1 only). Outperforms the Wald interval in small-sample coverage. The column must contain only 0 and 1 values.",
+      "Formula": "(p̂ + z²/2n ± z√(p̂(1-p̂)/n + z²/4n²)) / (1 + z²/n)",
+      "Assumptions": "Column values must be binary (0 or 1 only). The API will return an error if other values are present."
+    },
+    "variance": {
+      "Title": "Confidence Interval for the Variance (Chi-squared)",
+      "Description": "Computes a confidence interval for the population variance σ² using the sample variance s² and the chi-squared distribution. Exact when data are normally distributed.",
+      "Formula": "[ (n-1)s² / χ²(α/2, n-1),  (n-1)s² / χ²(1-α/2, n-1) ]",
+      "Assumptions": "Data must be normally distributed. Coverage degrades when the normality assumption is violated."
+    },
+    "standard_deviation": {
+      "Title": "Confidence Interval for the Standard Deviation",
+      "Description": "Derives the confidence interval for the standard deviation as the square root of the variance CI bounds. The same normality assumption as the variance CI applies.",
+      "Formula": "[ √(lower variance CI), √(upper variance CI) ]",
+      "Assumptions": "Data must be normally distributed (same as the variance CI assumption)."
+    }
   },
   "CalculationView": {
     "Title": "Add Column with Calculation",
@@ -311,6 +411,7 @@
     "Subtraction": "Subtraction",
     "Multiplication": "Multiplication",
     "Division": "Division",
+    "Power": "Power (Exponentiation)",
     "OpenParenthesis": "Open Parenthesis",
     "CloseParenthesis": "Close Parenthesis",
     "ClearAll": "Clear All",
@@ -444,6 +545,7 @@
     "Degree": "Degree",
     "NewColumnName": "New column name",
     "NewColumnNamePlaceholder": "e.g., log_value",
+    "BasePlaceholder": "e (natural log)",
     "Submit": "Add"
   },
   "AddDummyColumnForm": {

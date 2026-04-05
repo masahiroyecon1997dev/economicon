@@ -103,7 +103,7 @@ export const BaseDialog = ({
         <RadixDialog.Content
           className={cn(
             "fixed left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2",
-            "overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-xl",
+            "flex flex-col max-h-[calc(100svh-3rem)] overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-xl",
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-5",
             "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-5",
             "duration-200",
@@ -136,7 +136,12 @@ export const BaseDialog = ({
           </div>
 
           {/* ── コンテンツ ── */}
-          <div className={cn("px-5 py-4 dark:text-gray-200", contentClassName)}>
+          <div
+            className={cn(
+              "flex-1 min-h-0 overflow-y-auto px-5 py-4 dark:text-gray-200",
+              contentClassName,
+            )}
+          >
             {children}
           </div>
 

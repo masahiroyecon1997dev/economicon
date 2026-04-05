@@ -110,11 +110,11 @@ def test_confidence_interval_mean_success(client, tables_store):
     result = response_data["result"]
     assert result["tableName"] == _TABLE_NAME
     assert result["columnName"] == "normal_col"
-    assert result["confidence_level"] == _CI_LEVEL_95
+    assert result["confidenceLevel"] == _CI_LEVEL_95
     assert result["statistic"]["type"] == _STAT_MEAN
     assert isinstance(result["statistic"]["value"], float)
 
-    ci = result["confidence_interval"]
+    ci = result["confidenceInterval"]
     assert "lower" in ci
     assert "upper" in ci
     assert ci["lower"] < ci["upper"]
@@ -142,7 +142,7 @@ def test_confidence_interval_mean_numerical(client, tables_store):
         scale=float(spstats.sem(normal_data)),
     )
 
-    ci = result["confidence_interval"]
+    ci = result["confidenceInterval"]
     assert ci["lower"] == pytest.approx(expected_lower, abs=1e-6)
     assert ci["upper"] == pytest.approx(expected_upper, abs=1e-6)
     assert result["statistic"]["value"] == pytest.approx(
@@ -166,10 +166,10 @@ def test_confidence_interval_median_success(client, tables_store):
 
     result = response_data["result"]
     assert result["statistic"]["type"] == _STAT_MEDIAN
-    assert result["confidence_level"] == _CI_LEVEL_90
+    assert result["confidenceLevel"] == _CI_LEVEL_90
     assert (
-        result["confidence_interval"]["lower"]
-        < result["confidence_interval"]["upper"]
+        result["confidenceInterval"]["lower"]
+        < result["confidenceInterval"]["upper"]
     )
 
 
@@ -196,7 +196,7 @@ def test_confidence_interval_median_numerical(client, tables_store):
     normal_data = np.random.normal(50, 10, _N_SAMPLES)
     expected_median = float(np.median(normal_data))
 
-    ci = result["confidence_interval"]
+    ci = result["confidenceInterval"]
     # 1. 区間の非退化性
     assert ci["lower"] < ci["upper"]
     # 2. サンプル中央値が CI 内に存在する
@@ -233,7 +233,7 @@ def test_confidence_interval_proportion_success(client, tables_store):
     proportion_value = result["statistic"]["value"]
     assert 0.0 <= proportion_value <= 1.0
 
-    ci = result["confidence_interval"]
+    ci = result["confidenceInterval"]
     assert 0.0 <= ci["lower"] <= ci["upper"] <= 1.0
 
 
@@ -261,7 +261,7 @@ def test_confidence_interval_proportion_numerical(client, tables_store):
         method="wilson",
     )
 
-    ci = result["confidence_interval"]
+    ci = result["confidenceInterval"]
     assert ci["lower"] == pytest.approx(cast(float, expected_lower), abs=1e-6)
     assert ci["upper"] == pytest.approx(cast(float, expected_upper), abs=1e-6)
 
@@ -284,8 +284,8 @@ def test_confidence_interval_variance_success(client, tables_store):
     assert result["statistic"]["type"] == _STAT_VARIANCE
     assert result["statistic"]["value"] > 0
     assert (
-        result["confidence_interval"]["lower"]
-        < result["confidence_interval"]["upper"]
+        result["confidenceInterval"]["lower"]
+        < result["confidenceInterval"]["upper"]
     )
 
 
@@ -309,7 +309,7 @@ def test_confidence_interval_variance_numerical(client, tables_store):
     expected_lower = (_N_SAMPLES - 1) * variance_val / chi2_upper
     expected_upper = (_N_SAMPLES - 1) * variance_val / chi2_lower
 
-    ci = result["confidence_interval"]
+    ci = result["confidenceInterval"]
     assert ci["lower"] == pytest.approx(expected_lower, abs=1e-6)
     assert ci["upper"] == pytest.approx(expected_upper, abs=1e-6)
     assert result["statistic"]["value"] == pytest.approx(
@@ -335,8 +335,8 @@ def test_confidence_interval_std_success(client, tables_store):
     assert result["statistic"]["type"] == _STAT_STD
     assert result["statistic"]["value"] > 0
     assert (
-        result["confidence_interval"]["lower"]
-        < result["confidence_interval"]["upper"]
+        result["confidenceInterval"]["lower"]
+        < result["confidenceInterval"]["upper"]
     )
 
 
@@ -362,7 +362,7 @@ def test_confidence_interval_std_numerical(client, tables_store):
     expected_lower = float(np.sqrt(var_lower))
     expected_upper = float(np.sqrt(var_upper))
 
-    ci = result["confidence_interval"]
+    ci = result["confidenceInterval"]
     assert ci["lower"] == pytest.approx(expected_lower, abs=1e-6)
     assert ci["upper"] == pytest.approx(expected_upper, abs=1e-6)
 
@@ -379,7 +379,7 @@ def test_confidence_interval_different_levels(client, tables_store):
         }
         response = client.post(URL, json=payload)
         assert response.status_code == status.HTTP_200_OK
-        ci = response.json()["result"]["confidence_interval"]
+        ci = response.json()["result"]["confidenceInterval"]
         widths[level] = ci["upper"] - ci["lower"]
 
     assert widths[_CI_LEVEL_90] < widths[_CI_LEVEL_95] < widths[_CI_LEVEL_99]
@@ -400,16 +400,16 @@ def test_confidence_interval_response_structure(client, tables_store):
         "tableName",
         "columnName",
         "statistic",
-        "confidence_interval",
-        "confidence_level",
+        "confidenceInterval",
+        "confidenceLevel",
     ]
     for field in required_fields:
         assert field in result
 
     assert "type" in result["statistic"]
     assert "value" in result["statistic"]
-    assert "lower" in result["confidence_interval"]
-    assert "upper" in result["confidence_interval"]
+    assert "lower" in result["confidenceInterval"]
+    assert "upper" in result["confidenceInterval"]
 
 
 # -----------------------------------------------------------

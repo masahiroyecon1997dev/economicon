@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field, StringConstraints, model_validator
+from pydantic import Field, StringConstraints, field_validator, model_validator
 
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import BaseRequest, BaseResult
@@ -202,6 +202,22 @@ class CalculateColumnRequestBody(BaseRequest):
             ),
         ),
     ]
+
+    @field_validator("calculation_expression", mode="after")
+    @classmethod
+    def _validate_expression_syntax(cls, v: str) -> str:
+        """計算式の構文を Pydantic バリデーション段階で検証する。
+
+        AST レベルで構文エラー・未サポート操作を検出し 422 として早期に返す。
+        循環インポート回避のためローカル import を使用する。
+        """
+        # 循環インポート回避のため、ここでローカルインポートする
+        from economicon.utils.algorithms import (  # noqa: PLC0415
+            validate_formula_syntax,
+        )
+
+        validate_formula_syntax(v)
+        return v
 
 
 class CalculateColumnResult(BaseResult):
@@ -758,3 +774,66 @@ class GetColumnListResult(BaseResult):
         title="Column Info List",
         description="カラム情報のリスト",
     )
+
+
+# ---------------------------------------------------------------------------
+# 列移動
+# ---------------------------------------------------------------------------
+
+
+class MoveColumnRequestBody(BaseRequest):
+    """列移動リクエスト"""
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            description=(
+                "操作対象のテーブル名。"
+                "ワークスペースに存在するテーブルの中から指定してください。"
+            )
+        ),
+    ]
+    column_name: Annotated[
+        ColumnName,
+        Field(description="移動する列名。既存の列名から指定してください。"),
+    ]
+    anchor_column_name: Annotated[
+        ColumnName | None,
+        Field(
+            default=None,
+            description=(
+                "挿入基準列名。指定した列の直前に移動列を挿入します。"
+                "null を指定した場合は末尾に移動します。"
+            ),
+        ),
+    ]
+
+    @model_validator(mode="after")
+    def _validate_columns_differ(self) -> MoveColumnRequestBody:
+        if (
+            self.anchor_column_name is not None
+            and self.column_name == self.anchor_column_name
+        ):
+            raise ValueError(
+                _("anchorColumnName must differ from columnName.")
+            )
+        return self
+
+
+class MoveColumnResult(BaseResult):
+    """列移動レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="列を移動したテーブル名",
+        ),
+    ]
+    column_names: Annotated[
+        list[str],
+        Field(
+            title="Column Names",
+            description="移動後の全列名リスト（順序付き）",
+        ),
+    ]

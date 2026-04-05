@@ -2,15 +2,15 @@
  * 列型変換フォーム
  */
 import { useForm, useStore } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getEconomiconAppAPI } from "../../../../api/endpoints";
 import { CastColumnBody } from "../../../../api/zod/column/column";
+import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-  replaceParamNames,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "../../../../lib/utils/apiError";
 import {
   createFieldError,
@@ -83,35 +83,27 @@ export const CastColumnForm = ({
           onSuccess(updatedList);
         } else {
           setApiError(
-            replaceParamNames(
-              getResponseErrorMessage(response, t("Error.UnexpectedError")),
-              {
-                newColumnName: t("CastColumnForm.NewColumnName"),
-                sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
-                targetType: t("CastColumnForm.TargetType"),
-              },
-            ),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError"), {
+              newColumnName: t("CastColumnForm.NewColumnName"),
+              sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+              targetType: t("CastColumnForm.TargetType"),
+            }),
           );
         }
       } catch (error) {
         setApiError(
-          replaceParamNames(
-            extractApiErrorMessage(error, t("Error.UnexpectedError")),
-            {
-              newColumnName: t("CastColumnForm.NewColumnName"),
-              sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
-              targetType: t("CastColumnForm.TargetType"),
-            },
-          ),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError"), {
+            newColumnName: t("CastColumnForm.NewColumnName"),
+            sourceColumnName: t("ColumnOperationForm.SourceColumnName"),
+            targetType: t("CastColumnForm.TargetType"),
+          }),
         );
       }
     },
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
   const targetType = useStore(form.store, (s) => s.values.targetType);
 
   const isStringSource =

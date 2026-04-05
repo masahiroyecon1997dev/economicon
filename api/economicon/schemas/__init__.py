@@ -18,6 +18,8 @@ from economicon.schemas.columns import (
     DuplicateColumnResult,
     GetColumnListRequestBody,
     GetColumnListResult,
+    MoveColumnRequestBody,
+    MoveColumnResult,
     RenameColumnRequestBody,
     RenameColumnResult,
     SortColumnsRequestBody,
@@ -90,6 +92,10 @@ from economicon.schemas.enums import (
 from economicon.schemas.regressions import (
     AddDiagnosticColumnsRequestBody,
     AddDiagnosticColumnsResult,
+    RegressionRequestBody,
+    RegressionResult,
+)
+from economicon.schemas.results import (
     AnalysisResultDetail,
     AnalysisResultSummary,
     ClearAllAnalysisResultsResult,
@@ -98,8 +104,6 @@ from economicon.schemas.regressions import (
     GetAnalysisResultResult,
     OutputResultRequest,
     OutputResultResult,
-    RegressionRequestBody,
-    RegressionResult,
     StarConfig,
 )
 from economicon.schemas.settings import (
@@ -230,6 +234,8 @@ __all__ = [
     "TransformColumnResult",
     "CastColumnRequestBody",
     "CastColumnResult",
+    "MoveColumnRequestBody",
+    "MoveColumnResult",
     "GetColumnListRequestBody",
     "GetColumnListResult",
     "ColumnInfo",

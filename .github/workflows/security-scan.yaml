@@ -1,11 +1,13 @@
 name: "Security Scan"
 
 on:
-  # dev ブランチへの PR 時に実行
+  # dev / main ブランチへの PR 時に実行
   pull_request:
-    branches: ["dev"]
+    branches: ["dev", "main"]
   # 手動での実行を可能にする
   workflow_dispatch:
+
+permissions: {}
 
 jobs:
   python-audit:
@@ -88,3 +90,41 @@ jobs:
       - name: Run cargo-audit
         working-directory: ./app/src-tauri
         run: cargo audit
+
+  supply-chain-freshness-check:
+    name: Supply Chain Freshness Check (新規パッケージ日齢確認)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # base ブランチの履歴を git show で参照するため全履歴が必要
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          # 3.11+ で tomllib が標準搭載。外部依存ゼロで動作する。
+          python-version: "3.14"
+
+      - name: Determine base ref and fetch
+        id: vars
+        run: |
+          # PR の場合は github.base_ref、workflow_dispatch の場合は main にフォールバック
+          BASE_REF="${{ github.base_ref }}"
+          if [ -z "$BASE_REF" ]; then
+            BASE_REF="main"
+            echo "workflow_dispatch: base-ref を main にフォールバックします。"
+          fi
+          echo "base_ref=$BASE_REF" >> "$GITHUB_OUTPUT"
+          git fetch --no-tags origin "$BASE_REF"
+
+      - name: Check package freshness
+        run: |
+          python packaging/check_new_packages.py \
+            --base-ref "origin/${{ steps.vars.outputs.base_ref }}" \
+            --days 10 \
+            --mode error
