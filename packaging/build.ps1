@@ -39,7 +39,7 @@ $PYTHON_VERSION_SHORT  = ($PYTHON_VERSION -split '\.')[0..1] -join ''
 
 # --- アプリ情報 ----------------------------------------------------------------
 $APP_NAME    = "economicon"
-$APP_VERSION = "0.2.0"    # tauri.conf.json の version と合わせてください
+$APP_VERSION = "0.3.0"    # tauri.conf.json の version と合わせてください
 
 # --- ディレクトリ --------------------------------------------------------------
 $SCRIPT_DIR    = $PSScriptRoot                          # packaging/
