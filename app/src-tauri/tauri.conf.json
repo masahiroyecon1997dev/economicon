@@ -19,8 +19,7 @@
         "fullscreen": false,
         "decorations": false,
         "dragDropEnabled": true,
-        "zoomHotkeysEnabled": false,
-        "devtools": false
+        "zoomHotkeysEnabled": false
       }
     ],
     "security": {

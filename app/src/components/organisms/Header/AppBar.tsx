@@ -258,6 +258,14 @@ export const AppBar = () => {
             close();
           },
         },
+        {
+          id: "confidence-interval",
+          label: t("HeaderMenu.ConfidenceInterval"),
+          handleSelect: () => {
+            setCurrentView("ConfidenceIntervalView");
+            close();
+          },
+        },
       ],
     },
     {
