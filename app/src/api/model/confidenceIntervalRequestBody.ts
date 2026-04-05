@@ -28,4 +28,12 @@ export type ConfidenceIntervalRequestBody = {
   confidenceLevel: number;
   /** 信頼区間を計算する統計量のタイプ。（mean: 平均、median: 中央値、proportion: 割合、variance: 分散、standard_deviation: 標準偏差） */
   statisticType: ConfidenceIntervalStatisticsType;
+  /**
+     * Bootstrap 法（中央値 CI）のリサンプリング回数。statisticType が median のときのみ有効。（デフォルト: 1000、100〜100000）
+     * @minimum 100
+     * @maximum 100000
+     */
+  bootstrapNResamples?: number;
+  /** Bootstrap 法の乱数シード。None の場合は毎回異なる結果になる。再現性が必要な場合に整数を指定してください。（デフォルト: None） */
+  bootstrapSeed?: number | null;
 };

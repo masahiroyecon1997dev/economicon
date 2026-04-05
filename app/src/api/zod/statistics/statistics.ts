@@ -32,13 +32,19 @@ export const ConfidenceIntervalHeader = zod.object({
 export const confidenceIntervalBodyConfidenceLevelExclusiveMin = 0;
 export const confidenceIntervalBodyConfidenceLevelExclusiveMax = 1;
 
+export const confidenceIntervalBodyBootstrapNResamplesDefault = 1000;
+export const confidenceIntervalBodyBootstrapNResamplesMin = 100;
+export const confidenceIntervalBodyBootstrapNResamplesMax = 100000;
+
 
 
 export const ConfidenceIntervalBody = zod.object({
   "tableName": zod.string().min(1).describe('信頼区間を計算する対象テーブル名。ワークスペース内に存在するテーブル名を指定してください。'),
   "columnName": zod.string().min(1).describe('信頼区間を計算する対象カラム名。テーブル内に存在するカラム名を指定してください。'),
   "confidenceLevel": zod.number().gt(confidenceIntervalBodyConfidenceLevelExclusiveMin).lt(confidenceIntervalBodyConfidenceLevelExclusiveMax).describe('信頼水準（例: 0.95 = 95%信頼区間）'),
-  "statisticType": zod.enum(['mean', 'median', 'proportion', 'variance', 'standard_deviation']).describe('信頼区間を計算する統計量のタイプ。（mean: 平均、median: 中央値、proportion: 割合、variance: 分散、standard_deviation: 標準偏差）')
+  "statisticType": zod.enum(['mean', 'median', 'proportion', 'variance', 'standard_deviation']).describe('信頼区間を計算する統計量のタイプ。（mean: 平均、median: 中央値、proportion: 割合、variance: 分散、standard_deviation: 標準偏差）'),
+  "bootstrapNResamples": zod.number().min(confidenceIntervalBodyBootstrapNResamplesMin).max(confidenceIntervalBodyBootstrapNResamplesMax).default(confidenceIntervalBodyBootstrapNResamplesDefault).describe('Bootstrap 法（中央値 CI）のリサンプリング回数。statisticType が median のときのみ有効。（デフォルト: 1000、100〜100000）'),
+  "bootstrapSeed": zod.union([zod.number(),zod.null()]).optional().describe('Bootstrap 法の乱数シード。None の場合は毎回異なる結果になる。再現性が必要な場合に整数を指定してください。（デフォルト: None）')
 }).describe('信頼区間計算リクエスト')
 
 export const confidenceIntervalResponseCodeDefault = `OK`;
@@ -178,6 +184,11 @@ export const StatisticalTestHeader = zod.object({
 export const statisticalTestBodyOptionsAlternativeDefault = `two-sided`;
 export const statisticalTestBodyOptionsPairedDefault = false;
 export const statisticalTestBodyOptionsEqualVarDefault = true;
+export const statisticalTestBodyOptionsConfidenceLevelDefault = 0.95;
+export const statisticalTestBodyOptionsConfidenceLevelExclusiveMin = 0;
+export const statisticalTestBodyOptionsConfidenceLevelExclusiveMax = 1;
+
+
 
 export const StatisticalTestBody = zod.object({
   "testType": zod.enum(['t-test', 'z-test', 'f-test']).describe('実行する統計検定の種類。t-test: t 検定、z-test: z 検定、f-test: F 検定 \/ ANOVA'),
@@ -189,7 +200,8 @@ export const StatisticalTestBody = zod.object({
   "alternative": zod.enum(['two-sided', 'larger', 'smaller']).default(statisticalTestBodyOptionsAlternativeDefault).describe('対立仮説の方向。two-sided: 両側検定（デフォルト）、larger: 右側検定、smaller: 左側検定'),
   "mu": zod.union([zod.number(),zod.null()]).optional().describe('1 群検定における比較基準値（デフォルト: 0.0）'),
   "paired": zod.boolean().default(statisticalTestBodyOptionsPairedDefault).describe('対応のある検定を行うかどうか（デフォルト: False）'),
-  "equalVar": zod.boolean().default(statisticalTestBodyOptionsEqualVarDefault).describe('t 検定で等分散を仮定するかどうか。False の場合は Welch の t 検定を使用（デフォルト: True）')
+  "equalVar": zod.boolean().default(statisticalTestBodyOptionsEqualVarDefault).describe('t 検定で等分散を仮定するかどうか。False の場合は Welch の t 検定を使用（デフォルト: True）'),
+  "confidenceLevel": zod.number().gt(statisticalTestBodyOptionsConfidenceLevelExclusiveMin).lt(statisticalTestBodyOptionsConfidenceLevelExclusiveMax).default(statisticalTestBodyOptionsConfidenceLevelDefault).describe('検定結果に付与する信頼区間の信頼水準。例: 0.95 = 95%信頼区間（デフォルト: 0.95）。t 検定・z 検定に適用。f 検定は信頼区間なし。')
 }).optional().describe('検定オプション（対立仮説・等分散仮定・対応の有無など）')
 }).describe('統計検定リクエスト')
 

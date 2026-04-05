@@ -3864,6 +3864,26 @@
             "$ref": "#/components/schemas/ConfidenceIntervalStatisticsType",
             "title": "Statistic Type",
             "description": "\u4fe1\u983c\u533a\u9593\u3092\u8a08\u7b97\u3059\u308b\u7d71\u8a08\u91cf\u306e\u30bf\u30a4\u30d7\u3002\uff08mean: \u5e73\u5747\u3001median: \u4e2d\u592e\u5024\u3001proportion: \u5272\u5408\u3001variance: \u5206\u6563\u3001standard_deviation: \u6a19\u6e96\u504f\u5dee\uff09"
+          },
+          "bootstrapNResamples": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "minimum": 100.0,
+            "title": "Bootstrap N Resamples",
+            "description": "Bootstrap \u6cd5\uff08\u4e2d\u592e\u5024 CI\uff09\u306e\u30ea\u30b5\u30f3\u30d7\u30ea\u30f3\u30b0\u56de\u6570\u3002statisticType \u304c median \u306e\u3068\u304d\u306e\u307f\u6709\u52b9\u3002\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: 1000\u3001100\u301c100000\uff09",
+            "default": 1000
+          },
+          "bootstrapSeed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bootstrap Seed",
+            "description": "Bootstrap \u6cd5\u306e\u4e71\u6570\u30b7\u30fc\u30c9\u3002None \u306e\u5834\u5408\u306f\u6bce\u56de\u7570\u306a\u308b\u7d50\u679c\u306b\u306a\u308b\u3002\u518d\u73fe\u6027\u304c\u5fc5\u8981\u306a\u5834\u5408\u306b\u6574\u6570\u3092\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: None\uff09"
           }
         },
         "type": "object",
@@ -6817,6 +6837,14 @@
             "title": "Equal Variance",
             "description": "t \u691c\u5b9a\u3067\u7b49\u5206\u6563\u3092\u4eee\u5b9a\u3059\u308b\u304b\u3069\u3046\u304b\u3002False \u306e\u5834\u5408\u306f Welch \u306e t \u691c\u5b9a\u3092\u4f7f\u7528\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: True\uff09",
             "default": true
+          },
+          "confidenceLevel": {
+            "type": "number",
+            "exclusiveMaximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Confidence Level",
+            "description": "\u691c\u5b9a\u7d50\u679c\u306b\u4ed8\u4e0e\u3059\u308b\u4fe1\u983c\u533a\u9593\u306e\u4fe1\u983c\u6c34\u6e96\u3002\u4f8b: 0.95 = 95%\u4fe1\u983c\u533a\u9593\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: 0.95\uff09\u3002t \u691c\u5b9a\u30fbz \u691c\u5b9a\u306b\u9069\u7528\u3002f \u691c\u5b9a\u306f\u4fe1\u983c\u533a\u9593\u306a\u3057\u3002",
+            "default": 0.95
           }
         },
         "type": "object",

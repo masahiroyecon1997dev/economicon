@@ -18,4 +18,10 @@ export type StatisticalTestOptions = {
   paired?: boolean;
   /** t 検定で等分散を仮定するかどうか。False の場合は Welch の t 検定を使用（デフォルト: True） */
   equalVar?: boolean;
+  /**
+     * 検定結果に付与する信頼区間の信頼水準。例: 0.95 = 95%信頼区間（デフォルト: 0.95）。t 検定・z 検定に適用。f 検定は信頼区間なし。
+     * @exclusiveMinimum 0
+     * @exclusiveMaximum 1
+     */
+  confidenceLevel?: number;
 };
