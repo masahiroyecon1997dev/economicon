@@ -10,12 +10,15 @@ vi.mock("../api/endpoints", () => ({
   getEconomiconAppAPI: vi.fn(),
 }));
 
-vi.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-    i18n: { language: "ja" },
-  }),
-}));
+vi.mock("react-i18next", () => {
+  const t = (key: string) => key;
+  return {
+    useTranslation: () => ({
+      t,
+      i18n: { language: "ja" },
+    }),
+  };
+});
 
 vi.mock("../lib/dialog/message", () => ({
   showMessageDialog: vi.fn(),
@@ -32,7 +35,8 @@ beforeEach(() => {
 
   // activeTableName をリセット
   useTableInfosStore.setState({ tableInfos: [], activeTableName: null });
-  useLoadingStore.setState({ isLoading: false, loadingMessage: "" });
+  // clearLoading() でモジュールレベルの _loadingTimer も含めてリセットする
+  useLoadingStore.getState().clearLoading();
 });
 
 afterEach(() => {
@@ -65,19 +69,10 @@ describe("useTableColumnLoader", () => {
       });
 
       const { result } = renderHook(() => useTableColumnLoader());
-      console.log("DEBUG: Initial columnList:", result.current.columnList);
-      await new Promise((r) => setTimeout(r, 100));
 
-      await waitFor(
-        () => {
-          expect(result.current.columnList).toHaveLength(2);
-        },
-        {
-          timeout: 3000, // 余裕を持って 3秒
-          interval: 100, // チェックの間隔
-        },
-      );
-      console.log("DEBUG: columnList after wait:", result.current.columnList);
+      await waitFor(() => {
+        expect(result.current.columnList).toHaveLength(2);
+      });
 
       expect(mockGetColumnList).toHaveBeenCalledWith({
         tableName: "tableA",
