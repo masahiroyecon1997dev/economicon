@@ -37,7 +37,11 @@ describe("useSettingsStore", () => {
     it("test_initialState_hasEmptyDefaults", () => {
       const state = useSettingsStore.getState();
       expect(state.language).toBe("");
+      expect(state.lastOpenedPath).toBe("");
       expect(state.theme).toBe("");
+      expect(state.encoding).toBe("");
+      expect(state.logPath).toBe("");
+      expect(state.osName).toBe("");
       expect(state.pathSeparator).toBe("/");
     });
   });
