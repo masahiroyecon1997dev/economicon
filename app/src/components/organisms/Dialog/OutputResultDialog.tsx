@@ -1,3 +1,11 @@
+import { OutputResultRequestFormat } from "@/api/model/outputResultRequestFormat";
+import { OutputResultRequestStatInParentheses } from "@/api/model/outputResultRequestStatInParentheses";
+import { Button } from "@/components/atoms/Button/Button";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
+import { useOutputResult } from "@/hooks/useOutputResult";
+import { cn } from "@/lib/utils/helpers";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
 import {
   Check,
   ChevronDown,
@@ -7,14 +15,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { OutputResultRequestFormat } from "@/api/model/outputResultRequestFormat";
-import { OutputResultRequestStatInParentheses } from "@/api/model/outputResultRequestStatInParentheses";
-import { useOutputResult } from "@/hooks/useOutputResult";
-import { cn } from "@/lib/utils/helpers";
-import type { LinearRegressionResultType } from "@/types/commonTypes";
-import { Button } from "@/components/atoms/Button/Button";
-import { Select, SelectItem } from "@/components/atoms/Input/Select";
-import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 
 // ─── 型定義 ──────────────────────────────────────────────────────────────────
 
@@ -29,50 +29,53 @@ export type OutputResultDialogPropsType = {
   result: LinearRegressionResultType;
 };
 
+type OutputResultDialogContentPropsType = OutputResultDialogPropsType & {
+  format: OutputResultRequestFormat;
+  setFormat: (value: OutputResultRequestFormat) => void;
+  statInParentheses: OutputResultRequestStatInParentheses;
+  setStatInParentheses: (value: OutputResultRequestStatInParentheses) => void;
+  constAtBottom: boolean;
+  setConstAtBottom: (value: boolean) => void;
+};
+
+const createInitialVarEntries = (
+  result: LinearRegressionResultType,
+): VarEntryType[] =>
+  result.parameters.map((parameter) => ({
+    original: parameter.variable,
+    label: "",
+  }));
+
 // ─── コンポーネント ───────────────────────────────────────────────────────────
 
-export const OutputResultDialog = ({
+const OutputResultDialogContent = ({
   open,
   onOpenChange,
   result,
-}: OutputResultDialogPropsType) => {
+  format,
+  setFormat,
+  statInParentheses,
+  setStatInParentheses,
+  constAtBottom,
+  setConstAtBottom,
+}: OutputResultDialogContentPropsType) => {
   const { t } = useTranslation();
-
-  // ── オプション state ─────────────────────────────────────────────────────
-  const [format, setFormat] = useState<OutputResultRequestFormat>(
-    OutputResultRequestFormat.markdown,
-  );
-  const [statInParentheses, setStatInParentheses] =
-    useState<OutputResultRequestStatInParentheses>(
-      OutputResultRequestStatInParentheses.se,
-    );
-  const [constAtBottom, setConstAtBottom] = useState(false);
+  const initialVarEntries = createInitialVarEntries(result);
 
   // ── 変数エントリー（順序 + ラベル） ──────────────────────────────────────
-  const [varEntries, setVarEntries] = useState<VarEntryType[]>([]);
+  const [varEntries, setVarEntries] = useState<VarEntryType[]>(
+    () => initialVarEntries,
+  );
 
   // ── ラベル変更をデバウンス（API 呼び出し頻度を抑制） ─────────────────────
   const [debouncedVarEntries, setDebouncedVarEntries] = useState<
     VarEntryType[]
-  >([]);
+  >(() => initialVarEntries);
 
   // ── コピー状態 ────────────────────────────────────────────────────────────
   const [isCopied, setIsCopied] = useState(false);
 
   const { content, isLoading, error, fetchOutput } = useOutputResult();
-
-  // ── ダイアログを開くたびに変数リストを初期化 ─────────────────────────────
-  useEffect(() => {
-    if (open) {
-      const entries = result.parameters.map((p) => ({
-        original: p.variable,
-        label: "",
-      }));
-      setVarEntries(entries);
-      setDebouncedVarEntries(entries);
-      setIsCopied(false);
-    }
-  }, [open, result.parameters]);
 
   // ── varEntries 変更を 600ms デバウンス ────────────────────────────────────
   useEffect(() => {
@@ -373,5 +376,35 @@ export const OutputResultDialog = ({
         </button>
       </div>
     </BaseDialog>
+  );
+};
+
+export const OutputResultDialog = ({
+  open,
+  onOpenChange,
+  result,
+}: OutputResultDialogPropsType) => {
+  const [format, setFormat] = useState<OutputResultRequestFormat>(
+    OutputResultRequestFormat.markdown,
+  );
+  const [statInParentheses, setStatInParentheses] =
+    useState<OutputResultRequestStatInParentheses>(
+      OutputResultRequestStatInParentheses.se,
+    );
+  const [constAtBottom, setConstAtBottom] = useState(false);
+
+  return (
+    <OutputResultDialogContent
+      key={`${result.resultId}:${open ? "open" : "closed"}`}
+      open={open}
+      onOpenChange={onOpenChange}
+      result={result}
+      format={format}
+      setFormat={setFormat}
+      statInParentheses={statInParentheses}
+      setStatInParentheses={setStatInParentheses}
+      constAtBottom={constAtBottom}
+      setConstAtBottom={setConstAtBottom}
+    />
   );
 };

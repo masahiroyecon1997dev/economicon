@@ -1,11 +1,12 @@
 /**
  * テーブル名変更フォーム
  */
-import { useForm, useStore } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { RenameTableBody } from "@/api/zod/table/table";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -14,9 +15,9 @@ import {
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
-import { InputText } from "@/components/atoms/Input/InputText";
-import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
-import { FormField } from "@/components/molecules/Form/FormField";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type RenameTableFormProps = {
   tableName: string;
@@ -101,9 +102,7 @@ export const RenameTableForm = ({
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
 
   return (
     <form

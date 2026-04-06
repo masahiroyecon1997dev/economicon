@@ -1,20 +1,25 @@
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useLoadingStore } from "@/stores/loading";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import type { ColumnType } from "@/types/commonTypes";
+import { useEffect, useEffectEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type UseTableColumnLoaderOptions = {
   numericOnly?: boolean;
   autoLoadOnMount?: boolean;
+  onLoadedColumns?: (columns: ColumnType[]) => void;
 };
 
 export const useTableColumnLoader = (
   options: UseTableColumnLoaderOptions = {},
 ) => {
-  const { numericOnly = false, autoLoadOnMount = true } = options;
+  const {
+    numericOnly = false,
+    autoLoadOnMount = true,
+    onLoadedColumns,
+  } = options;
   const { t } = useTranslation();
   const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const setLoading = useLoadingStore((s) => s.setLoading);
@@ -24,6 +29,9 @@ export const useTableColumnLoader = (
     activeTableName || "",
   );
   const [columnList, setColumnList] = useState<ColumnType[]>([]);
+  const notifyLoadedColumns = useEffectEvent((columns: ColumnType[]) => {
+    onLoadedColumns?.(columns);
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -39,6 +47,7 @@ export const useTableColumnLoader = (
         if (cancelled) return;
         if (response.code === "OK") {
           setColumnList(response.result.columnInfoList);
+          notifyLoadedColumns(response.result.columnInfoList);
         } else {
           await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
         }

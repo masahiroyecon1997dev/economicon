@@ -1,9 +1,12 @@
-import { useForm, useStore } from "@tanstack/react-form";
-import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { CalculateColumnBody } from "@/api/zod/column/column";
+import { ExpressionHelperButton } from "@/components/atoms/Button/ExpressionHelperButton";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { SearchInput } from "@/components/molecules/Form/SearchInput";
+import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
@@ -16,34 +19,27 @@ import { getTableInfo } from "@/lib/utils/internal";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
-import { ExpressionHelperButton } from "@/components/atoms/Button/ExpressionHelperButton";
-import { InputText } from "@/components/atoms/Input/InputText";
-import { Select, SelectItem } from "@/components/atoms/Input/Select";
-import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
-import { FormField } from "@/components/molecules/Form/FormField";
-import { SearchInput } from "@/components/molecules/Form/SearchInput";
-import { PageLayout } from "@/components/templates/PageLayout";
+import { useForm, useStore } from "@tanstack/react-form";
+import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
+import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const Calculation = () => {
   const { t } = useTranslation();
   const tErr = createFieldError(t);
   const tableList = useTableListStore((state) => state.tableList);
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const initialTableName =
+    useTableInfosStore((state) => state.activeTableName) ?? "";
   const { tableInfos, addTableInfo, invalidateTable, activateTableInfo } =
     useTableInfosStore();
-
-  const { selectedTableName, setSelectedTableName, columnList } =
-    useTableColumnLoader({
-      numericOnly: false,
-      autoLoadOnMount: true,
-    });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [filterValue, setFilterValue] = useState<string>("");
 
   const form = useForm({
     defaultValues: {
-      tableName: selectedTableName,
+      tableName: initialTableName,
       newColumnName: "",
       addPositionColumn: "",
       calculationExpression: "",
@@ -94,18 +90,16 @@ export const Calculation = () => {
     },
   });
 
-  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+  const { setSelectedTableName, columnList } = useTableColumnLoader({
+    numericOnly: false,
+    autoLoadOnMount: true,
+    onLoadedColumns: (columns) => {
+      const defaultColumn = columns[columns.length - 1]?.name ?? "";
+      form.setFieldValue("addPositionColumn", defaultColumn);
+    },
+  });
 
-  // columnList が更新されたら末尾列を追加位置のデフォルトとして設定
-  useEffect(() => {
-    if (columnList.length > 0) {
-      form.setFieldValue(
-        "addPositionColumn",
-        columnList[columnList.length - 1].name,
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnList]);
+  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
   const handleTableChange = (value: string) => {
     setSelectedTableName(value);

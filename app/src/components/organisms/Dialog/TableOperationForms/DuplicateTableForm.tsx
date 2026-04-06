@@ -1,11 +1,12 @@
 /**
  * テーブル複製フォーム
  */
-import { useForm, useStore } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { DuplicateTableBody } from "@/api/zod/table/table";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
@@ -13,9 +14,9 @@ import {
 } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { useTableListStore } from "@/stores/tableList";
-import { InputText } from "@/components/atoms/Input/InputText";
-import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
-import { FormField } from "@/components/molecules/Form/FormField";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type DuplicateTableFormProps = {
   tableName: string;
@@ -76,9 +77,7 @@ export const DuplicateTableForm = ({
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
 
   return (
     <form

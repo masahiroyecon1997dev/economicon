@@ -1,10 +1,13 @@
-import { useForm, useStore } from "@tanstack/react-form";
-import { ChevronDown } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { CorrelationMethod, MissingHandlingMethod } from "@/api/model";
 import { CreateCorrelationTableBody } from "@/api/zod/statistics/statistics";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
+import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { extractApiErrorMessage } from "@/lib/utils/apiError";
@@ -14,13 +17,10 @@ import { getTableInfo } from "@/lib/utils/internal";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
-import { InputText } from "@/components/atoms/Input/InputText";
-import { Select, SelectItem } from "@/components/atoms/Input/Select";
-import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
-import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
-import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
-import { FormField } from "@/components/molecules/Form/FormField";
-import { PageLayout } from "@/components/templates/PageLayout";
+import { useForm, useStore } from "@tanstack/react-form";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 // ---------------------------------------------------------------------------
 // Component
@@ -28,17 +28,14 @@ import { PageLayout } from "@/components/templates/PageLayout";
 export const CorrelationMatrix = () => {
   const { t } = useTranslation();
   const tableList = useTableListStore((s) => s.tableList);
+  const initialTableName = useTableInfosStore((s) => s.activeTableName) ?? "";
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
   const [optionsOpen, setOptionsOpen] = useState(false);
 
-  // Column loader (numeric only)
-  const { selectedTableName, setSelectedTableName, columnList, setColumnList } =
-    useTableColumnLoader({ numericOnly: true, autoLoadOnMount: true });
-
   const form = useForm({
     defaultValues: {
-      tableName: selectedTableName,
+      tableName: initialTableName,
       columnNames: [] as string[],
       newTableName: "",
       method: CorrelationMethod.pearson as CorrelationMethod,
@@ -80,18 +77,23 @@ export const CorrelationMatrix = () => {
     },
   });
 
+  // Column loader (numeric only)
+  const { selectedTableName, setSelectedTableName, columnList, setColumnList } =
+    useTableColumnLoader({
+      numericOnly: true,
+      autoLoadOnMount: true,
+      onLoadedColumns: (columns) => {
+        form.setFieldValue(
+          "columnNames",
+          columns.map((column) => column.name),
+        );
+      },
+    });
+
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
   /** Zod の汎用メッセージをフィールド固有の i18n キーで上書きする（Case C）*/
   const tErr = createFieldError(t);
-
-  // Sync column list → check all by default
-  useEffect(() => {
-    form.setFieldValue(
-      "columnNames",
-      columnList.map((c) => c.name),
-    );
-  }, [columnList, form]);
 
   // Reset columns when table changes
   const handleTableSelect = (value: string) => {
