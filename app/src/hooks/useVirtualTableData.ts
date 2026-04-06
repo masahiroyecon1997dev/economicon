@@ -11,10 +11,10 @@
  */
 import { tableFromIPC, type Table as ArrowTable } from "apache-arrow";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchDataToArrow } from "../api/bridge/tauri-commands";
-import { CHUNK_SIZE, useTableChunkStore } from "../stores/tableChunkStore";
-import { useTableInfosStore } from "../stores/tableInfos";
-import type { TalbeDataRowType } from "../types/commonTypes";
+import { fetchDataToArrow } from "@/api/bridge/tauri-commands";
+import { CHUNK_SIZE, useTableChunkStore } from "@/stores/tableChunkStore";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import type { TalbeDataRowType } from "@/types/commonTypes";
 
 // ---------------------------------------------------------------------------
 // Arrow  行データ変換

@@ -7,10 +7,10 @@
  */
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../api/endpoints";
-import { OutputResultRequestFormat } from "../api/model/outputResultRequestFormat";
-import { OutputResultRequestStatInParentheses } from "../api/model/outputResultRequestStatInParentheses";
-import { useOutputResult } from "./useOutputResult";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { OutputResultRequestFormat } from "@/api/model/outputResultRequestFormat";
+import { OutputResultRequestStatInParentheses } from "@/api/model/outputResultRequestStatInParentheses";
+import { useOutputResult } from "@/hooks/useOutputResult";
 
 vi.mock("../api/endpoints", () => ({
   getEconomiconAppAPI: vi.fn(),

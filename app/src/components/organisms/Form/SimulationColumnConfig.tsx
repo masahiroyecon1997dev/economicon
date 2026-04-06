@@ -5,7 +5,7 @@ import { z } from "zod";
 import {
   addSimulationColumnBodySimulationColumnColumnNameMax,
   addSimulationColumnBodySimulationColumnColumnNameRegExp,
-} from "../../../api/zod/column/column";
+} from "@/api/zod/column/column";
 import {
   CONTINUOUS_DIST_TYPES,
   DISCRETE_DIST_TYPES,
@@ -13,16 +13,16 @@ import {
   DIST_PARAM_LABEL_KEYS,
   DIST_PARAM_SCHEMAS,
   DIST_PARAMS,
-} from "../../../constants/simulation";
-import { extractFieldError } from "../../../lib/utils/formHelpers";
+} from "@/constants/simulation";
+import { extractFieldError } from "@/lib/utils/formHelpers";
 import type {
   DistributionType,
   SimulationColumnSetting,
-} from "../../../types/commonTypes";
-import { InputText } from "../../atoms/Input/InputText";
-import { RadioTagGroup } from "../../molecules/Field/RadioTagGroup";
-import { FormField } from "../../molecules/Form/FormField";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Tab/BaseTab";
+} from "@/types/commonTypes";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { RadioTagGroup } from "@/components/molecules/Field/RadioTagGroup";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/organisms/Tab/BaseTab";
 
 type SimulationColumnConfigProps = {
   formId: string;

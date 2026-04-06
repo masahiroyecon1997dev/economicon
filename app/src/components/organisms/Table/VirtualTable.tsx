@@ -31,22 +31,22 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { getEconomiconAppAPI } from "../../../api/endpoints";
-import { useDragColumnReorder } from "../../../hooks/useDragColumnReorder";
-import { useVirtualTableData } from "../../../hooks/useVirtualTableData";
-import { getPolarsTypeColor } from "../../../lib/utils/columnTypeColor";
-import { cn } from "../../../lib/utils/helpers";
-import { useTableChunkStore } from "../../../stores/tableChunkStore";
-import { useTableInfosStore } from "../../../stores/tableInfos";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { useDragColumnReorder } from "@/hooks/useDragColumnReorder";
+import { useVirtualTableData } from "@/hooks/useVirtualTableData";
+import { getPolarsTypeColor } from "@/lib/utils/columnTypeColor";
+import { cn } from "@/lib/utils/helpers";
+import { useTableChunkStore } from "@/stores/tableChunkStore";
+import { useTableInfosStore } from "@/stores/tableInfos";
 import type {
   ColumnType,
   TableDataCellType,
   TableInfoType,
   TalbeDataRowType,
-} from "../../../types/commonTypes";
-import { DraggableColumnHeader } from "../../molecules/Table/DraggableColumnHeader";
-import { ColumnOperationDialog } from "../Dialog/ColumnOperationDialog";
-import { ColumnContextMenu, type ColumnOperation } from "./ColumnContextMenu";
+} from "@/types/commonTypes";
+import { DraggableColumnHeader } from "@/components/molecules/Table/DraggableColumnHeader";
+import { ColumnOperationDialog } from "@/components/organisms/Dialog/ColumnOperationDialog";
+import { ColumnContextMenu, type ColumnOperation } from "@/components/organisms/Table/ColumnContextMenu";
 
 type VirtualTableProps = {
   tableInfo: TableInfoType;

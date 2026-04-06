@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { TableInfoType, TableInfosType } from "../types/commonTypes";
-import { useTableChunkStore } from "./tableChunkStore";
+import type { TableInfoType, TableInfosType } from "@/types/commonTypes";
+import { useTableChunkStore } from "@/stores/tableChunkStore";
 
 export type TableInfosActions = {
   addTableInfo: (tableInfo: TableInfoType) => void;

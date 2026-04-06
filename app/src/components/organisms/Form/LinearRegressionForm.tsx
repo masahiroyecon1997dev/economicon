@@ -3,31 +3,31 @@ import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAppAPI } from "../../../api/endpoints";
+import { getEconomiconAppAPI } from "@/api/endpoints";
 import type {
   AnalysisResultDetail,
   StandardErrorSettings,
-} from "../../../api/model";
+} from "@/api/model";
 import {
   MissingValueHandlingType,
   RobustStandardErrorHcType,
-} from "../../../api/model";
-import { useTableColumnLoader } from "../../../hooks/useTableColumnLoader";
-import { showMessageDialog } from "../../../lib/dialog/message";
+} from "@/api/model";
+import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
+import { showMessageDialog } from "@/lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
-} from "../../../lib/utils/apiError";
-import { extractFieldError } from "../../../lib/utils/formHelpers";
-import { cn } from "../../../lib/utils/helpers";
-import { useRegressionResultsStore } from "../../../stores/regressionResults";
-import { useTableListStore } from "../../../stores/tableList";
-import type { LinearRegressionResultType } from "../../../types/commonTypes";
-import { InputText } from "../../atoms/Input/InputText";
-import { Select, SelectItem } from "../../atoms/Input/Select";
-import { ActionButtonBar } from "../../molecules/ActionBar/ActionButtonBar";
-import { VariableSelectorField } from "../../molecules/Field/VariableSelectorField";
-import { FormField } from "../../molecules/Form/FormField";
+} from "@/lib/utils/apiError";
+import { extractFieldError } from "@/lib/utils/formHelpers";
+import { cn } from "@/lib/utils/helpers";
+import { useRegressionResultsStore } from "@/stores/regressionResults";
+import { useTableListStore } from "@/stores/tableList";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { VariableSelectorField } from "@/components/molecules/Field/VariableSelectorField";
+import { FormField } from "@/components/molecules/Form/FormField";
 
 const createRegressionSchema = (t: (key: string) => string) =>
   z.object({

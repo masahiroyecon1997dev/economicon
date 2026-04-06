@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { LinearRegressionResultType } from "../types/commonTypes";
-import { useRegressionResultsStore } from "./regressionResults";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
+import { useRegressionResultsStore } from "@/stores/regressionResults";
 
 const makeResult = (
   overrides: Partial<LinearRegressionResultType> = {},

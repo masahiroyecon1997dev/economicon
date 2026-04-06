@@ -1,6 +1,6 @@
 import { Minus, Square, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { cn } from "../../../lib/utils/helpers";
+import { cn } from "@/lib/utils/helpers";
 
 type WindowControlsProps = {
   isMac: boolean;

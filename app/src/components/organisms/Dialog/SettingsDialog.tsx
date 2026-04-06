@@ -20,17 +20,17 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../../api/endpoints";
-import type { ThemeDefinitionType } from "../../../constants/themes";
-import { THEMES } from "../../../constants/themes";
-import { showMessageDialog } from "../../../lib/dialog/message";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import type { ThemeDefinitionType } from "@/constants/themes";
+import { THEMES } from "@/constants/themes";
+import { showMessageDialog } from "@/lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
-} from "../../../lib/utils/apiError";
-import { cn } from "../../../lib/utils/helpers";
-import { useSettingsStore } from "../../../stores/settings";
-import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
+} from "@/lib/utils/apiError";
+import { cn } from "@/lib/utils/helpers";
+import { useSettingsStore } from "@/stores/settings";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 
 // ─── 型定義 ──────────────────────────────────────────────────────────────────
 

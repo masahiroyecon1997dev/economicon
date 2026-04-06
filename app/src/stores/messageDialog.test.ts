@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useMessageDialogStore } from "./messageDialog";
+import { useMessageDialogStore } from "@/stores/messageDialog";
 
 beforeEach(() => {
   vi.useFakeTimers();

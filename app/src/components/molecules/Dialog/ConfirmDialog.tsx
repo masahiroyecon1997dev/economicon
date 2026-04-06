@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { useConfirmDialogStore } from "../../../stores/confirmDialog";
-import { BaseDialog } from "./BaseDialog";
+import { useConfirmDialogStore } from "@/stores/confirmDialog";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 
 export const ConfirmDialog = () => {
   const { t } = useTranslation();

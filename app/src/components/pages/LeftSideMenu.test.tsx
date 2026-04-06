@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { LeftSideMenu } from "./LeftSideMenu";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { LeftSideMenu } from "@/components/pages/LeftSideMenu";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -103,7 +103,7 @@ describe("LeftSideMenu コンポーネント", () => {
 
   describe("テーブルクリック — 新規テーブル（キャッシュなし）", () => {
     it("未キャッシュのテーブルをクリックすると getTableInfo を呼び DataPreview に遷移する", async () => {
-      const { getTableInfo } = await import("../../lib/utils/internal");
+      const { getTableInfo } = await import("@/lib/utils/internal");
       const user = userEvent.setup();
       render(<LeftSideMenu />);
 
@@ -118,7 +118,7 @@ describe("LeftSideMenu コンポーネント", () => {
 
   describe("エラー処理", () => {
     it("getTableInfo がthrowした場合 → エラーダイアログを表示する", async () => {
-      const { getTableInfo } = await import("../../lib/utils/internal");
+      const { getTableInfo } = await import("@/lib/utils/internal");
       vi.mocked(getTableInfo).mockRejectedValueOnce(
         new Error("テーブル取得失敗"),
       );

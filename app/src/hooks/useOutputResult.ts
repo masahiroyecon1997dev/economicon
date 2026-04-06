@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
-import { getEconomiconAppAPI } from "../api/endpoints";
-import type { OutputResultRequest } from "../api/model/outputResultRequest";
-import { extractApiErrorMessage } from "../lib/utils/apiError";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import type { OutputResultRequest } from "@/api/model/outputResultRequest";
+import { extractApiErrorMessage } from "@/lib/utils/apiError";
 
 type UseOutputResultReturnType = {
   content: string | null;

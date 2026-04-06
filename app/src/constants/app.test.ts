@@ -4,7 +4,7 @@ import {
   DISTRIBUTION_OPTIONS,
   HEADER_MENU_HEIGHT,
   TABLE_TAB_HEIGHT,
-} from "./app";
+} from "@/constants/app";
 
 describe("app constants", () => {
   describe("HEADER_MENU_HEIGHT", () => {

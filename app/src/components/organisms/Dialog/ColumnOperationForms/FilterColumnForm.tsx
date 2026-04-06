@@ -9,28 +9,28 @@ import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import type { FilterOperatorType } from "../../../../api/model";
-import { LogicalOperatorType } from "../../../../api/model";
-import { FilterTableBody } from "../../../../api/zod/table/table";
-import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import type { FilterOperatorType } from "@/api/model";
+import { LogicalOperatorType } from "@/api/model";
+import { FilterTableBody } from "@/api/zod/table/table";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
 import {
   buildCaughtErrorMessage,
   buildResponseErrorMessage,
-} from "../../../../lib/utils/apiError";
+} from "@/lib/utils/apiError";
 import {
   createFieldError,
   extractFieldError,
-} from "../../../../lib/utils/formHelpers";
-import { getTableInfo } from "../../../../lib/utils/internal";
-import { useTableInfosStore } from "../../../../stores/tableInfos";
-import { useTableListStore } from "../../../../stores/tableList";
-import { Button } from "../../../atoms/Button/Button";
-import { InputText } from "../../../atoms/Input/InputText";
-import { Select, SelectItem } from "../../../atoms/Input/Select";
-import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
-import { FormField } from "../../../molecules/Form/FormField";
-import type { ColumnOperationFormPropsType } from "./types";
+} from "@/lib/utils/formHelpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { Button } from "@/components/atoms/Button/Button";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { FormField } from "@/components/molecules/Form/FormField";
+import type { ColumnOperationFormPropsType } from "@/components/organisms/Dialog/ColumnOperationForms/types";
 
 const ALL_OPERATORS: FilterOperatorType[] = [
   "equals",

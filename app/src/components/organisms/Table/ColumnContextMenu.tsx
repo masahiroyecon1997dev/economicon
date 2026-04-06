@@ -22,8 +22,8 @@ import {
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "../../../lib/utils/helpers";
-import type { ColumnType } from "../../../types/commonTypes";
+import { cn } from "@/lib/utils/helpers";
+import type { ColumnType } from "@/types/commonTypes";
 
 export type ColumnOperation =
   | "sort_asc"

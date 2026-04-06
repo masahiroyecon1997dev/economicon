@@ -8,32 +8,32 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "@/api/endpoints";
 import {
   addSimulationColumnBodySimulationColumnColumnNameMax,
   addSimulationColumnBodySimulationColumnColumnNameRegExp,
-} from "../../../../api/zod/column/column";
+} from "@/api/zod/column/column";
 import {
   buildDistributionFromParams,
   DIST_PARAM_LABEL_KEYS,
   DIST_PARAM_SCHEMAS,
   DIST_PARAMS,
   DIST_TYPES,
-} from "../../../../constants/simulation";
-import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
+} from "@/constants/simulation";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
 import {
   buildCaughtErrorMessage,
   buildResponseErrorMessage,
-} from "../../../../lib/utils/apiError";
-import { extractFieldError } from "../../../../lib/utils/formHelpers";
-import type { DistributionType } from "../../../../types/commonTypes";
-import { InputText } from "../../../atoms/Input/InputText";
-import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
-import { RadioTagGroup } from "../../../molecules/Field/RadioTagGroup";
-import { FormField } from "../../../molecules/Form/FormField";
-import { RandomSeedField } from "../../../molecules/Form/RandomSeedField";
-import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
-import type { ColumnOperationFormPropsType } from "./types";
+} from "@/lib/utils/apiError";
+import { extractFieldError } from "@/lib/utils/formHelpers";
+import type { DistributionType } from "@/types/commonTypes";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { RadioTagGroup } from "@/components/molecules/Field/RadioTagGroup";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { RandomSeedField } from "@/components/molecules/Form/RandomSeedField";
+import { fetchUpdatedColumnList } from "@/components/organisms/Dialog/ColumnOperationForms/fetchUpdatedColumnList";
+import type { ColumnOperationFormPropsType } from "@/components/organisms/Dialog/ColumnOperationForms/types";
 
 // -----------------------------------------------------------------------
 // フォームコンポーネント

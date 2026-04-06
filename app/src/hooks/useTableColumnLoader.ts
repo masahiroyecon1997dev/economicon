@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../api/endpoints";
-import { showMessageDialog } from "../lib/dialog/message";
-import { useLoadingStore } from "../stores/loading";
-import { useTableInfosStore } from "../stores/tableInfos";
-import type { ColumnType } from "../types/commonTypes";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useLoadingStore } from "@/stores/loading";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import type { ColumnType } from "@/types/commonTypes";
 
 type UseTableColumnLoaderOptions = {
   numericOnly?: boolean;

@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { useTableListStore } from "../../../../stores/tableList";
-import { DuplicateTableForm } from "./DuplicateTableForm";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { useTableListStore } from "@/stores/tableList";
+import { DuplicateTableForm } from "@/components/organisms/Dialog/TableOperationForms/DuplicateTableForm";
 
 // ---------------------------------------------------------------------------
 // Mocks

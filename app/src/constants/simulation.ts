@@ -5,7 +5,7 @@
  * パラメータ名は API 直接名（loc, scale, n, p など）で統一。
  */
 import { z } from "zod";
-import type { DistributionType } from "../types/commonTypes";
+import type { DistributionType } from "@/types/commonTypes";
 
 /** 連続分布タイプ */
 export const CONTINUOUS_DIST_TYPES: DistributionType[] = [

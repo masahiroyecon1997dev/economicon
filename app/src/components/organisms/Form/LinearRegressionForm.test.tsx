@@ -7,11 +7,11 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../api/endpoints";
-import { showMessageDialog } from "../../../lib/dialog/message";
-import { useRegressionResultsStore } from "../../../stores/regressionResults";
-import { useTableListStore } from "../../../stores/tableList";
-import { LinearRegressionForm } from "./LinearRegressionForm";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useRegressionResultsStore } from "@/stores/regressionResults";
+import { useTableListStore } from "@/stores/tableList";
+import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 
 // ---------------------------------------------------------------------------
 // Helpers

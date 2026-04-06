@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useRegressionResultsStore } from "../../stores/regressionResults";
-import type { LinearRegressionResultType } from "../../types/commonTypes";
-import { Regression } from "./RegressionView";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useRegressionResultsStore } from "@/stores/regressionResults";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
+import { Regression } from "@/components/pages/RegressionView";
 
 // ---------------------------------------------------------------------------
 // Mocks

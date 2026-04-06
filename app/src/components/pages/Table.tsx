@@ -1,8 +1,8 @@
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { cn } from "../../lib/utils/helpers";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { VirtualTable } from "../organisms/Table/VirtualTable";
+import { cn } from "@/lib/utils/helpers";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 
 export const Table = () => {
   const { t } = useTranslation();

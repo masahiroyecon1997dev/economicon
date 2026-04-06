@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { TableInfoType } from "../types/commonTypes";
-import { useTableChunkStore } from "./tableChunkStore";
-import { useTableInfosStore } from "./tableInfos";
+import type { TableInfoType } from "@/types/commonTypes";
+import { useTableChunkStore } from "@/stores/tableChunkStore";
+import { useTableInfosStore } from "@/stores/tableInfos";
 
 // ---------------------------------------------------------------------------
 // Helpers

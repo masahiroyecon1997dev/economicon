@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { CurrentPageValue } from "./currentView";
-import { useCurrentPageStore } from "./currentView";
+import type { CurrentPageValue } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentView";
 
 beforeEach(() => {
   useCurrentPageStore.setState({ currentView: "ImportDataFile" });

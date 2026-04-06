@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { DescriptiveStatisticType } from "../../api/model";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { useTableListStore } from "../../stores/tableList";
-import { DescriptiveStatistics } from "./DescriptiveStatistics";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { DescriptiveStatisticType } from "@/api/model";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useTableListStore } from "@/stores/tableList";
+import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
 
 // ---------------------------------------------------------------------------
 // Mocks

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cn } from "../../../lib/utils/helpers";
+import { cn } from "@/lib/utils/helpers";
 
 // セクションカード（タイトル + コンテンツ）
 type ResultSectionProps = {

@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getFiles } from "../../api/bridge/tauri-commands";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useFilesStore } from "../../stores/files";
-import { useSettingsStore } from "../../stores/settings";
-import { ImportDataFile } from "./ImportDataFile";
+import { getFiles } from "@/api/bridge/tauri-commands";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useFilesStore } from "@/stores/files";
+import { useSettingsStore } from "@/stores/settings";
+import { ImportDataFile } from "@/components/pages/ImportDataFile";
 
 const { mockFileListTable } = vi.hoisted(() => ({
   mockFileListTable: vi.fn(),

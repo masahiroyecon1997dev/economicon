@@ -6,11 +6,11 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../api/endpoints";
-import { showMessageDialog } from "../../../lib/dialog/message";
-import { useConfidenceIntervalResultsStore } from "../../../stores/confidenceIntervalResults";
-import { useTableListStore } from "../../../stores/tableList";
-import { ConfidenceIntervalForm } from "./ConfidenceIntervalForm";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useConfidenceIntervalResultsStore } from "@/stores/confidenceIntervalResults";
+import { useTableListStore } from "@/stores/tableList";
+import { ConfidenceIntervalForm } from "@/components/organisms/Form/ConfidenceIntervalForm";
 
 // ---------------------------------------------------------------------------
 // Helpers

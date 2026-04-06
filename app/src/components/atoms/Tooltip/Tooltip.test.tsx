@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Tooltip } from './Tooltip';
+import { Tooltip } from '@/components/atoms/Tooltip/Tooltip';
 
 describe('Tooltip', () => {
   it('子要素が正しくレンダリングされる', () => {

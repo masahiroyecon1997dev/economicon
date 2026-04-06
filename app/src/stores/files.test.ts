@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { FilesType } from "../types/commonTypes";
-import { useFilesStore } from "./files";
+import type { FilesType } from "@/types/commonTypes";
+import { useFilesStore } from "@/stores/files";
 
 const EMPTY_FILES: FilesType = { files: [], directoryPath: "" };
 

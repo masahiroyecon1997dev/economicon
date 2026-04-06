@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react";
-import { Button } from "../../atoms/Button/Button";
+import { Button } from "@/components/atoms/Button/Button";
 
 type ActionButtonBarProps = {
   cancelText: string;

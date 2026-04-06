@@ -7,8 +7,8 @@
  */
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { DeleteColumnForm } from "./DeleteColumnForm";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { DeleteColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/DeleteColumnForm";
 
 // ---------------------------------------------------------------------------
 // Mocks

@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { Table } from "./Table";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { Table } from "@/components/pages/Table";
 
 // ---------------------------------------------------------------------------
 // Mocks

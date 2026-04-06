@@ -4,19 +4,19 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { RenameTableBody } from "../../../../api/zod/table/table";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { RenameTableBody } from "@/api/zod/table/table";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
-} from "../../../../lib/utils/apiError";
-import { extractFieldError } from "../../../../lib/utils/formHelpers";
-import { useTableInfosStore } from "../../../../stores/tableInfos";
-import { useTableListStore } from "../../../../stores/tableList";
-import { InputText } from "../../../atoms/Input/InputText";
-import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
-import { FormField } from "../../../molecules/Form/FormField";
+} from "@/lib/utils/apiError";
+import { extractFieldError } from "@/lib/utils/formHelpers";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { FormField } from "@/components/molecules/Form/FormField";
 
 type RenameTableFormProps = {
   tableName: string;

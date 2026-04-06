@@ -10,8 +10,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { DuplicateColumnForm } from "./DuplicateColumnForm";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { DuplicateColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/DuplicateColumnForm";
 
 // ---------------------------------------------------------------------------
 // Mocks

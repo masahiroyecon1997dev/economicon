@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "../../../lib/utils/helpers";
-import type { ColumnType } from "../../../types/commonTypes";
+import { cn } from "@/lib/utils/helpers";
+import type { ColumnType } from "@/types/commonTypes";
 
 type VariableSelectorMode = "single" | "multiple";
 

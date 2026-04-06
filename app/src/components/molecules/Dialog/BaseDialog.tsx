@@ -14,8 +14,8 @@ import * as RadixDialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "../../../lib/utils/helpers";
-import { Button } from "../../atoms/Button/Button";
+import { cn } from "@/lib/utils/helpers";
+import { Button } from "@/components/atoms/Button/Button";
 
 // ─── 型定義 ──────────────────────────────────────────────────────────────────
 

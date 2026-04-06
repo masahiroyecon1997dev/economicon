@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { InputText } from "../../atoms/Input/InputText";
-import { FormField } from "./FormField";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { FormField } from "@/components/molecules/Form/FormField";
 
 type RandomSeedFieldProps = {
   id?: string;

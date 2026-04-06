@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useLoadingStore } from "./loading";
+import { useLoadingStore } from "@/stores/loading";
 
 beforeEach(() => {
   vi.useFakeTimers();

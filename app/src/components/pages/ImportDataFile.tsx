@@ -8,31 +8,31 @@ import {
   getFiles,
   getFilesSafe,
   TauriFileError,
-} from "../../api/bridge/tauri-commands";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { showMessageDialog } from "../../lib/dialog/message";
+} from "@/api/bridge/tauri-commands";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { showMessageDialog } from "@/lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
-} from "../../lib/utils/apiError";
-import type { ImportConfigSettings } from "../../lib/utils/importSchema";
-import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useFilesStore } from "../../stores/files";
-import { useLoadingStore } from "../../stores/loading";
-import { useSettingsStore } from "../../stores/settings";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
+} from "@/lib/utils/apiError";
+import type { ImportConfigSettings } from "@/lib/utils/importSchema";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useFilesStore } from "@/stores/files";
+import { useLoadingStore } from "@/stores/loading";
+import { useSettingsStore } from "@/stores/settings";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
 import type {
   FileType,
   SortDirection,
   SortField,
-} from "../../types/commonTypes";
-import { CancelButtonBar } from "../molecules/ActionBar/CancelButtonBar";
-import { NavigationSearchBar } from "../molecules/Navigation/NavigationSearchBar";
-import { FileListTable } from "../molecules/Table/FileListTable";
-import { ImportConfigDialog } from "../organisms/Dialog/ImportConfigDialog";
-import { PageLayout } from "../templates/PageLayout";
+} from "@/types/commonTypes";
+import { CancelButtonBar } from "@/components/molecules/ActionBar/CancelButtonBar";
+import { NavigationSearchBar } from "@/components/molecules/Navigation/NavigationSearchBar";
+import { FileListTable } from "@/components/molecules/Table/FileListTable";
+import { ImportConfigDialog } from "@/components/organisms/Dialog/ImportConfigDialog";
+import { PageLayout } from "@/components/templates/PageLayout";
 
 type FileTypeFilter = "all" | "csv" | "excel" | "parquet";
 

@@ -1,29 +1,29 @@
 import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "@/api/endpoints";
 import {
   createUnionTableBodyUnionTableNameMax,
   createUnionTableBodyUnionTableNameRegExp,
-} from "../../api/zod/table/table";
-import { showMessageDialog } from "../../lib/dialog/message";
+} from "@/api/zod/table/table";
+import { showMessageDialog } from "@/lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
-} from "../../lib/utils/apiError";
-import { cn, generateId } from "../../lib/utils/helpers";
-import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import type { ColumnType } from "../../types/commonTypes";
-import { InputText } from "../atoms/Input/InputText";
-import { Select, SelectItem } from "../atoms/Input/Select";
-import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
-import { SectionCard } from "../molecules/Card/SectionCard";
-import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
-import { FormField } from "../molecules/Form/FormField";
-import { PageLayout } from "../templates/PageLayout";
+} from "@/lib/utils/apiError";
+import { cn, generateId } from "@/lib/utils/helpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import type { ColumnType } from "@/types/commonTypes";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { SectionCard } from "@/components/molecules/Card/SectionCard";
+import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { PageLayout } from "@/components/templates/PageLayout";
 
 type TableEntry = { id: string; name: string };
 

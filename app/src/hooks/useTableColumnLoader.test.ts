@@ -1,10 +1,10 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../api/endpoints";
-import * as messageDialog from "../lib/dialog/message";
-import { useLoadingStore } from "../stores/loading";
-import { useTableInfosStore } from "../stores/tableInfos";
-import { useTableColumnLoader } from "./useTableColumnLoader";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import * as messageDialog from "@/lib/dialog/message";
+import { useLoadingStore } from "@/stores/loading";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 
 vi.mock("../api/endpoints", () => ({
   getEconomiconAppAPI: vi.fn(),

@@ -15,13 +15,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "@/api/endpoints";
 import {
   DIST_PARAM_LABEL_KEYS,
   DIST_PARAMS,
   DIST_TYPES,
-} from "../../../../constants/simulation";
-import { AddSimulationColumnForm } from "./AddSimulationColumnForm";
+} from "@/constants/simulation";
+import { AddSimulationColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddSimulationColumnForm";
 
 // ---------------------------------------------------------------------------
 // Mocks

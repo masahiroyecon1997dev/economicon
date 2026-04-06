@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { useTableListStore } from "./tableList";
+import { useTableListStore } from "@/stores/tableList";
 
 beforeEach(() => {
   useTableListStore.setState({ tableList: [] });

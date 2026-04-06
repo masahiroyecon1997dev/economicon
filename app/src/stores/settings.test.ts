@@ -1,7 +1,7 @@
 import type { GetSettingsResult } from "@/api/model";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { OsInfo } from "./settings";
-import { useSettingsStore } from "./settings";
+import type { OsInfo } from "@/stores/settings";
+import { useSettingsStore } from "@/stores/settings";
 
 const DEFAULT_SETTINGS: GetSettingsResult = {
   language: "",

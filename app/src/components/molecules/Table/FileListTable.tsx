@@ -10,7 +10,7 @@ import type {
   FileType,
   SortDirection,
   SortField,
-} from "../../../types/commonTypes";
+} from "@/types/commonTypes";
 
 type FileListTableProps = {
   files: FileType[];

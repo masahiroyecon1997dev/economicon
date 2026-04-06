@@ -6,18 +6,18 @@
  */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { ColumnType } from "../../../types/commonTypes";
-import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
-import type { ColumnOperation } from "../../organisms/Table/ColumnContextMenu";
-import { AddDummyColumnForm } from "./ColumnOperationForms/AddDummyColumnForm";
-import { AddLagLeadColumnForm } from "./ColumnOperationForms/AddLagLeadColumnForm";
-import { AddSimulationColumnForm } from "./ColumnOperationForms/AddSimulationColumnForm";
-import { CastColumnForm } from "./ColumnOperationForms/CastColumnForm";
-import { DeleteColumnForm } from "./ColumnOperationForms/DeleteColumnForm";
-import { DuplicateColumnForm } from "./ColumnOperationForms/DuplicateColumnForm";
-import { FilterColumnForm } from "./ColumnOperationForms/FilterColumnForm";
-import { RenameColumnForm } from "./ColumnOperationForms/RenameColumnForm";
-import { TransformColumnForm } from "./ColumnOperationForms/TransformColumnForm";
+import type { ColumnType } from "@/types/commonTypes";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
+import type { ColumnOperation } from "@/components/organisms/Table/ColumnContextMenu";
+import { AddDummyColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddDummyColumnForm";
+import { AddLagLeadColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddLagLeadColumnForm";
+import { AddSimulationColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddSimulationColumnForm";
+import { CastColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/CastColumnForm";
+import { DeleteColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/DeleteColumnForm";
+import { DuplicateColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/DuplicateColumnForm";
+import { FilterColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/FilterColumnForm";
+import { RenameColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/RenameColumnForm";
+import { TransformColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/TransformColumnForm";
 
 type ColumnOperationDialogProps = {
   open: boolean;

@@ -2,16 +2,16 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ChevronDown, MoreHorizontal, Settings } from "lucide-react";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../../api/endpoints";
-import logo from "../../../assets/app-icon.svg";
-import { cn } from "../../../lib/utils/helpers";
-import { useCurrentPageStore } from "../../../stores/currentView";
-import { useSettingsStore } from "../../../stores/settings";
-import type { DropmenuPositionType } from "../../../types/commonTypes";
-import { MenuItem } from "../../atoms/Menu/MenuItem";
-import { DropdownMenu } from "../../molecules/Menu/DropdownMenu";
-import { SettingsDialog } from "../Dialog/SettingsDialog";
-import { WindowControls } from "./WindowControls";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import logo from "@/assets/app-icon.svg";
+import { cn } from "@/lib/utils/helpers";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useSettingsStore } from "@/stores/settings";
+import type { DropmenuPositionType } from "@/types/commonTypes";
+import { MenuItem } from "@/components/atoms/Menu/MenuItem";
+import { DropdownMenu } from "@/components/molecules/Menu/DropdownMenu";
+import { SettingsDialog } from "@/components/organisms/Dialog/SettingsDialog";
+import { WindowControls } from "@/components/organisms/Header/WindowControls";
 
 const MENU_POSITION: DropmenuPositionType = "bottom-right";
 

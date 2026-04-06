@@ -1,11 +1,11 @@
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../api/endpoints";
-import { useTableChunkStore } from "../stores/tableChunkStore";
-import { useTableInfosStore } from "../stores/tableInfos";
-import type { ColumnType } from "../types/commonTypes";
-import { useDragColumnReorder } from "./useDragColumnReorder";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { useTableChunkStore } from "@/stores/tableChunkStore";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import type { ColumnType } from "@/types/commonTypes";
+import { useDragColumnReorder } from "@/hooks/useDragColumnReorder";
 
 vi.mock("../api/endpoints", () => ({
   getEconomiconAppAPI: vi.fn(),

@@ -5,20 +5,20 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { TransformColumnBody } from "../../../../api/zod/column/column";
-import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { TransformColumnBody } from "@/api/zod/column/column";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
 import {
   buildCaughtErrorMessage,
   buildResponseErrorMessage,
-} from "../../../../lib/utils/apiError";
-import { createFieldError } from "../../../../lib/utils/formHelpers";
-import { InputText } from "../../../atoms/Input/InputText";
-import { Select, SelectItem } from "../../../atoms/Input/Select";
-import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
-import { FormField } from "../../../molecules/Form/FormField";
-import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
-import type { ColumnOperationFormPropsType } from "./types";
+} from "@/lib/utils/apiError";
+import { createFieldError } from "@/lib/utils/formHelpers";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { fetchUpdatedColumnList } from "@/components/organisms/Dialog/ColumnOperationForms/fetchUpdatedColumnList";
+import type { ColumnOperationFormPropsType } from "@/components/organisms/Dialog/ColumnOperationForms/types";
 
 type TransformMethod = "log" | "power" | "root";
 

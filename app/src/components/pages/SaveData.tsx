@@ -5,35 +5,35 @@ import {
   checkFileExists,
   getFiles,
   getFilesSafe,
-} from "../../api/bridge/tauri-commands";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { ExportFileBody } from "../../api/zod/data/data";
-import { showConfirmDialog } from "../../lib/dialog/confirm";
-import { showMessageDialog } from "../../lib/dialog/message";
+} from "@/api/bridge/tauri-commands";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { ExportFileBody } from "@/api/zod/data/data";
+import { showConfirmDialog } from "@/lib/dialog/confirm";
+import { showMessageDialog } from "@/lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
-} from "../../lib/utils/apiError";
-import { extractFieldError } from "../../lib/utils/formHelpers";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useFilesStore } from "../../stores/files";
-import { useLoadingStore } from "../../stores/loading";
-import { useSettingsStore } from "../../stores/settings";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
+} from "@/lib/utils/apiError";
+import { extractFieldError } from "@/lib/utils/formHelpers";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useFilesStore } from "@/stores/files";
+import { useLoadingStore } from "@/stores/loading";
+import { useSettingsStore } from "@/stores/settings";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
 import type {
   FileType,
   SortDirection,
   SortField,
-} from "../../types/commonTypes";
-import { InputText } from "../atoms/Input/InputText";
-import { Select, SelectItem } from "../atoms/Input/Select";
-import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
-import { CancelButtonBar } from "../molecules/ActionBar/CancelButtonBar";
-import { FormField } from "../molecules/Form/FormField";
-import { NavigationSearchBar } from "../molecules/Navigation/NavigationSearchBar";
-import { FileListTable } from "../molecules/Table/FileListTable";
-import { PageLayout } from "../templates/PageLayout";
+} from "@/types/commonTypes";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { CancelButtonBar } from "@/components/molecules/ActionBar/CancelButtonBar";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { NavigationSearchBar } from "@/components/molecules/Navigation/NavigationSearchBar";
+import { FileListTable } from "@/components/molecules/Table/FileListTable";
+import { PageLayout } from "@/components/templates/PageLayout";
 
 type FileFormat = "csv" | "excel" | "parquet";
 

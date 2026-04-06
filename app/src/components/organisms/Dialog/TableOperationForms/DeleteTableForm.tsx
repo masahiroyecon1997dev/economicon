@@ -3,16 +3,16 @@
  */
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "@/api/endpoints";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
-} from "../../../../lib/utils/apiError";
-import { useCurrentPageStore } from "../../../../stores/currentView";
-import { useTableInfosStore } from "../../../../stores/tableInfos";
-import { useTableListStore } from "../../../../stores/tableList";
-import { DangerAlert } from "../../../molecules/Alert/DangerAlert";
-import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
+} from "@/lib/utils/apiError";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { DangerAlert } from "@/components/molecules/Alert/DangerAlert";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
 
 type DeleteTableFormProps = {
   tableName: string;

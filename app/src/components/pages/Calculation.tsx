@@ -2,27 +2,27 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { CalculateColumnBody } from "../../api/zod/column/column";
-import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
-import { showMessageDialog } from "../../lib/dialog/message";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { CalculateColumnBody } from "@/api/zod/column/column";
+import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
+import { showMessageDialog } from "@/lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
-} from "../../lib/utils/apiError";
-import { getPolarsTypeColor } from "../../lib/utils/columnTypeColor";
-import { createFieldError } from "../../lib/utils/formHelpers";
-import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import { ExpressionHelperButton } from "../atoms/Button/ExpressionHelperButton";
-import { InputText } from "../atoms/Input/InputText";
-import { Select, SelectItem } from "../atoms/Input/Select";
-import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
-import { FormField } from "../molecules/Form/FormField";
-import { SearchInput } from "../molecules/Form/SearchInput";
-import { PageLayout } from "../templates/PageLayout";
+} from "@/lib/utils/apiError";
+import { getPolarsTypeColor } from "@/lib/utils/columnTypeColor";
+import { createFieldError } from "@/lib/utils/formHelpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { ExpressionHelperButton } from "@/components/atoms/Button/ExpressionHelperButton";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { SearchInput } from "@/components/molecules/Form/SearchInput";
+import { PageLayout } from "@/components/templates/PageLayout";
 
 export const Calculation = () => {
   const { t } = useTranslation();

@@ -1,4 +1,4 @@
-import { Button } from "../../atoms/Button/Button";
+import { Button } from "@/components/atoms/Button/Button";
 
 type CancelButtonBarProps = {
   cancelText: string;

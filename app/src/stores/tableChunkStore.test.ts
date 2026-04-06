@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { CHUNK_SIZE, useTableChunkStore } from "./tableChunkStore";
+import { CHUNK_SIZE, useTableChunkStore } from "@/stores/tableChunkStore";
 
 // MAX_CACHE_CHUNKS はモジュール内プライベートだが CHUNK_SIZE は公開済み
 const MAX_CACHE_CHUNKS = 20;

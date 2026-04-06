@@ -1,7 +1,7 @@
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
 import type { LucideIcon } from 'lucide-react';
 
-import { cn } from '../../../lib/utils/helpers';
+import { cn } from '@/lib/utils/helpers';
 
 type MenuItemProps = {
   icon?: LucideIcon;

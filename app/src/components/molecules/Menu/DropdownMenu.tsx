@@ -1,6 +1,6 @@
 import * as RadixDropdownMenu from "@radix-ui/react-dropdown-menu";
 import type { ReactNode } from "react";
-import type { DropmenuPositionType } from "../../../types/commonTypes";
+import type { DropmenuPositionType } from "@/types/commonTypes";
 
 type DropdownMenuProps = {
   isOpen: boolean;

@@ -1,5 +1,5 @@
 import { type ComponentPropsWithoutRef } from "react";
-import { cn } from "../../../lib/utils/helpers";
+import { cn } from "@/lib/utils/helpers";
 
 // スタイル定義を外に出して整理
 const variants = {

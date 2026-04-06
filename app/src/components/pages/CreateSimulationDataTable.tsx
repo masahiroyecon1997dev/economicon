@@ -3,29 +3,29 @@ import { AlertCircle, Dices, Edit2, Hash, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import type { SimulationColumnConfig } from "../../api/model";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import type { SimulationColumnConfig } from "@/api/model";
 import {
   createSimulationDataTableBodyTableNameMax,
   createSimulationDataTableBodyTableNameRegExp,
-} from "../../api/zod/table/table";
-import { DISTRIBUTION_OPTIONS } from "../../constants/app";
-import { buildDistributionFromParams } from "../../constants/simulation";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { extractFieldError } from "../../lib/utils/formHelpers";
-import { cn } from "../../lib/utils/helpers";
-import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import type { SimulationColumnSetting } from "../../types/commonTypes";
-import { Button } from "../atoms/Button/Button";
-import { InputText } from "../atoms/Input/InputText";
-import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
-import { FormField } from "../molecules/Form/FormField";
-import { RandomSeedField } from "../molecules/Form/RandomSeedField";
-import { SimulationColumnEditDialog } from "../organisms/Dialog/SimulationColumnEditDialog";
-import { PageLayout } from "../templates/PageLayout";
+} from "@/api/zod/table/table";
+import { DISTRIBUTION_OPTIONS } from "@/constants/app";
+import { buildDistributionFromParams } from "@/constants/simulation";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { extractFieldError } from "@/lib/utils/formHelpers";
+import { cn } from "@/lib/utils/helpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import type { SimulationColumnSetting } from "@/types/commonTypes";
+import { Button } from "@/components/atoms/Button/Button";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { RandomSeedField } from "@/components/molecules/Form/RandomSeedField";
+import { SimulationColumnEditDialog } from "@/components/organisms/Dialog/SimulationColumnEditDialog";
+import { PageLayout } from "@/components/templates/PageLayout";
 
 const createSimulationSchema = (t: (key: string) => string) =>
   z.object({

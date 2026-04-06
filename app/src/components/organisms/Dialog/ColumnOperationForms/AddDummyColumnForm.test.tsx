@@ -8,8 +8,8 @@
  */
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { AddDummyColumnForm } from "./AddDummyColumnForm";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { AddDummyColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddDummyColumnForm";
 
 // ---------------------------------------------------------------------------
 // Mocks

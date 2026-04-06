@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { THEMES } from "./themes";
+import { THEMES } from "@/constants/themes";
 
 describe("THEMES", () => {
   it("test_themes_hasAtLeastOneTheme", () => {

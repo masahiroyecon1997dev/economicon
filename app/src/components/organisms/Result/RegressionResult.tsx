@@ -1,13 +1,13 @@
 import { Check, Clipboard, FileDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../../api/endpoints";
-import { OutputResultRequestFormat } from "../../../api/model/outputResultRequestFormat";
-import { OutputResultRequestStatInParentheses } from "../../../api/model/outputResultRequestStatInParentheses";
-import { cn } from "../../../lib/utils/helpers";
-import type { LinearRegressionResultType } from "../../../types/commonTypes";
-import { ResultSection, StatItem } from "../../molecules/Result/ResultSection";
-import { OutputResultDialog } from "../Dialog/OutputResultDialog";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { OutputResultRequestFormat } from "@/api/model/outputResultRequestFormat";
+import { OutputResultRequestStatInParentheses } from "@/api/model/outputResultRequestStatInParentheses";
+import { cn } from "@/lib/utils/helpers";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
+import { ResultSection, StatItem } from "@/components/molecules/Result/ResultSection";
+import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 
 type RegressionResultProps = {
   result: LinearRegressionResultType;

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { ConfidenceIntervalResultEntry } from "../../../stores/confidenceIntervalResults";
-import { ConfidenceIntervalResult } from "./ConfidenceIntervalResult";
+import type { ConfidenceIntervalResultEntry } from "@/stores/confidenceIntervalResults";
+import { ConfidenceIntervalResult } from "@/components/organisms/Result/ConfidenceIntervalResult";
 
 // ---------------------------------------------------------------------------
 // Mocks

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import type { SimulationColumnSetting } from "../../../types/commonTypes";
-import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
-import { SimulationColumnConfig } from "../Form/SimulationColumnConfig";
+import type { SimulationColumnSetting } from "@/types/commonTypes";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
+import { SimulationColumnConfig } from "@/components/organisms/Form/SimulationColumnConfig";
 
 const FORM_ID = "simulation-column-config-form";
 

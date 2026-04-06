@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useConfirmDialogStore } from "./confirmDialog";
+import { useConfirmDialogStore } from "@/stores/confirmDialog";
 
 beforeEach(() => {
   vi.useFakeTimers();

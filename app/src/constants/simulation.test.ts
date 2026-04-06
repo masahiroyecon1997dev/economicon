@@ -9,7 +9,7 @@ import {
   DIST_PARAM_SCHEMAS,
   DIST_PARAMS,
   DIST_TYPES,
-} from "./simulation";
+} from "@/constants/simulation";
 
 // ---------------------------------------------------------------------------
 // 分布タイプ定数

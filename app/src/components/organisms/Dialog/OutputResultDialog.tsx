@@ -7,14 +7,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { OutputResultRequestFormat } from "../../../api/model/outputResultRequestFormat";
-import { OutputResultRequestStatInParentheses } from "../../../api/model/outputResultRequestStatInParentheses";
-import { useOutputResult } from "../../../hooks/useOutputResult";
-import { cn } from "../../../lib/utils/helpers";
-import type { LinearRegressionResultType } from "../../../types/commonTypes";
-import { Button } from "../../atoms/Button/Button";
-import { Select, SelectItem } from "../../atoms/Input/Select";
-import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
+import { OutputResultRequestFormat } from "@/api/model/outputResultRequestFormat";
+import { OutputResultRequestStatInParentheses } from "@/api/model/outputResultRequestStatInParentheses";
+import { useOutputResult } from "@/hooks/useOutputResult";
+import { cn } from "@/lib/utils/helpers";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
+import { Button } from "@/components/atoms/Button/Button";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 
 // ─── 型定義 ──────────────────────────────────────────────────────────────────
 

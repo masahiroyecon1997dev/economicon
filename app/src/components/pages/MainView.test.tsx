@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { CurrentPageValue } from "../../stores/currentView";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { MainView } from "./MainView";
+import type { CurrentPageValue } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { MainView } from "@/components/pages/MainView";
 
 // ---------------------------------------------------------------------------
 // Mocks

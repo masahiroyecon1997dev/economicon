@@ -4,9 +4,9 @@ import { Copy, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "../../../lib/utils/helpers";
-import type { TableOperation } from "../../organisms/Dialog/TableOperationDialog";
-import { TableOperationDialog } from "../../organisms/Dialog/TableOperationDialog";
+import { cn } from "@/lib/utils/helpers";
+import type { TableOperation } from "@/components/organisms/Dialog/TableOperationDialog";
+import { TableOperationDialog } from "@/components/organisms/Dialog/TableOperationDialog";
 
 // ---------------------------------------------------------------------------
 // 共通スロット型: ContextMenu / DropdownMenu 両方と互換

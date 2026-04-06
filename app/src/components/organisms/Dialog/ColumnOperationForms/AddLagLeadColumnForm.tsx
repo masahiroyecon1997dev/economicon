@@ -5,20 +5,20 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { AddLagLeadColumnBody } from "../../../../api/zod/column/column";
-import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { AddLagLeadColumnBody } from "@/api/zod/column/column";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
 import {
   buildCaughtErrorMessage,
   buildResponseErrorMessage,
-} from "../../../../lib/utils/apiError";
-import { extractFieldError } from "../../../../lib/utils/formHelpers";
-import { useTableInfosStore } from "../../../../stores/tableInfos";
-import { InputText } from "../../../atoms/Input/InputText";
-import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
-import { FormField } from "../../../molecules/Form/FormField";
-import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
-import type { ColumnOperationFormPropsType } from "./types";
+} from "@/lib/utils/apiError";
+import { extractFieldError } from "@/lib/utils/formHelpers";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { fetchUpdatedColumnList } from "@/components/organisms/Dialog/ColumnOperationForms/fetchUpdatedColumnList";
+import type { ColumnOperationFormPropsType } from "@/components/organisms/Dialog/ColumnOperationForms/types";
 
 const EMPTY_COLUMNS: { name: string; type: string }[] = [];
 

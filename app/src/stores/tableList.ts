@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { TableListType } from "../types/commonTypes";
+import type { TableListType } from "@/types/commonTypes";
 
 export type TableListActions = {
   setTableList: (tableList: TableListType) => void;

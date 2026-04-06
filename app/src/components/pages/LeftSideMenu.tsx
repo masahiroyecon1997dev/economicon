@@ -1,12 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { extractApiErrorMessage } from "../../lib/utils/apiError";
-import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import { SectionHeading } from "../atoms/List/SectionHeading";
-import { TableNav } from "../molecules/List/TableNav";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { extractApiErrorMessage } from "@/lib/utils/apiError";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { SectionHeading } from "@/components/atoms/List/SectionHeading";
+import { TableNav } from "@/components/molecules/List/TableNav";
 
 export const LeftSideMenu = () => {
   const { t } = useTranslation();

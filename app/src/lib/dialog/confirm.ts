@@ -1,4 +1,4 @@
-import { useConfirmDialogStore } from "../../stores/confirmDialog";
+import { useConfirmDialogStore } from "@/stores/confirmDialog";
 
 /**
  * 確認ダイアログを表示する汎用関数

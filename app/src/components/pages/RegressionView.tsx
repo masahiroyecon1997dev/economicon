@@ -1,21 +1,21 @@
 import { X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { extractApiErrorMessage } from "../../lib/utils/apiError";
-import { cn } from "../../lib/utils/helpers";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useRegressionResultsStore } from "../../stores/regressionResults";
-import { LinearRegressionForm } from "../organisms/Form/LinearRegressionForm";
-import { RegressionResult } from "../organisms/Result/RegressionResult";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { extractApiErrorMessage } from "@/lib/utils/apiError";
+import { cn } from "@/lib/utils/helpers";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useRegressionResultsStore } from "@/stores/regressionResults";
+import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
+import { RegressionResult } from "@/components/organisms/Result/RegressionResult";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../organisms/Tab/BaseTab";
-import { PageLayout } from "../templates/PageLayout";
+} from "@/components/organisms/Tab/BaseTab";
+import { PageLayout } from "@/components/templates/PageLayout";
 
 type RegressionProps = {
   className?: string;

@@ -1,4 +1,4 @@
-import { client } from "../bridge/api-gateway"; // 既存のclient.tsをインポート
+import { client } from "@/api/bridge/api-gateway"; // 既存のclient.tsをインポート
 
 export const customInstance = async <T>(
   config: {

@@ -4,8 +4,8 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { extractFieldError } from "../../../lib/utils/formHelpers";
-import { cn } from "../../../lib/utils/helpers";
+import { extractFieldError } from "@/lib/utils/formHelpers";
+import { cn } from "@/lib/utils/helpers";
 import {
   CSV_ENCODINGS,
   createImportConfigSchema,
@@ -14,8 +14,8 @@ import {
   validateSeparatorCustom,
   validateSheetName,
   type ImportConfigSettings,
-} from "../../../lib/utils/importSchema";
-import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
+} from "@/lib/utils/importSchema";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 
 type ImportConfigDialogProps = {
   isOpen: boolean;

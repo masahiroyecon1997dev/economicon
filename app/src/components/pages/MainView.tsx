@@ -1,16 +1,16 @@
-import type { CurrentPageValue } from "../../stores/currentView";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { Calculation } from "./Calculation";
-import { ConfidenceIntervalView } from "./ConfidenceIntervalView";
-import { CorrelationMatrix } from "./CorrelationMatrix";
-import { CreateSimulationDataTable } from "./CreateSimulationDataTable";
-import { DescriptiveStatistics } from "./DescriptiveStatistics";
-import { ImportDataFile } from "./ImportDataFile";
-import { JoinTable } from "./JoinTable";
-import { Regression } from "./RegressionView";
-import { SaveData } from "./SaveData";
-import { Table } from "./Table";
-import { UnionTable } from "./UnionTable";
+import type { CurrentPageValue } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { Calculation } from "@/components/pages/Calculation";
+import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
+import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
+import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
+import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
+import { ImportDataFile } from "@/components/pages/ImportDataFile";
+import { JoinTable } from "@/components/pages/JoinTable";
+import { Regression } from "@/components/pages/RegressionView";
+import { SaveData } from "@/components/pages/SaveData";
+import { Table } from "@/components/pages/Table";
+import { UnionTable } from "@/components/pages/UnionTable";
 
 const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
   ImportDataFile: <ImportDataFile />,

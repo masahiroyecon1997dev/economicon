@@ -4,26 +4,26 @@ import {
   getAuthToken,
   getFilesSafe,
   getOsInfo,
-} from "./api/bridge/tauri-commands";
-import { getEconomiconAppAPI } from "./api/endpoints";
-import { showMessageDialog } from "./lib/dialog/message";
-import { useCurrentPageStore } from "./stores/currentView";
-import { useLoadingStore } from "./stores/loading";
-import { useSettingsStore } from "./stores/settings";
-import { useTableListStore } from "./stores/tableList";
+} from "@/api/bridge/tauri-commands";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useLoadingStore } from "@/stores/loading";
+import { useSettingsStore } from "@/stores/settings";
+import { useTableListStore } from "@/stores/tableList";
 
 import {
   Panel,
   Group as PanelGroup,
   Separator as PanelResizeHandle,
 } from "react-resizable-panels";
-import { ConfirmDialog } from "./components/molecules/Dialog/ConfirmDialog";
-import { MessageDialog } from "./components/molecules/Dialog/MessageDialog";
-import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
-import { AppBar } from "./components/organisms/Header/AppBar";
-import { LeftSideMenu } from "./components/pages/LeftSideMenu";
-import { MainView } from "./components/pages/MainView";
-import { useFilesStore } from "./stores/files";
+import { ConfirmDialog } from "@/components/molecules/Dialog/ConfirmDialog";
+import { MessageDialog } from "@/components/molecules/Dialog/MessageDialog";
+import { LoadingOverlay } from "@/components/molecules/Loading/LoadingOverlay";
+import { AppBar } from "@/components/organisms/Header/AppBar";
+import { LeftSideMenu } from "@/components/pages/LeftSideMenu";
+import { MainView } from "@/components/pages/MainView";
+import { useFilesStore } from "@/stores/files";
 
 export const App = () => {
   const { t } = useTranslation();

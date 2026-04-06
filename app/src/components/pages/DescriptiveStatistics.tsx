@@ -1,19 +1,19 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { DescriptiveStatisticType } from "../../api/model";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { cn } from "../../lib/utils/helpers";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableListStore } from "../../stores/tableList";
-import type { ColumnType } from "../../types/commonTypes";
-import { Select, SelectItem } from "../atoms/Input/Select";
-import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
-import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
-import { SelectAllBar } from "../molecules/Field/SelectAllBar";
-import { FormField } from "../molecules/Form/FormField";
-import { PageLayout } from "../templates/PageLayout";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { DescriptiveStatisticType } from "@/api/model";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { cn } from "@/lib/utils/helpers";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableListStore } from "@/stores/tableList";
+import type { ColumnType } from "@/types/commonTypes";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
+import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { PageLayout } from "@/components/templates/PageLayout";
 
 // ---------------------------------------------------------------------------
 // Type assertions for the API response (statistics: unknown → StatisticsMap)

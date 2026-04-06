@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { FilesType, FileType } from "../../types/commonTypes";
-import { client } from "./api-gateway";
+import type { FilesType, FileType } from "@/types/commonTypes";
+import { client } from "@/api/bridge/api-gateway";
 
 // Rust 側の FileError に対応するエラー種別
 export type FileErrorType =

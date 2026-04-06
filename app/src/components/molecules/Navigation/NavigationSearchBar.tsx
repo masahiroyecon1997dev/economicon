@@ -1,6 +1,6 @@
-import { UpDirectoryButton } from "../../atoms/Button/UpDirectoryButton";
-import { SearchInput } from "../Form/SearchInput";
-import { Breadcrumb } from "./Breadcrumb";
+import { UpDirectoryButton } from "@/components/atoms/Button/UpDirectoryButton";
+import { SearchInput } from "@/components/molecules/Form/SearchInput";
+import { Breadcrumb } from "@/components/molecules/Navigation/Breadcrumb";
 
 type NavigationSearchBarProps = {
   pathSegments: string[];
