@@ -33,6 +33,18 @@ export const Calculation = () => {
     useTableInfosStore((state) => state.activeTableName) ?? "";
   const { tableInfos, addTableInfo, invalidateTable, activateTableInfo } =
     useTableInfosStore();
+  const formActionsRef = useRef<{
+    setFieldValue: (field: "addPositionColumn", value: string) => void;
+  } | null>(null);
+
+  const { setSelectedTableName, columnList } = useTableColumnLoader({
+    numericOnly: false,
+    autoLoadOnMount: true,
+    onLoadedColumns: (columns) => {
+      const defaultColumn = columns[columns.length - 1]?.name ?? "";
+      formActionsRef.current?.setFieldValue("addPositionColumn", defaultColumn);
+    },
+  });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [filterValue, setFilterValue] = useState<string>("");
@@ -41,7 +53,7 @@ export const Calculation = () => {
     defaultValues: {
       tableName: initialTableName,
       newColumnName: "",
-      addPositionColumn: "",
+      addPositionColumn: columnList[columnList.length - 1]?.name ?? "",
       calculationExpression: "",
     },
     validators: {
@@ -89,15 +101,9 @@ export const Calculation = () => {
       }
     },
   });
-
-  const { setSelectedTableName, columnList } = useTableColumnLoader({
-    numericOnly: false,
-    autoLoadOnMount: true,
-    onLoadedColumns: (columns) => {
-      const defaultColumn = columns[columns.length - 1]?.name ?? "";
-      form.setFieldValue("addPositionColumn", defaultColumn);
-    },
-  });
+  formActionsRef.current = {
+    setFieldValue: form.setFieldValue,
+  };
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 

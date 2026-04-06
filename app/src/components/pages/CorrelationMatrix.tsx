@@ -19,7 +19,7 @@ import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { useForm, useStore } from "@tanstack/react-form";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 // ---------------------------------------------------------------------------
@@ -32,11 +32,27 @@ export const CorrelationMatrix = () => {
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const formActionsRef = useRef<{
+    setFieldValue: (field: "columnNames", value: string[]) => void;
+  } | null>(null);
+
+  // Column loader (numeric only)
+  const { selectedTableName, setSelectedTableName, columnList, setColumnList } =
+    useTableColumnLoader({
+      numericOnly: true,
+      autoLoadOnMount: true,
+      onLoadedColumns: (columns) => {
+        formActionsRef.current?.setFieldValue(
+          "columnNames",
+          columns.map((column) => column.name),
+        );
+      },
+    });
 
   const form = useForm({
     defaultValues: {
       tableName: initialTableName,
-      columnNames: [] as string[],
+      columnNames: columnList.map((column) => column.name),
       newTableName: "",
       method: CorrelationMethod.pearson as CorrelationMethod,
       decimalPlaces: 3,
@@ -76,19 +92,9 @@ export const CorrelationMatrix = () => {
       }
     },
   });
-
-  // Column loader (numeric only)
-  const { selectedTableName, setSelectedTableName, columnList, setColumnList } =
-    useTableColumnLoader({
-      numericOnly: true,
-      autoLoadOnMount: true,
-      onLoadedColumns: (columns) => {
-        form.setFieldValue(
-          "columnNames",
-          columns.map((column) => column.name),
-        );
-      },
-    });
+  formActionsRef.current = {
+    setFieldValue: form.setFieldValue,
+  };
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
@@ -100,7 +106,10 @@ export const CorrelationMatrix = () => {
     setSelectedTableName(value);
     if (!value) setColumnList([]);
     form.setFieldValue("tableName", value);
-    form.setFieldValue("columnNames", []);
+    form.setFieldValue(
+      "columnNames",
+      value ? columnList.map((column) => column.name) : [],
+    );
   };
 
   // ---------------------------------------------------------------------------
