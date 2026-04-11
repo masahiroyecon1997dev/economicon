@@ -1,11 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getFiles } from "@/api/bridge/tauri-commands";
+import { getFiles, getFilesSafe } from "@/api/bridge/tauri-commands";
+import { ImportDataFile } from "@/components/pages/ImportDataFile";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useFilesStore } from "@/stores/files";
 import { useSettingsStore } from "@/stores/settings";
-import { ImportDataFile } from "@/components/pages/ImportDataFile";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { mockFileListTable } = vi.hoisted(() => ({
   mockFileListTable: vi.fn(),
@@ -76,18 +76,33 @@ beforeEach(() => {
   useCurrentPageStore.setState({ currentView: "ImportDataFile" });
 });
 
+const renderImportDataFile = async (
+  expectedLoader: "safe" | "current" = "safe",
+) => {
+  render(<ImportDataFile />);
+
+  await waitFor(() => {
+    if (expectedLoader === "safe") {
+      expect(vi.mocked(getFilesSafe)).toHaveBeenCalled();
+      return;
+    }
+
+    expect(vi.mocked(getFiles)).toHaveBeenCalled();
+  });
+};
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 describe("ImportDataFile コンポーネント", () => {
   describe("初期レンダリング", () => {
-    it("タイトルが表示される", () => {
-      render(<ImportDataFile />);
+    it("タイトルが表示される", async () => {
+      await renderImportDataFile();
       expect(screen.getByText("ImportDataFileView.Title")).toBeInTheDocument();
     });
 
-    it("ドラッグ&ドロップタブとファイル選択タブが表示される", () => {
-      render(<ImportDataFile />);
+    it("ドラッグ&ドロップタブとファイル選択タブが表示される", async () => {
+      await renderImportDataFile();
       expect(
         screen.getByText("ImportDataFileView.DragAndDropTab"),
       ).toBeInTheDocument();
@@ -96,8 +111,8 @@ describe("ImportDataFile コンポーネント", () => {
       ).toBeInTheDocument();
     });
 
-    it("ドラッグ&ドロップエリアのタイトルが表示される", () => {
-      render(<ImportDataFile />);
+    it("ドラッグ&ドロップエリアのタイトルが表示される", async () => {
+      await renderImportDataFile();
       expect(
         screen.getByText("ImportDataFileView.DragDropAreaTitle"),
       ).toBeInTheDocument();
@@ -107,7 +122,7 @@ describe("ImportDataFile コンポーネント", () => {
   describe("タブ切替", () => {
     it("ファイル選択タブをクリックするとファイルフィルターが表示される", async () => {
       const user = userEvent.setup();
-      render(<ImportDataFile />);
+      await renderImportDataFile();
 
       const fileSelectTab = screen.getByText(
         "ImportDataFileView.FileSelectTab",
@@ -123,7 +138,7 @@ describe("ImportDataFile コンポーネント", () => {
 
     it("ファイル選択タブでCSVフィルターが表示される", async () => {
       const user = userEvent.setup();
-      render(<ImportDataFile />);
+      await renderImportDataFile();
 
       const fileSelectTab = screen.getByText(
         "ImportDataFileView.FileSelectTab",
@@ -170,7 +185,7 @@ describe("ImportDataFile コンポーネント", () => {
       });
 
       const user = userEvent.setup();
-      render(<ImportDataFile />);
+      await renderImportDataFile("current");
 
       const fileSelectTab = screen.getByText(
         "ImportDataFileView.FileSelectTab",
@@ -191,7 +206,7 @@ describe("ImportDataFile コンポーネント", () => {
   describe("キャンセル", () => {
     it("キャンセルボタンをクリックすると DataPreview に遷移する", async () => {
       const user = userEvent.setup();
-      render(<ImportDataFile />);
+      await renderImportDataFile();
 
       const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
       await user.click(cancelBtn);
