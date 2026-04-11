@@ -1,19 +1,19 @@
-import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { DescriptiveStatisticType } from "@/api/model";
-import { showMessageDialog } from "@/lib/dialog/message";
-import { cn } from "@/lib/utils/helpers";
-import { useCurrentPageStore } from "@/stores/currentView";
-import { useTableListStore } from "@/stores/tableList";
-import type { ColumnType } from "@/types/commonTypes";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
 import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
 import { FormField } from "@/components/molecules/Form/FormField";
 import { PageLayout } from "@/components/templates/PageLayout";
+import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { cn } from "@/lib/utils/helpers";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableListStore } from "@/stores/tableList";
+import { ChevronDown } from "lucide-react";
+import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 // ---------------------------------------------------------------------------
 // Type assertions for the API response (statistics: unknown → StatisticsMap)
@@ -73,46 +73,26 @@ export const DescriptiveStatistics = () => {
   const tableList = useTableListStore((s) => s.tableList);
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
 
-  const [selectedTable, setSelectedTable] = useState("");
-  const [columns, setColumns] = useState<ColumnType[]>([]);
   const [checkedCols, setCheckedCols] = useState<Set<string>>(new Set());
   const [checkedStats, setCheckedStats] = useState<
     Set<DescriptiveStatisticType>
   >(new Set(ALL_STAT_TYPES));
   const resultRef = useRef<HTMLDivElement>(null);
-  const [isLoadingCols, setIsLoadingCols] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState<ResultSnapshot | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [statsOpen, setStatsOpen] = useState(true);
-
-  /* ── Fetch columns when table changes ────────────────────── */
-  useEffect(() => {
-    if (!selectedTable) {
-      setColumns([]);
-      setCheckedCols(new Set());
-      setResult(null);
-      return;
-    }
-    setIsLoadingCols(true);
-    setResult(null);
-    const api = getEconomiconAppAPI();
-    void (async () => {
-      try {
-        const resp = await api.getColumnList({ tableName: selectedTable });
-        if (resp.code === "OK") {
-          setColumns(resp.result.columnInfoList);
-          setCheckedCols(
-            new Set(resp.result.columnInfoList.map((c: ColumnType) => c.name)),
-          );
-        }
-      } catch {
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
-      } finally {
-        setIsLoadingCols(false);
-      }
-    })();
-  }, [selectedTable, t]);
+  const {
+    selectedTableName: selectedTable,
+    setSelectedTableName,
+    columnList: columns,
+    isLoading: isLoadingCols,
+  } = useTableColumnLoader({
+    initialSelectedTableName: "",
+    onLoadedColumns: (loadedColumns) => {
+      setCheckedCols(new Set(loadedColumns.map((column) => column.name)));
+    },
+  });
 
   /* ── Toggle helpers ──────────────────────────────────────── */
   const toggleCol = (name: string) => {
@@ -204,7 +184,9 @@ export const DescriptiveStatistics = () => {
           <Select
             value={selectedTable}
             onValueChange={(v) => {
-              setSelectedTable(v);
+              setSelectedTableName(v);
+              setCheckedCols(new Set());
+              setResult(null);
               setErrors({});
             }}
             placeholder={t("DescriptiveStatistics.SelectData")}

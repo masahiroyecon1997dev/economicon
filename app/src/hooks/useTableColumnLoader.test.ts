@@ -1,10 +1,10 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import * as messageDialog from "@/lib/dialog/message";
 import { useLoadingStore } from "@/stores/loading";
 import { useTableInfosStore } from "@/stores/tableInfos";
-import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../api/endpoints", () => ({
   getEconomiconAppAPI: vi.fn(),
@@ -190,6 +190,31 @@ describe("useTableColumnLoader", () => {
       });
 
       expect(mockGetColumnList).not.toHaveBeenCalled();
+    });
+
+    it("test_initialSelectedTableName_empty_skipsActiveTableAutoload", async () => {
+      useTableInfosStore.setState({
+        tableInfos: [
+          {
+            tableName: "tableA",
+            columnList: [],
+            totalRows: 0,
+            isActive: true,
+          },
+        ],
+        activeTableName: "tableA",
+      });
+
+      const { result } = renderHook(() =>
+        useTableColumnLoader({ initialSelectedTableName: "" }),
+      );
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      expect(mockGetColumnList).not.toHaveBeenCalled();
+      expect(result.current.selectedTableName).toBe("");
     });
   });
 

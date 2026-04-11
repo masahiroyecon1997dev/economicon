@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 type UseTableColumnLoaderOptions = {
   numericOnly?: boolean;
   autoLoadOnMount?: boolean;
+  initialSelectedTableName?: string;
   onLoadedColumns?: (columns: ColumnType[]) => void;
 };
 
@@ -18,6 +19,7 @@ export const useTableColumnLoader = (
   const {
     numericOnly = false,
     autoLoadOnMount = true,
+    initialSelectedTableName,
     onLoadedColumns,
   } = options;
   const { t } = useTranslation();
@@ -26,16 +28,26 @@ export const useTableColumnLoader = (
   const clearLoading = useLoadingStore((s) => s.clearLoading);
   // TODO : アクティブなテーブルがなければ、テーブルリストの最初のテーブルをセットする処理を追加する
   const [selectedTableName, setSelectedTableName] = useState<string>(
-    activeTableName || "",
+    initialSelectedTableName ?? activeTableName ?? "",
   );
   const [columnList, setColumnList] = useState<ColumnType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const notifyLoadedColumns = useEffectEvent((columns: ColumnType[]) => {
     onLoadedColumns?.(columns);
   });
 
   useEffect(() => {
     let cancelled = false;
+    if (!selectedTableName) {
+      setColumnList([]);
+      setIsLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
     const loadColumnList = async (tableName: string) => {
+      setIsLoading(true);
       setLoading(true, t("Loading.Loading"));
       try {
         const api = getEconomiconAppAPI();
@@ -55,7 +67,10 @@ export const useTableColumnLoader = (
         if (cancelled) return;
         await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
       } finally {
-        if (!cancelled) clearLoading();
+        if (!cancelled) {
+          setIsLoading(false);
+          clearLoading();
+        }
       }
     };
     if (autoLoadOnMount && selectedTableName) {
@@ -78,6 +93,7 @@ export const useTableColumnLoader = (
     selectedTableName,
     setSelectedTableName,
     columnList,
+    isLoading,
     setColumnList,
   };
 };
