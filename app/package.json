@@ -19,8 +19,7 @@
     "test:e2e:report": "playwright show-report",
     "gen:api": "orval",
     "gen:api:watch": "orval --watch",
-    "gen:all": "cd ../api && .\\.venv\\Scripts\\python.exe gen_openapi.py && cd ../app && pnpm gen:api",
-    "tauri:dev:debug": "cross-env ECONOMICON_DEV_RUN=true tauri dev"
+    "gen:all": "cd ../api && .\\.venv\\Scripts\\python.exe gen_openapi.py && cd ../app && pnpm gen:api"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
