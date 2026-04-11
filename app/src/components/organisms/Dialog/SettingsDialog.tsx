@@ -8,6 +8,17 @@
  * - データ / ログ: 将来の拡張スペース
  * - 保存ボタンで PUT /api/settings を呼び出し、成功時に store を更新
  */
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
+import type { ThemeDefinitionType } from "@/constants/themes";
+import { THEMES } from "@/constants/themes";
+import { showMessageDialog } from "@/lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "@/lib/utils/apiError";
+import { cn } from "@/lib/utils/helpers";
+import { useSettingsStore } from "@/stores/settings";
 import * as Select from "@radix-ui/react-select";
 import * as Tabs from "@radix-ui/react-tabs";
 import {
@@ -18,19 +29,8 @@ import {
   Palette,
   SlidersHorizontal,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "@/api/endpoints";
-import type { ThemeDefinitionType } from "@/constants/themes";
-import { THEMES } from "@/constants/themes";
-import { showMessageDialog } from "@/lib/dialog/message";
-import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-} from "@/lib/utils/apiError";
-import { cn } from "@/lib/utils/helpers";
-import { useSettingsStore } from "@/stores/settings";
-import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 
 // ─── 型定義 ──────────────────────────────────────────────────────────────────
 
@@ -44,6 +44,16 @@ type DraftSettingsType = {
   language: string;
   encoding: string;
 };
+
+type SetSettingsFnType = ReturnType<
+  typeof useSettingsStore.getState
+>["setSettings"];
+
+type SettingsDialogContentPropsType = SettingsDialogPropsType &
+  DraftSettingsType & {
+    logPath: string | null;
+    setSettings: SetSettingsFnType;
+  };
 
 // ─── 定数 ────────────────────────────────────────────────────────────────────
 
@@ -179,19 +189,16 @@ const ThemeCard = ({ theme, isSelected, onClick }: ThemeCardPropsType) => {
   );
 };
 
-// ─── SettingsDialog ──────────────────────────────────────────────────────────
-
-export const SettingsDialog = ({
+const SettingsDialogContent = ({
   open,
   onOpenChange,
-}: SettingsDialogPropsType) => {
+  theme,
+  language,
+  encoding,
+  logPath,
+  setSettings,
+}: SettingsDialogContentPropsType) => {
   const { t, i18n } = useTranslation();
-
-  const theme = useSettingsStore((s) => s.theme);
-  const language = useSettingsStore((s) => s.language);
-  const encoding = useSettingsStore((s) => s.encoding);
-  const logPath = useSettingsStore((s) => s.logPath);
-  const setSettings = useSettingsStore((s) => s.setSettings);
 
   const [draft, setDraft] = useState<DraftSettingsType>({
     theme,
@@ -199,28 +206,6 @@ export const SettingsDialog = ({
     encoding,
   });
   const [isSaving, setIsSaving] = useState(false);
-
-  // ダイアログを開いた時点のテーマ・言語を記憶（キャンセル時に元に戻す）
-  const originalThemeRef = useRef(theme);
-  const originalLanguageRef = useRef(language);
-  useEffect(() => {
-    if (open) {
-      originalThemeRef.current = theme;
-      originalLanguageRef.current = language;
-    }
-  }, [open, theme, language]);
-
-  /** ダイアログを閉じる際に未保存のライブプレビューを元に戻す */
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      document.documentElement.classList.toggle(
-        "dark",
-        originalThemeRef.current === "dark",
-      );
-      void i18n.changeLanguage(originalLanguageRef.current);
-    }
-    onOpenChange(nextOpen);
-  };
 
   /** テーマカード選択: draftを更新し即座に画面にプレビューを反映 */
   const handleThemeSelect = (themeId: string) => {
@@ -233,13 +218,6 @@ export const SettingsDialog = ({
     setDraft((d) => ({ ...d, language: langId }));
     void i18n.changeLanguage(langId);
   };
-
-  // ダイアログを開くたびに現在の設定で draft を初期化
-  useEffect(() => {
-    if (open) {
-      setDraft({ theme, language, encoding });
-    }
-  }, [open, theme, language, encoding]);
 
   const isDirty =
     draft.theme !== theme ||
@@ -276,7 +254,7 @@ export const SettingsDialog = ({
   return (
     <BaseDialog
       open={open}
-      onOpenChange={handleOpenChange}
+      onOpenChange={onOpenChange}
       title={t("SettingsDialog.Title")}
       maxWidth="2xl"
       footerVariant="confirm"
@@ -445,5 +423,40 @@ export const SettingsDialog = ({
         </div>
       </Tabs.Root>
     </BaseDialog>
+  );
+};
+
+// ─── SettingsDialog ──────────────────────────────────────────────────────────
+
+export const SettingsDialog = ({
+  open,
+  onOpenChange,
+}: SettingsDialogPropsType) => {
+  const { i18n } = useTranslation();
+  const theme = useSettingsStore((s) => s.theme);
+  const language = useSettingsStore((s) => s.language);
+  const encoding = useSettingsStore((s) => s.encoding);
+  const logPath = useSettingsStore((s) => s.logPath);
+  const setSettings = useSettingsStore((s) => s.setSettings);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+      void i18n.changeLanguage(language);
+    }
+    onOpenChange(nextOpen);
+  };
+
+  return (
+    <SettingsDialogContent
+      key={`${open ? "open" : "closed"}:${theme}:${language}:${encoding}`}
+      open={open}
+      onOpenChange={handleOpenChange}
+      theme={theme}
+      language={language}
+      encoding={encoding}
+      logPath={logPath}
+      setSettings={setSettings}
+    />
   );
 };
