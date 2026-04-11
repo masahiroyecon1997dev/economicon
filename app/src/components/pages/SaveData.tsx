@@ -1,13 +1,15 @@
-import { useForm, useStore } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import {
-  checkFileExists,
-  getFiles,
-  getFilesSafe,
-} from "@/api/bridge/tauri-commands";
+import { checkFileExists, getFiles } from "@/api/bridge/tauri-commands";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { ExportFileBody } from "@/api/zod/data/data";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { CancelButtonBar } from "@/components/molecules/ActionBar/CancelButtonBar";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { NavigationSearchBar } from "@/components/molecules/Navigation/NavigationSearchBar";
+import { FileListTable } from "@/components/molecules/Table/FileListTable";
+import { PageLayout } from "@/components/templates/PageLayout";
+import { useInitializeFileListOnMount } from "@/hooks/useInitializeFileListOnMount";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
@@ -21,19 +23,10 @@ import { useLoadingStore } from "@/stores/loading";
 import { useSettingsStore } from "@/stores/settings";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
-import type {
-  FileType,
-  SortDirection,
-  SortField,
-} from "@/types/commonTypes";
-import { InputText } from "@/components/atoms/Input/InputText";
-import { Select, SelectItem } from "@/components/atoms/Input/Select";
-import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
-import { CancelButtonBar } from "@/components/molecules/ActionBar/CancelButtonBar";
-import { FormField } from "@/components/molecules/Form/FormField";
-import { NavigationSearchBar } from "@/components/molecules/Navigation/NavigationSearchBar";
-import { FileListTable } from "@/components/molecules/Table/FileListTable";
-import { PageLayout } from "@/components/templates/PageLayout";
+import type { FileType, SortDirection, SortField } from "@/types/commonTypes";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type FileFormat = "csv" | "excel" | "parquet";
 
@@ -125,20 +118,7 @@ export const SaveData = () => {
   });
 
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
-
-  // マウント時にファイルリストを最新化（画面遷移で表示が古くならないよう）
-  useEffect(() => {
-    if (directoryPath) {
-      getFiles(directoryPath)
-        .then(setFiles)
-        .catch(() => {});
-    } else {
-      getFilesSafe("")
-        .then(setFiles)
-        .catch(() => {});
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useInitializeFileListOnMount();
 
   const fileFormatOptions = [
     { value: "csv", label: "CSV (.csv)" },

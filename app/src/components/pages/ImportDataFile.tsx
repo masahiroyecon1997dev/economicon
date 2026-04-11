@@ -1,15 +1,15 @@
-import * as RadixTabs from "@radix-ui/react-tabs";
-import * as ToggleGroup from "@radix-ui/react-toggle-group";
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import { UploadCloud } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
   getFiles,
   getFilesSafe,
   TauriFileError,
 } from "@/api/bridge/tauri-commands";
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import { CancelButtonBar } from "@/components/molecules/ActionBar/CancelButtonBar";
+import { NavigationSearchBar } from "@/components/molecules/Navigation/NavigationSearchBar";
+import { FileListTable } from "@/components/molecules/Table/FileListTable";
+import { ImportConfigDialog } from "@/components/organisms/Dialog/ImportConfigDialog";
+import { PageLayout } from "@/components/templates/PageLayout";
+import { useInitializeFileListOnMount } from "@/hooks/useInitializeFileListOnMount";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
   extractApiErrorMessage,
@@ -23,16 +23,13 @@ import { useLoadingStore } from "@/stores/loading";
 import { useSettingsStore } from "@/stores/settings";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
-import type {
-  FileType,
-  SortDirection,
-  SortField,
-} from "@/types/commonTypes";
-import { CancelButtonBar } from "@/components/molecules/ActionBar/CancelButtonBar";
-import { NavigationSearchBar } from "@/components/molecules/Navigation/NavigationSearchBar";
-import { FileListTable } from "@/components/molecules/Table/FileListTable";
-import { ImportConfigDialog } from "@/components/organisms/Dialog/ImportConfigDialog";
-import { PageLayout } from "@/components/templates/PageLayout";
+import type { FileType, SortDirection, SortField } from "@/types/commonTypes";
+import * as RadixTabs from "@radix-ui/react-tabs";
+import * as ToggleGroup from "@radix-ui/react-toggle-group";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { UploadCloud } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type FileTypeFilter = "all" | "csv" | "excel" | "parquet";
 
@@ -88,6 +85,8 @@ export const ImportDataFile = () => {
 
   // Tauri 2 ネイティブ drag-drop イベント
   const [isDragActive, setIsDragActive] = useState(false);
+  // ファイルリストの初期化を行うカスタムフック
+  useInitializeFileListOnMount();
 
   useEffect(() => {
     let cleanup: (() => void) | undefined;
@@ -121,20 +120,6 @@ export const ImportDataFile = () => {
     return () => {
       cleanup?.();
     };
-  }, []);
-
-  // マウント時にファイルリストを最新化（画面遷移で表示が古くならないよう）
-  useEffect(() => {
-    if (directoryPath) {
-      getFiles(directoryPath)
-        .then(setFiles)
-        .catch(() => {});
-    } else {
-      getFilesSafe("")
-        .then(setFiles)
-        .catch(() => {});
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ファイルパスを分割するヘルパー関数
