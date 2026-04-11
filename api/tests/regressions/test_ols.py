@@ -13,9 +13,8 @@ from tests.regressions.conftest import (
 )
 
 # 数値比較の許容誤差
-_ABS_TOL = 1e-4
-# HAC標準誤差は収束に依存するため緩い許容誤差を使用
-_HAC_ABS_TOL = 1e-3
+_ABS_TOL = 1e-12
+_HAC_ABS_TOL = 1e-12
 
 # パラメータ数定数
 _N_PARAMS_WITH_CONST = 3
@@ -239,7 +238,9 @@ def test_ols_hac_numerical(client, tables_store):
     (x1, x2, y_linear, _), _, _ = generate_all_data()
     x_mat = sm.add_constant(np.column_stack([x1, x2]))
     sm_result = sm.OLS(y_linear, x_mat).fit(
-        cov_type="HAC", cov_kwds={"maxlags": 1}
+        cov_type="HAC",
+        cov_kwds={"maxlags": 1, "use_correction": True},
+        use_t=True,
     )
 
     payload = OlsPayload(se_method="hac", se_extra={"maxlags": 1}).build()

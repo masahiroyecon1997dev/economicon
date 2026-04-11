@@ -15,7 +15,7 @@ from tests.regressions.conftest import (
 )
 
 # statsmodels / sklearn 数値比較の許容誤差
-_ABS_TOL = 1e-5
+_ABS_TOL = 1e-12
 
 # Lasso デフォルト alpha（glmnet 規約）
 _ALPHA_DEFAULT = 0.1

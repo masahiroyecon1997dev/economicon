@@ -15,7 +15,7 @@ from tests.regressions.conftest import (
 )
 
 # sklearn/statsmodels との数値比較の許容誤差
-_ABS_TOL = 1e-5
+_ABS_TOL = 1e-12
 
 # Ridge デフォルト alpha
 _ALPHA_DEFAULT = 0.5
