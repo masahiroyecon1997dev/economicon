@@ -21,7 +21,7 @@ import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { useForm, useStore } from "@tanstack/react-form";
 import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export const Calculation = () => {
@@ -33,17 +33,10 @@ export const Calculation = () => {
     useTableInfosStore((state) => state.activeTableName) ?? "";
   const { tableInfos, addTableInfo, invalidateTable, activateTableInfo } =
     useTableInfosStore();
-  const formActionsRef = useRef<{
-    setFieldValue: (field: "addPositionColumn", value: string) => void;
-  } | null>(null);
 
   const { setSelectedTableName, columnList } = useTableColumnLoader({
     numericOnly: false,
     autoLoadOnMount: true,
-    onLoadedColumns: (columns) => {
-      const defaultColumn = columns[columns.length - 1]?.name ?? "";
-      formActionsRef.current?.setFieldValue("addPositionColumn", defaultColumn);
-    },
   });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -101,9 +94,11 @@ export const Calculation = () => {
       }
     },
   });
-  formActionsRef.current = {
-    setFieldValue: form.setFieldValue,
-  };
+
+  useEffect(() => {
+    const defaultColumn = columnList[columnList.length - 1]?.name ?? "";
+    form.setFieldValue("addPositionColumn", defaultColumn);
+  }, [columnList, form]);
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 

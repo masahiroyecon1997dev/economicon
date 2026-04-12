@@ -11,9 +11,10 @@ export async function setupTauriApp(
     browser = await playwrightInstance.chromium.connectOverCDP(
       "http://127.0.0.1:9222",
     );
-  } catch (_e) {
+  } catch (e) {
     throw new Error(
       "アプリ（ポート9222）が見つかりません。手動で引数付き起動しているか確認してください。",
+      { cause: e },
     );
   }
   const context = browser.contexts()[0];
