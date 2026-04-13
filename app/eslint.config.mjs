@@ -1,4 +1,5 @@
 import eslint from "@eslint/js";
+import reactCompiler from "eslint-plugin-react-compiler";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import { defineConfig } from "eslint/config";
@@ -27,11 +28,12 @@ export default defineConfig(
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "react-compiler": reactCompiler,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      // React Compiler は未使用のため incompatible-library は無効化
-      "react-hooks/incompatible-library": "off",
+      "react-hooks/incompatible-library": "error",
+      "react-compiler/react-compiler": "error",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
