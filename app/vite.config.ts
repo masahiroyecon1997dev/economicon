@@ -1,5 +1,6 @@
+import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react-swc";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import path from "node:path";
 import license from "rollup-plugin-license";
 import { defineConfig } from "vitest/config";
@@ -7,7 +8,19 @@ import { defineConfig } from "vitest/config";
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    babel({
+      presets: [
+        reactCompilerPreset({
+          target: "19",
+        }),
+      ],
+      // node_modules は除外してビルド速度を維持
+      exclude: /node_modules/,
+    }),
+    tailwindcss(),
+  ],
   resolve: {
     // `@` を `src` ディレクトリへのエイリアスとして設定
     alias: {
