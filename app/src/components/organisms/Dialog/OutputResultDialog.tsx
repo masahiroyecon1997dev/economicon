@@ -106,8 +106,6 @@ const OutputResultDialogContent = ({
         Object.keys(variableLabels).length > 0 ? variableLabels : undefined,
       variableOrder,
     });
-    // fetchOutput は useCallback で安定しているため依存に含める
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     open,
     result.resultId,
@@ -115,6 +113,7 @@ const OutputResultDialogContent = ({
     statInParentheses,
     constAtBottom,
     debouncedVarEntriesJson,
+    fetchOutput,
   ]);
 
   // ── 変数操作 ──────────────────────────────────────────────────────────────

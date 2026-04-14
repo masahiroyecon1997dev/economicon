@@ -9,12 +9,12 @@
  *   2. Arrow スキーマメタデータから totalRows を取得し tableInfosStore を更新
  *   3. 仮想スクロール中は prefetchRange で先読みチャンクを取得
  */
-import { tableFromIPC, type Table as ArrowTable } from "apache-arrow";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchDataToArrow } from "@/api/bridge/tauri-commands";
 import { CHUNK_SIZE, useTableChunkStore } from "@/stores/tableChunkStore";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import type { TalbeDataRowType } from "@/types/commonTypes";
+import { tableFromIPC, type Table as ArrowTable } from "apache-arrow";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // ---------------------------------------------------------------------------
 // Arrow  行データ変換
@@ -148,9 +148,7 @@ export const useVirtualTableData = ({
         void fetchChunk(0);
       }
     }
-    // version を依存に入れることで clearTable 後の再レンダー時に発火
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [version]);
+  }, [version, tableName, enabled, fetchChunk]);
 
   // ---------------------------------------------------------------------------
   // 行データ取得（VirtualTable から呼ばれる）

@@ -48,4 +48,11 @@ export default defineConfig(
       ],
     },
   },
+  {
+    files: ["src/components/organisms/Table/VirtualTableCompilerBoundary.tsx"],
+    rules: {
+      "react-hooks/incompatible-library": "off",
+      "react-compiler/react-compiler": "off",
+    },
+  },
 );
