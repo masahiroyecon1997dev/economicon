@@ -97,8 +97,7 @@ def validate_base_period_in_data(
         raise ProcessingError(
             error_code=ErrorCode.VALIDATION_ERROR,
             message=_(
-                "basePeriod {} is not in the data."
-                " Available periods: {}"
+                "basePeriod {} is not in the data. Available periods: {}"
             ).format(base_period, periods),
         )
 
@@ -153,17 +152,52 @@ def build_interaction_columns(
         基本 DID の交差項列名（Event Study では None）
     es_cols : list[str]
         Event Study 相互作用項列名（時間順）
+
+    Raises
+    ------
+    ProcessingError
+        内部予約列名がユーザーテーブルの列と衝突する場合。
     """
+    existing_cols = set(df.columns)
+
     if not include_event_study:
+        # 基本 DID: `_did_interact` との衝突チェック
+        if _DID_INTERACT_COL in existing_cols:
+            raise ProcessingError(
+                error_code=ErrorCode.VALIDATION_ERROR,
+                message=_(
+                    "Column '{}' already exists in the table."
+                    " This name is reserved for DID interaction term."
+                    " Please rename the column before running the analysis."
+                ).format(_DID_INTERACT_COL),
+            )
         df = df.with_columns(
-            (
-                pl.col(treatment_column) * pl.col(post_column)
-            ).alias(_DID_INTERACT_COL)
+            (pl.col(treatment_column) * pl.col(post_column)).alias(
+                _DID_INTERACT_COL
+            )
         )
         return df, _DID_INTERACT_COL, []
 
     # Event Study: 各時点（base_period を除く）の交差項を生成
     periods = sorted(df[time_column].unique().to_list())
+
+    # Event Study 相互作用項の予約列名との衝突チェック
+    conflicting = [
+        _es_col(t)
+        for t in periods
+        if t != base_period and _es_col(t) in existing_cols
+    ]
+    if conflicting:
+        raise ProcessingError(
+            error_code=ErrorCode.VALIDATION_ERROR,
+            message=_(
+                "Column(s) {} already exist in the table."
+                " These names are reserved for Event Study"
+                " interaction terms."
+                " Please rename them before running the analysis."
+            ).format(", ".join(conflicting)),
+        )
+
     es_cols: list[str] = []
     exprs = []
     for t in periods:
@@ -268,9 +302,7 @@ def resolve_cov_kwargs(
         case HacStandardError():
             return "kernel", {"bandwidth": se.maxlags}
         case _:
-            cov_type = LINEARMODELS_COV_TYPE_MAP.get(
-                se.method, "unadjusted"
-            )
+            cov_type = LINEARMODELS_COV_TYPE_MAP.get(se.method, "unadjusted")
             return cov_type, {}
 
 
@@ -308,9 +340,7 @@ def fit_twfe(
 
     y = df_pandas[dependent_variable]
     x = df_pandas[x_columns]
-    model = PanelOLS(
-        y, x, entity_effects=True, time_effects=True
-    )
+    model = PanelOLS(y, x, entity_effects=True, time_effects=True)
     return model.fit(cov_type=cov_type, **cov_kwargs)
 
 
@@ -337,8 +367,7 @@ def compute_pretrend_wald(
     pre_cols = [
         col
         for col in es_cols
-        if (p := _es_col_to_period(col)) is not None
-        and p < base_period
+        if (p := _es_col_to_period(col)) is not None and p < base_period
     ]
     if not pre_cols:
         return None
