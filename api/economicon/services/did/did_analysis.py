@@ -38,6 +38,7 @@ from economicon.services.did.fitters import (
     prepare_did_dataframe,
     resolve_cov_kwargs,
     validate_base_period_in_data,
+    validate_binary_column,
     validate_panel_uniqueness,
 )
 from economicon.services.did.formatters import (
@@ -109,6 +110,7 @@ class DIDAnalysis:
         - テーブル存在確認
         - 全指定列の存在確認
         - 被説明変数・処置/処置後ダミー列の数値型確認
+        - Event Study 有効時: time_column の数値型確認
         - explanatory_variables と treatment/post/entity_id/time 列の重複禁止
         """
         # テーブル存在確認
@@ -172,6 +174,12 @@ class DIDAnalysis:
             valid_list=column_name_list,
             target=_PARAM_NAMES["time_column"],
         )
+        if self.include_event_study:
+            validate_numeric_types(
+                schema=df_schema,
+                columns=[self.time_column],
+                target=_PARAM_NAMES["time_column"],
+            )
         validate_existence(
             value=self.entity_id_column,
             valid_list=column_name_list,
@@ -202,6 +210,14 @@ class DIDAnalysis:
             # 2. パネルユニーク性の検証（欠損値処理前）
             validate_panel_uniqueness(
                 df, self.entity_id_column, self.time_column
+            )
+
+            # 2b. treatment / post 列の 0/1 バイナリ検証
+            validate_binary_column(
+                df, self.treatment_column, "treatmentColumn"
+            )
+            validate_binary_column(
+                df, self.post_column, "postColumn"
             )
 
             # 3. basePeriod の決定（Event Study のみ使用）
@@ -288,9 +304,7 @@ class DIDAnalysis:
                 es_cols=es_cols,
                 pre_trend_test=pre_trend_test,
             )
-            result_data = format_did_result(
-                model_result, df_pandas, config
-            )
+            result_data = format_did_result(model_result, df_pandas, config)
 
             # 11. 結果保存
             result_id = self._save_result(result_data)
@@ -301,9 +315,7 @@ class DIDAnalysis:
         except Exception as e:
             raise ProcessingError(
                 error_code=ErrorCode.REGRESSION_PROCESS_ERROR,
-                message=_(
-                    "DID analysis failed: {}"
-                ).format(str(e)),
+                message=_("DID analysis failed: {}").format(str(e)),
             ) from e
 
     def _save_result(self, result_data: dict) -> str:

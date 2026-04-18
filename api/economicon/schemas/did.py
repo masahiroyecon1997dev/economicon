@@ -216,10 +216,50 @@ class DIDRequestBody(BaseRequest):
         """リクエスト内のパラメータ間列重複を検証する。
 
         チェック内容:
+        - explanatoryVariables に重複列名がないこと
+        - treatmentColumn/postColumn/entityIdColumn/timeColumn が
+          互いに重複しないこと
+        - dependentVariable が予約列と重複しないこと
         - dependentVariable が explanatoryVariables に含まれないこと
-        - explanatoryVariables が治療・後・個体・時点列と重複しないこと
+        - explanatoryVariables が予約列と重複しないこと
         """
         expl = set(self.explanatory_variables)
+
+        # W2: explanatory に重複列名がないこと
+        if len(self.explanatory_variables) != len(expl):
+            raise ValueError(
+                _(
+                    "explanatoryVariables must not contain"
+                    " duplicate column names."
+                )
+            )
+
+        # W1: 予約列が互いに重複しないこと
+        reserved_list = [
+            self.treatment_column,
+            self.post_column,
+            self.entity_id_column,
+            self.time_column,
+        ]
+        if len(reserved_list) != len(set(reserved_list)):
+            raise ValueError(
+                _(
+                    "treatmentColumn / postColumn / entityIdColumn"
+                    " / timeColumn must all be distinct."
+                )
+            )
+
+        reserved = set(reserved_list)
+
+        # C1: dependent が予約列と重複しないこと
+        if self.dependent_variable in reserved:
+            raise ValueError(
+                _(
+                    "dependentVariable '{}' must not overlap with"
+                    " treatmentColumn / postColumn"
+                    " / entityIdColumn / timeColumn."
+                ).format(self.dependent_variable)
+            )
 
         # dependent が explanatory に含まれないこと
         if self.dependent_variable in expl:
@@ -231,12 +271,6 @@ class DIDRequestBody(BaseRequest):
             )
 
         # explanatory が予約列と重複しないこと
-        reserved = {
-            self.treatment_column,
-            self.post_column,
-            self.entity_id_column,
-            self.time_column,
-        }
         overlap = reserved & expl
         if overlap:
             raise ValueError(

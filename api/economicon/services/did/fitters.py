@@ -129,6 +129,45 @@ def validate_panel_uniqueness(
         )
 
 
+def validate_binary_column(
+    df: pl.DataFrame,
+    column: str,
+    param_name: str,
+) -> None:
+    """
+    列の値が {0, 1} のみで構成されることを検証する。
+
+    null/NaN は欠損値処理で除去されることを前提に許容する。
+    DID の treatmentColumn / postColumn はバイナリダミー変数で
+    なければ ATT の因果的解釈が崩れるため、推定前に検証する。
+
+    Eco-Note:
+        連続値の treatment（例: 投与量）は ATT 解釈の前提を崩す。
+        0/1 以外の値（例: 2, -1, 0.5）が含まれる場合にエラーとする。
+
+    Args:
+        df: 検証対象の Polars DataFrame
+        column: チェック対象の列名
+        param_name: エラーメッセージに表示するパラメータ名
+
+    Raises:
+        ProcessingError: 0/1 以外の値が 1 件以上含まれる場合
+    """
+    non_binary_count: int = (
+        df.select(pl.col(column).drop_nulls())
+        .filter(~pl.col(column).cast(pl.Float64).is_in([0.0, 1.0]))
+        .height
+    )
+    if non_binary_count > 0:
+        raise ProcessingError(
+            error_code=ErrorCode.VALIDATION_ERROR,
+            message=_(
+                "'{}' must be a binary (0/1) dummy variable."
+                " Found {} non-binary value(s)."
+            ).format(param_name, non_binary_count),
+        )
+
+
 def build_interaction_columns(
     df: pl.DataFrame,
     *,
