@@ -275,3 +275,85 @@ COMMON_ERROR_RESPONSES: dict = {
         "description": "サーバー内部エラー",
     },
 }
+
+
+# ---------------------------------------------------------------------------
+# スキーマ間列重複チェック（model_validator 用）
+# ---------------------------------------------------------------------------
+
+
+def _check_group_pair(
+    name_a: str,
+    cols_a: set[str],
+    name_b: str,
+    cols_b: set[str],
+) -> None:
+    """2列グループ間に重複があれば ValueError を送出する。"""
+    overlap = cols_a & cols_b
+    if not overlap:
+        return
+    raise ValueError(
+        _("{} must not overlap with {}: {}").format(
+            name_a, name_b, ", ".join(sorted(overlap))
+        )
+    )
+
+
+def check_column_overlap(
+    *,
+    dependent_variable: str,
+    explanatory_variables: list[str],
+    reserved_scalars: dict[str, str] | None = None,
+    reserved_vectors: dict[str, list[str]] | None = None,
+) -> None:
+    """列重複チェック（Pydantic model_validator から呼ぶ）。
+
+    問題が検出された場合は ValueError を送出する。
+    全列グループをペアで比較し、重複があれば即座に送出する。
+
+    Parameters
+    ----------
+    dependent_variable : str
+        被説明変数名
+    explanatory_variables : list[str]
+        説明変数名リスト
+    reserved_scalars : dict[str, str] | None
+        {camelCaseParamName: columnName} 形式のスカラー予約列。
+        例: {"entityIdColumn": "entity_id", "timeColumn": "year"}
+    reserved_vectors : dict[str, list[str]] | None
+        {camelCaseParamName: [col1, ...]} 形式のリスト予約列。
+        例: {"instrumentalVariables": ["z1", "z2"]}
+
+    Raises
+    ------
+    ValueError
+        重複が検出された場合
+    """
+    rs = reserved_scalars or {}
+    rv = reserved_vectors or {}
+    expl_set = set(explanatory_variables)
+
+    # 1. explanatoryVariables 内の重複
+    if len(explanatory_variables) != len(expl_set):
+        raise ValueError(
+            _("explanatoryVariables must not contain duplicate column names.")
+        )
+
+    # 2. reserved_scalars 間の重複
+    rs_vals = list(rs.values())
+    if rs and len(rs_vals) != len(set(rs_vals)):
+        raise ValueError(
+            _("{} must all be distinct.").format(" / ".join(rs.keys()))
+        )
+
+    # 全グループを構築してペアで重複チェック
+    groups: dict[str, set[str]] = {
+        "dependentVariable": {dependent_variable},
+        "explanatoryVariables": expl_set,
+        **{k: {v} for k, v in rs.items()},
+        **{k: set(v) for k, v in rv.items()},
+    }
+    items = list(groups.items())
+    for i, (name_a, cols_a) in enumerate(items):
+        for name_b, cols_b in items[i + 1 :]:
+            _check_group_pair(name_a, cols_a, name_b, cols_b)
