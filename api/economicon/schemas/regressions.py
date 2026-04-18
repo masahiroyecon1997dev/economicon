@@ -2,14 +2,20 @@
 
 from typing import Annotated, Literal
 
-from pydantic import BeforeValidator, Field
+from pydantic import BeforeValidator, Field, model_validator
 
+from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import BaseRequest, BaseResult
 from economicon.schemas.entities import RegressionParams, StandardErrorSettings
 from economicon.schemas.enums import (
     MissingValueHandlingType,
 )
-from economicon.schemas.types import ColumnName, TableName
+from economicon.schemas.types import (
+    ColumnName,
+    ResultDescription,
+    ResultName,
+    TableName,
+)
 
 
 def _coerce_missing_value_handling(v: object) -> MissingValueHandlingType:
@@ -38,24 +44,8 @@ class RegressionRequestBody(BaseRequest):
             description="分析対象のテーブル名。ワークスペース内に存在するテーブル名を指定してください。"
         ),
     ]
-    result_name: Annotated[
-        str,
-        Field(
-            default="",
-            title="Result Name",
-            max_length=128,
-            description="分析結果の名前（省略時は被説明変数名を使用）",
-        ),
-    ]
-    description: Annotated[
-        str,
-        Field(
-            default="",
-            title="Description",
-            max_length=512,
-            description="分析結果の説明メモ",
-        ),
-    ]
+    result_name: ResultName
+    description: ResultDescription
     dependent_variable: Annotated[
         ColumnName,
         Field(
@@ -112,6 +102,20 @@ class RegressionRequestBody(BaseRequest):
             "hac（Newey-West）から選択します。",
         ),
     ]
+
+    @model_validator(mode="after")
+    def _validate_dependent_not_in_explanatory(
+        self,
+    ) -> RegressionRequestBody:
+        """dependent が explanatory に含まれないことを検証。"""
+        if self.dependent_variable in set(self.explanatory_variables):
+            raise ValueError(
+                _(
+                    "dependentVariable '{}' must not appear"
+                    " in explanatoryVariables."
+                ).format(self.dependent_variable)
+            )
+        return self
 
 
 # ---------------------------------------------------------------------------

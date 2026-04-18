@@ -383,8 +383,15 @@ wald = result.wald_test(formula=", ".join(pre_cols))
 
 ## 未決事項・TODO
 
-- [ ] `linearmodels` が `pyproject.toml` に含まれているか確認（既存コードでは `linearmodels` を FE/RE で使用中）
 - [ ] Event Study の `maxPrePeriods` / `maxPostPeriods` による期間フィルタリングの実装
-- [ ] 多時点処置（staggered adoption）への対応方針の検討（Callaway & Sant'Anna 等）
 - [ ] フロントエンド: Event Study プロット用コンポーネントの設計
 - [ ] `result_type` 文字列を `"did"` として既存の結果管理 UI に組み込む
+
+### 多時点処置（Staggered Adoption）を実装しない理由
+
+Callaway & Sant'Anna (2021) や Sun & Abraham (2021) 等の手法は、
+成熟した Python パッケージが存在しないため手動実装が必要となる。
+推定結果の正確性を R の参照実装（`fixest::sunab`、`did::att_gt`）と
+照合するコストが高く、テストによる正確性担保が現実的でない。
+また推定量の選択自体が現在もアクティブな研究領域であり、
+実装判断のコンセンサスが確立されていないため、現バージョンでは対象外とする。

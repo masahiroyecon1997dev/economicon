@@ -116,6 +116,26 @@ ColumnName = Annotated[
     ),
 ]
 
+ResultName = Annotated[
+    str,
+    Field(
+        default="",
+        title="Result Name",
+        max_length=128,
+        description="分析結果の名前（省略時は自動生成）",
+    ),
+]
+
+ResultDescription = Annotated[
+    str,
+    Field(
+        default="",
+        title="Description",
+        max_length=512,
+        description="分析結果の説明メモ",
+    ),
+]
+
 NewColumnName = Annotated[
     str,
     StringConstraints(

@@ -2,34 +2,50 @@
 差の差（DID）分析サービス
 
 DataOperation プロトコル実装。
-現在は未実装（NotImplementedError を送出）。
 
-推定方針（実装時の参考）
------------------------
+推定方針
+---------
 1. 基本 DID（TWFE）:
-   y_it = α + β*(D_i × P_t) + Σγ_k*X_kit + μ_i + τ_t + ε_it
-   → linearmodels.PanelOLS(entity_effects=True, time_effects=True)
+   y_it = α + β*(D_i×P_t) + Σγ_k*X_kit + μ_i + τ_t + ε_it
+   → PanelOLS(entity_effects=True, time_effects=True)
 
 2. Event Study:
-   y_it = α + Σ_{k≠base} δ_k*(D_i × 1[t=k])
+   y_it = α + Σ_{k≠base} δ_k*(D_i×1[t=k])
           + Σγ_k*X_kit + μ_i + τ_t + ε_it
-   → 各相対期間ダミーを Polars で生成し PanelOLS に渡す
+   → 各時点ダミーを Polars で生成し同 API に渡す
 
 3. 標準誤差:
-   クラスタ SE（個体レベル）を推奨。
-   linearmodels: cov_type='clustered', cluster_entity=True
+   クラスタ SE（個体レベル）推奨。
+   cluster_entity=True で個体内系列相関に対応。
 
 4. 並行トレンド検定:
-   処置前係数（k < 0, k ≠ base_period）の Wald 検定。
-   linearmodels: model.wald_test(restrictions, formula=None)
+   処置前係数 (k < base_period) の Wald F 検定。
 """
 
+from economicon.core.enums import ErrorCode
+from economicon.i18n.translation import gettext as _
 from economicon.schemas.did import DIDRequestBody
+from economicon.services.data.analysis_result import AnalysisResult
 from economicon.services.data.analysis_result_store import (
     AnalysisResultStore,
 )
 from economicon.services.data.tables_store import TablesStore
-from economicon.utils import ValidationError
+from economicon.services.did.fitters import (
+    auto_select_base_period,
+    build_interaction_columns,
+    compute_pretrend_wald,
+    fit_twfe,
+    prepare_did_dataframe,
+    resolve_cov_kwargs,
+    validate_base_period_in_data,
+    validate_panel_uniqueness,
+)
+from economicon.services.did.formatters import (
+    DIDFormatConfig,
+    format_did_result,
+)
+from economicon.services.regressions.common import MISSING_HANDLING_MAP
+from economicon.utils import ProcessingError
 from economicon.utils.validators import (
     validate_existence,
     validate_numeric_types,
@@ -162,30 +178,152 @@ class DIDAnalysis:
             target=_PARAM_NAMES["entity_id_column"],
         )
 
-        # --- 重複チェック ---
-        # explanatory_variables が treatment/post/entity_id/time と被らないこと
-        reserved_cols = {
-            self.treatment_column,
-            self.post_column,
-            self.entity_id_column,
-            self.time_column,
-        }
-        overlap = reserved_cols & set(self.explanatory_variables)
-        if overlap:
-            raise ValidationError(
-                error_code="DUPLICATE_COLUMN",
-                message=(
-                    "explanatoryVariables に treatmentColumn /"
-                    " postColumn / entityIdColumn / timeColumn"
-                    " と重複する列が含まれています: "
-                    f"{sorted(overlap)}"
-                ),
-            )
-
     def execute(self) -> dict:
         """
-        DID 推定を実行して結果 ID を返す。
+        TWFE DID 推定を実行して結果 ID を返す。
 
-        現在は未実装。linearmodels.PanelOLS を使用した TWFE 推定を実装予定。
+        実行フロー:
+        1. Polars でデータ読み込み
+        2. パネルユニーク性の検証
+        3. basePeriod の決定（Event Study 時のみ）
+        4. 交差項列の生成（Polars）
+        5. Pandas MultiIndex DataFrame への変換・欠損値処理
+        6. PanelOLS 推定（TWFE）
+        7. Event Study: 処置前係数の Wald 検定
+        8. 結果フォーマットと AnalysisResultStore への保存
+
+        Returns:
+            {"resultId": "<uuid>"}
         """
-        raise NotImplementedError
+        try:
+            # 1. データ読み込み
+            df = self.tables_store.get_table(self.table_name).table
+
+            # 2. パネルユニーク性の検証（欠損値処理前）
+            validate_panel_uniqueness(
+                df, self.entity_id_column, self.time_column
+            )
+
+            # 3. basePeriod の決定（Event Study のみ使用）
+            base_period: int = 0  # 基本 DID では未使用のセンチネル
+            if self.include_event_study:
+                if self.base_period is None:
+                    base_period = auto_select_base_period(
+                        df, self.time_column, self.post_column
+                    )
+                else:
+                    base_period = self.base_period
+                    validate_base_period_in_data(
+                        df, self.time_column, base_period
+                    )
+
+            # 4. 交差項列の生成
+            df, interact_col, es_cols = build_interaction_columns(
+                df,
+                treatment_column=self.treatment_column,
+                post_column=self.post_column,
+                time_column=self.time_column,
+                include_event_study=self.include_event_study,
+                base_period=base_period,
+            )
+
+            # 5. X 列リストの構築
+            if interact_col is not None:
+                x_columns = [interact_col] + self.explanatory_variables
+            else:
+                x_columns = es_cols + self.explanatory_variables
+
+            # 6. 欠損値処理 + Pandas MultiIndex 変換
+            missing = MISSING_HANDLING_MAP.get(
+                self.missing_value_handling, "drop"
+            )
+            df_pandas = prepare_did_dataframe(
+                df,
+                dependent_variable=self.dependent_variable,
+                entity_id_column=self.entity_id_column,
+                time_column=self.time_column,
+                treatment_column=self.treatment_column,
+                x_columns=x_columns,
+                missing=missing,
+            )
+
+            # 7. 標準誤差設定の解決
+            cov_type, cov_kwargs = resolve_cov_kwargs(
+                self.standard_error,
+                self.entity_id_column,
+                self.time_column,
+            )
+
+            # 8. TWFE 推定
+            model_result = fit_twfe(
+                df_pandas,
+                dependent_variable=self.dependent_variable,
+                x_columns=x_columns,
+                cov_type=cov_type,
+                cov_kwargs=cov_kwargs,
+            )
+
+            # 9. 並行トレンド検定（Event Study のみ）
+            pre_trend_test: dict | None = None
+            if self.include_event_study and es_cols:
+                pre_trend_test = compute_pretrend_wald(
+                    model_result,
+                    es_cols=es_cols,
+                    base_period=base_period,
+                )
+
+            # 10. 結果フォーマット
+            config = DIDFormatConfig(
+                table_name=self.table_name,
+                dependent_variable=self.dependent_variable,
+                treatment_column=self.treatment_column,
+                post_column=self.post_column,
+                time_column=self.time_column,
+                entity_id_column=self.entity_id_column,
+                explanatory_variables=self.explanatory_variables,
+                confidence_level=self.confidence_level,
+                include_event_study=self.include_event_study,
+                base_period=base_period,
+                interact_col=interact_col,
+                es_cols=es_cols,
+                pre_trend_test=pre_trend_test,
+            )
+            result_data = format_did_result(
+                model_result, df_pandas, config
+            )
+
+            # 11. 結果保存
+            result_id = self._save_result(result_data)
+            return {"resultId": result_id}
+
+        except ProcessingError:
+            raise
+        except Exception as e:
+            raise ProcessingError(
+                error_code=ErrorCode.REGRESSION_PROCESS_ERROR,
+                message=_(
+                    "DID analysis failed: {}"
+                ).format(str(e)),
+            ) from e
+
+    def _save_result(self, result_data: dict) -> str:
+        """AnalysisResult を生成・保存し result_id を返す。"""
+        if self.result_name:
+            name = self.result_name
+        else:
+            seq = self.result_store.next_sequence("did")
+            name = _("DID: {dep} #{seq}").format(
+                dep=self.dependent_variable,
+                seq=seq,
+            )
+        ar = AnalysisResult(
+            name=name,
+            description=self.description,
+            table_name=self.table_name,
+            result_data=result_data,
+            result_type="did",
+            model_type="did",
+            entity_id_column=self.entity_id_column,
+            time_column=self.time_column,
+        )
+        return self.result_store.save_result(ar)

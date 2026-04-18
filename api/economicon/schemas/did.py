@@ -2,12 +2,18 @@
 
 from typing import Annotated
 
-from pydantic import BeforeValidator, Field
+from pydantic import BeforeValidator, Field, model_validator
 
+from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import BaseRequest, BaseResult
 from economicon.schemas.entities import StandardErrorSettings
 from economicon.schemas.enums import MissingValueHandlingType
-from economicon.schemas.types import ColumnName, TableName
+from economicon.schemas.types import (
+    ColumnName,
+    ResultDescription,
+    ResultName,
+    TableName,
+)
 
 
 def _coerce_missing_value_handling(v: object) -> MissingValueHandlingType:
@@ -40,22 +46,8 @@ class DIDRequestBody(BaseRequest):
             ),
         ),
     ]
-    result_name: Annotated[
-        str,
-        Field(
-            default="",
-            max_length=128,
-            description="分析結果の名前（省略時は被説明変数名を使用）",
-        ),
-    ]
-    description: Annotated[
-        str,
-        Field(
-            default="",
-            max_length=512,
-            description="分析結果の説明メモ",
-        ),
-    ]
+    result_name: ResultName
+    description: ResultDescription
     dependent_variable: Annotated[
         ColumnName,
         Field(
@@ -187,6 +179,74 @@ class DIDRequestBody(BaseRequest):
             description="信頼区間の水準（デフォルト: 0.95）",
         ),
     ]
+
+    @model_validator(mode="after")
+    def _validate_event_study_params(
+        self,
+    ) -> DIDRequestBody:
+        """includeEventStudy=False のとき ES パラメータを禁止する。"""
+        if not self.include_event_study:
+            if self.base_period is not None:
+                raise ValueError(
+                    _(
+                        "basePeriod can only be set"
+                        " when includeEventStudy is true."
+                    )
+                )
+            if self.max_pre_periods is not None:
+                raise ValueError(
+                    _(
+                        "maxPrePeriods can only be set"
+                        " when includeEventStudy is true."
+                    )
+                )
+            if self.max_post_periods is not None:
+                raise ValueError(
+                    _(
+                        "maxPostPeriods can only be set"
+                        " when includeEventStudy is true."
+                    )
+                )
+        return self
+
+    @model_validator(mode="after")
+    def _validate_column_overlap(
+        self,
+    ) -> DIDRequestBody:
+        """リクエスト内のパラメータ間列重複を検証する。
+
+        チェック内容:
+        - dependentVariable が explanatoryVariables に含まれないこと
+        - explanatoryVariables が治療・後・個体・時点列と重複しないこと
+        """
+        expl = set(self.explanatory_variables)
+
+        # dependent が explanatory に含まれないこと
+        if self.dependent_variable in expl:
+            raise ValueError(
+                _(
+                    "dependentVariable '{}' must not appear"
+                    " in explanatoryVariables."
+                ).format(self.dependent_variable)
+            )
+
+        # explanatory が予約列と重複しないこと
+        reserved = {
+            self.treatment_column,
+            self.post_column,
+            self.entity_id_column,
+            self.time_column,
+        }
+        overlap = reserved & expl
+        if overlap:
+            raise ValueError(
+                _(
+                    "explanatoryVariables must not overlap with"
+                    " treatmentColumn / postColumn / entityIdColumn"
+                    " / timeColumn: {}"
+                ).format(", ".join(sorted(overlap)))
+            )
+        return self
 
 
 # ---------------------------------------------------------------------------
