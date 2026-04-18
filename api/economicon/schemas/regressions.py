@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BeforeValidator, Field, model_validator
 
+from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import (
     BaseRequest,
     BaseResult,
@@ -51,8 +52,6 @@ def _collect_reserved(
     if isinstance(analysis, (InstrumentalVariablesParams, PanelIvParams)):
         rv["instrumentalVariables"] = analysis.instrumental_variables
         rv["endogenousVariables"] = analysis.endogenous_variables
-    if isinstance(analysis, WLSParams):
-        rs["weightsColumn"] = analysis.weights_column
     if isinstance(analysis, FGLSParams | GLSParams):
         pass  # sigma_table_name はテーブル名のため列重複チェック不要
 
@@ -152,7 +151,17 @@ class RegressionRequestBody(BaseRequest):
         - IV: instrumentalVariables / endogenousVariables
           との重複禁止
         - PanelIV: 上記すべて
+        - WLS: weightsColumn != dependentVariable
         """
+        # WLS: weightsColumn は説明変数との重複は許容するが、
+        # 被説明変数との重複は循環的な定式化のため禁止
+        if (
+            isinstance(self.analysis, WLSParams)
+            and self.analysis.weights_column == self.dependent_variable
+        ):
+            raise ValueError(
+                _("weightsColumn must not be the same as dependentVariable.")
+            )
         rs: dict[str, str] = {}
         rv: dict[str, list[str]] = {}
         _collect_reserved(self.analysis, rs, rv)
