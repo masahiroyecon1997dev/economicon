@@ -52,6 +52,7 @@ from economicon.schemas.data_io import (
     ImportFileRequestBody,
     ImportFileResult,
 )
+from economicon.schemas.did import DIDResult as DIDResult
 from economicon.schemas.entities import (
     ClusteredStandardError,
     FEParams,
