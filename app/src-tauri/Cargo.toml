@@ -6,7 +6,7 @@ authors = ["masahiroyecon1997dev"]
 license = "MIT"
 repository = "https://github.com/masahiroyecon1997dev/economicon"
 edition = "2021"
-rust-version = "1.77.2"
+rust-version = "1.95.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -15,18 +15,18 @@ name = "app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.5.3", features = [] }
+tauri-build = { version = "=2.5.6", features = [] }
 
 [dependencies]
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-log = "0.4"
-tauri = { version = "2.9.5", features = [] }
-tauri-plugin-log = "2"
-tauri-plugin-opener = "2"
-reqwest = { version = "0.12", features = ["json", "multipart", "stream"] }
-tokio = { version = "1", features = ["full"] }
-thiserror = "2.0"
-dunce = "1.0.5"
-uuid = { version = "1", features = ["v4"] }
-tauri-plugin-shell = "2"
+serde_json = "=1.0.149"
+serde = { version = "=1.0.228", features = ["derive"] }
+log = "=0.4.29"
+tauri = { version = "=2.10.3", features = [] }
+tauri-plugin-log = "=2.8.0"
+tauri-plugin-opener = "=2.5.3"
+reqwest = { version = "=0.13.2", features = ["json", "multipart", "stream"] }
+tokio = { version = "=1.51.1", features = ["full"] }
+thiserror = "=2.0.18"
+dunce = "=1.0.5"
+uuid = { version = "=1.23.0", features = ["v4"] }
+tauri-plugin-shell = "=2.3.5"
