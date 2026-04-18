@@ -785,3 +785,136 @@ def fit_ridge(  # noqa: PLR0915
         bootstrap_ci_upper=bootstrap_ci_upper,
         bootstrap_se=bootstrap_se,
     )
+
+
+def fit_wls(
+    y_data: np.ndarray,
+    x_data: np.ndarray,
+    weights: np.ndarray,
+    missing: str,
+) -> RegressionResultsWrapper:
+    """WLS モデルのフィッティング。
+
+    Eco-Note: weights は 1/σ²_i に対応する正の重みベクトル。
+    statsmodels WLS(y, X, weights=w) は
+        min Σ w_i (y_i - x_i β)²
+    を最小化する。w_i = 1/σ²_i とすることで GLS の特殊ケースとして
+    不均一分散を効率的に処理する。
+
+    Args:
+        y_data: 被説明変数
+        x_data: 説明変数（定数項含む）
+        weights: 観測値ごとの重み (1/σ²_i)。全値 > 0 が必要。
+        missing: 欠損値処理方法 ('none', 'drop', 'raise')
+
+    Returns:
+        statsmodels の WLS 回帰結果
+    """
+    import statsmodels.api as sm  # noqa: PLC0415
+
+    model = sm.WLS(
+        y_data,
+        x_data,
+        weights=weights,  # type: ignore[arg-type]
+        missing=missing,
+    )
+    return model.fit()
+
+
+def fit_gls(
+    y_data: np.ndarray,
+    x_data: np.ndarray,
+    sigma: np.ndarray,
+) -> RegressionResultsWrapper:
+    """GLS モデルのフィッティング（既知の分散共分散行列を使用）。
+
+    Eco-Note: sigma は n×n の正定値分散共分散行列 Σ。
+    statsmodels GLS(y, X, sigma=Σ) は Aitken の一般化最小二乗法
+        β̂_GLS = (X'Σ⁻¹X)⁻¹ X'Σ⁻¹y
+    を計算する。Σ が正定値でない場合、LinAlgError が発生する。
+
+    欠損値処理は呼び出し元で "error" 固定として行うため、
+    missing 引数は不要（サンプル数と sigma の次元を一致させるため）。
+
+    Args:
+        y_data: 被説明変数 (n,)
+        x_data: 説明変数 (n, k)（定数項含む）
+        sigma: 分散共分散行列 (n, n)
+
+    Returns:
+        statsmodels の GLS 回帰結果
+    """
+    import statsmodels.api as sm  # noqa: PLC0415
+
+    model = sm.GLS(y_data, x_data, sigma=sigma)
+    return model.fit()
+
+
+def fit_fgls_heteroskedastic(
+    y_data: np.ndarray,
+    x_data: np.ndarray,
+    missing: str,
+) -> RegressionResultsWrapper:
+    """1ステップ FGLS（不均一分散対応）のフィッティング。
+
+    Eco-Note: OLS 残差 ê_i から分散を推定し WLS を適用する。
+        Step 1: OLS 推定 → ê = y - Xβ̂_OLS
+        Step 2: σ̂²_i = ê²_i（ゼロ除算防止のため ε = 1e-8 でクリップ）
+        Step 3: WLS(weights = 1/σ̂²_i) で再推定
+    この手法は不均一分散の構造が未知の場合の FGLS 近似として広く使われる。
+
+    Args:
+        y_data: 被説明変数
+        x_data: 説明変数（定数項含む）
+        missing: 欠損値処理方法
+
+    Returns:
+        statsmodels の WLS 回帰結果（FGLS 第2ステップ）
+    """
+    import statsmodels.api as sm  # noqa: PLC0415
+
+    # Step 1: OLS で残差を取得
+    ols_result = sm.OLS(y_data, x_data, missing=missing).fit()
+    residuals = np.asarray(ols_result.resid, dtype=np.float64)
+
+    # Step 2: σ̂²_i = ê²_i（数値安定性のため最小値でクリップ）
+    sigma2_hat = np.clip(residuals**2, a_min=1e-8, a_max=None)
+    weights = 1.0 / sigma2_hat
+
+    # Step 3: WLS 再推定
+    model = sm.WLS(
+        y_data,
+        x_data,
+        weights=weights,  # type: ignore[arg-type]
+        missing=missing,
+    )
+    return model.fit()
+
+
+def fit_fgls_ar1(
+    y_data: np.ndarray,
+    x_data: np.ndarray,
+    max_iter: int,
+    missing: str,
+) -> RegressionResultsWrapper:
+    """AR(1) 誤差構造を仮定した FGLS（GLSAR）のフィッティング。
+
+    Eco-Note: statsmodels GLSAR は AR(p) 誤差の GLS を反復推定する。
+        Step 1: OLS → 残差から ρ を推定
+        Step 2: Prais-Winsten 変換で GLS
+        → max_iter 回まで収束判定を繰り返す。
+    系列相関が疑われる時系列データに有効。
+
+    Args:
+        y_data: 被説明変数
+        x_data: 説明変数（定数項含む）
+        max_iter: 収束判定の最大イテレーション数
+        missing: 欠損値処理方法
+
+    Returns:
+        statsmodels の GLSAR 回帰結果
+    """
+    import statsmodels.api as sm  # noqa: PLC0415
+
+    model = sm.GLSAR(y_data, x_data, rho=1, missing=missing)
+    return model.iterative_fit(maxiter=max_iter)

@@ -11,6 +11,7 @@ from economicon.schemas.types import (
     ColumnName,
     DistributionConfig,
     NewColumnName,
+    TableName,
 )
 
 
@@ -174,6 +175,64 @@ class PanelIvParams(BaseRequest):
     gmm_weight_matrix: Literal["uncentered", "robust", "hac"] = "robust"
 
 
+class WLSParams(BaseRequest):
+    method: Literal[RegressionMethodType.WLS] = RegressionMethodType.WLS
+    # Eco-Note: weights は 1/σ²_i に対応する列。全値が正 (> 0) であること。
+    # statsmodels は WLS(y, X, weights=w) として受け取るため、
+    # ユーザーが指定する列がそのまま重みとして使われる。
+    weights_column: ColumnName = Field(
+        description=(
+            "観測値ごとの重み (1/σ²ᵢ) を格納した列名。"
+            "正の数値型列が必要（全値 > 0）。"
+        )
+    )
+
+
+class GLSParams(BaseRequest):
+    method: Literal[RegressionMethodType.GLS] = RegressionMethodType.GLS
+    # Eco-Note: sigma は n×n の分散共分散行列。
+    # sm.GLS(y, X, sigma=Σ) の Σ として使われる。
+    # テーブルの行数・列数が推定サンプル数 n と一致する必要がある。
+    # GLS 使用時は欠損値処理を "error" 固定にしてサンプル数を確定させること。
+    sigma_table_name: TableName = Field(
+        description=(
+            "n×n 正定値分散共分散行列を格納したテーブル名。"
+            "分析テーブルの行数と次元が一致する正方行列が必要。"
+            "GLS 使用時は欠損値処理が 'error' 固定となる。"
+        )
+    )
+
+
+class FGLSParams(BaseRequest):
+    method: Literal[RegressionMethodType.FGLS] = RegressionMethodType.FGLS
+    # Eco-Note: FGLS の推定手法
+    # "heteroskedastic" (デフォルト): OLS 残差 ê_i を用いて
+    #   分散を推定し WLS を適用（1ステップ FGLS）。
+    #   σ̂²_i = ê²_i として weights = 1/σ̂²_i。
+    # "ar1": sm.GLSAR(rho=1).iterative_fit() による AR(1) 誤差構造の FGLS。
+    #   時系列データで誤差が AR(1) 過程に従う場合に使用する。
+    fgls_method: Literal["heteroskedastic", "ar1"] = Field(
+        default="heteroskedastic",
+        alias="fglsMethod",
+        description=(
+            "FGLS の推定手法。"
+            "'heteroskedastic': OLS残差を用いた"
+            "1ステップFGLS（不均一分散対応）。"
+            "'ar1': AR(1)誤差構造を仮定した反復FGLS（GLSAR）。"
+        ),
+    )
+    max_iter: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        alias="maxIter",
+        description=(
+            "ar1 選択時の収束判定イテレーション上限。"
+            "heteroskedastic 選択時は無視される。"
+        ),
+    )
+
+
 type RegressionParams = Annotated[
     OLSParams
     | LassoParams
@@ -184,7 +243,10 @@ type RegressionParams = Annotated[
     | FEParams
     | REParams
     | TobitParams
-    | PanelIvParams,
+    | PanelIvParams
+    | WLSParams
+    | GLSParams
+    | FGLSParams,
     Field(discriminator="method"),
 ]
 

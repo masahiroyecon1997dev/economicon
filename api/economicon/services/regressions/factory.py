@@ -7,6 +7,8 @@ from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.entities import (
     FEParams,
+    FGLSParams,
+    GLSParams,
     InstrumentalVariablesParams,
     LassoParams,
     LogitParams,
@@ -16,6 +18,7 @@ from economicon.schemas.entities import (
     REParams,
     RidgeParams,
     TobitParams,
+    WLSParams,
 )
 from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
@@ -23,6 +26,8 @@ from economicon.services.data.tables_store import TablesStore
 from economicon.services.operation import DataOperation
 from economicon.services.regressions.estimators import (
     FERegression,
+    FGLSRegression,
+    GLSRegression,
     IVRegression,
     LassoRegression,
     LogitRegression,
@@ -32,6 +37,7 @@ from economicon.services.regressions.estimators import (
     RERegression,
     RidgeRegression,
     TobitRegression,
+    WLSRegression,
 )
 from economicon.utils import ProcessingError
 
@@ -47,6 +53,9 @@ _FACTORY_MAP: dict[type, type] = {
     REParams: RERegression,
     TobitParams: TobitRegression,
     PanelIvParams: PanelIVRegression,
+    WLSParams: WLSRegression,
+    GLSParams: GLSRegression,
+    FGLSParams: FGLSRegression,
 }
 
 

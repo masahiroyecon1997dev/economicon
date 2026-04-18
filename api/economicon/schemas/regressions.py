@@ -11,11 +11,14 @@ from economicon.schemas.common import (
 )
 from economicon.schemas.entities import (
     FEParams,
+    FGLSParams,
+    GLSParams,
     InstrumentalVariablesParams,
     PanelIvParams,
     RegressionParams,
     REParams,
     StandardErrorSettings,
+    WLSParams,
 )
 from economicon.schemas.enums import (
     MissingValueHandlingType,
@@ -48,6 +51,10 @@ def _collect_reserved(
     if isinstance(analysis, (InstrumentalVariablesParams, PanelIvParams)):
         rv["instrumentalVariables"] = analysis.instrumental_variables
         rv["endogenousVariables"] = analysis.endogenous_variables
+    if isinstance(analysis, WLSParams):
+        rs["weightsColumn"] = analysis.weights_column
+    if isinstance(analysis, FGLSParams | GLSParams):
+        pass  # sigma_table_name はテーブル名のため列重複チェック不要
 
 
 # ---------------------------------------------------------------------------
