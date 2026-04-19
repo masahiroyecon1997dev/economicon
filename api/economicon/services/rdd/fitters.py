@@ -516,7 +516,7 @@ def run_density_test(
     try:
         from rddensity import rddensity  # noqa: PLC0415
 
-        rd = rddensity(X=x, c=cutoff)
+        rd = rddensity(X=x, c=cutoff)  # type: ignore[arg-type]
         test = rd.test
 
         # test は dict または DataFrame または SimpleNamespace の可能性

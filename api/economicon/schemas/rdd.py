@@ -199,11 +199,19 @@ class RDDRequestBody(BaseRequest):
     ]
 
     @model_validator(mode="after")
-    def _validate_placebo_cutoffs(self) -> RDDRequestBody:
-        """プラシーボ境界値が本来のカットオフと重複しないことを検証する。"""
-        if self.placebo_cutoffs is None:
-            return self
-        if self.cutoff in self.placebo_cutoffs:
+    def _validate_request(self) -> RDDRequestBody:
+        """スキーマレベルの相互依存バリデーション。"""
+        if self.outcome_variable == self.running_variable:
+            raise ValueError(
+                _(
+                    "outcomeVariable and runningVariable"
+                    " must be different columns."
+                )
+            )
+        if (
+            self.placebo_cutoffs is not None
+            and self.cutoff in self.placebo_cutoffs
+        ):
             raise ValueError(
                 _("placeboCutoffs must not contain the main cutoff value.")
             )

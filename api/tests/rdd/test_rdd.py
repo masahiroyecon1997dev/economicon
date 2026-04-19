@@ -203,11 +203,8 @@ def test_rdd_custom_placebo_cutoffs(client, tables_store):
     assert len(rd["placeboTests"]) == _MIN_PLACEBO_COUNT
     # プラシーボ境界値が正しく記録されていることを確認
     cutoffs = {round(pt["cutoff"], 6) for pt in rd["placeboTests"]}
-    assert (
-        _TEST_PLACEBO_LEFT in cutoffs
-        or any(
-            abs(c - _TEST_PLACEBO_LEFT) < _PLACEBO_TOLERANCE for c in cutoffs
-        )
+    assert _TEST_PLACEBO_LEFT in cutoffs or any(
+        abs(c - _TEST_PLACEBO_LEFT) < _PLACEBO_TOLERANCE for c in cutoffs
     )
 
 
@@ -272,10 +269,10 @@ def test_rdd_string_column_error(client, tables_store):
 
 
 def test_rdd_same_column_error(client, tables_store):
-    """結果変数と実行変数が同じ列の場合に 400 が返ることを確認"""
+    """結果変数と実行変数が同じ列の場合に 422 が返ることを確認"""
     payload = RDDPayload(outcome="x", running="x").build()
     resp = client.post(URL_RDD, json=payload)
-    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     data = resp.json()
     assert data["code"] == ErrorCode.VALIDATION_ERROR
     assert "outcomeVariable and runningVariable" in data["message"]

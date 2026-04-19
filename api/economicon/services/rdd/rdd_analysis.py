@@ -148,17 +148,6 @@ class RDDAnalysis:
             target=_PARAM_NAMES["running_variable"],
         )
 
-        # 結果変数と実行変数の重複禁止
-        if self.outcome_variable == self.running_variable:
-            raise ValidationError(
-                error_code=ErrorCode.VALIDATION_ERROR,
-                message=_(
-                    "outcomeVariable and runningVariable"
-                    " must be different columns."
-                ),
-                target="outcomeVariable",
-            )
-
         # カットオフ両側のサンプル数確認
         df = self.tables_store.get_table(self.table_name).table
         x_col = df[self.running_variable].drop_nulls()
