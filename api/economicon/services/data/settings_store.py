@@ -3,6 +3,7 @@
 """
 
 import json
+import locale
 import os
 import platform
 import threading
@@ -39,6 +40,19 @@ class SettingsStore:
             self._initialized = True
 
     @staticmethod
+    def _get_default_language() -> str:
+        """
+        OSロケールから初期言語を決定する。
+
+        Returns:
+            str: "ja" または "en"
+        """
+        system_locale, _encoding = locale.getlocale()
+        if system_locale and system_locale.lower().startswith("ja"):
+            return "ja"
+        return "en"
+
+    @staticmethod
     def _get_default_settings() -> dict:
         """
         デフォルト設定を取得
@@ -49,7 +63,7 @@ class SettingsStore:
 
         return {
             "general": {
-                "language": "ja",
+                "language": SettingsStore._get_default_language(),
                 "last_opened_path": str(Path.home()).replace(os.sep, "/"),
                 "theme": "light",
             },
