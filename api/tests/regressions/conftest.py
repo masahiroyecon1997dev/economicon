@@ -447,18 +447,18 @@ def tables_store():
     df_panel = pl.read_csv(_DATA_DIR / "synthetic_panel.csv")
     manager.store_table(TABLE_PANEL, df_panel)
 
-    # --- PanelIVData (PanelData + z1, z2 instrument columns) ---
-    n_panel = len(df_panel)
+    # --- PanelIVData (PanelData + full-rank instrument columns) ---
     df_panel_iv = df_panel.with_columns(
         [
-            pl.Series(
-                "z1",
-                [float((i % 10) + 1) for i in range(n_panel)],
-            ),
-            pl.Series(
-                "z2",
-                [float(i // 10 + 1) for i in range(n_panel)],
-            ),
+            (
+                pl.col("x2") * 0.8
+                + pl.col("time_id") * 0.2
+            ).alias("z1"),
+            (
+                pl.col("x2") * pl.col("x2")
+                + pl.col("x1") * 0.3
+                + pl.col("time_id") * 0.1
+            ).alias("z2"),
         ]
     )
     manager.store_table(TABLE_PANEL_IV, df_panel_iv)
