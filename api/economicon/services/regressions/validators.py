@@ -11,6 +11,7 @@ from economicon.i18n.translation import gettext as _
 from economicon.schemas.entities import (
     FEParams,
     InstrumentalVariablesParams,
+    PanelIvParams,
     REParams,
 )
 from economicon.services.data.tables_store import TablesStore
@@ -200,3 +201,66 @@ def validate_gls_sigma(
             ).format(n=n_obs, r=n_rows, c=n_cols),
         )
     return sigma_df
+
+
+def validate_panel_iv_columns(
+    analysis: PanelIvParams,
+    column_name_list: list[str],
+    df_schema: pl.Schema,
+) -> None:
+    """PanelIV の entity_id / time / endog / instruments 列チェック。
+
+    識別条件 (len(instruments) >= len(endog)) もここで確認する。
+    """
+    validate_existence(
+        value=analysis.entity_id_column,
+        valid_list=column_name_list,
+        target=_PARAM_NAMES["entity_id_column"],
+    )
+    validate_numeric_types(
+        schema=df_schema,
+        columns=analysis.entity_id_column,
+        target=_PARAM_NAMES["entity_id_column"],
+    )
+    if analysis.time_column:
+        validate_existence(
+            value=analysis.time_column,
+            valid_list=column_name_list,
+            target=_PARAM_NAMES["time_column"],
+        )
+    if analysis.endogenous_variables:
+        validate_existence(
+            value=analysis.endogenous_variables,
+            valid_list=column_name_list,
+            target=_PARAM_NAMES["endogenous_variables"],
+        )
+        validate_numeric_types(
+            schema=df_schema,
+            columns=analysis.endogenous_variables,
+            target=_PARAM_NAMES["endogenous_variables"],
+        )
+    if analysis.instrumental_variables:
+        validate_existence(
+            value=analysis.instrumental_variables,
+            valid_list=column_name_list,
+            target=_PARAM_NAMES["instrumental_variables"],
+        )
+        validate_numeric_types(
+            schema=df_schema,
+            columns=analysis.instrumental_variables,
+            target=_PARAM_NAMES["instrumental_variables"],
+        )
+    # 識別条件: 操作変数の数 >= 内生変数の数
+    if len(analysis.instrumental_variables) < len(
+        analysis.endogenous_variables
+    ):
+        raise ProcessingError(
+            error_code=ErrorCode.REGRESSION_PROCESS_ERROR,
+            message=_(
+                "Number of instrumental variables ({n_iv}) must be"
+                " >= number of endogenous variables ({n_en})."
+            ).format(
+                n_iv=len(analysis.instrumental_variables),
+                n_en=len(analysis.endogenous_variables),
+            ),
+        )

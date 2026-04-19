@@ -351,6 +351,78 @@ def fit_re(
 
 
 @dataclass
+class PanelIVInput:
+    """固定効果IV推定の入力データクラス。"""
+
+    df_pandas: Any
+    dependent_variable: str
+    explanatory_variables: list[str]
+    endogenous_variables: list[str]
+    instrumental_variables: list[str]
+    entity_id_column: str
+    standard_error_method: str
+
+
+def fit_panel_iv(data_input: PanelIVInput) -> Any:
+    """固定効果IV (FE-2SLS) モデルのフィッティング。
+
+    Eco-Note: FWL定理により、entity effectsを absorb した AbsorbingLS は
+    Within変換後の2SLS推定と等価。
+    AbsorbingLS(absorb=Categorical列) がダミー吸収を内部で行う。
+    has_const は個体固定効果が切片を吸収するため不要。
+
+    Args:
+        data_input: PanelIVInput データクラス (MultiIndex 設定済み DataFrame)
+
+    Returns:
+        linearmodels AbsorbingLS 推定結果
+    """
+    import pandas as pd  # noqa: PLC0415
+    from linearmodels.iv.absorbing import AbsorbingLS  # noqa: PLC0415
+
+    cov_type = LINEARMODELS_COV_TYPE_MAP.get(
+        data_input.standard_error_method, "unadjusted"
+    )
+
+    # MultiIndex から entity_id を absorb 用 Categorical 列として取り出す
+    # Eco-Note: AbsorbingLS は Categorical dtype の列を entity dummies として
+    # 吸収するため、pd.Categorical に変換する必要がある。
+    entity_idx = data_input.df_pandas.index.get_level_values(
+        data_input.entity_id_column
+    )
+    absorb_df = pd.DataFrame(
+        {
+            data_input.entity_id_column: pd.Categorical(entity_idx),
+        },
+        index=data_input.df_pandas.index,
+    )
+
+    y = data_input.df_pandas[data_input.dependent_variable]
+    exog = (
+        data_input.df_pandas[data_input.explanatory_variables]
+        if data_input.explanatory_variables
+        else None
+    )
+    endog = (
+        data_input.df_pandas[data_input.endogenous_variables]
+        if data_input.endogenous_variables
+        else None
+    )
+    instruments = data_input.df_pandas[data_input.instrumental_variables]
+
+    model = AbsorbingLS(
+        y,
+        exog,
+        endog=endog,
+        instruments=instruments,
+        absorb=absorb_df,
+    )
+    result = model.fit(cov_type=cov_type)
+
+    return result
+
+
+@dataclass
 class RegularizedRegressionInput:
     y_data: np.ndarray
     x_data: np.ndarray

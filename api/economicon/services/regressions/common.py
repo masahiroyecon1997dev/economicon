@@ -275,6 +275,62 @@ def prepare_iv_dataframe(
     return df
 
 
+@dataclass
+class PanelIvDataConfig:
+    """固定効果IV分析用データ設定。"""
+
+    dependent_variable: str
+    explanatory_variables: list[str]
+    endogenous_variables: list[str]
+    instrumental_variables: list[str]
+    entity_id_column: str
+    missing: str
+    time_column: str | None = None
+
+
+def prepare_panel_iv_dataframe(
+    df_polars: pl.DataFrame,
+    config: PanelIvDataConfig,
+) -> Any:
+    """固定効果IV分析用の MultiIndex 付き Pandas DataFrame を準備する。
+
+    Args:
+        df_polars: Polars DataFrame
+        config: PanelIvDataConfig オブジェクト
+
+    Returns:
+        MultiIndex (entity, time) が設定された Pandas DataFrame
+    """
+    required_cols = (
+        [config.dependent_variable]
+        + config.explanatory_variables
+        + config.endogenous_variables
+        + config.instrumental_variables
+        + [config.entity_id_column]
+    )
+    if config.time_column:
+        required_cols.append(config.time_column)
+
+    df = df_polars.select(required_cols).to_pandas(
+        use_pyarrow_extension_array=True
+    )
+    del df_polars
+    gc.collect()
+
+    df = handle_missing_values(df, config.missing)
+
+    if config.time_column:
+        df = df.set_index([config.entity_id_column, config.time_column])
+    else:
+        temp_time_col = "__panel_time_idx__"
+        while temp_time_col in df.columns:
+            temp_time_col += "_"
+        df[temp_time_col] = df.groupby(config.entity_id_column).cumcount()
+        df = df.set_index([config.entity_id_column, temp_time_col])
+
+    return df
+
+
 def prepare_tobit_dataframe(
     df_polars: pl.DataFrame,
     dependent_variable: str,

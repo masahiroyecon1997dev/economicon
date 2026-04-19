@@ -420,6 +420,212 @@ def format_re_result(
 
 
 # ---------------------------------------------------------------------------
+# Panel IV (FE-2SLS / AbsorbingLS)
+# ---------------------------------------------------------------------------
+
+# Eco-Note: Staiger & Stock (1997) が提唱する弱操作変数の経験則閾値
+_WEAK_IV_F_THRESHOLD: float = 10.0
+
+
+def _compute_r2_between_overall(
+    model_result: Any,
+    y: Any,
+) -> tuple[float | None, float | None]:
+    """R²Between と R²Overall を残差から手動計算する。
+
+    Eco-Note: AbsorbingLS は rsquared_between / rsquared_overall を
+    持たないため FWL定理後の残差から算出する。
+        R²_overall = 1 - Σe²_it / Σ(y_it - ȳ)²
+        R²_between = 1 - Σē²_i  / Σ(ȳ_i  - ȳ)²
+    """
+    try:
+        resids = np.asarray(model_result.resids, dtype=np.float64)
+        y_vals = np.asarray(y, dtype=np.float64)
+        y_mean = float(np.mean(y_vals))
+
+        ss_tot_overall = float(np.sum((y_vals - y_mean) ** 2))
+        ss_res_overall = float(np.sum(resids**2))
+        r2_overall: float | None = (
+            1.0 - ss_res_overall / ss_tot_overall
+            if ss_tot_overall > 0
+            else None
+        )
+
+        # Between: 個体平均で集計（MultiIndex の level-0 を使用）
+        import pandas as pd  # noqa: PLC0415
+
+        idx = y.index.get_level_values(0)
+        e_series = pd.Series(resids, index=y.index)
+        y_series = pd.Series(y_vals, index=y.index)
+        e_bar = e_series.groupby(idx).mean()
+        y_bar = y_series.groupby(idx).mean()
+        y_bar_mean = float(y_bar.mean())
+        ss_res_between = float((e_bar**2).sum())
+        ss_tot_between = float(((y_bar - y_bar_mean) ** 2).sum())
+        r2_between: float | None = (
+            1.0 - ss_res_between / ss_tot_between
+            if ss_tot_between > 0
+            else None
+        )
+
+        return r2_between, r2_overall
+    except Exception:
+        return None, None
+
+
+def _build_panel_iv_wu_hausman(
+    model_result: Any,
+) -> dict[str, Any] | None:
+    """Wu-Hausman 内生性検定結果を構築する (H₀: 変数は外生)。"""
+    if not hasattr(model_result, "wu_hausman"):
+        return None
+    try:
+        wu = model_result.wu_hausman()
+        return {
+            "statistic": float(wu.stat),
+            "pValue": float(wu.pval),
+            "description": "Wu-Hausman test for endogeneity",
+        }
+    except Exception:
+        return None
+
+
+def _build_panel_iv_sargan(
+    model_result: Any,
+    n_iv: int,
+    n_endog: int,
+) -> dict[str, Any] | None:
+    """Sargan/Hansen J 検定結果を構築する (過剰識別時のみ)。"""
+    if n_iv <= n_endog or not hasattr(model_result, "sargan"):
+        return None
+    try:
+        sargan = model_result.sargan
+        return {
+            "statistic": float(sargan.stat),
+            "pValue": float(sargan.pval),
+            "df": n_iv - n_endog,
+            "description": (
+                "Sargan/Hansen J test for overidentifying restrictions"
+            ),
+        }
+    except Exception:
+        return None
+
+
+def _build_panel_iv_first_stage(
+    model_result: Any,
+    endogenous_variables: list[str],
+    warnings: list[str],
+) -> dict[str, Any] | None:
+    """First-stage F 統計量を構築し、弱操作変数の警告を warnings に追記。"""
+    if not hasattr(model_result, "first_stage"):
+        return None
+    try:
+        first_stage = model_result.first_stage
+        fs_dict: dict[str, Any] = {}
+        for endog_var in endogenous_variables:
+            if endog_var not in first_stage.individual:
+                continue
+            fs = first_stage.individual[endog_var]
+            f_stat = float(fs.f_statistic.stat)
+            fs_dict[endog_var] = {
+                "fStatistic": f_stat,
+                "pValue": float(fs.f_statistic.pval),
+                "description": (
+                    "First-stage F-test for weak instruments"
+                    " (rule of thumb: F > 10)"
+                ),
+            }
+            if f_stat < _WEAK_IV_F_THRESHOLD:
+                warnings.append(
+                    f"Weak instrument warning: first-stage F"
+                    f" for '{endog_var}' = {f_stat:.2f} (< 10)"
+                )
+        return fs_dict
+    except Exception:
+        return None
+
+
+def format_panel_iv_result(
+    model_result: Any,
+    y: Any,
+    table_name: str,
+    dependent_variable: str,
+    explanatory_variables: list[str],
+    endogenous_variables: list[str],
+    instrumental_variables: list[str],
+    entity_id_column: str,
+) -> dict:
+    """固定効果IV (AbsorbingLS) の結果を dict に変換する。
+
+    統計量:
+        R2Within  : AbsorbingLS の rsquared (absorb後の説明力)
+        R2Between : 残差の個体平均から手動計算
+        R2Overall : 残差全体から手動計算
+        nEntities : MultiIndex level-0 の unique 数
+        fPooled   : AbsorbingLS は非対応のため None
+        wuHausmanTest / sarganTest / firstStage: IV検定統計量
+    """
+    summary_text = str(model_result.summary)
+    all_vars = explanatory_variables + endogenous_variables
+    params_info = extract_linearmodels_params(model_result, all_vars)
+
+    n_entities = int(y.index.get_level_values(0).nunique())
+    r2_between, r2_overall = _compute_r2_between_overall(model_result, y)
+
+    model_stats: dict[str, Any] = {
+        "nObservations": int(model_result.nobs),
+        "nEntities": n_entities,
+        "R2Within": float(model_result.rsquared),
+    }
+    if r2_between is not None:
+        model_stats["R2Between"] = r2_between
+    if r2_overall is not None:
+        model_stats["R2Overall"] = r2_overall
+
+    diagnostics: dict[str, Any] = {
+        # Eco-Note: f_pooled は AbsorbingLS に実装されていないため省略
+        # (PanelOLS.f_pooled は Within vs Pooled-OLS の F 検定だが、
+        #  AbsorbingLS はその統計量を提供しない)
+        "fPooled": None,
+    }
+
+    wu = _build_panel_iv_wu_hausman(model_result)
+    if wu is not None:
+        diagnostics["wuHausmanTest"] = wu
+
+    sargan = _build_panel_iv_sargan(
+        model_result,
+        len(instrumental_variables),
+        len(endogenous_variables),
+    )
+    if sargan is not None:
+        diagnostics["sarganTest"] = sargan
+
+    warnings: list[str] = []
+    fs = _build_panel_iv_first_stage(
+        model_result, endogenous_variables, warnings
+    )
+    if fs is not None:
+        diagnostics["firstStage"] = fs
+
+    return {
+        "tableName": table_name,
+        "dependentVariable": dependent_variable,
+        "explanatoryVariables": explanatory_variables,
+        "endogenousVariables": endogenous_variables,
+        "instrumentalVariables": instrumental_variables,
+        "entityIdColumn": entity_id_column,
+        "estimationMethod": "Fixed Effects IV (FE-2SLS)",
+        "regressionResult": summary_text,
+        "parameters": params_info,
+        "modelStatistics": model_stats,
+        "diagnostics": diagnostics,
+        **({"warnings": warnings} if warnings else {}),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Lasso / Ridge (正則化回帰)
 # ---------------------------------------------------------------------------
 
