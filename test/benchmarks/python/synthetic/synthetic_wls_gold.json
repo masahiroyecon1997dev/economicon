@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T10:01:36.313980+00:00",
+    "python_version": "3.14.3",
+    "libraries": {
+      "statsmodels": "0.14.6"
+    },
+    "seed": 2024,
+    "tolerance_guide": {
+      "wls_coef": "atol=1e-12 (statsmodels WLS)"
+    },
+    "data_file": "synthetic_wls.parquet",
+    "model": "wls",
+    "weights_column": "weights",
+    "weights_definition": "inverse variance (1 / sigma2)",
+    "missing_value_handling": "no missing values in synthetic_wls"
+  },
+  "estimates": {
+    "dep_var": "y",
+    "expl_vars": [
+      "x1",
+      "x2",
+      "x3"
+    ],
+    "n_obs": 320,
+    "nonrobust": {
+      "coefficients": {
+        "const": 4.040263748276269,
+        "x1": 1.7993541590203093,
+        "x2": -1.054154534782446,
+        "x3": 0.634618552227026
+      },
+      "std_errors": {
+        "const": 0.15123502752127055,
+        "x1": 0.02165501600126161,
+        "x2": 0.027627001130510878,
+        "x3": 0.03830674756126534
+      },
+      "t_values": {
+        "const": 26.715132165450385,
+        "x1": 83.09179540275933,
+        "x2": -38.15667613732611,
+        "x3": 16.566756319159126
+      },
+      "p_values": {
+        "const": 4.711168201674952e-83,
+        "x1": 9.135826008138173e-217,
+        "x2": 2.4549209255682825e-120,
+        "x3": 8.304519011214039e-45
+      },
+      "conf_int": {
+        "const": {
+          "lower": 3.742708904398826,
+          "upper": 4.337818592153712
+        },
+        "x1": {
+          "lower": 1.7567479254576999,
+          "upper": 1.8419603925829187
+        },
+        "x2": {
+          "lower": -1.1085106462132779,
+          "upper": -0.9997984233516141
+        },
+        "x3": {
+          "lower": 0.5592500448325218,
+          "upper": 0.7099870596215302
+        }
+      }
+    },
+    "diagnostics": {
+      "r_squared": 0.9662537382197136,
+      "adj_r_squared": 0.9659333623167362,
+      "f_test": {
+        "statistic": 3016.0000463201773,
+        "p_value": 4.0277408516635476e-232
+      },
+      "aic": 1139.7055459364676,
+      "bic": 1154.7788299196427,
+      "log_likelihood": -565.8527729682338,
+      "weights_definition": "inverse variance (1 / sigma2)",
+      "nan_policy": "no NaN in synthetic_wls; no row dropped"
+    }
+  }
+}

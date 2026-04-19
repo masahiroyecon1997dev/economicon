@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T10:01:36.323471+00:00",
+    "python_version": "3.14.3",
+    "libraries": {
+      "statsmodels": "0.14.6"
+    },
+    "seed": 2024,
+    "tolerance_guide": {
+      "fgls_ar1_coef": "atol=1e-10 (statsmodels GLSAR iterative_fit)"
+    },
+    "data_file": "synthetic_fgls_ar1.parquet",
+    "model": "fgls_ar1",
+    "fgls_method": "ar1",
+    "max_iter": 10,
+    "missing_value_handling": "no missing values in synthetic_fgls_ar1"
+  },
+  "estimates": {
+    "dep_var": "y",
+    "expl_vars": [
+      "x1",
+      "x2",
+      "x3"
+    ],
+    "n_obs": 239,
+    "nonrobust": {
+      "coefficients": {
+        "const": 0.9006493068976937,
+        "x1": 1.4070771889375697,
+        "x2": -0.830838066955547,
+        "x3": 0.5742624152435282
+      },
+      "std_errors": {
+        "const": 0.17573969377719165,
+        "x1": 0.02487280023382075,
+        "x2": 0.044370924002858234,
+        "x3": 0.03578782890226502
+      },
+      "t_values": {
+        "const": 5.124905407195972,
+        "x1": 56.570919868696514,
+        "x2": -18.724831308494434,
+        "x3": 16.046304927069297
+      },
+      "p_values": {
+        "const": 6.211644093047244e-07,
+        "x1": 7.182618853651273e-139,
+        "x2": 1.705218581328964e-48,
+        "x3": 1.2575276185325315e-39
+      },
+      "conf_int": {
+        "const": {
+          "lower": 0.5544227678473332,
+          "upper": 1.2468758459480542
+        },
+        "x1": {
+          "lower": 1.358075034920135,
+          "upper": 1.4560793429550045
+        },
+        "x2": {
+          "lower": -0.9182536708057113,
+          "upper": -0.7434224631053826
+        },
+        "x3": {
+          "lower": 0.5037564534164466,
+          "upper": 0.6447683770706097
+        }
+      }
+    },
+    "diagnostics": {
+      "r_squared": 0.937123503057875,
+      "adj_r_squared": 0.9363208243735074,
+      "f_test": {
+        "statistic": 1167.495189929272,
+        "p_value": 7.89327283118378e-141
+      },
+      "aic": 649.0688454277749,
+      "bic": 662.974699635501,
+      "log_likelihood": -320.53442271388747,
+      "fgls_method": "ar1",
+      "max_iter": 10,
+      "estimated_rho": 0.6492766588163923,
+      "nan_policy": "no NaN in synthetic_fgls_ar1; no row dropped"
+    }
+  }
+}

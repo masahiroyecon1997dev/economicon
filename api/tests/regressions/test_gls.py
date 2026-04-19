@@ -9,12 +9,11 @@ from tests.regressions.conftest import (
     URL_REGRESSION,
     GlsPayload,
     OlsPayload,
+    load_py_gold,
 )
 
 _ABS_TOL = 1e-12
-_EXPECTED_N_OBS = 10
-_EXPECTED_SLOPE = 2.0
-_EXPECTED_INTERCEPT = 0.0
+_EXPECTED_N_OBS = 48
 _BAD_SIGMA_ROWS = 3
 _BAD_SIGMA_COLS = 3
 
@@ -34,6 +33,25 @@ def _valid_gls_payload() -> dict:
     return payload
 
 
+def _assert_model_statistics_matches_gold(output: dict, gold: dict) -> None:
+    stats = output["modelStatistics"]
+    diagnostics = gold["estimates"]["diagnostics"]
+
+    assert stats["nObservations"] == gold["estimates"]["n_obs"]
+    assert abs(stats["R2"] - diagnostics["r_squared"]) < _ABS_TOL
+    assert abs(stats["adjustedR2"] - diagnostics["adj_r_squared"]) < _ABS_TOL
+    assert abs(stats["fValue"] - diagnostics["f_test"]["statistic"]) < _ABS_TOL
+    assert (
+        abs(stats["fProbability"] - diagnostics["f_test"]["p_value"])
+        < _ABS_TOL
+    )
+    assert abs(stats["AIC"] - diagnostics["aic"]) < _ABS_TOL
+    assert abs(stats["BIC"] - diagnostics["bic"]) < _ABS_TOL
+    assert (
+        abs(stats["logLikelihood"] - diagnostics["log_likelihood"]) < _ABS_TOL
+    )
+
+
 def test_gls_success(client, tables_store):
     """GLS回帰が200を返しresultIdを含むことを確認"""
     resp = client.post(URL_REGRESSION, json=_valid_gls_payload())
@@ -43,30 +61,58 @@ def test_gls_success(client, tables_store):
     assert "resultId" in data["result"]
 
 
-def test_gls_identity_sigma_expected_coefficients(client, tables_store):
-    """単位行列 sigma のGLSが既知係数を返すことを確認"""
-    params = _get_output(client, _valid_gls_payload())["parameters"]
-    coef_map = {p["variable"]: p["coefficient"] for p in params}
+def test_gls_matches_python_gold(client, tables_store):
+    """GLS が Python gold benchmark と一致することを確認"""
+    gold = load_py_gold("gls")
+    output = _get_output(client, _valid_gls_payload())
+    params = {param["variable"]: param for param in output["parameters"]}
+    gold_params = gold["estimates"]["nonrobust"]
 
-    assert abs(coef_map["const"] - _EXPECTED_INTERCEPT) < _ABS_TOL
-    assert abs(coef_map["x1"] - _EXPECTED_SLOPE) < _ABS_TOL
+    for variable, expected in gold_params["coefficients"].items():
+        got = params[variable]
+        assert abs(got["coefficient"] - expected) < _ABS_TOL
+        assert (
+            abs(got["standardError"] - gold_params["std_errors"][variable])
+            < _ABS_TOL
+        )
+        assert (
+            abs(got["tValue"] - gold_params["t_values"][variable]) < _ABS_TOL
+        )
+        assert (
+            abs(got["pValue"] - gold_params["p_values"][variable]) < _ABS_TOL
+        )
+        assert (
+            abs(
+                got["confidenceIntervalLower"]
+                - gold_params["conf_int"][variable]["lower"]
+            )
+            < _ABS_TOL
+        )
+        assert (
+            abs(
+                got["confidenceIntervalUpper"]
+                - gold_params["conf_int"][variable]["upper"]
+            )
+            < _ABS_TOL
+        )
+
+    _assert_model_statistics_matches_gold(output, gold)
 
 
-def test_gls_identity_sigma_matches_ols(client, tables_store):
-    """単位行列 sigma では GLS 係数が OLS と一致することを確認"""
+def test_gls_differs_from_ols_when_sigma_is_non_identity(client, tables_store):
+    """非単位の sigma を使う GLS が OLS と異なることを確認"""
     gls_params = _get_output(client, _valid_gls_payload())["parameters"]
     ols_params = _get_output(
         client,
-        OlsPayload(table=TABLE_GLS_DATA, dep="y", expl=["x1"]).build(),
+        OlsPayload(table=TABLE_GLS_DATA, dep="y", expl=["x1", "x2"]).build(),
     )["parameters"]
 
     gls_map = {p["variable"]: p["coefficient"] for p in gls_params}
     ols_map = {p["variable"]: p["coefficient"] for p in ols_params}
 
-    for var, exp_coef in ols_map.items():
-        assert abs(gls_map[var] - exp_coef) < _ABS_TOL, (
-            f"{var}: GLS={gls_map[var]!r}, OLS={exp_coef!r}"
-        )
+    assert any(abs(gls_map[var] - ols_map[var]) > 1e-6 for var in gls_map), (
+        "GLS coefficients unexpectedly match OLS under non-identity sigma"
+    )
 
 
 def test_gls_missing_sigma_table(client, tables_store):
@@ -99,8 +145,7 @@ def test_gls_wrong_sigma_dimension(client, tables_store):
     data = resp.json()
     assert data["code"] == "SIGMA_DIMENSION_MISMATCH"
     assert data["message"] == (
-        "sigmaTableName must be a 10×10 square matrix,"
-        " but got 3×3."
+        "sigmaTableName must be a 48×48 square matrix, but got 3×3."
     )
 
 

@@ -36,12 +36,14 @@ TABLE_TOBIT = "TobitData"
 TABLE_WLS = "WLSData"
 TABLE_GLS_DATA = "GLSData"
 TABLE_GLS_SIGMA = "SigmaMatrix"
+TABLE_FGLS_HETERO = "FGLSHeteroskedasticData"
+TABLE_FGLS_AR1 = "FGLSAR1Data"
 TABLE_PANEL_IV = "PanelIVData"
 TABLE_STRING = "StringData"
 TABLE_NAN = "NaNData"
 
-# GLS 小規模データの行数
-_N_GLS = 10
+# GLS 合成データの行数
+_N_GLS = 48
 
 # エンドポイント
 URL_REGRESSION = "/api/analysis/regression"
@@ -247,7 +249,7 @@ class WlsPayload:
     """WLSリクエストペイロード"""
 
     table: str = TABLE_WLS
-    dep: str = "y_cont"
+    dep: str = "y"
     expl: list[str] = field(default_factory=lambda: ["x1", "x2", "x3"])
     weights_col: str = "weights"
     has_const: bool = True
@@ -274,7 +276,7 @@ class GlsPayload:
 
     table: str = TABLE_GLS_DATA
     dep: str = "y"
-    expl: list[str] = field(default_factory=lambda: ["x1"])
+    expl: list[str] = field(default_factory=lambda: ["x1", "x2"])
     sigma_table: str = TABLE_GLS_SIGMA
     has_const: bool = True
     se_method: str = "nonrobust"
@@ -298,8 +300,8 @@ class GlsPayload:
 class FglsPayload:
     """FGLSリクエストペイロード"""
 
-    table: str = TABLE_BASIC
-    dep: str = "y_cont"
+    table: str = TABLE_FGLS_HETERO
+    dep: str = "y"
     expl: list[str] = field(default_factory=lambda: ["x1", "x2", "x3"])
     fgls_method: str = "heteroskedastic"
     max_iter: int = 10
@@ -432,14 +434,8 @@ def tables_store():
     df_basic = pl.read_csv(_DATA_DIR / "synthetic_ols.csv")
     manager.store_table(TABLE_BASIC, df_basic)
 
-    # --- WLSData (BasicData + weights 列) ---
-    n_basic = len(df_basic)
-    df_wls = df_basic.with_columns(
-        pl.Series(
-            "weights",
-            [float(i + 1) for i in range(n_basic)],
-        )
-    )
+    # --- WLSData (synthetic_wls.csv: y, x1, x2, x3, sigma2, weights) ---
+    df_wls = pl.read_csv(_DATA_DIR / "synthetic_wls.csv")
     manager.store_table(TABLE_WLS, df_wls)
 
     # --- PanelData
@@ -473,22 +469,19 @@ def tables_store():
     df_tobit = pl.read_csv(_DATA_DIR / "synthetic_tobit.csv")
     manager.store_table(TABLE_TOBIT, df_tobit)
 
-    # --- GLSData (10行の小規模インラインデータ) ---
-    df_gls = pl.DataFrame(
-        {
-            "y": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
-            "x1": [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0],
-        }
-    )
+    # --- GLSData / SigmaMatrix ---
+    df_gls = pl.read_csv(_DATA_DIR / "synthetic_gls_data.csv")
     manager.store_table(TABLE_GLS_DATA, df_gls)
 
-    # --- SigmaMatrix (10×10 単位行列) ---
-    sigma_data = {
-        f"col_{i}": [1.0 if i == j else 0.0 for j in range(_N_GLS)]
-        for i in range(_N_GLS)
-    }
-    df_sigma = pl.DataFrame(sigma_data)
+    df_sigma = pl.read_csv(_DATA_DIR / "synthetic_gls_sigma.csv")
     manager.store_table(TABLE_GLS_SIGMA, df_sigma)
+
+    # --- FGLS datasets ---
+    df_fgls_hetero = pl.read_csv(_DATA_DIR / "synthetic_fgls_hetero.csv")
+    manager.store_table(TABLE_FGLS_HETERO, df_fgls_hetero)
+
+    df_fgls_ar1 = pl.read_csv(_DATA_DIR / "synthetic_fgls_ar1.csv")
+    manager.store_table(TABLE_FGLS_AR1, df_fgls_ar1)
 
     # --- StringData (dtype検証用) ---
     df_string = pl.DataFrame(

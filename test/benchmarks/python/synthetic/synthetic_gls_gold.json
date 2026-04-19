@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T10:01:36.316690+00:00",
+    "python_version": "3.14.3",
+    "libraries": {
+      "statsmodels": "0.14.6"
+    },
+    "seed": 2024,
+    "tolerance_guide": {
+      "gls_coef": "atol=1e-12 (statsmodels GLS)"
+    },
+    "data_file": "synthetic_gls_data.parquet",
+    "model": "gls",
+    "sigma_file": "synthetic_gls_sigma.parquet",
+    "missing_value_handling": "complete-case only; no missing values in synthetic_gls_data"
+  },
+  "estimates": {
+    "dep_var": "y",
+    "expl_vars": [
+      "x1",
+      "x2"
+    ],
+    "n_obs": 48,
+    "nonrobust": {
+      "coefficients": {
+        "const": 1.1500134502192045,
+        "x1": 2.0717415909173393,
+        "x2": -1.2502252655155364
+      },
+      "std_errors": {
+        "const": 0.5641438185062431,
+        "x1": 0.07663421335672371,
+        "x2": 0.1460404196162344
+      },
+      "t_values": {
+        "const": 2.0385111251670622,
+        "x1": 27.034160072520265,
+        "x2": -8.560816716364437
+      },
+      "p_values": {
+        "const": 0.04740047234125814,
+        "x1": 1.8308953375082086e-29,
+        "x2": 5.3397270608389026e-11
+      },
+      "conf_int": {
+        "const": {
+          "lower": 0.013769473549599454,
+          "upper": 2.2862574268888096
+        },
+        "x1": {
+          "lower": 1.9173923620913442,
+          "upper": 2.2260908197433342
+        },
+        "x2": {
+          "lower": -1.544365769578175,
+          "upper": -0.9560847614528978
+        }
+      }
+    },
+    "diagnostics": {
+      "r_squared": 0.9427959483094607,
+      "adj_r_squared": 0.9402535460121033,
+      "f_test": {
+        "statistic": 370.82878240373213,
+        "p_value": 1.1018000411029955e-28
+      },
+      "aic": 173.14913859995582,
+      "bic": 178.76274163267948,
+      "log_likelihood": -83.57456929997791,
+      "sigma_shape": [
+        48,
+        48
+      ],
+      "sigma_structure": "Toeplitz AR(1)-like covariance",
+      "nan_policy": "GLS requires aligned complete cases; no NaN in synthetic_gls_data"
+    }
+  }
+}

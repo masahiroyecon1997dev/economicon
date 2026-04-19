@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T10:01:36.319735+00:00",
+    "python_version": "3.14.3",
+    "libraries": {
+      "statsmodels": "0.14.6"
+    },
+    "seed": 2024,
+    "tolerance_guide": {
+      "fgls_heteroskedastic_coef": "atol=1e-12 (1-step FGLS/WLS)"
+    },
+    "data_file": "synthetic_fgls_hetero.parquet",
+    "model": "fgls_heteroskedastic",
+    "fgls_method": "heteroskedastic",
+    "missing_value_handling": "no missing values in synthetic_fgls_hetero"
+  },
+  "estimates": {
+    "dep_var": "y",
+    "expl_vars": [
+      "x1",
+      "x2",
+      "x3"
+    ],
+    "n_obs": 320,
+    "nonrobust": {
+      "coefficients": {
+        "const": 2.466065507828487,
+        "x1": 1.8790930656682026,
+        "x2": -1.4568412584600363,
+        "x3": 0.8143933337761797
+      },
+      "std_errors": {
+        "const": 0.0040680203373506,
+        "x1": 0.0014509937373138162,
+        "x2": 0.0031753830164149054,
+        "x3": 0.003100393929942657
+      },
+      "t_values": {
+        "const": 606.2077628241589,
+        "x1": 1295.0387154302366,
+        "x2": -458.79229400957433,
+        "x3": 262.6741479239195
+      },
+      "p_values": {
+        "const": 0.0,
+        "x1": 0.0,
+        "x2": 0.0,
+        "x3": 0.0
+      },
+      "conf_int": {
+        "const": {
+          "lower": 2.4580616797721833,
+          "upper": 2.474069335884791
+        },
+        "x1": {
+          "lower": 1.8762382361882208,
+          "upper": 1.8819478951481843
+        },
+        "x2": {
+          "lower": -1.4630888230169148,
+          "upper": -1.4505936939031578
+        },
+        "x3": {
+          "lower": 0.8082933102108525,
+          "upper": 0.820493357341507
+        }
+      }
+    },
+    "diagnostics": {
+      "r_squared": 0.9999084522116225,
+      "adj_r_squared": 0.9999075830870493,
+      "f_test": {
+        "statistic": 1150477.7140584495,
+        "p_value": 0.0
+      },
+      "aic": 661.2405008279711,
+      "bic": 676.3137848111462,
+      "log_likelihood": -326.62025041398556,
+      "fgls_method": "heteroskedastic",
+      "variance_estimator": "sigma2_hat = clip(ols_resid^2, 1e-8, None)",
+      "nan_policy": "no NaN in synthetic_fgls_hetero; no row dropped"
+    }
+  }
+}

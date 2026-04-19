@@ -9,6 +9,7 @@ from tests.regressions.conftest import (
     URL_REGRESSION,
     OlsPayload,
     WlsPayload,
+    load_py_gold,
 )
 
 _ABS_TOL = 1e-12
@@ -22,6 +23,25 @@ def _get_output(client, payload: dict) -> dict:
     assert resp.status_code == status.HTTP_200_OK, resp.text
     result_id = resp.json()["result"]["resultId"]
     return AnalysisResultStore().get_result(result_id).result_data
+
+
+def _assert_model_statistics_matches_gold(output: dict, gold: dict) -> None:
+    stats = output["modelStatistics"]
+    diagnostics = gold["estimates"]["diagnostics"]
+
+    assert stats["nObservations"] == gold["estimates"]["n_obs"]
+    assert abs(stats["R2"] - diagnostics["r_squared"]) < _ABS_TOL
+    assert abs(stats["adjustedR2"] - diagnostics["adj_r_squared"]) < _ABS_TOL
+    assert abs(stats["fValue"] - diagnostics["f_test"]["statistic"]) < _ABS_TOL
+    assert (
+        abs(stats["fProbability"] - diagnostics["f_test"]["p_value"])
+        < _ABS_TOL
+    )
+    assert abs(stats["AIC"] - diagnostics["aic"]) < _ABS_TOL
+    assert abs(stats["BIC"] - diagnostics["bic"]) < _ABS_TOL
+    assert (
+        abs(stats["logLikelihood"] - diagnostics["log_likelihood"]) < _ABS_TOL
+    )
 
 
 def test_wls_success(client, tables_store):
@@ -42,6 +62,44 @@ def test_wls_response_structure(client, tables_store):
     assert len(output["parameters"]) == _N_PARAMS_WITH_CONST
 
 
+def test_wls_matches_python_gold(client, tables_store):
+    """WLS が Python gold benchmark と一致することを確認"""
+    gold = load_py_gold("wls")
+    output = _get_output(client, WlsPayload().build())
+    params = {param["variable"]: param for param in output["parameters"]}
+    gold_params = gold["estimates"]["nonrobust"]
+
+    for variable, expected in gold_params["coefficients"].items():
+        got = params[variable]
+        assert abs(got["coefficient"] - expected) < _ABS_TOL
+        assert (
+            abs(got["standardError"] - gold_params["std_errors"][variable])
+            < _ABS_TOL
+        )
+        assert (
+            abs(got["tValue"] - gold_params["t_values"][variable]) < _ABS_TOL
+        )
+        assert (
+            abs(got["pValue"] - gold_params["p_values"][variable]) < _ABS_TOL
+        )
+        assert (
+            abs(
+                got["confidenceIntervalLower"]
+                - gold_params["conf_int"][variable]["lower"]
+            )
+            < _ABS_TOL
+        )
+        assert (
+            abs(
+                got["confidenceIntervalUpper"]
+                - gold_params["conf_int"][variable]["upper"]
+            )
+            < _ABS_TOL
+        )
+
+    _assert_model_statistics_matches_gold(output, gold)
+
+
 def test_wls_equal_weights_matches_ols(client, tables_store):
     """全重みが1のときWLS係数がOLS係数と一致することを確認"""
     df = tables_store.get_table(TABLE_WLS).table.with_columns(
@@ -53,9 +111,10 @@ def test_wls_equal_weights_matches_ols(client, tables_store):
         client,
         WlsPayload(weights_col="weights_one").build(),
     )["parameters"]
-    ols_params = _get_output(client, OlsPayload(table=TABLE_WLS).build())[
-        "parameters"
-    ]
+    ols_params = _get_output(
+        client,
+        OlsPayload(table=TABLE_WLS, dep="y", expl=["x1", "x2", "x3"]).build(),
+    )["parameters"]
 
     wls_map = {p["variable"]: p["coefficient"] for p in wls_params}
     ols_map = {p["variable"]: p["coefficient"] for p in ols_params}
