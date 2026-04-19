@@ -50,6 +50,13 @@
       "args": ["tests", "-v"],
       "justMyCode": false,
       "cwd": "${workspaceFolder}/api"
+    },
+    {
+      "name": "Python デバッガー: 現在のファイル",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
     }
   ],
   "compounds": [
