@@ -42,7 +42,7 @@ from sklearn.preprocessing import StandardScaler
 _SCRIPT_DIR = Path(__file__).parent
 _REPO_ROOT = _SCRIPT_DIR.parent.parent.parent
 _DATA_DIR = _REPO_ROOT / "test" / "data" / "parquet"
-_BENCH_DIR = _REPO_ROOT / "test" / "benchmarks"
+_BENCH_DIR = _REPO_ROOT / "test" / "benchmarks" / "python" / "synthetic"
 
 
 def _out(name: str) -> Path:
