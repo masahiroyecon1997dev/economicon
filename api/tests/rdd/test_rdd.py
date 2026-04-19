@@ -1,10 +1,12 @@
 """RDD 分析テスト"""
 
+import polars as pl
 import pytest
 from fastapi import status
 
 from economicon.core.enums import ErrorCode
 from economicon.services.data.analysis_result_store import AnalysisResultStore
+from economicon.services.rdd.fitters import compute_bins_data
 from tests.rdd.conftest import (
     TABLE_STRING,
     URL_RDD,
@@ -18,6 +20,7 @@ _PLACEBO_TOLERANCE = 1e-6
 _MIN_PLACEBO_COUNT = 2
 _TEST_PLACEBO_LEFT = -0.5
 _TEST_PLACEBO_RIGHT = 0.5
+_TEST_BINS_COUNT = 4
 
 # -----------------------------------------------------------
 # ヘルパー
@@ -116,6 +119,50 @@ def test_rdd_bins_data_nonempty(client, tables_store):
     for b in rd["binsData"]:
         assert "x" in b
         assert "y" in b
+
+
+def test_rdd_bins_data_internal_bin_name_collision() -> None:
+    """内部ビン列名が実列名と衝突しても集計できることを確認"""
+    df_pl = pl.DataFrame(
+        {
+            "_bin": [-1.0, -0.5, 0.5, 1.0],
+            "y": [1.0, 2.0, 3.0, 4.0],
+        }
+    )
+
+    bins = compute_bins_data(
+        df_pl,
+        outcome_var="y",
+        running_var="_bin",
+        cutoff=0.0,
+        n_bins=_TEST_BINS_COUNT,
+    )
+
+    assert len(bins) == _TEST_BINS_COUNT
+    assert bins[0] == {"x": -1.0, "y": 1.0}
+    assert bins[-1] == {"x": 1.0, "y": 4.0}
+
+
+def test_rdd_bins_data_base_internal_name_collision() -> None:
+    """内部基底名と衝突しても連番付き一時列名で集計できることを確認"""
+    df_pl = pl.DataFrame(
+        {
+            "__rdd_internal_bin_index__": [-1.0, -0.5, 0.5, 1.0],
+            "y": [1.0, 2.0, 3.0, 4.0],
+        }
+    )
+
+    bins = compute_bins_data(
+        df_pl,
+        outcome_var="y",
+        running_var="__rdd_internal_bin_index__",
+        cutoff=0.0,
+        n_bins=_TEST_BINS_COUNT,
+    )
+
+    assert len(bins) == _TEST_BINS_COUNT
+    assert bins[1] == {"x": -0.5, "y": 2.0}
+    assert bins[2] == {"x": 0.5, "y": 3.0}
 
 
 def test_rdd_poly_fit_nonempty(client, tables_store):

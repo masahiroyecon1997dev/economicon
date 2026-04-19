@@ -265,6 +265,13 @@ def compute_bins_data(
     n_left_bins = n_bins // 2
     n_right_bins = n_bins - n_left_bins
     bins: list[dict[str, float]] = []
+    bin_col = "__rdd_internal_bin_index__"
+    used_names = {running_var, outcome_var}
+    suffix = 1
+
+    while bin_col in used_names:
+        bin_col = f"__rdd_internal_bin_index__{suffix}"
+        suffix += 1
 
     for side_filter, n_side in [
         (pl.col(running_var) < cutoff, n_left_bins),
@@ -288,9 +295,9 @@ def compute_bins_data(
                     .floor()
                     .clip(upper_bound=n_side - 1)
                     .cast(pl.Int32)
-                ).alias("_bin")
+                ).alias(bin_col)
             )
-            .group_by("_bin")
+            .group_by(bin_col)
             .agg(
                 [
                     pl.col(running_var).mean().alias("x"),
