@@ -72,6 +72,33 @@ class NullStrategy(StrEnum):
     ERROR = "error"
 
 
+class RDDKernelType(StrEnum):
+    TRIANGULAR = "triangular"
+    EPANECHNIKOV = "epanechnikov"
+    UNIFORM = "uniform"
+
+
+class RDDBandwidthSelectType(StrEnum):
+    MSERD = "mserd"
+    MSETWO = "msetwo"
+    MSESUM = "msesum"
+    MSECOMB1 = "msecomb1"
+    MSECOMB2 = "msecomb2"
+    CERRD = "cerrd"
+    CERTWO = "certwo"
+    CERSUM = "cersum"
+    CERCOMB1 = "cercomb1"
+    CERCOMB2 = "cercomb2"
+
+
+class RDDVceType(StrEnum):
+    NN = "nn"
+    HC1 = "hc1"
+    HC3 = "hc3"
+    CLUSTER = "cluster"
+    NNCLUSTER = "nncluster"
+
+
 class DescriptiveStatisticType(StrEnum):
     MEAN = "mean"
     MEDIAN = "median"
