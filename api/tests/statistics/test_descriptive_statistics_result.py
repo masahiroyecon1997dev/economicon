@@ -5,16 +5,8 @@ POST で得た resultId を使い、GET /api/analysis/results/{resultId} で
 数値精度の検証は test_descriptive_statistics.py で行う。
 """
 
-import polars as pl
-import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-
-from economicon.services.data.analysis_result_store import (
-    AnalysisResultStore,
-)
-from economicon.services.data.tables_store import TablesStore
-from main import app
 
 # -----------------------------------------------------------
 # 定数
@@ -37,44 +29,6 @@ _STAT_POP_VARIANCE = "population_variance"
 
 URL_DS = "/api/statistics/descriptive"
 URL_RESULTS = "/api/analysis/results"
-
-
-# -----------------------------------------------------------
-# フィクスチャ
-# -----------------------------------------------------------
-
-
-@pytest.fixture
-def client():
-    """TestClient のフィクスチャ"""
-    return TestClient(app)
-
-
-@pytest.fixture
-def tables_store():
-    """TablesStore のフィクスチャ"""
-    manager = TablesStore()
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
-
-    df_numeric = pl.DataFrame(
-        {
-            "A": [1, 2, 3, 4, 5],
-            "B": [10, 20, 30, 40, 50],
-        }
-    )
-    manager.store_table(_TABLE_NUMERIC, df_numeric)
-
-    df_string = pl.DataFrame(
-        {
-            "name": ["Alice", "Bob", "Charlie", "Alice", "Bob"],
-        }
-    )
-    manager.store_table(_TABLE_STRING, df_string)
-
-    yield manager
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
 
 
 # -----------------------------------------------------------

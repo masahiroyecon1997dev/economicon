@@ -5,25 +5,14 @@ POST で得た resultId を使い、GET /api/analysis/results/{resultId} で
 数値精度の検証は test_confidence_interval.py で行う。
 """
 
-import numpy as np
-import polars as pl
-import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-
-from economicon.services.data.analysis_result_store import (
-    AnalysisResultStore,
-)
-from economicon.services.data.tables_store import TablesStore
-from main import app
 
 # -----------------------------------------------------------
 # 定数
 # -----------------------------------------------------------
 
 _TABLE_NAME = "CIResultTestTable"
-_N_SAMPLES = 100
-_SEED = 42
 _CI_LEVEL_90 = 0.90
 _CI_LEVEL_95 = 0.95
 _CI_LEVEL_99 = 0.99
@@ -36,41 +25,6 @@ _STAT_STD = "standard_deviation"
 
 URL_CI = "/api/statistics/confidence-interval"
 URL_RESULTS = "/api/analysis/results"
-
-
-# -----------------------------------------------------------
-# フィクスチャ
-# -----------------------------------------------------------
-
-
-@pytest.fixture
-def client():
-    """TestClient のフィクスチャ"""
-    return TestClient(app)
-
-
-@pytest.fixture
-def tables_store():
-    """TablesStore のフィクスチャ"""
-    manager = TablesStore()
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
-
-    np.random.seed(_SEED)
-    normal_data = np.random.normal(50, 10, _N_SAMPLES)
-    binary_data = np.random.binomial(1, 0.3, _N_SAMPLES)
-
-    df = pl.DataFrame(
-        {
-            "normal_col": normal_data,
-            "binary_col": binary_data.astype(float),
-        }
-    )
-    manager.store_table(_TABLE_NAME, df)
-
-    yield manager
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
 
 
 # -----------------------------------------------------------

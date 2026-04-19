@@ -1,15 +1,10 @@
 """記述統計計算APIのテスト"""
 
-import polars as pl
 import pytest
 from fastapi import status
-from fastapi.testclient import TestClient
 
-from economicon.services.data.analysis_result_store import (
-    AnalysisResultStore,
-)
-from economicon.services.data.tables_store import TablesStore
-from main import app
+from economicon.services.data.analysis_result_store import AnalysisResultStore
+from tests.statistics.conftest import load_statistics_gold_case
 
 # -----------------------------------------------------------
 # 定数
@@ -50,61 +45,6 @@ def _get_result_data(client: TestClient, payload: dict) -> dict:
     assert resp.status_code == status.HTTP_200_OK, resp.text
     result_id = resp.json()["result"]["resultId"]
     return AnalysisResultStore().get_result(result_id).result_data
-
-
-# -----------------------------------------------------------
-# フィクスチャ
-# -----------------------------------------------------------
-
-
-@pytest.fixture
-def client():
-    """TestClientのフィクスチャ"""
-    return TestClient(app)
-
-
-@pytest.fixture
-def tables_store():
-    """TablesStoreのフィクスチャ"""
-    manager = TablesStore()
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
-
-    df_numeric = pl.DataFrame(
-        {
-            "A": [1, 2, 3, 4, 5],
-            "B": [10, 20, 30, 40, 50],
-            "C": [5.234, 8.321, 2.976, 4.567, 9.629],
-        }
-    )
-    manager.store_table(_TABLE_NUMERIC, df_numeric)
-
-    df_string = pl.DataFrame(
-        {
-            "name": ["Alice", "Bob", "Charlie", "Alice", "Bob"],
-            "category": ["A", "B", "A", "A", "C"],
-        }
-    )
-    manager.store_table(_TABLE_STRING, df_string)
-
-    yield manager
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
-
-
-@pytest.fixture
-def tables_store_with_nulls():
-    """null包含データのテーブルストア"""
-    manager = TablesStore()
-    manager.clear_tables()
-    df = pl.DataFrame(
-        {
-            "X": pl.Series([1.0, None, 3.0, None, 5.0], dtype=pl.Float64),
-        }
-    )
-    manager.store_table("TestNulls", df)
-    yield manager
-    manager.clear_tables()
 
 
 # -----------------------------------------------------------
@@ -324,7 +264,7 @@ def test_descriptive_statistics_response_structure(client, tables_store):
 def test_descriptive_statistics_mean_median_variance_std_numerical(
     client, tables_store
 ):
-    """A=[1..5] の平均・中央値・分散・標準偏差が期待値と一致する"""
+    """A=[1..5] の平均・中央値・分散・標準偏差が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_NUMERIC,
         "columnNameList": ["A"],
@@ -337,52 +277,63 @@ def test_descriptive_statistics_mean_median_variance_std_numerical(
     }
     rd = _get_result_data(client, payload)
     stats_a = rd["statistics"]["A"]
+    gold = load_statistics_gold_case("descriptive_statistics", "ds_A_basic")
+    expected = gold["expected"]["statistics"]["A"]
 
-    assert stats_a[_STAT_MEAN] == pytest.approx(3.0, abs=1e-8)
-    assert stats_a[_STAT_MEDIAN] == pytest.approx(3.0, abs=1e-8)
-    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-8)
+    assert stats_a[_STAT_MEAN] == pytest.approx(expected[_STAT_MEAN], abs=1e-8)
+    assert stats_a[_STAT_MEDIAN] == pytest.approx(
+        expected[_STAT_MEDIAN], abs=1e-8
+    )
+    assert stats_a[_STAT_VARIANCE] == pytest.approx(
+        expected[_STAT_VARIANCE], abs=1e-8
+    )
     assert stats_a[_STAT_STD_DEV] == pytest.approx(
-        1.5811388300841898, abs=1e-8
+        expected[_STAT_STD_DEV], abs=1e-8
     )
 
 
 def test_descriptive_statistics_range_iqr_numerical(client, tables_store):
-    """A=[1..5] の range と IQR が Polars の直接計算と一致する"""
+    """A=[1..5] の range と IQR が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_NUMERIC,
         "columnNameList": ["A"],
         "statistics": [_STAT_RANGE, _STAT_IQR],
     }
     rd = _get_result_data(client, payload)
-
-    df = pl.DataFrame({"A": [1, 2, 3, 4, 5]})
-    expected_range = float(
-        df.select(pl.col("A").max() - pl.col("A").min()).to_series(0)[0]
+    gold = load_statistics_gold_case(
+        "descriptive_statistics", "ds_A_range_iqr"
     )
-    expected_iqr = float(
-        df.select(
-            pl.col("A").quantile(0.75) - pl.col("A").quantile(0.25)
-        ).to_series(0)[0]
-    )
+    expected = gold["expected"]["statistics"]["A"]
     stats_a = rd["statistics"]["A"]
-    assert stats_a[_STAT_RANGE] == pytest.approx(expected_range, abs=1e-8)
-    assert stats_a[_STAT_IQR] == pytest.approx(expected_iqr, abs=1e-8)
+    assert stats_a[_STAT_RANGE] == pytest.approx(
+        expected[_STAT_RANGE], abs=1e-8
+    )
+    assert stats_a[_STAT_IQR] == pytest.approx(expected[_STAT_IQR], abs=1e-8)
 
 
 def test_descriptive_statistics_population_variance_distinction(
     client, tables_store
 ):
-    """A=[1..5] で不偏分散=2.5、母分散=2.0 の区別が正しい"""
+    """A=[1..5] で不偏分散と母分散が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_NUMERIC,
         "columnNameList": ["A"],
         "statistics": [_STAT_VARIANCE, _STAT_POP_VARIANCE],
     }
     rd = _get_result_data(client, payload)
+    gold = load_statistics_gold_case(
+        "descriptive_statistics",
+        "ds_A_variance_vs_population",
+    )
+    expected = gold["expected"]["statistics"]["A"]
     stats_a = rd["statistics"]["A"]
 
-    assert stats_a[_STAT_VARIANCE] == pytest.approx(2.5, abs=1e-8)
-    assert stats_a[_STAT_POP_VARIANCE] == pytest.approx(2.0, abs=1e-8)
+    assert stats_a[_STAT_VARIANCE] == pytest.approx(
+        expected[_STAT_VARIANCE], abs=1e-8
+    )
+    assert stats_a[_STAT_POP_VARIANCE] == pytest.approx(
+        expected[_STAT_POP_VARIANCE], abs=1e-8
+    )
 
 
 def test_descriptive_statistics_string_mode_result(client, tables_store):
@@ -397,46 +348,48 @@ def test_descriptive_statistics_string_mode_result(client, tables_store):
 
 
 def test_descriptive_statistics_count_null_result(client, tables_store):
-    """count=5、null_count=0、null_ratio=0.0 が正しく返る"""
+    """count/null_count/null_ratio が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_NUMERIC,
         "columnNameList": ["A"],
         "statistics": [_STAT_COUNT, _STAT_NULL_COUNT, _STAT_NULL_RATIO],
     }
     rd = _get_result_data(client, payload)
+    gold = load_statistics_gold_case("descriptive_statistics", "ds_A_counts")
+    expected = gold["expected"]["statistics"]["A"]
     stats_a = rd["statistics"]["A"]
 
-    expected_count = 5
-    assert stats_a[_STAT_COUNT] == expected_count
-    assert stats_a[_STAT_NULL_COUNT] == 0
-    assert stats_a[_STAT_NULL_RATIO] == pytest.approx(0.0, abs=1e-8)
+    assert stats_a[_STAT_COUNT] == expected[_STAT_COUNT]
+    assert stats_a[_STAT_NULL_COUNT] == expected[_STAT_NULL_COUNT]
+    assert stats_a[_STAT_NULL_RATIO] == pytest.approx(
+        expected[_STAT_NULL_RATIO], abs=1e-8
+    )
 
 
 def test_descriptive_statistics_multi_column_numerical(client, tables_store):
-    """A と B の平均が Polars describe() の値と一致する"""
+    """A と B の平均と標準偏差が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_NUMERIC,
         "columnNameList": ["A", "B"],
         "statistics": [_STAT_MEAN, _STAT_STD_DEV],
     }
     rd = _get_result_data(client, payload)
-
-    df = pl.DataFrame({"A": [1, 2, 3, 4, 5], "B": [10, 20, 30, 40, 50]})
-    desc = df.describe()
-    mean_row = desc.filter(pl.col("statistic") == "mean")
-    std_row = desc.filter(pl.col("statistic") == "std")
+    gold = load_statistics_gold_case(
+        "descriptive_statistics", "ds_AB_mean_std"
+    )
+    expected = gold["expected"]["statistics"]
 
     assert rd["statistics"]["A"][_STAT_MEAN] == pytest.approx(
-        float(mean_row["A"][0]), abs=1e-8
+        expected["A"][_STAT_MEAN], abs=1e-8
     )
     assert rd["statistics"]["B"][_STAT_MEAN] == pytest.approx(
-        float(mean_row["B"][0]), abs=1e-8
+        expected["B"][_STAT_MEAN], abs=1e-8
     )
     assert rd["statistics"]["A"][_STAT_STD_DEV] == pytest.approx(
-        float(std_row["A"][0]), abs=1e-8
+        expected["A"][_STAT_STD_DEV], abs=1e-8
     )
     assert rd["statistics"]["B"][_STAT_STD_DEV] == pytest.approx(
-        float(std_row["B"][0]), abs=1e-8
+        expected["B"][_STAT_STD_DEV], abs=1e-8
     )
 
 

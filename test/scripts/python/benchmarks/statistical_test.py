@@ -18,6 +18,26 @@ def _sample_summary(values: np.ndarray) -> dict:
     }
 
 
+def _cohen_d_1samp(x: np.ndarray, mu: float) -> float:
+    return float(abs(np.mean(x) - mu) / np.std(x, ddof=1))
+
+
+def _cohen_d_2samp(x: np.ndarray, y: np.ndarray, equal_var: bool) -> float:
+    n1, n2 = len(x), len(y)
+    s1 = float(np.std(x, ddof=1))
+    s2 = float(np.std(y, ddof=1))
+    if equal_var:
+        pooled = np.sqrt(((n1 - 1) * s1**2 + (n2 - 1) * s2**2) / (n1 + n2 - 2))
+    else:
+        pooled = np.sqrt((s1**2 + s2**2) / 2)
+    return float(abs(np.mean(x) - np.mean(y)) / pooled)
+
+
+def _cohen_d_paired(x: np.ndarray, y: np.ndarray) -> float:
+    diff = x - y
+    return float(abs(np.mean(diff)) / np.std(diff, ddof=1))
+
+
 def bench_statistical_test(df: pd.DataFrame) -> dict:
     group_a = _group(df, "StatTestTableA")
     group_b = _group(df, "StatTestTableB")
@@ -84,7 +104,7 @@ def bench_statistical_test(df: pd.DataFrame) -> dict:
             "df": f(len(group_a) - 1),
             "df2": None,
             "confidence_interval": {"lower": f(t1_ci.low), "upper": f(t1_ci.high)},
-            "effect_size": None,
+            "effect_size": f(_cohen_d_1samp(group_a, 50.0)),
             "sample_summary": {"StatTestTableA": _sample_summary(group_a)},
         },
         {
@@ -100,7 +120,7 @@ def bench_statistical_test(df: pd.DataFrame) -> dict:
             "df": f(len(group_a) + len(group_b) - 2),
             "df2": None,
             "confidence_interval": {"lower": f(t2_ci.low), "upper": f(t2_ci.high)},
-            "effect_size": None,
+            "effect_size": f(_cohen_d_2samp(group_a, group_b, True)),
             "sample_summary": {
                 "StatTestTableA": _sample_summary(group_a),
                 "StatTestTableB": _sample_summary(group_b),
@@ -119,7 +139,7 @@ def bench_statistical_test(df: pd.DataFrame) -> dict:
             "df": f(tw.df),
             "df2": None,
             "confidence_interval": {"lower": f(tw_ci.low), "upper": f(tw_ci.high)},
-            "effect_size": None,
+            "effect_size": f(_cohen_d_2samp(group_a, group_b, False)),
             "sample_summary": {
                 "StatTestTableA": _sample_summary(group_a),
                 "StatTestTableB": _sample_summary(group_b),
@@ -138,7 +158,7 @@ def bench_statistical_test(df: pd.DataFrame) -> dict:
             "df": f(len(group_a) - 1),
             "df2": None,
             "confidence_interval": {"lower": f(tp_ci.low), "upper": f(tp_ci.high)},
-            "effect_size": None,
+            "effect_size": f(_cohen_d_paired(group_a, group_b)),
             "sample_summary": {
                 "StatTestTableA": _sample_summary(group_a),
                 "StatTestTableB": _sample_summary(group_b),

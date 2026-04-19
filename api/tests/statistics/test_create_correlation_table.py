@@ -3,10 +3,8 @@
 import polars as pl
 import pytest
 from fastapi import status
-from fastapi.testclient import TestClient
 
-from economicon.services.data.tables_store import TablesStore
-from main import app
+from tests.statistics.conftest import load_statistics_gold_case
 
 # -----------------------------------------------------------
 # 定数
@@ -41,101 +39,31 @@ _MSG_COLUMN_NAMES_TOO_FEW = "columnNamesは2件以上ある必要があります
 
 
 # -----------------------------------------------------------
-# フィクスチャ
-# -----------------------------------------------------------
-
-
-@pytest.fixture
-def client():
-    """TestClientのフィクスチャ"""
-    return TestClient(app)
-
-
-@pytest.fixture
-def tables_store():
-    """TablesStoreのフィクスチャ"""
-    manager = TablesStore()
-    manager.clear_tables()
-
-    # A と B は完全正相関、C は A と完全負相関
-    df = pl.DataFrame(
-        {
-            "A": [1.0, 2.0, 3.0, 4.0, 5.0],
-            "B": [2.0, 4.0, 6.0, 8.0, 10.0],
-            "C": [5.0, 4.0, 3.0, 2.0, 1.0],
-            "D": [2.0, 3.0, 5.0, 4.0, 5.0],
-        }
-    )
-    manager.store_table(_TABLE, df)
-
-    # 欠損値あり
-    df_nulls = pl.DataFrame(
-        {
-            "X": [1.0, None, 3.0, 4.0, 5.0],
-            "Y": [2.0, 4.0, None, 8.0, 10.0],
-        }
-    )
-    manager.store_table(_TABLE_WITH_NULLS, df_nulls)
-
-    # 文字列列を含むテーブル
-    df_string = pl.DataFrame(
-        {
-            "name": ["Alice", "Bob", "Charlie"],
-            "score": [1.0, 2.0, 3.0],
-        }
-    )
-    manager.store_table(_TABLE_STRING, df_string)
-
-    # P-Q の有効ペア数が 0 件（pairwise で _pair_corr が None を返すケース）
-    df_sparse = pl.DataFrame(
-        {
-            "P": [1.0, None, None, None],
-            "Q": [None, 2.0, 3.0, 4.0],
-        }
-    )
-    manager.store_table(_TABLE_SPARSE, df_sparse)
-
-    # Const 列は分散ゼロ → scipy が NaN を返すケース
-    df_constant = pl.DataFrame(
-        {
-            "Const": [3.0, 3.0, 3.0, 3.0, 3.0],
-            "Vary": [1.0, 2.0, 3.0, 4.0, 5.0],
-        }
-    )
-    manager.store_table(_TABLE_CONSTANT, df_constant)
-
-    # 日本語テーブル名・列名
-    df_jp = pl.DataFrame(
-        {
-            "変数A": [1.0, 2.0, 3.0, 4.0, 5.0],
-            "変数B": [2.0, 4.0, 6.0, 8.0, 10.0],
-        }
-    )
-    manager.store_table(_TABLE_JP, df_jp)
-
-    # 5 列の大きな行列テスト用
-    df_large = pl.DataFrame(
-        {
-            "V1": [1.0, 2.0, 3.0, 4.0, 5.0],
-            "V2": [2.0, 4.0, 6.0, 8.0, 10.0],
-            "V3": [5.0, 4.0, 3.0, 2.0, 1.0],
-            "V4": [2.0, 3.0, 5.0, 4.0, 5.0],
-            "V5": [1.0, 3.0, 2.0, 5.0, 4.0],
-        }
-    )
-    manager.store_table(_TABLE_LARGE, df_large)
-
-    yield manager
-    manager.clear_tables()
-
-
-# -----------------------------------------------------------
 # 成功ケース
 # -----------------------------------------------------------
 
 
+def _assert_corr_table_matches_gold(df: pl.DataFrame, case_id: str) -> None:
+    gold = load_statistics_gold_case("correlation_table", case_id)
+    expected = gold["expected"]
+    order = expected["variable_order"]
+
+    assert df["variable_name"].to_list() == order
+
+    for row_idx, row_name in enumerate(order):
+        for col_idx, col_name in enumerate(order):
+            actual = df[col_name].to_list()[row_idx]
+            expected_value = expected["rounded_matrix"][row_idx][col_idx]
+            if expected_value is None:
+                assert actual is None, (
+                    f"expected null at ({row_name}, {col_name}) but got {actual}"
+                )
+            else:
+                assert actual == pytest.approx(expected_value, abs=1e-8)
+
+
 def test_create_correlation_table_success_pearson(client, tables_store):
-    """pearson 手法で相関係数テーブルが正しく作成される"""
+    """pearson 手法で相関係数テーブルが gold JSON と一致する"""
     payload = {
         "tableName": _TABLE,
         "columnNames": ["A", "B"],
@@ -151,19 +79,12 @@ def test_create_correlation_table_success_pearson(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert data["code"] == "OK"
     assert data["result"]["tableName"] == _NEW_TABLE
-
-    # 保存されたテーブルの内容を確認
     df = tables_store.get_table(_NEW_TABLE).table
-    assert df["variable_name"].to_list() == ["A", "B"]
-    # A と B は完全正相関なので r = 1.0
-    assert df["A"].to_list()[0] == pytest.approx(1.0)
-    assert df["B"].to_list()[1] == pytest.approx(1.0)
-    assert df["A"].to_list()[1] == pytest.approx(1.0)
-    assert df["B"].to_list()[0] == pytest.approx(1.0)
+    _assert_corr_table_matches_gold(df, "corr_ab_pearson_dp3")
 
 
 def test_create_correlation_table_success_spearman(client, tables_store):
-    """spearman 手法で相関係数テーブルが正しく作成される"""
+    """spearman 手法で相関係数テーブルが gold JSON と一致する"""
     payload = {
         "tableName": _TABLE,
         "columnNames": ["A", "C"],
@@ -178,13 +99,12 @@ def test_create_correlation_table_success_spearman(client, tables_store):
 
     assert response.status_code == status.HTTP_200_OK
     assert data["code"] == "OK"
-    # A と C は完全負相関なので r = -1.0
     df = tables_store.get_table(_NEW_TABLE).table
-    assert df["C"].to_list()[0] == pytest.approx(-1.0)
+    _assert_corr_table_matches_gold(df, "corr_ac_spearman_dp3")
 
 
 def test_create_correlation_table_success_kendall(client, tables_store):
-    """kendall 手法で相関係数テーブルが正しく作成される"""
+    """kendall 手法で相関係数テーブルが gold JSON と一致する"""
     payload = {
         "tableName": _TABLE,
         "columnNames": ["A", "B"],
@@ -200,8 +120,7 @@ def test_create_correlation_table_success_kendall(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
     assert data["code"] == "OK"
     df = tables_store.get_table(_NEW_TABLE).table
-    # A と B は完全正相関なので kendall r = 1.0
-    assert df["B"].to_list()[0] == pytest.approx(1.0)
+    _assert_corr_table_matches_gold(df, "corr_ab_kendall_dp3")
 
 
 def test_create_correlation_table_success_lower_triangle(client, tables_store):
@@ -237,8 +156,7 @@ def test_create_correlation_table_success_lower_triangle(client, tables_store):
 
 
 def test_create_correlation_table_success_decimal_places(client, tables_store):
-    """decimalPlaces が相関係数の丸め精度を制御する"""
-    # A と D の pearson 相関係数: 35 / sqrt(1700) ≈ 0.84887658...
+    """decimalPlaces が gold JSON と同じ丸め結果を返す"""
     base_payload = {
         "tableName": _TABLE,
         "columnNames": ["A", "D"],
@@ -252,27 +170,25 @@ def test_create_correlation_table_success_decimal_places(client, tables_store):
     res3 = client.post(URL, json=payload3)
     assert res3.status_code == status.HTTP_200_OK
     df3 = tables_store.get_table("Result3").table
-    assert df3["D"].to_list()[0] == pytest.approx(0.849, abs=1e-9)
+    _assert_corr_table_matches_gold(df3, "corr_ad_pearson_dp3")
 
-    # decimal_places=2 → 0.85
     payload2 = {**base_payload, "newTableName": "Result2", "decimalPlaces": 2}
     res2 = client.post(URL, json=payload2)
     assert res2.status_code == status.HTTP_200_OK
     df2 = tables_store.get_table("Result2").table
-    assert df2["D"].to_list()[0] == pytest.approx(0.85, abs=1e-9)
+    _assert_corr_table_matches_gold(df2, "corr_ad_pearson_dp2")
 
-    # decimal_places=1 → 0.8
     payload1 = {**base_payload, "newTableName": "Result1", "decimalPlaces": 1}
     res1 = client.post(URL, json=payload1)
     assert res1.status_code == status.HTTP_200_OK
     df1 = tables_store.get_table("Result1").table
-    assert df1["D"].to_list()[0] == pytest.approx(0.8, abs=1e-9)
+    _assert_corr_table_matches_gold(df1, "corr_ad_pearson_dp1")
 
 
 def test_create_correlation_table_success_pairwise_with_nulls(
     client, tables_store
 ):
-    """pairwise 指定時に欠損値がある列でも相関係数が計算される"""
+    """pairwise 指定時の相関係数が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_WITH_NULLS,
         "columnNames": ["X", "Y"],
@@ -287,16 +203,14 @@ def test_create_correlation_table_success_pairwise_with_nulls(
 
     assert response.status_code == status.HTTP_200_OK
     assert data["code"] == "OK"
-
-    # 有効なペア: (1,2), (4,8), (5,10) → 完全正相関 r=1.0
     df = tables_store.get_table(_NEW_TABLE).table
-    assert df["Y"].to_list()[0] == pytest.approx(1.0)
+    _assert_corr_table_matches_gold(df, "corr_xy_pairwise_pearson")
 
 
 def test_create_correlation_table_success_listwise_with_nulls(
     client, tables_store
 ):
-    """listwise 指定時に欠損行を一括除去して相関係数が計算される"""
+    """listwise 指定時の相関係数が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_WITH_NULLS,
         "columnNames": ["X", "Y"],
@@ -311,10 +225,8 @@ def test_create_correlation_table_success_listwise_with_nulls(
 
     assert response.status_code == status.HTTP_200_OK
     assert data["code"] == "OK"
-
-    # 有効行（両列が非null）: (1,2), (4,8), (5,10) → r=1.0
     df = tables_store.get_table(_NEW_TABLE).table
-    assert df["Y"].to_list()[0] == pytest.approx(1.0)
+    _assert_corr_table_matches_gold(df, "corr_xy_listwise_pearson")
 
 
 def test_create_correlation_table_result_schema(client, tables_store):
@@ -604,7 +516,7 @@ def test_create_correlation_table_column_names_not_list(client, tables_store):
 def test_create_correlation_table_pair_corr_returns_none_when_no_valid_pairs(
     client, tables_store
 ):
-    """pairwise: ペア有効観測数が 0 件のとき off-diagonal が null になる"""
+    """pairwise で有効ペアが 0 件のとき gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_SPARSE,
         "columnNames": ["P", "Q"],
@@ -619,14 +531,8 @@ def test_create_correlation_table_pair_corr_returns_none_when_no_valid_pairs(
 
     assert response.status_code == status.HTTP_200_OK
     assert data["code"] == "OK"
-
     df = tables_store.get_table(_NEW_TABLE).table
-    # 対角は 1.0（定義）
-    assert df["P"].to_list()[0] == pytest.approx(1.0)
-    assert df["Q"].to_list()[1] == pytest.approx(1.0)
-    # 有効ペアが 0 件 → off-diagonal は null
-    assert df["Q"].to_list()[0] is None
-    assert df["P"].to_list()[1] is None
+    _assert_corr_table_matches_gold(df, "corr_sparse_pairwise")
 
 
 def test_create_correlation_table_constant_column_does_not_raise(
@@ -660,7 +566,7 @@ def test_create_correlation_table_constant_column_does_not_raise(
 def test_create_correlation_table_listwise_spearman_with_nulls(
     client, tables_store
 ):
-    """listwise + spearman: 欠損行を一括除去してから spearman 相関を計算する"""
+    """listwise + spearman の相関係数が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_WITH_NULLS,
         "columnNames": ["X", "Y"],
@@ -675,15 +581,14 @@ def test_create_correlation_table_listwise_spearman_with_nulls(
 
     assert response.status_code == status.HTTP_200_OK
     assert data["code"] == "OK"
-    # 有効行: (1,2), (4,8), (5,10) → spearman r = 1.0
     df = tables_store.get_table(_NEW_TABLE).table
-    assert df["Y"].to_list()[0] == pytest.approx(1.0)
+    _assert_corr_table_matches_gold(df, "corr_xy_listwise_spearman")
 
 
 def test_create_correlation_table_listwise_kendall_with_nulls(
     client, tables_store
 ):
-    """listwise + kendall: 欠損行を一括除去してから kendall 相関を計算する"""
+    """listwise + kendall の相関係数が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_WITH_NULLS,
         "columnNames": ["X", "Y"],
@@ -698,9 +603,8 @@ def test_create_correlation_table_listwise_kendall_with_nulls(
 
     assert response.status_code == status.HTTP_200_OK
     assert data["code"] == "OK"
-    # 有効行: (1,2), (4,8), (5,10) → kendall τ = 1.0
     df = tables_store.get_table(_NEW_TABLE).table
-    assert df["Y"].to_list()[0] == pytest.approx(1.0)
+    _assert_corr_table_matches_gold(df, "corr_xy_listwise_kendall")
 
 
 # -----------------------------------------------------------
@@ -709,7 +613,7 @@ def test_create_correlation_table_listwise_kendall_with_nulls(
 
 
 def test_create_correlation_table_symmetry(client, tables_store):
-    """相関行列は対称行列 (r_ij == r_ji) であることを明示的に検証する"""
+    """相関行列が gold JSON の対称行列と一致する"""
     payload = {
         "tableName": _TABLE,
         "columnNames": ["A", "B", "C", "D"],
@@ -721,22 +625,13 @@ def test_create_correlation_table_symmetry(client, tables_store):
     }
     client.post(URL, json=payload)
     df = tables_store.get_table(_NEW_TABLE).table
-
-    cols = ["A", "B", "C", "D"]
-    for i, ci in enumerate(cols):
-        for j, cj in enumerate(cols):
-            r_ij = df[cj].to_list()[i]  # 行 i, 列 j
-            r_ji = df[ci].to_list()[j]  # 行 j, 列 i
-            assert r_ij == pytest.approx(r_ji, abs=1e-9), (
-                f"対称性違反: r[{ci},{cj}]={r_ij} != r[{cj},{ci}]={r_ji}"
-            )
+    _assert_corr_table_matches_gold(df, "corr_abcd_symmetry_dp10")
 
 
 def test_create_correlation_table_lower_triangle_listwise_pearson(
     client, tables_store
 ):
-    """lowerTriangle=True + listwise + pearson: np.corrcoef 高速パスでも
-    上三角が null になる"""
+    """lowerTriangle=True + listwise + pearson が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE,
         "columnNames": ["A", "B", "C"],
@@ -750,14 +645,7 @@ def test_create_correlation_table_lower_triangle_listwise_pearson(
     assert response.status_code == status.HTTP_200_OK
 
     df = tables_store.get_table(_NEW_TABLE).table
-    # 上三角は null
-    assert df["B"].to_list()[0] is None  # (A 行, B 列)
-    assert df["C"].to_list()[0] is None  # (A 行, C 列)
-    assert df["C"].to_list()[1] is None  # (B 行, C 列)
-    # 対角は 1.0
-    assert df["A"].to_list()[0] == pytest.approx(1.0)
-    assert df["B"].to_list()[1] == pytest.approx(1.0)
-    assert df["C"].to_list()[2] == pytest.approx(1.0)
+    _assert_corr_table_matches_gold(df, "corr_abc_lower_triangle_listwise")
     # 下三角は非 null
     assert df["A"].to_list()[1] is not None  # (B 行, A 列)
     assert df["A"].to_list()[2] is not None  # (C 行, A 列)

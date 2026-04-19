@@ -5,17 +5,8 @@ POST で得た resultId を使い、GET /api/analysis/results/{resultId} で
 数値精度の検証は test_statistical_test.py で行う。
 """
 
-import numpy as np
-import polars as pl
-import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-
-from economicon.services.data.analysis_result_store import (
-    AnalysisResultStore,
-)
-from economicon.services.data.tables_store import TablesStore
-from main import app
 
 # -----------------------------------------------------------
 # 定数
@@ -25,46 +16,8 @@ _TABLE_A = "STResultTableA"
 _TABLE_B = "STResultTableB"
 _TABLE_C = "STResultTableC"
 _COL = "value"
-_N = 50
-_SEED = 42
-
 URL_TEST = "/api/statistics/test"
 URL_RESULTS = "/api/analysis/results"
-
-# テストデータ（期待値計算用）
-rng = np.random.default_rng(_SEED)
-_GROUP_A: np.ndarray = rng.normal(50, 10, _N)
-_GROUP_B: np.ndarray = rng.normal(55, 10, _N)
-_GROUP_C: np.ndarray = rng.normal(60, 10, _N)
-
-
-# -----------------------------------------------------------
-# フィクスチャ
-# -----------------------------------------------------------
-
-
-@pytest.fixture
-def client():
-    """TestClient のフィクスチャ"""
-    return TestClient(app)
-
-
-@pytest.fixture
-def tables_store():
-    """TablesStore のフィクスチャ"""
-    manager = TablesStore()
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
-
-    manager.store_table(_TABLE_A, pl.DataFrame({_COL: _GROUP_A}))
-    manager.store_table(_TABLE_B, pl.DataFrame({_COL: _GROUP_B}))
-    manager.store_table(_TABLE_C, pl.DataFrame({_COL: _GROUP_C}))
-
-    yield manager
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
-
-
 # -----------------------------------------------------------
 # ヘルパー
 # -----------------------------------------------------------

@@ -1,20 +1,11 @@
 """信頼区間計算 POST エンドポイントのテスト"""
 
-from typing import cast
-
-import numpy as np
-import polars as pl
 import pytest
-import scipy.stats as spstats
 from fastapi import status
 from fastapi.testclient import TestClient
-from statsmodels.stats.proportion import proportion_confint
 
-from economicon.services.data.analysis_result_store import (
-    AnalysisResultStore,
-)
-from economicon.services.data.tables_store import TablesStore
-from main import app
+from economicon.services.data.analysis_result_store import AnalysisResultStore
+from tests.statistics.conftest import load_statistics_gold_case
 
 # -----------------------------------------------------------
 # 定数
@@ -23,8 +14,6 @@ from main import app
 _TABLE_NAME = "ConfidenceTestTable"
 _TEXT_TABLE = "TextTable"
 _EMPTY_TABLE = "EmptyTable"
-_N_SAMPLES = 100
-_SEED = 42
 _CI_LEVEL_90 = 0.90
 _CI_LEVEL_95 = 0.95
 _CI_LEVEL_99 = 0.99
@@ -54,56 +43,6 @@ def _get_result_data(client: TestClient, payload: dict) -> dict:
     assert resp.status_code == status.HTTP_200_OK, resp.text
     result_id = resp.json()["result"]["resultId"]
     return AnalysisResultStore().get_result(result_id).result_data
-
-
-# -----------------------------------------------------------
-# フィクスチャ
-# -----------------------------------------------------------
-
-
-@pytest.fixture
-def client():
-    """TestClientのフィクスチャ"""
-    return TestClient(app)
-
-
-@pytest.fixture
-def tables_store():
-    """TablesStoreのフィクスチャ"""
-    manager = TablesStore()
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
-
-    np.random.seed(_SEED)
-    normal_data = np.random.normal(50, 10, _N_SAMPLES)
-    binary_data = np.random.binomial(1, 0.3, _N_SAMPLES)
-
-    df = pl.DataFrame(
-        {
-            "normal_col": normal_data,
-            "binary_col": binary_data.astype(float),
-            "id": list(range(_N_SAMPLES)),
-        }
-    )
-    manager.store_table(_TABLE_NAME, df)
-
-    df_with_text = pl.DataFrame(
-        {
-            "numeric_col": [1.0, 2.0, 3.0, 4.0],
-            "text_col": ["a", "b", "c", "d"],
-        }
-    )
-    manager.store_table(_TEXT_TABLE, df_with_text)
-
-    df_empty = pl.DataFrame(
-        {"empty_col": [None, None, None]},
-        schema={"empty_col": pl.Float64},
-    )
-    manager.store_table(_EMPTY_TABLE, df_empty)
-
-    yield manager
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
 
 
 # -----------------------------------------------------------
@@ -226,7 +165,7 @@ def test_confidence_interval_response_structure(client, tables_store):
 
 
 def test_confidence_interval_mean_numerical(client, tables_store):
-    """平均値 CI の数値が scipy.stats.t.interval と一致する"""
+    """平均値 CI の数値が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "normal_col",
@@ -234,45 +173,50 @@ def test_confidence_interval_mean_numerical(client, tables_store):
         "statisticType": _STAT_MEAN,
     }
     rd = _get_result_data(client, payload)
+    gold = load_statistics_gold_case("confidence_interval", "ci_mean_95")
 
-    np.random.seed(_SEED)
-    data = np.random.normal(50, 10, _N_SAMPLES)
-    exp_lower, exp_upper = spstats.t.interval(
-        _CI_LEVEL_95,
-        df=_N_SAMPLES - 1,
-        loc=float(np.mean(data)),
-        scale=float(spstats.sem(data)),
-    )
     ci = rd["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-8)
-    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-8)
+    assert rd["statistic"]["type"] == gold["statistic"]["type"]
     assert rd["statistic"]["value"] == pytest.approx(
-        float(np.mean(data)), abs=1e-8
+        gold["statistic"]["value"], abs=1e-8
+    )
+    assert ci["lower"] == pytest.approx(
+        gold["confidence_interval"]["lower"], abs=1e-8
+    )
+    assert ci["upper"] == pytest.approx(
+        gold["confidence_interval"]["upper"], abs=1e-8
     )
 
 
 def test_confidence_interval_median_properties(client, tables_store):
-    """中央値 CI がブートストラップ法の統計的性質を満たす"""
+    """中央値 CI の数値が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "normal_col",
         "confidenceLevel": _CI_LEVEL_90,
         "statisticType": _STAT_MEDIAN,
+        "bootstrapNResamples": 10000,
+        "bootstrapSeed": 42,
     }
     rd = _get_result_data(client, payload)
-
-    np.random.seed(_SEED)
-    data = np.random.normal(50, 10, _N_SAMPLES)
-    expected_median = float(np.median(data))
+    gold = load_statistics_gold_case("confidence_interval", "ci_median_90")
 
     ci = rd["confidenceInterval"]
     assert ci["lower"] < ci["upper"]
-    assert ci["lower"] <= expected_median <= ci["upper"]
-    assert rd["statistic"]["value"] == pytest.approx(expected_median, abs=1e-8)
+    assert ci["lower"] == pytest.approx(
+        gold["confidence_interval"]["lower"], abs=1e-8
+    )
+    assert ci["upper"] == pytest.approx(
+        gold["confidence_interval"]["upper"], abs=1e-8
+    )
+    assert ci["lower"] <= gold["statistic"]["value"] <= ci["upper"]
+    assert rd["statistic"]["value"] == pytest.approx(
+        gold["statistic"]["value"], abs=1e-8
+    )
 
 
 def test_confidence_interval_proportion_numerical(client, tables_store):
-    """比率 CI の数値が statsmodels Wilson score と一致する"""
+    """比率 CI の数値が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "binary_col",
@@ -280,28 +224,22 @@ def test_confidence_interval_proportion_numerical(client, tables_store):
         "statisticType": _STAT_PROPORTION,
     }
     rd = _get_result_data(client, payload)
+    gold = load_statistics_gold_case("confidence_interval", "ci_proportion_95")
 
-    np.random.seed(_SEED)
-    _dummy = np.random.normal(50, 10, _N_SAMPLES)  # normal_col 分の消費
-    binary_data = np.random.binomial(1, 0.3, _N_SAMPLES)
-    n_successes = int(np.sum(binary_data))
-    exp_lower, exp_upper = proportion_confint(
-        n_successes,
-        _N_SAMPLES,
-        alpha=1 - _CI_LEVEL_95,
-        method="wilson",
-    )
     ci = rd["confidenceInterval"]
+    assert rd["statistic"]["value"] == pytest.approx(
+        gold["statistic"]["value"], abs=1e-8
+    )
     assert ci["lower"] == pytest.approx(
-        float(cast(float, exp_lower)), abs=1e-8
+        gold["confidence_interval"]["lower"], abs=1e-8
     )
     assert ci["upper"] == pytest.approx(
-        float(cast(float, exp_upper)), abs=1e-8
+        gold["confidence_interval"]["upper"], abs=1e-8
     )
 
 
 def test_confidence_interval_variance_numerical(client, tables_store):
-    """分散 CI の数値がカイ二乗分布と一致する"""
+    """分散 CI の数値が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "normal_col",
@@ -309,23 +247,22 @@ def test_confidence_interval_variance_numerical(client, tables_store):
         "statisticType": _STAT_VARIANCE,
     }
     rd = _get_result_data(client, payload)
+    gold = load_statistics_gold_case("confidence_interval", "ci_variance_95")
 
-    np.random.seed(_SEED)
-    data = np.random.normal(50, 10, _N_SAMPLES)
-    var_val = float(np.var(data, ddof=1))
-    alpha = 1 - _CI_LEVEL_95
-    chi2_lo = spstats.chi2.ppf(alpha / 2, df=_N_SAMPLES - 1)
-    chi2_hi = spstats.chi2.ppf(1 - alpha / 2, df=_N_SAMPLES - 1)
-    exp_lower = (_N_SAMPLES - 1) * var_val / chi2_hi
-    exp_upper = (_N_SAMPLES - 1) * var_val / chi2_lo
     ci = rd["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-8)
-    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-8)
-    assert rd["statistic"]["value"] == pytest.approx(var_val, abs=1e-8)
+    assert rd["statistic"]["value"] == pytest.approx(
+        gold["statistic"]["value"], abs=1e-8
+    )
+    assert ci["lower"] == pytest.approx(
+        gold["confidence_interval"]["lower"], abs=1e-8
+    )
+    assert ci["upper"] == pytest.approx(
+        gold["confidence_interval"]["upper"], abs=1e-8
+    )
 
 
 def test_confidence_interval_std_numerical(client, tables_store):
-    """標準偏差 CI の数値が分散 CI の平方根と一致する"""
+    """標準偏差 CI の数値が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE_NAME,
         "columnName": "normal_col",
@@ -333,18 +270,18 @@ def test_confidence_interval_std_numerical(client, tables_store):
         "statisticType": _STAT_STD,
     }
     rd = _get_result_data(client, payload)
+    gold = load_statistics_gold_case("confidence_interval", "ci_std_95")
 
-    np.random.seed(_SEED)
-    data = np.random.normal(50, 10, _N_SAMPLES)
-    var_val = float(np.var(data, ddof=1))
-    alpha = 1 - _CI_LEVEL_95
-    chi2_lo = spstats.chi2.ppf(alpha / 2, df=_N_SAMPLES - 1)
-    chi2_hi = spstats.chi2.ppf(1 - alpha / 2, df=_N_SAMPLES - 1)
-    exp_lower = float(np.sqrt((_N_SAMPLES - 1) * var_val / chi2_hi))
-    exp_upper = float(np.sqrt((_N_SAMPLES - 1) * var_val / chi2_lo))
     ci = rd["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(exp_lower, abs=1e-8)
-    assert ci["upper"] == pytest.approx(exp_upper, abs=1e-8)
+    assert rd["statistic"]["value"] == pytest.approx(
+        gold["statistic"]["value"], abs=1e-8
+    )
+    assert ci["lower"] == pytest.approx(
+        gold["confidence_interval"]["lower"], abs=1e-8
+    )
+    assert ci["upper"] == pytest.approx(
+        gold["confidence_interval"]["upper"], abs=1e-8
+    )
 
 
 def test_confidence_interval_levels_width_ordering(client, tables_store):

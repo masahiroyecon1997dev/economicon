@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-04-19T10:57:44.935996+00:00",
+    "generated_at": "2026-04-19T11:11:00.795013+00:00",
     "python_version": "3.14.3",
     "libraries": {
       "numpy": "2.4.4",
@@ -37,7 +37,7 @@
           "lower": 48.72869058044808,
           "upper": 53.09553002941215
         },
-        "effect_size": null,
+        "effect_size": 0.11872150719343916,
         "sample_summary": {
           "StatTestTableA": {
             "n": 50,
@@ -70,7 +70,7 @@
           "lower": -5.216289637738184,
           "upper": 0.8755153168129493
         },
-        "effect_size": null,
+        "effect_size": 0.28281028140294434,
         "sample_summary": {
           "StatTestTableA": {
             "n": 50,
@@ -108,7 +108,7 @@
           "lower": -5.216289821023363,
           "upper": 0.8755155000981283
         },
-        "effect_size": null,
+        "effect_size": 0.28281028140294434,
         "sample_summary": {
           "StatTestTableA": {
             "n": 50,
@@ -146,7 +146,7 @@
           "lower": -5.308878662750724,
           "upper": 0.9681043418254904
         },
-        "effect_size": null,
+        "effect_size": 0.19653301777688204,
         "sample_summary": {
           "StatTestTableA": {
             "n": 50,

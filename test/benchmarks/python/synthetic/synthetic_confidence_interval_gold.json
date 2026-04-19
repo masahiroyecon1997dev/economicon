@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-04-19T10:57:44.927552+00:00",
+    "generated_at": "2026-04-19T11:11:00.788090+00:00",
     "python_version": "3.14.3",
     "libraries": {
       "scipy": "1.17.1",
@@ -51,7 +51,7 @@
           "upper": 50.944191629417716
         },
         "method": "bootstrap_percentile",
-        "notes": "scipy.stats.bootstrap percentile, random_state=42, n_resamples=10000"
+        "notes": "manual percentile bootstrap, seed=42, n_resamples=10000"
       },
       {
         "case_id": "ci_proportion_95",

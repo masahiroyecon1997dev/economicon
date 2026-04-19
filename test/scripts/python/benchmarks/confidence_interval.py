@@ -20,14 +20,14 @@ def bench_confidence_interval(df: pd.DataFrame) -> dict:
 
     median_level = 0.90
     median_stat = float(np.median(normal))
-    median_boot = spstats.bootstrap(
-        (normal,),
-        np.median,
-        confidence_level=median_level,
-        n_resamples=10000,
-        method="percentile",
-        random_state=42,
-    )
+    median_rng = np.random.default_rng(42)
+    median_boot = []
+    for _index in range(10000):
+        bootstrap_sample = median_rng.choice(normal, size=len(normal), replace=True)
+        median_boot.append(np.median(bootstrap_sample))
+    median_alpha = 1 - median_level
+    median_lower = float(np.percentile(median_boot, (median_alpha / 2) * 100))
+    median_upper = float(np.percentile(median_boot, (1 - median_alpha / 2) * 100))
 
     prop_level = 0.95
     prop_successes = int(np.sum(binary))
@@ -73,11 +73,11 @@ def bench_confidence_interval(df: pd.DataFrame) -> dict:
             "n_obs": len(normal),
             "statistic": {"type": "median", "value": median_stat},
             "confidence_interval": {
-                "lower": f(median_boot.confidence_interval.low),
-                "upper": f(median_boot.confidence_interval.high),
+                "lower": f(median_lower),
+                "upper": f(median_upper),
             },
             "method": "bootstrap_percentile",
-            "notes": "scipy.stats.bootstrap percentile, random_state=42, n_resamples=10000",
+            "notes": "manual percentile bootstrap, seed=42, n_resamples=10000",
         },
         {
             "case_id": "ci_proportion_95",

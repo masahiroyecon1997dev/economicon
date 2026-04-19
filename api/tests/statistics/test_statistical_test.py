@@ -1,21 +1,15 @@
 """統計的検定 API のテスト"""
 
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import polars as pl
 import pytest
-import scipy.stats as spstats
 from fastapi import status
 from fastapi.testclient import TestClient
-from statsmodels.stats.weightstats import ztest as sm_ztest
 
-from economicon.services.data.analysis_result_store import (
-    AnalysisResultStore,
-)
-from economicon.services.data.tables_store import TablesStore
-from main import app
+from economicon.services.data.analysis_result_store import AnalysisResultStore
+from tests.statistics.conftest import load_statistics_gold_case
 
 # -----------------------------------------------------------
 # 定数
@@ -27,8 +21,6 @@ _TABLE_C = "StatTestTableC"
 _TABLE_SMALL = "StatTestTableSmall"
 _COL = "value"
 _N = 50
-_N_SMALL = 30
-_SEED = 42
 
 # 追加テスト用テーブル名・列名
 _TABLE_NULL_COL = "StatTestTableNullCol"
@@ -38,45 +30,6 @@ _TABLE_JP = "統計テスト表"
 _COL_JP = "測定値"
 
 URL = "/api/statistics/test"
-
-# -----------------------------------------------------------
-# テストデータ（期待値計算用）
-# -----------------------------------------------------------
-
-rng = np.random.default_rng(_SEED)
-_GROUP_A: np.ndarray = rng.normal(50, 10, _N)
-_GROUP_B: np.ndarray = rng.normal(55, 10, _N)
-_GROUP_C: np.ndarray = rng.normal(60, 10, _N)
-_GROUP_SMALL: np.ndarray = rng.normal(50, 10, _N_SMALL)
-
-
-# -----------------------------------------------------------
-# フィクスチャ
-# -----------------------------------------------------------
-
-
-@pytest.fixture
-def client():
-    """TestClient のフィクスチャ"""
-    return TestClient(app)
-
-
-@pytest.fixture
-def tables_store():
-    """TablesStore のフィクスチャ"""
-    manager = TablesStore()
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
-
-    manager.store_table(_TABLE_A, pl.DataFrame({_COL: _GROUP_A}))
-    manager.store_table(_TABLE_B, pl.DataFrame({_COL: _GROUP_B}))
-    manager.store_table(_TABLE_C, pl.DataFrame({_COL: _GROUP_C}))
-    manager.store_table(_TABLE_SMALL, pl.DataFrame({_COL: _GROUP_SMALL}))
-
-    yield manager
-    manager.clear_tables()
-    AnalysisResultStore().clear_all()
-
 
 # -----------------------------------------------------------
 # ヘルパー
@@ -96,6 +49,41 @@ def _get_result_data(client: TestClient, payload: dict) -> dict:
     assert resp.status_code == status.HTTP_200_OK, resp.text
     result_id = resp.json()["result"]["resultId"]
     return AnalysisResultStore().get_result(result_id).result_data
+
+
+def _assert_statistical_test_matches_gold(rd: dict, case_id: str) -> None:
+    gold = load_statistics_gold_case("statistical_test", case_id)
+
+    assert rd["statistic"] == pytest.approx(gold["statistic"], abs=1e-8)
+    assert rd["pValue"] == pytest.approx(gold["p_value"], abs=1e-8)
+
+    if gold["df"] is None:
+        assert rd["df"] is None
+    else:
+        assert rd["df"] == pytest.approx(gold["df"], abs=1e-8)
+
+    actual_df2 = rd.get("df2")
+    if gold["df2"] is None:
+        assert actual_df2 is None
+    else:
+        assert actual_df2 == pytest.approx(gold["df2"], abs=1e-8)
+
+    if gold["confidence_interval"] is None:
+        assert rd["confidenceInterval"] is None
+    else:
+        ci = rd["confidenceInterval"]
+        assert ci is not None
+        assert ci["lower"] == pytest.approx(
+            gold["confidence_interval"]["lower"], abs=1e-8
+        )
+        assert ci["upper"] == pytest.approx(
+            gold["confidence_interval"]["upper"], abs=1e-8
+        )
+
+    if gold["effect_size"] is None:
+        assert rd["effectSize"] is None
+    else:
+        assert rd["effectSize"] == pytest.approx(gold["effect_size"], abs=1e-8)
 
 
 # -----------------------------------------------------------
@@ -615,7 +603,8 @@ def test_empty_samples_list_validation(client, tables_store):
 
 def test_japanese_table_name_success(client, tables_store):
     """日本語テーブル名で正常に存在確認・検定が動作する"""
-    tables_store.store_table(_TABLE_JP, pl.DataFrame({_COL: _GROUP_A}))
+    values = tables_store.get_table(_TABLE_A).table[_COL].to_list()
+    tables_store.store_table(_TABLE_JP, pl.DataFrame({_COL: values}))
     payload = {
         "testType": "t-test",
         "samples": _samples((_TABLE_JP, _COL)),
@@ -629,8 +618,9 @@ def test_japanese_table_name_success(client, tables_store):
 
 def test_japanese_column_name_success(client, tables_store):
     """日本語カラム名で正常に存在確認・検定が動作する"""
+    values = tables_store.get_table(_TABLE_A).table[_COL].to_list()
     tables_store.store_table(
-        _TABLE_JP + "_col", pl.DataFrame({_COL_JP: _GROUP_A})
+        _TABLE_JP + "_col", pl.DataFrame({_COL_JP: values})
     )
     payload = {
         "testType": "t-test",
@@ -703,177 +693,83 @@ def test_ztest_one_sided_smaller(client, tables_store):
 
 
 def test_ttest_1sample_numerical(client, tables_store):
-    """1 群 t 検定の数値が scipy.stats.ttest_1samp と一致する"""
+    """1 群 t 検定の数値が gold JSON と一致する"""
     payload = {
         "testType": "t-test",
         "samples": _samples((_TABLE_A, _COL)),
         "options": {"alternative": "two-sided", "mu": 50.0},
     }
     rd = _get_result_data(client, payload)
-
-    res: Any = spstats.ttest_1samp(_GROUP_A, popmean=50.0)
-    ci_res: Any = spstats.ttest_1samp(
-        _GROUP_A, popmean=50.0, alternative="two-sided"
-    )
-    exp_ci = ci_res.confidence_interval(confidence_level=0.95)
-    assert rd["statistic"] == pytest.approx(float(res.statistic), abs=1e-8)
-    assert rd["pValue"] == pytest.approx(float(res.pvalue), abs=1e-8)
-    assert rd["df"] == pytest.approx(_N - 1, abs=1e-8)
-    ci = rd["confidenceInterval"]
-    assert ci is not None
-    assert ci["lower"] == pytest.approx(float(exp_ci.low), abs=1e-8)
-    assert ci["upper"] == pytest.approx(float(exp_ci.high), abs=1e-8)
-    assert rd["effectSize"] is not None
-    assert rd["effectSize"] >= 0.0
+    _assert_statistical_test_matches_gold(rd, "ttest_1sample_mu50")
 
 
 def test_ttest_2sample_independent_numerical(client, tables_store):
-    """独立 2 群 t 検定（等分散）の数値が scipy と一致する"""
+    """独立 2 群 t 検定（等分散）の数値が gold JSON と一致する"""
     payload = {
         "testType": "t-test",
         "samples": _samples((_TABLE_A, _COL), (_TABLE_B, _COL)),
         "options": {"equal_var": True},
     }
     rd = _get_result_data(client, payload)
-
-    res: Any = spstats.ttest_ind(_GROUP_A, _GROUP_B, equal_var=True)
-    exp_ci = res.confidence_interval(confidence_level=0.95)
-    assert rd["statistic"] == pytest.approx(float(res.statistic), abs=1e-8)
-    assert rd["pValue"] == pytest.approx(float(res.pvalue), abs=1e-8)
-    # 等分散 pooled df = N_A + N_B - 2
-    assert rd["df"] == pytest.approx(_N + _N - 2, abs=1e-8)
-    ci = rd["confidenceInterval"]
-    assert ci is not None
-    assert ci["lower"] == pytest.approx(float(exp_ci.low), abs=1e-8)
-    assert ci["upper"] == pytest.approx(float(exp_ci.high), abs=1e-8)
-    assert rd["effectSize"] is not None
+    _assert_statistical_test_matches_gold(rd, "ttest_2sample_equal_var")
 
 
 def test_ttest_welch_numerical(client, tables_store):
-    """Welch t 検定の statistic/pValue/df/CI が scipy と一致する"""
+    """Welch t 検定の数値が gold JSON と一致する"""
     payload = {
         "testType": "t-test",
         "samples": _samples((_TABLE_A, _COL), (_TABLE_B, _COL)),
         "options": {"equalVar": False},
     }
     rd = _get_result_data(client, payload)
-
-    res: Any = spstats.ttest_ind(
-        _GROUP_A, _GROUP_B, equal_var=False, alternative="two-sided"
-    )
-    exp_ci = res.confidence_interval(confidence_level=0.95)
-    assert rd["statistic"] == pytest.approx(float(res.statistic), abs=1e-8)
-    assert rd["pValue"] == pytest.approx(float(res.pvalue), abs=1e-8)
-    # Welch df ≠ N_A + N_B - 2
-    assert rd["df"] == pytest.approx(float(res.df), abs=1e-8)
-    ci = rd["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(float(exp_ci.low), abs=1e-8)
-    assert ci["upper"] == pytest.approx(float(exp_ci.high), abs=1e-8)
+    _assert_statistical_test_matches_gold(rd, "ttest_welch")
 
 
 def test_ttest_paired_numerical(client, tables_store):
-    """対応あり t 検定の statistic/pValue/df/CI が scipy と一致する"""
+    """対応あり t 検定の数値が gold JSON と一致する"""
     payload = {
         "testType": "t-test",
         "samples": _samples((_TABLE_A, _COL), (_TABLE_B, _COL)),
         "options": {"paired": True},
     }
     rd = _get_result_data(client, payload)
-
-    res: Any = spstats.ttest_rel(_GROUP_A, _GROUP_B, alternative="two-sided")
-    exp_ci = res.confidence_interval(confidence_level=0.95)
-    assert rd["statistic"] == pytest.approx(float(res.statistic), abs=1e-8)
-    assert rd["pValue"] == pytest.approx(float(res.pvalue), abs=1e-8)
-    assert rd["df"] == pytest.approx(_N - 1, abs=1e-8)
-    ci = rd["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(float(exp_ci.low), abs=1e-8)
-    assert ci["upper"] == pytest.approx(float(exp_ci.high), abs=1e-8)
+    _assert_statistical_test_matches_gold(rd, "ttest_paired")
 
 
 def test_ztest_1sample_numerical(client, tables_store):
-    """1 群 z 検定の statistic/pValue/CI が statsmodels と一致する"""
+    """1 群 z 検定の数値が gold JSON と一致する"""
     payload = {
         "testType": "z-test",
         "samples": _samples((_TABLE_A, _COL)),
         "options": {"mu": 50.0},
     }
     rd = _get_result_data(client, payload)
-
-    stat, p_val = sm_ztest(
-        _GROUP_A,
-        value=50,
-        alternative="two-sided",
-    )
-    exp_center = float(np.mean(_GROUP_A))
-    exp_se = float(np.std(_GROUP_A, ddof=1) / np.sqrt(len(_GROUP_A)))
-    z_crit = float(spstats.norm.ppf(0.975))
-    assert rd["statistic"] == pytest.approx(float(stat), abs=1e-8)
-    assert rd["pValue"] == pytest.approx(float(p_val), abs=1e-8)
-    assert rd["df"] is None
-    ci = rd["confidenceInterval"]
-    assert ci is not None
-    assert ci["lower"] == pytest.approx(exp_center - z_crit * exp_se, abs=1e-8)
-    assert ci["upper"] == pytest.approx(exp_center + z_crit * exp_se, abs=1e-8)
-    assert rd["effectSize"] is None
+    _assert_statistical_test_matches_gold(rd, "ztest_1sample_mu50")
 
 
 def test_ztest_2sample_numerical(client, tables_store):
-    """2 群 z 検定の数値が statsmodels と一致する"""
+    """2 群 z 検定の数値が gold JSON と一致する"""
     payload = {
         "testType": "z-test",
         "samples": _samples((_TABLE_A, _COL), (_TABLE_B, _COL)),
         "options": {"alternative": "two-sided"},
     }
     rd = _get_result_data(client, payload)
-
-    stat, p_val = sm_ztest(
-        _GROUP_A,
-        _GROUP_B,
-        value=0,
-        alternative="two-sided",
-    )
-    exp_center = float(np.mean(_GROUP_A) - np.mean(_GROUP_B))
-    exp_se = float(
-        np.sqrt(
-            np.var(_GROUP_A, ddof=1) / len(_GROUP_A)
-            + np.var(_GROUP_B, ddof=1) / len(_GROUP_B)
-        )
-    )
-    z_crit = float(spstats.norm.ppf(0.975))
-    assert rd["statistic"] == pytest.approx(float(stat), abs=1e-8)
-    assert rd["pValue"] == pytest.approx(float(p_val), abs=1e-8)
-    ci = rd["confidenceInterval"]
-    assert ci["lower"] == pytest.approx(exp_center - z_crit * exp_se, abs=1e-8)
-    assert ci["upper"] == pytest.approx(exp_center + z_crit * exp_se, abs=1e-8)
+    _assert_statistical_test_matches_gold(rd, "ztest_2sample")
 
 
 def test_ftest_variance_ratio_numerical(client, tables_store):
-    """分散比 F 検定の statistic/pValue/df が手計算と abs=1e-8 で一致する"""
+    """分散比 F 検定の数値が gold JSON と一致する"""
     payload = {
         "testType": "f-test",
         "samples": _samples((_TABLE_A, _COL), (_TABLE_B, _COL)),
     }
     rd = _get_result_data(client, payload)
-
-    var_a = float(np.var(_GROUP_A, ddof=1))
-    var_b = float(np.var(_GROUP_B, ddof=1))
-    f_expected = var_a / var_b
-    df1 = _N - 1
-    df2 = _N - 1
-    p_expected = 2.0 * min(
-        float(spstats.f.cdf(f_expected, df1, df2)),
-        float(spstats.f.sf(f_expected, df1, df2)),
-    )
-    assert rd["statistic"] == pytest.approx(f_expected, abs=1e-8)
-    assert rd["pValue"] == pytest.approx(p_expected, abs=1e-8)
-    assert rd["df"] == pytest.approx(df1, abs=1e-8)
-    assert rd["df2"] == pytest.approx(df2, abs=1e-8)
-    assert rd["confidenceInterval"] is None
-    assert rd["effectSize"] is None
+    _assert_statistical_test_matches_gold(rd, "ftest_variance_ratio")
 
 
 def test_ftest_anova_numerical(client, tables_store):
-    """3群 ANOVA: statistic/pValue/df/η² が scipy・手計算と abs=1e-8 で一致"""
+    """3群 ANOVA の数値が gold JSON と一致する"""
     payload = {
         "testType": "f-test",
         "samples": _samples(
@@ -883,26 +779,7 @@ def test_ftest_anova_numerical(client, tables_store):
         ),
     }
     rd = _get_result_data(client, payload)
-
-    res = spstats.f_oneway(_GROUP_A, _GROUP_B, _GROUP_C)
-    # η² 手計算
-    all_data = np.concatenate([_GROUP_A, _GROUP_B, _GROUP_C])
-    grand_mean = float(np.mean(all_data))
-    ss_between = float(
-        sum(
-            len(g) * (float(np.mean(g)) - grand_mean) ** 2
-            for g in [_GROUP_A, _GROUP_B, _GROUP_C]
-        )
-    )
-    ss_total = float(np.sum((all_data - grand_mean) ** 2))
-    eta_sq_expected = ss_between / ss_total
-
-    assert rd["statistic"] == pytest.approx(float(res.statistic), abs=1e-8)
-    assert rd["pValue"] == pytest.approx(float(res.pvalue), abs=1e-8)
-    assert rd["df"] == pytest.approx(2.0, abs=1e-8)
-    assert rd["df2"] == pytest.approx(float(3 * _N - 3), abs=1e-8)
-    assert rd["confidenceInterval"] is None
-    assert rd["effectSize"] == pytest.approx(eta_sq_expected, abs=1e-8)
+    _assert_statistical_test_matches_gold(rd, "anova_3groups")
 
 
 # -----------------------------------------------------------
