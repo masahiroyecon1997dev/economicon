@@ -1,0 +1,806 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T10:57:45.017385+00:00",
+    "python_version": "3.14.3",
+    "libraries": {
+      "scipy": "1.17.1"
+    },
+    "seed": 2024,
+    "tolerance_guide": {
+      "correlation_table": "atol=1e-12 for raw matrix, atol=1e-8 for rounded API comparisons"
+    },
+    "data_file": "synthetic_statistics_core.parquet",
+    "model": "correlation_table",
+    "aux_data_files": [
+      "synthetic_statistics_nulls.parquet",
+      "synthetic_statistics_constant.parquet"
+    ]
+  },
+  "estimates": {
+    "cases": [
+      {
+        "case_id": "corr_ab_pearson_dp3",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A",
+          "B"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "A",
+            "B"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_ac_spearman_dp3",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A",
+          "C"
+        ],
+        "method": "spearman",
+        "missing_handling": "pairwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "A",
+            "C"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              0.19999999999999998
+            ],
+            [
+              0.19999999999999998,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              0.2
+            ],
+            [
+              0.2,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_ab_kendall_dp3",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A",
+          "B"
+        ],
+        "method": "kendall",
+        "missing_handling": "pairwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "A",
+            "B"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              0.9999999999999999
+            ],
+            [
+              0.9999999999999999,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_ad_pearson_dp1",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A",
+          "D"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 1,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "A",
+            "D"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              0.8488746876271653
+            ],
+            [
+              0.8488746876271653,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              0.8
+            ],
+            [
+              0.8,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_ad_pearson_dp2",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A",
+          "D"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 2,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "A",
+            "D"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              0.8488746876271653
+            ],
+            [
+              0.8488746876271653,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              0.85
+            ],
+            [
+              0.85,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_ad_pearson_dp3",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A",
+          "D"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "A",
+            "D"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              0.8488746876271653
+            ],
+            [
+              0.8488746876271653,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              0.849
+            ],
+            [
+              0.849,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_xy_pairwise_pearson",
+        "table_name": "synthetic_statistics_nulls",
+        "column_names": [
+          "X",
+          "Y"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "X",
+            "Y"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_xy_listwise_pearson",
+        "table_name": "synthetic_statistics_nulls",
+        "column_names": [
+          "X",
+          "Y"
+        ],
+        "method": "pearson",
+        "missing_handling": "listwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "X",
+            "Y"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_xy_listwise_spearman",
+        "table_name": "synthetic_statistics_nulls",
+        "column_names": [
+          "X",
+          "Y"
+        ],
+        "method": "spearman",
+        "missing_handling": "listwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "X",
+            "Y"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_xy_listwise_kendall",
+        "table_name": "synthetic_statistics_nulls",
+        "column_names": [
+          "X",
+          "Y"
+        ],
+        "method": "kendall",
+        "missing_handling": "listwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "X",
+            "Y"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_sparse_pairwise",
+        "table_name": "synthetic_statistics_nulls",
+        "column_names": [
+          "P",
+          "Q"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "P",
+            "Q"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              null
+            ],
+            [
+              null,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              null
+            ],
+            [
+              null,
+              1.0
+            ]
+          ],
+          "null_positions": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_abcd_symmetry_dp10",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 10,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              1.0,
+              0.2896176395143011,
+              0.8488746876271653
+            ],
+            [
+              1.0,
+              1.0,
+              0.2896176395143011,
+              0.8488746876271653
+            ],
+            [
+              0.2896176395143011,
+              0.2896176395143011,
+              1.0,
+              -0.002691981905814489
+            ],
+            [
+              0.8488746876271653,
+              0.8488746876271653,
+              -0.002691981905814489,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              1.0,
+              0.2896176395,
+              0.8488746876
+            ],
+            [
+              1.0,
+              1.0,
+              0.2896176395,
+              0.8488746876
+            ],
+            [
+              0.2896176395,
+              0.2896176395,
+              1.0,
+              -0.0026919819
+            ],
+            [
+              0.8488746876,
+              0.8488746876,
+              -0.0026919819,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_abc_lower_triangle_listwise",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A",
+          "B",
+          "C"
+        ],
+        "method": "pearson",
+        "missing_handling": "listwise",
+        "decimal_places": 3,
+        "lower_triangle_only": true,
+        "expected": {
+          "variable_order": [
+            "A",
+            "B",
+            "C"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              null,
+              null
+            ],
+            [
+              1.0,
+              1.0,
+              null
+            ],
+            [
+              0.2896176395143011,
+              0.2896176395143011,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              null,
+              null
+            ],
+            [
+              1.0,
+              1.0,
+              null
+            ],
+            [
+              0.29,
+              0.29,
+              1.0
+            ]
+          ],
+          "null_positions": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_v1_v5_large_matrix",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "V1",
+          "V2",
+          "V3",
+          "V4",
+          "V5"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "V1",
+            "V2",
+            "V3",
+            "V4",
+            "V5"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              1.0,
+              -1.0,
+              0.8488746876271653,
+              0.8
+            ],
+            [
+              1.0,
+              1.0,
+              -1.0,
+              0.8488746876271653,
+              0.8
+            ],
+            [
+              -1.0,
+              -1.0,
+              1.0,
+              -0.8488746876271653,
+              -0.8
+            ],
+            [
+              0.8488746876271653,
+              0.8488746876271653,
+              -0.8488746876271653,
+              1.0,
+              0.48507125007266594
+            ],
+            [
+              0.8,
+              0.8,
+              -0.8,
+              0.48507125007266594,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              1.0,
+              -1.0,
+              0.849,
+              0.8
+            ],
+            [
+              1.0,
+              1.0,
+              -1.0,
+              0.849,
+              0.8
+            ],
+            [
+              -1.0,
+              -1.0,
+              1.0,
+              -0.849,
+              -0.8
+            ],
+            [
+              0.849,
+              0.849,
+              -0.849,
+              1.0,
+              0.485
+            ],
+            [
+              0.8,
+              0.8,
+              -0.8,
+              0.485,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_japanese_names",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "変数A",
+          "変数B"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "変数A",
+            "変数B"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_constant_column",
+        "table_name": "synthetic_statistics_constant",
+        "column_names": [
+          "Const",
+          "Vary"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 3,
+        "lower_triangle_only": false,
+        "expected": {
+          "variable_order": [
+            "Const",
+            "Vary"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              NaN
+            ],
+            [
+              NaN,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              null
+            ],
+            [
+              null,
+              1.0
+            ]
+          ],
+          "null_positions": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "diagonal_value": 1.0
+        }
+      }
+    ]
+  }
+}

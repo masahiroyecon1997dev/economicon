@@ -28,6 +28,10 @@ TOLERANCE_GUIDE = {
     "gls_coef": "atol=1e-12 (statsmodels GLS)",
     "fgls_heteroskedastic_coef": "atol=1e-12 (1-step FGLS/WLS)",
     "fgls_ar1_coef": "atol=1e-10 (statsmodels GLSAR iterative_fit)",
+    "descriptive_statistics": "atol=1e-8",
+    "confidence_interval": "atol=1e-8",
+    "statistical_test": "atol=1e-8",
+    "correlation_table": "atol=1e-12 for raw matrix, atol=1e-8 for rounded API comparisons",
 }
 
 

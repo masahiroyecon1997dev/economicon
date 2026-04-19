@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import pandas as pd
+from benchmarks.confidence_interval import bench_confidence_interval
+from benchmarks.correlation_table import bench_correlation_table
+from benchmarks.descriptive_statistics import bench_descriptive_statistics
 from benchmarks.fe import bench_fe
 from benchmarks.fgls_ar1 import bench_fgls_ar1
 from benchmarks.fgls_heteroskedastic import bench_fgls_heteroskedastic
@@ -17,6 +20,7 @@ from benchmarks.probit import bench_probit
 from benchmarks.rdd import bench_rdd
 from benchmarks.re import bench_re
 from benchmarks.ridge import bench_ridge
+from benchmarks.statistical_test import bench_statistical_test
 from benchmarks.tobit import bench_tobit
 from benchmarks.wls import bench_wls
 
@@ -34,10 +38,21 @@ def main() -> None:
     df_tobit = pd.read_parquet(DATA_DIR / "synthetic_tobit.parquet")
     df_heckman = pd.read_parquet(DATA_DIR / "synthetic_heckman.parquet")
     df_rdd = pd.read_parquet(DATA_DIR / "synthetic_rdd.parquet")
+    df_statistics_core = pd.read_parquet(DATA_DIR / "synthetic_statistics_core.parquet")
+    df_statistics_nulls = pd.read_parquet(
+        DATA_DIR / "synthetic_statistics_nulls.parquet"
+    )
+    df_statistics_constant = pd.read_parquet(
+        DATA_DIR / "synthetic_statistics_constant.parquet"
+    )
+    df_statistics_ci = pd.read_parquet(DATA_DIR / "synthetic_statistics_ci.parquet")
+    df_statistics_test_groups = pd.read_parquet(
+        DATA_DIR / "synthetic_statistics_test_groups.parquet"
+    )
 
     print("Running models...")
 
-    print("  [1/15] OLS...")
+    print("  [1/19] OLS...")
     ols = bench_ols(df_ols)
     write_benchmark(
         "ols",
@@ -50,7 +65,7 @@ def main() -> None:
         ),
     )
 
-    print("  [2/15] Logit...")
+    print("  [2/19] Logit...")
     logit = bench_logit(df_ols)
     write_benchmark(
         "logit",
@@ -63,7 +78,7 @@ def main() -> None:
         ),
     )
 
-    print("  [3/15] Probit...")
+    print("  [3/19] Probit...")
     probit = bench_probit(df_ols)
     write_benchmark(
         "probit",
@@ -76,7 +91,7 @@ def main() -> None:
         ),
     )
 
-    print("  [4/15] Lasso...")
+    print("  [4/19] Lasso...")
     lasso = bench_lasso(df_ols, alpha=0.1)
     write_benchmark(
         "lasso",
@@ -90,7 +105,7 @@ def main() -> None:
         ),
     )
 
-    print("  [5/15] Ridge...")
+    print("  [5/19] Ridge...")
     ridge = bench_ridge(df_ols, alpha=0.5)
     write_benchmark(
         "ridge",
@@ -104,7 +119,7 @@ def main() -> None:
         ),
     )
 
-    print("  [6/15] Fixed Effects (FE)...")
+    print("  [6/19] Fixed Effects (FE)...")
     fe = bench_fe(df_panel)
     write_benchmark(
         "fe",
@@ -117,7 +132,7 @@ def main() -> None:
         ),
     )
 
-    print("  [7/15] Random Effects (RE)...")
+    print("  [7/19] Random Effects (RE)...")
     re = bench_re(df_panel)
     write_benchmark(
         "re",
@@ -130,7 +145,7 @@ def main() -> None:
         ),
     )
 
-    print("  [8/15] IV (2SLS)...")
+    print("  [8/19] IV (2SLS)...")
     iv = bench_iv(df_iv)
     write_benchmark(
         "iv",
@@ -143,7 +158,7 @@ def main() -> None:
         ),
     )
 
-    print("  [9/15] WLS...")
+    print("  [9/19] WLS...")
     wls = bench_wls(df_wls)
     write_benchmark(
         "wls",
@@ -159,7 +174,7 @@ def main() -> None:
         ),
     )
 
-    print("  [10/15] GLS...")
+    print("  [10/19] GLS...")
     gls = bench_gls(df_gls, df_gls_sigma)
     write_benchmark(
         "gls",
@@ -174,7 +189,7 @@ def main() -> None:
         ),
     )
 
-    print("  [11/15] FGLS heteroskedastic...")
+    print("  [11/19] FGLS heteroskedastic...")
     fgls_heteroskedastic = bench_fgls_heteroskedastic(df_fgls_hetero)
     write_benchmark(
         "fgls_heteroskedastic",
@@ -189,7 +204,7 @@ def main() -> None:
         ),
     )
 
-    print("  [12/15] FGLS AR(1)...")
+    print("  [12/19] FGLS AR(1)...")
     fgls_ar1 = bench_fgls_ar1(df_fgls_ar1, max_iter=10)
     write_benchmark(
         "fgls_ar1",
@@ -205,7 +220,7 @@ def main() -> None:
         ),
     )
 
-    print("  [13/15] Tobit...")
+    print("  [13/19] Tobit...")
     tobit = bench_tobit(df_tobit)
     write_benchmark(
         "tobit",
@@ -218,7 +233,7 @@ def main() -> None:
         ),
     )
 
-    print("  [14/15] Heckman 2-step...")
+    print("  [14/19] Heckman 2-step...")
     heckman = bench_heckman(df_heckman)
     write_benchmark(
         "heckman",
@@ -232,7 +247,7 @@ def main() -> None:
         ),
     )
 
-    print("  [15/15] RDD (rdrobust)...")
+    print("  [15/19] RDD (rdrobust)...")
     rdd = bench_rdd(df_rdd)
     write_benchmark(
         "rdd",
@@ -242,6 +257,72 @@ def main() -> None:
             "synthetic_rdd.parquet",
             ["rdrobust"],
             ["rdd_coef"],
+        ),
+    )
+
+    print("  [16/19] Descriptive statistics...")
+    descriptive_statistics = bench_descriptive_statistics(
+        df_statistics_core,
+        df_statistics_nulls,
+    )
+    write_benchmark(
+        "descriptive_statistics",
+        descriptive_statistics,
+        build_meta(
+            "descriptive_statistics",
+            "synthetic_statistics_core.parquet",
+            ["polars"],
+            ["descriptive_statistics"],
+            aux_data_files=["synthetic_statistics_nulls.parquet"],
+        ),
+    )
+
+    print("  [17/19] Confidence interval...")
+    confidence_interval = bench_confidence_interval(df_statistics_ci)
+    write_benchmark(
+        "confidence_interval",
+        confidence_interval,
+        build_meta(
+            "confidence_interval",
+            "synthetic_statistics_ci.parquet",
+            ["scipy", "statsmodels"],
+            ["confidence_interval"],
+            bootstrap_random_state=42,
+            bootstrap_resamples=10000,
+        ),
+    )
+
+    print("  [18/19] Statistical tests...")
+    statistical_test = bench_statistical_test(df_statistics_test_groups)
+    write_benchmark(
+        "statistical_test",
+        statistical_test,
+        build_meta(
+            "statistical_test",
+            "synthetic_statistics_test_groups.parquet",
+            ["numpy", "scipy", "statsmodels"],
+            ["statistical_test"],
+        ),
+    )
+
+    print("  [19/19] Correlation table...")
+    correlation_table = bench_correlation_table(
+        df_statistics_core,
+        df_statistics_nulls,
+        df_statistics_constant,
+    )
+    write_benchmark(
+        "correlation_table",
+        correlation_table,
+        build_meta(
+            "correlation_table",
+            "synthetic_statistics_core.parquet",
+            ["scipy"],
+            ["correlation_table"],
+            aux_data_files=[
+                "synthetic_statistics_nulls.parquet",
+                "synthetic_statistics_constant.parquet",
+            ],
         ),
     )
 

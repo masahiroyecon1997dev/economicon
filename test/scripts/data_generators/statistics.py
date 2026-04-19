@@ -25,7 +25,6 @@ def generate_statistics_core_data() -> pd.DataFrame:
     )
 
 
-
 def generate_statistics_nulls_data() -> pd.DataFrame:
     return pd.DataFrame(
         {
@@ -37,7 +36,6 @@ def generate_statistics_nulls_data() -> pd.DataFrame:
     )
 
 
-
 def generate_statistics_constant_data() -> pd.DataFrame:
     return pd.DataFrame(
         {
@@ -45,7 +43,6 @@ def generate_statistics_constant_data() -> pd.DataFrame:
             "Vary": [1.0, 2.0, 3.0, 4.0, 5.0],
         }
     )
-
 
 
 # 現行 statistics テストの乱数列と整合しやすいように RandomState(42) 互換で作る。
@@ -63,7 +60,6 @@ def generate_statistics_ci_data(seed: int = 42) -> pd.DataFrame:
     )
 
 
-
 def generate_statistics_ci_invalid_data() -> pd.DataFrame:
     return pd.DataFrame(
         {
@@ -72,7 +68,6 @@ def generate_statistics_ci_invalid_data() -> pd.DataFrame:
             "empty_col": [np.nan, np.nan, np.nan, np.nan],
         }
     )
-
 
 
 # t/z/F/ANOVA で使う群データを long format で保持し、将来 fixture 側で tableName ごとに分割しやすくする。

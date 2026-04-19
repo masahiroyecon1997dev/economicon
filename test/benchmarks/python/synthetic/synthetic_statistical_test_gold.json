@@ -1,0 +1,307 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T10:57:44.935996+00:00",
+    "python_version": "3.14.3",
+    "libraries": {
+      "numpy": "2.4.4",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6"
+    },
+    "seed": 2024,
+    "tolerance_guide": {
+      "statistical_test": "atol=1e-8"
+    },
+    "data_file": "synthetic_statistics_test_groups.parquet",
+    "model": "statistical_test"
+  },
+  "estimates": {
+    "cases": [
+      {
+        "case_id": "ttest_1sample_mu50",
+        "test_type": "t-test",
+        "sample_tables": [
+          {
+            "table_name": "StatTestTableA",
+            "column_name": "value"
+          }
+        ],
+        "options": {
+          "alternative": "two-sided",
+          "mu": 50.0
+        },
+        "statistic": 0.839487828091683,
+        "p_value": 0.40527287278483515,
+        "df": 49.0,
+        "df2": null,
+        "confidence_interval": {
+          "lower": 48.72869058044808,
+          "upper": 53.09553002941215
+        },
+        "effect_size": null,
+        "sample_summary": {
+          "StatTestTableA": {
+            "n": 50,
+            "mean": 50.91211030493012,
+            "variance": 59.0249899612828
+          }
+        }
+      },
+      {
+        "case_id": "ttest_2sample_equal_var",
+        "test_type": "t-test",
+        "sample_tables": [
+          {
+            "table_name": "StatTestTableA",
+            "column_name": "value"
+          },
+          {
+            "table_name": "StatTestTableB",
+            "column_name": "value"
+          }
+        ],
+        "options": {
+          "equal_var": true
+        },
+        "statistic": -1.4140514070147217,
+        "p_value": 0.1605158425424986,
+        "df": 98.0,
+        "df2": null,
+        "confidence_interval": {
+          "lower": -5.216289637738184,
+          "upper": 0.8755153168129493
+        },
+        "effect_size": null,
+        "sample_summary": {
+          "StatTestTableA": {
+            "n": 50,
+            "mean": 50.91211030493012,
+            "variance": 59.0249899612828
+          },
+          "StatTestTableB": {
+            "n": 50,
+            "mean": 53.082497465392734,
+            "variance": 58.76653137103509
+          }
+        }
+      },
+      {
+        "case_id": "ttest_welch",
+        "test_type": "t-test",
+        "sample_tables": [
+          {
+            "table_name": "StatTestTableA",
+            "column_name": "value"
+          },
+          {
+            "table_name": "StatTestTableB",
+            "column_name": "value"
+          }
+        ],
+        "options": {
+          "equalVar": false
+        },
+        "statistic": -1.4140514070147217,
+        "p_value": 0.16051585776273275,
+        "df": 97.99952817834983,
+        "df2": null,
+        "confidence_interval": {
+          "lower": -5.216289821023363,
+          "upper": 0.8755155000981283
+        },
+        "effect_size": null,
+        "sample_summary": {
+          "StatTestTableA": {
+            "n": 50,
+            "mean": 50.91211030493012,
+            "variance": 59.0249899612828
+          },
+          "StatTestTableB": {
+            "n": 50,
+            "mean": 53.082497465392734,
+            "variance": 58.76653137103509
+          }
+        }
+      },
+      {
+        "case_id": "ttest_paired",
+        "test_type": "t-test",
+        "sample_tables": [
+          {
+            "table_name": "StatTestTableA",
+            "column_name": "value"
+          },
+          {
+            "table_name": "StatTestTableB",
+            "column_name": "value"
+          }
+        ],
+        "options": {
+          "paired": true
+        },
+        "statistic": -1.3896982959708957,
+        "p_value": 0.17090267743491247,
+        "df": 49.0,
+        "df2": null,
+        "confidence_interval": {
+          "lower": -5.308878662750724,
+          "upper": 0.9681043418254904
+        },
+        "effect_size": null,
+        "sample_summary": {
+          "StatTestTableA": {
+            "n": 50,
+            "mean": 50.91211030493012,
+            "variance": 59.0249899612828
+          },
+          "StatTestTableB": {
+            "n": 50,
+            "mean": 53.082497465392734,
+            "variance": 58.76653137103509
+          }
+        }
+      },
+      {
+        "case_id": "ztest_1sample_mu50",
+        "test_type": "z-test",
+        "sample_tables": [
+          {
+            "table_name": "StatTestTableA",
+            "column_name": "value"
+          }
+        ],
+        "options": {
+          "mu": 50.0
+        },
+        "statistic": 0.839487828091683,
+        "p_value": 0.40119561673980253,
+        "df": null,
+        "df2": null,
+        "confidence_interval": {
+          "lower": 48.78259360704699,
+          "upper": 53.04162700281324
+        },
+        "effect_size": null,
+        "sample_summary": {
+          "StatTestTableA": {
+            "n": 50,
+            "mean": 50.91211030493012,
+            "variance": 59.0249899612828
+          }
+        }
+      },
+      {
+        "case_id": "ztest_2sample",
+        "test_type": "z-test",
+        "sample_tables": [
+          {
+            "table_name": "StatTestTableA",
+            "column_name": "value"
+          },
+          {
+            "table_name": "StatTestTableB",
+            "column_name": "value"
+          }
+        ],
+        "options": {
+          "alternative": "two-sided"
+        },
+        "statistic": -1.4140514070147217,
+        "p_value": 0.15734680921247235,
+        "df": null,
+        "df2": null,
+        "confidence_interval": {
+          "lower": -5.178679960789783,
+          "upper": 0.8379056398645477
+        },
+        "effect_size": null,
+        "sample_summary": {
+          "StatTestTableA": {
+            "n": 50,
+            "mean": 50.91211030493012,
+            "variance": 59.0249899612828
+          },
+          "StatTestTableB": {
+            "n": 50,
+            "mean": 53.082497465392734,
+            "variance": 58.76653137103509
+          }
+        }
+      },
+      {
+        "case_id": "ftest_variance_ratio",
+        "test_type": "f-test",
+        "sample_tables": [
+          {
+            "table_name": "StatTestTableA",
+            "column_name": "value"
+          },
+          {
+            "table_name": "StatTestTableB",
+            "column_name": "value"
+          }
+        ],
+        "options": {},
+        "statistic": 1.004398057605542,
+        "p_value": 0.9878077733185848,
+        "df": 49.0,
+        "df2": 49.0,
+        "confidence_interval": null,
+        "effect_size": null,
+        "sample_summary": {
+          "StatTestTableA": {
+            "n": 50,
+            "mean": 50.91211030493012,
+            "variance": 59.0249899612828
+          },
+          "StatTestTableB": {
+            "n": 50,
+            "mean": 53.082497465392734,
+            "variance": 58.76653137103509
+          }
+        }
+      },
+      {
+        "case_id": "anova_3groups",
+        "test_type": "f-test",
+        "sample_tables": [
+          {
+            "table_name": "StatTestTableA",
+            "column_name": "value"
+          },
+          {
+            "table_name": "StatTestTableB",
+            "column_name": "value"
+          },
+          {
+            "table_name": "StatTestTableC",
+            "column_name": "value"
+          }
+        ],
+        "options": {},
+        "statistic": 13.641078862713087,
+        "p_value": 3.679034712486912e-06,
+        "df": 2.0,
+        "df2": 147.0,
+        "confidence_interval": null,
+        "effect_size": 0.15654016499157608,
+        "sample_summary": {
+          "StatTestTableA": {
+            "n": 50,
+            "mean": 50.91211030493012,
+            "variance": 59.0249899612828
+          },
+          "StatTestTableB": {
+            "n": 50,
+            "mean": 53.082497465392734,
+            "variance": 58.76653137103509
+          },
+          "StatTestTableC": {
+            "n": 50,
+            "mean": 59.487710311942074,
+            "variance": 100.80967714437301
+          }
+        }
+      }
+    ]
+  }
+}

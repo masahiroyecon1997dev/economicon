@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T10:57:44.901652+00:00",
+    "python_version": "3.14.3",
+    "libraries": {
+      "polars": "1.39.3"
+    },
+    "seed": 2024,
+    "tolerance_guide": {
+      "descriptive_statistics": "atol=1e-8"
+    },
+    "data_file": "synthetic_statistics_core.parquet",
+    "model": "descriptive_statistics",
+    "aux_data_files": [
+      "synthetic_statistics_nulls.parquet"
+    ]
+  },
+  "estimates": {
+    "cases": [
+      {
+        "case_id": "ds_A_basic",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A"
+        ],
+        "requested_statistics": [
+          "mean",
+          "median",
+          "variance",
+          "std_dev"
+        ],
+        "expected": {
+          "statistics": {
+            "A": {
+              "mean": 3.0,
+              "median": 3.0,
+              "variance": 2.5,
+              "std_dev": 1.5811388300841898
+            }
+          }
+        }
+      },
+      {
+        "case_id": "ds_A_range_iqr",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A"
+        ],
+        "requested_statistics": [
+          "range",
+          "iqr"
+        ],
+        "expected": {
+          "statistics": {
+            "A": {
+              "range": 4.0,
+              "iqr": 2.0
+            }
+          }
+        }
+      },
+      {
+        "case_id": "ds_A_variance_vs_population",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A"
+        ],
+        "requested_statistics": [
+          "variance",
+          "population_variance"
+        ],
+        "expected": {
+          "statistics": {
+            "A": {
+              "variance": 2.5,
+              "population_variance": 2.0
+            }
+          }
+        }
+      },
+      {
+        "case_id": "ds_A_counts",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A"
+        ],
+        "requested_statistics": [
+          "count",
+          "null_count",
+          "null_ratio"
+        ],
+        "expected": {
+          "statistics": {
+            "A": {
+              "count": 5,
+              "null_count": 0,
+              "null_ratio": 0.0
+            }
+          }
+        }
+      },
+      {
+        "case_id": "ds_X_null_counts",
+        "table_name": "synthetic_statistics_nulls",
+        "column_names": [
+          "X"
+        ],
+        "requested_statistics": [
+          "count",
+          "null_count",
+          "null_ratio"
+        ],
+        "expected": {
+          "statistics": {
+            "X": {
+              "count": 4,
+              "null_count": 1,
+              "null_ratio": 0.2
+            }
+          }
+        }
+      },
+      {
+        "case_id": "ds_AB_mean_std",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A",
+          "B"
+        ],
+        "requested_statistics": [
+          "mean",
+          "std_dev"
+        ],
+        "expected": {
+          "statistics": {
+            "A": {
+              "mean": 3.0,
+              "std_dev": 1.5811388300841898
+            },
+            "B": {
+              "mean": 30.0,
+              "std_dev": 15.811388300841896
+            }
+          }
+        }
+      },
+      {
+        "case_id": "ds_name_mode",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "name"
+        ],
+        "requested_statistics": [
+          "mode"
+        ],
+        "expected": {
+          "statistics": {
+            "name": {
+              "mode": [
+                "Bob",
+                "Alice"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "case_id": "ds_name_numeric_none",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "name"
+        ],
+        "requested_statistics": [
+          "mean",
+          "variance"
+        ],
+        "expected": {
+          "statistics": {
+            "name": {
+              "mean": null,
+              "variance": null
+            }
+          }
+        }
+      }
+    ]
+  }
+}
