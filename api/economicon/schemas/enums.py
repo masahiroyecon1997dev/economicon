@@ -16,6 +16,7 @@ class DistributionType(StrEnum):
     HYPERGEOMETRIC = "hypergeometric"
     NEGATIVE_BINOMIAL = "negative_binomial"
     FIXED = "fixed"
+    SEQUENCE = "sequence"
 
 
 class TransformMethodType(StrEnum):

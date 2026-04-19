@@ -207,6 +207,16 @@ class FixedParams(BaseRequest):
     value: int | float = Field(description="固定値")
 
 
+class SequenceParams(BaseRequest):
+    """連番のパラメータ"""
+
+    type: Literal[DistributionType.SEQUENCE] = Field(
+        description="分布の種類"
+    )
+    start: int = Field(default=1, description="開始値")
+    step: int = Field(default=1, description="増分（負値で降順連番）")
+
+
 class LogParams(BaseRequest):
     """対数変換のパラメータ"""
 

@@ -7,6 +7,8 @@ from economicon.schemas import (
     AddDummyColumnResult,
     AddLagLeadColumnRequestBody,
     AddLagLeadColumnResult,
+    AddPanelTimeColumnRequestBody,
+    AddPanelTimeColumnResult,
     AddSimulationColumnRequestBody,
     AddSimulationColumnResult,
     CalculateColumnRequestBody,
@@ -33,6 +35,9 @@ from economicon.schemas import (
 # 各ビジネスロジック（既存のpython_apis）
 from economicon.services.columns.add_dummy_column import AddDummyColumn
 from economicon.services.columns.add_lag_lead_column import AddLagLeadColumn
+from economicon.services.columns.add_panel_time_column import (
+    AddPanelTimeColumn,
+)
 from economicon.services.columns.add_simulation_column import (
     AddSimulationColumn,
 )
@@ -411,6 +416,36 @@ async def move_column(
         処理結果
     """
     api = MoveColumn(body, tables_store)
+    result = run_operation(api)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.post(
+    "/add-panel-time",
+    response_model=SuccessResponse[AddPanelTimeColumnResult],
+)
+async def add_panel_time_column(
+    request: Request,
+    body: AddPanelTimeColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
+    """パネル時間カラムを追加するエンドポイント
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    body : AddPanelTimeColumnRequestBody
+        リクエストボディ
+
+    Returns
+    -------
+    JSONResponse
+        処理結果
+    """
+    api = AddPanelTimeColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result

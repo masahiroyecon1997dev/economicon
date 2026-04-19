@@ -19,6 +19,7 @@ from economicon.schemas.common import (
     PoissonParams,
     PowerParams,
     RootParams,
+    SequenceParams,
     UniformParams,
     WeibullParams,
 )
@@ -249,6 +250,7 @@ type DistributionParams = (
     | HypergeometricParams
     | NegativeBinomialParams
     | FixedParams
+    | SequenceParams
 )
 
 type DistributionConfig = Annotated[

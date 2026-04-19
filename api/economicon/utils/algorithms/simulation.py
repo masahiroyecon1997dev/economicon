@@ -47,6 +47,12 @@ def generate_simulation_data(
             d.n, d.p, row_count
         ),
         DistributionType.FIXED: lambda d: np.full(row_count, d.value),
+        DistributionType.SEQUENCE: lambda d: np.arange(
+            d.start,
+            d.start + row_count * d.step,
+            d.step,
+            dtype=np.int64,
+        ),
     }
 
     generator = generators.get(distribution.type)
