@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T06:14:16.636808+00:00",
+    "python_version": "3.14.3",
+    "statsmodels_version": "0.14.6",
+    "linearmodels_version": "7.0",
+    "py4etrics_version": "0.1.9",
+    "scikit_learn_version": "1.8.0",
+    "rdrobust_version": "1.3.0",
+    "seed": 2024,
+    "tolerance_guide": {
+      "ols_coef": "atol=1e-12 (nonrobust)",
+      "ols_se_hc1": "atol=1e-12",
+      "logit_probit_coef": "atol=1e-8 (MLE 収束差)",
+      "fe_re_coef": "atol=1e-12",
+      "iv_coef": "atol=1e-12",
+      "tobit_coef": "atol=1e-6 (py4etrics MLE)",
+      "heckman_coef": "atol=1e-8 (2段階 OLS/Probit)",
+      "rdd_coef": "atol=1e-4 (rdrobust ローカル多項式)",
+      "lasso_ridge_coef_scaled": "atol=1e-8 (sklearn Pipeline)"
+    },
+    "data_file": "synthetic_tobit.parquet",
+    "model": "tobit"
+  },
+  "estimates": {
+    "dep_var": "y",
+    "left_censoring_limit": 0.0,
+    "n_obs": 300,
+    "censoring_ratio": 0.3466666666666667,
+    "sigma": 2.0605532809872686,
+    "log_likelihood": -458.5495431314108,
+    "aic": 923.0990862628216,
+    "bic": 934.2104336867902,
+    "coefficients": {
+      "const": 2.064404074271817,
+      "x1": 1.9365077482726023,
+      "x2": 1.3637109298908998
+    },
+    "std_errors": {
+      "const": 0.1587501796146427,
+      "x1": 0.07955479242648551,
+      "x2": 0.0737196241437798
+    },
+    "t_values": {
+      "const": 13.004105439647653,
+      "x1": 24.341811337916294,
+      "x2": 18.498614795311116
+    },
+    "conf_int": {
+      "const": {
+        "lower": 1.753259439614836,
+        "upper": 2.3755487089287977
+      },
+      "x1": {
+        "lower": 1.78058322028254,
+        "upper": 2.092432276262665
+      },
+      "x2": {
+        "lower": 1.219223121581355,
+        "upper": 1.5081987382004447
+      }
+    }
+  }
+}

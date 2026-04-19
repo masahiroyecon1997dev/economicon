@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T06:14:16.636808+00:00",
+    "python_version": "3.14.3",
+    "statsmodels_version": "0.14.6",
+    "linearmodels_version": "7.0",
+    "py4etrics_version": "0.1.9",
+    "scikit_learn_version": "1.8.0",
+    "rdrobust_version": "1.3.0",
+    "seed": 2024,
+    "tolerance_guide": {
+      "ols_coef": "atol=1e-12 (nonrobust)",
+      "ols_se_hc1": "atol=1e-12",
+      "logit_probit_coef": "atol=1e-8 (MLE 収束差)",
+      "fe_re_coef": "atol=1e-12",
+      "iv_coef": "atol=1e-12",
+      "tobit_coef": "atol=1e-6 (py4etrics MLE)",
+      "heckman_coef": "atol=1e-8 (2段階 OLS/Probit)",
+      "rdd_coef": "atol=1e-4 (rdrobust ローカル多項式)",
+      "lasso_ridge_coef_scaled": "atol=1e-8 (sklearn Pipeline)"
+    },
+    "data_file": "synthetic_ols.parquet",
+    "model": "ridge"
+  },
+  "estimates": {
+    "dep_var": "y_cont",
+    "alpha": 0.5,
+    "n_obs": 300,
+    "coef_scaled": {
+      "x1": 12.402964712787224,
+      "x2": -14.963108928355283,
+      "x3": 4.081259348320313
+    },
+    "coef_orig": {
+      "const": 3.548734572256077,
+      "x1": 2.5300425882379667,
+      "x2": -1.8284560793492002,
+      "x3": 0.9742057930672984
+    },
+    "note": "coef_scaled は StandardScaler(ddof=0) → Ridge(alpha) の coef_。 coef_orig は元スケールに逆変換した係数。"
+  }
+}

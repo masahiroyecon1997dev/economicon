@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T06:14:16.636808+00:00",
+    "python_version": "3.14.3",
+    "statsmodels_version": "0.14.6",
+    "linearmodels_version": "7.0",
+    "py4etrics_version": "0.1.9",
+    "scikit_learn_version": "1.8.0",
+    "rdrobust_version": "1.3.0",
+    "seed": 2024,
+    "tolerance_guide": {
+      "ols_coef": "atol=1e-12 (nonrobust)",
+      "ols_se_hc1": "atol=1e-12",
+      "logit_probit_coef": "atol=1e-8 (MLE 収束差)",
+      "fe_re_coef": "atol=1e-12",
+      "iv_coef": "atol=1e-12",
+      "tobit_coef": "atol=1e-6 (py4etrics MLE)",
+      "heckman_coef": "atol=1e-8 (2段階 OLS/Probit)",
+      "rdd_coef": "atol=1e-4 (rdrobust ローカル多項式)",
+      "lasso_ridge_coef_scaled": "atol=1e-8 (sklearn Pipeline)"
+    },
+    "data_file": "synthetic_heckman.parquet",
+    "model": "heckman"
+  },
+  "estimates": {
+    "n_total": 600,
+    "n_selected": 327,
+    "selection_ratio": 0.545,
+    "step1_probit": {
+      "dep_var": "employed",
+      "sel_vars": [
+        "educ",
+        "exp",
+        "kids"
+      ],
+      "n_obs": 600,
+      "coefficients": {
+        "const": -2.7338950772349913,
+        "educ": 0.23078530048028986,
+        "exp": 0.1705657669574565,
+        "kids": -0.5258218744205582
+      },
+      "std_errors": {
+        "const": 0.40691468659118374,
+        "educ": 0.03236609259482616,
+        "exp": 0.020921323460667975,
+        "kids": 0.0562244826607241
+      },
+      "t_values": {
+        "const": -6.718595242008707,
+        "educ": 7.130465310390348,
+        "exp": 8.152723573062653,
+        "kids": -9.352186975085743
+      },
+      "p_values": {
+        "const": 1.834847977808376e-11,
+        "educ": 1.0003018461050367e-12,
+        "exp": 3.5581830595446716e-16,
+        "kids": 8.58538344779749e-21
+      },
+      "conf_int": {
+        "const": {
+          "lower": -3.531433207734115,
+          "upper": -1.9363569467358674
+        },
+        "educ": {
+          "lower": 0.16734892467414203,
+          "upper": 0.2942216762864377
+        },
+        "exp": {
+          "lower": 0.12956072646563438,
+          "upper": 0.21157080744927864
+        },
+        "kids": {
+          "lower": -0.6360198354849742,
+          "upper": -0.4156239133561422
+        }
+      },
+      "pseudo_r_squared": 0.24744605859489754,
+      "log_likelihood": -311.1472027690892
+    },
+    "step2_ols": {
+      "dep_var": "wage",
+      "outcome_vars": [
+        "educ",
+        "exp"
+      ],
+      "n_obs": 327,
+      "coefficients": {
+        "const": 4.330956773852215,
+        "educ": 0.6219268466742953,
+        "exp": 0.3665803402054215,
+        "imr": -0.5018556561021347
+      },
+      "std_errors": {
+        "const": 1.095401450334743,
+        "educ": 0.06508596615775201,
+        "exp": 0.04553484279842526,
+        "imr": 0.3909567866416455
+      },
+      "t_values": {
+        "const": 3.9537621321650804,
+        "educ": 9.555467689715185,
+        "exp": 8.050545860632663,
+        "imr": -1.2836601722996563
+      },
+      "p_values": {
+        "const": 9.456565008248058e-05,
+        "educ": 3.2320119230004787e-19,
+        "exp": 1.5961342533244486e-14,
+        "imr": 0.20018100086929477
+      },
+      "conf_int": {
+        "const": {
+          "lower": 2.1759344962871756,
+          "upper": 6.485979051417254
+        },
+        "educ": {
+          "lower": 0.49388090791464023,
+          "upper": 0.7499727854339504
+        },
+        "exp": {
+          "lower": 0.27699802259388157,
+          "upper": 0.45616265781696147
+        },
+        "imr": {
+          "lower": -1.2709988633897669,
+          "upper": 0.2672875511854975
+        }
+      },
+      "r_squared": 0.4242945827022697,
+      "adj_r_squared": 0.41894747356328144
+    },
+    "imr": {
+      "coefficient": -0.5018556561021347,
+      "std_error": 0.3909567866416455,
+      "t_value": -1.2836601722996563,
+      "p_value": 0.20018100086929477
+    }
+  }
+}

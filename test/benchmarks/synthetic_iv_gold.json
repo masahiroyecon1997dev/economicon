@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T06:14:16.636808+00:00",
+    "python_version": "3.14.3",
+    "statsmodels_version": "0.14.6",
+    "linearmodels_version": "7.0",
+    "py4etrics_version": "0.1.9",
+    "scikit_learn_version": "1.8.0",
+    "rdrobust_version": "1.3.0",
+    "seed": 2024,
+    "tolerance_guide": {
+      "ols_coef": "atol=1e-12 (nonrobust)",
+      "ols_se_hc1": "atol=1e-12",
+      "logit_probit_coef": "atol=1e-8 (MLE 収束差)",
+      "fe_re_coef": "atol=1e-12",
+      "iv_coef": "atol=1e-12",
+      "tobit_coef": "atol=1e-6 (py4etrics MLE)",
+      "heckman_coef": "atol=1e-8 (2段階 OLS/Probit)",
+      "rdd_coef": "atol=1e-4 (rdrobust ローカル多項式)",
+      "lasso_ridge_coef_scaled": "atol=1e-8 (sklearn Pipeline)"
+    },
+    "data_file": "synthetic_iv.parquet",
+    "model": "iv"
+  },
+  "estimates": {
+    "dep_var": "y",
+    "exog_vars": [
+      "x_exog"
+    ],
+    "endog_vars": [
+      "x_endog"
+    ],
+    "instruments": [
+      "z1",
+      "z2"
+    ],
+    "n_obs": 400,
+    "r_squared": 0.9554764235449367,
+    "nonrobust": {
+      "coefficients": {
+        "const": 2.042375336761865,
+        "x_exog": 1.4882483069142793,
+        "x_endog": 3.0410482266954864
+      },
+      "std_errors": {
+        "const": 0.05343144441205058,
+        "x_exog": 0.0196493337918551,
+        "x_endog": 0.06814810191516583
+      },
+      "t_values": {
+        "const": 38.22422094771671,
+        "x_exog": 75.7403952052144,
+        "x_endog": 44.62410751338512
+      },
+      "p_values": {
+        "const": 0.0,
+        "x_exog": 0.0,
+        "x_endog": 0.0
+      },
+      "conf_int": {
+        "const": {
+          "lower": 1.937651630072292,
+          "upper": 2.147099043451438
+        },
+        "x_exog": {
+          "lower": 1.4497363203620375,
+          "upper": 1.5267602934665212
+        },
+        "x_endog": {
+          "lower": 2.907480401326996,
+          "upper": 3.1746160520639766
+        }
+      }
+    },
+    "hc1": {
+      "coefficients": {
+        "const": 2.042375336761865,
+        "x_exog": 1.4882483069142793,
+        "x_endog": 3.0410482266954864
+      },
+      "std_errors": {
+        "const": 0.05390033237046787,
+        "x_exog": 0.018760164967412174,
+        "x_endog": 0.06720195546654273
+      },
+      "t_values": {
+        "const": 37.89170209052158,
+        "x_exog": 79.33023560824114,
+        "x_endog": 45.25237704146135
+      },
+      "p_values": {
+        "const": 0.0,
+        "x_exog": 0.0,
+        "x_endog": 0.0
+      },
+      "conf_int": {
+        "const": {
+          "lower": 1.9367326265610094,
+          "upper": 2.1480180469627204
+        },
+        "x_exog": {
+          "lower": 1.4514790592341213,
+          "upper": 1.5250175545944373
+        },
+        "x_endog": {
+          "lower": 2.909334814290398,
+          "upper": 3.1727616391005746
+        }
+      }
+    },
+    "first_stage": {
+      "partial_r_squared": 0.7002734182013213,
+      "f_statistic": 467.27481693411005,
+      "f_p_value": 0.0
+    }
+  }
+}
