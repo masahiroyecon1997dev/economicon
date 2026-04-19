@@ -197,6 +197,17 @@ msgstr "CSVファイルが空であるか、有効なデータが含まれてい
 msgid "Column contains no valid data"
 msgstr "カラムに有効なデータが含まれていません"
 
+msgid "All analysis results must have the same result type for output."
+msgstr "出力対象の分析結果はすべて同じ resultType である必要があります。"
+
+#, python-format
+msgid "Requested result type '%(requested)s' does not match stored analysis result type '%(actual)s'."
+msgstr "要求された resultType '%(requested)s' は、保存済み分析結果の resultType '%(actual)s' と一致しません。"
+
+#, python-format
+msgid "Requested result type '%(requested)s' is not supported for formatted output."
+msgstr "要求された resultType '%(requested)s' は整形出力をサポートしていません。"
+
 # フィールド名の翻訳
 msgid "Field.tableName"
 msgstr "テーブル名"

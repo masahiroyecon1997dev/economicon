@@ -198,6 +198,17 @@ msgstr ""
 msgid "Column contains no valid data"
 msgstr ""
 
+msgid "All analysis results must have the same result type for output."
+msgstr ""
+
+#, python-format
+msgid "Requested result type '%(requested)s' does not match stored analysis result type '%(actual)s'."
+msgstr ""
+
+#, python-format
+msgid "Requested result type '%(requested)s' is not supported for formatted output."
+msgstr ""
+
 # Translate field name
 msgid "Field.tableName"
 msgstr "Table Name"
