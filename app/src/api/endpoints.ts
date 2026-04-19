@@ -8,6 +8,7 @@ import type {
   AddDiagnosticColumnsRequestBody,
   AddDummyColumnRequestBody,
   AddLagLeadColumnRequestBody,
+  AddPanelTimeColumnRequestBody,
   AddSimulationColumnRequestBody,
   CalculateColumnRequestBody,
   CastColumnRequestBody,
@@ -16,6 +17,7 @@ import type {
   CreateJoinTableRequestBody,
   CreateSimulationDataTableRequestBody,
   CreateUnionTableRequestBody,
+  DIDRequestBody,
   DeleteColumnRequestBody,
   DeleteTableRequestBody,
   DescriptiveStatisticsRequestBody,
@@ -26,9 +28,11 @@ import type {
   FetchDataToJsonRequestBody,
   FilterRequestBody,
   GetColumnListRequestBody,
+  HeckmanRequestBody,
   ImportFileRequestBody,
   MoveColumnRequestBody,
   OutputResultRequest,
+  RDDRequestBody,
   RegressionRequestBody,
   RenameColumnRequestBody,
   RenameTableRequestBody,
@@ -37,6 +41,7 @@ import type {
   SuccessResponseAddDiagnosticColumnsResult,
   SuccessResponseAddDummyColumnResult,
   SuccessResponseAddLagLeadColumnResult,
+  SuccessResponseAddPanelTimeColumnResult,
   SuccessResponseAddSimulationColumnResult,
   SuccessResponseCalculateColumnResult,
   SuccessResponseCastColumnResult,
@@ -47,6 +52,7 @@ import type {
   SuccessResponseCreateJoinTableResult,
   SuccessResponseCreateSimulationDataTableResult,
   SuccessResponseCreateUnionTableResult,
+  SuccessResponseDIDResult,
   SuccessResponseDeleteAnalysisResultResult,
   SuccessResponseDeleteColumnResult,
   SuccessResponseDeleteTableResult,
@@ -61,9 +67,11 @@ import type {
   SuccessResponseGetColumnListResult,
   SuccessResponseGetSettingsResult,
   SuccessResponseGetTableListResult,
+  SuccessResponseHeckmanResult,
   SuccessResponseImportFileResult,
   SuccessResponseMoveColumnResult,
   SuccessResponseOutputResultResult,
+  SuccessResponseRDDResult,
   SuccessResponseRegressionResult,
   SuccessResponseRenameColumnResult,
   SuccessResponseRenameTableResult,
@@ -424,6 +432,33 @@ const moveColumn = (
       {url: `/api/column/move`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: moveColumnRequestBody
+    },
+      options);
+    }
+
+/**
+ * パネル時間カラムを追加するエンドポイント
+
+Parameters
+----------
+request : Request
+    FastAPIのリクエストオブジェクト
+body : AddPanelTimeColumnRequestBody
+    リクエストボディ
+
+Returns
+-------
+JSONResponse
+    処理結果
+ * @summary Add Panel Time Column
+ */
+const addPanelTimeColumn = (
+    addPanelTimeColumnRequestBody: AddPanelTimeColumnRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseAddPanelTimeColumnResult>>,) => {
+      return customInstance<SuccessResponseAddPanelTimeColumnResult>(
+      {url: `/api/column/add-panel-time`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: addPanelTimeColumnRequestBody
     },
       options);
     }
@@ -791,6 +826,128 @@ const addDiagnosticColumns = (
       {url: `/api/analysis/regression/add-diagnostic-columns`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: addDiagnosticColumnsRequestBody
+    },
+      options);
+    }
+
+/**
+ * ヘックマン2段階推定エンドポイント
+
+Step 1 で Probit により選択方程式を推定し逆ミルズ比 (IMR)
+を計算します。Step 2 で IMR を追加した OLS により結果方程式
+を推定し、セレクションバイアスを補正します。
+
+Parameters
+----------
+request : Request
+    FastAPI のリクエストオブジェクト
+body : HeckmanRequestBody
+    - tableName: 対象テーブル名
+    - dependentVariable: 被説明変数（結果方程式）
+    - explanatoryVariables: 説明変数（結果方程式）
+    - selectionColumn: 選択ダミー列（0/1）
+    - selectionVariables: 説明変数（選択方程式）
+    - reportFirstStage: 第1段階結果を含めるか
+
+Returns
+-------
+JSONResponse
+    分析結果 ID またはエラーメッセージ
+ * @summary Heckman Regression
+ */
+const heckmanRegression = (
+    heckmanRequestBody: HeckmanRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseHeckmanResult>>,) => {
+      return customInstance<SuccessResponseHeckmanResult>(
+      {url: `/api/analysis/heckman-regression`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: heckmanRequestBody
+    },
+      options);
+    }
+
+/**
+ * 差の差（DID）分析エンドポイント
+
+Two-Way Fixed Effects（TWFE）による DID 推定を実行します。
+交差項（treated × post）はサービス層で自動生成されます。
+include_event_study=true の場合、各時点の処置効果係数も推定します。
+
+Parameters
+----------
+request : Request
+    FastAPI のリクエストオブジェクト
+body : DIDRequestBody
+    DID 分析リクエスト
+    - tableName: 対象テーブル名
+    - dependentVariable: 被説明変数
+    - treatmentColumn: 処置群ダミー（treated_i）
+    - postColumn: 処置後ダミー（post_t）
+    - timeColumn: 時点列
+    - entityIdColumn: 個体 ID 列
+    - explanatoryVariables: 追加共変量（省略可）
+    - includeEventStudy: Event Study 実行フラグ
+    - basePeriod: Event Study 基準期（省略時は自動選択）
+    - standardError: 標準誤差の種別（cluster 推奨）
+    - confidenceLevel: 信頼区間水準
+
+Returns
+-------
+JSONResponse
+    {"code": "OK", "result": {"resultId": "<uuid>"}}
+    分析結果は GET /analysis/results/{resultId} で取得可能。
+ * @summary Did Analysis
+ */
+const didAnalysis = (
+    dIDRequestBody: DIDRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseDIDResult>>,) => {
+      return customInstance<SuccessResponseDIDResult>(
+      {url: `/api/analysis/did`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: dIDRequestBody
+    },
+      options);
+    }
+
+/**
+ * 回帰不連続デザイン（RDD）分析エンドポイント
+
+rdrobust による局所多項式推定で RDD の LATE を推定します。
+バイアス補正済み推定・McCrary 密度検定・プラシーボ検定を包括的に返します。
+
+Parameters
+----------
+request : Request
+    FastAPI のリクエストオブジェクト
+body : RDDRequestBody
+    RDD 分析リクエスト
+    - tableName: 対象テーブル名
+    - outcomeVariable: 結果変数
+    - runningVariable: 実行変数（強制変数）
+    - cutoff: カットオフ値（デフォルト: 0）
+    - kernel: カーネル関数 ('triangular' / 'epanechnikov' / 'uniform')
+    - bwSelect: バンド幅自動選択アルゴリズム
+    - h: 手動バンド幅（null の場合は自動選択）
+    - p: 多項式次数（1: 線形, 2: 2次式）
+    - vce: 標準誤差の計算方法
+    - confidenceLevel: 信頼区間水準（デフォルト: 0.95）
+    - nBins: 散布図用ビン数（デフォルト: 30）
+    - placeboCutoffs: プラシーボ境界値リスト（null で自動生成）
+
+Returns
+-------
+JSONResponse
+    {"code": "OK", "result": {"resultId": "<uuid>"}}
+    分析結果は GET /analysis/results/{resultId} で取得可能。
+ * @summary Rdd Analysis
+ */
+const rddAnalysis = (
+    rDDRequestBody: RDDRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseRDDResult>>,) => {
+      return customInstance<SuccessResponseRDDResult>(
+      {url: `/api/analysis/rdd`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: rDDRequestBody
     },
       options);
     }
@@ -1199,7 +1356,7 @@ const shutdown = (
       options);
     }
 
-return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,filterTable,regression,addDiagnosticColumns,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
+return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
 export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['healthCheck']>>>
 export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDummyColumn']>>>
 export type DeleteColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteColumn']>>>
@@ -1213,6 +1370,7 @@ export type GetColumnListResult = NonNullable<Awaited<ReturnType<ReturnType<type
 export type SortColumnsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['sortColumns']>>>
 export type CastColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['castColumn']>>>
 export type MoveColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['moveColumn']>>>
+export type AddPanelTimeColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addPanelTimeColumn']>>>
 export type CreateJoinTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createJoinTable']>>>
 export type CreateUnionTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createUnionTable']>>>
 export type CreateSimulationDataTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createSimulationDataTable']>>>
@@ -1226,6 +1384,9 @@ export type FetchDataToArrowResult = NonNullable<Awaited<ReturnType<ReturnType<t
 export type FilterTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['filterTable']>>>
 export type RegressionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['regression']>>>
 export type AddDiagnosticColumnsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDiagnosticColumns']>>>
+export type HeckmanRegressionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['heckmanRegression']>>>
+export type DidAnalysisResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['didAnalysis']>>>
+export type RddAnalysisResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['rddAnalysis']>>>
 export type GetAllAnalysisResultsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getAllAnalysisResults']>>>
 export type ClearAllAnalysisResultsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['clearAllAnalysisResults']>>>
 export type GetAnalysisResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getAnalysisResult']>>>

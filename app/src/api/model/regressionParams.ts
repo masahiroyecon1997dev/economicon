@@ -5,6 +5,8 @@
  * OpenAPI spec version: 0.3.0
  */
 import type { FEParams } from './fEParams';
+import type { FGLSParams } from './fGLSParams';
+import type { GLSParams } from './gLSParams';
 import type { InstrumentalVariablesParams } from './instrumentalVariablesParams';
 import type { LassoParams } from './lassoParams';
 import type { LogitParams } from './logitParams';
@@ -14,5 +16,6 @@ import type { ProbitParams } from './probitParams';
 import type { REParams } from './rEParams';
 import type { RidgeParams } from './ridgeParams';
 import type { TobitParams } from './tobitParams';
+import type { WLSParams } from './wLSParams';
 
-export type RegressionParams = OLSParams | LassoParams | RidgeParams | LogitParams | ProbitParams | InstrumentalVariablesParams | FEParams | REParams | TobitParams | PanelIvParams;
+export type RegressionParams = OLSParams | LassoParams | RidgeParams | LogitParams | ProbitParams | InstrumentalVariablesParams | FEParams | REParams | TobitParams | PanelIvParams | WLSParams | GLSParams | FGLSParams;

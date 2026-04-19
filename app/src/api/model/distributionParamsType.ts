@@ -21,6 +21,7 @@ export const DistributionParamsType = {
   negative_binomial: 'negative_binomial',
   normal: 'normal',
   poisson: 'poisson',
+  sequence: 'sequence',
   uniform: 'uniform',
   weibull: 'weibull',
 } as const;

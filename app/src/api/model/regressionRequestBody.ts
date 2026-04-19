@@ -21,7 +21,7 @@ export type RegressionRequestBody = {
      */
   tableName: string;
   /**
-     * 分析結果の名前（省略時は被説明変数名を使用）
+     * 分析結果の名前（省略時は自動生成）
      * @maxLength 128
      */
   resultName?: string;

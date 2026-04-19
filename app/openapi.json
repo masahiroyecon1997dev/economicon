@@ -922,6 +922,81 @@
         }
       }
     },
+    "/api/column/add-panel-time": {
+      "post": {
+        "tags": [
+          "column"
+        ],
+        "summary": "Add Panel Time Column",
+        "description": "\u30d1\u30cd\u30eb\u6642\u9593\u30ab\u30e9\u30e0\u3092\u8ffd\u52a0\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : AddPanelTimeColumnRequestBody\n    \u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\n\nReturns\n-------\nJSONResponse\n    \u51e6\u7406\u7d50\u679c",
+        "operationId": "add_panel_time_column",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPanelTimeColumnRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_AddPanelTimeColumnResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/table/create-join": {
       "post": {
         "tags": [
@@ -1836,6 +1911,231 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SuccessResponse_AddDiagnosticColumnsResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/heckman-regression": {
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Heckman Regression",
+        "description": "\u30d8\u30c3\u30af\u30de\u30f32\u6bb5\u968e\u63a8\u5b9a\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nStep 1 \u3067 Probit \u306b\u3088\u308a\u9078\u629e\u65b9\u7a0b\u5f0f\u3092\u63a8\u5b9a\u3057\u9006\u30df\u30eb\u30ba\u6bd4 (IMR)\n\u3092\u8a08\u7b97\u3057\u307e\u3059\u3002Step 2 \u3067 IMR \u3092\u8ffd\u52a0\u3057\u305f OLS \u306b\u3088\u308a\u7d50\u679c\u65b9\u7a0b\u5f0f\n\u3092\u63a8\u5b9a\u3057\u3001\u30bb\u30ec\u30af\u30b7\u30e7\u30f3\u30d0\u30a4\u30a2\u30b9\u3092\u88dc\u6b63\u3057\u307e\u3059\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI \u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : HeckmanRequestBody\n    - tableName: \u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d\n    - dependentVariable: \u88ab\u8aac\u660e\u5909\u6570\uff08\u7d50\u679c\u65b9\u7a0b\u5f0f\uff09\n    - explanatoryVariables: \u8aac\u660e\u5909\u6570\uff08\u7d50\u679c\u65b9\u7a0b\u5f0f\uff09\n    - selectionColumn: \u9078\u629e\u30c0\u30df\u30fc\u5217\uff080/1\uff09\n    - selectionVariables: \u8aac\u660e\u5909\u6570\uff08\u9078\u629e\u65b9\u7a0b\u5f0f\uff09\n    - reportFirstStage: \u7b2c1\u6bb5\u968e\u7d50\u679c\u3092\u542b\u3081\u308b\u304b\n\nReturns\n-------\nJSONResponse\n    \u5206\u6790\u7d50\u679c ID \u307e\u305f\u306f\u30a8\u30e9\u30fc\u30e1\u30c3\u30bb\u30fc\u30b8",
+        "operationId": "heckman_regression",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HeckmanRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_HeckmanResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/did": {
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Did Analysis",
+        "description": "\u5dee\u306e\u5dee\uff08DID\uff09\u5206\u6790\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nTwo-Way Fixed Effects\uff08TWFE\uff09\u306b\u3088\u308b DID \u63a8\u5b9a\u3092\u5b9f\u884c\u3057\u307e\u3059\u3002\n\u4ea4\u5dee\u9805\uff08treated \u00d7 post\uff09\u306f\u30b5\u30fc\u30d3\u30b9\u5c64\u3067\u81ea\u52d5\u751f\u6210\u3055\u308c\u307e\u3059\u3002\ninclude_event_study=true \u306e\u5834\u5408\u3001\u5404\u6642\u70b9\u306e\u51e6\u7f6e\u52b9\u679c\u4fc2\u6570\u3082\u63a8\u5b9a\u3057\u307e\u3059\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI \u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : DIDRequestBody\n    DID \u5206\u6790\u30ea\u30af\u30a8\u30b9\u30c8\n    - tableName: \u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d\n    - dependentVariable: \u88ab\u8aac\u660e\u5909\u6570\n    - treatmentColumn: \u51e6\u7f6e\u7fa4\u30c0\u30df\u30fc\uff08treated_i\uff09\n    - postColumn: \u51e6\u7f6e\u5f8c\u30c0\u30df\u30fc\uff08post_t\uff09\n    - timeColumn: \u6642\u70b9\u5217\n    - entityIdColumn: \u500b\u4f53 ID \u5217\n    - explanatoryVariables: \u8ffd\u52a0\u5171\u5909\u91cf\uff08\u7701\u7565\u53ef\uff09\n    - includeEventStudy: Event Study \u5b9f\u884c\u30d5\u30e9\u30b0\n    - basePeriod: Event Study \u57fa\u6e96\u671f\uff08\u7701\u7565\u6642\u306f\u81ea\u52d5\u9078\u629e\uff09\n    - standardError: \u6a19\u6e96\u8aa4\u5dee\u306e\u7a2e\u5225\uff08cluster \u63a8\u5968\uff09\n    - confidenceLevel: \u4fe1\u983c\u533a\u9593\u6c34\u6e96\n\nReturns\n-------\nJSONResponse\n    {\"code\": \"OK\", \"result\": {\"resultId\": \"<uuid>\"}}\n    \u5206\u6790\u7d50\u679c\u306f GET /analysis/results/{resultId} \u3067\u53d6\u5f97\u53ef\u80fd\u3002",
+        "operationId": "did_analysis",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DIDRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_DIDResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/rdd": {
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Rdd Analysis",
+        "description": "\u56de\u5e30\u4e0d\u9023\u7d9a\u30c7\u30b6\u30a4\u30f3\uff08RDD\uff09\u5206\u6790\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\nrdrobust \u306b\u3088\u308b\u5c40\u6240\u591a\u9805\u5f0f\u63a8\u5b9a\u3067 RDD \u306e LATE \u3092\u63a8\u5b9a\u3057\u307e\u3059\u3002\n\u30d0\u30a4\u30a2\u30b9\u88dc\u6b63\u6e08\u307f\u63a8\u5b9a\u30fbMcCrary \u5bc6\u5ea6\u691c\u5b9a\u30fb\u30d7\u30e9\u30b7\u30fc\u30dc\u691c\u5b9a\u3092\u5305\u62ec\u7684\u306b\u8fd4\u3057\u307e\u3059\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI \u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : RDDRequestBody\n    RDD \u5206\u6790\u30ea\u30af\u30a8\u30b9\u30c8\n    - tableName: \u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d\n    - outcomeVariable: \u7d50\u679c\u5909\u6570\n    - runningVariable: \u5b9f\u884c\u5909\u6570\uff08\u5f37\u5236\u5909\u6570\uff09\n    - cutoff: \u30ab\u30c3\u30c8\u30aa\u30d5\u5024\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: 0\uff09\n    - kernel: \u30ab\u30fc\u30cd\u30eb\u95a2\u6570 ('triangular' / 'epanechnikov' / 'uniform')\n    - bwSelect: \u30d0\u30f3\u30c9\u5e45\u81ea\u52d5\u9078\u629e\u30a2\u30eb\u30b4\u30ea\u30ba\u30e0\n    - h: \u624b\u52d5\u30d0\u30f3\u30c9\u5e45\uff08null \u306e\u5834\u5408\u306f\u81ea\u52d5\u9078\u629e\uff09\n    - p: \u591a\u9805\u5f0f\u6b21\u6570\uff081: \u7dda\u5f62, 2: 2\u6b21\u5f0f\uff09\n    - vce: \u6a19\u6e96\u8aa4\u5dee\u306e\u8a08\u7b97\u65b9\u6cd5\n    - confidenceLevel: \u4fe1\u983c\u533a\u9593\u6c34\u6e96\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: 0.95\uff09\n    - nBins: \u6563\u5e03\u56f3\u7528\u30d3\u30f3\u6570\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: 30\uff09\n    - placeboCutoffs: \u30d7\u30e9\u30b7\u30fc\u30dc\u5883\u754c\u5024\u30ea\u30b9\u30c8\uff08null \u3067\u81ea\u52d5\u751f\u6210\uff09\n\nReturns\n-------\nJSONResponse\n    {\"code\": \"OK\", \"result\": {\"resultId\": \"<uuid>\"}}\n    \u5206\u6790\u7d50\u679c\u306f GET /analysis/results/{resultId} \u3067\u53d6\u5f97\u53ef\u80fd\u3002",
+        "operationId": "rdd_analysis",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RDDRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_RDDResult_"
                 }
               }
             }
@@ -3224,6 +3524,94 @@
         "title": "AddLagLeadColumnResult",
         "description": "\u30e9\u30b0\u30fb\u30ea\u30fc\u30c9\u30ab\u30e9\u30e0\u8ffd\u52a0\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
+      "AddPanelTimeColumnRequestBody": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Table Name",
+            "description": "\u64cd\u4f5c\u5bfe\u8c61\u306e\u30c6\u30fc\u30d6\u30eb\u540d\u3002\u30ef\u30fc\u30af\u30b9\u30da\u30fc\u30b9\u306b\u5b58\u5728\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u306e\u4e2d\u304b\u3089\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population_data",
+              "\u5e02\u533a\u753a\u6751\u4eba\u53e3\u30c7\u30fc\u30bf"
+            ]
+          },
+          "idColumn": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u30b0\u30eb\u30fc\u30d7\u5316\u30ad\u30fc\u3068\u306a\u308b\u500b\u4f53ID\u5217\u540d\u3002\u65e2\u5b58\u306e\u5217\u540d\u304b\u3089\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "newColumnName": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+            "title": "New Column Name",
+            "description": "\u65b0\u3057\u3044\u30ab\u30e9\u30e0\u540d\u3002\u65e2\u5b58\u306e\u30ab\u30e9\u30e0\u540d\u3068\u91cd\u8907\u3057\u306a\u3044\u540d\u524d\u3092\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "addPositionColumn": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u8ffd\u52a0\u4f4d\u7f6e\u306e\u30ab\u30e9\u30e0\u540d\u3002\u6307\u5b9a\u3057\u305f\u30ab\u30e9\u30e0\u306e\u53f3\u96a3\u306b\u65b0\u3057\u3044\u30ab\u30e9\u30e0\u304c\u8ffd\u52a0\u3055\u308c\u307e\u3059\u3002\u65e2\u5b58\u306e\u30ab\u30e9\u30e0\u540d\u304b\u3089\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "startValue": {
+            "type": "integer",
+            "title": "Startvalue",
+            "description": "\u5404\u30b0\u30eb\u30fc\u30d7\u5185\u306e\u6700\u521d\u306e\u5024\u3002\u4f8b: 2000 \u3092\u6307\u5b9a\u3059\u308b\u3068 2000, 2001, 2002, ... \u3068\u306a\u308b\u3002",
+            "default": 1
+          },
+          "step": {
+            "type": "integer",
+            "title": "Step",
+            "description": "\u5897\u5206\u3002\u8ca0\u306e\u5024\u3067\u964d\u9806\u3082\u53ef\u80fd\u30020 \u306f\u7981\u6b62\uff08\u5168\u884c\u540c\u5024\u306b\u306a\u308b\u305f\u3081\u56fa\u5b9a\u5024\u5217\u3092\u4f7f\u7528\u3059\u308b\u3053\u3068\uff09\u3002",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "idColumn",
+          "newColumnName",
+          "addPositionColumn"
+        ],
+        "title": "AddPanelTimeColumnRequestBody",
+        "description": "\u30d1\u30cd\u30eb\u6642\u9593\u30ab\u30e9\u30e0\u8ffd\u52a0\u30ea\u30af\u30a8\u30b9\u30c8\n\n\u500b\u4f53ID\u5217\u3067\u30b0\u30eb\u30fc\u30d7\u5316\u3057\u3001\u30b0\u30eb\u30fc\u30d7\u5185\u306e\u884c\u9806\u306b\nstart_value \u304b\u3089 step \u305a\u3064\u5897\u52a0\u3059\u308b\u6574\u6570\u5217\u3092\u8ffd\u52a0\u3059\u308b\u3002\n\u30d1\u30cd\u30eb\u30c7\u30fc\u30bf\u306e\u5e74\u6b21\u30fb\u671f\u6b21\u5909\u6570\u751f\u6210\u306b\u4f7f\u7528\u3059\u308b\u3002"
+      },
+      "AddPanelTimeColumnResult": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "title": "Table Name",
+            "description": "\u30d1\u30cd\u30eb\u6642\u9593\u30ab\u30e9\u30e0\u3092\u8ffd\u52a0\u3057\u305f\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "columnName": {
+            "type": "string",
+            "title": "Column Name",
+            "description": "\u8ffd\u52a0\u3057\u305f\u30d1\u30cd\u30eb\u6642\u9593\u30ab\u30e9\u30e0\u540d"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "columnName"
+        ],
+        "title": "AddPanelTimeColumnResult",
+        "description": "\u30d1\u30cd\u30eb\u6642\u9593\u30ab\u30e9\u30e0\u8ffd\u52a0\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
       "AddSimulationColumnRequestBody": {
         "properties": {
           "tableName": {
@@ -4258,6 +4646,187 @@
         "title": "CreateUnionTableResult",
         "description": "\u30e6\u30cb\u30aa\u30f3\u30c6\u30fc\u30d6\u30eb\u4f5c\u6210\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
+      "DIDRequestBody": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Table Name",
+            "description": "\u5206\u6790\u5bfe\u8c61\u306e\u30c6\u30fc\u30d6\u30eb\u540d\u3002\u30ef\u30fc\u30af\u30b9\u30da\u30fc\u30b9\u5185\u306b\u5b58\u5728\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d\u3092\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population_data",
+              "\u5e02\u533a\u753a\u6751\u4eba\u53e3\u30c7\u30fc\u30bf"
+            ]
+          },
+          "resultName": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Result Name",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u540d\u524d\uff08\u7701\u7565\u6642\u306f\u81ea\u52d5\u751f\u6210\uff09",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 512,
+            "title": "Description",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u8aac\u660e\u30e1\u30e2",
+            "default": ""
+          },
+          "dependentVariable": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u88ab\u8aac\u660e\u5909\u6570\uff08\u76ee\u7684\u5909\u6570\uff09\u306e\u5217\u540d\u3002\u30c6\u30fc\u30d6\u30eb\u5185\u306b\u5b58\u5728\u3059\u308b\u6570\u5024\u578b\u30ab\u30e9\u30e0\u3092\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "explanatoryVariables": {
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Column Name",
+              "description": "\u30ab\u30e9\u30e0\u540d",
+              "examples": [
+                "population",
+                "\u4eba\u53e3"
+              ]
+            },
+            "type": "array",
+            "title": "Explanatoryvariables",
+            "description": "\u8ffd\u52a0\u306e\u5171\u5909\u91cf\uff08\u30b3\u30f3\u30c8\u30ed\u30fc\u30eb\u5909\u6570\uff09\u306e\u5217\u540d\u30ea\u30b9\u30c8\u3002treatment_column / post_column \u3068\u306e\u91cd\u8907\u306f\u4e0d\u53ef\u3002"
+          },
+          "treatmentColumn": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u51e6\u7f6e\u7fa4\u30c0\u30df\u30fc\u5217\u540d\uff08treated_i\uff09\u3002\u500b\u4f53\u30ec\u30d9\u30eb\u306e 0/1 \u5909\u6570\u3002\u51e6\u7f6e\u7fa4=1\u3001\u5bfe\u7167\u7fa4=0\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "postColumn": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u51e6\u7f6e\u5f8c\u30c0\u30df\u30fc\u5217\u540d\uff08post_t\uff09\u3002\u6642\u70b9\u30ec\u30d9\u30eb\u306e 0/1 \u5909\u6570\u3002\u51e6\u7f6e\u5f8c=1\u3001\u51e6\u7f6e\u524d=0\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "timeColumn": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u6642\u70b9\u5217\u540d\u3002\u6570\u5024\u578b\u307e\u305f\u306f Date \u578b\u3002Event Study \u5b9f\u884c\u6642\u306f\u6574\u6570\u578b\u3092\u63a8\u5968\u3057\u307e\u3059\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "entityIdColumn": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u500b\u4f53 ID \u5217\u540d\u3002TWFE \u306e\u500b\u4f53\u56fa\u5b9a\u52b9\u679c\u306b\u4f7f\u7528\u3057\u307e\u3059\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "includeEventStudy": {
+            "type": "boolean",
+            "title": "Includeeventstudy",
+            "description": "Event Study \u3092\u5b9f\u884c\u3059\u308b\u304b\u3069\u3046\u304b\u3002True \u306e\u5834\u5408\u3001\u5404\u6642\u70b9\u306e\u51e6\u7f6e\u52b9\u679c\u4fc2\u6570\uff08\u03b4_k\uff09\u3092\u63a8\u5b9a\u3057\u307e\u3059\u3002",
+            "default": false
+          },
+          "basePeriod": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseperiod",
+            "description": "Event Study \u306e\u57fa\u6e96\u671f\uff08\u51e6\u7f6e\u52b9\u679c\u3092\u30bc\u30ed\u306b\u56fa\u5b9a\u3059\u308b\u6642\u70b9\uff09\u3002null \u306e\u5834\u5408\u306f\u51e6\u7f6e\u76f4\u524d\u671f\uff08\u901a\u5e38 -1\uff09\u3092\u81ea\u52d5\u9078\u629e\u3057\u307e\u3059\u3002include_event_study=true \u306e\u3068\u304d\u306e\u307f\u6709\u52b9\u3067\u3059\u3002"
+          },
+          "maxPrePeriods": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maxpreperiods",
+            "description": "Event Study \u3067\u8868\u793a\u3059\u308b\u51e6\u7f6e\u524d\u306e\u6700\u5927\u671f\u9593\u6570\u3002null \u306e\u5834\u5408\u306f\u30c7\u30fc\u30bf\u5185\u306e\u5168\u51e6\u7f6e\u524d\u671f\u9593\u3092\u4f7f\u7528\u3057\u307e\u3059\u3002"
+          },
+          "maxPostPeriods": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maxpostperiods",
+            "description": "Event Study \u3067\u8868\u793a\u3059\u308b\u51e6\u7f6e\u5f8c\u306e\u6700\u5927\u671f\u9593\u6570\u3002null \u306e\u5834\u5408\u306f\u30c7\u30fc\u30bf\u5185\u306e\u5168\u51e6\u7f6e\u5f8c\u671f\u9593\u3092\u4f7f\u7528\u3057\u307e\u3059\u3002"
+          },
+          "missingValueHandling": {
+            "$ref": "#/components/schemas/MissingValueHandlingType",
+            "description": "\u6b20\u640d\u5024\u306e\u51e6\u7406\u65b9\u6cd5\u3002remove: \u8a72\u5f53\u884c\u3092\u524a\u9664\u3001ignore: \u305d\u306e\u307e\u307e\u4f7f\u7528\u3001error: \u30a8\u30e9\u30fc\u3068\u3057\u3066\u6271\u3046\u3002",
+            "default": "remove"
+          },
+          "standardError": {
+            "$ref": "#/components/schemas/StandardErrorSettings",
+            "description": "\u6a19\u6e96\u8aa4\u5dee\u306e\u8a08\u7b97\u65b9\u6cd5\u3002DID \u3067\u306f\u500b\u4f53\u30ec\u30d9\u30eb\u306e\u30af\u30e9\u30b9\u30bf\u6a19\u6e96\u8aa4\u5dee\uff08cluster\uff09\u3092\u63a8\u5968\u3057\u307e\u3059\u3002"
+          },
+          "confidenceLevel": {
+            "type": "number",
+            "maximum": 0.999,
+            "minimum": 0.5,
+            "title": "Confidencelevel",
+            "description": "\u4fe1\u983c\u533a\u9593\u306e\u6c34\u6e96\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: 0.95\uff09",
+            "default": 0.95
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "dependentVariable",
+          "treatmentColumn",
+          "postColumn",
+          "timeColumn",
+          "entityIdColumn",
+          "standardError"
+        ],
+        "title": "DIDRequestBody",
+        "description": "\u5dee\u306e\u5dee\uff08DID\uff09\u5206\u6790\u30ea\u30af\u30a8\u30b9\u30c8\n\nTwo-Way Fixed Effects\uff08TWFE\uff09\u306b\u3088\u308b\u5dee\u306e\u5dee\u63a8\u5b9a\u3068\u3001\n\u30aa\u30d7\u30b7\u30e7\u30f3\u3067 Event Study \u3092\u5b9f\u884c\u3057\u307e\u3059\u3002\n\u4ea4\u5dee\u9805\uff08treated \u00d7 post\uff09\u306f\u30b5\u30fc\u30d3\u30b9\u5c64\u3067\u81ea\u52d5\u751f\u6210\u3057\u307e\u3059\u3002"
+      },
+      "DIDResult": {
+        "properties": {
+          "resultId": {
+            "type": "string",
+            "title": "Result ID",
+            "description": "\u4fdd\u5b58\u3055\u308c\u305f\u5206\u6790\u7d50\u679c\u306e\u4e00\u610f ID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resultId"
+        ],
+        "title": "DIDResult",
+        "description": "DID \u5206\u6790\u5b9f\u884c\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
       "DeleteAnalysisResultResult": {
         "properties": {
           "deletedResultId": {
@@ -4455,6 +5024,7 @@
             "negative_binomial": "#/components/schemas/DistributionParams",
             "normal": "#/components/schemas/DistributionParams",
             "poisson": "#/components/schemas/DistributionParams",
+            "sequence": "#/components/schemas/DistributionParams",
             "uniform": "#/components/schemas/DistributionParams",
             "weibull": "#/components/schemas/DistributionParams"
           }
@@ -4503,6 +5073,9 @@
           },
           {
             "$ref": "#/components/schemas/FixedParams"
+          },
+          {
+            "$ref": "#/components/schemas/SequenceParams"
           }
         ]
       },
@@ -4522,7 +5095,8 @@
           "geometric",
           "hypergeometric",
           "negative_binomial",
-          "fixed"
+          "fixed",
+          "sequence"
         ],
         "title": "DistributionType"
       },
@@ -4885,6 +5459,36 @@
         ],
         "title": "FEParams"
       },
+      "FGLSParams": {
+        "properties": {
+          "method": {
+            "type": "string",
+            "const": "fgls",
+            "title": "Method",
+            "default": "fgls"
+          },
+          "fglsMethod": {
+            "type": "string",
+            "enum": [
+              "heteroskedastic",
+              "ar1"
+            ],
+            "title": "Fglsmethod",
+            "description": "FGLS \u306e\u63a8\u5b9a\u624b\u6cd5\u3002'heteroskedastic': OLS\u6b8b\u5dee\u3092\u7528\u3044\u305f1\u30b9\u30c6\u30c3\u30d7FGLS\uff08\u4e0d\u5747\u4e00\u5206\u6563\u5bfe\u5fdc\uff09\u3002'ar1': AR(1)\u8aa4\u5dee\u69cb\u9020\u3092\u4eee\u5b9a\u3057\u305f\u53cd\u5fa9FGLS\uff08GLSAR\uff09\u3002",
+            "default": "heteroskedastic"
+          },
+          "maxIter": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Maxiter",
+            "description": "ar1 \u9078\u629e\u6642\u306e\u53ce\u675f\u5224\u5b9a\u30a4\u30c6\u30ec\u30fc\u30b7\u30e7\u30f3\u4e0a\u9650\u3002heteroskedastic \u9078\u629e\u6642\u306f\u7121\u8996\u3055\u308c\u308b\u3002",
+            "default": 10
+          }
+        },
+        "type": "object",
+        "title": "FGLSParams"
+      },
       "FetchDataToArrowRequestBody": {
         "properties": {
           "tableName": {
@@ -5136,6 +5740,31 @@
         "title": "FixedParams",
         "description": "\u56fa\u5b9a\u5024\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
       },
+      "GLSParams": {
+        "properties": {
+          "method": {
+            "type": "string",
+            "const": "gls",
+            "title": "Method",
+            "default": "gls"
+          },
+          "sigmaTableName": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Table Name",
+            "description": "n\u00d7n \u6b63\u5b9a\u5024\u5206\u6563\u5171\u5206\u6563\u884c\u5217\u3092\u683c\u7d0d\u3057\u305f\u30c6\u30fc\u30d6\u30eb\u540d\u3002\u5206\u6790\u30c6\u30fc\u30d6\u30eb\u306e\u884c\u6570\u3068\u6b21\u5143\u304c\u4e00\u81f4\u3059\u308b\u6b63\u65b9\u884c\u5217\u304c\u5fc5\u8981\u3002GLS \u4f7f\u7528\u6642\u306f\u6b20\u640d\u5024\u51e6\u7406\u304c 'error' \u56fa\u5b9a\u3068\u306a\u308b\u3002",
+            "examples": [
+              "population_data",
+              "\u5e02\u533a\u753a\u6751\u4eba\u53e3\u30c7\u30fc\u30bf"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "sigmaTableName"
+        ],
+        "title": "GLSParams"
+      },
       "GammaParams": {
         "properties": {
           "type": {
@@ -5362,6 +5991,126 @@
           "maxlags"
         ],
         "title": "HacStandardError"
+      },
+      "HeckmanRequestBody": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Table Name",
+            "description": "\u5206\u6790\u5bfe\u8c61\u306e\u30c6\u30fc\u30d6\u30eb\u540d\u3002\u30ef\u30fc\u30af\u30b9\u30da\u30fc\u30b9\u5185\u306b\u5b58\u5728\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d\u3092\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population_data",
+              "\u5e02\u533a\u753a\u6751\u4eba\u53e3\u30c7\u30fc\u30bf"
+            ]
+          },
+          "resultName": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Result Name",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u540d\u524d\uff08\u7701\u7565\u6642\u306f\u81ea\u52d5\u751f\u6210\uff09",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 512,
+            "title": "Description",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u8aac\u660e\u30e1\u30e2",
+            "default": ""
+          },
+          "dependentVariable": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u7d50\u679c\u65b9\u7a0b\u5f0f\u306e\u88ab\u8aac\u660e\u5909\u6570\u5217\u540d\u3002\u9078\u629e\u30b5\u30f3\u30d7\u30eb\uff08selectionColumn=1\uff09\u306e\u307f\u3067\u63a8\u5b9a\u3055\u308c\u307e\u3059\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "explanatoryVariables": {
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Column Name",
+              "description": "\u30ab\u30e9\u30e0\u540d",
+              "examples": [
+                "population",
+                "\u4eba\u53e3"
+              ]
+            },
+            "type": "array",
+            "title": "Explanatoryvariables",
+            "description": "\u7d50\u679c\u65b9\u7a0b\u5f0f\u306e\u8aac\u660e\u5909\u6570\u5217\u540d\u30ea\u30b9\u30c8\u3002"
+          },
+          "selectionColumn": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u9078\u629e\u30c0\u30df\u30fc\u5217\u540d\uff080/1\uff09\u30021 = \u7d50\u679c\u5909\u6570\u304c\u89b3\u6e2c\u3055\u308c\u308b\u30b5\u30f3\u30d7\u30eb\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "selectionVariables": {
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Column Name",
+              "description": "\u30ab\u30e9\u30e0\u540d",
+              "examples": [
+                "population",
+                "\u4eba\u53e3"
+              ]
+            },
+            "type": "array",
+            "title": "Selectionvariables",
+            "description": "\u9078\u629e\u65b9\u7a0b\u5f0f\uff08Probit\uff09\u306e\u8aac\u660e\u5909\u6570\u5217\u540d\u30ea\u30b9\u30c8\u3002\u9664\u5916\u5236\u7d04\u3068\u3057\u3066 explanatoryVariables \u306b\u306a\u3044\u5909\u6570\u3092 1 \u3064\u4ee5\u4e0a\u542b\u3080\u5fc5\u8981\u304c\u3042\u308a\u307e\u3059\u3002"
+          },
+          "hasConst": {
+            "type": "boolean",
+            "title": "Hasconst",
+            "description": "\u7d50\u679c\u65b9\u7a0b\u5f0f\uff08Step 2 OLS\uff09\u306b\u5b9a\u6570\u9805\u3092\u8ffd\u52a0\u3059\u308b\u304b\u3002",
+            "default": true
+          },
+          "missingValueHandling": {
+            "$ref": "#/components/schemas/MissingValueHandlingType",
+            "description": "\u6b20\u640d\u5024\u306e\u51e6\u7406\u65b9\u6cd5\uff08remove: \u524a\u9664, ignore: \u7121\u8996, error: \u30a8\u30e9\u30fc\uff09",
+            "default": "remove"
+          },
+          "reportFirstStage": {
+            "type": "boolean",
+            "title": "Reportfirststage",
+            "description": "1 \u6bb5\u968e\u76ee\uff08Probit\uff09\u306e\u63a8\u5b9a\u7d50\u679c\u3092\u30ec\u30b9\u30dd\u30f3\u30b9\u306e firstStage \u306b\u542b\u3081\u308b\u304b\u3002",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "dependentVariable",
+          "explanatoryVariables",
+          "selectionColumn",
+          "selectionVariables"
+        ],
+        "title": "HeckmanRequestBody",
+        "description": "\u30d8\u30c3\u30af\u30de\u30f32\u6bb5\u968e\u63a8\u5b9a\u30ea\u30af\u30a8\u30b9\u30c8\n\n\u9078\u629e\u65b9\u7a0b\u5f0f\uff08Probit\uff09\u3068\u7d50\u679c\u65b9\u7a0b\u5f0f\uff08OLS\uff09\u306e2\u6bb5\u968e\u63a8\u5b9a\n\u306b\u3088\u308a\u30b5\u30f3\u30d7\u30eb\u30bb\u30ec\u30af\u30b7\u30e7\u30f3\u30d0\u30a4\u30a2\u30b9\u3092\u88dc\u6b63\u3057\u307e\u3059\u3002"
+      },
+      "HeckmanResult": {
+        "properties": {
+          "resultId": {
+            "type": "string",
+            "title": "Result ID",
+            "description": "\u4fdd\u5b58\u3055\u308c\u305f\u5206\u6790\u7d50\u679c\u306e\u4e00\u610f ID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resultId"
+        ],
+        "title": "HeckmanResult",
+        "description": "\u30d8\u30c3\u30af\u30de\u30f32\u6bb5\u968e\u63a8\u5b9a\u5b9f\u884c\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
       "HypergeometricParams": {
         "properties": {
@@ -6042,7 +6791,8 @@
           "method": {
             "type": "string",
             "const": "feiv",
-            "title": "Method"
+            "title": "Method",
+            "default": "feiv"
           },
           "entityIdColumn": {
             "type": "string",
@@ -6114,7 +6864,6 @@
         },
         "type": "object",
         "required": [
-          "method",
           "entityIdColumn",
           "instrumentalVariables",
           "endogenousVariables"
@@ -6204,6 +6953,187 @@
         "type": "object",
         "title": "ProbitParams"
       },
+      "RDDBandwidthSelectType": {
+        "type": "string",
+        "enum": [
+          "mserd",
+          "msetwo",
+          "msesum",
+          "msecomb1",
+          "msecomb2",
+          "cerrd",
+          "certwo",
+          "cersum",
+          "cercomb1",
+          "cercomb2"
+        ],
+        "title": "RDDBandwidthSelectType"
+      },
+      "RDDKernelType": {
+        "type": "string",
+        "enum": [
+          "triangular",
+          "epanechnikov",
+          "uniform"
+        ],
+        "title": "RDDKernelType"
+      },
+      "RDDRequestBody": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Table Name",
+            "description": "\u5206\u6790\u5bfe\u8c61\u306e\u30c6\u30fc\u30d6\u30eb\u540d\u3002\u30ef\u30fc\u30af\u30b9\u30da\u30fc\u30b9\u5185\u306b\u5b58\u5728\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d\u3092\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population_data",
+              "\u5e02\u533a\u753a\u6751\u4eba\u53e3\u30c7\u30fc\u30bf"
+            ]
+          },
+          "resultName": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Result Name",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u540d\u524d\uff08\u7701\u7565\u6642\u306f\u81ea\u52d5\u751f\u6210\uff09",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 512,
+            "title": "Description",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u8aac\u660e\u30e1\u30e2",
+            "default": ""
+          },
+          "outcomeVariable": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u7d50\u679c\u5909\u6570\uff08y\uff09\u306e\u5217\u540d\u3002\u6570\u5024\u578b\u30ab\u30e9\u30e0\u3092\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "runningVariable": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u5b9f\u884c\u5909\u6570\uff08score / forcing variable\uff09\u306e\u5217\u540d\u3002\u30ab\u30c3\u30c8\u30aa\u30d5\u524d\u5f8c\u3067\u51e6\u7f6e\u5272\u308a\u5f53\u3066\u304c\u6c7a\u307e\u308b\u9023\u7d9a\u5909\u6570\u3002\u6570\u5024\u578b\u30ab\u30e9\u30e0\u3092\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          },
+          "cutoff": {
+            "type": "number",
+            "title": "Cutoff",
+            "description": "\u30ab\u30c3\u30c8\u30aa\u30d5\u5024\u3002\u5b9f\u884c\u5909\u6570\u304c\u3053\u306e\u5024\u4ee5\u4e0a\u306e\u89b3\u6e2c\u3092\u51e6\u7f6e\u7fa4\u3068\u307f\u306a\u3057\u307e\u3059\u3002\u30c7\u30d5\u30a9\u30eb\u30c8\u306f 0\u3002",
+            "default": 0.0
+          },
+          "kernel": {
+            "$ref": "#/components/schemas/RDDKernelType",
+            "description": "\u30ab\u30fc\u30cd\u30eb\u91cd\u307f\u4ed8\u3051\u95a2\u6570\u3002triangular\uff08\u30c7\u30d5\u30a9\u30eb\u30c8\uff09/ epanechnikov / uniform\u3002",
+            "default": "triangular"
+          },
+          "bwSelect": {
+            "$ref": "#/components/schemas/RDDBandwidthSelectType",
+            "description": "\u30d0\u30f3\u30c9\u5e45\u306e\u81ea\u52d5\u9078\u5b9a\u30a2\u30eb\u30b4\u30ea\u30ba\u30e0\u3002mserd\uff08\u30c7\u30d5\u30a9\u30eb\u30c8\uff09: MSE \u6700\u5c0f\u5316\u30fb\u5de6\u53f3\u5171\u901a\u30d0\u30f3\u30c9\u5e45\u3002msetwo: MSE \u6700\u5c0f\u5316\u30fb\u5de6\u53f3\u72ec\u7acb\u30d0\u30f3\u30c9\u5e45\u3002cerrd/certwo: CER\uff08Coverage Error Rate\uff09\u6700\u5c0f\u5316\u3002",
+            "default": "mserd"
+          },
+          "h": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "H",
+            "description": "\u624b\u52d5\u30d0\u30f3\u30c9\u5e45\u3002\u6307\u5b9a\u3057\u305f\u5834\u5408 bwSelect \u306b\u3088\u308b\u81ea\u52d5\u9078\u629e\u3088\u308a\u512a\u5148\u3055\u308c\u307e\u3059\u3002null \u306e\u5834\u5408\u306f bwSelect \u3067\u81ea\u52d5\u9078\u629e\u3057\u307e\u3059\u3002"
+          },
+          "p": {
+            "type": "integer",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "P",
+            "description": "\u5c40\u6240\u591a\u9805\u5f0f\u306e\u6b21\u6570\u30011\uff08\u7dda\u5f62\u3001\u30c7\u30d5\u30a9\u30eb\u30c8\uff09\u307e\u305f\u306f2\uff082\u6b21\u5f0f\uff09\u3092\u63a8\u5968\u3002\u30d0\u30a4\u30a2\u30b9\u88dc\u6b63\u30d0\u30f3\u30c9\u5e45\u306b\u306f p+1 \u6b21\u591a\u9805\u5f0f\u304c\u4f7f\u7528\u3055\u308c\u307e\u3059\u3002",
+            "default": 1
+          },
+          "vce": {
+            "$ref": "#/components/schemas/RDDVceType",
+            "description": "\u5206\u6563\u5171\u5206\u6563\u884c\u5217\u306e\u63a8\u5b9a\u65b9\u5f0f\uff08\u6a19\u6e96\u8aa4\u5dee\u306e\u8a08\u7b97\u65b9\u6cd5\uff09\u3002nn: \u6700\u8fd1\u508d\u6cd5\uff08\u30c7\u30d5\u30a9\u30eb\u30c8\uff09\u3002hc1 / hc3: HC \u4e0d\u5747\u4e00\u5206\u6563\u4e00\u81f4\u63a8\u5b9a\u91cf\u3002cluster: \u30af\u30e9\u30b9\u30bf\u6a19\u6e96\u8aa4\u5dee\u3002nncluster: \u6700\u8fd1\u508d\u30af\u30e9\u30b9\u30bf\u6a19\u6e96\u8aa4\u5dee\u3002",
+            "default": "hc1"
+          },
+          "confidenceLevel": {
+            "type": "number",
+            "maximum": 0.999,
+            "minimum": 0.5,
+            "title": "Confidencelevel",
+            "description": "\u4fe1\u983c\u533a\u9593\u306e\u6c34\u6e96\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: 0.95 \u2192 95%\uff09",
+            "default": 0.95
+          },
+          "nBins": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 10.0,
+            "title": "Nbins",
+            "description": "\u6563\u5e03\u56f3\u7528\u30d3\u30f3\u6570\uff08\u5de6\u53f3\u5408\u8a08\uff09\u3002\u30c7\u30d5\u30a9\u30eb\u30c8: 30\uff08\u5de6\u53f3\u5404 15 \u672c\uff09\u3002",
+            "default": 30
+          },
+          "placeboCutoffs": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array",
+                "maxItems": 10
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Placebocutoffs",
+            "description": "\u30d7\u30e9\u30b7\u30fc\u30dc\u691c\u5b9a\u7528\u306e\u507d\u5883\u754c\u5024\u30ea\u30b9\u30c8\u3002null \u306e\u5834\u5408\u306f\u5b9f\u884c\u5909\u6570\u306e\u7bc4\u56f2\u306b\u57fa\u3065\u304d\u30ab\u30c3\u30c8\u30aa\u30d5\u5de6\u53f3 \u00b15% \u76f8\u5f53\u306e 2 \u70b9\u3092\u81ea\u52d5\u751f\u6210\u3057\u307e\u3059\u3002"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "outcomeVariable",
+          "runningVariable"
+        ],
+        "title": "RDDRequestBody",
+        "description": "\u56de\u5e30\u4e0d\u9023\u7d9a\u30c7\u30b6\u30a4\u30f3\uff08RDD\uff09\u5206\u6790\u30ea\u30af\u30a8\u30b9\u30c8\n\nrdrobust \u3092\u4f7f\u7528\u3057\u305f\u30b7\u30e3\u30fc\u30d7 RDD \u63a8\u5b9a\u3068\u8a3a\u65ad\u3092\u5b9f\u884c\u3057\u307e\u3059\u3002\n\u30d0\u30a4\u30a2\u30b9\u88dc\u6b63\u6e08\u307f\u63a8\u5b9a\u30fb\u5bc6\u5ea6\u691c\u5b9a\u30fb\u30d7\u30e9\u30b7\u30fc\u30dc\u691c\u5b9a\u3092\u5305\u62ec\u7684\u306b\u8fd4\u3057\u307e\u3059\u3002"
+      },
+      "RDDResult": {
+        "properties": {
+          "resultId": {
+            "type": "string",
+            "title": "Result ID",
+            "description": "\u4fdd\u5b58\u3055\u308c\u305f\u5206\u6790\u7d50\u679c\u306e\u4e00\u610f ID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resultId"
+        ],
+        "title": "RDDResult",
+        "description": "RDD \u5206\u6790\u5b9f\u884c\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "RDDVceType": {
+        "type": "string",
+        "enum": [
+          "nn",
+          "hc1",
+          "hc3",
+          "cluster",
+          "nncluster"
+        ],
+        "title": "RDDVceType"
+      },
       "REParams": {
         "properties": {
           "entityIdColumn": {
@@ -6279,6 +7209,15 @@
           },
           {
             "$ref": "#/components/schemas/PanelIvParams"
+          },
+          {
+            "$ref": "#/components/schemas/WLSParams"
+          },
+          {
+            "$ref": "#/components/schemas/GLSParams"
+          },
+          {
+            "$ref": "#/components/schemas/FGLSParams"
           }
         ],
         "discriminator": {
@@ -6286,6 +7225,8 @@
           "mapping": {
             "fe": "#/components/schemas/FEParams",
             "feiv": "#/components/schemas/PanelIvParams",
+            "fgls": "#/components/schemas/FGLSParams",
+            "gls": "#/components/schemas/GLSParams",
             "iv": "#/components/schemas/InstrumentalVariablesParams",
             "lasso": "#/components/schemas/LassoParams",
             "logit": "#/components/schemas/LogitParams",
@@ -6293,7 +7234,8 @@
             "probit": "#/components/schemas/ProbitParams",
             "re": "#/components/schemas/REParams",
             "ridge": "#/components/schemas/RidgeParams",
-            "tobit": "#/components/schemas/TobitParams"
+            "tobit": "#/components/schemas/TobitParams",
+            "wls": "#/components/schemas/WLSParams"
           }
         }
       },
@@ -6313,7 +7255,7 @@
             "type": "string",
             "maxLength": 128,
             "title": "Result Name",
-            "description": "\u5206\u6790\u7d50\u679c\u306e\u540d\u524d\uff08\u7701\u7565\u6642\u306f\u88ab\u8aac\u660e\u5909\u6570\u540d\u3092\u4f7f\u7528\uff09",
+            "description": "\u5206\u6790\u7d50\u679c\u306e\u540d\u524d\uff08\u7701\u7565\u6642\u306f\u81ea\u52d5\u751f\u6210\uff09",
             "default": ""
           },
           "description": {
@@ -6650,6 +7592,34 @@
         "title": "SampleInput",
         "description": "\u691c\u5b9a\u306b\u4f7f\u7528\u3059\u308b1\u30b5\u30f3\u30d7\u30eb\u306e\u6307\u5b9a\uff08\u30c6\u30fc\u30d6\u30eb\u540d\u30fb\u5217\u540d\u306e\u30da\u30a2\uff09"
       },
+      "SequenceParams": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "sequence",
+            "title": "Type",
+            "description": "\u5206\u5e03\u306e\u7a2e\u985e"
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start",
+            "description": "\u958b\u59cb\u5024",
+            "default": 1
+          },
+          "step": {
+            "type": "integer",
+            "title": "Step",
+            "description": "\u5897\u5206\uff08\u8ca0\u5024\u3067\u964d\u9806\u9023\u756a\uff09",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "SequenceParams",
+        "description": "\u9023\u756a\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
+      },
       "ShutdownResult": {
         "properties": {
           "status": {
@@ -6962,6 +7932,25 @@
         ],
         "title": "SuccessResponse[AddLagLeadColumnResult]"
       },
+      "SuccessResponse_AddPanelTimeColumnResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/AddPanelTimeColumnResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[AddPanelTimeColumnResult]"
+      },
       "SuccessResponse_AddSimulationColumnResult_": {
         "properties": {
           "code": {
@@ -7151,6 +8140,25 @@
           "result"
         ],
         "title": "SuccessResponse[CreateUnionTableResult]"
+      },
+      "SuccessResponse_DIDResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/DIDResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[DIDResult]"
       },
       "SuccessResponse_DeleteAnalysisResultResult_": {
         "properties": {
@@ -7418,6 +8426,25 @@
         ],
         "title": "SuccessResponse[GetTableListResult]"
       },
+      "SuccessResponse_HeckmanResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/HeckmanResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[HeckmanResult]"
+      },
       "SuccessResponse_ImportFileResult_": {
         "properties": {
           "code": {
@@ -7474,6 +8501,25 @@
           "result"
         ],
         "title": "SuccessResponse[OutputResultResult]"
+      },
+      "SuccessResponse_RDDResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/RDDResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[RDDResult]"
       },
       "SuccessResponse_RegressionResult_": {
         "properties": {
@@ -7898,6 +8944,31 @@
         ],
         "title": "UpdateSettingsResult",
         "description": "\u30a2\u30d7\u30ea\u30b1\u30fc\u30b7\u30e7\u30f3\u8a2d\u5b9a\u66f4\u65b0\u30ec\u30b9\u30dd\u30f3\u30b9\uff08\u66f4\u65b0\u5f8c\u306e\u5168\u8a2d\u5b9a\u3092\u8fd4\u3059\uff09"
+      },
+      "WLSParams": {
+        "properties": {
+          "method": {
+            "type": "string",
+            "const": "wls",
+            "title": "Method",
+            "default": "wls"
+          },
+          "weightsColumn": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Column Name",
+            "description": "\u89b3\u6e2c\u5024\u3054\u3068\u306e\u91cd\u307f (1/\u03c3\u00b2\u1d62) \u3092\u683c\u7d0d\u3057\u305f\u5217\u540d\u3002\u6b63\u306e\u6570\u5024\u578b\u5217\u304c\u5fc5\u8981\uff08\u5168\u5024 > 0\uff09\u3002",
+            "examples": [
+              "population",
+              "\u4eba\u53e3"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "weightsColumn"
+        ],
+        "title": "WLSParams"
       },
       "WeibullParams": {
         "properties": {

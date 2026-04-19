@@ -174,7 +174,8 @@ export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOn
 export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOnethreePExclusiveMin = 0;
 export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOnethreePMax = 1;
 
-
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOnefiveStartDefault = 1;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOneOnefiveStepDefault = 1;
 export const createSimulationDataTableBodyRandomSeedOneMin = 0;
 export const createSimulationDataTableBodyRandomSeedOneMax = 100000000;
 
@@ -237,8 +238,12 @@ export const CreateSimulationDataTableBody = zod.object({
 }).describe('負の二項分布のパラメータ\n\nn 回成功するまでに必要な失敗回数をシミュレートする。\nイベント発生強度の過分散モデリングに広く使われる。'),zod.object({
   "type": zod.literal("fixed").describe('分布の種類'),
   "value": zod.union([zod.number(),zod.number()]).describe('固定値')
-}).describe('固定値のパラメータ')]).and(zod.object({
-  "type": zod.enum(['bernoulli', 'beta', 'binomial', 'exponential', 'fixed', 'gamma', 'geometric', 'hypergeometric', 'lognormal', 'negative_binomial', 'normal', 'poisson', 'uniform', 'weibull'])
+}).describe('固定値のパラメータ'),zod.object({
+  "type": zod.literal("sequence").describe('分布の種類'),
+  "start": zod.number().default(createSimulationDataTableBodySimulationColumnsItemDistributionOneOnefiveStartDefault).describe('開始値'),
+  "step": zod.number().default(createSimulationDataTableBodySimulationColumnsItemDistributionOneOnefiveStepDefault).describe('増分（負値で降順連番）')
+}).describe('連番のパラメータ')]).and(zod.object({
+  "type": zod.enum(['bernoulli', 'beta', 'binomial', 'exponential', 'fixed', 'gamma', 'geometric', 'hypergeometric', 'lognormal', 'negative_binomial', 'normal', 'poisson', 'sequence', 'uniform', 'weibull'])
 })).describe('分布設定')
 }).describe('新しい列名とその生成規則のペア。\n複数のAPI（列追加、シミュレーション設定等）で共通利用される。')).min(1).describe('シミュレーションカラムの設定リスト'),
   "randomSeed": zod.union([zod.number().min(createSimulationDataTableBodyRandomSeedOneMin).max(createSimulationDataTableBodyRandomSeedOneMax),zod.null()]).optional().describe('乱数シード値（0以上1億以下の整数）。同じシードを指定すると同じ結果が再現されます。None の場合は毎回異なる結果になります。')

@@ -260,7 +260,8 @@ export const addSimulationColumnBodySimulationColumnDistributionOneOnethreeNExcl
 export const addSimulationColumnBodySimulationColumnDistributionOneOnethreePExclusiveMin = 0;
 export const addSimulationColumnBodySimulationColumnDistributionOneOnethreePMax = 1;
 
-
+export const addSimulationColumnBodySimulationColumnDistributionOneOnefiveStartDefault = 1;
+export const addSimulationColumnBodySimulationColumnDistributionOneOnefiveStepDefault = 1;
 export const addSimulationColumnBodyRandomSeedOneMin = 0;
 export const addSimulationColumnBodyRandomSeedOneMax = 100000000;
 
@@ -322,8 +323,12 @@ export const AddSimulationColumnBody = zod.object({
 }).describe('負の二項分布のパラメータ\n\nn 回成功するまでに必要な失敗回数をシミュレートする。\nイベント発生強度の過分散モデリングに広く使われる。'),zod.object({
   "type": zod.literal("fixed").describe('分布の種類'),
   "value": zod.union([zod.number(),zod.number()]).describe('固定値')
-}).describe('固定値のパラメータ')]).and(zod.object({
-  "type": zod.enum(['bernoulli', 'beta', 'binomial', 'exponential', 'fixed', 'gamma', 'geometric', 'hypergeometric', 'lognormal', 'negative_binomial', 'normal', 'poisson', 'uniform', 'weibull'])
+}).describe('固定値のパラメータ'),zod.object({
+  "type": zod.literal("sequence").describe('分布の種類'),
+  "start": zod.number().default(addSimulationColumnBodySimulationColumnDistributionOneOnefiveStartDefault).describe('開始値'),
+  "step": zod.number().default(addSimulationColumnBodySimulationColumnDistributionOneOnefiveStepDefault).describe('増分（負値で降順連番）')
+}).describe('連番のパラメータ')]).and(zod.object({
+  "type": zod.enum(['bernoulli', 'beta', 'binomial', 'exponential', 'fixed', 'gamma', 'geometric', 'hypergeometric', 'lognormal', 'negative_binomial', 'normal', 'poisson', 'sequence', 'uniform', 'weibull'])
 })).describe('分布設定')
 }).describe('シミュレーションカラムの設定。'),
   "addPositionColumn": zod.string().min(1).describe('追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。'),
@@ -337,7 +342,7 @@ export const AddSimulationColumnResponse = zod.object({
   "result": zod.object({
   "tableName": zod.string().describe('シミュレーションカラムを追加したテーブル名'),
   "columnName": zod.string().describe('追加したシミュレーションカラム名'),
-  "distributionType": zod.enum(['uniform', 'exponential', 'normal', 'gamma', 'beta', 'weibull', 'lognormal', 'binomial', 'bernoulli', 'poisson', 'geometric', 'hypergeometric', 'negative_binomial', 'fixed']).describe('使用した分布タイプ')
+  "distributionType": zod.enum(['uniform', 'exponential', 'normal', 'gamma', 'beta', 'weibull', 'lognormal', 'binomial', 'bernoulli', 'poisson', 'geometric', 'hypergeometric', 'negative_binomial', 'fixed', 'sequence']).describe('使用した分布タイプ')
 }).describe('処理結果')
 })
 
@@ -676,6 +681,55 @@ export const MoveColumnResponse = zod.object({
   "result": zod.object({
   "tableName": zod.string().describe('列を移動したテーブル名'),
   "columnNames": zod.array(zod.string()).describe('移動後の全列名リスト（順序付き）')
+}).describe('処理結果')
+})
+
+/**
+ * パネル時間カラムを追加するエンドポイント
+
+Parameters
+----------
+request : Request
+    FastAPIのリクエストオブジェクト
+body : AddPanelTimeColumnRequestBody
+    リクエストボディ
+
+Returns
+-------
+JSONResponse
+    処理結果
+ * @summary Add Panel Time Column
+ */
+export const AddPanelTimeColumnHeader = zod.object({
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
+
+
+export const addPanelTimeColumnBodyNewColumnNameMax = 128;
+
+
+export const addPanelTimeColumnBodyNewColumnNameRegExp = new RegExp('^[^\\x00-\\x1f\\x7f]+$');
+
+export const addPanelTimeColumnBodyStartValueDefault = 1;
+export const addPanelTimeColumnBodyStepDefault = 1;
+
+export const AddPanelTimeColumnBody = zod.object({
+  "tableName": zod.string().min(1).describe('操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。'),
+  "idColumn": zod.string().min(1).describe('グループ化キーとなる個体ID列名。既存の列名から指定してください。'),
+  "newColumnName": zod.string().min(1).max(addPanelTimeColumnBodyNewColumnNameMax).regex(addPanelTimeColumnBodyNewColumnNameRegExp).describe('新しいカラム名。既存のカラム名と重複しない名前を指定してください。'),
+  "addPositionColumn": zod.string().min(1).describe('追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。'),
+  "startValue": zod.number().default(addPanelTimeColumnBodyStartValueDefault).describe('各グループ内の最初の値。例: 2000 を指定すると 2000, 2001, 2002, ... となる。'),
+  "step": zod.number().default(addPanelTimeColumnBodyStepDefault).describe('増分。負の値で降順も可能。0 は禁止（全行同値になるため固定値列を使用すること）。')
+}).describe('パネル時間カラム追加リクエスト\n\n個体ID列でグループ化し、グループ内の行順に\nstart_value から step ずつ増加する整数列を追加する。\nパネルデータの年次・期次変数生成に使用する。')
+
+export const addPanelTimeColumnResponseCodeDefault = `OK`;
+
+export const AddPanelTimeColumnResponse = zod.object({
+  "code": zod.string().default(addPanelTimeColumnResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('パネル時間カラムを追加したテーブル名'),
+  "columnName": zod.string().describe('追加したパネル時間カラム名')
 }).describe('処理結果')
 })
 

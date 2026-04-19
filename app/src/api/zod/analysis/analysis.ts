@@ -94,10 +94,18 @@ export const regressionBodyAnalysisSevenMethodDefault = `fe`;
 
 export const regressionBodyAnalysisEightMethodDefault = `re`;
 export const regressionBodyAnalysisNineLeftCensoringLimitDefault = 0;
+export const regressionBodyAnalysisOnezeroMethodDefault = `feiv`;
 
 
 
 export const regressionBodyAnalysisOnezeroGmmWeightMatrixDefault = `robust`;
+export const regressionBodyAnalysisOneoneMethodDefault = `wls`;
+export const regressionBodyAnalysisOnetwoMethodDefault = `gls`;
+export const regressionBodyAnalysisOnethreeMethodDefault = `fgls`;
+export const regressionBodyAnalysisOnethreeFglsMethodDefault = `heteroskedastic`;
+export const regressionBodyAnalysisOnethreeMaxIterDefault = 10;
+export const regressionBodyAnalysisOnethreeMaxIterMax = 100;
+
 export const regressionBodyStandardErrorOneMethodDefault = `nonrobust`;
 export const regressionBodyStandardErrorTwoMethodDefault = `robust`;
 export const regressionBodyStandardErrorTwoHcTypeDefault = `HC1`;
@@ -111,7 +119,7 @@ export const regressionBodyStandardErrorFourUseCorrectionDefault = true;
 
 export const RegressionBody = zod.object({
   "tableName": zod.string().min(1).describe('分析対象のテーブル名。ワークスペース内に存在するテーブル名を指定してください。'),
-  "resultName": zod.string().max(regressionBodyResultNameMax).default(regressionBodyResultNameDefault).describe('分析結果の名前（省略時は被説明変数名を使用）'),
+  "resultName": zod.string().max(regressionBodyResultNameMax).default(regressionBodyResultNameDefault).describe('分析結果の名前（省略時は自動生成）'),
   "description": zod.string().max(regressionBodyDescriptionMax).default(regressionBodyDescriptionDefault).describe('分析結果の説明メモ'),
   "dependentVariable": zod.string().min(1).describe('被説明変数（目的変数）の列名。テーブル内に存在するカラム名を指定してください。'),
   "explanatoryVariables": zod.array(zod.string().min(1).describe('カラム名')).describe('説明変数の列名のリスト。テーブル内に存在するカラム名を指定してください。'),
@@ -170,12 +178,22 @@ export const RegressionBody = zod.object({
   "leftCensoringLimit": zod.union([zod.number(),zod.null()]).default(regressionBodyAnalysisNineLeftCensoringLimitDefault).describe('左側打ち切り値。この値以下のデータが打ち切られていると見なす'),
   "rightCensoringLimit": zod.union([zod.number(),zod.null()]).optional().describe('右側打ち切り値')
 }),zod.object({
-  "method": zod.enum(['feiv']),
+  "method": zod.enum(['feiv']).default(regressionBodyAnalysisOnezeroMethodDefault),
   "entityIdColumn": zod.string().min(1).describe('個体ID列名'),
   "timeColumn": zod.union([zod.string().min(1).describe('カラム名'),zod.null()]).optional().describe('時間列名'),
   "instrumentalVariables": zod.array(zod.string().min(1).describe('カラム名')),
   "endogenousVariables": zod.array(zod.string().min(1).describe('カラム名')),
   "gmmWeightMatrix": zod.enum(['uncentered', 'robust', 'hac']).default(regressionBodyAnalysisOnezeroGmmWeightMatrixDefault)
+}),zod.object({
+  "method": zod.enum(['wls']).default(regressionBodyAnalysisOneoneMethodDefault),
+  "weightsColumn": zod.string().min(1).describe('観測値ごとの重み (1\/σ²ᵢ) を格納した列名。正の数値型列が必要（全値 > 0）。')
+}),zod.object({
+  "method": zod.enum(['gls']).default(regressionBodyAnalysisOnetwoMethodDefault),
+  "sigmaTableName": zod.string().min(1).describe('n×n 正定値分散共分散行列を格納したテーブル名。分析テーブルの行数と次元が一致する正方行列が必要。GLS 使用時は欠損値処理が \'error\' 固定となる。')
+}),zod.object({
+  "method": zod.enum(['fgls']).default(regressionBodyAnalysisOnethreeMethodDefault),
+  "fglsMethod": zod.enum(['heteroskedastic', 'ar1']).default(regressionBodyAnalysisOnethreeFglsMethodDefault).describe('FGLS の推定手法。\'heteroskedastic\': OLS残差を用いた1ステップFGLS（不均一分散対応）。\'ar1\': AR(1)誤差構造を仮定した反復FGLS（GLSAR）。'),
+  "maxIter": zod.number().min(1).max(regressionBodyAnalysisOnethreeMaxIterMax).default(regressionBodyAnalysisOnethreeMaxIterDefault).describe('ar1 選択時の収束判定イテレーション上限。heteroskedastic 選択時は無視される。')
 })]).describe('回帰分析手法の詳細パラメータ。method フィールドで手法（ols, fe, re, iv 等）を指定します。'),
   "standardError": zod.union([zod.object({
   "method": zod.enum(['nonrobust']).default(regressionBodyStandardErrorOneMethodDefault)
@@ -256,6 +274,274 @@ export const AddDiagnosticColumnsResponse = zod.object({
   "result": zod.object({
   "tableName": zod.string().describe('更新されたテーブル名'),
   "addedColumns": zod.array(zod.string()).describe('追加された列名のリスト')
+}).describe('処理結果')
+})
+
+/**
+ * ヘックマン2段階推定エンドポイント
+
+Step 1 で Probit により選択方程式を推定し逆ミルズ比 (IMR)
+を計算します。Step 2 で IMR を追加した OLS により結果方程式
+を推定し、セレクションバイアスを補正します。
+
+Parameters
+----------
+request : Request
+    FastAPI のリクエストオブジェクト
+body : HeckmanRequestBody
+    - tableName: 対象テーブル名
+    - dependentVariable: 被説明変数（結果方程式）
+    - explanatoryVariables: 説明変数（結果方程式）
+    - selectionColumn: 選択ダミー列（0/1）
+    - selectionVariables: 説明変数（選択方程式）
+    - reportFirstStage: 第1段階結果を含めるか
+
+Returns
+-------
+JSONResponse
+    分析結果 ID またはエラーメッセージ
+ * @summary Heckman Regression
+ */
+export const HeckmanRegressionHeader = zod.object({
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
+
+export const heckmanRegressionBodyResultNameDefault = ``;
+export const heckmanRegressionBodyResultNameMax = 128;
+
+export const heckmanRegressionBodyDescriptionDefault = ``;
+export const heckmanRegressionBodyDescriptionMax = 512;
+
+
+
+
+
+export const heckmanRegressionBodyHasConstDefault = true;
+export const heckmanRegressionBodyMissingValueHandlingDefault = `remove`;
+export const heckmanRegressionBodyReportFirstStageDefault = true;
+
+export const HeckmanRegressionBody = zod.object({
+  "tableName": zod.string().min(1).describe('分析対象のテーブル名。ワークスペース内に存在するテーブル名を指定してください。'),
+  "resultName": zod.string().max(heckmanRegressionBodyResultNameMax).default(heckmanRegressionBodyResultNameDefault).describe('分析結果の名前（省略時は自動生成）'),
+  "description": zod.string().max(heckmanRegressionBodyDescriptionMax).default(heckmanRegressionBodyDescriptionDefault).describe('分析結果の説明メモ'),
+  "dependentVariable": zod.string().min(1).describe('結果方程式の被説明変数列名。選択サンプル（selectionColumn=1）のみで推定されます。'),
+  "explanatoryVariables": zod.array(zod.string().min(1).describe('カラム名')).describe('結果方程式の説明変数列名リスト。'),
+  "selectionColumn": zod.string().min(1).describe('選択ダミー列名（0\/1）。1 = 結果変数が観測されるサンプル。'),
+  "selectionVariables": zod.array(zod.string().min(1).describe('カラム名')).describe('選択方程式（Probit）の説明変数列名リスト。除外制約として explanatoryVariables にない変数を 1 つ以上含む必要があります。'),
+  "hasConst": zod.boolean().default(heckmanRegressionBodyHasConstDefault).describe('結果方程式（Step 2 OLS）に定数項を追加するか。'),
+  "missingValueHandling": zod.enum(['ignore', 'remove', 'error']).default(heckmanRegressionBodyMissingValueHandlingDefault).describe('欠損値の処理方法（remove: 削除, ignore: 無視, error: エラー）'),
+  "reportFirstStage": zod.boolean().default(heckmanRegressionBodyReportFirstStageDefault).describe('1 段階目（Probit）の推定結果をレスポンスの firstStage に含めるか。')
+}).describe('ヘックマン2段階推定リクエスト\n\n選択方程式（Probit）と結果方程式（OLS）の2段階推定\nによりサンプルセレクションバイアスを補正します。')
+
+export const heckmanRegressionResponseCodeDefault = `OK`;
+
+export const HeckmanRegressionResponse = zod.object({
+  "code": zod.string().default(heckmanRegressionResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "resultId": zod.string().describe('保存された分析結果の一意 ID')
+}).describe('処理結果')
+})
+
+/**
+ * 差の差（DID）分析エンドポイント
+
+Two-Way Fixed Effects（TWFE）による DID 推定を実行します。
+交差項（treated × post）はサービス層で自動生成されます。
+include_event_study=true の場合、各時点の処置効果係数も推定します。
+
+Parameters
+----------
+request : Request
+    FastAPI のリクエストオブジェクト
+body : DIDRequestBody
+    DID 分析リクエスト
+    - tableName: 対象テーブル名
+    - dependentVariable: 被説明変数
+    - treatmentColumn: 処置群ダミー（treated_i）
+    - postColumn: 処置後ダミー（post_t）
+    - timeColumn: 時点列
+    - entityIdColumn: 個体 ID 列
+    - explanatoryVariables: 追加共変量（省略可）
+    - includeEventStudy: Event Study 実行フラグ
+    - basePeriod: Event Study 基準期（省略時は自動選択）
+    - standardError: 標準誤差の種別（cluster 推奨）
+    - confidenceLevel: 信頼区間水準
+
+Returns
+-------
+JSONResponse
+    {"code": "OK", "result": {"resultId": "<uuid>"}}
+    分析結果は GET /analysis/results/{resultId} で取得可能。
+ * @summary Did Analysis
+ */
+export const DidAnalysisHeader = zod.object({
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
+
+export const didAnalysisBodyResultNameDefault = ``;
+export const didAnalysisBodyResultNameMax = 128;
+
+export const didAnalysisBodyDescriptionDefault = ``;
+export const didAnalysisBodyDescriptionMax = 512;
+
+
+
+
+
+
+
+export const didAnalysisBodyIncludeEventStudyDefault = false;
+
+export const didAnalysisBodyMissingValueHandlingDefault = `remove`;
+export const didAnalysisBodyStandardErrorOneMethodDefault = `nonrobust`;
+export const didAnalysisBodyStandardErrorTwoMethodDefault = `robust`;
+export const didAnalysisBodyStandardErrorTwoHcTypeDefault = `HC1`;
+export const didAnalysisBodyStandardErrorThreeMethodDefault = `cluster`;
+export const didAnalysisBodyStandardErrorThreeUseCorrectionDefault = true;
+export const didAnalysisBodyStandardErrorFourMethodDefault = `hac`;
+export const didAnalysisBodyStandardErrorFourMaxlagsMin = 0;
+
+export const didAnalysisBodyStandardErrorFourKernelDefault = `bartlett`;
+export const didAnalysisBodyStandardErrorFourUseCorrectionDefault = true;
+export const didAnalysisBodyConfidenceLevelDefault = 0.95;
+export const didAnalysisBodyConfidenceLevelMin = 0.5;
+export const didAnalysisBodyConfidenceLevelMax = 0.999;
+
+
+
+export const DidAnalysisBody = zod.object({
+  "tableName": zod.string().min(1).describe('分析対象のテーブル名。ワークスペース内に存在するテーブル名を指定してください。'),
+  "resultName": zod.string().max(didAnalysisBodyResultNameMax).default(didAnalysisBodyResultNameDefault).describe('分析結果の名前（省略時は自動生成）'),
+  "description": zod.string().max(didAnalysisBodyDescriptionMax).default(didAnalysisBodyDescriptionDefault).describe('分析結果の説明メモ'),
+  "dependentVariable": zod.string().min(1).describe('被説明変数（目的変数）の列名。テーブル内に存在する数値型カラムを指定してください。'),
+  "explanatoryVariables": zod.array(zod.string().min(1).describe('カラム名')).optional().describe('追加の共変量（コントロール変数）の列名リスト。treatment_column \/ post_column との重複は不可。'),
+  "treatmentColumn": zod.string().min(1).describe('処置群ダミー列名（treated_i）。個体レベルの 0\/1 変数。処置群=1、対照群=0。'),
+  "postColumn": zod.string().min(1).describe('処置後ダミー列名（post_t）。時点レベルの 0\/1 変数。処置後=1、処置前=0。'),
+  "timeColumn": zod.string().min(1).describe('時点列名。数値型または Date 型。Event Study 実行時は整数型を推奨します。'),
+  "entityIdColumn": zod.string().min(1).describe('個体 ID 列名。TWFE の個体固定効果に使用します。'),
+  "includeEventStudy": zod.boolean().default(didAnalysisBodyIncludeEventStudyDefault).describe('Event Study を実行するかどうか。True の場合、各時点の処置効果係数（δ_k）を推定します。'),
+  "basePeriod": zod.union([zod.number(),zod.null()]).optional().describe('Event Study の基準期（処置効果をゼロに固定する時点）。null の場合は処置直前期（通常 -1）を自動選択します。include_event_study=true のときのみ有効です。'),
+  "maxPrePeriods": zod.union([zod.number().min(1),zod.null()]).optional().describe('Event Study で表示する処置前の最大期間数。null の場合はデータ内の全処置前期間を使用します。'),
+  "maxPostPeriods": zod.union([zod.number().min(1),zod.null()]).optional().describe('Event Study で表示する処置後の最大期間数。null の場合はデータ内の全処置後期間を使用します。'),
+  "missingValueHandling": zod.enum(['ignore', 'remove', 'error']).default(didAnalysisBodyMissingValueHandlingDefault).describe('欠損値の処理方法。remove: 該当行を削除、ignore: そのまま使用、error: エラーとして扱う。'),
+  "standardError": zod.union([zod.object({
+  "method": zod.enum(['nonrobust']).default(didAnalysisBodyStandardErrorOneMethodDefault)
+}),zod.object({
+  "method": zod.enum(['robust']).default(didAnalysisBodyStandardErrorTwoMethodDefault),
+  "hcType": zod.enum(['HC0', 'HC1', 'HC2', 'HC3']).default(didAnalysisBodyStandardErrorTwoHcTypeDefault)
+}),zod.object({
+  "method": zod.enum(['cluster']).default(didAnalysisBodyStandardErrorThreeMethodDefault),
+  "groups": zod.array(zod.string().min(1).describe('カラム名')).describe('クラスターを構成する列名'),
+  "useCorrection": zod.boolean().default(didAnalysisBodyStandardErrorThreeUseCorrectionDefault).describe('小標本補正を行うか')
+}),zod.object({
+  "method": zod.enum(['hac']).default(didAnalysisBodyStandardErrorFourMethodDefault),
+  "maxlags": zod.number().min(didAnalysisBodyStandardErrorFourMaxlagsMin).describe('考慮する最大ラグ数'),
+  "kernel": zod.string().default(didAnalysisBodyStandardErrorFourKernelDefault).describe('カーネルの種類'),
+  "useCorrection": zod.boolean().default(didAnalysisBodyStandardErrorFourUseCorrectionDefault).describe('小標本補正を行うか')
+})]).describe('標準誤差の計算方法。DID では個体レベルのクラスタ標準誤差（cluster）を推奨します。'),
+  "confidenceLevel": zod.number().min(didAnalysisBodyConfidenceLevelMin).max(didAnalysisBodyConfidenceLevelMax).default(didAnalysisBodyConfidenceLevelDefault).describe('信頼区間の水準（デフォルト: 0.95）')
+}).describe('差の差（DID）分析リクエスト\n\nTwo-Way Fixed Effects（TWFE）による差の差推定と、\nオプションで Event Study を実行します。\n交差項（treated × post）はサービス層で自動生成します。')
+
+export const didAnalysisResponseCodeDefault = `OK`;
+
+export const DidAnalysisResponse = zod.object({
+  "code": zod.string().default(didAnalysisResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "resultId": zod.string().describe('保存された分析結果の一意 ID')
+}).describe('処理結果')
+})
+
+/**
+ * 回帰不連続デザイン（RDD）分析エンドポイント
+
+rdrobust による局所多項式推定で RDD の LATE を推定します。
+バイアス補正済み推定・McCrary 密度検定・プラシーボ検定を包括的に返します。
+
+Parameters
+----------
+request : Request
+    FastAPI のリクエストオブジェクト
+body : RDDRequestBody
+    RDD 分析リクエスト
+    - tableName: 対象テーブル名
+    - outcomeVariable: 結果変数
+    - runningVariable: 実行変数（強制変数）
+    - cutoff: カットオフ値（デフォルト: 0）
+    - kernel: カーネル関数 ('triangular' / 'epanechnikov' / 'uniform')
+    - bwSelect: バンド幅自動選択アルゴリズム
+    - h: 手動バンド幅（null の場合は自動選択）
+    - p: 多項式次数（1: 線形, 2: 2次式）
+    - vce: 標準誤差の計算方法
+    - confidenceLevel: 信頼区間水準（デフォルト: 0.95）
+    - nBins: 散布図用ビン数（デフォルト: 30）
+    - placeboCutoffs: プラシーボ境界値リスト（null で自動生成）
+
+Returns
+-------
+JSONResponse
+    {"code": "OK", "result": {"resultId": "<uuid>"}}
+    分析結果は GET /analysis/results/{resultId} で取得可能。
+ * @summary Rdd Analysis
+ */
+export const RddAnalysisHeader = zod.object({
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
+
+export const rddAnalysisBodyResultNameDefault = ``;
+export const rddAnalysisBodyResultNameMax = 128;
+
+export const rddAnalysisBodyDescriptionDefault = ``;
+export const rddAnalysisBodyDescriptionMax = 512;
+
+
+
+export const rddAnalysisBodyCutoffDefault = 0;
+export const rddAnalysisBodyKernelDefault = `triangular`;
+export const rddAnalysisBodyBwSelectDefault = `mserd`;
+export const rddAnalysisBodyHOneExclusiveMin = 0;
+
+export const rddAnalysisBodyPDefault = 1;
+export const rddAnalysisBodyPMax = 4;
+
+export const rddAnalysisBodyVceDefault = `hc1`;
+export const rddAnalysisBodyConfidenceLevelDefault = 0.95;
+export const rddAnalysisBodyConfidenceLevelMin = 0.5;
+export const rddAnalysisBodyConfidenceLevelMax = 0.999;
+
+export const rddAnalysisBodyNBinsDefault = 30;
+export const rddAnalysisBodyNBinsMin = 10;
+export const rddAnalysisBodyNBinsMax = 200;
+
+export const rddAnalysisBodyPlaceboCutoffsOneMax = 10;
+
+
+
+export const RddAnalysisBody = zod.object({
+  "tableName": zod.string().min(1).describe('分析対象のテーブル名。ワークスペース内に存在するテーブル名を指定してください。'),
+  "resultName": zod.string().max(rddAnalysisBodyResultNameMax).default(rddAnalysisBodyResultNameDefault).describe('分析結果の名前（省略時は自動生成）'),
+  "description": zod.string().max(rddAnalysisBodyDescriptionMax).default(rddAnalysisBodyDescriptionDefault).describe('分析結果の説明メモ'),
+  "outcomeVariable": zod.string().min(1).describe('結果変数（y）の列名。数値型カラムを指定してください。'),
+  "runningVariable": zod.string().min(1).describe('実行変数（score \/ forcing variable）の列名。カットオフ前後で処置割り当てが決まる連続変数。数値型カラムを指定してください。'),
+  "cutoff": zod.number().default(rddAnalysisBodyCutoffDefault).describe('カットオフ値。実行変数がこの値以上の観測を処置群とみなします。デフォルトは 0。'),
+  "kernel": zod.enum(['triangular', 'epanechnikov', 'uniform']).default(rddAnalysisBodyKernelDefault).describe('カーネル重み付け関数。triangular（デフォルト）\/ epanechnikov \/ uniform。'),
+  "bwSelect": zod.enum(['mserd', 'msetwo', 'msesum', 'msecomb1', 'msecomb2', 'cerrd', 'certwo', 'cersum', 'cercomb1', 'cercomb2']).default(rddAnalysisBodyBwSelectDefault).describe('バンド幅の自動選定アルゴリズム。mserd（デフォルト）: MSE 最小化・左右共通バンド幅。msetwo: MSE 最小化・左右独立バンド幅。cerrd\/certwo: CER（Coverage Error Rate）最小化。'),
+  "h": zod.union([zod.number().gt(rddAnalysisBodyHOneExclusiveMin),zod.null()]).optional().describe('手動バンド幅。指定した場合 bwSelect による自動選択より優先されます。null の場合は bwSelect で自動選択します。'),
+  "p": zod.number().min(1).max(rddAnalysisBodyPMax).default(rddAnalysisBodyPDefault).describe('局所多項式の次数、1（線形、デフォルト）または2（2次式）を推奨。バイアス補正バンド幅には p+1 次多項式が使用されます。'),
+  "vce": zod.enum(['nn', 'hc1', 'hc3', 'cluster', 'nncluster']).default(rddAnalysisBodyVceDefault).describe('分散共分散行列の推定方式（標準誤差の計算方法）。nn: 最近傍法（デフォルト）。hc1 \/ hc3: HC 不均一分散一致推定量。cluster: クラスタ標準誤差。nncluster: 最近傍クラスタ標準誤差。'),
+  "confidenceLevel": zod.number().min(rddAnalysisBodyConfidenceLevelMin).max(rddAnalysisBodyConfidenceLevelMax).default(rddAnalysisBodyConfidenceLevelDefault).describe('信頼区間の水準（デフォルト: 0.95 → 95%）'),
+  "nBins": zod.number().min(rddAnalysisBodyNBinsMin).max(rddAnalysisBodyNBinsMax).default(rddAnalysisBodyNBinsDefault).describe('散布図用ビン数（左右合計）。デフォルト: 30（左右各 15 本）。'),
+  "placeboCutoffs": zod.union([zod.array(zod.number()).max(rddAnalysisBodyPlaceboCutoffsOneMax),zod.null()]).optional().describe('プラシーボ検定用の偽境界値リスト。null の場合は実行変数の範囲に基づきカットオフ左右 ±5% 相当の 2 点を自動生成します。')
+}).describe('回帰不連続デザイン（RDD）分析リクエスト\n\nrdrobust を使用したシャープ RDD 推定と診断を実行します。\nバイアス補正済み推定・密度検定・プラシーボ検定を包括的に返します。')
+
+export const rddAnalysisResponseCodeDefault = `OK`;
+
+export const RddAnalysisResponse = zod.object({
+  "code": zod.string().default(rddAnalysisResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "resultId": zod.string().describe('保存された分析結果の一意 ID')
 }).describe('処理結果')
 })
 

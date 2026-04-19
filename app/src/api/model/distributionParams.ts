@@ -17,6 +17,7 @@ import type { LognormalParams } from './lognormalParams';
 import type { NegativeBinomialParams } from './negativeBinomialParams';
 import type { NormalParams } from './normalParams';
 import type { PoissonParams } from './poissonParams';
+import type { SequenceParams } from './sequenceParams';
 import type { UniformParams } from './uniformParams';
 import type { WeibullParams } from './weibullParams';
 
@@ -47,5 +48,7 @@ export type DistributionParams = (UniformParams & {
 }) | (NegativeBinomialParams & {
   type: DistributionParamsType;
 }) | (FixedParams & {
+  type: DistributionParamsType;
+}) | (SequenceParams & {
   type: DistributionParamsType;
 });

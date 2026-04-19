@@ -23,4 +23,5 @@ export const DistributionType = {
   hypergeometric: 'hypergeometric',
   negative_binomial: 'negative_binomial',
   fixed: 'fixed',
+  sequence: 'sequence',
 } as const;
