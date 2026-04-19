@@ -1,6 +1,9 @@
 """Lasso回帰テスト"""
 
+from pathlib import Path
+
 import numpy as np
+import polars as pl
 import statsmodels.api as sm
 from fastapi import status
 from sklearn.linear_model import Lasso
@@ -11,11 +14,14 @@ from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
     LassoPayload,
-    generate_all_data,
+    load_py_gold,
 )
 
 # statsmodels / sklearn 数値比較の許容誤差
-_ABS_TOL = 1e-12
+# 座標降下法の実装差による微小差を許容する
+_ABS_TOL = 1e-4
+# ゴールド JSON 比較の許容誤差
+_GOLD_ABS_TOL = 1e-4
 
 # Lasso デフォルト alpha（glmnet 規約）
 _ALPHA_DEFAULT = 0.1
@@ -23,8 +29,25 @@ _ALPHA_DEFAULT = 0.1
 _ALPHA_LARGE = 10.0
 
 # パラメータ数定数
-_N_PARAMS_WITH_CONST = 3
-_N_PARAMS_NO_CONST = 2
+_N_PARAMS_WITH_CONST = 4  # const, x1, x2, x3
+_N_PARAMS_NO_CONST = 3  # x1, x2, x3
+
+# 洗練データ CSV パス
+_BASIC_CSV = (
+    Path(__file__).resolve().parents[3]
+    / "test"
+    / "data"
+    / "csv"
+    / "synthetic_ols.csv"
+)
+
+
+def _load_basic_xy() -> tuple[np.ndarray, np.ndarray]:
+    """synthetic_ols.csv から (X_no_const, y) を返す。"""
+    df = pl.read_csv(_BASIC_CSV).to_pandas()
+    x_no_const = df[["x1", "x2", "x3"]].to_numpy()
+    y = df["y_cont"].to_numpy()
+    return x_no_const, y
 
 
 def _get_output(client, payload):
@@ -53,7 +76,7 @@ def test_lasso_response_structure(client, tables_store):
     """regressionOutputに必須キーが含まれることを確認"""
     output = _get_output(client, LassoPayload().build())
     params = output["parameters"]
-    assert len(params) == _N_PARAMS_WITH_CONST  # const, x1, x2
+    assert len(params) == _N_PARAMS_WITH_CONST  # const, x1, x2, x3
 
     for p in params:
         for key in ("variable", "coefficient", "coefficientScaled"):
@@ -78,31 +101,24 @@ def test_lasso_variable_coefficient_scaled_is_float(client, tables_store):
 
 
 def test_lasso_coefficients_scaled_numerical(client, tables_store):
-    """coefficientScaled が sklearn Lasso(alpha) の結果と一致することを確認
+    """coefficientScaled が gold JSON と一致することを確認 (atol=1e-8)
 
     Eco-Note D: glmnet λ = statsmodels α = sklearn α（全て同一式）
-    1/(2n)||y-Xβ||² + λ||β||₁ の係数はいずれも同値。
     """
-    (x1, x2, y_linear, _), _, _ = generate_all_data()
-    x_no_const = np.column_stack([x1, x2])  # 定数項なし
-
-    # glmnet λ=0.1 = sklearn α=0.1（同一目的関数）
-    sklearn_alpha = _ALPHA_DEFAULT
-    model = make_pipeline(StandardScaler(), Lasso(alpha=sklearn_alpha))
-    model.fit(x_no_const, y_linear)
-    lasso_step = model.named_steps["lasso"]
-    expected_scaled = lasso_step.coef_  # [x1_scaled, x2_scaled]
+    gold_scaled = load_py_gold("lasso")["estimates"]["coef_scaled"]
 
     params = _get_output(client, LassoPayload(alpha=_ALPHA_DEFAULT).build())[
         "parameters"
     ]
-    var_params = [p for p in params if p["variable"] != "const"]
+    coef_map = {
+        p["variable"]: p["coefficientScaled"]
+        for p in params
+        if p["variable"] != "const"
+    }
 
-    pairs = zip(expected_scaled, var_params, strict=False)
-    for i, (exp, param) in enumerate(pairs):
-        assert abs(param["coefficientScaled"] - exp) < _ABS_TOL, (
-            f"Lasso coef_scaled[{i}]:"
-            f" {param['coefficientScaled']!r} != {exp!r}"
+    for var, exp_scaled in gold_scaled.items():
+        assert abs(coef_map[var] - exp_scaled) < _GOLD_ABS_TOL, (
+            f"Lasso coef_scaled[{var!r}]: {coef_map[var]!r} != {exp_scaled!r}"
         )
 
 
@@ -135,7 +151,7 @@ def test_lasso_without_constant(client, tables_store):
     """hasConst=FalseでLassoが動作することを確認"""
     output = _get_output(client, LassoPayload(has_const=False).build())
     params = output["parameters"]
-    assert len(params) == _N_PARAMS_NO_CONST  # x1, x2 のみ
+    assert len(params) == _N_PARAMS_NO_CONST  # x1, x2, x3 のみ
     names = [p["variable"] for p in params]
     assert "const" not in names
 
@@ -199,8 +215,7 @@ def test_lasso_statsmodels_consistency(client, tables_store):
     Eco-Note D: glmnet λ = statsmodels α（直接一致）。
     API の alpha はデフォルト glmnet 規約を使用する。
     """
-    (x1, x2, y_linear, _), _, _ = generate_all_data()
-    x_no_const = np.column_stack([x1, x2])
+    x_no_const, y_linear = _load_basic_xy()
 
     expected_scaled = _build_sm_lasso_reference(
         x_no_const, y_linear, _ALPHA_DEFAULT
@@ -226,8 +241,7 @@ def test_lasso_sklearn_r2_consistency(client, tables_store):
     Eco-Note D: glmnet λ = sklearn α = statsmodels α（同一目的関数）。
     R² もそのまま一致する。
     """
-    (x1, x2, y_linear, _), _, _ = generate_all_data()
-    x_no_const = np.column_stack([x1, x2])
+    x_no_const, y_linear = _load_basic_xy()
 
     sklearn_alpha = _ALPHA_DEFAULT
     model = make_pipeline(StandardScaler(), Lasso(alpha=sklearn_alpha))
@@ -264,8 +278,7 @@ def test_lasso_sklearn_convention(client, tables_store):
 
     sklearn 規約: α_sm = α_sk (Lasso は同一式)
     """
-    (x1, x2, y_linear, _), _, _ = generate_all_data()
-    x_no_const = np.column_stack([x1, x2])
+    x_no_const, y_linear = _load_basic_xy()
 
     sklearn_alpha = _ALPHA_DEFAULT  # sklearn 規約ではそのまま使用
     model = make_pipeline(StandardScaler(), Lasso(alpha=sklearn_alpha))

@@ -1,5 +1,8 @@
 """RDD 分析テスト"""
 
+import json
+from pathlib import Path
+
 import polars as pl
 import pytest
 from fastapi import status
@@ -12,6 +15,24 @@ from tests.rdd.conftest import (
     URL_RDD,
     RDDPayload,
 )
+
+# ベンチマークファイルパス
+_BENCH_PY_DIR = (
+    Path(__file__).resolve().parents[3]
+    / "test"
+    / "benchmarks"
+    / "python"
+    / "synthetic"
+)
+
+
+def _load_rdd_gold() -> dict:
+    """RDD gold JSON を読み込む"""
+    with (_BENCH_PY_DIR / "synthetic_rdd_gold.json").open(
+        encoding="utf-8"
+    ) as f:
+        return json.load(f)
+
 
 # テスト用定数
 _POLY_FIT_POINTS = 100
@@ -317,7 +338,7 @@ def test_rdd_string_column_error(client, tables_store):
 
 def test_rdd_same_column_error(client, tables_store):
     """結果変数と実行変数が同じ列の場合に 422 が返ることを確認"""
-    payload = RDDPayload(outcome="x", running="x").build()
+    payload = RDDPayload(outcome="running_var", running="running_var").build()
     resp = client.post(URL_RDD, json=payload)
     assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     data = resp.json()
@@ -327,8 +348,8 @@ def test_rdd_same_column_error(client, tables_store):
 
 def test_rdd_insufficient_left_observations_error(client, tables_store):
     """カットオフ左側のサンプルが不足している場合に 400 が返ることを確認"""
-    # cutoff を -0.99 にすると左側サンプルがほぼゼロになる
-    payload = RDDPayload(cutoff=-0.99).build()
+    # running_var の範囲は [-2, 2]。cutoff=-1.95 で左側がはぼゼロ
+    payload = RDDPayload(cutoff=-1.95).build()
     resp = client.post(URL_RDD, json=payload)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     data = resp.json()
@@ -366,3 +387,27 @@ def test_rdd_bw_select_algorithms(client, tables_store, bw):
     rd = _get_result_data(client, RDDPayload(bw_select=bw).build())
     assert rd["bandwidth"]["bwLeft"] > 0
     assert rd["bandwidth"]["bwRight"] > 0
+
+
+# -----------------------------------------------------------
+# 数値検証: Gold JSON との対照
+# -----------------------------------------------------------
+
+
+def test_rdd_estimate_numerical(client, tables_store):
+    """洗練データでの conventional 推定値を gold JSON と照合"""
+    gold = _load_rdd_gold()
+    expected_coef: float = gold["estimates"]["conventional"]["coef"]
+    expected_se: float = gold["estimates"]["conventional"]["std_err"]
+
+    rd = _get_result_data(client, RDDPayload().build())
+    coef: float = rd["estimate"]["coef"]
+    se: float = rd["estimate"]["se"]
+
+    # rdrobust のローカル多項式測定は許容誤差大きめ
+    assert abs(coef - expected_coef) <= 1e-4, (
+        f"coef mismatch: got {coef}, expected {expected_coef}"
+    )
+    assert abs(se - expected_se) <= 1e-4, (
+        f"se mismatch: got {se}, expected {expected_se}"
+    )

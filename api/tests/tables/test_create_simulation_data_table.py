@@ -103,6 +103,11 @@ _COL_NEG_BINOMIAL = {
     "columnName": "neg_binomial_col",
     "distribution": {"type": "negative_binomial", "n": 5, "p": 0.3},
 }
+# 単独カラム設定（等差数列）
+_COL_SEQUENCE = {
+    "columnName": "sequence_col",
+    "distribution": {"type": "sequence", "start": 1, "step": 1},
+}
 
 
 # ─────────────────────────────────────────────────────────────
@@ -218,8 +223,54 @@ def test_create_table_with_multiple_columns(client, tables_store):
     assert "exp_col" in df.columns
 
 
+def test_create_table_with_sequence_distribution(client, tables_store):
+    """等差数列カラムを持つテーブルを正常に作成できる"""
+    row_count = 5
+    payload = {
+        "tableName": "SequenceTable",
+        "rowCount": row_count,
+        "simulationColumns": [_COL_SEQUENCE],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["tableName"] == "SequenceTable"
+
+    df = tables_store.get_table("SequenceTable").table
+    assert len(df) == row_count
+    assert "sequence_col" in df.columns
+    # デフォルト start=1, step=1 → [1, 2, 3, 4, 5]
+    assert df["sequence_col"].to_list() == list(range(1, row_count + 1))
+
+
+def test_create_table_with_sequence_distribution_descending(
+    client, tables_store
+):
+    """step=-1 の等差数列カラムで降順になることを確認"""
+    row_count = 5
+    payload = {
+        "tableName": "SeqDescTable",
+        "rowCount": row_count,
+        "simulationColumns": [
+            {
+                "columnName": "seq_desc_col",
+                "distribution": {"type": "sequence", "start": 1, "step": -1},
+            }
+        ],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("SeqDescTable").table
+    # start=1, step=-1 → [1, 0, -1, -2, -3]
+    assert df["seq_desc_col"].to_list() == [1, 0, -1, -2, -3]
+
+
 def test_create_table_with_all_distributions(client, tables_store):
-    """全 14 分布タイプを含むテーブルを正常に作成できる"""
+    """全 15 分布タイプを含むテーブルを正常に作成できる"""
     all_cols = [
         _COL_NORMAL,
         _COL_UNIFORM,
@@ -235,6 +286,7 @@ def test_create_table_with_all_distributions(client, tables_store):
         _COL_GEOMETRIC,
         _COL_HYPERGEOMETRIC,
         _COL_NEG_BINOMIAL,
+        _COL_SEQUENCE,
     ]
     payload = {
         "tableName": "AllDistTable",
@@ -268,6 +320,8 @@ def test_create_table_with_all_distributions(client, tables_store):
     assert all(v >= 1 for v in df["geometric_col"])
     assert all(0 <= v <= hypergeometric_max for v in df["hypergeometric_col"])
     assert all(v >= 0 for v in df["neg_binomial_col"])
+    # sequence_col: start=1, step=1 → [1, 2, ..., 50]
+    assert df["sequence_col"].to_list() == list(range(1, 51))
 
 
 # ─────────────────────────────────────────────────────────────

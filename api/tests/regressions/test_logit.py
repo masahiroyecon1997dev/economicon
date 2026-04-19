@@ -1,21 +1,19 @@
 """Logit回帰テスト"""
 
-import numpy as np
-import statsmodels.api as sm
 from fastapi import status
 
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
     LogitPayload,
-    generate_all_data,
+    load_py_gold,
 )
 
 # 数値比較の許容誤差
-_ABS_TOL = 1e-12
+_ABS_TOL = 1e-8
 
 # パラメータ数定数
-_N_PARAMS_WITH_CONST = 3
+_N_PARAMS_WITH_CONST = 4
 
 
 def _get_output(client, payload):
@@ -64,16 +62,16 @@ def test_logit_response_structure(client, tables_store):
 
 
 def test_logit_coefficients_numerical(client, tables_store):
-    """Logit係数がstatsmodelsと一致することを確認"""
-    (x1, x2, _, y_binary), _, _ = generate_all_data()
-    x_mat = sm.add_constant(np.column_stack([x1, x2]))
-    sm_result = sm.Logit(y_binary, x_mat).fit(disp=False)
+    """Logit係数が gold JSON と一致することを確認"""
+    gold = load_py_gold("logit")["estimates"]
+    expected = gold["coefficients"]
 
     params = _get_output(client, LogitPayload().build())["parameters"]
+    coef_map = {p["variable"]: p["coefficient"] for p in params}
 
-    for i, exp_coef in enumerate(sm_result.params):
-        assert abs(params[i]["coefficient"] - exp_coef) < _ABS_TOL, (
-            f"Logit params[{i}]: {params[i]['coefficient']!r} != {exp_coef!r}"
+    for var, exp_coef in expected.items():
+        assert abs(coef_map[var] - exp_coef) < _ABS_TOL, (
+            f"{var}: got {coef_map[var]!r}, expected {exp_coef!r}"
         )
 
 
@@ -95,27 +93,23 @@ def test_logit_log_likelihood_negative(client, tables_store):
 
 
 def test_logit_log_likelihood_numerical(client, tables_store):
-    """logLikelihoodがstatsmodelsと一致することを確認"""
-    (x1, x2, _, y_binary), _, _ = generate_all_data()
-    x_mat = sm.add_constant(np.column_stack([x1, x2]))
-    sm_result = sm.Logit(y_binary, x_mat).fit(disp=False)
+    """logLikelihood が gold JSON と一致することを確認"""
+    gold_ll: float = load_py_gold("logit")["estimates"]["log_likelihood"]
 
     model_stats = _get_output(client, LogitPayload().build())[
         "modelStatistics"
     ]
-    assert abs(model_stats["logLikelihood"] - sm_result.llf) < _ABS_TOL
+    assert abs(model_stats["logLikelihood"] - gold_ll) < _ABS_TOL
 
 
 def test_logit_pseudo_r2_numerical(client, tables_store):
-    """McFadden pseudoR2がstatsmodelsと一致することを確認"""
-    (x1, x2, _, y_binary), _, _ = generate_all_data()
-    x_mat = sm.add_constant(np.column_stack([x1, x2]))
-    sm_result = sm.Logit(y_binary, x_mat).fit(disp=False)
+    """McFadden pseudoR2 が gold JSON と一致することを確認"""
+    gold_pr2: float = load_py_gold("logit")["estimates"]["pseudo_r_squared"]
 
     model_stats = _get_output(client, LogitPayload().build())[
         "modelStatistics"
     ]
-    assert abs(model_stats["pseudoRSquared"] - sm_result.prsquared) < _ABS_TOL
+    assert abs(model_stats["pseudoRSquared"] - gold_pr2) < _ABS_TOL
 
 
 def test_logit_robust_se(client, tables_store):

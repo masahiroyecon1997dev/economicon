@@ -97,7 +97,7 @@ class RDDPayload:
 
     table: str = TABLE_RDD
     outcome: str = "y"
-    running: str = "x"
+    running: str = "running_var"
     cutoff: float = 0.0
     kernel: str = "triangular"
     bw_select: str = "mserd"

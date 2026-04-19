@@ -68,6 +68,10 @@ NEG_BINOMIAL_P = 0.3
 # 固定値
 FIXED_VALUE = 42.0
 
+# 等差数列
+SEQUENCE_START = 1
+SEQUENCE_STEP = 1
+
 # シード値テスト用
 SEED_VALUE = 42
 SEED_VALUE_MAX = 100_000_000
@@ -482,6 +486,83 @@ def test_add_negative_binomial_column_success(client, tables_store):
     assert len(df["NegBinomialCol"]) == ROW_COUNT
     # 負の二項分布は非負整数
     assert all(v >= 0 for v in df["NegBinomialCol"])
+
+
+def test_add_sequence_column_success(client, tables_store):
+    """\u7b49\u5dee\u6570\u5217\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: start=1, step=1\uff09\u306e\u5217\u8ffd\u52a0\u304c\u6b63\u5e38\u306b\u52d5\u4f5c\u3059\u308b"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SequenceCol",
+                "distribution": {
+                    "type": "sequence",
+                    "start": SEQUENCE_START,
+                    "step": SEQUENCE_STEP,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["tableName"] == TABLE_NAME
+    assert response_data["result"]["columnName"] == "SequenceCol"
+    assert response_data["result"]["distributionType"] == "sequence"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == [COL_A, "SequenceCol", COL_B]
+    assert len(df["SequenceCol"]) == ROW_COUNT
+    # start=1, step=1 \u2192 [1, 2, 3, 4, 5]
+    assert df["SequenceCol"].to_list() == list(range(1, ROW_COUNT + 1))
+
+
+def test_add_sequence_column_descending(client, tables_store):
+    """step=-1 \u306e\u7b49\u5dee\u6570\u5217\u3067\u964d\u9806\u306b\u306a\u308b\u3053\u3068\u3092\u78ba\u8a8d"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "SeqDescCol",
+                "distribution": {
+                    "type": "sequence",
+                    "start": 1,
+                    "step": -1,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    assert response.status_code == status.HTTP_200_OK
+    df = tables_store.get_table(TABLE_NAME).table
+    # start=1, step=-1 \u2192 [1, 0, -1, -2, -3]
+    assert df["SeqDescCol"].to_list() == [1, 0, -1, -2, -3]
+
+
+def test_add_sequence_column_custom_start(client, tables_store):
+    """start=2000 \u306e\u7b49\u5dee\u6570\u5217\u3067\u5e74\u6b21\u5217\u6a21\u64ec\u306b\u306a\u308b\u3053\u3068\u3092\u78ba\u8a8d"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "YearCol",
+                "distribution": {
+                    "type": "sequence",
+                    "start": 2000,
+                    "step": 1,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    assert response.status_code == status.HTTP_200_OK
+    df = tables_store.get_table(TABLE_NAME).table
+    # start=2000, step=1 \u2192 [2000, 2001, 2002, 2003, 2004]
+    assert df["YearCol"].to_list() == list(range(2000, 2000 + ROW_COUNT))
 
 
 # ========================================
@@ -1467,9 +1548,7 @@ def test_add_simulation_column_negative_binomial_n_zero(client, tables_store):
 # ========================================
 
 
-def test_add_simulation_column_with_seed_is_reproducible(
-    client, tables_store
-):
+def test_add_simulation_column_with_seed_is_reproducible(client, tables_store):
     """S1: 同一シードで追加した2カラムは同じ値を持つ"""
     # 1回目: seed=42 で SeedColA を追加
     response1 = client.post(
@@ -1590,9 +1669,7 @@ def test_add_simulation_column_seed_exceeds_max_is_rejected(
     assert df_after.equals(df_before)
 
 
-def test_add_simulation_column_seed_negative_is_rejected(
-    client, tables_store
-):
+def test_add_simulation_column_seed_negative_is_rejected(client, tables_store):
     """S5: randomSeed < 0 は 422 VALIDATION_ERROR"""
     df_before = tables_store.get_table(TABLE_NAME).table.clone()
 
@@ -1623,9 +1700,7 @@ def test_add_simulation_column_seed_negative_is_rejected(
     assert df_after.equals(df_before)
 
 
-def test_add_simulation_column_seed_date_format_is_valid(
-    client, tables_store
-):
+def test_add_simulation_column_seed_date_format_is_valid(client, tables_store):
     """S6: 日付形式シード（20241231）は正常に受け付けられる"""
     response = client.post(
         "/api/column/add-simulation",

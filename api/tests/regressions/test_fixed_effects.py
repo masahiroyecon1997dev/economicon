@@ -1,8 +1,10 @@
 """固定効果回帰テスト"""
 
+from pathlib import Path
 from typing import cast
 
 import pandas as pd
+import polars as pl
 from fastapi import status
 from linearmodels.panel import PanelOLS
 
@@ -10,7 +12,7 @@ from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
     FePayload,
-    generate_all_data,
+    load_py_gold,
 )
 
 # 数値比較の許容誤差
@@ -21,6 +23,22 @@ _N_PARAMS_FE = 2
 
 # エンティティ数定数
 _N_ENTITIES = 10
+
+# 洗練データ CSV パス
+_PANEL_CSV = (
+    Path(__file__).resolve().parents[3]
+    / "test"
+    / "data"
+    / "csv"
+    / "synthetic_panel.csv"
+)
+
+
+def _load_panel_df() -> pd.DataFrame:
+    """synthetic_panel.csv を pandas MultiIndex DataFrame として返す。"""
+    return (
+        pl.read_csv(_PANEL_CSV).to_pandas().set_index(["entity_id", "time_id"])
+    )
 
 
 def _get_output(client, payload):
@@ -70,30 +88,15 @@ def test_fe_response_structure(client, tables_store):
 
 
 def test_fe_coefficients_numerical(client, tables_store):
-    """FE係数がlinearmodels (PanelOLS) と一致することを確認"""
-    _, panel, _ = generate_all_data()
-    entity_ids, time_ids, x1p, x2p, y_p = panel
-
-    df = pd.DataFrame(
-        {
-            "entity_id": entity_ids.astype(float),
-            "time_id": time_ids.astype(float),
-            "y": y_p,
-            "x1": x1p,
-            "x2": x2p,
-        }
-    )
-    df = df.set_index(["entity_id", "time_id"])
-    model_result = PanelOLS(
-        df["y"], df[["x1", "x2"]], entity_effects=True
-    ).fit(cov_type="unadjusted")
+    """FE係数が gold JSON と一致することを確認"""
+    gold = load_py_gold("fe")["estimates"]["nonrobust"]["coefficients"]
 
     params = _get_output(client, FePayload().build())["parameters"]
-    expected = model_result.params
+    coef_map = {p["variable"]: p["coefficient"] for p in params}
 
-    for i, (exp_coef, param) in enumerate(zip(expected, params, strict=False)):
-        assert abs(param["coefficient"] - exp_coef) < _ABS_TOL, (
-            f"FE params[{i}]: {param['coefficient']!r} != {exp_coef!r}"
+    for var, exp_coef in gold.items():
+        assert abs(coef_map[var] - exp_coef) < _ABS_TOL, (
+            f"{var}: got {coef_map[var]!r}, expected {exp_coef!r}"
         )
 
 
@@ -160,19 +163,7 @@ def test_fe_robust_se_matches_linearmodels(client, tables_store):
     cov_type が 'unadjusted' にフォールバックしていた。
     このテストは旧バグ下では失敗する。
     """
-    _, panel, _ = generate_all_data()
-    entity_ids, time_ids, x1p, x2p, y_p = panel
-
-    df = pd.DataFrame(
-        {
-            "entity_id": entity_ids.astype(float),
-            "time_id": time_ids.astype(float),
-            "y": y_p,
-            "x1": x1p,
-            "x2": x2p,
-        }
-    )
-    df = df.set_index(["entity_id", "time_id"])
+    df = _load_panel_df()
     expected = PanelOLS(df["y"], df[["x1", "x2"]], entity_effects=True).fit(
         cov_type="robust"
     )
@@ -224,19 +215,7 @@ def test_fe_cluster_se_matches_linearmodels(client, tables_store):
     cov_type が 'unadjusted' にフォールバックしていた。
     このテストは旧バグ下では失敗する。
     """
-    _, panel, _ = generate_all_data()
-    entity_ids, time_ids, x1p, x2p, y_p = panel
-
-    df = pd.DataFrame(
-        {
-            "entity_id": entity_ids.astype(float),
-            "time_id": time_ids.astype(float),
-            "y": y_p,
-            "x1": x1p,
-            "x2": x2p,
-        }
-    )
-    df = df.set_index(["entity_id", "time_id"])
+    df = _load_panel_df()
     # PanelOLS + cov_type='clustered': entity でクラスタリング（デフォルト）
     expected = PanelOLS(df["y"], df[["x1", "x2"]], entity_effects=True).fit(
         cov_type="clustered"
@@ -266,18 +245,7 @@ def test_fe_full_numerical_validation(client, tables_store):
                          R2Within/Between/Overall, fValue, fProbability
       - diagnostics.fPooled: statistic, pValue
     """
-    _, panel, _ = generate_all_data()
-    entity_ids, time_ids, x1p, x2p, y_p = panel
-
-    df = pd.DataFrame(
-        {
-            "entity_id": entity_ids.astype(float),
-            "time_id": time_ids.astype(float),
-            "y": y_p,
-            "x1": x1p,
-            "x2": x2p,
-        }
-    ).set_index(["entity_id", "time_id"])
+    df = _load_panel_df()
     ref = PanelOLS(df["y"], df[["x1", "x2"]], entity_effects=True).fit(
         cov_type="unadjusted"
     )

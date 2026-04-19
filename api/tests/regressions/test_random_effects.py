@@ -1,8 +1,10 @@
 """変量効果回帰テスト"""
 
+from pathlib import Path
 from typing import cast
 
 import pandas as pd
+import polars as pl
 from fastapi import status
 from linearmodels.panel import RandomEffects
 
@@ -10,14 +12,30 @@ from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
     RePayload,
-    generate_all_data,
+    load_py_gold,
 )
 
 # 数値比較の許容誤差
 _ABS_TOL = 1e-12
 
-# nObservations 定数（10 エンティティ × 5 期間 = 50）
-_N_OBS = 50
+# nObservations 定数（10 エンティティ × 10 期間 = 100）
+_N_OBS = 100
+
+# 洗練データ CSV パス
+_PANEL_CSV = (
+    Path(__file__).resolve().parents[3]
+    / "test"
+    / "data"
+    / "csv"
+    / "synthetic_panel.csv"
+)
+
+
+def _load_panel_df() -> pd.DataFrame:
+    """synthetic_panel.csv を pandas MultiIndex DataFrame として返す。"""
+    return (
+        pl.read_csv(_PANEL_CSV).to_pandas().set_index(["entity_id", "time_id"])
+    )
 
 
 def _get_output(client, payload):
@@ -60,30 +78,16 @@ def test_re_response_structure(client, tables_store):
 
 
 def test_re_coefficients_numerical(client, tables_store):
-    """RE係数がlinearmodels (RandomEffects) と一致することを確認"""
-    _, panel, _ = generate_all_data()
-    entity_ids, time_ids, x1p, x2p, y_p = panel
-
-    df = pd.DataFrame(
-        {
-            "entity_id": entity_ids.astype(float),
-            "time_id": time_ids.astype(float),
-            "y": y_p,
-            "x1": x1p,
-            "x2": x2p,
-        }
-    )
-    df = df.set_index(["entity_id", "time_id"])
-    model_result = RandomEffects(df["y"], df[["x1", "x2"]]).fit(
-        cov_type="unadjusted"
-    )
+    """RE係数が gold JSON と一致することを確認"""
+    gold_all = load_py_gold("re")["estimates"]["nonrobust"]["coefficients"]
+    gold = {k: v for k, v in gold_all.items() if k != "const"}
 
     params = _get_output(client, RePayload().build())["parameters"]
-    expected = model_result.params  # pandas Series
+    coef_map = {p["variable"]: p["coefficient"] for p in params}
 
-    for i, (exp_coef, param) in enumerate(zip(expected, params, strict=False)):
-        assert abs(param["coefficient"] - exp_coef) < _ABS_TOL, (
-            f"RE params[{i}]: {param['coefficient']!r} != {exp_coef!r}"
+    for var, exp_coef in gold.items():
+        assert abs(coef_map[var] - exp_coef) < _ABS_TOL, (
+            f"{var}: got {coef_map[var]!r}, expected {exp_coef!r}"
         )
 
 
@@ -139,19 +143,7 @@ def test_re_robust_se_matches_linearmodels(client, tables_store):
     cov_type が 'unadjusted' にフォールバックしていた。
     このテストは旧バグ下では失敗する。
     """
-    _, panel, _ = generate_all_data()
-    entity_ids, time_ids, x1p, x2p, y_p = panel
-
-    df = pd.DataFrame(
-        {
-            "entity_id": entity_ids.astype(float),
-            "time_id": time_ids.astype(float),
-            "y": y_p,
-            "x1": x1p,
-            "x2": x2p,
-        }
-    )
-    df = df.set_index(["entity_id", "time_id"])
+    df = _load_panel_df()
     expected = RandomEffects(df["y"], df[["x1", "x2"]]).fit(cov_type="robust")
 
     payload = {
@@ -215,18 +207,7 @@ def test_re_full_numerical_validation(client, tables_store):
       - modelStatistics: nObservations, R2Within/Between/Overall
       - diagnostics.theta: 変量効果の重み（全エンティティ平均）
     """
-    _, panel, _ = generate_all_data()
-    entity_ids, time_ids, x1p, x2p, y_p = panel
-
-    df = pd.DataFrame(
-        {
-            "entity_id": entity_ids.astype(float),
-            "time_id": time_ids.astype(float),
-            "y": y_p,
-            "x1": x1p,
-            "x2": x2p,
-        }
-    ).set_index(["entity_id", "time_id"])
+    df = _load_panel_df()
     # fit_re は exog に const を追加しないため params = ['x1', 'x2']
     ref = RandomEffects(df["y"], df[["x1", "x2"]]).fit(cov_type="unadjusted")
 

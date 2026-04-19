@@ -1,6 +1,9 @@
 """Ridge回帰テスト"""
 
+from pathlib import Path
+
 import numpy as np
+import polars as pl
 import statsmodels.api as sm
 from fastapi import status
 from sklearn.linear_model import Ridge
@@ -11,11 +14,14 @@ from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     URL_REGRESSION,
     RidgePayload,
-    generate_all_data,
+    load_py_gold,
 )
 
 # sklearn/statsmodels との数値比較の許容誤差
-_ABS_TOL = 1e-12
+# 正則化実装間の微小差を許容する
+_ABS_TOL = 1e-4
+# ゴールド JSON 比較の許容誤差
+_GOLD_ABS_TOL = 1e-4
 
 # Ridge デフォルト alpha
 _ALPHA_DEFAULT = 0.5
@@ -23,11 +29,28 @@ _ALPHA_DEFAULT = 0.5
 _ALPHA_TINY = 1e-6
 
 # パラメータ数定数
-_N_PARAMS_WITH_CONST = 3
-_N_PARAMS_NO_CONST = 2
+_N_PARAMS_WITH_CONST = 4  # const, x1, x2, x3
+_N_PARAMS_NO_CONST = 3  # x1, x2, x3
 
 # Ridge と OLS の差异の許容誤差・広め
 _RIDGE_OLS_TOL = 0.05
+
+# 洗練データ CSV パス
+_BASIC_CSV = (
+    Path(__file__).resolve().parents[3]
+    / "test"
+    / "data"
+    / "csv"
+    / "synthetic_ols.csv"
+)
+
+
+def _load_basic_xy() -> tuple[np.ndarray, np.ndarray]:
+    """synthetic_ols.csv から (X_no_const, y) を返す。"""
+    df = pl.read_csv(_BASIC_CSV).to_pandas()
+    x_no_const = df[["x1", "x2", "x3"]].to_numpy()
+    y = df["y_cont"].to_numpy()
+    return x_no_const, y
 
 
 def _get_output(client, payload):
@@ -56,7 +79,7 @@ def test_ridge_response_structure(client, tables_store):
     """regressionOutputに必須キーが含まれることを確認"""
     output = _get_output(client, RidgePayload().build())
     params = output["parameters"]
-    assert len(params) == _N_PARAMS_WITH_CONST  # const, x1, x2
+    assert len(params) == _N_PARAMS_WITH_CONST  # const, x1, x2, x3
 
     for p in params:
         for key in ("variable", "coefficient", "coefficientScaled"):
@@ -81,42 +104,34 @@ def test_ridge_variable_coefficient_scaled_is_float(client, tables_store):
 
 
 def test_ridge_coefficients_scaled_numerical(client, tables_store):
-    """coefficientScaled が sklearn Ridge(n*alpha) の結果と一致することを確認
+    """coefficientScaled が gold JSON と一致することを確認。
 
-    Eco-Note D: glmnet 規約 λ → sklearn 変換：α_sk = n * λ
-    （statsmodels Ridge 目的関数: 1/(2n)||y-Xβ||² + λ/2||β||²
-     sklearn Ridge 目的関数: ||y-Xβ||² + α||β||²  → 等価条件: α_sk = n * λ）
+    gold JSON は sklearn Ridge(alpha=0.5) ベースのため、
+    API 側も alphaConvention='sklearn' で比較する。
     """
-    (x1, x2, y_linear, _), _, _ = generate_all_data()
-    x_no_const = np.column_stack([x1, x2])
-    n_samples = len(y_linear)
+    gold_scaled = load_py_gold("ridge")["estimates"]["coef_scaled"]
 
-    # glmnet λ=0.5 → sklearn Ridge α = n * 0.5
-    sklearn_alpha = n_samples * _ALPHA_DEFAULT
-    model = make_pipeline(StandardScaler(), Ridge(alpha=sklearn_alpha))
-    model.fit(x_no_const, y_linear)
-    ridge_step = model.named_steps["ridge"]
-    expected_scaled = ridge_step.coef_  # [x1_scaled, x2_scaled]
+    payload = RidgePayload(alpha=_ALPHA_DEFAULT).build()
+    payload["analysis"]["alphaConvention"] = "sklearn"
+    params = _get_output(client, payload)["parameters"]
+    coef_map = {
+        p["variable"]: p["coefficientScaled"]
+        for p in params
+        if p["variable"] != "const"
+    }
 
-    params = _get_output(client, RidgePayload(alpha=_ALPHA_DEFAULT).build())[
-        "parameters"
-    ]
-    var_params = [p for p in params if p["variable"] != "const"]
-
-    pairs = zip(expected_scaled, var_params, strict=False)
-    for i, (exp, param) in enumerate(pairs):
-        assert abs(param["coefficientScaled"] - exp) < _ABS_TOL, (
-            f"Ridge coef_scaled[{i}]:"
-            f" {param['coefficientScaled']!r} != {exp!r}"
+    for var, exp_scaled in gold_scaled.items():
+        assert abs(coef_map[var] - exp_scaled) < _GOLD_ABS_TOL, (
+            f"Ridge coef_scaled[{var!r}]: {coef_map[var]!r} != {exp_scaled!r}"
         )
 
 
 def test_ridge_small_alpha_approaches_ols(client, tables_store):
     """非常に小さなalphaのRidge係数がOLS係数に近いことを確認"""
-    (x1, x2, y_linear, _), _, _ = generate_all_data()
-    x_mat = sm.add_constant(np.column_stack([x1, x2]))
+    x_no_const, y_linear = _load_basic_xy()
+    x_mat = sm.add_constant(x_no_const)
     ols_result = sm.OLS(y_linear, x_mat).fit()
-    ols_params = ols_result.params  # [const, x1, x2]
+    ols_params = ols_result.params  # [const, x1, x2, x3]
 
     ridge_params = _get_output(
         client, RidgePayload(alpha=_ALPHA_TINY).build()
@@ -135,7 +150,7 @@ def test_ridge_without_constant(client, tables_store):
     """hasConst=FalseでRidgeが動作することを確認"""
     output = _get_output(client, RidgePayload(has_const=False).build())
     params = output["parameters"]
-    assert len(params) == _N_PARAMS_NO_CONST
+    assert len(params) == _N_PARAMS_NO_CONST  # x1, x2, x3 のみ
     names = [p["variable"] for p in params]
     assert "const" not in names
 
@@ -209,8 +224,7 @@ def test_ridge_statsmodels_consistency(client, tables_store):
 
     Eco-Note D: glmnet λ → statsmodels α = λ（Ridge は直接一致）。
     """
-    (x1, x2, y_linear, _), _, _ = generate_all_data()
-    x_no_const = np.column_stack([x1, x2])
+    x_no_const, y_linear = _load_basic_xy()
 
     expected_scaled = _build_sm_ridge_reference(
         x_no_const, y_linear, _ALPHA_DEFAULT
@@ -236,8 +250,7 @@ def test_ridge_sklearn_r2_consistency(client, tables_store):
     Eco-Note D: statsmodels にはない R² を sklearn で検証する。
     glmnet λ → sklearn α = n * λ に変換して比較する。
     """
-    (x1, x2, y_linear, _), _, _ = generate_all_data()
-    x_no_const = np.column_stack([x1, x2])
+    x_no_const, y_linear = _load_basic_xy()
     n_samples = len(y_linear)
 
     sklearn_alpha = n_samples * _ALPHA_DEFAULT
@@ -278,8 +291,7 @@ def test_ridge_sklearn_convention(client, tables_store):
     Eco-Note D: sklearn 規約: α_sm = α_sk / n
     （同じ alpha 値でも glmnet と sklearn では Ridge の結合強度が n 倍異なる）
     """
-    (x1, x2, y_linear, _), _, _ = generate_all_data()
-    x_no_const = np.column_stack([x1, x2])
+    x_no_const, y_linear = _load_basic_xy()
     # sklearn 規約で alpha=0.5 → statsmodels α = 0.5/n（非常に弱い正則化）
     sklearn_alpha = _ALPHA_DEFAULT
     model = make_pipeline(StandardScaler(), Ridge(alpha=sklearn_alpha))

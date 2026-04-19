@@ -15,9 +15,9 @@ from tests.regressions.heckman.conftest import (
 _BASE_PAYLOAD: dict = {
     "tableName": TABLE_HECKMAN,
     "dependentVariable": "wage",
-    "explanatoryVariables": ["education", "experience"],
+    "explanatoryVariables": ["educ", "exp"],
     "selectionColumn": "employed",
-    "selectionVariables": ["education", "experience", "n_children"],
+    "selectionVariables": ["educ", "exp", "kids"],
     "hasConst": True,
     "reportFirstStage": True,
 }
@@ -80,7 +80,7 @@ def test_heckman_lambda_in_parameters(client, tables_store):
     """Step 2 パラメータに lambda（IMR 係数）が含まれることを確認。"""
     rd = _get_result_data(client, _payload())
     params = rd["parameters"]
-    # const + education + experience + lambda = 4 パラメータ
+    # const + educ + exp + lambda = 4 パラメータ
     assert len(params) == 4  # noqa: PLR2004
     assert params[-1]["variable"] == "lambda"
     for key in ("coefficient", "standardError", "tValue", "pValue"):
@@ -96,7 +96,7 @@ def test_heckman_first_stage_present(client, tables_store):
     assert "pseudoR2" in fs
     assert "logLikelihood" in fs
     assert "description" in fs
-    # const + education + experience + n_children = 4
+    # const + educ + exp + kids = 4
     assert len(fs["parameters"]) == 4  # noqa: PLR2004
 
 
@@ -136,7 +136,7 @@ def test_heckman_no_const(client, tables_store):
     result_id = resp.json()["result"]["resultId"]
     rd = AnalysisResultStore().get_result(result_id).result_data
     params = rd["parameters"]
-    # education + experience + lambda = 3 パラメータ
+    # educ + exp + lambda = 3 パラメータ
     assert len(params) == 3  # noqa: PLR2004
     assert params[-1]["variable"] == "lambda"
 
@@ -169,7 +169,7 @@ def test_heckman_exclusion_restriction_error(client, tables_store):
     resp = client.post(
         URL_HECKMAN,
         json=_payload(
-            selectionVariables=["education", "experience"],
+            selectionVariables=["educ", "exp"],
         ),
     )
     # スキーマ層（model_validator）による検証は FastAPI が 422 を返す
@@ -184,9 +184,9 @@ def test_heckman_selection_column_not_binary_error(client, tables_store):
         json=_payload(
             selectionColumn="wage",
             selectionVariables=[
-                "education",
-                "experience",
-                "n_children",
+                "educ",
+                "exp",
+                "kids",
             ],
         ),
     )
