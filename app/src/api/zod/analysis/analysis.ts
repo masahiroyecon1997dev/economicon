@@ -700,22 +700,70 @@ export const OutputResultHeader = zod.object({
   "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
 })
 
+export const outputResultBodyOneResultTypeDefault = `regression`;
+export const outputResultBodyOneOptionsStatInParenthesesDefault = `se`;
+export const outputResultBodyOneOptionsConstAtBottomDefault = true;
+export const outputResultBodyTwoResultTypeDefault = `descriptive_statistics`;
+export const outputResultBodyTwoOptionsIncludeResultNameDefault = true;
+export const outputResultBodyTwoOptionsIncludeTableNameDefault = true;
+export const outputResultBodyThreeResultTypeDefault = `confidence_interval`;
+export const outputResultBodyThreeOptionsIncludeResultNameDefault = true;
+export const outputResultBodyThreeOptionsIncludeTableNameDefault = true;
+export const outputResultBodyThreeOptionsIncludeConfidenceLevelDefault = true;
+export const outputResultBodyFourResultTypeDefault = `statistical_test`;
+export const outputResultBodyFourOptionsIncludeResultNameDefault = true;
+export const outputResultBodyFourOptionsIncludeTableNameDefault = true;
+export const outputResultBodyFourOptionsIncludeConfidenceIntervalDefault = true;
+export const outputResultBodyFourOptionsIncludeConfidenceLevelDefault = true;
+export const outputResultBodyFourOptionsIncludeEffectSizeDefault = true;
 
-export const outputResultBodyStatInParenthesesDefault = `se`;
-export const outputResultBodyConstAtBottomDefault = true;
-
-export const OutputResultBody = zod.object({
+export const OutputResultBody = zod.union([zod.object({
+  "resultType": zod.literal("regression").default(outputResultBodyOneResultTypeDefault).describe('出力対象の分析結果種別。'),
   "resultIds": zod.array(zod.string()).min(1).describe('出力する分析結果 ID のリスト（1件以上）'),
-  "format": zod.enum(['latex', 'markdown', 'text']).describe('出力フォーマット。latex: LaTeX tabular、markdown: Markdown テーブル、text: 固定幅テキスト'),
-  "statInParentheses": zod.enum(['se', 't', 'p', 'none']).default(outputResultBodyStatInParenthesesDefault).describe('括弧内に表示する統計量。se: 標準誤差、t: t 値、p: p 値、none: 括弧行なし'),
+  "format": zod.enum(['latex', 'markdown', 'text']).describe('出力フォーマット。'),
+  "options": zod.object({
+  "statInParentheses": zod.enum(['se', 't', 'p', 'none']).default(outputResultBodyOneOptionsStatInParenthesesDefault).describe('括弧内に表示する統計量。se: 標準誤差、t: t 値、p: p 値、none: 括弧行なし'),
   "significanceStars": zod.union([zod.array(zod.object({
   "threshold": zod.number().describe('有意水準の閾値（例: 0.05）'),
   "symbol": zod.string().describe('有意性を示す記号（例: \'\*\*\'）')
 }).describe('有意性記号の設定')),zod.null()]).optional().describe('有意性記号の設定リスト。None の場合はデフォルト設定を使用 (0.01:\*\*\*, 0.05:\*\*, 0.1:\*)'),
   "variableLabels": zod.union([zod.record(zod.string(), zod.string()),zod.null()]).optional().describe('変数名から表示ラベルへのマッピング辞書。未設定の変数は変数名をそのまま使用。'),
-  "constAtBottom": zod.boolean().default(outputResultBodyConstAtBottomDefault).describe('True の場合、定数項を変数リストの最下部に配置する。'),
+  "constAtBottom": zod.boolean().default(outputResultBodyOneOptionsConstAtBottomDefault).describe('True の場合、定数項を変数リストの最下部に配置する。'),
   "variableOrder": zod.union([zod.array(zod.string()),zod.null()]).optional().describe('変数の表示順序を明示的に指定するリスト。指定した変数は先頭から順に表示される。リストに含まれない変数はその後ろに追加される。None の場合は推定結果への登場順を使用。')
-}).describe('推定結果フォーマット出力リクエスト\n\n複数の分析結果を LaTeX \/ Markdown \/ Text 形式に整形します。')
+}).optional().describe('回帰結果出力用オプション。')
+}).describe('回帰結果のフォーマット出力リクエスト'),zod.object({
+  "resultType": zod.literal("descriptive_statistics").default(outputResultBodyTwoResultTypeDefault).describe('出力対象の分析結果種別。'),
+  "resultIds": zod.array(zod.string()).min(1).describe('出力する分析結果 ID のリスト（1件以上）'),
+  "format": zod.enum(['latex', 'markdown', 'text']).describe('出力フォーマット。'),
+  "options": zod.object({
+  "includeResultName": zod.boolean().default(outputResultBodyTwoOptionsIncludeResultNameDefault).describe('True の場合、結果名の列を出力に含める。'),
+  "includeTableName": zod.boolean().default(outputResultBodyTwoOptionsIncludeTableNameDefault).describe('True の場合、テーブル名の列を出力に含める。'),
+  "variableLabels": zod.union([zod.record(zod.string(), zod.string()),zod.null()]).optional().describe('変数名から表示ラベルへのマッピング辞書。'),
+  "variableOrder": zod.union([zod.array(zod.string()),zod.null()]).optional().describe('変数の表示順序を指定するリスト。'),
+  "statisticLabels": zod.union([zod.record(zod.string(), zod.string()),zod.null()]).optional().describe('統計量名から表示ラベルへのマッピング辞書。'),
+  "statisticOrder": zod.union([zod.array(zod.string()),zod.null()]).optional().describe('統計量列の表示順序を指定するリスト。')
+}).optional().describe('記述統計出力用オプション。')
+}).describe('記述統計結果のフォーマット出力リクエスト'),zod.object({
+  "resultType": zod.literal("confidence_interval").default(outputResultBodyThreeResultTypeDefault).describe('出力対象の分析結果種別。'),
+  "resultIds": zod.array(zod.string()).min(1).describe('出力する分析結果 ID のリスト（1件以上）'),
+  "format": zod.enum(['latex', 'markdown', 'text']).describe('出力フォーマット。'),
+  "options": zod.object({
+  "includeResultName": zod.boolean().default(outputResultBodyThreeOptionsIncludeResultNameDefault).describe('True の場合、結果名の列を出力に含める。'),
+  "includeTableName": zod.boolean().default(outputResultBodyThreeOptionsIncludeTableNameDefault).describe('True の場合、テーブル名の列を出力に含める。'),
+  "includeConfidenceLevel": zod.boolean().default(outputResultBodyThreeOptionsIncludeConfidenceLevelDefault).describe('True の場合、信頼水準の列を出力に含める。')
+}).optional().describe('信頼区間出力用オプション。')
+}).describe('信頼区間結果のフォーマット出力リクエスト'),zod.object({
+  "resultType": zod.literal("statistical_test").default(outputResultBodyFourResultTypeDefault).describe('出力対象の分析結果種別。'),
+  "resultIds": zod.array(zod.string()).min(1).describe('出力する分析結果 ID のリスト（1件以上）'),
+  "format": zod.enum(['latex', 'markdown', 'text']).describe('出力フォーマット。'),
+  "options": zod.object({
+  "includeResultName": zod.boolean().default(outputResultBodyFourOptionsIncludeResultNameDefault).describe('True の場合、結果名の列を出力に含める。'),
+  "includeTableName": zod.boolean().default(outputResultBodyFourOptionsIncludeTableNameDefault).describe('True の場合、テーブル名の列を出力に含める。'),
+  "includeConfidenceInterval": zod.boolean().default(outputResultBodyFourOptionsIncludeConfidenceIntervalDefault).describe('True の場合、信頼区間列を出力に含める。'),
+  "includeConfidenceLevel": zod.boolean().default(outputResultBodyFourOptionsIncludeConfidenceLevelDefault).describe('True の場合、信頼水準の列を出力に含める。'),
+  "includeEffectSize": zod.boolean().default(outputResultBodyFourOptionsIncludeEffectSizeDefault).describe('True の場合、効果量の列を出力に含める。')
+}).optional().describe('統計的検定出力用オプション。')
+}).describe('統計的検定結果のフォーマット出力リクエスト')])
 
 export const outputResultResponseCodeDefault = `OK`;
 

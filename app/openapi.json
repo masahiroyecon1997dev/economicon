@@ -2473,7 +2473,30 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OutputResultRequest"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/RegressionOutputRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DescriptiveStatisticsOutputRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ConfidenceIntervalOutputRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/StatisticalTestOutputRequest"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "resultType",
+                  "mapping": {
+                    "regression": "#/components/schemas/RegressionOutputRequest",
+                    "descriptive_statistics": "#/components/schemas/DescriptiveStatisticsOutputRequest",
+                    "confidence_interval": "#/components/schemas/ConfidenceIntervalOutputRequest",
+                    "statistical_test": "#/components/schemas/StatisticalTestOutputRequest"
+                  }
+                },
+                "title": "Body"
               }
             }
           }
@@ -4219,6 +4242,66 @@
         "title": "ColumnInfo",
         "description": "\u30ab\u30e9\u30e0\u60c5\u5831"
       },
+      "ConfidenceIntervalOutputOptions": {
+        "properties": {
+          "includeResultName": {
+            "type": "boolean",
+            "title": "Includeresultname",
+            "description": "True \u306e\u5834\u5408\u3001\u7d50\u679c\u540d\u306e\u5217\u3092\u51fa\u529b\u306b\u542b\u3081\u308b\u3002",
+            "default": true
+          },
+          "includeTableName": {
+            "type": "boolean",
+            "title": "Includetablename",
+            "description": "True \u306e\u5834\u5408\u3001\u30c6\u30fc\u30d6\u30eb\u540d\u306e\u5217\u3092\u51fa\u529b\u306b\u542b\u3081\u308b\u3002",
+            "default": true
+          },
+          "includeConfidenceLevel": {
+            "type": "boolean",
+            "title": "Includeconfidencelevel",
+            "description": "True \u306e\u5834\u5408\u3001\u4fe1\u983c\u6c34\u6e96\u306e\u5217\u3092\u51fa\u529b\u306b\u542b\u3081\u308b\u3002",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "ConfidenceIntervalOutputOptions",
+        "description": "\u4fe1\u983c\u533a\u9593\u51fa\u529b\u30aa\u30d7\u30b7\u30e7\u30f3"
+      },
+      "ConfidenceIntervalOutputRequest": {
+        "properties": {
+          "resultType": {
+            "type": "string",
+            "const": "confidence_interval",
+            "title": "Resulttype",
+            "description": "\u51fa\u529b\u5bfe\u8c61\u306e\u5206\u6790\u7d50\u679c\u7a2e\u5225\u3002",
+            "default": "confidence_interval"
+          },
+          "resultIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Resultids",
+            "description": "\u51fa\u529b\u3059\u308b\u5206\u6790\u7d50\u679c ID \u306e\u30ea\u30b9\u30c8\uff081\u4ef6\u4ee5\u4e0a\uff09"
+          },
+          "format": {
+            "$ref": "#/components/schemas/OutputResultFormat",
+            "description": "\u51fa\u529b\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u3002"
+          },
+          "options": {
+            "$ref": "#/components/schemas/ConfidenceIntervalOutputOptions",
+            "description": "\u4fe1\u983c\u533a\u9593\u51fa\u529b\u7528\u30aa\u30d7\u30b7\u30e7\u30f3\u3002"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resultIds",
+          "format"
+        ],
+        "title": "ConfidenceIntervalOutputRequest",
+        "description": "\u4fe1\u983c\u533a\u9593\u7d50\u679c\u306e\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u51fa\u529b\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
       "ConfidenceIntervalRequestBody": {
         "properties": {
           "tableName": {
@@ -4939,6 +5022,120 @@
           "population_variance"
         ],
         "title": "DescriptiveStatisticType"
+      },
+      "DescriptiveStatisticsOutputOptions": {
+        "properties": {
+          "includeResultName": {
+            "type": "boolean",
+            "title": "Includeresultname",
+            "description": "True \u306e\u5834\u5408\u3001\u7d50\u679c\u540d\u306e\u5217\u3092\u51fa\u529b\u306b\u542b\u3081\u308b\u3002",
+            "default": true
+          },
+          "includeTableName": {
+            "type": "boolean",
+            "title": "Includetablename",
+            "description": "True \u306e\u5834\u5408\u3001\u30c6\u30fc\u30d6\u30eb\u540d\u306e\u5217\u3092\u51fa\u529b\u306b\u542b\u3081\u308b\u3002",
+            "default": true
+          },
+          "variableLabels": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variablelabels",
+            "description": "\u5909\u6570\u540d\u304b\u3089\u8868\u793a\u30e9\u30d9\u30eb\u3078\u306e\u30de\u30c3\u30d4\u30f3\u30b0\u8f9e\u66f8\u3002"
+          },
+          "variableOrder": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variableorder",
+            "description": "\u5909\u6570\u306e\u8868\u793a\u9806\u5e8f\u3092\u6307\u5b9a\u3059\u308b\u30ea\u30b9\u30c8\u3002"
+          },
+          "statisticLabels": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statisticlabels",
+            "description": "\u7d71\u8a08\u91cf\u540d\u304b\u3089\u8868\u793a\u30e9\u30d9\u30eb\u3078\u306e\u30de\u30c3\u30d4\u30f3\u30b0\u8f9e\u66f8\u3002"
+          },
+          "statisticOrder": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statisticorder",
+            "description": "\u7d71\u8a08\u91cf\u5217\u306e\u8868\u793a\u9806\u5e8f\u3092\u6307\u5b9a\u3059\u308b\u30ea\u30b9\u30c8\u3002"
+          }
+        },
+        "type": "object",
+        "title": "DescriptiveStatisticsOutputOptions",
+        "description": "\u8a18\u8ff0\u7d71\u8a08\u51fa\u529b\u30aa\u30d7\u30b7\u30e7\u30f3"
+      },
+      "DescriptiveStatisticsOutputRequest": {
+        "properties": {
+          "resultType": {
+            "type": "string",
+            "const": "descriptive_statistics",
+            "title": "Resulttype",
+            "description": "\u51fa\u529b\u5bfe\u8c61\u306e\u5206\u6790\u7d50\u679c\u7a2e\u5225\u3002",
+            "default": "descriptive_statistics"
+          },
+          "resultIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Resultids",
+            "description": "\u51fa\u529b\u3059\u308b\u5206\u6790\u7d50\u679c ID \u306e\u30ea\u30b9\u30c8\uff081\u4ef6\u4ee5\u4e0a\uff09"
+          },
+          "format": {
+            "$ref": "#/components/schemas/OutputResultFormat",
+            "description": "\u51fa\u529b\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u3002"
+          },
+          "options": {
+            "$ref": "#/components/schemas/DescriptiveStatisticsOutputOptions",
+            "description": "\u8a18\u8ff0\u7d71\u8a08\u51fa\u529b\u7528\u30aa\u30d7\u30b7\u30e7\u30f3\u3002"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resultIds",
+          "format"
+        ],
+        "title": "DescriptiveStatisticsOutputRequest",
+        "description": "\u8a18\u8ff0\u7d71\u8a08\u7d50\u679c\u306e\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u51fa\u529b\u30ea\u30af\u30a8\u30b9\u30c8"
       },
       "DescriptiveStatisticsRequestBody": {
         "properties": {
@@ -6672,98 +6869,13 @@
         ],
         "title": "OLSParams"
       },
-      "OutputResultRequest": {
-        "properties": {
-          "resultIds": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "minItems": 1,
-            "title": "Resultids",
-            "description": "\u51fa\u529b\u3059\u308b\u5206\u6790\u7d50\u679c ID \u306e\u30ea\u30b9\u30c8\uff081\u4ef6\u4ee5\u4e0a\uff09"
-          },
-          "format": {
-            "type": "string",
-            "enum": [
-              "latex",
-              "markdown",
-              "text"
-            ],
-            "title": "Format",
-            "description": "\u51fa\u529b\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u3002latex: LaTeX tabular\u3001markdown: Markdown \u30c6\u30fc\u30d6\u30eb\u3001text: \u56fa\u5b9a\u5e45\u30c6\u30ad\u30b9\u30c8"
-          },
-          "statInParentheses": {
-            "type": "string",
-            "enum": [
-              "se",
-              "t",
-              "p",
-              "none"
-            ],
-            "title": "Statinparentheses",
-            "description": "\u62ec\u5f27\u5185\u306b\u8868\u793a\u3059\u308b\u7d71\u8a08\u91cf\u3002se: \u6a19\u6e96\u8aa4\u5dee\u3001t: t \u5024\u3001p: p \u5024\u3001none: \u62ec\u5f27\u884c\u306a\u3057",
-            "default": "se"
-          },
-          "significanceStars": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/StarConfig"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Significancestars",
-            "description": "\u6709\u610f\u6027\u8a18\u53f7\u306e\u8a2d\u5b9a\u30ea\u30b9\u30c8\u3002None \u306e\u5834\u5408\u306f\u30c7\u30d5\u30a9\u30eb\u30c8\u8a2d\u5b9a\u3092\u4f7f\u7528 (0.01:***, 0.05:**, 0.1:*)"
-          },
-          "variableLabels": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Variablelabels",
-            "description": "\u5909\u6570\u540d\u304b\u3089\u8868\u793a\u30e9\u30d9\u30eb\u3078\u306e\u30de\u30c3\u30d4\u30f3\u30b0\u8f9e\u66f8\u3002\u672a\u8a2d\u5b9a\u306e\u5909\u6570\u306f\u5909\u6570\u540d\u3092\u305d\u306e\u307e\u307e\u4f7f\u7528\u3002"
-          },
-          "constAtBottom": {
-            "type": "boolean",
-            "title": "Constatbottom",
-            "description": "True \u306e\u5834\u5408\u3001\u5b9a\u6570\u9805\u3092\u5909\u6570\u30ea\u30b9\u30c8\u306e\u6700\u4e0b\u90e8\u306b\u914d\u7f6e\u3059\u308b\u3002",
-            "default": true
-          },
-          "variableOrder": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Variableorder",
-            "description": "\u5909\u6570\u306e\u8868\u793a\u9806\u5e8f\u3092\u660e\u793a\u7684\u306b\u6307\u5b9a\u3059\u308b\u30ea\u30b9\u30c8\u3002\u6307\u5b9a\u3057\u305f\u5909\u6570\u306f\u5148\u982d\u304b\u3089\u9806\u306b\u8868\u793a\u3055\u308c\u308b\u3002\u30ea\u30b9\u30c8\u306b\u542b\u307e\u308c\u306a\u3044\u5909\u6570\u306f\u305d\u306e\u5f8c\u308d\u306b\u8ffd\u52a0\u3055\u308c\u308b\u3002None \u306e\u5834\u5408\u306f\u63a8\u5b9a\u7d50\u679c\u3078\u306e\u767b\u5834\u9806\u3092\u4f7f\u7528\u3002"
-          }
-        },
-        "type": "object",
-        "required": [
-          "resultIds",
-          "format"
-        ],
-        "title": "OutputResultRequest",
-        "description": "\u63a8\u5b9a\u7d50\u679c\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u51fa\u529b\u30ea\u30af\u30a8\u30b9\u30c8\n\n\u8907\u6570\u306e\u5206\u6790\u7d50\u679c\u3092 LaTeX / Markdown / Text \u5f62\u5f0f\u306b\u6574\u5f62\u3057\u307e\u3059\u3002"
+      "OutputResultFormat": {
+        "type": "string",
+        "enum": [
+          "latex",
+          "markdown",
+          "text"
+        ]
       },
       "OutputResultResult": {
         "properties": {
@@ -7177,6 +7289,111 @@
           "entityIdColumn"
         ],
         "title": "REParams"
+      },
+      "RegressionOutputOptions": {
+        "properties": {
+          "statInParentheses": {
+            "type": "string",
+            "enum": [
+              "se",
+              "t",
+              "p",
+              "none"
+            ],
+            "title": "Statinparentheses",
+            "description": "\u62ec\u5f27\u5185\u306b\u8868\u793a\u3059\u308b\u7d71\u8a08\u91cf\u3002se: \u6a19\u6e96\u8aa4\u5dee\u3001t: t \u5024\u3001p: p \u5024\u3001none: \u62ec\u5f27\u884c\u306a\u3057",
+            "default": "se"
+          },
+          "significanceStars": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StarConfig"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Significancestars",
+            "description": "\u6709\u610f\u6027\u8a18\u53f7\u306e\u8a2d\u5b9a\u30ea\u30b9\u30c8\u3002None \u306e\u5834\u5408\u306f\u30c7\u30d5\u30a9\u30eb\u30c8\u8a2d\u5b9a\u3092\u4f7f\u7528 (0.01:***, 0.05:**, 0.1:*)"
+          },
+          "variableLabels": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variablelabels",
+            "description": "\u5909\u6570\u540d\u304b\u3089\u8868\u793a\u30e9\u30d9\u30eb\u3078\u306e\u30de\u30c3\u30d4\u30f3\u30b0\u8f9e\u66f8\u3002\u672a\u8a2d\u5b9a\u306e\u5909\u6570\u306f\u5909\u6570\u540d\u3092\u305d\u306e\u307e\u307e\u4f7f\u7528\u3002"
+          },
+          "constAtBottom": {
+            "type": "boolean",
+            "title": "Constatbottom",
+            "description": "True \u306e\u5834\u5408\u3001\u5b9a\u6570\u9805\u3092\u5909\u6570\u30ea\u30b9\u30c8\u306e\u6700\u4e0b\u90e8\u306b\u914d\u7f6e\u3059\u308b\u3002",
+            "default": true
+          },
+          "variableOrder": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variableorder",
+            "description": "\u5909\u6570\u306e\u8868\u793a\u9806\u5e8f\u3092\u660e\u793a\u7684\u306b\u6307\u5b9a\u3059\u308b\u30ea\u30b9\u30c8\u3002\u6307\u5b9a\u3057\u305f\u5909\u6570\u306f\u5148\u982d\u304b\u3089\u9806\u306b\u8868\u793a\u3055\u308c\u308b\u3002\u30ea\u30b9\u30c8\u306b\u542b\u307e\u308c\u306a\u3044\u5909\u6570\u306f\u305d\u306e\u5f8c\u308d\u306b\u8ffd\u52a0\u3055\u308c\u308b\u3002None \u306e\u5834\u5408\u306f\u63a8\u5b9a\u7d50\u679c\u3078\u306e\u767b\u5834\u9806\u3092\u4f7f\u7528\u3002"
+          }
+        },
+        "type": "object",
+        "title": "RegressionOutputOptions",
+        "description": "\u56de\u5e30\u7d50\u679c\u51fa\u529b\u30aa\u30d7\u30b7\u30e7\u30f3"
+      },
+      "RegressionOutputRequest": {
+        "properties": {
+          "resultType": {
+            "type": "string",
+            "const": "regression",
+            "title": "Resulttype",
+            "description": "\u51fa\u529b\u5bfe\u8c61\u306e\u5206\u6790\u7d50\u679c\u7a2e\u5225\u3002",
+            "default": "regression"
+          },
+          "resultIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Resultids",
+            "description": "\u51fa\u529b\u3059\u308b\u5206\u6790\u7d50\u679c ID \u306e\u30ea\u30b9\u30c8\uff081\u4ef6\u4ee5\u4e0a\uff09"
+          },
+          "format": {
+            "$ref": "#/components/schemas/OutputResultFormat",
+            "description": "\u51fa\u529b\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u3002"
+          },
+          "options": {
+            "$ref": "#/components/schemas/RegressionOutputOptions",
+            "description": "\u56de\u5e30\u7d50\u679c\u51fa\u529b\u7528\u30aa\u30d7\u30b7\u30e7\u30f3\u3002"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resultIds",
+          "format"
+        ],
+        "title": "RegressionOutputRequest",
+        "description": "\u56de\u5e30\u7d50\u679c\u306e\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u51fa\u529b\u30ea\u30af\u30a8\u30b9\u30c8"
       },
       "RegressionParams": {
         "oneOf": [
@@ -7820,6 +8037,78 @@
         "type": "object",
         "title": "StatisticalTestOptions",
         "description": "\u7d71\u8a08\u691c\u5b9a\u306e\u30aa\u30d7\u30b7\u30e7\u30f3\u8a2d\u5b9a"
+      },
+      "StatisticalTestOutputOptions": {
+        "properties": {
+          "includeResultName": {
+            "type": "boolean",
+            "title": "Includeresultname",
+            "description": "True \u306e\u5834\u5408\u3001\u7d50\u679c\u540d\u306e\u5217\u3092\u51fa\u529b\u306b\u542b\u3081\u308b\u3002",
+            "default": true
+          },
+          "includeTableName": {
+            "type": "boolean",
+            "title": "Includetablename",
+            "description": "True \u306e\u5834\u5408\u3001\u30c6\u30fc\u30d6\u30eb\u540d\u306e\u5217\u3092\u51fa\u529b\u306b\u542b\u3081\u308b\u3002",
+            "default": true
+          },
+          "includeConfidenceInterval": {
+            "type": "boolean",
+            "title": "Includeconfidenceinterval",
+            "description": "True \u306e\u5834\u5408\u3001\u4fe1\u983c\u533a\u9593\u5217\u3092\u51fa\u529b\u306b\u542b\u3081\u308b\u3002",
+            "default": true
+          },
+          "includeConfidenceLevel": {
+            "type": "boolean",
+            "title": "Includeconfidencelevel",
+            "description": "True \u306e\u5834\u5408\u3001\u4fe1\u983c\u6c34\u6e96\u306e\u5217\u3092\u51fa\u529b\u306b\u542b\u3081\u308b\u3002",
+            "default": true
+          },
+          "includeEffectSize": {
+            "type": "boolean",
+            "title": "Includeeffectsize",
+            "description": "True \u306e\u5834\u5408\u3001\u52b9\u679c\u91cf\u306e\u5217\u3092\u51fa\u529b\u306b\u542b\u3081\u308b\u3002",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "StatisticalTestOutputOptions",
+        "description": "\u7d71\u8a08\u7684\u691c\u5b9a\u51fa\u529b\u30aa\u30d7\u30b7\u30e7\u30f3"
+      },
+      "StatisticalTestOutputRequest": {
+        "properties": {
+          "resultType": {
+            "type": "string",
+            "const": "statistical_test",
+            "title": "Resulttype",
+            "description": "\u51fa\u529b\u5bfe\u8c61\u306e\u5206\u6790\u7d50\u679c\u7a2e\u5225\u3002",
+            "default": "statistical_test"
+          },
+          "resultIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Resultids",
+            "description": "\u51fa\u529b\u3059\u308b\u5206\u6790\u7d50\u679c ID \u306e\u30ea\u30b9\u30c8\uff081\u4ef6\u4ee5\u4e0a\uff09"
+          },
+          "format": {
+            "$ref": "#/components/schemas/OutputResultFormat",
+            "description": "\u51fa\u529b\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u3002"
+          },
+          "options": {
+            "$ref": "#/components/schemas/StatisticalTestOutputOptions",
+            "description": "\u7d71\u8a08\u7684\u691c\u5b9a\u51fa\u529b\u7528\u30aa\u30d7\u30b7\u30e7\u30f3\u3002"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resultIds",
+          "format"
+        ],
+        "title": "StatisticalTestOutputRequest",
+        "description": "\u7d71\u8a08\u7684\u691c\u5b9a\u7d50\u679c\u306e\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u51fa\u529b\u30ea\u30af\u30a8\u30b9\u30c8"
       },
       "StatisticalTestRequestBody": {
         "properties": {

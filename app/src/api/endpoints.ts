@@ -12,6 +12,7 @@ import type {
   AddSimulationColumnRequestBody,
   CalculateColumnRequestBody,
   CastColumnRequestBody,
+  ConfidenceIntervalOutputRequest,
   ConfidenceIntervalRequestBody,
   CreateCorrelationTableRequestBody,
   CreateJoinTableRequestBody,
@@ -20,6 +21,7 @@ import type {
   DIDRequestBody,
   DeleteColumnRequestBody,
   DeleteTableRequestBody,
+  DescriptiveStatisticsOutputRequest,
   DescriptiveStatisticsRequestBody,
   DuplicateColumnRequestBody,
   DuplicateTableRequestBody,
@@ -31,12 +33,13 @@ import type {
   HeckmanRequestBody,
   ImportFileRequestBody,
   MoveColumnRequestBody,
-  OutputResultRequest,
   RDDRequestBody,
+  RegressionOutputRequest,
   RegressionRequestBody,
   RenameColumnRequestBody,
   RenameTableRequestBody,
   SortColumnsRequestBody,
+  StatisticalTestOutputRequest,
   StatisticalTestRequestBody,
   SuccessResponseAddDiagnosticColumnsResult,
   SuccessResponseAddDummyColumnResult,
@@ -1063,12 +1066,12 @@ JSONResponse
  * @summary Output Result
  */
 const outputResult = (
-    outputResultRequest: OutputResultRequest,
+    regressionOutputRequestDescriptiveStatisticsOutputRequestConfidenceIntervalOutputRequestStatisticalTestOutputRequest: RegressionOutputRequest | DescriptiveStatisticsOutputRequest | ConfidenceIntervalOutputRequest | StatisticalTestOutputRequest,
  options?: SecondParameter<typeof customInstance<SuccessResponseOutputResultResult>>,) => {
       return customInstance<SuccessResponseOutputResultResult>(
       {url: `/api/analysis/results/output`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: outputResultRequest
+      data: regressionOutputRequestDescriptiveStatisticsOutputRequestConfidenceIntervalOutputRequestStatisticalTestOutputRequest
     },
       options);
     }
