@@ -19,6 +19,7 @@ import polars as pl
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.utils import ProcessingError
+from economicon.utils.column_names import generate_unique_column_name
 
 # ---------------------------------------------------------------------------
 # rdrobust 共通パラメータ集約クラス
@@ -265,13 +266,10 @@ def compute_bins_data(
     n_left_bins = n_bins // 2
     n_right_bins = n_bins - n_left_bins
     bins: list[dict[str, float]] = []
-    bin_col = "__rdd_internal_bin_index__"
-    used_names = {running_var, outcome_var}
-    suffix = 1
-
-    while bin_col in used_names:
-        bin_col = f"__rdd_internal_bin_index__{suffix}"
-        suffix += 1
+    bin_col = generate_unique_column_name(
+        "__rdd_internal_bin_index__",
+        {running_var, outcome_var},
+    )
 
     for side_filter, n_side in [
         (pl.col(running_var) < cutoff, n_left_bins),

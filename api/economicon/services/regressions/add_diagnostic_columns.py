@@ -28,6 +28,7 @@ from economicon.services.regressions.diagnostics import (
 )
 from economicon.services.regressions.fitters import RegularizedResult
 from economicon.utils import ProcessingError, ValidationError
+from economicon.utils.column_names import generate_unique_column_name
 from economicon.utils.validators import validate_existence
 
 
@@ -389,7 +390,7 @@ class AddDiagnosticColumns:
         元テーブルと診断値 DataFrame を left_join する。
 
         FE/RE は entity_id_column + time_column の 2 キー結合。
-        それ以外は ``__row_idx__`` を一時キーとして結合。
+        それ以外は一意な内部行番号キーを一時的に付与して結合。
 
         欠損値を含む行は join 結果が null になるが、
         これは元データに欠損があるためであり仕様どおり。
@@ -421,15 +422,22 @@ class AddDiagnosticColumns:
                 how="left",
             )
         else:
-            # __row_idx__ を一時キーとして使用
+            row_idx_col = generate_unique_column_name(
+                "__row_idx__",
+                df.columns,
+            )
+            values_join_df = values_df
+            if row_idx_col != "__row_idx__":
+                values_join_df = values_df.rename({"__row_idx__": row_idx_col})
+
             joined = (
-                df.with_row_index("__row_idx__")
+                df.with_row_index(row_idx_col)
                 .join(
-                    values_df,
-                    on="__row_idx__",
+                    values_join_df,
+                    on=row_idx_col,
                     how="left",
                 )
-                .drop("__row_idx__")
+                .drop(row_idx_col)
             )
 
         return joined

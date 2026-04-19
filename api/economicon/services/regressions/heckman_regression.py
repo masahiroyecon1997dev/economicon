@@ -27,6 +27,7 @@ from economicon.services.regressions.common import (
     extract_statsmodels_params,
 )
 from economicon.utils import ProcessingError, ValidationError
+from economicon.utils.column_names import generate_unique_column_name
 from economicon.utils.validators import (
     validate_existence,
     validate_numeric_types,
@@ -178,14 +179,18 @@ class HeckmanRegression:
                     *self.explanatory_variables,
                 }
             )
-            df_indexed = df.select(all_cols).with_row_index("__orig_idx__")
+            orig_idx_col = generate_unique_column_name(
+                "__orig_idx__",
+                all_cols,
+            )
+            df_indexed = df.select(all_cols).with_row_index(orig_idx_col)
 
             # 欠損値処理
             if self.missing == "drop":
                 df_clean = df_indexed.drop_nulls()
             elif self.missing == "raise":
                 null_total = sum(
-                    df_indexed.drop("__orig_idx__").null_count().row(0)
+                    df_indexed.drop(orig_idx_col).null_count().row(0)
                 )
                 if null_total > 0:
                     raise ProcessingError(
@@ -363,7 +368,7 @@ class HeckmanRegression:
             # 選択サンプルの元テーブル行インデックス
             # （add_diagnostic_columns での行アライメントに使用）
             orig_indices = (
-                df_clean["__orig_idx__"].to_numpy()[sel_mask].astype(np.int64)
+                df_clean[orig_idx_col].to_numpy()[sel_mask].astype(np.int64)
             )
 
             # Step 1 (Probit) + Step 2 (OLS) を両方 pickle 保存

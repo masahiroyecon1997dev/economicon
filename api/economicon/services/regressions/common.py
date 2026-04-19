@@ -15,6 +15,7 @@ import statsmodels.api as sm
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.utils import ProcessingError
+from economicon.utils.column_names import generate_unique_column_name
 
 
 def handle_missing_values(df: Any, missing: str) -> Any:
@@ -219,11 +220,10 @@ def prepare_panel_dataframe(
     if config.time_column:
         df = df.set_index([config.entity_id_column, config.time_column])
     else:
-        # 時間列がない場合は自動生成
-        # 既存列との衝突を避けるためユニークな名前を使用
-        temp_time_col = "__panel_time_idx__"
-        while temp_time_col in df.columns:
-            temp_time_col += "_"
+        temp_time_col = generate_unique_column_name(
+            "__panel_time_idx__",
+            df.columns,
+        )
         df[temp_time_col] = df.groupby(config.entity_id_column).cumcount()
         df = df.set_index([config.entity_id_column, temp_time_col])
 
@@ -322,9 +322,10 @@ def prepare_panel_iv_dataframe(
     if config.time_column:
         df = df.set_index([config.entity_id_column, config.time_column])
     else:
-        temp_time_col = "__panel_time_idx__"
-        while temp_time_col in df.columns:
-            temp_time_col += "_"
+        temp_time_col = generate_unique_column_name(
+            "__panel_time_idx__",
+            df.columns,
+        )
         df[temp_time_col] = df.groupby(config.entity_id_column).cumcount()
         df = df.set_index([config.entity_id_column, temp_time_col])
 
