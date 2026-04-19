@@ -342,7 +342,7 @@ def client():
 
 
 @pytest.fixture
-def tables_store():
+def tables_store():  # noqa: PLR0915
     """TablesStoreのフィクスチャ（全テーブルを事前ロード）"""
     manager = TablesStore()
     manager.clear_tables()

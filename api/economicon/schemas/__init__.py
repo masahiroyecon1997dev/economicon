@@ -90,6 +90,7 @@ from economicon.schemas.enums import (
     StatisticalTestType,
     TransformMethodType,
 )
+from economicon.schemas.heckman import HeckmanResult as HeckmanResult
 from economicon.schemas.rdd import RDDResult as RDDResult
 from economicon.schemas.regressions import (
     AddDiagnosticColumnsRequestBody,

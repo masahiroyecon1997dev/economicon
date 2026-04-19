@@ -696,6 +696,73 @@ def extract_from_linearmodels_iv(
 # ---------------------------------------------------------------------------
 
 
+def extract_from_heckman(
+    raw_model: dict,
+    options: DiagnosticExtractOptions,
+    row_indices: np.ndarray | None,
+) -> tuple[pl.DataFrame, list[str]]:
+    """
+    ヘックマン2段階推定の結果から診断値を抽出する。
+
+    Step 2 OLS（結果方程式）の予測値・残差を抽出した後、
+    ``__row_idx__`` をローカル選択サンプル内インデックス
+    （0 .. n_sel-1）から元テーブルの行インデックスに変換する。
+
+    Eco-Note: Step 2 OLS は選択サンプル（employed=1）のみを
+    使用するため、フィット値のインデックスは 0 から n_sel-1 の
+    連番となる。``row_indices``（AnalysisResult に保存済み）を
+    使ってこれを元テーブルの行番号に逆引きする。
+
+    Parameters
+    ----------
+    raw_model:
+        ``{"step1_probit": ProbitResults, "step2_ols": RegressionResults}``
+        形式の辞書。
+    options:
+        共通の診断値抽出オプション。
+    row_indices:
+        AnalysisResult.row_indices — 選択サンプルの元テーブル行番号配列。
+
+    Returns
+    -------
+    tuple[pl.DataFrame, list[str]]
+        - DataFrame: ``__row_idx__``（元テーブル行番号）と
+          診断列を持つ Polars DataFrame。
+        - list[str]: 追加された列名のリスト。
+
+    Raises
+    ------
+    KeyError
+        ``raw_model`` に ``step2_ols`` キーが存在しない場合。
+    TypeError
+        ``raw_model`` が dict でない場合。
+    """
+    if not isinstance(raw_model, dict):
+        raise TypeError(
+            f"Expected dict for heckman raw_model, got {type(raw_model)}"
+        )
+    step2 = raw_model.get("step2_ols")
+    if step2 is None:
+        raise KeyError("step2_ols not found in heckman model dict")
+
+    values_df, added_cols = extract_from_statsmodels(
+        model=step2, options=options
+    )
+
+    # ローカルインデックス（0..n_sel-1）→ 元テーブル行番号に変換
+    if row_indices is not None:
+        local_idx = values_df["__row_idx__"].to_numpy().astype(np.int64)
+        values_df = values_df.with_columns(
+            pl.Series(
+                "__row_idx__",
+                row_indices.astype(np.int64)[local_idx],
+                dtype=pl.Int64,
+            )
+        )
+
+    return values_df, added_cols
+
+
 def extract_from_regularized(
     reg_result: RegularizedResult,
     options: DiagnosticExtractOptions,

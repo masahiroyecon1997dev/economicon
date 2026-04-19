@@ -19,6 +19,7 @@ from economicon.services.regressions.diagnostics import (
     DiagnosticExtractOptions,
     PanelExtractConfig,
     TobitExtractConfig,
+    extract_from_heckman,
     extract_from_linearmodels_iv,
     extract_from_linearmodels_panel,
     extract_from_regularized,
@@ -249,7 +250,7 @@ class AddDiagnosticColumns:
     # 内部ヘルパー
     # ------------------------------------------------------------------
 
-    def _dispatch_extract(
+    def _dispatch_extract(  # noqa: C901
         self,
         raw_model: object,
         model_type: str,
@@ -354,6 +355,20 @@ class AddDiagnosticColumns:
             return extract_from_regularized(
                 reg_result=raw_model,
                 options=opts,
+            )
+
+        if model_type == "heckman":
+            opts = DiagnosticExtractOptions(
+                dep_var=dep_var,
+                existing_cols=existing_cols,
+                target=self.target,
+                standardized=self.standardized,
+                include_interval=self.include_interval,
+            )
+            return extract_from_heckman(
+                raw_model=raw_model,  # type: ignore[arg-type]
+                options=opts,
+                row_indices=analysis_result.row_indices,  # type: ignore[union-attr]
             )
 
         raise ProcessingError(
