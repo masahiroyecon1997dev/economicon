@@ -250,17 +250,3 @@ def validate_panel_iv_columns(
             columns=analysis.instrumental_variables,
             target=_PARAM_NAMES["instrumental_variables"],
         )
-    # 識別条件: 操作変数の数 >= 内生変数の数
-    if len(analysis.instrumental_variables) < len(
-        analysis.endogenous_variables
-    ):
-        raise ProcessingError(
-            error_code=ErrorCode.REGRESSION_PROCESS_ERROR,
-            message=_(
-                "Number of instrumental variables ({n_iv}) must be"
-                " >= number of endogenous variables ({n_en})."
-            ).format(
-                n_iv=len(analysis.instrumental_variables),
-                n_en=len(analysis.endogenous_variables),
-            ),
-        )

@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from economicon.schemas.common import BaseRequest, BinaryChoiceRegularization
 from economicon.schemas.enums import (
@@ -162,7 +162,7 @@ class REParams(_PanelBase):
 
 
 class PanelIvParams(BaseRequest):
-    method: Literal[RegressionMethodType.FEIV]
+    method: Literal[RegressionMethodType.FEIV] = RegressionMethodType.FEIV
     # 個体ID列と時間列を追加
     entity_id_column: ColumnName = Field(description="個体ID列名")
     time_column: ColumnName | None = Field(
@@ -173,6 +173,18 @@ class PanelIvParams(BaseRequest):
     endogenous_variables: list[ColumnName]
     # GMMを選択した場合の重み行列の設定（必要なら）
     gmm_weight_matrix: Literal["uncentered", "robust", "hac"] = "robust"
+
+    @model_validator(mode="after")
+    def check_identification(self) -> PanelIvParams:
+        """識別条件: 操作変数の数 >= 内生変数の数。"""
+        if len(self.instrumental_variables) < len(self.endogenous_variables):
+            n_iv = len(self.instrumental_variables)
+            n_en = len(self.endogenous_variables)
+            raise ValueError(
+                f"Number of instrumental variables ({n_iv})"
+                f" must be >= endogenous variables ({n_en})."
+            )
+        return self
 
 
 class WLSParams(BaseRequest):
