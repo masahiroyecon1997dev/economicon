@@ -22,6 +22,9 @@ N_TOBIT = 300
 N_HECKMAN = 600
 N_RDD = 1000
 N_DESC = 500
+N_STAT_CI = 100
+N_STAT_TEST = 50
+N_STAT_TEST_SMALL = 30
 
 
 def ensure_dirs() -> None:
