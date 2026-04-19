@@ -17,8 +17,6 @@
 
 from __future__ import annotations
 
-import os
-import sys
 from pathlib import Path
 
 import numpy as np
@@ -41,15 +39,15 @@ _PARQUET_DIR = _DATA_DIR / "parquet"
 SEED = 2024
 
 # 各データセットのサンプルサイズ
-N_OLS = 300          # OLS / Logit / Probit / Lasso / Ridge
-N_ENTITIES = 10      # パネルデータ: エンティティ数
-N_PERIODS = 10       # パネルデータ: 期間数
+N_OLS = 300  # OLS / Logit / Probit / Lasso / Ridge
+N_ENTITIES = 10  # パネルデータ: エンティティ数
+N_PERIODS = 10  # パネルデータ: 期間数
 N_PANEL = N_ENTITIES * N_PERIODS  # FE / RE
-N_IV = 400           # IV (2SLS)
-N_TOBIT = 300        # Tobit
-N_HECKMAN = 600      # Heckman
-N_RDD = 1000         # RDD
-N_DESC = 500         # 記述統計 / 相関行列
+N_IV = 400  # IV (2SLS)
+N_TOBIT = 300  # Tobit
+N_HECKMAN = 600  # Heckman
+N_RDD = 1000  # RDD
+N_DESC = 500  # 記述統計 / 相関行列
 
 
 # ---------------------------------------------------------------------------
