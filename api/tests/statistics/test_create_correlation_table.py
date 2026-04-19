@@ -1,5 +1,7 @@
 """相関係数テーブル作成APIのテスト"""
 
+import math
+
 import polars as pl
 import pytest
 from fastapi import status
@@ -55,8 +57,9 @@ def _assert_corr_table_matches_gold(df: pl.DataFrame, case_id: str) -> None:
             actual = df[col_name].to_list()[row_idx]
             expected_value = expected["rounded_matrix"][row_idx][col_idx]
             if expected_value is None:
-                assert actual is None, (
-                    f"expected null at ({row_name}, {col_name}) but got {actual}"
+                assert actual is None or math.isnan(actual), (
+                    "expected null at "
+                    f"({row_name}, {col_name}) but got {actual}"
                 )
             else:
                 assert actual == pytest.approx(expected_value, abs=1e-8)
@@ -124,7 +127,7 @@ def test_create_correlation_table_success_kendall(client, tables_store):
 
 
 def test_create_correlation_table_success_lower_triangle(client, tables_store):
-    """lowerTriangleOnly=True のとき上三角部分が null になる"""
+    """lowerTriangleOnly=True の行列が gold JSON と一致する"""
     payload = {
         "tableName": _TABLE,
         "columnNames": ["A", "B", "C"],
@@ -138,21 +141,7 @@ def test_create_correlation_table_success_lower_triangle(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
 
     df = tables_store.get_table(_NEW_TABLE).table
-
-    # 行 0（A）: 対角 = 1.0, B列 = null, C列 = null
-    assert df["A"].to_list()[0] == pytest.approx(1.0)
-    assert df["B"].to_list()[0] is None
-    assert df["C"].to_list()[0] is None
-
-    # 行 1（B）: A列 = corr(B,A), 対角 = 1.0, C列 = null
-    assert df["A"].to_list()[1] is not None
-    assert df["B"].to_list()[1] == pytest.approx(1.0)
-    assert df["C"].to_list()[1] is None
-
-    # 行 2（C）: A列 = corr(C,A), B列 = corr(C,B), 対角 = 1.0
-    assert df["A"].to_list()[2] is not None
-    assert df["B"].to_list()[2] is not None
-    assert df["C"].to_list()[2] == pytest.approx(1.0)
+    _assert_corr_table_matches_gold(df, "corr_abc_lower_triangle_pairwise")
 
 
 def test_create_correlation_table_success_decimal_places(client, tables_store):
@@ -557,10 +546,8 @@ def test_create_correlation_table_constant_column_does_not_raise(
 
     assert response.status_code == status.HTTP_200_OK
     assert data["result"]["tableName"] == _NEW_TABLE
-    # 対角は 1.0（直接設定のため NaN にならない）
     df = tables_store.get_table(_NEW_TABLE).table
-    assert df["Const"].to_list()[0] == pytest.approx(1.0)
-    assert df["Vary"].to_list()[1] == pytest.approx(1.0)
+    _assert_corr_table_matches_gold(df, "corr_constant_column")
 
 
 def test_create_correlation_table_listwise_spearman_with_nulls(
@@ -671,13 +658,9 @@ def test_create_correlation_table_five_columns(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
 
     df = tables_store.get_table(_NEW_TABLE).table
+    _assert_corr_table_matches_gold(df, "corr_v1_v5_large_matrix")
     assert df.shape == (5, 6)  # 5 変数 × (variable_name + 5 列)
     assert df["variable_name"].to_list() == cols
-    # 対角はすべて 1.0
-    for i, col in enumerate(cols):
-        assert df[col].to_list()[i] == pytest.approx(1.0), (
-            f"対角 ({col},{col}) が 1.0 ではない"
-        )
 
 
 # -----------------------------------------------------------
@@ -706,11 +689,10 @@ def test_create_correlation_table_japanese_table_and_column_names(
     assert data["result"]["tableName"] == new_jp_table
 
     df = tables_store.get_table(new_jp_table).table
+    _assert_corr_table_matches_gold(df, "corr_japanese_names")
     assert df["variable_name"].to_list() == ["変数A", "変数B"]
     assert df.schema["変数A"] == pl.Float64
     assert df.schema["変数B"] == pl.Float64
-    # 変数A と 変数B は完全正相関
-    assert df["変数B"].to_list()[0] == pytest.approx(1.0)
 
 
 def test_create_correlation_table_table_name_with_leading_trailing_spaces(

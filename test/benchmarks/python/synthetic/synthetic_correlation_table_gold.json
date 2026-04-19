@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-04-19T11:11:00.846577+00:00",
+    "generated_at": "2026-04-19T11:35:30.762422+00:00",
     "python_version": "3.14.3",
     "libraries": {
       "scipy": "1.17.1"
@@ -540,6 +540,75 @@
             ]
           ],
           "null_positions": [],
+          "diagonal_value": 1.0
+        }
+      },
+      {
+        "case_id": "corr_abc_lower_triangle_pairwise",
+        "table_name": "synthetic_statistics_core",
+        "column_names": [
+          "A",
+          "B",
+          "C"
+        ],
+        "method": "pearson",
+        "missing_handling": "pairwise",
+        "decimal_places": 3,
+        "lower_triangle_only": true,
+        "expected": {
+          "variable_order": [
+            "A",
+            "B",
+            "C"
+          ],
+          "raw_matrix": [
+            [
+              1.0,
+              null,
+              null
+            ],
+            [
+              1.0,
+              1.0,
+              null
+            ],
+            [
+              0.2896176395143011,
+              0.2896176395143011,
+              1.0
+            ]
+          ],
+          "rounded_matrix": [
+            [
+              1.0,
+              null,
+              null
+            ],
+            [
+              1.0,
+              1.0,
+              null
+            ],
+            [
+              0.29,
+              0.29,
+              1.0
+            ]
+          ],
+          "null_positions": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ],
           "diagonal_value": 1.0
         }
       },

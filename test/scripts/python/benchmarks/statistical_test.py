@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 import pandas as pd
 import scipy.stats as spstats
@@ -43,20 +45,20 @@ def bench_statistical_test(df: pd.DataFrame) -> dict:
     group_b = _group(df, "StatTestTableB")
     group_c = _group(df, "StatTestTableC")
 
-    t1 = spstats.ttest_1samp(group_a, popmean=50.0)
+    t1: Any = spstats.ttest_1samp(group_a, popmean=50.0)
     t1_ci = spstats.ttest_1samp(
         group_a,
         popmean=50.0,
         alternative="two-sided",
     ).confidence_interval(confidence_level=0.95)
 
-    t2 = spstats.ttest_ind(group_a, group_b, equal_var=True)
+    t2: Any = spstats.ttest_ind(group_a, group_b, equal_var=True)
     t2_ci = t2.confidence_interval(confidence_level=0.95)
 
-    tw = spstats.ttest_ind(group_a, group_b, equal_var=False)
+    tw: Any = spstats.ttest_ind(group_a, group_b, equal_var=False)
     tw_ci = tw.confidence_interval(confidence_level=0.95)
 
-    tp = spstats.ttest_rel(group_a, group_b, alternative="two-sided")
+    tp: Any = spstats.ttest_rel(group_a, group_b, alternative="two-sided")
     tp_ci = tp.confidence_interval(confidence_level=0.95)
 
     z1_stat, z1_p = sm_ztest(group_a, value=50, alternative="two-sided")
@@ -81,7 +83,7 @@ def bench_statistical_test(df: pd.DataFrame) -> dict:
         float(spstats.f.sf(f_stat, len(group_a) - 1, len(group_b) - 1)),
     )
 
-    anova = spstats.f_oneway(group_a, group_b, group_c)
+    anova: Any = spstats.f_oneway(group_a, group_b, group_c)
     all_data = np.concatenate([group_a, group_b, group_c])
     grand_mean = float(np.mean(all_data))
     ss_between = float(

@@ -1,4 +1,5 @@
 import math
+from typing import Any
 
 import pandas as pd
 import scipy.stats as spstats
@@ -19,10 +20,13 @@ def _corr(a: pd.Series, b: pd.Series, method: str) -> float | None:
     x = valid.iloc[:, 0].to_numpy(dtype=float)
     y = valid.iloc[:, 1].to_numpy(dtype=float)
     if method == "pearson":
-        return float(spstats.pearsonr(x, y).statistic)
+        pearson_result: Any = spstats.pearsonr(x, y)
+        return float(pearson_result.statistic)
     if method == "spearman":
-        return float(spstats.spearmanr(x, y).statistic)
-    return float(spstats.kendalltau(x, y).statistic)
+        spearman_result: Any = spstats.spearmanr(x, y)
+        return float(spearman_result.statistic)
+    kendall_result: Any = spstats.kendalltau(x, y)
+    return float(kendall_result.statistic)
 
 
 def _matrix(
@@ -198,6 +202,16 @@ def bench_correlation_table(
             "expected": _matrix(
                 core, ["A", "B", "C", "D"], "pearson", 10, "pairwise", False
             ),
+        },
+        {
+            "case_id": "corr_abc_lower_triangle_pairwise",
+            "table_name": "synthetic_statistics_core",
+            "column_names": ["A", "B", "C"],
+            "method": "pearson",
+            "missing_handling": "pairwise",
+            "decimal_places": 3,
+            "lower_triangle_only": True,
+            "expected": _matrix(core, ["A", "B", "C"], "pearson", 3, "pairwise", True),
         },
         {
             "case_id": "corr_abc_lower_triangle_listwise",
