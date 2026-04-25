@@ -1,13 +1,16 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { OutputResultFormat } from "@/api/model/outputResultFormat";
+import { RegressionOutputOptionsStatInParentheses } from "@/api/model/regressionOutputOptionsStatInParentheses";
+import {
+  ResultSection,
+  StatItem,
+} from "@/components/molecules/Result/ResultSection";
+import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
+import { cn } from "@/lib/utils/helpers";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
 import { Check, Clipboard, FileDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "@/api/endpoints";
-import { OutputResultRequestFormat } from "@/api/model/outputResultRequestFormat";
-import { OutputResultRequestStatInParentheses } from "@/api/model/outputResultRequestStatInParentheses";
-import { cn } from "@/lib/utils/helpers";
-import type { LinearRegressionResultType } from "@/types/commonTypes";
-import { ResultSection, StatItem } from "@/components/molecules/Result/ResultSection";
-import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 
 type RegressionResultProps = {
   result: LinearRegressionResultType;
@@ -43,9 +46,12 @@ export const RegressionResult = ({
     setIsQuickCopying(true);
     try {
       const response = await getEconomiconAppAPI().outputResult({
+        resultType: "regression",
         resultIds: [result.resultId],
-        format: OutputResultRequestFormat.markdown,
-        statInParentheses: OutputResultRequestStatInParentheses.se,
+        format: OutputResultFormat.markdown,
+        options: {
+          statInParentheses: RegressionOutputOptionsStatInParentheses.se,
+        },
       });
       if (response.code === "OK" && response.result) {
         await navigator.clipboard.writeText(response.result.content);
