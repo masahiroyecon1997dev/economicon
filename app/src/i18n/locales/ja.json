@@ -484,6 +484,7 @@
     "Transform": "変換列を追加",
     "AddDummy": "ダミー変数を追加",
     "AddLagLead": "ラグ・リード列を追加",
+    "AddPanelTime": "パネル時間列を追加",
     "AddSimulation": "シミュレーション列を追加",
     "Filter": "フィルタ",
     "Delete": "列を削除",
@@ -646,6 +647,22 @@
     "GroupColumns": "グループ化列（省略可能）",
     "NewColumnName": "新しい列名",
     "NewColumnNamePlaceholder": "例: lag_1_value",
+    "Submit": "追加"
+  },
+  "AddPanelTimeColumnForm": {
+    "Title": "パネル時間列を追加",
+    "IdColumn": "個体ID列",
+    "NewColumnName": "新しい列名",
+    "NewColumnNamePlaceholder": "例: time_firm_id",
+    "StartValue": "開始値",
+    "StartValuePlaceholder": "例: 1",
+    "StartValueError": "数値を入力してください。",
+    "Step": "増分",
+    "StepPlaceholder": "例: 1",
+    "StepError": "0 以外の数値を入力してください。",
+    "StepNumberError": "数値を入力してください。",
+    "AddPosition": "追加位置",
+    "AddPositionDescription": "追加位置は {{columnName}} の右隣に固定されます。",
     "Submit": "追加"
   },
   "ColumnOperationForm": {

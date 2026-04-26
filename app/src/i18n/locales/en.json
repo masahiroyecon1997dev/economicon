@@ -484,6 +484,7 @@
     "Transform": "Add Transform Column",
     "AddDummy": "Add Dummy Column",
     "AddLagLead": "Add Lag/Lead Column",
+    "AddPanelTime": "Add Panel Time Column",
     "AddSimulation": "Add Simulation Column",
     "Filter": "Filter",
     "Delete": "Delete Column",
@@ -646,6 +647,22 @@
     "GroupColumns": "Group columns (optional)",
     "NewColumnName": "New column name",
     "NewColumnNamePlaceholder": "e.g., lag_1_value",
+    "Submit": "Add"
+  },
+  "AddPanelTimeColumnForm": {
+    "Title": "Add Panel Time Column",
+    "IdColumn": "Entity ID column",
+    "NewColumnName": "New column name",
+    "NewColumnNamePlaceholder": "e.g., time_firm_id",
+    "StartValue": "Start value",
+    "StartValuePlaceholder": "e.g., 1",
+    "StartValueError": "Enter a numeric value.",
+    "Step": "Step",
+    "StepPlaceholder": "e.g., 1",
+    "StepError": "Enter a non-zero numeric value.",
+    "StepNumberError": "Enter a numeric value.",
+    "AddPosition": "Insert position",
+    "AddPositionDescription": "The new column will be inserted immediately to the right of {{columnName}}.",
     "Submit": "Add"
   },
   "ColumnOperationForm": {

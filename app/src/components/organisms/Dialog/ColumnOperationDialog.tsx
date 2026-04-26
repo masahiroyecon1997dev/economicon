@@ -4,13 +4,10 @@
  * ColumnContextMenu からの操作イベントを受け取り、
  * 対応するフォームコンポーネントを BaseDialog で表示する。
  */
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import type { ColumnType } from "@/types/commonTypes";
 import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
-import type { ColumnOperation } from "@/components/organisms/Table/ColumnContextMenu";
 import { AddDummyColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddDummyColumnForm";
 import { AddLagLeadColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddLagLeadColumnForm";
+import { AddPanelTimeColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddPanelTimeColumnForm";
 import { AddSimulationColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddSimulationColumnForm";
 import { CastColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/CastColumnForm";
 import { DeleteColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/DeleteColumnForm";
@@ -18,6 +15,10 @@ import { DuplicateColumnForm } from "@/components/organisms/Dialog/ColumnOperati
 import { FilterColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/FilterColumnForm";
 import { RenameColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/RenameColumnForm";
 import { TransformColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/TransformColumnForm";
+import type { ColumnOperation } from "@/components/organisms/Table/ColumnContextMenu";
+import type { ColumnType } from "@/types/commonTypes";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type ColumnOperationDialogProps = {
   open: boolean;
@@ -47,6 +48,8 @@ const getDialogTitle = (
       return t("AddDummyColumnForm.Title");
     case "addLagLead":
       return t("AddLagLeadColumnForm.Title");
+    case "addPanelTime":
+      return t("AddPanelTimeColumnForm.Title");
     case "addSimulation":
       return t("AddSimulationColumnForm.Title");
     case "filter":
@@ -76,6 +79,8 @@ const getSubmitLabel = (
       return t("AddDummyColumnForm.Submit");
     case "addLagLead":
       return t("AddLagLeadColumnForm.Submit");
+    case "addPanelTime":
+      return t("AddPanelTimeColumnForm.Submit");
     case "addSimulation":
       return t("AddSimulationColumnForm.Submit");
     case "filter":
@@ -92,6 +97,7 @@ const getMaxWidth = (operation: ColumnOperation | null): "md" | "lg" => {
     case "transform":
     case "addDummy":
     case "addLagLead":
+    case "addPanelTime":
     case "addSimulation":
     case "filter":
       return "lg";
@@ -151,6 +157,8 @@ export const ColumnOperationDialog = ({
         return <AddDummyColumnForm {...formProps} />;
       case "addLagLead":
         return <AddLagLeadColumnForm {...formProps} />;
+      case "addPanelTime":
+        return <AddPanelTimeColumnForm {...formProps} />;
       case "addSimulation":
         return <AddSimulationColumnForm {...formProps} />;
       case "filter":
