@@ -19,9 +19,7 @@ from economicon.services.data.dependencies import (
     TablesStoreDep,
 )
 from economicon.services.operation import run_operation
-from economicon.services.selection_models.heckman_regression import (
-    HeckmanRegression,
-)
+from economicon.services.selection_models import HeckmanRegression
 from economicon.utils import create_success_response
 
 router = APIRouter(
