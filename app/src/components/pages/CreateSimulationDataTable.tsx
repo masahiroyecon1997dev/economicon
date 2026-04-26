@@ -140,7 +140,7 @@ export const CreateSimulationDataTable = () => {
               col.dataType === "fixed"
                 ? { value: Number(col.fixedValue) }
                 : col.distributionParams!,
-            ) as SimulationColumnConfig["distribution"],
+            ),
           }),
         );
 

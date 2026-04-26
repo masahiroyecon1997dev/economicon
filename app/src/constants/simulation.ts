@@ -4,6 +4,7 @@
  * AddSimulationColumnForm / SimulationColumnConfig の両方で使用する。
  * パラメータ名は API 直接名（loc, scale, n, p など）で統一。
  */
+import type { DistributionConfig } from "@/api/model";
 import type { DistributionType } from "@/types/commonTypes";
 import { z } from "zod";
 
@@ -226,14 +227,94 @@ export const DIST_PARAM_SCHEMAS: Record<string, () => z.ZodTypeAny> = {
   value: anyNum,
 };
 
+type DistributionByType<T extends DistributionType> = Extract<
+  DistributionConfig,
+  { type: T }
+>;
+
+type DistributionBuilderMap = {
+  [K in DistributionType]: (
+    params: Record<string, number>,
+  ) => DistributionByType<K>;
+};
+
+const DISTRIBUTION_BUILDERS = {
+  uniform: (params) => ({
+    type: "uniform",
+    low: params.low,
+    high: params.high,
+  }),
+  exponential: (params) => ({
+    type: "exponential",
+    scale: params.scale,
+  }),
+  normal: (params) => ({
+    type: "normal",
+    loc: params.loc,
+    scale: params.scale,
+  }),
+  gamma: (params) => ({
+    type: "gamma",
+    shape: params.shape,
+    scale: params.scale,
+  }),
+  beta: (params) => ({
+    type: "beta",
+    a: params.a,
+    b: params.b,
+  }),
+  weibull: (params) => ({
+    type: "weibull",
+    a: params.a,
+    scale: params.scale,
+  }),
+  lognormal: (params) => ({
+    type: "lognormal",
+    mean: params.mean,
+    sigma: params.sigma,
+  }),
+  binomial: (params) => ({
+    type: "binomial",
+    n: params.n,
+    p: params.p,
+  }),
+  bernoulli: (params) => ({
+    type: "bernoulli",
+    p: params.p,
+  }),
+  poisson: (params) => ({
+    type: "poisson",
+    lam: params.lam,
+  }),
+  geometric: (params) => ({
+    type: "geometric",
+    p: params.p,
+  }),
+  hypergeometric: (params) => ({
+    type: "hypergeometric",
+    populationSize: params.populationSize,
+    successCount: params.successCount,
+    sampleSize: params.sampleSize,
+  }),
+  negative_binomial: (params) => ({
+    type: "negative_binomial",
+    n: params.n,
+    p: params.p,
+  }),
+  sequence: (params) => ({
+    type: "sequence",
+    start: params.start,
+    step: params.step,
+  }),
+  fixed: (params) => ({
+    type: "fixed",
+    value: params.value,
+  }),
+} satisfies DistributionBuilderMap;
+
 /** API リクエスト用分布オブジェクトを組み立てる */
-export const buildDistributionFromParams = (
-  type: DistributionType,
+export const buildDistributionFromParams = <T extends DistributionType>(
+  type: T,
   params: Record<string, number>,
-) =>
-  Object.assign(
-    { type },
-    Object.fromEntries(
-      DIST_PARAMS[type].map((param) => [param, params[param]]),
-    ),
-  );
+): DistributionByType<T> =>
+  DISTRIBUTION_BUILDERS[type](params) as DistributionByType<T>;
