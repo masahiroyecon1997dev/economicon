@@ -3,7 +3,7 @@
 from fastapi import status
 
 from economicon.services.data.analysis_result_store import AnalysisResultStore
-from tests.regressions.heckman.conftest import (
+from tests.selection_models.heckman.conftest import (
     TABLE_HECKMAN,
     URL_HECKMAN,
 )

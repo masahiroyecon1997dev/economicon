@@ -39,7 +39,6 @@ class RegressionMethodType(StrEnum):
     WLS = "wls"
     GLS = "gls"
     FGLS = "fgls"
-    HECKMAN = "heckman"
 
 
 class StandardErrorMethodType(StrEnum):
