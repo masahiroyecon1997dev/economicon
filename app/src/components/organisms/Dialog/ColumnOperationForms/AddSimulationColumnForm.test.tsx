@@ -20,7 +20,6 @@ import {
 } from "@/constants/simulation";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { act } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
@@ -54,6 +53,12 @@ const defaultProps = {
   formId: "sim-col-form",
   onIsSubmittingChange: vi.fn(),
   onSuccess: vi.fn(),
+};
+
+const submitForm = () => {
+  const form = document.getElementById("sim-col-form");
+  expect(form).toBeInstanceOf(HTMLFormElement);
+  fireEvent.submit(form as HTMLFormElement);
 };
 
 beforeEach(() => {
@@ -99,9 +104,7 @@ describe("AddSimulationColumnForm", () => {
         const radio = screen.getByRole("radio", {
           name: new RegExp(`AddSimulationColumnForm\\.${distType}`, "i"),
         });
-        await act(async () => {
-          radio.click();
-        });
+        fireEvent.click(radio);
 
         for (const param of DIST_PARAMS[distType]) {
           await waitFor(() => {
@@ -133,15 +136,16 @@ describe("AddSimulationColumnForm", () => {
     });
 
     it("乱数シードに負数を入力してサブミット → ErrorAlert に ValidationMessages.RandomSeedRange が表示される", async () => {
+      const user = userEvent.setup();
       render(<AddSimulationColumnForm {...defaultProps} />);
 
       const seedInput = screen.getByRole("spinbutton", {
         name: /Common\.RandomSeed/i,
       });
-      fireEvent.change(seedInput, { target: { value: "-1" } });
+      await user.clear(seedInput);
+      await user.type(seedInput, "-1");
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -151,15 +155,16 @@ describe("AddSimulationColumnForm", () => {
     });
 
     it("乱数シードに小数を入力してサブミット → ErrorAlert に ValidationMessages.RandomSeedRange が表示される", async () => {
+      const user = userEvent.setup();
       render(<AddSimulationColumnForm {...defaultProps} />);
 
       const seedInput = screen.getByRole("spinbutton", {
         name: /Common\.RandomSeed/i,
       });
-      fireEvent.change(seedInput, { target: { value: "1.5" } });
+      await user.clear(seedInput);
+      await user.type(seedInput, "1.5");
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -175,8 +180,7 @@ describe("AddSimulationColumnForm", () => {
 
       render(<AddSimulationColumnForm {...defaultProps} />);
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(defaultProps.onSuccess).toHaveBeenCalledWith([
@@ -195,9 +199,7 @@ describe("AddSimulationColumnForm", () => {
       const radio = screen.getByRole("radio", {
         name: /AddSimulationColumnForm\.sequence/i,
       });
-      await act(async () => {
-        radio.click();
-      });
+      fireEvent.click(radio);
 
       await waitFor(() => {
         expect(
@@ -216,8 +218,7 @@ describe("AddSimulationColumnForm", () => {
       await user.clear(stepInput as HTMLInputElement);
       await user.type(stepInput as HTMLInputElement, "-2");
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(mockApi.addSimulationColumn).toHaveBeenCalledWith(
@@ -244,8 +245,7 @@ describe("AddSimulationColumnForm", () => {
 
       render(<AddSimulationColumnForm {...defaultProps} />);
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -261,8 +261,7 @@ describe("AddSimulationColumnForm", () => {
 
       render(<AddSimulationColumnForm {...defaultProps} />);
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(screen.getByText("接続タイムアウト")).toBeInTheDocument();
