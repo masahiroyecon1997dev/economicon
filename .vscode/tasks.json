@@ -27,7 +27,7 @@
       "type": "shell",
       "command": "cd app; pnpm run gen:all",
       "label": "Generate API Client (OpenAPI & Types)",
-      "detail": "Runs pnpm gen:all to regenerate openapi.json and Orval clients",
+      "detail": "Runs pnpm gen:all to regenerate openapi.json and clean/rebuild Orval clients",
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
