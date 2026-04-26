@@ -127,6 +127,10 @@ def test_fetch_plot_data_table_not_found(client, tables_store):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert (
+        response_data["message"]
+        == "tableName 'no_such_table'は存在しません。"
+    )
 
 
 def test_fetch_plot_data_column_not_found(client, tables_store):
@@ -137,11 +141,23 @@ def test_fetch_plot_data_column_not_found(client, tables_store):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
+    assert (
+        response_data["message"]
+        == "columnNames 'no_such_col'は存在しません。"
+    )
 
 
 def test_fetch_plot_data_empty_column_names(client, tables_store):
     """異常系: columnNames が空リスト → 422"""
     payload = {**_BASE_PAYLOAD, "columnNames": []}
+    response = client.post("/api/table/fetch-plot-data", json=payload)
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+def test_fetch_plot_data_too_many_columns(client, tables_store):
+    """異常系: columnNames が 51 列（max_length=50 超過）→ 422"""
+    payload = {**_BASE_PAYLOAD, "columnNames": [f"col_{i}" for i in range(51)]}
     response = client.post("/api/table/fetch-plot-data", json=payload)
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
