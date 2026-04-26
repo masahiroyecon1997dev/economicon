@@ -58,25 +58,6 @@ from economicon.schemas.distribution_params import (
     UniformParams,
     WeibullParams,
 )
-from economicon.schemas.entities import (
-    ClusteredStandardError,
-    FEParams,
-    HacStandardError,
-    InstrumentalVariablesParams,
-    LassoParams,
-    LogitParams,
-    NonRobustStandardError,
-    OLSParams,
-    PanelIvParams,
-    ProbitParams,
-    REParams,
-    RidgeParams,
-    RobustStandardError,
-    SimulationColumnConfig,
-    SortInstruction,
-    StandardErrorSettings,
-    TobitParams,
-)
 from economicon.schemas.enums import (
     AlternativeHypothesis,
     ConfidenceIntervalStatisticsType,
@@ -97,6 +78,21 @@ from economicon.schemas.enums import (
 )
 from economicon.schemas.heckman import HeckmanResult as HeckmanResult
 from economicon.schemas.rdd import RDDResult as RDDResult
+from economicon.schemas.regression_params import (
+    FEParams,
+    FGLSParams,
+    GLSParams,
+    InstrumentalVariablesParams,
+    LassoParams,
+    LogitParams,
+    OLSParams,
+    PanelIvParams,
+    ProbitParams,
+    REParams,
+    RidgeParams,
+    TobitParams,
+    WLSParams,
+)
 from economicon.schemas.regressions import (
     AddDiagnosticColumnsRequestBody,
     AddDiagnosticColumnsResult,
@@ -129,9 +125,21 @@ from economicon.schemas.settings import (
     GetSettingsRequestBody,
     GetSettingsResult,
     UpdateSettingsRequest,
+    UpdateSettingsRequestBody,
     UpdateSettingsResult,
 )
+from economicon.schemas.shared_entities import (
+    SimulationColumnConfig,
+    SortInstruction,
+)
 from economicon.schemas.shutdown import ShutdownResult
+from economicon.schemas.standard_error_settings import (
+    ClusteredStandardError,
+    HacStandardError,
+    NonRobustStandardError,
+    RobustStandardError,
+    StandardErrorSettings,
+)
 from economicon.schemas.statistics import (
     ConfidenceIntervalRequestBody,
     ConfidenceIntervalResult,
@@ -225,6 +233,9 @@ __all__ = [
     "REParams",
     "PanelIvParams",
     "TobitParams",
+    "WLSParams",
+    "GLSParams",
+    "FGLSParams",
     "StandardErrorSettings",
     "NonRobustStandardError",
     "RobustStandardError",
@@ -298,6 +309,7 @@ __all__ = [
     "AppSettings",
     "GetSettingsRequestBody",
     "GetSettingsResult",
+    "UpdateSettingsRequestBody",
     "UpdateSettingsRequest",
     "UpdateSettingsResult",
     # Shutdown

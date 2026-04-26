@@ -6,8 +6,8 @@ from pydantic import BeforeValidator, Field, model_validator
 
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import BaseRequest, BaseResult
-from economicon.schemas.entities import StandardErrorSettings
 from economicon.schemas.enums import MissingValueHandlingType
+from economicon.schemas.standard_error_settings import StandardErrorSettings
 from economicon.schemas.types import (
     ColumnName,
     ResultDescription,

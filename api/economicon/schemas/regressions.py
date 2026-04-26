@@ -9,7 +9,10 @@ from economicon.schemas.common import (
     BaseRequest,
     BaseResult,
 )
-from economicon.schemas.entities import (
+from economicon.schemas.enums import (
+    MissingValueHandlingType,
+)
+from economicon.schemas.regression_params import (
     FEParams,
     FGLSParams,
     GLSParams,
@@ -17,13 +20,10 @@ from economicon.schemas.entities import (
     PanelIvParams,
     RegressionParams,
     REParams,
-    StandardErrorSettings,
     WLSParams,
 )
-from economicon.schemas.enums import (
-    MissingValueHandlingType,
-)
 from economicon.schemas.schema_validators import check_column_overlap
+from economicon.schemas.standard_error_settings import StandardErrorSettings
 from economicon.schemas.types import (
     ColumnName,
     ResultDescription,

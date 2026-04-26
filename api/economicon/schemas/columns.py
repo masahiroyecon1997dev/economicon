@@ -6,11 +6,14 @@ from pydantic import Field, StringConstraints, field_validator, model_validator
 
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import BaseRequest, BaseResult
-from economicon.schemas.entities import SimulationColumnConfig, SortInstruction
 from economicon.schemas.enums import (
     DistributionType,
     DummyMode,
     NullStrategy,
+)
+from economicon.schemas.shared_entities import (
+    SimulationColumnConfig,
+    SortInstruction,
 )
 from economicon.schemas.types import (
     ColumnName,

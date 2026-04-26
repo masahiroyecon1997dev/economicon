@@ -7,12 +7,12 @@ from pydantic_core import PydanticCustomError
 
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import BaseRequest, BaseResult
-from economicon.schemas.entities import SimulationColumnConfig
 from economicon.schemas.enums import (
     FilterOperatorType,
     JoinType,
     LogicalOperatorType,
 )
+from economicon.schemas.shared_entities import SimulationColumnConfig
 from economicon.schemas.types import (
     ColumnName,
     NewTableName,

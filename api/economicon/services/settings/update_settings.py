@@ -1,6 +1,6 @@
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.schemas import UpdateSettingsRequest
+from economicon.schemas import UpdateSettingsRequestBody
 from economicon.services.data.settings_store import SettingsStore
 from economicon.utils import ProcessingError
 
@@ -15,7 +15,7 @@ class UpdateSettings:
 
     def __init__(
         self,
-        body: UpdateSettingsRequest,
+        body: UpdateSettingsRequestBody,
         settings_store: SettingsStore,
     ):
         self.settings_store = settings_store

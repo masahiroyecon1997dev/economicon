@@ -5,7 +5,7 @@ from economicon.schemas import (
     COMMON_ERROR_RESPONSES,
     GetSettingsResult,
     SuccessResponse,
-    UpdateSettingsRequest,
+    UpdateSettingsRequestBody,
     UpdateSettingsResult,
 )
 from economicon.services.data.dependencies import SettingsStoreDep
@@ -49,7 +49,7 @@ async def get_settings(
 @router.put("", response_model=SuccessResponse[UpdateSettingsResult])
 async def update_settings(
     request: Request,
-    body: UpdateSettingsRequest,
+    body: UpdateSettingsRequestBody,
     settings_store: SettingsStoreDep,
 ):
     """アプリケーション設定を更新するエンドポイント
@@ -61,7 +61,7 @@ async def update_settings(
     ----------
     request : Request
         FastAPIのリクエストオブジェクト
-    body : UpdateSettingsRequest
+    body : UpdateSettingsRequestBody
         更新するフィールドを含むリクエストボディ（すべて省略可能）
     settings_store : SettingsStoreDep
         依存注入された設定ストア

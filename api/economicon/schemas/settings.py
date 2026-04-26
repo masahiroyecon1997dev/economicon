@@ -71,7 +71,7 @@ class GetSettingsResult(AppSettings):
 # ---------------------------------------------------------------------------
 
 
-class UpdateSettingsRequest(BaseRequest):
+class UpdateSettingsRequestBody(BaseRequest):
     """アプリケーション設定更新リクエスト（すべてのフィールドが省略可能）"""
 
     language: Annotated[
@@ -112,3 +112,7 @@ class UpdateSettingsRequest(BaseRequest):
 
 class UpdateSettingsResult(AppSettings):
     """アプリケーション設定更新レスポンス（更新後の全設定を返す）"""
+
+
+# 後方互換のため旧名を残す
+UpdateSettingsRequest = UpdateSettingsRequestBody
