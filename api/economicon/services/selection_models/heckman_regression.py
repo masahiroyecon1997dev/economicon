@@ -172,36 +172,51 @@ class HeckmanRegression:
 
             # 必要な列のみ選択 + 元行インデックスを付与
             all_cols = list(
-                {
-                    self.selection_column,
-                    self.dependent_variable,
-                    *self.selection_variables,
-                    *self.explanatory_variables,
-                }
+                dict.fromkeys(
+                    [
+                        self.selection_column,
+                        self.dependent_variable,
+                        *self.selection_variables,
+                        *self.explanatory_variables,
+                    ]
+                )
             )
             orig_idx_col = generate_unique_column_name(
                 "__orig_idx__",
                 all_cols,
             )
             df_indexed = df.select(all_cols).with_row_index(orig_idx_col)
-
-            # 欠損値処理
-            if self.missing == "drop":
-                df_clean = df_indexed.drop_nulls()
-            elif self.missing == "raise":
-                null_total = sum(
-                    df_indexed.drop(orig_idx_col).null_count().row(0)
+            step1_cols = list(
+                dict.fromkeys(
+                    [self.selection_column, *self.selection_variables]
                 )
+            )
+            step2_cols = list(
+                dict.fromkeys(
+                    [
+                        self.dependent_variable,
+                        *self.explanatory_variables,
+                    ]
+                )
+            )
+            imr_col = generate_unique_column_name(
+                "__imr__",
+                [orig_idx_col, *all_cols],
+            )
+            df_step1 = df_indexed.select([orig_idx_col, *step1_cols])
+
+            # 欠損値処理（Step 1: selection equation 用の列だけ確認）
+            if self.missing == "drop":
+                df_step1 = df_step1.drop_nulls()
+            elif self.missing == "raise":
+                null_total = sum(df_step1.drop(orig_idx_col).null_count().row(0))
                 if null_total > 0:
                     raise ProcessingError(
                         error_code=ErrorCode.MISSING_VALUES_FOUND,
                         message=_("Missing values found in data"),
                     )
-                df_clean = df_indexed
-            else:
-                df_clean = df_indexed
 
-            if df_clean.height == 0:
+            if df_step1.height == 0:
                 raise ProcessingError(
                     error_code=ErrorCode.NO_VALID_OBSERVATIONS,
                     message=_(
@@ -214,8 +229,8 @@ class HeckmanRegression:
             # Eco-Note: 選択方程式には識別のため常に定数項を付与する。
             # has_const は結果方程式（Step 2）のみ制御する。
             # ============================================================
-            y_sel = df_clean[self.selection_column].to_numpy().astype(float)
-            x_sel_raw = df_clean[self.selection_variables].to_numpy()
+            y_sel = df_step1[self.selection_column].to_numpy().astype(float)
+            x_sel_raw = df_step1[self.selection_variables].to_numpy()
             x_sel = sm.add_constant(x_sel_raw, has_constant="skip")
 
             try:
@@ -237,14 +252,34 @@ class HeckmanRegression:
             # ============================================================
             xb = probit_result.predict(linear=True)
             imr_all = norm.pdf(xb) / norm.cdf(xb)
+            df_step1 = df_step1.with_columns(
+                pl.Series(name=imr_col, values=imr_all)
+            )
 
             # ============================================================
             # Step 2: OLS + IMR（選択サンプルのみ）
             # Eco-Note: IMR は generated regressor であるため
             # 通常の OLS SE は不一致。HC1 robust SE を適用する。
             # ============================================================
-            sel_mask = y_sel.astype(bool)
-            n_selected = int(sel_mask.sum())
+            df_step2 = df_step1.filter(
+                pl.col(self.selection_column).cast(pl.Boolean)
+            ).join(
+                df_indexed.select([orig_idx_col, *step2_cols]),
+                on=orig_idx_col,
+                how="left",
+            )
+
+            if self.missing == "drop":
+                df_step2 = df_step2.drop_nulls(subset=step2_cols)
+            elif self.missing == "raise":
+                null_total = sum(df_step2.select(step2_cols).null_count().row(0))
+                if null_total > 0:
+                    raise ProcessingError(
+                        error_code=ErrorCode.MISSING_VALUES_FOUND,
+                        message=_("Missing values found in data"),
+                    )
+
+            n_selected = df_step2.height
             if n_selected == 0:
                 raise ProcessingError(
                     error_code=ErrorCode.NO_VALID_OBSERVATIONS,
@@ -254,11 +289,9 @@ class HeckmanRegression:
                     ),
                 )
 
-            y_out = df_clean[self.dependent_variable].to_numpy()[sel_mask]
-            x_out_raw = df_clean[self.explanatory_variables].to_numpy()[
-                sel_mask
-            ]
-            imr_selected = imr_all[sel_mask]
+            y_out = df_step2[self.dependent_variable].to_numpy()
+            x_out_raw = df_step2[self.explanatory_variables].to_numpy()
+            imr_selected = df_step2[imr_col].to_numpy()
 
             if self.has_const:
                 x_out_base = sm.add_constant(x_out_raw, has_constant="skip")
@@ -367,9 +400,7 @@ class HeckmanRegression:
 
             # 選択サンプルの元テーブル行インデックス
             # （add_diagnostic_columns での行アライメントに使用）
-            orig_indices = (
-                df_clean[orig_idx_col].to_numpy()[sel_mask].astype(np.int64)
-            )
+            orig_indices = df_step2[orig_idx_col].to_numpy().astype(np.int64)
 
             # Step 1 (Probit) + Step 2 (OLS) を両方 pickle 保存
             raw_model = {
