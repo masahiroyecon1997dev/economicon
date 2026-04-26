@@ -185,6 +185,10 @@ msgstr "{} '{}'は存在しません。"
 msgid "{} '{}' already exists."
 msgstr "{} '{}'は既に存在します。"
 
+#, python-brace-format
+msgid "Table '{}' has too many rows for plotting ({} rows). The maximum is {} rows."
+msgstr "テーブル '{}'のプロット対象行数（{}行）が上限（{}行）を超えています。"
+
 msgid "For uniform distribution, 'low' must be less than 'high'"
 msgstr "一様分布では、'low'は'high'より小さい必要があります"
 

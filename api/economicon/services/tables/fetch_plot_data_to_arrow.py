@@ -11,7 +11,7 @@ from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.schemas import FetchPlotDataRequestBody
 from economicon.services.data.tables_store import TablesStore
-from economicon.utils import ProcessingError
+from economicon.utils import ProcessingError, ValidationError
 from economicon.utils.validators import validate_existence
 
 
@@ -29,6 +29,7 @@ class FetchPlotDataToArrow:
         "table_name": "tableName",
         "column_names": "columnNames",
     }
+    MAX_PLOT_ROWS: ClassVar[int] = 100_000
 
     def __init__(
         self,
@@ -59,6 +60,18 @@ class FetchPlotDataToArrow:
             ),
             target=self.PARAM_NAMES["column_names"],
         )
+        row_count = self.tables_store.get_table_row_count(self.table_name)
+        if row_count > self.MAX_PLOT_ROWS:
+            raise ValidationError(
+                error_code=ErrorCode.VALIDATION_ERROR,
+                message=_(
+                    "Table '{}' has too many rows for plotting"
+                    " ({} rows). The maximum is {} rows."
+                ).format(
+                    self.table_name, row_count, self.MAX_PLOT_ROWS
+                ),
+                target=self.PARAM_NAMES["table_name"],
+            )
 
     def execute(self) -> bytes:
         """

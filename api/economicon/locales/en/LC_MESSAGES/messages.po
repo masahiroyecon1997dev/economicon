@@ -185,6 +185,10 @@ msgstr "{} '{}' does not exist."
 msgid "{} '{}' already exists."
 msgstr "{} '{}' already exists."
 
+#, python-brace-format
+msgid "Table '{}' has too many rows for plotting ({} rows). The maximum is {} rows."
+msgstr "Table '{}' has too many rows for plotting ({} rows). The maximum is {} rows."
+
 #: economicon/utils/validator/statistics_validators.py:40
 msgid "For uniform distribution, 'low' must be less than 'high'"
 msgstr ""

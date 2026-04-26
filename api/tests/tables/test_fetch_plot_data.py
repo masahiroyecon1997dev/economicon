@@ -161,3 +161,31 @@ def test_fetch_plot_data_too_many_columns(client, tables_store):
     response = client.post("/api/table/fetch-plot-data", json=payload)
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+def test_fetch_plot_data_row_count_exceeds_limit(client):
+    """異常系: テーブルの行数が MAX_PLOT_ROWS を超える → 400"""
+    from economicon.services.tables.fetch_plot_data_to_arrow import (
+        FetchPlotDataToArrow,
+    )
+
+    store = TablesStore()
+    store.clear_tables()
+    large_df = pl.DataFrame(
+        {"col_int": range(FetchPlotDataToArrow.MAX_PLOT_ROWS + 1)}
+    )
+    store.store_table(_TABLE_NAME, large_df)
+
+    payload = {**_BASE_PAYLOAD, "columnNames": ["col_int"]}
+    response = client.post("/api/table/fetch-plot-data", json=payload)
+    response_data = response.json()
+
+    store.clear_tables()
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert response_data["message"] == (
+        f"テーブル '{_TABLE_NAME}'のプロット対象行数"
+        f"（{FetchPlotDataToArrow.MAX_PLOT_ROWS + 1}行）"
+        f"が上限（{FetchPlotDataToArrow.MAX_PLOT_ROWS}行）を超えています。"
+    )
