@@ -1,7 +1,7 @@
 """Probit 回帰モデル"""
 
 from economicon.core.enums import ErrorCode
-from economicon.schemas.entities import ProbitParams
+from economicon.schemas.regression_params import ProbitParams
 from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore

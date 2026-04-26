@@ -13,7 +13,9 @@ from scipy import stats as spstats
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.schemas.entities import ClusteredStandardError
+from economicon.schemas.standard_error_settings import (
+    ClusteredStandardError,
+)
 from economicon.services.regressions.common import (
     extract_linearmodels_params,
     extract_statsmodels_params,

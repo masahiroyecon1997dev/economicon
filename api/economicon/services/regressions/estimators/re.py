@@ -1,7 +1,7 @@
 """変量効果 (RE) パネル回帰モデル"""
 
 from economicon.core.enums import ErrorCode
-from economicon.schemas.entities import REParams
+from economicon.schemas.regression_params import REParams
 from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore

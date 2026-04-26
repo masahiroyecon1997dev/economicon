@@ -17,7 +17,7 @@ import polars as pl
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.schemas.entities import (
+from economicon.schemas.standard_error_settings import (
     ClusteredStandardError,
     HacStandardError,
 )
@@ -28,7 +28,9 @@ from economicon.services.regressions.common import (
 from economicon.utils import ProcessingError
 
 if TYPE_CHECKING:
-    from economicon.schemas.entities import StandardErrorSettings
+    from economicon.schemas.standard_error_settings import (
+        StandardErrorSettings,
+    )
 
 # 基本 DID 交差項の内部列名
 _DID_INTERACT_COL = "_did_interact"

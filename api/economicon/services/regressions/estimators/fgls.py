@@ -1,7 +1,7 @@
 """FGLS（実行可能一般化最小二乗法）回帰モデル"""
 
 from economicon.core.enums import ErrorCode
-from economicon.schemas.entities import FGLSParams
+from economicon.schemas.regression_params import FGLSParams
 from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore

@@ -8,7 +8,7 @@ import polars as pl
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
-from economicon.schemas.entities import (
+from economicon.schemas.regression_params import (
     FEParams,
     InstrumentalVariablesParams,
     PanelIvParams,

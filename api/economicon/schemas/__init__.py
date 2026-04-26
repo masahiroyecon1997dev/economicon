@@ -124,7 +124,6 @@ from economicon.schemas.settings import (
     AppSettings,
     GetSettingsRequestBody,
     GetSettingsResult,
-    UpdateSettingsRequest,
     UpdateSettingsRequestBody,
     UpdateSettingsResult,
 )
@@ -310,7 +309,6 @@ __all__ = [
     "GetSettingsRequestBody",
     "GetSettingsResult",
     "UpdateSettingsRequestBody",
-    "UpdateSettingsRequest",
     "UpdateSettingsResult",
     # Shutdown
     "ShutdownResult",

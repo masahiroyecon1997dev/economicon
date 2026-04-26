@@ -6,8 +6,8 @@ from typing import ClassVar
 import numpy as np
 
 from economicon.i18n.translation import gettext as _
-from economicon.schemas.entities import StandardErrorSettings
 from economicon.schemas.regressions import RegressionRequestBody
+from economicon.schemas.standard_error_settings import StandardErrorSettings
 from economicon.services.data.analysis_result import AnalysisResult
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore

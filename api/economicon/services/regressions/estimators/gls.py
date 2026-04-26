@@ -3,8 +3,8 @@
 import polars as pl
 
 from economicon.core.enums import ErrorCode
-from economicon.schemas.entities import GLSParams
 from economicon.schemas.enums import MissingValueHandlingType
+from economicon.schemas.regression_params import GLSParams
 from economicon.schemas.regressions import RegressionRequestBody
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore

@@ -112,7 +112,3 @@ class UpdateSettingsRequestBody(BaseRequest):
 
 class UpdateSettingsResult(AppSettings):
     """アプリケーション設定更新レスポンス（更新後の全設定を返す）"""
-
-
-# 後方互換のため旧名を残す
-UpdateSettingsRequest = UpdateSettingsRequestBody
