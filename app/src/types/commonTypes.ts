@@ -1,3 +1,5 @@
+import type { DistributionParamsType as ApiDistributionType } from "@/api/model";
+
 export type FileType = {
   name: string;
   isFile: boolean;
@@ -32,21 +34,7 @@ export type SelectListType = { value: string; name: string }[];
 
 export type checkInputType = { isError: boolean; message: string };
 
-export type DistributionType =
-  | "uniform"
-  | "exponential"
-  | "normal"
-  | "gamma"
-  | "beta"
-  | "weibull"
-  | "lognormal"
-  | "binomial"
-  | "bernoulli"
-  | "poisson"
-  | "geometric"
-  | "hypergeometric"
-  | "negative_binomial"
-  | "fixed";
+export type DistributionType = ApiDistributionType;
 
 export type SimulationColumnSetting = {
   id: string;

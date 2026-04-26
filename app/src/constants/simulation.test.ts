@@ -1,8 +1,7 @@
-import type { DistributionType } from "@/types/commonTypes";
-import { describe, expect, it } from "vitest";
 import {
   buildDistributionFromParams,
   CONTINUOUS_DIST_TYPES,
+  DETERMINISTIC_DIST_TYPES,
   DISCRETE_DIST_TYPES,
   DIST_PARAM_DEFAULTS,
   DIST_PARAM_LABEL_KEYS,
@@ -10,6 +9,8 @@ import {
   DIST_PARAMS,
   DIST_TYPES,
 } from "@/constants/simulation";
+import type { DistributionType } from "@/types/commonTypes";
+import { describe, expect, it } from "vitest";
 
 // ---------------------------------------------------------------------------
 // 分布タイプ定数
@@ -53,8 +54,16 @@ describe("DIST_TYPES", () => {
     }
   });
 
-  it("test_distTypes_includesFixed", () => {
+  it("test_distTypes_includesDeterministicTypes", () => {
     expect(DIST_TYPES).toContain("fixed");
+    expect(DIST_TYPES).toContain("sequence");
+  });
+});
+
+describe("DETERMINISTIC_DIST_TYPES", () => {
+  it("test_deterministicDistTypes_containsExpectedTypes", () => {
+    const expected: DistributionType[] = ["sequence", "fixed"];
+    expect(DETERMINISTIC_DIST_TYPES).toEqual(expected);
   });
 });
 
@@ -76,6 +85,10 @@ describe("DIST_PARAMS", () => {
 
   it("test_distParams_fixed_hasValue", () => {
     expect(DIST_PARAMS.fixed).toEqual(["value"]);
+  });
+
+  it("test_distParams_sequence_hasStartStep", () => {
+    expect(DIST_PARAMS.sequence).toEqual(["start", "step"]);
   });
 
   it("test_distParams_allTypesHaveAtLeastOneParam", () => {
@@ -110,6 +123,10 @@ describe("DIST_PARAM_DEFAULTS", () => {
 
   it("test_distParamDefaults_binomialHasNAndP", () => {
     expect(DIST_PARAM_DEFAULTS.binomial).toEqual({ n: 10, p: 0.5 });
+  });
+
+  it("test_distParamDefaults_sequenceHasStartAndStep", () => {
+    expect(DIST_PARAM_DEFAULTS.sequence).toEqual({ start: 1, step: 1 });
   });
 
   it("test_distParamDefaults_allTypesHaveDefaultsMatchingParams", () => {
@@ -192,6 +209,16 @@ describe("DIST_PARAM_SCHEMAS", () => {
     });
     it("test_value_nonNumber_isInvalid", () => {
       expect(valid("value", "not_a_number")).toBe(false);
+    });
+  });
+
+  describe("start / step (anyNum)", () => {
+    it("test_start_positive_isValid", () => {
+      expect(valid("start", "1")).toBe(true);
+    });
+
+    it("test_step_negative_isValid", () => {
+      expect(valid("step", "-1")).toBe(true);
     });
   });
 
@@ -322,6 +349,16 @@ describe("buildDistributionFromParams", () => {
     expect(buildDistributionFromParams("fixed", { value: 42 })).toEqual({
       type: "fixed",
       value: 42,
+    });
+  });
+
+  it("test_build_sequence", () => {
+    expect(
+      buildDistributionFromParams("sequence", { start: 1, step: -1 }),
+    ).toEqual({
+      type: "sequence",
+      start: 1,
+      step: -1,
     });
   });
 });

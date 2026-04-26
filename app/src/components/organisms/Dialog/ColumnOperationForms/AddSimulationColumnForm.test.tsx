@@ -11,17 +11,17 @@
  * - API失敗 → ErrorAlert に APIのmessage が表示される
  * - throw → ErrorAlert にエラーメッセージが表示される
  */
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { act } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import { AddSimulationColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddSimulationColumnForm";
 import {
   DIST_PARAM_LABEL_KEYS,
   DIST_PARAMS,
   DIST_TYPES,
 } from "@/constants/simulation";
-import { AddSimulationColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddSimulationColumnForm";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { act } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -183,6 +183,54 @@ describe("AddSimulationColumnForm", () => {
           { name: "price", type: "Float64" },
           { name: "sim_price", type: "Float64" },
         ]);
+      });
+    });
+
+    it("distributionType = sequence で start と step を送信できる", async () => {
+      const user = userEvent.setup();
+      mockApi.addSimulationColumn.mockResolvedValue({ code: "OK", result: {} });
+
+      render(<AddSimulationColumnForm {...defaultProps} />);
+
+      const radio = screen.getByRole("radio", {
+        name: /AddSimulationColumnForm\.sequence/i,
+      });
+      await act(async () => {
+        radio.click();
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("AddSimulationColumnForm.Start"),
+        ).toBeInTheDocument();
+      });
+
+      const startInput = document.getElementById("sim-param-start");
+      const stepInput = document.getElementById("sim-param-step");
+
+      expect(startInput).toBeInstanceOf(HTMLInputElement);
+      expect(stepInput).toBeInstanceOf(HTMLInputElement);
+
+      await user.clear(startInput as HTMLInputElement);
+      await user.type(startInput as HTMLInputElement, "10");
+      await user.clear(stepInput as HTMLInputElement);
+      await user.type(stepInput as HTMLInputElement, "-2");
+
+      const form = document.getElementById("sim-col-form")!;
+      form.dispatchEvent(new Event("submit", { bubbles: true }));
+
+      await waitFor(() => {
+        expect(mockApi.addSimulationColumn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            simulationColumn: expect.objectContaining({
+              distribution: {
+                type: "sequence",
+                start: 10,
+                step: -2,
+              },
+            }),
+          }),
+        );
       });
     });
   });

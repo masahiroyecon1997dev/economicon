@@ -1,16 +1,21 @@
-import { useForm, useStore } from "@tanstack/react-form";
-import { AlertCircle, Dices, Edit2, Hash, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { z } from "zod";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import type { SimulationColumnConfig } from "@/api/model";
 import {
   createSimulationDataTableBodyTableNameMax,
   createSimulationDataTableBodyTableNameRegExp,
 } from "@/api/zod/table/table";
-import { DISTRIBUTION_OPTIONS } from "@/constants/app";
-import { buildDistributionFromParams } from "@/constants/simulation";
+import { Button } from "@/components/atoms/Button/Button";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { RandomSeedField } from "@/components/molecules/Form/RandomSeedField";
+import { SimulationColumnEditDialog } from "@/components/organisms/Dialog/SimulationColumnEditDialog";
+import { PageLayout } from "@/components/templates/PageLayout";
+import {
+  buildDistributionFromParams,
+  DIST_PARAM_LABEL_KEYS,
+  DIST_PARAMS,
+} from "@/constants/simulation";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
@@ -19,13 +24,11 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { SimulationColumnSetting } from "@/types/commonTypes";
-import { Button } from "@/components/atoms/Button/Button";
-import { InputText } from "@/components/atoms/Input/InputText";
-import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
-import { FormField } from "@/components/molecules/Form/FormField";
-import { RandomSeedField } from "@/components/molecules/Form/RandomSeedField";
-import { SimulationColumnEditDialog } from "@/components/organisms/Dialog/SimulationColumnEditDialog";
-import { PageLayout } from "@/components/templates/PageLayout";
+import { useForm, useStore } from "@tanstack/react-form";
+import { AlertCircle, Dices, Edit2, Hash, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 const createSimulationSchema = (t: (key: string) => string) =>
   z.object({
@@ -344,12 +347,7 @@ export const CreateSimulationDataTable = () => {
             <div className="flex flex-col gap-2">
               {columns.map((column) => {
                 const colHasError = hasColumnError(column);
-                const distOption =
-                  column.dataType === "distribution"
-                    ? DISTRIBUTION_OPTIONS.find(
-                        (d) => d.value === column.distributionType,
-                      )
-                    : null;
+                const distributionType = column.distributionType;
 
                 return (
                   <div
@@ -393,9 +391,9 @@ export const CreateSimulationDataTable = () => {
                         </span>
 
                         {/* 分布 / 固定値バッジ */}
-                        {distOption && (
+                        {distributionType && (
                           <span className="rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 text-xs font-medium text-indigo-600 dark:text-indigo-400">
-                            {t(distOption.label)}
+                            {t(`AddSimulationColumnForm.${distributionType}`)}
                           </span>
                         )}
                         {column.dataType === "fixed" && (
@@ -417,11 +415,11 @@ export const CreateSimulationDataTable = () => {
                       <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
                         {column.dataType === "fixed"
                           ? `${t("Common.Constant")} = ${column.fixedValue || "-"}`
-                          : distOption
-                            ? distOption.params
+                          : distributionType
+                            ? DIST_PARAMS[distributionType]
                                 .map(
                                   (p) =>
-                                    `${p} = ${column.distributionParams?.[p] ?? "?"}`,
+                                    `${t(DIST_PARAM_LABEL_KEYS[p])} = ${column.distributionParams?.[p] ?? "?"}`,
                                 )
                                 .join("  /  ")
                             : "-"}

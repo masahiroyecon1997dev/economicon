@@ -4,15 +4,18 @@
  * POST /api/column/add-simulation をコールし、
  * 選択した確率分布からランダム値を持つ列をテーブルに追加する。
  */
-import { useForm, useStore } from "@tanstack/react-form";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { z } from "zod";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import {
   addSimulationColumnBodySimulationColumnColumnNameMax,
   addSimulationColumnBodySimulationColumnColumnNameRegExp,
 } from "@/api/zod/column/column";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { RadioTagGroup } from "@/components/molecules/Field/RadioTagGroup";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { RandomSeedField } from "@/components/molecules/Form/RandomSeedField";
+import { fetchUpdatedColumnList } from "@/components/organisms/Dialog/ColumnOperationForms/fetchUpdatedColumnList";
+import type { ColumnOperationFormPropsType } from "@/components/organisms/Dialog/ColumnOperationForms/types";
 import {
   buildDistributionFromParams,
   DIST_PARAM_LABEL_KEYS,
@@ -27,13 +30,10 @@ import {
 } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import type { DistributionType } from "@/types/commonTypes";
-import { InputText } from "@/components/atoms/Input/InputText";
-import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
-import { RadioTagGroup } from "@/components/molecules/Field/RadioTagGroup";
-import { FormField } from "@/components/molecules/Form/FormField";
-import { RandomSeedField } from "@/components/molecules/Form/RandomSeedField";
-import { fetchUpdatedColumnList } from "@/components/organisms/Dialog/ColumnOperationForms/fetchUpdatedColumnList";
-import type { ColumnOperationFormPropsType } from "@/components/organisms/Dialog/ColumnOperationForms/types";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 // -----------------------------------------------------------------------
 // フォームコンポーネント
@@ -69,6 +69,8 @@ export const AddSimulationColumnForm = ({
       populationSize: "100",
       successCount: "50",
       sampleSize: "10",
+      start: "1",
+      step: "1",
       value: "0",
     },
     onSubmit: async ({ value }) => {

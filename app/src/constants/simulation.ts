@@ -4,65 +4,132 @@
  * AddSimulationColumnForm / SimulationColumnConfig の両方で使用する。
  * パラメータ名は API 直接名（loc, scale, n, p など）で統一。
  */
-import { z } from "zod";
 import type { DistributionType } from "@/types/commonTypes";
+import { z } from "zod";
+
+export type DistributionCategory = "continuous" | "discrete" | "deterministic";
+
+type DistributionDefinition = {
+  value: DistributionType;
+  category: DistributionCategory;
+  params: string[];
+};
+
+const DISTRIBUTION_DEFINITIONS: DistributionDefinition[] = [
+  {
+    value: "uniform",
+    category: "continuous",
+    params: ["low", "high"],
+  },
+  {
+    value: "exponential",
+    category: "continuous",
+    params: ["scale"],
+  },
+  {
+    value: "normal",
+    category: "continuous",
+    params: ["loc", "scale"],
+  },
+  {
+    value: "gamma",
+    category: "continuous",
+    params: ["shape", "scale"],
+  },
+  {
+    value: "beta",
+    category: "continuous",
+    params: ["a", "b"],
+  },
+  {
+    value: "weibull",
+    category: "continuous",
+    params: ["a", "scale"],
+  },
+  {
+    value: "lognormal",
+    category: "continuous",
+    params: ["mean", "sigma"],
+  },
+  {
+    value: "binomial",
+    category: "discrete",
+    params: ["n", "p"],
+  },
+  {
+    value: "bernoulli",
+    category: "discrete",
+    params: ["p"],
+  },
+  {
+    value: "poisson",
+    category: "discrete",
+    params: ["lam"],
+  },
+  {
+    value: "geometric",
+    category: "discrete",
+    params: ["p"],
+  },
+  {
+    value: "hypergeometric",
+    category: "discrete",
+    params: ["populationSize", "successCount", "sampleSize"],
+  },
+  {
+    value: "negative_binomial",
+    category: "discrete",
+    params: ["n", "p"],
+  },
+  {
+    value: "sequence",
+    category: "deterministic",
+    params: ["start", "step"],
+  },
+  {
+    value: "fixed",
+    category: "deterministic",
+    params: ["value"],
+  },
+];
+
+const getDistributionTypesByCategory = (
+  category: DistributionCategory,
+): DistributionType[] =>
+  DISTRIBUTION_DEFINITIONS.filter(
+    (definition) => definition.category === category,
+  ).map((definition) => definition.value);
 
 /** 連続分布タイプ */
-export const CONTINUOUS_DIST_TYPES: DistributionType[] = [
-  "uniform",
-  "exponential",
-  "normal",
-  "gamma",
-  "beta",
-  "weibull",
-  "lognormal",
-];
+export const CONTINUOUS_DIST_TYPES =
+  getDistributionTypesByCategory("continuous");
 
 /** 離散分布タイプ */
-export const DISCRETE_DIST_TYPES: DistributionType[] = [
-  "binomial",
-  "bernoulli",
-  "poisson",
-  "geometric",
-  "hypergeometric",
-  "negative_binomial",
-];
+export const DISCRETE_DIST_TYPES = getDistributionTypesByCategory("discrete");
+
+/** 決定的系列タイプ */
+export const DETERMINISTIC_DIST_TYPES =
+  getDistributionTypesByCategory("deterministic");
+
+export const getDistributionCategory = (
+  distributionType: DistributionType,
+): DistributionCategory =>
+  DISTRIBUTION_DEFINITIONS.find(
+    (definition) => definition.value === distributionType,
+  )?.category ?? "continuous";
 
 /** すべての分布タイプ（表示順） */
-export const DIST_TYPES: DistributionType[] = [
-  "uniform",
-  "exponential",
-  "normal",
-  "gamma",
-  "beta",
-  "weibull",
-  "lognormal",
-  "binomial",
-  "bernoulli",
-  "poisson",
-  "geometric",
-  "hypergeometric",
-  "negative_binomial",
-  "fixed",
-];
+export const DIST_TYPES = DISTRIBUTION_DEFINITIONS.map(
+  (definition) => definition.value,
+);
 
 /** 各分布で使用するパラメータ名（API 直接名） */
-export const DIST_PARAMS: Record<DistributionType, string[]> = {
-  uniform: ["low", "high"],
-  exponential: ["scale"],
-  normal: ["loc", "scale"],
-  gamma: ["shape", "scale"],
-  beta: ["a", "b"],
-  weibull: ["a", "scale"],
-  lognormal: ["mean", "sigma"],
-  binomial: ["n", "p"],
-  bernoulli: ["p"],
-  poisson: ["lam"],
-  geometric: ["p"],
-  hypergeometric: ["populationSize", "successCount", "sampleSize"],
-  negative_binomial: ["n", "p"],
-  fixed: ["value"],
-};
+export const DIST_PARAMS = Object.fromEntries(
+  DISTRIBUTION_DEFINITIONS.map((definition) => [
+    definition.value,
+    definition.params,
+  ]),
+) as Record<DistributionType, string[]>;
 
 /** パラメータの i18n キー */
 export const DIST_PARAM_LABEL_KEYS: Record<string, string> = {
@@ -81,6 +148,8 @@ export const DIST_PARAM_LABEL_KEYS: Record<string, string> = {
   populationSize: "AddSimulationColumnForm.PopulationSize",
   successCount: "AddSimulationColumnForm.SuccessCount",
   sampleSize: "AddSimulationColumnForm.SampleSize",
+  start: "AddSimulationColumnForm.Start",
+  step: "AddSimulationColumnForm.Step",
   value: "AddSimulationColumnForm.Value",
 };
 
@@ -102,6 +171,7 @@ export const DIST_PARAM_DEFAULTS: Record<
   geometric: { p: 0.5 },
   hypergeometric: { populationSize: 20, successCount: 5, sampleSize: 10 },
   negative_binomial: { n: 5, p: 0.5 },
+  sequence: { start: 1, step: 1 },
   fixed: { value: 0 },
 };
 
@@ -151,6 +221,8 @@ export const DIST_PARAM_SCHEMAS: Record<string, () => z.ZodTypeAny> = {
   populationSize: gtZeroInt,
   successCount: gtZeroInt,
   sampleSize: gtZeroInt,
+  start: anyNum,
+  step: anyNum,
   value: anyNum,
 };
 
@@ -158,40 +230,10 @@ export const DIST_PARAM_SCHEMAS: Record<string, () => z.ZodTypeAny> = {
 export const buildDistributionFromParams = (
   type: DistributionType,
   params: Record<string, number>,
-) => {
-  switch (type) {
-    case "uniform":
-      return { type, low: params.low, high: params.high };
-    case "exponential":
-      return { type, scale: params.scale };
-    case "normal":
-      return { type, loc: params.loc, scale: params.scale };
-    case "gamma":
-      return { type, shape: params.shape, scale: params.scale };
-    case "beta":
-      return { type, a: params.a, b: params.b };
-    case "weibull":
-      return { type, a: params.a, scale: params.scale };
-    case "lognormal":
-      return { type, mean: params.mean, sigma: params.sigma };
-    case "binomial":
-      return { type, n: params.n, p: params.p };
-    case "bernoulli":
-      return { type, p: params.p };
-    case "poisson":
-      return { type, lam: params.lam };
-    case "geometric":
-      return { type, p: params.p };
-    case "hypergeometric":
-      return {
-        type,
-        populationSize: params.populationSize,
-        successCount: params.successCount,
-        sampleSize: params.sampleSize,
-      };
-    case "negative_binomial":
-      return { type, n: params.n, p: params.p };
-    case "fixed":
-      return { type, value: params.value };
-  }
-};
+) =>
+  Object.assign(
+    { type },
+    Object.fromEntries(
+      DIST_PARAMS[type].map((param) => [param, params[param]]),
+    ),
+  );
