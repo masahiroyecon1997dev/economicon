@@ -519,6 +519,44 @@ export const FetchDataToArrowBody = zod.object({
 }).describe('データArrow取得リクエスト')
 
 /**
+ * プロット用列指定データを Apache Arrow IPC 形式で返すエンドポイント
+
+グラフ描画に必要な列のみを取得することで、メモリ・転送量を削減する。
+JSON 包装なしで Arrow IPC 形式生バイナリを直接返す。
+メタデータ（tableName / columnNames / totalRows）は
+Arrow スキーマメタデータに埋め込む。
+
+Parameters
+----------
+request : Request
+    FastAPIのリクエストオブジェクト
+body : FetchPlotDataRequestBody
+    tableName / columnNames（1〜50列）
+tables_store : TablesStoreDep
+    テーブルストア依存性
+
+Returns
+-------
+Response
+    Arrow IPC 形式生バイナリ
+ * @summary Fetch Plot Data
+ */
+export const FetchPlotDataHeader = zod.object({
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
+
+
+export const fetchPlotDataBodyColumnNamesMax = 50;
+
+
+
+export const FetchPlotDataBody = zod.object({
+  "tableName": zod.string().min(1).describe('データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。'),
+  "columnNames": zod.array(zod.string().min(1).describe('カラム名')).min(1).max(fetchPlotDataBodyColumnNamesMax).describe('取得する列名のリスト（1〜50列）。重複した列名は無視されます。')
+}).describe('プロット用列指定データ Arrow 取得リクエスト\n\nグラフ描画に必要な列のみを選択して Arrow IPC 形式で返す。\n列を絞ることでメモリ使用量と転送量を削減する。')
+
+/**
  * テーブルフィルタリングを実行するエンドポイント
 
 Parameters

@@ -1723,6 +1723,77 @@
         }
       }
     },
+    "/api/table/fetch-plot-data": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "Fetch Plot Data",
+        "description": "\u30d7\u30ed\u30c3\u30c8\u7528\u5217\u6307\u5b9a\u30c7\u30fc\u30bf\u3092 Apache Arrow IPC \u5f62\u5f0f\u3067\u8fd4\u3059\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u30b0\u30e9\u30d5\u63cf\u753b\u306b\u5fc5\u8981\u306a\u5217\u306e\u307f\u3092\u53d6\u5f97\u3059\u308b\u3053\u3068\u3067\u3001\u30e1\u30e2\u30ea\u30fb\u8ee2\u9001\u91cf\u3092\u524a\u6e1b\u3059\u308b\u3002\nJSON \u5305\u88c5\u306a\u3057\u3067 Arrow IPC \u5f62\u5f0f\u751f\u30d0\u30a4\u30ca\u30ea\u3092\u76f4\u63a5\u8fd4\u3059\u3002\n\u30e1\u30bf\u30c7\u30fc\u30bf\uff08tableName / columnNames / totalRows\uff09\u306f\nArrow \u30b9\u30ad\u30fc\u30de\u30e1\u30bf\u30c7\u30fc\u30bf\u306b\u57cb\u3081\u8fbc\u3080\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : FetchPlotDataRequestBody\n    tableName / columnNames\uff081\u301c50\u5217\uff09\ntables_store : TablesStoreDep\n    \u30c6\u30fc\u30d6\u30eb\u30b9\u30c8\u30a2\u4f9d\u5b58\u6027\n\nReturns\n-------\nResponse\n    Arrow IPC \u5f62\u5f0f\u751f\u30d0\u30a4\u30ca\u30ea",
+        "operationId": "fetch_plot_data",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FetchPlotDataRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u6307\u5b9a\u5217\u306e\u307f\u306e Apache Arrow IPC \u30d5\u30a1\u30a4\u30eb\u5f62\u5f0f\u306e\u751f\u30d0\u30a4\u30ca\u30ea\u3002\u30b9\u30ad\u30fc\u30de\u30e1\u30bf\u30c7\u30fc\u30bf\u306b tableName / columnNames / totalRows \u3092\u542b\u3080\u3002",
+            "content": {
+              "application/vnd.apache.arrow.stream": {}
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/table/filter": {
       "post": {
         "tags": [
@@ -5794,6 +5865,44 @@
         ],
         "title": "FetchDataToJsonResult",
         "description": "\u30c6\u30fc\u30d6\u30eb\u30c7\u30fc\u30bf JSON \u5f62\u5f0f\u53d6\u5f97\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "FetchPlotDataRequestBody": {
+        "properties": {
+          "tableName": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Table Name",
+            "description": "\u30c7\u30fc\u30bf\u3092\u53d6\u5f97\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u540d\u3002\u30ef\u30fc\u30af\u30b9\u30da\u30fc\u30b9\u306b\u5b58\u5728\u3059\u308b\u30c6\u30fc\u30d6\u30eb\u306e\u4e2d\u304b\u3089\u6307\u5b9a\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+            "examples": [
+              "population_data",
+              "\u5e02\u533a\u753a\u6751\u4eba\u53e3\u30c7\u30fc\u30bf"
+            ]
+          },
+          "columnNames": {
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Column Name",
+              "description": "\u30ab\u30e9\u30e0\u540d",
+              "examples": [
+                "population",
+                "\u4eba\u53e3"
+              ]
+            },
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Columnnames",
+            "description": "\u53d6\u5f97\u3059\u308b\u5217\u540d\u306e\u30ea\u30b9\u30c8\uff081\u301c50\u5217\uff09\u3002\u91cd\u8907\u3057\u305f\u5217\u540d\u306f\u7121\u8996\u3055\u308c\u307e\u3059\u3002"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "columnNames"
+        ],
+        "title": "FetchPlotDataRequestBody",
+        "description": "\u30d7\u30ed\u30c3\u30c8\u7528\u5217\u6307\u5b9a\u30c7\u30fc\u30bf Arrow \u53d6\u5f97\u30ea\u30af\u30a8\u30b9\u30c8\n\n\u30b0\u30e9\u30d5\u63cf\u753b\u306b\u5fc5\u8981\u306a\u5217\u306e\u307f\u3092\u9078\u629e\u3057\u3066 Arrow IPC \u5f62\u5f0f\u3067\u8fd4\u3059\u3002\n\u5217\u3092\u7d5e\u308b\u3053\u3068\u3067\u30e1\u30e2\u30ea\u4f7f\u7528\u91cf\u3068\u8ee2\u9001\u91cf\u3092\u524a\u6e1b\u3059\u308b\u3002"
       },
       "FilterCondition": {
         "properties": {

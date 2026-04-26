@@ -28,6 +28,7 @@ import type {
   ExportFileRequestBody,
   FetchDataToArrowRequestBody,
   FetchDataToJsonRequestBody,
+  FetchPlotDataRequestBody,
   FilterRequestBody,
   GetColumnListRequestBody,
   HeckmanRequestBody,
@@ -737,6 +738,41 @@ const fetchDataToArrow = (
     }
 
 /**
+ * プロット用列指定データを Apache Arrow IPC 形式で返すエンドポイント
+
+グラフ描画に必要な列のみを取得することで、メモリ・転送量を削減する。
+JSON 包装なしで Arrow IPC 形式生バイナリを直接返す。
+メタデータ（tableName / columnNames / totalRows）は
+Arrow スキーマメタデータに埋め込む。
+
+Parameters
+----------
+request : Request
+    FastAPIのリクエストオブジェクト
+body : FetchPlotDataRequestBody
+    tableName / columnNames（1〜50列）
+tables_store : TablesStoreDep
+    テーブルストア依存性
+
+Returns
+-------
+Response
+    Arrow IPC 形式生バイナリ
+ * @summary Fetch Plot Data
+ */
+const fetchPlotData = (
+    fetchPlotDataRequestBody: FetchPlotDataRequestBody,
+ options?: SecondParameter<typeof customInstance<Blob>>,) => {
+      return customInstance<Blob>(
+      {url: `/api/table/fetch-plot-data`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: fetchPlotDataRequestBody,
+        responseType: 'blob'
+    },
+      options);
+    }
+
+/**
  * テーブルフィルタリングを実行するエンドポイント
 
 Parameters
@@ -1359,7 +1395,7 @@ const shutdown = (
       options);
     }
 
-return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
+return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,fetchPlotData,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
 export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['healthCheck']>>>
 export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDummyColumn']>>>
 export type DeleteColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteColumn']>>>
@@ -1384,6 +1420,7 @@ export type GetTableListResult = NonNullable<Awaited<ReturnType<ReturnType<typeo
 export type ClearTablesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['clearTables']>>>
 export type FetchDataToJsonResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['fetchDataToJson']>>>
 export type FetchDataToArrowResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['fetchDataToArrow']>>>
+export type FetchPlotDataResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['fetchPlotData']>>>
 export type FilterTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['filterTable']>>>
 export type RegressionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['regression']>>>
 export type AddDiagnosticColumnsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDiagnosticColumns']>>>

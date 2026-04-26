@@ -86,6 +86,7 @@ export * from './fEParamsMethod';
 export * from './fetchDataToArrowRequestBody';
 export * from './fetchDataToJsonRequestBody';
 export * from './fetchDataToJsonResult';
+export * from './fetchPlotDataRequestBody';
 export * from './fGLSParams';
 export * from './fGLSParamsFglsMethod';
 export * from './fGLSParamsMethod';
