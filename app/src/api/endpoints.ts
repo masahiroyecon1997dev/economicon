@@ -85,7 +85,7 @@ import type {
   SuccessResponseTransformColumnResult,
   SuccessResponseUpdateSettingsResult,
   TransformColumnRequestBody,
-  UpdateSettingsRequest
+  UpdateSettingsRequestBody
 } from './model';
 
 import { customInstance } from './mutator/custom-instance';
@@ -1343,7 +1343,7 @@ Parameters
 ----------
 request : Request
     FastAPIのリクエストオブジェクト
-body : UpdateSettingsRequest
+body : UpdateSettingsRequestBody
     更新するフィールドを含むリクエストボディ（すべて省略可能）
 settings_store : SettingsStoreDep
     依存注入された設定ストア
@@ -1355,12 +1355,12 @@ JSONResponse
  * @summary Update Settings
  */
 const updateSettings = (
-    updateSettingsRequest: UpdateSettingsRequest,
+    updateSettingsRequestBody: UpdateSettingsRequestBody,
  options?: SecondParameter<typeof customInstance<SuccessResponseUpdateSettingsResult>>,) => {
       return customInstance<SuccessResponseUpdateSettingsResult>(
       {url: `/api/settings`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
-      data: updateSettingsRequest
+      data: updateSettingsRequestBody
     },
       options);
     }

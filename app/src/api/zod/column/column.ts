@@ -320,7 +320,7 @@ export const AddSimulationColumnBody = zod.object({
   "type": zod.literal("negative_binomial").describe('分布の種類'),
   "n": zod.number().gt(addSimulationColumnBodySimulationColumnDistributionOneOnethreeNExclusiveMin).describe('成功回数'),
   "p": zod.number().gt(addSimulationColumnBodySimulationColumnDistributionOneOnethreePExclusiveMin).max(addSimulationColumnBodySimulationColumnDistributionOneOnethreePMax).describe('成功確率')
-}).describe('負の二項分布のパラメータ\n\nn 回成功するまでに必要な失敗回数をシミュレートする。\nイベント発生強度の過分散モデリングに広く使われる。'),zod.object({
+}).describe('負の二項分布のパラメータ'),zod.object({
   "type": zod.literal("fixed").describe('分布の種類'),
   "value": zod.union([zod.number(),zod.number()]).describe('固定値')
 }).describe('固定値のパラメータ'),zod.object({

@@ -238,7 +238,7 @@ export * from './transformMethodConfig';
 export * from './transformMethodParams';
 export * from './transformMethodParamsMethod';
 export * from './uniformParams';
-export * from './updateSettingsRequest';
+export * from './updateSettingsRequestBody';
 export * from './updateSettingsResult';
 export * from './weibullParams';
 export * from './wLSParams';

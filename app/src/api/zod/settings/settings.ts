@@ -48,7 +48,7 @@ Parameters
 ----------
 request : Request
     FastAPIのリクエストオブジェクト
-body : UpdateSettingsRequest
+body : UpdateSettingsRequestBody
     更新するフィールドを含むリクエストボディ（すべて省略可能）
 settings_store : SettingsStoreDep
     依存注入された設定ストア
