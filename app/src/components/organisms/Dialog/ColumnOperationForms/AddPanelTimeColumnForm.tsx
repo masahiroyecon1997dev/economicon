@@ -24,6 +24,32 @@ const buildDefaultColumnName = (columnName: string) => `time_${columnName}`;
 
 const parseNumber = (value: string) => Number(value.trim());
 
+const buildAddPanelTimeColumnFormSchema = (t: (key: string) => string) =>
+  z.object({
+    idColumn: AddPanelTimeColumnBody.shape.idColumn,
+    newColumnName: AddPanelTimeColumnBody.shape.newColumnName,
+    startValue: z
+      .string()
+      .trim()
+      .min(1, t("AddPanelTimeColumnForm.StartValueError"))
+      .refine(
+        (value) => Number.isFinite(parseNumber(value)),
+        t("AddPanelTimeColumnForm.StartValueError"),
+      ),
+    step: z
+      .string()
+      .trim()
+      .min(1, t("AddPanelTimeColumnForm.StepNumberError"))
+      .refine(
+        (value) => Number.isFinite(parseNumber(value)),
+        t("AddPanelTimeColumnForm.StepNumberError"),
+      )
+      .refine(
+        (value) => parseNumber(value) !== 0,
+        t("AddPanelTimeColumnForm.StepError"),
+      ),
+  });
+
 export const AddPanelTimeColumnForm = ({
   tableName,
   column,
@@ -48,22 +74,7 @@ export const AddPanelTimeColumnForm = ({
       step: "1",
     },
     validators: {
-      onSubmit: AddPanelTimeColumnBody.pick({
-        idColumn: true,
-        newColumnName: true,
-      })
-        .required()
-        .extend(
-          z.object({
-            startValue: z.coerce.number(),
-            step: z.coerce
-              .number()
-              .refine(
-                (value) => value !== 0,
-                t("AddPanelTimeColumnForm.StepError"),
-              ),
-          }).shape,
-        ),
+      onSubmit: buildAddPanelTimeColumnFormSchema(t),
     },
     onSubmit: async ({ value }) => {
       setApiError(null);
