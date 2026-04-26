@@ -1,5 +1,5 @@
-import { OutputResultRequestFormat } from "@/api/model/outputResultRequestFormat";
-import { OutputResultRequestStatInParentheses } from "@/api/model/outputResultRequestStatInParentheses";
+import { OutputResultFormat } from "@/api/model/outputResultFormat";
+import { RegressionOutputOptionsStatInParentheses } from "@/api/model/regressionOutputOptionsStatInParentheses";
 import { Button } from "@/components/atoms/Button/Button";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
@@ -30,10 +30,12 @@ export type OutputResultDialogPropsType = {
 };
 
 type OutputResultDialogContentPropsType = OutputResultDialogPropsType & {
-  format: OutputResultRequestFormat;
-  setFormat: (value: OutputResultRequestFormat) => void;
-  statInParentheses: OutputResultRequestStatInParentheses;
-  setStatInParentheses: (value: OutputResultRequestStatInParentheses) => void;
+  format: OutputResultFormat;
+  setFormat: (value: OutputResultFormat) => void;
+  statInParentheses: RegressionOutputOptionsStatInParentheses;
+  setStatInParentheses: (
+    value: RegressionOutputOptionsStatInParentheses,
+  ) => void;
   constAtBottom: boolean;
   setConstAtBottom: (value: boolean) => void;
 };
@@ -170,16 +172,16 @@ const OutputResultDialogContent = ({
           </label>
           <Select
             value={format}
-            onValueChange={(v) => setFormat(v as OutputResultRequestFormat)}
+            onValueChange={(v) => setFormat(v as OutputResultFormat)}
             data-testid="output-format-select"
           >
-            <SelectItem value={OutputResultRequestFormat.text}>
+            <SelectItem value={OutputResultFormat.text}>
               {t("OutputResultDialog.FormatText")}
             </SelectItem>
-            <SelectItem value={OutputResultRequestFormat.markdown}>
+            <SelectItem value={OutputResultFormat.markdown}>
               {t("OutputResultDialog.FormatMarkdown")}
             </SelectItem>
-            <SelectItem value={OutputResultRequestFormat.latex}>
+            <SelectItem value={OutputResultFormat.latex}>
               {t("OutputResultDialog.FormatLatex")}
             </SelectItem>
           </Select>
@@ -192,20 +194,22 @@ const OutputResultDialogContent = ({
           <Select
             value={statInParentheses}
             onValueChange={(v) =>
-              setStatInParentheses(v as OutputResultRequestStatInParentheses)
+              setStatInParentheses(
+                v as RegressionOutputOptionsStatInParentheses,
+              )
             }
             data-testid="output-stat-select"
           >
-            <SelectItem value={OutputResultRequestStatInParentheses.se}>
+            <SelectItem value={RegressionOutputOptionsStatInParentheses.se}>
               {t("OutputResultDialog.StatSE")}
             </SelectItem>
-            <SelectItem value={OutputResultRequestStatInParentheses.t}>
+            <SelectItem value={RegressionOutputOptionsStatInParentheses.t}>
               {t("OutputResultDialog.StatT")}
             </SelectItem>
-            <SelectItem value={OutputResultRequestStatInParentheses.p}>
+            <SelectItem value={RegressionOutputOptionsStatInParentheses.p}>
               {t("OutputResultDialog.StatP")}
             </SelectItem>
-            <SelectItem value={OutputResultRequestStatInParentheses.none}>
+            <SelectItem value={RegressionOutputOptionsStatInParentheses.none}>
               {t("OutputResultDialog.StatNone")}
             </SelectItem>
           </Select>
@@ -383,12 +387,12 @@ export const OutputResultDialog = ({
   onOpenChange,
   result,
 }: OutputResultDialogPropsType) => {
-  const [format, setFormat] = useState<OutputResultRequestFormat>(
-    OutputResultRequestFormat.markdown,
+  const [format, setFormat] = useState<OutputResultFormat>(
+    OutputResultFormat.markdown,
   );
   const [statInParentheses, setStatInParentheses] =
-    useState<OutputResultRequestStatInParentheses>(
-      OutputResultRequestStatInParentheses.se,
+    useState<RegressionOutputOptionsStatInParentheses>(
+      RegressionOutputOptionsStatInParentheses.se,
     );
   const [constAtBottom, setConstAtBottom] = useState(false);
 

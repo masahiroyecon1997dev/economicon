@@ -17,7 +17,8 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
-    "gen:api": "orval",
+    "gen:api:clean": "node ./scripts/clean-generated-api.mjs",
+    "gen:api": "pnpm run gen:api:clean && orval",
     "gen:api:watch": "orval --watch",
     "gen:all": "cd ../api && .\\.venv\\Scripts\\python.exe gen_openapi.py && cd ../app && pnpm gen:api"
   },

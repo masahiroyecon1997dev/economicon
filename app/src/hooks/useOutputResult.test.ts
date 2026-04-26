@@ -5,12 +5,12 @@
  * - fetchOutput 呼び出し中は isLoading=true になる
  * - fetchOutput 呼び出し失敗時に error がセットされる
  */
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { OutputResultFormat } from "@/api/model/outputResultFormat";
+import { RegressionOutputOptionsStatInParentheses } from "@/api/model/regressionOutputOptionsStatInParentheses";
+import { useOutputResult } from "@/hooks/useOutputResult";
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "@/api/endpoints";
-import { OutputResultRequestFormat } from "@/api/model/outputResultRequestFormat";
-import { OutputResultRequestStatInParentheses } from "@/api/model/outputResultRequestStatInParentheses";
-import { useOutputResult } from "@/hooks/useOutputResult";
 
 vi.mock("../api/endpoints", () => ({
   getEconomiconAppAPI: vi.fn(),
@@ -27,8 +27,8 @@ beforeEach(() => {
 
 const baseRequest = {
   resultIds: ["result-1"],
-  format: OutputResultRequestFormat.markdown,
-  statInParentheses: OutputResultRequestStatInParentheses.se,
+  format: OutputResultFormat.markdown,
+  statInParentheses: RegressionOutputOptionsStatInParentheses.se,
   constAtBottom: false,
   variableOrder: ["x1", "const"],
 };

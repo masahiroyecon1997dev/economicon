@@ -2,7 +2,7 @@
  * アプリケーションテーマ定義
  *
  * 新しいテーマを追加する場合は THEMES 配列にオブジェクトを追加するだけでよい。
- * バックエンドの `UpdateSettingsRequest.theme` バリデーションも合わせて更新すること。
+ * バックエンドの `UpdateSettingsRequestBody.theme` バリデーションも合わせて更新すること。
  */
 import type { LucideIcon } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
