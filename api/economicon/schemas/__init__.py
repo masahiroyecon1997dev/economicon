@@ -32,10 +32,20 @@ from economicon.schemas.columns import (
 from economicon.schemas.common import (
     COMMON_ERROR_RESPONSES,
     BaseResponse,
+    ErrorResponse,
+    SuccessResponse,
+)
+from economicon.schemas.data_io import (
+    ExportFileRequestBody,
+    ExportFileResult,
+    ImportFileRequestBody,
+    ImportFileResult,
+)
+from economicon.schemas.did import DIDResult as DIDResult
+from economicon.schemas.distribution_params import (
     BernoulliParams,
     BetaParams,
     BinomialParams,
-    ErrorResponse,
     ExponentialParams,
     GammaParams,
     GeometricParams,
@@ -45,17 +55,9 @@ from economicon.schemas.common import (
     NormalParams,
     PoissonParams,
     SequenceParams,
-    SuccessResponse,
     UniformParams,
     WeibullParams,
 )
-from economicon.schemas.data_io import (
-    ExportFileRequestBody,
-    ExportFileResult,
-    ImportFileRequestBody,
-    ImportFileResult,
-)
-from economicon.schemas.did import DIDResult as DIDResult
 from economicon.schemas.entities import (
     ClusteredStandardError,
     FEParams,
@@ -101,17 +103,19 @@ from economicon.schemas.regressions import (
     RegressionRequestBody,
     RegressionResult,
 )
-from economicon.schemas.results import (
+from economicon.schemas.result_management import (
     AnalysisResultDetail,
     AnalysisResultSummary,
     ClearAllAnalysisResultsResult,
-    ConfidenceIntervalOutputOptions,
-    ConfidenceIntervalOutputRequest,
     DeleteAnalysisResultResult,
-    DescriptiveStatisticsOutputOptions,
-    DescriptiveStatisticsOutputRequest,
     GetAllAnalysisResultsResult,
     GetAnalysisResultResult,
+)
+from economicon.schemas.result_output import (
+    ConfidenceIntervalOutputOptions,
+    ConfidenceIntervalOutputRequest,
+    DescriptiveStatisticsOutputOptions,
+    DescriptiveStatisticsOutputRequest,
     OutputResultRequest,
     OutputResultResult,
     RegressionOutputOptions,

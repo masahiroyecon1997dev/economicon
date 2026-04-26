@@ -2,7 +2,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
-from economicon.schemas.common import BaseRequest, BinaryChoiceRegularization
+from economicon.schemas.common import BaseRequest
 from economicon.schemas.enums import (
     RegressionMethodType,
     StandardErrorMethodType,
@@ -28,6 +28,11 @@ class SimulationColumnConfig(BaseRequest):
 class SortInstruction(BaseRequest):
     column_name: ColumnName
     ascending: bool
+
+
+class BinaryChoiceRegularization(BaseRequest):
+    type: Literal["l1", "l2"] = "l1"
+    alpha: float = Field(default=1.0, ge=0.0)
 
 
 class OLSParams(BaseRequest):

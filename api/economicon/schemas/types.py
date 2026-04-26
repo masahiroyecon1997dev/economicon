@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, Field, StringConstraints
 
 from economicon.i18n.translation import gettext as _
-from economicon.schemas.common import (
+from economicon.schemas.distribution_params import (
     BernoulliParams,
     BetaParams,
     BinomialParams,
@@ -13,15 +13,17 @@ from economicon.schemas.common import (
     GeometricParams,
     HypergeometricParams,
     LognormalParams,
-    LogParams,
     NegativeBinomialParams,
     NormalParams,
     PoissonParams,
-    PowerParams,
-    RootParams,
     SequenceParams,
     UniformParams,
     WeibullParams,
+)
+from economicon.schemas.transform_params import (
+    LogParams,
+    PowerParams,
+    RootParams,
 )
 
 NAME_PATTERN = r"^[^\x00-\x1f\x7f]+$"

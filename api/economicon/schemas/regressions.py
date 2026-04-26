@@ -8,7 +8,6 @@ from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import (
     BaseRequest,
     BaseResult,
-    check_column_overlap,
 )
 from economicon.schemas.entities import (
     FEParams,
@@ -24,6 +23,7 @@ from economicon.schemas.entities import (
 from economicon.schemas.enums import (
     MissingValueHandlingType,
 )
+from economicon.schemas.schema_validators import check_column_overlap
 from economicon.schemas.types import (
     ColumnName,
     ResultDescription,
