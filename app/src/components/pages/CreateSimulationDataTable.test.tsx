@@ -1,18 +1,12 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
-import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -73,10 +67,10 @@ const mockApi = {
   createSimulationDataTable: vi.fn(),
 };
 
-const submitForm = async () => {
-  await act(async () => {
-    fireEvent.submit(document.querySelector("form")!);
-  });
+const submitForm = () => {
+  const form = document.querySelector("form");
+  expect(form).toBeInstanceOf(HTMLFormElement);
+  fireEvent.submit(form as HTMLFormElement);
 };
 
 const makeColumnValid = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -164,7 +158,7 @@ describe("CreateSimulationDataTable フォーム", () => {
   describe("バリデーション", () => {
     it("データ名が空でサブミットするとバリデーションエラーが表示される", async () => {
       render(<CreateSimulationDataTable />);
-      await submitForm();
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -189,7 +183,7 @@ describe("CreateSimulationDataTable フォーム", () => {
       await user.type(tableNameInput, "sim_table");
       await makeColumnValid(user);
 
-      await submitForm();
+      submitForm();
 
       await waitFor(() => {
         expect(mockApi.createSimulationDataTable).toHaveBeenCalledTimes(1);
@@ -211,7 +205,7 @@ describe("CreateSimulationDataTable フォーム", () => {
       await user.type(tableNameInput, "sim_table");
       await makeColumnValid(user);
 
-      await submitForm();
+      submitForm();
 
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
@@ -232,7 +226,7 @@ describe("CreateSimulationDataTable フォーム", () => {
       await user.type(tableNameInput, "sim_table");
       await makeColumnValid(user);
 
-      await submitForm();
+      submitForm();
 
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
