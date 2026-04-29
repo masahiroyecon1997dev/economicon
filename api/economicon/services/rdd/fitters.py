@@ -383,6 +383,9 @@ def extract_rdrobust_results(result: Any) -> dict[str, Any]:
         coef[0] = conventional（局所 p 次多項式の係数）
         coef[1] = bias-corrected（p+1 次バイアス項を補正）
         coef[2] = robust（= bias-corrected 点推定値）
+        se[2]   = robust SE
+        t[2]    = robust z 統計量（bias-corrected / robust SE）
+        pv[2]   = robust p 値（Calonico et al. 2014 推奨）
         ci[0, :] = conventional CI
         ci[2, :] = robust CI（bias-corrected 点推定 + robust SE）
         rho     = h / b（バンド幅比率）
@@ -404,6 +407,20 @@ def extract_rdrobust_results(result: Any) -> dict[str, Any]:
 
     # bias-corrected 点推定値（coef[1] または coef[2]）
     bc_coef = float(coef[1]) if len(coef) > 1 else conv_coef
+
+    # Eco-Note: robust z 統計量・p 値は行インデックス 2。
+    # Calonico et al. (2014) が推奨する推論は
+    # bias-corrected 点推定 + robust SE に基づく。
+    # 行インデックス 2 が存在しない場合は 1 → 0 の順にフォールバック。
+    if len(z_stat) >= 3:  # noqa: PLR2004
+        bc_z = float(z_stat[2])
+        bc_pv = float(pv[2])
+    elif len(z_stat) >= 2:  # noqa: PLR2004
+        bc_z = float(z_stat[1])
+        bc_pv = float(pv[1])
+    else:
+        bc_z = float("nan")
+        bc_pv = float("nan")
 
     # robust CI（行インデックス 2）または bias-corrected CI（行インデックス 1）
     if ci.shape[0] >= 3:  # noqa: PLR2004
@@ -441,6 +458,8 @@ def extract_rdrobust_results(result: Any) -> dict[str, Any]:
         "conv_ci_lower": conv_ci_lower,
         "conv_ci_upper": conv_ci_upper,
         "bc_coef": bc_coef,
+        "bc_z": bc_z,
+        "bc_pv": bc_pv,
         "bc_ci_lower": bc_ci_lower,
         "bc_ci_upper": bc_ci_upper,
         "rho": rho_val,
