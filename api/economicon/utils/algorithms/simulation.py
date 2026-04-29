@@ -18,25 +18,31 @@ def generate_simulation_data(
             d.low, d.high, row_count
         ),
         DistributionType.EXPONENTIAL: lambda d: rng.exponential(
-            d.scale, row_count
+            d.scale_parameter, row_count
         ),
         DistributionType.NORMAL: lambda d: rng.normal(
-            d.loc, d.scale, row_count
+            d.mean, d.standard_deviation, row_count
         ),
         DistributionType.GAMMA: lambda d: rng.gamma(
-            d.shape, d.scale, row_count
+            d.shape_parameter, d.scale_parameter, row_count
         ),
-        DistributionType.BETA: lambda d: rng.beta(d.a, d.b, row_count),
+        DistributionType.BETA: lambda d: rng.beta(d.alpha, d.beta, row_count),
         DistributionType.WEIBULL: lambda d: (
-            rng.weibull(d.a, row_count) * d.scale
+            rng.weibull(d.shape_parameter, row_count) * d.scale_parameter
         ),
         DistributionType.LOGNORMAL: lambda d: rng.lognormal(
-            d.mean, d.sigma, row_count
+            d.log_mean, d.log_standard_deviation, row_count
         ),
-        DistributionType.BINOMIAL: lambda d: rng.binomial(d.n, d.p, row_count),
-        DistributionType.BERNOULLI: lambda d: rng.binomial(1, d.p, row_count),
-        DistributionType.POISSON: lambda d: rng.poisson(d.lam, row_count),
-        DistributionType.GEOMETRIC: lambda d: rng.geometric(d.p, row_count),
+        DistributionType.BINOMIAL: lambda d: rng.binomial(
+            d.trial_count, d.success_probability, row_count
+        ),
+        DistributionType.BERNOULLI: lambda d: rng.binomial(
+            1, d.success_probability, row_count
+        ),
+        DistributionType.POISSON: lambda d: rng.poisson(d.rate, row_count),
+        DistributionType.GEOMETRIC: lambda d: rng.geometric(
+            d.success_probability, row_count
+        ),
         DistributionType.HYPERGEOMETRIC: lambda d: rng.hypergeometric(
             d.success_count,
             d.population_size - d.success_count,
@@ -44,7 +50,7 @@ def generate_simulation_data(
             row_count,
         ),
         DistributionType.NEGATIVE_BINOMIAL: lambda d: rng.negative_binomial(
-            d.n, d.p, row_count
+            d.target_success_count, d.success_probability, row_count
         ),
         DistributionType.FIXED: lambda d: np.full(row_count, d.value),
         DistributionType.SEQUENCE: lambda d: np.arange(

@@ -602,6 +602,12 @@ msgstr ""
 msgid "For hypergeometric distribution, 'n' must not exceed 'N'"
 msgstr ""
 
+msgid "For hypergeometric distribution, 'successCount' must not exceed 'populationSize'"
+msgstr ""
+
+msgid "For hypergeometric distribution, 'sampleSize' must not exceed 'populationSize'"
+msgstr ""
+
 #: economicon/utils/validator/statistics_validators.py:198
 msgid "Dependent variable cannot be included in explanatory variables"
 msgstr ""

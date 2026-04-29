@@ -149,8 +149,8 @@ def test_add_normal_column_success(client, tables_store):
                 "columnName": "NormalCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -176,8 +176,8 @@ def test_add_binomial_column_success(client, tables_store):
                 "columnName": "BinomialCol",
                 "distribution": {
                     "type": "binomial",
-                    "n": BINOMIAL_N,
-                    "p": BINOMIAL_P,
+                    "trialCount": BINOMIAL_N,
+                    "successProbability": BINOMIAL_P,
                 },
             },
             "addPositionColumn": COL_A,
@@ -204,7 +204,7 @@ def test_add_exponential_column_success(client, tables_store):
                 "columnName": "ExponentialCol",
                 "distribution": {
                     "type": "exponential",
-                    "scale": EXPONENTIAL_SCALE,
+                    "scaleParameter": EXPONENTIAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -230,8 +230,8 @@ def test_add_gamma_column_success(client, tables_store):
                 "columnName": "GammaCol",
                 "distribution": {
                     "type": "gamma",
-                    "shape": GAMMA_SHAPE,
-                    "scale": GAMMA_SCALE,
+                    "shapeParameter": GAMMA_SHAPE,
+                    "scaleParameter": GAMMA_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -253,8 +253,8 @@ def test_add_beta_column_success(client, tables_store):
                 "columnName": "BetaCol",
                 "distribution": {
                     "type": "beta",
-                    "a": BETA_A,
-                    "b": BETA_B,
+                    "alpha": BETA_A,
+                    "beta": BETA_B,
                 },
             },
             "addPositionColumn": COL_A,
@@ -276,7 +276,7 @@ def test_add_poisson_column_success(client, tables_store):
                 "columnName": "PoissonCol",
                 "distribution": {
                     "type": "poisson",
-                    "lam": POISSON_LAM,
+                    "rate": POISSON_LAM,
                 },
             },
             "addPositionColumn": COL_A,
@@ -327,8 +327,8 @@ def test_add_weibull_column_success(client, tables_store):
                 "columnName": "WeibullCol",
                 "distribution": {
                     "type": "weibull",
-                    "a": WEIBULL_A,
-                    "scale": WEIBULL_SCALE,
+                    "shapeParameter": WEIBULL_A,
+                    "scaleParameter": WEIBULL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -356,8 +356,8 @@ def test_add_lognormal_column_success(client, tables_store):
                 "columnName": "LognormalCol",
                 "distribution": {
                     "type": "lognormal",
-                    "mean": LOGNORMAL_MEAN,
-                    "sigma": LOGNORMAL_SIGMA,
+                    "logMean": LOGNORMAL_MEAN,
+                    "logStandardDeviation": LOGNORMAL_SIGMA,
                 },
             },
             "addPositionColumn": COL_A,
@@ -385,7 +385,7 @@ def test_add_bernoulli_column_success(client, tables_store):
                 "columnName": "BernoulliCol",
                 "distribution": {
                     "type": "bernoulli",
-                    "p": BERNOULLI_P,
+                    "successProbability": BERNOULLI_P,
                 },
             },
             "addPositionColumn": COL_A,
@@ -413,7 +413,7 @@ def test_add_geometric_column_success(client, tables_store):
                 "columnName": "GeometricCol",
                 "distribution": {
                     "type": "geometric",
-                    "p": GEOMETRIC_P,
+                    "successProbability": GEOMETRIC_P,
                 },
             },
             "addPositionColumn": COL_A,
@@ -469,8 +469,8 @@ def test_add_negative_binomial_column_success(client, tables_store):
                 "columnName": "NegBinomialCol",
                 "distribution": {
                     "type": "negative_binomial",
-                    "n": NEG_BINOMIAL_N,
-                    "p": NEG_BINOMIAL_P,
+                    "targetSuccessCount": NEG_BINOMIAL_N,
+                    "successProbability": NEG_BINOMIAL_P,
                 },
             },
             "addPositionColumn": COL_A,
@@ -581,8 +581,8 @@ def test_add_simulation_column_missing_table_name(client, tables_store):
                 "columnName": "TestCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -641,8 +641,8 @@ def test_add_simulation_column_missing_add_position_column(
                 "columnName": "TestCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
         },
@@ -733,7 +733,7 @@ def test_missing_required_distribution_param(client, tables_store):
                 "columnName": "TestCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
+                    "mean": NORMAL_LOC,
                     # scale が省略
                 },
             },
@@ -747,7 +747,8 @@ def test_missing_required_distribution_param(client, tables_store):
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.normal"
-        ".NormalParams.scaleは必須です。" in response_data["details"]
+        ".standardDeviationは必須です。"
+        in response_data["details"]
     )
 
     df_after = tables_store.get_table(TABLE_NAME).table
@@ -766,8 +767,8 @@ def test_invalid_distribution_param_type(client, tables_store):
                 "columnName": "TestCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": "invalid",  # float でないと無効
-                    "scale": NORMAL_SCALE,
+                    "mean": "invalid",  # float でないと無効
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -780,7 +781,7 @@ def test_invalid_distribution_param_type(client, tables_store):
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.normal"
-        ".NormalParams.locは数値で入力してください。"
+        ".meanは数値で入力してください。"
         in response_data["details"]
     )
 
@@ -802,8 +803,8 @@ def test_normal_negative_scale(client, tables_store):
                 "columnName": "TestCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": negative_scale,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": negative_scale,
                 },
             },
             "addPositionColumn": COL_A,
@@ -816,7 +817,7 @@ def test_normal_negative_scale(client, tables_store):
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.normal"
-        ".NormalParams.scaleは0.0より大きい値で入力してください。"
+        ".standardDeviationは0.0より大きい値で入力してください。"
         in response_data["details"]
     )
 
@@ -838,8 +839,8 @@ def test_binomial_invalid_p_greater_than_one(client, tables_store):
                 "columnName": "TestCol",
                 "distribution": {
                     "type": "binomial",
-                    "n": BINOMIAL_N,
-                    "p": invalid_p,
+                    "trialCount": BINOMIAL_N,
+                    "successProbability": invalid_p,
                 },
             },
             "addPositionColumn": COL_A,
@@ -852,7 +853,7 @@ def test_binomial_invalid_p_greater_than_one(client, tables_store):
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.binomial"
-        ".BinomialParams.pは1.0以下で入力してください。"
+        ".successProbabilityは1.0以下で入力してください。"
         in response_data["details"]
     )
 
@@ -876,9 +877,9 @@ def test_hypergeometric_invalid_k_exceeds_n(client, tables_store):
                 "columnName": "TestCol",
                 "distribution": {
                     "type": "hypergeometric",
-                    "N": invalid_population,
-                    "K": invalid_success_states,
-                    "n": 5,
+                    "populationSize": invalid_population,
+                    "successCount": invalid_success_states,
+                    "sampleSize": 5,
                 },
             },
             "addPositionColumn": COL_A,
@@ -888,12 +889,12 @@ def test_hypergeometric_invalid_k_exceeds_n(client, tables_store):
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "simulationColumn.distribution" in response_data["message"]
-    assert (
-        "simulationColumn.distribution.hypergeometric"
-        ".function-after[validate_high(), HypergeometricParams]"
-        ".populationSizeは必須です。" in response_data["details"]
+    expected_msg = (
+        "超幾何分布では、'successCount'は'populationSize'を"
+        "超えてはいけません"
     )
+    assert response_data["message"] == expected_msg
+    assert expected_msg in response_data["details"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -916,8 +917,8 @@ def test_invalid_table_name(client, tables_store):
                 "columnName": "SimCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -945,8 +946,8 @@ def test_duplicate_column_name(client, tables_store):
                 "columnName": COL_A,  # 既存の列名
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -977,8 +978,8 @@ def test_invalid_position_column(client, tables_store):
                 "columnName": "SimCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": "no_such_col",
@@ -1287,8 +1288,8 @@ def test_add_simulation_column_normal_scale_zero(client, tables_store):
                 "columnName": "SimCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": 0.0,
-                    "scale": 0.0,
+                    "mean": 0.0,
+                    "standardDeviation": 0.0,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1301,7 +1302,7 @@ def test_add_simulation_column_normal_scale_zero(client, tables_store):
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.normal"
-        ".NormalParams.scaleは0.0より大きい値で入力してください。"
+        ".standardDeviationは0.0より大きい値で入力してください。"
         in response_data["details"]
     )
 
@@ -1321,8 +1322,8 @@ def test_add_simulation_column_normal_near_zero_scale(client, tables_store):
                 "columnName": "TinyScaleCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": 0.0,
-                    "scale": 1e-15,
+                    "mean": 0.0,
+                    "standardDeviation": 1e-15,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1345,8 +1346,8 @@ def test_add_simulation_column_binomial_probability_zero(client, tables_store):
                 "columnName": "SimCol",
                 "distribution": {
                     "type": "binomial",
-                    "n": BINOMIAL_N,
-                    "p": 0.0,
+                    "trialCount": BINOMIAL_N,
+                    "successProbability": 0.0,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1358,7 +1359,7 @@ def test_add_simulation_column_binomial_probability_zero(client, tables_store):
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.binomial"
-        ".BinomialParams.pは0.0より大きい値で入力してください。"
+        ".successProbabilityは0.0より大きい値で入力してください。"
         in response_data["details"]
     )
 
@@ -1380,8 +1381,8 @@ def test_add_simulation_column_binomial_probability_over_one(
                 "columnName": "SimCol",
                 "distribution": {
                     "type": "binomial",
-                    "n": BINOMIAL_N,
-                    "p": 1.5,
+                    "trialCount": BINOMIAL_N,
+                    "successProbability": 1.5,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1393,7 +1394,7 @@ def test_add_simulation_column_binomial_probability_over_one(
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.binomial"
-        ".BinomialParams.pは1.0以下で入力してください。"
+        ".successProbabilityは1.0以下で入力してください。"
         in response_data["details"]
     )
 
@@ -1415,9 +1416,9 @@ def test_add_simulation_column_hypergeometric_k_exceeds_n(
                 "columnName": "SimCol",
                 "distribution": {
                     "type": "hypergeometric",
-                    "N": 5,
-                    "K": 6,
-                    "n": 3,
+                    "populationSize": 5,
+                    "successCount": 6,
+                    "sampleSize": 3,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1426,12 +1427,12 @@ def test_add_simulation_column_hypergeometric_k_exceeds_n(
     response_data = response.json()
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
-    assert "simulationColumn.distribution" in response_data["message"]
-    assert (
-        "simulationColumn.distribution.hypergeometric"
-        ".function-after[validate_high(), HypergeometricParams]"
-        ".populationSizeは必須です。" in response_data["details"]
+    expected_msg = (
+        "超幾何分布では、'successCount'は'populationSize'を"
+        "超えてはいけません"
     )
+    assert response_data["message"] == expected_msg
+    assert expected_msg in response_data["details"]
 
     df_after = tables_store.get_table(TABLE_NAME).table
     assert df_after.equals(df_before)
@@ -1454,8 +1455,8 @@ def test_add_simulation_column_negative_binomial_probability_zero(
                 "columnName": "SimCol",
                 "distribution": {
                     "type": "negative_binomial",
-                    "n": NEG_BINOMIAL_N,
-                    "p": 0.0,
+                    "targetSuccessCount": NEG_BINOMIAL_N,
+                    "successProbability": 0.0,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1467,7 +1468,7 @@ def test_add_simulation_column_negative_binomial_probability_zero(
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.negative_binomial"
-        ".NegativeBinomialParams.pは0.0より大きい値で入力してください。"
+        ".successProbabilityは0.0より大きい値で入力してください。"
         in response_data["details"]
     )
 
@@ -1489,8 +1490,8 @@ def test_add_simulation_column_negative_binomial_probability_over_one(
                 "columnName": "SimCol",
                 "distribution": {
                     "type": "negative_binomial",
-                    "n": NEG_BINOMIAL_N,
-                    "p": 1.5,
+                    "targetSuccessCount": NEG_BINOMIAL_N,
+                    "successProbability": 1.5,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1502,7 +1503,7 @@ def test_add_simulation_column_negative_binomial_probability_over_one(
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.negative_binomial"
-        ".NegativeBinomialParams.pは1.0以下で入力してください。"
+        ".successProbabilityは1.0以下で入力してください。"
         in response_data["details"]
     )
 
@@ -1522,8 +1523,8 @@ def test_add_simulation_column_negative_binomial_n_zero(client, tables_store):
                 "columnName": "SimCol",
                 "distribution": {
                     "type": "negative_binomial",
-                    "n": 0,
-                    "p": NEG_BINOMIAL_P,
+                    "targetSuccessCount": 0,
+                    "successProbability": NEG_BINOMIAL_P,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1535,7 +1536,7 @@ def test_add_simulation_column_negative_binomial_n_zero(client, tables_store):
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.negative_binomial"
-        ".NegativeBinomialParams.nは0より大きい値で入力してください。"
+        ".targetSuccessCountは0より大きい値で入力してください。"
         in response_data["details"]
     )
 
@@ -1559,8 +1560,8 @@ def test_add_simulation_column_with_seed_is_reproducible(client, tables_store):
                 "columnName": "SeedColA",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1578,8 +1579,8 @@ def test_add_simulation_column_with_seed_is_reproducible(client, tables_store):
                 "columnName": "SeedColB",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1650,8 +1651,8 @@ def test_add_simulation_column_seed_exceeds_max_is_rejected(
                 "columnName": "SeedOverCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1681,8 +1682,8 @@ def test_add_simulation_column_seed_negative_is_rejected(client, tables_store):
                 "columnName": "SeedNegCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,
@@ -1710,8 +1711,8 @@ def test_add_simulation_column_seed_date_format_is_valid(client, tables_store):
                 "columnName": "SeedDateCol",
                 "distribution": {
                     "type": "normal",
-                    "loc": NORMAL_LOC,
-                    "scale": NORMAL_SCALE,
+                    "mean": NORMAL_LOC,
+                    "standardDeviation": NORMAL_SCALE,
                 },
             },
             "addPositionColumn": COL_A,

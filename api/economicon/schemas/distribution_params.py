@@ -12,9 +12,7 @@ from economicon.schemas.enums import DistributionType
 class UniformParams(BaseRequest):
     """一様分布のパラメータ"""
 
-    type: Literal[DistributionType.UNIFORM] = Field(
-        description="分布の種類"
-    )
+    type: Literal[DistributionType.UNIFORM] = Field(description="分布の種類")
     low: float = Field(description="分布の下限")
     high: float = Field(description="分布の上限")
 
@@ -33,86 +31,78 @@ class ExponentialParams(BaseRequest):
     type: Literal[DistributionType.EXPONENTIAL] = Field(
         description="分布の種類"
     )
-    scale: float = Field(gt=0, description="尺度パラメータ")
+    scale_parameter: float = Field(gt=0, description="尺度パラメータ")
 
 
 class NormalParams(BaseRequest):
     """正規分布のパラメータ"""
 
     type: Literal[DistributionType.NORMAL] = Field(description="分布の種類")
-    loc: float = Field(description="平均")
-    scale: float = Field(gt=0, description="標準偏差")
+    mean: float = Field(description="平均")
+    standard_deviation: float = Field(gt=0, description="標準偏差")
 
 
 class GammaParams(BaseRequest):
     """ガンマ分布のパラメータ"""
 
     type: Literal[DistributionType.GAMMA] = Field(description="分布の種類")
-    shape: float = Field(gt=0, description="形状パラメータ")
-    scale: float = Field(gt=0, description="尺度パラメータ")
+    shape_parameter: float = Field(gt=0, description="形状パラメータ")
+    scale_parameter: float = Field(gt=0, description="尺度パラメータ")
 
 
 class BetaParams(BaseRequest):
     """ベータ分布のパラメータ"""
 
     type: Literal[DistributionType.BETA] = Field(description="分布の種類")
-    a: float = Field(gt=0, description="形状パラメータa")
-    b: float = Field(gt=0, description="形状パラメータb")
+    alpha: float = Field(gt=0, description="形状パラメータalpha")
+    beta: float = Field(gt=0, description="形状パラメータbeta")
 
 
 class WeibullParams(BaseRequest):
     """ワイブル分布のパラメータ"""
 
-    type: Literal[DistributionType.WEIBULL] = Field(
-        description="分布の種類"
-    )
-    a: float = Field(gt=0, description="形状パラメータ")
-    scale: float = Field(gt=0, description="尺度パラメータ")
+    type: Literal[DistributionType.WEIBULL] = Field(description="分布の種類")
+    shape_parameter: float = Field(gt=0, description="形状パラメータ")
+    scale_parameter: float = Field(gt=0, description="尺度パラメータ")
 
 
 class LognormalParams(BaseRequest):
     """対数正規分布のパラメータ"""
 
-    type: Literal[DistributionType.LOGNORMAL] = Field(
-        description="分布の種類"
+    type: Literal[DistributionType.LOGNORMAL] = Field(description="分布の種類")
+    log_mean: float = Field(description="対数空間での平均")
+    log_standard_deviation: float = Field(
+        gt=0, description="対数空間での標準偏差"
     )
-    mean: float = Field(description="平均")
-    sigma: float = Field(gt=0, description="標準偏差")
 
 
 class BinomialParams(BaseRequest):
     """二項分布のパラメータ"""
 
-    type: Literal[DistributionType.BINOMIAL] = Field(
-        description="分布の種類"
-    )
-    n: int = Field(gt=0, description="試行回数")
-    p: float = Field(gt=0, le=1, description="成功確率")
+    type: Literal[DistributionType.BINOMIAL] = Field(description="分布の種類")
+    trial_count: int = Field(gt=0, description="試行回数")
+    success_probability: float = Field(gt=0, le=1, description="成功確率")
 
 
 class BernoulliParams(BaseRequest):
     """ベルヌーイ分布のパラメータ"""
 
-    type: Literal[DistributionType.BERNOULLI] = Field(
-        description="分布の種類"
-    )
-    p: float = Field(gt=0, le=1, description="成功確率")
+    type: Literal[DistributionType.BERNOULLI] = Field(description="分布の種類")
+    success_probability: float = Field(gt=0, le=1, description="成功確率")
 
 
 class PoissonParams(BaseRequest):
     """ポアソン分布のパラメータ"""
 
     type: Literal[DistributionType.POISSON] = Field(description="分布の種類")
-    lam: float = Field(gt=0, description="発生率")
+    rate: float = Field(gt=0, description="発生率")
 
 
 class GeometricParams(BaseRequest):
     """幾何分布のパラメータ"""
 
-    type: Literal[DistributionType.GEOMETRIC] = Field(
-        description="分布の種類"
-    )
-    p: float = Field(gt=0, le=1, description="成功確率")
+    type: Literal[DistributionType.GEOMETRIC] = Field(description="分布の種類")
+    success_probability: float = Field(gt=0, le=1, description="成功確率")
 
 
 class NegativeBinomialParams(BaseRequest):
@@ -121,8 +111,8 @@ class NegativeBinomialParams(BaseRequest):
     type: Literal[DistributionType.NEGATIVE_BINOMIAL] = Field(
         description="分布の種類"
     )
-    n: int = Field(gt=0, description="成功回数")
-    p: float = Field(gt=0, le=1, description="成功確率")
+    target_success_count: int = Field(gt=0, description="成功回数")
+    success_probability: float = Field(gt=0, le=1, description="成功確率")
 
 
 class HypergeometricParams(BaseRequest):
@@ -140,15 +130,15 @@ class HypergeometricParams(BaseRequest):
         if self.success_count > self.population_size:
             raise ValueError(
                 _(
-                    "For hypergeometric distribution, 'success_count' must "
-                    "not exceed 'population_size'"
+                    "For hypergeometric distribution, 'successCount' must "
+                    "not exceed 'populationSize'"
                 )
             )
         if self.sample_size > self.population_size:
             raise ValueError(
                 _(
-                    "For hypergeometric distribution, 'sample_size' must "
-                    "not exceed 'population_size'"
+                    "For hypergeometric distribution, 'sampleSize' must "
+                    "not exceed 'populationSize'"
                 )
             )
         return self
@@ -164,8 +154,6 @@ class FixedParams(BaseRequest):
 class SequenceParams(BaseRequest):
     """連番のパラメータ"""
 
-    type: Literal[DistributionType.SEQUENCE] = Field(
-        description="分布の種類"
-    )
+    type: Literal[DistributionType.SEQUENCE] = Field(description="分布の種類")
     start: int = Field(default=1, description="開始値")
     step: int = Field(default=1, description="増分（負値で降順連番）")

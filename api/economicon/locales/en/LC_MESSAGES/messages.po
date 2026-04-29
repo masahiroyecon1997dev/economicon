@@ -189,6 +189,12 @@ msgstr "Table '{}' has too many rows for plotting ({} rows). The maximum is {} r
 msgid "For uniform distribution, 'low' must be less than 'high'"
 msgstr ""
 
+msgid "For hypergeometric distribution, 'successCount' must not exceed 'populationSize'"
+msgstr ""
+
+msgid "For hypergeometric distribution, 'sampleSize' must not exceed 'populationSize'"
+msgstr ""
+
 msgid "For proportion confidence interval, data must contain only 0 and 1 values"
 msgstr ""
 

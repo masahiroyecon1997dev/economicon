@@ -188,6 +188,12 @@ msgstr "テーブル '{}'のプロット対象行数（{}行）が上限（{}行
 msgid "For uniform distribution, 'low' must be less than 'high'"
 msgstr "一様分布では、'low'は'high'より小さい必要があります"
 
+msgid "For hypergeometric distribution, 'successCount' must not exceed 'populationSize'"
+msgstr "超幾何分布では、'successCount'は'populationSize'を超えてはいけません"
+
+msgid "For hypergeometric distribution, 'sampleSize' must not exceed 'populationSize'"
+msgstr "超幾何分布では、'sampleSize'は'populationSize'を超えてはいけません"
+
 msgid "For proportion confidence interval, data must contain only 0 and 1 values"
 msgstr "データには0と1の値のみが含まれる必要があります"
 
