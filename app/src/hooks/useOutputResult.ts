@@ -1,7 +1,18 @@
-import { useCallback, useState } from "react";
 import { getEconomiconAppAPI } from "@/api/endpoints";
-import type { OutputResultRequest } from "@/api/model/outputResultRequest";
+import type {
+  ConfidenceIntervalOutputRequest,
+  DescriptiveStatisticsOutputRequest,
+  RegressionOutputRequest,
+  StatisticalTestOutputRequest,
+} from "@/api/model";
 import { extractApiErrorMessage } from "@/lib/utils/apiError";
+import { useCallback, useState } from "react";
+
+type OutputResultRequest =
+  | RegressionOutputRequest
+  | DescriptiveStatisticsOutputRequest
+  | ConfidenceIntervalOutputRequest
+  | StatisticalTestOutputRequest;
 
 type UseOutputResultReturnType = {
   content: string | null;
