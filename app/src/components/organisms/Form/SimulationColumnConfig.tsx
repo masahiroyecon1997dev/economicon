@@ -42,19 +42,21 @@ type SimulationColumnConfigProps = {
 type ParamKey = [
   "low",
   "high",
-  "scale",
-  "loc",
-  "shape",
-  "a",
-  "b",
+  "scaleParameter",
   "mean",
-  "sigma",
-  "n",
-  "p",
-  "lam",
+  "standardDeviation",
+  "shapeParameter",
+  "alpha",
+  "beta",
+  "logMean",
+  "logStandardDeviation",
+  "trialCount",
+  "successProbability",
+  "rate",
   "populationSize",
   "successCount",
   "sampleSize",
+  "targetSuccessCount",
   "start",
   "step",
   "value",
@@ -108,19 +110,21 @@ export const SimulationColumnConfig = ({
       // 全パラメータをフラット文字列で保持
       low: initParam("low"),
       high: initParam("high"),
-      scale: initParam("scale"),
-      loc: initParam("loc"),
-      shape: initParam("shape"),
-      a: initParam("a"),
-      b: initParam("b"),
+      scaleParameter: initParam("scaleParameter"),
       mean: initParam("mean"),
-      sigma: initParam("sigma"),
-      n: initParam("n"),
-      p: initParam("p"),
-      lam: initParam("lam"),
+      standardDeviation: initParam("standardDeviation"),
+      shapeParameter: initParam("shapeParameter"),
+      alpha: initParam("alpha"),
+      beta: initParam("beta"),
+      logMean: initParam("logMean"),
+      logStandardDeviation: initParam("logStandardDeviation"),
+      trialCount: initParam("trialCount"),
+      successProbability: initParam("successProbability"),
+      rate: initParam("rate"),
       populationSize: initParam("populationSize"),
       successCount: initParam("successCount"),
       sampleSize: initParam("sampleSize"),
+      targetSuccessCount: initParam("targetSuccessCount"),
       start: initParam("start"),
       step: initParam("step"),
       value:
@@ -349,10 +353,11 @@ export const SimulationColumnConfig = ({
                   onBlur={field.handleBlur}
                   disabled={disabled}
                   step={
-                    param === "n" ||
+                    param === "trialCount" ||
                     param === "populationSize" ||
                     param === "successCount" ||
-                    param === "sampleSize"
+                    param === "sampleSize" ||
+                    param === "targetSuccessCount"
                       ? 1
                       : "any"
                   }

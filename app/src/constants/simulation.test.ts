@@ -117,12 +117,18 @@ describe("DIST_PARAM_LABEL_KEYS", () => {
 // DIST_PARAM_DEFAULTS
 // ---------------------------------------------------------------------------
 describe("DIST_PARAM_DEFAULTS", () => {
-  it("test_distParamDefaults_normalHasLocAndScale", () => {
-    expect(DIST_PARAM_DEFAULTS.normal).toEqual({ loc: 0, scale: 1 });
+  it("test_distParamDefaults_normalHasMeanAndStandardDeviation", () => {
+    expect(DIST_PARAM_DEFAULTS.normal).toEqual({
+      mean: 0,
+      standardDeviation: 1,
+    });
   });
 
-  it("test_distParamDefaults_binomialHasNAndP", () => {
-    expect(DIST_PARAM_DEFAULTS.binomial).toEqual({ n: 10, p: 0.5 });
+  it("test_distParamDefaults_binomialHasTrialCountAndSuccessProbability", () => {
+    expect(DIST_PARAM_DEFAULTS.binomial).toEqual({
+      trialCount: 10,
+      successProbability: 0.5,
+    });
   });
 
   it("test_distParamDefaults_sequenceHasStartAndStep", () => {
@@ -150,59 +156,59 @@ describe("DIST_PARAM_SCHEMAS", () => {
   const valid = (schemaKey: string, value: string) =>
     DIST_PARAM_SCHEMAS[schemaKey]().safeParse(value).success;
 
-  describe("scale (gtZeroNum)", () => {
-    it("test_scale_positiveNumber_isValid", () => {
-      expect(valid("scale", "1")).toBe(true);
-      expect(valid("scale", "0.001")).toBe(true);
+  describe("scaleParameter (gtZeroNum)", () => {
+    it("test_scaleParameter_positiveNumber_isValid", () => {
+      expect(valid("scaleParameter", "1")).toBe(true);
+      expect(valid("scaleParameter", "0.001")).toBe(true);
     });
-    it("test_scale_zero_isInvalid", () => {
-      expect(valid("scale", "0")).toBe(false);
+    it("test_scaleParameter_zero_isInvalid", () => {
+      expect(valid("scaleParameter", "0")).toBe(false);
     });
-    it("test_scale_negative_isInvalid", () => {
-      expect(valid("scale", "-1")).toBe(false);
+    it("test_scaleParameter_negative_isInvalid", () => {
+      expect(valid("scaleParameter", "-1")).toBe(false);
     });
-    it("test_scale_nonNumber_isInvalid", () => {
-      expect(valid("scale", "abc")).toBe(false);
-    });
-  });
-
-  describe("p (probability: 0 < p <= 1)", () => {
-    it("test_p_0dot5_isValid", () => {
-      expect(valid("p", "0.5")).toBe(true);
-    });
-    it("test_p_1_isValid", () => {
-      expect(valid("p", "1")).toBe(true);
-    });
-    it("test_p_0_isInvalid", () => {
-      expect(valid("p", "0")).toBe(false);
-    });
-    it("test_p_greaterThan1_isInvalid", () => {
-      expect(valid("p", "1.1")).toBe(false);
-    });
-    it("test_p_negative_isInvalid", () => {
-      expect(valid("p", "-0.1")).toBe(false);
+    it("test_scaleParameter_nonNumber_isInvalid", () => {
+      expect(valid("scaleParameter", "abc")).toBe(false);
     });
   });
 
-  describe("n (gtZeroInt)", () => {
-    it("test_n_positiveInteger_isValid", () => {
-      expect(valid("n", "5")).toBe(true);
-      expect(valid("n", "1")).toBe(true);
+  describe("successProbability (probability: 0 < p <= 1)", () => {
+    it("test_successProbability_0dot5_isValid", () => {
+      expect(valid("successProbability", "0.5")).toBe(true);
     });
-    it("test_n_zero_isInvalid", () => {
-      expect(valid("n", "0")).toBe(false);
+    it("test_successProbability_1_isValid", () => {
+      expect(valid("successProbability", "1")).toBe(true);
     });
-    it("test_n_float_isInvalid", () => {
-      expect(valid("n", "1.5")).toBe(false);
+    it("test_successProbability_0_isInvalid", () => {
+      expect(valid("successProbability", "0")).toBe(false);
     });
-    it("test_n_negative_isInvalid", () => {
-      expect(valid("n", "-1")).toBe(false);
+    it("test_successProbability_greaterThan1_isInvalid", () => {
+      expect(valid("successProbability", "1.1")).toBe(false);
+    });
+    it("test_successProbability_negative_isInvalid", () => {
+      expect(valid("successProbability", "-0.1")).toBe(false);
     });
   });
 
-  describe("loc / low / high / mean / value (anyNum)", () => {
-    it("test_loc_zero_isValid", () => {
-      expect(valid("loc", "0")).toBe(true);
+  describe("trialCount (gtZeroInt)", () => {
+    it("test_trialCount_positiveInteger_isValid", () => {
+      expect(valid("trialCount", "5")).toBe(true);
+      expect(valid("trialCount", "1")).toBe(true);
+    });
+    it("test_trialCount_zero_isInvalid", () => {
+      expect(valid("trialCount", "0")).toBe(false);
+    });
+    it("test_trialCount_float_isInvalid", () => {
+      expect(valid("trialCount", "1.5")).toBe(false);
+    });
+    it("test_trialCount_negative_isInvalid", () => {
+      expect(valid("trialCount", "-1")).toBe(false);
+    });
+  });
+
+  describe("mean / low / high / logMean / value (anyNum)", () => {
+    it("test_mean_zero_isValid", () => {
+      expect(valid("mean", "0")).toBe(true);
     });
     it("test_low_negative_isValid", () => {
       expect(valid("low", "-100")).toBe(true);
@@ -222,12 +228,12 @@ describe("DIST_PARAM_SCHEMAS", () => {
     });
   });
 
-  describe("lam (gtZeroNum)", () => {
-    it("test_lam_positive_isValid", () => {
-      expect(valid("lam", "3.5")).toBe(true);
+  describe("rate (gtZeroNum)", () => {
+    it("test_rate_positive_isValid", () => {
+      expect(valid("rate", "3.5")).toBe(true);
     });
-    it("test_lam_zero_isInvalid", () => {
-      expect(valid("lam", "0")).toBe(false);
+    it("test_rate_zero_isInvalid", () => {
+      expect(valid("rate", "0")).toBe(false);
     });
   });
 
@@ -255,72 +261,93 @@ describe("buildDistributionFromParams", () => {
   });
 
   it("test_build_exponential", () => {
-    expect(buildDistributionFromParams("exponential", { scale: 2 })).toEqual({
+    expect(
+      buildDistributionFromParams("exponential", { scaleParameter: 2 }),
+    ).toEqual({
       type: "exponential",
-      scale: 2,
+      scaleParameter: 2,
     });
   });
 
   it("test_build_normal", () => {
-    expect(buildDistributionFromParams("normal", { loc: 0, scale: 1 })).toEqual(
-      { type: "normal", loc: 0, scale: 1 },
-    );
+    expect(
+      buildDistributionFromParams("normal", {
+        mean: 0,
+        standardDeviation: 1,
+      }),
+    ).toEqual({ type: "normal", mean: 0, standardDeviation: 1 });
   });
 
   it("test_build_gamma", () => {
     expect(
-      buildDistributionFromParams("gamma", { shape: 2, scale: 1 }),
-    ).toEqual({ type: "gamma", shape: 2, scale: 1 });
+      buildDistributionFromParams("gamma", {
+        shapeParameter: 2,
+        scaleParameter: 1,
+      }),
+    ).toEqual({ type: "gamma", shapeParameter: 2, scaleParameter: 1 });
   });
 
   it("test_build_beta", () => {
-    expect(buildDistributionFromParams("beta", { a: 2, b: 2 })).toEqual({
+    expect(buildDistributionFromParams("beta", { alpha: 2, beta: 2 })).toEqual({
       type: "beta",
-      a: 2,
-      b: 2,
+      alpha: 2,
+      beta: 2,
     });
   });
 
   it("test_build_weibull", () => {
-    expect(buildDistributionFromParams("weibull", { a: 1, scale: 1 })).toEqual({
-      type: "weibull",
-      a: 1,
-      scale: 1,
-    });
+    expect(
+      buildDistributionFromParams("weibull", {
+        shapeParameter: 1,
+        scaleParameter: 1,
+      }),
+    ).toEqual({ type: "weibull", shapeParameter: 1, scaleParameter: 1 });
   });
 
   it("test_build_lognormal", () => {
     expect(
-      buildDistributionFromParams("lognormal", { mean: 0, sigma: 1 }),
-    ).toEqual({ type: "lognormal", mean: 0, sigma: 1 });
+      buildDistributionFromParams("lognormal", {
+        logMean: 0,
+        logStandardDeviation: 1,
+      }),
+    ).toEqual({ type: "lognormal", logMean: 0, logStandardDeviation: 1 });
   });
 
   it("test_build_binomial", () => {
-    expect(buildDistributionFromParams("binomial", { n: 10, p: 0.5 })).toEqual({
+    expect(
+      buildDistributionFromParams("binomial", {
+        trialCount: 10,
+        successProbability: 0.5,
+      }),
+    ).toEqual({
       type: "binomial",
-      n: 10,
-      p: 0.5,
+      trialCount: 10,
+      successProbability: 0.5,
     });
   });
 
   it("test_build_bernoulli", () => {
-    expect(buildDistributionFromParams("bernoulli", { p: 0.3 })).toEqual({
+    expect(
+      buildDistributionFromParams("bernoulli", { successProbability: 0.3 }),
+    ).toEqual({
       type: "bernoulli",
-      p: 0.3,
+      successProbability: 0.3,
     });
   });
 
   it("test_build_poisson", () => {
-    expect(buildDistributionFromParams("poisson", { lam: 3 })).toEqual({
+    expect(buildDistributionFromParams("poisson", { rate: 3 })).toEqual({
       type: "poisson",
-      lam: 3,
+      rate: 3,
     });
   });
 
   it("test_build_geometric", () => {
-    expect(buildDistributionFromParams("geometric", { p: 0.4 })).toEqual({
+    expect(
+      buildDistributionFromParams("geometric", { successProbability: 0.4 }),
+    ).toEqual({
       type: "geometric",
-      p: 0.4,
+      successProbability: 0.4,
     });
   });
 
@@ -341,8 +368,15 @@ describe("buildDistributionFromParams", () => {
 
   it("test_build_negative_binomial", () => {
     expect(
-      buildDistributionFromParams("negative_binomial", { n: 5, p: 0.5 }),
-    ).toEqual({ type: "negative_binomial", n: 5, p: 0.5 });
+      buildDistributionFromParams("negative_binomial", {
+        targetSuccessCount: 5,
+        successProbability: 0.5,
+      }),
+    ).toEqual({
+      type: "negative_binomial",
+      targetSuccessCount: 5,
+      successProbability: 0.5,
+    });
   });
 
   it("test_build_fixed", () => {

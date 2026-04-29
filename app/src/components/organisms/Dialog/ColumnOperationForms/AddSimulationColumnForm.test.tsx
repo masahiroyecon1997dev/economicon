@@ -2,7 +2,7 @@
  * AddSimulationColumnForm のテスト
  * - 列名フィールドのデフォルト値は "sim_price"
  * - デフォルト分布タイプ "normal" のラジオが選択済み
- * - normal のパラメータ (Loc / Scale) が表示される
+ * - normal のパラメータ (Mean / StandardDeviation) が表示される
  * - 分布タイプ切り替え（全14種）: 対応するパラメータフィールドが表示される
  * - 列名を空にして blur → ValidationMessages.NewColumnNameRequired が表示される
  * - 乱数シードに負数を入力してサブミット → ValidationMessages.RandomSeedRange（ErrorAlert）
@@ -84,13 +84,13 @@ describe("AddSimulationColumnForm", () => {
       expect(radio).toBeChecked();
     });
 
-    it("normal のパラメータ (Loc / Scale) が表示される", () => {
+    it("normal のパラメータ (Mean / StandardDeviation) が表示される", () => {
       render(<AddSimulationColumnForm {...defaultProps} />);
       expect(
-        screen.getByText("AddSimulationColumnForm.Loc"),
+        screen.getByText("AddSimulationColumnForm.Mean"),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("AddSimulationColumnForm.Scale"),
+        screen.getByText("AddSimulationColumnForm.StandardDeviation"),
       ).toBeInTheDocument();
     });
   });

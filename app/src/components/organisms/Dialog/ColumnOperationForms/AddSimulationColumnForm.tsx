@@ -56,19 +56,21 @@ export const AddSimulationColumnForm = ({
       // 全パラメータをフラットに保持（使わないものはサブミット時に無視）
       low: "0",
       high: "1",
-      scale: "1",
-      loc: "0",
-      shape: "1",
-      a: "1",
-      b: "1",
+      scaleParameter: "1",
       mean: "0",
-      sigma: "1",
-      n: "10",
-      p: "0.5",
-      lam: "1",
+      standardDeviation: "1",
+      shapeParameter: "1",
+      alpha: "1",
+      beta: "1",
+      logMean: "0",
+      logStandardDeviation: "1",
+      trialCount: "10",
+      successProbability: "0.5",
+      rate: "1",
       populationSize: "100",
       successCount: "50",
       sampleSize: "10",
+      targetSuccessCount: "5",
       start: "1",
       step: "1",
       value: "0",
@@ -227,10 +229,11 @@ export const AddSimulationColumnForm = ({
                 onBlur={field.handleBlur}
                 disabled={isSubmitting}
                 step={
-                  param === "n" ||
+                  param === "trialCount" ||
                   param === "populationSize" ||
                   param === "successCount" ||
-                  param === "sampleSize"
+                  param === "sampleSize" ||
+                  param === "targetSuccessCount"
                     ? 1
                     : "any"
                 }

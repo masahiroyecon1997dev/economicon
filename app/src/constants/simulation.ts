@@ -2,7 +2,7 @@
  * シミュレーション分布に関する共通定数・スキーマ・ヘルパー
  *
  * AddSimulationColumnForm / SimulationColumnConfig の両方で使用する。
- * パラメータ名は API 直接名（loc, scale, n, p など）で統一。
+ * パラメータ名は API の公開名（camelCase）で統一。
  */
 import type { DistributionConfig } from "@/api/model";
 import type { DistributionType } from "@/types/commonTypes";
@@ -25,52 +25,52 @@ const DISTRIBUTION_DEFINITIONS: DistributionDefinition[] = [
   {
     value: "exponential",
     category: "continuous",
-    params: ["scale"],
+    params: ["scaleParameter"],
   },
   {
     value: "normal",
     category: "continuous",
-    params: ["loc", "scale"],
+    params: ["mean", "standardDeviation"],
   },
   {
     value: "gamma",
     category: "continuous",
-    params: ["shape", "scale"],
+    params: ["shapeParameter", "scaleParameter"],
   },
   {
     value: "beta",
     category: "continuous",
-    params: ["a", "b"],
+    params: ["alpha", "beta"],
   },
   {
     value: "weibull",
     category: "continuous",
-    params: ["a", "scale"],
+    params: ["shapeParameter", "scaleParameter"],
   },
   {
     value: "lognormal",
     category: "continuous",
-    params: ["mean", "sigma"],
+    params: ["logMean", "logStandardDeviation"],
   },
   {
     value: "binomial",
     category: "discrete",
-    params: ["n", "p"],
+    params: ["trialCount", "successProbability"],
   },
   {
     value: "bernoulli",
     category: "discrete",
-    params: ["p"],
+    params: ["successProbability"],
   },
   {
     value: "poisson",
     category: "discrete",
-    params: ["lam"],
+    params: ["rate"],
   },
   {
     value: "geometric",
     category: "discrete",
-    params: ["p"],
+    params: ["successProbability"],
   },
   {
     value: "hypergeometric",
@@ -80,7 +80,7 @@ const DISTRIBUTION_DEFINITIONS: DistributionDefinition[] = [
   {
     value: "negative_binomial",
     category: "discrete",
-    params: ["n", "p"],
+    params: ["targetSuccessCount", "successProbability"],
   },
   {
     value: "sequence",
@@ -124,7 +124,7 @@ export const DIST_TYPES = DISTRIBUTION_DEFINITIONS.map(
   (definition) => definition.value,
 );
 
-/** 各分布で使用するパラメータ名（API 直接名） */
+/** 各分布で使用するパラメータ名（API 公開名） */
 export const DIST_PARAMS = Object.fromEntries(
   DISTRIBUTION_DEFINITIONS.map((definition) => [
     definition.value,
@@ -136,19 +136,21 @@ export const DIST_PARAMS = Object.fromEntries(
 export const DIST_PARAM_LABEL_KEYS: Record<string, string> = {
   low: "AddSimulationColumnForm.Low",
   high: "AddSimulationColumnForm.High",
-  scale: "AddSimulationColumnForm.Scale",
-  loc: "AddSimulationColumnForm.Loc",
-  shape: "AddSimulationColumnForm.Shape",
-  a: "AddSimulationColumnForm.A",
-  b: "AddSimulationColumnForm.B",
+  scaleParameter: "AddSimulationColumnForm.ScaleParameter",
   mean: "AddSimulationColumnForm.Mean",
-  sigma: "AddSimulationColumnForm.Sigma",
-  n: "AddSimulationColumnForm.N",
-  p: "AddSimulationColumnForm.P",
-  lam: "AddSimulationColumnForm.Lam",
+  standardDeviation: "AddSimulationColumnForm.StandardDeviation",
+  shapeParameter: "AddSimulationColumnForm.ShapeParameter",
+  alpha: "AddSimulationColumnForm.Alpha",
+  beta: "AddSimulationColumnForm.Beta",
+  logMean: "AddSimulationColumnForm.LogMean",
+  logStandardDeviation: "AddSimulationColumnForm.LogStandardDeviation",
+  trialCount: "AddSimulationColumnForm.TrialCount",
+  successProbability: "AddSimulationColumnForm.SuccessProbability",
+  rate: "AddSimulationColumnForm.Rate",
   populationSize: "AddSimulationColumnForm.PopulationSize",
   successCount: "AddSimulationColumnForm.SuccessCount",
   sampleSize: "AddSimulationColumnForm.SampleSize",
+  targetSuccessCount: "AddSimulationColumnForm.TargetSuccessCount",
   start: "AddSimulationColumnForm.Start",
   step: "AddSimulationColumnForm.Step",
   value: "AddSimulationColumnForm.Value",
@@ -160,18 +162,18 @@ export const DIST_PARAM_DEFAULTS: Record<
   Record<string, number>
 > = {
   uniform: { low: 0, high: 10 },
-  exponential: { scale: 1 },
-  normal: { loc: 0, scale: 1 },
-  gamma: { shape: 2, scale: 1 },
-  beta: { a: 2, b: 2 },
-  weibull: { a: 1, scale: 1 },
-  lognormal: { mean: 0, sigma: 1 },
-  binomial: { n: 10, p: 0.5 },
-  bernoulli: { p: 0.5 },
-  poisson: { lam: 1 },
-  geometric: { p: 0.5 },
+  exponential: { scaleParameter: 1 },
+  normal: { mean: 0, standardDeviation: 1 },
+  gamma: { shapeParameter: 2, scaleParameter: 1 },
+  beta: { alpha: 2, beta: 2 },
+  weibull: { shapeParameter: 1, scaleParameter: 1 },
+  lognormal: { logMean: 0, logStandardDeviation: 1 },
+  binomial: { trialCount: 10, successProbability: 0.5 },
+  bernoulli: { successProbability: 0.5 },
+  poisson: { rate: 1 },
+  geometric: { successProbability: 0.5 },
   hypergeometric: { populationSize: 20, successCount: 5, sampleSize: 10 },
-  negative_binomial: { n: 5, p: 0.5 },
+  negative_binomial: { targetSuccessCount: 5, successProbability: 0.5 },
   sequence: { start: 1, step: 1 },
   fixed: { value: 0 },
 };
@@ -209,19 +211,21 @@ const gtZeroInt = () =>
 export const DIST_PARAM_SCHEMAS: Record<string, () => z.ZodTypeAny> = {
   low: anyNum,
   high: anyNum,
-  scale: gtZeroNum,
-  loc: anyNum,
-  shape: gtZeroNum,
-  a: gtZeroNum,
-  b: gtZeroNum,
+  scaleParameter: gtZeroNum,
   mean: anyNum,
-  sigma: gtZeroNum,
-  n: gtZeroInt,
-  p: probability,
-  lam: gtZeroNum,
+  standardDeviation: gtZeroNum,
+  shapeParameter: gtZeroNum,
+  alpha: gtZeroNum,
+  beta: gtZeroNum,
+  logMean: anyNum,
+  logStandardDeviation: gtZeroNum,
+  trialCount: gtZeroInt,
+  successProbability: probability,
+  rate: gtZeroNum,
   populationSize: gtZeroInt,
   successCount: gtZeroInt,
   sampleSize: gtZeroInt,
+  targetSuccessCount: gtZeroInt,
   start: anyNum,
   step: anyNum,
   value: anyNum,
@@ -246,49 +250,49 @@ const DISTRIBUTION_BUILDERS = {
   }),
   exponential: (params) => ({
     type: "exponential",
-    scale: params.scale,
+    scaleParameter: params.scaleParameter,
   }),
   normal: (params) => ({
     type: "normal",
-    loc: params.loc,
-    scale: params.scale,
+    mean: params.mean,
+    standardDeviation: params.standardDeviation,
   }),
   gamma: (params) => ({
     type: "gamma",
-    shape: params.shape,
-    scale: params.scale,
+    shapeParameter: params.shapeParameter,
+    scaleParameter: params.scaleParameter,
   }),
   beta: (params) => ({
     type: "beta",
-    a: params.a,
-    b: params.b,
+    alpha: params.alpha,
+    beta: params.beta,
   }),
   weibull: (params) => ({
     type: "weibull",
-    a: params.a,
-    scale: params.scale,
+    shapeParameter: params.shapeParameter,
+    scaleParameter: params.scaleParameter,
   }),
   lognormal: (params) => ({
     type: "lognormal",
-    mean: params.mean,
-    sigma: params.sigma,
+    logMean: params.logMean,
+    logStandardDeviation: params.logStandardDeviation,
   }),
   binomial: (params) => ({
     type: "binomial",
-    n: params.n,
-    p: params.p,
+    trialCount: params.trialCount,
+    successProbability: params.successProbability,
   }),
   bernoulli: (params) => ({
     type: "bernoulli",
-    p: params.p,
+    successProbability: params.successProbability,
   }),
   poisson: (params) => ({
     type: "poisson",
-    lam: params.lam,
+    rate: params.rate,
   }),
   geometric: (params) => ({
     type: "geometric",
-    p: params.p,
+    successProbability: params.successProbability,
   }),
   hypergeometric: (params) => ({
     type: "hypergeometric",
@@ -298,8 +302,8 @@ const DISTRIBUTION_BUILDERS = {
   }),
   negative_binomial: (params) => ({
     type: "negative_binomial",
-    n: params.n,
-    p: params.p,
+    targetSuccessCount: params.targetSuccessCount,
+    successProbability: params.successProbability,
   }),
   sequence: (params) => ({
     type: "sequence",
