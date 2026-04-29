@@ -422,7 +422,7 @@ def format_re_result(
 
 
 # ---------------------------------------------------------------------------
-# Panel IV (FE-2SLS / AbsorbingLS)
+# Panel IV (FE-2SLS)
 # ---------------------------------------------------------------------------
 
 # Eco-Note: Staiger & Stock (1997) が提唱する弱操作変数の経験則閾値
@@ -435,8 +435,9 @@ def _compute_r2_between_overall(
 ) -> tuple[float | None, float | None]:
     """R²Between と R²Overall を残差から手動計算する。
 
-    Eco-Note: AbsorbingLS は rsquared_between / rsquared_overall を
-    持たないため FWL定理後の残差から算出する。
+    Eco-Note: FE-2SLS は IV2SLS を within-transformed データに適用するため、
+    rsquared_between / rsquared_overall を持たない。
+    FWL定理後の残差から測定数を算出する。
         R²_overall = 1 - Σe²_it / Σ(y_it - ȳ)²
         R²_between = 1 - Σē²_i  / Σ(ȳ_i  - ȳ)²
     """
@@ -558,14 +559,16 @@ def format_panel_iv_result(
     instrumental_variables: list[str],
     entity_id_column: str,
 ) -> dict:
-    """固定効果IV (AbsorbingLS) の結果を dict に変換する。
+    """固定効果IV (FE-2SLS) の結果を dict に変換する。
+
+    推定方法: manual within-transformation (entity[+time] demean) + IV2SLS。
 
     統計量:
-        R2Within  : AbsorbingLS の rsquared (absorb後の説明力)
+        R2Within  : within-transformed データに対する IV2SLS の rsquared
         R2Between : 残差の個体平均から手動計算
         R2Overall : 残差全体から手動計算
         nEntities : MultiIndex level-0 の unique 数
-        fPooled   : AbsorbingLS は非対応のため None
+        fPooled   : FE-2SLS は測定不能のため None
         wuHausmanTest / sarganTest / firstStage: IV検定統計量
     """
     summary_text = str(model_result.summary)
@@ -586,9 +589,10 @@ def format_panel_iv_result(
         model_stats["R2Overall"] = r2_overall
 
     diagnostics: dict[str, Any] = {
-        # Eco-Note: f_pooled は AbsorbingLS に実装されていないため省略
+        # Eco-Note: f_pooled は FE-2SLS (manual within + IV2SLS) では
+        # 測定できないため省略。
         # (PanelOLS.f_pooled は Within vs Pooled-OLS の F 検定だが、
-        #  AbsorbingLS はその統計量を提供しない)
+        #  IV2SLS はその統計量を提供しない)
         "fPooled": None,
     }
 
