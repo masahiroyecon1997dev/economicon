@@ -84,13 +84,15 @@ class AnalysisResultStore:
                     f"Analysis result with ID '{result_id}' does not exist."
                 )
 
-    def get_all_summaries(self) -> list[dict[str, str]]:
+    def get_all_summaries(self) -> list[dict[str, str | None]]:
         """
         すべての分析結果のサマリー情報を取得
 
         Returns:
             サマリー情報のリスト
-            (id, name, description, createdAt を含む)
+            (id, name, description, createdAt, tableName,
+             resultType, resultTypeLabel, modelType, summaryText
+             を含む。modelType は None になる場合がある。)
         """
         with self._lock:
             return [

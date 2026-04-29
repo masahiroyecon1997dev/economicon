@@ -569,7 +569,12 @@ export const GetAllAnalysisResultsResponse = zod.object({
   "id": zod.string().describe('分析結果の一意 ID'),
   "name": zod.string().describe('分析結果名'),
   "description": zod.string().describe('分析結果の説明メモ'),
-  "createdAt": zod.string().describe('作成日時（ISO 8601 形式）')
+  "createdAt": zod.string().describe('作成日時（ISO 8601 形式）'),
+  "tableName": zod.string().describe('分析対象テーブル名'),
+  "resultType": zod.string().describe('分析種別文字列（regression \/ confidence_interval \/ descriptive_statistics \/ statistical_test \/ did \/ rdd \/ heckman 等）'),
+  "resultTypeLabel": zod.string().describe('分析種別の表示ラベル（日本語）'),
+  "modelType": zod.union([zod.string(),zod.null()]).describe('モデルの種別文字列（ols \/ fe \/ re \/ iv 等）'),
+  "summaryText": zod.string().describe('分析内容の簡潔な説明文（フロントエンド一覧表示用）')
 }).describe('分析結果サマリー（一覧取得用の各要素）')).describe('分析結果のサマリーリスト')
 }).describe('処理結果')
 })

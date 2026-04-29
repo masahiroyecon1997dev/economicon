@@ -3843,6 +3843,38 @@
             "type": "string",
             "title": "Created At",
             "description": "\u4f5c\u6210\u65e5\u6642\uff08ISO 8601 \u5f62\u5f0f\uff09"
+          },
+          "tableName": {
+            "type": "string",
+            "title": "Table Name",
+            "description": "\u5206\u6790\u5bfe\u8c61\u30c6\u30fc\u30d6\u30eb\u540d"
+          },
+          "resultType": {
+            "type": "string",
+            "title": "Result Type",
+            "description": "\u5206\u6790\u7a2e\u5225\u6587\u5b57\u5217\uff08regression / confidence_interval / descriptive_statistics / statistical_test / did / rdd / heckman \u7b49\uff09"
+          },
+          "resultTypeLabel": {
+            "type": "string",
+            "title": "Result Type Label",
+            "description": "\u5206\u6790\u7a2e\u5225\u306e\u8868\u793a\u30e9\u30d9\u30eb\uff08\u65e5\u672c\u8a9e\uff09"
+          },
+          "modelType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Type",
+            "description": "\u30e2\u30c7\u30eb\u306e\u7a2e\u5225\u6587\u5b57\u5217\uff08ols / fe / re / iv \u7b49\uff09"
+          },
+          "summaryText": {
+            "type": "string",
+            "title": "Summary Text",
+            "description": "\u5206\u6790\u5185\u5bb9\u306e\u7c21\u6f54\u306a\u8aac\u660e\u6587\uff08\u30d5\u30ed\u30f3\u30c8\u30a8\u30f3\u30c9\u4e00\u89a7\u8868\u793a\u7528\uff09"
           }
         },
         "type": "object",
@@ -3850,7 +3882,12 @@
           "id",
           "name",
           "description",
-          "createdAt"
+          "createdAt",
+          "tableName",
+          "resultType",
+          "resultTypeLabel",
+          "modelType",
+          "summaryText"
         ],
         "title": "AnalysisResultSummary",
         "description": "\u5206\u6790\u7d50\u679c\u30b5\u30de\u30ea\u30fc\uff08\u4e00\u89a7\u53d6\u5f97\u7528\u306e\u5404\u8981\u7d20\uff09"

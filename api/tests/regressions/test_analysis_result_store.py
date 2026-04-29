@@ -81,10 +81,25 @@ def test_get_all_summaries_returns_list(result_store, sample_result):
     summaries = result_store.get_all_summaries()
 
     assert len(summaries) == _EXPECTED_RESULT_COUNT
+    # 基本フィールド
     assert all("id" in s for s in summaries)
     assert all("name" in s for s in summaries)
     assert all("description" in s for s in summaries)
     assert all("createdAt" in s for s in summaries)
+    # 拡張フィールド
+    assert all("tableName" in s for s in summaries)
+    assert all("resultType" in s for s in summaries)
+    assert all("resultTypeLabel" in s for s in summaries)
+    assert all("modelType" in s for s in summaries)
+    assert all("summaryText" in s for s in summaries)
+    # 値の検証（sample_result の内容）
+    first = next(s for s in summaries if s["name"] == "Test Analysis")
+    assert first["tableName"] == "test_table"
+    assert first["resultType"] == "regression"
+    assert first["resultTypeLabel"] == "回帰分析"
+    assert first["modelType"] is None
+    # result_data に dependentVariable なし → description へフォールバック
+    assert first["summaryText"] == "Test Description"
 
 
 def test_delete_result_removes_result(result_store, sample_result):

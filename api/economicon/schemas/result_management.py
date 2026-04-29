@@ -20,6 +20,31 @@ class AnalysisResultSummary(BaseResult):
         title="Created At",
         description="作成日時（ISO 8601 形式）",
     )
+    table_name: str = Field(
+        title="Table Name",
+        description="分析対象テーブル名",
+    )
+    result_type: str = Field(
+        title="Result Type",
+        description=(
+            "分析種別文字列"
+            "（regression / confidence_interval /"
+            " descriptive_statistics / statistical_test /"
+            " did / rdd / heckman 等）"
+        ),
+    )
+    result_type_label: str = Field(
+        title="Result Type Label",
+        description="分析種別の表示ラベル（日本語）",
+    )
+    model_type: str | None = Field(
+        title="Model Type",
+        description="モデルの種別文字列（ols / fe / re / iv 等）",
+    )
+    summary_text: str = Field(
+        title="Summary Text",
+        description="分析内容の簡潔な説明文（フロントエンド一覧表示用）",
+    )
 
 
 class GetAllAnalysisResultsResult(BaseResult):

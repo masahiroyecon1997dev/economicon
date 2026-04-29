@@ -17,4 +17,14 @@ export type AnalysisResultSummary = {
   description: string;
   /** 作成日時（ISO 8601 形式） */
   createdAt: string;
+  /** 分析対象テーブル名 */
+  tableName: string;
+  /** 分析種別文字列（regression / confidence_interval / descriptive_statistics / statistical_test / did / rdd / heckman 等） */
+  resultType: string;
+  /** 分析種別の表示ラベル（日本語） */
+  resultTypeLabel: string;
+  /** モデルの種別文字列（ols / fe / re / iv 等） */
+  modelType: string | null;
+  /** 分析内容の簡潔な説明文（フロントエンド一覧表示用） */
+  summaryText: string;
 };

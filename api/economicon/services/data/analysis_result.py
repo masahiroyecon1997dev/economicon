@@ -8,6 +8,17 @@ from typing import Any
 
 import numpy as np
 
+# 分析種別 → 表示ラベル（日本語）
+_RESULT_TYPE_LABELS: dict[str, str] = {
+    "regression": "回帰分析",
+    "confidence_interval": "信頼区間",
+    "descriptive_statistics": "基本統計量",
+    "statistical_test": "統計的検定",
+    "did": "DID",
+    "rdd": "RDD",
+    "heckman": "Heckman",
+}
+
 
 class AnalysisResult:
     """
@@ -207,6 +218,70 @@ class AnalysisResult:
             return False
         return Path(self._model_path).exists()
 
+    def _get_result_type_label(self) -> str:
+        """分析種別の表示ラベルを返す。"""
+        return _RESULT_TYPE_LABELS.get(self._result_type, "分析結果")
+
+    def _summary_regression(self) -> str | None:
+        dep = self._result_data.get("dependentVariable", "")
+        model = (self._model_type or "").upper()
+        if dep and model:
+            return f"{model} / {dep}"
+        return dep or None
+
+    def _summary_confidence_interval(self) -> str | None:
+        stat = self._result_data.get("statistic", {})
+        stat_type = stat.get("type", "") if isinstance(stat, dict) else ""
+        level = self._result_data.get("confidenceLevel", "")
+        if stat_type and level:
+            return f"{stat_type} / {int(float(level) * 100)}%"
+        return None
+
+    def _summary_descriptive_statistics(self) -> str | None:
+        stats = self._result_data.get("statistics", {})
+        if not isinstance(stats, dict):
+            return None
+        col_count = len(stats)
+        first = next(iter(stats.values()), {})
+        stat_count = len(first) if isinstance(first, dict) else 0
+        if col_count > 0 and stat_count > 0:
+            return f"{col_count}列 / {stat_count}統計量"
+        return None
+
+    def _summary_did(self) -> str | None:
+        dep = self._result_data.get("dependentVariable", "")
+        return f"DID / {dep}" if dep else None
+
+    def _summary_rdd(self) -> str | None:
+        outcome = self._result_data.get("outcomeVariable", "")
+        if outcome:
+            return f"RDD / {outcome}"
+        cutoff = self._result_data.get("cutoff", "")
+        return f"RDD / cutoff={cutoff}" if cutoff != "" else None
+
+    def _build_summary_text(self) -> str:
+        """
+        フロントエンド一覧表示用の簡潔な説明文を生成する。
+
+        result_type に応じた _summary_* メソッドを呼び出す。
+        キーが欠如している場合は description または
+        result_type_label にフォールバックする。
+        """
+        _builders = {
+            "regression": self._summary_regression,
+            "heckman": self._summary_regression,
+            "confidence_interval": self._summary_confidence_interval,
+            "descriptive_statistics": (self._summary_descriptive_statistics),
+            "did": self._summary_did,
+            "rdd": self._summary_rdd,
+        }
+        builder = _builders.get(self._result_type)
+        try:
+            text = builder() if builder is not None else None
+        except Exception:  # noqa: BLE001
+            text = None
+        return text or self._description or self._get_result_type_label()
+
     def to_dict(self) -> dict[str, Any]:
         """
         AnalysisResultを辞書形式に変換
@@ -225,13 +300,23 @@ class AnalysisResult:
             "timeColumn": self._time_column,
         }
 
-    def to_summary_dict(self) -> dict[str, str]:
+    def to_summary_dict(self) -> dict[str, str | None]:
         """
         サマリー情報を辞書形式に変換
+
+        Returns:
+            id, name, description, createdAt, tableName,
+            resultType, resultTypeLabel, modelType, summaryText
+            を含む辞書。modelType は None になる場合がある。
         """
         return {
             "id": self._id,
             "name": self._name,
             "description": self._description,
             "createdAt": self._created_at,
+            "tableName": self._table_name,
+            "resultType": self._result_type,
+            "resultTypeLabel": self._get_result_type_label(),
+            "modelType": self._model_type,
+            "summaryText": self._build_summary_text(),
         }
