@@ -13,10 +13,10 @@ from economicon.schemas import (
     SuccessResponse,
 )
 from economicon.schemas.results import (
+    AnalysisResultDetail,
     ClearAllAnalysisResultsResult,
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
-    GetAnalysisResultResult,
     OutputResultRequest,
     OutputResultResult,
 )
@@ -62,7 +62,7 @@ async def get_all_analysis_results(
 
 @router.get(
     "/results/{result_id}",
-    response_model=SuccessResponse[GetAnalysisResultResult],
+    response_model=SuccessResponse[AnalysisResultDetail],
 )
 async def get_analysis_result(
     request: Request,

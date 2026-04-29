@@ -174,9 +174,7 @@ export const DescriptiveStatistics = () => {
         const { resultId } = resp.result;
         const detailResp = await api.getAnalysisResult(resultId);
         if (detailResp.code === "OK") {
-          console.log(detailResp.result);
-          const data = detailResp.result.result.resultData
-            .statistics as StatisticsMap;
+          const data = detailResp.result.resultData.statistics as StatisticsMap;
           setResult({ resultId, data, cols: orderedCols, stats: orderedStats });
           setTimeout(
             () =>
@@ -188,8 +186,7 @@ export const DescriptiveStatistics = () => {
           );
         }
       }
-    } catch (error) {
-      console.log(error);
+    } catch {
       await showMessageDialog(
         t("DescriptiveStatistics.ErrorCalculation"),
         "error",

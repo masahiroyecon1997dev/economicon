@@ -46,6 +46,7 @@ import type {
   SuccessResponseAddLagLeadColumnResult,
   SuccessResponseAddPanelTimeColumnResult,
   SuccessResponseAddSimulationColumnResult,
+  SuccessResponseAnalysisResultDetail,
   SuccessResponseCalculateColumnResult,
   SuccessResponseCastColumnResult,
   SuccessResponseClearAllAnalysisResultsResult,
@@ -65,7 +66,6 @@ import type {
   SuccessResponseFetchDataToJsonResult,
   SuccessResponseFilterResult,
   SuccessResponseGetAllAnalysisResultsResult,
-  SuccessResponseGetAnalysisResultResult,
   SuccessResponseGetColumnListResult,
   SuccessResponseGetSettingsResult,
   SuccessResponseGetTableListResult,
@@ -1016,8 +1016,8 @@ JSONResponse
  */
 const getAnalysisResult = (
     resultId: string,
- options?: SecondParameter<typeof customInstance<SuccessResponseGetAnalysisResultResult>>,) => {
-      return customInstance<SuccessResponseGetAnalysisResultResult>(
+ options?: SecondParameter<typeof customInstance<SuccessResponseAnalysisResultDetail>>,) => {
+      return customInstance<SuccessResponseAnalysisResultDetail>(
       {url: `/api/analysis/results/${resultId}`, method: 'GET'
     },
       options);

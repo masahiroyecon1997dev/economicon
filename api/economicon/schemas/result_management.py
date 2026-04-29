@@ -81,15 +81,6 @@ class AnalysisResultDetail(BaseResult):
     )
 
 
-class GetAnalysisResultResult(BaseResult):
-    """分析結果詳細取得レスポンス"""
-
-    result: AnalysisResultDetail = Field(
-        title="Result",
-        description="分析結果の詳細データ",
-    )
-
-
 class DeleteAnalysisResultResult(BaseResult):
     """分析結果削除レスポンス"""
 

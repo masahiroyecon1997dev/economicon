@@ -6,10 +6,9 @@
  */
 import type { AnalysisResultDetail } from './analysisResultDetail';
 
-/**
- * 分析結果詳細取得レスポンス
- */
-export type GetAnalysisResultResult = {
-  /** 分析結果の詳細データ */
+export type SuccessResponseAnalysisResultDetail = {
+  /** レスポンスコード */
+  code?: string;
+  /** 処理結果 */
   result: AnalysisResultDetail;
 };

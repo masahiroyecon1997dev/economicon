@@ -2333,7 +2333,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_GetAnalysisResultResult_"
+                  "$ref": "#/components/schemas/SuccessResponse_AnalysisResultDetail_"
                 }
               }
             }
@@ -5985,21 +5985,6 @@
         "title": "GetAllAnalysisResultsResult",
         "description": "\u5168\u5206\u6790\u7d50\u679c\u30b5\u30de\u30ea\u30fc\u53d6\u5f97\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
-      "GetAnalysisResultResult": {
-        "properties": {
-          "result": {
-            "$ref": "#/components/schemas/AnalysisResultDetail",
-            "title": "Result",
-            "description": "\u5206\u6790\u7d50\u679c\u306e\u8a73\u7d30\u30c7\u30fc\u30bf"
-          }
-        },
-        "type": "object",
-        "required": [
-          "result"
-        ],
-        "title": "GetAnalysisResultResult",
-        "description": "\u5206\u6790\u7d50\u679c\u8a73\u7d30\u53d6\u5f97\u30ec\u30b9\u30dd\u30f3\u30b9"
-      },
       "GetColumnListRequestBody": {
         "properties": {
           "tableName": {
@@ -8212,6 +8197,25 @@
         ],
         "title": "SuccessResponse[AddSimulationColumnResult]"
       },
+      "SuccessResponse_AnalysisResultDetail_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/AnalysisResultDetail",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[AnalysisResultDetail]"
+      },
       "SuccessResponse_CalculateColumnResult_": {
         "properties": {
           "code": {
@@ -8572,25 +8576,6 @@
           "result"
         ],
         "title": "SuccessResponse[GetAllAnalysisResultsResult]"
-      },
-      "SuccessResponse_GetAnalysisResultResult_": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
-            "default": "OK"
-          },
-          "result": {
-            "$ref": "#/components/schemas/GetAnalysisResultResult",
-            "description": "\u51e6\u7406\u7d50\u679c"
-          }
-        },
-        "type": "object",
-        "required": [
-          "result"
-        ],
-        "title": "SuccessResponse[GetAnalysisResultResult]"
       },
       "SuccessResponse_GetColumnListResult_": {
         "properties": {

@@ -122,7 +122,7 @@ describe("DescriptiveStatistics フォーム", () => {
       });
       mockApi.getAnalysisResult.mockResolvedValue({
         code: "OK",
-        result: { result: { resultData: { statistics } } },
+        result: { resultData: { statistics } },
       });
 
       const user = userEvent.setup();
@@ -277,11 +277,9 @@ describe("DescriptiveStatistics フォーム", () => {
       mockApi.getAnalysisResult.mockResolvedValue({
         code: "OK",
         result: {
-          result: {
-            resultData: {
-              statistics: {
-                price: { [DescriptiveStatisticType.mean]: 10 },
-              },
+          resultData: {
+            statistics: {
+              price: { [DescriptiveStatisticType.mean]: 10 },
             },
           },
         },

@@ -11,8 +11,8 @@ import { extractApiErrorMessage } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
 import {
-  useConfidenceIntervalResultsStore,
-  type ConfidenceIntervalResultData,
+    useConfidenceIntervalResultsStore,
+    type ConfidenceIntervalResultData,
 } from "@/stores/confidenceIntervalResults";
 import { useTableListStore } from "@/stores/tableList";
 import { useForm, useStore } from "@tanstack/react-form";
@@ -111,7 +111,7 @@ export const ConfidenceIntervalForm = ({
           const { resultId } = response.result;
           const detailResponse = await api.getAnalysisResult(resultId);
           if (detailResponse.code === "OK") {
-            const resultData = detailResponse.result.result.resultData as Omit<
+            const resultData = detailResponse.result.resultData as Omit<
               ConfidenceIntervalResultData,
               "resultId"
             >;

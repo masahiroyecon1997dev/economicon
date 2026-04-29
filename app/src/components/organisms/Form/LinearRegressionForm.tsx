@@ -1,17 +1,14 @@
-import { useForm, useStore } from "@tanstack/react-form";
-import { ChevronDown } from "lucide-react";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { z } from "zod";
 import { getEconomiconAppAPI } from "@/api/endpoints";
-import type {
-  AnalysisResultDetail,
-  StandardErrorSettings,
-} from "@/api/model";
+import type { AnalysisResultDetail, StandardErrorSettings } from "@/api/model";
 import {
   MissingValueHandlingType,
   RobustStandardErrorHcType,
 } from "@/api/model";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { VariableSelectorField } from "@/components/molecules/Field/VariableSelectorField";
+import { FormField } from "@/components/molecules/Form/FormField";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
@@ -23,11 +20,11 @@ import { cn } from "@/lib/utils/helpers";
 import { useRegressionResultsStore } from "@/stores/regressionResults";
 import { useTableListStore } from "@/stores/tableList";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
-import { InputText } from "@/components/atoms/Input/InputText";
-import { Select, SelectItem } from "@/components/atoms/Input/Select";
-import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
-import { VariableSelectorField } from "@/components/molecules/Field/VariableSelectorField";
-import { FormField } from "@/components/molecules/Form/FormField";
+import { useForm, useStore } from "@tanstack/react-form";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 const createRegressionSchema = (t: (key: string) => string) =>
   z.object({
@@ -112,10 +109,7 @@ export const LinearRegressionForm = ({
           const { resultId } = regressionResponse.result;
           const resultResponse = await api.getAnalysisResult(resultId);
           if (resultResponse.code === "OK" && resultResponse.result) {
-            // APIレスポンス構造: { code: "OK", result: AnalysisResultDetail }
-            // TypeScript生成型よりも深くネストされているため unknown キャストを使用
-            const detail =
-              resultResponse.result as unknown as AnalysisResultDetail;
+            const detail: AnalysisResultDetail = resultResponse.result;
             addResult({
               ...(detail.resultData as unknown as LinearRegressionResultType),
               resultId: detail.id,

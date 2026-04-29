@@ -103,7 +103,6 @@ from economicon.schemas.result_management import (
     ClearAllAnalysisResultsResult,
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
-    GetAnalysisResultResult,
 )
 from economicon.schemas.result_output import (
     ConfidenceIntervalOutputOptions,
@@ -319,7 +318,6 @@ __all__ = [
     "AnalysisResultSummary",
     "GetAllAnalysisResultsResult",
     "AnalysisResultDetail",
-    "GetAnalysisResultResult",
     "DeleteAnalysisResultResult",
     "ClearAllAnalysisResultsResult",
     "AddDiagnosticColumnsRequestBody",

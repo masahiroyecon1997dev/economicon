@@ -625,7 +625,6 @@ export const getAnalysisResultResponseCodeDefault = `OK`;
 export const GetAnalysisResultResponse = zod.object({
   "code": zod.string().default(getAnalysisResultResponseCodeDefault).describe('レスポンスコード'),
   "result": zod.object({
-  "result": zod.object({
   "id": zod.string().describe('分析結果の一意 ID'),
   "name": zod.string().describe('分析結果名'),
   "description": zod.string().describe('分析結果の説明メモ'),
@@ -637,7 +636,6 @@ export const GetAnalysisResultResponse = zod.object({
   "modelType": zod.union([zod.string(),zod.null()]).describe('モデルの種別文字列（ols \/ fe \/ re \/ iv 等）'),
   "entityIdColumn": zod.union([zod.string(),zod.null()]).describe('パネルデータ分析における個体 ID 列名'),
   "timeColumn": zod.union([zod.string(),zod.null()]).describe('パネルデータ分析における時間列名')
-}).describe('分析結果の詳細データ')
 }).describe('処理結果')
 })
 
