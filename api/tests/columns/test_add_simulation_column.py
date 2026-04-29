@@ -489,7 +489,7 @@ def test_add_negative_binomial_column_success(client, tables_store):
 
 
 def test_add_sequence_column_success(client, tables_store):
-    """\u7b49\u5dee\u6570\u5217\uff08\u30c7\u30d5\u30a9\u30eb\u30c8: start=1, step=1\uff09\u306e\u5217\u8ffd\u52a0\u304c\u6b63\u5e38\u306b\u52d5\u4f5c\u3059\u308b"""
+    """既定値の等差数列を追加できる"""
     response = client.post(
         "/api/column/add-simulation",
         json={
@@ -520,7 +520,7 @@ def test_add_sequence_column_success(client, tables_store):
 
 
 def test_add_sequence_column_descending(client, tables_store):
-    """step=-1 \u306e\u7b49\u5dee\u6570\u5217\u3067\u964d\u9806\u306b\u306a\u308b\u3053\u3068\u3092\u78ba\u8a8d"""
+    """負の step で降順の列を追加できる"""
     response = client.post(
         "/api/column/add-simulation",
         json={
@@ -543,7 +543,7 @@ def test_add_sequence_column_descending(client, tables_store):
 
 
 def test_add_sequence_column_custom_start(client, tables_store):
-    """start=2000 \u306e\u7b49\u5dee\u6570\u5217\u3067\u5e74\u6b21\u5217\u6a21\u64ec\u306b\u306a\u308b\u3053\u3068\u3092\u78ba\u8a8d"""
+    """開始値を指定した年次列を追加できる"""
     response = client.post(
         "/api/column/add-simulation",
         json={

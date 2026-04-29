@@ -38,6 +38,7 @@ def _load_rdd_gold() -> dict:
 _POLY_FIT_POINTS = 100
 _BW_TOLERANCE = 1e-6
 _PLACEBO_TOLERANCE = 1e-6
+_RDROBUST_ESTIMATE_TOLERANCE = 1e-4
 _MIN_PLACEBO_COUNT = 2
 _TEST_PLACEBO_LEFT = -0.5
 _TEST_PLACEBO_RIGHT = 0.5
@@ -405,9 +406,9 @@ def test_rdd_estimate_numerical(client, tables_store):
     se: float = rd["estimate"]["se"]
 
     # rdrobust のローカル多項式測定は許容誤差大きめ
-    assert abs(coef - expected_coef) <= 1e-4, (
+    assert abs(coef - expected_coef) <= _RDROBUST_ESTIMATE_TOLERANCE, (
         f"coef mismatch: got {coef}, expected {expected_coef}"
     )
-    assert abs(se - expected_se) <= 1e-4, (
+    assert abs(se - expected_se) <= _RDROBUST_ESTIMATE_TOLERANCE, (
         f"se mismatch: got {se}, expected {expected_se}"
     )

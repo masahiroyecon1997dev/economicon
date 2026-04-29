@@ -2,6 +2,7 @@
 
 import pytest
 from fastapi import status
+from fastapi.testclient import TestClient
 
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.statistics.conftest import load_statistics_gold_case

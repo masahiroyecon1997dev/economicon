@@ -77,13 +77,14 @@ def test_fetch_plot_data_success(client, tables_store):
     )
 
     arrow_table = _decode_arrow_table(response)
-    assert arrow_table.num_columns == 2
+    expected_plot_column_count = 2
+    assert arrow_table.num_columns == expected_plot_column_count
     assert arrow_table.num_rows == len(_SOURCE_DF)
     assert set(arrow_table.column_names) == {"col_int", "col_float"}
 
 
 def test_fetch_plot_data_metadata(client, tables_store):
-    """正常系: スキーマメタデータに tableName / columnNames / totalRows が含まれる"""
+    """正常系: 主要メタデータが含まれる"""
     response = client.post("/api/table/fetch-plot-data", json=_BASE_PAYLOAD)
     meta = _get_schema_meta(response)
 
@@ -113,7 +114,8 @@ def test_fetch_plot_data_deduplication(client, tables_store):
     assert response.status_code == status.HTTP_200_OK
 
     arrow_table = _decode_arrow_table(response)
-    assert arrow_table.num_columns == 2
+    expected_deduped_column_count = 2
+    assert arrow_table.num_columns == expected_deduped_column_count
 
 
 # ─────────────────────────────────────────────────────────────
@@ -128,8 +130,7 @@ def test_fetch_plot_data_table_not_found(client, tables_store):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
     assert (
-        response_data["message"]
-        == "tableName 'no_such_table'は存在しません。"
+        response_data["message"] == "tableName 'no_such_table'は存在しません。"
     )
 
 
@@ -142,8 +143,7 @@ def test_fetch_plot_data_column_not_found(client, tables_store):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["code"] == ErrorCode.DATA_NOT_FOUND
     assert (
-        response_data["message"]
-        == "columnNames 'no_such_col'は存在しません。"
+        response_data["message"] == "columnNames 'no_such_col'は存在しません。"
     )
 
 
@@ -165,7 +165,8 @@ def test_fetch_plot_data_too_many_columns(client, tables_store):
 
 def test_fetch_plot_data_row_count_exceeds_limit(client):
     """異常系: テーブルの行数が MAX_PLOT_ROWS を超える → 400"""
-    from economicon.services.tables.fetch_plot_data_to_arrow import (
+    # このクラス定数はこのテストでのみ使うため局所 import に留める。
+    from economicon.services.tables.fetch_plot_data_to_arrow import (  # noqa: PLC0415
         FetchPlotDataToArrow,
     )
 

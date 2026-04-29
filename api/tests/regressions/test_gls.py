@@ -13,6 +13,7 @@ from tests.regressions.conftest import (
 )
 
 _ABS_TOL = 1e-12
+_GLS_OLS_DIFFERENCE_THRESHOLD = 1e-6
 _EXPECTED_N_OBS = 48
 _BAD_SIGMA_ROWS = 3
 _BAD_SIGMA_COLS = 3
@@ -110,9 +111,10 @@ def test_gls_differs_from_ols_when_sigma_is_non_identity(client, tables_store):
     gls_map = {p["variable"]: p["coefficient"] for p in gls_params}
     ols_map = {p["variable"]: p["coefficient"] for p in ols_params}
 
-    assert any(abs(gls_map[var] - ols_map[var]) > 1e-6 for var in gls_map), (
-        "GLS coefficients unexpectedly match OLS under non-identity sigma"
-    )
+    assert any(
+        abs(gls_map[var] - ols_map[var]) > _GLS_OLS_DIFFERENCE_THRESHOLD
+        for var in gls_map
+    ), "GLS coefficients unexpectedly match OLS under non-identity sigma"
 
 
 def test_gls_missing_sigma_table(client, tables_store):
