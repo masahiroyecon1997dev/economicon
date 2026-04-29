@@ -8,15 +8,17 @@ from typing import Any
 
 import numpy as np
 
-# 分析種別 → 表示ラベル（日本語）
+from economicon.i18n.translation import gettext as _
+
+# 分析種別 → 表示ラベルの翻訳キー（msgid）
 _RESULT_TYPE_LABELS: dict[str, str] = {
-    "regression": "回帰分析",
-    "confidence_interval": "信頼区間",
-    "descriptive_statistics": "基本統計量",
-    "statistical_test": "統計的検定",
-    "did": "DID",
-    "rdd": "RDD",
-    "heckman": "Heckman",
+    "regression": "regression",
+    "confidence_interval": "confidence_interval",
+    "descriptive_statistics": "descriptive_statistics",
+    "statistical_test": "statistical_test",
+    "did": "did",
+    "rdd": "rdd",
+    "heckman": "heckman",
 }
 
 
@@ -220,7 +222,8 @@ class AnalysisResult:
 
     def _get_result_type_label(self) -> str:
         """分析種別の表示ラベルを返す。"""
-        return _RESULT_TYPE_LABELS.get(self._result_type, "分析結果")
+        label_key = _RESULT_TYPE_LABELS.get(self._result_type, "分析結果")
+        return _(label_key)
 
     def _summary_regression(self) -> str | None:
         dep = self._result_data.get("dependentVariable", "")

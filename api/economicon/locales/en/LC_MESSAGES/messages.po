@@ -18,6 +18,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
+#: economicon/services/data/analysis_result.py
+msgid "regression"
+msgstr "Regression"
+
+msgid "confidence_interval"
+msgstr "Confidence interval"
+
+msgid "descriptive_statistics"
+msgstr "Descriptive statistics"
+
+msgid "statistical_test"
+msgstr "Statistical test"
+
+msgid "did"
+msgstr "Difference-In-Differences"
+
+msgid "rdd"
+msgstr "Regression Discontinuity Design"
+
+msgid "heckman"
+msgstr "Heckman"
+
 #: economicon/exception_handlers.py:34
 msgid "An unexpected error occurred during processing"
 msgstr ""

@@ -18,6 +18,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
+#: economicon/services/data/analysis_result.py
+msgid "regression"
+msgstr "回帰分析"
+
+msgid "confidence_interval"
+msgstr "信頼区間"
+
+msgid "descriptive_statistics"
+msgstr "基本統計量"
+
+msgid "statistical_test"
+msgstr "仮説検定"
+
+msgid "did"
+msgstr "差の差分析"
+
+msgid "rdd"
+msgstr "回帰不連続デザイン"
+
+msgid "heckman"
+msgstr "ヘキットモデル"
+
 #: economicon/exception_handlers.py:34
 msgid "An unexpected error occurred during processing"
 msgstr "処理中に予期しないエラーが発生しました"
