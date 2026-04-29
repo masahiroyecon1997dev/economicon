@@ -2,8 +2,8 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { OutputResultFormat } from "@/api/model/outputResultFormat";
 import { RegressionOutputOptionsStatInParentheses } from "@/api/model/regressionOutputOptionsStatInParentheses";
 import {
-  ResultSection,
-  StatItem,
+    ResultSection,
+    StatItem,
 } from "@/components/molecules/Result/ResultSection";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { cn } from "@/lib/utils/helpers";
@@ -23,6 +23,7 @@ export const RegressionResult = ({
 }: RegressionResultProps) => {
   const { t } = useTranslation();
   const [isOutputDialogOpen, setIsOutputDialogOpen] = useState(false);
+  const [outputDialogSessionKey, setOutputDialogSessionKey] = useState(0);
   const [isQuickCopying, setIsQuickCopying] = useState(false);
   const [isQuickCopied, setIsQuickCopied] = useState(false);
 
@@ -63,6 +64,11 @@ export const RegressionResult = ({
     }
   };
 
+  const openOutputDialog = () => {
+    setOutputDialogSessionKey((prev) => prev + 1);
+    setIsOutputDialogOpen(true);
+  };
+
   return (
     <div className={cn("flex flex-col gap-4 p-4", className)}>
       {/* 分析概要 */}
@@ -97,7 +103,7 @@ export const RegressionResult = ({
 
           <button
             type="button"
-            onClick={() => setIsOutputDialogOpen(true)}
+            onClick={openOutputDialog}
             title={t("RegressionResult.OutputDialog")}
             className={cn(
               "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
@@ -133,6 +139,7 @@ export const RegressionResult = ({
 
       {/* 出力ダイアログ */}
       <OutputResultDialog
+        key={`${result.resultId}:${outputDialogSessionKey}`}
         open={isOutputDialogOpen}
         onOpenChange={setIsOutputDialogOpen}
         resultKind="regression"

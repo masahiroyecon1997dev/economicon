@@ -338,7 +338,7 @@ export const ImportConfigDialog = ({
 
   return (
     <ImportConfigDialogContent
-      key={`${fileInfo.path}:${isOpen ? "open" : "closed"}`}
+      key={fileInfo.path}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       fileInfo={fileInfo}

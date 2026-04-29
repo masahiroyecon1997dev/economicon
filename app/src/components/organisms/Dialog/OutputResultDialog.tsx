@@ -575,7 +575,7 @@ export const OutputResultDialog = (props: OutputResultDialogPropsType) => {
   ) {
     return (
       <DescriptiveStatisticsOutputResultDialogContent
-        key={`${props.resultId}:${props.open ? "open" : "closed"}`}
+        key={props.resultId}
         open={props.open}
         onOpenChange={props.onOpenChange}
         resultId={props.resultId}
@@ -589,7 +589,7 @@ export const OutputResultDialog = (props: OutputResultDialogPropsType) => {
 
   return (
     <RegressionOutputResultDialogContent
-      key={`${props.result.resultId}:${props.open ? "open" : "closed"}`}
+      key={props.result.resultId}
       open={props.open}
       onOpenChange={props.onOpenChange}
       result={props.result}

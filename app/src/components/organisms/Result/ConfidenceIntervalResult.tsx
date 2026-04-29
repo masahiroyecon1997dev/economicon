@@ -25,6 +25,7 @@ export const ConfidenceIntervalResult = ({
   const { t } = useTranslation();
   const levelPct = `${(result.confidenceLevel * 100).toFixed(0)}%`;
   const [isOutputDialogOpen, setIsOutputDialogOpen] = useState(false);
+  const [outputDialogSessionKey, setOutputDialogSessionKey] = useState(0);
   const [isQuickCopying, setIsQuickCopying] = useState(false);
   const [isQuickCopied, setIsQuickCopied] = useState(false);
 
@@ -49,6 +50,11 @@ export const ConfidenceIntervalResult = ({
     } finally {
       setIsQuickCopying(false);
     }
+  };
+
+  const openOutputDialog = () => {
+    setOutputDialogSessionKey((prev) => prev + 1);
+    setIsOutputDialogOpen(true);
   };
 
   return (
@@ -88,7 +94,7 @@ export const ConfidenceIntervalResult = ({
 
             <button
               type="button"
-              onClick={() => setIsOutputDialogOpen(true)}
+              onClick={openOutputDialog}
               title={t("ConfidenceIntervalView.OutputDialog")}
               className={cn(
                 "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
@@ -158,6 +164,7 @@ export const ConfidenceIntervalResult = ({
       </div>
 
       <OutputResultDialog
+        key={`${result.resultId}:${outputDialogSessionKey}`}
         open={isOutputDialogOpen}
         onOpenChange={setIsOutputDialogOpen}
         resultKind="confidence_interval"

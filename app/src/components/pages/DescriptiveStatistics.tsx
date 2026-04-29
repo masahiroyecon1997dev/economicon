@@ -85,6 +85,7 @@ export const DescriptiveStatistics = () => {
   const [result, setResult] = useState<ResultSnapshot | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isOutputDialogOpen, setIsOutputDialogOpen] = useState(false);
+  const [outputDialogSessionKey, setOutputDialogSessionKey] = useState(0);
   const [isQuickCopying, setIsQuickCopying] = useState(false);
   const [isQuickCopied, setIsQuickCopied] = useState(false);
 
@@ -113,6 +114,12 @@ export const DescriptiveStatistics = () => {
       setIsQuickCopying(false);
     }
   };
+
+  const openOutputDialog = () => {
+    setOutputDialogSessionKey((prev) => prev + 1);
+    setIsOutputDialogOpen(true);
+  };
+
   const [statsOpen, setStatsOpen] = useState(true);
   const {
     selectedTableName: selectedTable,
@@ -341,7 +348,7 @@ export const DescriptiveStatistics = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setIsOutputDialogOpen(true)}
+                  onClick={openOutputDialog}
                   className={cn(
                     "inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
                     "border border-gray-300 dark:border-gray-600",
@@ -421,6 +428,7 @@ export const DescriptiveStatistics = () => {
       />
       {result && (
         <OutputResultDialog
+          key={`${result.resultId}:${outputDialogSessionKey}`}
           open={isOutputDialogOpen}
           onOpenChange={setIsOutputDialogOpen}
           resultKind="descriptive_statistics"

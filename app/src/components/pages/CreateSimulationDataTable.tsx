@@ -26,9 +26,11 @@ import { useTableListStore } from "@/stores/tableList";
 import type { SimulationColumnSetting } from "@/types/commonTypes";
 import { useForm, useStore } from "@tanstack/react-form";
 import { AlertCircle, Dices, Edit2, Hash, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+
+const DIALOG_CLOSE_ANIMATION_MS = 220;
 
 const createSimulationSchema = (t: (key: string) => string) =>
   z.object({
@@ -90,6 +92,17 @@ export const CreateSimulationDataTable = () => {
   ]);
 
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (isEditDialogOpen || !editingColumnId) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setEditingColumnId(null);
+    }, DIALOG_CLOSE_ANIMATION_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isEditDialogOpen, editingColumnId]);
 
   const form = useForm({
     defaultValues: {
@@ -201,6 +214,10 @@ export const CreateSimulationDataTable = () => {
   const handleCancel = () => {
     setCurrentView("ImportDataFile");
   };
+
+  const editingColumn = editingColumnId
+    ? (columns.find((col) => col.id === editingColumnId) ?? null)
+    : null;
 
   return (
     <PageLayout
@@ -437,7 +454,10 @@ export const CreateSimulationDataTable = () => {
                     <div className="flex items-center gap-0.5 shrink-0">
                       <button
                         type="button"
-                        onClick={() => setEditingColumnId(column.id)}
+                        onClick={() => {
+                          setEditingColumnId(column.id);
+                          setIsEditDialogOpen(true);
+                        }}
                         className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={isSubmitting}
                         aria-label={t("Common.Edit")}
@@ -483,18 +503,19 @@ export const CreateSimulationDataTable = () => {
         />
       </form>
 
-      {editingColumnId && (
+      {editingColumn && (
         <SimulationColumnEditDialog
-          key={editingColumnId}
-          isOpen={!!editingColumnId}
-          column={columns.find((col) => col.id === editingColumnId)!}
-          index={columns.findIndex((col) => col.id === editingColumnId)}
+          key={editingColumn.id}
+          isOpen={isEditDialogOpen}
+          column={editingColumn}
+          index={columns.findIndex((col) => col.id === editingColumn.id)}
           onSave={updateColumn}
           onRemove={(id) => {
             removeColumn(id);
+            setIsEditDialogOpen(false);
             setEditingColumnId(null);
           }}
-          onClose={() => setEditingColumnId(null)}
+          onClose={() => setIsEditDialogOpen(false)}
           canRemove={columns.length > 1}
           disabled={isSubmitting}
         />
