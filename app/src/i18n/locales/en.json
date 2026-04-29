@@ -367,7 +367,9 @@
     "ResultConfidenceLevel": "Confidence Level",
     "ResultConfidenceInterval": "Confidence Interval",
     "ResultLower": "Lower",
-    "ResultUpper": "Upper"
+    "ResultUpper": "Upper",
+    "QuickCopyMd": "Copy as Markdown",
+    "OutputDialog": "Export..."
   },
   "StatisticsInfo": {
     "FormulaLabel": "Formula",

@@ -367,7 +367,9 @@
     "ResultConfidenceLevel": "信頼水準",
     "ResultConfidenceInterval": "信頼区間",
     "ResultLower": "下限",
-    "ResultUpper": "上限"
+    "ResultUpper": "上限",
+    "QuickCopyMd": "Markdownをクリップボードにコピー",
+    "OutputDialog": "出力..."
   },
   "StatisticsInfo": {
     "FormulaLabel": "計算式",

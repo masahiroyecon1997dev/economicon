@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const makeResult = (
   overrides: Partial<ConfidenceIntervalResultData> = {},
 ): ConfidenceIntervalResultData => ({
+  resultId: "result-001",
   tableName: "sales",
   columnName: "price",
   statistic: { type: "mean", value: 120.5 },
@@ -33,28 +34,21 @@ afterEach(() => {
 // --------------------------------------------------------------------------
 describe("useConfidenceIntervalResultsStore", () => {
   describe("addResult", () => {
-    it("test_addResult_appendsEntryWithId", () => {
-      vi.spyOn(crypto, "randomUUID").mockReturnValueOnce(
-        "00000000-0000-0000-0000-000000000001",
-      );
+    it("test_addResult_appendsEntryWithResultId", () => {
       const { addResult } = useConfidenceIntervalResultsStore.getState();
       addResult(makeResult());
 
       const { results } = useConfidenceIntervalResultsStore.getState();
       expect(results).toHaveLength(1);
-      expect(results[0].id).toBe("00000000-0000-0000-0000-000000000001");
+      expect(results[0].resultId).toBe("result-001");
       expect(results[0].tableName).toBe("sales");
       expect(results[0].columnName).toBe("price");
     });
 
     it("test_addResult_multipleResults_keepsOrder", () => {
-      vi.spyOn(crypto, "randomUUID")
-        .mockReturnValueOnce("00000000-0000-0000-0000-000000000001")
-        .mockReturnValueOnce("00000000-0000-0000-0000-000000000002");
-
       const { addResult } = useConfidenceIntervalResultsStore.getState();
-      addResult(makeResult({ columnName: "price" }));
-      addResult(makeResult({ columnName: "quantity" }));
+      addResult(makeResult({ resultId: "r1", columnName: "price" }));
+      addResult(makeResult({ resultId: "r2", columnName: "quantity" }));
 
       const { results } = useConfidenceIntervalResultsStore.getState();
       expect(results).toHaveLength(2);
@@ -81,16 +75,12 @@ describe("useConfidenceIntervalResultsStore", () => {
 
   describe("removeResult", () => {
     it("test_removeResult_removesCorrectEntry", () => {
-      vi.spyOn(crypto, "randomUUID")
-        .mockReturnValueOnce("00000000-0000-0000-0000-000000000001")
-        .mockReturnValueOnce("00000000-0000-0000-0000-000000000002");
-
       const { addResult, removeResult } =
         useConfidenceIntervalResultsStore.getState();
-      addResult(makeResult({ columnName: "price" }));
-      addResult(makeResult({ columnName: "quantity" }));
+      addResult(makeResult({ resultId: "r1", columnName: "price" }));
+      addResult(makeResult({ resultId: "r2", columnName: "quantity" }));
 
-      removeResult("00000000-0000-0000-0000-000000000001");
+      removeResult("r1");
 
       const { results } = useConfidenceIntervalResultsStore.getState();
       expect(results).toHaveLength(1);
@@ -98,9 +88,6 @@ describe("useConfidenceIntervalResultsStore", () => {
     });
 
     it("test_removeResult_unknownId_doesNothing", () => {
-      vi.spyOn(crypto, "randomUUID").mockReturnValueOnce(
-        "00000000-0000-0000-0000-000000000001",
-      );
       const { addResult, removeResult } =
         useConfidenceIntervalResultsStore.getState();
       addResult(makeResult());
@@ -113,13 +100,10 @@ describe("useConfidenceIntervalResultsStore", () => {
     });
 
     it("test_removeResult_lastEntry_leavesEmptyArray", () => {
-      vi.spyOn(crypto, "randomUUID").mockReturnValueOnce(
-        "00000000-0000-0000-0000-000000000001",
-      );
       const { addResult, removeResult } =
         useConfidenceIntervalResultsStore.getState();
       addResult(makeResult());
-      removeResult("00000000-0000-0000-0000-000000000001");
+      removeResult("result-001");
 
       expect(useConfidenceIntervalResultsStore.getState().results).toHaveLength(
         0,

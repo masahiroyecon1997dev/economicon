@@ -1,7 +1,9 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import type { ConfidenceIntervalResultEntry } from "@/stores/confidenceIntervalResults";
+import { getEconomiconAppAPI } from "@/api/endpoints";
 import { ConfidenceIntervalResult } from "@/components/organisms/Result/ConfidenceIntervalResult";
+import type { ConfidenceIntervalResultEntry } from "@/stores/confidenceIntervalResults";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -12,19 +14,43 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
+vi.mock("@/api/endpoints", () => ({
+  getEconomiconAppAPI: vi.fn(),
+}));
+
+vi.mock("@/components/organisms/Dialog/OutputResultDialog", () => ({
+  OutputResultDialog: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="ci-output-dialog">output dialog</div> : null,
+}));
+
 // ---------------------------------------------------------------------------
 // Fixture
 // ---------------------------------------------------------------------------
 const makeEntry = (
   overrides: Partial<ConfidenceIntervalResultEntry> = {},
 ): ConfidenceIntervalResultEntry => ({
-  id: "test-id",
+  resultId: "test-result-id",
   tableName: "sales",
   columnName: "price",
   statistic: { type: "mean", value: 120.5 },
   confidenceInterval: { lower: 115.1234, upper: 126.5678 },
   confidenceLevel: 0.95,
   ...overrides,
+});
+
+const mockOutputResult = vi.fn();
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(getEconomiconAppAPI).mockReturnValue({
+    outputResult: mockOutputResult,
+  } as never);
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: {
+      writeText: vi.fn().mockResolvedValue(undefined),
+    },
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -110,6 +136,14 @@ describe("ConfidenceIntervalResult — 表示テスト", () => {
       );
       expect(el).toBeTruthy();
     });
+
+    it("test_result_showsOutputButtons", () => {
+      render(<ConfidenceIntervalResult result={makeEntry()} />);
+      expect(screen.getByTestId("ci-quick-copy-md-btn")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("ci-open-output-dialog-btn"),
+      ).toBeInTheDocument();
+    });
   });
 
   describe("statisticType が median のとき", () => {
@@ -124,6 +158,38 @@ describe("ConfidenceIntervalResult — 表示テスト", () => {
       expect(
         screen.getByText("ConfidenceIntervalView.StatisticType_median"),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("出力操作", () => {
+    it("test_output_quickCopy_callsOutputResultWithConfidenceInterval", async () => {
+      mockOutputResult.mockResolvedValueOnce({
+        code: "OK",
+        result: { content: "| Result |", format: "markdown" },
+      });
+      const user = userEvent.setup();
+
+      render(<ConfidenceIntervalResult result={makeEntry()} />);
+      await user.click(screen.getByTestId("ci-quick-copy-md-btn"));
+
+      await waitFor(() => {
+        expect(mockOutputResult).toHaveBeenCalledWith(
+          expect.objectContaining({
+            resultType: "confidence_interval",
+            resultIds: ["test-result-id"],
+            format: "markdown",
+          }),
+        );
+      });
+    });
+
+    it("test_output_dialogButton_opensDialog", async () => {
+      const user = userEvent.setup();
+
+      render(<ConfidenceIntervalResult result={makeEntry()} />);
+      await user.click(screen.getByTestId("ci-open-output-dialog-btn"));
+
+      expect(screen.getByTestId("ci-output-dialog")).toBeInTheDocument();
     });
   });
 });

@@ -36,6 +36,13 @@ export type OutputResultDialogPropsType =
       resultKind: "descriptive_statistics";
       resultId: string;
       title: string;
+    }
+  | {
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      resultKind: "confidence_interval";
+      resultId: string;
+      title: string;
     };
 
 type RegressionOutputResultDialogContentPropsType = {
@@ -57,6 +64,7 @@ type DescriptiveStatisticsOutputResultDialogContentPropsType = {
   onOpenChange: (open: boolean) => void;
   resultId: string;
   title: string;
+  resultType: "descriptive_statistics" | "confidence_interval";
   format: OutputResultFormat;
   setFormat: (value: OutputResultFormat) => void;
 };
@@ -121,13 +129,16 @@ const RegressionOutputResultDialogContent = ({
     const variableOrder = entries.map((e) => e.original);
 
     void fetchOutput({
+      resultType: "regression",
       resultIds: [result.resultId],
       format,
-      statInParentheses,
-      constAtBottom,
-      variableLabels:
-        Object.keys(variableLabels).length > 0 ? variableLabels : undefined,
-      variableOrder,
+      options: {
+        statInParentheses,
+        constAtBottom,
+        variableLabels:
+          Object.keys(variableLabels).length > 0 ? variableLabels : undefined,
+        variableOrder,
+      },
     });
   }, [
     open,
@@ -410,6 +421,7 @@ const DescriptiveStatisticsOutputResultDialogContent = ({
   onOpenChange,
   resultId,
   title,
+  resultType,
   format,
   setFormat,
 }: DescriptiveStatisticsOutputResultDialogContentPropsType) => {
@@ -420,10 +432,11 @@ const DescriptiveStatisticsOutputResultDialogContent = ({
   useEffect(() => {
     if (!open) return;
     void fetchOutput({
+      resultType,
       resultIds: [resultId],
       format,
     });
-  }, [open, resultId, format, fetchOutput]);
+  }, [open, resultId, resultType, format, fetchOutput]);
 
   const handleCopy = async () => {
     if (!content) return;
@@ -537,7 +550,10 @@ export const OutputResultDialog = (props: OutputResultDialogPropsType) => {
     );
   const [constAtBottom, setConstAtBottom] = useState(false);
 
-  if (props.resultKind === "descriptive_statistics") {
+  if (
+    props.resultKind === "descriptive_statistics" ||
+    props.resultKind === "confidence_interval"
+  ) {
     return (
       <DescriptiveStatisticsOutputResultDialogContent
         key={`${props.resultId}:${props.open ? "open" : "closed"}`}
@@ -545,6 +561,7 @@ export const OutputResultDialog = (props: OutputResultDialogPropsType) => {
         onOpenChange={props.onOpenChange}
         resultId={props.resultId}
         title={props.title}
+        resultType={props.resultKind}
         format={format}
         setFormat={setFormat}
       />

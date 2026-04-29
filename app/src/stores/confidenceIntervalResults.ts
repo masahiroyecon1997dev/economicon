@@ -1,8 +1,8 @@
 import { create } from "zustand";
 
 // GET /api/analysis/results/{id} の resultData に格納される信頼区間の計算結果
-// TODO: 信頼区間のAPIが変更されIDをバックエンドで生成するようになったため、idはバックエンドから受け取るようにすること
 export type ConfidenceIntervalResultData = {
+  resultId: string;
   tableName: string;
   columnName: string;
   statistic: { type: string; value: number | null };
@@ -10,13 +10,11 @@ export type ConfidenceIntervalResultData = {
   confidenceLevel: number;
 };
 
-export type ConfidenceIntervalResultEntry = ConfidenceIntervalResultData & {
-  id: string;
-};
+export type ConfidenceIntervalResultEntry = ConfidenceIntervalResultData;
 
 type ConfidenceIntervalResultsActions = {
   addResult: (result: ConfidenceIntervalResultData) => void;
-  removeResult: (id: string) => void;
+  removeResult: (resultId: string) => void;
 };
 
 type ConfidenceIntervalResultsStore = {
@@ -28,10 +26,10 @@ export const useConfidenceIntervalResultsStore =
     results: [],
     addResult: (result) =>
       set((state) => ({
-        results: [...state.results, { ...result, id: crypto.randomUUID() }],
+        results: [...state.results, result],
       })),
-    removeResult: (id) =>
+    removeResult: (resultId) =>
       set((state) => ({
-        results: state.results.filter((r) => r.id !== id),
+        results: state.results.filter((r) => r.resultId !== resultId),
       })),
   }));

@@ -1,10 +1,10 @@
 import { ConfidenceIntervalForm } from "@/components/organisms/Form/ConfidenceIntervalForm";
 import { ConfidenceIntervalResult } from "@/components/organisms/Result/ConfidenceIntervalResult";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
 } from "@/components/organisms/Tab/BaseTab";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { cn } from "@/lib/utils/helpers";
@@ -57,7 +57,10 @@ export const ConfidenceIntervalView = ({
 
           {/* 結果タブ */}
           {results.map((result, index) => (
-            <TabsTrigger key={`result-${result.id}`} value={`result-${index}`}>
+            <TabsTrigger
+              key={`result-${result.resultId}`}
+              value={`result-${index}`}
+            >
               <span>
                 {t("ConfidenceIntervalView.ResultLabel", { number: index + 1 })}
               </span>
@@ -66,7 +69,7 @@ export const ConfidenceIntervalView = ({
                 aria-label={t("ConfidenceIntervalView.DeleteResult")}
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDeleteResult(result.id, index);
+                  handleDeleteResult(result.resultId, index);
                 }}
                 className="ml-1.5 rounded p-0.5 opacity-60 hover:bg-white/20 hover:opacity-100 transition-opacity"
               >
@@ -92,7 +95,7 @@ export const ConfidenceIntervalView = ({
         {/* 結果タブコンテンツ */}
         {results.map((result, index) => (
           <TabsContent
-            key={`result-${result.id}`}
+            key={`result-${result.resultId}`}
             value={`result-${index}`}
             className="flex min-h-0 flex-1 flex-col"
           >

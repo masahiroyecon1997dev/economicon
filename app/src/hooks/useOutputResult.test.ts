@@ -26,11 +26,14 @@ beforeEach(() => {
 });
 
 const baseRequest = {
+  resultType: "regression" as const,
   resultIds: ["result-1"],
   format: OutputResultFormat.markdown,
-  statInParentheses: RegressionOutputOptionsStatInParentheses.se,
-  constAtBottom: false,
-  variableOrder: ["x1", "const"],
+  options: {
+    statInParentheses: RegressionOutputOptionsStatInParentheses.se,
+    constAtBottom: false,
+    variableOrder: ["x1", "const"],
+  },
 };
 
 describe("useOutputResult", () => {

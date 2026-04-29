@@ -111,10 +111,11 @@ export const ConfidenceIntervalForm = ({
           const { resultId } = response.result;
           const detailResponse = await api.getAnalysisResult(resultId);
           if (detailResponse.code === "OK") {
-            addResult(
-              detailResponse.result.result
-                .resultData as ConfidenceIntervalResultData,
-            );
+            const resultData = detailResponse.result.result.resultData as Omit<
+              ConfidenceIntervalResultData,
+              "resultId"
+            >;
+            addResult({ resultId, ...resultData });
             const newIndex =
               useConfidenceIntervalResultsStore.getState().results.length - 1;
             onAnalysisComplete?.(newIndex);
