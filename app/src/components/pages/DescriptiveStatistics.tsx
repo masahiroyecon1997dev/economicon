@@ -97,6 +97,10 @@ export const DescriptiveStatistics = () => {
         resultType: "descriptive_statistics",
         resultIds: [result.resultId],
         format: OutputResultFormat.markdown,
+        options: {
+          includeResultName: false,
+          includeTableName: false,
+        },
       });
       if (resp.code === "OK" && resp.result) {
         await navigator.clipboard.writeText(resp.result.content);

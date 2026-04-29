@@ -6,6 +6,7 @@ import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 import { useOutputResult } from "@/hooks/useOutputResult";
 import { cn } from "@/lib/utils/helpers";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
+import * as RadixDialog from "@radix-ui/react-dialog";
 import {
   Check,
   ChevronDown,
@@ -380,9 +381,9 @@ const RegressionOutputResultDialogContent = ({
 
       {/* ── フッター（コピー + 閉じる） ── */}
       <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-700 pt-3">
-        <Button variant="outline" onClick={() => onOpenChange(false)}>
-          {t("Common.Close")}
-        </Button>
+        <RadixDialog.Close asChild>
+          <Button variant="outline">{t("Common.Close")}</Button>
+        </RadixDialog.Close>
         <button
           type="button"
           onClick={() => void handleCopy()}
@@ -431,10 +432,28 @@ const DescriptiveStatisticsOutputResultDialogContent = ({
 
   useEffect(() => {
     if (!open) return;
+    if (resultType === "descriptive_statistics") {
+      void fetchOutput({
+        resultType,
+        resultIds: [resultId],
+        format,
+        options: {
+          includeResultName: false,
+          includeTableName: false,
+        },
+      });
+      return;
+    }
+
     void fetchOutput({
       resultType,
       resultIds: [resultId],
       format,
+      options: {
+        includeResultName: false,
+        includeTableName: false,
+        includeConfidenceLevel: true,
+      },
     });
   }, [open, resultId, resultType, format, fetchOutput]);
 
@@ -506,9 +525,9 @@ const DescriptiveStatisticsOutputResultDialogContent = ({
 
       {/* ── フッター ── */}
       <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-700 pt-3">
-        <Button variant="outline" onClick={() => onOpenChange(false)}>
-          {t("Common.Close")}
-        </Button>
+        <RadixDialog.Close asChild>
+          <Button variant="outline">{t("Common.Close")}</Button>
+        </RadixDialog.Close>
         <button
           type="button"
           onClick={() => void handleCopy()}

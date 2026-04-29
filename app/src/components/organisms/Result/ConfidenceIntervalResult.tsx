@@ -35,6 +35,11 @@ export const ConfidenceIntervalResult = ({
         resultType: "confidence_interval",
         resultIds: [result.resultId],
         format: OutputResultFormat.markdown,
+        options: {
+          includeResultName: false,
+          includeTableName: false,
+          includeConfidenceLevel: true,
+        },
       });
       if (response.code === "OK" && response.result) {
         await navigator.clipboard.writeText(response.result.content);

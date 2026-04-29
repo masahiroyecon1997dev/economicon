@@ -10,12 +10,12 @@
  * - submitFormId を指定すると HTML5 フォーム関連付けで送信
  * - ダークモード完全対応
  */
+import { Button } from "@/components/atoms/Button/Button";
+import { cn } from "@/lib/utils/helpers";
 import * as RadixDialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils/helpers";
-import { Button } from "@/components/atoms/Button/Button";
 
 // ─── 型定義 ──────────────────────────────────────────────────────────────────
 
@@ -149,13 +149,11 @@ export const BaseDialog = ({
           {footerVariant !== "none" && (
             <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-700 px-5 py-3">
               {footerVariant === "confirm" && (
-                <Button
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={isSubmitting}
-                >
-                  {t("Common.Cancel")}
-                </Button>
+                <RadixDialog.Close asChild>
+                  <Button variant="outline" disabled={isSubmitting}>
+                    {t("Common.Cancel")}
+                  </Button>
+                </RadixDialog.Close>
               )}
               <Button
                 variant={submitVariant}
