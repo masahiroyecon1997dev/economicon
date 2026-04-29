@@ -361,14 +361,16 @@ class PanelIVInput:
     instrumental_variables: list[str]
     entity_id_column: str
     standard_error_method: str
+    time_column: str | None = None
 
 
 def fit_panel_iv(data_input: PanelIVInput) -> Any:
     """固定効果IV (FE-2SLS) モデルのフィッティング。
 
-    Eco-Note: FWL定理に基づき、entity-demean (Within変換) 後に
-    IV2SLS を適用する。Within変換により entity fixed effects が除去される。
-    has_const は个体効果が切片を吸収するため不要。
+    Eco-Note: FWL定理に基づき、entity-demean および（time_column 指定時は）
+    time-demean を行う Two-Way Within 変換後に IV2SLS を適用する。
+    time_column が None の場合は entity FE のみ除去（One-Way FE-2SLS）。
+    has_const は個体・時点効果が切片を吸収するため不要。
 
     AbsorbingLS は OLS 専用 (endog/instruments 非対応) のため不使用。
 
@@ -387,9 +389,33 @@ def fit_panel_iv(data_input: PanelIVInput) -> Any:
     df = data_input.df_pandas
     entity_idx = df.index.get_level_values(data_input.entity_id_column)
 
-    def _within(col: Any) -> Any:
+    def _entity_within(col: Any) -> Any:
         """Entity-mean を除去する Within 変換。"""
         return col - col.groupby(entity_idx).transform("mean")
+
+    def _twoway_within(col: Any) -> Any:
+        """
+        Two-Way Within 変換（entity + time demean）。
+
+        Eco-Note: TWFE の FWL 展開と同等。
+            ỹ_it = y_it - ȳ_i. - ȳ_.t + ȳ..
+        entity と time の両固定効果を FWL 定理で射影除去する。
+        """
+        import pandas as pd  # noqa: PLC0415
+
+        time_idx = df.index.get_level_values(data_input.time_column)
+        col_e = col.groupby(entity_idx).transform("mean")
+        col_t = col.groupby(time_idx).transform("mean")
+        col_grand = col.mean()
+        if isinstance(col, pd.DataFrame):
+            return col - col_e - col_t + col_grand
+        return col - col_e - col_t + float(col_grand)
+
+    _within = (
+        _twoway_within
+        if data_input.time_column is not None
+        else _entity_within
+    )
 
     y = _within(df[data_input.dependent_variable])
     exog = (
