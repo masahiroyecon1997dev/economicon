@@ -73,11 +73,11 @@ def test_ols_fitted_values_added(client, tables_store):
     assert data["result"]["tableName"] == TABLE_BASIC
     added_cols = data["result"]["addedColumns"]
     assert len(added_cols) == 1
-    assert "y_linear_fitted" in added_cols
+    assert "y_cont_fitted" in added_cols
 
     # テーブルに列が存在することを確認
     cols = _get_table_columns(TABLE_BASIC)
-    assert "y_linear_fitted" in cols
+    assert "y_cont_fitted" in cols
 
 
 def test_ols_residuals_added(client, tables_store):
@@ -95,8 +95,8 @@ def test_ols_residuals_added(client, tables_store):
 
     assert resp.status_code == status.HTTP_200_OK, resp.text
     added_cols = resp.json()["result"]["addedColumns"]
-    assert "y_linear_resid" in added_cols
-    assert "y_linear_fitted" not in added_cols
+    assert "y_cont_resid" in added_cols
+    assert "y_cont_fitted" not in added_cols
 
 
 def test_ols_residuals_standardized(client, tables_store):
@@ -115,8 +115,8 @@ def test_ols_residuals_standardized(client, tables_store):
 
     assert resp.status_code == status.HTTP_200_OK, resp.text
     added_cols = resp.json()["result"]["addedColumns"]
-    assert "y_linear_resid" in added_cols
-    assert "y_linear_resid_std" in added_cols
+    assert "y_cont_resid" in added_cols
+    assert "y_cont_resid_std" in added_cols
 
 
 def test_ols_both_with_interval(client, tables_store):
@@ -135,10 +135,10 @@ def test_ols_both_with_interval(client, tables_store):
 
     assert resp.status_code == status.HTTP_200_OK, resp.text
     added_cols = resp.json()["result"]["addedColumns"]
-    assert "y_linear_fitted" in added_cols
-    assert "y_linear_fitted_lower_95" in added_cols
-    assert "y_linear_fitted_upper_95" in added_cols
-    assert "y_linear_resid" in added_cols
+    assert "y_cont_fitted" in added_cols
+    assert "y_cont_fitted_lower_95" in added_cols
+    assert "y_cont_fitted_upper_95" in added_cols
+    assert "y_cont_resid" in added_cols
 
 
 def test_ols_column_values_are_finite(client, tables_store):
@@ -154,8 +154,8 @@ def test_ols_column_values_are_finite(client, tables_store):
     )
 
     df = TablesStore().get_table(TABLE_BASIC).table
-    assert df["y_linear_fitted"].null_count() == 0
-    assert df["y_linear_fitted"].is_nan().sum() == 0
+    assert df["y_cont_fitted"].null_count() == 0
+    assert df["y_cont_fitted"].is_nan().sum() == 0
 
 
 # -----------------------------------------------------------
@@ -167,7 +167,7 @@ def test_column_name_deduplication(client, tables_store):
     """同名列が存在する場合に _0, _1 が付くことを確認"""
     result_id = _run_regression(client, OlsPayload().build())
 
-    # 1回目：y_linear_fitted が追加される
+    # 1回目：y_cont_fitted が追加される
     _add_diagnostic(
         client,
         {
@@ -177,7 +177,7 @@ def test_column_name_deduplication(client, tables_store):
         },
     )
 
-    # 2回目：y_linear_fitted が既に存在するため y_linear_fitted_0 が追加される
+    # 2回目：y_cont_fitted が既に存在するため y_cont_fitted_0 が追加される
     resp2 = _add_diagnostic(
         client,
         {
@@ -189,9 +189,9 @@ def test_column_name_deduplication(client, tables_store):
 
     assert resp2.status_code == status.HTTP_200_OK, resp2.text
     added_cols2 = resp2.json()["result"]["addedColumns"]
-    assert "y_linear_fitted_0" in added_cols2
+    assert "y_cont_fitted_0" in added_cols2
 
-    # 3回目：y_linear_fitted_0 も存在するため y_linear_fitted_1 が追加される
+    # 3回目：y_cont_fitted_0 も存在するため y_cont_fitted_1 が追加される
     resp3 = _add_diagnostic(
         client,
         {
@@ -202,7 +202,7 @@ def test_column_name_deduplication(client, tables_store):
     )
     assert resp3.status_code == status.HTTP_200_OK, resp3.text
     added_cols3 = resp3.json()["result"]["addedColumns"]
-    assert "y_linear_fitted_1" in added_cols3
+    assert "y_cont_fitted_1" in added_cols3
 
 
 # -----------------------------------------------------------
@@ -262,7 +262,7 @@ def test_tobit_fitted_and_resid(client, tables_store):
         {
             "tableName": TABLE_TOBIT,
             "dependentVariable": "y",
-            "explanatoryVariables": ["x"],
+            "explanatoryVariables": ["x1", "x2"],
             "hasConst": True,
             "analysis": {
                 "method": "tobit",
@@ -301,7 +301,7 @@ def test_tobit_observable_fitted(client, tables_store):
     payload = {
         "tableName": TABLE_TOBIT,
         "dependentVariable": "y",
-        "explanatoryVariables": ["x"],
+        "explanatoryVariables": ["x1", "x2"],
         "hasConst": True,
         "analysis": {
             "method": "tobit",
@@ -636,7 +636,7 @@ def test_ridge_fitted_values_added(client, tables_store):
 
     assert resp.status_code == status.HTTP_200_OK, resp.text
     added_cols = resp.json()["result"]["addedColumns"]
-    assert "y_linear_fitted" in added_cols
+    assert "y_cont_fitted" in added_cols
 
 
 def test_ridge_residuals(client, tables_store):
@@ -654,7 +654,7 @@ def test_ridge_residuals(client, tables_store):
 
     assert resp.status_code == status.HTTP_200_OK, resp.text
     added_cols = resp.json()["result"]["addedColumns"]
-    assert "y_linear_resid" in added_cols
+    assert "y_cont_resid" in added_cols
 
 
 # -----------------------------------------------------------
@@ -677,8 +677,8 @@ def test_lasso_fitted_values_added(client, tables_store):
 
     assert resp.status_code == status.HTTP_200_OK, resp.text
     added_cols = resp.json()["result"]["addedColumns"]
-    assert "y_linear_fitted" in added_cols
-    assert "y_linear_resid" in added_cols
+    assert "y_cont_fitted" in added_cols
+    assert "y_cont_resid" in added_cols
 
 
 # -----------------------------------------------------------

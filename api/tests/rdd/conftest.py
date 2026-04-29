@@ -1,8 +1,8 @@
 """RDD 分析テスト共通フィクスチャ"""
 
 from dataclasses import dataclass
+from pathlib import Path
 
-import numpy as np
 import polars as pl
 import pytest
 from fastapi.testclient import TestClient
@@ -11,11 +11,10 @@ from economicon.services.data.tables_store import TablesStore
 from main import app
 
 # -----------------------------------------------------------
-# データ生成定数
+# データパス
 # -----------------------------------------------------------
 
-_SEED = 42
-_N = 500
+_DATA_DIR = Path(__file__).resolve().parents[3] / "test" / "data" / "parquet"
 
 TABLE_RDD = "RDDData"
 TABLE_NO_LEFT = "RDDNoLeft"
@@ -26,45 +25,29 @@ URL_RESULT_DETAIL = "/api/analysis/results/{result_id}"
 
 
 # -----------------------------------------------------------
-# データ生成
+# データ登録
 # -----------------------------------------------------------
 
 
-def generate_rdd_data(
-    n: int = _N,
-    seed: int = _SEED,
-    true_effect: float = 1.5,
-    cutoff: float = 0.0,
-) -> tuple[np.ndarray, np.ndarray]:
-    """
-    シャープ RDD の DGP（データ生成過程）。
-
-    y = 1 + 2*x + true_effect * 1[x >= cutoff] + ε
-    x ~ Uniform(-1, 1), ε ~ N(0, 0.5²)
-    """
-    rng = np.random.default_rng(seed)
-    x = rng.uniform(-1.0, 1.0, n)
-    treatment = (x >= cutoff).astype(float)
-    y = 1.0 + 2.0 * x + true_effect * treatment + rng.normal(0, 0.5, n)
-    return y, x
-
-
 def _build_tables(tables_store: TablesStore) -> None:
-    """テスト用テーブルを TablesStore に登録する。"""
-    y, x = generate_rdd_data()
-    df = pl.DataFrame({"y": y, "x": x})
+    """Parquet から読み込んだテーブルを TablesStore に登録する。
+
+    CSV では浮動小数点精度が欠落するため、rdrobust の数値答との比較には
+    Parquet を使用する。
+    """
+    df = pl.read_parquet(_DATA_DIR / "synthetic_rdd.parquet")
     tables_store.store_table(TABLE_RDD, df)
 
-    # 左側サンプルなし（全観測が cutoff=0 以上）
+    # 左側サンプルなし（running_var >= 0 のみ）
     tables_store.store_table(
         TABLE_NO_LEFT,
-        pl.DataFrame({"y": y[x >= 0.0], "x": x[x >= 0.0]}),
+        df.filter(pl.col("running_var") >= 0.0),
     )
 
     # 文字列列のみのテーブル
     tables_store.store_table(
         TABLE_STRING,
-        pl.DataFrame({"y": ["a"] * 20, "x": ["b"] * 20}),
+        pl.DataFrame({"y": ["a"] * 20, "running_var": ["b"] * 20}),
     )
 
 

@@ -11,6 +11,7 @@ from economicon.core.enums import ErrorCode
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.rdd.fitters import compute_bins_data
 from tests.rdd.conftest import (
+    TABLE_NO_LEFT,
     TABLE_STRING,
     URL_RDD,
     RDDPayload,
@@ -349,8 +350,8 @@ def test_rdd_same_column_error(client, tables_store):
 
 def test_rdd_insufficient_left_observations_error(client, tables_store):
     """カットオフ左側のサンプルが不足している場合に 400 が返ることを確認"""
-    # running_var の範囲は [-2, 2]。cutoff=-1.95 で左側がはぼゼロ
-    payload = RDDPayload(cutoff=-1.95).build()
+    # TABLE_NO_LEFT は running_var >= 0 のみ。cutoff=0.0 で左側が 0 件
+    payload = RDDPayload(table=TABLE_NO_LEFT, cutoff=0.0).build()
     resp = client.post(URL_RDD, json=payload)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     data = resp.json()
@@ -403,7 +404,7 @@ def test_rdd_estimate_numerical(client, tables_store):
 
     rd = _get_result_data(client, RDDPayload().build())
     coef: float = rd["estimate"]["coef"]
-    se: float = rd["estimate"]["se"]
+    se: float = rd["estimate"]["stdErr"]
 
     # rdrobust のローカル多項式測定は許容誤差大きめ
     assert abs(coef - expected_coef) <= _RDROBUST_ESTIMATE_TOLERANCE, (
