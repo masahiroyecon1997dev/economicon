@@ -61,6 +61,7 @@ class PanelIVRegression(_RegressionBase):
                 instrumental_variables=self.analysis.instrumental_variables,
                 entity_id_column=self.analysis.entity_id_column,
                 standard_error_method=self.standard_error.method,
+                time_column=self.analysis.time_column,
             )
             model_result = fit_panel_iv(data_input)
             y = df_pandas[self.dependent_variable]
