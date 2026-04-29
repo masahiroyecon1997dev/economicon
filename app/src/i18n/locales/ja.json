@@ -348,7 +348,7 @@
     "StatisticType_variance": "分散（カイ二乗）",
     "StatisticType_standard_deviation": "標準偏差",
     "ConfidenceLevelLabel": "信頼水準",
-    "ConfidenceLevelModeSelect": "和表から選択",
+    "ConfidenceLevelModeSelect": "主要な水準から選択",
     "ConfidenceLevelModeManual": "手動入力",
     "ConfidenceLevel_090": "90%",
     "ConfidenceLevel_095": "95%",

@@ -348,7 +348,7 @@
     "StatisticType_variance": "Variance (Chi-squared)",
     "StatisticType_standard_deviation": "Std Deviation",
     "ConfidenceLevelLabel": "Confidence Level",
-    "ConfidenceLevelModeSelect": "Select from table",
+    "ConfidenceLevelModeSelect": "Select from common levels",
     "ConfidenceLevelModeManual": "Manual input",
     "ConfidenceLevel_090": "90%",
     "ConfidenceLevel_095": "95%",
