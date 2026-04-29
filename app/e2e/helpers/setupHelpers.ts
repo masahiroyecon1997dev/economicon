@@ -1,7 +1,7 @@
-import {} from "@playwright/test";
+import type { PlaywrightWorkerArgs } from "@playwright/test";
 
 export async function setupTauriApp(
-  playwrightInstance: typeof import("@playwright/test"),
+  playwrightInstance: PlaywrightWorkerArgs["playwright"],
 ) {
   // アプリが起動してポートが開くまで少し待つ
   await new Promise((resolve) => setTimeout(resolve, 5000));
