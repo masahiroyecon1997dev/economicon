@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { NegativeBinomialParamsType } from './negativeBinomialParamsType';
 
 /**
  * 負の二項分布のパラメータ
  */
 export type NegativeBinomialParams = {
   /** 分布の種類 */
-  type: 'negative_binomial';
+  type: NegativeBinomialParamsType;
   /**
      * 成功回数
      * @exclusiveMinimum 0

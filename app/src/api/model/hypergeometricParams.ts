@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { HypergeometricParamsType } from './hypergeometricParamsType';
 
 /**
  * 超幾何分布のパラメータ
  */
 export type HypergeometricParams = {
   /** 分布の種類 */
-  type: 'hypergeometric';
+  type: HypergeometricParamsType;
   /**
      * 母集団サイズ
      * @exclusiveMinimum 0

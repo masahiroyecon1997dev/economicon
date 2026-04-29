@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { UniformParamsType } from './uniformParamsType';
 
 /**
  * 一様分布のパラメータ
  */
 export type UniformParams = {
   /** 分布の種類 */
-  type: 'uniform';
+  type: UniformParamsType;
   /** 分布の下限 */
   low: number;
   /** 分布の上限 */

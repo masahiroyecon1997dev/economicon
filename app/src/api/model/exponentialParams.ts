@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { ExponentialParamsType } from './exponentialParamsType';
 
 /**
  * 指数分布のパラメータ
  */
 export type ExponentialParams = {
   /** 分布の種類 */
-  type: 'exponential';
+  type: ExponentialParamsType;
   /**
      * 尺度パラメータ
      * @exclusiveMinimum 0

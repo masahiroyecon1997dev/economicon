@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { RootParamsMethod } from './rootParamsMethod';
 
 /**
  * 平方根変換のパラメータ
  */
 export type RootParams = {
   /** 変換方法 */
-  method: 'root';
+  method: RootParamsMethod;
   /**
      * ルートの指数 (省略時は平方根)
      * @exclusiveMinimum 0

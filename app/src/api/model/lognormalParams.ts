@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { LognormalParamsType } from './lognormalParamsType';
 
 /**
  * 対数正規分布のパラメータ
  */
 export type LognormalParams = {
   /** 分布の種類 */
-  type: 'lognormal';
+  type: LognormalParamsType;
   /** 平均 */
   mean: number;
   /**

@@ -5198,34 +5198,6 @@
       "DistributionConfig": {
         "oneOf": [
           {
-            "$ref": "#/components/schemas/DistributionParams"
-          }
-        ],
-        "description": "\u5206\u5e03\u8a2d\u5b9a",
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "bernoulli": "#/components/schemas/DistributionParams",
-            "beta": "#/components/schemas/DistributionParams",
-            "binomial": "#/components/schemas/DistributionParams",
-            "exponential": "#/components/schemas/DistributionParams",
-            "fixed": "#/components/schemas/DistributionParams",
-            "gamma": "#/components/schemas/DistributionParams",
-            "geometric": "#/components/schemas/DistributionParams",
-            "hypergeometric": "#/components/schemas/DistributionParams",
-            "lognormal": "#/components/schemas/DistributionParams",
-            "negative_binomial": "#/components/schemas/DistributionParams",
-            "normal": "#/components/schemas/DistributionParams",
-            "poisson": "#/components/schemas/DistributionParams",
-            "sequence": "#/components/schemas/DistributionParams",
-            "uniform": "#/components/schemas/DistributionParams",
-            "weibull": "#/components/schemas/DistributionParams"
-          }
-        }
-      },
-      "DistributionParams": {
-        "anyOf": [
-          {
             "$ref": "#/components/schemas/UniformParams"
           },
           {
@@ -5270,7 +5242,28 @@
           {
             "$ref": "#/components/schemas/SequenceParams"
           }
-        ]
+        ],
+        "description": "\u5206\u5e03\u8a2d\u5b9a",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "bernoulli": "#/components/schemas/BernoulliParams",
+            "beta": "#/components/schemas/BetaParams",
+            "binomial": "#/components/schemas/BinomialParams",
+            "exponential": "#/components/schemas/ExponentialParams",
+            "fixed": "#/components/schemas/FixedParams",
+            "gamma": "#/components/schemas/GammaParams",
+            "geometric": "#/components/schemas/GeometricParams",
+            "hypergeometric": "#/components/schemas/HypergeometricParams",
+            "lognormal": "#/components/schemas/LognormalParams",
+            "negative_binomial": "#/components/schemas/NegativeBinomialParams",
+            "normal": "#/components/schemas/NormalParams",
+            "poisson": "#/components/schemas/PoissonParams",
+            "sequence": "#/components/schemas/SequenceParams",
+            "uniform": "#/components/schemas/UniformParams",
+            "weibull": "#/components/schemas/WeibullParams"
+          }
+        }
       },
       "DistributionType": {
         "type": "string",
@@ -6429,6 +6422,7 @@
               ]
             },
             "type": "array",
+            "minItems": 1,
             "title": "Instrumentalvariables"
           },
           "endogenousVariables": {
@@ -6443,6 +6437,7 @@
               ]
             },
             "type": "array",
+            "minItems": 1,
             "title": "Endogenousvariables"
           },
           "gmmWeightMatrix": {
@@ -9023,22 +9018,6 @@
       "TransformMethodConfig": {
         "oneOf": [
           {
-            "$ref": "#/components/schemas/TransformMethodParams"
-          }
-        ],
-        "description": "\u5909\u63db\u65b9\u6cd5\u8a2d\u5b9a",
-        "discriminator": {
-          "propertyName": "method",
-          "mapping": {
-            "log": "#/components/schemas/TransformMethodParams",
-            "power": "#/components/schemas/TransformMethodParams",
-            "root": "#/components/schemas/TransformMethodParams"
-          }
-        }
-      },
-      "TransformMethodParams": {
-        "anyOf": [
-          {
             "$ref": "#/components/schemas/LogParams"
           },
           {
@@ -9047,7 +9026,16 @@
           {
             "$ref": "#/components/schemas/RootParams"
           }
-        ]
+        ],
+        "description": "\u5909\u63db\u65b9\u6cd5\u8a2d\u5b9a",
+        "discriminator": {
+          "propertyName": "method",
+          "mapping": {
+            "log": "#/components/schemas/LogParams",
+            "power": "#/components/schemas/PowerParams",
+            "root": "#/components/schemas/RootParams"
+          }
+        }
       },
       "UniformParams": {
         "properties": {

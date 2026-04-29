@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { GeometricParamsType } from './geometricParamsType';
 
 /**
  * 幾何分布のパラメータ
  */
 export type GeometricParams = {
   /** 分布の種類 */
-  type: 'geometric';
+  type: GeometricParamsType;
   /**
      * 成功確率
      * @maximum 1

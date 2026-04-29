@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { LogParamsMethod } from './logParamsMethod';
 
 /**
  * 対数変換のパラメータ
  */
 export type LogParams = {
   /** 変換方法 */
-  method: 'log';
+  method: LogParamsMethod;
   /** 対数の底 (省略時は自然対数) */
   logBase?: number | null;
 };

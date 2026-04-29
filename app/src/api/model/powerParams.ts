@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { PowerParamsMethod } from './powerParamsMethod';
 
 /**
  * べき乗変換のパラメータ
  */
 export type PowerParams = {
   /** 変換方法 */
-  method: 'power';
+  method: PowerParamsMethod;
   /** べき乗の指数 (省略時は2乗) */
   exponent?: number;
 };

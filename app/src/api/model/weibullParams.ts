@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { WeibullParamsType } from './weibullParamsType';
 
 /**
  * ワイブル分布のパラメータ
  */
 export type WeibullParams = {
   /** 分布の種類 */
-  type: 'weibull';
+  type: WeibullParamsType;
   /**
      * 形状パラメータ
      * @exclusiveMinimum 0

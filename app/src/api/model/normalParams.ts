@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { NormalParamsType } from './normalParamsType';
 
 /**
  * 正規分布のパラメータ
  */
 export type NormalParams = {
   /** 分布の種類 */
-  type: 'normal';
+  type: NormalParamsType;
   /** 平均 */
   loc: number;
   /**

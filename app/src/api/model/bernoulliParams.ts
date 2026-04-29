@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { BernoulliParamsType } from './bernoulliParamsType';
 
 /**
  * ベルヌーイ分布のパラメータ
  */
 export type BernoulliParams = {
   /** 分布の種類 */
-  type: 'bernoulli';
+  type: BernoulliParamsType;
   /**
      * 成功確率
      * @maximum 1

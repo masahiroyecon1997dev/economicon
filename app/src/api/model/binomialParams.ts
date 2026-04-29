@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { BinomialParamsType } from './binomialParamsType';
 
 /**
  * 二項分布のパラメータ
  */
 export type BinomialParams = {
   /** 分布の種類 */
-  type: 'binomial';
+  type: BinomialParamsType;
   /**
      * 試行回数
      * @exclusiveMinimum 0

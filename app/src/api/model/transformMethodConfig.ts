@@ -4,9 +4,11 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
-import type { TransformMethodParams } from './transformMethodParams';
+import type { LogParams } from './logParams';
+import type { PowerParams } from './powerParams';
+import type { RootParams } from './rootParams';
 
 /**
  * 変換方法設定
  */
-export type TransformMethodConfig = TransformMethodParams;
+export type TransformMethodConfig = LogParams | PowerParams | RootParams;

@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { FixedParamsType } from './fixedParamsType';
 
 /**
  * 固定値のパラメータ
  */
 export type FixedParams = {
   /** 分布の種類 */
-  type: 'fixed';
+  type: FixedParamsType;
   /** 固定値 */
   value: number;
 };

@@ -88,6 +88,8 @@ export const regressionBodyAnalysisFiveBinaryResidualTypeDefault = `raw`;
 export const regressionBodyAnalysisFiveMethodDefault = `probit`;
 export const regressionBodyAnalysisSixIvMethodDefault = `2sls`;
 
+
+
 export const regressionBodyAnalysisSixGmmWeightMatrixDefault = `robust`;
 
 export const regressionBodyAnalysisSevenMethodDefault = `fe`;
@@ -162,8 +164,8 @@ export const RegressionBody = zod.object({
 }),zod.object({
   "method": zod.enum(['iv']),
   "ivMethod": zod.enum(['2sls', 'gmm']).default(regressionBodyAnalysisSixIvMethodDefault).describe('推定アルゴリズム。過剰識別かつ異分散がある場合はGMMを推奨'),
-  "instrumentalVariables": zod.array(zod.string().min(1).describe('カラム名')),
-  "endogenousVariables": zod.array(zod.string().min(1).describe('カラム名')),
+  "instrumentalVariables": zod.array(zod.string().min(1).describe('カラム名')).min(1),
+  "endogenousVariables": zod.array(zod.string().min(1).describe('カラム名')).min(1),
   "gmmWeightMatrix": zod.enum(['uncentered', 'robust', 'hac']).default(regressionBodyAnalysisSixGmmWeightMatrixDefault)
 }),zod.object({
   "entityIdColumn": zod.string().min(1).describe('個体ID列名'),

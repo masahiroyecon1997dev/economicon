@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { GammaParamsType } from './gammaParamsType';
 
 /**
  * ガンマ分布のパラメータ
  */
 export type GammaParams = {
   /** 分布の種類 */
-  type: 'gamma';
+  type: GammaParamsType;
   /**
      * 形状パラメータ
      * @exclusiveMinimum 0

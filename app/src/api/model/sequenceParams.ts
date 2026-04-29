@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { SequenceParamsType } from './sequenceParamsType';
 
 /**
  * 連番のパラメータ
  */
 export type SequenceParams = {
   /** 分布の種類 */
-  type: 'sequence';
+  type: SequenceParamsType;
   /** 開始値 */
   start?: number;
   /** 増分（負値で降順連番） */

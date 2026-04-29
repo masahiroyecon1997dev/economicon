@@ -4,13 +4,14 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
+import { BetaParamsType } from './betaParamsType';
 
 /**
  * ベータ分布のパラメータ
  */
 export type BetaParams = {
   /** 分布の種類 */
-  type: 'beta';
+  type: BetaParamsType;
   /**
      * 形状パラメータa
      * @exclusiveMinimum 0

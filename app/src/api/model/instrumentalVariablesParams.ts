@@ -12,7 +12,9 @@ export type InstrumentalVariablesParams = {
   method: InstrumentalVariablesParamsMethod;
   /** 推定アルゴリズム。過剰識別かつ異分散がある場合はGMMを推奨 */
   ivMethod?: InstrumentalVariablesParamsIvMethod;
+  /** @minItems 1 */
   instrumentalVariables: string[];
+  /** @minItems 1 */
   endogenousVariables: string[];
   gmmWeightMatrix?: InstrumentalVariablesParamsGmmWeightMatrix;
 };

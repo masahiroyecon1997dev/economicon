@@ -4,9 +4,23 @@
  * Economicon App API
  * OpenAPI spec version: 0.3.0
  */
-import type { DistributionParams } from './distributionParams';
+import type { BernoulliParams } from './bernoulliParams';
+import type { BetaParams } from './betaParams';
+import type { BinomialParams } from './binomialParams';
+import type { ExponentialParams } from './exponentialParams';
+import type { FixedParams } from './fixedParams';
+import type { GammaParams } from './gammaParams';
+import type { GeometricParams } from './geometricParams';
+import type { HypergeometricParams } from './hypergeometricParams';
+import type { LognormalParams } from './lognormalParams';
+import type { NegativeBinomialParams } from './negativeBinomialParams';
+import type { NormalParams } from './normalParams';
+import type { PoissonParams } from './poissonParams';
+import type { SequenceParams } from './sequenceParams';
+import type { UniformParams } from './uniformParams';
+import type { WeibullParams } from './weibullParams';
 
 /**
  * 分布設定
  */
-export type DistributionConfig = DistributionParams;
+export type DistributionConfig = UniformParams | ExponentialParams | NormalParams | GammaParams | BetaParams | WeibullParams | LognormalParams | BinomialParams | BernoulliParams | PoissonParams | GeometricParams | HypergeometricParams | NegativeBinomialParams | FixedParams | SequenceParams;
