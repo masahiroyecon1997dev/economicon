@@ -1,7 +1,8 @@
 """差の差（DID）分析テスト
 
 合成データ (test/data/csv/synthetic_did*.csv) を TablesStore に登録し、
-Python gold benchmark (test/benchmarks/python/synthetic/synthetic_did_gold.json)
+Python gold benchmark
+(test/benchmarks/python/synthetic/synthetic_did_gold.json)
 と照合して推定精度を保証する。
 """
 

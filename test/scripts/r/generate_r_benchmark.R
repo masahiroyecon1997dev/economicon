@@ -38,6 +38,8 @@
 #
 # 必要パッケージ:
 #   install.packages(c("plm", "AER", "glmnet", "jsonlite"))
+#   arrow があれば parquet を直接読む。未導入時は、同じ生成元から書き出した
+#   CSV fallback を使用する。
 # =============================================================================
 
 # =============================================================================
@@ -60,18 +62,29 @@ suppressPackageStartupMessages({
 LASSO_ALPHA <- 0.1   # sklearn: Lasso(alpha=0.1)
 RIDGE_ALPHA <- 1.0   # sklearn: Ridge(alpha=1.0)
 
-SCRIPT_DIR  <- tryCatch(
-  dirname(normalizePath(sys.frame(1)$ofile)),
-  error = function(e) getwd()
-)
-TARGET_DIR  <- file.path(SCRIPT_DIR, "tests", "benchmarks")
-OUTPUT_FILE <- file.path(TARGET_DIR, "r_grunfeld_gold.json")
+script_file_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+SCRIPT_DIR  <- if (length(script_file_arg) > 0L) {
+  dirname(normalizePath(sub("^--file=", "", script_file_arg[1])))
+} else {
+  getwd()
+}
+REPO_ROOT   <- normalizePath(file.path(SCRIPT_DIR, "..", "..", ".."))
+TARGET_DIR  <- file.path(REPO_ROOT, "test", "benchmarks", "r", "real")
+OUTPUT_FILE <- file.path(TARGET_DIR, "r_plm_grunfeld_gold.json")
+DATA_FILE   <- file.path(REPO_ROOT, "test", "data", "parquet", "plm_grunfeld.parquet")
+CSV_FILE    <- file.path(REPO_ROOT, "test", "data", "csv", "plm_grunfeld.csv")
 
 # -----------------------------------------------------------------------------
 # 1. データ読み込みと前処理
 # -----------------------------------------------------------------------------
 
-data("Grunfeld", package = "plm")
+if (requireNamespace("arrow", quietly = TRUE)) {
+  Grunfeld <- as.data.frame(arrow::read_parquet(DATA_FILE))
+} else {
+  # R 環境に arrow が無い場合でも、同じ Python generator から書き出した
+  # CSV fallback を読むことで benchmark の入力データを固定する。
+  Grunfeld <- read.csv(CSV_FILE)
+}
 stopifnot(
   all(c("firm", "year", "inv", "value", "capital") %in% colnames(Grunfeld)),
   nrow(Grunfeld) == 200L
@@ -389,19 +402,22 @@ ridge_result <- list(
 # -----------------------------------------------------------------------------
 # 11. メタデータ
 # -----------------------------------------------------------------------------
-meta <- list(
+metadata <- list(
   generated_at   = format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z"),
   r_version      = as.character(getRversion()),
   plm_version    = as.character(packageVersion("plm")),
   aer_version    = as.character(packageVersion("AER")),
   glmnet_version = as.character(packageVersion("glmnet")),
-  dataset        = "Grunfeld (plm package)",
+  arrow_version  = if (requireNamespace("arrow", quietly = TRUE)) as.character(packageVersion("arrow")) else NULL,
+  dataset        = "plm_grunfeld.parquet",
   n_obs          = N_OBS,
   n_obs_iv       = N_OBS_IV,
   n_firms        = N_FIRMS,
   n_years        = N_YEARS,
   inv_median     = INV_MEDIAN,
   n_inv_high     = N_POSITIVE,
+  nan_policy     = "Lag creation drops the first row for each firm in IV only; otherwise no NaN rows are removed.",
+  dummy_policy   = "inv_high is defined as 1(inv > median(inv)); no category dummy expansion is used.",
   tolerance_guide = list(
     ols_fe_re_coef      = "atol=1e-8",
     ols_fe_re_r2        = "atol=1e-5",
@@ -416,15 +432,17 @@ meta <- list(
 # 12. JSON 出力
 # -----------------------------------------------------------------------------
 benchmark_results <- list(
-  meta   = meta,
-  ols    = ols_result,
-  fe     = fe_result,
-  re     = re_result,
-  logit  = logit_result,
-  probit = probit_result,
-  iv     = iv_result,
-  lasso  = lasso_result,
-  ridge  = ridge_result
+  metadata = metadata,
+  estimates = list(
+    ols    = ols_result,
+    fe     = fe_result,
+    re     = re_result,
+    logit  = logit_result,
+    probit = probit_result,
+    iv     = iv_result,
+    lasso  = lasso_result,
+    ridge  = ridge_result
+  )
 )
 
 if (!dir.exists(TARGET_DIR)) dir.create(TARGET_DIR, recursive = TRUE)

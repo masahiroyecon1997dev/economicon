@@ -36,7 +36,6 @@ import polars as pl
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from statsmodels.datasets import get_rdataset
 
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
@@ -50,10 +49,18 @@ from tests.regressions.conftest import URL_REGRESSION, URL_RESULTS
 # このファイルから parents[3] = ワークスペースルート
 _BENCHMARK_JSON = (
     Path(__file__).resolve().parents[3]
-    / "Rcode"
-    / "tests"
+    / "test"
     / "benchmarks"
-    / "r_grunfeld_gold.json"
+    / "r"
+    / "real"
+    / "r_plm_grunfeld_gold.json"
+)
+_DATA_PARQUET = (
+    Path(__file__).resolve().parents[3]
+    / "test"
+    / "data"
+    / "parquet"
+    / "plm_grunfeld.parquet"
 )
 
 # ------------------------------------------------------------------
@@ -138,21 +145,19 @@ def r_gold() -> dict[str, Any]:
     """R Gold Standard JSON を読み込む。"""
     assert _BENCHMARK_JSON.exists(), (
         f"Benchmark JSON が存在しません: {_BENCHMARK_JSON}\n"
-        "Rcode/generate_r_benchmark.R を実行して生成してください。"
+        "test/scripts/r/generate_r_benchmark.R を実行して生成してください。"
     )
-    return json.loads(_BENCHMARK_JSON.read_text(encoding="utf-8"))
+    raw = json.loads(_BENCHMARK_JSON.read_text(encoding="utf-8"))
+    return {"meta": raw["metadata"], **raw["estimates"]}
 
 
 @pytest.fixture(scope="module")
 def grunfeld_raw_ext() -> pd.DataFrame:
-    """Grunfeld データを pandas DataFrame で返す。"""
-    dataset = get_rdataset("Grunfeld", "plm")
-    assert dataset is not None
-    assert dataset.data is not None
-    df: pd.DataFrame = dataset.data[
-        ["firm", "year", "inv", "value", "capital"]
-    ].copy()
-    return df.astype(float).reset_index(drop=True)
+    """生成済み parquet から Grunfeld データを pandas DataFrame で返す。"""
+    assert _DATA_PARQUET.exists(), (
+        f"Grunfeld parquet not found: {_DATA_PARQUET}"
+    )
+    return pd.read_parquet(_DATA_PARQUET).astype(float).reset_index(drop=True)
 
 
 @pytest.fixture(scope="module")

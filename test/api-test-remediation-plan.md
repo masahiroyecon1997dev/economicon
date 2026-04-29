@@ -6,6 +6,31 @@
 - 数値比較の許容誤差を 1e-8 基準で整理する。
 - 既存の合成データ中心テストに加えて、test/data/parquet の実データを使う検証を追加する。
 
+## 進捗状況
+
+### 完了済み
+
+- DID 用 synthetic data generator を追加し、生成入口を test/scripts/generate_synthetic_data.py に統合した。
+- DID 用 Python benchmark を追加し、test/scripts/python/generate_benchmarks.py から synthetic_did_gold.json を生成できるようにした。
+- api/tests/test_did.py を inline 生成から test/data 配下の生成済み fixture 読み込み方式に移行した。
+- api/tests/rdd/conftest.py を runtime 生成から test/data/parquet/synthetic_rdd.parquet 読み込み方式に移行した。
+- RDD benchmark 条件を API の既定値に合わせ、test/scripts/python/benchmarks/rdd.py の vce 設定と gold を更新した。
+- api/tests/regressions/test_add_diagnostic_columns.py の診断列名期待値と Tobit 説明変数指定を修正した。
+- 対象修正後の確認として、api/tests/test_did.py・api/tests/rdd/・api/tests/regressions/test_add_diagnostic_columns.py を再実行し、74 passed を確認した。
+- test/data/parquet/plm_grunfeld.parquet を実データ fixture として追加し、同じ生成元から CSV fallback も出力する構成にした。
+- test/scripts/python/generate_real_benchmarks.py を追加し、実データ parquet から Python gold を生成できるようにした。
+- test/scripts/r/generate_r_benchmark.R を実データ parquet 起点へ更新し、arrow 非導入環境では同一生成元の CSV fallback を使うようにした。
+- api/tests/integration_tests/test_grunfeld_consistency.py と api/tests/integration_tests/test_r_benchmark_external_validity.py を runtime 外部取得から parquet 読み込み方式へ移行した。
+- Grunfeld 系 integration tests を再実行し、70 passed を確認した。
+
+### 進行中
+
+- 実データ parquet benchmark の生成手順を README または運用手順に反映する。
+
+### 未着手
+
+- 実データ parquet benchmark の生成手順を明文化し、pytest は生成済み JSON のみを参照する運用へ揃える。
+
 ## 現状の棚卸し
 
 対象として挙がっていた DID, WLS, GLS, FGLS, PanelIV, RDD, Heckman, 信頼区間, 検定, 記述統計は、少なくとも以下の API テストファイルが既に存在する。
@@ -145,22 +170,22 @@
 ### 1. DID API
 
 - エンドポイント: `/api/analysis/did`
-- 現状: `api/tests/test_did.py` で inline に panel データを生成している。
-- 状態: 未移行
+- 現状: generator・fixture・Python benchmark を追加し、pytest は生成済み fixture を読む構成に更新済み。
+- 状態: 移行済み
 
 ### 2. RDD API
 
 - エンドポイント: `/api/analysis/rdd`
-- 現状: generator と benchmark は存在するが、pytest fixture は `api/tests/rdd/conftest.py` で runtime 生成した `DataFrame` を使っている。
-- 状態: 部分移行。generator / benchmark はあるが、pytest 読み込みが未移行
+- 現状: generator / benchmark / pytest fixture を生成済み fixture 読み込み方式に統一済み。
+- 状態: 移行済み
 
 ### 3. Regression API の Grunfeld 統合系
 
 - エンドポイント: `/api/analysis/regression`, `/api/analysis/results/{result_id}`
 - 対象メソッド: OLS, FE, RE, IV, Logit, Probit, Lasso, Ridge
 - 該当テスト: `api/tests/integration_tests/test_grunfeld_consistency.py`, `api/tests/integration_tests/test_r_benchmark_external_validity.py`
-- 現状: `statsmodels.datasets.get_rdataset("Grunfeld", "plm")` で runtime に外部データ取得し、fixture をその場で組み立てている。
-- 状態: 未移行
+- 現状: `test/data/parquet/plm_grunfeld.parquet` を source of truth とし、Python / R benchmark をこの入力から生成する構成へ更新済み。
+- 状態: 移行済み
 
 補足:
 
