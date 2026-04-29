@@ -78,10 +78,6 @@ msgstr ""
 msgid "An unexpected error occurred during descriptive statistics processing"
 msgstr ""
 
-#: economicon/services/duplicate_column.py:82
-msgid "An unexpected error occurred during duplicating column processing"
-msgstr ""
-
 #: economicon/services/duplicate_table.py:64
 msgid "An unexpected error occurred during table duplication processing"
 msgstr ""

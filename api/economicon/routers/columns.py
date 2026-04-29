@@ -17,8 +17,6 @@ from economicon.schemas import (
     CastColumnResult,
     DeleteColumnRequestBody,
     DeleteColumnResult,
-    DuplicateColumnRequestBody,
-    DuplicateColumnResult,
     GetColumnListRequestBody,
     GetColumnListResult,
     MoveColumnRequestBody,
@@ -44,7 +42,6 @@ from economicon.services.columns.add_simulation_column import (
 from economicon.services.columns.calculate_column import CalculateColumn
 from economicon.services.columns.cast_column import CastColumn
 from economicon.services.columns.delete_column import DeleteColumn
-from economicon.services.columns.duplicate_column import DuplicateColumn
 from economicon.services.columns.get_column_list import GetColumnList
 from economicon.services.columns.move_column import MoveColumn
 from economicon.services.columns.rename_column import RenameColumn
@@ -238,36 +235,6 @@ async def calculate_column(
     api = CalculateColumn(body, tables_store)
     result = run_operation(api)
 
-    return create_success_response(
-        status_code=http_status.HTTP_200_OK, response_object=result
-    )
-
-
-@router.post(
-    "/duplicate", response_model=SuccessResponse[DuplicateColumnResult]
-)
-async def duplicate_column(
-    request: Request,
-    body: DuplicateColumnRequestBody,
-    tables_store: TablesStoreDep,
-):
-    """カラムを複製するエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : DuplicateColumnRequestBody
-        リクエストボディ
-
-    Returns
-    -------
-    JSONResponse
-        処理結果
-    """
-    # ビジネスロジックの実行
-    api = DuplicateColumn(body, tables_store)
-    result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result
     )

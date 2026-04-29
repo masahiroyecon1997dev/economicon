@@ -114,59 +114,6 @@ class RenameColumnResult(BaseResult):
 
 
 # ---------------------------------------------------------------------------
-# カラム複製
-# ---------------------------------------------------------------------------
-
-
-class DuplicateColumnRequestBody(BaseRequest):
-    """カラム複製リクエスト"""
-
-    table_name: Annotated[
-        TableName,
-        Field(
-            description="操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
-        ),
-    ]
-    source_column_name: Annotated[
-        ColumnName,
-        Field(
-            description="元となるカラム名。ワークスペースに存在するテーブルの中から指定してください。"
-        ),
-    ]
-    new_column_name: Annotated[
-        NewColumnName,
-        Field(
-            description="新しいカラム名。既存のカラム名と重複しない名前を指定してください。"
-        ),
-    ]
-    add_position_column: Annotated[
-        ColumnName,
-        Field(
-            description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
-        ),
-    ]
-
-
-class DuplicateColumnResult(BaseResult):
-    """カラム複製レスポンス"""
-
-    table_name: Annotated[
-        str,
-        Field(
-            title="Table Name",
-            description="複製操作を行ったテーブル名",
-        ),
-    ]
-    column_name: Annotated[
-        str,
-        Field(
-            title="Column Name",
-            description="複製後の新しいカラム名",
-        ),
-    ]
-
-
-# ---------------------------------------------------------------------------
 # カラム計算
 # ---------------------------------------------------------------------------
 

@@ -23,7 +23,6 @@ import type {
   DeleteTableRequestBody,
   DescriptiveStatisticsOutputRequest,
   DescriptiveStatisticsRequestBody,
-  DuplicateColumnRequestBody,
   DuplicateTableRequestBody,
   ExportFileRequestBody,
   FetchDataToArrowRequestBody,
@@ -61,7 +60,6 @@ import type {
   SuccessResponseDeleteColumnResult,
   SuccessResponseDeleteTableResult,
   SuccessResponseDescriptiveStatisticsResult,
-  SuccessResponseDuplicateColumnResult,
   SuccessResponseDuplicateTableResult,
   SuccessResponseExportFileResult,
   SuccessResponseFetchDataToJsonResult,
@@ -269,33 +267,6 @@ const calculateColumn = (
       {url: `/api/column/calculate`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: calculateColumnRequestBody
-    },
-      options);
-    }
-
-/**
- * カラムを複製するエンドポイント
-
-Parameters
-----------
-request : Request
-    FastAPIのリクエストオブジェクト
-body : DuplicateColumnRequestBody
-    リクエストボディ
-
-Returns
--------
-JSONResponse
-    処理結果
- * @summary Duplicate Column
- */
-const duplicateColumn = (
-    duplicateColumnRequestBody: DuplicateColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseDuplicateColumnResult>>,) => {
-      return customInstance<SuccessResponseDuplicateColumnResult>(
-      {url: `/api/column/duplicate`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: duplicateColumnRequestBody
     },
       options);
     }
@@ -1395,7 +1366,7 @@ const shutdown = (
       options);
     }
 
-return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,duplicateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,fetchPlotData,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
+return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,fetchPlotData,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
 export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['healthCheck']>>>
 export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDummyColumn']>>>
 export type DeleteColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteColumn']>>>
@@ -1403,7 +1374,6 @@ export type RenameColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeo
 export type AddLagLeadColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addLagLeadColumn']>>>
 export type AddSimulationColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addSimulationColumn']>>>
 export type CalculateColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['calculateColumn']>>>
-export type DuplicateColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['duplicateColumn']>>>
 export type TransformColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['transformColumn']>>>
 export type GetColumnListResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getColumnList']>>>
 export type SortColumnsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['sortColumns']>>>

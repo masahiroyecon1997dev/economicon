@@ -393,52 +393,6 @@ export const CalculateColumnResponse = zod.object({
 })
 
 /**
- * カラムを複製するエンドポイント
-
-Parameters
-----------
-request : Request
-    FastAPIのリクエストオブジェクト
-body : DuplicateColumnRequestBody
-    リクエストボディ
-
-Returns
--------
-JSONResponse
-    処理結果
- * @summary Duplicate Column
- */
-export const DuplicateColumnHeader = zod.object({
-  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
-})
-
-
-
-export const duplicateColumnBodyNewColumnNameMax = 128;
-
-
-export const duplicateColumnBodyNewColumnNameRegExp = new RegExp('^[^\\x00-\\x1f\\x7f]+$');
-
-
-
-export const DuplicateColumnBody = zod.object({
-  "tableName": zod.string().min(1).describe('操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。'),
-  "sourceColumnName": zod.string().min(1).describe('元となるカラム名。ワークスペースに存在するテーブルの中から指定してください。'),
-  "newColumnName": zod.string().min(1).max(duplicateColumnBodyNewColumnNameMax).regex(duplicateColumnBodyNewColumnNameRegExp).describe('新しいカラム名。既存のカラム名と重複しない名前を指定してください。'),
-  "addPositionColumn": zod.string().min(1).describe('追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。')
-}).describe('カラム複製リクエスト')
-
-export const duplicateColumnResponseCodeDefault = `OK`;
-
-export const DuplicateColumnResponse = zod.object({
-  "code": zod.string().default(duplicateColumnResponseCodeDefault).describe('レスポンスコード'),
-  "result": zod.object({
-  "tableName": zod.string().describe('複製操作を行ったテーブル名'),
-  "columnName": zod.string().describe('複製後の新しいカラム名')
-}).describe('処理結果')
-})
-
-/**
  * 列の変換処理エンドポイント
 
 Parameters

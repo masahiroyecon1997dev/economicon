@@ -78,10 +78,6 @@ msgstr "テーブルの削除処理中に予期しないエラーが発生しま
 msgid "An unexpected error occurred during descriptive statistics processing"
 msgstr "記述統計の処理中に予期しないエラーが発生しました"
 
-#: economicon/services/duplicate_column.py:82
-msgid "An unexpected error occurred during duplicating column processing"
-msgstr "列の複製処理中に予期しないエラーが発生しました"
-
 #: economicon/services/duplicate_table.py:64
 msgid "An unexpected error occurred during table duplication processing"
 msgstr "テーブルの複製処理中に予期しないエラーが発生しました"
