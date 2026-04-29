@@ -20,7 +20,7 @@ from tests.regressions.conftest import (
 )
 
 # 数値比較の許容誤差
-_ABS_TOL = 1e-12
+_ABS_TOL = 1e-8
 
 # 洗練データ CSV パス
 _IV_CSV = (

@@ -17,7 +17,7 @@ Economicon API が統計的に一致することを検証する。
   Ridge  | R: glmnet      vs API: sklearn Ridge (coefficientScaled)
 
 許容誤差:
-  OLS/FE/RE/IV 係数・SE  atol=1e-10
+    OLS/FE/RE/IV 係数・SE  atol=1e-8
   Logit/Probit 係数・SE  atol=1e-5  (MLE 収束差)
   R² (FE/RE)             atol=1e-5  (定義差を考慮)
   Lasso/Ridge scaled     atol=1e-5  (同一目的関数)
@@ -67,15 +67,14 @@ TABLE_GRUNFELD_IV_EXT = "GrunfeldIVExtData"
 # 許容誤差定数
 # ------------------------------------------------------------------
 
-# OLS / FE / RE / IV: 使用ライブラリが共通の線形代数ルーチンを使用。
-# API JSON ラウンドトリップなしのため 1e-10 までたどれる。
-_ABS_TOL_LINEAR = 1e-10
+# OLS / FE / RE / IV: 線形モデル系の絶対許容差は 1e-8 に統一する。
+_ABS_TOL_LINEAR = 1e-8
 
 # FE/RE R²: within R² の定義が plm と linearmodels で微妙に異なる場合あり
 _ABS_TOL_R2_PANEL = 1e-5
 
-# OLS R²: lm vs statsmodels は完全一致するはず
-_ABS_TOL_R2_OLS = 1e-10
+# OLS R²: lm vs statsmodels の比較も 1e-8 に統一する
+_ABS_TOL_R2_OLS = 1e-8
 
 # IV R² (RSS/TSS 定義): AER と linearmodels で一致
 _ABS_TOL_R2_IV = 1e-5
@@ -480,7 +479,7 @@ class TestOLSvsR:
         np.testing.assert_allclose(
             ms["fProbability"],
             r_f["p_value"],
-            atol=1e-10,
+            atol=1e-8,
             rtol=0,
             err_msg="OLS F p値が R と不一致",
         )

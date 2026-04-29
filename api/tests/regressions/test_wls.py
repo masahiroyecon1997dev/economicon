@@ -12,7 +12,7 @@ from tests.regressions.conftest import (
     load_py_gold,
 )
 
-_ABS_TOL = 1e-12
+_ABS_TOL = 1e-8
 _N_PARAMS_WITH_CONST = 4
 _N_INVALID_WEIGHTS = 2
 

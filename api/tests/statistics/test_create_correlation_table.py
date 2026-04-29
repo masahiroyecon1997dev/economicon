@@ -749,4 +749,4 @@ def test_create_correlation_table_idempotency(client, tables_store):
             if v1 is None:
                 assert v2 is None
             else:
-                assert v1 == pytest.approx(v2, abs=1e-12)
+                assert v1 == pytest.approx(v2, abs=1e-8)

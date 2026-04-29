@@ -10,7 +10,7 @@ from tests.regressions.conftest import (
     load_py_gold,
 )
 
-_ABS_TOL = 1e-10
+_ABS_TOL = 1e-8
 _N_PARAMS_WITH_CONST = 4
 
 

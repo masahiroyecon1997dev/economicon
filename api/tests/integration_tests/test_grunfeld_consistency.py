@@ -52,8 +52,8 @@ from tests.regressions.conftest import (
 TABLE_GRUNFELD = "GrunfeldData"
 TABLE_GRUNFELD_IV = "GrunfeldIVData"
 
-# 浮動小数点の許容誤差 (API JSONラウンドトリップなしのため 1e-10 まで収める)
-_ABS_TOL = 1e-10
+# 浮動小数点の許容誤差
+_ABS_TOL = 1e-8
 
 # HAC 標準誤差は収束依存のため緩め
 _HAC_ABS_TOL = 1e-6

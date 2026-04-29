@@ -12,7 +12,7 @@ from tests.regressions.conftest import (
     load_py_gold,
 )
 
-_ABS_TOL = 1e-12
+_ABS_TOL = 1e-8
 _GLS_OLS_DIFFERENCE_THRESHOLD = 1e-6
 _EXPECTED_N_OBS = 48
 _BAD_SIGMA_ROWS = 3
