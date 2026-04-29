@@ -186,6 +186,15 @@ class DIDAnalysis:
             target=_PARAM_NAMES["entity_id_column"],
         )
 
+        # base_period が明示指定の場合は、データの時点集合に
+        # 存在するかを validate() で確認する。
+        # None の場合は auto-select (実行時に確定) のため不要。
+        if self.include_event_study and self.base_period is not None:
+            df = self.tables_store.get_table(self.table_name).table
+            validate_base_period_in_data(
+                df, self.time_column, self.base_period
+            )
+
     def execute(self) -> dict:
         """
         TWFE DID 推定を実行して結果 ID を返す。
@@ -216,9 +225,7 @@ class DIDAnalysis:
             validate_binary_column(
                 df, self.treatment_column, "treatmentColumn"
             )
-            validate_binary_column(
-                df, self.post_column, "postColumn"
-            )
+            validate_binary_column(df, self.post_column, "postColumn")
 
             # 3. basePeriod の決定（Event Study のみ使用）
             base_period: int = 0  # 基本 DID では未使用のセンチネル
@@ -229,9 +236,6 @@ class DIDAnalysis:
                     )
                 else:
                     base_period = self.base_period
-                    validate_base_period_in_data(
-                        df, self.time_column, base_period
-                    )
 
             # 4. 交差項列の生成
             df, interact_col, es_cols = build_interaction_columns(
