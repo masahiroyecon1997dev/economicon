@@ -16,11 +16,11 @@ export type NegativeBinomialParams = {
      * 成功回数
      * @exclusiveMinimum 0
      */
-  n: number;
+  targetSuccessCount: number;
   /**
      * 成功確率
      * @maximum 1
      * @exclusiveMinimum 0
      */
-  p: number;
+  successProbability: number;
 };

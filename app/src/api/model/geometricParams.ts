@@ -17,5 +17,5 @@ export type GeometricParams = {
      * @maximum 1
      * @exclusiveMinimum 0
      */
-  p: number;
+  successProbability: number;
 };

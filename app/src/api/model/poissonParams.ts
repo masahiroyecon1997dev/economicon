@@ -16,5 +16,5 @@ export type PoissonParams = {
      * 発生率
      * @exclusiveMinimum 0
      */
-  lam: number;
+  rate: number;
 };

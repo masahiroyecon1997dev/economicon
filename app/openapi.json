@@ -3863,18 +3863,18 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "p": {
+          "successProbability": {
             "type": "number",
             "maximum": 1.0,
             "exclusiveMinimum": 0.0,
-            "title": "P",
+            "title": "Successprobability",
             "description": "\u6210\u529f\u78ba\u7387"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "p"
+          "successProbability"
         ],
         "title": "BernoulliParams",
         "description": "\u30d9\u30eb\u30cc\u30fc\u30a4\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -3887,24 +3887,24 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "a": {
+          "alpha": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "A",
-            "description": "\u5f62\u72b6\u30d1\u30e9\u30e1\u30fc\u30bfa"
+            "title": "Alpha",
+            "description": "\u5f62\u72b6\u30d1\u30e9\u30e1\u30fc\u30bfalpha"
           },
-          "b": {
+          "beta": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "B",
-            "description": "\u5f62\u72b6\u30d1\u30e9\u30e1\u30fc\u30bfb"
+            "title": "Beta",
+            "description": "\u5f62\u72b6\u30d1\u30e9\u30e1\u30fc\u30bfbeta"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "a",
-          "b"
+          "alpha",
+          "beta"
         ],
         "title": "BetaParams",
         "description": "\u30d9\u30fc\u30bf\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -3938,25 +3938,25 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "n": {
+          "trialCount": {
             "type": "integer",
             "exclusiveMinimum": 0.0,
-            "title": "N",
+            "title": "Trialcount",
             "description": "\u8a66\u884c\u56de\u6570"
           },
-          "p": {
+          "successProbability": {
             "type": "number",
             "maximum": 1.0,
             "exclusiveMinimum": 0.0,
-            "title": "P",
+            "title": "Successprobability",
             "description": "\u6210\u529f\u78ba\u7387"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "n",
-          "p"
+          "trialCount",
+          "successProbability"
         ],
         "title": "BinomialParams",
         "description": "\u4e8c\u9805\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -5386,17 +5386,17 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "scale": {
+          "scaleParameter": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "Scale",
+            "title": "Scaleparameter",
             "description": "\u5c3a\u5ea6\u30d1\u30e9\u30e1\u30fc\u30bf"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "scale"
+          "scaleParameter"
         ],
         "title": "ExponentialParams",
         "description": "\u6307\u6570\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -5921,24 +5921,24 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "shape": {
+          "shapeParameter": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "Shape",
+            "title": "Shapeparameter",
             "description": "\u5f62\u72b6\u30d1\u30e9\u30e1\u30fc\u30bf"
           },
-          "scale": {
+          "scaleParameter": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "Scale",
+            "title": "Scaleparameter",
             "description": "\u5c3a\u5ea6\u30d1\u30e9\u30e1\u30fc\u30bf"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "shape",
-          "scale"
+          "shapeParameter",
+          "scaleParameter"
         ],
         "title": "GammaParams",
         "description": "\u30ac\u30f3\u30de\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -5951,18 +5951,18 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "p": {
+          "successProbability": {
             "type": "number",
             "maximum": 1.0,
             "exclusiveMinimum": 0.0,
-            "title": "P",
+            "title": "Successprobability",
             "description": "\u6210\u529f\u78ba\u7387"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "p"
+          "successProbability"
         ],
         "title": "GeometricParams",
         "description": "\u5e7e\u4f55\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -6615,23 +6615,23 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "mean": {
+          "logMean": {
             "type": "number",
-            "title": "Mean",
-            "description": "\u5e73\u5747"
+            "title": "Logmean",
+            "description": "\u5bfe\u6570\u7a7a\u9593\u3067\u306e\u5e73\u5747"
           },
-          "sigma": {
+          "logStandardDeviation": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "Sigma",
-            "description": "\u6a19\u6e96\u504f\u5dee"
+            "title": "Logstandarddeviation",
+            "description": "\u5bfe\u6570\u7a7a\u9593\u3067\u306e\u6a19\u6e96\u504f\u5dee"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "mean",
-          "sigma"
+          "logMean",
+          "logStandardDeviation"
         ],
         "title": "LognormalParams",
         "description": "\u5bfe\u6570\u6b63\u898f\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -6735,25 +6735,25 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "n": {
+          "targetSuccessCount": {
             "type": "integer",
             "exclusiveMinimum": 0.0,
-            "title": "N",
+            "title": "Targetsuccesscount",
             "description": "\u6210\u529f\u56de\u6570"
           },
-          "p": {
+          "successProbability": {
             "type": "number",
             "maximum": 1.0,
             "exclusiveMinimum": 0.0,
-            "title": "P",
+            "title": "Successprobability",
             "description": "\u6210\u529f\u78ba\u7387"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "n",
-          "p"
+          "targetSuccessCount",
+          "successProbability"
         ],
         "title": "NegativeBinomialParams",
         "description": "\u8ca0\u306e\u4e8c\u9805\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -6778,23 +6778,23 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "loc": {
+          "mean": {
             "type": "number",
-            "title": "Loc",
+            "title": "Mean",
             "description": "\u5e73\u5747"
           },
-          "scale": {
+          "standardDeviation": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "Scale",
+            "title": "Standarddeviation",
             "description": "\u6a19\u6e96\u504f\u5dee"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "loc",
-          "scale"
+          "mean",
+          "standardDeviation"
         ],
         "title": "NormalParams",
         "description": "\u6b63\u898f\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -6943,17 +6943,17 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "lam": {
+          "rate": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "Lam",
+            "title": "Rate",
             "description": "\u767a\u751f\u7387"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "lam"
+          "rate"
         ],
         "title": "PoissonParams",
         "description": "\u30dd\u30a2\u30bd\u30f3\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
@@ -9194,24 +9194,24 @@
             "title": "Type",
             "description": "\u5206\u5e03\u306e\u7a2e\u985e"
           },
-          "a": {
+          "shapeParameter": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "A",
+            "title": "Shapeparameter",
             "description": "\u5f62\u72b6\u30d1\u30e9\u30e1\u30fc\u30bf"
           },
-          "scale": {
+          "scaleParameter": {
             "type": "number",
             "exclusiveMinimum": 0.0,
-            "title": "Scale",
+            "title": "Scaleparameter",
             "description": "\u5c3a\u5ea6\u30d1\u30e9\u30e1\u30fc\u30bf"
           }
         },
         "type": "object",
         "required": [
           "type",
-          "a",
-          "scale"
+          "shapeParameter",
+          "scaleParameter"
         ],
         "title": "WeibullParams",
         "description": "\u30ef\u30a4\u30d6\u30eb\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"

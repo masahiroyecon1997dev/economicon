@@ -16,10 +16,10 @@ export type GammaParams = {
      * 形状パラメータ
      * @exclusiveMinimum 0
      */
-  shape: number;
+  shapeParameter: number;
   /**
      * 尺度パラメータ
      * @exclusiveMinimum 0
      */
-  scale: number;
+  scaleParameter: number;
 };

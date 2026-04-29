@@ -132,36 +132,36 @@ export const createSimulationDataTableBodySimulationColumnsItemColumnNameMax = 1
 
 
 export const createSimulationDataTableBodySimulationColumnsItemColumnNameRegExp = new RegExp('^[^\\x00-\\x1f\\x7f]+$');
-export const createSimulationDataTableBodySimulationColumnsItemDistributionTwoScaleExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionTwoScaleParameterExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionThreeScaleExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionThreeStandardDeviationExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionFourShapeExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionFourShapeParameterExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionFourScaleExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionFourScaleParameterExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionFiveAExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionFiveAlphaExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionFiveBExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionFiveBetaExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionSixAExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionSixShapeParameterExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionSixScaleExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionSixScaleParameterExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionSevenSigmaExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionSevenLogStandardDeviationExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionEightNExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionEightTrialCountExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionEightPExclusiveMin = 0;
-export const createSimulationDataTableBodySimulationColumnsItemDistributionEightPMax = 1;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionEightSuccessProbabilityExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionEightSuccessProbabilityMax = 1;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionNinePExclusiveMin = 0;
-export const createSimulationDataTableBodySimulationColumnsItemDistributionNinePMax = 1;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionNineSuccessProbabilityExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionNineSuccessProbabilityMax = 1;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionOnezeroLamExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOnezeroRateExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionOneonePExclusiveMin = 0;
-export const createSimulationDataTableBodySimulationColumnsItemDistributionOneonePMax = 1;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOneoneSuccessProbabilityExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOneoneSuccessProbabilityMax = 1;
 
 export const createSimulationDataTableBodySimulationColumnsItemDistributionOnetwoPopulationSizeExclusiveMin = 0;
 
@@ -169,10 +169,10 @@ export const createSimulationDataTableBodySimulationColumnsItemDistributionOnetw
 
 export const createSimulationDataTableBodySimulationColumnsItemDistributionOnetwoSampleSizeExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeNExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeTargetSuccessCountExclusiveMin = 0;
 
-export const createSimulationDataTableBodySimulationColumnsItemDistributionOnethreePExclusiveMin = 0;
-export const createSimulationDataTableBodySimulationColumnsItemDistributionOnethreePMax = 1;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeSuccessProbabilityExclusiveMin = 0;
+export const createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeSuccessProbabilityMax = 1;
 
 export const createSimulationDataTableBodySimulationColumnsItemDistributionOnefiveStartDefault = 1;
 export const createSimulationDataTableBodySimulationColumnsItemDistributionOnefiveStepDefault = 1;
@@ -192,40 +192,40 @@ export const CreateSimulationDataTableBody = zod.object({
   "high": zod.number().describe('分布の上限')
 }).describe('一様分布のパラメータ'),zod.object({
   "type": zod.enum(['exponential']).describe('分布の種類'),
-  "scale": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionTwoScaleExclusiveMin).describe('尺度パラメータ')
+  "scaleParameter": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionTwoScaleParameterExclusiveMin).describe('尺度パラメータ')
 }).describe('指数分布のパラメータ'),zod.object({
   "type": zod.enum(['normal']).describe('分布の種類'),
-  "loc": zod.number().describe('平均'),
-  "scale": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionThreeScaleExclusiveMin).describe('標準偏差')
+  "mean": zod.number().describe('平均'),
+  "standardDeviation": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionThreeStandardDeviationExclusiveMin).describe('標準偏差')
 }).describe('正規分布のパラメータ'),zod.object({
   "type": zod.enum(['gamma']).describe('分布の種類'),
-  "shape": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFourShapeExclusiveMin).describe('形状パラメータ'),
-  "scale": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFourScaleExclusiveMin).describe('尺度パラメータ')
+  "shapeParameter": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFourShapeParameterExclusiveMin).describe('形状パラメータ'),
+  "scaleParameter": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFourScaleParameterExclusiveMin).describe('尺度パラメータ')
 }).describe('ガンマ分布のパラメータ'),zod.object({
   "type": zod.enum(['beta']).describe('分布の種類'),
-  "a": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFiveAExclusiveMin).describe('形状パラメータa'),
-  "b": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFiveBExclusiveMin).describe('形状パラメータb')
+  "alpha": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFiveAlphaExclusiveMin).describe('形状パラメータalpha'),
+  "beta": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFiveBetaExclusiveMin).describe('形状パラメータbeta')
 }).describe('ベータ分布のパラメータ'),zod.object({
   "type": zod.enum(['weibull']).describe('分布の種類'),
-  "a": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionSixAExclusiveMin).describe('形状パラメータ'),
-  "scale": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionSixScaleExclusiveMin).describe('尺度パラメータ')
+  "shapeParameter": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionSixShapeParameterExclusiveMin).describe('形状パラメータ'),
+  "scaleParameter": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionSixScaleParameterExclusiveMin).describe('尺度パラメータ')
 }).describe('ワイブル分布のパラメータ'),zod.object({
   "type": zod.enum(['lognormal']).describe('分布の種類'),
-  "mean": zod.number().describe('平均'),
-  "sigma": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionSevenSigmaExclusiveMin).describe('標準偏差')
+  "logMean": zod.number().describe('対数空間での平均'),
+  "logStandardDeviation": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionSevenLogStandardDeviationExclusiveMin).describe('対数空間での標準偏差')
 }).describe('対数正規分布のパラメータ'),zod.object({
   "type": zod.enum(['binomial']).describe('分布の種類'),
-  "n": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionEightNExclusiveMin).describe('試行回数'),
-  "p": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionEightPExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionEightPMax).describe('成功確率')
+  "trialCount": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionEightTrialCountExclusiveMin).describe('試行回数'),
+  "successProbability": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionEightSuccessProbabilityExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionEightSuccessProbabilityMax).describe('成功確率')
 }).describe('二項分布のパラメータ'),zod.object({
   "type": zod.enum(['bernoulli']).describe('分布の種類'),
-  "p": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionNinePExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionNinePMax).describe('成功確率')
+  "successProbability": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionNineSuccessProbabilityExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionNineSuccessProbabilityMax).describe('成功確率')
 }).describe('ベルヌーイ分布のパラメータ'),zod.object({
   "type": zod.enum(['poisson']).describe('分布の種類'),
-  "lam": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnezeroLamExclusiveMin).describe('発生率')
+  "rate": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnezeroRateExclusiveMin).describe('発生率')
 }).describe('ポアソン分布のパラメータ'),zod.object({
   "type": zod.enum(['geometric']).describe('分布の種類'),
-  "p": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOneonePExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionOneonePMax).describe('成功確率')
+  "successProbability": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOneoneSuccessProbabilityExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionOneoneSuccessProbabilityMax).describe('成功確率')
 }).describe('幾何分布のパラメータ'),zod.object({
   "type": zod.enum(['hypergeometric']).describe('分布の種類'),
   "populationSize": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnetwoPopulationSizeExclusiveMin).describe('母集団サイズ'),
@@ -233,8 +233,8 @@ export const CreateSimulationDataTableBody = zod.object({
   "sampleSize": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnetwoSampleSizeExclusiveMin).describe('標本サイズ')
 }).describe('超幾何分布のパラメータ'),zod.object({
   "type": zod.enum(['negative_binomial']).describe('分布の種類'),
-  "n": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeNExclusiveMin).describe('成功回数'),
-  "p": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnethreePExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionOnethreePMax).describe('成功確率')
+  "targetSuccessCount": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeTargetSuccessCountExclusiveMin).describe('成功回数'),
+  "successProbability": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeSuccessProbabilityExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeSuccessProbabilityMax).describe('成功確率')
 }).describe('負の二項分布のパラメータ'),zod.object({
   "type": zod.enum(['fixed']).describe('分布の種類'),
   "value": zod.union([zod.number(),zod.number()]).describe('固定値')

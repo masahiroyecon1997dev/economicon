@@ -16,11 +16,11 @@ export type BinomialParams = {
      * 試行回数
      * @exclusiveMinimum 0
      */
-  n: number;
+  trialCount: number;
   /**
      * 成功確率
      * @maximum 1
      * @exclusiveMinimum 0
      */
-  p: number;
+  successProbability: number;
 };

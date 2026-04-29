@@ -16,5 +16,5 @@ export type ExponentialParams = {
      * 尺度パラメータ
      * @exclusiveMinimum 0
      */
-  scale: number;
+  scaleParameter: number;
 };

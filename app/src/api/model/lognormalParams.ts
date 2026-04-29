@@ -12,11 +12,11 @@ import { LognormalParamsType } from './lognormalParamsType';
 export type LognormalParams = {
   /** 分布の種類 */
   type: LognormalParamsType;
-  /** 平均 */
-  mean: number;
+  /** 対数空間での平均 */
+  logMean: number;
   /**
-     * 標準偏差
+     * 対数空間での標準偏差
      * @exclusiveMinimum 0
      */
-  sigma: number;
+  logStandardDeviation: number;
 };

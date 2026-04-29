@@ -16,10 +16,10 @@ export type WeibullParams = {
      * 形状パラメータ
      * @exclusiveMinimum 0
      */
-  a: number;
+  shapeParameter: number;
   /**
      * 尺度パラメータ
      * @exclusiveMinimum 0
      */
-  scale: number;
+  scaleParameter: number;
 };

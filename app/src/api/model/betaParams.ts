@@ -13,13 +13,13 @@ export type BetaParams = {
   /** 分布の種類 */
   type: BetaParamsType;
   /**
-     * 形状パラメータa
+     * 形状パラメータalpha
      * @exclusiveMinimum 0
      */
-  a: number;
+  alpha: number;
   /**
-     * 形状パラメータb
+     * 形状パラメータbeta
      * @exclusiveMinimum 0
      */
-  b: number;
+  beta: number;
 };

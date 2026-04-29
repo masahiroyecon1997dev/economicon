@@ -13,10 +13,10 @@ export type NormalParams = {
   /** 分布の種類 */
   type: NormalParamsType;
   /** 平均 */
-  loc: number;
+  mean: number;
   /**
      * 標準偏差
      * @exclusiveMinimum 0
      */
-  scale: number;
+  standardDeviation: number;
 };
