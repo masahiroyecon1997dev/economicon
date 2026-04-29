@@ -210,7 +210,8 @@ def validate_panel_iv_columns(
 ) -> None:
     """PanelIV の entity_id / time / endog / instruments 列チェック。
 
-    識別条件 (len(instruments) >= len(endog)) もここで確認する。
+    識別条件チェック (len(instruments) >= len(endog)) は
+    PanelIvParams.check_identification (Pydantic) で実施済み。
     """
     validate_existence(
         value=analysis.entity_id_column,
