@@ -112,9 +112,20 @@ class InstrumentalVariablesParams(BaseRequest):
         default="2sls",
         description="推定アルゴリズム。過剰識別かつ異分散がある場合はGMMを推奨",
     )
-    instrumental_variables: list[ColumnName]
-    endogenous_variables: list[ColumnName]
+    instrumental_variables: list[ColumnName] = Field(min_length=1)
+    endogenous_variables: list[ColumnName] = Field(min_length=1)
     gmm_weight_matrix: Literal["uncentered", "robust", "hac"] = "robust"
+
+    @model_validator(mode="after")
+    def check_identification(self) -> InstrumentalVariablesParams:
+        if len(self.instrumental_variables) < len(self.endogenous_variables):
+            n_iv = len(self.instrumental_variables)
+            n_en = len(self.endogenous_variables)
+            raise ValueError(
+                f"Number of instrumental variables ({n_iv})"
+                f" must be >= endogenous variables ({n_en})."
+            )
+        return self
 
 
 class _PanelBase(BaseRequest):
