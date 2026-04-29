@@ -1,0 +1,201 @@
+{
+  "meta": {
+    "generated_at": "2026-04-29T04:49:21.664906+00:00",
+    "python_version": "3.14.3",
+    "libraries": {
+      "linearmodels": "7.0"
+    },
+    "seed": 2024,
+    "tolerance_guide": {
+      "did_coef": "atol=1e-8 (TWFE PanelOLS, linearmodels)"
+    },
+    "data_file": "synthetic_did.parquet",
+    "model": "did",
+    "n_entities": 40,
+    "n_periods": 8,
+    "treatment_start": 4,
+    "base_period": -1
+  },
+  "estimates": {
+    "input": {
+      "dependent_variable": "y",
+      "treatment_column": "treated",
+      "post_column": "post",
+      "time_column": "time_id",
+      "entity_id_column": "entity_id",
+      "confidence_level": 0.95,
+      "n_entities": 40,
+      "n_periods": 8,
+      "n_treated": 20,
+      "n_control": 20
+    },
+    "twfe": {
+      "nonrobust": {
+        "did_estimate": {
+          "coefficient": 2.675309050969673,
+          "standard_error": 0.2380439110074901,
+          "t_value": 11.238720787466367,
+          "p_value": 0.0,
+          "ci_lower": 2.206650812263634,
+          "ci_upper": 3.143967289675712,
+          "description": "ATT: Average Treatment Effect on the Treated (TWFE)"
+        },
+        "parameters": [
+          {
+            "name": "x1",
+            "coefficient": 1.484478330244322,
+            "standard_error": 0.080088339940403,
+            "t_value": 18.53551130350539,
+            "p_value": 0.0,
+            "ci_lower": 1.326801285792726,
+            "ci_upper": 1.642155374695918
+          },
+          {
+            "name": "x2",
+            "coefficient": -0.759993131432031,
+            "standard_error": 0.049928430942111884,
+            "t_value": -15.221650612517418,
+            "p_value": 0.0,
+            "ci_lower": -0.858291678148271,
+            "ci_upper": -0.6616945847157909
+          }
+        ],
+        "model_statistics": {
+          "n_observations": 320,
+          "r2": 0.718592831133952,
+          "adjusted_r2": 0.718592831133952,
+          "f_value": 229.82127663151573,
+          "f_probability": 0.0,
+          "n_treated": 20,
+          "n_control": 20,
+          "n_periods": 8
+        }
+      },
+      "clustered_entity": {
+        "did_estimate": {
+          "coefficient": 2.675309050969673,
+          "standard_error": 0.2675006350064134,
+          "t_value": 10.001131589484007,
+          "p_value": 0.0,
+          "ci_lower": 2.148656737435352,
+          "ci_upper": 3.201961364503994,
+          "description": "ATT: Average Treatment Effect on the Treated (TWFE)"
+        },
+        "parameters": [
+          {
+            "name": "x1",
+            "coefficient": 1.484478330244322,
+            "standard_error": 0.08813120793796196,
+            "t_value": 16.843957605679115,
+            "p_value": 0.0,
+            "ci_lower": 1.31096657557507,
+            "ci_upper": 1.6579900849135742
+          },
+          {
+            "name": "x2",
+            "coefficient": -0.759993131432031,
+            "standard_error": 0.04942258349983804,
+            "t_value": -15.37744645490905,
+            "p_value": 0.0,
+            "ci_lower": -0.8572957712571994,
+            "ci_upper": -0.6626904916068626
+          }
+        ],
+        "model_statistics": {
+          "n_observations": 320,
+          "r2": 0.718592831133952,
+          "adjusted_r2": 0.718592831133952,
+          "f_value": 229.82127663151573,
+          "f_probability": 0.0,
+          "n_treated": 20,
+          "n_control": 20,
+          "n_periods": 8
+        }
+      }
+    },
+    "event_study": {
+      "event_study_points": [
+        {
+          "period": -3,
+          "coefficient": 0.48794440428347746,
+          "standard_error": 0.4418616228276267,
+          "t_value": 1.1042923374086009,
+          "p_value": 0.27047181844158086,
+          "ci_lower": -0.38207693202206255,
+          "ci_upper": 1.3579657405890175
+        },
+        {
+          "period": -2,
+          "coefficient": 0.41052481779762007,
+          "standard_error": 0.5161907280837892,
+          "t_value": 0.7952967681569492,
+          "p_value": 0.4271553362287801,
+          "ci_lower": -0.6058498204025927,
+          "ci_upper": 1.426899455997833
+        },
+        {
+          "period": -1,
+          "coefficient": 0.0,
+          "standard_error": 0.0,
+          "t_value": 0.0,
+          "p_value": 1.0,
+          "ci_lower": 0.0,
+          "ci_upper": 0.0
+        },
+        {
+          "period": 0,
+          "coefficient": 2.7917582953023334,
+          "standard_error": 0.4716808024381534,
+          "t_value": 5.918744797056665,
+          "p_value": 1.0043618381416763e-08,
+          "ci_lower": 1.863023277717426,
+          "ci_upper": 3.720493312887241
+        },
+        {
+          "period": 1,
+          "coefficient": 2.8380554393673347,
+          "standard_error": 0.3644748789775729,
+          "t_value": 7.786696979854042,
+          "p_value": 1.5720758028692217e-13,
+          "ci_lower": 2.120407866290885,
+          "ci_upper": 3.5557030124437845
+        },
+        {
+          "period": 2,
+          "coefficient": 2.6745217706326763,
+          "standard_error": 0.5381841896844308,
+          "t_value": 4.9695286890551476,
+          "p_value": 1.2082120497414195e-06,
+          "ci_lower": 1.6148422155462114,
+          "ci_upper": 3.734201325719141
+        },
+        {
+          "period": 3,
+          "coefficient": 3.293183619393995,
+          "standard_error": 0.5213634028324047,
+          "t_value": 6.3164840522045775,
+          "p_value": 1.1299461366576224e-09,
+          "ci_lower": 2.26662403377005,
+          "ci_upper": 4.31974320501794
+        },
+        {
+          "period": 4,
+          "coefficient": 3.2843125812525114,
+          "standard_error": 0.48858355426468475,
+          "t_value": 6.722110379247991,
+          "p_value": 1.10109033002459e-10,
+          "ci_lower": 2.3222962059492023,
+          "ci_upper": 4.24632895655582
+        }
+      ],
+      "diagnostics": {
+        "pre_trend_test": {
+          "f_statistic": 583.8838870213156,
+          "df1": 2,
+          "df2": 264,
+          "p_value": 0.0
+        }
+      }
+    }
+  }
+}
