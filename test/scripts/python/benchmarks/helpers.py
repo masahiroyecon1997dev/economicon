@@ -32,6 +32,7 @@ TOLERANCE_GUIDE = {
     "confidence_interval": "atol=1e-8",
     "statistical_test": "atol=1e-8",
     "correlation_table": "atol=1e-12 for raw matrix, atol=1e-8 for rounded API comparisons",
+    "did_coef": "atol=1e-8 (TWFE PanelOLS, linearmodels)",
 }
 
 

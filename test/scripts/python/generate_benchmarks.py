@@ -6,6 +6,7 @@ import pandas as pd
 from benchmarks.confidence_interval import bench_confidence_interval
 from benchmarks.correlation_table import bench_correlation_table
 from benchmarks.descriptive_statistics import bench_descriptive_statistics
+from benchmarks.did import bench_did
 from benchmarks.fe import bench_fe
 from benchmarks.fgls_ar1 import bench_fgls_ar1
 from benchmarks.fgls_heteroskedastic import bench_fgls_heteroskedastic
@@ -49,6 +50,7 @@ def main() -> None:
     df_statistics_test_groups = pd.read_parquet(
         DATA_DIR / "synthetic_statistics_test_groups.parquet"
     )
+    df_did = pd.read_parquet(DATA_DIR / "synthetic_did.parquet")
 
     print("Running models...")
 
@@ -305,7 +307,7 @@ def main() -> None:
         ),
     )
 
-    print("  [19/19] Correlation table...")
+    print("  [19/20] Correlation table...")
     correlation_table = bench_correlation_table(
         df_statistics_core,
         df_statistics_nulls,
@@ -323,6 +325,23 @@ def main() -> None:
                 "synthetic_statistics_nulls.parquet",
                 "synthetic_statistics_constant.parquet",
             ],
+        ),
+    )
+
+    print("  [20/20] DID (TWFE + Event Study)...")
+    did = bench_did(df_did)
+    write_benchmark(
+        "did",
+        did,
+        build_meta(
+            "did",
+            "synthetic_did.parquet",
+            ["linearmodels"],
+            ["did_coef"],
+            n_entities=40,
+            n_periods=8,
+            treatment_start=4,
+            base_period=-1,
         ),
     )
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 from data_generators.descriptive import generate_descriptive_data
+from data_generators.did import generate_did_datasets
 from data_generators.fgls_ar1 import generate_fgls_ar1_data
 from data_generators.fgls_heteroskedastic import (
     generate_fgls_hetero_data,
@@ -38,6 +39,7 @@ def main() -> None:
     rng_gls = np.random.default_rng(SEED + 102)
     rng_fgls_hetero = np.random.default_rng(SEED + 103)
     rng_fgls_ar1 = np.random.default_rng(SEED + 104)
+    rng_did = np.random.default_rng(SEED + 105)
     stats_ci_seed = 42
     stats_test_groups_seed = 42
 
@@ -112,7 +114,12 @@ def main() -> None:
         "synthetic_statistics_test_groups",
     )
 
-    print("[18/18] Synthetic statistics add-ons complete")
+    print("[18/19] Synthetic statistics add-ons complete")
+
+    print("[19/19] DID data")
+    for name, df in generate_did_datasets(rng_did).items():
+        save_dataset(df, name)
+
     print()
     print(f"All done. Output: {DATA_DIR}")
 
