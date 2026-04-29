@@ -69,7 +69,14 @@ def format_rdd_result(
         "pValue": rd_stats["conv_pv"],
         "ciLower": rd_stats["conv_ci_lower"],
         "ciUpper": rd_stats["conv_ci_upper"],
+        # Eco-Note: Calonico et al. (2014) 推奨の robust 推論。
+        # biasCorrectedZStat / biasCorrectedPValue は
+        # bias-corrected 点推定値 ÷ robust SE に基づく。
+        # フロントエンドでは conventional zStat/pValue ではなく
+        # こちらを優先表示すること。
         "biasCorrectedCoef": rd_stats["bc_coef"],
+        "biasCorrectedZStat": rd_stats["bc_z"],
+        "biasCorrectedPValue": rd_stats["bc_pv"],
         "biasCorrectedCiLower": rd_stats["bc_ci_lower"],
         "biasCorrectedCiUpper": rd_stats["bc_ci_upper"],
         "rho": rd_stats["rho"],
