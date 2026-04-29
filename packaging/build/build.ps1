@@ -42,8 +42,9 @@ $APP_NAME    = "economicon"
 $APP_VERSION = "0.3.0"    # tauri.conf.json の version と合わせてください
 
 # --- ディレクトリ --------------------------------------------------------------
-$SCRIPT_DIR    = $PSScriptRoot                          # packaging/
-$PROJECT_ROOT  = Split-Path -Parent $SCRIPT_DIR        # リポジトリルート
+$SCRIPT_DIR    = $PSScriptRoot                          # packaging/build/
+$PACKAGING_DIR = Split-Path -Parent $SCRIPT_DIR        # packaging/
+$PROJECT_ROOT  = Split-Path -Parent $PACKAGING_DIR     # リポジトリルート
 $API_DIR       = Join-Path $PROJECT_ROOT "api"
 $APP_DIR       = Join-Path $PROJECT_ROOT "app"
 $TAURI_DIR     = Join-Path $APP_DIR "src-tauri"
@@ -422,7 +423,7 @@ Copy-Item $jsLicSrc -Destination $jsLicOut -Force
 Write-Success "JavaScript ライセンス → $jsLicOut"
 
 # --- 6-4: Rust サードパーティライセンス (cargo-about) ---------------------------------
-# packaging/about.toml と packaging/about.hbs を使用してライセンスを生成する。
+# packaging/build/about.toml と packaging/build/about.hbs を使用してライセンスを生成する。
 Write-Info "Rust ライセンス収集中..."
 
 $rustLicOut = Join-Path $LICENSES_DIR "03_RUST_CRATES.txt"

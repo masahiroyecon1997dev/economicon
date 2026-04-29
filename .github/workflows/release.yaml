@@ -53,16 +53,16 @@ jobs:
           cache-dependency-glob: "api/uv.lock"
 
       # -----------------------------------------------------------------------
-      # build.ps1 STEP 1-9 相当
+      # build/build.ps1 STEP 1-9 相当
       # -CI スイッチにより STEP 0（前提ツール確認・対話プロンプト）をスキップして実行
       # -----------------------------------------------------------------------
-      - name: Build Windows installer (packaging/build.ps1 -CI)
+      - name: Build Windows installer (packaging/build/build.ps1 -CI)
         shell: pwsh
-        run: .\packaging\build.ps1 -CI
+        run: .\packaging\build\build.ps1 -CI
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: economicon-windows-installer
-          path: packaging/release/*.exe
+          path: packaging/build/release/*.exe
           retention-days: 14

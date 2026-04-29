@@ -70,8 +70,9 @@ if ($Version -notmatch '^\d+\.\d+\.\d+$') {
     exit 1
 }
 
-$SCRIPT_DIR   = $PSScriptRoot
-$PROJECT_ROOT = Split-Path -Parent $SCRIPT_DIR
+$SCRIPT_DIR    = $PSScriptRoot
+$PACKAGING_DIR = Split-Path -Parent $SCRIPT_DIR
+$PROJECT_ROOT  = Split-Path -Parent $PACKAGING_DIR
 
 # ==============================================================================
 #  ヘッダー
@@ -124,8 +125,8 @@ $targets = @(
         UseBOM  = $false
     },
     @{
-        Label   = "packaging/build.ps1"
-        Path    = Join-Path $PROJECT_ROOT "packaging\build.ps1"
+        Label   = "packaging/build/build.ps1"
+        Path    = Join-Path $PROJECT_ROOT "packaging\build\build.ps1"
         Pattern = '(?<=\$APP_VERSION\s+=\s+")[^"]+'
         Replace = $Version
         UseBOM  = $true   # PowerShell スクリプトは UTF-8 with BOM で保存

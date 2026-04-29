@@ -6,7 +6,7 @@ pnpm-lock.yaml / uv.lock / Cargo.lock を base-ref と HEAD で比較し、
 リリースから --days 日未満のパッケージが見つかった場合は警告またはエラーを出力する。
 
 使い方:
-    python packaging/check_new_packages.py \\
+    python packaging/deps/check_new_packages.py \\
         --base-ref origin/dev \\
         --days 7 \\
         --mode error
@@ -24,6 +24,8 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import quote
+
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # ---------------------------------------------------------------------------
 # Git helpers

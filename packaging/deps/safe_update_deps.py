@@ -14,8 +14,8 @@
     更新後に pnpm / uv / cargo の整合性検証を実行する。
 
 使い方:
-    python packaging/safe_update_deps.py --mode outdated --days 7
-    python packaging/safe_update_deps.py --mode apply   --days 7
+    python packaging/deps/safe_update_deps.py --mode outdated --days 7
+    python packaging/deps/safe_update_deps.py --mode apply   --days 7
 """
 
 from __future__ import annotations
@@ -43,7 +43,7 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() != "utf-8":
 # Helpers
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 APP_DIR = REPO_ROOT / "app"
 API_DIR = REPO_ROOT / "api"
 TAURI_DIR = APP_DIR / "src-tauri"

@@ -299,7 +299,7 @@ pub fn run() {
 
                 let runime_path = resource_dir
                     .join("resources")
-                    .join("runtime") // packaging/build.ps1 で runtime フォルダに展開する前提
+                    .join("runtime") // packaging/build/build.ps1 で runtime フォルダに展開する前提
                     .to_string_lossy().into_owned();
 
                 let auth_token = app.state::<AuthTokenState>().token.clone();
