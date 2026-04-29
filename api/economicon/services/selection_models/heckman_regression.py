@@ -209,7 +209,9 @@ class HeckmanRegression:
             if self.missing == "drop":
                 df_step1 = df_step1.drop_nulls()
             elif self.missing == "raise":
-                null_total = sum(df_step1.drop(orig_idx_col).null_count().row(0))
+                null_total = sum(
+                    df_step1.drop(orig_idx_col).null_count().row(0)
+                )
                 if null_total > 0:
                     raise ProcessingError(
                         error_code=ErrorCode.MISSING_VALUES_FOUND,
@@ -252,8 +254,13 @@ class HeckmanRegression:
             # ============================================================
             xb = probit_result.predict(linear=True)
             imr_all = norm.pdf(xb) / norm.cdf(xb)
+            xb_col = generate_unique_column_name(
+                "__xb__",
+                [orig_idx_col, imr_col, *all_cols],
+            )
             df_step1 = df_step1.with_columns(
-                pl.Series(name=imr_col, values=imr_all)
+                pl.Series(name=imr_col, values=imr_all),
+                pl.Series(name=xb_col, values=xb),
             )
 
             # ============================================================
@@ -272,7 +279,9 @@ class HeckmanRegression:
             if self.missing == "drop":
                 df_step2 = df_step2.drop_nulls(subset=step2_cols)
             elif self.missing == "raise":
-                null_total = sum(df_step2.select(step2_cols).null_count().row(0))
+                null_total = sum(
+                    df_step2.select(step2_cols).null_count().row(0)
+                )
                 if null_total > 0:
                     raise ProcessingError(
                         error_code=ErrorCode.MISSING_VALUES_FOUND,
@@ -312,7 +321,41 @@ class HeckmanRegression:
             ols_result = sm.OLS(y_out, x_out).fit(cov_type="HC1")
 
             # ============================================================
-            # 結果整形
+            # Murphy-Topel (1985) delta-method SE 補正
+            # Eco-Note: generated regressor (IMR) による OLS SE の不一致を
+            # 補正する。
+            #   Var_MT = Var_HC1
+            #           + β̂_λ² (X'X)⁻¹ [X'Δ̂Z Var(γ̂) Z'Δ̂X] (X'X)⁻¹
+            #   δ_i = λ_i(λ_i + z_i'γ̂) : IMR の z_i'γ に関する徣分
+            # ============================================================
+            from scipy.stats import t as t_dist  # noqa: PLC0415
+
+            mt_applied = False
+            min_se: float = 1e-15
+            try:
+                beta_lambda_val = float(ols_result.params[-1])
+                xb_sel_arr = df_step2[xb_col].to_numpy().astype(float)
+                lam_sel = imr_selected
+                z_sel_raw = df_step2[self.selection_variables].to_numpy()
+                z_sel = sm.add_constant(z_sel_raw, has_constant="skip")
+                delta_sel = lam_sel * (lam_sel + xb_sel_arr)  # (n_s,)
+
+                xt_x = x_out.T @ x_out  # (k_x, k_x)
+                xt_x_inv = np.linalg.inv(xt_x)
+                # X'ΔZ: (k_x, k_z)
+                xt_dz = (x_out * delta_sel[:, np.newaxis]).T @ z_sel
+                v_gamma = np.array(probit_result.cov_params())  # (k_z, k_z)
+                correction = (
+                    beta_lambda_val**2
+                    * xt_x_inv
+                    @ (xt_dz @ v_gamma @ xt_dz.T)
+                    @ xt_x_inv
+                )
+                cov_mt = np.array(ols_result.cov_HC1) + correction
+                se_mt = np.sqrt(np.maximum(np.diag(cov_mt), 0.0))
+                mt_applied = True
+            except Exception:
+                se_mt = np.array(ols_result.bse)
             # ============================================================
             param_names_step2 = (
                 (["const"] if self.has_const else [])
@@ -322,6 +365,33 @@ class HeckmanRegression:
             params_info = extract_statsmodels_params(
                 ols_result, param_names_step2
             )
+
+            # Murphy-Topel 補正 SE で上書き
+            if mt_applied:
+                betas_arr = np.array(ols_result.params)
+                dof = float(ols_result.df_resid)
+                for i, p in enumerate(params_info):
+                    se = float(se_mt[i])
+                    coef = float(betas_arr[i])
+                    t_val = coef / se if se > min_se else float("nan")
+                    pv = (
+                        float(2 * t_dist.sf(abs(t_val), df=dof))
+                        if np.isfinite(t_val)
+                        else float("nan")
+                    )
+                    p.update(
+                        {
+                            "standardError": se,
+                            "tValue": t_val,
+                            "pValue": pv,
+                            "confIntLow95": (
+                                coef + t_dist.ppf(0.025, df=dof) * se
+                            ),
+                            "confIntHigh95": (
+                                coef + t_dist.ppf(0.975, df=dof) * se
+                            ),
+                        }
+                    )
 
             # λ（IMR 係数）を diagnostics に抽出
             lambda_info = params_info[-1]
@@ -358,10 +428,18 @@ class HeckmanRegression:
                     "pValue": p_val,
                     "description": lambda_desc,
                 },
-                "standardErrorNote": _(
-                    "HC1 robust SE applied to Step 2 OLS."
-                    " OLS SE is inconsistent due to the"
-                    " generated regressor (IMR)."
+                "standardErrorNote": (
+                    _(
+                        "Murphy-Topel (1985) delta-method correction"
+                        " applied to Step 2 SE. Accounts for"
+                        " estimation uncertainty in Step 1 IMR."
+                    )
+                    if mt_applied
+                    else _(
+                        "HC1 robust SE applied to Step 2 OLS."
+                        " OLS SE is inconsistent due to the"
+                        " generated regressor (IMR)."
+                    )
                 ),
             }
 
