@@ -249,7 +249,9 @@
     "ErrorDataRequired": "データを選択してください",
     "ErrorColumnsRequired": "1つ以上の列を選択してください",
     "ErrorStatsRequired": "1つ以上の統計量を選択してください",
-    "ErrorCalculation": "計算中にエラーが発生しました"
+    "ErrorCalculation": "計算中にエラーが発生しました",
+    "QuickCopyMd": "Markdownをクリップボードにコピー",
+    "OutputDialog": "出力..."
   },
   "LinearRegressionForm": {
     "DataSource": "データ",

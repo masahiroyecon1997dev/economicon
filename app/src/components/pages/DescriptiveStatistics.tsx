@@ -1,17 +1,19 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { DescriptiveStatisticType } from "@/api/model";
+import { OutputResultFormat } from "@/api/model/outputResultFormat";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
 import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
 import { FormField } from "@/components/molecules/Form/FormField";
+import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { cn } from "@/lib/utils/helpers";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Clipboard, Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -60,6 +62,7 @@ type FormErrors = {
 };
 
 type ResultSnapshot = {
+  resultId: string;
   data: StatisticsMap;
   cols: string[];
   stats: DescriptiveStatisticType[];
@@ -81,6 +84,31 @@ export const DescriptiveStatistics = () => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState<ResultSnapshot | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isOutputDialogOpen, setIsOutputDialogOpen] = useState(false);
+  const [isQuickCopying, setIsQuickCopying] = useState(false);
+  const [isQuickCopied, setIsQuickCopied] = useState(false);
+
+  const handleQuickCopy = async () => {
+    if (!result) return;
+    setIsQuickCopying(true);
+    try {
+      const api = getEconomiconAppAPI();
+      const resp = await api.outputResult({
+        resultType: "descriptive_statistics",
+        resultIds: [result.resultId],
+        format: OutputResultFormat.markdown,
+      });
+      if (resp.code === "OK" && resp.result) {
+        await navigator.clipboard.writeText(resp.result.content);
+        setIsQuickCopied(true);
+        setTimeout(() => setIsQuickCopied(false), 2000);
+      }
+    } catch {
+      // silent — クリップボード失敗は無視
+    } finally {
+      setIsQuickCopying(false);
+    }
+  };
   const [statsOpen, setStatsOpen] = useState(true);
   const {
     selectedTableName: selectedTable,
@@ -148,7 +176,7 @@ export const DescriptiveStatistics = () => {
         if (detailResp.code === "OK") {
           const data = detailResp.result.result.resultData
             .statistics as StatisticsMap;
-          setResult({ data, cols: orderedCols, stats: orderedStats });
+          setResult({ resultId, data, cols: orderedCols, stats: orderedStats });
           setTimeout(
             () =>
               resultRef.current?.scrollIntoView({
@@ -279,9 +307,49 @@ export const DescriptiveStatistics = () => {
         {/* ─── 5. Result table ───────────────────────────────── */}
         {result && (
           <div ref={resultRef} className="space-y-2 pb-4">
-            <h2 className="text-sm font-semibold text-brand-text-main">
-              {t("DescriptiveStatistics.ResultTitle")}
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-brand-text-main">
+                {t("DescriptiveStatistics.ResultTitle")}
+              </h2>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => void handleQuickCopy()}
+                  disabled={isQuickCopying}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
+                    "border border-gray-300 dark:border-gray-600",
+                    isQuickCopied
+                      ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      : "bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+                    "disabled:cursor-not-allowed disabled:opacity-50",
+                  )}
+                  title={t("DescriptiveStatistics.QuickCopyMd")}
+                  data-testid="ds-quick-copy-btn"
+                >
+                  {isQuickCopying ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : isQuickCopied ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    <Clipboard className="h-3.5 w-3.5" />
+                  )}
+                  MD
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsOutputDialogOpen(true)}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
+                    "border border-gray-300 dark:border-gray-600",
+                    "bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+                  )}
+                  data-testid="ds-output-dialog-btn"
+                >
+                  {t("DescriptiveStatistics.OutputDialog")}
+                </button>
+              </div>
+            </div>
             <div className="overflow-x-auto rounded-lg border border-border-color">
               <table className="min-w-full text-sm">
                 <thead>
@@ -348,6 +416,15 @@ export const DescriptiveStatistics = () => {
         disabled={isCalculating}
         isLoading={isCalculating}
       />
+      {result && (
+        <OutputResultDialog
+          open={isOutputDialogOpen}
+          onOpenChange={setIsOutputDialogOpen}
+          resultKind="descriptive_statistics"
+          resultId={result.resultId}
+          title={selectedTable}
+        />
+      )}
     </PageLayout>
   );
 };

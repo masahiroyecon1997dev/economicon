@@ -86,6 +86,87 @@
 
 ## 追加テスト方針
 
+### DID / RDD のテストデータ移行方針
+
+#### 基本方針
+
+- DID と RDD は、テスト実行時に `api/tests` 内で都度 `DataFrame` を組み立てる方式をやめる。
+- 正常系の主要 fixture は `test/data` 配下の生成済み CSV / Parquet を唯一の入力ソースにする。
+- 入力データの生成ロジックは `test/scripts/data_generators` に寄せ、生成入口は既存の `test/scripts/generate_synthetic_data.py` に統合する。
+- benchmark は `test/benchmarks/python/synthetic` と `test/benchmarks/r/synthetic` に保存し、pytest は benchmark を再計算せず生成済み成果物を読む。
+- pytest 側は「データ生成コードの正しさ」ではなく「生成済み fixture に対する API の振る舞い」を検証する構成にする。
+
+#### RDD
+
+現状:
+
+- データ生成関数は `test/scripts/data_generators/rdd.py` に既に存在する。
+- benchmark も `test/benchmarks/python/synthetic/synthetic_rdd_gold.json` と `test/benchmarks/r/synthetic/r_synthetic_rdd_gold.json` が存在する。
+- しかし pytest は `api/tests/rdd/conftest.py` で乱数から再生成した `DataFrame` を直接 `TablesStore` に入れており、`test/data` の生成済み fixture を読んでいない。
+
+対応方針:
+
+1. `test/scripts/generate_synthetic_data.py` の RDD 出力を source of truth にする。
+2. pytest の fixture は `test/data/csv/synthetic_rdd.csv` または `test/data/parquet/synthetic_rdd.parquet` を読み込んで `TablesStore` に登録する。
+3. `TABLE_NO_LEFT`, `TABLE_STRING` のような異常系派生テーブルも、可能なら generator 側で派生 fixture を出力する。
+4. payload の既定列名は生成済みデータの列名に揃える。現状の `runningVariable='running_var'` と runtime fixture の `x` の不整合はここで解消する。
+5. benchmark 再生成手順を明文化し、Python / R の両 benchmark が fixture と同じデータを参照するよう統一する。
+
+#### DID
+
+現状:
+
+- pytest は `api/tests/test_did.py` 内で inline に panel データを組み立てている。
+- `test/scripts/data_generators` に DID 用 generator がまだ無い。
+- DID 用 benchmark も既存の synthetic benchmark 群に含まれていない。
+
+対応方針:
+
+1. `test/scripts/data_generators/did.py` を新設し、正常系・重複 entity-time・非 binary treatment などの派生データを生成する。
+2. `test/scripts/generate_synthetic_data.py` に DID を組み込み、少なくとも以下を `test/data` に出力する。
+   - `synthetic_did`
+   - `synthetic_did_duplicate`
+   - `synthetic_did_bad_treatment`
+3. Python benchmark を `test/benchmarks/python/synthetic`、必要なら R benchmark を `test/benchmarks/r/synthetic` に追加する。
+4. pytest 側は inline 生成をやめ、生成済み fixture を読み込むだけにする。
+5. 正常系 fixture は current implementation で absorbed されない説明変数を使う。現行の `x1 = entity_id + time_id` のような fully absorbed な構成は generator 側で排除する。
+
+#### benchmark 生成の運用方針
+
+- synthetic データを更新したら benchmark も同じ commit で更新する。
+- benchmark の生成スクリプトは `test/scripts/python` / `test/scripts/r` に集約する。
+- pytest から benchmark 生成を暗黙実行しない。未生成なら明示的に失敗または skip する。
+- fixture 名、benchmark 名、pytest 参照名は `synthetic_<api>...` で統一する。
+
+## この方式に未移行の API
+
+ここでいう「未移行」は、主要な正常系 fixture / benchmark が `test/data` と `test/scripts/data_generators` を source of truth にせず、pytest 実行時の inline 生成または外部データ取得に依存している状態を指す。小さな異常系専用の一時 `DataFrame` は対象外とする。
+
+### 1. DID API
+
+- エンドポイント: `/api/analysis/did`
+- 現状: `api/tests/test_did.py` で inline に panel データを生成している。
+- 状態: 未移行
+
+### 2. RDD API
+
+- エンドポイント: `/api/analysis/rdd`
+- 現状: generator と benchmark は存在するが、pytest fixture は `api/tests/rdd/conftest.py` で runtime 生成した `DataFrame` を使っている。
+- 状態: 部分移行。generator / benchmark はあるが、pytest 読み込みが未移行
+
+### 3. Regression API の Grunfeld 統合系
+
+- エンドポイント: `/api/analysis/regression`, `/api/analysis/results/{result_id}`
+- 対象メソッド: OLS, FE, RE, IV, Logit, Probit, Lasso, Ridge
+- 該当テスト: `api/tests/integration_tests/test_grunfeld_consistency.py`, `api/tests/integration_tests/test_r_benchmark_external_validity.py`
+- 現状: `statsmodels.datasets.get_rdataset("Grunfeld", "plm")` で runtime に外部データ取得し、fixture をその場で組み立てている。
+- 状態: 未移行
+
+補足:
+
+- Heckman は `test/scripts/data_generators/heckman.py` と `test/data/csv/synthetic_heckman.csv` / `test/data/parquet/synthetic_heckman.parquet` を使う構成が既にあるため、この観点では移行済み。
+- OLS / WLS / GLS / FGLS / IV / Tobit / Statistics も主要 fixture は `test/data` と synthetic benchmark を読む構成が既にある。
+
 ### 回帰系
 
 | データ                                            | 主対象                         | 追加したい検証                               |

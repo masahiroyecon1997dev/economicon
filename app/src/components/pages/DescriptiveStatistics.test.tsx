@@ -1,11 +1,11 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { DescriptiveStatisticType } from "@/api/model";
+import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useTableListStore } from "@/stores/tableList";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "@/api/endpoints";
-import { DescriptiveStatisticType } from "@/api/model";
-import { showMessageDialog } from "@/lib/dialog/message";
-import { useTableListStore } from "@/stores/tableList";
-import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -44,6 +44,7 @@ const mockApi = {
   getColumnList: vi.fn(),
   descriptiveStatistics: vi.fn(),
   getAnalysisResult: vi.fn(),
+  outputResult: vi.fn(),
 };
 
 beforeEach(() => {
@@ -259,6 +260,105 @@ describe("DescriptiveStatistics フォーム", () => {
 
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe("出力ボタン", () => {
+    const setupWithResult = async () => {
+      mockApi.getColumnList.mockResolvedValue({
+        code: "OK",
+        result: { columnInfoList: [{ name: "price", type: "Float64" }] },
+      });
+      mockApi.descriptiveStatistics.mockResolvedValue({
+        code: "OK",
+        result: { resultId: "result-123" },
+      });
+      mockApi.getAnalysisResult.mockResolvedValue({
+        code: "OK",
+        result: {
+          result: {
+            resultData: {
+              statistics: {
+                price: { [DescriptiveStatisticType.mean]: 10 },
+              },
+            },
+          },
+        },
+      });
+
+      const user = userEvent.setup();
+      render(<DescriptiveStatistics />);
+
+      const selectTrigger = screen.getByRole("combobox");
+      await user.click(selectTrigger);
+      const option = await screen.findByRole("option", { name: "sales" });
+      await user.click(option);
+
+      await waitFor(() =>
+        expect(screen.getByText("price")).toBeInTheDocument(),
+      );
+
+      const submitBtn = screen.getByRole("button", {
+        name: "DescriptiveStatistics.RunCalculation",
+      });
+      await user.click(submitBtn);
+
+      await waitFor(() =>
+        expect(
+          screen.getByText("DescriptiveStatistics.ResultTitle"),
+        ).toBeInTheDocument(),
+      );
+
+      return user;
+    };
+
+    it("計算成功後にクイックコピーボタンと出力ダイアログボタンが表示される", async () => {
+      await setupWithResult();
+      expect(screen.getByTestId("ds-quick-copy-btn")).toBeInTheDocument();
+      expect(screen.getByTestId("ds-output-dialog-btn")).toBeInTheDocument();
+    });
+
+    it("クイックコピーボタンクリックで outputResult が markdown 形式で呼ばれる", async () => {
+      mockApi.outputResult = vi.fn().mockResolvedValue({
+        code: "OK",
+        result: { content: "| col | mean |\n|-----|------|\n| price | 10 |" },
+      });
+      const user = await setupWithResult();
+
+      const writeTextMock = vi.fn().mockResolvedValue(undefined);
+      vi.spyOn(navigator.clipboard, "writeText").mockImplementation(
+        writeTextMock,
+      );
+
+      const copyBtn = screen.getByTestId("ds-quick-copy-btn");
+      await user.click(copyBtn);
+
+      await waitFor(() => {
+        expect(mockApi.outputResult).toHaveBeenCalledWith(
+          expect.objectContaining({
+            resultType: "descriptive_statistics",
+            resultIds: ["result-123"],
+            format: "markdown",
+          }),
+        );
+      });
+    });
+
+    it("出力ダイアログボタンクリックでダイアログが開く", async () => {
+      mockApi.outputResult = vi.fn().mockResolvedValue({
+        code: "OK",
+        result: { content: "preview text" },
+      });
+      const user = await setupWithResult();
+
+      const dialogBtn = screen.getByTestId("ds-output-dialog-btn");
+      await user.click(dialogBtn);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("OutputResultDialog.Title"),
+        ).toBeInTheDocument();
       });
     });
   });

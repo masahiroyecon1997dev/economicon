@@ -249,7 +249,9 @@
     "ErrorDataRequired": "Please select data",
     "ErrorColumnsRequired": "Please select at least one column",
     "ErrorStatsRequired": "Please select at least one statistic",
-    "ErrorCalculation": "An error occurred during calculation"
+    "ErrorCalculation": "An error occurred during calculation",
+    "QuickCopyMd": "Copy as Markdown",
+    "OutputDialog": "Export..."
   },
   "LinearRegressionForm": {
     "DataSource": "Data",

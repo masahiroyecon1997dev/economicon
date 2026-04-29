@@ -23,13 +23,25 @@ type VarEntryType = {
   label: string;
 };
 
-export type OutputResultDialogPropsType = {
+export type OutputResultDialogPropsType =
+  | {
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      resultKind: "regression";
+      result: LinearRegressionResultType;
+    }
+  | {
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      resultKind: "descriptive_statistics";
+      resultId: string;
+      title: string;
+    };
+
+type RegressionOutputResultDialogContentPropsType = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   result: LinearRegressionResultType;
-};
-
-type OutputResultDialogContentPropsType = OutputResultDialogPropsType & {
   format: OutputResultFormat;
   setFormat: (value: OutputResultFormat) => void;
   statInParentheses: RegressionOutputOptionsStatInParentheses;
@@ -38,6 +50,15 @@ type OutputResultDialogContentPropsType = OutputResultDialogPropsType & {
   ) => void;
   constAtBottom: boolean;
   setConstAtBottom: (value: boolean) => void;
+};
+
+type DescriptiveStatisticsOutputResultDialogContentPropsType = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  resultId: string;
+  title: string;
+  format: OutputResultFormat;
+  setFormat: (value: OutputResultFormat) => void;
 };
 
 const createInitialVarEntries = (
@@ -50,7 +71,7 @@ const createInitialVarEntries = (
 
 // ─── コンポーネント ───────────────────────────────────────────────────────────
 
-const OutputResultDialogContent = ({
+const RegressionOutputResultDialogContent = ({
   open,
   onOpenChange,
   result,
@@ -60,7 +81,7 @@ const OutputResultDialogContent = ({
   setStatInParentheses,
   constAtBottom,
   setConstAtBottom,
-}: OutputResultDialogContentPropsType) => {
+}: RegressionOutputResultDialogContentPropsType) => {
   const { t } = useTranslation();
   const initialVarEntries = createInitialVarEntries(result);
 
@@ -382,11 +403,131 @@ const OutputResultDialogContent = ({
   );
 };
 
-export const OutputResultDialog = ({
+// ─── 基本統計量出力ダイアログ内容 ──────────────────────────────────────────────
+
+const DescriptiveStatisticsOutputResultDialogContent = ({
   open,
   onOpenChange,
-  result,
-}: OutputResultDialogPropsType) => {
+  resultId,
+  title,
+  format,
+  setFormat,
+}: DescriptiveStatisticsOutputResultDialogContentPropsType) => {
+  const { t } = useTranslation();
+  const [isCopied, setIsCopied] = useState(false);
+  const { content, isLoading, error, fetchOutput } = useOutputResult();
+
+  useEffect(() => {
+    if (!open) return;
+    void fetchOutput({
+      resultIds: [resultId],
+      format,
+    });
+  }, [open, resultId, format, fetchOutput]);
+
+  const handleCopy = async () => {
+    if (!content) return;
+    await navigator.clipboard.writeText(content);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  return (
+    <BaseDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("OutputResultDialog.Title")}
+      subtitle={title}
+      maxWidth="2xl"
+      footerVariant="none"
+    >
+      {/* ── 出力フォーマット ── */}
+      <div className="mb-4 max-w-xs">
+        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+          {t("OutputResultDialog.Format")}
+        </label>
+        <Select
+          value={format}
+          onValueChange={(v) => setFormat(v as OutputResultFormat)}
+          data-testid="output-format-select"
+        >
+          <SelectItem value={OutputResultFormat.text}>
+            {t("OutputResultDialog.FormatText")}
+          </SelectItem>
+          <SelectItem value={OutputResultFormat.markdown}>
+            {t("OutputResultDialog.FormatMarkdown")}
+          </SelectItem>
+          <SelectItem value={OutputResultFormat.latex}>
+            {t("OutputResultDialog.FormatLatex")}
+          </SelectItem>
+        </Select>
+      </div>
+
+      {/* ── プレビュー ── */}
+      <div className="mb-4">
+        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          {t("OutputResultDialog.Preview")}
+        </h4>
+        <div className="relative max-h-64 min-h-20 overflow-auto rounded-md border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+          {isLoading && (
+            <div className="flex h-20 items-center justify-center gap-2 text-sm text-gray-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {t("OutputResultDialog.Loading")}
+            </div>
+          )}
+          {error && !isLoading && (
+            <div className="flex h-20 items-center justify-center text-sm text-red-500">
+              {t("OutputResultDialog.Error")}
+            </div>
+          )}
+          {content && !isLoading && (
+            <pre
+              className="p-3 text-xs font-mono leading-relaxed whitespace-pre text-gray-800 dark:text-gray-200"
+              data-testid="output-preview"
+            >
+              {content}
+            </pre>
+          )}
+        </div>
+      </div>
+
+      {/* ── フッター ── */}
+      <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-700 pt-3">
+        <Button variant="outline" onClick={() => onOpenChange(false)}>
+          {t("Common.Close")}
+        </Button>
+        <button
+          type="button"
+          onClick={() => void handleCopy()}
+          disabled={!content || isLoading}
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-md px-6 py-2.5 text-sm font-semibold transition-colors cursor-pointer",
+            "focus-visible:outline-2 focus-visible:outline-offset-2",
+            isCopied
+              ? "bg-green-600 text-white focus-visible:outline-green-600"
+              : "bg-brand-accent text-white hover:bg-brand-accent/90 focus-visible:outline-brand-accent",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+          )}
+          data-testid="output-copy-btn"
+        >
+          {isCopied ? (
+            <>
+              <Check className="h-4 w-4" />
+              {t("OutputResultDialog.Copied")}
+            </>
+          ) : (
+            <>
+              <Clipboard className="h-4 w-4" />
+              {t("OutputResultDialog.CopyButton")}
+            </>
+          )}
+        </button>
+      </div>
+    </BaseDialog>
+  );
+};
+
+export const OutputResultDialog = (props: OutputResultDialogPropsType) => {
   const [format, setFormat] = useState<OutputResultFormat>(
     OutputResultFormat.markdown,
   );
@@ -396,12 +537,26 @@ export const OutputResultDialog = ({
     );
   const [constAtBottom, setConstAtBottom] = useState(false);
 
+  if (props.resultKind === "descriptive_statistics") {
+    return (
+      <DescriptiveStatisticsOutputResultDialogContent
+        key={`${props.resultId}:${props.open ? "open" : "closed"}`}
+        open={props.open}
+        onOpenChange={props.onOpenChange}
+        resultId={props.resultId}
+        title={props.title}
+        format={format}
+        setFormat={setFormat}
+      />
+    );
+  }
+
   return (
-    <OutputResultDialogContent
-      key={`${result.resultId}:${open ? "open" : "closed"}`}
-      open={open}
-      onOpenChange={onOpenChange}
-      result={result}
+    <RegressionOutputResultDialogContent
+      key={`${props.result.resultId}:${props.open ? "open" : "closed"}`}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      result={props.result}
       format={format}
       setFormat={setFormat}
       statInParentheses={statInParentheses}

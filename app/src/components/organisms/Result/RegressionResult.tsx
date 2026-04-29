@@ -135,6 +135,7 @@ export const RegressionResult = ({
       <OutputResultDialog
         open={isOutputDialogOpen}
         onOpenChange={setIsOutputDialogOpen}
+        resultKind="regression"
         result={result}
       />
 
