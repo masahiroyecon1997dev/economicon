@@ -347,7 +347,7 @@ def run_rdrobust(
         推定失敗（サンプル不足・特異行列等）の場合
     """
     try:
-        from rdrobust import rdrobust as _rdrobust  # noqa: PLC0415
+        from rdrobust import rdrobust  # noqa: PLC0415
 
         kwargs: dict[str, Any] = {
             "c": cutoff,
@@ -361,7 +361,7 @@ def run_rdrobust(
         if h is not None:
             kwargs["h"] = h
 
-        return _rdrobust(y=y, x=x, **kwargs)
+        return rdrobust(y=y, x=x, **kwargs)
     except ProcessingError:
         raise
     except Exception as exc:

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-04-29T04:49:21.276287+00:00",
+    "generated_at": "2026-04-29T05:02:27.986760+00:00",
     "python_version": "3.14.3",
     "libraries": {
       "polars": "1.39.3"
@@ -157,8 +157,8 @@
           "statistics": {
             "name": {
               "mode": [
-                "Bob",
-                "Alice"
+                "Alice",
+                "Bob"
               ]
             }
           }

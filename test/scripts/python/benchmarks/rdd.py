@@ -9,7 +9,8 @@ def bench_rdd(df: pd.DataFrame) -> dict:
 
     y = df["y"].values
     x = df["running_var"].values
-    result = rdrobust(y, x, c=0.0)
+    # vce='hc1' は API の RDDPayload デフォルトと一致させる
+    result = rdrobust(y, x, c=0.0, vce="hc1")
 
     return {
         "dep_var": "y",
