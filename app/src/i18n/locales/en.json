@@ -479,7 +479,6 @@
     "SortAsc": "Sort Ascending",
     "SortDesc": "Sort Descending",
     "Rename": "Rename Column",
-    "Duplicate": "Duplicate Column",
     "Cast": "Cast Type",
     "Transform": "Add Transform Column",
     "AddDummy": "Add Dummy Column",
@@ -518,12 +517,6 @@
   "DeleteTableForm": {
     "Title": "Delete Data",
     "Warning": "Delete data \"<b>{{tableName}}</b>\"? This action cannot be undone."
-  },
-  "DuplicateColumnForm": {
-    "Title": "Duplicate Column",
-    "NewColumnName": "New column name",
-    "NewColumnNamePlaceholder": "e.g., column_copy",
-    "Submit": "Duplicate"
   },
   "CastColumnForm": {
     "Title": "Cast Column Type",

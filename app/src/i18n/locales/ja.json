@@ -479,7 +479,6 @@
     "SortAsc": "昇順ソート",
     "SortDesc": "降順ソート",
     "Rename": "列名変更",
-    "Duplicate": "列を複製",
     "Cast": "型変換",
     "Transform": "変換列を追加",
     "AddDummy": "ダミー変数を追加",
@@ -518,12 +517,6 @@
   "DeleteTableForm": {
     "Title": "データを削除",
     "Warning": "データ「<b>{{tableName}}</b>」を削除します。この操作は元に戻せません。"
-  },
-  "DuplicateColumnForm": {
-    "Title": "列を複製",
-    "NewColumnName": "複製先の列名",
-    "NewColumnNamePlaceholder": "例: column_copy",
-    "Submit": "複製"
   },
   "CastColumnForm": {
     "Title": "型変換",

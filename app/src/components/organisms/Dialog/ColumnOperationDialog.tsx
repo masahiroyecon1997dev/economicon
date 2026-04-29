@@ -11,7 +11,6 @@ import { AddPanelTimeColumnForm } from "@/components/organisms/Dialog/ColumnOper
 import { AddSimulationColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddSimulationColumnForm";
 import { CastColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/CastColumnForm";
 import { DeleteColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/DeleteColumnForm";
-import { DuplicateColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/DuplicateColumnForm";
 import { FilterColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/FilterColumnForm";
 import { RenameColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/RenameColumnForm";
 import { TransformColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/TransformColumnForm";
@@ -38,8 +37,6 @@ const getDialogTitle = (
       return t("RenameColumnForm.Title");
     case "delete":
       return t("DeleteColumnForm.Title");
-    case "duplicate":
-      return t("DuplicateColumnForm.Title");
     case "cast":
       return t("CastColumnForm.Title");
     case "transform":
@@ -69,8 +66,6 @@ const getSubmitLabel = (
       return t("RenameColumnForm.Submit");
     case "delete":
       return t("DeleteColumnForm.Submit");
-    case "duplicate":
-      return t("DuplicateColumnForm.Submit");
     case "cast":
       return t("CastColumnForm.Submit");
     case "transform":
@@ -147,8 +142,6 @@ export const ColumnOperationDialog = ({
         return <RenameColumnForm {...formProps} />;
       case "delete":
         return <DeleteColumnForm {...formProps} />;
-      case "duplicate":
-        return <DuplicateColumnForm {...formProps} />;
       case "cast":
         return <CastColumnForm {...formProps} />;
       case "transform":
