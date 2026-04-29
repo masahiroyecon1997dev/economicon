@@ -1,7 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useTableInfosStore } from "@/stores/tableInfos";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { Table } from "@/components/pages/Table";
 
 // ---------------------------------------------------------------------------
@@ -42,6 +44,25 @@ beforeEach(() => {
     tableInfos: [TABLE_SALES, TABLE_COSTS],
     activeTableName: "sales",
   });
+  useWorkspaceTabsStore.setState({
+    tabs: [],
+    activeTabId: null,
+  });
+  useAnalysisResultsStore.setState({
+    pane: "data",
+    summaries: [],
+    activeResultId: null,
+    activeResultDetail: null,
+    isListLoading: false,
+    isDetailLoading: false,
+    setPane: useAnalysisResultsStore.getState().setPane,
+    setActiveResult: useAnalysisResultsStore.getState().setActiveResult,
+    fetchSummaries: vi.fn().mockResolvedValue(undefined),
+    openResult: vi.fn(),
+    removeSummary: vi.fn(),
+    upsertSummary: vi.fn(),
+    clearActiveResult: vi.fn(),
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -71,6 +92,47 @@ describe("Table コンポーネント", () => {
       useTableInfosStore.setState({ tableInfos: [], activeTableName: null });
       render(<Table />);
       expect(screen.queryByRole("button")).toBeNull();
+    });
+
+    it("結果タブが存在する場合は data タブと同じバーに表示される", () => {
+      useWorkspaceTabsStore.setState({
+        tabs: [
+          {
+            id: "result:result-1",
+            kind: "result",
+            title: "とても長い推定結果名とても長い推定結果名",
+            resultId: "result-1",
+            resultType: "regression",
+            detail: {
+              id: "result-1",
+              name: "とても長い推定結果名とても長い推定結果名",
+              description: "desc",
+              tableName: "sales",
+              resultType: "regression",
+              resultData: {
+                tableName: "sales",
+                dependentVariable: "price",
+                explanatoryVariables: [],
+                regressionResult: "OLS",
+                parameters: [],
+                modelStatistics: { nObservations: 10 },
+              },
+              createdAt: "2026-04-29T10:15:30Z",
+              modelPath: null,
+              modelType: "ols",
+              entityIdColumn: null,
+              timeColumn: null,
+            },
+          },
+        ],
+        activeTabId: "result:result-1",
+      });
+
+      render(<Table />);
+
+      expect(
+        screen.getByText("とても長い推定結果名とても長い推定結果名"),
+      ).toBeInTheDocument();
     });
   });
 

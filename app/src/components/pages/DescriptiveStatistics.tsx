@@ -11,6 +11,7 @@ import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { cn } from "@/lib/utils/helpers";
+import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
 import { Check, ChevronDown, Clipboard, Loader2 } from "lucide-react";
@@ -187,6 +188,7 @@ export const DescriptiveStatistics = () => {
         if (detailResp.code === "OK") {
           const data = detailResp.result.resultData.statistics as StatisticsMap;
           setResult({ resultId, data, cols: orderedCols, stats: orderedStats });
+          await useAnalysisResultsStore.getState().fetchSummaries();
           setTimeout(
             () =>
               resultRef.current?.scrollIntoView({

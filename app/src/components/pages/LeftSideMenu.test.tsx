@@ -8,6 +8,7 @@ import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { LeftSideMenu } from "@/components/pages/LeftSideMenu";
 
 // ---------------------------------------------------------------------------
@@ -80,6 +81,27 @@ const mockApi = {
   getAnalysisResult: vi.fn(),
 };
 
+const MOCK_RESULT_DETAIL = {
+  id: "result-1",
+  name: "OLS 1",
+  description: "desc",
+  tableName: "sales",
+  resultType: "regression",
+  resultData: {
+    tableName: "sales",
+    dependentVariable: "price",
+    explanatoryVariables: ["quantity"],
+    regressionResult: "OLS",
+    parameters: [],
+    modelStatistics: { nObservations: 10 },
+  },
+  createdAt: "2026-04-29T10:15:30Z",
+  modelPath: null,
+  modelType: "ols",
+  entityIdColumn: null,
+  timeColumn: null,
+};
+
 // ---------------------------------------------------------------------------
 // Setup
 // ---------------------------------------------------------------------------
@@ -99,6 +121,10 @@ beforeEach(() => {
   });
   useTableListStore.setState({ tableList: ["sales", "new_table"] });
   useCurrentPageStore.setState({ currentView: "ImportDataFile" });
+  useWorkspaceTabsStore.setState({
+    tabs: [],
+    activeTabId: null,
+  });
   useAnalysisResultsStore.setState({
     pane: "data",
     summaries: [],
@@ -107,9 +133,11 @@ beforeEach(() => {
     isListLoading: false,
     isDetailLoading: false,
     setPane: useAnalysisResultsStore.getState().setPane,
+    setActiveResult: useAnalysisResultsStore.getState().setActiveResult,
     fetchSummaries: vi.fn().mockResolvedValue(undefined),
-    openResult: vi.fn().mockResolvedValue(undefined),
+    openResult: vi.fn().mockResolvedValue(MOCK_RESULT_DETAIL),
     removeSummary: vi.fn(),
+    upsertSummary: vi.fn(),
     clearActiveResult: vi.fn(),
   });
 });
@@ -151,9 +179,9 @@ describe("LeftSideMenu コンポーネント", () => {
     });
   });
 
-  it("結果項目クリックで AnalysisResultPreview に遷移する", async () => {
+  it("結果項目クリックで結果タブが開き DataPreview に遷移する", async () => {
     const user = userEvent.setup();
-    const openResult = vi.fn().mockResolvedValue(undefined);
+    const openResult = vi.fn().mockResolvedValue(MOCK_RESULT_DETAIL);
     useAnalysisResultsStore.setState({
       pane: "results",
       summaries: [
@@ -177,8 +205,54 @@ describe("LeftSideMenu コンポーネント", () => {
 
     await waitFor(() => {
       expect(openResult).toHaveBeenCalledWith("result-1");
-      expect(useCurrentPageStore.getState().currentView).toBe(
-        "AnalysisResultPreview",
+      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useWorkspaceTabsStore.getState().activeTabId).toBe(
+        "result:result-1",
+      );
+    });
+  });
+
+  it("既に開いている結果は再取得せず再アクティブ化する", async () => {
+    const user = userEvent.setup();
+    const openResult = vi.fn();
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "result:result-1",
+          kind: "result",
+          title: "OLS 1",
+          resultId: "result-1",
+          resultType: "regression",
+          detail: MOCK_RESULT_DETAIL,
+        },
+      ],
+      activeTabId: null,
+    });
+    useAnalysisResultsStore.setState({
+      pane: "results",
+      summaries: [
+        {
+          id: "result-1",
+          name: "OLS 1",
+          description: "desc",
+          createdAt: "2026-04-29T10:15:30Z",
+          tableName: "sales",
+          resultType: "regression",
+          resultTypeLabel: "回帰分析",
+          modelType: "ols",
+          summaryText: "OLS / price",
+        },
+      ],
+      openResult,
+    });
+    render(<LeftSideMenu />);
+
+    await user.click(screen.getByTestId("analysis-result-open-result-1"));
+
+    await waitFor(() => {
+      expect(openResult).not.toHaveBeenCalled();
+      expect(useWorkspaceTabsStore.getState().activeTabId).toBe(
+        "result:result-1",
       );
     });
   });

@@ -15,9 +15,14 @@ type AnalysisResultsState = {
 
 type AnalysisResultsActions = {
   setPane: (pane: AnalysisResultsPane) => void;
+  setActiveResult: (
+    resultId: string | null,
+    detail?: AnalysisResultDetail | null,
+  ) => void;
   fetchSummaries: () => Promise<void>;
-  openResult: (resultId: string) => Promise<void>;
+  openResult: (resultId: string) => Promise<AnalysisResultDetail>;
   removeSummary: (resultId: string) => void;
+  upsertSummary: (summary: AnalysisResultSummary) => void;
   clearActiveResult: () => void;
 };
 
@@ -32,6 +37,12 @@ export const useAnalysisResultsStore = create<AnalysisResultsStore>((set) => ({
   isDetailLoading: false,
 
   setPane: (pane) => set({ pane }),
+
+  setActiveResult: (resultId, detail = null) =>
+    set({
+      activeResultId: resultId,
+      activeResultDetail: detail,
+    }),
 
   fetchSummaries: async () => {
     set({ isListLoading: true });
@@ -53,6 +64,7 @@ export const useAnalysisResultsStore = create<AnalysisResultsStore>((set) => ({
         activeResultDetail: response.result,
         isDetailLoading: false,
       });
+      return response.result;
     } catch {
       set({ isDetailLoading: false });
       throw new Error("FAILED_TO_FETCH_ANALYSIS_RESULT");
@@ -67,6 +79,20 @@ export const useAnalysisResultsStore = create<AnalysisResultsStore>((set) => ({
       activeResultDetail:
         state.activeResultId === resultId ? null : state.activeResultDetail,
     })),
+
+  upsertSummary: (summary) =>
+    set((state) => {
+      const existingIndex = state.summaries.findIndex(
+        (result) => result.id === summary.id,
+      );
+      if (existingIndex === -1) {
+        return { summaries: [summary, ...state.summaries] };
+      }
+
+      const nextSummaries = [...state.summaries];
+      nextSummaries[existingIndex] = summary;
+      return { summaries: nextSummaries };
+    }),
 
   clearActiveResult: () =>
     set({

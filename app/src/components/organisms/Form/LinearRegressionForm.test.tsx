@@ -9,8 +9,10 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { useRegressionResultsStore } from "@/stores/regressionResults";
+import { useAnalysisResultsStore } from "@/stores/analysisResults";
+import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 
 // ---------------------------------------------------------------------------
@@ -103,7 +105,17 @@ const REGRESSION_RESULT = {
 };
 
 const ANALYSIS_DETAIL = {
-  regressionOutput: {
+  id: "r-001",
+  name: "OLS 1",
+  description: "desc",
+  tableName: "sales",
+  resultType: "regression",
+  createdAt: "2026-04-29T10:15:30Z",
+  modelPath: null,
+  modelType: "ols",
+  entityIdColumn: null,
+  timeColumn: null,
+  resultData: {
     tableName: "sales",
     dependentVariable: "price",
     explanatoryVariables: ["quantity"],
@@ -153,7 +165,23 @@ beforeEach(() => {
   });
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales"] });
-  useRegressionResultsStore.setState({ results: [] });
+  useCurrentPageStore.setState({ currentView: "LinearRegressionForm" });
+  useWorkspaceTabsStore.setState({ tabs: [], activeTabId: null });
+  useAnalysisResultsStore.setState({
+    pane: "data",
+    summaries: [],
+    activeResultId: null,
+    activeResultDetail: null,
+    isListLoading: false,
+    isDetailLoading: false,
+    setPane: useAnalysisResultsStore.getState().setPane,
+    setActiveResult: useAnalysisResultsStore.getState().setActiveResult,
+    fetchSummaries: vi.fn().mockResolvedValue(undefined),
+    openResult: vi.fn(),
+    removeSummary: vi.fn(),
+    upsertSummary: vi.fn(),
+    clearActiveResult: useAnalysisResultsStore.getState().clearActiveResult,
+  });
 });
 
 describe("LinearRegressionForm", () => {
@@ -208,7 +236,7 @@ describe("LinearRegressionForm", () => {
   });
 
   describe("API成功時（2段連鎖）", () => {
-    it("regression → getAnalysisResult が両方成功すると addResult と onAnalysisComplete が呼ばれる", async () => {
+    it("regression → getAnalysisResult が両方成功すると共通タブを開いて DataPreview に戻る", async () => {
       mockApi.regression.mockResolvedValue({
         code: "OK",
         result: REGRESSION_RESULT,
@@ -238,7 +266,8 @@ describe("LinearRegressionForm", () => {
         expect(onAnalysisComplete).toHaveBeenCalledWith(0);
       });
       expect(vi.mocked(showMessageDialog)).not.toHaveBeenCalled();
-      expect(useRegressionResultsStore.getState().results).toHaveLength(1);
+      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useWorkspaceTabsStore.getState().activeTabId).toBe("result:r-001");
     });
   });
 

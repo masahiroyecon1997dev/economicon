@@ -17,9 +17,10 @@ import {
 } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
-import { useRegressionResultsStore } from "@/stores/regressionResults";
+import { useAnalysisResultsStore } from "@/stores/analysisResults";
+import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
-import type { LinearRegressionResultType } from "@/types/commonTypes";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -58,7 +59,8 @@ export const LinearRegressionForm = ({
       numericOnly: false,
       autoLoadOnMount: true,
     });
-  const addResult = useRegressionResultsStore((state) => state.addResult);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
 
   const form = useForm({
     defaultValues: {
@@ -110,13 +112,10 @@ export const LinearRegressionForm = ({
           const resultResponse = await api.getAnalysisResult(resultId);
           if (resultResponse.code === "OK" && resultResponse.result) {
             const detail: AnalysisResultDetail = resultResponse.result;
-            addResult({
-              ...(detail.resultData as unknown as LinearRegressionResultType),
-              resultId: detail.id,
-            });
-            const newIndex =
-              useRegressionResultsStore.getState().results.length - 1;
-            onAnalysisComplete?.(newIndex);
+            openResultTab(detail);
+            await useAnalysisResultsStore.getState().fetchSummaries();
+            setCurrentView("DataPreview");
+            onAnalysisComplete?.(0);
             return;
           }
           await showMessageDialog(

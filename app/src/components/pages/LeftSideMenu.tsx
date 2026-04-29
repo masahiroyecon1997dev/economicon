@@ -13,6 +13,7 @@ import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { SectionHeading } from "@/components/atoms/List/SectionHeading";
 import { TableNav } from "@/components/molecules/List/TableNav";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
@@ -66,14 +67,22 @@ export const LeftSideMenu = () => {
   const setPane = useAnalysisResultsStore((state) => state.setPane);
   const summaries = useAnalysisResultsStore((state) => state.summaries);
   const isListLoading = useAnalysisResultsStore((state) => state.isListLoading);
-  const activeResultId = useAnalysisResultsStore(
-    (state) => state.activeResultId,
+  const setActiveResult = useAnalysisResultsStore(
+    (state) => state.setActiveResult,
   );
   const fetchSummaries = useAnalysisResultsStore(
     (state) => state.fetchSummaries,
   );
   const openResult = useAnalysisResultsStore((state) => state.openResult);
   const removeSummary = useAnalysisResultsStore((state) => state.removeSummary);
+  const tabs = useWorkspaceTabsStore((state) => state.tabs);
+  const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
+  const openDataTab = useWorkspaceTabsStore((state) => state.openDataTab);
+  const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
+  const activateTab = useWorkspaceTabsStore((state) => state.activateTab);
+  const removeResultTab = useWorkspaceTabsStore(
+    (state) => state.removeResultTab,
+  );
   const [outputTarget, setOutputTarget] = useState<OutputTarget>(null);
 
   useEffect(() => {
@@ -130,6 +139,7 @@ export const LeftSideMenu = () => {
         const tableInfo = await getTableInfo(tableName);
         addTableInfo(tableInfo);
       }
+      openDataTab(tableName);
       setCurrentView("DataPreview");
     } catch (error) {
       await showMessageDialog(
@@ -140,9 +150,18 @@ export const LeftSideMenu = () => {
   };
 
   const handleOpenResult = async (resultId: string) => {
+    const existingTab = tabs.find((tab) => tab.id === `result:${resultId}`);
+    if (existingTab?.kind === "result") {
+      activateTab(existingTab.id);
+      setActiveResult(existingTab.resultId, existingTab.detail);
+      setCurrentView("DataPreview");
+      return;
+    }
+
     try {
-      await openResult(resultId);
-      setCurrentView("AnalysisResultPreview");
+      const detail = await openResult(resultId);
+      openResultTab(detail);
+      setCurrentView("DataPreview");
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
@@ -161,7 +180,9 @@ export const LeftSideMenu = () => {
     try {
       await getEconomiconAppAPI().deleteAnalysisResult(resultId);
       removeSummary(resultId);
-      if (activeResultId === resultId) {
+      removeResultTab(resultId);
+      if (activeTabId === `result:${resultId}`) {
+        setActiveResult(null, null);
         setCurrentView(tableList.length > 0 ? "DataPreview" : "ImportDataFile");
       }
     } catch (error) {
@@ -214,12 +235,15 @@ export const LeftSideMenu = () => {
   return (
     <aside className="flex h-full w-full flex-col overflow-hidden bg-brand-primary text-white dark:bg-gray-900">
       <SectionHeading title={t("LeftSideMenu.Title")} />
-      <div className="px-4 pb-3 pt-2" data-testid="workspace-navigator-toggle">
-        <div className="grid grid-cols-2 rounded-lg bg-white/10 p-1">
+      <div
+        className="px-4 pb-2 pt-1.5"
+        data-testid="workspace-navigator-toggle"
+      >
+        <div className="grid grid-cols-2 rounded-lg bg-white/10 p-0.5">
           <button
             type="button"
             className={cn(
-              "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
               pane === "data"
                 ? "bg-white text-brand-primary"
                 : "text-white/70 hover:text-white",
@@ -232,7 +256,7 @@ export const LeftSideMenu = () => {
           <button
             type="button"
             className={cn(
-              "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
               pane === "results"
                 ? "bg-white text-brand-primary"
                 : "text-white/70 hover:text-white",
@@ -289,7 +313,7 @@ export const LeftSideMenu = () => {
                           key={result.id}
                           className={cn(
                             "rounded-lg border border-white/10 bg-white/5 p-2 transition-colors",
-                            activeResultId === result.id &&
+                            activeTabId === `result:${result.id}` &&
                               "border-brand-accent bg-white/10",
                           )}
                           data-testid={`analysis-result-item-${result.id}`}

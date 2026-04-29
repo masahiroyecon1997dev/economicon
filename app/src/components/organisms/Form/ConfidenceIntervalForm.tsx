@@ -10,11 +10,10 @@ import { showMessageDialog } from "@/lib/dialog/message";
 import { extractApiErrorMessage } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
-import {
-    useConfidenceIntervalResultsStore,
-    type ConfidenceIntervalResultData,
-} from "@/stores/confidenceIntervalResults";
+import { useAnalysisResultsStore } from "@/stores/analysisResults";
+import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
 import { Info } from "lucide-react";
 import { useState } from "react";
@@ -77,7 +76,8 @@ export const ConfidenceIntervalForm = ({
   const tableList = useTableListStore((s) => s.tableList);
   const { selectedTableName, setSelectedTableName, columnList } =
     useTableColumnLoader({ numericOnly: true, autoLoadOnMount: true });
-  const addResult = useConfidenceIntervalResultsStore((s) => s.addResult);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
   const [levelMode, setLevelMode] = useState<"select" | "manual">("select");
   const [infoDialogKey, setInfoDialogKey] = useState<string | null>(null);
 
@@ -111,14 +111,10 @@ export const ConfidenceIntervalForm = ({
           const { resultId } = response.result;
           const detailResponse = await api.getAnalysisResult(resultId);
           if (detailResponse.code === "OK") {
-            const resultData = detailResponse.result.resultData as Omit<
-              ConfidenceIntervalResultData,
-              "resultId"
-            >;
-            addResult({ resultId, ...resultData });
-            const newIndex =
-              useConfidenceIntervalResultsStore.getState().results.length - 1;
-            onAnalysisComplete?.(newIndex);
+            openResultTab(detailResponse.result);
+            await useAnalysisResultsStore.getState().fetchSummaries();
+            setCurrentView("DataPreview");
+            onAnalysisComplete?.(0);
             return;
           }
         }
