@@ -73,11 +73,27 @@
     "OrdinaryLeastSquares": "最小二乗法"
   },
   "LeftSideMenu": {
+    "Title": "ワークスペース",
+    "DataTab": "データ",
+    "ResultsTab": "分析結果",
     "DataList": "データ一覧",
     "EmptyState": "データがありません。\nファイルをインポートして開始してください。",
+    "ResultsLoading": "分析結果を読み込んでいます...",
+    "ResultsEmptyState": "分析結果がありません。\n基本統計量・信頼区間・回帰分析を実行するとここに表示されます。",
+    "OpenResult": "結果を開く",
+    "OutputResult": "結果を出力",
+    "DeleteResult": "結果を削除",
+    "DeleteResultConfirmTitle": "分析結果を削除",
+    "DeleteResultConfirmMessage": "「{{resultName}}」を削除しますか？この操作は元に戻せません。",
     "MenuRenameData": "データ名を変更",
     "MenuDuplicateData": "データを複製",
     "MenuDeleteData": "データを削除"
+  },
+  "AnalysisResultPreview": {
+    "Title": "分析結果",
+    "Loading": "分析結果を読み込んでいます...",
+    "Empty": "左の一覧から分析結果を選択してください。",
+    "Unsupported": "この分析種別はまだ専用プレビューに対応していません: {{resultType}}"
   },
   "Table": {
     "LoadingData": "データを読み込んでいます",
@@ -327,7 +343,8 @@
   "RegressionTab": {
     "FormTab": "分析設定(最小二乗法)",
     "ResultLabel": "結果 {{number}}",
-    "DeleteResult": "結果を削除"
+    "DeleteResult": "結果を削除",
+    "CloseResult": "結果タブを閉じる"
   },
   "ConfidenceIntervalView": {
     "Title": "信頼区間",
@@ -335,6 +352,7 @@
     "FormTab": "分析設定（信頼区間）",
     "ResultLabel": "結果 {{number}}",
     "DeleteResult": "結果を削除",
+    "CloseResult": "結果タブを閉じる",
     "DataLabel": "対象データ",
     "SelectData": "データを選択",
     "ColumnLabel": "対象列",

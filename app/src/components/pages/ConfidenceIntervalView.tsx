@@ -1,10 +1,10 @@
 import { ConfidenceIntervalForm } from "@/components/organisms/Form/ConfidenceIntervalForm";
 import { ConfidenceIntervalResult } from "@/components/organisms/Result/ConfidenceIntervalResult";
 import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from "@/components/organisms/Tab/BaseTab";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { cn } from "@/lib/utils/helpers";
@@ -35,7 +35,7 @@ export const ConfidenceIntervalView = ({
     setActiveTab(`result-${resultIndex}`);
   };
 
-  const handleDeleteResult = (id: string, index: number) => {
+  const handleCloseResult = (id: string, index: number) => {
     removeResult(id);
     if (activeTab === `result-${index}`) {
       setActiveTab("analysis-settings");
@@ -64,17 +64,24 @@ export const ConfidenceIntervalView = ({
               <span>
                 {t("ConfidenceIntervalView.ResultLabel", { number: index + 1 })}
               </span>
-              <button
-                type="button"
-                aria-label={t("ConfidenceIntervalView.DeleteResult")}
+              <span
+                role="button"
+                tabIndex={0}
+                aria-label={t("ConfidenceIntervalView.CloseResult")}
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDeleteResult(result.resultId, index);
+                  handleCloseResult(result.resultId, index);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" && e.key !== " ") return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCloseResult(result.resultId, index);
                 }}
                 className="ml-1.5 rounded p-0.5 opacity-60 hover:bg-white/20 hover:opacity-100 transition-opacity"
               >
                 <X size={11} aria-hidden="true" />
-              </button>
+              </span>
             </TabsTrigger>
           ))}
         </TabsList>

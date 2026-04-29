@@ -1,8 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "@/api/endpoints";
-import { showMessageDialog } from "@/lib/dialog/message";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useRegressionResultsStore } from "@/stores/regressionResults";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
@@ -21,11 +19,6 @@ vi.mock("react-i18next", () => ({
       );
     },
   }),
-}));
-
-vi.mock("../../api/endpoints");
-vi.mock("../../lib/dialog/message", () => ({
-  showMessageDialog: vi.fn().mockResolvedValue(undefined),
 }));
 
 // 子コンポーネントのスタブ化（重量コンポーネント）
@@ -62,10 +55,6 @@ vi.mock("../organisms/Result/RegressionResult", () => ({
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-const mockApi = {
-  deleteAnalysisResult: vi.fn(),
-};
-
 const MOCK_RESULT: LinearRegressionResultType = {
   resultId: "result-1",
   tableName: "sales",
@@ -94,7 +83,6 @@ const MOCK_RESULT: LinearRegressionResultType = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useRegressionResultsStore.setState({ results: [] });
   useCurrentPageStore.setState({ currentView: "LinearRegressionForm" });
 });
@@ -126,7 +114,7 @@ describe("RegressionView コンポーネント", () => {
       render(<Regression />);
 
       expect(
-        screen.getAllByRole("button", { name: "RegressionTab.DeleteResult" }),
+        screen.getAllByRole("button", { name: "RegressionTab.CloseResult" }),
       ).toHaveLength(1);
     });
 
@@ -137,7 +125,7 @@ describe("RegressionView コンポーネント", () => {
       render(<Regression />);
 
       expect(
-        screen.getAllByRole("button", { name: "RegressionTab.DeleteResult" }),
+        screen.getAllByRole("button", { name: "RegressionTab.CloseResult" }),
       ).toHaveLength(2);
     });
 
@@ -157,43 +145,20 @@ describe("RegressionView コンポーネント", () => {
     });
   });
 
-  describe("結果の削除", () => {
-    it("結果タブの×ボタンをクリックすると deleteAnalysisResult が呼ばれる", async () => {
-      mockApi.deleteAnalysisResult.mockResolvedValue({ code: "OK" });
+  describe("結果タブを閉じる", () => {
+    it("結果タブの×ボタンをクリックするとローカル結果だけが閉じる", async () => {
       useRegressionResultsStore.setState({ results: [MOCK_RESULT] });
       const user = userEvent.setup();
       render(<Regression />);
 
-      const deleteBtn = screen.getByRole("button", {
-        name: "RegressionTab.DeleteResult",
+      const closeBtn = screen.getByRole("button", {
+        name: "RegressionTab.CloseResult",
       });
-      await user.click(deleteBtn);
+      await user.click(closeBtn);
 
       await waitFor(() => {
-        expect(mockApi.deleteAnalysisResult).toHaveBeenCalledWith("result-1");
+        expect(useRegressionResultsStore.getState().results).toHaveLength(0);
       });
-      expect(useRegressionResultsStore.getState().results).toHaveLength(0);
-    });
-
-    it("deleteAnalysisResult がthrowした場合 → エラーダイアログを表示して結果を削除しない", async () => {
-      mockApi.deleteAnalysisResult.mockRejectedValue(new Error("削除失敗"));
-      useRegressionResultsStore.setState({ results: [MOCK_RESULT] });
-      const user = userEvent.setup();
-      render(<Regression />);
-
-      const deleteBtn = screen.getByRole("button", {
-        name: "RegressionTab.DeleteResult",
-      });
-      await user.click(deleteBtn);
-
-      await waitFor(() => {
-        expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
-          "Error.Error",
-          "削除失敗",
-        );
-      });
-      // 結果は削除されない
-      expect(useRegressionResultsStore.getState().results).toHaveLength(1);
     });
   });
 

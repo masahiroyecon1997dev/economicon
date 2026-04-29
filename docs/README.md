@@ -34,6 +34,10 @@
 - **[バックエンドセットアップ](docs/setup/backend.md)** - Python 3.14、uv、FastAPIの環境構築
 - **[フロントエンドセットアップ](docs/setup/frontend.md)** - fnm、Node.js、pnpm、Vite、Tauriの環境構築
 
+## 設計メモ
+
+- **[分析結果ナビゲーション仕様](docs/tips/analysis-results-navigation-spec.md)** - 左サイドメニューで分析結果を扱うための画面仕様、一覧項目仕様、API レスポンス案
+
 ### クイックスタート
 
 ```powershell

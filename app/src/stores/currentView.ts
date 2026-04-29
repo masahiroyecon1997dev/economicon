@@ -11,6 +11,7 @@ export type CurrentPageValue =
   | "CreateSimulationDataTable"
   | "CalculationView"
   | "SaveData"
+  | "AnalysisResultPreview"
   | "DataPreview";
 
 export type CurrentPageActions = {

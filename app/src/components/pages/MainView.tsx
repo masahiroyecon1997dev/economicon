@@ -1,6 +1,7 @@
 import type { CurrentPageValue } from "@/stores/currentView";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { Calculation } from "@/components/pages/Calculation";
+import { AnalysisResultPreview } from "@/components/pages/AnalysisResultPreview";
 import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
@@ -23,6 +24,7 @@ const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
   CreateSimulationDataTable: <CreateSimulationDataTable />,
   CalculationView: <Calculation />,
   SaveData: <SaveData />,
+  AnalysisResultPreview: <AnalysisResultPreview />,
   DataPreview: <Table />,
 };
 

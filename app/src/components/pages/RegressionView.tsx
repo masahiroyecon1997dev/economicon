@@ -1,9 +1,6 @@
 import { X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "@/api/endpoints";
-import { showMessageDialog } from "@/lib/dialog/message";
-import { extractApiErrorMessage } from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useRegressionResultsStore } from "@/stores/regressionResults";
@@ -36,16 +33,7 @@ export const Regression = ({ className }: RegressionProps) => {
     setActiveTab(`result-${resultIndex}`);
   };
 
-  const handleDeleteResult = async (resultId: string, index: number) => {
-    try {
-      await getEconomiconAppAPI().deleteAnalysisResult(resultId);
-    } catch (error) {
-      await showMessageDialog(
-        t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
-      );
-      return;
-    }
+  const handleCloseResult = (resultId: string, index: number) => {
     removeResult(resultId);
     if (activeTab === `result-${index}`) {
       setActiveTab("analysis-settings");
@@ -71,17 +59,24 @@ export const Regression = ({ className }: RegressionProps) => {
               <span>
                 {t("RegressionTab.ResultLabel", { number: index + 1 })}
               </span>
-              <button
-                type="button"
-                aria-label={t("RegressionTab.DeleteResult")}
+              <span
+                role="button"
+                tabIndex={0}
+                aria-label={t("RegressionTab.CloseResult")}
                 onClick={(e) => {
                   e.stopPropagation();
-                  void handleDeleteResult(result.resultId, index);
+                  handleCloseResult(result.resultId, index);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" && e.key !== " ") return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCloseResult(result.resultId, index);
                 }}
                 className="ml-1.5 rounded p-0.5 opacity-60 hover:bg-white/20 hover:opacity-100 transition-opacity"
               >
                 <X size={11} aria-hidden="true" />
-              </button>
+              </span>
             </TabsTrigger>
           ))}
         </TabsList>

@@ -73,11 +73,27 @@
     "OrdinaryLeastSquares": "Ordinary Least Squares"
   },
   "LeftSideMenu": {
+    "Title": "Workspace",
+    "DataTab": "Data",
+    "ResultsTab": "Results",
     "DataList": "Data List",
     "EmptyState": "No data.\nImport a file to get started.",
+    "ResultsLoading": "Loading analysis results...",
+    "ResultsEmptyState": "No analysis results yet.\nRun descriptive statistics, confidence intervals, or regressions to see them here.",
+    "OpenResult": "Open result",
+    "OutputResult": "Output result",
+    "DeleteResult": "Delete result",
+    "DeleteResultConfirmTitle": "Delete Analysis Result",
+    "DeleteResultConfirmMessage": "Delete \"{{resultName}}\"? This action cannot be undone.",
     "MenuRenameData": "Rename Data",
     "MenuDuplicateData": "Duplicate Data",
     "MenuDeleteData": "Delete Data"
+  },
+  "AnalysisResultPreview": {
+    "Title": "Analysis Result",
+    "Loading": "Loading analysis result...",
+    "Empty": "Select an analysis result from the list on the left.",
+    "Unsupported": "This analysis type is not yet supported in the dedicated preview: {{resultType}}"
   },
   "Table": {
     "LoadingData": "Loading data",
@@ -327,7 +343,8 @@
   "RegressionTab": {
     "FormTab": "Analysis Settings(OLS)",
     "ResultLabel": "Result {{number}}",
-    "DeleteResult": "Delete result"
+    "DeleteResult": "Delete result",
+    "CloseResult": "Close result tab"
   },
   "ConfidenceIntervalView": {
     "Title": "Confidence Interval",
@@ -335,6 +352,7 @@
     "FormTab": "Analysis Settings (CI)",
     "ResultLabel": "Result {{number}}",
     "DeleteResult": "Delete result",
+    "CloseResult": "Close result tab",
     "DataLabel": "Target Data",
     "SelectData": "Select data",
     "ColumnLabel": "Target Column",
