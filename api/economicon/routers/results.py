@@ -5,7 +5,9 @@
 回帰分析・検定・因果推論など、あらゆる分析の結果を統一して管理します。
 """
 
-from fastapi import APIRouter, Request
+from typing import Annotated
+
+from fastapi import APIRouter, Path, Request
 from fastapi import status as http_status
 
 from economicon.schemas import (
@@ -69,7 +71,7 @@ async def get_all_analysis_results(
 )
 async def get_analysis_result(
     request: Request,
-    result_id: str,
+    result_id: Annotated[str, Path(min_length=1)],
     result_store: AnalysisResultStoreDep,
 ):
     """
@@ -100,7 +102,7 @@ async def get_analysis_result(
 )
 async def update_analysis_result(
     request: Request,
-    result_id: str,
+    result_id: Annotated[str, Path(min_length=1)],
     body: UpdateAnalysisResultRequest,
     result_store: AnalysisResultStoreDep,
 ):
@@ -118,7 +120,7 @@ async def update_analysis_result(
 )
 async def delete_analysis_result(
     request: Request,
-    result_id: str,
+    result_id: Annotated[str, Path(min_length=1)],
     result_store: AnalysisResultStoreDep,
 ):
     """
