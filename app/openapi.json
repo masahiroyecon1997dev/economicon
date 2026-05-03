@@ -2312,6 +2312,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "minLength": 1,
               "title": "Result Id"
             }
           },
@@ -2384,6 +2385,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "minLength": 1,
               "title": "Result Id"
             }
           },
@@ -2466,6 +2468,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "minLength": 1,
               "title": "Result Id"
             }
           },
@@ -3885,6 +3888,11 @@
             ],
             "title": "Time Column",
             "description": "\u30d1\u30cd\u30eb\u30c7\u30fc\u30bf\u5206\u6790\u306b\u304a\u3051\u308b\u6642\u9593\u5217\u540d"
+          },
+          "summaryText": {
+            "type": "string",
+            "title": "Summary Text",
+            "description": "\u5206\u6790\u5185\u5bb9\u306e\u7c21\u6f54\u306a\u8aac\u660e\u6587\uff08\u30d5\u30ed\u30f3\u30c8\u30a8\u30f3\u30c9\u4e00\u89a7\u8868\u793a\u7528\uff09"
           }
         },
         "type": "object",
@@ -3899,7 +3907,8 @@
           "modelPath",
           "modelType",
           "entityIdColumn",
-          "timeColumn"
+          "timeColumn",
+          "summaryText"
         ],
         "title": "AnalysisResultDetail",
         "description": "\u5206\u6790\u7d50\u679c\u8a73\u7d30\uff081\u4ef6\u53d6\u5f97\u7528\uff09"

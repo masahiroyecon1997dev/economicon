@@ -159,7 +159,7 @@ export const Calculation = () => {
         }}
         className="flex flex-col flex-1 min-h-0 gap-4"
       >
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="app-scrollbar flex-1 overflow-y-auto min-h-0">
           <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-color overflow-hidden">
             <div className="p-4 border-b border-border-color grid grid-cols-1 md:grid-cols-2 gap-4 bg-neutral-50/50 dark:bg-neutral-800/30">
               {/* テーブル選択 */}
@@ -385,7 +385,7 @@ export const Calculation = () => {
                     />
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                <div className="app-scrollbar flex-1 overflow-y-auto p-2 space-y-1">
                   {filteredColumns.map((column, index) => {
                     const typeColor = getPolarsTypeColor(column.type);
                     return (

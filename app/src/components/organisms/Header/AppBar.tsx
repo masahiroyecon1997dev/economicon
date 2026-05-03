@@ -20,10 +20,11 @@ const MENU_POSITION: DropmenuPositionType = "bottom-right";
 /**
  * 統合アプリバー
  *
- * TitleBar（ウィンドウ制御） + HeaderMenu（ナビゲーション）を1本に統合。
- * - mousedown で起点を記録し、mousemove の閾値超えで startDragging() を呼び出す
- *   （mousedown 即呼び出しだと OS がマウスを捕捉して dblclick が届かなくなるため）
- * - ダブルクリックで最大化 ⇔ 復元をトグル（最大化中でも正しく動作）
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "CorrelationMatrix",
+              t("HeaderMenu.CorrelationMatrix"),
+            ),
  * - ボタン等のインタラクティブ要素上ではドラッグを開始しない
  * - osName が "macOS" の場合は左端にトラフィックライト、
  *   Windows / Linux は右端に Fluent スタイルのウィンドウ制御を表示

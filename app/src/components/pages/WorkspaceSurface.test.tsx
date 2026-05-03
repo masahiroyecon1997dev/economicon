@@ -42,6 +42,9 @@ vi.mock("./ConfidenceIntervalView", () => ({
 vi.mock("./RegressionView", () => ({
   Regression: () => <div data-testid="work-reg" />,
 }));
+vi.mock("./CorrelationMatrix", () => ({
+  CorrelationMatrix: () => <div data-testid="work-corr" />,
+}));
 
 const TABLE_SALES = {
   tableName: "sales",
@@ -103,6 +106,30 @@ describe("WorkspaceSurface コンポーネント", () => {
 
     expect(screen.getByTestId("workspace-work-tab-JoinTable")).toBeInTheDocument();
     expect(screen.getByTestId("work-join-input")).toBeInTheDocument();
+  });
+
+  it("CorrelationMatrix の work tab も WorkspaceSurface 経由で表示する", () => {
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "work:CorrelationMatrix",
+          kind: "work",
+          title: "相関行列",
+          featureKey: "CorrelationMatrix",
+          dirty: false,
+          createdAt: Date.now(),
+        },
+      ],
+      activeTabId: "work:CorrelationMatrix",
+    });
+    useCurrentPageStore.setState({ currentView: "CorrelationMatrix" });
+
+    render(<WorkspaceSurface />);
+
+    expect(
+      screen.getByTestId("workspace-work-tab-CorrelationMatrix"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("work-corr")).toBeInTheDocument();
   });
 
   it("work tab で入力すると dirty になり、閉じる時に確認する", async () => {

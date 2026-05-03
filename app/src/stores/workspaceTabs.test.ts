@@ -31,6 +31,7 @@ describe("workspaceTabs store", () => {
       title: "ジョイン",
       dirty: true,
     });
+    expect(typeof state.tabs[0]?.createdAt).toBe("number");
     expect(state.activeTabId).toBe("work:JoinTable");
   });
 
@@ -47,5 +48,83 @@ describe("workspaceTabs store", () => {
       "work:CalculationView",
     ]);
     expect(state.activeTabId).toBe("work:CalculationView");
+  });
+
+  it("draft 更新は committedValues との差分で dirty を判定する", () => {
+    const tabId = useWorkspaceTabsStore
+      .getState()
+      .openWorkTab("CorrelationMatrix", "相関行列");
+
+    useWorkspaceTabsStore.getState().ensureWorkTabState(tabId, {
+      tableName: "sales",
+      columnNames: ["price", "quantity"],
+    });
+    useWorkspaceTabsStore.getState().updateWorkTabDraft(tabId, {
+      tableName: "sales",
+      columnNames: ["price"],
+    });
+
+    let tab = useWorkspaceTabsStore
+      .getState()
+      .tabs.find((item) => item.id === tabId);
+    expect(tab).toMatchObject({
+      kind: "work",
+      dirty: true,
+      draftValues: {
+        tableName: "sales",
+        columnNames: ["price"],
+      },
+      committedValues: {
+        tableName: "sales",
+        columnNames: ["price", "quantity"],
+      },
+    });
+
+    useWorkspaceTabsStore.getState().updateWorkTabDraft(tabId, {
+      tableName: "sales",
+      columnNames: ["price", "quantity"],
+    });
+
+    tab = useWorkspaceTabsStore.getState().tabs.find((item) => item.id === tabId);
+    expect(tab).toMatchObject({
+      kind: "work",
+      dirty: false,
+    });
+  });
+
+  it("commitWorkTab は draft と committed を同期して dirty を false に戻す", () => {
+    const tabId = useWorkspaceTabsStore
+      .getState()
+      .openWorkTab("CorrelationMatrix", "相関行列");
+
+    useWorkspaceTabsStore.getState().ensureWorkTabState(tabId, {
+      tableName: "sales",
+      newTableName: "corr_a",
+    });
+    useWorkspaceTabsStore.getState().updateWorkTabDraft(tabId, {
+      tableName: "sales",
+      newTableName: "corr_b",
+    });
+    useWorkspaceTabsStore.getState().commitWorkTab(tabId, {
+      tableName: "sales",
+      newTableName: "corr_b",
+    });
+
+    const tab = useWorkspaceTabsStore
+      .getState()
+      .tabs.find((item) => item.id === tabId);
+
+    expect(tab).toMatchObject({
+      kind: "work",
+      dirty: false,
+      draftValues: {
+        tableName: "sales",
+        newTableName: "corr_b",
+      },
+      committedValues: {
+        tableName: "sales",
+        newTableName: "corr_b",
+      },
+    });
   });
 });

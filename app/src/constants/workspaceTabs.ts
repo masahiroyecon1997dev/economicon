@@ -30,6 +30,10 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     featureKey: "LinearRegressionForm",
     titleKey: "HeaderMenu.OrdinaryLeastSquares",
   },
+  {
+    featureKey: "CorrelationMatrix",
+    titleKey: "HeaderMenu.CorrelationMatrix",
+  },
 ];
 
 export const isWorkFeatureKey = (value: string): value is WorkFeatureKey =>

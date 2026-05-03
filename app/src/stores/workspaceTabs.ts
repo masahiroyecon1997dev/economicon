@@ -23,7 +23,8 @@ export type WorkFeatureKey =
   | "CreateSimulationDataTable"
   | "CalculationView"
   | "ConfidenceIntervalView"
-  | "LinearRegressionForm";
+  | "LinearRegressionForm"
+  | "CorrelationMatrix";
 
 export type WorkspaceWorkTab = {
   id: `work:${WorkFeatureKey}`;
@@ -31,6 +32,9 @@ export type WorkspaceWorkTab = {
   title: string;
   featureKey: WorkFeatureKey;
   dirty: boolean;
+  createdAt: number;
+  draftValues?: unknown;
+  committedValues?: unknown;
 };
 
 export type WorkspaceTab =
@@ -48,6 +52,9 @@ type WorkspaceTabsActions = {
   openResultTab: (detail: AnalysisResultDetail) => void;
   openWorkTab: (featureKey: WorkFeatureKey, title: string) => string;
   setWorkTabDirty: (tabId: string, dirty: boolean) => void;
+  ensureWorkTabState: (tabId: string, initialValues: unknown) => void;
+  updateWorkTabDraft: (tabId: string, draftValues: unknown) => void;
+  commitWorkTab: (tabId: string, values: unknown) => void;
   activateTab: (tabId: string) => void;
   closeTab: (tabId: string) => void;
   syncDataTabs: (
@@ -68,6 +75,16 @@ type WorkspaceTabsStore = WorkspaceTabsState & WorkspaceTabsActions;
 
 const toWorkTabId = (featureKey: WorkFeatureKey): `work:${WorkFeatureKey}` =>
   `work:${featureKey}`;
+
+const cloneWorkTabValues = <T,>(values: T): T => {
+  if (values === undefined) {
+    return values;
+  }
+  return JSON.parse(JSON.stringify(values)) as T;
+};
+
+const areWorkTabValuesEqual = (left: unknown, right: unknown) =>
+  JSON.stringify(left) === JSON.stringify(right);
 
 const nextActiveTabId = (
   tabs: WorkspaceTab[],
@@ -229,6 +246,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
             title,
             featureKey,
             dirty: false,
+            createdAt: Date.now(),
           },
         ],
         activeTabId: tabId,
@@ -245,6 +263,67 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
       const tab = nextTabs[index];
       if (tab?.kind !== "work") return {};
       nextTabs[index] = { ...tab, dirty };
+      return { tabs: nextTabs };
+    }),
+
+  ensureWorkTabState: (tabId, initialValues) =>
+    set((state) => {
+      const index = state.tabs.findIndex((tab) => tab.id === tabId);
+      if (index === -1) return {};
+      const nextTabs = [...state.tabs];
+      const tab = nextTabs[index];
+      if (tab?.kind !== "work") return {};
+      if (tab.draftValues !== undefined || tab.committedValues !== undefined) {
+        return {};
+      }
+      const snapshot = cloneWorkTabValues(initialValues);
+      nextTabs[index] = {
+        ...tab,
+        draftValues: snapshot,
+        committedValues: snapshot,
+        dirty: false,
+      };
+      return { tabs: nextTabs };
+    }),
+
+  updateWorkTabDraft: (tabId, draftValues) =>
+    set((state) => {
+      const index = state.tabs.findIndex((tab) => tab.id === tabId);
+      if (index === -1) return {};
+      const nextTabs = [...state.tabs];
+      const tab = nextTabs[index];
+      if (tab?.kind !== "work") return {};
+
+      const nextDraftValues = cloneWorkTabValues(draftValues);
+      const committedValues =
+        tab.committedValues === undefined
+          ? nextDraftValues
+          : tab.committedValues;
+
+      nextTabs[index] = {
+        ...tab,
+        draftValues: nextDraftValues,
+        committedValues,
+        dirty: !areWorkTabValuesEqual(nextDraftValues, committedValues),
+      };
+      return { tabs: nextTabs };
+    }),
+
+  commitWorkTab: (tabId, values) =>
+    set((state) => {
+      const index = state.tabs.findIndex((tab) => tab.id === tabId);
+      if (index === -1) return {};
+      const nextTabs = [...state.tabs];
+      const tab = nextTabs[index];
+      if (tab?.kind !== "work") return {};
+
+      const snapshot = cloneWorkTabValues(values);
+      nextTabs[index] = {
+        ...tab,
+        draftValues: snapshot,
+        committedValues: snapshot,
+        dirty: false,
+      };
       return { tabs: nextTabs };
     }),
 

@@ -201,7 +201,7 @@ export const JoinTable = () => {
       title={t("JoinTable.Title")}
       description={t("JoinTable.Description")}
     >
-      <div className="flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
+      <div className="app-scrollbar flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
         {/* ── Section 1: テーブル・結合タイプ ── */}
         <SectionCard title={t("JoinTable.SelectData")}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

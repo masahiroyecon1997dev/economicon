@@ -138,7 +138,7 @@ export const BaseDialog = ({
           {/* ── コンテンツ ── */}
           <div
             className={cn(
-              "flex-1 min-h-0 overflow-y-auto px-5 py-4 dark:text-gray-200",
+              "app-scrollbar flex-1 min-h-0 overflow-y-auto px-5 py-4 dark:text-gray-200",
               contentClassName,
             )}
           >

@@ -17,39 +17,87 @@ import { getTableInfo } from "@/lib/utils/internal";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+type CorrelationMatrixFormValues = {
+  tableName: string;
+  columnNames: string[];
+  newTableName: string;
+  method: CorrelationMethod;
+  decimalPlaces: number;
+  lowerTriangleOnly: boolean;
+  missingHandling: MissingHandlingMethod;
+};
+
+type CorrelationMatrixProps = {
+  workTabId?: `work:CorrelationMatrix`;
+  onSuccess?: (
+    tableName: string,
+    submittedValues: CorrelationMatrixFormValues,
+  ) => void;
+  onCancel?: () => void | Promise<void>;
+};
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
-export const CorrelationMatrix = () => {
+export const CorrelationMatrix = ({
+  workTabId,
+  onSuccess,
+  onCancel,
+}: CorrelationMatrixProps) => {
   const { t } = useTranslation();
   const tableList = useTableListStore((s) => s.tableList);
   const initialTableName = useTableInfosStore((s) => s.activeTableName) ?? "";
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const ensureWorkTabState = useWorkspaceTabsStore(
+    (state) => state.ensureWorkTabState,
+  );
+  const updateWorkTabDraft = useWorkspaceTabsStore(
+    (state) => state.updateWorkTabDraft,
+  );
+  const commitWorkTab = useWorkspaceTabsStore((state) => state.commitWorkTab);
+  const persistedWorkTab = useWorkspaceTabsStore((state) =>
+    workTabId
+      ? state.tabs.find(
+          (tab) => tab.id === workTabId && tab.kind === "work",
+        ) ?? null
+      : null,
+  );
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const persistedDraft =
+    persistedWorkTab?.featureKey === "CorrelationMatrix"
+      ? (persistedWorkTab.draftValues as CorrelationMatrixFormValues | undefined)
+      : undefined;
+  const shouldAutoSelectColumnsRef = useRef(!persistedDraft);
+  const initialValues: CorrelationMatrixFormValues = {
+    tableName: persistedDraft?.tableName ?? initialTableName,
+    columnNames: persistedDraft?.columnNames ?? [],
+    newTableName: persistedDraft?.newTableName ?? "",
+    method:
+      persistedDraft?.method ?? (CorrelationMethod.pearson as CorrelationMethod),
+    decimalPlaces: persistedDraft?.decimalPlaces ?? 3,
+    lowerTriangleOnly: persistedDraft?.lowerTriangleOnly ?? false,
+    missingHandling:
+      persistedDraft?.missingHandling ??
+      (MissingHandlingMethod.pairwise as MissingHandlingMethod),
+  };
 
   // Column loader (numeric only)
   const { selectedTableName, setSelectedTableName, columnList, setColumnList } =
     useTableColumnLoader({
       numericOnly: true,
       autoLoadOnMount: true,
+      initialSelectedTableName: initialValues.tableName,
     });
 
   const form = useForm({
-    defaultValues: {
-      tableName: initialTableName,
-      columnNames: columnList.map((column) => column.name),
-      newTableName: "",
-      method: CorrelationMethod.pearson as CorrelationMethod,
-      decimalPlaces: 3,
-      lowerTriangleOnly: false,
-      missingHandling: MissingHandlingMethod.pairwise as MissingHandlingMethod,
-    },
+    defaultValues: initialValues,
     validators: {
       onSubmit: CreateCorrelationTableBody.required(),
     },
@@ -59,19 +107,25 @@ export const CorrelationMatrix = () => {
         const orderedCols = columnList
           .map((c) => c.name)
           .filter((n) => value.columnNames.includes(n));
-        const resp = await api.createCorrelationTable({
-          tableName: value.tableName,
+        const submittedValues: CorrelationMatrixFormValues = {
+          ...value,
           columnNames: orderedCols,
           newTableName: value.newTableName.trim(),
-          method: value.method,
-          decimalPlaces: value.decimalPlaces,
-          lowerTriangleOnly: value.lowerTriangleOnly,
-          missingHandling: value.missingHandling,
+        };
+        const resp = await api.createCorrelationTable({
+          ...submittedValues,
         });
         if (resp.code === "OK") {
           const tableInfo = await getTableInfo(resp.result.tableName);
           addTableInfo(tableInfo);
-          setCurrentView("DataPreview");
+          if (workTabId) {
+            commitWorkTab(workTabId, submittedValues);
+          }
+          if (onSuccess) {
+            onSuccess(resp.result.tableName, submittedValues);
+          } else {
+            setCurrentView("DataPreview");
+          }
         } else {
           await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
         }
@@ -84,14 +138,30 @@ export const CorrelationMatrix = () => {
     },
   });
 
+  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+  const formValues = useStore(form.store, (s) => s.values);
+
   useEffect(() => {
+    if (!shouldAutoSelectColumnsRef.current || columnList.length === 0) {
+      return;
+    }
+
     form.setFieldValue(
       "columnNames",
       columnList.map((column) => column.name),
     );
+    shouldAutoSelectColumnsRef.current = false;
   }, [columnList, form]);
 
-  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+  useEffect(() => {
+    if (!workTabId) return;
+    ensureWorkTabState(workTabId, formValues);
+  }, [ensureWorkTabState, formValues, workTabId]);
+
+  useEffect(() => {
+    if (!workTabId) return;
+    updateWorkTabDraft(workTabId, formValues);
+  }, [formValues, updateWorkTabDraft, workTabId]);
 
   /** Zod の汎用メッセージをフィールド固有の i18n キーで上書きする（Case C）*/
   const tErr = createFieldError(t);
@@ -100,8 +170,17 @@ export const CorrelationMatrix = () => {
   const handleTableSelect = (value: string) => {
     setSelectedTableName(value);
     if (!value) setColumnList([]);
+    shouldAutoSelectColumnsRef.current = !!value;
     form.setFieldValue("tableName", value);
     form.setFieldValue("columnNames", []);
+  };
+
+  const handleCancel = () => {
+    if (onCancel) {
+      void onCancel();
+      return;
+    }
+    setCurrentView("DataPreview");
   };
 
   // ---------------------------------------------------------------------------
@@ -186,7 +265,7 @@ export const CorrelationMatrix = () => {
               )}
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className="app-scrollbar min-h-0 flex-1 overflow-y-auto">
               {!selectedTableName ? (
                 <p className="text-sm text-brand-text-sub">
                   {t("CorrelationMatrix.SelectData")}
@@ -405,7 +484,7 @@ export const CorrelationMatrix = () => {
               ? t("CorrelationMatrix.Processing")
               : t("CorrelationMatrix.RunCalculation")
           }
-          onCancel={() => setCurrentView("DataPreview")}
+          onCancel={handleCancel}
           onSelect={() => void form.handleSubmit()}
           disabled={isSubmitting}
           isLoading={isSubmitting}

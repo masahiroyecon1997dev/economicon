@@ -101,7 +101,7 @@ export const Regression = ({ className }: RegressionProps) => {
             value={`result-${index}`}
             className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="mx-auto w-full max-w-6xl overflow-y-auto pt-4">
+            <div className="app-scrollbar mx-auto w-full max-w-6xl overflow-y-auto pt-4">
               <RegressionResult result={result} />
             </div>
           </TabsContent>

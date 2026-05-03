@@ -955,7 +955,10 @@ PATCH /api/analysis/results/{result_id} に対して次を確認する。
 - 分析結果一覧のための API 拡張と PATCH /api/analysis/results/{result_id} は実装済み。
 - 左ペインの分析結果一覧、result tab の再利用、分析後の一覧再取得は実装済み。
 - ワークスペースタブストアは data tab / result tab / work tab の型を持つ。
+- work tab の起点は AppBar に集約し、左サイドメニューからは開かない。
+- phase 1 の work tab は featureKey 単位で 1 タブに統一し、AppBar から再度開いた場合は既存タブを再アクティブ化する。
 - result tab 上の編集ボタンと EditAnalysisResultDialog は実装済み。
+- work tab close 時の dirty 確認と、結果メタデータ編集ダイアログの未保存確認は実装済み。
 - 保存後の summary 更新、result tab タイトル更新、activeResultDetail 更新は実装済み。
 - Table 相当コンポーネントは、実態として data / result / work を描画するワークスペース面になっている。
 
@@ -989,9 +992,9 @@ PATCH /api/analysis/results/{result_id} に対して次を確認する。
 
 ## 7. 未実装項目
 
-### 7-1. work tab の導線接続
+### 7-1. phase 1 の work tab 対象の拡張
 
-work tab の型と描画先はあるが、実際に openWorkTab を叩く UI 導線は未実装である。
+phase 1 の work tab は AppBar 起点・featureKey 単位で一意という方針で実装を進める。
 
 対象:
 
@@ -1001,29 +1004,73 @@ work tab の型と描画先はあるが、実際に openWorkTab を叩く UI 導
 - CalculationView
 - ConfidenceIntervalView
 - LinearRegressionForm
+- CorrelationMatrix
 
-必要作業:
+相関行列の具体仕様:
 
-- 左ナビまたは各起点ボタンから openWorkTab を呼ぶ
-- MainView のページ切替と work tab 起動ポリシーを統一する
+- AppBar の「相関行列」は新規ページ遷移ではなく、work:CorrelationMatrix を開くまたは再アクティブ化する
+- 同じ featureKey の work tab は 1 つだけ持ち、再度開いた場合は既存タブを前面化する
+- 既存タブに draft が残っている場合はそのまま復元し、初期値に戻さない
+- CorrelationMatrix の UI 本体は既存フォームを再利用し、ナビゲーション制御のみ WorkspaceSurface 側に寄せる
+- 成功時は生成された相関行列表の data tab を自動で前面化する。ただし work:CorrelationMatrix 自体は閉じずに残し、dirty は false に戻す
+- Cancel は単独ページの「DataPreview に戻る」ではなく、work tab を閉じる操作として扱う。dirty の場合は共通の破棄確認を出す
+
+実装境界:
+
+- WorkFeatureKey に CorrelationMatrix を追加する
+- WORK_TAB_ENTRIES と WORK_TAB_COMPONENTS に CorrelationMatrix を追加する
+- MainView の currentView="CorrelationMatrix" は CorrelationMatrix 単体ではなく WorkspaceSurface を描画する
+- CorrelationMatrix コンポーネントは「ページ遷移を決める責務」を持たず、完了時は onSuccess / onCancel のようなワークスペース向けコールバックで閉じる
+
+受け入れ条件:
+
+- AppBar から相関行列を 2 回開いても tab は 1 つだけである
+- 相関行列 form 入力中に別タブへ移動して戻っても入力状態が保持される
+- 実行成功後は新しい data tab が前面化され、work:CorrelationMatrix には dirty バッジが付かない
+- close / cancel 時の確認挙動は他 work tab と同一である
 
 ### 7-2. work tab の状態モデル
 
 現状の work tab は title / featureKey / dirty の最小情報のみで、作業セッションとしては未完成である。
 
-未実装:
+追加方針:
 
-- draftValues 保持
-- createdAt 保持
-- dirty=true 時の close 確認ダイアログ
-- reopen 時のセッション再利用ルール
+- createdAt: タブ初回生成時刻。タブ順や将来のセッション復元基準に使う
+- draftValues: 現在フォーム上に見えている入力値
+- committedValues: 現在 dirty=false とみなす基準スナップショット
+
+dirty 判定ルール:
+
+- 初回 open 時は draftValues = committedValues = その時点の初期値とし、dirty=false
+- フィールド編集のたびに draftValues を更新し、committedValues と差分があれば dirty=true、完全一致なら dirty=false
+- 成功時は submitted values を draftValues / committedValues の両方に反映し、dirty=false
+- 明示的な Reset 操作時は reset 後の値を draftValues / committedValues の両方に反映し、dirty=false
+- activeTableName や一覧選択が外部で変わっても、既に存在する work tab の draftValues は自動上書きしない
+
+状態保持ルール:
+
+- タブが開いている間は、未送信の draft も送信済みの値も維持する
+- AppBar から同じ feature を再度開いた場合は、既存 tab の draftValues をそのまま見せる
+- work tab を閉じた時点で、その tab の draftValues / committedValues は破棄する
+- 閉じた後に同じ feature を開き直した場合は、その時点の activeTableName や既定値から新しいセッションを作る
+
+feature ごとの成功後ルール:
+
+- JoinTable / UnionTable / CreateSimulationDataTable / CalculationView / CorrelationMatrix:
+  実行成功後は新規 data tab を前面化し、work tab 自体は残す。次回再訪時は直前成功時の入力値を保持した状態から再開する
+- ConfidenceIntervalView / LinearRegressionForm:
+  実行成功後は生成された result tab を前面化し、work tab 自体は残す。次回再訪時は直前成功時の入力値を保持した状態から再開する
+
+補足:
+
+- dirty フラグは DOM の input/change イベント検出だけに依存せず、最終的には form state と committedValues の差分で判定する形へ寄せる
+- phase 1 では store 上の draftValues は feature ごとの object とし、細かい型最適化は後回しにしてよい
 
 ### 7-3. 結果メタデータ編集の残件
 
-初期導線は実装済みだが、次は未実装である。
+中央結果プレビューからの編集導線と未保存確認は実装済みだが、次は未実装である。
 
 - 左一覧の行アクションから編集ダイアログを開くショートカット導線
-- 編集ダイアログを未保存変更ありで閉じるときの破棄確認
 
 補足:
 
@@ -1034,18 +1081,92 @@ work tab の型と描画先はあるが、実際に openWorkTab を叩く UI 導
 未実装:
 
 - data / result / work の視覚的区別用アイコンまたはバッジ
-- work tab を含む close ルールの明示的 UX 整備
 - MainView 側の余白最適化の最終調整
 
-### 7-5. phase 2 候補
+### 7-5. スクロールデザインの統一
+
+現在のスクロール領域は各コンポーネントで overflow-y-auto を個別に持つが、見た目は OS 既定に依存しており、アプリ全体として統一されていない。
+
+方針:
+
+- スクロールバーはアプリ全体のブランドに合わせた共通デザインに統一する
+- 対象は WorkspaceSurface、LeftSideMenu、各 work tab フォーム、結果プレビュー、主要ダイアログ内部とする
+- まずはデスクトップ前提で Windows を基準に設計し、macOS では過剰に主張しないようにする
+
+共通前提:
+
+- 既存の .dark 全体指定はベースとして残しつつ、主要スクロール領域には明示クラスを適用して見た目を統一する
+- 横スクロールと縦スクロールで同じトークンを使い、太さだけ必要最小限で調整する
+- track は背景と喧嘩させず、thumb だけで操作可能性を示す
+
+デザイン案 A: Slate Rail
+
+- 方向性: 現在の brand-primary と brand-secondary に最も自然になじむ、業務アプリ寄りの落ち着いた案
+- 幅: 9px
+- track: brand-secondary ベースにごく薄い inset border
+- thumb: brand-primary の低彩度版。hover で brand-primary-light 相当へ上げる
+- 印象: 常時見えても邪魔にならず、Windows でも見失いにくい
+- 向いている場所: WorkspaceSurface、LeftSideMenu、結果プレビュー
+
+デザイン案 B: Accent Capsule
+
+- 方向性: brand-accent を使って「分析ツールらしい活性」を少し出す案
+- 幅: 10px
+- track: ほぼ透明、または白背景に薄い border-color
+- thumb: brand-accent を細いカプセル状に置き、hover で accent-dark に寄せる
+- 印象: 視認性が高く、フォーム群でスクロール位置を把握しやすい
+- 向いている場所: CorrelationMatrix、LinearRegressionForm、CalculationView など入力量の多い work tab
+
+デザイン案 C: Ghost Minimal
+
+- 方向性: macOS 風に近い、存在感を極力抑えたミニマル案
+- 幅: 8px
+- track: 透明
+- thumb: 通常時は半透明グレー、hover または focus-within 時だけコントラストを上げる
+- 印象: 画面はきれいに見えるが、Windows ではやや発見性が落ちる
+- 向いている場所: ダイアログ内部、補助パネル、二次的なスクロール領域
+
+推奨案:
+
+- phase 1 の全体統一デザインは A を第一候補とする
+- その上で B は「work tab の主フォームだけ強めに出したい」という判断が出た場合の派生案として残す
+- C をアプリ全体の標準にはしない。使う場合もダイアログなど二次領域に限定する
+
+最低仕様:
+
+- 細めのトラック幅
+- brand-primary / border-color 系トークンに沿った thumb 色
+- hover 時のみ少しコントラストを上げる
+- 角丸を持たせ、フラット過ぎない見た目にする
+- コンテンツ可読性を優先し、常時強い存在感は出さない
+
+実装方針:
+
+- 共通クラスまたはベース CSS で scrollbar を定義し、個別画面でのバラバラな指定を避ける
+- overflow-y-auto を持つ主要コンテナに同一クラスを適用する
+- WebKit 系と Firefox 系の両方に最低限対応する
+- CorrelationMatrix の列選択ペイン、WorkspaceSurface の result/work 表示領域、LeftSideMenu の一覧領域を優先適用対象にする
+
+未実装:
+
+- スクロールの共通デザイントークン定義
+- 共通 scrollbar クラスの作成
+- WorkspaceSurface / LeftSideMenu / CorrelationMatrix を含む主要スクロール領域への適用
+- ダークモード時の色調整
+
+### 7-6. phase 2 候補
 
 次は work tab 化の対象候補として残す。
 
 - DescriptiveStatistics
-- CorrelationMatrix
 
 ## 8. 現在の判断メモ
 
 - 実テーブル描画は VirtualTable が担当し、ワークスペース切替面は別名に分離する。
 - 実装済み仕様の詳細はコードを正とし、この文書は残タスクと命名判断の記録に寄せる。
-- 次の実装優先度は、work tab 導線接続、dirty 管理、左一覧からの編集導線の順とする。
+- work tab の新規起点は AppBar のみとし、左サイドメニューは既存データと既存結果の再訪に限定する。
+- phase 1 の work tab は featureKey 単位で 1 つだけ持ち、再度開く時は既存タブを再アクティブ化する。
+- work tab の入力保持は「タブが開いている間だけ保持、閉じたら破棄」を基本ルールとする。
+- CorrelationMatrix は data 生成系 work tab として扱い、成功後は生成先 data tab を前面化しつつ form tab 自体は残す。
+- スクロール共通デザインは Slate Rail を第一候補とし、まず主要スクロール領域から揃える。
+- 次の実装優先度は、CorrelationMatrix の work tab 化、スクロールデザイン統一、work tab 状態モデルの拡張、左一覧からの編集導線の順とする。

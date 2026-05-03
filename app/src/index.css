@@ -5,6 +5,14 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  :root {
+    --scrollbar-size: 9px;
+    --scrollbar-track: #eef2f6;
+    --scrollbar-track-border: rgba(44, 62, 80, 0.08);
+    --scrollbar-thumb: #7b8a9a;
+    --scrollbar-thumb-hover: #5f7387;
+  }
+
   .dark {
     /* ブランドカラー上書き */
     /* 修正: color-scheme: dark を削除  ブラウザのデフォルト白文字適用を防止 */
@@ -12,6 +20,10 @@
     --color-brand-border: #2d3748;
     --color-brand-text-main: #e2e8f0;
     --color-brand-primary-light: #2c3e50;
+    --scrollbar-track: #1f2937;
+    --scrollbar-track-border: rgba(255, 255, 255, 0.05);
+    --scrollbar-thumb: #51657b;
+    --scrollbar-thumb-hover: #6b829a;
   }
 
   button,
@@ -27,17 +39,6 @@
   html,
   body {
     @apply h-full w-full overflow-hidden overscroll-none;
-  }
-
-  /* ===== Dark mode: スクロールバー ===== */
-  .dark *::-webkit-scrollbar-track {
-    background: #1a2236;
-  }
-  .dark *::-webkit-scrollbar-thumb {
-    background: #374151;
-  }
-  .dark *::-webkit-scrollbar-thumb:hover {
-    background: #4b5563;
   }
 }
 
@@ -151,6 +152,31 @@
   }
   .animate-fade-out-up {
     animation: fade-out-up 0.5s ease-out;
+  }
+
+  .app-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+  .app-scrollbar::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+  .app-scrollbar::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--scrollbar-track-border);
+  }
+  .app-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+    min-height: 24px;
+  }
+  .app-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+    background-clip: padding-box;
   }
 
   .scrollbar-hide {

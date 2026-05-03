@@ -268,7 +268,7 @@ export const LeftSideMenu = () => {
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="app-scrollbar flex-1 overflow-y-auto px-4 pb-4">
         {pane === "data" && (
           <>
             {tableList.length === 0 && (

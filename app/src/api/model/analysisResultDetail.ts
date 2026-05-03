@@ -32,4 +32,6 @@ export type AnalysisResultDetail = {
   entityIdColumn: string | null;
   /** パネルデータ分析における時間列名 */
   timeColumn: string | null;
+  /** 分析内容の簡潔な説明文（フロントエンド一覧表示用） */
+  summaryText: string;
 };

@@ -1,4 +1,3 @@
-import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
 import { ImportDataFile } from "@/components/pages/ImportDataFile";
 import { SaveData } from "@/components/pages/SaveData";
@@ -11,7 +10,7 @@ const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
   JoinTable: <WorkspaceSurface />,
   UnionTable: <WorkspaceSurface />,
   DescriptiveStatistics: <DescriptiveStatistics />,
-  CorrelationMatrix: <CorrelationMatrix />,
+  CorrelationMatrix: <WorkspaceSurface />,
   ConfidenceIntervalView: <WorkspaceSurface />,
   LinearRegressionForm: <WorkspaceSurface />,
   CreateSimulationDataTable: <WorkspaceSurface />,

@@ -20,9 +20,6 @@ vi.mock("./ImportDataFile", () => ({
 vi.mock("./DescriptiveStatistics", () => ({
   DescriptiveStatistics: () => <div data-testid="page-DescriptiveStatistics" />,
 }));
-vi.mock("./CorrelationMatrix", () => ({
-  CorrelationMatrix: () => <div data-testid="page-CorrelationMatrix" />,
-}));
 vi.mock("./SaveData", () => ({
   SaveData: () => <div data-testid="page-SaveData" />,
 }));
@@ -43,7 +40,7 @@ describe("MainView コンポーネント", () => {
     ["JoinTable", "page-WorkspaceSurface"],
     ["UnionTable", "page-WorkspaceSurface"],
     ["DescriptiveStatistics", "page-DescriptiveStatistics"],
-    ["CorrelationMatrix", "page-CorrelationMatrix"],
+    ["CorrelationMatrix", "page-WorkspaceSurface"],
     ["ConfidenceIntervalView", "page-WorkspaceSurface"],
     ["LinearRegressionForm", "page-WorkspaceSurface"],
     ["CreateSimulationDataTable", "page-WorkspaceSurface"],

@@ -12,7 +12,9 @@ import { showMessageDialog } from "@/lib/dialog/message";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
+import { CorrelationMethod, MissingHandlingMethod } from "@/api/model";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -76,6 +78,10 @@ beforeEach(() => {
     activeTableName: null,
   });
   useCurrentPageStore.setState({ currentView: "CorrelationMatrix" });
+  useWorkspaceTabsStore.setState({
+    tabs: [],
+    activeTabId: null,
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -169,6 +175,85 @@ describe("CorrelationMatrix フォーム", () => {
       expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
       expect(vi.mocked(showMessageDialog)).not.toHaveBeenCalled();
     });
+
+    it("work tab モードでは成功時に onSuccess を呼び、dirty を false に戻す", async () => {
+      mockApi.createCorrelationTable.mockResolvedValue({
+        code: "OK",
+        result: { tableName: "corr_result" },
+      });
+      const onSuccess = vi.fn();
+      useWorkspaceTabsStore.setState({
+        tabs: [
+          {
+            id: "work:CorrelationMatrix",
+            kind: "work",
+            title: "相関行列",
+            featureKey: "CorrelationMatrix",
+            dirty: true,
+            createdAt: Date.now(),
+            draftValues: {
+              tableName: "sales",
+              columnNames: ["price", "quantity"],
+              newTableName: "corr_result",
+              method: CorrelationMethod.pearson,
+              decimalPlaces: 3,
+              lowerTriangleOnly: false,
+              missingHandling: MissingHandlingMethod.pairwise,
+            },
+            committedValues: {
+              tableName: "sales",
+              columnNames: ["price"],
+              newTableName: "corr_old",
+              method: CorrelationMethod.pearson,
+              decimalPlaces: 3,
+              lowerTriangleOnly: false,
+              missingHandling: MissingHandlingMethod.pairwise,
+            },
+          },
+        ],
+        activeTabId: "work:CorrelationMatrix",
+      });
+
+      render(
+        <CorrelationMatrix
+          workTabId="work:CorrelationMatrix"
+          onSuccess={onSuccess}
+        />,
+      );
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(onSuccess).toHaveBeenCalledWith("corr_result", {
+          tableName: "sales",
+          columnNames: ["price", "quantity"],
+          newTableName: "corr_result",
+          method: CorrelationMethod.pearson,
+          decimalPlaces: 3,
+          lowerTriangleOnly: false,
+          missingHandling: MissingHandlingMethod.pairwise,
+        });
+      });
+
+      expect(
+        useWorkspaceTabsStore.getState().tabs.find(
+          (tab) => tab.id === "work:CorrelationMatrix",
+        ),
+      ).toMatchObject({
+        kind: "work",
+        dirty: false,
+        draftValues: {
+          tableName: "sales",
+          columnNames: ["price", "quantity"],
+          newTableName: "corr_result",
+        },
+        committedValues: {
+          tableName: "sales",
+          columnNames: ["price", "quantity"],
+          newTableName: "corr_result",
+        },
+      });
+    });
   });
 
   describe("API失敗時", () => {
@@ -234,6 +319,23 @@ describe("CorrelationMatrix フォーム", () => {
       await user.click(cancelBtn);
 
       expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+    });
+
+    it("work tab モードではキャンセル時に onCancel を呼ぶ", async () => {
+      const user = userEvent.setup();
+      const onCancel = vi.fn();
+
+      render(
+        <CorrelationMatrix
+          workTabId="work:CorrelationMatrix"
+          onCancel={onCancel}
+        />,
+      );
+
+      const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
+      await user.click(cancelBtn);
+
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
   });
 });

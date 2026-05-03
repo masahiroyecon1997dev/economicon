@@ -200,7 +200,7 @@ export const UnionTable = () => {
       title={t("UnionTable.Title")}
       description={t("UnionTable.Description")}
     >
-      <div className="flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
+      <div className="app-scrollbar flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
         {/* ── Section 1: 対象テーブル ── */}
         <SectionCard title={t("UnionTable.SelectDataList")}>
           {/* テーブル追加行 */}

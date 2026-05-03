@@ -3,6 +3,7 @@ import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnal
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
 import { Calculation } from "@/components/pages/Calculation";
+import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { JoinTable } from "@/components/pages/JoinTable";
@@ -14,13 +15,19 @@ import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
-import type { WorkFeatureKey, WorkspaceTab } from "@/stores/workspaceTabs";
+import type {
+  WorkFeatureKey,
+  WorkspaceTab,
+  WorkspaceWorkTab,
+} from "@/stores/workspaceTabs";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-const WORK_TAB_COMPONENTS: Record<WorkFeatureKey, React.ReactElement> = {
+type StaticWorkFeatureKey = Exclude<WorkFeatureKey, "CorrelationMatrix">;
+
+const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
   JoinTable: <JoinTable />,
   UnionTable: <UnionTable />,
   CreateSimulationDataTable: <CreateSimulationDataTable />,
@@ -56,6 +63,7 @@ export const WorkspaceSurface = () => {
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const activateTab = useWorkspaceTabsStore((state) => state.activateTab);
   const closeTab = useWorkspaceTabsStore((state) => state.closeTab);
+  const openDataTab = useWorkspaceTabsStore((state) => state.openDataTab);
   const syncDataTabs = useWorkspaceTabsStore((state) => state.syncDataTabs);
   const pruneMissingDataTabs = useWorkspaceTabsStore(
     (state) => state.pruneMissingDataTabs,
@@ -191,10 +199,27 @@ export const WorkspaceSurface = () => {
     }
   };
 
+  const renderWorkTab = (tab: WorkspaceWorkTab) => {
+    if (tab.featureKey === "CorrelationMatrix") {
+      return (
+        <CorrelationMatrix
+          workTabId={tab.id}
+          onSuccess={(tableName) => {
+            openDataTab(tableName);
+            setCurrentView("DataPreview");
+          }}
+          onCancel={() => void handleCloseTab(tab.id)}
+        />
+      );
+    }
+
+    return WORK_TAB_COMPONENTS[tab.featureKey];
+  };
+
   return (
     <div className="h-full flex flex-col min-h-0">
       <div className="border-b border-gray-200 shrink-0">
-        <nav className="-mb-px flex space-x-1 overflow-x-auto">
+        <nav className="app-scrollbar -mb-px flex space-x-1 overflow-x-auto">
           {tabs.map((tab) => (
             <div
               role="button"
@@ -256,7 +281,7 @@ export const WorkspaceSurface = () => {
       {activeTab?.kind === "result" && (
         <div
           key={activeTab.id}
-          className="flex-1 min-h-0 overflow-y-auto px-1 pt-1"
+          className="app-scrollbar flex-1 min-h-0 overflow-y-auto px-1 pt-1"
         >
           <AnalysisResultPanel
             detail={activeTab.detail}
@@ -268,10 +293,10 @@ export const WorkspaceSurface = () => {
         <div
           ref={workTabContainerRef}
           key={activeTab.id}
-          className="flex-1 min-h-0 overflow-y-auto"
+          className="app-scrollbar flex-1 min-h-0 overflow-y-auto"
           data-testid={`workspace-work-tab-${activeTab.featureKey}`}
         >
-          {WORK_TAB_COMPONENTS[activeTab.featureKey]}
+          {renderWorkTab(activeTab)}
         </div>
       )}
 

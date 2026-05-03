@@ -100,7 +100,7 @@ export const AnalysisResultPanel = ({
       </div>
 
       {/* 結果コンテンツ */}
-      <div className="flex-1 overflow-y-auto min-h-0 pb-2">
+      <div className="app-scrollbar flex-1 overflow-y-auto min-h-0 pb-2">
         {detail.resultType === "regression" && (
           <RegressionResult result={toRegressionResult(detail)} />
         )}

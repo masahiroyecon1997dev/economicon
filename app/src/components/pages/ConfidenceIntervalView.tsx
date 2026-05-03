@@ -106,7 +106,7 @@ export const ConfidenceIntervalView = ({
             value={`result-${index}`}
             className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="mx-auto w-full max-w-4xl overflow-y-auto pt-4">
+            <div className="app-scrollbar mx-auto w-full max-w-4xl overflow-y-auto pt-4">
               <ConfidenceIntervalResult result={result} />
             </div>
           </TabsContent>

@@ -235,7 +235,7 @@ export const CreateSimulationDataTable = () => {
         className="flex flex-col h-full min-h-0 gap-4"
       >
         {/* ── スクロール領域 ── */}
-        <div className="flex flex-col gap-4 overflow-y-auto min-h-0 pb-2">
+        <div className="app-scrollbar flex flex-col gap-4 overflow-y-auto min-h-0 pb-2">
           {/* テーブル設定 */}
           <div className="rounded-xl border border-border-color dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm">
             <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading dark:text-white">

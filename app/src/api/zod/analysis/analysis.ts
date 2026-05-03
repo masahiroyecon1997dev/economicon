@@ -617,8 +617,11 @@ JSONResponse
     分析結果の詳細
  * @summary Get Analysis Result
  */
+
+
+
 export const GetAnalysisResultParams = zod.object({
-  "result_id": zod.string()
+  "result_id": zod.string().min(1)
 })
 
 export const GetAnalysisResultHeader = zod.object({
@@ -640,7 +643,8 @@ export const GetAnalysisResultResponse = zod.object({
   "modelPath": zod.union([zod.string(),zod.null()]).describe('保存済みモデルファイルのパス（None の場合は未保存）'),
   "modelType": zod.union([zod.string(),zod.null()]).describe('モデルの種別文字列（ols \/ fe \/ re \/ iv 等）'),
   "entityIdColumn": zod.union([zod.string(),zod.null()]).describe('パネルデータ分析における個体 ID 列名'),
-  "timeColumn": zod.union([zod.string(),zod.null()]).describe('パネルデータ分析における時間列名')
+  "timeColumn": zod.union([zod.string(),zod.null()]).describe('パネルデータ分析における時間列名'),
+  "summaryText": zod.string().describe('分析内容の簡潔な説明文（フロントエンド一覧表示用）')
 }).describe('処理結果')
 })
 
@@ -648,8 +652,11 @@ export const GetAnalysisResultResponse = zod.object({
  * 指定されたIDの分析結果メタデータを更新する。
  * @summary Update Analysis Result
  */
+
+
+
 export const UpdateAnalysisResultParams = zod.object({
-  "result_id": zod.string()
+  "result_id": zod.string().min(1)
 })
 
 export const UpdateAnalysisResultHeader = zod.object({
@@ -697,7 +704,8 @@ export const UpdateAnalysisResultResponse = zod.object({
   "modelPath": zod.union([zod.string(),zod.null()]).describe('保存済みモデルファイルのパス（None の場合は未保存）'),
   "modelType": zod.union([zod.string(),zod.null()]).describe('モデルの種別文字列（ols \/ fe \/ re \/ iv 等）'),
   "entityIdColumn": zod.union([zod.string(),zod.null()]).describe('パネルデータ分析における個体 ID 列名'),
-  "timeColumn": zod.union([zod.string(),zod.null()]).describe('パネルデータ分析における時間列名')
+  "timeColumn": zod.union([zod.string(),zod.null()]).describe('パネルデータ分析における時間列名'),
+  "summaryText": zod.string().describe('分析内容の簡潔な説明文（フロントエンド一覧表示用）')
 }).describe('更新後の分析結果詳細')
 }).describe('処理結果')
 })
@@ -718,8 +726,11 @@ JSONResponse
     削除成功メッセージ
  * @summary Delete Analysis Result
  */
+
+
+
 export const DeleteAnalysisResultParams = zod.object({
-  "result_id": zod.string()
+  "result_id": zod.string().min(1)
 })
 
 export const DeleteAnalysisResultHeader = zod.object({
