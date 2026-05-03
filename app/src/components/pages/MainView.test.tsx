@@ -1,8 +1,8 @@
-import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MainView } from "@/components/pages/MainView";
 import type { CurrentPageValue } from "@/stores/currentView";
 import { useCurrentPageStore } from "@/stores/currentView";
-import { MainView } from "@/components/pages/MainView";
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -17,34 +17,17 @@ vi.mock("react-i18next", () => ({
 vi.mock("./ImportDataFile", () => ({
   ImportDataFile: () => <div data-testid="page-ImportDataFile" />,
 }));
-vi.mock("./JoinTable", () => ({
-  JoinTable: () => <div data-testid="page-JoinTable" />,
-}));
-vi.mock("./UnionTable", () => ({
-  UnionTable: () => <div data-testid="page-UnionTable" />,
-}));
 vi.mock("./DescriptiveStatistics", () => ({
   DescriptiveStatistics: () => <div data-testid="page-DescriptiveStatistics" />,
 }));
 vi.mock("./CorrelationMatrix", () => ({
   CorrelationMatrix: () => <div data-testid="page-CorrelationMatrix" />,
 }));
-vi.mock("./RegressionView", () => ({
-  Regression: () => <div data-testid="page-LinearRegressionForm" />,
-}));
-vi.mock("./CreateSimulationDataTable", () => ({
-  CreateSimulationDataTable: () => (
-    <div data-testid="page-CreateSimulationDataTable" />
-  ),
-}));
-vi.mock("./Calculation", () => ({
-  Calculation: () => <div data-testid="page-CalculationView" />,
-}));
 vi.mock("./SaveData", () => ({
   SaveData: () => <div data-testid="page-SaveData" />,
 }));
-vi.mock("./Table", () => ({
-  Table: () => <div data-testid="page-DataPreview" />,
+vi.mock("./WorkspaceSurface", () => ({
+  WorkspaceSurface: () => <div data-testid="page-WorkspaceSurface" />,
 }));
 
 // ---------------------------------------------------------------------------
@@ -57,15 +40,17 @@ describe("MainView コンポーネント", () => {
 
   const PAGE_CASES: Array<[CurrentPageValue, string]> = [
     ["ImportDataFile", "page-ImportDataFile"],
-    ["JoinTable", "page-JoinTable"],
-    ["UnionTable", "page-UnionTable"],
+    ["JoinTable", "page-WorkspaceSurface"],
+    ["UnionTable", "page-WorkspaceSurface"],
     ["DescriptiveStatistics", "page-DescriptiveStatistics"],
     ["CorrelationMatrix", "page-CorrelationMatrix"],
-    ["LinearRegressionForm", "page-LinearRegressionForm"],
-    ["CreateSimulationDataTable", "page-CreateSimulationDataTable"],
-    ["CalculationView", "page-CalculationView"],
+    ["ConfidenceIntervalView", "page-WorkspaceSurface"],
+    ["LinearRegressionForm", "page-WorkspaceSurface"],
+    ["CreateSimulationDataTable", "page-WorkspaceSurface"],
+    ["CalculationView", "page-WorkspaceSurface"],
     ["SaveData", "page-SaveData"],
-    ["DataPreview", "page-DataPreview"],
+    ["AnalysisResultPreview", "page-WorkspaceSurface"],
+    ["DataPreview", "page-WorkspaceSurface"],
   ];
 
   it.each(PAGE_CASES)(

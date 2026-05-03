@@ -8,6 +8,7 @@ import {
 import { InputText } from "@/components/atoms/Input/InputText";
 import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 import { FormField } from "@/components/molecules/Form/FormField";
+import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { extractApiErrorMessage } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
@@ -99,7 +100,17 @@ export const EditAnalysisResultDialog = ({
   const isDirty = useStore(form.store, (s) => s.isDirty);
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) onClose();
+    if (open) return;
+    void (async () => {
+      if (isDirty && !isSubmitting) {
+        const confirmed = await showConfirmDialog(
+          t("EditAnalysisResultDialog.DiscardTitle"),
+          t("EditAnalysisResultDialog.DiscardMessage"),
+        );
+        if (!confirmed) return;
+      }
+      onClose();
+    })();
   };
 
   return (

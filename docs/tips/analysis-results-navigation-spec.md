@@ -946,130 +946,54 @@ PATCH /api/analysis/results/{result_id} に対して次を確認する。
 - name が空白のみの場合に INVALID_INPUT になる
 - 旧データに summary_text_override が無くても更新できる
 
-## 6. 実装順序
+## 6. 実装状況
 
-次フェーズの API 実装は次の順で進める。
+実装済みの詳細設計はコードを正とし、この節以降には今後の判断に必要な要点だけを残す。
 
-1. AnalysisResultSummary スキーマを拡張
-2. AnalysisResult.to_summary_dict を拡張
-3. PATCH /api/analysis/results/{result_id} 用の request / response schema を追加
-4. 永続化層で name / description / summaryTextOverride を更新できるようにする
-5. ストア docstring とテストを更新
-6. GET /api/analysis/results と PATCH /api/analysis/results/{result_id} の API テストを更新
-7. app/pnpm gen:all を実行
-8. フロント側で生成型を確認
+### 6-1. 実装済み
 
-この順序なら、変更の責務が局所化され、詳細 API や他の分析サービスへの影響を最小化できる。
+- 分析結果一覧のための API 拡張と PATCH /api/analysis/results/{result_id} は実装済み。
+- 左ペインの分析結果一覧、result tab の再利用、分析後の一覧再取得は実装済み。
+- ワークスペースタブストアは data tab / result tab / work tab の型を持つ。
+- result tab 上の編集ボタンと EditAnalysisResultDialog は実装済み。
+- 保存後の summary 更新、result tab タイトル更新、activeResultDetail 更新は実装済み。
+- Table 相当コンポーネントは、実態として data / result / work を描画するワークスペース面になっている。
 
-## 7. フロント実装方針
+### 6-2. 命名整理案
 
-### 7-1. 中央領域のタブ管理
+現状の app/src/components/pages/Table.tsx と app/src/components/pages/Table.test.tsx は、実際の責務と名前が一致していない。
 
-中央領域はデータ専用タブと分析結果専用タブに分けず、共通のワークスペースタブストアで管理する。
+推奨案:
 
-タブモデルは少なくとも次を持つ。
+- ファイル名: app/src/components/pages/WorkspaceSurface.tsx
+- コンポーネント名: WorkspaceSurface
+- テストファイル名: app/src/components/pages/WorkspaceSurface.test.tsx
 
-- id
-- kind: data | result
-- title
-- tableName または resultId
-- result detail（result タブ時）
+理由:
 
-同一 resultId を再度開こうとした場合は新規タブを作らず、既存タブをアクティブ化する。
+- Table は実テーブル描画ではなく、ワークスペース全体のタブ面を表している。
+- VirtualTable という本来のテーブル描画コンポーネントが別に存在するため、意味衝突を避けられる。
+- MainView 配下での役割は「ワークスペースの本文面」であり、Surface が最も責務に近い。
 
-### 7-2. 新規分析結果作成後の同期
+代替案:
 
-回帰分析、信頼区間、基本統計量を実行して新しい結果が作成されたら、少なくとも次を行う。
+- WorkspaceTabsView: タブ面であることは明確だが、本文描画の責務がやや弱く見える。
+- WorkspaceView: MainView との責務境界が曖昧になりやすい。
 
-- 成功後に一覧 API を再取得する
-- 生成された resultId の詳細を取得できる場合は中央のワークスペースタブへ開く
-- 左の分析結果一覧が stale なまま残らないようにする
+現時点の推奨は WorkspaceSurface とする。
 
-### 7-3. ワークスペースタブ拡張方針
+### 6-3. 関連して見直す名前
 
-本仕様では、インポートと保存を除く一部フォーム系機能を将来的にワークスペースタブ化してよい。
+- MainView 内の DataPreview / AnalysisResultPreview は、長期的にはどちらも WorkspaceSurface を表示する入口として整理できる。
+- Table.test.tsx の describe 名も WorkspaceSurface に合わせて更新するのが自然である。
 
-ただし、機能単位で一律にタブ化するのではなく、次の 3 層で考える。
+## 7. 未実装項目
 
-1. 常設遷移
-2. 作業セッションタブ
-3. 結果ビュータブ
+### 7-1. work tab の導線接続
 
-常設遷移として扱うもの:
+work tab の型と描画先はあるが、実際に openWorkTab を叩く UI 導線は未実装である。
 
-- インポート
-- 保存
-
-作業セッションタブとして扱う候補:
-
-- ジョイン
-- ユニオン
-- データ生成
-- 計算
-- 信頼区間フォーム
-- 最小二乗法フォーム
-
-結果ビュータブとして扱う候補:
-
-- データプレビュー
-- 分析結果プレビュー
-- 基本統計量結果
-- 相関行列結果
-
-この分け方の目的は、ユーザーがテーブルデータとフォームを行き来しながら条件を確認し、分析条件を少し変えて再実行しやすくすることである。
-
-### 7-4. タブ種別ごとの具体仕様
-
-ワークスペースタブは少なくとも次の 3 種別を持つ。
-
-- data tab
-- result tab
-- work tab
-
-data tab:
-
-- テーブルプレビューを表示する
-- タイトルは tableName を使う
-- 左一覧のデータ項目クリックで開く
-
-result tab:
-
-- 分析結果プレビューを表示する
-- タイトルは result.name を使う
-- 左一覧の分析結果項目クリックで開く
-- 同一 resultId の result tab は 1 つだけ存在できる
-
-work tab:
-
-- フォーム系画面を表示する
-- タイトルは機能名またはユーザーに理解しやすい短い作業名を使う
-- 例: ジョイン, ユニオン, 計算, データ生成, 信頼区間, 最小二乗法
-- 同一機能でも複数セッションを開けるよう、同一種類の work tab を複数持ててよい
-
-初期のフロント実装では、data tab と result tab を優先し、work tab は段階的に導入する。
-
-### 7-5. タブライフサイクル
-
-タブの生成、再利用、クローズは次のルールで統一する。
-
-1. data tab は tableName 単位で一意
-2. result tab は resultId 単位で一意
-3. work tab は一意性を持たず、必要に応じて複数作れる
-
-アクティブ化ルール:
-
-- 既に存在する data tab / result tab を開こうとした場合は、新規生成せず既存タブをアクティブ化する
-- work tab は「新規作業」導線から開いた場合は新規タブを作る
-- work tab を再訪する導線を後から追加する場合は、機能ごとの reopen 仕様を別途定義する
-
-クローズルール:
-
-- data tab / result tab は close しても左一覧や結果一覧から再度開ける
-- work tab は close 時に未保存状態を持つ可能性があるため、dirty 状態の確認ダイアログ対象とする
-
-### 7-6. work tab の対象画面
-
-phase 1 の対象候補は次とする。
+対象:
 
 - JoinTable
 - UnionTable
@@ -1078,247 +1002,50 @@ phase 1 の対象候補は次とする。
 - ConfidenceIntervalView
 - LinearRegressionForm
 
-phase 2 の対象候補:
+必要作業:
+
+- 左ナビまたは各起点ボタンから openWorkTab を呼ぶ
+- MainView のページ切替と work tab 起動ポリシーを統一する
+
+### 7-2. work tab の状態モデル
+
+現状の work tab は title / featureKey / dirty の最小情報のみで、作業セッションとしては未完成である。
+
+未実装:
+
+- draftValues 保持
+- createdAt 保持
+- dirty=true 時の close 確認ダイアログ
+- reopen 時のセッション再利用ルール
+
+### 7-3. 結果メタデータ編集の残件
+
+初期導線は実装済みだが、次は未実装である。
+
+- 左一覧の行アクションから編集ダイアログを開くショートカット導線
+- 編集ダイアログを未保存変更ありで閉じるときの破棄確認
+
+補足:
+
+- 現在のフロントは summary_text 上書き値そのものを保持しておらず、入力欄は空文字初期値 + 現在 summaryText の placeholder 表示で運用している。
+
+### 7-4. タブ UI の仕上げ
+
+未実装:
+
+- data / result / work の視覚的区別用アイコンまたはバッジ
+- work tab を含む close ルールの明示的 UX 整備
+- MainView 側の余白最適化の最終調整
+
+### 7-5. phase 2 候補
+
+次は work tab 化の対象候補として残す。
 
 - DescriptiveStatistics
 - CorrelationMatrix
 
-phase 1 と phase 2 を分ける理由は次のとおり。
-
-- phase 1 はフォームと元データを行き来したい需要が明確である
-- phase 2 は結果ビューとの分離設計を先に詰めた方が UI が安定する
-
-### 7-7. work tab の状態モデル
-
-work tab は少なくとも次の状態を持つ。
-
-- tabId
-- featureKey
-- title
-- draftValues
-- dirty
-- createdAt
-
-draftValues はフォームの途中入力を保持する。
-dirty は初期値から変更が入ったか、または未保存のローカル変更があるかを示す。
-
-dirty=true の work tab を閉じる場合は次の確認ダイアログを表示する。
-
-- タブを閉じると入力中の内容は破棄されます
-- キャンセル
-- 破棄して閉じる
-
-### 7-8. タブバーの見た目ルール
-
-タブバーは data / result / work の 3 種別を混在表示してよい。
-
-表示ルール:
-
-- 種別ごとにアイコンを変えるか、バッジや subtle な色差で区別する
-- ただし色差だけに依存せず、ラベルでも識別できるようにする
-- result tab は data tab よりやや広めの最小幅を持つ
-- work tab は data tab と同程度の幅でよい
-- 文字サイズ、padding、margin は現行より一段だけ compact にしてよい
-- close アイコンのクリック領域は縮めすぎない
-
-### 7-9. MainView とワークスペースの関係
-
-MainView は単なるページ切替コンテナではなく、将来的にはワークスペース全体の表示コンテナとして扱う。
-
-表示領域の責務分担:
-
-- 左ペイン: 一覧ナビゲーション
-- 上部タブバー: 開いている data / result / work の切替
-- 本文: 現在アクティブなタブの中身
-
-ImportDataFile と SaveData はワークスペースタブへ入れず、常設遷移として扱う。
-
-### 7-10. ワークスペースビューの命名方針
-
-現状の Table 相当コンポーネントは、実態としてはテーブル専用ではなくワークスペース全体のタブ面である。
-
-そのため、将来的な命名は次のような意味に寄せることを推奨する。
-
-- WorkspaceView
-- WorkspaceTabsView
-- WorkspaceSurface
-
-目的は、データプレビュー専用コンポーネントと誤認されないようにすることである。
-
-## 8. 追加仕様: 結果メタデータ編集
-
-### 8-1. 目的
-
-分析結果の一覧性と再利用性を高めるため、ユーザーが次の 3 項目を後から編集できるようにする。
-
-- name
-- description
-- summary_text
-
-### 8-2. 採用 UI 方針
-
-初期実装では、中央結果プレビュー上部の情報カードから開く「結果情報を編集」ダイアログを採用する。
-
-左一覧の行内直接編集を初期採用しない理由は次のとおり。
-
-- 左一覧は閲覧と選択を主目的とするため、編集 UI を混在させると密度が上がりすぎる
-- description が複数行になるため、一覧行高との相性が悪い
-- 詳細を見ながら編集した方が結果の文脈を保ちやすい
-
-編集導線は次の 2 箇所を許容する。
-
-1. result tab のヘッダ右上にある 編集 ボタン
-2. 左一覧の行アクションから開く 編集 メニュー
-
-ただし初期実装では 1 を主導線にし、2 はショートカット導線として後から足してよい。
-
-### 8-3. フォーム項目仕様
-
-編集ダイアログには少なくとも次を置く。
-
-- name: 必須、1 行入力
-- description: 任意、複数行入力
-- summary_text: 任意、1 行入力
-
-補助仕様:
-
-- name は保存後に左一覧、中央タブ名、詳細ヘッダへ反映する
-- description は左一覧の補助テキストまたは詳細情報として使える
-- summary_text は左一覧の 3 段目表示に使う
-- summary_text が未入力なら API 自動生成値を表示する
-
-フィールド初期値:
-
-- name: updatedDetail.name
-- description: updatedDetail.description
-- summary_text: summaryTextOverride がある場合はその値、無い場合は空文字
-
-placeholder:
-
-- summary_text には現在の自動生成 summaryText を placeholder 表示してよい
-
-### 8-4. バリデーションと保存状態
-
-フロント側バリデーションは API 制約に合わせる。
-
-- name は必須
-- name は空白のみ不可
-- name は 100 文字以内
-- description は 1000 文字以内
-- summary_text は 200 文字以内
-
-保存ボタンの状態:
-
-- 変更が無い場合は disabled
-- 保存中は loading 表示
-- 保存成功後はダイアログを閉じる
-- 保存失敗時はダイアログを閉じず、エラーメッセージを表示する
-
-summary_text を空で保存した場合は、API へは null を送る扱いにする。
-
-### 8-5. 保存後の UI 同期
-
-保存成功後は少なくとも次を同時更新する。
-
-- 左一覧の該当行
-- 開いているワークスペースタブのタイトル
-- 詳細表示ヘッダ
-
-更新 API のレスポンスで updatedSummary / updatedDetail を返す前提により、フロント側では不要な再取得を減らせる。
-
-同期ルール:
-
-- 左一覧に存在する該当 summary は updatedSummary で置き換える
-- 開いている result tab の title は updatedDetail.name に更新する
-- activeResultDetail は updatedDetail で置き換える
-- 編集対象が現在非アクティブな result tab でも、対応タブが開いていれば title は更新する
-
-### 8-6. 編集ダイアログの閉じ方
-
-未保存変更がある状態で閉じる場合は確認ダイアログを出してよい。
-
-- 変更を破棄して閉じる
-- 編集を続ける
-
-保存成功後は確認なしで閉じる。
-
-### 8-7. summary_text の見せ方
-
-summary_text は「一覧用サマリー」の意味を UI 上で明示する。
-
-説明文例:
-
-- 左一覧の補助表示として使われます
-- 空欄にすると自動生成に戻ります
-
-これにより、description と summary_text の用途を混同しにくくする。
-
-### 8-8. 代替 UI 案
-
-将来的な代替案として次を許容する。
-
-1. 左一覧の行アクションから開く小型ダイアログ
-2. 右サイドのインスペクタ常設
-
-ただし初期段階では、詳細上部ダイアログを第一案とする。
-
-## 9. 追加仕様: 表示密度と余白方針
-
-### 9-1. 目的
-
-フォームや結果表示の面積をできるだけ広く取り、スクロールせずに見える情報量を増やす。
-
-### 9-2. 基本方針
-
-余白を一律に縮めるのではなく、情報価値の高い領域を優先して表示面積を広げる。
-
-優先順位は次のとおり。
-
-1. フォーム本文
-2. 結果本文
-3. タブバー
-4. ページ外側の余白
-
-### 9-3. MainView の方針
-
-MainView の内側 padding は現行より一段階小さくしてよい。
-
-ただし次を守る。
-
-- フォームの主要アクションボタン領域は押しやすさを維持する
-- セクション間の区切りが失われない範囲で縮める
-- モバイルではなくデスクトップ前提のため、横方向の情報量増加を優先する
-
-### 9-4. タブの方針
-
-ワークスペースタブは次の方針で Compact 寄りに調整してよい。
-
-- 文字サイズは現行よりわずかに小さくする
-- 上下 padding を縮める
-- タブ間 margin を縮める
-- ただし close 操作のクリック領域は維持する
-
-work tab を導入する場合も同じ密度ルールを適用する。
-
-### 9-5. 密度モード
-
-将来的には Comfortable / Compact の 2 モードを持てる設計が望ましい。
-
-初期実装でモード切替を入れない場合でも、Compact を強く意識した spacing token を採用しておく。
-
-## 受け入れ基準
-
-- 左サイドメニューで データ と 分析結果 を切り替えられる。
-- 分析結果一覧の 1 行だけで、何の結果か判断できる。
-- 結果を開く操作でフォームには戻らず、結果表示へ直接遷移する。
-- タブを閉じても結果は一覧から再オープンできる。
-- 結果削除は明示操作でのみサーバ削除される。
-- 新しい分析種別を追加しても、一覧 UI の大枠を変えずに拡張できる。
-- 分析結果ナビゲーションは GET /api/analysis/results の拡張で成立し、メタデータ編集は PATCH /api/analysis/results/{result_id} で扱える。
-- GET /api/analysis/results/{result_id} のレスポンス形状は維持される。
-- name / description / summary_text を更新しても、左一覧、中央タブ、詳細表示の整合が崩れない。
-- summary_text 未入力時は API 自動生成値へ戻せる。
-- 将来的なフォーム系ワークスペースタブ化に対応できる情報設計になっている。
-- MainView とワークスペースタブの余白を縮めても、主要操作の押しやすさは維持される。
-- work tab は未保存変更を持つ場合に破棄確認を出せる。
-- result tab は resultId 単位で一意、data tab は tableName 単位で一意に保たれる。
+## 8. 現在の判断メモ
+
+- 実テーブル描画は VirtualTable が担当し、ワークスペース切替面は別名に分離する。
+- 実装済み仕様の詳細はコードを正とし、この文書は残タスクと命名判断の記録に寄せる。
+- 次の実装優先度は、work tab 導線接続、dirty 管理、左一覧からの編集導線の順とする。

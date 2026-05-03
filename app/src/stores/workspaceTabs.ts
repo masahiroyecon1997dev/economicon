@@ -26,7 +26,7 @@ export type WorkFeatureKey =
   | "LinearRegressionForm";
 
 export type WorkspaceWorkTab = {
-  id: `work:${string}`;
+  id: `work:${WorkFeatureKey}`;
   kind: "work";
   title: string;
   featureKey: WorkFeatureKey;
@@ -47,12 +47,13 @@ type WorkspaceTabsActions = {
   openDataTab: (tableName: string) => void;
   openResultTab: (detail: AnalysisResultDetail) => void;
   openWorkTab: (featureKey: WorkFeatureKey, title: string) => string;
+  setWorkTabDirty: (tabId: string, dirty: boolean) => void;
   activateTab: (tabId: string) => void;
   closeTab: (tabId: string) => void;
   syncDataTabs: (
     tableNames: string[],
     activeTableName: string | null,
-    preserveActiveResult: boolean,
+    preserveActiveNonData: boolean,
   ) => void;
   pruneMissingDataTabs: (tableNames: string[]) => void;
   removeResultTab: (resultId: string) => void;
@@ -64,6 +65,9 @@ type WorkspaceTabsActions = {
 };
 
 type WorkspaceTabsStore = WorkspaceTabsState & WorkspaceTabsActions;
+
+const toWorkTabId = (featureKey: WorkFeatureKey): `work:${WorkFeatureKey}` =>
+  `work:${featureKey}`;
 
 const nextActiveTabId = (
   tabs: WorkspaceTab[],
@@ -138,7 +142,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
           : state.activeTabId,
     })),
 
-  syncDataTabs: (tableNames, activeTableName, preserveActiveResult) =>
+  syncDataTabs: (tableNames, activeTableName, preserveActiveNonData) =>
     set((state) => {
       const nextTabs = state.tabs.filter(
         (tab) => tab.kind !== "data" || tableNames.includes(tab.tableName),
@@ -160,7 +164,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
         (tab) => tab.id === state.activeTabId,
       );
       const nextActiveTabId =
-        preserveActiveResult && activeTabExists
+        preserveActiveNonData && activeTabExists
           ? state.activeTabId
           : activeTableName
             ? (`data:${activeTableName}` as const)
@@ -201,22 +205,48 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
     }),
 
   openWorkTab: (featureKey, title) => {
-    const tabId = `work:${featureKey}-${Date.now()}` as const;
-    set((state) => ({
-      tabs: [
-        ...state.tabs,
-        {
-          id: tabId,
-          kind: "work" as const,
-          title,
-          featureKey,
-          dirty: false,
-        },
-      ],
-      activeTabId: tabId,
-    }));
+    const tabId = toWorkTabId(featureKey);
+    set((state) => {
+      const existingIndex = state.tabs.findIndex((tab) => tab.id === tabId);
+      if (existingIndex !== -1) {
+        const nextTabs = [...state.tabs];
+        const existingTab = nextTabs[existingIndex];
+        if (existingTab?.kind === "work") {
+          nextTabs[existingIndex] = { ...existingTab, title };
+        }
+        return {
+          tabs: nextTabs,
+          activeTabId: tabId,
+        };
+      }
+
+      return {
+        tabs: [
+          ...state.tabs,
+          {
+            id: tabId,
+            kind: "work" as const,
+            title,
+            featureKey,
+            dirty: false,
+          },
+        ],
+        activeTabId: tabId,
+      };
+    });
     return tabId;
   },
+
+  setWorkTabDirty: (tabId, dirty) =>
+    set((state) => {
+      const index = state.tabs.findIndex((tab) => tab.id === tabId);
+      if (index === -1) return {};
+      const nextTabs = [...state.tabs];
+      const tab = nextTabs[index];
+      if (tab?.kind !== "work") return {};
+      nextTabs[index] = { ...tab, dirty };
+      return { tabs: nextTabs };
+    }),
 
   updateResultTabTitle: (resultId, title) =>
     set((state) => {

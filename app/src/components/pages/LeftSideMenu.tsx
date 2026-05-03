@@ -1,10 +1,9 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import type { AnalysisResultDetail } from "@/api/model";
+import { SectionHeading } from "@/components/atoms/List/SectionHeading";
+import { TableNav } from "@/components/molecules/List/TableNav";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
-import { useTranslation } from "react-i18next";
-import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, FileDown, Trash2 } from "lucide-react";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { extractApiErrorMessage } from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
@@ -14,9 +13,10 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
-import { SectionHeading } from "@/components/atoms/List/SectionHeading";
-import { TableNav } from "@/components/molecules/List/TableNav";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
+import { ExternalLink, FileDown, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const RESULT_TYPE_ORDER = [
   "descriptive_statistics",

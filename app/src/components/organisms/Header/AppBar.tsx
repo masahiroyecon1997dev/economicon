@@ -1,17 +1,19 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ChevronDown, MoreHorizontal, Settings } from "lucide-react";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import logo from "@/assets/app-icon.svg";
-import { cn } from "@/lib/utils/helpers";
-import { useCurrentPageStore } from "@/stores/currentView";
-import { useSettingsStore } from "@/stores/settings";
-import type { DropmenuPositionType } from "@/types/commonTypes";
 import { MenuItem } from "@/components/atoms/Menu/MenuItem";
 import { DropdownMenu } from "@/components/molecules/Menu/DropdownMenu";
 import { SettingsDialog } from "@/components/organisms/Dialog/SettingsDialog";
 import { WindowControls } from "@/components/organisms/Header/WindowControls";
+import { WORK_TAB_ENTRIES } from "@/constants/workspaceTabs";
+import { cn } from "@/lib/utils/helpers";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useSettingsStore } from "@/stores/settings";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import type { DropmenuPositionType } from "@/types/commonTypes";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { ChevronDown, MoreHorizontal, Settings } from "lucide-react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const MENU_POSITION: DropmenuPositionType = "bottom-right";
 
@@ -30,6 +32,7 @@ export const AppBar = () => {
   const { t } = useTranslation();
   const osName = useSettingsStore((s) => s.osName);
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const openWorkTab = useWorkspaceTabsStore((s) => s.openWorkTab);
   const [isMaximized, setIsMaximized] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -171,6 +174,12 @@ export const AppBar = () => {
 
   const close = () => setOpenMenuId(null);
 
+  const handleOpenWorkTab = (featureKey: (typeof WORK_TAB_ENTRIES)[number]["featureKey"], title: string) => {
+    openWorkTab(featureKey, title);
+    setCurrentView(featureKey);
+    close();
+  };
+
   const menus = [
     {
       id: "file",
@@ -205,34 +214,27 @@ export const AppBar = () => {
         {
           id: "join-table",
           label: t("HeaderMenu.JoinTable"),
-          handleSelect: () => {
-            setCurrentView("JoinTable");
-            close();
-          },
+          handleSelect: () => handleOpenWorkTab("JoinTable", t("HeaderMenu.JoinTable")),
         },
         {
           id: "union-table",
           label: t("HeaderMenu.UnionTable"),
-          handleSelect: () => {
-            setCurrentView("UnionTable");
-            close();
-          },
+          handleSelect: () => handleOpenWorkTab("UnionTable", t("HeaderMenu.UnionTable")),
         },
         {
           id: "data-generation",
           label: t("HeaderMenu.DataGeneration"),
-          handleSelect: () => {
-            setCurrentView("CreateSimulationDataTable");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "CreateSimulationDataTable",
+              t("HeaderMenu.DataGeneration"),
+            ),
         },
         {
           id: "calculate",
           label: t("HeaderMenu.Calculate"),
-          handleSelect: () => {
-            setCurrentView("CalculationView");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab("CalculationView", t("HeaderMenu.Calculate")),
         },
       ],
     },
@@ -261,10 +263,11 @@ export const AppBar = () => {
         {
           id: "confidence-interval",
           label: t("HeaderMenu.ConfidenceInterval"),
-          handleSelect: () => {
-            setCurrentView("ConfidenceIntervalView");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "ConfidenceIntervalView",
+              t("HeaderMenu.ConfidenceInterval"),
+            ),
         },
       ],
     },
@@ -277,10 +280,11 @@ export const AppBar = () => {
         {
           id: "linear-regression-item",
           label: t("HeaderMenu.OrdinaryLeastSquares"),
-          handleSelect: () => {
-            setCurrentView("LinearRegressionForm");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "LinearRegressionForm",
+              t("HeaderMenu.OrdinaryLeastSquares"),
+            ),
         },
         // {
         //   id: "lasso-regression",

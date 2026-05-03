@@ -1,30 +1,24 @@
-import type { CurrentPageValue } from "@/stores/currentView";
-import { useCurrentPageStore } from "@/stores/currentView";
-import { Calculation } from "@/components/pages/Calculation";
-import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
-import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
 import { ImportDataFile } from "@/components/pages/ImportDataFile";
-import { JoinTable } from "@/components/pages/JoinTable";
-import { Regression } from "@/components/pages/RegressionView";
 import { SaveData } from "@/components/pages/SaveData";
-import { Table } from "@/components/pages/Table";
-import { UnionTable } from "@/components/pages/UnionTable";
+import { WorkspaceSurface } from "@/components/pages/WorkspaceSurface";
+import type { CurrentPageValue } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentView";
 
 const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
   ImportDataFile: <ImportDataFile />,
-  JoinTable: <JoinTable />,
-  UnionTable: <UnionTable />,
+  JoinTable: <WorkspaceSurface />,
+  UnionTable: <WorkspaceSurface />,
   DescriptiveStatistics: <DescriptiveStatistics />,
   CorrelationMatrix: <CorrelationMatrix />,
-  ConfidenceIntervalView: <ConfidenceIntervalView />,
-  LinearRegressionForm: <Regression />,
-  CreateSimulationDataTable: <CreateSimulationDataTable />,
-  CalculationView: <Calculation />,
+  ConfidenceIntervalView: <WorkspaceSurface />,
+  LinearRegressionForm: <WorkspaceSurface />,
+  CreateSimulationDataTable: <WorkspaceSurface />,
+  CalculationView: <WorkspaceSurface />,
   SaveData: <SaveData />,
-  AnalysisResultPreview: <Table />,
-  DataPreview: <Table />,
+  AnalysisResultPreview: <WorkspaceSurface />,
+  DataPreview: <WorkspaceSurface />,
 };
 
 export const MainView = () => {
@@ -32,7 +26,7 @@ export const MainView = () => {
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden h-full bg-brand-secondary">
-      <div className="flex-1 overflow-hidden p-4 flex flex-col min-h-0">
+      <div className="flex-1 overflow-hidden p-2 flex flex-col min-h-0">
         {PAGE_COMPONENTS[currentView]}
       </div>
     </main>

@@ -1,7 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import { LeftSideMenu } from "@/components/pages/LeftSideMenu";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
@@ -9,7 +7,9 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
-import { LeftSideMenu } from "@/components/pages/LeftSideMenu";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -164,6 +164,12 @@ describe("LeftSideMenu コンポーネント", () => {
       expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
       expect(useTableInfosStore.getState().activeTableName).toBe("sales");
     });
+  });
+
+  it("左メニューに work tab 起動導線は表示しない", () => {
+    render(<LeftSideMenu />);
+
+    expect(screen.queryByTestId("left-menu-work-actions")).toBeNull();
   });
 
   it("結果タブへ切り替えると fetchSummaries が呼ばれる", async () => {

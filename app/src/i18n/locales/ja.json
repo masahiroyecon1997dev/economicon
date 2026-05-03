@@ -76,6 +76,7 @@
     "Title": "ワークスペース",
     "DataTab": "データ",
     "ResultsTab": "分析結果",
+    "WorkActionsTitle": "作業タブ",
     "DataList": "データ一覧",
     "EmptyState": "データがありません。\nファイルをインポートして開始してください。",
     "ResultsLoading": "分析結果を読み込んでいます...",
@@ -105,6 +106,8 @@
     "DescriptionLabel": "説明メモ",
     "DescriptionPlaceholder": "分析の目的や条件など（任意）",
     "DescriptionMaxLength": "説明は{{max}}文字以内で入力してください",
+    "DiscardTitle": "編集内容を破棄",
+    "DiscardMessage": "保存していない変更があります。破棄して閉じますか？",
     "SummaryTextLabel": "一覧用サマリー（上書き）",
     "SummaryTextPlaceholder": "自動生成テキストを使用",
     "SummaryTextHint": "空のままにすると、自動生成された概要が表示されます。",
@@ -117,6 +120,11 @@
     "CloseTab": "タブを閉じる",
     "MoveColumnError": "列の移動に失敗しました",
     "EmptyState": "データが読み込まれていません。ファイルをインポートして開始してください。"
+  },
+  "WorkspaceSurface": {
+    "DirtyBadge": "未保存の変更あり",
+    "CloseDirtyWorkTabTitle": "作業タブを閉じる",
+    "CloseDirtyWorkTabMessage": "タブを閉じると入力中の内容は破棄されます。閉じますか？"
   },
   "ImportDataFileView": {
     "Title": "ファイルをインポート",

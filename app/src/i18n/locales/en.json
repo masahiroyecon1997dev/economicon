@@ -76,6 +76,7 @@
     "Title": "Workspace",
     "DataTab": "Data",
     "ResultsTab": "Results",
+    "WorkActionsTitle": "Work Tabs",
     "DataList": "Data List",
     "EmptyState": "No data.\nImport a file to get started.",
     "ResultsLoading": "Loading analysis results...",
@@ -105,6 +106,8 @@
     "DescriptionLabel": "Description",
     "DescriptionPlaceholder": "Purpose or conditions of the analysis (optional)",
     "DescriptionMaxLength": "Description must be at most {{max}} characters",
+    "DiscardTitle": "Discard changes",
+    "DiscardMessage": "You have unsaved changes. Close without saving?",
     "SummaryTextLabel": "List Summary (Override)",
     "SummaryTextPlaceholder": "Use auto-generated text",
     "SummaryTextHint": "Leave blank to use the auto-generated summary.",
@@ -117,6 +120,11 @@
     "CloseTab": "Close tab",
     "MoveColumnError": "Failed to move column",
     "EmptyState": "No data loaded. Please import a file to get started."
+  },
+  "WorkspaceSurface": {
+    "DirtyBadge": "Unsaved changes",
+    "CloseDirtyWorkTabTitle": "Close work tab",
+    "CloseDirtyWorkTabMessage": "Closing this tab will discard the current inputs. Continue?"
   },
   "ImportDataFileView": {
     "Title": "Select File",
