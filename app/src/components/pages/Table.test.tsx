@@ -1,10 +1,10 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Table } from "@/components/pages/Table";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
-import { Table } from "@/components/pages/Table";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -131,8 +131,8 @@ describe("Table コンポーネント", () => {
       render(<Table />);
 
       expect(
-        screen.getByText("とても長い推定結果名とても長い推定結果名"),
-      ).toBeInTheDocument();
+        screen.getAllByText("とても長い推定結果名とても長い推定結果名").length,
+      ).toBeGreaterThanOrEqual(1);
     });
   });
 

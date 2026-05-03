@@ -95,6 +95,21 @@
     "Empty": "左の一覧から分析結果を選択してください。",
     "Unsupported": "この分析種別はまだ専用プレビューに対応していません: {{resultType}}"
   },
+  "EditAnalysisResultDialog": {
+    "Title": "結果情報を編集",
+    "EditButtonLabel": "編集",
+    "NameLabel": "結果名",
+    "NamePlaceholder": "例: 賃金回帰モデル v2",
+    "NameRequired": "結果名は必須です",
+    "NameMaxLength": "結果名は{{max}}文字以内で入力してください",
+    "DescriptionLabel": "説明メモ",
+    "DescriptionPlaceholder": "分析の目的や条件など（任意）",
+    "DescriptionMaxLength": "説明は{{max}}文字以内で入力してください",
+    "SummaryTextLabel": "一覧用サマリー（上書き）",
+    "SummaryTextPlaceholder": "自動生成テキストを使用",
+    "SummaryTextHint": "空のままにすると、自動生成された概要が表示されます。",
+    "SummaryTextMaxLength": "サマリーは{{max}}文字以内で入力してください"
+  },
   "Table": {
     "LoadingData": "データを読み込んでいます",
     "FetchingChunk": "読み込み中",

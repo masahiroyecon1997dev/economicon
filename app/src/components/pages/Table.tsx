@@ -1,12 +1,30 @@
-import { X } from "lucide-react";
-import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import type { AnalysisResultDetail } from "@/api/model";
+import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnalysisResultDialog";
+import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
+import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
+import { Calculation } from "@/components/pages/Calculation";
+import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
+import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
+import { JoinTable } from "@/components/pages/JoinTable";
+import { Regression } from "@/components/pages/RegressionView";
+import { UnionTable } from "@/components/pages/UnionTable";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useTableInfosStore } from "@/stores/tableInfos";
+import type { WorkFeatureKey } from "@/stores/workspaceTabs";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
-import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
-import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
+import { X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+const WORK_TAB_COMPONENTS: Record<WorkFeatureKey, React.ReactElement> = {
+  JoinTable: <JoinTable />,
+  UnionTable: <UnionTable />,
+  CreateSimulationDataTable: <CreateSimulationDataTable />,
+  CalculationView: <Calculation />,
+  ConfidenceIntervalView: <ConfidenceIntervalView />,
+  LinearRegressionForm: <Regression />,
+};
 
 export const Table = () => {
   const { t } = useTranslation();
@@ -26,6 +44,10 @@ export const Table = () => {
   const syncDataTabs = useWorkspaceTabsStore((state) => state.syncDataTabs);
   const pruneMissingDataTabs = useWorkspaceTabsStore(
     (state) => state.pruneMissingDataTabs,
+  );
+
+  const [editTarget, setEditTarget] = useState<AnalysisResultDetail | null>(
+    null,
   );
 
   useEffect(() => {
@@ -55,8 +77,11 @@ export const Table = () => {
       activateTableInfo(tab.tableName);
       return;
     }
-
-    setActiveResult(tab.resultId, tab.detail);
+    if (tab.kind === "result") {
+      setActiveResult(tab.resultId, tab.detail);
+      return;
+    }
+    // work tab: アクティブ化のみ
   };
 
   const handleCloseTab = (tabId: string) => {
@@ -68,8 +93,11 @@ export const Table = () => {
       removeTableInfo(tab.tableName);
       return;
     }
-
-    setActiveResult(null, null);
+    if (tab.kind === "result") {
+      setActiveResult(null, null);
+      return;
+    }
+    // work tab: dirty 確認は将来実装
   };
 
   return (
@@ -84,7 +112,7 @@ export const Table = () => {
               key={tab.id}
               onClick={() => handleActivateTab(tab.id)}
               className={cn(
-                "group flex items-center gap-1.5 border-b-2 px-4 py-3 text-sm font-medium transition-colors",
+                "group flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
                 tab.kind === "result" && "min-w-44 max-w-64 pr-3",
                 activeTabId === tab.id
                   ? "border-brand-primary text-brand-primary"
@@ -105,7 +133,7 @@ export const Table = () => {
                   handleCloseTab(tab.id);
                 }}
                 className={cn(
-                  "rounded-full w-4 h-4 flex items-center justify-center transition-colors",
+                  "rounded-full w-4 h-4 flex items-center justify-center transition-colors shrink-0",
                   "opacity-0 group-hover:opacity-100 focus:opacity-100",
                   activeTabId === tab.id
                     ? "hover:bg-brand-primary/20 text-brand-primary"
@@ -119,7 +147,7 @@ export const Table = () => {
         </nav>
       </div>
 
-      {/* テーブル本体: アクティブなテーブルのみマウント */}
+      {/* コンテンツ領域 */}
       {tabs.length === 0 && (
         <div className="flex-1 flex flex-col items-center justify-center text-brand-text-sub">
           <p className="text-sm">{t("Table.EmptyState")}</p>
@@ -131,9 +159,29 @@ export const Table = () => {
         </div>
       )}
       {activeTab?.kind === "result" && (
-        <div key={activeTab.id} className="flex-1 min-h-0 overflow-y-auto">
-          <AnalysisResultPanel detail={activeTab.detail} />
+        <div
+          key={activeTab.id}
+          className="flex-1 min-h-0 overflow-y-auto px-1 pt-1"
+        >
+          <AnalysisResultPanel
+            detail={activeTab.detail}
+            onEdit={() => setEditTarget(activeTab.detail)}
+          />
         </div>
+      )}
+      {activeTab?.kind === "work" && (
+        <div key={activeTab.id} className="flex-1 min-h-0 overflow-y-auto">
+          {WORK_TAB_COMPONENTS[activeTab.featureKey]}
+        </div>
+      )}
+
+      {/* 分析結果編集ダイアログ */}
+      {editTarget && (
+        <EditAnalysisResultDialog
+          isOpen={!!editTarget}
+          detail={editTarget}
+          onClose={() => setEditTarget(null)}
+        />
       )}
     </div>
   );

@@ -17,7 +17,26 @@ export type WorkspaceResultTab = {
   detail: AnalysisResultDetail;
 };
 
-export type WorkspaceTab = WorkspaceDataTab | WorkspaceResultTab;
+export type WorkFeatureKey =
+  | "JoinTable"
+  | "UnionTable"
+  | "CreateSimulationDataTable"
+  | "CalculationView"
+  | "ConfidenceIntervalView"
+  | "LinearRegressionForm";
+
+export type WorkspaceWorkTab = {
+  id: `work:${string}`;
+  kind: "work";
+  title: string;
+  featureKey: WorkFeatureKey;
+  dirty: boolean;
+};
+
+export type WorkspaceTab =
+  | WorkspaceDataTab
+  | WorkspaceResultTab
+  | WorkspaceWorkTab;
 
 type WorkspaceTabsState = {
   tabs: WorkspaceTab[];
@@ -27,6 +46,7 @@ type WorkspaceTabsState = {
 type WorkspaceTabsActions = {
   openDataTab: (tableName: string) => void;
   openResultTab: (detail: AnalysisResultDetail) => void;
+  openWorkTab: (featureKey: WorkFeatureKey, title: string) => string;
   activateTab: (tabId: string) => void;
   closeTab: (tabId: string) => void;
   syncDataTabs: (
@@ -36,6 +56,11 @@ type WorkspaceTabsActions = {
   ) => void;
   pruneMissingDataTabs: (tableNames: string[]) => void;
   removeResultTab: (resultId: string) => void;
+  updateResultTabTitle: (resultId: string, title: string) => void;
+  updateResultTabDetail: (
+    resultId: string,
+    detail: AnalysisResultDetail,
+  ) => void;
 };
 
 type WorkspaceTabsStore = WorkspaceTabsState & WorkspaceTabsActions;
@@ -120,7 +145,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
       );
 
       for (const tableName of tableNames) {
-        const tabId = `data:${tableName}`;
+        const tabId: `data:${string}` = `data:${tableName}`;
         if (!nextTabs.some((tab) => tab.id === tabId)) {
           nextTabs.push({
             id: tabId,
@@ -173,5 +198,47 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
             ? nextActiveTabId(state.tabs, tabId)
             : state.activeTabId,
       };
+    }),
+
+  openWorkTab: (featureKey, title) => {
+    const tabId = `work:${featureKey}-${Date.now()}` as const;
+    set((state) => ({
+      tabs: [
+        ...state.tabs,
+        {
+          id: tabId,
+          kind: "work" as const,
+          title,
+          featureKey,
+          dirty: false,
+        },
+      ],
+      activeTabId: tabId,
+    }));
+    return tabId;
+  },
+
+  updateResultTabTitle: (resultId, title) =>
+    set((state) => {
+      const tabId = `result:${resultId}`;
+      const index = state.tabs.findIndex((tab) => tab.id === tabId);
+      if (index === -1) return {};
+      const nextTabs = [...state.tabs];
+      const tab = nextTabs[index];
+      if (tab?.kind !== "result") return {};
+      nextTabs[index] = { ...tab, title };
+      return { tabs: nextTabs };
+    }),
+
+  updateResultTabDetail: (resultId, detail) =>
+    set((state) => {
+      const tabId = `result:${resultId}`;
+      const index = state.tabs.findIndex((tab) => tab.id === tabId);
+      if (index === -1) return {};
+      const nextTabs = [...state.tabs];
+      const tab = nextTabs[index];
+      if (tab?.kind !== "result") return {};
+      nextTabs[index] = { ...tab, title: detail.name, detail };
+      return { tabs: nextTabs };
     }),
 }));

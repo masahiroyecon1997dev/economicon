@@ -95,6 +95,21 @@
     "Empty": "Select an analysis result from the list on the left.",
     "Unsupported": "This analysis type is not yet supported in the dedicated preview: {{resultType}}"
   },
+  "EditAnalysisResultDialog": {
+    "Title": "Edit Result Info",
+    "EditButtonLabel": "Edit",
+    "NameLabel": "Result Name",
+    "NamePlaceholder": "e.g., Wage Regression Model v2",
+    "NameRequired": "Result name is required",
+    "NameMaxLength": "Result name must be at most {{max}} characters",
+    "DescriptionLabel": "Description",
+    "DescriptionPlaceholder": "Purpose or conditions of the analysis (optional)",
+    "DescriptionMaxLength": "Description must be at most {{max}} characters",
+    "SummaryTextLabel": "List Summary (Override)",
+    "SummaryTextPlaceholder": "Use auto-generated text",
+    "SummaryTextHint": "Leave blank to use the auto-generated summary.",
+    "SummaryTextMaxLength": "Summary must be at most {{max}} characters"
+  },
   "Table": {
     "LoadingData": "Loading data",
     "FetchingChunk": "Loading",
