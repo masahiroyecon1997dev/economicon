@@ -645,6 +645,64 @@ export const GetAnalysisResultResponse = zod.object({
 })
 
 /**
+ * 指定されたIDの分析結果メタデータを更新する。
+ * @summary Update Analysis Result
+ */
+export const UpdateAnalysisResultParams = zod.object({
+  "result_id": zod.string()
+})
+
+export const UpdateAnalysisResultHeader = zod.object({
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
+export const updateAnalysisResultBodyNameOneMax = 100;
+
+export const updateAnalysisResultBodyDescriptionOneMax = 1000;
+
+export const updateAnalysisResultBodySummaryTextOverrideOneMax = 200;
+
+
+
+export const UpdateAnalysisResultBody = zod.object({
+  "name": zod.union([zod.string().max(updateAnalysisResultBodyNameOneMax),zod.null()]).optional().describe('更新後の分析結果名'),
+  "description": zod.union([zod.string().max(updateAnalysisResultBodyDescriptionOneMax),zod.null()]).optional().describe('更新後の分析結果説明'),
+  "summaryTextOverride": zod.union([zod.string().max(updateAnalysisResultBodySummaryTextOverrideOneMax),zod.null()]).optional().describe('一覧表示用 summaryText の上書き値')
+}).describe('分析結果メタデータ更新リクエスト')
+
+export const updateAnalysisResultResponseCodeDefault = `OK`;
+
+export const UpdateAnalysisResultResponse = zod.object({
+  "code": zod.string().default(updateAnalysisResultResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "updatedSummary": zod.object({
+  "id": zod.string().describe('分析結果の一意 ID'),
+  "name": zod.string().describe('分析結果名'),
+  "description": zod.string().describe('分析結果の説明メモ'),
+  "createdAt": zod.string().describe('作成日時（ISO 8601 形式）'),
+  "tableName": zod.string().describe('分析対象テーブル名'),
+  "resultType": zod.string().describe('分析種別文字列（regression \/ confidence_interval \/ descriptive_statistics \/ statistical_test \/ did \/ rdd \/ heckman 等）'),
+  "resultTypeLabel": zod.string().describe('分析種別の表示ラベル（日本語）'),
+  "modelType": zod.union([zod.string(),zod.null()]).describe('モデルの種別文字列（ols \/ fe \/ re \/ iv 等）'),
+  "summaryText": zod.string().describe('分析内容の簡潔な説明文（フロントエンド一覧表示用）')
+}).describe('更新後の分析結果サマリー'),
+  "updatedDetail": zod.object({
+  "id": zod.string().describe('分析結果の一意 ID'),
+  "name": zod.string().describe('分析結果名'),
+  "description": zod.string().describe('分析結果の説明メモ'),
+  "tableName": zod.string().describe('分析対象テーブル名'),
+  "resultType": zod.string().describe('分析種別文字列（regression \/ confidence_interval \/ descriptive_statistics \/ statistical_test 等）'),
+  "resultData": zod.record(zod.string(), zod.unknown()).describe('分析結果の詳細データ。分析種別（result_type）により含まれるキーが異なる。'),
+  "createdAt": zod.string().describe('作成日時（ISO 8601 形式）'),
+  "modelPath": zod.union([zod.string(),zod.null()]).describe('保存済みモデルファイルのパス（None の場合は未保存）'),
+  "modelType": zod.union([zod.string(),zod.null()]).describe('モデルの種別文字列（ols \/ fe \/ re \/ iv 等）'),
+  "entityIdColumn": zod.union([zod.string(),zod.null()]).describe('パネルデータ分析における個体 ID 列名'),
+  "timeColumn": zod.union([zod.string(),zod.null()]).describe('パネルデータ分析における時間列名')
+}).describe('更新後の分析結果詳細')
+}).describe('処理結果')
+})
+
+/**
  * 指定されたIDの分析結果を削除
 
 Parameters

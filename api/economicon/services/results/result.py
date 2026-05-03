@@ -9,6 +9,7 @@ from typing import ClassVar
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
+from economicon.schemas.result_management import UpdateAnalysisResultRequest
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.utils import ProcessingError, ValidationError
 
@@ -150,6 +151,85 @@ class DeleteAnalysisResult:
                 error_code=ErrorCode.DELETE_ANALYSIS_RESULT_ERROR,
                 message=_(
                     "An unexpected error occurred during deleting "
+                    "analysis result"
+                ),
+            ) from e
+
+
+class UpdateAnalysisResult:
+    """特定の分析結果メタデータを更新するサービス"""
+
+    PARAM_NAMES: ClassVar[dict[str, str]] = {"result_id": "resultId"}
+
+    def __init__(
+        self,
+        result_id: str,
+        request: UpdateAnalysisResultRequest,
+        result_store: AnalysisResultStore,
+    ):
+        self.result_store = result_store
+        self.result_id = result_id
+        self.request = request
+
+    def validate(self):
+        if not self.result_id or not self.result_id.strip():
+            raise ValidationError(
+                error_code=ErrorCode.RESULT_ID_REQUIRED,
+                message=_("Result ID is required"),
+            )
+
+        if not self.request.model_fields_set:
+            raise ValidationError(
+                error_code=ErrorCode.INVALID_INPUT,
+                message=_("At least one field must be provided"),
+            )
+
+        if "name" in self.request.model_fields_set:
+            if self.request.name is None or not self.request.name.strip():
+                raise ValidationError(
+                    error_code=ErrorCode.INVALID_INPUT,
+                    message=_("Name must not be blank"),
+                )
+
+    def execute(self):
+        try:
+            name = None
+            description = None
+            summary_text_override: str | None | object = object()
+
+            if "name" in self.request.model_fields_set:
+                name = self.request.name.strip() if self.request.name else None
+
+            if "description" in self.request.model_fields_set:
+                description = (self.request.description or "").strip()
+
+            if "summary_text_override" in self.request.model_fields_set:
+                raw_summary = self.request.summary_text_override
+                summary_text_override = (
+                    raw_summary.strip()
+                    if raw_summary and raw_summary.strip()
+                    else None
+                )
+
+            updated = self.result_store.update_metadata(
+                self.result_id,
+                name=name,
+                description=description,
+                summary_text_override=summary_text_override,
+            )
+            return {
+                "updatedSummary": updated.to_summary_dict(),
+                "updatedDetail": updated.to_dict(),
+            }
+        except KeyError:
+            raise
+        except ValidationError:
+            raise
+        except Exception as e:
+            raise ProcessingError(
+                error_code=ErrorCode.UPDATE_ANALYSIS_RESULT_ERROR,
+                message=_(
+                    "An unexpected error occurred during updating "
                     "analysis result"
                 ),
             ) from e

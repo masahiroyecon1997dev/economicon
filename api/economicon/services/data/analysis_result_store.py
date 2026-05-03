@@ -2,6 +2,8 @@ import threading
 
 from economicon.services.data.analysis_result import AnalysisResult
 
+_UNSET = object()
+
 
 class AnalysisResultStore:
     """
@@ -125,6 +127,31 @@ class AnalysisResultStore:
                 raise KeyError(
                     f"Analysis result with ID '{result_id}' does not exist."
                 )
+
+    def update_metadata(
+        self,
+        result_id: str,
+        *,
+        name: str | None = None,
+        description: str | None = None,
+        summary_text_override: str | None | object = _UNSET,
+    ) -> AnalysisResult:
+        """指定された結果のメタデータを更新して返す。"""
+        with self._lock:
+            result = self._results.get(result_id)
+            if not result:
+                raise KeyError(
+                    f"Analysis result with ID '{result_id}' does not exist."
+                )
+
+            result.update_metadata(
+                name=name,
+                description=description,
+                summary_text_override=summary_text_override,
+                update_summary_text_override=summary_text_override
+                is not _UNSET,
+            )
+            return result
 
     def clear_all(self) -> bool:
         """

@@ -19,6 +19,8 @@ from economicon.schemas.results import (
     GetAllAnalysisResultsResult,
     OutputResultRequest,
     OutputResultResult,
+    UpdateAnalysisResultRequest,
+    UpdateAnalysisResultResult,
 )
 from economicon.services.data.dependencies import AnalysisResultStoreDep
 from economicon.services.operation import run_operation
@@ -28,6 +30,7 @@ from economicon.services.results.result import (
     DeleteAnalysisResult,
     GetAllAnalysisResults,
     GetAnalysisResult,
+    UpdateAnalysisResult,
 )
 from economicon.utils import create_success_response
 
@@ -85,6 +88,24 @@ async def get_analysis_result(
         分析結果の詳細
     """
     api = GetAnalysisResult(result_id, result_store)
+    result = run_operation(api)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.patch(
+    "/results/{result_id}",
+    response_model=SuccessResponse[UpdateAnalysisResultResult],
+)
+async def update_analysis_result(
+    request: Request,
+    result_id: str,
+    body: UpdateAnalysisResultRequest,
+    result_store: AnalysisResultStoreDep,
+):
+    """指定されたIDの分析結果メタデータを更新する。"""
+    api = UpdateAnalysisResult(result_id, body, result_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result

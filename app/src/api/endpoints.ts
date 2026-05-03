@@ -81,8 +81,10 @@ import type {
   SuccessResponseSortColumnsResult,
   SuccessResponseStatisticalTestResult,
   SuccessResponseTransformColumnResult,
+  SuccessResponseUpdateAnalysisResultResult,
   SuccessResponseUpdateSettingsResult,
   TransformColumnRequestBody,
+  UpdateAnalysisResultRequest,
   UpdateSettingsRequestBody
 } from './model';
 
@@ -1024,6 +1026,22 @@ const getAnalysisResult = (
     }
 
 /**
+ * 指定されたIDの分析結果メタデータを更新する。
+ * @summary Update Analysis Result
+ */
+const updateAnalysisResult = (
+    resultId: string,
+    updateAnalysisResultRequest: UpdateAnalysisResultRequest,
+ options?: SecondParameter<typeof customInstance<SuccessResponseUpdateAnalysisResultResult>>,) => {
+      return customInstance<SuccessResponseUpdateAnalysisResultResult>(
+      {url: `/api/analysis/results/${resultId}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateAnalysisResultRequest
+    },
+      options);
+    }
+
+/**
  * 指定されたIDの分析結果を削除
 
 Parameters
@@ -1366,7 +1384,7 @@ const shutdown = (
       options);
     }
 
-return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,fetchPlotData,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
+return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,fetchPlotData,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,updateAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,getSettings,updateSettings,shutdown}};
 export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['healthCheck']>>>
 export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDummyColumn']>>>
 export type DeleteColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteColumn']>>>
@@ -1400,6 +1418,7 @@ export type RddAnalysisResult = NonNullable<Awaited<ReturnType<ReturnType<typeof
 export type GetAllAnalysisResultsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getAllAnalysisResults']>>>
 export type ClearAllAnalysisResultsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['clearAllAnalysisResults']>>>
 export type GetAnalysisResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getAnalysisResult']>>>
+export type UpdateAnalysisResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['updateAnalysisResult']>>>
 export type DeleteAnalysisResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteAnalysisResult']>>>
 export type OutputResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['outputResult']>>>
 export type ImportFileResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['importFile']>>>

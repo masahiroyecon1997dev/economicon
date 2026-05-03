@@ -106,6 +106,42 @@ class AnalysisResultDetail(BaseResult):
     )
 
 
+class UpdateAnalysisResultRequest(BaseResult):
+    """分析結果メタデータ更新リクエスト"""
+
+    name: str | None = Field(
+        default=None,
+        title="Name",
+        description="更新後の分析結果名",
+        max_length=100,
+    )
+    description: str | None = Field(
+        default=None,
+        title="Description",
+        description="更新後の分析結果説明",
+        max_length=1000,
+    )
+    summary_text_override: str | None = Field(
+        default=None,
+        title="Summary Text Override",
+        description="一覧表示用 summaryText の上書き値",
+        max_length=200,
+    )
+
+
+class UpdateAnalysisResultResult(BaseResult):
+    """分析結果メタデータ更新レスポンス"""
+
+    updated_summary: AnalysisResultSummary = Field(
+        title="Updated Summary",
+        description="更新後の分析結果サマリー",
+    )
+    updated_detail: AnalysisResultDetail = Field(
+        title="Updated Detail",
+        description="更新後の分析結果詳細",
+    )
+
+
 class DeleteAnalysisResultResult(BaseResult):
     """分析結果削除レスポンス"""
 

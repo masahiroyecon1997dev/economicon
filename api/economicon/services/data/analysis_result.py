@@ -39,6 +39,7 @@ class AnalysisResult:
     _created_at: str
     _model_path: str | None
     _model_type: str | None
+    _summary_text_override: str | None
     _entity_id_column: str | None
     _time_column: str | None
     # Tobit 欠損値除去後の元テーブル行インデックス（__row_idx__ 結合用）
@@ -66,6 +67,7 @@ class AnalysisResult:
         self._created_at = datetime.now().isoformat()
         self._model_path = None
         self._model_type = model_type
+        self._summary_text_override = None
         self._entity_id_column = entity_id_column
         self._time_column = time_column
         self._row_indices = row_indices
@@ -126,6 +128,10 @@ class AnalysisResult:
         return self._model_type
 
     @property
+    def summary_text_override(self) -> str | None:
+        return self._summary_text_override
+
+    @property
     def entity_id_column(self) -> str | None:
         return self._entity_id_column
 
@@ -145,6 +151,10 @@ class AnalysisResult:
     @description.setter
     def description(self, description: str):
         self._description = description
+
+    @summary_text_override.setter
+    def summary_text_override(self, summary_text_override: str | None):
+        self._summary_text_override = summary_text_override
 
     # ------------------------------------------------------------------
     # モデルファイル操作
@@ -270,6 +280,9 @@ class AnalysisResult:
         キーが欠如している場合は description または
         result_type_label にフォールバックする。
         """
+        if self._summary_text_override:
+            return self._summary_text_override
+
         _builders = {
             "regression": self._summary_regression,
             "heckman": self._summary_regression,
@@ -284,6 +297,27 @@ class AnalysisResult:
         except Exception:  # noqa: BLE001
             text = None
         return text or self._description or self._get_result_type_label()
+
+    def update_metadata(
+        self,
+        *,
+        name: str | None = None,
+        description: str | None = None,
+        summary_text_override: str | None | object = None,
+        update_summary_text_override: bool = False,
+    ) -> None:
+        """メタデータを更新する。"""
+        if name is not None:
+            self._name = name
+        if description is not None:
+            self._description = description
+        if update_summary_text_override:
+            self._summary_text_override = (
+                summary_text_override
+                if isinstance(summary_text_override, str)
+                or summary_text_override is None
+                else self._summary_text_override
+            )
 
     def to_dict(self) -> dict[str, Any]:
         """
