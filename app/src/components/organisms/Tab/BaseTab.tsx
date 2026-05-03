@@ -6,7 +6,7 @@ const Tabs = TabsPrimitive.Root;
 const TabsList = ({ className, ...props }: TabsPrimitive.TabsListProps) => (
   <div className="mb-1 border-b border-brand-border">
     <TabsPrimitive.List
-      className={cn("-mb-px flex space-x-8 overflow-x-auto", className)}
+      className={cn("app-scrollbar -mb-px flex space-x-8 overflow-x-auto", className)}
       {...props}
     />
   </div>

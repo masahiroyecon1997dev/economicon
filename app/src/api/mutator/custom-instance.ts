@@ -23,6 +23,9 @@ export const customInstance = async <T>(
     case "POST":
       response = await client.post<T>(url, data);
       break;
+    case "PATCH":
+      response = await client.patch<T>(url, data);
+      break;
     case "PUT":
       response = await client.put<T>(url, data);
       break;

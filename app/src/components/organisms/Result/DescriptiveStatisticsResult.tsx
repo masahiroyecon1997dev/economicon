@@ -87,7 +87,7 @@ export const DescriptiveStatisticsResult = ({
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-lg border border-border-color bg-white dark:bg-brand-primary">
+        <div className="app-scrollbar overflow-x-auto rounded-lg border border-border-color bg-white dark:bg-brand-primary">
           <table className="min-w-full text-sm">
             <thead>
               <tr className="border-b border-border-color bg-brand-secondary">

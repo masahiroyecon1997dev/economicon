@@ -65,7 +65,7 @@ export const FileListTable = ({
       className={`overflow-hidden rounded-xl border border-brand-primary/20 w-full${className ? ` ${className}` : ""}`}
     >
       <div
-        className="overflow-y-auto overflow-x-auto"
+        className="app-scrollbar overflow-y-auto overflow-x-auto"
         style={{ maxHeight, height: maxHeight === "100%" ? "100%" : undefined }}
       >
         <table

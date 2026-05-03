@@ -40,7 +40,7 @@ export const SimulationColumnEditDialog = ({
       submitFormId={FORM_ID}
       isSubmitDisabled={disabled}
     >
-      <div className="overflow-y-auto max-h-[calc(90vh-160px)]">
+      <div className="app-scrollbar overflow-y-auto max-h-[calc(90vh-160px)]">
         <SimulationColumnConfig
           formId={FORM_ID}
           column={column}

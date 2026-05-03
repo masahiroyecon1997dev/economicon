@@ -412,7 +412,7 @@ export const LinearRegressionForm = ({
                             label={t("LinearRegressionForm.ClusterGroups")}
                             htmlFor="cluster-groups"
                           >
-                            <div className="max-h-32 overflow-y-auto rounded-md border border-border-color bg-white p-1.5">
+                            <div className="app-scrollbar max-h-32 overflow-y-auto rounded-md border border-border-color bg-white p-1.5">
                               {columnList.length === 0 ? (
                                 <p className="text-xs text-brand-text-main/60">
                                   {t("Common.NoColumnsAvailable")}

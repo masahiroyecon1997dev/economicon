@@ -139,7 +139,7 @@ export const ConfidenceIntervalForm = ({
       }}
       className="flex flex-col flex-1 min-h-0"
     >
-      <div className="flex flex-col gap-4 max-w-lg overflow-y-auto flex-1 min-h-0 pb-2 px-1">
+      <div className="app-scrollbar flex flex-col gap-4 max-w-lg overflow-y-auto flex-1 min-h-0 pb-2 px-1">
         {/* 対象データ */}
         <form.Field name="tableName">
           {(field) => (

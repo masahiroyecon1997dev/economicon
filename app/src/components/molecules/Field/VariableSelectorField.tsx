@@ -92,7 +92,7 @@ export const VariableSelectorField = ({
       )}
       <div
         className={cn(
-          "min-h-0 flex-1 overflow-y-auto rounded-lg border px-2 py-1",
+          "app-scrollbar min-h-0 flex-1 overflow-y-auto rounded-lg border px-2 py-1",
           error
             ? "border-red-500 bg-red-50"
             : "border-border-color bg-secondary",

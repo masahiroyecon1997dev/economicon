@@ -295,7 +295,7 @@ const SettingsDialogContent = ({
           {/* ===== 外観タブ ===== */}
           <Tabs.Content
             value="appearance"
-            className="flex-1 overflow-y-auto px-6 py-5"
+            className="app-scrollbar flex-1 overflow-y-auto px-6 py-5"
           >
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
               {t("SettingsDialog.Theme.Label")}
@@ -318,7 +318,7 @@ const SettingsDialogContent = ({
           {/* ===== 一般タブ ===== */}
           <Tabs.Content
             value="general"
-            className="flex-1 space-y-6 overflow-y-auto px-6 py-5"
+            className="app-scrollbar flex-1 space-y-6 overflow-y-auto px-6 py-5"
           >
             {/* 言語 */}
             <div>
@@ -401,7 +401,7 @@ const SettingsDialogContent = ({
           {/* ===== データタブ（将来実装） ===== */}
           <Tabs.Content
             value="data"
-            className="flex-1 overflow-y-auto px-6 py-5"
+            className="app-scrollbar flex-1 overflow-y-auto px-6 py-5"
           >
             <p className="text-sm text-gray-400 dark:text-gray-500">
               {t("SettingsDialog.Placeholder")}
@@ -411,7 +411,7 @@ const SettingsDialogContent = ({
           {/* ===== ログタブ ===== */}
           <Tabs.Content
             value="log"
-            className="flex-1 overflow-y-auto px-6 py-5"
+            className="app-scrollbar flex-1 overflow-y-auto px-6 py-5"
           >
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
               {t("SettingsDialog.LogPath.Label")}

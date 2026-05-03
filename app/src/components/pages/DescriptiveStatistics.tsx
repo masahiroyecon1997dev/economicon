@@ -215,7 +215,7 @@ export const DescriptiveStatistics = () => {
       title={t("DescriptiveStatistics.Title")}
       description={t("DescriptiveStatistics.Description")}
     >
-      <div className="flex-1 overflow-y-auto min-h-0 space-y-4 pb-2">
+      <div className="app-scrollbar flex-1 overflow-y-auto min-h-0 space-y-4 pb-2">
         {/* ─── 1. Table selection ────────────────────────────── */}
         <FormField
           label={t("DescriptiveStatistics.DataLabel")}
@@ -362,7 +362,7 @@ export const DescriptiveStatistics = () => {
                 </button>
               </div>
             </div>
-            <div className="overflow-x-auto rounded-lg border border-border-color">
+            <div className="app-scrollbar overflow-x-auto rounded-lg border border-border-color">
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="bg-brand-secondary border-b border-border-color">

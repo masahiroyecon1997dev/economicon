@@ -214,7 +214,7 @@ export const AddLagLeadColumnForm = ({
             label={t("AddLagLeadColumnForm.GroupColumns")}
             htmlFor="lag-group-cols"
           >
-            <div className="space-y-1 max-h-36 overflow-y-auto rounded-md border border-input bg-background p-2">
+            <div className="app-scrollbar space-y-1 max-h-36 overflow-y-auto rounded-md border border-input bg-background p-2">
               {allColumns.length === 0 ? (
                 <p className="text-xs text-gray-400">
                   {t("AddLagLeadColumnForm.NoColumns")}

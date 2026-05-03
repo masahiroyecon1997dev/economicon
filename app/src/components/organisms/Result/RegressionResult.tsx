@@ -148,7 +148,7 @@ export const RegressionResult = ({
 
       {/* 係数テーブル */}
       <ResultSection title={t("RegressionResult.Coefficients")}>
-        <div className="overflow-x-auto">
+        <div className="app-scrollbar overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10">
               <tr className="border-b border-border-color bg-secondary">
