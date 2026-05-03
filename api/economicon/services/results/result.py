@@ -5,8 +5,6 @@ AnalysisResultStoreへのアクセスをラップし、
 統一されたエラーハンドリングとバリデーションを提供します。
 """
 
-from typing import ClassVar
-
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.result_management import UpdateAnalysisResultRequest
@@ -53,23 +51,13 @@ class GetAnalysisResult:
     特定の分析結果を取得するサービス
     """
 
-    PARAM_NAMES: ClassVar[dict[str, str]] = {"result_id": "resultId"}
-
     def __init__(self, result_id: str, result_store: AnalysisResultStore):
         self.result_store = result_store
         self.result_id = result_id
 
     def validate(self):
-        """
-        バリデーション
-
-        結果IDが空でないことを確認
-        """
-        if not self.result_id or not self.result_id.strip():
-            raise ValidationError(
-                error_code=ErrorCode.RESULT_ID_REQUIRED,
-                message=_("Result ID is required"),
-            )
+        """バリデーション（特になし）"""
+        return None
 
     def execute(self):
         """
@@ -107,23 +95,13 @@ class DeleteAnalysisResult:
     特定の分析結果を削除するサービス
     """
 
-    PARAM_NAMES: ClassVar[dict[str, str]] = {"result_id": "resultId"}
-
     def __init__(self, result_id: str, result_store: AnalysisResultStore):
         self.result_store = result_store
         self.result_id = result_id
 
     def validate(self):
-        """
-        バリデーション
-
-        結果IDが空でないことを確認
-        """
-        if not self.result_id or not self.result_id.strip():
-            raise ValidationError(
-                error_code=ErrorCode.RESULT_ID_REQUIRED,
-                message=_("Result ID is required"),
-            )
+        """バリデーション（特になし）"""
+        return None
 
     def execute(self):
         """
@@ -159,8 +137,6 @@ class DeleteAnalysisResult:
 class UpdateAnalysisResult:
     """特定の分析結果メタデータを更新するサービス"""
 
-    PARAM_NAMES: ClassVar[dict[str, str]] = {"result_id": "resultId"}
-
     def __init__(
         self,
         result_id: str,
@@ -172,24 +148,11 @@ class UpdateAnalysisResult:
         self.request = request
 
     def validate(self):
-        if not self.result_id or not self.result_id.strip():
-            raise ValidationError(
-                error_code=ErrorCode.RESULT_ID_REQUIRED,
-                message=_("Result ID is required"),
-            )
-
         if not self.request.model_fields_set:
             raise ValidationError(
                 error_code=ErrorCode.INVALID_INPUT,
                 message=_("At least one field must be provided"),
             )
-
-        if "name" in self.request.model_fields_set:
-            if self.request.name is None or not self.request.name.strip():
-                raise ValidationError(
-                    error_code=ErrorCode.INVALID_INPUT,
-                    message=_("Name must not be blank"),
-                )
 
     def execute(self):
         try:
@@ -258,7 +221,7 @@ class ClearAllAnalysisResults:
         """
         try:
             self.result_store.clear_all()
-            return {"message": "All analysis results cleared"}
+            return {"message": _("All analysis results cleared")}
         except Exception as e:
             raise ProcessingError(
                 error_code=ErrorCode.CLEAR_ALL_ANALYSIS_RESULTS_ERROR,

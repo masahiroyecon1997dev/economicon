@@ -342,7 +342,7 @@ def test_patch_result_by_id_api_returns_invalid_input_for_empty_body(
 def test_patch_result_by_id_api_returns_invalid_input_for_blank_name(
     client, tables_store
 ):
-    """PATCH /results/{id} に空白 name を送ると 400 を返す"""
+    """PATCH /results/{id} に空白 name を送ると 422 を返す"""
     resp_reg = client.post(URL_REGRESSION, json=OlsPayload().build())
     result_id = resp_reg.json()["result"]["resultId"]
 
@@ -351,7 +351,92 @@ def test_patch_result_by_id_api_returns_invalid_input_for_blank_name(
         json={"name": "   "},
     )
 
-    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     data = resp.json()
-    assert data["code"] == "INVALID_INPUT"
+    assert data["code"] == "VALIDATION_ERROR"
     assert data["message"] == "Name must not be blank"
+
+
+# -----------------------------------------------------------
+# 存在しない ID へのアクセス (404 Not Found)
+# -----------------------------------------------------------
+
+_NONEXISTENT_ID = "00000000-0000-0000-0000-000000000000"
+
+
+def test_get_result_by_nonexistent_id_returns_404(client, tables_store):
+    """GET /results/{id} で存在しない ID は 404 RESULT_NOT_FOUND を返す"""
+    resp = client.get(f"{URL_RESULTS}/{_NONEXISTENT_ID}")
+
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+    assert resp.json()["code"] == "RESULT_NOT_FOUND"
+
+
+def test_delete_result_by_nonexistent_id_returns_404(client, tables_store):
+    """DELETE /results/{id} で存在しない ID は 404 RESULT_NOT_FOUND を返す"""
+    resp = client.delete(f"{URL_RESULTS}/{_NONEXISTENT_ID}")
+
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+    assert resp.json()["code"] == "RESULT_NOT_FOUND"
+
+
+def test_patch_result_by_nonexistent_id_returns_404(client, tables_store):
+    """PATCH /results/{id} で存在しない ID は 404 RESULT_NOT_FOUND を返す"""
+    resp = client.patch(
+        f"{URL_RESULTS}/{_NONEXISTENT_ID}",
+        json={"name": "Updated Name"},
+    )
+
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+    assert resp.json()["code"] == "RESULT_NOT_FOUND"
+
+
+# -----------------------------------------------------------
+# フィールド長バリデーション (422 Unprocessable Entity)
+# -----------------------------------------------------------
+
+
+def test_patch_result_api_returns_422_for_name_too_long(client, tables_store):
+    """PATCH /results/{id} の name が 101 文字超なら 422 を返す"""
+    resp_reg = client.post(URL_REGRESSION, json=OlsPayload().build())
+    result_id = resp_reg.json()["result"]["resultId"]
+
+    resp = client.patch(
+        f"{URL_RESULTS}/{result_id}",
+        json={"name": "a" * 101},
+    )
+
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert resp.json()["code"] == "VALIDATION_ERROR"
+
+
+def test_patch_result_api_returns_422_for_description_too_long(
+    client, tables_store
+):
+    """PATCH /results/{id} の description が 1001 文字超なら 422 を返す"""
+    resp_reg = client.post(URL_REGRESSION, json=OlsPayload().build())
+    result_id = resp_reg.json()["result"]["resultId"]
+
+    resp = client.patch(
+        f"{URL_RESULTS}/{result_id}",
+        json={"description": "a" * 1001},
+    )
+
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert resp.json()["code"] == "VALIDATION_ERROR"
+
+
+def test_patch_result_api_returns_422_for_summary_text_override_too_long(
+    client, tables_store
+):
+    """PATCH /results/{id} の summaryTextOverride が 201 文字超なら 422"""
+    resp_reg = client.post(URL_REGRESSION, json=OlsPayload().build())
+    result_id = resp_reg.json()["result"]["resultId"]
+
+    resp = client.patch(
+        f"{URL_RESULTS}/{result_id}",
+        json={"summaryTextOverride": "a" * 201},
+    )
+
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert resp.json()["code"] == "VALIDATION_ERROR"

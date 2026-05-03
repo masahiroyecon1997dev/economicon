@@ -335,6 +335,7 @@ class AnalysisResult:
             "modelType": self._model_type,
             "entityIdColumn": self._entity_id_column,
             "timeColumn": self._time_column,
+            "summaryText": self._build_summary_text(),
         }
 
     def to_summary_dict(self) -> dict[str, str | None]:

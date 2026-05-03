@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from economicon.schemas.common import BaseResult
 
@@ -104,6 +104,10 @@ class AnalysisResultDetail(BaseResult):
         title="Time Column",
         description="パネルデータ分析における時間列名",
     )
+    summary_text: str = Field(
+        title="Summary Text",
+        description="分析内容の簡潔な説明文（フロントエンド一覧表示用）",
+    )
 
 
 class UpdateAnalysisResultRequest(BaseResult):
@@ -127,6 +131,13 @@ class UpdateAnalysisResultRequest(BaseResult):
         description="一覧表示用 summaryText の上書き値",
         max_length=200,
     )
+
+    @field_validator("name")
+    @classmethod
+    def name_must_not_be_blank(cls, v: str | None) -> str | None:
+        if v is not None and not v.strip():
+            raise ValueError("Name must not be blank")
+        return v
 
 
 class UpdateAnalysisResultResult(BaseResult):
