@@ -155,6 +155,7 @@
   "rust-analyzer.check.command": "clippy",
   // すべての機能を有効化
   "rust-analyzer.cargo.features": "all",
+  "rust-analyzer.linkedProjects": ["./app/src-tauri/Cargo.toml"],
   // Python テストの作業ディレクトリ
   "python.testing.cwd": "${workspaceFolder}/api",
   // pytest の引数
