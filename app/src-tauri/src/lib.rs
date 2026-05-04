@@ -94,6 +94,7 @@ async fn proxy_request(
         "GET" => state.client.get(&url),
         "POST" => state.client.post(&url),
         "PUT" => state.client.put(&url),
+        "PATCH" => state.client.patch(&url),
         "DELETE" => state.client.delete(&url),
         _ => {
             return Err(ApiError {
@@ -145,6 +146,7 @@ async fn fetch_binary(
         "GET" => state.client.get(&url),
         "POST" => state.client.post(&url),
         "PUT" => state.client.put(&url),
+        "PATCH" => state.client.patch(&url),
         "DELETE" => state.client.delete(&url),
         _ => {
             return Err(ApiError {
