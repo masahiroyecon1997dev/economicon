@@ -85,7 +85,7 @@ export const DescriptiveStatisticsHeader = zod.object({
 export const DescriptiveStatisticsBody = zod.object({
   "tableName": zod.string().min(1).describe('記述統計を計算する対象テーブル名。ワークスペース内に存在するテーブル名を指定してください。'),
   "columnNameList": zod.array(zod.string().min(1).describe('カラム名')).min(1).describe('記述統計を計算する対象カラム名のリスト。テーブル内に存在するカラム名を指定してください。複数カラムを指定することもできます。'),
-  "statistics": zod.array(zod.enum(['mean', 'median', 'mode', 'variance', 'std_dev', 'range', 'iqr', 'count', 'null_count', 'null_ratio', 'population_variance'])).min(1).describe('計算する統計量のリスト（mean: 平均、median: 中央値、mode: 最頻値、variance: 不偏分散、std_dev: 標準偏差、range: 範囲、iqr: 四分位数範囲、count: 有効サンプル数、null_count: null数、null_ratio: null割合、population_variance: 母分散）')
+  "statistics": zod.array(zod.enum(['mean', 'median', 'mode', 'variance', 'std_dev', 'range', 'iqr', 'count', 'null_count', 'null_ratio', 'population_variance', 'min', 'max', 'skewness', 'kurtosis'])).min(1).describe('計算する統計量のリスト（mean: 平均、median: 中央値、mode: 最頻値、variance: 不偏分散、std_dev: 標準偏差、range: 範囲、iqr: 四分位数範囲、count: 有効サンプル数、null_count: null数、null_ratio: null割合、population_variance: 母分散、min: 最小値、max: 最大値、skewness: 歪度、kurtosis: 超過尖度）')
 }).describe('記述統計リクエスト')
 
 export const descriptiveStatisticsResponseCodeDefault = `OK`;

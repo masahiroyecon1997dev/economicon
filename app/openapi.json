@@ -5143,7 +5143,11 @@
           "count",
           "null_count",
           "null_ratio",
-          "population_variance"
+          "population_variance",
+          "min",
+          "max",
+          "skewness",
+          "kurtosis"
         ],
         "title": "DescriptiveStatisticType"
       },
@@ -5296,7 +5300,7 @@
             "type": "array",
             "minItems": 1,
             "title": "Statistics",
-            "description": "\u8a08\u7b97\u3059\u308b\u7d71\u8a08\u91cf\u306e\u30ea\u30b9\u30c8\uff08mean: \u5e73\u5747\u3001median: \u4e2d\u592e\u5024\u3001mode: \u6700\u983b\u5024\u3001variance: \u4e0d\u504f\u5206\u6563\u3001std_dev: \u6a19\u6e96\u504f\u5dee\u3001range: \u7bc4\u56f2\u3001iqr: \u56db\u5206\u4f4d\u6570\u7bc4\u56f2\u3001count: \u6709\u52b9\u30b5\u30f3\u30d7\u30eb\u6570\u3001null_count: null\u6570\u3001null_ratio: null\u5272\u5408\u3001population_variance: \u6bcd\u5206\u6563\uff09"
+            "description": "\u8a08\u7b97\u3059\u308b\u7d71\u8a08\u91cf\u306e\u30ea\u30b9\u30c8\uff08mean: \u5e73\u5747\u3001median: \u4e2d\u592e\u5024\u3001mode: \u6700\u983b\u5024\u3001variance: \u4e0d\u504f\u5206\u6563\u3001std_dev: \u6a19\u6e96\u504f\u5dee\u3001range: \u7bc4\u56f2\u3001iqr: \u56db\u5206\u4f4d\u6570\u7bc4\u56f2\u3001count: \u6709\u52b9\u30b5\u30f3\u30d7\u30eb\u6570\u3001null_count: null\u6570\u3001null_ratio: null\u5272\u5408\u3001population_variance: \u6bcd\u5206\u6563\u3001min: \u6700\u5c0f\u5024\u3001max: \u6700\u5927\u5024\u3001skewness: \u6b6a\u5ea6\u3001kurtosis: \u8d85\u904e\u5c16\u5ea6\uff09"
           }
         },
         "type": "object",

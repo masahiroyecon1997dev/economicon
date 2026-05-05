@@ -20,4 +20,8 @@ export const DescriptiveStatisticType = {
   null_count: 'null_count',
   null_ratio: 'null_ratio',
   population_variance: 'population_variance',
+  min: 'min',
+  max: 'max',
+  skewness: 'skewness',
+  kurtosis: 'kurtosis',
 } as const;
