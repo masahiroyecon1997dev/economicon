@@ -10,6 +10,15 @@ import type { LinearRegressionResultType } from "@/types/commonTypes";
 import { Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+type DescriptiveStatisticsResultDataType = {
+  statistics?: Record<
+    string,
+    Record<string, number | string | number[] | null>
+  >;
+  columnNameList?: string[];
+  statisticOrder?: string[];
+};
+
 type StatisticsMap = Record<
   string,
   Record<string, number | string | number[] | null>
@@ -77,7 +86,7 @@ export const AnalysisResultPanel = ({
       data-testid="analysis-result-preview"
     >
       {/* ヘッダー: 結果名 + 編集ボタン */}
-      <div className="flex items-start justify-between gap-2 px-1 pb-2 shrink-0">
+      <div className="flex items-start justify-between gap-2 px-1 pb-2 pt-1 shrink-0">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
             {detail.name}
@@ -101,7 +110,7 @@ export const AnalysisResultPanel = ({
       </div>
 
       {/* 結果コンテンツ */}
-      <div className="app-scrollbar flex-1 overflow-y-auto min-h-0 pb-2">
+      <div className="app-scrollbar flex-1 overflow-y-auto min-h-0 pb-1">
         {detail.resultType === "regression" && (
           <RegressionResult result={toRegressionResult(detail)} />
         )}
@@ -116,7 +125,18 @@ export const AnalysisResultPanel = ({
           <DescriptiveStatisticsResult
             resultId={detail.id}
             tableName={detail.tableName}
-            statistics={detail.resultData.statistics as StatisticsMap}
+            statistics={
+              (detail.resultData as DescriptiveStatisticsResultDataType)
+                .statistics as StatisticsMap
+            }
+            columnNameList={
+              (detail.resultData as DescriptiveStatisticsResultDataType)
+                .columnNameList
+            }
+            statisticOrder={
+              (detail.resultData as DescriptiveStatisticsResultDataType)
+                .statisticOrder
+            }
           />
         )}
 

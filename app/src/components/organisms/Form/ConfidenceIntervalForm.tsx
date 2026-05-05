@@ -5,6 +5,10 @@ import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { FormField } from "@/components/molecules/Form/FormField";
 import { StatisticsInfoDialog } from "@/components/organisms/Dialog/StatisticsInfoDialog";
+import {
+  AnalysisEmptyState,
+  AnalysisNoTablesState,
+} from "@/components/organisms/EmptyState/AnalysisNoTablesState";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { extractApiErrorMessage } from "@/lib/utils/apiError";
@@ -15,7 +19,7 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
-import { Info } from "lucide-react";
+import { Info, Loader2, SearchX } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -74,7 +78,7 @@ export const ConfidenceIntervalForm = ({
 }: ConfidenceIntervalFormProps) => {
   const { t } = useTranslation();
   const tableList = useTableListStore((s) => s.tableList);
-  const { selectedTableName, setSelectedTableName, columnList } =
+  const { selectedTableName, setSelectedTableName, columnList, isLoading } =
     useTableColumnLoader({ numericOnly: true, autoLoadOnMount: true });
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
@@ -130,6 +134,16 @@ export const ConfidenceIntervalForm = ({
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
+  if (tableList.length === 0) {
+    return (
+      <AnalysisNoTablesState
+        className="flex-1"
+        onCancel={onCancel}
+        onSelect={() => setCurrentView("ImportDataFile")}
+      />
+    );
+  }
+
   return (
     <form
       onSubmit={(e) => {
@@ -177,20 +191,41 @@ export const ConfidenceIntervalForm = ({
               htmlFor="ci-column-name"
               error={extractFieldError(field.state.meta.errors)}
             >
-              <Select
-                id="ci-column-name"
-                value={field.state.value}
-                placeholder={t("ConfidenceIntervalView.SelectColumn")}
-                error={extractFieldError(field.state.meta.errors)}
-                onValueChange={field.handleChange}
-                disabled={columnList.length === 0}
-              >
-                {columnList.map((col) => (
-                  <SelectItem key={col.name} value={col.name}>
-                    {col.name}
-                  </SelectItem>
-                ))}
-              </Select>
+              {selectedTableName !== "" && isLoading ? (
+                <AnalysisEmptyState
+                  compact
+                  testId="confidence-interval-loading-columns-state"
+                  icon={<Loader2 className="h-6 w-6 animate-spin" />}
+                  title={t("AnalysisEmptyState.LoadingColumnsTitle")}
+                  description={t(
+                    "AnalysisEmptyState.LoadingColumnsDescription",
+                  )}
+                />
+              ) : selectedTableName !== "" && columnList.length === 0 ? (
+                <AnalysisEmptyState
+                  compact
+                  testId="confidence-interval-no-columns-state"
+                  icon={<SearchX className="h-6 w-6" />}
+                  title={t("AnalysisEmptyState.NoEligibleColumnsTitle")}
+                  description={t("ConfidenceIntervalView.NoColumns")}
+                  hint={t("AnalysisEmptyState.NoEligibleColumnsHint")}
+                />
+              ) : (
+                <Select
+                  id="ci-column-name"
+                  value={field.state.value}
+                  placeholder={t("ConfidenceIntervalView.SelectColumn")}
+                  error={extractFieldError(field.state.meta.errors)}
+                  onValueChange={field.handleChange}
+                  disabled={columnList.length === 0}
+                >
+                  {columnList.map((col) => (
+                    <SelectItem key={col.name} value={col.name}>
+                      {col.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+              )}
             </FormField>
           )}
         </form.Field>

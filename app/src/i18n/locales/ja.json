@@ -260,6 +260,15 @@
     "ErrorColumnsRequired": "2つ以上の列を選択してください",
     "ErrorOutputNameRequired": "出力データ名を入力してください"
   },
+  "AnalysisEmptyState": {
+    "NoTablesTitle": "分析対象のデータがまだありません",
+    "NoTablesDescription": "先にデータを取り込むと、この画面で分析を開始できます。",
+    "NoTablesAction": "データを取り込む",
+    "NoEligibleColumnsTitle": "この画面で使える列がありません",
+    "NoEligibleColumnsHint": "別のテーブルを選ぶか、前処理で必要な列を追加してください。",
+    "LoadingColumnsTitle": "列情報を読み込んでいます",
+    "LoadingColumnsDescription": "利用可能な列を確認しています。しばらくお待ちください。"
+  },
   "DescriptiveStatistics": {
     "Title": "基本統計量",
     "Description": "データの列を選択し、平均・分散などの基本統計量を計算します。",
@@ -282,6 +291,10 @@
     "Stat_null_count": "null数",
     "Stat_null_ratio": "null割合",
     "Stat_population_variance": "母分散",
+    "Stat_min": "最小値",
+    "Stat_max": "最大値",
+    "Stat_skewness": "歪度",
+    "Stat_kurtosis": "超過尖度",
     "RunCalculation": "計算する",
     "Processing": "処理中...",
     "ResultTitle": "計算結果",
@@ -443,6 +456,7 @@
     "SelectData": "データを選択",
     "ColumnLabel": "対象列",
     "SelectColumn": "列を選択",
+    "NoColumns": "信頼区間を計算できる数値列がありません",
     "StatisticTypeLabel": "統計量タイプ",
     "SelectStatisticType": "タイプを選択",
     "StatisticTypeInfoLabel": "統計量の説明を表示",

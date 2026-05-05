@@ -1,5 +1,5 @@
-import { type ReactNode } from "react";
 import { cn } from "@/lib/utils/helpers";
+import { type ReactNode } from "react";
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -19,7 +19,7 @@ export const PageLayout = ({
       {title && description ? (
         <div className="flex flex-1 flex-col gap-2 min-h-0">
           <header className="shrink-0">
-            <h1 className="text-xl font-bold text-black dark:text-gray-100">
+            <h1 className="text-xl pt-2 font-bold text-black dark:text-gray-100">
               {title}
             </h1>
             <p className="mt-1 text-xs text-black/60 dark:text-gray-400">

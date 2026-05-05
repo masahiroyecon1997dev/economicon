@@ -139,6 +139,42 @@ beforeEach(() => {
 });
 
 describe("StatisticalTestView", () => {
+  it("テーブルが 0 件なら NoTables state を表示し、ImportDataFile に遷移できる", async () => {
+    const user = userEvent.setup();
+    useTableListStore.setState({ tableList: [] });
+
+    render(<StatisticalTestView />);
+
+    expect(
+      screen.getByTestId("analysis-no-tables-state"),
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "AnalysisEmptyState.NoTablesAction",
+      }),
+    );
+
+    expect(useCurrentPageStore.getState().currentView).toBe(
+      "ImportDataFile",
+    );
+  });
+
+  it("対象列がないサンプルでは共通 no-columns state を表示する", async () => {
+    mockGetColumnList.mockResolvedValue({
+      code: "OK",
+      result: {
+        columnInfoList: [],
+      },
+    });
+
+    render(<StatisticalTestView />);
+
+    expect(
+      await screen.findByTestId("statistical-test-no-columns-state-0"),
+    ).toBeInTheDocument();
+  });
+
   it("列未選択のまま送信するとエラーを表示する", async () => {
     render(<StatisticalTestView />);
 

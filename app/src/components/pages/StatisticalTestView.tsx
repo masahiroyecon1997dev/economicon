@@ -14,6 +14,10 @@ import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { FormField } from "@/components/molecules/Form/FormField";
+import {
+  AnalysisEmptyState,
+  AnalysisNoTablesState,
+} from "@/components/organisms/EmptyState/AnalysisNoTablesState";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { extractApiErrorMessage } from "@/lib/utils/apiError";
@@ -26,7 +30,7 @@ import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { ColumnType } from "@/types/commonTypes";
 import { useForm, useStore } from "@tanstack/react-form";
-import { Minus, Plus } from "lucide-react";
+import { Loader2, Minus, Plus, SearchX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -505,14 +509,21 @@ export const StatisticalTestView = ({
       title={t("StatisticalTestView.Title")}
       description={t("StatisticalTestView.Description")}
     >
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          void handleSubmit();
-        }}
-        className="flex min-h-0 flex-1 flex-col gap-4"
-      >
+      {tableList.length === 0 ? (
+        <AnalysisNoTablesState
+          className="flex-1"
+          onCancel={handleCancel}
+          onSelect={() => setCurrentView("ImportDataFile")}
+        />
+      ) : (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void handleSubmit();
+          }}
+          className="flex min-h-0 flex-1 flex-col gap-4"
+        >
         <div className="app-scrollbar flex-1 space-y-4 overflow-y-auto pb-2">
           <FormField
             label={t("StatisticalTestView.TestTypeLabel")}
@@ -623,27 +634,42 @@ export const StatisticalTestView = ({
                       label={t("StatisticalTestView.ColumnLabel")}
                       error={rowErrors.columnName}
                     >
-                      <Select
-                        value={sample.columnName}
-                        onValueChange={(value) =>
-                          handleSampleColumnChange(index, value)
-                        }
-                        placeholder={t("StatisticalTestView.SelectColumn")}
-                        disabled={sample.tableName === "" || isLoadingColumns}
-                      >
-                        {numericColumns.map((column) => (
-                          <SelectItem key={column.name} value={column.name}>
-                            {column.name}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                      {sample.tableName !== "" &&
-                        !isLoadingColumns &&
-                        numericColumns.length === 0 && (
-                          <p className="mt-1 text-xs text-brand-text-sub dark:text-gray-400">
-                            {t("StatisticalTestView.NoColumns")}
-                          </p>
-                        )}
+                      {sample.tableName !== "" && isLoadingColumns ? (
+                        <AnalysisEmptyState
+                          compact
+                          testId={`statistical-test-loading-columns-state-${index}`}
+                          icon={<Loader2 className="h-6 w-6 animate-spin" />}
+                          title={t("AnalysisEmptyState.LoadingColumnsTitle")}
+                          description={t(
+                            "AnalysisEmptyState.LoadingColumnsDescription",
+                          )}
+                        />
+                      ) : sample.tableName !== "" &&
+                        numericColumns.length === 0 ? (
+                        <AnalysisEmptyState
+                          compact
+                          testId={`statistical-test-no-columns-state-${index}`}
+                          icon={<SearchX className="h-6 w-6" />}
+                          title={t("AnalysisEmptyState.NoEligibleColumnsTitle")}
+                          description={t("StatisticalTestView.NoColumns")}
+                          hint={t("AnalysisEmptyState.NoEligibleColumnsHint")}
+                        />
+                      ) : (
+                        <Select
+                          value={sample.columnName}
+                          onValueChange={(value) =>
+                            handleSampleColumnChange(index, value)
+                          }
+                          placeholder={t("StatisticalTestView.SelectColumn")}
+                          disabled={sample.tableName === "" || isLoadingColumns}
+                        >
+                          {numericColumns.map((column) => (
+                            <SelectItem key={column.name} value={column.name}>
+                              {column.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                      )}
                     </FormField>
                   </div>
                 </div>
@@ -789,7 +815,8 @@ export const StatisticalTestView = ({
           onSelectType="submit"
           isLoading={isSubmitting}
         />
-      </form>
+        </form>
+      )}
     </PageLayout>
   );
 };

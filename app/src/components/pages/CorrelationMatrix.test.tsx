@@ -1,3 +1,11 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { CorrelationMethod, MissingHandlingMethod } from "@/api/model";
+import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import {
   act,
   fireEvent,
@@ -7,14 +15,6 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "@/api/endpoints";
-import { showMessageDialog } from "@/lib/dialog/message";
-import { useCurrentPageStore } from "@/stores/currentView";
-import { useTableInfosStore } from "@/stores/tableInfos";
-import { useTableListStore } from "@/stores/tableList";
-import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
-import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
-import { CorrelationMethod, MissingHandlingMethod } from "@/api/model";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -43,16 +43,22 @@ vi.mock("../../lib/utils/internal", () => ({
     isActive: true,
   }),
 }));
-vi.mock("../../hooks/useTableColumnLoader", () => ({
-  useTableColumnLoader: () => ({
-    selectedTableName: "",
-    setSelectedTableName: vi.fn(),
-    columnList: [
-      { name: "price", type: "Float64" },
-      { name: "quantity", type: "Float64" },
-    ],
-    setColumnList: vi.fn(),
+const mockTableLoader = vi.hoisted(() => ({
+  selectedTableName: "",
+  setSelectedTableName: vi.fn((tableName: string) => {
+    mockTableLoader.selectedTableName = tableName;
   }),
+  columnList: [
+    { name: "price", type: "Float64" },
+    { name: "quantity", type: "Float64" },
+  ],
+  setColumnList: vi.fn((columnList: Array<{ name: string; type: string }>) => {
+    mockTableLoader.columnList = columnList;
+  }),
+  isLoading: false,
+}));
+vi.mock("../../hooks/useTableColumnLoader", () => ({
+  useTableColumnLoader: () => ({ ...mockTableLoader }),
 }));
 
 // ---------------------------------------------------------------------------
@@ -71,6 +77,20 @@ const submitForm = async () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockTableLoader.selectedTableName = "";
+  mockTableLoader.columnList = [
+    { name: "price", type: "Float64" },
+    { name: "quantity", type: "Float64" },
+  ];
+  mockTableLoader.isLoading = false;
+  mockTableLoader.setSelectedTableName.mockImplementation((tableName: string) => {
+    mockTableLoader.selectedTableName = tableName;
+  });
+  mockTableLoader.setColumnList.mockImplementation(
+    (columnList: Array<{ name: string; type: string }>) => {
+      mockTableLoader.columnList = columnList;
+    },
+  );
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales", "costs"] });
   useTableInfosStore.setState({
@@ -88,6 +108,40 @@ beforeEach(() => {
 // Tests
 // ---------------------------------------------------------------------------
 describe("CorrelationMatrix フォーム", () => {
+  describe("empty state", () => {
+    it("テーブルが 0 件なら NoTables state を表示し、ImportDataFile に遷移できる", async () => {
+      const user = userEvent.setup();
+      useTableListStore.setState({ tableList: [] });
+
+      render(<CorrelationMatrix />);
+
+      expect(
+        screen.getByTestId("analysis-no-tables-state"),
+      ).toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", {
+          name: "AnalysisEmptyState.NoTablesAction",
+        }),
+      );
+
+      expect(useCurrentPageStore.getState().currentView).toBe(
+        "ImportDataFile",
+      );
+    });
+
+    it("対象列がないときは共通 no-columns state を表示する", () => {
+      mockTableLoader.selectedTableName = "sales";
+      mockTableLoader.columnList = [];
+
+      render(<CorrelationMatrix />);
+
+      expect(
+        screen.getByTestId("correlation-matrix-no-columns-state"),
+      ).toBeInTheDocument();
+    });
+  });
+
   describe("バリデーション", () => {
     it("テーブル未選択でサブミットするとエラーが表示される", async () => {
       render(<CorrelationMatrix />);
@@ -154,14 +208,10 @@ describe("CorrelationMatrix フォーム", () => {
         code: "OK",
         result: { tableName: "corr_result" },
       });
+      mockTableLoader.selectedTableName = "sales";
+      useTableInfosStore.setState({ tableInfos: [], activeTableName: "sales" });
       const user = userEvent.setup();
       render(<CorrelationMatrix />);
-
-      // テーブルを選択
-      const selectTrigger = screen.getByRole("combobox");
-      await user.click(selectTrigger);
-      const option = await screen.findByRole("option", { name: "sales" });
-      await user.click(option);
 
       // 出力データ名を入力
       const outputInput = screen.getByRole("textbox");
@@ -262,13 +312,10 @@ describe("CorrelationMatrix フォーム", () => {
         code: "UNEXPECTED_ERROR",
         message: "相関計算に失敗しました",
       });
+      mockTableLoader.selectedTableName = "sales";
+      useTableInfosStore.setState({ tableInfos: [], activeTableName: "sales" });
       const user = userEvent.setup();
       render(<CorrelationMatrix />);
-
-      const selectTrigger = screen.getByRole("combobox");
-      await user.click(selectTrigger);
-      const option = await screen.findByRole("option", { name: "sales" });
-      await user.click(option);
 
       const outputInput = screen.getByRole("textbox");
       await user.type(outputInput, "corr_result");
@@ -287,13 +334,10 @@ describe("CorrelationMatrix フォーム", () => {
       mockApi.createCorrelationTable.mockRejectedValue(
         new Error("ネットワークエラー"),
       );
+      mockTableLoader.selectedTableName = "sales";
+      useTableInfosStore.setState({ tableInfos: [], activeTableName: "sales" });
       const user = userEvent.setup();
       render(<CorrelationMatrix />);
-
-      const selectTrigger = screen.getByRole("combobox");
-      await user.click(selectTrigger);
-      const option = await screen.findByRole("option", { name: "sales" });
-      await user.click(option);
 
       const outputInput = screen.getByRole("textbox");
       await user.type(outputInput, "corr_result");

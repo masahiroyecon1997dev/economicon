@@ -1,3 +1,9 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { ConfidenceIntervalForm } from "@/components/organisms/Form/ConfidenceIntervalForm";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useConfidenceIntervalResultsStore } from "@/stores/confidenceIntervalResults";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableListStore } from "@/stores/tableList";
 import {
   act,
   fireEvent,
@@ -6,11 +12,6 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "@/api/endpoints";
-import { showMessageDialog } from "@/lib/dialog/message";
-import { useConfidenceIntervalResultsStore } from "@/stores/confidenceIntervalResults";
-import { useTableListStore } from "@/stores/tableList";
-import { ConfidenceIntervalForm } from "@/components/organisms/Form/ConfidenceIntervalForm";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -47,6 +48,7 @@ const mockTableLoader = vi.hoisted(() => ({
     { name: "quantity", type: "Int64" },
   ],
   setColumnList: vi.fn(),
+  isLoading: false,
 }));
 
 vi.mock("../../../hooks/useTableColumnLoader", () => ({
@@ -83,7 +85,13 @@ const CI_DETAIL_RESPONSE = {
 // ---------------------------------------------------------------------------
 beforeEach(() => {
   mockTableLoader.selectedTableName = "sales";
+  mockTableLoader.columnList = [
+    { name: "price", type: "Float64" },
+    { name: "quantity", type: "Int64" },
+  ];
+  mockTableLoader.isLoading = false;
   useConfidenceIntervalResultsStore.setState({ results: [] });
+  useCurrentPageStore.setState({ currentView: "ConfidenceIntervalView" });
   useTableListStore.setState({ tableList: ["sales", "orders"] });
 
   vi.mocked(getEconomiconAppAPI).mockReturnValue({
@@ -96,6 +104,40 @@ beforeEach(() => {
 // Tests
 // ---------------------------------------------------------------------------
 describe("ConfidenceIntervalForm", () => {
+  describe("empty state", () => {
+    it("test_noTables_showsEmptyStateAndNavigatesToImport", async () => {
+      useTableListStore.setState({ tableList: [] });
+
+      render(<ConfidenceIntervalForm onCancel={vi.fn()} />);
+
+      expect(
+        screen.getByTestId("analysis-no-tables-state"),
+      ).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(
+          screen.getByRole("button", {
+            name: "AnalysisEmptyState.NoTablesAction",
+          }),
+        );
+      });
+
+      expect(useCurrentPageStore.getState().currentView).toBe(
+        "ImportDataFile",
+      );
+    });
+
+    it("test_noEligibleColumns_showsSharedEmptyState", () => {
+      mockTableLoader.columnList = [];
+
+      render(<ConfidenceIntervalForm onCancel={vi.fn()} />);
+
+      expect(
+        screen.getByTestId("confidence-interval-no-columns-state"),
+      ).toBeInTheDocument();
+    });
+  });
+
   describe("フォームレンダリング", () => {
     it("test_render_showsDataLabel", () => {
       render(<ConfidenceIntervalForm onCancel={vi.fn()} />);
@@ -140,7 +182,7 @@ describe("ConfidenceIntervalForm", () => {
     it("test_validation_emptyTableName_showsError", async () => {
       // useTableColumnLoader の selectedTableName を空にしてフォームの defaultValue を "" にする
       mockTableLoader.selectedTableName = "";
-      useTableListStore.setState({ tableList: [] });
+      useTableListStore.setState({ tableList: ["sales"] });
       vi.mocked(getEconomiconAppAPI).mockReturnValue({
         confidenceInterval: vi.fn(),
         getAnalysisResult: vi.fn(),

@@ -1,3 +1,4 @@
+import { DescriptiveStatisticType } from "@/api/model";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { cn } from "@/lib/utils/helpers";
 import { Check, Clipboard, Loader2 } from "lucide-react";
@@ -6,12 +7,33 @@ import { useTranslation } from "react-i18next";
 
 type StatCellValue = number | string | number[] | null;
 type StatisticsMap = Record<string, Record<string, StatCellValue>>;
+type StatisticKey = DescriptiveStatisticType | string;
 
 type DescriptiveStatisticsResultProps = {
   resultId: string;
   tableName: string;
   statistics: StatisticsMap;
+  columnNameList?: string[];
+  statisticOrder?: string[];
 };
+
+const CANONICAL_STAT_ORDER: DescriptiveStatisticType[] = [
+  DescriptiveStatisticType.count,
+  DescriptiveStatisticType.null_count,
+  DescriptiveStatisticType.null_ratio,
+  DescriptiveStatisticType.mean,
+  DescriptiveStatisticType.median,
+  DescriptiveStatisticType.mode,
+  DescriptiveStatisticType.variance,
+  DescriptiveStatisticType.population_variance,
+  DescriptiveStatisticType.std_dev,
+  DescriptiveStatisticType.min,
+  DescriptiveStatisticType.max,
+  DescriptiveStatisticType.range,
+  DescriptiveStatisticType.iqr,
+  DescriptiveStatisticType.skewness,
+  DescriptiveStatisticType.kurtosis,
+];
 
 const formatStatValue = (value: StatCellValue | undefined): string => {
   if (value === null || value === undefined) return "-";
@@ -23,10 +45,59 @@ const formatStatValue = (value: StatCellValue | undefined): string => {
   return String(value);
 };
 
+const getOrderedColumns = (
+  statistics: StatisticsMap,
+  columnNameList?: string[],
+): string[] => {
+  const availableColumns = Object.keys(statistics);
+  if (!columnNameList?.length) {
+    return availableColumns;
+  }
+
+  const includedColumns = columnNameList.filter(
+    (columnName) => columnName in statistics,
+  );
+  const remainingColumns = availableColumns.filter(
+    (columnName) => !includedColumns.includes(columnName),
+  );
+
+  return [...includedColumns, ...remainingColumns];
+};
+
+const getOrderedStatisticKeys = (
+  statistics: StatisticsMap,
+  columns: string[],
+  statisticOrder?: string[],
+): StatisticKey[] => {
+  const discoveredKeys: string[] = [];
+
+  columns.forEach((columnName) => {
+    Object.keys(statistics[columnName] ?? {}).forEach((statKey) => {
+      if (!discoveredKeys.includes(statKey)) {
+        discoveredKeys.push(statKey);
+      }
+    });
+  });
+
+  const prioritizedKeys = statisticOrder?.length
+    ? statisticOrder
+    : CANONICAL_STAT_ORDER;
+  const knownKeys = prioritizedKeys.filter((statKey) =>
+    discoveredKeys.includes(statKey),
+  );
+  const remainingKeys = discoveredKeys.filter(
+    (statKey) => !knownKeys.includes(statKey),
+  );
+
+  return [...knownKeys, ...remainingKeys];
+};
+
 export const DescriptiveStatisticsResult = ({
   resultId,
   tableName,
   statistics,
+  columnNameList,
+  statisticOrder,
 }: DescriptiveStatisticsResultProps) => {
   const { t } = useTranslation();
   const [isOutputDialogOpen, setIsOutputDialogOpen] = useState(false);
@@ -34,8 +105,14 @@ export const DescriptiveStatisticsResult = ({
   const [isQuickCopying, setIsQuickCopying] = useState(false);
   const [isQuickCopied, setIsQuickCopied] = useState(false);
 
-  const columns = Object.keys(statistics);
-  const statKeys = Object.keys(statistics[columns[0]] ?? {});
+  const columns = getOrderedColumns(statistics, columnNameList);
+  const statKeys = getOrderedStatisticKeys(statistics, columns, statisticOrder);
+
+  const getStatLabel = (statKey: StatisticKey): string => {
+    const translationKey = `DescriptiveStatistics.Stat_${statKey}`;
+    const translated = t(translationKey);
+    return translated === translationKey ? statKey : translated;
+  };
 
   const handleQuickCopy = async () => {
     setIsQuickCopying(true);
@@ -99,7 +176,7 @@ export const DescriptiveStatisticsResult = ({
                     key={statKey}
                     className="whitespace-nowrap px-4 py-2.5 text-right font-medium text-brand-text-sub"
                   >
-                    {t(`DescriptiveStatistics.Stat_${statKey}`)}
+                    {getStatLabel(statKey)}
                   </th>
                 ))}
               </tr>

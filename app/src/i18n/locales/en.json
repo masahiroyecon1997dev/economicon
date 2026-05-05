@@ -260,6 +260,15 @@
     "ErrorColumnsRequired": "Please select at least 2 columns",
     "ErrorOutputNameRequired": "Please enter an output data name"
   },
+  "AnalysisEmptyState": {
+    "NoTablesTitle": "No analysis data available yet",
+    "NoTablesDescription": "Import data first to start working with this analysis screen.",
+    "NoTablesAction": "Import data",
+    "NoEligibleColumnsTitle": "No usable columns for this analysis",
+    "NoEligibleColumnsHint": "Choose another table or prepare the required columns first.",
+    "LoadingColumnsTitle": "Loading column information",
+    "LoadingColumnsDescription": "Checking which columns are available. Please wait a moment."
+  },
   "DescriptiveStatistics": {
     "Title": "Descriptive Statistics",
     "Description": "Select columns from a dataset and calculate basic statistics such as mean, variance, and more.",
@@ -282,6 +291,10 @@
     "Stat_null_count": "Null Count",
     "Stat_null_ratio": "Null Ratio",
     "Stat_population_variance": "Population Variance",
+    "Stat_min": "Min",
+    "Stat_max": "Max",
+    "Stat_skewness": "Skewness",
+    "Stat_kurtosis": "Excess Kurtosis",
     "RunCalculation": "Calculate",
     "Processing": "Processing...",
     "ResultTitle": "Results",
@@ -443,6 +456,7 @@
     "SelectData": "Select data",
     "ColumnLabel": "Target Column",
     "SelectColumn": "Select column",
+    "NoColumns": "No numeric columns available for confidence intervals",
     "StatisticTypeLabel": "Statistic Type",
     "SelectStatisticType": "Select type",
     "StatisticTypeInfoLabel": "Show statistic description",

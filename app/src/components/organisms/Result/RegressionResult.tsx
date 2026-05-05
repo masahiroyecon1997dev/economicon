@@ -2,8 +2,8 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { OutputResultFormat } from "@/api/model/outputResultFormat";
 import { RegressionOutputOptionsStatInParentheses } from "@/api/model/regressionOutputOptionsStatInParentheses";
 import {
-    ResultSection,
-    StatItem,
+  ResultSection,
+  StatItem,
 } from "@/components/molecules/Result/ResultSection";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { cn } from "@/lib/utils/helpers";
@@ -70,7 +70,7 @@ export const RegressionResult = ({
   };
 
   return (
-    <div className={cn("flex flex-col gap-4 p-4", className)}>
+    <div className={cn("flex flex-col gap-4 p-2", className)}>
       {/* 分析概要 */}
       <ResultSection title={t("RegressionResult.AnalysisSummary")}>
         {/* ── ヘッダー右端: 出力ボタン群 ── */}
