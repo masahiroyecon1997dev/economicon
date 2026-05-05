@@ -198,4 +198,47 @@ describe("WorkspaceSurface コンポーネント", () => {
       });
     });
   });
+
+  it("アクティブな work tab を閉じても他の work tab は残る", async () => {
+    const user = userEvent.setup();
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "work:JoinTable",
+          kind: "work",
+          title: "Join",
+          featureKey: "JoinTable",
+          dirty: false,
+          createdAt: 1,
+        },
+        {
+          id: "work:UnionTable",
+          kind: "work",
+          title: "Union",
+          featureKey: "UnionTable",
+          dirty: false,
+          createdAt: 2,
+        },
+      ],
+      activeTabId: "work:UnionTable",
+    });
+    useCurrentPageStore.setState({ currentView: "UnionTable" });
+
+    render(<WorkspaceSurface />);
+
+    const closeButton = screen.getAllByLabelText("Table.CloseTab")[1];
+    await user.click(closeButton);
+
+    await waitFor(() => {
+      const workTabs = useWorkspaceTabsStore
+        .getState()
+        .tabs.filter((tab) => tab.kind === "work");
+      expect(workTabs).toHaveLength(1);
+      expect(workTabs[0]).toMatchObject({
+        id: "work:JoinTable",
+        kind: "work",
+      });
+      expect(useWorkspaceTabsStore.getState().activeTabId).toBe("data:sales");
+    });
+  });
 });

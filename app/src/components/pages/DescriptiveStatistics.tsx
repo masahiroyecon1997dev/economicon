@@ -1,12 +1,10 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { DescriptiveStatisticType } from "@/api/model";
-import { OutputResultFormat } from "@/api/model/outputResultFormat";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
 import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
 import { FormField } from "@/components/molecules/Form/FormField";
-import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
@@ -14,21 +12,11 @@ import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
-import { Check, ChevronDown, Clipboard, Loader2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-// ---------------------------------------------------------------------------
-// Type assertions for the API response (statistics: unknown → StatisticsMap)
-// ---------------------------------------------------------------------------
-type StatKey = DescriptiveStatisticType;
-type StatCellValue = number | string | number[] | null;
-type StatRow = Partial<Record<StatKey, StatCellValue>>;
-type StatisticsMap = Record<string, StatRow>;
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
 const ALL_STAT_TYPES: DescriptiveStatisticType[] = [
   DescriptiveStatisticType.mean,
   DescriptiveStatisticType.median,
@@ -43,85 +31,26 @@ const ALL_STAT_TYPES: DescriptiveStatisticType[] = [
   DescriptiveStatisticType.population_variance,
 ];
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-function formatStatValue(val: StatCellValue | undefined): string {
-  if (val === null || val === undefined) return "—";
-  if (Array.isArray(val)) return val.join(", ");
-  if (typeof val === "number") {
-    if (Number.isInteger(val)) return val.toLocaleString();
-    return val.toFixed(4);
-  }
-  return String(val);
-}
-
 type FormErrors = {
   table?: string;
   columns?: string;
   stats?: string;
 };
 
-type ResultSnapshot = {
-  resultId: string;
-  data: StatisticsMap;
-  cols: string[];
-  stats: DescriptiveStatisticType[];
-};
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 export const DescriptiveStatistics = () => {
   const { t } = useTranslation();
-  const tableList = useTableListStore((s) => s.tableList);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const tableList = useTableListStore((state) => state.tableList);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
 
   const [checkedCols, setCheckedCols] = useState<Set<string>>(new Set());
   const [checkedStats, setCheckedStats] = useState<
     Set<DescriptiveStatisticType>
   >(new Set(ALL_STAT_TYPES));
-  const resultRef = useRef<HTMLDivElement>(null);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [result, setResult] = useState<ResultSnapshot | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isOutputDialogOpen, setIsOutputDialogOpen] = useState(false);
-  const [outputDialogSessionKey, setOutputDialogSessionKey] = useState(0);
-  const [isQuickCopying, setIsQuickCopying] = useState(false);
-  const [isQuickCopied, setIsQuickCopied] = useState(false);
-
-  const handleQuickCopy = async () => {
-    if (!result) return;
-    setIsQuickCopying(true);
-    try {
-      const api = getEconomiconAppAPI();
-      const resp = await api.outputResult({
-        resultType: "descriptive_statistics",
-        resultIds: [result.resultId],
-        format: OutputResultFormat.markdown,
-        options: {
-          includeResultName: false,
-          includeTableName: false,
-        },
-      });
-      if (resp.code === "OK" && resp.result) {
-        await navigator.clipboard.writeText(resp.result.content);
-        setIsQuickCopied(true);
-        setTimeout(() => setIsQuickCopied(false), 2000);
-      }
-    } catch {
-      // silent — クリップボード失敗は無視
-    } finally {
-      setIsQuickCopying(false);
-    }
-  };
-
-  const openOutputDialog = () => {
-    setOutputDialogSessionKey((prev) => prev + 1);
-    setIsOutputDialogOpen(true);
-  };
-
   const [statsOpen, setStatsOpen] = useState(true);
+
   const {
     selectedTableName: selectedTable,
     setSelectedTableName,
@@ -134,12 +63,14 @@ export const DescriptiveStatistics = () => {
     },
   });
 
-  /* ── Toggle helpers ──────────────────────────────────────── */
   const toggleCol = (name: string) => {
     setCheckedCols((prev) => {
       const next = new Set(prev);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
       return next;
     });
   };
@@ -147,21 +78,26 @@ export const DescriptiveStatistics = () => {
   const toggleStat = (stat: DescriptiveStatisticType) => {
     setCheckedStats((prev) => {
       const next = new Set(prev);
-      if (next.has(stat)) next.delete(stat);
-      else next.add(stat);
+      if (next.has(stat)) {
+        next.delete(stat);
+      } else {
+        next.add(stat);
+      }
       return next;
     });
   };
 
-  /* ── Submit ──────────────────────────────────────────────── */
   const handleSubmit = async () => {
     const newErrors: FormErrors = {};
-    if (!selectedTable)
+    if (!selectedTable) {
       newErrors.table = t("DescriptiveStatistics.ErrorDataRequired");
-    if (checkedCols.size === 0)
+    }
+    if (checkedCols.size === 0) {
       newErrors.columns = t("DescriptiveStatistics.ErrorColumnsRequired");
-    if (checkedStats.size === 0)
+    }
+    if (checkedStats.size === 0) {
       newErrors.stats = t("DescriptiveStatistics.ErrorStatsRequired");
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -170,35 +106,37 @@ export const DescriptiveStatistics = () => {
     setErrors({});
 
     const orderedCols = columns
-      .map((c) => c.name)
-      .filter((n) => checkedCols.has(n));
-    const orderedStats = ALL_STAT_TYPES.filter((s) => checkedStats.has(s));
+      .map((column) => column.name)
+      .filter((name) => checkedCols.has(name));
+    const orderedStats = ALL_STAT_TYPES.filter((stat) =>
+      checkedStats.has(stat),
+    );
 
     setIsCalculating(true);
     try {
       const api = getEconomiconAppAPI();
-      const resp = await api.descriptiveStatistics({
+      const response = await api.descriptiveStatistics({
         tableName: selectedTable,
         columnNameList: orderedCols,
         statistics: orderedStats,
       });
-      if (resp.code === "OK") {
-        const { resultId } = resp.result;
-        const detailResp = await api.getAnalysisResult(resultId);
-        if (detailResp.code === "OK") {
-          const data = detailResp.result.resultData.statistics as StatisticsMap;
-          setResult({ resultId, data, cols: orderedCols, stats: orderedStats });
+
+      if (response.code === "OK" && response.result) {
+        const detailResponse = await api.getAnalysisResult(
+          response.result.resultId,
+        );
+        if (detailResponse.code === "OK") {
+          openResultTab(detailResponse.result);
           await useAnalysisResultsStore.getState().fetchSummaries();
-          setTimeout(
-            () =>
-              resultRef.current?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              }),
-            50,
-          );
+          setCurrentView("DataPreview");
+          return;
         }
       }
+
+      await showMessageDialog(
+        t("DescriptiveStatistics.ErrorCalculation"),
+        "error",
+      );
     } catch {
       await showMessageDialog(
         t("DescriptiveStatistics.ErrorCalculation"),
@@ -209,24 +147,21 @@ export const DescriptiveStatistics = () => {
     }
   };
 
-  /* ── Render ──────────────────────────────────────────────── */
   return (
     <PageLayout
       title={t("DescriptiveStatistics.Title")}
       description={t("DescriptiveStatistics.Description")}
     >
-      <div className="app-scrollbar flex-1 overflow-y-auto min-h-0 space-y-4 pb-2">
-        {/* ─── 1. Table selection ────────────────────────────── */}
+      <div className="app-scrollbar flex-1 min-h-0 space-y-4 overflow-y-auto pb-2">
         <FormField
           label={t("DescriptiveStatistics.DataLabel")}
           error={errors.table}
         >
           <Select
             value={selectedTable}
-            onValueChange={(v) => {
-              setSelectedTableName(v);
+            onValueChange={(value) => {
+              setSelectedTableName(value);
               setCheckedCols(new Set());
-              setResult(null);
               setErrors({});
             }}
             placeholder={t("DescriptiveStatistics.SelectData")}
@@ -239,7 +174,6 @@ export const DescriptiveStatistics = () => {
           </Select>
         </FormField>
 
-        {/* ─── 2. Column selection ───────────────────────────── */}
         {selectedTable && (
           <FormField label={t("DescriptiveStatistics.ColumnsLabel")}>
             {isLoadingCols ? (
@@ -256,12 +190,17 @@ export const DescriptiveStatistics = () => {
                   selectAllLabel={t("DescriptiveStatistics.SelectAll")}
                   deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
                   onSelectAll={() =>
-                    setCheckedCols(new Set(columns.map((c) => c.name)))
+                    setCheckedCols(
+                      new Set(columns.map((column) => column.name)),
+                    )
                   }
                   onDeselectAll={() => setCheckedCols(new Set())}
                 />
                 <CheckboxTagGroup
-                  items={columns.map((c) => ({ value: c.name, label: c.name }))}
+                  items={columns.map((column) => ({
+                    value: column.name,
+                    label: column.name,
+                  }))}
                   checked={checkedCols}
                   onToggle={toggleCol}
                   error={errors.columns}
@@ -271,12 +210,11 @@ export const DescriptiveStatistics = () => {
           </FormField>
         )}
 
-        {/* ─── 3. Statistics selection (accordion) ───────────────────── */}
         <div className="space-y-1">
           <button
             type="button"
-            onClick={() => setStatsOpen((v) => !v)}
-            className="flex w-full items-center justify-between py-0.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-accent transition-colors"
+            onClick={() => setStatsOpen((prev) => !prev)}
+            className="flex w-full items-center justify-between py-0.5 text-sm font-medium text-gray-700 transition-colors hover:text-brand-accent dark:text-gray-300"
           >
             <span>{t("DescriptiveStatistics.StatisticsLabel")}</span>
             <ChevronDown
@@ -295,126 +233,25 @@ export const DescriptiveStatistics = () => {
                 onDeselectAll={() => setCheckedStats(new Set())}
               />
               <CheckboxTagGroup
-                items={ALL_STAT_TYPES.map((s) => ({
-                  value: s,
-                  label: t(`DescriptiveStatistics.Stat_${s}`),
+                items={ALL_STAT_TYPES.map((stat) => ({
+                  value: stat,
+                  label: t(`DescriptiveStatistics.Stat_${stat}`),
                 }))}
                 checked={checkedStats as Set<string>}
-                onToggle={(v) => toggleStat(v as DescriptiveStatisticType)}
+                onToggle={(value) =>
+                  toggleStat(value as DescriptiveStatisticType)
+                }
                 error={errors.stats}
                 columns={3}
               />
             </div>
           )}
           {!statsOpen && errors.stats && (
-            <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">
+            <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">
               {errors.stats}
             </p>
           )}
         </div>
-
-        {/* ─── 4. Submit ─────────────────────────────────────── */}
-        {/* ActionButtonBar は最下部に移動済み */}
-
-        {/* ─── 5. Result table ───────────────────────────────── */}
-        {result && (
-          <div ref={resultRef} className="space-y-2 pb-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-brand-text-main">
-                {t("DescriptiveStatistics.ResultTitle")}
-              </h2>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => void handleQuickCopy()}
-                  disabled={isQuickCopying}
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
-                    "border border-gray-300 dark:border-gray-600",
-                    isQuickCopied
-                      ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                      : "bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
-                    "disabled:cursor-not-allowed disabled:opacity-50",
-                  )}
-                  title={t("DescriptiveStatistics.QuickCopyMd")}
-                  data-testid="ds-quick-copy-btn"
-                >
-                  {isQuickCopying ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : isQuickCopied ? (
-                    <Check className="h-3.5 w-3.5" />
-                  ) : (
-                    <Clipboard className="h-3.5 w-3.5" />
-                  )}
-                  MD
-                </button>
-                <button
-                  type="button"
-                  onClick={openOutputDialog}
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
-                    "border border-gray-300 dark:border-gray-600",
-                    "bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
-                  )}
-                  data-testid="ds-output-dialog-btn"
-                >
-                  {t("DescriptiveStatistics.OutputDialog")}
-                </button>
-              </div>
-            </div>
-            <div className="app-scrollbar overflow-x-auto rounded-lg border border-border-color">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="bg-brand-secondary border-b border-border-color">
-                    <th className="px-4 py-2.5 text-left font-medium text-brand-text-sub whitespace-nowrap sticky left-0 bg-brand-secondary">
-                      {t("DescriptiveStatistics.Column")}
-                    </th>
-                    {result.stats.map((stat) => (
-                      <th
-                        key={stat}
-                        className="px-4 py-2.5 text-right font-medium text-brand-text-sub whitespace-nowrap"
-                      >
-                        {t(`DescriptiveStatistics.Stat_${stat}`)}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.cols.map((col, i) => (
-                    <tr
-                      key={col}
-                      className={cn(
-                        "border-b border-border-color last:border-0 transition-colors",
-                        i % 2 === 0
-                          ? "bg-white dark:bg-brand-primary"
-                          : "bg-brand-secondary",
-                      )}
-                    >
-                      <td
-                        className={cn(
-                          "px-4 py-2 font-medium text-brand-text-main sticky left-0 whitespace-nowrap",
-                          i % 2 === 0
-                            ? "bg-white dark:bg-brand-primary"
-                            : "bg-brand-secondary",
-                        )}
-                      >
-                        {col}
-                      </td>
-                      {result.stats.map((stat) => (
-                        <td
-                          key={stat}
-                          className="px-4 py-2 text-right font-mono text-brand-text-main tabular-nums"
-                        >
-                          {formatStatValue(result.data[col]?.[stat])}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
       <ActionButtonBar
         cancelText={t("Common.Cancel")}
@@ -428,16 +265,6 @@ export const DescriptiveStatistics = () => {
         disabled={isCalculating}
         isLoading={isCalculating}
       />
-      {result && (
-        <OutputResultDialog
-          key={`${result.resultId}:${outputDialogSessionKey}`}
-          open={isOutputDialogOpen}
-          onOpenChange={setIsOutputDialogOpen}
-          resultKind="descriptive_statistics"
-          resultId={result.resultId}
-          title={selectedTable}
-        />
-      )}
     </PageLayout>
   );
 };

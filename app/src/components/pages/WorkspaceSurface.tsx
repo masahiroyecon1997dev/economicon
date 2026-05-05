@@ -94,6 +94,7 @@ export const WorkspaceSurface = () => {
     null,
   );
   const previousViewRef = useRef(currentView);
+  const suppressWorkTabCleanupRef = useRef(false);
   const workTabContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -113,6 +114,11 @@ export const WorkspaceSurface = () => {
   useEffect(() => {
     const previousView = previousViewRef.current;
     previousViewRef.current = currentView;
+
+    if (suppressWorkTabCleanupRef.current) {
+      suppressWorkTabCleanupRef.current = false;
+      return;
+    }
 
     if (
       activeTab?.kind !== "work" ||
@@ -201,6 +207,10 @@ export const WorkspaceSurface = () => {
         t("WorkspaceSurface.CloseDirtyWorkTabMessage"),
       );
       if (!confirmed) return;
+    }
+
+    if (tab.kind === "work" && activeTabId === tabId) {
+      suppressWorkTabCleanupRef.current = true;
     }
 
     closeTab(tabId);
