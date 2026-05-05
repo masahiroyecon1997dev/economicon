@@ -411,3 +411,10 @@ msgstr "{test_type}（{n}群） #{seq}"
 #, python-brace-format
 msgid "{model_type}: {dependent} #{seq}"
 msgstr "{model_type}: {dependent} #{seq}"
+
+msgid "An unexpected error occurred during group statistics table creation processing"
+msgstr "グループ別統計量テーブルの作成処理中に予期しないエラーが発生しました"
+
+#, python-brace-format
+msgid "The following columns cannot be used as group keys because they are floating-point type: {}"
+msgstr "以下の列は浮動小数点型のためグループキーとして使用できません: {}"

@@ -413,3 +413,10 @@ msgstr "{test_type} ({n}-sample) #{seq}"
 #, python-brace-format
 msgid "{model_type}: {dependent} #{seq}"
 msgstr "{model_type}: {dependent} #{seq}"
+
+msgid "An unexpected error occurred during group statistics table creation processing"
+msgstr "An unexpected error occurred during group statistics table creation processing"
+
+#, python-brace-format
+msgid "The following columns cannot be used as group keys because they are floating-point type: {}"
+msgstr "The following columns cannot be used as group keys because they are floating-point type: {}"

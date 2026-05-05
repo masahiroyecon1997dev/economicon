@@ -7,6 +7,8 @@ from economicon.schemas import (
     ConfidenceIntervalResult,
     CreateCorrelationTableRequestBody,
     CreateCorrelationTableResult,
+    CreateGroupStatisticsTableRequestBody,
+    CreateGroupStatisticsTableResult,
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticsResult,
     StatisticalTestRequestBody,
@@ -23,6 +25,9 @@ from economicon.services.statistics.confidence_interval import (
 )
 from economicon.services.statistics.create_correlation_table import (
     CreateCorrelationTable,
+)
+from economicon.services.statistics.create_group_statistics_table import (
+    CreateGroupStatisticsTable,
 )
 from economicon.services.statistics.descriptive_statistics import (
     DescriptiveStatistics,
@@ -171,6 +176,42 @@ async def statistical_test(
         処理結果
     """
     api = StatisticalTest(body, tables_store, result_store)
+    result = run_operation(api)
+
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.post(
+    "/create-group-statistics-table",
+    response_model=SuccessResponse[CreateGroupStatisticsTableResult],
+)
+async def create_group_statistics_table(
+    request: Request,
+    body: CreateGroupStatisticsTableRequestBody,
+    tables_store: TablesStoreDep,
+):
+    """GroupBy 統計テーブルを作成するエンドポイント
+
+    指定されたグループキーでグループ化し、各列の記述統計を計算して
+    新しいテーブルとして保存します。
+
+    Parameters
+    ----------
+    request : Request
+        FastAPI のリクエストオブジェクト
+    body : CreateGroupStatisticsTableRequestBody
+        リクエストボディ
+    tables_store : TablesStoreDep
+        テーブルストア依存性
+
+    Returns
+    -------
+    JSONResponse
+        処理結果（新規作成されたテーブル名）
+    """
+    api = CreateGroupStatisticsTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(

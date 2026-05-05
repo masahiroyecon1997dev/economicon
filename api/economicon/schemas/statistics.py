@@ -538,3 +538,101 @@ class StatisticalTestResult(BaseResult):
             "詳細は GET /api/analysis/results/{resultId} で取得可能。"
         ),
     )
+
+
+# ---------------------------------------------------------------------------
+# GroupBy 統計テーブル作成
+# ---------------------------------------------------------------------------
+
+
+class CreateGroupStatisticsTableRequestBody(BaseRequest):
+    """GroupBy 統計テーブル作成リクエスト"""
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            title="Table Name",
+            description="集計対象の元テーブル名。",
+        ),
+    ]
+    group_by_columns: Annotated[
+        list[ColumnName],
+        Field(
+            title="Group By Columns",
+            description=(
+                "グループ化キーとする列名のリスト。"
+                "浮動小数点型（Float32/Float64）の列は指定不可。"
+            ),
+            min_length=1,
+        ),
+    ]
+    stat_columns: Annotated[
+        list[ColumnName],
+        Field(
+            title="Stat Columns",
+            description=(
+                "統計量を計算する対象列名のリスト。"
+                "groupByColumns との重複は不可。"
+            ),
+            min_length=1,
+        ),
+    ]
+    statistics: Annotated[
+        list[DescriptiveStatisticType],
+        Field(
+            title="Statistics",
+            description=(
+                "計算する統計量のリスト。"
+                "（mean: 平均、median: 中央値、mode: 最頻値、"
+                "variance: 不偏分散、std_dev: 標準偏差、"
+                "range: 範囲、iqr: 四分位数範囲、"
+                "count: 有効サンプル数、null_count: null数、"
+                "null_ratio: null割合、population_variance: 母分散、"
+                "min: 最小値、max: 最大値、"
+                "skewness: 歪度、kurtosis: 超過尖度）"
+            ),
+            min_length=1,
+        ),
+    ]
+    new_table_name: Annotated[
+        TableName,
+        Field(
+            title="New Table Name",
+            description="結果を格納する新規テーブル名。",
+        ),
+    ]
+
+    @field_validator("statistics", mode="before")
+    @classmethod
+    def coerce_group_statistics(cls, v: Any) -> Any:
+        """JSON文字列をDescriptiveStatisticTypeに変換するfield_validator"""
+        if not isinstance(v, list):
+            return v
+        result = []
+        for item in v:
+            if isinstance(item, DescriptiveStatisticType):
+                result.append(item)
+            elif isinstance(item, str):
+                try:
+                    result.append(DescriptiveStatisticType(item))
+                except ValueError:
+                    valid = ", ".join(
+                        e.value for e in DescriptiveStatisticType
+                    )
+                    raise PydanticCustomError(
+                        "literal_error",
+                        "statistics must be one of: {expected}",
+                        {"expected": valid},
+                    ) from None
+            else:
+                result.append(item)
+        return result
+
+
+class CreateGroupStatisticsTableResult(BaseResult):
+    """GroupBy 統計テーブル作成レスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="新規作成された GroupBy 統計テーブルの名前。",
+    )
