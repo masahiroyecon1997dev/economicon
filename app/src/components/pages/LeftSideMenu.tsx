@@ -2,6 +2,7 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import type { AnalysisResultDetail } from "@/api/model";
 import { SectionHeading } from "@/components/atoms/List/SectionHeading";
 import { TableNav } from "@/components/molecules/List/TableNav";
+import type { OutputResultDialogTargetType } from "@/components/organisms/Dialog/OutputResultDialog";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { showMessageDialog } from "@/lib/dialog/message";
@@ -41,22 +42,7 @@ type OutputSupportedType =
   | "statistical_test"
   | "regression";
 
-type OutputTarget =
-  | {
-      id: string;
-      type:
-        | "descriptive_statistics"
-        | "confidence_interval"
-        | "statistical_test";
-      title: string;
-    }
-  | {
-      id: string;
-      type: "regression";
-      title: string;
-      regressionResult: LinearRegressionResultType;
-    }
-  | null;
+type OutputTarget = OutputResultDialogTargetType | null;
 
 export const LeftSideMenu = () => {
   const { t } = useTranslation();
@@ -217,23 +203,49 @@ export const LeftSideMenu = () => {
     title: string,
   ) => {
     if (type !== "regression") {
-      setOutputTarget({ id, type, title });
+      setOutputTarget({ resultKind: type, resultId: id, title });
       return;
     }
 
     try {
       const response = await getEconomiconAppAPI().getAnalysisResult(id);
       setOutputTarget({
-        id,
-        type,
-        title,
-        regressionResult: toRegressionResult(response.result),
+        resultKind: type,
+        result: toRegressionResult(response.result),
       });
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
         extractApiErrorMessage(error, t("Error.UnexpectedError")),
       );
+    }
+  };
+
+  const renderOutputDialog = () => {
+    if (!outputTarget) return null;
+
+    switch (outputTarget.resultKind) {
+      case "regression":
+        return (
+          <OutputResultDialog
+            open
+            onOpenChange={(open) => !open && setOutputTarget(null)}
+            resultKind="regression"
+            result={outputTarget.result}
+          />
+        );
+      case "descriptive_statistics":
+      case "confidence_interval":
+      case "statistical_test":
+        return (
+          <OutputResultDialog
+            open
+            onOpenChange={(open) => !open && setOutputTarget(null)}
+            resultKind={outputTarget.resultKind}
+            resultId={outputTarget.resultId}
+            title={outputTarget.title}
+          />
+        );
     }
   };
 
@@ -400,34 +412,7 @@ export const LeftSideMenu = () => {
         )}
       </div>
 
-      {outputTarget?.type === "regression" && (
-        <OutputResultDialog
-          open={outputTarget !== null}
-          onOpenChange={(open) => !open && setOutputTarget(null)}
-          resultKind="regression"
-          result={outputTarget.regressionResult}
-        />
-      )}
-
-      {outputTarget?.type === "descriptive_statistics" && (
-        <OutputResultDialog
-          open={outputTarget !== null}
-          onOpenChange={(open) => !open && setOutputTarget(null)}
-          resultKind="descriptive_statistics"
-          resultId={outputTarget.id}
-          title={outputTarget.title}
-        />
-      )}
-
-      {outputTarget?.type === "confidence_interval" && (
-        <OutputResultDialog
-          open={outputTarget !== null}
-          onOpenChange={(open) => !open && setOutputTarget(null)}
-          resultKind="confidence_interval"
-          resultId={outputTarget.id}
-          title={outputTarget.title}
-        />
-      )}
+      {renderOutputDialog()}
     </aside>
   );
 };

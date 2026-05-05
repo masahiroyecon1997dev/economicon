@@ -1,5 +1,6 @@
 import type { AnalysisResultDetail } from "@/api/model";
 import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnalysisResultDialog";
+import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
 import { Calculation } from "@/components/pages/Calculation";
@@ -8,7 +9,6 @@ import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
 import { JoinTable } from "@/components/pages/JoinTable";
-import { Regression } from "@/components/pages/RegressionView";
 import { StatisticalTestView } from "@/components/pages/StatisticalTestView";
 import { UnionTable } from "@/components/pages/UnionTable";
 import { isWorkFeatureKey } from "@/constants/workspaceTabs";
@@ -29,7 +29,10 @@ import { useTranslation } from "react-i18next";
 
 type StaticWorkFeatureKey = Exclude<
   WorkFeatureKey,
-  "CorrelationMatrix" | "DescriptiveStatistics" | "StatisticalTestView"
+  | "CorrelationMatrix"
+  | "DescriptiveStatistics"
+  | "StatisticalTestView"
+  | "LinearRegressionForm"
 >;
 
 const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
@@ -38,7 +41,6 @@ const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
   CreateSimulationDataTable: <CreateSimulationDataTable />,
   CalculationView: <Calculation />,
   ConfidenceIntervalView: <ConfidenceIntervalView />,
-  LinearRegressionForm: <Regression />,
 };
 
 const findLastNonWorkTab = (tabs: WorkspaceTab[], excludedId: string) => {
@@ -265,6 +267,10 @@ export const WorkspaceSurface = () => {
           onCancel={() => void handleCloseTab(tab.id)}
         />
       );
+    }
+
+    if (tab.featureKey === "LinearRegressionForm") {
+      return <LinearRegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
     }
 
     const staticFeatureKey = tab.featureKey as StaticWorkFeatureKey;

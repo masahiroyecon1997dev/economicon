@@ -147,7 +147,6 @@ const mockApi = {
 };
 
 const onCancel = vi.fn();
-const onAnalysisComplete = vi.fn();
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -213,10 +212,7 @@ describe("LinearRegressionForm", () => {
 
     it("説明変数が0件でサブミット → ExplanatoryVariablesRequiredエラーが表示される", async () => {
       render(
-        <LinearRegressionForm
-          onCancel={onCancel}
-          onAnalysisComplete={onAnalysisComplete}
-        />,
+        <LinearRegressionForm onCancel={onCancel} />,
       );
 
       // 目的変数のみ設定して説明変数は空のまま
@@ -247,12 +243,7 @@ describe("LinearRegressionForm", () => {
       });
 
       const user = userEvent.setup();
-      render(
-        <LinearRegressionForm
-          onCancel={onCancel}
-          onAnalysisComplete={onAnalysisComplete}
-        />,
-      );
+      render(<LinearRegressionForm onCancel={onCancel} />);
 
       const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
         name: "add-variable",
@@ -263,7 +254,7 @@ describe("LinearRegressionForm", () => {
       await submitForm();
 
       await waitFor(() => {
-        expect(onAnalysisComplete).toHaveBeenCalledWith(0);
+        expect(mockApi.getAnalysisResult).toHaveBeenCalledWith("r-001");
       });
       expect(vi.mocked(showMessageDialog)).not.toHaveBeenCalled();
       expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");

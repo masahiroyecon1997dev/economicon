@@ -20,7 +20,7 @@
 - 分析結果の表示ガワは AnalysisResultPanel / AnalysisResultPreview に統一する。
 - descriptive statistics / confidence interval / statistical test は result tab 表示を正とする。
 - Basic Statistics / Correlation Matrix / Confidence Interval / Hypothesis Test は基本分析メニューから work tab として開く。
-- 既存の RegressionView 内部タブは、この分析画面タブ統一の現在スコープには含めない。必要なら次フェーズで別件として扱う。
+- 回帰分析の workspace 導線は RegressionView を介さず、LinearRegressionForm の work tab と result tab に統一する。
 
 ### 2. タブ操作
 
@@ -62,6 +62,85 @@
 - statistics は列名ごとの辞書を維持し、追加統計量を同じレベルで返す。
 
 想定 shape:
+```json
+{
+	"tableName": "sales",
+	"columnNameList": ["revenue", "employees"],
+	"statisticOrder": [
+		"count",
+		"mean",
+		"std_dev",
+		"min",
+		"max",
+		"skewness",
+		"kurtosis"
+	],
+	"statistics": {
+		"revenue": {
+			"count": 120,
+			"mean": 103.2,
+			"std_dev": 14.8,
+			"min": 74.0,
+			"max": 151.0,
+			"skewness": 0.41,
+			"kurtosis": -0.62
+		}
+	}
+}
+```
+
+### フロントエンドへの影響
+
+- Orval 生成 enum に min / max / skewness / kurtosis を追加する。
+- DescriptiveStatisticsResult は statisticOrder 優先で列順を描画する。
+- i18n に Stat_min / Stat_max / Stat_skewness / Stat_kurtosis を追加する。
+
+## UI 具体仕様
+
+### DescriptiveStatisticsResult の表示順
+
+- 行方向の列順は resultData.columnNameList を最優先で使う。
+- resultData.columnNameList がない旧結果では statistics のキー順を使う。
+- 列方向の統計量順は resultData.statisticOrder を最優先で使う。
+- resultData.statisticOrder がない旧結果では、次の canonical order を使う。
+
+canonical order:
+
+1. count
+2. null_count
+3. null_ratio
+4. mean
+5. median
+6. mode
+7. variance
+8. population_variance
+9. std_dev
+10. min
+11. max
+12. range
+13. iqr
+14. skewness
+15. kurtosis
+
+- canonical order にない将来の統計量キーは、既知キーの後ろに API から来た順で追加表示する。
+- テーブル描画時は、表示対象の統計量キーを 1 列目の辞書構造から推測しない。resultData.statisticOrder または canonical order で明示的に決める。
+- 古い resultData でも列を欠落させないことを優先する。順序が不明でも、statistics 内に存在するキーはすべて描画対象に含める。
+
+### DescriptiveStatisticsResult の i18n
+
+- 統計量ラベルは DescriptiveStatistics.Stat_<statKey> に統一する。
+- 追加キーは次で固定する。
+- ja: Stat_min=最小値、Stat_max=最大値、Stat_skewness=歪度、Stat_kurtosis=超過尖度
+- en: Stat_min=Min、Stat_max=Max、Stat_skewness=Skewness、Stat_kurtosis=Excess Kurtosis
+- kurtosis は API の excess kurtosis と表示文言を一致させるため、英語は Kurtosis ではなく Excess Kurtosis を使う。
+- 翻訳キーが存在しない未知の統計量は、表示崩れを避けるため statKey の生値をヘッダーに出してよい。翻訳未定義で列自体を消さない。
+
+### 互換性の扱い
+
+- 新規に保存される descriptive_statistics 結果は、columnNameList と statisticOrder を常に持つ前提でよい。
+- 既存の保存済み結果タブや import 済み結果は、columnNameList / statisticOrder が欠ける可能性を考慮して描画する。
+- 結果表示コンポーネント側で migration は行わず、描画時フォールバックで吸収する。
+
 ### 分析画面 empty state 仕様
 
 - Basic Statistics / Correlation Matrix / Confidence Interval / Hypothesis Test の 4 画面は、NoTables / LoadingColumns / NoEligibleColumns を共通レイアウトで表示する。
@@ -77,87 +156,18 @@
 - 対象列なし: 選択テーブルには必要な列がないことを明示し、別テーブル選択または前処理を案内する。
 - 文言は AnalysisEmptyState を共通骨格とし、画面差分は各画面キーの detail/hint に閉じ込める。
 
-- 1 は画面横断で同じ見た目、同じ文言構造、同じ誘導アクションに揃える。
-- 2 は画面ごとに条件が違うため本文は個別化してよいが、レイアウト・トーン・補助説明の出し方は共通化する。
-- empty state の文言は、単なる否定文だけで終わらせず、次に何をすればよいかを 1 文で示す。
-- この整理ではまだ全画面共通コンポーネント化を必須にしない。まず見た目と文言ルールを揃え、差分が固まった段階で共通化を判断する。
+### 回帰分析 work tab 方針
 
-### 4 画面の現状棚卸し
+- 現行の workspace タブ導線では、LinearRegressionForm の work tab は WorkspaceSurface から直接フォーム本体を描画する。
+- 回帰分析の成功後は、RegressionView 内部タブに切り替えず、他分析と同じく result tab を開いて DataPreview に戻す。
+- RegressionView コンポーネントは削除し、回帰分析の導線を workspace タブへ一本化する。
 
-1. Basic Statistics
+### OutputResultDialog 方針
 
-- ワークスペースにテーブルが 0 件なら、共通 NoTables empty state を表示して ImportDataFile へ誘導する。
-- テーブル未選択時は列エリア自体を出さず、空状態メッセージは出していない。
-- テーブル選択後は LoadingColumns と NoColumns をテキストで表示する。
-- 初期選択統計量は全選択ではなく、count / mean / median / std_dev / min / max の標準セットを使う。
-
-2. Correlation Matrix
-
-- ワークスペースにテーブルが 0 件なら、共通 NoTables empty state を表示して ImportDataFile へ誘導する。
-- テーブル未選択時は列ペイン内に SelectData をプレースホルダ風テキストで出す。
-- テーブル選択後に対象列が 0 件だと NoColumns を列ペイン内に表示する。
-
-3. Confidence Interval
-
-- ワークスペースにテーブルが 0 件なら、共通 NoTables empty state を表示して ImportDataFile へ誘導する。
-- テーブル未選択時の専用 empty state はなく、Select のプレースホルダのみ。
-- 列が 0 件でも NoColumns や補助説明は出ず、列 Select が disabled になるだけ。
-- LoadingColumns 相当の表示も現状は持っていない。
-
-4. Hypothesis Test
-
-- ワークスペースにテーブルが 0 件なら、共通 NoTables empty state を表示して ImportDataFile へ誘導する。
-- サンプルごとに table / column を持つため、空状態が行単位に分散している。
-- テーブル未選択時の専用 empty state はなく、各 Select のプレースホルダのみ。
-- テーブル選択後に数値列が 0 件だと、対象列の下に NoColumns を補助文として出す。
-
-### empty state の共通キー案
-
-- 名前空間は仮で AnalysisEmptyState とする。
-- まずは 4 画面共通で次の骨格キーを持つ。
-
-1. AnalysisEmptyState.NoTablesTitle
-2. AnalysisEmptyState.NoTablesDescription
-3. AnalysisEmptyState.NoTablesAction
-4. AnalysisEmptyState.NoEligibleColumnsTitle
-5. AnalysisEmptyState.NoEligibleColumnsDescription
-6. AnalysisEmptyState.NoEligibleColumnsHint
-7. AnalysisEmptyState.LoadingColumns
-
-- NoTables 系は「分析対象データがまだない」状態を表す共通キーとし、画面別に言い換えない。
-- NoEligibleColumns 系はレイアウト骨格を共通化するためのベース文言として使い、どの条件を満たしていないかは画面個別キーで補足する。
-- LoadingColumns は Basic Statistics の既存キーを起点に、他画面でも同じトーンへ寄せる候補とする。
-
-### empty state の画面個別キー案
-
-- 画面ごとの差は「必要列の条件説明」だけに寄せる。
-- 個別キーは仮で <Screen>.EmptyState.\* に寄せる。
-
-1. DescriptiveStatistics.EmptyState.NoEligibleColumnsDetail
-2. CorrelationMatrix.EmptyState.NoEligibleColumnsDetail
-3. ConfidenceIntervalView.EmptyState.NoEligibleColumnsDetail
-4. StatisticalTestView.EmptyState.NoEligibleColumnsDetail
-
-- Basic Statistics は「このテーブルに集計可能な列がありません。別のテーブルを選ぶか、前処理で対象列を追加してください。」を基準文とする。
-- Correlation Matrix は「このテーブルに相関計算に必要な数値列がありません。」を基準文とする。
-- Confidence Interval は「このテーブルに信頼区間を計算できる列がありません。」を基準文とする。
-- Hypothesis Test は「このテーブルに検定に使える数値列がありません。」を基準文とする。
-- Hypothesis Test はサンプル行ごとの文脈があるため、必要なら SampleRowNoEligibleColumnsDetail のような派生キーを追加してよい。
-
-### 導入順の提案
-
-1. Basic Statistics / Correlation Matrix の NoEligibleColumns を共通レイアウトへ寄せる。
-2. Confidence Interval / Hypothesis Test に不足している NoEligibleColumns と LoadingColumns の表示を追加する。
-3. 最後に key 名の整理と共通コンポーネント化の要否を判断する。
-
-### empty state 文言ルール
-
-- データ未投入: ワークスペースに分析対象データがないことを明示し、ファイル取込またはサンプルデータ準備へ誘導する。
-- 対象列なし: 選択テーブルには必要な列がないことを明示し、別テーブル選択または前処理を案内する。
-- 文言は NoData, NoColumns, EmptyState のようなキーの乱立を避け、画面共通の骨格に寄せて整理する。
-- 次の UI 整理では、各画面の空状態を棚卸しして、共通キー候補と画面個別キー候補を分けて定義する。
+- OutputResultDialog は resultKind の discriminated union を入力とし、switch ベースで regression と non-regression を分岐する。
+- non-regression 系の output payload は resultKind ごとの helper で一元化する。
+- LeftSideMenu からの出力導線も同じ union shape に寄せ、descriptive statistics / confidence interval / statistical test / regression を同じ方法で開く。
 
 ## 未修正 backlog
 
-- [pending] OutputResultDialog の resultKind 分岐を switch ベースへ整理し、非回帰系の見通しを上げる。
-- [pending] 詳細オプションが多い分析画面は、初期表示をコンパクトに保つレイアウトへ寄せる。
+- [pending] 詳細オプションが多い分析画面は、初期表示をコンパクトに保つレイアウトへさらに寄せる。

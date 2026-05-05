@@ -24,34 +24,41 @@ type VarEntryType = {
   label: string;
 };
 
+type BaseOutputResultDialogPropsType = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+type RegressionOutputResultDialogPropsType =
+  BaseOutputResultDialogPropsType & {
+    resultKind: "regression";
+    result: LinearRegressionResultType;
+  };
+
+type NonRegressionResultKindType =
+  | "descriptive_statistics"
+  | "confidence_interval"
+  | "statistical_test";
+
+type NonRegressionOutputResultDialogPropsType =
+  BaseOutputResultDialogPropsType & {
+    resultKind: NonRegressionResultKindType;
+    resultId: string;
+    title: string;
+  };
+
 export type OutputResultDialogPropsType =
-  | {
-      open: boolean;
-      onOpenChange: (open: boolean) => void;
-      resultKind: "regression";
-      result: LinearRegressionResultType;
-    }
-  | {
-      open: boolean;
-      onOpenChange: (open: boolean) => void;
-      resultKind: "descriptive_statistics";
-      resultId: string;
-      title: string;
-    }
-  | {
-      open: boolean;
-      onOpenChange: (open: boolean) => void;
-      resultKind: "confidence_interval";
-      resultId: string;
-      title: string;
-    }
-  | {
-      open: boolean;
-      onOpenChange: (open: boolean) => void;
-      resultKind: "statistical_test";
-      resultId: string;
-      title: string;
-    };
+  | RegressionOutputResultDialogPropsType
+  | NonRegressionOutputResultDialogPropsType;
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
+  ? Omit<T, K>
+  : never;
+
+export type OutputResultDialogTargetType = DistributiveOmit<
+  OutputResultDialogPropsType,
+  "open" | "onOpenChange"
+>;
 
 type RegressionOutputResultDialogContentPropsType = {
   open: boolean;
@@ -72,10 +79,7 @@ type NonRegressionOutputResultDialogContentPropsType = {
   onOpenChange: (open: boolean) => void;
   resultId: string;
   title: string;
-  resultType:
-    | "descriptive_statistics"
-    | "confidence_interval"
-    | "statistical_test";
+  resultType: NonRegressionResultKindType;
   format: OutputResultFormat;
   setFormat: (value: OutputResultFormat) => void;
 };
@@ -87,6 +91,46 @@ const createInitialVarEntries = (
     original: parameter.variable,
     label: "",
   }));
+
+const createNonRegressionOutputRequest = ({
+  resultId,
+  resultType,
+  format,
+}: {
+  resultId: string;
+  resultType: NonRegressionResultKindType;
+  format: OutputResultFormat;
+}) => {
+  switch (resultType) {
+    case "descriptive_statistics":
+      return {
+        resultType,
+        resultIds: [resultId],
+        format,
+        options: {
+          includeResultName: false,
+          includeTableName: false,
+        },
+      };
+    case "confidence_interval":
+      return {
+        resultType,
+        resultIds: [resultId],
+        format,
+        options: {
+          includeResultName: false,
+          includeTableName: false,
+          includeConfidenceLevel: true,
+        },
+      };
+    case "statistical_test":
+      return {
+        resultType,
+        resultIds: [resultId],
+        format,
+      };
+  }
+};
 
 // ─── コンポーネント ───────────────────────────────────────────────────────────
 
@@ -442,38 +486,13 @@ const NonRegressionOutputResultDialogContent = ({
 
   useEffect(() => {
     if (!open) return;
-    if (resultType === "descriptive_statistics") {
-      void fetchOutput({
+    void fetchOutput(
+      createNonRegressionOutputRequest({
+        resultId,
         resultType,
-        resultIds: [resultId],
         format,
-        options: {
-          includeResultName: false,
-          includeTableName: false,
-        },
-      });
-      return;
-    }
-
-    if (resultType === "statistical_test") {
-      void fetchOutput({
-        resultType,
-        resultIds: [resultId],
-        format,
-      });
-      return;
-    }
-
-    void fetchOutput({
-      resultType,
-      resultIds: [resultId],
-      format,
-      options: {
-        includeResultName: false,
-        includeTableName: false,
-        includeConfidenceLevel: true,
-      },
-    });
+      }),
+    );
   }, [open, resultId, resultType, format, fetchOutput]);
 
   const handleCopy = async () => {
@@ -588,33 +607,36 @@ export const OutputResultDialog = (props: OutputResultDialogPropsType) => {
     );
   const [constAtBottom, setConstAtBottom] = useState(false);
 
-  if (props.resultKind !== "regression") {
-    return (
-      <NonRegressionOutputResultDialogContent
-        key={props.resultId}
-        open={props.open}
-        onOpenChange={props.onOpenChange}
-        resultId={props.resultId}
-        title={props.title}
-        resultType={props.resultKind}
-        format={format}
-        setFormat={setFormat}
-      />
-    );
+  switch (props.resultKind) {
+    case "descriptive_statistics":
+    case "confidence_interval":
+    case "statistical_test":
+      return (
+        <NonRegressionOutputResultDialogContent
+          key={props.resultId}
+          open={props.open}
+          onOpenChange={props.onOpenChange}
+          resultId={props.resultId}
+          title={props.title}
+          resultType={props.resultKind}
+          format={format}
+          setFormat={setFormat}
+        />
+      );
+    case "regression":
+      return (
+        <RegressionOutputResultDialogContent
+          key={props.result.resultId}
+          open={props.open}
+          onOpenChange={props.onOpenChange}
+          result={props.result}
+          format={format}
+          setFormat={setFormat}
+          statInParentheses={statInParentheses}
+          setStatInParentheses={setStatInParentheses}
+          constAtBottom={constAtBottom}
+          setConstAtBottom={setConstAtBottom}
+        />
+      );
   }
-
-  return (
-    <RegressionOutputResultDialogContent
-      key={props.result.resultId}
-      open={props.open}
-      onOpenChange={props.onOpenChange}
-      result={props.result}
-      format={format}
-      setFormat={setFormat}
-      statInParentheses={statInParentheses}
-      setStatInParentheses={setStatInParentheses}
-      constAtBottom={constAtBottom}
-      setConstAtBottom={setConstAtBottom}
-    />
-  );
 };

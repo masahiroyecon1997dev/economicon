@@ -2,6 +2,7 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { CorrelationMethod, MissingHandlingMethod } from "@/api/model";
 import { CreateCorrelationTableBody } from "@/api/zod/statistics/statistics";
 import { InputText } from "@/components/atoms/Input/InputText";
+import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
@@ -16,7 +17,6 @@ import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { extractApiErrorMessage } from "@/lib/utils/apiError";
 import { createFieldError } from "@/lib/utils/formHelpers";
-import { cn } from "@/lib/utils/helpers";
 import { getTableInfo } from "@/lib/utils/internal";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
@@ -24,7 +24,7 @@ import { useTableListStore } from "@/stores/tableList";
 import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
-import { ChevronDown, Loader2, SearchX } from "lucide-react";
+import { Loader2, SearchX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -372,155 +372,129 @@ export const CorrelationMatrix = ({
               </div>
 
               {/* 詳細オプション（accordion）*/}
-              <div className="rounded-xl border border-border-color bg-white shadow-sm dark:bg-gray-800 dark:border-gray-700">
-                <button
-                  type="button"
-                  onClick={() => setOptionsOpen((v) => !v)}
-                  className="flex w-full items-center justify-between px-3 py-2.5 text-left transition-colors hover:bg-secondary/50 dark:hover:bg-gray-700/50"
-                >
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-bold text-text-heading dark:text-gray-100">
-                      {t("CorrelationMatrix.AdvancedOptions")}
-                    </span>
-                    <form.Subscribe selector={(s) => s.values}>
-                      {(values) => (
-                        <span className="text-xs text-brand-text-main/60 dark:text-gray-400">
-                          {t("CorrelationMatrix.AdvancedOptionsSummary", {
-                            method: t(
-                              `CorrelationMatrix.Method_${values.method}`,
-                            ),
-                            places: values.decimalPlaces,
-                            missing: t(
-                              `CorrelationMatrix.Missing_${values.missingHandling}`,
-                            ),
-                          })}
-                        </span>
-                      )}
-                    </form.Subscribe>
-                  </div>
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 shrink-0 text-brand-text-main/60 transition-transform duration-200",
-                      optionsOpen && "rotate-180",
+              <AnalysisOptionsCard
+                title={t("CorrelationMatrix.AdvancedOptions")}
+                open={optionsOpen}
+                onToggle={() => setOptionsOpen((v) => !v)}
+                summary={
+                  <form.Subscribe selector={(s) => s.values}>
+                    {(values) =>
+                      t("CorrelationMatrix.AdvancedOptionsSummary", {
+                        method: t(`CorrelationMatrix.Method_${values.method}`),
+                        places: values.decimalPlaces,
+                        missing: t(
+                          `CorrelationMatrix.Missing_${values.missingHandling}`,
+                        ),
+                      })
+                    }
+                  </form.Subscribe>
+                }
+              >
+                <div className="flex flex-col gap-3">
+                  {/* 計算手法 */}
+                  <form.Field name="method">
+                    {(field) => (
+                      <FormField
+                        label={t("CorrelationMatrix.MethodLabel")}
+                        htmlFor="correlation-method"
+                      >
+                        <Select
+                          id="correlation-method"
+                          value={field.state.value}
+                          onValueChange={(v) =>
+                            field.handleChange(v as CorrelationMethod)
+                          }
+                          disabled={isSubmitting}
+                        >
+                          <SelectItem value={CorrelationMethod.pearson}>
+                            {t("CorrelationMatrix.Method_pearson")}
+                          </SelectItem>
+                          <SelectItem value={CorrelationMethod.spearman}>
+                            {t("CorrelationMatrix.Method_spearman")}
+                          </SelectItem>
+                          <SelectItem value={CorrelationMethod.kendall}>
+                            {t("CorrelationMatrix.Method_kendall")}
+                          </SelectItem>
+                        </Select>
+                      </FormField>
                     )}
-                  />
-                </button>
+                  </form.Field>
 
-                {optionsOpen && (
-                  <div className="border-t border-border-color px-3 pb-4 pt-3 dark:border-gray-700">
-                    <div className="flex flex-col gap-3">
-                      {/* 計算手法 */}
-                      <form.Field name="method">
-                        {(field) => (
-                          <FormField
-                            label={t("CorrelationMatrix.MethodLabel")}
-                            htmlFor="correlation-method"
-                          >
-                            <Select
-                              id="correlation-method"
-                              value={field.state.value}
-                              onValueChange={(v) =>
-                                field.handleChange(v as CorrelationMethod)
-                              }
-                              disabled={isSubmitting}
-                            >
-                              <SelectItem value={CorrelationMethod.pearson}>
-                                {t("CorrelationMatrix.Method_pearson")}
-                              </SelectItem>
-                              <SelectItem value={CorrelationMethod.spearman}>
-                                {t("CorrelationMatrix.Method_spearman")}
-                              </SelectItem>
-                              <SelectItem value={CorrelationMethod.kendall}>
-                                {t("CorrelationMatrix.Method_kendall")}
-                              </SelectItem>
-                            </Select>
-                          </FormField>
-                        )}
-                      </form.Field>
+                  {/* 丸め桁数 */}
+                  <form.Field name="decimalPlaces">
+                    {(field) => (
+                      <FormField
+                        label={t("CorrelationMatrix.DecimalPlacesLabel")}
+                        htmlFor="decimal-places"
+                      >
+                        <InputText
+                          id="decimal-places"
+                          type="number"
+                          value={field.state.value.toString()}
+                          onChange={(e) => {
+                            const v = Math.min(
+                              15,
+                              Math.max(1, parseInt(e.target.value) || 1),
+                            );
+                            field.handleChange(v);
+                          }}
+                          disabled={isSubmitting}
+                        />
+                      </FormField>
+                    )}
+                  </form.Field>
 
-                      {/* 丸め桁数 */}
-                      <form.Field name="decimalPlaces">
-                        {(field) => (
-                          <FormField
-                            label={t("CorrelationMatrix.DecimalPlacesLabel")}
-                            htmlFor="decimal-places"
-                          >
-                            <InputText
-                              id="decimal-places"
-                              type="number"
-                              value={field.state.value.toString()}
-                              onChange={(e) => {
-                                const v = Math.min(
-                                  15,
-                                  Math.max(1, parseInt(e.target.value) || 1),
-                                );
-                                field.handleChange(v);
-                              }}
-                              disabled={isSubmitting}
-                            />
-                          </FormField>
-                        )}
-                      </form.Field>
+                  {/* 下三角のみ */}
+                  <form.Field name="lowerTriangleOnly">
+                    {(field) => (
+                      <FormField
+                        label={t("CorrelationMatrix.LowerTriangleOnly")}
+                        htmlFor="lower-triangle"
+                      >
+                        <Select
+                          id="lower-triangle"
+                          value={field.state.value ? "true" : "false"}
+                          onValueChange={(v) => field.handleChange(v === "true")}
+                          disabled={isSubmitting}
+                        >
+                          <SelectItem value="false">
+                            {t("CorrelationMatrix.LowerTriangle_false")}
+                          </SelectItem>
+                          <SelectItem value="true">
+                            {t("CorrelationMatrix.LowerTriangle_true")}
+                          </SelectItem>
+                        </Select>
+                      </FormField>
+                    )}
+                  </form.Field>
 
-                      {/* 下三角のみ */}
-                      <form.Field name="lowerTriangleOnly">
-                        {(field) => (
-                          <FormField
-                            label={t("CorrelationMatrix.LowerTriangleOnly")}
-                            htmlFor="lower-triangle"
-                          >
-                            <Select
-                              id="lower-triangle"
-                              value={field.state.value ? "true" : "false"}
-                              onValueChange={(v) =>
-                                field.handleChange(v === "true")
-                              }
-                              disabled={isSubmitting}
-                            >
-                              <SelectItem value="false">
-                                {t("CorrelationMatrix.LowerTriangle_false")}
-                              </SelectItem>
-                              <SelectItem value="true">
-                                {t("CorrelationMatrix.LowerTriangle_true")}
-                              </SelectItem>
-                            </Select>
-                          </FormField>
-                        )}
-                      </form.Field>
-
-                      {/* 欠損値処理 */}
-                      <form.Field name="missingHandling">
-                        {(field) => (
-                          <FormField
-                            label={t("CorrelationMatrix.MissingHandlingLabel")}
-                            htmlFor="missing-handling"
-                          >
-                            <Select
-                              id="missing-handling"
-                              value={field.state.value}
-                              onValueChange={(v) =>
-                                field.handleChange(v as MissingHandlingMethod)
-                              }
-                              disabled={isSubmitting}
-                            >
-                              <SelectItem
-                                value={MissingHandlingMethod.pairwise}
-                              >
-                                {t("CorrelationMatrix.Missing_pairwise")}
-                              </SelectItem>
-                              <SelectItem
-                                value={MissingHandlingMethod.listwise}
-                              >
-                                {t("CorrelationMatrix.Missing_listwise")}
-                              </SelectItem>
-                            </Select>
-                          </FormField>
-                        )}
-                      </form.Field>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  {/* 欠損値処理 */}
+                  <form.Field name="missingHandling">
+                    {(field) => (
+                      <FormField
+                        label={t("CorrelationMatrix.MissingHandlingLabel")}
+                        htmlFor="missing-handling"
+                      >
+                        <Select
+                          id="missing-handling"
+                          value={field.state.value}
+                          onValueChange={(v) =>
+                            field.handleChange(v as MissingHandlingMethod)
+                          }
+                          disabled={isSubmitting}
+                        >
+                          <SelectItem value={MissingHandlingMethod.pairwise}>
+                            {t("CorrelationMatrix.Missing_pairwise")}
+                          </SelectItem>
+                          <SelectItem value={MissingHandlingMethod.listwise}>
+                            {t("CorrelationMatrix.Missing_listwise")}
+                          </SelectItem>
+                        </Select>
+                      </FormField>
+                    )}
+                  </form.Field>
+                </div>
+              </AnalysisOptionsCard>
             </div>
           </div>
 

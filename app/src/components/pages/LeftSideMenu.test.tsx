@@ -1,4 +1,5 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import type { AnalysisResultDetail } from "@/api/model";
 import { LeftSideMenu } from "@/components/pages/LeftSideMenu";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { showMessageDialog } from "@/lib/dialog/message";
@@ -81,7 +82,7 @@ const mockApi = {
   getAnalysisResult: vi.fn(),
 };
 
-const MOCK_RESULT_DETAIL = {
+const MOCK_RESULT_DETAIL: AnalysisResultDetail = {
   id: "result-1",
   name: "OLS 1",
   description: "desc",
@@ -100,6 +101,7 @@ const MOCK_RESULT_DETAIL = {
   modelType: "ols",
   entityIdColumn: null,
   timeColumn: null,
+  summaryText: "OLS / price",
 };
 
 // ---------------------------------------------------------------------------
@@ -293,6 +295,33 @@ describe("LeftSideMenu コンポーネント", () => {
       expect(mockApi.deleteAnalysisResult).toHaveBeenCalledWith("result-1");
       expect(removeSummary).toHaveBeenCalledWith("result-1");
     });
+  });
+
+  it("statistical_test の出力ボタンでも OutputResultDialog を開ける", async () => {
+    const user = userEvent.setup();
+    useAnalysisResultsStore.setState({
+      pane: "results",
+      summaries: [
+        {
+          id: "result-2",
+          name: "t-test 1",
+          description: "desc",
+          createdAt: "2026-04-29T10:15:30Z",
+          tableName: "sales",
+          resultType: "statistical_test",
+          resultTypeLabel: "仮説検定",
+          modelType: null,
+          summaryText: "t-test / value",
+        },
+      ],
+    });
+
+    render(<LeftSideMenu />);
+
+    await user.click(screen.getByTestId("analysis-result-output-result-2"));
+
+    expect(screen.getByTestId("output-result-dialog")).toBeInTheDocument();
+    expect(mockApi.getAnalysisResult).not.toHaveBeenCalled();
   });
 
   it("結果取得に失敗した場合はエラーダイアログを表示する", async () => {

@@ -39,8 +39,8 @@ vi.mock("./Calculation", () => ({
 vi.mock("./ConfidenceIntervalView", () => ({
   ConfidenceIntervalView: () => <div data-testid="work-ci" />,
 }));
-vi.mock("./RegressionView", () => ({
-  Regression: () => <div data-testid="work-reg" />,
+vi.mock("../organisms/Form/LinearRegressionForm", () => ({
+  LinearRegressionForm: () => <div data-testid="work-reg-form" />,
 }));
 vi.mock("./StatisticalTestView", () => ({
   StatisticalTestView: () => <div data-testid="work-stat-test" />,
@@ -187,6 +187,30 @@ describe("WorkspaceSurface コンポーネント", () => {
       screen.getByTestId("workspace-work-tab-DescriptiveStatistics"),
     ).toBeInTheDocument();
     expect(screen.getByTestId("work-desc-stats")).toBeInTheDocument();
+  });
+
+  it("LinearRegressionForm の work tab は RegressionView を介さずフォーム本体を表示する", () => {
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "work:LinearRegressionForm",
+          kind: "work",
+          title: "回帰分析",
+          featureKey: "LinearRegressionForm",
+          dirty: false,
+          createdAt: Date.now(),
+        },
+      ],
+      activeTabId: "work:LinearRegressionForm",
+    });
+    useCurrentPageStore.setState({ currentView: "LinearRegressionForm" });
+
+    render(<WorkspaceSurface />);
+
+    expect(
+      screen.getByTestId("workspace-work-tab-LinearRegressionForm"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("work-reg-form")).toBeInTheDocument();
   });
 
   it("work tab で入力すると dirty になり、閉じる時に確認する", async () => {
