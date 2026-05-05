@@ -9,14 +9,16 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const mockT = (key: string, options?: Record<string, unknown>) => {
+  if (options?.number) {
+    return `${key}:${options.number}`;
+  }
+  return key;
+};
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key: string, options?: Record<string, unknown>) => {
-      if (options?.number) {
-        return `${key}:${options.number}`;
-      }
-      return key;
-    },
+    t: mockT,
   }),
 }));
 
@@ -162,7 +164,7 @@ describe("StatisticalTestView", () => {
 
     const selects = screen.getAllByRole("combobox");
     await user.selectOptions(selects[2]!, "value");
-    await user.click(screen.getByText("StatisticalTestView.RunTest"));
+    fireEvent.submit(document.querySelector("form")!);
 
     await waitFor(() => {
       expect(mockStatisticalTest).toHaveBeenCalledWith(

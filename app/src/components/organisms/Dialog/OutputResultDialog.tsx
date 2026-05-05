@@ -67,7 +67,7 @@ type RegressionOutputResultDialogContentPropsType = {
   setConstAtBottom: (value: boolean) => void;
 };
 
-type DescriptiveStatisticsOutputResultDialogContentPropsType = {
+type NonRegressionOutputResultDialogContentPropsType = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   resultId: string;
@@ -427,7 +427,7 @@ const RegressionOutputResultDialogContent = ({
 
 // ─── 基本統計量出力ダイアログ内容 ──────────────────────────────────────────────
 
-const DescriptiveStatisticsOutputResultDialogContent = ({
+const NonRegressionOutputResultDialogContent = ({
   open,
   onOpenChange,
   resultId,
@@ -435,7 +435,7 @@ const DescriptiveStatisticsOutputResultDialogContent = ({
   resultType,
   format,
   setFormat,
-}: DescriptiveStatisticsOutputResultDialogContentPropsType) => {
+}: NonRegressionOutputResultDialogContentPropsType) => {
   const { t } = useTranslation();
   const [isCopied, setIsCopied] = useState(false);
   const { content, isLoading, error, fetchOutput } = useOutputResult();
@@ -588,13 +588,9 @@ export const OutputResultDialog = (props: OutputResultDialogPropsType) => {
     );
   const [constAtBottom, setConstAtBottom] = useState(false);
 
-  if (
-    props.resultKind === "descriptive_statistics" ||
-    props.resultKind === "confidence_interval" ||
-    props.resultKind === "statistical_test"
-  ) {
+  if (props.resultKind !== "regression") {
     return (
-      <DescriptiveStatisticsOutputResultDialogContent
+      <NonRegressionOutputResultDialogContent
         key={props.resultId}
         open={props.open}
         onOpenChange={props.onOpenChange}

@@ -31,7 +31,12 @@ describe("workspaceTabs store", () => {
       title: "ジョイン",
       dirty: true,
     });
-    expect(typeof state.tabs[0]?.createdAt).toBe("number");
+    const workTab = state.tabs[0];
+    expect(workTab?.kind).toBe("work");
+    if (!workTab || workTab.kind !== "work") {
+      throw new Error("Expected first tab to be a work tab");
+    }
+    expect(typeof workTab.createdAt).toBe("number");
     expect(state.activeTabId).toBe("work:JoinTable");
   });
 

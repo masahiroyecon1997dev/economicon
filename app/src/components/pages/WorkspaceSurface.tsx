@@ -50,6 +50,20 @@ const findLastNonWorkTab = (tabs: WorkspaceTab[], excludedId: string) => {
   return null;
 };
 
+const isCorrelationMatrixWorkTab = (
+  tab: WorkspaceWorkTab,
+): tab is WorkspaceWorkTab & {
+  featureKey: "CorrelationMatrix";
+  id: "work:CorrelationMatrix";
+} => tab.featureKey === "CorrelationMatrix";
+
+const isStatisticalTestWorkTab = (
+  tab: WorkspaceWorkTab,
+): tab is WorkspaceWorkTab & {
+  featureKey: "StatisticalTestView";
+  id: "work:StatisticalTestView";
+} => tab.featureKey === "StatisticalTestView";
+
 export const WorkspaceSurface = () => {
   const { t } = useTranslation();
   const currentView = useCurrentPageStore((state) => state.currentView);
@@ -204,7 +218,7 @@ export const WorkspaceSurface = () => {
   };
 
   const renderWorkTab = (tab: WorkspaceWorkTab) => {
-    if (tab.featureKey === "CorrelationMatrix") {
+    if (isCorrelationMatrixWorkTab(tab)) {
       return (
         <CorrelationMatrix
           workTabId={tab.id}
@@ -217,7 +231,7 @@ export const WorkspaceSurface = () => {
       );
     }
 
-    if (tab.featureKey === "StatisticalTestView") {
+    if (isStatisticalTestWorkTab(tab)) {
       return (
         <StatisticalTestView
           workTabId={tab.id}
@@ -226,7 +240,8 @@ export const WorkspaceSurface = () => {
       );
     }
 
-    return WORK_TAB_COMPONENTS[tab.featureKey];
+    const staticFeatureKey = tab.featureKey as StaticWorkFeatureKey;
+    return WORK_TAB_COMPONENTS[staticFeatureKey];
   };
 
   return (

@@ -22,6 +22,7 @@ import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { ColumnType } from "@/types/commonTypes";
 import { useForm, useStore } from "@tanstack/react-form";
@@ -277,15 +278,15 @@ export const StatisticalTestView = ({
   const persistedWorkTab = useWorkspaceTabsStore((state) =>
     workTabId
       ? (state.tabs.find(
-          (tab) => tab.id === workTabId && tab.kind === "work",
+          (tab): tab is WorkspaceWorkTab =>
+            tab.id === workTabId && tab.kind === "work",
         ) ?? null)
       : null,
   );
 
-  const persistedDraft =
-    persistedWorkTab?.featureKey === "StatisticalTestView"
-      ? (persistedWorkTab.draftValues as StatisticalTestFormValues | undefined)
-      : undefined;
+  const persistedDraft = persistedWorkTab?.draftValues as
+    | StatisticalTestFormValues
+    | undefined;
 
   const form = useForm({
     defaultValues: buildDefaultValues(initialTableName, persistedDraft),
@@ -326,7 +327,10 @@ export const StatisticalTestView = ({
   useEffect(() => {
     const missingTables = values.samples
       .map((sample) => sample.tableName)
-      .filter((tableName) => tableName && !columnsByTable[tableName]);
+      .filter(
+        (tableName) =>
+          tableName && !columnsByTable[tableName] && !loadingTables[tableName],
+      );
 
     if (missingTables.length === 0) return;
 
@@ -355,7 +359,7 @@ export const StatisticalTestView = ({
         }
       }),
     );
-  }, [columnsByTable, t, values.samples]);
+  }, [columnsByTable, loadingTables, t, values.samples]);
 
   const handleCancel = () => {
     if (onCancel) {
