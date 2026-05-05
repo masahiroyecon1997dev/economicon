@@ -35,6 +35,14 @@ type FileTypeFilter = "all" | "csv" | "excel" | "parquet";
 
 const SUPPORTED_IMPORT_EXTENSIONS = [".csv", ".xlsx", ".xls", ".parquet"];
 
+const getFileExtension = (fileName: string) => {
+  return fileName.toLowerCase().match(/\.[^.]+$/)?.[0] ?? "";
+};
+
+const isSupportedImportFile = (fileName: string) => {
+  return SUPPORTED_IMPORT_EXTENSIONS.includes(getFileExtension(fileName));
+};
+
 const FILE_TYPE_FILTERS: {
   value: FileTypeFilter;
   labelKey: string;
@@ -83,6 +91,29 @@ export const ImportDataFile = () => {
     name: string;
   } | null>(null);
 
+  const showUnsupportedFileWarning = async (fileName: string) => {
+    await showMessageDialog(
+      t("ImportDataFileView.UnsupportedFileTitle"),
+      t("ImportDataFileView.UnsupportedFileMessage", {
+        fileName,
+        supportedExtensions: SUPPORTED_IMPORT_EXTENSIONS.join(", "),
+      }),
+    );
+  };
+
+  const handleImportFileSelection = async (
+    filePath: string,
+    fileName: string,
+  ) => {
+    if (!isSupportedImportFile(fileName)) {
+      await showUnsupportedFileWarning(fileName);
+      return;
+    }
+
+    setSelectedFileInfo({ path: filePath, name: fileName });
+    setIsImportDialogOpen(true);
+  };
+
   // Tauri 2 ネイティブ drag-drop イベント
   const [isDragActive, setIsDragActive] = useState(false);
   // ファイルリストの初期化を行うカスタムフック
@@ -105,11 +136,7 @@ export const ImportDataFile = () => {
             const filePath = paths[0];
             const fileName =
               filePath.replace(/\\/g, "/").split("/").pop() ?? filePath;
-            const ext = fileName.toLowerCase().match(/\.[^.]+$/)?.[0] ?? "";
-            if (SUPPORTED_IMPORT_EXTENSIONS.includes(ext)) {
-              setSelectedFileInfo({ path: filePath, name: fileName });
-              setIsImportDialogOpen(true);
-            }
+            void handleImportFileSelection(filePath, fileName);
           }
         }
       })
@@ -196,11 +223,10 @@ export const ImportDataFile = () => {
           : directoryPath + pathSeparator + file.name;
       await changeDirectory(newPath);
     } else {
-      setSelectedFileInfo({
-        path: directoryPath + pathSeparator + file.name,
-        name: file.name,
-      });
-      setIsImportDialogOpen(true);
+      await handleImportFileSelection(
+        directoryPath + pathSeparator + file.name,
+        file.name,
+      );
     }
   };
 

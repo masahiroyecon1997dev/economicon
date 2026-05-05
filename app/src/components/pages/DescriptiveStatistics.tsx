@@ -50,6 +50,22 @@ const DEFAULT_STAT_TYPES: DescriptiveStatisticType[] = [
   DescriptiveStatisticType.max,
 ];
 
+const PRIMARY_STAT_TYPES: DescriptiveStatisticType[] = [
+  DescriptiveStatisticType.count,
+  DescriptiveStatisticType.mean,
+  DescriptiveStatisticType.median,
+  DescriptiveStatisticType.std_dev,
+  DescriptiveStatisticType.variance,
+  DescriptiveStatisticType.min,
+  DescriptiveStatisticType.max,
+  DescriptiveStatisticType.null_count,
+  DescriptiveStatisticType.null_ratio,
+];
+
+const ADVANCED_STAT_TYPES: DescriptiveStatisticType[] = ALL_STAT_TYPES.filter(
+  (stat) => !PRIMARY_STAT_TYPES.includes(stat),
+);
+
 type FormErrors = {
   table?: string;
   columns?: string;
@@ -126,6 +142,7 @@ export const DescriptiveStatistics = ({
   const [isCalculating, setIsCalculating] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [statsOpen, setStatsOpen] = useState(true);
+  const [advancedStatsOpen, setAdvancedStatsOpen] = useState(false);
 
   const handleCancel = () => {
     if (onCancel) {
@@ -203,6 +220,26 @@ export const DescriptiveStatistics = ({
         next.delete(stat);
       } else {
         next.add(stat);
+      }
+      return next;
+    });
+  };
+
+  const selectStats = (stats: DescriptiveStatisticType[]) => {
+    setCheckedStats((prev) => {
+      const next = new Set(prev);
+      for (const stat of stats) {
+        next.add(stat);
+      }
+      return next;
+    });
+  };
+
+  const deselectStats = (stats: DescriptiveStatisticType[]) => {
+    setCheckedStats((prev) => {
+      const next = new Set(prev);
+      for (const stat of stats) {
+        next.delete(stat);
       }
       return next;
     });
@@ -372,27 +409,71 @@ export const DescriptiveStatistics = ({
             </button>
             {statsOpen && (
               <div className="space-y-2">
-                <SelectAllBar
-                  selectAllLabel={t("DescriptiveStatistics.SelectAll")}
-                  deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
-                  onSelectAll={() => setCheckedStats(new Set(ALL_STAT_TYPES))}
-                  onDeselectAll={() => setCheckedStats(new Set())}
-                />
-                <CheckboxTagGroup
-                  items={ALL_STAT_TYPES.map((stat) => ({
-                    value: stat,
-                    label: t(`DescriptiveStatistics.Stat_${stat}`),
-                  }))}
-                  checked={checkedStats as Set<string>}
-                  onToggle={(value) =>
-                    toggleStat(value as DescriptiveStatisticType)
-                  }
-                  error={errors.stats}
-                  columns={3}
-                />
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-medium text-brand-text-main dark:text-gray-100">
+                      {t("DescriptiveStatistics.PrimaryStatisticsLabel")}
+                    </p>
+                    <SelectAllBar
+                      selectAllLabel={t("DescriptiveStatistics.SelectAll")}
+                      deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
+                      onSelectAll={() => selectStats(PRIMARY_STAT_TYPES)}
+                      onDeselectAll={() => deselectStats(PRIMARY_STAT_TYPES)}
+                    />
+                  </div>
+                  <CheckboxTagGroup
+                    items={PRIMARY_STAT_TYPES.map((stat) => ({
+                      value: stat,
+                      label: t(`DescriptiveStatistics.Stat_${stat}`),
+                    }))}
+                    checked={checkedStats as Set<string>}
+                    onToggle={(value) =>
+                      toggleStat(value as DescriptiveStatisticType)
+                    }
+                    columns={3}
+                  />
+                </div>
+
+                <div className="space-y-2 rounded-lg border border-border-color/70 bg-white/70 p-3 dark:border-gray-700 dark:bg-gray-800/40">
+                  <button
+                    type="button"
+                    onClick={() => setAdvancedStatsOpen((prev) => !prev)}
+                    className="flex w-full items-center justify-between text-left text-sm font-medium text-gray-700 transition-colors hover:text-brand-accent dark:text-gray-300"
+                  >
+                    <span>{t("DescriptiveStatistics.AdvancedStatisticsLabel")}</span>
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 text-brand-text-main/60 transition-transform duration-200",
+                        advancedStatsOpen && "rotate-180",
+                      )}
+                    />
+                  </button>
+
+                  {advancedStatsOpen && (
+                    <div className="space-y-2">
+                      <SelectAllBar
+                        selectAllLabel={t("DescriptiveStatistics.SelectAll")}
+                        deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
+                        onSelectAll={() => selectStats(ADVANCED_STAT_TYPES)}
+                        onDeselectAll={() => deselectStats(ADVANCED_STAT_TYPES)}
+                      />
+                      <CheckboxTagGroup
+                        items={ADVANCED_STAT_TYPES.map((stat) => ({
+                          value: stat,
+                          label: t(`DescriptiveStatistics.Stat_${stat}`),
+                        }))}
+                        checked={checkedStats as Set<string>}
+                        onToggle={(value) =>
+                          toggleStat(value as DescriptiveStatisticType)
+                        }
+                        columns={3}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
-            {!statsOpen && errors.stats && (
+            {errors.stats && (
               <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">
                 {errors.stats}
               </p>

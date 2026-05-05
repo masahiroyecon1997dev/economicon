@@ -147,6 +147,8 @@
     "DragDropAreaTitle": "ファイルをここにドラッグ&ドロップ",
     "DragDropAreaTitleActive": "ファイルをドロップしてください",
     "DragDropAreaDescription": "サポートされている形式: .csv, .xlsx, .xls, .parquet",
+    "UnsupportedFileTitle": "非対応のファイル形式です",
+    "UnsupportedFileMessage": "「{{fileName}}」はインポートできません。対応形式は {{supportedExtensions}} です。",
     "ImportDialog": {
       "Title": "インポート設定",
       "DataName": "データ名",
@@ -175,7 +177,7 @@
     "SelectDirectory": "保存先フォルダを選択",
     "Save": "保存",
     "SavingFile": "ファイルを保存中...",
-    "SaveSuccess": "ファイルを保存しました: {{path}}",
+    "SaveSuccess": "ファイルを保存しました:\n{{path}}",
     "NoDataImported": "データが取り込まれていません。",
     "OverwriteConfirmTitle": "ファイルの上書き確認",
     "OverwriteConfirmMessage": "「{{fileName}}」はすでに存在します。上書きしますか？"
@@ -280,6 +282,8 @@
     "SelectAll": "すべて選択",
     "DeselectAll": "すべて解除",
     "StatisticsLabel": "計算する統計量",
+    "PrimaryStatisticsLabel": "通常よく使う統計量",
+    "AdvancedStatisticsLabel": "詳細統計量",
     "Stat_mean": "平均",
     "Stat_median": "中央値",
     "Stat_mode": "最頻値",

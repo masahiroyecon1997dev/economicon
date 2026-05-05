@@ -111,6 +111,38 @@ describe("DescriptiveStatistics フォーム", () => {
   });
 
   describe("バリデーション", () => {
+    it("詳細統計量は初期表示で隠れ、展開すると選択肢が見える", async () => {
+      mockApi.getColumnList.mockResolvedValue({
+        code: "OK",
+        result: { columnInfoList: COLUMNS },
+      });
+      const user = userEvent.setup();
+
+      render(<DescriptiveStatistics />);
+
+      const selectTrigger = screen.getByRole("combobox");
+      await user.click(selectTrigger);
+      const option = await screen.findByRole("option", { name: "sales" });
+      await user.click(option);
+
+      await waitFor(() =>
+        expect(screen.getByText("DescriptiveStatistics.Stat_mean")).toBeInTheDocument(),
+      );
+      expect(
+        screen.queryByText("DescriptiveStatistics.Stat_skewness"),
+      ).not.toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", {
+          name: "DescriptiveStatistics.AdvancedStatisticsLabel",
+        }),
+      );
+
+      expect(
+        await screen.findByText("DescriptiveStatistics.Stat_skewness"),
+      ).toBeInTheDocument();
+    });
+
     it("テーブル未選択でサブミットするとテーブル選択エラーが表示される", async () => {
       const user = userEvent.setup();
       render(<DescriptiveStatistics />);

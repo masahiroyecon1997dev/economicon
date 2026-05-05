@@ -147,6 +147,8 @@
     "DragDropAreaTitle": "Drop a file here",
     "DragDropAreaTitleActive": "Drop it!",
     "DragDropAreaDescription": "Supported formats: .csv, .xlsx, .xls, .parquet",
+    "UnsupportedFileTitle": "Unsupported file format",
+    "UnsupportedFileMessage": "\"{{fileName}}\" cannot be imported. Supported formats are {{supportedExtensions}}.",
     "ImportDialog": {
       "Title": "Import Settings",
       "DataName": "Data Name",
@@ -175,7 +177,7 @@
     "SelectDirectory": "Select Save Directory",
     "Save": "Save",
     "SavingFile": "Saving file...",
-    "SaveSuccess": "File saved successfully: {{path}}",
+    "SaveSuccess": "File saved successfully:\n{{path}}",
     "NoDataImported": "No data has been imported.",
     "OverwriteConfirmTitle": "Overwrite File?",
     "OverwriteConfirmMessage": "\"{{fileName}}\" already exists. Do you want to overwrite it?"
@@ -280,6 +282,8 @@
     "SelectAll": "Select all",
     "DeselectAll": "Deselect all",
     "StatisticsLabel": "Statistics to Calculate",
+    "PrimaryStatisticsLabel": "Commonly used statistics",
+    "AdvancedStatisticsLabel": "Advanced statistics",
     "Stat_mean": "Mean",
     "Stat_median": "Median",
     "Stat_mode": "Mode",

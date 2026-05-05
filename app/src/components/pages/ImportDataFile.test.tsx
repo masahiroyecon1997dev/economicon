@@ -1,5 +1,6 @@
 import { getFiles, getFilesSafe } from "@/api/bridge/tauri-commands";
 import { ImportDataFile } from "@/components/pages/ImportDataFile";
+import { showMessageDialog } from "@/lib/dialog/message";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useFilesStore } from "@/stores/files";
 import { useSettingsStore } from "@/stores/settings";
@@ -51,12 +52,21 @@ vi.mock("../organisms/Dialog/ImportConfigDialog", () => ({
   ImportConfigDialog: () => <div data-testid="import-config-dialog" />,
 }));
 vi.mock("../molecules/Table/FileListTable", () => ({
-  FileListTable: (props: { files: Array<{ name: string }> }) => {
+  FileListTable: (props: {
+    files: Array<{ name: string; isFile?: boolean }>;
+    onFileClick?: (file: { name: string; isFile?: boolean }) => void;
+  }) => {
     mockFileListTable(props);
     return (
       <div data-testid="file-list-table">
         {props.files.map((file) => (
-          <div key={file.name}>{file.name}</div>
+          <button
+            key={file.name}
+            type="button"
+            onClick={() => props.onFileClick?.(file)}
+          >
+            {file.name}
+          </button>
         ))}
       </div>
     );
@@ -198,6 +208,44 @@ describe("ImportDataFile コンポーネント", () => {
           expect.arrayContaining([
             expect.objectContaining({ name: "test.csv" }),
           ]),
+        );
+      });
+    });
+
+    it("非対応形式のファイルを選ぶと警告ダイアログを表示する", async () => {
+      vi.mocked(getFiles).mockResolvedValue({
+        directoryPath: "/tmp",
+        files: [
+          {
+            name: "notes.json",
+            isFile: true,
+            size: 256,
+            modifiedTime: new Date().toISOString(),
+          },
+        ],
+      });
+      useFilesStore.setState({
+        files: [
+          {
+            name: "notes.json",
+            isFile: true,
+            size: 256,
+            modifiedTime: new Date().toISOString(),
+          },
+        ],
+        directoryPath: "/tmp",
+      });
+      const user = userEvent.setup();
+
+      await renderImportDataFile("current");
+
+      await user.click(screen.getByText("ImportDataFileView.FileSelectTab"));
+      await user.click(screen.getByRole("button", { name: "notes.json" }));
+
+      await waitFor(() => {
+        expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
+          "ImportDataFileView.UnsupportedFileTitle",
+          "ImportDataFileView.UnsupportedFileMessage",
         );
       });
     });
