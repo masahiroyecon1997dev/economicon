@@ -44,6 +44,42 @@ type OutputSupportedType =
 
 type OutputTarget = OutputResultDialogTargetType | null;
 
+const isOutputSupportedType = (
+  resultType: string,
+): resultType is OutputSupportedType => {
+  return OUTPUT_SUPPORTED_TYPES.has(resultType as OutputSupportedType);
+};
+
+const groupSummariesByResultType = (
+  summaries: ReturnType<typeof useAnalysisResultsStore.getState>["summaries"],
+) => {
+  const groups = new Map<string, typeof summaries>();
+  const sorted = [...summaries].sort((left, right) => {
+    const leftIndex = RESULT_TYPE_ORDER.indexOf(left.resultType as never);
+    const rightIndex = RESULT_TYPE_ORDER.indexOf(right.resultType as never);
+    const groupDelta =
+      (leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex) -
+      (rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex);
+
+    if (groupDelta !== 0) return groupDelta;
+    return (
+      new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+    );
+  });
+
+  for (const summary of sorted) {
+    const key = summary.resultType;
+    const prev = groups.get(key) ?? [];
+    groups.set(key, [...prev, summary]);
+  }
+
+  return Array.from(groups.entries()).map(([resultType, results]) => ({
+    resultType,
+    label: results[0]?.resultTypeLabel ?? resultType,
+    results,
+  }));
+};
+
 export const LeftSideMenu = () => {
   const { t } = useTranslation();
   const tableInfos = useTableInfosStore((state) => state.tableInfos);
@@ -92,31 +128,7 @@ export const LeftSideMenu = () => {
   }, [fetchSummaries, pane, t]);
 
   const groupedResults = useMemo(() => {
-    const groups = new Map<string, typeof summaries>();
-    const sorted = [...summaries].sort((left, right) => {
-      const leftIndex = RESULT_TYPE_ORDER.indexOf(left.resultType as never);
-      const rightIndex = RESULT_TYPE_ORDER.indexOf(right.resultType as never);
-      const groupDelta =
-        (leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex) -
-        (rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex);
-
-      if (groupDelta !== 0) return groupDelta;
-      return (
-        new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
-      );
-    });
-
-    for (const summary of sorted) {
-      const key = summary.resultType;
-      const prev = groups.get(key) ?? [];
-      groups.set(key, [...prev, summary]);
-    }
-
-    return Array.from(groups.entries()).map(([resultType, results]) => ({
-      resultType,
-      label: results[0]?.resultTypeLabel ?? resultType,
-      results,
-    }));
+    return groupSummariesByResultType(summaries);
   }, [summaries]);
 
   const clickTableName = async (tableName: string) => {
@@ -197,22 +209,38 @@ export const LeftSideMenu = () => {
     };
   };
 
+  const createRegressionOutputTarget = (detail: AnalysisResultDetail) => {
+    return {
+      resultKind: "regression" as const,
+      result: toRegressionResult(detail),
+    };
+  };
+
+  const createNonRegressionOutputTarget = (
+    id: string,
+    resultKind: Exclude<OutputSupportedType, "regression">,
+    title: string,
+  ) => {
+    return {
+      resultKind,
+      resultId: id,
+      title,
+    };
+  };
+
   const handleOutputResult = async (
     id: string,
     type: OutputSupportedType,
     title: string,
   ) => {
     if (type !== "regression") {
-      setOutputTarget({ resultKind: type, resultId: id, title });
+      setOutputTarget(createNonRegressionOutputTarget(id, type, title));
       return;
     }
 
     try {
       const response = await getEconomiconAppAPI().getAnalysisResult(id);
-      setOutputTarget({
-        resultKind: type,
-        result: toRegressionResult(response.result),
-      });
+      setOutputTarget(createRegressionOutputTarget(response.result));
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
@@ -322,7 +350,7 @@ export const LeftSideMenu = () => {
                   </h3>
                   <div className="space-y-2">
                     {group.results.map((result) => {
-                      const supportsOutput = OUTPUT_SUPPORTED_TYPES.has(
+                      const supportsOutput = isOutputSupportedType(
                         result.resultType,
                       );
                       return (
@@ -375,7 +403,7 @@ export const LeftSideMenu = () => {
                                   onClick={() =>
                                     void handleOutputResult(
                                       result.id,
-                                      result.resultType as OutputSupportedType,
+                                      result.resultType,
                                       `${result.tableName} / ${result.name}`,
                                     )
                                   }
