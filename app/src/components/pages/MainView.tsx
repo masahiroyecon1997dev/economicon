@@ -1,4 +1,3 @@
-import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
 import { ImportDataFile } from "@/components/pages/ImportDataFile";
 import { SaveData } from "@/components/pages/SaveData";
 import { WorkspaceSurface } from "@/components/pages/WorkspaceSurface";
@@ -9,7 +8,7 @@ const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
   ImportDataFile: <ImportDataFile />,
   JoinTable: <WorkspaceSurface />,
   UnionTable: <WorkspaceSurface />,
-  DescriptiveStatistics: <DescriptiveStatistics />,
+  DescriptiveStatistics: <WorkspaceSurface />,
   StatisticalTestView: <WorkspaceSurface />,
   CorrelationMatrix: <WorkspaceSurface />,
   ConfidenceIntervalView: <WorkspaceSurface />,

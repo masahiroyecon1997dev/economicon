@@ -45,6 +45,9 @@ vi.mock("./RegressionView", () => ({
 vi.mock("./StatisticalTestView", () => ({
   StatisticalTestView: () => <div data-testid="work-stat-test" />,
 }));
+vi.mock("./DescriptiveStatistics", () => ({
+  DescriptiveStatistics: () => <div data-testid="work-desc-stats" />,
+}));
 vi.mock("./CorrelationMatrix", () => ({
   CorrelationMatrix: () => <div data-testid="work-corr" />,
 }));
@@ -160,6 +163,30 @@ describe("WorkspaceSurface コンポーネント", () => {
       screen.getByTestId("workspace-work-tab-StatisticalTestView"),
     ).toBeInTheDocument();
     expect(screen.getByTestId("work-stat-test")).toBeInTheDocument();
+  });
+
+  it("DescriptiveStatistics の work tab も WorkspaceSurface 経由で表示する", () => {
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "work:DescriptiveStatistics",
+          kind: "work",
+          title: "基本統計量",
+          featureKey: "DescriptiveStatistics",
+          dirty: false,
+          createdAt: Date.now(),
+        },
+      ],
+      activeTabId: "work:DescriptiveStatistics",
+    });
+    useCurrentPageStore.setState({ currentView: "DescriptiveStatistics" });
+
+    render(<WorkspaceSurface />);
+
+    expect(
+      screen.getByTestId("workspace-work-tab-DescriptiveStatistics"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("work-desc-stats")).toBeInTheDocument();
   });
 
   it("work tab で入力すると dirty になり、閉じる時に確認する", async () => {

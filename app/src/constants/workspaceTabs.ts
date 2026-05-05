@@ -23,6 +23,10 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     titleKey: "HeaderMenu.Calculate",
   },
   {
+    featureKey: "DescriptiveStatistics",
+    titleKey: "HeaderMenu.BasicStatistics",
+  },
+  {
     featureKey: "ConfidenceIntervalView",
     titleKey: "HeaderMenu.ConfidenceInterval",
   },

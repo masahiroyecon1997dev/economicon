@@ -11,10 +11,12 @@ import { showMessageDialog } from "@/lib/dialog/message";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const ALL_STAT_TYPES: DescriptiveStatisticType[] = [
@@ -37,16 +39,73 @@ type FormErrors = {
   stats?: string;
 };
 
-export const DescriptiveStatistics = () => {
+type DescriptiveStatisticsFormValues = {
+  tableName: string;
+  columnNames: string[];
+  statistics: DescriptiveStatisticType[];
+};
+
+type DescriptiveStatisticsProps = {
+  workTabId?: `work:DescriptiveStatistics`;
+  onCancel?: () => void | Promise<void>;
+};
+
+const buildFormValues = (
+  tableName: string,
+  columnNames: string[],
+  statistics: DescriptiveStatisticType[],
+): DescriptiveStatisticsFormValues => ({
+  tableName,
+  columnNames,
+  statistics,
+});
+
+export const DescriptiveStatistics = ({
+  workTabId,
+  onCancel,
+}: DescriptiveStatisticsProps) => {
   const { t } = useTranslation();
   const tableList = useTableListStore((state) => state.tableList);
+  const initialTableName =
+    useTableInfosStore((state) => state.activeTableName) ?? "";
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
+  const ensureWorkTabState = useWorkspaceTabsStore(
+    (state) => state.ensureWorkTabState,
+  );
+  const updateWorkTabDraft = useWorkspaceTabsStore(
+    (state) => state.updateWorkTabDraft,
+  );
+  const commitWorkTab = useWorkspaceTabsStore((state) => state.commitWorkTab);
+  const persistedWorkTab = useWorkspaceTabsStore((state) =>
+    workTabId
+      ? (state.tabs.find(
+          (
+            tab,
+          ): tab is WorkspaceWorkTab & {
+            featureKey: "DescriptiveStatistics";
+            id: `work:DescriptiveStatistics`;
+          } =>
+            tab.id === workTabId &&
+            tab.kind === "work" &&
+            tab.featureKey === "DescriptiveStatistics",
+        ) ?? null)
+      : null,
+  );
+  const persistedDraft = persistedWorkTab?.draftValues as
+    | DescriptiveStatisticsFormValues
+    | undefined;
+  const initialDraftRef = useRef(persistedDraft);
+  const shouldAutoSelectColumnsRef = useRef(
+    !persistedDraft || persistedDraft.columnNames.length === 0,
+  );
 
-  const [checkedCols, setCheckedCols] = useState<Set<string>>(new Set());
+  const [checkedCols, setCheckedCols] = useState<Set<string>>(
+    () => new Set(persistedDraft?.columnNames ?? []),
+  );
   const [checkedStats, setCheckedStats] = useState<
     Set<DescriptiveStatisticType>
-  >(new Set(ALL_STAT_TYPES));
+  >(() => new Set(persistedDraft?.statistics ?? ALL_STAT_TYPES));
   const [isCalculating, setIsCalculating] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [statsOpen, setStatsOpen] = useState(true);
@@ -57,11 +116,48 @@ export const DescriptiveStatistics = () => {
     columnList: columns,
     isLoading: isLoadingCols,
   } = useTableColumnLoader({
-    initialSelectedTableName: "",
+    initialSelectedTableName: persistedDraft?.tableName ?? initialTableName,
     onLoadedColumns: (loadedColumns) => {
-      setCheckedCols(new Set(loadedColumns.map((column) => column.name)));
+      if (shouldAutoSelectColumnsRef.current) {
+        setCheckedCols(new Set(loadedColumns.map((column) => column.name)));
+        shouldAutoSelectColumnsRef.current = false;
+        return;
+      }
+
+      const nextColumns = new Set(
+        loadedColumns
+          .map((column) => column.name)
+          .filter((columnName) =>
+            initialDraftRef.current?.columnNames.includes(columnName),
+          ),
+      );
+      setCheckedCols(nextColumns);
     },
   });
+
+  useEffect(() => {
+    if (!workTabId || !selectedTable) {
+      return;
+    }
+
+    const nextValues = buildFormValues(
+      selectedTable,
+      columns
+        .map((column) => column.name)
+        .filter((name) => checkedCols.has(name)),
+      ALL_STAT_TYPES.filter((stat) => checkedStats.has(stat)),
+    );
+    ensureWorkTabState(workTabId, nextValues);
+    updateWorkTabDraft(workTabId, nextValues);
+  }, [
+    checkedCols,
+    checkedStats,
+    columns,
+    ensureWorkTabState,
+    selectedTable,
+    updateWorkTabDraft,
+    workTabId,
+  ]);
 
   const toggleCol = (name: string) => {
     setCheckedCols((prev) => {
@@ -126,6 +222,12 @@ export const DescriptiveStatistics = () => {
           response.result.resultId,
         );
         if (detailResponse.code === "OK") {
+          if (workTabId) {
+            commitWorkTab(
+              workTabId,
+              buildFormValues(selectedTable, orderedCols, orderedStats),
+            );
+          }
           openResultTab(detailResponse.result);
           await useAnalysisResultsStore.getState().fetchSummaries();
           setCurrentView("DataPreview");
@@ -161,6 +263,7 @@ export const DescriptiveStatistics = () => {
             value={selectedTable}
             onValueChange={(value) => {
               setSelectedTableName(value);
+              shouldAutoSelectColumnsRef.current = true;
               setCheckedCols(new Set());
               setErrors({});
             }}
@@ -260,7 +363,13 @@ export const DescriptiveStatistics = () => {
             ? t("DescriptiveStatistics.Processing")
             : t("DescriptiveStatistics.RunCalculation")
         }
-        onCancel={() => setCurrentView("DataPreview")}
+        onCancel={() => {
+          if (onCancel) {
+            void onCancel();
+            return;
+          }
+          setCurrentView("DataPreview");
+        }}
         onSelect={handleSubmit}
         disabled={isCalculating}
         isLoading={isCalculating}

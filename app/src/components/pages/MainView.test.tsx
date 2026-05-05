@@ -17,9 +17,6 @@ vi.mock("react-i18next", () => ({
 vi.mock("./ImportDataFile", () => ({
   ImportDataFile: () => <div data-testid="page-ImportDataFile" />,
 }));
-vi.mock("./DescriptiveStatistics", () => ({
-  DescriptiveStatistics: () => <div data-testid="page-DescriptiveStatistics" />,
-}));
 vi.mock("./SaveData", () => ({
   SaveData: () => <div data-testid="page-SaveData" />,
 }));
@@ -39,7 +36,7 @@ describe("MainView コンポーネント", () => {
     ["ImportDataFile", "page-ImportDataFile"],
     ["JoinTable", "page-WorkspaceSurface"],
     ["UnionTable", "page-WorkspaceSurface"],
-    ["DescriptiveStatistics", "page-DescriptiveStatistics"],
+    ["DescriptiveStatistics", "page-WorkspaceSurface"],
     ["StatisticalTestView", "page-WorkspaceSurface"],
     ["CorrelationMatrix", "page-WorkspaceSurface"],
     ["ConfidenceIntervalView", "page-WorkspaceSurface"],

@@ -19,12 +19,6 @@ const MENU_POSITION: DropmenuPositionType = "bottom-right";
 
 /**
  * 統合アプリバー
- *
-          handleSelect: () =>
-            handleOpenWorkTab(
-              "CorrelationMatrix",
-              t("HeaderMenu.CorrelationMatrix"),
-            ),
  * - ボタン等のインタラクティブ要素上ではドラッグを開始しない
  * - osName が "macOS" の場合は左端にトラフィックライト、
  *   Windows / Linux は右端に Fluent スタイルのウィンドウ制御を表示
@@ -253,18 +247,20 @@ export const AppBar = () => {
         {
           id: "basic-statistics",
           label: t("HeaderMenu.BasicStatistics"),
-          handleSelect: () => {
-            setCurrentView("DescriptiveStatistics");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "DescriptiveStatistics",
+              t("HeaderMenu.BasicStatistics"),
+            ),
         },
         {
           id: "correlation-matrix",
           label: t("HeaderMenu.CorrelationMatrix"),
-          handleSelect: () => {
-            setCurrentView("CorrelationMatrix");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "CorrelationMatrix",
+              t("HeaderMenu.CorrelationMatrix"),
+            ),
         },
         {
           id: "confidence-interval",

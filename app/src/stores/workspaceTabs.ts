@@ -22,6 +22,7 @@ export type WorkFeatureKey =
   | "UnionTable"
   | "CreateSimulationDataTable"
   | "CalculationView"
+  | "DescriptiveStatistics"
   | "ConfidenceIntervalView"
   | "StatisticalTestView"
   | "LinearRegressionForm"

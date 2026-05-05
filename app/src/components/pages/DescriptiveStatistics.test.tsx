@@ -181,6 +181,73 @@ describe("DescriptiveStatistics フォーム", () => {
         screen.queryByText("DescriptiveStatistics.ResultTitle"),
       ).not.toBeInTheDocument();
     });
+
+    it("work tab モードでは保存済み draft を使ってそのまま送信できる", async () => {
+      mockApi.getColumnList.mockResolvedValue({
+        code: "OK",
+        result: { columnInfoList: [{ name: "price", type: "Float64" }] },
+      });
+      mockApi.descriptiveStatistics.mockResolvedValue({
+        code: "OK",
+        result: { resultId: "test-result-id" },
+      });
+      mockApi.getAnalysisResult.mockResolvedValue({
+        code: "OK",
+        result: {
+          id: "test-result-id",
+          name: "sales descriptive statistics",
+          resultType: "descriptive_statistics",
+          resultData: {
+            statistics: {
+              price: { [DescriptiveStatisticType.mean]: 24.5 },
+            },
+          },
+        },
+      });
+      useWorkspaceTabsStore.setState({
+        tabs: [
+          {
+            id: "work:DescriptiveStatistics",
+            kind: "work",
+            title: "基本統計量",
+            featureKey: "DescriptiveStatistics",
+            dirty: true,
+            createdAt: Date.now(),
+            draftValues: {
+              tableName: "sales",
+              columnNames: ["price"],
+              statistics: [DescriptiveStatisticType.mean],
+            },
+            committedValues: {
+              tableName: "sales",
+              columnNames: [],
+              statistics: [],
+            },
+          },
+        ],
+        activeTabId: "work:DescriptiveStatistics",
+      });
+
+      const user = userEvent.setup();
+      render(<DescriptiveStatistics workTabId="work:DescriptiveStatistics" />);
+
+      await waitFor(() =>
+        expect(screen.getByText("price")).toBeInTheDocument(),
+      );
+
+      const submitBtn = screen.getByRole("button", {
+        name: "DescriptiveStatistics.RunCalculation",
+      });
+      await user.click(submitBtn);
+
+      await waitFor(() => {
+        expect(mockApi.descriptiveStatistics).toHaveBeenCalledWith({
+          tableName: "sales",
+          columnNameList: ["price"],
+          statistics: [DescriptiveStatisticType.mean],
+        });
+      });
+    });
   });
 
   describe("API失敗時", () => {
@@ -261,6 +328,34 @@ describe("DescriptiveStatistics フォーム", () => {
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe("キャンセル", () => {
+    it("通常モードでは DataPreview に戻る", async () => {
+      const user = userEvent.setup();
+      render(<DescriptiveStatistics />);
+
+      const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
+      await user.click(cancelBtn);
+
+      expect(mockSetCurrentView).toHaveBeenCalledWith("DataPreview");
+    });
+
+    it("work tab モードでは onCancel を呼ぶ", async () => {
+      const user = userEvent.setup();
+      const onCancel = vi.fn();
+      render(
+        <DescriptiveStatistics
+          workTabId="work:DescriptiveStatistics"
+          onCancel={onCancel}
+        />,
+      );
+
+      const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
+      await user.click(cancelBtn);
+
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
   });
 });

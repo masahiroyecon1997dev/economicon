@@ -6,6 +6,7 @@ import { Calculation } from "@/components/pages/Calculation";
 import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
+import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
 import { JoinTable } from "@/components/pages/JoinTable";
 import { Regression } from "@/components/pages/RegressionView";
 import { StatisticalTestView } from "@/components/pages/StatisticalTestView";
@@ -28,7 +29,7 @@ import { useTranslation } from "react-i18next";
 
 type StaticWorkFeatureKey = Exclude<
   WorkFeatureKey,
-  "CorrelationMatrix" | "StatisticalTestView"
+  "CorrelationMatrix" | "DescriptiveStatistics" | "StatisticalTestView"
 >;
 
 const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
@@ -63,6 +64,13 @@ const isStatisticalTestWorkTab = (
   featureKey: "StatisticalTestView";
   id: "work:StatisticalTestView";
 } => tab.featureKey === "StatisticalTestView";
+
+const isDescriptiveStatisticsWorkTab = (
+  tab: WorkspaceWorkTab,
+): tab is WorkspaceWorkTab & {
+  featureKey: "DescriptiveStatistics";
+  id: "work:DescriptiveStatistics";
+} => tab.featureKey === "DescriptiveStatistics";
 
 export const WorkspaceSurface = () => {
   const { t } = useTranslation();
@@ -244,6 +252,15 @@ export const WorkspaceSurface = () => {
     if (isStatisticalTestWorkTab(tab)) {
       return (
         <StatisticalTestView
+          workTabId={tab.id}
+          onCancel={() => void handleCloseTab(tab.id)}
+        />
+      );
+    }
+
+    if (isDescriptiveStatisticsWorkTab(tab)) {
+      return (
+        <DescriptiveStatistics
           workTabId={tab.id}
           onCancel={() => void handleCloseTab(tab.id)}
         />
