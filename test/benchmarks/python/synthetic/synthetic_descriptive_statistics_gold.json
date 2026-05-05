@@ -11,24 +11,15 @@
     },
     "data_file": "synthetic_statistics_core.parquet",
     "model": "descriptive_statistics",
-    "aux_data_files": [
-      "synthetic_statistics_nulls.parquet"
-    ]
+    "aux_data_files": ["synthetic_statistics_nulls.parquet"]
   },
   "estimates": {
     "cases": [
       {
         "case_id": "ds_A_basic",
         "table_name": "synthetic_statistics_core",
-        "column_names": [
-          "A"
-        ],
-        "requested_statistics": [
-          "mean",
-          "median",
-          "variance",
-          "std_dev"
-        ],
+        "column_names": ["A"],
+        "requested_statistics": ["mean", "median", "variance", "std_dev"],
         "expected": {
           "statistics": {
             "A": {
@@ -43,13 +34,8 @@
       {
         "case_id": "ds_A_range_iqr",
         "table_name": "synthetic_statistics_core",
-        "column_names": [
-          "A"
-        ],
-        "requested_statistics": [
-          "range",
-          "iqr"
-        ],
+        "column_names": ["A"],
+        "requested_statistics": ["range", "iqr"],
         "expected": {
           "statistics": {
             "A": {
@@ -62,13 +48,8 @@
       {
         "case_id": "ds_A_variance_vs_population",
         "table_name": "synthetic_statistics_core",
-        "column_names": [
-          "A"
-        ],
-        "requested_statistics": [
-          "variance",
-          "population_variance"
-        ],
+        "column_names": ["A"],
+        "requested_statistics": ["variance", "population_variance"],
         "expected": {
           "statistics": {
             "A": {
@@ -81,14 +62,8 @@
       {
         "case_id": "ds_A_counts",
         "table_name": "synthetic_statistics_core",
-        "column_names": [
-          "A"
-        ],
-        "requested_statistics": [
-          "count",
-          "null_count",
-          "null_ratio"
-        ],
+        "column_names": ["A"],
+        "requested_statistics": ["count", "null_count", "null_ratio"],
         "expected": {
           "statistics": {
             "A": {
@@ -102,14 +77,8 @@
       {
         "case_id": "ds_X_null_counts",
         "table_name": "synthetic_statistics_nulls",
-        "column_names": [
-          "X"
-        ],
-        "requested_statistics": [
-          "count",
-          "null_count",
-          "null_ratio"
-        ],
+        "column_names": ["X"],
+        "requested_statistics": ["count", "null_count", "null_ratio"],
         "expected": {
           "statistics": {
             "X": {
@@ -123,14 +92,8 @@
       {
         "case_id": "ds_AB_mean_std",
         "table_name": "synthetic_statistics_core",
-        "column_names": [
-          "A",
-          "B"
-        ],
-        "requested_statistics": [
-          "mean",
-          "std_dev"
-        ],
+        "column_names": ["A", "B"],
+        "requested_statistics": ["mean", "std_dev"],
         "expected": {
           "statistics": {
             "A": {
@@ -147,19 +110,12 @@
       {
         "case_id": "ds_name_mode",
         "table_name": "synthetic_statistics_core",
-        "column_names": [
-          "name"
-        ],
-        "requested_statistics": [
-          "mode"
-        ],
+        "column_names": ["name"],
+        "requested_statistics": ["mode"],
         "expected": {
           "statistics": {
             "name": {
-              "mode": [
-                "Alice",
-                "Bob"
-              ]
+              "mode": ["Alice", "Bob"]
             }
           }
         }
@@ -167,18 +123,41 @@
       {
         "case_id": "ds_name_numeric_none",
         "table_name": "synthetic_statistics_core",
-        "column_names": [
-          "name"
-        ],
-        "requested_statistics": [
-          "mean",
-          "variance"
-        ],
+        "column_names": ["name"],
+        "requested_statistics": ["mean", "variance"],
         "expected": {
           "statistics": {
             "name": {
               "mean": null,
               "variance": null
+            }
+          }
+        }
+      },
+      {
+        "case_id": "ds_A_min_max",
+        "table_name": "synthetic_statistics_core",
+        "column_names": ["A"],
+        "requested_statistics": ["min", "max"],
+        "expected": {
+          "statistics": {
+            "A": {
+              "min": 1,
+              "max": 5
+            }
+          }
+        }
+      },
+      {
+        "case_id": "ds_A_skewness_kurtosis",
+        "table_name": "synthetic_statistics_core",
+        "column_names": ["A"],
+        "requested_statistics": ["skewness", "kurtosis"],
+        "expected": {
+          "statistics": {
+            "A": {
+              "skewness": 0.0,
+              "kurtosis": -1.3
             }
           }
         }

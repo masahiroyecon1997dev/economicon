@@ -155,7 +155,9 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
             "range: 範囲、iqr: 四分位数範囲、"
             "count: 有効サンプル数、null_count: null数、"
             "null_ratio: null割合、"
-            "population_variance: 母分散）",
+            "population_variance: 母分散、"
+            "min: 最小値、max: 最大値、"
+            "skewness: 歪度、kurtosis: 超過尖度）",
             min_length=1,
         ),
     ]

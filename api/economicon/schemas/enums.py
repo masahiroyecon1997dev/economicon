@@ -112,6 +112,10 @@ class DescriptiveStatisticType(StrEnum):
     NULL_COUNT = "null_count"
     NULL_RATIO = "null_ratio"
     POPULATION_VARIANCE = "population_variance"
+    MIN = "min"
+    MAX = "max"
+    SKEWNESS = "skewness"
+    KURTOSIS = "kurtosis"
 
 
 class JoinType(StrEnum):

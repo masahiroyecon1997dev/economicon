@@ -47,6 +47,14 @@ class DescriptiveStatistics:
         DescriptiveStatisticType.POPULATION_VARIANCE: (
             lambda c: pl.col(c).var(ddof=0)
         ),
+        DescriptiveStatisticType.MIN: lambda c: pl.col(c).min(),
+        DescriptiveStatisticType.MAX: lambda c: pl.col(c).max(),
+        DescriptiveStatisticType.SKEWNESS: (
+            lambda c: pl.col(c).skew(bias=True)
+        ),
+        DescriptiveStatisticType.KURTOSIS: (
+            lambda c: pl.col(c).kurtosis(fisher=True, bias=True)
+        ),
     }
 
     PARAM_NAMES: ClassVar[dict[str, str]] = {
@@ -105,6 +113,8 @@ class DescriptiveStatistics:
 
             result = {
                 "tableName": self.table_name,
+                "columnNameList": self.column_name_list,
+                "statisticOrder": [s.value for s in self.statistics],
                 "statistics": stats_result,
             }
 

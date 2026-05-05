@@ -25,11 +25,16 @@ _STAT_COUNT = "count"
 _STAT_NULL_COUNT = "null_count"
 _STAT_NULL_RATIO = "null_ratio"
 _STAT_POP_VARIANCE = "population_variance"
+_STAT_MIN = "min"
+_STAT_MAX = "max"
+_STAT_SKEWNESS = "skewness"
+_STAT_KURTOSIS = "kurtosis"
 
 _STATISTICS_ERROR = (
     "statisticsは次のいずれかである必要があります: "
     "mean, median, mode, variance, std_dev, range, iqr, "
-    "count, null_count, null_ratio, population_variance"
+    "count, null_count, null_ratio, population_variance, "
+    "min, max, skewness, kurtosis"
 )
 
 URL = "/api/statistics/descriptive"
@@ -406,6 +411,75 @@ def test_descriptive_statistics_string_numeric_stats_are_none(
     rd = _get_result_data(client, payload)
     assert rd["statistics"]["name"][_STAT_MEAN] is None
     assert rd["statistics"]["name"][_STAT_VARIANCE] is None
+
+
+def test_descriptive_statistics_min_max_numerical(client, tables_store):
+    """A=[1..5] の min と max が gold JSON と一致する"""
+    payload = {
+        "tableName": _TABLE_NUMERIC,
+        "columnNameList": ["A"],
+        "statistics": [_STAT_MIN, _STAT_MAX],
+    }
+    rd = _get_result_data(client, payload)
+    gold = load_statistics_gold_case("descriptive_statistics", "ds_A_min_max")
+    expected = gold["expected"]["statistics"]["A"]
+    stats_a = rd["statistics"]["A"]
+    assert stats_a[_STAT_MIN] == pytest.approx(expected[_STAT_MIN], abs=1e-8)
+    assert stats_a[_STAT_MAX] == pytest.approx(expected[_STAT_MAX], abs=1e-8)
+
+
+def test_descriptive_statistics_skewness_kurtosis_numerical(
+    client, tables_store
+):
+    """A=[1..5] の skewness と kurtosis が gold JSON と一致する"""
+    payload = {
+        "tableName": _TABLE_NUMERIC,
+        "columnNameList": ["A"],
+        "statistics": [_STAT_SKEWNESS, _STAT_KURTOSIS],
+    }
+    rd = _get_result_data(client, payload)
+    gold = load_statistics_gold_case(
+        "descriptive_statistics", "ds_A_skewness_kurtosis"
+    )
+    expected = gold["expected"]["statistics"]["A"]
+    stats_a = rd["statistics"]["A"]
+    assert stats_a[_STAT_SKEWNESS] == pytest.approx(
+        expected[_STAT_SKEWNESS], abs=1e-8
+    )
+    assert stats_a[_STAT_KURTOSIS] == pytest.approx(
+        expected[_STAT_KURTOSIS], abs=1e-8
+    )
+
+
+def test_descriptive_statistics_new_stats_on_string_are_none(
+    client, tables_store
+):
+    """文字列列に min/max/skewness/kurtosis を要求した場合 None が返る"""
+    payload = {
+        "tableName": _TABLE_STRING,
+        "columnNameList": ["name"],
+        "statistics": [
+            _STAT_SKEWNESS,
+            _STAT_KURTOSIS,
+        ],
+    }
+    rd = _get_result_data(client, payload)
+    assert rd["statistics"]["name"][_STAT_SKEWNESS] is None
+    assert rd["statistics"]["name"][_STAT_KURTOSIS] is None
+
+
+def test_descriptive_statistics_result_data_has_meta_fields(
+    client, tables_store
+):
+    """resultData に columnNameList と statisticOrder が含まれる"""
+    payload = {
+        "tableName": _TABLE_NUMERIC,
+        "columnNameList": ["A", "B"],
+        "statistics": [_STAT_MEAN, _STAT_STD_DEV],
+    }
+    rd = _get_result_data(client, payload)
+    assert rd["columnNameList"] == ["A", "B"]
+    assert rd["statisticOrder"] == [_STAT_MEAN, _STAT_STD_DEV]
 
 
 # -----------------------------------------------------------
