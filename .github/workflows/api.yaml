@@ -44,6 +44,12 @@ jobs:
         working-directory: ./api
         run: uv run ruff check .
 
+      # テスト用設定ファイルを作成（日本語ロケールを強制）
+      - name: Create test settings file (force Japanese locale)
+        run: |
+          mkdir -p ~/.economicon
+          echo '{"general": {"language": "ja"}}' > ~/.economicon/economicon.config.json
+
       # テストとカバレッジの実行
       - name: Run tests with coverage
         working-directory: ./api
