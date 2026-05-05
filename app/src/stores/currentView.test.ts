@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest";
 import type { CurrentPageValue } from "@/stores/currentView";
 import { useCurrentPageStore } from "@/stores/currentView";
+import { beforeEach, describe, expect, it } from "vitest";
 
 beforeEach(() => {
   useCurrentPageStore.setState({ currentView: "ImportDataFile" });
@@ -19,6 +19,7 @@ describe("useCurrentPageStore", () => {
       "JoinTable",
       "UnionTable",
       "DescriptiveStatistics",
+      "StatisticalTestView",
       "CorrelationMatrix",
       "ConfidenceIntervalView",
       "LinearRegressionForm",

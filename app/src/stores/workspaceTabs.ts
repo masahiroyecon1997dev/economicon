@@ -23,6 +23,7 @@ export type WorkFeatureKey =
   | "CreateSimulationDataTable"
   | "CalculationView"
   | "ConfidenceIntervalView"
+  | "StatisticalTestView"
   | "LinearRegressionForm"
   | "CorrelationMatrix";
 
@@ -76,7 +77,7 @@ type WorkspaceTabsStore = WorkspaceTabsState & WorkspaceTabsActions;
 const toWorkTabId = (featureKey: WorkFeatureKey): `work:${WorkFeatureKey}` =>
   `work:${featureKey}`;
 
-const cloneWorkTabValues = <T,>(values: T): T => {
+const cloneWorkTabValues = <T>(values: T): T => {
   if (values === undefined) {
     return values;
   }

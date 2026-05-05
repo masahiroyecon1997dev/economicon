@@ -27,6 +27,10 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     titleKey: "HeaderMenu.ConfidenceInterval",
   },
   {
+    featureKey: "StatisticalTestView",
+    titleKey: "HeaderMenu.HypothesisTest",
+  },
+  {
     featureKey: "LinearRegressionForm",
     titleKey: "HeaderMenu.OrdinaryLeastSquares",
   },

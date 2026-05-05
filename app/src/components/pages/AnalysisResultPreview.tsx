@@ -2,6 +2,7 @@ import type { AnalysisResultDetail } from "@/api/model";
 import { ConfidenceIntervalResult } from "@/components/organisms/Result/ConfidenceIntervalResult";
 import { DescriptiveStatisticsResult } from "@/components/organisms/Result/DescriptiveStatisticsResult";
 import { RegressionResult } from "@/components/organisms/Result/RegressionResult";
+import { StatisticalTestResult } from "@/components/organisms/Result/StatisticalTestResult";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import type { ConfidenceIntervalResultEntry } from "@/stores/confidenceIntervalResults";
@@ -119,10 +120,15 @@ export const AnalysisResultPanel = ({
           />
         )}
 
+        {detail.resultType === "statistical_test" && (
+          <StatisticalTestResult detail={detail} />
+        )}
+
         {![
           "regression",
           "confidence_interval",
           "descriptive_statistics",
+          "statistical_test",
         ].includes(detail.resultType) && (
           <div
             className="rounded-lg border border-border-color bg-white p-6 text-sm text-brand-text-sub dark:bg-brand-primary"

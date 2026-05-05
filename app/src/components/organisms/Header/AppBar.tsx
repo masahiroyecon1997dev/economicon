@@ -175,7 +175,10 @@ export const AppBar = () => {
 
   const close = () => setOpenMenuId(null);
 
-  const handleOpenWorkTab = (featureKey: (typeof WORK_TAB_ENTRIES)[number]["featureKey"], title: string) => {
+  const handleOpenWorkTab = (
+    featureKey: (typeof WORK_TAB_ENTRIES)[number]["featureKey"],
+    title: string,
+  ) => {
     openWorkTab(featureKey, title);
     setCurrentView(featureKey);
     close();
@@ -215,12 +218,14 @@ export const AppBar = () => {
         {
           id: "join-table",
           label: t("HeaderMenu.JoinTable"),
-          handleSelect: () => handleOpenWorkTab("JoinTable", t("HeaderMenu.JoinTable")),
+          handleSelect: () =>
+            handleOpenWorkTab("JoinTable", t("HeaderMenu.JoinTable")),
         },
         {
           id: "union-table",
           label: t("HeaderMenu.UnionTable"),
-          handleSelect: () => handleOpenWorkTab("UnionTable", t("HeaderMenu.UnionTable")),
+          handleSelect: () =>
+            handleOpenWorkTab("UnionTable", t("HeaderMenu.UnionTable")),
         },
         {
           id: "data-generation",
@@ -268,6 +273,15 @@ export const AppBar = () => {
             handleOpenWorkTab(
               "ConfidenceIntervalView",
               t("HeaderMenu.ConfidenceInterval"),
+            ),
+        },
+        {
+          id: "hypothesis-test",
+          label: t("HeaderMenu.HypothesisTest"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "StatisticalTestView",
+              t("HeaderMenu.HypothesisTest"),
             ),
         },
       ],

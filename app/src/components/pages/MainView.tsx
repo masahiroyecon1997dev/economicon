@@ -10,6 +10,7 @@ const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
   JoinTable: <WorkspaceSurface />,
   UnionTable: <WorkspaceSurface />,
   DescriptiveStatistics: <DescriptiveStatistics />,
+  StatisticalTestView: <WorkspaceSurface />,
   CorrelationMatrix: <WorkspaceSurface />,
   ConfidenceIntervalView: <WorkspaceSurface />,
   LinearRegressionForm: <WorkspaceSurface />,

@@ -42,6 +42,9 @@ vi.mock("./ConfidenceIntervalView", () => ({
 vi.mock("./RegressionView", () => ({
   Regression: () => <div data-testid="work-reg" />,
 }));
+vi.mock("./StatisticalTestView", () => ({
+  StatisticalTestView: () => <div data-testid="work-stat-test" />,
+}));
 vi.mock("./CorrelationMatrix", () => ({
   CorrelationMatrix: () => <div data-testid="work-corr" />,
 }));
@@ -104,7 +107,9 @@ describe("WorkspaceSurface コンポーネント", () => {
 
     render(<WorkspaceSurface />);
 
-    expect(screen.getByTestId("workspace-work-tab-JoinTable")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("workspace-work-tab-JoinTable"),
+    ).toBeInTheDocument();
     expect(screen.getByTestId("work-join-input")).toBeInTheDocument();
   });
 
@@ -130,6 +135,30 @@ describe("WorkspaceSurface コンポーネント", () => {
       screen.getByTestId("workspace-work-tab-CorrelationMatrix"),
     ).toBeInTheDocument();
     expect(screen.getByTestId("work-corr")).toBeInTheDocument();
+  });
+
+  it("StatisticalTestView の work tab も WorkspaceSurface 経由で表示する", () => {
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "work:StatisticalTestView",
+          kind: "work",
+          title: "仮説検定",
+          featureKey: "StatisticalTestView",
+          dirty: false,
+          createdAt: Date.now(),
+        },
+      ],
+      activeTabId: "work:StatisticalTestView",
+    });
+    useCurrentPageStore.setState({ currentView: "StatisticalTestView" });
+
+    render(<WorkspaceSurface />);
+
+    expect(
+      screen.getByTestId("workspace-work-tab-StatisticalTestView"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("work-stat-test")).toBeInTheDocument();
   });
 
   it("work tab で入力すると dirty になり、閉じる時に確認する", async () => {

@@ -44,6 +44,13 @@ export type OutputResultDialogPropsType =
       resultKind: "confidence_interval";
       resultId: string;
       title: string;
+    }
+  | {
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      resultKind: "statistical_test";
+      resultId: string;
+      title: string;
     };
 
 type RegressionOutputResultDialogContentPropsType = {
@@ -65,7 +72,10 @@ type DescriptiveStatisticsOutputResultDialogContentPropsType = {
   onOpenChange: (open: boolean) => void;
   resultId: string;
   title: string;
-  resultType: "descriptive_statistics" | "confidence_interval";
+  resultType:
+    | "descriptive_statistics"
+    | "confidence_interval"
+    | "statistical_test";
   format: OutputResultFormat;
   setFormat: (value: OutputResultFormat) => void;
 };
@@ -445,6 +455,15 @@ const DescriptiveStatisticsOutputResultDialogContent = ({
       return;
     }
 
+    if (resultType === "statistical_test") {
+      void fetchOutput({
+        resultType,
+        resultIds: [resultId],
+        format,
+      });
+      return;
+    }
+
     void fetchOutput({
       resultType,
       resultIds: [resultId],
@@ -571,7 +590,8 @@ export const OutputResultDialog = (props: OutputResultDialogPropsType) => {
 
   if (
     props.resultKind === "descriptive_statistics" ||
-    props.resultKind === "confidence_interval"
+    props.resultKind === "confidence_interval" ||
+    props.resultKind === "statistical_test"
   ) {
     return (
       <DescriptiveStatisticsOutputResultDialogContent

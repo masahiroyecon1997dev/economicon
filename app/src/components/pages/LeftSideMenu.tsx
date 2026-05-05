@@ -32,17 +32,22 @@ const OUTPUT_SUPPORTED_TYPES = new Set([
   "descriptive_statistics",
   "confidence_interval",
   "regression",
+  "statistical_test",
 ]);
 
 type OutputSupportedType =
   | "descriptive_statistics"
   | "confidence_interval"
+  | "statistical_test"
   | "regression";
 
 type OutputTarget =
   | {
       id: string;
-      type: "descriptive_statistics" | "confidence_interval";
+      type:
+        | "descriptive_statistics"
+        | "confidence_interval"
+        | "statistical_test";
       title: string;
     }
   | {

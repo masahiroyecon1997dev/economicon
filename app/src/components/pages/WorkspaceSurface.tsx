@@ -3,11 +3,12 @@ import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnal
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
 import { Calculation } from "@/components/pages/Calculation";
-import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
+import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { JoinTable } from "@/components/pages/JoinTable";
 import { Regression } from "@/components/pages/RegressionView";
+import { StatisticalTestView } from "@/components/pages/StatisticalTestView";
 import { UnionTable } from "@/components/pages/UnionTable";
 import { isWorkFeatureKey } from "@/constants/workspaceTabs";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
@@ -25,7 +26,10 @@ import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-type StaticWorkFeatureKey = Exclude<WorkFeatureKey, "CorrelationMatrix">;
+type StaticWorkFeatureKey = Exclude<
+  WorkFeatureKey,
+  "CorrelationMatrix" | "StatisticalTestView"
+>;
 
 const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
   JoinTable: <JoinTable />,
@@ -208,6 +212,15 @@ export const WorkspaceSurface = () => {
             openDataTab(tableName);
             setCurrentView("DataPreview");
           }}
+          onCancel={() => void handleCloseTab(tab.id)}
+        />
+      );
+    }
+
+    if (tab.featureKey === "StatisticalTestView") {
+      return (
+        <StatisticalTestView
+          workTabId={tab.id}
           onCancel={() => void handleCloseTab(tab.id)}
         />
       );

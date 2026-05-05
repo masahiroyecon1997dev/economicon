@@ -40,6 +40,7 @@ describe("MainView コンポーネント", () => {
     ["JoinTable", "page-WorkspaceSurface"],
     ["UnionTable", "page-WorkspaceSurface"],
     ["DescriptiveStatistics", "page-DescriptiveStatistics"],
+    ["StatisticalTestView", "page-WorkspaceSurface"],
     ["CorrelationMatrix", "page-WorkspaceSurface"],
     ["ConfidenceIntervalView", "page-WorkspaceSurface"],
     ["LinearRegressionForm", "page-WorkspaceSurface"],

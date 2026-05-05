@@ -39,15 +39,15 @@ describe("workspaceTabs store", () => {
     useWorkspaceTabsStore.getState().openWorkTab("JoinTable", "ジョイン");
     useWorkspaceTabsStore
       .getState()
-      .openWorkTab("CalculationView", "計算");
+      .openWorkTab("StatisticalTestView", "仮説検定");
 
     const state = useWorkspaceTabsStore.getState();
     expect(state.tabs).toHaveLength(2);
     expect(state.tabs.map((tab) => tab.id)).toEqual([
       "work:JoinTable",
-      "work:CalculationView",
+      "work:StatisticalTestView",
     ]);
-    expect(state.activeTabId).toBe("work:CalculationView");
+    expect(state.activeTabId).toBe("work:StatisticalTestView");
   });
 
   it("draft 更新は committedValues との差分で dirty を判定する", () => {
@@ -85,7 +85,9 @@ describe("workspaceTabs store", () => {
       columnNames: ["price", "quantity"],
     });
 
-    tab = useWorkspaceTabsStore.getState().tabs.find((item) => item.id === tabId);
+    tab = useWorkspaceTabsStore
+      .getState()
+      .tabs.find((item) => item.id === tabId);
     expect(tab).toMatchObject({
       kind: "work",
       dirty: false,
