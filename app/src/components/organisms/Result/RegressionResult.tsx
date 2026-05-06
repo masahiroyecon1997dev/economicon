@@ -1,6 +1,7 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { OutputResultFormat } from "@/api/model/outputResultFormat";
 import { RegressionOutputOptionsStatInParentheses } from "@/api/model/regressionOutputOptionsStatInParentheses";
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
 import {
   ResultSection,
   StatItem,
@@ -75,46 +76,54 @@ export const RegressionResult = ({
       <ResultSection title={t("RegressionResult.AnalysisSummary")}>
         {/* ── ヘッダー右端: 出力ボタン群 ── */}
         <div className="mb-3 flex justify-end gap-1.5">
-          <button
-            type="button"
-            onClick={() => void handleQuickCopy()}
-            disabled={isQuickCopying}
-            title={t("RegressionResult.QuickCopyMd")}
-            className={cn(
-              "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
-              "border border-gray-300 dark:border-gray-600",
-              "hover:bg-gray-100 dark:hover:bg-gray-700",
-              "disabled:cursor-not-allowed disabled:opacity-50",
-              isQuickCopied
-                ? "border-green-500 text-green-600 dark:text-green-400"
-                : "text-gray-600 dark:text-gray-400",
-            )}
-            data-testid="quick-copy-md-btn"
-          >
-            {isQuickCopying ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : isQuickCopied ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Clipboard className="h-3.5 w-3.5" />
-            )}
-            MD
-          </button>
+          <Tooltip content={t("RegressionResult.QuickCopyMd")}>
+            <span className="inline-flex">
+              <button
+                type="button"
+                onClick={() => void handleQuickCopy()}
+                disabled={isQuickCopying}
+                aria-label={t("RegressionResult.QuickCopyMd")}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                  "border border-gray-300 dark:border-gray-600",
+                  "hover:bg-gray-100 dark:hover:bg-gray-700",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
+                  isQuickCopied
+                    ? "border-green-500 text-green-600 dark:text-green-400"
+                    : "text-gray-600 dark:text-gray-400",
+                )}
+                data-testid="quick-copy-md-btn"
+              >
+                {isQuickCopying ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : isQuickCopied ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  <Clipboard className="h-3.5 w-3.5" />
+                )}
+                MD
+              </button>
+            </span>
+          </Tooltip>
 
-          <button
-            type="button"
-            onClick={openOutputDialog}
-            title={t("RegressionResult.OutputDialog")}
-            className={cn(
-              "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
-              "border border-gray-300 dark:border-gray-600",
-              "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            data-testid="open-output-dialog-btn"
-          >
-            <FileDown className="h-3.5 w-3.5" />
-            {t("RegressionResult.OutputDialog")}
-          </button>
+          <Tooltip content={t("RegressionResult.OutputDialog")}>
+            <span className="inline-flex">
+              <button
+                type="button"
+                onClick={openOutputDialog}
+                aria-label={t("RegressionResult.OutputDialog")}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                  "border border-gray-300 dark:border-gray-600",
+                  "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+                )}
+                data-testid="open-output-dialog-btn"
+              >
+                <FileDown className="h-3.5 w-3.5" />
+                {t("RegressionResult.OutputDialog")}
+              </button>
+            </span>
+          </Tooltip>
         </div>
 
         <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm md:grid-cols-2">

@@ -1,4 +1,5 @@
 import { DescriptiveStatisticType } from "@/api/model";
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { cn } from "@/lib/utils/helpers";
 import { Check, Clipboard, Loader2 } from "lucide-react";
@@ -137,30 +138,34 @@ export const DescriptiveStatisticsResult = ({
             <p className="text-xs text-brand-text-sub">{tableName}</p>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => void handleQuickCopy()}
-              disabled={isQuickCopying}
-              className={cn(
-                "inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
-                "border border-gray-300 dark:border-gray-600",
-                isQuickCopied
-                  ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                  : "bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
-                "disabled:cursor-not-allowed disabled:opacity-50",
-              )}
-              title={t("DescriptiveStatistics.OutputDialog")}
-              data-testid="analysis-result-output-button"
-            >
-              {isQuickCopying ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : isQuickCopied ? (
-                <Check className="h-3.5 w-3.5" />
-              ) : (
-                <Clipboard className="h-3.5 w-3.5" />
-              )}
-              {t("DescriptiveStatistics.OutputDialog")}
-            </button>
+            <Tooltip content={t("DescriptiveStatistics.OutputDialog")}>
+              <span className="inline-flex">
+                <button
+                  type="button"
+                  onClick={() => void handleQuickCopy()}
+                  disabled={isQuickCopying}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
+                    "border border-gray-300 dark:border-gray-600",
+                    isQuickCopied
+                      ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      : "bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+                    "disabled:cursor-not-allowed disabled:opacity-50",
+                  )}
+                  aria-label={t("DescriptiveStatistics.OutputDialog")}
+                  data-testid="analysis-result-output-button"
+                >
+                  {isQuickCopying ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : isQuickCopied ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    <Clipboard className="h-3.5 w-3.5" />
+                  )}
+                  {t("DescriptiveStatistics.OutputDialog")}
+                </button>
+              </span>
+            </Tooltip>
           </div>
         </div>
 

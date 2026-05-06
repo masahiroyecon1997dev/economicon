@@ -343,10 +343,7 @@ export const LeftSideMenu = () => {
       <div className="flex items-center justify-between px-4 pb-2 pt-3">
         <h2 className="font-semibold">{t("LeftSideMenu.Title")}</h2>
         <Tooltip content={t("LeftSideMenu.ResetWorkspaceTooltip")}>
-          <span
-            className="inline-flex"
-            title={t("LeftSideMenu.ResetWorkspaceTooltip")}
-          >
+          <span className="inline-flex">
             <button
               type="button"
               className={cn(

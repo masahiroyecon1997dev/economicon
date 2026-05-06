@@ -3,6 +3,7 @@ import { CalculateColumnBody } from "@/api/zod/column/column";
 import { ExpressionHelperButton } from "@/components/atoms/Button/ExpressionHelperButton";
 import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { FormField } from "@/components/molecules/Form/FormField";
 import { SearchInput } from "@/components/molecules/Form/SearchInput";
@@ -312,17 +313,21 @@ export const Calculation = () => {
                     )
                   </ExpressionHelperButton>
                   <div className="ml-auto flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleClearClick}
-                      className="text-neutral-400 hover:text-accent transition-colors"
-                      title={t("CalculationView.ClearAll")}
-                      disabled={isSubmitting}
-                    >
-                      <span className="material-symbols-outlined text-[20px]">
-                        <Eraser />
+                    <Tooltip content={t("CalculationView.ClearAll")}>
+                      <span className="inline-flex">
+                        <button
+                          type="button"
+                          onClick={handleClearClick}
+                          className="text-neutral-400 hover:text-accent transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                          aria-label={t("CalculationView.ClearAll")}
+                          disabled={isSubmitting}
+                        >
+                          <span className="material-symbols-outlined text-[20px]">
+                            <Eraser />
+                          </span>
+                        </button>
                       </span>
-                    </button>
+                    </Tooltip>
                   </div>
                 </div>
 

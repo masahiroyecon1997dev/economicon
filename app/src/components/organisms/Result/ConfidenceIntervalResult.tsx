@@ -1,5 +1,6 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { OutputResultFormat } from "@/api/model/outputResultFormat";
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { cn } from "@/lib/utils/helpers";
 import type { ConfidenceIntervalResultEntry } from "@/stores/confidenceIntervalResults";
@@ -66,46 +67,54 @@ export const ConfidenceIntervalResult = ({
         {/* ヘッダー */}
         <div className="px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
           <div className="mb-3 flex justify-end gap-1.5">
-            <button
-              type="button"
-              onClick={() => void handleQuickCopy()}
-              disabled={isQuickCopying}
-              title={t("ConfidenceIntervalView.QuickCopyMd")}
-              className={cn(
-                "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
-                "border border-gray-300 dark:border-gray-600",
-                "hover:bg-gray-100 dark:hover:bg-gray-700",
-                "disabled:cursor-not-allowed disabled:opacity-50",
-                isQuickCopied
-                  ? "border-green-500 text-green-600 dark:text-green-400"
-                  : "text-gray-600 dark:text-gray-400",
-              )}
-              data-testid="ci-quick-copy-md-btn"
-            >
-              {isQuickCopying ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : isQuickCopied ? (
-                <Check className="h-3.5 w-3.5" />
-              ) : (
-                <Clipboard className="h-3.5 w-3.5" />
-              )}
-              MD
-            </button>
+            <Tooltip content={t("ConfidenceIntervalView.QuickCopyMd")}>
+              <span className="inline-flex">
+                <button
+                  type="button"
+                  onClick={() => void handleQuickCopy()}
+                  disabled={isQuickCopying}
+                  aria-label={t("ConfidenceIntervalView.QuickCopyMd")}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                    "border border-gray-300 dark:border-gray-600",
+                    "hover:bg-gray-100 dark:hover:bg-gray-700",
+                    "disabled:cursor-not-allowed disabled:opacity-50",
+                    isQuickCopied
+                      ? "border-green-500 text-green-600 dark:text-green-400"
+                      : "text-gray-600 dark:text-gray-400",
+                  )}
+                  data-testid="ci-quick-copy-md-btn"
+                >
+                  {isQuickCopying ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : isQuickCopied ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    <Clipboard className="h-3.5 w-3.5" />
+                  )}
+                  MD
+                </button>
+              </span>
+            </Tooltip>
 
-            <button
-              type="button"
-              onClick={openOutputDialog}
-              title={t("ConfidenceIntervalView.OutputDialog")}
-              className={cn(
-                "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
-                "border border-gray-300 dark:border-gray-600",
-                "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-              )}
-              data-testid="ci-open-output-dialog-btn"
-            >
-              <FileDown className="h-3.5 w-3.5" />
-              {t("ConfidenceIntervalView.OutputDialog")}
-            </button>
+            <Tooltip content={t("ConfidenceIntervalView.OutputDialog")}>
+              <span className="inline-flex">
+                <button
+                  type="button"
+                  onClick={openOutputDialog}
+                  aria-label={t("ConfidenceIntervalView.OutputDialog")}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                    "border border-gray-300 dark:border-gray-600",
+                    "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+                  )}
+                  data-testid="ci-open-output-dialog-btn"
+                >
+                  <FileDown className="h-3.5 w-3.5" />
+                  {t("ConfidenceIntervalView.OutputDialog")}
+                </button>
+              </span>
+            </Tooltip>
           </div>
 
           <h3 className="text-sm font-semibold text-gray-800">

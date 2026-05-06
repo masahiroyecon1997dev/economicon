@@ -1,6 +1,7 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import type { AnalysisResultDetail } from "@/api/model";
 import { OutputResultFormat } from "@/api/model/outputResultFormat";
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { cn } from "@/lib/utils/helpers";
 import { Check, Clipboard, FileDown, Loader2 } from "lucide-react";
@@ -86,46 +87,54 @@ export const StatisticalTestResult = ({
             </p>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => void handleQuickCopy()}
-              disabled={isQuickCopying}
-              title={t("StatisticalTestResult.QuickCopyMd")}
-              className={cn(
-                "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
-                "border border-gray-300 dark:border-gray-600",
-                "hover:bg-gray-100 dark:hover:bg-gray-700",
-                "disabled:cursor-not-allowed disabled:opacity-50",
-                isQuickCopied
-                  ? "border-green-500 text-green-600 dark:text-green-400"
-                  : "text-gray-600 dark:text-gray-400",
-              )}
-              data-testid="statistical-test-quick-copy-md-btn"
-            >
-              {isQuickCopying ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : isQuickCopied ? (
-                <Check className="h-3.5 w-3.5" />
-              ) : (
-                <Clipboard className="h-3.5 w-3.5" />
-              )}
-              MD
-            </button>
+            <Tooltip content={t("StatisticalTestResult.QuickCopyMd")}>
+              <span className="inline-flex">
+                <button
+                  type="button"
+                  onClick={() => void handleQuickCopy()}
+                  disabled={isQuickCopying}
+                  aria-label={t("StatisticalTestResult.QuickCopyMd")}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                    "border border-gray-300 dark:border-gray-600",
+                    "hover:bg-gray-100 dark:hover:bg-gray-700",
+                    "disabled:cursor-not-allowed disabled:opacity-50",
+                    isQuickCopied
+                      ? "border-green-500 text-green-600 dark:text-green-400"
+                      : "text-gray-600 dark:text-gray-400",
+                  )}
+                  data-testid="statistical-test-quick-copy-md-btn"
+                >
+                  {isQuickCopying ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : isQuickCopied ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    <Clipboard className="h-3.5 w-3.5" />
+                  )}
+                  MD
+                </button>
+              </span>
+            </Tooltip>
 
-            <button
-              type="button"
-              onClick={openOutputDialog}
-              title={t("StatisticalTestResult.OutputDialog")}
-              className={cn(
-                "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
-                "border border-gray-300 dark:border-gray-600",
-                "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-              )}
-              data-testid="statistical-test-open-output-dialog-btn"
-            >
-              <FileDown className="h-3.5 w-3.5" />
-              {t("StatisticalTestResult.OutputDialog")}
-            </button>
+            <Tooltip content={t("StatisticalTestResult.OutputDialog")}>
+              <span className="inline-flex">
+                <button
+                  type="button"
+                  onClick={openOutputDialog}
+                  aria-label={t("StatisticalTestResult.OutputDialog")}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                    "border border-gray-300 dark:border-gray-600",
+                    "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+                  )}
+                  data-testid="statistical-test-open-output-dialog-btn"
+                >
+                  <FileDown className="h-3.5 w-3.5" />
+                  {t("StatisticalTestResult.OutputDialog")}
+                </button>
+              </span>
+            </Tooltip>
           </div>
         </div>
 
