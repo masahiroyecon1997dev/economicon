@@ -62,30 +62,31 @@
 - statistics は列名ごとの辞書を維持し、追加統計量を同じレベルで返す。
 
 想定 shape:
+
 ```json
 {
-	"tableName": "sales",
-	"columnNameList": ["revenue", "employees"],
-	"statisticOrder": [
-		"count",
-		"mean",
-		"std_dev",
-		"min",
-		"max",
-		"skewness",
-		"kurtosis"
-	],
-	"statistics": {
-		"revenue": {
-			"count": 120,
-			"mean": 103.2,
-			"std_dev": 14.8,
-			"min": 74.0,
-			"max": 151.0,
-			"skewness": 0.41,
-			"kurtosis": -0.62
-		}
-	}
+  "tableName": "sales",
+  "columnNameList": ["revenue", "employees"],
+  "statisticOrder": [
+    "count",
+    "mean",
+    "std_dev",
+    "min",
+    "max",
+    "skewness",
+    "kurtosis"
+  ],
+  "statistics": {
+    "revenue": {
+      "count": 120,
+      "mean": 103.2,
+      "std_dev": 14.8,
+      "min": 74.0,
+      "max": 151.0,
+      "skewness": 0.41,
+      "kurtosis": -0.62
+    }
+  }
 }
 ```
 
@@ -128,7 +129,7 @@ canonical order:
 
 ### DescriptiveStatisticsResult の i18n
 
-- 統計量ラベルは DescriptiveStatistics.Stat_<statKey> に統一する。
+- 統計量ラベルは DescriptiveStatistics.Stat\_<statKey> に統一する。
 - 追加キーは次で固定する。
 - ja: Stat_min=最小値、Stat_max=最大値、Stat_skewness=歪度、Stat_kurtosis=超過尖度
 - en: Stat_min=Min、Stat_max=Max、Stat_skewness=Skewness、Stat_kurtosis=Excess Kurtosis
@@ -171,3 +172,93 @@ canonical order:
 ## 未修正 backlog
 
 - [pending] 詳細オプションが多い分析画面は、初期表示をコンパクトに保つレイアウトへさらに寄せる。
+
+---
+
+### E2E テスト追加
+
+#### 相関行列テーブル作成 E2E
+
+- シナリオ: ファイルインポート → 相関行列フォームで列を複数選択 → 実行 → 結果テーブル名がサイドバーに追加表示されることを確認
+- 確認ポイント: 新テーブルがサイドバーの一覧に現れる / result tab が開くこと
+- 配置案: 既存の `02-parquet-import-statistics-ols.spec.ts` に追記
+
+#### 仮説検定 正常系 E2E
+
+- シナリオ: サンプル CSV インポート → 仮説検定（t 検定）フォームで変数・設定を選択 → 実行 → result tab に検定統計量と p 値が表示されることを確認
+- 確認ポイント: result tab が開くこと / 検定統計量・p 値の表示セクションが存在すること
+- 配置案: 新規 `app/e2e/04-hypothesis-test.spec.ts`
+
+---
+
+### Plotly.js 統計ビジュアライゼーション
+
+#### 配置方針（要最終確認）
+
+4 種のうち **① 分布シミュレーション** はデータ生成フォームの文脈で使うことを想定。
+列編集ダイアログ内のプレビューパネルへの統合を第一案とするが、ダイアログのサイズ・レイアウト変更が必要なため要検討。
+**② ③ ④** の教育的シミュレーション図は独立した統計教育ビジュアライゼーションページにまとめ、メインメニューから遷移する方式を第一案とする。
+
+#### ① 分布シミュレーション図
+
+- 内容: データ生成で利用可能な全分布（正規 / 一様 / t / カイ二乗 / F / 二項 / ポアソン など）の PDF / PMF をインタラクティブに表示
+- インタラクション: 分布種別セレクタ + 各パラメータのスライダー → リアルタイムで確率密度/質量関数を再描画
+- データソース: クライアント側 JS で生成（API 不要）
+- 配置案: データ生成の列編集ダイアログ内プレビューパネル（要レイアウト検討）
+
+#### ② 信頼区間の網羅性シミュレーション
+
+- 内容: 真の値 μ を固定し同一設定で CI を 100 本生成、95% が真値を含む様子を可視化
+- インタラクション: サンプルサイズ / 信頼水準 / 真のパラメータをスライダーで変更 → 包含率と図を再計算
+- データソース: クライアント側 JS で乱数生成
+
+#### ③ 回帰パラメータ分布（CLT・漸近正規性）
+
+- 内容: 同一 DGP で回帰を 100 回繰り返し、β 推定値の分布が正規分布に収束する様子を図示
+- インタラクション: サンプルサイズ / 真の β / 誤差分散をスライダーで変更
+- データソース: クライアント側 JS で乱数生成
+
+#### ④ 一致性の可視化
+
+- 内容: サンプルサイズを増やしながら β 推定値が真値に収束する様子を折れ線またはアニメーションで表示
+- インタラクション: 試行回数 / 真の β をスライダーで変更
+- データソース: クライアント側 JS で乱数生成
+
+#### 技術メモ
+
+- plotly.js はインストール済み
+- ② ③ ④ 用コンポーネント配置案: `app/src/components/pages/StatVizPage.tsx`
+- ① 用コンポーネント配置案: `app/src/components/organisms/Dialog/SimulationColumnEditDialog.tsx` 内プレビューパネル
+
+---
+
+### グループ別基本統計量テーブル作成（フロント実装）
+
+#### 概要
+
+`POST /api/statistics/create-group-statistics-table` は API 実装済み。フロントの実装が未対応。
+
+#### フォーム仕様
+
+| フィールド     | UI 部品               | 備考                                   |
+| -------------- | --------------------- | -------------------------------------- |
+| 対象テーブル   | Select                | テーブル一覧から選択                   |
+| グループキー列 | VariableSelectorField | 複数選択可                             |
+| 集計列         | VariableSelectorField | 複数選択可                             |
+| 統計量         | CheckboxTagGroup      | Basic Statistics と同じ選択 UI・同項目 |
+| 出力テーブル名 | InputText             | 入力必須                               |
+
+#### 結果フロー
+
+- 成功後は新テーブルとして workspaceTabs に追加（`create-correlation-table` と同じフロー）
+- result tab を開いて DataPreview に戻す
+
+#### 配置
+
+- 基本分析メニューから work tab として開く
+- Correlation Matrix の下に配置予定
+
+#### 型・スキーマ
+
+- Orval 生成の `CreateGroupStatisticsTableRequestBody` / `CreateGroupStatisticsTableResult` を使用
+- 手動再定義禁止

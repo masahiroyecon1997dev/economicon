@@ -242,24 +242,6 @@ export const CreateSimulationDataTable = () => {
               {t("CreateSimulationDataTableView.DataSettings")}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <form.Field name="randomSeed">
-                {(field) => {
-                  const errorMsg = field.state.meta.isTouched
-                    ? extractFieldError(field.state.meta.errors)
-                    : undefined;
-                  return (
-                    <RandomSeedField
-                      id="sim-table-random-seed"
-                      value={field.state.value}
-                      onChange={field.handleChange}
-                      onBlur={field.handleBlur}
-                      disabled={isSubmitting}
-                      error={errorMsg}
-                    />
-                  );
-                }}
-              </form.Field>
-
               <form.Field
                 name="tableName"
                 validators={{
@@ -486,6 +468,25 @@ export const CreateSimulationDataTable = () => {
               })}
             </div>
           </div>
+
+          {/* 乱数シード（省略可） */}
+          <form.Field name="randomSeed">
+            {(field) => {
+              const errorMsg = field.state.meta.isTouched
+                ? extractFieldError(field.state.meta.errors)
+                : undefined;
+              return (
+                <RandomSeedField
+                  id="sim-table-random-seed"
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  onBlur={field.handleBlur}
+                  disabled={isSubmitting}
+                  error={errorMsg}
+                />
+              );
+            }}
+          </form.Field>
         </div>
 
         {/* ── アクションバー（常に最下部固定）── */}
