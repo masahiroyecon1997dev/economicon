@@ -1,6 +1,6 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import type { AnalysisResultDetail } from "@/api/model";
-import { SectionHeading } from "@/components/atoms/List/SectionHeading";
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
 import { TableNav } from "@/components/molecules/List/TableNav";
 import type { OutputResultDialogTargetType } from "@/components/organisms/Dialog/OutputResultDialog";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
@@ -11,11 +11,13 @@ import { cn } from "@/lib/utils/helpers";
 import { getTableInfo } from "@/lib/utils/internal";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
+import { useLoadingStore } from "@/stores/loading";
+import { useTableChunkStore } from "@/stores/tableChunkStore";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
-import { ExternalLink, FileDown, Trash2 } from "lucide-react";
+import { ExternalLink, FileDown, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -90,6 +92,7 @@ export const LeftSideMenu = () => {
   );
   const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const tableList = useTableListStore((state) => state.tableList);
+  const setTableList = useTableListStore((state) => state.setTableList);
   const pane = useAnalysisResultsStore((state) => state.pane);
   const setPane = useAnalysisResultsStore((state) => state.setPane);
   const summaries = useAnalysisResultsStore((state) => state.summaries);
@@ -110,7 +113,12 @@ export const LeftSideMenu = () => {
   const removeResultTab = useWorkspaceTabsStore(
     (state) => state.removeResultTab,
   );
+  const setLoading = useLoadingStore((state) => state.setLoading);
+  const clearLoading = useLoadingStore((state) => state.clearLoading);
   const [outputTarget, setOutputTarget] = useState<OutputTarget>(null);
+
+  const hasWorkspaceContent =
+    tableList.length > 0 || summaries.length > 0 || tabs.length > 0;
 
   useEffect(() => {
     if (pane !== "results") return;
@@ -177,6 +185,7 @@ export const LeftSideMenu = () => {
     const confirmed = await showConfirmDialog(
       t("LeftSideMenu.DeleteResultConfirmTitle"),
       t("LeftSideMenu.DeleteResultConfirmMessage", { resultName }),
+      { submitVariant: "danger" },
     );
     if (!confirmed) return;
 
@@ -249,6 +258,58 @@ export const LeftSideMenu = () => {
     }
   };
 
+  const handleResetWorkspace = async () => {
+    const confirmed = await showConfirmDialog(
+      t("LeftSideMenu.ResetWorkspaceConfirmTitle"),
+      t("LeftSideMenu.ResetWorkspaceConfirmMessage"),
+      { submitVariant: "danger" },
+    );
+    if (!confirmed) return;
+
+    setLoading(true, t("LeftSideMenu.ResetWorkspaceLoading"));
+    try {
+      const api = getEconomiconAppAPI();
+      const [clearTablesResponse, clearResultsResponse] = await Promise.all([
+        api.clearTables(),
+        api.clearAllAnalysisResults(),
+      ]);
+
+      if (clearTablesResponse.code !== "OK") {
+        throw new Error(t("Error.UnexpectedError"));
+      }
+      if (clearResultsResponse.code !== "OK") {
+        throw new Error(t("Error.UnexpectedError"));
+      }
+
+      setTableList([]);
+      useTableInfosStore.setState({
+        tableInfos: [],
+        activeTableName: null,
+      });
+      useTableChunkStore.getState().clearAll();
+      useWorkspaceTabsStore.setState({
+        tabs: [],
+        activeTabId: null,
+      });
+      useAnalysisResultsStore.setState({
+        pane: "data",
+        summaries: [],
+        activeResultId: null,
+        activeResultDetail: null,
+        isListLoading: false,
+        isDetailLoading: false,
+      });
+      setCurrentView("ImportDataFile");
+    } catch (error) {
+      await showMessageDialog(
+        t("Error.Error"),
+        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+      );
+    } finally {
+      clearLoading();
+    }
+  };
+
   const renderOutputDialog = () => {
     if (!outputTarget) return null;
 
@@ -279,7 +340,31 @@ export const LeftSideMenu = () => {
 
   return (
     <aside className="flex h-full w-full flex-col overflow-hidden bg-brand-primary text-white dark:bg-gray-900">
-      <SectionHeading title={t("LeftSideMenu.Title")} />
+      <div className="flex items-center justify-between px-4 pb-2 pt-3">
+        <h2 className="font-semibold">{t("LeftSideMenu.Title")}</h2>
+        <Tooltip content={t("LeftSideMenu.ResetWorkspaceTooltip")}>
+          <span
+            className="inline-flex"
+            title={t("LeftSideMenu.ResetWorkspaceTooltip")}
+          >
+            <button
+              type="button"
+              className={cn(
+                "rounded-md p-1.5 text-white/70 transition-colors",
+                "hover:bg-white/10 hover:text-white",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                "disabled:cursor-not-allowed disabled:text-white/30 disabled:hover:bg-transparent",
+              )}
+              onClick={() => void handleResetWorkspace()}
+              disabled={!hasWorkspaceContent}
+              aria-label={t("LeftSideMenu.ResetWorkspaceAriaLabel")}
+              data-testid="left-menu-reset-workspace"
+            >
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </span>
+        </Tooltip>
+      </div>
       <div
         className="px-4 pb-2 pt-1.5"
         data-testid="workspace-navigator-toggle"

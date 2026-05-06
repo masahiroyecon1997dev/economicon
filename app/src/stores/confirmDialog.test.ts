@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useConfirmDialogStore } from "@/stores/confirmDialog";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -7,6 +7,7 @@ beforeEach(() => {
     isOpen: false,
     title: "",
     message: "",
+    submitVariant: "primary",
     resolver: null,
   });
 });
@@ -32,6 +33,15 @@ describe("useConfirmDialogStore", () => {
       const { showConfirmDialog } = useConfirmDialogStore.getState();
       const promise = showConfirmDialog("T", "M");
       expect(promise).toBeInstanceOf(Promise);
+    });
+
+    it("test_showConfirmDialog_acceptsDangerVariant", () => {
+      const { showConfirmDialog } = useConfirmDialogStore.getState();
+      void showConfirmDialog("確認", "削除しますか？", {
+        submitVariant: "danger",
+      });
+
+      expect(useConfirmDialogStore.getState().submitVariant).toBe("danger");
     });
 
     it("test_showConfirmDialog_existingResolver_cancelledWithFalse", async () => {

@@ -78,6 +78,8 @@ vi.mock("../organisms/Dialog/OutputResultDialog", () => ({
 }));
 
 const mockApi = {
+  clearAllAnalysisResults: vi.fn(),
+  clearTables: vi.fn(),
   deleteAnalysisResult: vi.fn(),
   getAnalysisResult: vi.fn(),
 };
@@ -154,6 +156,17 @@ describe("LeftSideMenu コンポーネント", () => {
     expect(screen.getByText("LeftSideMenu.Title")).toBeInTheDocument();
     expect(screen.getByTestId("left-menu-tab-data")).toBeInTheDocument();
     expect(screen.getByText("sales")).toBeInTheDocument();
+    expect(screen.getByTestId("left-menu-reset-workspace")).toBeEnabled();
+  });
+
+  it("空のワークスペースでは初期化ボタンが無効化される", () => {
+    useTableListStore.setState({ tableList: [] });
+    useWorkspaceTabsStore.setState({ tabs: [], activeTabId: null });
+    useAnalysisResultsStore.setState({ summaries: [] });
+
+    render(<LeftSideMenu />);
+
+    expect(screen.getByTestId("left-menu-reset-workspace")).toBeDisabled();
   });
 
   it("既存テーブルをクリックすると DataPreview に遷移する", async () => {
@@ -294,6 +307,56 @@ describe("LeftSideMenu コンポーネント", () => {
       expect(vi.mocked(showConfirmDialog)).toHaveBeenCalled();
       expect(mockApi.deleteAnalysisResult).toHaveBeenCalledWith("result-1");
       expect(removeSummary).toHaveBeenCalledWith("result-1");
+    });
+  });
+
+  it("ワークスペース初期化でテーブルと結果とタブをクリアする", async () => {
+    const user = userEvent.setup();
+    mockApi.clearTables.mockResolvedValue({ code: "OK" });
+    mockApi.clearAllAnalysisResults.mockResolvedValue({ code: "OK" });
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "data:sales",
+          kind: "data",
+          title: "sales",
+          tableName: "sales",
+        },
+      ],
+      activeTabId: "data:sales",
+    });
+    useAnalysisResultsStore.setState({
+      summaries: [
+        {
+          id: "result-1",
+          name: "OLS 1",
+          description: "desc",
+          createdAt: "2026-04-29T10:15:30Z",
+          tableName: "sales",
+          resultType: "regression",
+          resultTypeLabel: "回帰分析",
+          modelType: "ols",
+          summaryText: "OLS / price",
+        },
+      ],
+    });
+
+    render(<LeftSideMenu />);
+
+    await user.click(screen.getByTestId("left-menu-reset-workspace"));
+
+    await waitFor(() => {
+      expect(vi.mocked(showConfirmDialog)).toHaveBeenCalledWith(
+        "LeftSideMenu.ResetWorkspaceConfirmTitle",
+        "LeftSideMenu.ResetWorkspaceConfirmMessage",
+        { submitVariant: "danger" },
+      );
+      expect(mockApi.clearTables).toHaveBeenCalled();
+      expect(mockApi.clearAllAnalysisResults).toHaveBeenCalled();
+      expect(useTableListStore.getState().tableList).toEqual([]);
+      expect(useWorkspaceTabsStore.getState().tabs).toEqual([]);
+      expect(useCurrentPageStore.getState().currentView).toBe("ImportDataFile");
+      expect(useAnalysisResultsStore.getState().summaries).toEqual([]);
     });
   });
 

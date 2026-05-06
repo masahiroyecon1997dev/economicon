@@ -11,11 +11,28 @@ import { useSettingsStore } from "@/stores/settings";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { DropmenuPositionType } from "@/types/commonTypes";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import type { LucideIcon } from "lucide-react";
 import { ChevronDown, MoreHorizontal, Settings } from "lucide-react";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const MENU_POSITION: DropmenuPositionType = "bottom-right";
+
+type AppBarMenuItemType = {
+  id: string;
+  label: string;
+  handleSelect: () => void;
+  icon?: LucideIcon;
+  variant?: "default" | "danger";
+};
+
+type AppBarMenuType = {
+  id: string;
+  menuName: string;
+  isOpen: boolean;
+  onClose: () => void;
+  items: AppBarMenuItemType[];
+};
 
 /**
  * 統合アプリバー
@@ -178,7 +195,7 @@ export const AppBar = () => {
     close();
   };
 
-  const menus = [
+  const menus: AppBarMenuType[] = [
     {
       id: "file",
       menuName: t("HeaderMenu.File"),
@@ -464,8 +481,9 @@ export const AppBar = () => {
               {menu.items.map((item, i) => (
                 <MenuItem
                   key={item.id}
+                  icon={item.icon}
                   label={item.label}
-                  variant="default"
+                  variant={item.variant ?? "default"}
                   isFirst={i === 0}
                   isLast={i === menu.items.length - 1}
                   handleSelect={item.handleSelect}
@@ -510,8 +528,9 @@ export const AppBar = () => {
                   {menu.items.map((item, i) => (
                     <MenuItem
                       key={item.id}
+                      icon={item.icon}
                       label={item.label}
-                      variant="default"
+                      variant={item.variant ?? "default"}
                       isFirst={i === 0}
                       isLast={i === menu.items.length - 1}
                       handleSelect={item.handleSelect}
