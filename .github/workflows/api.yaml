@@ -15,13 +15,15 @@ permissions: {}
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Python gold benchmark の生成環境に寄せて、
+    # 数値比較が runner 更新で揺れないように固定する。
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.14"]
+        python-version: ["3.14.3"]
 
     steps:
       - uses: actions/checkout@v4
