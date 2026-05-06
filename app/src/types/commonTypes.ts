@@ -1,4 +1,4 @@
-import type { DistributionParamsType as ApiDistributionType } from "@/api/model";
+import type { DistributionType as ApiDistributionType } from "@/api/model";
 
 export type FileType = {
   name: string;

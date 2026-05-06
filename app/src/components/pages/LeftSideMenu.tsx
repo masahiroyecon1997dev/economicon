@@ -350,9 +350,11 @@ export const LeftSideMenu = () => {
                   </h3>
                   <div className="space-y-2">
                     {group.results.map((result) => {
-                      const supportsOutput = isOutputSupportedType(
+                      const outputType = isOutputSupportedType(
                         result.resultType,
-                      );
+                      )
+                        ? result.resultType
+                        : null;
                       return (
                         <div
                           key={result.id}
@@ -397,13 +399,13 @@ export const LeftSideMenu = () => {
                               >
                                 <ExternalLink className="h-4 w-4" />
                               </button>
-                              {supportsOutput && (
+                              {outputType && (
                                 <button
                                   type="button"
                                   onClick={() =>
                                     void handleOutputResult(
                                       result.id,
-                                      result.resultType,
+                                      outputType,
                                       `${result.tableName} / ${result.name}`,
                                     )
                                   }
