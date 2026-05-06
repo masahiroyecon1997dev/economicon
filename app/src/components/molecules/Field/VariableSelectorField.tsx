@@ -16,6 +16,8 @@ type VariableSelectorFieldProps = {
   onMultipleChange?: (values: string[]) => void;
   error?: string;
   disabled?: boolean;
+  /** 個別列を選択不可にする列名の Set（グレーアウト表示）*/
+  disabledValues?: Set<string>;
   className?: string;
   name?: string;
 };
@@ -31,6 +33,7 @@ export const VariableSelectorField = ({
   onMultipleChange,
   error,
   disabled = false,
+  disabledValues,
   className,
   name,
 }: VariableSelectorFieldProps) => {
@@ -43,6 +46,7 @@ export const VariableSelectorField = ({
   };
 
   const handleCheckboxChange = (columnName: string) => {
+    if (disabledValues?.has(columnName)) return;
     if (mode === "multiple" && onMultipleChange) {
       if (selectedValues.includes(columnName)) {
         onMultipleChange(selectedValues.filter((v) => v !== columnName));
@@ -110,40 +114,46 @@ export const VariableSelectorField = ({
           <ul className="flex flex-col gap-1">
             {visibleColumns.map((column, index) => (
               <li key={index}>
-                <label
-                  htmlFor={`variable-selector-field-${column.name}-${name || "default"}`}
-                  className={cn(
-                    "flex w-full cursor-pointer items-center gap-3 rounded-md p-0.5",
-                    disabled
-                      ? "cursor-not-allowed opacity-50"
-                      : "hover:bg-white dark:hover:bg-gray-700",
-                  )}
-                >
-                  {mode === "single" ? (
-                    <input
-                      id={`variable-selector-field-${column.name}-${name || "default"}`}
-                      className="h-4 w-4 border-gray-300 text-accent focus:ring-accent"
-                      type="radio"
-                      name={name || "variable-selector-single"}
-                      value={column.name}
-                      checked={selectedValue === column.name}
-                      onChange={() => handleRadioChange(column.name)}
-                      disabled={disabled}
-                    />
-                  ) : (
-                    <input
-                      id={`variable-selector-field-${column.name}-${name || "default"}`}
-                      className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent"
-                      type="checkbox"
-                      name={name || "variable-selector-multiple"}
-                      value={column.name}
-                      checked={selectedValues.includes(column.name)}
-                      onChange={() => handleCheckboxChange(column.name)}
-                      disabled={disabled}
-                    />
-                  )}
-                  <span className="text-sm">{column.name}</span>
-                </label>
+                {(() => {
+                  const isItemDisabled =
+                    disabled || (disabledValues?.has(column.name) ?? false);
+                  return (
+                    <label
+                      htmlFor={`variable-selector-field-${column.name}-${name || "default"}`}
+                      className={cn(
+                        "flex w-full cursor-pointer items-center gap-3 rounded-md p-0.5",
+                        isItemDisabled
+                          ? "cursor-not-allowed opacity-40"
+                          : "hover:bg-white dark:hover:bg-gray-700",
+                      )}
+                    >
+                      {mode === "single" ? (
+                        <input
+                          id={`variable-selector-field-${column.name}-${name || "default"}`}
+                          className="h-4 w-4 border-gray-300 text-accent focus:ring-accent"
+                          type="radio"
+                          name={name || "variable-selector-single"}
+                          value={column.name}
+                          checked={selectedValue === column.name}
+                          onChange={() => handleRadioChange(column.name)}
+                          disabled={isItemDisabled}
+                        />
+                      ) : (
+                        <input
+                          id={`variable-selector-field-${column.name}-${name || "default"}`}
+                          className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent"
+                          type="checkbox"
+                          name={name || "variable-selector-multiple"}
+                          value={column.name}
+                          checked={selectedValues.includes(column.name)}
+                          onChange={() => handleCheckboxChange(column.name)}
+                          disabled={isItemDisabled}
+                        />
+                      )}
+                      <span className="text-sm">{column.name}</span>
+                    </label>
+                  );
+                })()}
               </li>
             ))}
           </ul>

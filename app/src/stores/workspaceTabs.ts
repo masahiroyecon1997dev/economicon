@@ -26,7 +26,8 @@ export type WorkFeatureKey =
   | "ConfidenceIntervalView"
   | "StatisticalTestView"
   | "LinearRegressionForm"
-  | "CorrelationMatrix";
+  | "CorrelationMatrix"
+  | "GroupStatistics";
 
 export type WorkspaceWorkTab = {
   id: `work:${WorkFeatureKey}`;

@@ -263,6 +263,15 @@ export const AppBar = () => {
             ),
         },
         {
+          id: "group-statistics",
+          label: t("HeaderMenu.GroupStatistics"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "GroupStatistics",
+              t("HeaderMenu.GroupStatistics"),
+            ),
+        },
+        {
           id: "confidence-interval",
           label: t("HeaderMenu.ConfidenceInterval"),
           handleSelect: () =>

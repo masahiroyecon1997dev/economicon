@@ -42,6 +42,10 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     featureKey: "CorrelationMatrix",
     titleKey: "HeaderMenu.CorrelationMatrix",
   },
+  {
+    featureKey: "GroupStatistics",
+    titleKey: "HeaderMenu.GroupStatistics",
+  },
 ];
 
 export const isWorkFeatureKey = (value: string): value is WorkFeatureKey =>

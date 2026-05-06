@@ -224,11 +224,37 @@ canonical order:
 - インタラクション: 試行回数 / 真の β をスライダーで変更
 - データソース: クライアント側 JS で乱数生成
 
+### Plotly 4 種の仕様
+
+#### ① 分布シミュレーション図
+
+- 内容: データ生成で利用可能な全分布（正規 / 一様 / t / カイ二乗 / F / 二項 / ポアソン など）の PDF / PMF をインタラクティブに表示
+- インタラクション: 分布種別セレクタ + 各パラメータのスライダー → リアルタイムで確率密度/質量関数を再描画
+- データソース: クライアント側 JS で生成（API 不要）
+- 配置: **SimulationColumnEditDialog 内プレビューパネル**（ダイアログレイアウト変更を伴う）→ **フェーズ 1 で実装**
+
+#### ② 信頼区間の網羅性シミュレーション（後回し）
+
+- 内容: 真の値 μ を固定し同一設定で CI を 100 本生成、95% が真値を含む様子を可視化
+- インタラクション: サンプルサイズ / 信頼水準 / 真のパラメータをスライダーで変更 → 包含率と図を再計算
+- データソース: クライアント側 JS で乱数生成
+
+#### ③ 回帰パラメータ分布（CLT・漸近正規性）（後回し）
+
+- 内容: 同一 DGP で回帰を 100 回繰り返し、β 推定値の分布が正規分布に収束する様子を図示
+- インタラクション: サンプルサイズ / 真の β / 誤差分散をスライダーで変更
+- データソース: クライアント側 JS で乱数生成
+
+#### ④ 一致性の可視化（後回し）
+
+- 内容: サンプルサイズを増やしながら β 推定値が真値に収束する様子を折れ線またはアニメーションで表示
+- インタラクション: 試行回数 / 真の β をスライダーで変更
+- データソース: クライアント側 JS で乱数生成
+
 #### 技術メモ
 
-- plotly.js はインストール済み
-- ② ③ ④ 用コンポーネント配置案: `app/src/components/pages/StatVizPage.tsx`
-- ① 用コンポーネント配置案: `app/src/components/organisms/Dialog/SimulationColumnEditDialog.tsx` 内プレビューパネル
+- plotly.js はインストール済み（`plotly.js@3.5.0`、`@types/plotly.js@^3.0.10`）
+- ② ③ ④ の配置は未定（後回し）。配置先が決まったときにここを更新する
 
 ---
 
@@ -240,25 +266,105 @@ canonical order:
 
 #### フォーム仕様
 
-| フィールド     | UI 部品               | 備考                                   |
-| -------------- | --------------------- | -------------------------------------- |
-| 対象テーブル   | Select                | テーブル一覧から選択                   |
-| グループキー列 | VariableSelectorField | 複数選択可                             |
-| 集計列         | VariableSelectorField | 複数選択可                             |
-| 統計量         | CheckboxTagGroup      | Basic Statistics と同じ選択 UI・同項目 |
-| 出力テーブル名 | InputText             | 入力必須                               |
+| フィールド     | UI 部品               | 備考                                                              |
+| -------------- | --------------------- | ----------------------------------------------------------------- |
+| 対象テーブル   | Select                | テーブル一覧から選択                                              |
+| グループキー列 | VariableSelectorField | 複数選択可。Float32/Float64 列はグレーアウトして選択不可にする    |
+| 集計列         | VariableSelectorField | 複数選択可。groupByColumns との重複は不可（重複列は選択不可表示） |
+| 統計量         | CheckboxTagGroup      | Basic Statistics と同じ選択 UI・同項目                            |
+| 出力テーブル名 | InputText             | 入力必須                                                          |
+
+#### グループキー列の Float 除外実装方針
+
+- `getColumnList` は列ごとに `columnType` を返す
+- `useTableColumnLoader` は `numericOnly` フィルタのみ持つため、グループキー列用に **Float 除外フィルタ** を呼び出し側で実装する
+  - `columns.filter(col => !col.columnType.includes("Float"))` で除外
+  - VariableSelectorField の `columns` props に渡す前にフィルタをかける方式（ `disabled` props を列単位で持たせる拡張は行わない）
+- 集計列（statColumns）は全列を渡す（Float も含む）
+
+#### 列の重複バリデーション
+
+- groupByColumns と statColumns に同じ列が含まれる場合はフォームレベルでバリデーションエラーを出す
+- API でも弾かれるが、フロントでも即時フィードバックする
 
 #### 結果フロー
 
 - 成功後は新テーブルとして workspaceTabs に追加（`create-correlation-table` と同じフロー）
-- result tab を開いて DataPreview に戻す
+- サイドバーにテーブルが追加表示され、DataPreview に戻す
 
 #### 配置
 
-- 基本分析メニューから work tab として開く
+- 基本分析メニューから work tab として開く（`GroupStatistics` as `WorkFeatureKey`）
 - Correlation Matrix の下に配置予定
 
 #### 型・スキーマ
 
 - Orval 生成の `CreateGroupStatisticsTableRequestBody` / `CreateGroupStatisticsTableResult` を使用
+- Zod スキーマは `CreateGroupStatisticsTableBody`（`@/api/zod/statistics/statistics`）を使用
 - 手動再定義禁止
+
+---
+
+### 通常グラフビュー（散布図・ヒストグラム・折れ線グラフ）
+
+#### 概要
+
+`fetchPlotData`（Arrow IPC）で取得したデータをフロントで Plotly.js により可視化する。
+分析結果として保存しない（work tab 内のみ、閉じたら消える）。
+
+#### データフロー
+
+```
+ユーザーが列選択
+  → fetchPlotData (Arrow IPC バイナリ)
+  → @apache-arrow/es2015-esm で RecordBatch に変換
+  → 列データを JS number[] に変換
+  → Plotly.react() でチャート更新
+```
+
+#### 対応グラフ種別と列選択
+
+| 種別         | X 軸           | Y 軸              | 備考                            |
+| ------------ | -------------- | ----------------- | ------------------------------- |
+| 散布図       | 数値列（1 列） | 数値列（1 列）    | hover で (x, y) 値を表示        |
+| ヒストグラム | 数値列（1 列） | —（自動集計）     | ビン数は UI で調整可（10〜100） |
+| 折れ線グラフ | 任意列（1 列） | 数値列（1〜複数） | 時系列・カテゴリ軸にも対応      |
+
+#### 実装方針（3 案から選択）
+
+> **案は別途確認のうえ決定する。** 以下は選択肢の概要：
+>
+> - **案 A（スプリットパネル）**: 左 30% 設定 + 右 70% グラフ。列変更 → debounce 400ms → 自動再描画。「実行」ボタン不要。探索性が高い。
+> - **案 B（縦積み）**: フォーム（上）+「描画する」ボタン + グラフ（下）。既存 work tab パターンに最も近い。
+> - **案 C（サブタブ）**: work tab 内に「設定」「グラフ」サブタブ。グラフ全画面表示。
+
+#### 配置
+
+- 基本分析メニューから work tab として開く（`ChartView` as `WorkFeatureKey`）
+- Arrow デコードには `apache-arrow` パッケージを使用（インストール要確認）
+
+#### 列制約
+
+- 散布図・ヒストグラムの X 軸: 数値列のみ（`numericOnly: true` を `useTableColumnLoader` に渡す）
+- 折れ線グラフの X 軸: 全列（文字列・日付・数値）
+
+---
+
+### Plotly 教育ビジュアライゼーション ① 分布シミュレーション
+
+#### 対象
+
+データ生成の列編集ダイアログ（`SimulationColumnEditDialog`）内にプレビューパネルとして統合。
+
+#### 仕様
+
+- 選択中の分布と現在のパラメータ値に応じた PDF / PMF をリアルタイム描画
+- 分布種別セレクタ変更 / パラメータ変更 → 即時再描画（API 不要、クライアント JS で生成）
+- 対応分布: 正規 / 一様 / t / カイ二乗 / F / 二項 / ポアソン（データ生成で使用可能な全分布）
+- パラメータはスライダーまたは数値入力と連動
+- グラフサイズ: ダイアログ内プレビュー領域（高さ約 200px）
+
+#### 実装メモ
+
+- SimulationColumnEditDialog のレイアウト変更が必要（プレビューパネル追加）
+- ② 信頼区間 / ③ CLT / ④ 一致性 は後回し（別タスクで実装）

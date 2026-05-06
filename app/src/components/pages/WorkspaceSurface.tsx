@@ -8,6 +8,7 @@ import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalVie
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
+import { GroupStatistics } from "@/components/pages/GroupStatistics";
 import { JoinTable } from "@/components/pages/JoinTable";
 import { StatisticalTestView } from "@/components/pages/StatisticalTestView";
 import { UnionTable } from "@/components/pages/UnionTable";
@@ -33,6 +34,7 @@ type StaticWorkFeatureKey = Exclude<
   | "DescriptiveStatistics"
   | "StatisticalTestView"
   | "LinearRegressionForm"
+  | "GroupStatistics"
 >;
 
 const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
@@ -73,6 +75,13 @@ const isDescriptiveStatisticsWorkTab = (
   featureKey: "DescriptiveStatistics";
   id: "work:DescriptiveStatistics";
 } => tab.featureKey === "DescriptiveStatistics";
+
+const isGroupStatisticsWorkTab = (
+  tab: WorkspaceWorkTab,
+): tab is WorkspaceWorkTab & {
+  featureKey: "GroupStatistics";
+  id: "work:GroupStatistics";
+} => tab.featureKey === "GroupStatistics";
 
 export const WorkspaceSurface = () => {
   const { t } = useTranslation();
@@ -269,8 +278,23 @@ export const WorkspaceSurface = () => {
       );
     }
 
+    if (isGroupStatisticsWorkTab(tab)) {
+      return (
+        <GroupStatistics
+          workTabId={tab.id}
+          onSuccess={(tableName) => {
+            openDataTab(tableName);
+            setCurrentView("DataPreview");
+          }}
+          onCancel={() => void handleCloseTab(tab.id)}
+        />
+      );
+    }
+
     if (tab.featureKey === "LinearRegressionForm") {
-      return <LinearRegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
+      return (
+        <LinearRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
+      );
     }
 
     const staticFeatureKey = tab.featureKey as StaticWorkFeatureKey;

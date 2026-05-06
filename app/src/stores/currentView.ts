@@ -7,6 +7,7 @@ export type CurrentPageValue =
   | "DescriptiveStatistics"
   | "StatisticalTestView"
   | "CorrelationMatrix"
+  | "GroupStatistics"
   | "ConfidenceIntervalView"
   | "LinearRegressionForm"
   | "CreateSimulationDataTable"
