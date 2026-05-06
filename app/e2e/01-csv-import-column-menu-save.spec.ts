@@ -18,11 +18,15 @@
 
 import { expect, test } from "@playwright/test";
 import {
+  cleanupE2EOutputDir,
+  clearWorkspaceFromUi,
   clickColumnMenuItem,
   clickHeaderMenu,
-  closeMessageDialog,
+  closeSaveSuccessDialog,
+  ensureE2EOutputDir,
   fillDialogAndSubmit,
   importFile,
+  navigateFileBrowserToDir,
   navigateToSampleDir,
   openColumnMenu,
   openTableContextMenu,
@@ -33,19 +37,33 @@ import { setupTauriApp } from "./helpers/setupHelpers";
 // テスト用定数
 // ---------------------------------------------------------------------------
 const CSV_FILE_NAME = "ユニオン1.csv";
-const TABLE_NAME = "union1_test";
+const RUN_ID = `e2e${Date.now().toString(36)}`;
+const TABLE_NAME = `union1_test_${RUN_ID}`;
 /** ソート・削除用に使いまわす列（ユニオン1.csv の数値列） */
 const TARGET_COL = "amount";
+const OUTPUT_DIR_NAME = "csv-column-save";
+
+let outputDirPath = "";
 
 // ---------------------------------------------------------------------------
 // テストスイート
 // ---------------------------------------------------------------------------
 test.describe("01: CSV 取り込み → 列メニュー → データメニュー → 保存", async () => {
+  test.beforeAll(async () => {
+    outputDirPath = await ensureE2EOutputDir(OUTPUT_DIR_NAME);
+  });
+
+  test.afterAll(async () => {
+    await cleanupE2EOutputDir(outputDirPath);
+  });
+
   // =========================================================================
   // STEP 1: CSV ファイルを取り込む
   // =========================================================================
   test("Step 1: CSV ファイルをインポートする", async ({ playwright }) => {
     const page = await setupTauriApp(playwright);
+
+    await clearWorkspaceFromUi(page);
 
     // ファイル選択タブに切り替え
     const fileSelectTab = page.getByRole("tab", {
@@ -391,7 +409,7 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
     await expect(
       page
         .getByRole("navigation")
-        .getByText(`${TABLE_NAME}_v2`, { exact: true }),
+        .locator(`span[title="${TABLE_NAME}_v2"]`),
     ).toBeVisible();
   });
 
@@ -422,7 +440,7 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
     await expect(
       page
         .getByRole("navigation")
-        .getByText(`${TABLE_NAME}_copy`, { exact: true }),
+        .locator(`span[title="${TABLE_NAME}_copy"]`),
     ).toBeVisible();
   });
 
@@ -449,7 +467,7 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
 
     // サイドバーから複製データが消えること
     await expect(
-      page.getByRole("navigation").getByText(copyName, { exact: true }),
+      page.getByRole("navigation").locator(`span[title="${copyName}"]`),
     ).toBeHidden();
   });
 
@@ -518,6 +536,8 @@ async function _saveCurrentData(
     page.getByRole("heading", { name: /データを保存|Save Data/i }),
   ).toBeVisible();
 
+  await navigateFileBrowserToDir(page, outputDirPath);
+
   // データ名を選択
   const tableNameSelect = page.getByLabel(/保存するデータ|Data to Save/i);
   await tableNameSelect.waitFor({ state: "visible" });
@@ -545,10 +565,17 @@ async function _saveCurrentData(
 
   // 上書き確認ダイアログが出た場合は OK をクリック
   const confirmDlg = page.getByRole("dialog");
-  if (await confirmDlg.isVisible()) {
+  if (
+    await confirmDlg
+      .getByText(/上書き|Overwrite/i)
+      .isVisible()
+      .catch(() => false)
+  ) {
     await confirmDlg.getByRole("button", { name: /OK|はい/i }).click();
   }
 
   // 成功メッセージダイアログを閉じる
-  await closeMessageDialog(page);
+  await closeSaveSuccessDialog(page);
+
+  await expect(page.getByRole("button", { name: tableName })).toBeVisible();
 }

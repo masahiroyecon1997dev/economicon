@@ -1,4 +1,5 @@
 import type { PlaywrightWorkerArgs } from "@playwright/test";
+import { expect } from "@playwright/test";
 
 export async function setupTauriApp(
   playwrightInstance: PlaywrightWorkerArgs["playwright"],
@@ -18,7 +19,24 @@ export async function setupTauriApp(
     );
   }
   const context = browser.contexts()[0];
-  const page = context.pages()[0];
+  const page =
+    context
+      .pages()
+      .find((candidate) => !candidate.url().startsWith("devtools://")) ??
+    context.pages()[0];
+
+  await page.bringToFront().catch(() => {
+    // Tauri 実行環境では bringToFront が失敗しても継続できる。
+  });
+  await page.waitForLoadState("domcontentloaded").catch(() => {
+    // 既に描画済みなら待機不要。
+  });
+
+  await expect(
+    page.getByRole("banner").getByRole("button", {
+      name: /ファイル|File/i,
+    }),
+  ).toBeVisible({ timeout: 30_000 });
 
   return page;
 }
