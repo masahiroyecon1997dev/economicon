@@ -55,7 +55,6 @@ const PRIMARY_STAT_TYPES: DescriptiveStatisticType[] = [
   DescriptiveStatisticType.mean,
   DescriptiveStatisticType.median,
   DescriptiveStatisticType.std_dev,
-  DescriptiveStatisticType.variance,
   DescriptiveStatisticType.min,
   DescriptiveStatisticType.max,
   DescriptiveStatisticType.null_count,
@@ -440,7 +439,9 @@ export const DescriptiveStatistics = ({
                     onClick={() => setAdvancedStatsOpen((prev) => !prev)}
                     className="flex w-full items-center justify-between text-left text-sm font-medium text-gray-700 transition-colors hover:text-brand-accent dark:text-gray-300"
                   >
-                    <span>{t("DescriptiveStatistics.AdvancedStatisticsLabel")}</span>
+                    <span>
+                      {t("DescriptiveStatistics.AdvancedStatisticsLabel")}
+                    </span>
                     <ChevronDown
                       className={cn(
                         "h-4 w-4 text-brand-text-main/60 transition-transform duration-200",
@@ -453,7 +454,9 @@ export const DescriptiveStatistics = ({
                     <div className="space-y-2">
                       <SelectAllBar
                         selectAllLabel={t("DescriptiveStatistics.SelectAll")}
-                        deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
+                        deselectAllLabel={t(
+                          "DescriptiveStatistics.DeselectAll",
+                        )}
                         onSelectAll={() => selectStats(ADVANCED_STAT_TYPES)}
                         onDeselectAll={() => deselectStats(ADVANCED_STAT_TYPES)}
                       />
