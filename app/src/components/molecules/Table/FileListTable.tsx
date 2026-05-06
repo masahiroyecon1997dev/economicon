@@ -1,3 +1,4 @@
+import type { FileType, SortDirection, SortField } from "@/types/commonTypes";
 import {
   ArrowDown,
   ArrowUp,
@@ -6,11 +7,6 @@ import {
   Folder,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type {
-  FileType,
-  SortDirection,
-  SortField,
-} from "@/types/commonTypes";
 
 type FileListTableProps = {
   files: FileType[];
@@ -126,7 +122,7 @@ export const FileListTable = ({
                 onClick={() => onFileClick(file)}
               >
                 <td
-                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm font-medium text-black min-w-0"
+                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm font-medium text-black dark:text-gray-100 min-w-0"
                   style={{ width: "50%", minWidth: "120px" }}
                 >
                   <div className="flex items-center gap-2 min-w-0">
@@ -146,7 +142,7 @@ export const FileListTable = ({
                   </div>
                 </td>
                 <td
-                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm text-black/60 min-w-0 hidden sm:table-cell"
+                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm text-black/60 dark:text-gray-400 min-w-0 hidden sm:table-cell"
                   style={{ width: "25%", minWidth: "80px" }}
                 >
                   {file.isFile && (
@@ -154,7 +150,7 @@ export const FileListTable = ({
                   )}
                 </td>
                 <td
-                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm text-black/60 min-w-0"
+                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm text-black/60 dark:text-gray-400 min-w-0"
                   style={{ width: "25%", minWidth: "100px" }}
                 >
                   {file.isFile && (

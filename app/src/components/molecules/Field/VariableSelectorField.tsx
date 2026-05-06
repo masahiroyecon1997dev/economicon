@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils/helpers";
 import type { ColumnType } from "@/types/commonTypes";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type VariableSelectorMode = "single" | "multiple";
 
@@ -87,7 +87,7 @@ export const VariableSelectorField = ({
           onChange={(e) => setFilterText(e.target.value)}
           placeholder={t("Common.FilterColumns")}
           disabled={disabled}
-          className="mb-1.5 w-full rounded-md border border-border-color bg-white px-2 py-1 text-xs placeholder:text-brand-text-main/40 focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
+          className="mb-1.5 w-full rounded-md border border-border-color bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 px-2 py-1 text-xs placeholder:text-brand-text-main/40 dark:placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
         />
       )}
       <div
@@ -116,7 +116,7 @@ export const VariableSelectorField = ({
                     "flex w-full cursor-pointer items-center gap-3 rounded-md p-0.5",
                     disabled
                       ? "cursor-not-allowed opacity-50"
-                      : "hover:bg-white",
+                      : "hover:bg-white dark:hover:bg-gray-700",
                   )}
                 >
                   {mode === "single" ? (

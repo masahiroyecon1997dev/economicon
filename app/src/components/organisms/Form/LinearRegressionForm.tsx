@@ -5,9 +5,9 @@ import {
   RobustStandardErrorHcType,
 } from "@/api/model";
 import { InputText } from "@/components/atoms/Input/InputText";
-import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
 import { VariableSelectorField } from "@/components/molecules/Field/VariableSelectorField";
 import { FormField } from "@/components/molecules/Form/FormField";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
@@ -158,7 +158,7 @@ export const LinearRegressionForm = ({
       className="flex flex-col gap-3 h-full min-h-0"
     >
       {/* ── TOP: テーブル選択（幅コンパクト）── */}
-      <div className="shrink-0 rounded-xl border border-border-color bg-white px-3 py-2 shadow-sm">
+      <div className="shrink-0 rounded-xl border border-border-color bg-white dark:bg-gray-800 dark:border-gray-700 px-3 py-2 shadow-sm">
         <form.Field name="tableName">
           {(field) => (
             <div className="flex items-center gap-3">
@@ -195,7 +195,7 @@ export const LinearRegressionForm = ({
         {/* 左: 変数選択（主役・flex-1�E�E*/}
         <div className="flex min-h-0 flex-1 flex-col gap-3">
           {/* 変数選択カード */}
-          <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border-color bg-white p-3 shadow-sm">
+          <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border-color bg-white dark:bg-gray-800 dark:border-gray-700 p-3 shadow-sm">
             <h2 className="mb-2 shrink-0 text-sm font-bold leading-tight text-text-heading">
               {t("LinearRegressionForm.SelectVariables")}
             </h2>
@@ -389,7 +389,7 @@ export const LinearRegressionForm = ({
                         label={t("LinearRegressionForm.ClusterGroups")}
                         htmlFor="cluster-groups"
                       >
-                        <div className="app-scrollbar max-h-32 overflow-y-auto rounded-md border border-border-color bg-white p-1.5">
+                        <div className="app-scrollbar max-h-32 overflow-y-auto rounded-md border border-border-color bg-white dark:bg-gray-800 p-1.5">
                           {columnList.length === 0 ? (
                             <p className="text-xs text-brand-text-main/60">
                               {t("Common.NoColumnsAvailable")}

@@ -224,7 +224,7 @@ export const UnionTable = () => {
               onClick={handleAddTable}
               disabled={!addingTable || isDisabled}
               className={cn(
-                "flex shrink-0 items-center gap-1 rounded-md border border-border-color bg-white px-3 py-1.5 text-sm font-medium",
+                "flex shrink-0 items-center gap-1 rounded-md border border-border-color bg-white dark:bg-gray-800 dark:border-gray-600 px-3 py-1.5 text-sm font-medium",
                 "transition-colors hover:bg-secondary",
                 "disabled:cursor-not-allowed disabled:opacity-40",
               )}

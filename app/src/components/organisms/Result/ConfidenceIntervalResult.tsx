@@ -60,11 +60,11 @@ export const ConfidenceIntervalResult = ({
   return (
     <>
       <div
-        className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden"
+        className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden"
         data-testid="confidence-interval-result"
       >
         {/* ヘッダー */}
-        <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
+        <div className="px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
           <div className="mb-3 flex justify-end gap-1.5">
             <button
               type="button"

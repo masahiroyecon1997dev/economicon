@@ -292,7 +292,7 @@ export const ConfidenceIntervalForm = ({
                 "px-3 py-1 text-xs rounded-md border transition-colors",
                 levelMode === "select"
                   ? "bg-brand-accent text-white border-brand-accent"
-                  : "bg-white text-gray-600 border-gray-300 hover:border-gray-400",
+                  : "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500",
               )}
             >
               {t("ConfidenceIntervalView.ConfidenceLevelModeSelect")}
@@ -307,7 +307,7 @@ export const ConfidenceIntervalForm = ({
                 "px-3 py-1 text-xs rounded-md border transition-colors",
                 levelMode === "manual"
                   ? "bg-brand-accent text-white border-brand-accent"
-                  : "bg-white text-gray-600 border-gray-300 hover:border-gray-400",
+                  : "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500",
               )}
             >
               {t("ConfidenceIntervalView.ConfidenceLevelModeManual")}

@@ -65,7 +65,7 @@ const ImportConfigDialogContent = ({
     "rounded-full border px-3 py-0.5 text-xs font-medium transition-colors",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50",
     "data-[state=on]:border-brand-primary data-[state=on]:bg-brand-primary data-[state=on]:text-white",
-    "data-[state=off]:border-gray-300 data-[state=off]:bg-white data-[state=off]:text-gray-600",
+    "data-[state=off]:border-gray-300 data-[state=off]:bg-white data-[state=off]:text-gray-600 dark:data-[state=off]:border-gray-600 dark:data-[state=off]:bg-gray-700 dark:data-[state=off]:text-gray-300",
     "data-[state=off]:hover:border-brand-primary/50 data-[state=off]:hover:bg-brand-primary/5",
   );
 
@@ -249,7 +249,7 @@ const ImportConfigDialogContent = ({
                     </RadixSelect.Trigger>
                     <RadixSelect.Portal>
                       <RadixSelect.Content
-                        className="z-50 overflow-hidden rounded-md border border-gray-200 bg-white shadow-md"
+                        className="z-50 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md"
                         position="popper"
                         sideOffset={4}
                       >

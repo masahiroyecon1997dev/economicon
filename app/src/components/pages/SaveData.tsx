@@ -319,7 +319,7 @@ export const SaveData = () => {
             className="flex flex-col gap-3 flex-1 min-h-0"
           >
             <div className="flex flex-col gap-3 shrink-0">
-              <h2 className="text-lg font-bold text-black">
+              <h2 className="text-lg font-bold text-black dark:text-gray-100">
                 {t("SaveDataView.SelectDirectory")}
               </h2>
               <NavigationSearchBar

@@ -19,7 +19,7 @@ import type { ImportConfigSettings } from "@/lib/utils/importSchema";
 import { getTableInfo } from "@/lib/utils/internal";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useFilesStore } from "@/stores/files";
-import { useLoadingStore } from "@/stores/loading";
+import { LOADING_DELAY_DIR, useLoadingStore } from "@/stores/loading";
 import { useSettingsStore } from "@/stores/settings";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
@@ -169,7 +169,7 @@ export const ImportDataFile = () => {
   // ディレクトリ変更処理
   const changeDirectory = async (newPath: string) => {
     // delay: 200ms — 一瞬で完了した場合はローディングを表示しない
-    setLoading(true, t("Loading.Loading"), 200);
+    setLoading(true, t("Loading.Loading"), LOADING_DELAY_DIR);
     try {
       const result = await getFiles(newPath);
       setFiles(result);
@@ -354,20 +354,20 @@ export const ImportDataFile = () => {
         defaultValue="dragDrop"
         className="flex flex-1 flex-col gap-2 min-h-0"
       >
-        <RadixTabs.List className="flex w-full border-b border-gray-200">
+        <RadixTabs.List className="flex w-full border-b border-gray-200 dark:border-gray-700">
           <RadixTabs.Trigger
             value="dragDrop"
-            className="group relative flex h-9 items-center justify-center px-4 text-sm font-medium text-gray-500 hover:text-gray-700 data-[state=active]:font-semibold data-[state=active]:text-gray-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
+            className="group relative flex h-9 items-center justify-center px-4 text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 data-[state=active]:font-semibold data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
           >
             {t("ImportDataFileView.DragAndDropTab")}
-            <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-gray-900 opacity-0 transition-opacity group-data-[state=active]:opacity-100" />
+            <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-gray-900 dark:bg-gray-100 opacity-0 transition-opacity group-data-[state=active]:opacity-100" />
           </RadixTabs.Trigger>
           <RadixTabs.Trigger
             value="fileSelect"
-            className="group relative flex h-9 items-center justify-center px-4 text-sm font-medium text-gray-500 hover:text-gray-700 data-[state=active]:font-semibold data-[state=active]:text-gray-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
+            className="group relative flex h-9 items-center justify-center px-4 text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 data-[state=active]:font-semibold data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
           >
             {t("ImportDataFileView.FileSelectTab")}
-            <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-gray-900 opacity-0 transition-opacity group-data-[state=active]:opacity-100" />
+            <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-gray-900 dark:bg-gray-100 opacity-0 transition-opacity group-data-[state=active]:opacity-100" />
           </RadixTabs.Trigger>
         </RadixTabs.List>
 
@@ -375,8 +375,8 @@ export const ImportDataFile = () => {
           <div
             className={`flex h-56 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
               isDragActive
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-300 hover:border-gray-400 bg-gray-50"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
+                : "border-gray-300 hover:border-gray-400 bg-gray-50 dark:border-gray-600 dark:hover:border-gray-500 dark:bg-gray-800/50"
             }`}
           >
             <UploadCloud
@@ -384,12 +384,12 @@ export const ImportDataFile = () => {
                 isDragActive ? "text-blue-500" : "text-gray-400"
               }`}
             />
-            <h3 className="mb-2 text-lg font-semibold text-gray-700">
+            <h3 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-200">
               {isDragActive
                 ? t("ImportDataFileView.DragDropAreaTitleActive")
                 : t("ImportDataFileView.DragDropAreaTitle")}
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {t("ImportDataFileView.DragDropAreaDescription")}
             </p>
           </div>
@@ -421,7 +421,7 @@ export const ImportDataFile = () => {
               <ToggleGroup.Item
                 key={filter.value}
                 value={filter.value}
-                className="rounded-full border px-3 py-0.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50 data-[state=on]:border-brand-primary data-[state=on]:bg-brand-primary data-[state=on]:text-white data-[state=off]:border-gray-300 data-[state=off]:bg-white data-[state=off]:text-gray-600 data-[state=off]:hover:border-brand-primary/50 data-[state=off]:hover:bg-brand-primary/5"
+                className="rounded-full border px-3 py-0.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50 data-[state=on]:border-brand-primary data-[state=on]:bg-brand-primary data-[state=on]:text-white data-[state=off]:border-gray-300 data-[state=off]:bg-white data-[state=off]:text-gray-600 data-[state=off]:hover:border-brand-primary/50 data-[state=off]:hover:bg-brand-primary/5 dark:data-[state=off]:border-gray-600 dark:data-[state=off]:bg-gray-700 dark:data-[state=off]:text-gray-300 dark:data-[state=off]:hover:border-brand-primary/40"
               >
                 {t(filter.labelKey)}
               </ToggleGroup.Item>
