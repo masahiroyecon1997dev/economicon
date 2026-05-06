@@ -91,30 +91,82 @@ jobs:
         with:
           workspaces: "app/src-tauri -> target"
 
-      - name: Create resources placeholder
-        # resources/ は .gitignore で除外されているため CI では存在しない。
-        # tauri.conf.json の "resources": ["resources/**/*"] がビルド時に検証するため
-        # ダミーファイルを置いてエラーを防ぐ。
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Path "app\src-tauri\resources" -Force | Out-Null
-          Set-Content -Path "app\src-tauri\resources\.gitkeep" -Value ""
+      - name: Install uv
+        uses: astral-sh/setup-uv@22695119d769bdb6f7032ad67b9bca0ef8c4a174 # v5.4.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "api/uv.lock"
 
-      - name: Prepare sidecar binary placeholder
-        # tauri.conf.json の externalBin ["binaries/python"] を参照するため、
-        # Tauri ビルド時に binaries/python-x86_64-pc-windows-msvc.exe が必要。
-        # CI では ECONOMICON_DEV_RUN=true でサイドカーを起動しないため、
-        # Embedded Python の python.exe を名前変更してプレースホルダーとして配置する。
+      - name: Prepare sidecar runtime resources
+        # E2E では本物の runtime/resources を用意して sidecar を起動する。
+        # build.ps1 のうち、runtime 展開に必要な最小処理だけをここで実行する。
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
           $PYTHON_VERSION = "3.14.3"
+          $PYTHON_VERSION_SHORT = "314"
+          $RESOURCES_DIR = "app\src-tauri\resources"
+          $RUNTIME_DIR = Join-Path $RESOURCES_DIR "runtime"
+          $SITE_PACKAGES_DIR = Join-Path $RUNTIME_DIR "site-packages"
           $BINARIES_DIR = "app\src-tauri\binaries"
-          $ZIP = "python_embed_tmp.zip"
-          $EXTRACT = "python_embed_tmp"
+          $REQ_FILE_TMP = Join-Path $env:RUNNER_TEMP "economicon-e2e-requirements.txt"
+          $ZIP = Join-Path $env:RUNNER_TEMP "python_embed_tmp.zip"
+          $EXTRACT = Join-Path $env:RUNNER_TEMP "python_embed_tmp"
+
+          if (Test-Path $RESOURCES_DIR) {
+            Remove-Item -Recurse -Force $RESOURCES_DIR
+          }
+          if (Test-Path $BINARIES_DIR) {
+            Remove-Item -Recurse -Force $BINARIES_DIR
+          }
+
+          New-Item -ItemType Directory -Path $SITE_PACKAGES_DIR -Force | Out-Null
           New-Item -ItemType Directory -Path $BINARIES_DIR -Force | Out-Null
+
           Invoke-WebRequest -Uri "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip" -OutFile $ZIP -UseBasicParsing
           Expand-Archive -Path $ZIP -DestinationPath $EXTRACT -Force
-          Copy-Item "$EXTRACT\python.exe" -Destination "$BINARIES_DIR\python-x86_64-pc-windows-msvc.exe"
+          Copy-Item "$EXTRACT\*" -Destination $RUNTIME_DIR -Recurse -Force
+
+          $pthFile = Get-ChildItem $RUNTIME_DIR -Filter "*._pth" | Select-Object -First 1
+          if (-not $pthFile) {
+            throw "Embedded Python の ._pth ファイルが見つかりません。"
+          }
+
+          $pthContent = @"
+          .
+          python$PYTHON_VERSION_SHORT.zip
+          site-packages
+          import site
+          "@
+          [System.IO.File]::WriteAllText(
+            $pthFile.FullName,
+            $pthContent.TrimStart(),
+            [System.Text.Encoding]::UTF8
+          )
+
+          Copy-Item (Join-Path $RUNTIME_DIR "python.exe") -Destination (Join-Path $BINARIES_DIR "python-x86_64-pc-windows-msvc.exe") -Force
+
+          Push-Location "api"
+          try {
+            uv export --frozen --no-dev --no-hashes --no-annotate --quiet --output-file $REQ_FILE_TMP
+            uv python install $PYTHON_VERSION
+            uv pip install --python $PYTHON_VERSION --target (Resolve-Path $SITE_PACKAGES_DIR) --no-cache -r $REQ_FILE_TMP
+          }
+          finally {
+            Pop-Location
+            Remove-Item $REQ_FILE_TMP -Force -ErrorAction SilentlyContinue
+          }
+
+          Copy-Item "api\main.py" -Destination (Join-Path $RESOURCES_DIR "main.py") -Force
+
+          $economiconDst = Join-Path $SITE_PACKAGES_DIR "economicon"
+          if (Test-Path $economiconDst) {
+            Remove-Item -Recurse -Force $economiconDst
+          }
+          Copy-Item "api\economicon" -Destination $economiconDst -Recurse -Force
+          Get-ChildItem $economiconDst -Recurse -Directory -Filter "__pycache__" -ErrorAction SilentlyContinue |
+            Remove-Item -Recurse -Force
+
           Remove-Item -Recurse -Force $ZIP, $EXTRACT
 
       - name: Build Tauri debug binary
@@ -128,16 +180,35 @@ jobs:
         run: pnpm exec playwright install chromium --with-deps
 
       - name: Start Economicon with CDP debug port
-        # ECONOMICON_DEV_RUN=true: Python サイドカー起動をスキップ
+        # sidecar を含む通常起動で実行し、CDP ポートが実際に開くまで待機する
         # WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: WebView2 に CDP ポートを開放させる
         working-directory: ./app
         shell: pwsh
         run: |
-          $env:ECONOMICON_DEV_RUN = "true"
+          $ErrorActionPreference = "Stop"
+          $env:ECONOMICON_DEV_RUN = "false"
           $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9222"
-          Start-Process -FilePath ".\src-tauri\target\debug\Economicon.exe" -PassThru
-          # WebView2 が CDP ポートを開放するまで待機
-          Start-Sleep -Seconds 15
+          $process = Start-Process -FilePath ".\src-tauri\target\debug\Economicon.exe" -PassThru
+          $cdpReady = $false
+
+          for ($attempt = 0; $attempt -lt 30; $attempt++) {
+            if ($process.HasExited) {
+              throw "Economicon.exe exited before CDP port became ready."
+            }
+
+            try {
+              Invoke-WebRequest -Uri "http://127.0.0.1:9222/json/version" -UseBasicParsing | Out-Null
+              $cdpReady = $true
+              break
+            }
+            catch {
+              Start-Sleep -Seconds 2
+            }
+          }
+
+          if (-not $cdpReady) {
+            throw "CDP port 9222 did not become ready in time."
+          }
 
       - name: Run E2E tests
         working-directory: ./app
