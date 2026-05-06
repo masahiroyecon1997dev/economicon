@@ -27,12 +27,58 @@ function Exit-WithFailure {
     exit 1
 }
 
+function Sync-ApiSourcesToResources {
+    param(
+        [string]$TargetResourcesDir,
+        [string]$TargetLabel
+    )
+
+    $targetRuntimeDir = Join-Path $TargetResourcesDir "runtime"
+    $targetSitePackagesDir = Join-Path $targetRuntimeDir "site-packages"
+    $targetMainDst = Join-Path $TargetResourcesDir "main.py"
+    $targetEconomiconDst = Join-Path $targetSitePackagesDir "economicon"
+
+    if (-not (Test-Path $targetRuntimeDir)) {
+        Write-Info "Skipped $TargetLabel sync because runtime directory was not found: $targetRuntimeDir"
+        return $null
+    }
+
+    if (-not (Test-Path $targetSitePackagesDir)) {
+        Write-Info "Skipped $TargetLabel sync because site-packages directory was not found: $targetSitePackagesDir"
+        return $null
+    }
+
+    New-Item -ItemType Directory -Path $TargetResourcesDir -Force | Out-Null
+
+    Copy-Item $mainSrc -Destination $targetMainDst -Force
+    Write-Success "main.py -> $TargetLabel/main.py"
+
+    if (Test-Path $targetEconomiconDst) {
+        Remove-Item $targetEconomiconDst -Recurse -Force
+        Write-Info "Removed existing $TargetLabel/runtime/site-packages/economicon"
+    }
+
+    Copy-Item $economiconSrc -Destination $targetEconomiconDst -Recurse -Force
+    Write-Success "economicon/ -> $TargetLabel/runtime/site-packages/economicon/"
+
+    Get-ChildItem $targetEconomiconDst -Recurse -Directory -Filter "__pycache__" -ErrorAction SilentlyContinue |
+        Remove-Item -Recurse -Force
+    Write-Success "Removed copied __pycache__ directories under $TargetLabel"
+
+    return @{
+        RuntimeDir = $targetRuntimeDir
+        MainPath = $targetMainDst
+        EconomiconDir = $targetEconomiconDst
+    }
+}
+
 $SCRIPT_DIR = $PSScriptRoot
 $PACKAGING_DIR = Split-Path -Parent $SCRIPT_DIR
 $PROJECT_ROOT = Split-Path -Parent $PACKAGING_DIR
 $API_DIR = Join-Path $PROJECT_ROOT "api"
 $APP_DIR = Join-Path $PROJECT_ROOT "app"
 $TAURI_DIR = Join-Path $APP_DIR "src-tauri"
+$TARGET_DEBUG_RESOURCES_DIR = Join-Path $TAURI_DIR "target\debug\resources"
 $RESOURCES_DIR = Join-Path $TAURI_DIR "resources"
 $RUNTIME_DIR = Join-Path $RESOURCES_DIR "runtime"
 $SITE_PACKAGES_DIR = Join-Path $RUNTIME_DIR "site-packages"
@@ -63,22 +109,14 @@ if (-not (Test-Path $economiconSrc)) {
     Exit-WithFailure "Source package was not found: $economiconSrc"
 }
 
-New-Item -ItemType Directory -Path $RESOURCES_DIR -Force | Out-Null
+$primarySync = Sync-ApiSourcesToResources -TargetResourcesDir $RESOURCES_DIR -TargetLabel "resources"
 
-Copy-Item $mainSrc -Destination $mainDst -Force
-Write-Success "main.py -> resources/main.py"
-
-if (Test-Path $economiconDst) {
-    Remove-Item $economiconDst -Recurse -Force
-    Write-Info "Removed existing runtime/site-packages/economicon"
+$debugSync = $null
+if (Test-Path $TARGET_DEBUG_RESOURCES_DIR) {
+    $debugSync = Sync-ApiSourcesToResources -TargetResourcesDir $TARGET_DEBUG_RESOURCES_DIR -TargetLabel "target/debug/resources"
+} else {
+    Write-Info "Skipped target/debug/resources sync because the directory does not exist."
 }
-
-Copy-Item $economiconSrc -Destination $economiconDst -Recurse -Force
-Write-Success "economicon/ -> runtime/site-packages/economicon/"
-
-Get-ChildItem $economiconDst -Recurse -Directory -Filter "__pycache__" -ErrorAction SilentlyContinue |
-    Remove-Item -Recurse -Force
-Write-Success "Removed copied __pycache__ directories"
 
 if ($Compile) {
     if (-not (Test-Path $pythonExe)) {
@@ -98,6 +136,20 @@ if ($Compile) {
         Exit-WithFailure "Failed to precompile runtime/site-packages/economicon"
     }
     Write-Success "Precompiled runtime/site-packages/economicon"
+
+    if ($debugSync -and (Test-Path $pythonExe)) {
+        & $pythonExe -O -m compileall -q -l $TARGET_DEBUG_RESOURCES_DIR
+        if ($LASTEXITCODE -ne 0) {
+            Exit-WithFailure "Failed to precompile target/debug/resources/main.py"
+        }
+        Write-Success "Precompiled target/debug/resources/main.py"
+
+        & $pythonExe -O -m compileall -q -j 0 $debugSync.EconomiconDir
+        if ($LASTEXITCODE -ne 0) {
+            Exit-WithFailure "Failed to precompile target/debug/resources/runtime/site-packages/economicon"
+        }
+        Write-Success "Precompiled target/debug/resources/runtime/site-packages/economicon"
+    }
 }
 
 Write-Host ""
