@@ -1,10 +1,14 @@
 import {
+  canDeleteFile,
+  deleteFile,
   getFiles,
   getFilesSafe,
   TauriFileError,
 } from "@/api/bridge/tauri-commands";
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import { Button } from "@/components/atoms/Button/Button";
 import { CancelButtonBar } from "@/components/molecules/ActionBar/CancelButtonBar";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 import { NavigationSearchBar } from "@/components/molecules/Navigation/NavigationSearchBar";
 import { FileListTable } from "@/components/molecules/Table/FileListTable";
 import { ImportConfigDialog } from "@/components/organisms/Dialog/ImportConfigDialog";
@@ -27,8 +31,8 @@ import type { FileType, SortDirection, SortField } from "@/types/commonTypes";
 import * as RadixTabs from "@radix-ui/react-tabs";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { UploadCloud } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Trash2, UploadCloud } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 type FileTypeFilter = "all" | "csv" | "excel" | "parquet";
@@ -90,28 +94,139 @@ export const ImportDataFile = () => {
     path: string;
     name: string;
   } | null>(null);
+  const [deleteTargetFileInfo, setDeleteTargetFileInfo] = useState<{
+    path: string;
+    name: string;
+  } | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeletingFile, setIsDeletingFile] = useState(false);
 
-  const showUnsupportedFileWarning = async (fileName: string) => {
-    await showMessageDialog(
-      t("ImportDataFileView.UnsupportedFileTitle"),
-      t("ImportDataFileView.UnsupportedFileMessage", {
-        fileName,
-        supportedExtensions: SUPPORTED_IMPORT_EXTENSIONS.join(", "),
-      }),
-    );
+  const showUnsupportedFileWarning = useCallback(
+    async (fileName: string) => {
+      await showMessageDialog(
+        t("ImportDataFileView.UnsupportedFileTitle"),
+        t("ImportDataFileView.UnsupportedFileMessage", {
+          fileName,
+          supportedExtensions: SUPPORTED_IMPORT_EXTENSIONS.join(", "),
+        }),
+      );
+    },
+    [t],
+  );
+
+  const handleImportFileSelection = useCallback(
+    async (filePath: string, fileName: string) => {
+      if (!isSupportedImportFile(fileName)) {
+        await showUnsupportedFileWarning(fileName);
+        return;
+      }
+
+      setSelectedFileInfo({ path: filePath, name: fileName });
+      setIsImportDialogOpen(true);
+    },
+    [showUnsupportedFileWarning],
+  );
+
+  const buildChildPath = (fileName: string) => {
+    if (!directoryPath) return fileName;
+    if (directoryPath.endsWith(pathSeparator)) {
+      return directoryPath + fileName;
+    }
+    return directoryPath + pathSeparator + fileName;
   };
 
-  const handleImportFileSelection = async (
-    filePath: string,
-    fileName: string,
-  ) => {
-    if (!isSupportedImportFile(fileName)) {
-      await showUnsupportedFileWarning(fileName);
+  const refreshCurrentDirectory = async () => {
+    if (!directoryPath) {
+      const safeFiles = await getFilesSafe("");
+      setFiles(safeFiles);
       return;
     }
 
-    setSelectedFileInfo({ path: filePath, name: fileName });
-    setIsImportDialogOpen(true);
+    try {
+      const refreshed = await getFiles(directoryPath);
+      setFiles(refreshed);
+    } catch {
+      const safeFiles = await getFilesSafe("");
+      setFiles(safeFiles);
+    }
+  };
+
+  const getDeleteBlockedMessage = (fileName: string, error: unknown) => {
+    if (error instanceof TauriFileError) {
+      switch (error.errorType) {
+        case "PermissionDenied":
+          return t("ImportDataFileView.DeleteFileBlockedPermissionDenied", {
+            fileName,
+          });
+        case "FileInUse":
+          return t("ImportDataFileView.DeleteFileBlockedFileInUse", {
+            fileName,
+          });
+        case "PathNotFound":
+          return t("ImportDataFileView.DeleteFileBlockedPathNotFound", {
+            fileName,
+          });
+        case "NotAFile":
+          return t("ImportDataFileView.DeleteFileBlockedNotAFile", {
+            fileName,
+          });
+      }
+    }
+
+    return t("ImportDataFileView.DeleteFileBlockedUnexpected", {
+      fileName,
+    });
+  };
+
+  const showDeleteBlockedDialog = async (fileName: string, error: unknown) => {
+    await showMessageDialog(
+      t("ImportDataFileView.DeleteFileBlockedTitle"),
+      getDeleteBlockedMessage(fileName, error),
+    );
+  };
+
+  const closeDeleteDialog = () => {
+    if (isDeletingFile) return;
+    setIsDeleteDialogOpen(false);
+    setDeleteTargetFileInfo(null);
+  };
+
+  const handleDeleteIconClick = async (file: FileType) => {
+    const filePath = buildChildPath(file.name);
+
+    try {
+      await canDeleteFile(filePath);
+      setDeleteTargetFileInfo({ path: filePath, name: file.name });
+      setIsDeleteDialogOpen(true);
+    } catch (error: unknown) {
+      await showDeleteBlockedDialog(file.name, error);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetFileInfo) return;
+
+    const targetFile = deleteTargetFileInfo;
+    setIsDeletingFile(true);
+
+    try {
+      await deleteFile(targetFile.path);
+      setIsDeleteDialogOpen(false);
+      setDeleteTargetFileInfo(null);
+      await showMessageDialog(
+        t("ImportDataFileView.DeleteFileSuccessTitle"),
+        t("ImportDataFileView.DeleteFileSuccessMessage", {
+          fileName: targetFile.name,
+        }),
+      );
+      await refreshCurrentDirectory();
+    } catch (error: unknown) {
+      setIsDeleteDialogOpen(false);
+      setDeleteTargetFileInfo(null);
+      await showDeleteBlockedDialog(targetFile.name, error);
+    } finally {
+      setIsDeletingFile(false);
+    }
   };
 
   // Tauri 2 ネイティブ drag-drop イベント
@@ -147,7 +262,7 @@ export const ImportDataFile = () => {
     return () => {
       cleanup?.();
     };
-  }, []);
+  }, [handleImportFileSelection]);
 
   // ファイルパスを分割するヘルパー関数
   const getPathSegments = () => {
@@ -217,16 +332,10 @@ export const ImportDataFile = () => {
   // ファイルクリック処理
   const handleFileClick = async (file: FileType) => {
     if (!file.isFile) {
-      const newPath =
-        directoryPath === pathSeparator
-          ? pathSeparator + file.name
-          : directoryPath + pathSeparator + file.name;
+      const newPath = buildChildPath(file.name);
       await changeDirectory(newPath);
     } else {
-      await handleImportFileSelection(
-        directoryPath + pathSeparator + file.name,
-        file.name,
-      );
+      await handleImportFileSelection(buildChildPath(file.name), file.name);
     }
   };
 
@@ -338,6 +447,10 @@ export const ImportDataFile = () => {
 
   const handleCancel = () => setCurrentView("DataPreview");
 
+  const canRenderDeleteAction = (file: FileType) => {
+    return file.isFile && isSupportedImportFile(file.name);
+  };
+
   return (
     <PageLayout
       title={t("ImportDataFileView.Title")}
@@ -349,6 +462,30 @@ export const ImportDataFile = () => {
         fileInfo={selectedFileInfo}
         onImport={executeImport}
       />
+      <BaseDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeDeleteDialog();
+          }
+        }}
+        title={t("ImportDataFileView.DeleteFileConfirmTitle")}
+        subtitle={deleteTargetFileInfo?.name}
+        footerVariant="confirm"
+        submitLabel={t("Common.Delete")}
+        submitVariant="danger"
+        isSubmitting={isDeletingFile}
+        onSubmit={() => {
+          void handleDeleteConfirm();
+        }}
+      >
+        <p
+          className="text-sm text-gray-900 dark:text-gray-200 whitespace-pre-wrap"
+          data-testid="delete-file-confirm-message"
+        >
+          {t("ImportDataFileView.DeleteFileConfirmMessage")}
+        </p>
+      </BaseDialog>
 
       <RadixTabs.Root
         defaultValue="dragDrop"
@@ -434,11 +571,37 @@ export const ImportDataFile = () => {
             fileNameHeader={t("ImportDataFileView.FileNameHeader")}
             sizeHeader={t("ImportDataFileView.SizeHeader")}
             lastModifiedHeader={t("ImportDataFileView.LastModifiedHeader")}
+            actionsHeader={t("ImportDataFileView.ActionsHeader")}
             maxHeight="100%"
             className="flex-1 min-h-0"
             sortField={sortField}
             sortDirection={sortDirection}
             onSort={handleSort}
+            renderRowActions={(file) => {
+              if (!canRenderDeleteAction(file)) {
+                return null;
+              }
+
+              return (
+                <Button
+                  variant="ghost"
+                  className="px-2 py-2"
+                  aria-label={t(
+                    "ImportDataFileView.DeleteFileButtonAriaLabel",
+                    {
+                      fileName: file.name,
+                    },
+                  )}
+                  data-testid={`delete-file-button-${file.name}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleDeleteIconClick(file);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 text-red-600" />
+                </Button>
+              );
+            }}
           />
         </RadixTabs.Content>
       </RadixTabs.Root>

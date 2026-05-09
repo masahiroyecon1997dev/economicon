@@ -1,5 +1,5 @@
-import { type ComponentPropsWithoutRef } from "react";
 import { cn } from "@/lib/utils/helpers";
+import { type ComponentPropsWithoutRef } from "react";
 
 // スタイル定義を外に出して整理
 const variants = {
@@ -18,6 +18,11 @@ const variants = {
     "bg-red-600 text-white shadow-sm hover:bg-red-700",
     "dark:bg-red-700 dark:hover:bg-red-600",
     "focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-red-600",
+  ),
+  // 装飾なし、軽微なアクション向け
+  ghost: cn(
+    "bg-transparent border-none shadow-none hover:bg-gray-100",
+    "dark:hover:bg-gray-800",
   ),
 };
 

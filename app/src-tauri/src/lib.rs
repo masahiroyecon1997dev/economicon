@@ -14,8 +14,8 @@ use tauri_plugin_shell::process::CommandChild;
 use tauri_plugin_shell::ShellExt;
 
 use files::{
-    check_file_exists_internal, get_files_internal, get_files_with_fallback, FileError,
-    GetFilesResponse,
+    can_delete_file_internal, check_file_exists_internal, delete_file_internal, get_files_internal,
+    get_files_with_fallback, FileError, GetFilesResponse,
 };
 use os_info::{get_os_info_internal, OsInfoResponse};
 
@@ -237,6 +237,18 @@ fn check_file_exists(file_path: String) -> bool {
     check_file_exists_internal(&file_path)
 }
 
+/// 指定したファイルが削除候補として有効か事前に検証する。
+#[tauri::command]
+fn can_delete_file(file_path: String) -> Result<(), FileError> {
+    can_delete_file_internal(&file_path)
+}
+
+/// 指定したファイルを OS 上から即時削除する。
+#[tauri::command]
+fn delete_file(file_path: String) -> Result<(), FileError> {
+    delete_file_internal(&file_path)
+}
+
 /// エラーを返さない安全版 get_files。
 /// パスが存在しない・空の場合はホームディレクトリ等にフォールバックする。
 /// アプリ初期化時（設定に保存されたパスが消えた場合など）に使用する。
@@ -367,7 +379,9 @@ pub fn run() {
             get_os_info,
             get_auth_token,
             get_api_port,
-            check_file_exists
+            check_file_exists,
+            can_delete_file,
+            delete_file
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

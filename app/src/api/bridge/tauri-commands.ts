@@ -1,13 +1,15 @@
-import { invoke } from "@tauri-apps/api/core";
-import type { FilesType, FileType } from "@/types/commonTypes";
 import { client } from "@/api/bridge/api-gateway";
+import type { FilesType, FileType } from "@/types/commonTypes";
+import { invoke } from "@tauri-apps/api/core";
 
 // Rust 側の FileError に対応するエラー種別
 export type FileErrorType =
   | "PathRequired"
   | "PathNotFound"
+  | "NotAFile"
   | "NotADirectory"
   | "PermissionDenied"
+  | "FileInUse"
   | "CanonicalizationError"
   | "UnexpectedError";
 
@@ -44,6 +46,14 @@ type RustGetFilesResponse = {
   files: RustFileItem[];
 };
 
+const throwIfTauriFileError = (e: unknown): never => {
+  if (e !== null && typeof e === "object" && "errorType" in e) {
+    const err = e as FileErrorResponse;
+    throw new TauriFileError(err.errorType, err.message ?? "");
+  }
+  throw e;
+};
+
 /** Rust の FileItem → TypeScript の FileType に変換する共通マッパー */
 const mapRustFiles = (response: RustGetFilesResponse): FilesType => ({
   directoryPath: response.directoryPath,
@@ -68,11 +78,7 @@ export const getFiles = async (path: string): Promise<FilesType> => {
     return mapRustFiles(response);
   } catch (e: unknown) {
     // Tauri は Err(FileError) を構造化オブジェクトとして throw する
-    if (e !== null && typeof e === "object" && "errorType" in e) {
-      const err = e as FileErrorResponse;
-      throw new TauriFileError(err.errorType, err.message ?? "");
-    }
-    throw e;
+    return throwIfTauriFileError(e);
   }
 };
 
@@ -119,6 +125,22 @@ export const getApiPort = async (): Promise<number> => {
  */
 export const checkFileExists = async (filePath: string): Promise<boolean> => {
   return await invoke<boolean>("check_file_exists", { filePath });
+};
+
+export const canDeleteFile = async (filePath: string): Promise<void> => {
+  try {
+    await invoke<void>("can_delete_file", { filePath });
+  } catch (e: unknown) {
+    throwIfTauriFileError(e);
+  }
+};
+
+export const deleteFile = async (filePath: string): Promise<void> => {
+  try {
+    await invoke<void>("delete_file", { filePath });
+  } catch (e: unknown) {
+    throwIfTauriFileError(e);
+  }
 };
 
 export const fetchDataToArrow = async (
