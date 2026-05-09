@@ -27,7 +27,8 @@ export type WorkFeatureKey =
   | "StatisticalTestView"
   | "LinearRegressionForm"
   | "CorrelationMatrix"
-  | "GroupStatistics";
+  | "GroupStatistics"
+  | "ChartView";
 
 export type WorkspaceWorkTab = {
   id: `work:${WorkFeatureKey}`;

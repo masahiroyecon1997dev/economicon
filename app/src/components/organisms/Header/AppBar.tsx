@@ -192,6 +192,8 @@ export const AppBar = () => {
   ) => {
     openWorkTab(featureKey, title);
     setCurrentView(featureKey);
+    console.log(`Opening work tab: ${featureKey}2`);
+
     close();
   };
 
@@ -252,6 +254,12 @@ export const AppBar = () => {
           label: t("HeaderMenu.Calculate"),
           handleSelect: () =>
             handleOpenWorkTab("CalculationView", t("HeaderMenu.Calculate")),
+        },
+        {
+          id: "chart-view",
+          label: t("HeaderMenu.ChartView"),
+          handleSelect: () =>
+            handleOpenWorkTab("ChartView", t("HeaderMenu.ChartView")),
         },
       ],
     },

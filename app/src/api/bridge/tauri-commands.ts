@@ -159,3 +159,15 @@ export const fetchDataToArrow = async (
   );
   return new Uint8Array(response.data);
 };
+
+export const fetchPlotDataBinary = async (
+  tableName: string,
+  columnNames: string[],
+): Promise<Uint8Array> => {
+  const response = await client.fetch_binary<number[]>(
+    "POST",
+    "/api/table/fetch-plot-data",
+    { tableName, columnNames },
+  );
+  return new Uint8Array(response.data);
+};

@@ -46,6 +46,10 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     featureKey: "GroupStatistics",
     titleKey: "HeaderMenu.GroupStatistics",
   },
+  {
+    featureKey: "ChartView",
+    titleKey: "HeaderMenu.ChartView",
+  },
 ];
 
 export const isWorkFeatureKey = (value: string): value is WorkFeatureKey =>

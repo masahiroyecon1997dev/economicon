@@ -25,7 +25,13 @@ export default defineConfig({
     // `@` を `src` ディレクトリへのエイリアスとして設定
     alias: {
       "@": path.resolve(__dirname, "src"),
+      // plotly.js のブラウザビルドを使用（Node.js 依存モジュールを含む plotly.js を回避）
+      "plotly.js": "plotly.js-dist-min",
     },
+  },
+
+  optimizeDeps: {
+    include: ["plotly.js-dist-min"],
   },
 
   // Tauri CLI出力を見やすくするための設定

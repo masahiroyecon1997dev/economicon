@@ -71,6 +71,9 @@ importers:
       plotly.js:
         specifier: 3.5.0
         version: 3.5.0(mapbox-gl@1.13.3)
+      plotly.js-dist-min:
+        specifier: 3.5.0
+        version: 3.5.0
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -83,6 +86,9 @@ importers:
       react-i18next:
         specifier: 17.0.2
         version: 17.0.2(i18next@26.0.4(typescript@6.0.2))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.2)
+      react-plotly.js:
+        specifier: 2.6.0
+        version: 2.6.0(plotly.js@3.5.0(mapbox-gl@1.13.3))(react@19.2.4)
       react-resizable-panels:
         specifier: 4.7.6
         version: 4.7.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -132,12 +138,18 @@ importers:
       '@types/node':
         specifier: 25.5.0
         version: 25.5.0
+      '@types/plotly.js-dist-min':
+        specifier: 2.3.4
+        version: 2.3.4
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
+      '@types/react-plotly.js':
+        specifier: 2.6.4
+        version: 2.6.4
       '@vitejs/plugin-react':
         specifier: 6.0.1
         version: 6.0.1(@rolldown/plugin-babel@0.2.2(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.17)(vite@8.0.10(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.8.3)))(babel-plugin-react-compiler@1.0.0)(vite@8.0.10(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.8.3))
@@ -1799,6 +1811,9 @@ packages:
   '@types/pbf@3.0.5':
     resolution: {integrity: sha512-j3pOPiEcWZ34R6a6mN07mUkM4o4Lwf6hPNt8eilOeZhTFbxFXmKhvXl9Y28jotFPaI1bpPDJsbCprUoNke6OrA==}
 
+  '@types/plotly.js-dist-min@2.3.4':
+    resolution: {integrity: sha512-ISwLFV6Zs/v3DkaRFLyk2rvYAfVdnYP2VVVy7h+fBDWw52sn7sMUzytkWiN4M75uxr1uz1uiBioePTDpAfoFIg==}
+
   '@types/plotly.js@3.0.10':
     resolution: {integrity: sha512-q+MgO4aajC2HrO7FllTYWzrpdfbTjboSMfjkz/aXKjg1v7HNo1zMEFfAW7quKfk6SL+bH74A5ThBEps/7hZxOA==}
 
@@ -1806,6 +1821,9 @@ packages:
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
     peerDependencies:
       '@types/react': ^19.2.0
+
+  '@types/react-plotly.js@2.6.4':
+    resolution: {integrity: sha512-AU6w1u3qEGM0NmBA69PaOgNc0KPFA/+qkH6Uu9EBTJ45/WYOUoXi9AF5O15PRM2klpHSiHAAs4WnlI+OZAFmUA==}
 
   '@types/react@19.2.14':
     resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
@@ -3317,6 +3335,9 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  plotly.js-dist-min@3.5.0:
+    resolution: {integrity: sha512-rN+0P4M6eIHiNeKsyv4F0cCmA3pslxIjUpGpEh6PbNzEQQMjHbXFbC7nVUbK805TaLxnjh6FnwsVau/DlWimUA==}
+
   plotly.js@3.5.0:
     resolution: {integrity: sha512-a3AYQIMG7OdZmrJ/fJ65HSt3g1l5qDeludKqjjafU1dh5E+fwqDhsEBndW7VCYwjlducCfN6KtPdWdiWFcoBWw==}
     engines: {node: '>=18.0.0'}
@@ -3413,6 +3434,12 @@ packages:
 
   react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
+
+  react-plotly.js@2.6.0:
+    resolution: {integrity: sha512-g93xcyhAVCSt9kV1svqG1clAEdL6k3U+jjuSzfTV7owaSU9Go6Ph8bl25J+jKfKvIGAEYpe4qj++WHJuc9IaeA==}
+    peerDependencies:
+      plotly.js: '>1.34.0'
+      react: '>0.13.0'
 
   react-remove-scroll-bar@2.3.8:
     resolution: {integrity: sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q==}
@@ -5650,10 +5677,19 @@ snapshots:
 
   '@types/pbf@3.0.5': {}
 
+  '@types/plotly.js-dist-min@2.3.4':
+    dependencies:
+      '@types/plotly.js': 3.0.10
+
   '@types/plotly.js@3.0.10': {}
 
   '@types/react-dom@19.2.3(@types/react@19.2.14)':
     dependencies:
+      '@types/react': 19.2.14
+
+  '@types/react-plotly.js@2.6.4':
+    dependencies:
+      '@types/plotly.js': 3.0.10
       '@types/react': 19.2.14
 
   '@types/react@19.2.14':
@@ -7276,6 +7312,8 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.2
 
+  plotly.js-dist-min@3.5.0: {}
+
   plotly.js@3.5.0(mapbox-gl@1.13.3):
     dependencies:
       '@plotly/d3': 3.8.2
@@ -7416,6 +7454,12 @@ snapshots:
   react-is@16.13.1: {}
 
   react-is@17.0.2: {}
+
+  react-plotly.js@2.6.0(plotly.js@3.5.0(mapbox-gl@1.13.3))(react@19.2.4):
+    dependencies:
+      plotly.js: 3.5.0(mapbox-gl@1.13.3)
+      prop-types: 15.8.1
+      react: 19.2.4
 
   react-remove-scroll-bar@2.3.8(@types/react@19.2.14)(react@19.2.4):
     dependencies:

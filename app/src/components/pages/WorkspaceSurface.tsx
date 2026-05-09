@@ -4,6 +4,7 @@ import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressi
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
 import { Calculation } from "@/components/pages/Calculation";
+import { ChartView } from "@/components/pages/ChartView";
 import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
@@ -35,6 +36,7 @@ type StaticWorkFeatureKey = Exclude<
   | "StatisticalTestView"
   | "LinearRegressionForm"
   | "GroupStatistics"
+  | "ChartView"
 >;
 
 const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
@@ -82,6 +84,13 @@ const isGroupStatisticsWorkTab = (
   featureKey: "GroupStatistics";
   id: "work:GroupStatistics";
 } => tab.featureKey === "GroupStatistics";
+
+const isChartViewWorkTab = (
+  tab: WorkspaceWorkTab,
+): tab is WorkspaceWorkTab & {
+  featureKey: "ChartView";
+  id: "work:ChartView";
+} => tab.featureKey === "ChartView";
 
 export const WorkspaceSurface = () => {
   const { t } = useTranslation();
@@ -286,6 +295,15 @@ export const WorkspaceSurface = () => {
             openDataTab(tableName);
             setCurrentView("DataPreview");
           }}
+          onCancel={() => void handleCloseTab(tab.id)}
+        />
+      );
+    }
+
+    if (isChartViewWorkTab(tab)) {
+      return (
+        <ChartView
+          workTabId={tab.id}
           onCancel={() => void handleCloseTab(tab.id)}
         />
       );

@@ -12,6 +12,7 @@ export type CurrentPageValue =
   | "LinearRegressionForm"
   | "CreateSimulationDataTable"
   | "CalculationView"
+  | "ChartView"
   | "SaveData"
   | "AnalysisResultPreview"
   | "DataPreview";
