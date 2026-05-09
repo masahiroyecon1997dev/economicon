@@ -100,6 +100,7 @@ export const TableNavItem = ({
                 : "font-normal text-white/70 hover:bg-white/10 hover:text-white",
             )}
             onClick={() => onClick(tableName)}
+            data-testid={`left-menu-table-item-${tableName}`}
           >
             <Tooltip content={tableName}>
               <span className="flex-1 min-w-0 block truncate text-sm">
@@ -120,6 +121,7 @@ export const TableNavItem = ({
                   )}
                   aria-label={t("AreaLabels.DataMenu")}
                   onClick={(e) => e.stopPropagation()}
+                  data-testid={`left-menu-table-menu-${tableName}`}
                 >
                   <MoreVertical size={14} />
                 </button>

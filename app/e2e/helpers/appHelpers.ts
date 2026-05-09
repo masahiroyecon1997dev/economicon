@@ -211,15 +211,22 @@ export async function clickHeaderMenu(
 
 /**
  * UI からワークスペースを初期化し、テーブルと分析結果を全削除する。
+ * ワークスペースが空で初期化ボタンが非活性の場合は何もしない。
  */
 export async function clearWorkspaceFromUi(page: Page): Promise<void> {
-  await clickHeaderMenu(
-    page,
-    /ファイル|File/i,
-    /ワークスペースを初期化|Reset Workspace/i,
-  );
+  const resetButton = page.getByTestId("left-menu-reset-workspace");
+  await resetButton.waitFor({ state: "visible", timeout: LOADING_TIMEOUT_MS });
 
-  const dialog = page.getByRole("dialog");
+  if (await resetButton.isDisabled()) {
+    await expect(
+      page.getByRole("heading", { name: /ファイルをインポート|Select File/i }),
+    ).toBeVisible({ timeout: LOADING_TIMEOUT_MS });
+    return;
+  }
+
+  await resetButton.click();
+
+  const dialog = page.getByRole("dialog").or(page.getByRole("alertdialog"));
   await expect(dialog).toBeVisible({ timeout: API_TIMEOUT_MS });
   await dialog.getByRole("button", { name: /^OK$/i }).click();
   await expect(dialog).toBeHidden({ timeout: API_TIMEOUT_MS });
@@ -291,33 +298,13 @@ export async function openTableContextMenu(
   page: Page,
   tableName: string,
 ): Promise<void> {
-  // サイドバー内のテーブル名 span を hover
-  const tableItem = page
-    .getByRole("navigation")
-    .locator(`span[title="${tableName}"]`)
-    .filter({ hasText: tableName })
-    .first();
+  const tableItem = page.getByTestId(`left-menu-table-item-${tableName}`);
   await expect(tableItem).toBeVisible({ timeout: API_TIMEOUT_MS });
   await tableItem.hover();
 
-  // MoreVertical ボタンが現れるまで待機してクリック
-  const moreBtn = page
-    .getByRole("navigation")
-    .locator(`span:has-text("${tableName}")`)
-    .locator("xpath=..")
-    .getByRole("button", { name: /データメニュー|DataMenu/i });
-
-  // aria-label は AreaLabels.DataMenu キーによる翻訳テキスト
-  // 念のため parent の sibling button も探す
-  const moreBtnFallback = page
-    .getByRole("navigation")
-    .filter({ hasText: tableName })
-    .locator("button")
-    .last();
-
-  const btn = (await moreBtn.isVisible()) ? moreBtn : moreBtnFallback;
-  await btn.waitFor({ state: "visible", timeout: 5000 });
-  await btn.click();
+  const menuButton = page.getByTestId(`left-menu-table-menu-${tableName}`);
+  await menuButton.waitFor({ state: "visible", timeout: 5000 });
+  await menuButton.click();
 }
 
 /**
@@ -327,12 +314,9 @@ export async function clickTableInSidebar(
   page: Page,
   tableName: string,
 ): Promise<void> {
-  const span = page
-    .getByRole("navigation")
-    .getByText(tableName, { exact: true })
-    .first();
-  await expect(span).toBeVisible({ timeout: API_TIMEOUT_MS });
-  await span.click();
+  const tableItem = page.getByTestId(`left-menu-table-item-${tableName}`);
+  await expect(tableItem).toBeVisible({ timeout: API_TIMEOUT_MS });
+  await tableItem.click();
 
   // DataPreview（テーブルタブ）が表示されるまで待機
   await expect(page.getByRole("tab", { name: tableName })).toBeVisible({

@@ -107,32 +107,12 @@
     },
     {
       "type": "shell",
-      "command": "pnpm run dev",
-      "label": "Economicon: Vite Dev",
-      "detail": "Run Vite development server for Economicon app for E2E testing",
-      "options": {
-        "cwd": "${workspaceFolder}/app"
-      },
-      "isBackground": true,
-      "problemMatcher": {
-        "owner": "custom",
-        "pattern": { "regexp": "^.*$" },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": ".*VITE.*",
-          "endsPattern": ".*ready in.*"
-        }
-      }
-    },
-    {
-      "type": "shell",
-      "command": "$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9222'; .\\src-tauri\\target\\debug\\Economicon.exe",
+      "command": "$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9222'; pnpm tauri dev",
       "label": "Economicon: App (Debug Port)",
       "detail": "Run Economicon app with debug port for E2E testing",
       "options": {
         "cwd": "${workspaceFolder}/app"
       },
-      "dependsOn": ["Economicon: Vite Dev"],
       "isBackground": true,
       "problemMatcher": {
         "owner": "custom",

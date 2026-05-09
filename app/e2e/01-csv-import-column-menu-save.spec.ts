@@ -408,7 +408,7 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
     // サイドバーに新しい名前が表示されること
     await expect(
       page
-        .getByRole("navigation")
+        .getByTestId(`left-menu-table-item-${TABLE_NAME}_v2`)
         .locator(`span[title="${TABLE_NAME}_v2"]`),
     ).toBeVisible();
   });
@@ -438,9 +438,7 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
 
     // サイドバーに複製データが追加されること
     await expect(
-      page
-        .getByRole("navigation")
-        .locator(`span[title="${TABLE_NAME}_copy"]`),
+      page.getByRole("navigation").locator(`span[title="${TABLE_NAME}_copy"]`),
     ).toBeVisible();
   });
 
