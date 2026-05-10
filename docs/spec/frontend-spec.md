@@ -27,6 +27,7 @@
 - 明示的に work tab を閉じたとき、他の work tab を連鎖的に閉じない。
 - 分析完了やキャンセルで DataPreview に戻る場合だけ、必要に応じて work tab をクローズまたは fallback tab に切り替える。
 - data tab / result tab は workspaceTabs ストアで一元管理する。
+- Workspace 表示中の data / result / work の中身は activeTabId を唯一の正として扱い、currentView は workspace 外のシェル画面切り替えに限定するのが整理方針である。
 
 ## 今回修正済み
 
@@ -46,6 +47,13 @@
 - [fixed] StatisticalTestView: 14 inch 画面を想定し、検定タイプ行・サンプルカード・オプション領域の余白を圧縮して縦方向の情報密度を改善した。
 - [fixed] WorkspaceSurface: タブのドラッグ&ドロップ並び替えを追加し、Alt+Shift+ArrowLeft / ArrowRight でも左右移動できるようにした。
 - [fixed] Group Statistics: 2 ステップ Wizard を実装し、Step 2 を Role Assignment Matrix ベースに再構成した。列検索、役割の排他制御、summary、統計量選択、出力データ名を同一ステップに集約した。
+
+### WorkspaceSurface タブ D&D 実装メモ
+
+- タブのドラッグ開始時は、ネイティブ D&D を成立させるため DataTransfer に workspace tab 用 MIME type と tab id を格納し、effectAllowed は move に固定する。
+- ドロップ先の tab 本体と drop slot は dragOver ごとに dropEffect=move を明示し、WebView2 上で禁止マークにならないことを正とする。
+- 並び替え処理のソースは React state の draggedTabId だけに依存せず、drop 時は DataTransfer に入っている tab id からも復元できるようにする。
+- jsdom の fireEvent だけではネイティブ D&D の成立条件を十分に再現できないため、ユニットテストでは DataTransfer を明示モックし、必要なら将来的に E2E でも補完する。
 
 ## API拡張仕様
 
@@ -199,6 +207,15 @@ canonical order:
 - [pending] ImportDataFile のファイル選択タブに Rust ベースのファイル削除導線を追加し、削除不可 / 確認 / 完了ダイアログと一覧再読込まで実装する。
 - [pending] 詳細オプションが多い分析画面は、初期表示をコンパクトに保つレイアウトへさらに寄せる。
 - [pending] Linear Regression の列指定 UI は、選択済み状況の可視化と役割ごとの誤選択防止を強めたレイアウトへ更新する。
+- [pending] currentView と activeTabId の二重管理を整理し、workspace 内表示は activeTabId、アプリ全体画面は shellView 相当の単純な状態に責務分離する。
+
+### currentView / activeTabId 整理案
+
+- currentView は ImportDataFile / SaveData / Workspace のようなシェル画面専用の状態へ縮小し、DataPreview / LinearRegressionForm / CorrelationMatrix など workspace 内の view 種別は持たない。
+- WorkspaceSurface の描画分岐は activeTabId から導出した activeTab.kind を唯一の正とし、data tab は表、result tab は結果、work tab はフォームを表示する。
+- 画面から直接 setCurrentView と activateTab を別々に呼ぶ形はやめ、showImportView / showSaveView / activateDataTab / activateResultTab / activateWorkTab のような用途別アクションへ寄せる。
+- インポート成功時は tableInfo 追加後に新規 data tab を必ず activate し、その後に workspace シェルへ戻す。DataPreview へ戻すだけで activeTabId を放置する状態は許容しない。
+- 段階的移行では、まず currentView を shellView 相当へ改名して値を縮小し、その後に WorkspaceSurface 配下の setCurrentView("DataPreview") / setCurrentView(workFeatureKey) 呼び出しを tab activation API へ置換する。
 
 ---
 

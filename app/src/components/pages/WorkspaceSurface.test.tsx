@@ -65,8 +65,14 @@ const TABLE_SALES = {
   isActive: true,
 };
 
+
 beforeEach(() => {
   vi.clearAllMocks();
+  // JSDOM は Pointer Capture API を実装していないため no-op で定義
+  Object.assign(Element.prototype, {
+    setPointerCapture: vi.fn(),
+    releasePointerCapture: vi.fn(),
+  });
   useCurrentPageStore.setState({ currentView: "DataPreview" });
   useTableInfosStore.setState({
     tableInfos: [TABLE_SALES],
@@ -359,12 +365,15 @@ describe("WorkspaceSurface コンポーネント", () => {
 
     render(<WorkspaceSurface />);
 
-    const joinTab = screen.getByText("Join").closest("[role='button']");
-    const dropSlot = screen.getByTestId("workspace-tab-drop-slot-0");
+    const joinTab = screen
+      .getByText("Join")
+      .closest("[role='button']") as HTMLElement;
 
-    fireEvent.dragStart(joinTab!);
-    fireEvent.dragOver(dropSlot);
-    fireEvent.drop(dropSlot);
+    // JSDOM の getBoundingClientRect は全て 0 を返す（left=0, width=0）。
+    // clientX=-1 にすると left+width/2=0 より小さくなり、index=0 に解決される。
+    fireEvent.pointerDown(joinTab, { button: 0, clientX: 100, pointerId: 1 });
+    fireEvent.pointerMove(joinTab, { clientX: -1, pointerId: 1 });
+    fireEvent.pointerUp(joinTab, { clientX: -1, pointerId: 1 });
 
     await waitFor(() => {
       expect(

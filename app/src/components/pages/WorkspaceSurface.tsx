@@ -26,7 +26,13 @@ import type {
 } from "@/stores/workspaceTabs";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { X } from "lucide-react";
-import { Fragment, useEffect, useRef, useState, type DragEvent } from "react";
+import {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent,
+} from "react";
 import { useTranslation } from "react-i18next";
 
 type TabDropTarget = {
@@ -131,6 +137,14 @@ export const WorkspaceSurface = () => {
   const previousViewRef = useRef(currentView);
   const suppressWorkTabCleanupRef = useRef(false);
   const workTabContainerRef = useRef<HTMLDivElement | null>(null);
+  const pointerDragRef = useRef<{
+    tabId: string;
+    pointerId: number;
+    startX: number;
+    dragging: boolean;
+  } | null>(null);
+  const tabNodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const skipNextClickRef = useRef(false);
 
   useEffect(() => {
     pruneMissingDataTabs(tableInfos.map((table) => table.tableName));
@@ -281,37 +295,64 @@ export const WorkspaceSurface = () => {
     setDropTarget(null);
   };
 
-  const handleDropOnSlot = (index: number) => {
-    if (!draggedTabId) return;
-    moveTab(draggedTabId, index);
+  const DRAG_THRESHOLD_PX = 4;
+
+  const resolveDropIndexFromPointer = (clientX: number): number => {
+    for (let i = 0; i < tabs.length; i++) {
+      const el = tabNodeRefs.current.get(tabs[i].id);
+      if (!el) continue;
+      const { left, width } = el.getBoundingClientRect();
+      if (clientX < left + width / 2) return i;
+    }
+    return tabs.length;
+  };
+
+  const handleTabPointerDown = (
+    event: PointerEvent<HTMLDivElement>,
+    tabId: string,
+  ) => {
+    if (event.button !== 0) return;
+    if ((event.target as HTMLElement).closest("button")) return;
+    pointerDragRef.current = {
+      tabId,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      dragging: false,
+    };
+  };
+
+  const handleTabPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const state = pointerDragRef.current;
+    if (!state) return;
+    if (!state.dragging) {
+      if (Math.abs(event.clientX - state.startX) < DRAG_THRESHOLD_PX) return;
+      state.dragging = true;
+      event.currentTarget.setPointerCapture(state.pointerId);
+      setDraggedTabId(state.tabId);
+    }
+    setDropTarget({ index: resolveDropIndexFromPointer(event.clientX) });
+  };
+
+  const handleTabPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const state = pointerDragRef.current;
+    if (!state) return;
+    if (state.dragging) {
+      event.currentTarget.releasePointerCapture(state.pointerId);
+      moveTab(state.tabId, resolveDropIndexFromPointer(event.clientX));
+      skipNextClickRef.current = true;
+    }
+    pointerDragRef.current = null;
     resetDragState();
   };
 
-  const resolveDropIndexFromTab = (
-    event: DragEvent<HTMLDivElement>,
-    index: number,
-  ) => {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    if (bounds.width <= 0) {
-      return index;
+  const handleTabPointerCancel = (event: PointerEvent<HTMLDivElement>) => {
+    const state = pointerDragRef.current;
+    if (!state) return;
+    if (state.dragging) {
+      event.currentTarget.releasePointerCapture(state.pointerId);
     }
-
-    const midpoint = bounds.left + bounds.width / 2;
-    return event.clientX < midpoint ? index : index + 1;
-  };
-
-  const handleDragOverTab = (
-    event: DragEvent<HTMLDivElement>,
-    index: number,
-  ) => {
-    event.preventDefault();
-    if (!draggedTabId) return;
-    setDropTarget({ index: resolveDropIndexFromTab(event, index) });
-  };
-
-  const handleDropOnTab = (event: DragEvent<HTMLDivElement>, index: number) => {
-    event.preventDefault();
-    handleDropOnSlot(resolveDropIndexFromTab(event, index));
+    pointerDragRef.current = null;
+    resetDragState();
   };
 
   const renderWorkTab = (tab: WorkspaceWorkTab) => {
@@ -387,16 +428,6 @@ export const WorkspaceSurface = () => {
               <div
                 data-testid={`workspace-tab-drop-slot-${index}`}
                 aria-hidden="true"
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  if (draggedTabId) {
-                    setDropTarget({ index });
-                  }
-                }}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  handleDropOnSlot(index);
-                }}
                 className={cn(
                   "shrink-0 self-stretch transition-all",
                   draggedTabId ? "w-2" : "w-0",
@@ -414,22 +445,30 @@ export const WorkspaceSurface = () => {
               <div
                 role="button"
                 tabIndex={0}
-                draggable
-                onDragStart={() => {
-                  setDraggedTabId(tab.id);
-                  setDropTarget({ index });
+                ref={(el) => {
+                  if (el) tabNodeRefs.current.set(tab.id, el);
+                  else tabNodeRefs.current.delete(tab.id);
                 }}
-                onDragOver={(event) => handleDragOverTab(event, index)}
-                onDrop={(event) => handleDropOnTab(event, index)}
-                onDragEnd={resetDragState}
-                onClick={() => void handleActivateTab(tab.id)}
+                onPointerDown={(event) => handleTabPointerDown(event, tab.id)}
+                onPointerMove={handleTabPointerMove}
+                onPointerUp={handleTabPointerUp}
+                onPointerCancel={handleTabPointerCancel}
+                onClick={() => {
+                  if (skipNextClickRef.current) {
+                    skipNextClickRef.current = false;
+                    return;
+                  }
+                  void handleActivateTab(tab.id);
+                }}
                 className={cn(
-                  "group flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
+                  "group flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors select-none touch-none",
                   tab.kind === "result" && "min-w-44 max-w-64 pr-3",
                   activeTabId === tab.id
                     ? "border-brand-primary text-brand-primary"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
-                  draggedTabId === tab.id && "opacity-60",
+                  draggedTabId === tab.id
+                    ? "opacity-60 cursor-grabbing"
+                    : "cursor-grab",
                 )}
                 onKeyDown={(event) => {
                   if (
@@ -466,7 +505,6 @@ export const WorkspaceSurface = () => {
                 )}
                 <button
                   type="button"
-                  draggable={false}
                   aria-label={t("Table.CloseTab")}
                   onClick={(event) => {
                     event.stopPropagation();
@@ -488,16 +526,6 @@ export const WorkspaceSurface = () => {
           <div
             data-testid={`workspace-tab-drop-slot-${tabs.length}`}
             aria-hidden="true"
-            onDragOver={(event) => {
-              event.preventDefault();
-              if (draggedTabId) {
-                setDropTarget({ index: tabs.length });
-              }
-            }}
-            onDrop={(event) => {
-              event.preventDefault();
-              handleDropOnSlot(tabs.length);
-            }}
             className={cn(
               "shrink-0 self-stretch transition-all",
               draggedTabId ? "w-2" : "w-0",
