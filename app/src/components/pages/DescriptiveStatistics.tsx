@@ -480,11 +480,6 @@ export const DescriptiveStatistics = ({
               {validationError}
             </p>
           )}
-          {validationError && (
-            <p className="text-xs text-red-600 dark:text-red-400">
-              {validationError}
-            </p>
-          )}
           <ActionButtonBar
             cancelText={t("Common.Cancel")}
             selectText={
