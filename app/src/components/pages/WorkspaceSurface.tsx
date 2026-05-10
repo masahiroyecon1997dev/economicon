@@ -26,7 +26,7 @@ import type {
 } from "@/stores/workspaceTabs";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { X } from "lucide-react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState, type DragEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 type TabDropTarget = {
@@ -287,6 +287,33 @@ export const WorkspaceSurface = () => {
     resetDragState();
   };
 
+  const resolveDropIndexFromTab = (
+    event: DragEvent<HTMLDivElement>,
+    index: number,
+  ) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    if (bounds.width <= 0) {
+      return index;
+    }
+
+    const midpoint = bounds.left + bounds.width / 2;
+    return event.clientX < midpoint ? index : index + 1;
+  };
+
+  const handleDragOverTab = (
+    event: DragEvent<HTMLDivElement>,
+    index: number,
+  ) => {
+    event.preventDefault();
+    if (!draggedTabId) return;
+    setDropTarget({ index: resolveDropIndexFromTab(event, index) });
+  };
+
+  const handleDropOnTab = (event: DragEvent<HTMLDivElement>, index: number) => {
+    event.preventDefault();
+    handleDropOnSlot(resolveDropIndexFromTab(event, index));
+  };
+
   const renderWorkTab = (tab: WorkspaceWorkTab) => {
     if (isCorrelationMatrixWorkTab(tab)) {
       return (
@@ -392,6 +419,8 @@ export const WorkspaceSurface = () => {
                   setDraggedTabId(tab.id);
                   setDropTarget({ index });
                 }}
+                onDragOver={(event) => handleDragOverTab(event, index)}
+                onDrop={(event) => handleDropOnTab(event, index)}
                 onDragEnd={resetDragState}
                 onClick={() => void handleActivateTab(tab.id)}
                 className={cn(

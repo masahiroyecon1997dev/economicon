@@ -11,6 +11,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
@@ -106,6 +107,7 @@ beforeEach(() => {
 describe("ConfidenceIntervalForm", () => {
   describe("empty state", () => {
     it("test_noTables_showsEmptyStateAndNavigatesToImport", async () => {
+      const user = userEvent.setup();
       useTableListStore.setState({ tableList: [] });
 
       render(<ConfidenceIntervalForm onCancel={vi.fn()} />);
@@ -114,13 +116,11 @@ describe("ConfidenceIntervalForm", () => {
         screen.getByTestId("analysis-no-tables-state"),
       ).toBeInTheDocument();
 
-      await act(async () => {
-        fireEvent.click(
-          screen.getByRole("button", {
-            name: "AnalysisEmptyState.NoTablesAction",
-          }),
-        );
-      });
+      await user.click(
+        screen.getByRole("button", {
+          name: "AnalysisEmptyState.NoTablesAction",
+        }),
+      );
 
       expect(useCurrentPageStore.getState().currentView).toBe(
         "ImportDataFile",
@@ -168,12 +168,11 @@ describe("ConfidenceIntervalForm", () => {
     });
 
     it("test_render_cancelButtonCallsOnCancel", async () => {
+      const user = userEvent.setup();
       const onCancel = vi.fn();
       render(<ConfidenceIntervalForm onCancel={onCancel} />);
       const cancelBtn = screen.getByText("Common.Cancel");
-      await act(async () => {
-        fireEvent.click(cancelBtn);
-      });
+      await user.click(cancelBtn);
       expect(onCancel).toHaveBeenCalledOnce();
     });
   });
@@ -220,13 +219,12 @@ describe("ConfidenceIntervalForm", () => {
     });
 
     it("test_confidenceLevel_switchToManual_showsNumberInput", async () => {
+      const user = userEvent.setup();
       render(<ConfidenceIntervalForm onCancel={vi.fn()} />);
       const manualBtn = screen.getByText(
         "ConfidenceIntervalView.ConfidenceLevelModeManual",
       );
-      await act(async () => {
-        fireEvent.click(manualBtn);
-      });
+      await user.click(manualBtn);
       expect(
         screen.getByPlaceholderText(
           "ConfidenceIntervalView.ConfidenceLevelManualPlaceholder",
