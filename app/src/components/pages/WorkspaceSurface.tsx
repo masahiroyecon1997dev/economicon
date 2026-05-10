@@ -26,8 +26,12 @@ import type {
 } from "@/stores/workspaceTabs";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+type TabDropTarget = {
+  index: number;
+};
 
 type StaticWorkFeatureKey = Exclude<
   WorkFeatureKey,
@@ -109,6 +113,7 @@ export const WorkspaceSurface = () => {
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const activateTab = useWorkspaceTabsStore((state) => state.activateTab);
   const closeTab = useWorkspaceTabsStore((state) => state.closeTab);
+  const moveTab = useWorkspaceTabsStore((state) => state.moveTab);
   const openDataTab = useWorkspaceTabsStore((state) => state.openDataTab);
   const syncDataTabs = useWorkspaceTabsStore((state) => state.syncDataTabs);
   const pruneMissingDataTabs = useWorkspaceTabsStore(
@@ -121,6 +126,8 @@ export const WorkspaceSurface = () => {
   const [editTarget, setEditTarget] = useState<AnalysisResultDetail | null>(
     null,
   );
+  const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<TabDropTarget | null>(null);
   const previousViewRef = useRef(currentView);
   const suppressWorkTabCleanupRef = useRef(false);
   const workTabContainerRef = useRef<HTMLDivElement | null>(null);
@@ -255,6 +262,31 @@ export const WorkspaceSurface = () => {
     }
   };
 
+  const handleMoveTabByKeyboard = (tabId: string, direction: -1 | 1) => {
+    const currentIndex = tabs.findIndex((tab) => tab.id === tabId);
+    if (currentIndex === -1) return;
+
+    const targetIndex = Math.max(
+      0,
+      Math.min(currentIndex + direction, tabs.length - 1),
+    );
+
+    if (targetIndex === currentIndex) return;
+
+    moveTab(tabId, direction === 1 ? targetIndex + 1 : targetIndex);
+  };
+
+  const resetDragState = () => {
+    setDraggedTabId(null);
+    setDropTarget(null);
+  };
+
+  const handleDropOnSlot = (index: number) => {
+    if (!draggedTabId) return;
+    moveTab(draggedTabId, index);
+    resetDragState();
+  };
+
   const renderWorkTab = (tab: WorkspaceWorkTab) => {
     if (isCorrelationMatrixWorkTab(tab)) {
       return (
@@ -323,51 +355,134 @@ export const WorkspaceSurface = () => {
     <div className="h-full flex flex-col min-h-0">
       <div className="border-b border-gray-200 shrink-0">
         <nav className="app-scrollbar -mb-px flex space-x-1 overflow-x-auto">
-          {tabs.map((tab) => (
-            <div
-              role="button"
-              tabIndex={0}
-              key={tab.id}
-              onClick={() => void handleActivateTab(tab.id)}
-              className={cn(
-                "group flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
-                tab.kind === "result" && "min-w-44 max-w-64 pr-3",
-                activeTabId === tab.id
-                  ? "border-brand-primary text-brand-primary"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
-              )}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  void handleActivateTab(tab.id);
-                }
-              }}
-            >
-              <span className="truncate">{tab.title}</span>
-              {tab.kind === "work" && tab.dirty && (
-                <span
-                  className="h-2 w-2 rounded-full bg-amber-500 shrink-0"
-                  aria-label={t("WorkspaceSurface.DirtyBadge")}
-                />
-              )}
-              <button
-                type="button"
-                aria-label={t("Table.CloseTab")}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  void handleCloseTab(tab.id);
+          {tabs.map((tab, index) => (
+            <Fragment key={tab.id}>
+              <div
+                data-testid={`workspace-tab-drop-slot-${index}`}
+                aria-hidden="true"
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  if (draggedTabId) {
+                    setDropTarget({ index });
+                  }
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  handleDropOnSlot(index);
                 }}
                 className={cn(
-                  "rounded-full w-4 h-4 flex items-center justify-center transition-colors shrink-0",
-                  "opacity-0 group-hover:opacity-100 focus:opacity-100",
-                  activeTabId === tab.id
-                    ? "hover:bg-brand-primary/20 text-brand-primary"
-                    : "hover:bg-gray-200 text-gray-400 hover:text-gray-600",
+                  "shrink-0 self-stretch transition-all",
+                  draggedTabId ? "w-2" : "w-0",
                 )}
               >
-                <X className="w-2.5 h-2.5" />
-              </button>
-            </div>
+                <div
+                  className={cn(
+                    "h-full w-0.5 rounded-full transition-opacity",
+                    dropTarget?.index === index && draggedTabId
+                      ? "bg-brand-primary opacity-100"
+                      : "opacity-0",
+                  )}
+                />
+              </div>
+              <div
+                role="button"
+                tabIndex={0}
+                draggable
+                onDragStart={() => {
+                  setDraggedTabId(tab.id);
+                  setDropTarget({ index });
+                }}
+                onDragEnd={resetDragState}
+                onClick={() => void handleActivateTab(tab.id)}
+                className={cn(
+                  "group flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
+                  tab.kind === "result" && "min-w-44 max-w-64 pr-3",
+                  activeTabId === tab.id
+                    ? "border-brand-primary text-brand-primary"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
+                  draggedTabId === tab.id && "opacity-60",
+                )}
+                onKeyDown={(event) => {
+                  if (
+                    event.altKey &&
+                    event.shiftKey &&
+                    event.key === "ArrowLeft"
+                  ) {
+                    event.preventDefault();
+                    handleMoveTabByKeyboard(tab.id, -1);
+                    return;
+                  }
+
+                  if (
+                    event.altKey &&
+                    event.shiftKey &&
+                    event.key === "ArrowRight"
+                  ) {
+                    event.preventDefault();
+                    handleMoveTabByKeyboard(tab.id, 1);
+                    return;
+                  }
+
+                  if (event.key === "Enter" || event.key === " ") {
+                    void handleActivateTab(tab.id);
+                  }
+                }}
+              >
+                <span className="truncate">{tab.title}</span>
+                {tab.kind === "work" && tab.dirty && (
+                  <span
+                    className="h-2 w-2 rounded-full bg-amber-500 shrink-0"
+                    aria-label={t("WorkspaceSurface.DirtyBadge")}
+                  />
+                )}
+                <button
+                  type="button"
+                  draggable={false}
+                  aria-label={t("Table.CloseTab")}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleCloseTab(tab.id);
+                  }}
+                  className={cn(
+                    "rounded-full w-4 h-4 flex items-center justify-center transition-colors shrink-0",
+                    "opacity-0 group-hover:opacity-100 focus:opacity-100",
+                    activeTabId === tab.id
+                      ? "hover:bg-brand-primary/20 text-brand-primary"
+                      : "hover:bg-gray-200 text-gray-400 hover:text-gray-600",
+                  )}
+                >
+                  <X className="w-2.5 h-2.5" />
+                </button>
+              </div>
+            </Fragment>
           ))}
+          <div
+            data-testid={`workspace-tab-drop-slot-${tabs.length}`}
+            aria-hidden="true"
+            onDragOver={(event) => {
+              event.preventDefault();
+              if (draggedTabId) {
+                setDropTarget({ index: tabs.length });
+              }
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              handleDropOnSlot(tabs.length);
+            }}
+            className={cn(
+              "shrink-0 self-stretch transition-all",
+              draggedTabId ? "w-2" : "w-0",
+            )}
+          >
+            <div
+              className={cn(
+                "h-full w-0.5 rounded-full transition-opacity",
+                dropTarget?.index === tabs.length && draggedTabId
+                  ? "bg-brand-primary opacity-100"
+                  : "opacity-0",
+              )}
+            />
+          </div>
         </nav>
       </div>
 

@@ -4,7 +4,7 @@ import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -296,6 +296,80 @@ describe("WorkspaceSurface コンポーネント", () => {
         kind: "work",
       });
       expect(useWorkspaceTabsStore.getState().activeTabId).toBe("data:sales");
+    });
+  });
+
+  it("Alt+Shift+Arrow でタブ順を入れ替えられる", async () => {
+    const user = userEvent.setup();
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "data:sales",
+          kind: "data",
+          title: "sales",
+          tableName: "sales",
+        },
+        {
+          id: "work:JoinTable",
+          kind: "work",
+          title: "Join",
+          featureKey: "JoinTable",
+          dirty: false,
+          createdAt: 1,
+        },
+      ],
+      activeTabId: "data:sales",
+    });
+
+    render(<WorkspaceSurface />);
+
+    const joinTab = screen
+      .getByText("Join")
+      .closest<HTMLElement>("[role='button']");
+    await user.click(joinTab!);
+    await user.keyboard("{Alt>}{Shift>}{ArrowLeft}{/Shift}{/Alt}");
+
+    await waitFor(() => {
+      expect(
+        useWorkspaceTabsStore.getState().tabs.map((tab) => tab.id),
+      ).toEqual(["work:JoinTable", "data:sales"]);
+    });
+  });
+
+  it("ドラッグ&ドロップでタブ順を入れ替えられる", async () => {
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "data:sales",
+          kind: "data",
+          title: "sales",
+          tableName: "sales",
+        },
+        {
+          id: "work:JoinTable",
+          kind: "work",
+          title: "Join",
+          featureKey: "JoinTable",
+          dirty: false,
+          createdAt: 1,
+        },
+      ],
+      activeTabId: "data:sales",
+    });
+
+    render(<WorkspaceSurface />);
+
+    const joinTab = screen.getByText("Join").closest("[role='button']");
+    const dropSlot = screen.getByTestId("workspace-tab-drop-slot-0");
+
+    fireEvent.dragStart(joinTab!);
+    fireEvent.dragOver(dropSlot);
+    fireEvent.drop(dropSlot);
+
+    await waitFor(() => {
+      expect(
+        useWorkspaceTabsStore.getState().tabs.map((tab) => tab.id),
+      ).toEqual(["work:JoinTable", "data:sales"]);
     });
   });
 });

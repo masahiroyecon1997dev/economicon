@@ -55,6 +55,7 @@ type WorkspaceTabsActions = {
   openDataTab: (tableName: string) => void;
   openResultTab: (detail: AnalysisResultDetail) => void;
   openWorkTab: (featureKey: WorkFeatureKey, title: string) => string;
+  moveTab: (tabId: string, targetIndex: number) => void;
   setWorkTabDirty: (tabId: string, dirty: boolean) => void;
   ensureWorkTabState: (tabId: string, initialValues: unknown) => void;
   updateWorkTabDraft: (tabId: string, draftValues: unknown) => void;
@@ -99,6 +100,32 @@ const nextActiveTabId = (
   if (remainingTabs.length === 0) return null;
   const nextIndex = Math.min(index, remainingTabs.length - 1);
   return remainingTabs[nextIndex]?.id ?? null;
+};
+
+const reorderTabs = (
+  tabs: WorkspaceTab[],
+  tabId: string,
+  targetIndex: number,
+): WorkspaceTab[] => {
+  const sourceIndex = tabs.findIndex((tab) => tab.id === tabId);
+  if (sourceIndex === -1) return tabs;
+
+  const boundedTargetIndex = Math.max(0, Math.min(targetIndex, tabs.length));
+  const nextTabs = [...tabs];
+  const [movedTab] = nextTabs.splice(sourceIndex, 1);
+  if (!movedTab) return tabs;
+
+  const insertionIndex =
+    boundedTargetIndex > sourceIndex
+      ? boundedTargetIndex - 1
+      : boundedTargetIndex;
+
+  if (insertionIndex === sourceIndex) {
+    return tabs;
+  }
+
+  nextTabs.splice(insertionIndex, 0, movedTab);
+  return nextTabs;
 };
 
 export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
@@ -153,6 +180,11 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
     }),
 
   activateTab: (tabId) => set({ activeTabId: tabId }),
+
+  moveTab: (tabId, targetIndex) =>
+    set((state) => ({
+      tabs: reorderTabs(state.tabs, tabId, targetIndex),
+    })),
 
   closeTab: (tabId) =>
     set((state) => ({

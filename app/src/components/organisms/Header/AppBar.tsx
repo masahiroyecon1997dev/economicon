@@ -192,8 +192,6 @@ export const AppBar = () => {
   ) => {
     openWorkTab(featureKey, title);
     setCurrentView(featureKey);
-    console.log(`Opening work tab: ${featureKey}2`);
-
     close();
   };
 

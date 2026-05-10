@@ -134,4 +134,34 @@ describe("workspaceTabs store", () => {
       },
     });
   });
+
+  it("moveTab はアクティブ状態を維持したままタブ順を入れ替える", () => {
+    const store = useWorkspaceTabsStore.getState();
+    store.openDataTab("sales");
+    store.openWorkTab("JoinTable", "ジョイン");
+    store.openResultTab({
+      id: "result-1",
+      name: "結果1",
+      description: "",
+      tableName: "sales",
+      resultType: "descriptive_statistics",
+      resultData: {},
+      createdAt: "2026-05-10T00:00:00Z",
+      modelPath: null,
+      modelType: null,
+      entityIdColumn: null,
+      timeColumn: null,
+      summaryText: "",
+    });
+
+    useWorkspaceTabsStore.getState().moveTab("work:JoinTable", 0);
+
+    const state = useWorkspaceTabsStore.getState();
+    expect(state.tabs.map((tab) => tab.id)).toEqual([
+      "work:JoinTable",
+      "data:sales",
+      "result:result-1",
+    ]);
+    expect(state.activeTabId).toBe("result:result-1");
+  });
 });
