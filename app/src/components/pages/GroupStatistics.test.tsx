@@ -6,7 +6,7 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
-import { act, fireEvent, render, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("react-i18next", () => ({
@@ -59,6 +59,12 @@ const submitForm = async () => {
   });
 };
 
+const goToStep2 = async () => {
+  await act(async () => {
+    fireEvent.click(screen.getByText("GroupStatistics.NextStep"));
+  });
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockTableLoader.selectedTableName = "sales";
@@ -100,6 +106,23 @@ beforeEach(() => {
 });
 
 describe("GroupStatistics", () => {
+  it("2 ステップ Wizard で Step 1 と Step 2 を往復できる", async () => {
+    render(<GroupStatistics workTabId="work:GroupStatistics" />);
+
+    expect(screen.getByText("GroupStatistics.Step1Lead")).toBeInTheDocument();
+
+    await goToStep2();
+
+    expect(screen.getByText("GroupStatistics.Step2Lead")).toBeInTheDocument();
+    expect(screen.getByTestId("group-statistics-role-matrix")).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("Common.Back"));
+    });
+
+    expect(screen.getByText("GroupStatistics.Step1Lead")).toBeInTheDocument();
+  });
+
   it("成功時は新しいテーブル名を tableList に追加して DataPreview に戻る", async () => {
     mockApi.createGroupStatisticsTable.mockResolvedValue({
       code: "OK",
@@ -108,6 +131,7 @@ describe("GroupStatistics", () => {
 
     render(<GroupStatistics workTabId="work:GroupStatistics" />);
 
+    await goToStep2();
     await submitForm();
 
     await waitFor(() => {
@@ -126,6 +150,7 @@ describe("GroupStatistics", () => {
 
     render(<GroupStatistics workTabId="work:GroupStatistics" />);
 
+    await goToStep2();
     await submitForm();
 
     await waitFor(() => {

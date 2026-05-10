@@ -45,6 +45,7 @@
 - [fixed] LinearRegressionForm: 他の分析フォームと同じ title / description ヘッダーを追加した。
 - [fixed] StatisticalTestView: 14 inch 画面を想定し、検定タイプ行・サンプルカード・オプション領域の余白を圧縮して縦方向の情報密度を改善した。
 - [fixed] WorkspaceSurface: タブのドラッグ&ドロップ並び替えを追加し、Alt+Shift+ArrowLeft / ArrowRight でも左右移動できるようにした。
+- [fixed] Group Statistics: 2 ステップ Wizard を実装し、Step 2 を Role Assignment Matrix ベースに再構成した。列検索、役割の排他制御、summary、統計量選択、出力データ名を同一ステップに集約した。
 
 ## API拡張仕様
 
@@ -197,7 +198,7 @@ canonical order:
 
 - [pending] ImportDataFile のファイル選択タブに Rust ベースのファイル削除導線を追加し、削除不可 / 確認 / 完了ダイアログと一覧再読込まで実装する。
 - [pending] 詳細オプションが多い分析画面は、初期表示をコンパクトに保つレイアウトへさらに寄せる。
-- [pending] Group Statistics / Linear Regression の列指定 UI は、選択済み状況の可視化と役割ごとの誤選択防止を強めたレイアウトへ更新する。
+- [pending] Linear Regression の列指定 UI は、選択済み状況の可視化と役割ごとの誤選択防止を強めたレイアウトへ更新する。
 
 ---
 
