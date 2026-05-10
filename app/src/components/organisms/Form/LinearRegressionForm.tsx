@@ -10,6 +10,7 @@ import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBa
 import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
 import { VariableSelectorField } from "@/components/molecules/Field/VariableSelectorField";
 import { FormField } from "@/components/molecules/Form/FormField";
+import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
@@ -149,302 +150,303 @@ export const LinearRegressionForm = ({
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        void form.handleSubmit();
-      }}
-      className="flex flex-col gap-3 h-full min-h-0"
+    <PageLayout
+      title={t("LinearRegressionForm.Title")}
+      description={t("LinearRegressionForm.Description")}
     >
-      {/* ── TOP: テーブル選択（幅コンパクト）── */}
-      <div className="shrink-0 rounded-xl border border-border-color bg-white dark:bg-gray-800 dark:border-gray-700 px-3 py-2 shadow-sm">
-        <form.Field name="tableName">
-          {(field) => (
-            <div className="flex items-center gap-3">
-              <label className="shrink-0 text-xs font-medium text-brand-text-main">
-                {t("LinearRegressionForm.DataSource")}
-              </label>
-              <div className="flex-1">
-                <Select
-                  id="data-table"
-                  value={field.state.value}
-                  onValueChange={handleTableSelect}
-                  disabled={isSubmitting}
-                  error={extractFieldError(field.state.meta.errors)}
-                >
-                  {tableList.map((table, index) => (
-                    <SelectItem key={index} value={table}>
-                      {table}
-                    </SelectItem>
-                  ))}
-                </Select>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          void form.handleSubmit();
+        }}
+        className="flex min-h-0 flex-1 flex-col gap-3"
+      >
+        {/* ── TOP: テーブル選択（幅コンパクト）── */}
+        <div className="shrink-0 rounded-xl border border-border-color bg-white px-3 py-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <form.Field name="tableName">
+            {(field) => (
+              <div className="flex items-center gap-3">
+                <label className="shrink-0 text-xs font-medium text-brand-text-main">
+                  {t("LinearRegressionForm.DataSource")}
+                </label>
+                <div className="flex-1">
+                  <Select
+                    id="data-table"
+                    value={field.state.value}
+                    onValueChange={handleTableSelect}
+                    disabled={isSubmitting}
+                    error={extractFieldError(field.state.meta.errors)}
+                  >
+                    {tableList.map((table, index) => (
+                      <SelectItem key={index} value={table}>
+                        {table}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
+                {extractFieldError(field.state.meta.errors) && (
+                  <p className="shrink-0 text-xs text-red-600">
+                    {extractFieldError(field.state.meta.errors)}
+                  </p>
+                )}
               </div>
-              {extractFieldError(field.state.meta.errors) && (
-                <p className="shrink-0 text-xs text-red-600">
-                  {extractFieldError(field.state.meta.errors)}
-                </p>
-              )}
+            )}
+          </form.Field>
+        </div>
+
+        {/* ── MIDDLE: 2ペイン（変数選択 + オプション）── */}
+        <div className="flex min-h-0 flex-1 gap-3">
+          <div className="flex min-h-0 flex-1 flex-col gap-3">
+            <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border-color bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+              <h2 className="mb-2 shrink-0 text-sm font-bold leading-tight text-text-heading">
+                {t("LinearRegressionForm.SelectVariables")}
+              </h2>
+              <div className="flex min-h-0 flex-1 gap-3">
+                <form.Field name="dependentVariable">
+                  {(field) => (
+                    <VariableSelectorField
+                      label={t("LinearRegressionForm.DependentVariable")}
+                      description={t(
+                        "LinearRegressionForm.DependentVariableDescription",
+                      )}
+                      mode="single"
+                      columns={columnList}
+                      selectedValue={field.state.value}
+                      onSingleChange={(v) => field.handleChange(v)}
+                      error={extractFieldError(field.state.meta.errors)}
+                      disabled={isSubmitting}
+                      name="dependentVariable"
+                      className="flex min-h-0 w-[33%] flex-col"
+                    />
+                  )}
+                </form.Field>
+
+                <div className="w-px shrink-0 bg-border-color" />
+
+                <form.Field name="explanatoryVariables">
+                  {(field) => (
+                    <VariableSelectorField
+                      label={t("LinearRegressionForm.ExplanatoryVariables")}
+                      description={t(
+                        "LinearRegressionForm.ExplanatoryVariablesDescription",
+                      )}
+                      mode="multiple"
+                      columns={columnList}
+                      selectedValues={field.state.value}
+                      onMultipleChange={(v) => field.handleChange(v)}
+                      error={extractFieldError(field.state.meta.errors)}
+                      disabled={isSubmitting}
+                      name="explanatoryVariables"
+                      className="flex min-h-0 flex-1 flex-col"
+                    />
+                  )}
+                </form.Field>
+              </div>
             </div>
-          )}
-        </form.Field>
-      </div>
+          </div>
 
-      {/* ── MIDDLE: 2ペイン（変数選択 + オプション）── */}
-      <div className="flex min-h-0 flex-1 gap-3">
-        {/* 左: 変数選択（主役・flex-1�E�E*/}
-        <div className="flex min-h-0 flex-1 flex-col gap-3">
-          {/* 変数選択カード */}
-          <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border-color bg-white dark:bg-gray-800 dark:border-gray-700 p-3 shadow-sm">
-            <h2 className="mb-2 shrink-0 text-sm font-bold leading-tight text-text-heading">
-              {t("LinearRegressionForm.SelectVariables")}
-            </h2>
-            <div className="flex min-h-0 flex-1 gap-3">
-              {/* 被説明変数 (1/3) */}
-              <form.Field name="dependentVariable">
-                {(field) => (
-                  <VariableSelectorField
-                    label={t("LinearRegressionForm.DependentVariable")}
-                    description={t(
-                      "LinearRegressionForm.DependentVariableDescription",
-                    )}
-                    mode="single"
-                    columns={columnList}
-                    selectedValue={field.state.value}
-                    onSingleChange={(v) => field.handleChange(v)}
-                    error={extractFieldError(field.state.meta.errors)}
-                    disabled={isSubmitting}
-                    name="dependentVariable"
-                    className="flex min-h-0 w-[33%] flex-col"
-                  />
+          <div className="flex w-56 shrink-0 flex-col">
+            <AnalysisOptionsCard
+              title={t("LinearRegressionForm.AdvancedOptions")}
+              open={optionsOpen}
+              onToggle={() => setOptionsOpen((v) => !v)}
+              summary={
+                <form.Subscribe selector={(s) => s.values}>
+                  {(values) =>
+                    t("LinearRegressionForm.AdvancedOptionsSummary", {
+                      se: t(
+                        `LinearRegressionForm.StandardError_${values.standardErrorMethod}`,
+                      ),
+                      const: values.hasConst
+                        ? t("LinearRegressionForm.HasConstYes")
+                        : t("LinearRegressionForm.HasConstNo"),
+                      missing: t(
+                        `LinearRegressionForm.MissingValue_${values.missingValueHandling}`,
+                      ),
+                    })
+                  }
+                </form.Subscribe>
+              }
+            >
+              <div className="flex flex-col gap-3">
+                {/* 標準誤差 */}
+                <form.Field name="standardErrorMethod">
+                  {(field) => (
+                    <FormField
+                      label={t("LinearRegressionForm.StandardErrorMethod")}
+                      htmlFor="standard-error-method"
+                    >
+                      <Select
+                        id="standard-error-method"
+                        value={field.state.value}
+                        onValueChange={(v) => field.handleChange(v)}
+                        disabled={isSubmitting}
+                      >
+                        <SelectItem value="nonrobust">
+                          {t("LinearRegressionForm.StandardError_nonrobust")}
+                        </SelectItem>
+                        <SelectItem value="HC0">HC0</SelectItem>
+                        <SelectItem value="HC1">HC1</SelectItem>
+                        <SelectItem value="HC2">HC2</SelectItem>
+                        <SelectItem value="HC3">HC3</SelectItem>
+                        <SelectItem value="hac">
+                          {t("LinearRegressionForm.StandardError_hac")}
+                        </SelectItem>
+                        <SelectItem value="cluster">
+                          {t("LinearRegressionForm.StandardError_cluster")}
+                        </SelectItem>
+                      </Select>
+                    </FormField>
+                  )}
+                </form.Field>
+
+                {/* 定数項 */}
+                <form.Field name="hasConst">
+                  {(field) => (
+                    <FormField
+                      label={t("LinearRegressionForm.HasConst")}
+                      htmlFor="has-const"
+                    >
+                      <Select
+                        id="has-const"
+                        value={field.state.value ? "true" : "false"}
+                        onValueChange={(v) => field.handleChange(v === "true")}
+                        disabled={isSubmitting}
+                      >
+                        <SelectItem value="true">
+                          {t("LinearRegressionForm.HasConstYes")}
+                        </SelectItem>
+                        <SelectItem value="false">
+                          {t("LinearRegressionForm.HasConstNo")}
+                        </SelectItem>
+                      </Select>
+                    </FormField>
+                  )}
+                </form.Field>
+
+                {/* 欠損値処理 */}
+                <form.Field name="missingValueHandling">
+                  {(field) => (
+                    <FormField
+                      label={t("LinearRegressionForm.MissingValueHandling")}
+                      htmlFor="missing-value-handling"
+                    >
+                      <Select
+                        id="missing-value-handling"
+                        value={field.state.value}
+                        onValueChange={(v) =>
+                          field.handleChange(v as MissingValueHandlingType)
+                        }
+                        disabled={isSubmitting}
+                      >
+                        <SelectItem value={MissingValueHandlingType.remove}>
+                          {t("LinearRegressionForm.MissingValue_remove")}
+                        </SelectItem>
+                        <SelectItem value={MissingValueHandlingType.ignore}>
+                          {t("LinearRegressionForm.MissingValue_ignore")}
+                        </SelectItem>
+                        <SelectItem value={MissingValueHandlingType.error}>
+                          {t("LinearRegressionForm.MissingValue_error")}
+                        </SelectItem>
+                      </Select>
+                    </FormField>
+                  )}
+                </form.Field>
+
+                {/* HAC 追加パラメータ */}
+                {seMethod === "hac" && (
+                  <div className="rounded-lg border border-border-color bg-secondary/50 p-2">
+                    <form.Field name="hacMaxlags">
+                      {(field) => (
+                        <FormField
+                          label={t("LinearRegressionForm.HacMaxlags")}
+                          htmlFor="hac-maxlags"
+                        >
+                          <InputText
+                            id="hac-maxlags"
+                            type="number"
+                            value={field.state.value.toString()}
+                            onChange={(e) =>
+                              field.handleChange(parseInt(e.target.value) || 0)
+                            }
+                            onBlur={field.handleBlur}
+                            disabled={isSubmitting}
+                          />
+                        </FormField>
+                      )}
+                    </form.Field>
+                  </div>
                 )}
-              </form.Field>
 
-              {/* 縦区切り */}
-              <div className="w-px shrink-0 bg-border-color" />
-
-              {/* 説明変数 (2/3) */}
-              <form.Field name="explanatoryVariables">
-                {(field) => (
-                  <VariableSelectorField
-                    label={t("LinearRegressionForm.ExplanatoryVariables")}
-                    description={t(
-                      "LinearRegressionForm.ExplanatoryVariablesDescription",
-                    )}
-                    mode="multiple"
-                    columns={columnList}
-                    selectedValues={field.state.value}
-                    onMultipleChange={(v) => field.handleChange(v)}
-                    error={extractFieldError(field.state.meta.errors)}
-                    disabled={isSubmitting}
-                    name="explanatoryVariables"
-                    className="flex min-h-0 flex-1 flex-col"
-                  />
+                {/* Cluster 追加パラメータ */}
+                {seMethod === "cluster" && (
+                  <div className="rounded-lg border border-border-color bg-secondary/50 p-2">
+                    <form.Field name="clusterGroups">
+                      {(field) => (
+                        <FormField
+                          label={t("LinearRegressionForm.ClusterGroups")}
+                          htmlFor="cluster-groups"
+                        >
+                          <div className="app-scrollbar max-h-32 overflow-y-auto rounded-md border border-border-color bg-white dark:bg-gray-800 p-1.5">
+                            {columnList.length === 0 ? (
+                              <p className="text-xs text-brand-text-main/60">
+                                {t("Common.NoColumnsAvailable")}
+                              </p>
+                            ) : (
+                              columnList.map((col) => (
+                                <label
+                                  key={col.name}
+                                  className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-secondary"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className="h-3.5 w-3.5 rounded border-gray-300 text-accent focus:ring-accent"
+                                    checked={field.state.value.includes(
+                                      col.name,
+                                    )}
+                                    onChange={() => {
+                                      const next = field.state.value.includes(
+                                        col.name,
+                                      )
+                                        ? field.state.value.filter(
+                                            (v) => v !== col.name,
+                                          )
+                                        : [...field.state.value, col.name];
+                                      field.handleChange(next);
+                                    }}
+                                    disabled={isSubmitting}
+                                  />
+                                  <span className="text-brand-text-main">
+                                    {col.name}
+                                  </span>
+                                </label>
+                              ))
+                            )}
+                          </div>
+                        </FormField>
+                      )}
+                    </form.Field>
+                  </div>
                 )}
-              </form.Field>
-            </div>
+              </div>
+            </AnalysisOptionsCard>
           </div>
         </div>
 
-        {/* 右: 詳細オプション（脇役・w-56）*/}
-        <div className="flex w-56 shrink-0 flex-col">
-          <AnalysisOptionsCard
-            title={t("LinearRegressionForm.AdvancedOptions")}
-            open={optionsOpen}
-            onToggle={() => setOptionsOpen((v) => !v)}
-            summary={
-              <form.Subscribe selector={(s) => s.values}>
-                {(values) =>
-                  t("LinearRegressionForm.AdvancedOptionsSummary", {
-                    se: t(
-                      `LinearRegressionForm.StandardError_${values.standardErrorMethod}`,
-                    ),
-                    const: values.hasConst
-                      ? t("LinearRegressionForm.HasConstYes")
-                      : t("LinearRegressionForm.HasConstNo"),
-                    missing: t(
-                      `LinearRegressionForm.MissingValue_${values.missingValueHandling}`,
-                    ),
-                  })
-                }
-              </form.Subscribe>
-            }
-          >
-            <div className="flex flex-col gap-3">
-              {/* 標準誤差 */}
-              <form.Field name="standardErrorMethod">
-                {(field) => (
-                  <FormField
-                    label={t("LinearRegressionForm.StandardErrorMethod")}
-                    htmlFor="standard-error-method"
-                  >
-                    <Select
-                      id="standard-error-method"
-                      value={field.state.value}
-                      onValueChange={(v) => field.handleChange(v)}
-                      disabled={isSubmitting}
-                    >
-                      <SelectItem value="nonrobust">
-                        {t("LinearRegressionForm.StandardError_nonrobust")}
-                      </SelectItem>
-                      <SelectItem value="HC0">HC0</SelectItem>
-                      <SelectItem value="HC1">HC1</SelectItem>
-                      <SelectItem value="HC2">HC2</SelectItem>
-                      <SelectItem value="HC3">HC3</SelectItem>
-                      <SelectItem value="hac">
-                        {t("LinearRegressionForm.StandardError_hac")}
-                      </SelectItem>
-                      <SelectItem value="cluster">
-                        {t("LinearRegressionForm.StandardError_cluster")}
-                      </SelectItem>
-                    </Select>
-                  </FormField>
-                )}
-              </form.Field>
-
-              {/* 定数項 */}
-              <form.Field name="hasConst">
-                {(field) => (
-                  <FormField
-                    label={t("LinearRegressionForm.HasConst")}
-                    htmlFor="has-const"
-                  >
-                    <Select
-                      id="has-const"
-                      value={field.state.value ? "true" : "false"}
-                      onValueChange={(v) => field.handleChange(v === "true")}
-                      disabled={isSubmitting}
-                    >
-                      <SelectItem value="true">
-                        {t("LinearRegressionForm.HasConstYes")}
-                      </SelectItem>
-                      <SelectItem value="false">
-                        {t("LinearRegressionForm.HasConstNo")}
-                      </SelectItem>
-                    </Select>
-                  </FormField>
-                )}
-              </form.Field>
-
-              {/* 欠損値処理 */}
-              <form.Field name="missingValueHandling">
-                {(field) => (
-                  <FormField
-                    label={t("LinearRegressionForm.MissingValueHandling")}
-                    htmlFor="missing-value-handling"
-                  >
-                    <Select
-                      id="missing-value-handling"
-                      value={field.state.value}
-                      onValueChange={(v) =>
-                        field.handleChange(v as MissingValueHandlingType)
-                      }
-                      disabled={isSubmitting}
-                    >
-                      <SelectItem value={MissingValueHandlingType.remove}>
-                        {t("LinearRegressionForm.MissingValue_remove")}
-                      </SelectItem>
-                      <SelectItem value={MissingValueHandlingType.ignore}>
-                        {t("LinearRegressionForm.MissingValue_ignore")}
-                      </SelectItem>
-                      <SelectItem value={MissingValueHandlingType.error}>
-                        {t("LinearRegressionForm.MissingValue_error")}
-                      </SelectItem>
-                    </Select>
-                  </FormField>
-                )}
-              </form.Field>
-
-              {/* HAC 追加パラメータ */}
-              {seMethod === "hac" && (
-                <div className="rounded-lg border border-border-color bg-secondary/50 p-2">
-                  <form.Field name="hacMaxlags">
-                    {(field) => (
-                      <FormField
-                        label={t("LinearRegressionForm.HacMaxlags")}
-                        htmlFor="hac-maxlags"
-                      >
-                        <InputText
-                          id="hac-maxlags"
-                          type="number"
-                          value={field.state.value.toString()}
-                          onChange={(e) =>
-                            field.handleChange(parseInt(e.target.value) || 0)
-                          }
-                          onBlur={field.handleBlur}
-                          disabled={isSubmitting}
-                        />
-                      </FormField>
-                    )}
-                  </form.Field>
-                </div>
-              )}
-
-              {/* Cluster 追加パラメータ */}
-              {seMethod === "cluster" && (
-                <div className="rounded-lg border border-border-color bg-secondary/50 p-2">
-                  <form.Field name="clusterGroups">
-                    {(field) => (
-                      <FormField
-                        label={t("LinearRegressionForm.ClusterGroups")}
-                        htmlFor="cluster-groups"
-                      >
-                        <div className="app-scrollbar max-h-32 overflow-y-auto rounded-md border border-border-color bg-white dark:bg-gray-800 p-1.5">
-                          {columnList.length === 0 ? (
-                            <p className="text-xs text-brand-text-main/60">
-                              {t("Common.NoColumnsAvailable")}
-                            </p>
-                          ) : (
-                            columnList.map((col) => (
-                              <label
-                                key={col.name}
-                                className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-secondary"
-                              >
-                                <input
-                                  type="checkbox"
-                                  className="h-3.5 w-3.5 rounded border-gray-300 text-accent focus:ring-accent"
-                                  checked={field.state.value.includes(col.name)}
-                                  onChange={() => {
-                                    const next = field.state.value.includes(
-                                      col.name,
-                                    )
-                                      ? field.state.value.filter(
-                                          (v) => v !== col.name,
-                                        )
-                                      : [...field.state.value, col.name];
-                                    field.handleChange(next);
-                                  }}
-                                  disabled={isSubmitting}
-                                />
-                                <span className="text-brand-text-main">
-                                  {col.name}
-                                </span>
-                              </label>
-                            ))
-                          )}
-                        </div>
-                      </FormField>
-                    )}
-                  </form.Field>
-                </div>
-              )}
-            </div>
-          </AnalysisOptionsCard>
-        </div>
-      </div>
-
-      <ActionButtonBar
-        cancelText={t("Common.Cancel")}
-        selectText={
-          isSubmitting
-            ? t("LinearRegressionForm.Processing")
-            : t("LinearRegressionForm.RunAnalysis")
-        }
-        onCancel={onCancel}
-        onSelect={() => {}}
-        onSelectType="submit"
-        isLoading={isSubmitting}
-      />
-    </form>
+        <ActionButtonBar
+          cancelText={t("Common.Cancel")}
+          selectText={
+            isSubmitting
+              ? t("LinearRegressionForm.Processing")
+              : t("LinearRegressionForm.RunAnalysis")
+          }
+          onCancel={onCancel}
+          onSelect={() => {}}
+          onSelectType="submit"
+          isLoading={isSubmitting}
+        />
+      </form>
+    </PageLayout>
   );
 };

@@ -440,6 +440,8 @@
     "OutputDialog": "出力..."
   },
   "LinearRegressionForm": {
+    "Title": "最小二乗法",
+    "Description": "データを選択し、被説明変数と説明変数を指定して OLS を実行します。必要に応じて標準誤差や欠損値処理を詳細オプションで調整できます。",
     "DataSource": "データ",
     "SelectData": "データを選択してください",
     "SelectVariables": "変数の選択",

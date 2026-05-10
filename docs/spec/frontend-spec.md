@@ -40,6 +40,10 @@
 - [fixed] NoTables empty state: Basic Statistics / Correlation Matrix / Confidence Interval / Hypothesis Test の 4 画面で、共通文言と ImportDataFile 導線を先に揃えた。
 - [fixed] Basic Statistics: 初期選択統計量を全選択から標準セットへ変更した。
 - [fixed] Analysis empty state: NoEligibleColumns / LoadingColumns も 4 画面で共通レイアウトへ寄せ、NoTables を含めて action bar 付きの共通部品に統一した。
+- [fixed] Correlation Matrix / Group Statistics: 新規テーブル作成成功時に tableInfo と tableList を同時更新し、LeftSideBar とテーブル一覧へ即時反映するように揃えた。
+- [fixed] Analysis forms: code !== OK と catch の両方でサーバー message を優先表示する方針に揃え、Correlation Matrix / Group Statistics の newTableName はフォーム入力名に置換して表示するようにした。
+- [fixed] LinearRegressionForm: 他の分析フォームと同じ title / description ヘッダーを追加した。
+- [fixed] StatisticalTestView: 14 inch 画面を想定し、検定タイプ行・サンプルカード・オプション領域の余白を圧縮して縦方向の情報密度を改善した。
 
 ## API拡張仕様
 
@@ -193,10 +197,6 @@ canonical order:
 - [pending] ImportDataFile のファイル選択タブに Rust ベースのファイル削除導線を追加し、削除不可 / 確認 / 完了ダイアログと一覧再読込まで実装する。
 - [pending] 詳細オプションが多い分析画面は、初期表示をコンパクトに保つレイアウトへさらに寄せる。
 - [pending] WorkspaceSurface のタブは、横並びが増えたときでも順序を自分で整えられるよう、ドラッグ&ドロップによる並び替えを追加する。
-- [pending] Correlation Matrix / Group Statistics の新規テーブル作成成功時は、tableInfo だけでなく tableList も即時更新し、LeftSideBar とテーブル一覧に新テーブルを同時反映する。
-- [pending] 分析フォームの API エラー表示は、code !== OK と catch の両方でサーバー message を優先表示する共通方針に揃える。
-- [pending] Linear Regression Form に、他の分析フォームと同じ title / description ヘッダーを追加する。
-- [pending] Statistical Test は 14 inch 画面の既定表示で縦スクロールなしを目標に、余白と情報の出し方を再設計する。
 - [pending] Group Statistics / Linear Regression の列指定 UI は、選択済み状況の可視化と役割ごとの誤選択防止を強めたレイアウトへ更新する。
 
 ---

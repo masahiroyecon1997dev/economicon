@@ -311,7 +311,7 @@ describe("CorrelationMatrix フォーム", () => {
     it("code ≠ OK → エラーダイアログを表示する", async () => {
       mockApi.createCorrelationTable.mockResolvedValue({
         code: "UNEXPECTED_ERROR",
-        message: "相関計算に失敗しました",
+        message: "newTableName 'corr_result'は既に存在します。",
       });
       mockTableLoader.selectedTableName = "sales";
       useTableInfosStore.setState({ tableInfos: [], activeTableName: "sales" });
@@ -326,7 +326,7 @@ describe("CorrelationMatrix フォーム", () => {
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
           "Error.Error",
-          "相関計算に失敗しました",
+          "CorrelationMatrix.OutputDataLabel 'corr_result'は既に存在します。",
         );
       });
     });

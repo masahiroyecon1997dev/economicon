@@ -1,3 +1,10 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useAnalysisResultsStore } from "@/stores/analysisResults";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import {
   act,
   fireEvent,
@@ -7,13 +14,6 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "@/api/endpoints";
-import { showMessageDialog } from "@/lib/dialog/message";
-import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
-import { useTableListStore } from "@/stores/tableList";
-import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
-import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -184,6 +184,15 @@ beforeEach(() => {
 });
 
 describe("LinearRegressionForm", () => {
+  it("タイトルと説明を表示する", () => {
+    render(<LinearRegressionForm onCancel={onCancel} />);
+
+    expect(screen.getByText("LinearRegressionForm.Title")).toBeInTheDocument();
+    expect(
+      screen.getByText("LinearRegressionForm.Description"),
+    ).toBeInTheDocument();
+  });
+
   describe("バリデーション", () => {
     it("テーブル未選択でサブミット → DataNameSelectエラーが表示される", async () => {
       mockTableLoader.selectedTableName = "";
@@ -211,9 +220,7 @@ describe("LinearRegressionForm", () => {
     });
 
     it("説明変数が0件でサブミット → ExplanatoryVariablesRequiredエラーが表示される", async () => {
-      render(
-        <LinearRegressionForm onCancel={onCancel} />,
-      );
+      render(<LinearRegressionForm onCancel={onCancel} />);
 
       // 目的変数のみ設定して説明変数は空のまま
       const [depAddBtn] = screen.getAllByRole("button", {

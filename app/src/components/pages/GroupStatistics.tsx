@@ -16,8 +16,8 @@ import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { createFieldError } from "@/lib/utils/formHelpers";
 import { getTableInfo } from "@/lib/utils/internal";
@@ -96,6 +96,9 @@ export const GroupStatistics = ({
   onCancel,
 }: GroupStatisticsProps) => {
   const { t } = useTranslation();
+  const errorParamMap = {
+    newTableName: t("GroupStatistics.OutputDataLabel"),
+  };
   const tableList = useTableListStore((s) => s.tableList);
   const addTableName = useTableListStore((s) => s.addTableName);
   const initialTableName = useTableInfosStore((s) => s.activeTableName) ?? "";
@@ -196,13 +199,21 @@ export const GroupStatistics = ({
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(resp, t("Error.UnexpectedError")),
+            buildResponseErrorMessage(
+              resp,
+              t("Error.UnexpectedError"),
+              errorParamMap,
+            ),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(
+            error,
+            t("Error.UnexpectedError"),
+            errorParamMap,
+          ),
         );
       }
     },

@@ -535,41 +535,32 @@ export const StatisticalTestView = ({
             event.stopPropagation();
             void handleSubmit();
           }}
-          className="flex min-h-0 flex-1 flex-col gap-4"
+          className="flex min-h-0 flex-1 flex-col gap-3"
         >
-          <div className="app-scrollbar flex-1 space-y-4 overflow-y-auto pb-2">
-            <FormField
-              label={t("StatisticalTestView.TestTypeLabel")}
-              error={errors.testType}
-            >
-              <Select
-                value={values.testType}
-                onValueChange={handleTestTypeChange}
-                placeholder={t("StatisticalTestView.TestTypeLabel")}
-              >
-                {TEST_TYPE_OPTIONS.map((testType) => (
-                  <SelectItem key={testType} value={testType}>
-                    {t(`StatisticalTestView.TestType_${testType}`)}
-                  </SelectItem>
-                ))}
-              </Select>
-            </FormField>
-
-            <section className="space-y-3 rounded-lg border border-border-color bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-brand-text-main dark:text-gray-100">
-                    {t("StatisticalTestView.SamplesLabel")}
-                  </h3>
-                  <p className="mt-1 text-xs text-brand-text-sub dark:text-gray-400">
-                    {t(`StatisticalTestView.SamplesHint_${values.testType}`)}
-                  </p>
-                </div>
+          <div className="app-scrollbar flex-1 space-y-3 overflow-y-auto pb-2">
+            <section className="rounded-lg border border-border-color bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+              <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+                <FormField
+                  label={t("StatisticalTestView.TestTypeLabel")}
+                  error={errors.testType}
+                >
+                  <Select
+                    value={values.testType}
+                    onValueChange={handleTestTypeChange}
+                    placeholder={t("StatisticalTestView.TestTypeLabel")}
+                  >
+                    {TEST_TYPE_OPTIONS.map((testType) => (
+                      <SelectItem key={testType} value={testType}>
+                        {t(`StatisticalTestView.TestType_${testType}`)}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </FormField>
                 <button
                   type="button"
                   onClick={addSample}
                   className={cn(
-                    "inline-flex items-center gap-1 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700",
+                    "inline-flex items-center justify-center gap-1 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 md:min-w-32",
                     (values.testType === StatisticalTestTypeValues["t-test"] ||
                       values.testType ===
                         StatisticalTestTypeValues["z-test"]) &&
@@ -588,6 +579,17 @@ export const StatisticalTestView = ({
                   {t("StatisticalTestView.AddSample")}
                 </button>
               </div>
+              <p className="mt-2 text-xs text-brand-text-sub dark:text-gray-400">
+                {t(`StatisticalTestView.SamplesHint_${values.testType}`)}
+              </p>
+            </section>
+
+            <section className="space-y-2.5 rounded-lg border border-border-color bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-semibold text-brand-text-main dark:text-gray-100">
+                  {t("StatisticalTestView.SamplesLabel")}
+                </h3>
+              </div>
 
               {values.samples.map((sample, index) => {
                 const rowErrors = errors.sampleRows[index] ?? {};
@@ -602,7 +604,7 @@ export const StatisticalTestView = ({
                 return (
                   <div
                     key={`${index}:${sample.tableName}:${sample.columnName}`}
-                    className="space-y-3 rounded-md border border-gray-200 p-3 dark:border-gray-700"
+                    className="space-y-2 rounded-md border border-gray-200 p-2.5 dark:border-gray-700"
                     data-testid={`statistical-test-sample-${index}`}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -616,7 +618,7 @@ export const StatisticalTestView = ({
                         onClick={() => removeSample(index)}
                         disabled={values.samples.length <= minimumSamples}
                         className={cn(
-                          "inline-flex items-center gap-1 rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700",
+                          "inline-flex items-center gap-1 rounded-md border border-gray-300 px-2 py-1 text-[11px] font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700",
                           values.samples.length <= minimumSamples &&
                             "cursor-not-allowed opacity-50",
                         )}
@@ -627,7 +629,7 @@ export const StatisticalTestView = ({
                       </button>
                     </div>
 
-                    <div className="grid gap-3 md:grid-cols-2">
+                    <div className="grid gap-2 md:grid-cols-2">
                       <FormField
                         label={t("StatisticalTestView.DataLabel")}
                         error={rowErrors.tableName}
@@ -704,12 +706,12 @@ export const StatisticalTestView = ({
               )}
             </section>
 
-            <section className="space-y-3 rounded-lg border border-border-color bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+            <section className="space-y-2.5 rounded-lg border border-border-color bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
               <h3 className="text-sm font-semibold text-brand-text-main dark:text-gray-100">
                 {t("StatisticalTestView.OptionsLabel")}
               </h3>
 
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-2 md:grid-cols-2">
                 <FormField label={t("StatisticalTestView.AlternativeLabel")}>
                   <Select
                     value={values.options.alternative}
@@ -774,52 +776,56 @@ export const StatisticalTestView = ({
                 </FormField>
               )}
 
-              {showPaired && (
-                <div className="space-y-1">
-                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-                    <input
-                      type="checkbox"
-                      checked={values.options.paired}
-                      onChange={(event) => {
-                        clearErrors();
-                        form.setFieldValue(
-                          "options.paired",
-                          event.target.checked,
-                        );
-                      }}
-                      className="h-4 w-4 rounded border-gray-300 accent-brand-accent"
-                      data-testid="statistical-test-paired"
-                    />
-                    {t("StatisticalTestView.PairedLabel")}
-                  </label>
-                  <p className="text-xs text-brand-text-sub dark:text-gray-400">
-                    {errors.options.paired ??
-                      t("StatisticalTestView.PairedHint")}
-                  </p>
-                </div>
-              )}
+              {(showPaired || showEqualVar) && (
+                <div className="grid gap-2 md:grid-cols-2">
+                  {showPaired && (
+                    <div className="space-y-0.5 rounded-md border border-border-color/70 bg-secondary/30 px-3 py-2">
+                      <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+                        <input
+                          type="checkbox"
+                          checked={values.options.paired}
+                          onChange={(event) => {
+                            clearErrors();
+                            form.setFieldValue(
+                              "options.paired",
+                              event.target.checked,
+                            );
+                          }}
+                          className="h-4 w-4 rounded border-gray-300 accent-brand-accent"
+                          data-testid="statistical-test-paired"
+                        />
+                        {t("StatisticalTestView.PairedLabel")}
+                      </label>
+                      <p className="text-xs text-brand-text-sub dark:text-gray-400">
+                        {errors.options.paired ??
+                          t("StatisticalTestView.PairedHint")}
+                      </p>
+                    </div>
+                  )}
 
-              {showEqualVar && (
-                <div className="space-y-1">
-                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-                    <input
-                      type="checkbox"
-                      checked={values.options.equalVar}
-                      onChange={(event) => {
-                        clearErrors();
-                        form.setFieldValue(
-                          "options.equalVar",
-                          event.target.checked,
-                        );
-                      }}
-                      className="h-4 w-4 rounded border-gray-300 accent-brand-accent"
-                      data-testid="statistical-test-equal-var"
-                    />
-                    {t("StatisticalTestView.EqualVarLabel")}
-                  </label>
-                  <p className="text-xs text-brand-text-sub dark:text-gray-400">
-                    {t("StatisticalTestView.EqualVarHint")}
-                  </p>
+                  {showEqualVar && (
+                    <div className="space-y-0.5 rounded-md border border-border-color/70 bg-secondary/30 px-3 py-2">
+                      <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+                        <input
+                          type="checkbox"
+                          checked={values.options.equalVar}
+                          onChange={(event) => {
+                            clearErrors();
+                            form.setFieldValue(
+                              "options.equalVar",
+                              event.target.checked,
+                            );
+                          }}
+                          className="h-4 w-4 rounded border-gray-300 accent-brand-accent"
+                          data-testid="statistical-test-equal-var"
+                        />
+                        {t("StatisticalTestView.EqualVarLabel")}
+                      </label>
+                      <p className="text-xs text-brand-text-sub dark:text-gray-400">
+                        {t("StatisticalTestView.EqualVarHint")}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </section>

@@ -440,6 +440,8 @@
     "OutputDialog": "Export..."
   },
   "LinearRegressionForm": {
+    "Title": "Ordinary Least Squares",
+    "Description": "Select data, assign the dependent and explanatory variables, then run OLS. Advanced options let you adjust standard errors and missing-value handling when needed.",
     "DataSource": "Data",
     "SelectData": "Select data",
     "SelectVariables": "Select Variables",
