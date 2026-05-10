@@ -192,6 +192,12 @@ canonical order:
 
 - [pending] ImportDataFile のファイル選択タブに Rust ベースのファイル削除導線を追加し、削除不可 / 確認 / 完了ダイアログと一覧再読込まで実装する。
 - [pending] 詳細オプションが多い分析画面は、初期表示をコンパクトに保つレイアウトへさらに寄せる。
+- [pending] WorkspaceSurface のタブは、横並びが増えたときでも順序を自分で整えられるよう、ドラッグ&ドロップによる並び替えを追加する。
+- [pending] Correlation Matrix / Group Statistics の新規テーブル作成成功時は、tableInfo だけでなく tableList も即時更新し、LeftSideBar とテーブル一覧に新テーブルを同時反映する。
+- [pending] 分析フォームの API エラー表示は、code !== OK と catch の両方でサーバー message を優先表示する共通方針に揃える。
+- [pending] Linear Regression Form に、他の分析フォームと同じ title / description ヘッダーを追加する。
+- [pending] Statistical Test は 14 inch 画面の既定表示で縦スクロールなしを目標に、余白と情報の出し方を再設計する。
+- [pending] Group Statistics / Linear Regression の列指定 UI は、選択済み状況の可視化と役割ごとの誤選択防止を強めたレイアウトへ更新する。
 
 ---
 
@@ -395,3 +401,153 @@ canonical order:
 
 - SimulationColumnEditDialog のレイアウト変更が必要（プレビューパネル追加）
 - ② 信頼区間 / ③ CLT / ④ 一致性 は後回し（別タスクで実装）
+
+---
+
+## 2026-05 UI/UX 改善レビュー
+
+### 1. WorkspaceSurface タブ並び替え
+
+#### 推奨判断
+
+- 推奨。data tab / result tab / work tab が混在すると横並びの走査コストが上がるため、ユーザー自身で順序を整えられる価値が高い。
+- 優先度は「不具合修正の次」。致命的不具合ではないが、分析を複数並行すると効いてくる改善。
+
+#### 期待効果
+
+- 比較したい data tab と result tab を隣接配置できる。
+- 作業中の work tab を左に寄せ、参照用の result tab を右に逃がすなど、ユーザーごとの作業流儀に合わせやすい。
+- タブが増えたときの「どこに何があるか」の探索コストを減らせる。
+
+#### 導入条件
+
+- ドラッグ開始領域は tab 本体のみとし、close button 押下と競合させない。
+- ドロップ位置は挿入インジケータを表示し、入れ替え先を視覚的に明示する。
+- active tab は並び替え後も active のまま維持する。
+- キーボード操作の代替手段を用意する。最低限、コンテキストメニューまたはショートカットで「左へ移動 / 右へ移動」を持たせる。
+- work tab の dirty 状態や data/result/work の kind は順序変更で失わない。
+
+#### 非推奨案
+
+- 自動ソート。テーブル名順や作成順へ勝手に戻ると、ユーザーが作った意味のある並びを壊すため不適。
+
+### 2. 確認した不具合と横断方針
+
+#### LeftSideBar に新規テーブルが出ない問題
+
+- Correlation Matrix と Group Statistics は、成功時に addTableInfo は行っているが addTableName を行っていない。
+- LeftSideBar とテーブル一覧の描画ソースは tableList のため、DataPreview は開けてもサイドバーには即時反映されない。
+- Join Table / Create Simulation Data Table は addTableInfo と addTableName を両方更新しており、ここが挙動差分になっている。
+
+仕様方針:
+
+- 新規テーブルを生成する画面は、成功時に tableInfo と tableList を同一トランザクションとして更新する。
+- 画面遷移前に LeftSideBar に新テーブルが見えている状態を正とする。
+- 「DataPreview は開くがサイドバーにない」状態を許容しない。
+
+#### サーバーエラーがダイアログに出ない問題
+
+- Correlation Matrix と Group Statistics は code !== OK 分岐で Error.UnexpectedError を固定表示しており、レスポンスの message を捨てている。
+- Confidence Interval も同じパターンを持つ。
+- Statistical Test / Descriptive Statistics は catch 側では message を拾えるが、非 OK レスポンスや 2 段目 API 失敗時に汎用エラーへ落ちる箇所がある。
+- Calculation / Join Table / Save Data / Linear Regression は getResponseErrorMessage を使う箇所があり、こちらが目指すべき基準。
+
+仕様方針:
+
+- API 呼び出し失敗時の表示優先順位は「response.message > thrown error message > 汎用 fallback」とする。
+- 分析フォーム間でエラーダイアログの情報量を揃える。
+- 入力項目に紐づくエラーは可能な限りフィールド近傍に出し、ダイアログは横断的または予期しない失敗に限定する。
+- message が長い場合でも省略せず表示し、必要ならダイアログ内で折り返す。
+
+### 3. フォーム改善方針
+
+#### Linear Regression Form に title / description を追加する
+
+- 他の分析フォームは PageLayout ヘッダーを持つが、Linear Regression Form は本文から始まるため、画面意図と入力対象が一読で分かりにくい。
+- 最低限、タイトル、短い説明、期待する入力の順序をヘッダーで提示する。
+
+ヘッダー要件:
+
+- title: 最小二乗法
+- description: 「データ選択 → 被説明変数 / 説明変数指定 → 必要なら詳細オプション」という流れが分かる 1 文にする。
+- 他フォームと同じ vertical rhythm を保ち、ヘッダー追加で本文の圧迫が増えすぎないよう余白を抑える。
+
+#### Statistical Test を 14 inch 前提で圧縮する
+
+既定表示目標:
+
+- 1366x768 相当で、1 サンプルまたは 2 サンプルの通常利用時に action bar までスクロールなしで見える。
+- 追加サンプルや異常系だけがスクロール対象になる。
+
+レイアウト方針:
+
+- test type と sample action を同一行にまとめる。
+- sample card は p-4 / space-y-3 を 1 段階圧縮し、行内ラベルを短く保つ。
+- options は常時縦積みせず、2 列グリッドかインライン controls に寄せる。
+- 補助説明は初期表示では 1 行要約を優先し、詳細は tooltip または help text に逃がす。
+- action bar は下端に安定配置し、スクロール時に見失いにくくする。
+
+### 4. 列指定 UI 案（Group Statistics / Linear Regression 共通）
+
+#### 案 A: Dual List Transfer
+
+- 左に候補列、右に選択済み列を置く定番パターン。
+- 役割ごとに枠を分けると、被説明変数 / 説明変数 / グループキー / 集計列の境界が明確になる。
+- 列数が多いデータでの一覧性が高い。
+- 欠点は横幅を使うため、14 inch では 2 役割までが限界。
+
+#### 案 B: Command Palette + Chips
+
+- 入力欄で列名検索し、候補ポップオーバーから追加、選択済みは chips で保持する。
+- 列数が多い環境で最も速く、視認ノイズが少ない。
+- OLS の説明変数や Group Statistics の集計列と相性が良い。
+- 欠点は、列全体を俯瞰して選びたい初学者にはややブラックボックスになりやすい。
+
+#### 案 C: Role Assignment Matrix
+
+- 行に列名、列に役割を置き、checkbox / radio で役割を割り当てる。
+- 「この列はグループキーには使えるが集計列には使わない」といったルールを 1 画面で説明しやすい。
+- Group Statistics では最も誤選択を防ぎやすい。
+- 欠点は実装と学習コストがやや高い。
+
+#### 案 D: Stepper Assignment
+
+- 1 ステップ目でテーブル選択、2 ステップ目で列役割を決め、3 ステップ目でオプションと出力名を決める。
+- 一度に見せる情報量を減らせるため、初学者向けに強い。
+- 役割が多い画面でも縦の圧迫を抑えやすい。
+- 欠点は、熟練者にとっては往復操作が増える。
+
+推奨順:
+
+1. Group Statistics: 案 C または案 D
+2. Linear Regression: 案 B または案 A
+
+### 5. Group Statistics 全体レイアウト案
+
+#### 案 1: 2 ステップ Wizard
+
+- step 1 で「対象テーブル / グループキー / 集計列」、step 2 で「統計量 / 出力名 / 実行」に分ける。
+- 入力密度を半分に落とせるため、もっとも整理効果が高い。
+
+#### 案 2: Summary Sidebar 付き 2 ペイン
+
+- 左に入力、右に「選択中の設定要約」を固定表示する。
+- どの列を何役割に入れたかを常時確認でき、誤設定を減らせる。
+
+#### 案 3: Preset First
+
+- 先に「平均だけ」「平均+標準偏差」「欠損確認込み」などのプリセットを提示し、その後に微調整させる。
+- 初学者は短時間で完了でき、上級者だけが詳細編集へ進める。
+
+#### 案 4: Sentence Builder
+
+- 上部に「sales を region, year でグループ化し、revenue, cost に対して mean, std_dev を計算して sales_grouped を作成」のような文を生成する。
+- 入力の意味が自然言語として見えるため、学習者に特に有効。
+- 実体 UI は既存部品を流用できるため、見た目の改善効果に対して実装負荷を抑えやすい。
+
+推奨順:
+
+1. 案 1
+2. 案 2
+3. 案 3
+4. 案 4

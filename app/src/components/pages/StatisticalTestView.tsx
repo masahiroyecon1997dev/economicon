@@ -20,7 +20,10 @@ import {
 } from "@/components/organisms/EmptyState/AnalysisNoTablesState";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { extractApiErrorMessage } from "@/lib/utils/apiError";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
@@ -494,8 +497,18 @@ export const StatisticalTestView = ({
           setCurrentView("DataPreview");
           return;
         }
+
+        await showMessageDialog(
+          t("Error.Error"),
+          getResponseErrorMessage(detailResponse, t("Error.UnexpectedError")),
+        );
+        return;
       }
-      await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+
+      await showMessageDialog(
+        t("Error.Error"),
+        getResponseErrorMessage(response, t("Error.UnexpectedError")),
+      );
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
@@ -524,297 +537,306 @@ export const StatisticalTestView = ({
           }}
           className="flex min-h-0 flex-1 flex-col gap-4"
         >
-        <div className="app-scrollbar flex-1 space-y-4 overflow-y-auto pb-2">
-          <FormField
-            label={t("StatisticalTestView.TestTypeLabel")}
-            error={errors.testType}
-          >
-            <Select
-              value={values.testType}
-              onValueChange={handleTestTypeChange}
-              placeholder={t("StatisticalTestView.TestTypeLabel")}
+          <div className="app-scrollbar flex-1 space-y-4 overflow-y-auto pb-2">
+            <FormField
+              label={t("StatisticalTestView.TestTypeLabel")}
+              error={errors.testType}
             >
-              {TEST_TYPE_OPTIONS.map((testType) => (
-                <SelectItem key={testType} value={testType}>
-                  {t(`StatisticalTestView.TestType_${testType}`)}
-                </SelectItem>
-              ))}
-            </Select>
-          </FormField>
-
-          <section className="space-y-3 rounded-lg border border-border-color bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-sm font-semibold text-brand-text-main dark:text-gray-100">
-                  {t("StatisticalTestView.SamplesLabel")}
-                </h3>
-                <p className="mt-1 text-xs text-brand-text-sub dark:text-gray-400">
-                  {t(`StatisticalTestView.SamplesHint_${values.testType}`)}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={addSample}
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700",
-                  (values.testType === StatisticalTestTypeValues["t-test"] ||
-                    values.testType === StatisticalTestTypeValues["z-test"]) &&
-                    values.samples.length >= 2 &&
-                    "cursor-not-allowed opacity-50",
-                )}
-                disabled={
-                  (values.testType === StatisticalTestTypeValues["t-test"] ||
-                    values.testType === StatisticalTestTypeValues["z-test"]) &&
-                  values.samples.length >= 2
-                }
-                data-testid="statistical-test-add-sample"
+              <Select
+                value={values.testType}
+                onValueChange={handleTestTypeChange}
+                placeholder={t("StatisticalTestView.TestTypeLabel")}
               >
-                <Plus className="h-3.5 w-3.5" />
-                {t("StatisticalTestView.AddSample")}
-              </button>
-            </div>
+                {TEST_TYPE_OPTIONS.map((testType) => (
+                  <SelectItem key={testType} value={testType}>
+                    {t(`StatisticalTestView.TestType_${testType}`)}
+                  </SelectItem>
+                ))}
+              </Select>
+            </FormField>
 
-            {values.samples.map((sample, index) => {
-              const rowErrors = errors.sampleRows[index] ?? {};
-              const numericColumns = columnsByTable[sample.tableName] ?? [];
-              const isLoadingColumns =
-                sample.tableName !== "" && loadingTables[sample.tableName];
-              const minimumSamples =
-                values.testType === StatisticalTestTypeValues["f-test"] ? 2 : 1;
-
-              return (
-                <div
-                  key={`${index}:${sample.tableName}:${sample.columnName}`}
-                  className="space-y-3 rounded-md border border-gray-200 p-3 dark:border-gray-700"
-                  data-testid={`statistical-test-sample-${index}`}
+            <section className="space-y-3 rounded-lg border border-border-color bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-brand-text-main dark:text-gray-100">
+                    {t("StatisticalTestView.SamplesLabel")}
+                  </h3>
+                  <p className="mt-1 text-xs text-brand-text-sub dark:text-gray-400">
+                    {t(`StatisticalTestView.SamplesHint_${values.testType}`)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addSample}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700",
+                    (values.testType === StatisticalTestTypeValues["t-test"] ||
+                      values.testType ===
+                        StatisticalTestTypeValues["z-test"]) &&
+                      values.samples.length >= 2 &&
+                      "cursor-not-allowed opacity-50",
+                  )}
+                  disabled={
+                    (values.testType === StatisticalTestTypeValues["t-test"] ||
+                      values.testType ===
+                        StatisticalTestTypeValues["z-test"]) &&
+                    values.samples.length >= 2
+                  }
+                  data-testid="statistical-test-add-sample"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <h4 className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                      {t("StatisticalTestView.SampleTitle", {
-                        number: index + 1,
-                      })}
-                    </h4>
-                    <button
-                      type="button"
-                      onClick={() => removeSample(index)}
-                      disabled={values.samples.length <= minimumSamples}
-                      className={cn(
-                        "inline-flex items-center gap-1 rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700",
-                        values.samples.length <= minimumSamples &&
-                          "cursor-not-allowed opacity-50",
-                      )}
-                      data-testid={`statistical-test-remove-sample-${index}`}
-                    >
-                      <Minus className="h-3.5 w-3.5" />
-                      {t("StatisticalTestView.RemoveSample")}
-                    </button>
-                  </div>
+                  <Plus className="h-3.5 w-3.5" />
+                  {t("StatisticalTestView.AddSample")}
+                </button>
+              </div>
 
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <FormField
-                      label={t("StatisticalTestView.DataLabel")}
-                      error={rowErrors.tableName}
-                    >
-                      <Select
-                        value={sample.tableName}
-                        onValueChange={(value) =>
-                          handleSampleTableChange(index, value)
-                        }
-                        placeholder={t("StatisticalTestView.SelectData")}
+              {values.samples.map((sample, index) => {
+                const rowErrors = errors.sampleRows[index] ?? {};
+                const numericColumns = columnsByTable[sample.tableName] ?? [];
+                const isLoadingColumns =
+                  sample.tableName !== "" && loadingTables[sample.tableName];
+                const minimumSamples =
+                  values.testType === StatisticalTestTypeValues["f-test"]
+                    ? 2
+                    : 1;
+
+                return (
+                  <div
+                    key={`${index}:${sample.tableName}:${sample.columnName}`}
+                    className="space-y-3 rounded-md border border-gray-200 p-3 dark:border-gray-700"
+                    data-testid={`statistical-test-sample-${index}`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <h4 className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                        {t("StatisticalTestView.SampleTitle", {
+                          number: index + 1,
+                        })}
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => removeSample(index)}
+                        disabled={values.samples.length <= minimumSamples}
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700",
+                          values.samples.length <= minimumSamples &&
+                            "cursor-not-allowed opacity-50",
+                        )}
+                        data-testid={`statistical-test-remove-sample-${index}`}
                       >
-                        {tableList.map((tableName) => (
-                          <SelectItem key={tableName} value={tableName}>
-                            {tableName}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                    </FormField>
+                        <Minus className="h-3.5 w-3.5" />
+                        {t("StatisticalTestView.RemoveSample")}
+                      </button>
+                    </div>
 
-                    <FormField
-                      label={t("StatisticalTestView.ColumnLabel")}
-                      error={rowErrors.columnName}
-                    >
-                      {sample.tableName !== "" && isLoadingColumns ? (
-                        <AnalysisEmptyState
-                          compact
-                          testId={`statistical-test-loading-columns-state-${index}`}
-                          icon={<Loader2 className="h-6 w-6 animate-spin" />}
-                          title={t("AnalysisEmptyState.LoadingColumnsTitle")}
-                          description={t(
-                            "AnalysisEmptyState.LoadingColumnsDescription",
-                          )}
-                        />
-                      ) : sample.tableName !== "" &&
-                        numericColumns.length === 0 ? (
-                        <AnalysisEmptyState
-                          compact
-                          testId={`statistical-test-no-columns-state-${index}`}
-                          icon={<SearchX className="h-6 w-6" />}
-                          title={t("AnalysisEmptyState.NoEligibleColumnsTitle")}
-                          description={t("StatisticalTestView.NoColumns")}
-                          hint={t("AnalysisEmptyState.NoEligibleColumnsHint")}
-                        />
-                      ) : (
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <FormField
+                        label={t("StatisticalTestView.DataLabel")}
+                        error={rowErrors.tableName}
+                      >
                         <Select
-                          value={sample.columnName}
+                          value={sample.tableName}
                           onValueChange={(value) =>
-                            handleSampleColumnChange(index, value)
+                            handleSampleTableChange(index, value)
                           }
-                          placeholder={t("StatisticalTestView.SelectColumn")}
-                          disabled={sample.tableName === "" || isLoadingColumns}
+                          placeholder={t("StatisticalTestView.SelectData")}
                         >
-                          {numericColumns.map((column) => (
-                            <SelectItem key={column.name} value={column.name}>
-                              {column.name}
+                          {tableList.map((tableName) => (
+                            <SelectItem key={tableName} value={tableName}>
+                              {tableName}
                             </SelectItem>
                           ))}
                         </Select>
-                      )}
-                    </FormField>
+                      </FormField>
+
+                      <FormField
+                        label={t("StatisticalTestView.ColumnLabel")}
+                        error={rowErrors.columnName}
+                      >
+                        {sample.tableName !== "" && isLoadingColumns ? (
+                          <AnalysisEmptyState
+                            compact
+                            testId={`statistical-test-loading-columns-state-${index}`}
+                            icon={<Loader2 className="h-6 w-6 animate-spin" />}
+                            title={t("AnalysisEmptyState.LoadingColumnsTitle")}
+                            description={t(
+                              "AnalysisEmptyState.LoadingColumnsDescription",
+                            )}
+                          />
+                        ) : sample.tableName !== "" &&
+                          numericColumns.length === 0 ? (
+                          <AnalysisEmptyState
+                            compact
+                            testId={`statistical-test-no-columns-state-${index}`}
+                            icon={<SearchX className="h-6 w-6" />}
+                            title={t(
+                              "AnalysisEmptyState.NoEligibleColumnsTitle",
+                            )}
+                            description={t("StatisticalTestView.NoColumns")}
+                            hint={t("AnalysisEmptyState.NoEligibleColumnsHint")}
+                          />
+                        ) : (
+                          <Select
+                            value={sample.columnName}
+                            onValueChange={(value) =>
+                              handleSampleColumnChange(index, value)
+                            }
+                            placeholder={t("StatisticalTestView.SelectColumn")}
+                            disabled={
+                              sample.tableName === "" || isLoadingColumns
+                            }
+                          >
+                            {numericColumns.map((column) => (
+                              <SelectItem key={column.name} value={column.name}>
+                                {column.name}
+                              </SelectItem>
+                            ))}
+                          </Select>
+                        )}
+                      </FormField>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
 
-            {errors.samples && (
-              <p className="text-xs text-red-600 dark:text-red-400">
-                {errors.samples}
-              </p>
-            )}
-          </section>
+              {errors.samples && (
+                <p className="text-xs text-red-600 dark:text-red-400">
+                  {errors.samples}
+                </p>
+              )}
+            </section>
 
-          <section className="space-y-3 rounded-lg border border-border-color bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-            <h3 className="text-sm font-semibold text-brand-text-main dark:text-gray-100">
-              {t("StatisticalTestView.OptionsLabel")}
-            </h3>
+            <section className="space-y-3 rounded-lg border border-border-color bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+              <h3 className="text-sm font-semibold text-brand-text-main dark:text-gray-100">
+                {t("StatisticalTestView.OptionsLabel")}
+              </h3>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <FormField label={t("StatisticalTestView.AlternativeLabel")}>
-                <Select
-                  value={values.options.alternative}
-                  onValueChange={(value) => {
-                    clearErrors();
-                    form.setFieldValue(
-                      "options.alternative",
-                      value as AlternativeHypothesis,
-                    );
-                  }}
-                >
-                  {ALTERNATIVE_OPTIONS.map((alternative) => (
-                    <SelectItem key={alternative} value={alternative}>
-                      {t(`StatisticalTestView.Alternative_${alternative}`)}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </FormField>
+              <div className="grid gap-3 md:grid-cols-2">
+                <FormField label={t("StatisticalTestView.AlternativeLabel")}>
+                  <Select
+                    value={values.options.alternative}
+                    onValueChange={(value) => {
+                      clearErrors();
+                      form.setFieldValue(
+                        "options.alternative",
+                        value as AlternativeHypothesis,
+                      );
+                    }}
+                  >
+                    {ALTERNATIVE_OPTIONS.map((alternative) => (
+                      <SelectItem key={alternative} value={alternative}>
+                        {t(`StatisticalTestView.Alternative_${alternative}`)}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </FormField>
 
-              {showConfidenceLevel && (
+                {showConfidenceLevel && (
+                  <FormField
+                    label={t("StatisticalTestView.ConfidenceLevelLabel")}
+                    error={errors.options.confidenceLevel}
+                  >
+                    <InputText
+                      value={values.options.confidenceLevel}
+                      onChange={(event) => {
+                        clearErrors();
+                        form.setFieldValue(
+                          "options.confidenceLevel",
+                          event.target.value,
+                        );
+                      }}
+                      type="number"
+                      step="0.01"
+                      inputMode="decimal"
+                      data-testid="statistical-test-confidence-level"
+                    />
+                  </FormField>
+                )}
+              </div>
+
+              {showMu && (
                 <FormField
-                  label={t("StatisticalTestView.ConfidenceLevelLabel")}
-                  error={errors.options.confidenceLevel}
+                  label={t("StatisticalTestView.MuLabel")}
+                  error={errors.options.mu}
                 >
                   <InputText
-                    value={values.options.confidenceLevel}
+                    value={values.options.mu}
                     onChange={(event) => {
                       clearErrors();
-                      form.setFieldValue(
-                        "options.confidenceLevel",
-                        event.target.value,
-                      );
+                      form.setFieldValue("options.mu", event.target.value);
                     }}
                     type="number"
-                    step="0.01"
+                    step="any"
                     inputMode="decimal"
-                    data-testid="statistical-test-confidence-level"
+                    data-testid="statistical-test-mu"
                   />
+                  <p className="mt-1 text-xs text-brand-text-sub dark:text-gray-400">
+                    {t("StatisticalTestView.MuHint")}
+                  </p>
                 </FormField>
               )}
-            </div>
 
-            {showMu && (
-              <FormField
-                label={t("StatisticalTestView.MuLabel")}
-                error={errors.options.mu}
-              >
-                <InputText
-                  value={values.options.mu}
-                  onChange={(event) => {
-                    clearErrors();
-                    form.setFieldValue("options.mu", event.target.value);
-                  }}
-                  type="number"
-                  step="any"
-                  inputMode="decimal"
-                  data-testid="statistical-test-mu"
-                />
-                <p className="mt-1 text-xs text-brand-text-sub dark:text-gray-400">
-                  {t("StatisticalTestView.MuHint")}
-                </p>
-              </FormField>
-            )}
+              {showPaired && (
+                <div className="space-y-1">
+                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+                    <input
+                      type="checkbox"
+                      checked={values.options.paired}
+                      onChange={(event) => {
+                        clearErrors();
+                        form.setFieldValue(
+                          "options.paired",
+                          event.target.checked,
+                        );
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 accent-brand-accent"
+                      data-testid="statistical-test-paired"
+                    />
+                    {t("StatisticalTestView.PairedLabel")}
+                  </label>
+                  <p className="text-xs text-brand-text-sub dark:text-gray-400">
+                    {errors.options.paired ??
+                      t("StatisticalTestView.PairedHint")}
+                  </p>
+                </div>
+              )}
 
-            {showPaired && (
-              <div className="space-y-1">
-                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-                  <input
-                    type="checkbox"
-                    checked={values.options.paired}
-                    onChange={(event) => {
-                      clearErrors();
-                      form.setFieldValue(
-                        "options.paired",
-                        event.target.checked,
-                      );
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 accent-brand-accent"
-                    data-testid="statistical-test-paired"
-                  />
-                  {t("StatisticalTestView.PairedLabel")}
-                </label>
-                <p className="text-xs text-brand-text-sub dark:text-gray-400">
-                  {errors.options.paired ?? t("StatisticalTestView.PairedHint")}
-                </p>
-              </div>
-            )}
+              {showEqualVar && (
+                <div className="space-y-1">
+                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+                    <input
+                      type="checkbox"
+                      checked={values.options.equalVar}
+                      onChange={(event) => {
+                        clearErrors();
+                        form.setFieldValue(
+                          "options.equalVar",
+                          event.target.checked,
+                        );
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 accent-brand-accent"
+                      data-testid="statistical-test-equal-var"
+                    />
+                    {t("StatisticalTestView.EqualVarLabel")}
+                  </label>
+                  <p className="text-xs text-brand-text-sub dark:text-gray-400">
+                    {t("StatisticalTestView.EqualVarHint")}
+                  </p>
+                </div>
+              )}
+            </section>
+          </div>
 
-            {showEqualVar && (
-              <div className="space-y-1">
-                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-                  <input
-                    type="checkbox"
-                    checked={values.options.equalVar}
-                    onChange={(event) => {
-                      clearErrors();
-                      form.setFieldValue(
-                        "options.equalVar",
-                        event.target.checked,
-                      );
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 accent-brand-accent"
-                    data-testid="statistical-test-equal-var"
-                  />
-                  {t("StatisticalTestView.EqualVarLabel")}
-                </label>
-                <p className="text-xs text-brand-text-sub dark:text-gray-400">
-                  {t("StatisticalTestView.EqualVarHint")}
-                </p>
-              </div>
-            )}
-          </section>
-        </div>
-
-        <ActionButtonBar
-          cancelText={t("Common.Cancel")}
-          selectText={
-            isSubmitting
-              ? t("StatisticalTestView.Processing")
-              : t("StatisticalTestView.RunTest")
-          }
-          onCancel={handleCancel}
-          onSelect={() => {}}
-          onSelectType="submit"
-          isLoading={isSubmitting}
-        />
+          <ActionButtonBar
+            cancelText={t("Common.Cancel")}
+            selectText={
+              isSubmitting
+                ? t("StatisticalTestView.Processing")
+                : t("StatisticalTestView.RunTest")
+            }
+            onCancel={handleCancel}
+            onSelect={() => {}}
+            onSelectType="submit"
+            isLoading={isSubmitting}
+          />
         </form>
       )}
     </PageLayout>

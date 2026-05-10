@@ -83,9 +83,11 @@ beforeEach(() => {
     { name: "quantity", type: "Float64" },
   ];
   mockTableLoader.isLoading = false;
-  mockTableLoader.setSelectedTableName.mockImplementation((tableName: string) => {
-    mockTableLoader.selectedTableName = tableName;
-  });
+  mockTableLoader.setSelectedTableName.mockImplementation(
+    (tableName: string) => {
+      mockTableLoader.selectedTableName = tableName;
+    },
+  );
   mockTableLoader.setColumnList.mockImplementation(
     (columnList: Array<{ name: string; type: string }>) => {
       mockTableLoader.columnList = columnList;
@@ -125,9 +127,7 @@ describe("CorrelationMatrix フォーム", () => {
         }),
       );
 
-      expect(useCurrentPageStore.getState().currentView).toBe(
-        "ImportDataFile",
-      );
+      expect(useCurrentPageStore.getState().currentView).toBe("ImportDataFile");
     });
 
     it("対象列がないときは共通 no-columns state を表示する", () => {
@@ -223,6 +223,7 @@ describe("CorrelationMatrix フォーム", () => {
         expect(mockApi.createCorrelationTable).toHaveBeenCalledTimes(1);
       });
       expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useTableListStore.getState().tableList).toContain("corr_result");
       expect(vi.mocked(showMessageDialog)).not.toHaveBeenCalled();
     });
 
@@ -286,9 +287,9 @@ describe("CorrelationMatrix フォーム", () => {
       });
 
       expect(
-        useWorkspaceTabsStore.getState().tabs.find(
-          (tab) => tab.id === "work:CorrelationMatrix",
-        ),
+        useWorkspaceTabsStore
+          .getState()
+          .tabs.find((tab) => tab.id === "work:CorrelationMatrix"),
       ).toMatchObject({
         kind: "work",
         dirty: false,
@@ -325,7 +326,7 @@ describe("CorrelationMatrix フォーム", () => {
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
           "Error.Error",
-          "Error.UnexpectedError",
+          "相関計算に失敗しました",
         );
       });
     });

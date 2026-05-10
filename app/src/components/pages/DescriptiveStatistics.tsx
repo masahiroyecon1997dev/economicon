@@ -12,6 +12,10 @@ import {
 import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
@@ -294,16 +298,22 @@ export const DescriptiveStatistics = ({
           setCurrentView("DataPreview");
           return;
         }
+
+        await showMessageDialog(
+          t("Error.Error"),
+          getResponseErrorMessage(detailResponse, t("Error.UnexpectedError")),
+        );
+        return;
       }
 
       await showMessageDialog(
-        t("DescriptiveStatistics.ErrorCalculation"),
-        "error",
+        t("Error.Error"),
+        getResponseErrorMessage(response, t("Error.UnexpectedError")),
       );
-    } catch {
+    } catch (error) {
       await showMessageDialog(
-        t("DescriptiveStatistics.ErrorCalculation"),
-        "error",
+        t("Error.Error"),
+        extractApiErrorMessage(error, t("Error.UnexpectedError")),
       );
     } finally {
       setIsCalculating(false);

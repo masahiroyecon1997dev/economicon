@@ -2,9 +2,9 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { CorrelationMethod, MissingHandlingMethod } from "@/api/model";
 import { CreateCorrelationTableBody } from "@/api/zod/statistics/statistics";
 import { InputText } from "@/components/atoms/Input/InputText";
-import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
 import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
 import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
 import { FormField } from "@/components/molecules/Form/FormField";
@@ -15,7 +15,10 @@ import {
 import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { extractApiErrorMessage } from "@/lib/utils/apiError";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "@/lib/utils/apiError";
 import { createFieldError } from "@/lib/utils/formHelpers";
 import { getTableInfo } from "@/lib/utils/internal";
 import { useCurrentPageStore } from "@/stores/currentView";
@@ -57,6 +60,7 @@ export const CorrelationMatrix = ({
 }: CorrelationMatrixProps) => {
   const { t } = useTranslation();
   const tableList = useTableListStore((s) => s.tableList);
+  const addTableName = useTableListStore((s) => s.addTableName);
   const initialTableName = useTableInfosStore((s) => s.activeTableName) ?? "";
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
@@ -135,6 +139,7 @@ export const CorrelationMatrix = ({
         });
         if (resp.code === "OK") {
           const tableInfo = await getTableInfo(resp.result.tableName);
+          addTableName(resp.result.tableName);
           addTableInfo(tableInfo);
           if (workTabId) {
             commitWorkTab(workTabId, submittedValues);
@@ -145,7 +150,10 @@ export const CorrelationMatrix = ({
             setCurrentView("DataPreview");
           }
         } else {
-          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(resp, t("Error.UnexpectedError")),
+          );
         }
       } catch (error) {
         await showMessageDialog(
@@ -454,7 +462,9 @@ export const CorrelationMatrix = ({
                         <Select
                           id="lower-triangle"
                           value={field.state.value ? "true" : "false"}
-                          onValueChange={(v) => field.handleChange(v === "true")}
+                          onValueChange={(v) =>
+                            field.handleChange(v === "true")
+                          }
                           disabled={isSubmitting}
                         >
                           <SelectItem value="false">

@@ -15,7 +15,10 @@ import {
 import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { extractApiErrorMessage } from "@/lib/utils/apiError";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "@/lib/utils/apiError";
 import { createFieldError } from "@/lib/utils/formHelpers";
 import { getTableInfo } from "@/lib/utils/internal";
 import { useCurrentPageStore } from "@/stores/currentView";
@@ -94,6 +97,7 @@ export const GroupStatistics = ({
 }: GroupStatisticsProps) => {
   const { t } = useTranslation();
   const tableList = useTableListStore((s) => s.tableList);
+  const addTableName = useTableListStore((s) => s.addTableName);
   const initialTableName = useTableInfosStore((s) => s.activeTableName) ?? "";
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
@@ -179,6 +183,7 @@ export const GroupStatistics = ({
 
         if (resp.code === "OK") {
           const tableInfo = await getTableInfo(resp.result.tableName);
+          addTableName(resp.result.tableName);
           addTableInfo(tableInfo);
           if (workTabId) {
             commitWorkTab(workTabId, submittedValues);
@@ -189,7 +194,10 @@ export const GroupStatistics = ({
             setCurrentView("DataPreview");
           }
         } else {
-          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(resp, t("Error.UnexpectedError")),
+          );
         }
       } catch (error) {
         await showMessageDialog(

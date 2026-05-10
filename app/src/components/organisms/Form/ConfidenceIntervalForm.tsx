@@ -11,7 +11,10 @@ import {
 } from "@/components/organisms/EmptyState/AnalysisNoTablesState";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { extractApiErrorMessage } from "@/lib/utils/apiError";
+import {
+  extractApiErrorMessage,
+  getResponseErrorMessage,
+} from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
@@ -121,8 +124,18 @@ export const ConfidenceIntervalForm = ({
             onAnalysisComplete?.(0);
             return;
           }
+
+          await showMessageDialog(
+            t("Error.Error"),
+            getResponseErrorMessage(detailResponse, t("Error.UnexpectedError")),
+          );
+          return;
         }
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+
+        await showMessageDialog(
+          t("Error.Error"),
+          getResponseErrorMessage(response, t("Error.UnexpectedError")),
+        );
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
