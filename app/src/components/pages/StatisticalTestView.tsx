@@ -21,8 +21,8 @@ import {
 import { PageLayout } from "@/components/templates/PageLayout";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
@@ -30,12 +30,16 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
-import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import {
+  selectWorkTabDraft,
+  useWorkspaceTabsStore,
+} from "@/stores/workspaceTabs";
 import type { ColumnType } from "@/types/commonTypes";
 import { useForm, useStore } from "@tanstack/react-form";
 import { Loader2, Minus, Plus, SearchX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 type StatisticalTestFormValues = {
   testType: StatisticalTestType;
@@ -75,6 +79,26 @@ const EMPTY_ERRORS: ValidationErrors = {
   sampleRows: {},
   options: {},
 };
+
+const statisticalTestDraftSchema = z.object({
+  testType: z.enum([
+    StatisticalTestTypeValues["t-test"],
+    StatisticalTestTypeValues["z-test"],
+    StatisticalTestTypeValues["f-test"],
+  ]),
+  samples: z.array(z.object({ tableName: z.string(), columnName: z.string() })),
+  options: z.object({
+    alternative: z.enum([
+      AlternativeHypothesisValues["two-sided"],
+      AlternativeHypothesisValues.larger,
+      AlternativeHypothesisValues.smaller,
+    ]),
+    mu: z.string(),
+    paired: z.boolean(),
+    equalVar: z.boolean(),
+    confidenceLevel: z.string(),
+  }),
+});
 
 const TEST_TYPE_OPTIONS: StatisticalTestType[] = [
   StatisticalTestTypeValues["t-test"],
@@ -291,9 +315,10 @@ export const StatisticalTestView = ({
       : null,
   );
 
-  const persistedDraft = persistedWorkTab?.draftValues as
-    | StatisticalTestFormValues
-    | undefined;
+  const persistedDraft = selectWorkTabDraft(
+    persistedWorkTab,
+    statisticalTestDraftSchema,
+  );
 
   const form = useForm({
     defaultValues: buildDefaultValues(initialTableName, persistedDraft),
@@ -500,19 +525,19 @@ export const StatisticalTestView = ({
 
         await showMessageDialog(
           t("Error.Error"),
-          getResponseErrorMessage(detailResponse, t("Error.UnexpectedError")),
+          buildResponseErrorMessage(detailResponse, t("Error.UnexpectedError")),
         );
         return;
       }
 
       await showMessageDialog(
         t("Error.Error"),
-        getResponseErrorMessage(response, t("Error.UnexpectedError")),
+        buildResponseErrorMessage(response, t("Error.UnexpectedError")),
       );
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     }
   };

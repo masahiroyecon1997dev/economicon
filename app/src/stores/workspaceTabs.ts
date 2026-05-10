@@ -1,4 +1,5 @@
 import type { AnalysisResultDetail } from "@/api/model";
+import type { ZodType } from "zod";
 import { create } from "zustand";
 
 export type WorkspaceDataTab = {
@@ -387,3 +388,16 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
       return { tabs: nextTabs };
     }),
 }));
+
+/**
+ * draftValues を Zod スキーマで安全にパース・復元するユーティリティ。
+ * `persistedWorkTab?.draftValues as SomeType` の unsafe キャストを排除する。
+ */
+export const selectWorkTabDraft = <T>(
+  tab: WorkspaceWorkTab | null | undefined,
+  schema: ZodType<T>,
+): T | undefined => {
+  if (!tab?.draftValues) return undefined;
+  const result = schema.safeParse(tab.draftValues);
+  return result.success ? result.data : undefined;
+};

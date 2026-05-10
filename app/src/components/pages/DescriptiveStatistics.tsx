@@ -1,5 +1,6 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { DescriptiveStatisticType } from "@/api/model";
+import { DescriptiveStatisticsBody } from "@/api/zod/statistics/statistics";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
@@ -10,11 +11,12 @@ import {
   AnalysisNoTablesState,
 } from "@/components/organisms/EmptyState/AnalysisNoTablesState";
 import { PageLayout } from "@/components/templates/PageLayout";
+import { ALL_STAT_TYPES } from "@/constants/statisticTypes";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
@@ -22,28 +24,20 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
-import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import {
+  selectWorkTabDraft,
+  useWorkspaceTabsStore,
+} from "@/stores/workspaceTabs";
 import { ChevronDown, Loader2, SearchX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
-const ALL_STAT_TYPES: DescriptiveStatisticType[] = [
-  DescriptiveStatisticType.count,
-  DescriptiveStatisticType.mean,
-  DescriptiveStatisticType.median,
-  DescriptiveStatisticType.mode,
-  DescriptiveStatisticType.variance,
-  DescriptiveStatisticType.std_dev,
-  DescriptiveStatisticType.min,
-  DescriptiveStatisticType.max,
-  DescriptiveStatisticType.range,
-  DescriptiveStatisticType.iqr,
-  DescriptiveStatisticType.null_count,
-  DescriptiveStatisticType.null_ratio,
-  DescriptiveStatisticType.skewness,
-  DescriptiveStatisticType.kurtosis,
-  DescriptiveStatisticType.population_variance,
-];
+const descriptiveStatisticsDraftSchema = z.object({
+  tableName: z.string(),
+  columnNames: z.array(z.string()),
+  statistics: z.array(z.string()),
+});
 
 const DEFAULT_STAT_TYPES: DescriptiveStatisticType[] = [
   DescriptiveStatisticType.count,
@@ -68,12 +62,6 @@ const PRIMARY_STAT_TYPES: DescriptiveStatisticType[] = [
 const ADVANCED_STAT_TYPES: DescriptiveStatisticType[] = ALL_STAT_TYPES.filter(
   (stat) => !PRIMARY_STAT_TYPES.includes(stat),
 );
-
-type FormErrors = {
-  table?: string;
-  columns?: string;
-  stats?: string;
-};
 
 type DescriptiveStatisticsFormValues = {
   tableName: string;
@@ -128,9 +116,10 @@ export const DescriptiveStatistics = ({
         ) ?? null)
       : null,
   );
-  const persistedDraft = persistedWorkTab?.draftValues as
-    | DescriptiveStatisticsFormValues
-    | undefined;
+  const persistedDraft = selectWorkTabDraft(
+    persistedWorkTab,
+    descriptiveStatisticsDraftSchema,
+  ) as DescriptiveStatisticsFormValues | undefined;
   const initialDraftRef = useRef(persistedDraft);
   const shouldAutoSelectColumnsRef = useRef(
     !persistedDraft || persistedDraft.columnNames.length === 0,
@@ -143,7 +132,7 @@ export const DescriptiveStatistics = ({
     Set<DescriptiveStatisticType>
   >(() => new Set(persistedDraft?.statistics ?? DEFAULT_STAT_TYPES));
   const [isCalculating, setIsCalculating] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [statsOpen, setStatsOpen] = useState(true);
   const [advancedStatsOpen, setAdvancedStatsOpen] = useState(false);
 
@@ -249,29 +238,32 @@ export const DescriptiveStatistics = ({
   };
 
   const handleSubmit = async () => {
-    const newErrors: FormErrors = {};
-    if (!selectedTable) {
-      newErrors.table = t("DescriptiveStatistics.ErrorDataRequired");
-    }
-    if (checkedCols.size === 0) {
-      newErrors.columns = t("DescriptiveStatistics.ErrorColumnsRequired");
-    }
-    if (checkedStats.size === 0) {
-      newErrors.stats = t("DescriptiveStatistics.ErrorStatsRequired");
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-    setErrors({});
-
     const orderedCols = columns
       .map((column) => column.name)
       .filter((name) => checkedCols.has(name));
     const orderedStats = ALL_STAT_TYPES.filter((stat) =>
       checkedStats.has(stat),
     );
+
+    const parsed = DescriptiveStatisticsBody.safeParse({
+      tableName: selectedTable ?? "",
+      columnNameList: orderedCols,
+      statistics: orderedStats,
+    });
+
+    if (!parsed.success) {
+      const firstPath = parsed.error.issues[0]?.path[0];
+      let msg = t("Error.UnexpectedError");
+      if (firstPath === "tableName")
+        msg = t("DescriptiveStatistics.ErrorDataRequired");
+      else if (firstPath === "columnNameList")
+        msg = t("DescriptiveStatistics.ErrorColumnsRequired");
+      else if (firstPath === "statistics")
+        msg = t("DescriptiveStatistics.ErrorStatsRequired");
+      setValidationError(msg);
+      return;
+    }
+    setValidationError(null);
 
     setIsCalculating(true);
     try {
@@ -301,19 +293,19 @@ export const DescriptiveStatistics = ({
 
         await showMessageDialog(
           t("Error.Error"),
-          getResponseErrorMessage(detailResponse, t("Error.UnexpectedError")),
+          buildResponseErrorMessage(detailResponse, t("Error.UnexpectedError")),
         );
         return;
       }
 
       await showMessageDialog(
         t("Error.Error"),
-        getResponseErrorMessage(response, t("Error.UnexpectedError")),
+        buildResponseErrorMessage(response, t("Error.UnexpectedError")),
       );
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     } finally {
       setIsCalculating(false);
@@ -333,17 +325,14 @@ export const DescriptiveStatistics = ({
         />
       ) : (
         <div className="app-scrollbar flex-1 min-h-0 space-y-4 overflow-y-auto pb-2">
-          <FormField
-            label={t("DescriptiveStatistics.DataLabel")}
-            error={errors.table}
-          >
+          <FormField label={t("DescriptiveStatistics.DataLabel")}>
             <Select
               value={selectedTable}
               onValueChange={(value) => {
                 setSelectedTableName(value);
                 shouldAutoSelectColumnsRef.current = true;
                 setCheckedCols(new Set());
-                setErrors({});
+                setValidationError(null);
               }}
               placeholder={t("DescriptiveStatistics.SelectData")}
             >
@@ -395,7 +384,6 @@ export const DescriptiveStatistics = ({
                     }))}
                     checked={checkedCols}
                     onToggle={toggleCol}
-                    error={errors.columns}
                   />
                 </div>
               )}
@@ -486,12 +474,17 @@ export const DescriptiveStatistics = ({
                 </div>
               </div>
             )}
-            {errors.stats && (
-              <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">
-                {errors.stats}
-              </p>
-            )}
           </div>
+          {validationError && (
+            <p className="text-xs text-red-600 dark:text-red-400">
+              {validationError}
+            </p>
+          )}
+          {validationError && (
+            <p className="text-xs text-red-600 dark:text-red-400">
+              {validationError}
+            </p>
+          )}
           <ActionButtonBar
             cancelText={t("Common.Cancel")}
             selectText={

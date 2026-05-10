@@ -12,8 +12,8 @@ import {
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
@@ -127,19 +127,22 @@ export const ConfidenceIntervalForm = ({
 
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(detailResponse, t("Error.UnexpectedError")),
+            buildResponseErrorMessage(
+              detailResponse,
+              t("Error.UnexpectedError"),
+            ),
           );
           return;
         }
 
         await showMessageDialog(
           t("Error.Error"),
-          getResponseErrorMessage(response, t("Error.UnexpectedError")),
+          buildResponseErrorMessage(response, t("Error.UnexpectedError")),
         );
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
         );
       }
     },

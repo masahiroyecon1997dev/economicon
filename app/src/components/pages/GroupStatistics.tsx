@@ -13,6 +13,7 @@ import {
   AnalysisNoTablesState,
 } from "@/components/organisms/EmptyState/AnalysisNoTablesState";
 import { PageLayout } from "@/components/templates/PageLayout";
+import { ALL_STAT_TYPES } from "@/constants/statisticTypes";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
@@ -26,7 +27,10 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
-import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import {
+  selectWorkTabDraft,
+  useWorkspaceTabsStore,
+} from "@/stores/workspaceTabs";
 import type { ColumnType } from "@/types/commonTypes";
 import { useForm, useStore } from "@tanstack/react-form";
 import {
@@ -38,24 +42,6 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-const ALL_STAT_TYPES: DescriptiveStatisticType[] = [
-  DescriptiveStatisticType.count,
-  DescriptiveStatisticType.mean,
-  DescriptiveStatisticType.median,
-  DescriptiveStatisticType.mode,
-  DescriptiveStatisticType.variance,
-  DescriptiveStatisticType.std_dev,
-  DescriptiveStatisticType.min,
-  DescriptiveStatisticType.max,
-  DescriptiveStatisticType.range,
-  DescriptiveStatisticType.iqr,
-  DescriptiveStatisticType.null_count,
-  DescriptiveStatisticType.null_ratio,
-  DescriptiveStatisticType.skewness,
-  DescriptiveStatisticType.kurtosis,
-  DescriptiveStatisticType.population_variance,
-];
 
 const DEFAULT_STAT_TYPES: DescriptiveStatisticType[] = [
   DescriptiveStatisticType.count,
@@ -122,9 +108,10 @@ export const GroupStatistics = ({
       : null,
   );
 
-  const persistedDraft = persistedWorkTab?.draftValues as
-    | GroupStatisticsFormValues
-    | undefined;
+  const persistedDraft = selectWorkTabDraft(
+    persistedWorkTab,
+    CreateGroupStatisticsTableBody,
+  );
   const shouldAutoSelectRef = useRef(!persistedDraft);
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [columnFilter, setColumnFilter] = useState("");

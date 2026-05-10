@@ -25,7 +25,10 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
-import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import {
+  selectWorkTabDraft,
+  useWorkspaceTabsStore,
+} from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
 import { Loader2, SearchX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -90,9 +93,10 @@ export const CorrelationMatrix = ({
       : null,
   );
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const persistedDraft = persistedWorkTab?.draftValues as
-    | CorrelationMatrixFormValues
-    | undefined;
+  const persistedDraft = selectWorkTabDraft(
+    persistedWorkTab,
+    CreateCorrelationTableBody,
+  );
   const shouldAutoSelectColumnsRef = useRef(!persistedDraft);
   const initialValues: CorrelationMatrixFormValues = {
     tableName: persistedDraft?.tableName ?? initialTableName,

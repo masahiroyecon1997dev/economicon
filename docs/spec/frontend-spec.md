@@ -213,12 +213,29 @@ canonical order:
 - **対象**: `app/src/components/organisms/Form/LinearRegressionForm.tsx`
 - **問題**: `createRegressionSchema(t)` という手書き Zod スキーマを定義し `validators.onSubmit` に渡している。Orval 生成の `RegressionBody`（`@/api/zod/analysis/analysis.ts`）が存在するが未使用。
 - **修正方針**: `validators.onSubmit` を `RegressionBody` ベースに置き換える。バリデーションメッセージは `@tanstack/react-form` の `field.state.meta.errors` からとり、i18n キーで上書きする。
+- **実装ステップ**:
+  1. `createRegressionSchema` 関数および呼び出し箇所を削除する
+  2. `useForm` の `validators.onSubmit` を `RegressionBody` に変更する
+     ```ts
+     import { RegressionBody } from "@/api/zod/analysis/analysis";
+     validators: {
+       onSubmit: RegressionBody;
+     }
+     ```
+  3. フォームの `defaultValues` に `resultName: ""` / `description: ""` を追加する（`RegressionBody` のデフォルト値に合わせる）
+  4. `standardError` は `RegressionBody` 内の discriminated union（`method` フィールドで分岐）なので、submit 時に `standardErrorMethod` 文字列から union オブジェクトへ変換する既存ロジックはそのまま維持する
+  5. フィールドエラー表示は `extractFieldError(field.state.meta.errors)` から `tErr(field.state.meta.errors, "ValidationMessages.XXX")` パターンへ統一する
+  6. `LinearRegressionForm.test.tsx` でバリデーションエラーメッセージが変わる場合はアサーションを更新する
 
 #### RF-02: `FilterColumnForm` — `form: any` 使用（`any` 禁止ルール違反）
 
 - **対象**: `app/src/components/organisms/Dialog/ColumnOperationForms/FilterColumnForm.tsx` L315 付近
 - **問題**: `ConditionBlock` コンポーネントの Props 型に `// eslint-disable-next-line @typescript-eslint/no-explicit-any` とコメントしたうえで `form: any` を使っている。
 - **修正方針**: `form` の型を `ReturnType<typeof useForm<FormValues>>` に変更し、`any` を排除する。フォームの型変数が複雑な場合は `ConditionBlock` を `form.Field` の Render Prop に移動することも検討する。
+- **実装ステップ**:
+  1. `FilterColumnForm` 内の `useForm({...})` の戻り値型を確認する。`defaultValues` から型推論される `FormValues` が `typeof defaultValues` として取り出せる
+  2. `ConditionBlock` の `form: any` を `form: ReturnType<typeof useForm<typeof defaultValues>>` に変更し、ESLint コメントを削除する
+  3. ただし `@tanstack/react-form` の `useForm` の型パラメータ取り出しが難しい場合は、`ConditionBlock` を `form.Field` の Render Prop（`form.Field` の children 引数 `field` を直接受け取る）に変換して props の `form` を削除する方式も可
 
 ### ⚠️ Warning（次サイクルで対応）
 
@@ -226,6 +243,31 @@ canonical order:
 
 - **対象**: `DescriptiveStatistics.tsx` と `GroupStatistics.tsx` の両方に同一の `ALL_STAT_TYPES: DescriptiveStatisticType[]`（15 項目）を宣言
 - **修正方針**: `src/constants/statisticTypes.ts` に切り出し、両コンポーネントから import する。`DEFAULT_STAT_TYPES` は内容が異なるため各コンポーネントに残してよい。
+- **実装ステップ**:
+  1. `app/src/constants/statisticTypes.ts` を新規作成する
+     ```ts
+     import type { DescriptiveStatisticType } from "@/api/model";
+     export const ALL_STAT_TYPES: DescriptiveStatisticType[] = [
+       "count",
+       "mean",
+       "median",
+       "mode",
+       "variance",
+       "std_dev",
+       "min",
+       "max",
+       "range",
+       "iqr",
+       "null_count",
+       "null_ratio",
+       "skewness",
+       "kurtosis",
+       "population_variance",
+     ];
+     ```
+  2. `DescriptiveStatistics.tsx` の `ALL_STAT_TYPES` 定義を削除し、`@/constants/statisticTypes` から import する
+  3. `GroupStatistics.tsx` の `ALL_STAT_TYPES` 定義を削除し、同様に import する
+  4. `ADVANCED_STAT_TYPES` は `DescriptiveStatistics.tsx` のみで使用しているため、同ファイルに残す
 
 #### RF-04: エラーハンドラーヘルパーの不統一
 
@@ -233,16 +275,72 @@ canonical order:
   - 旧パターン使用ファイル: `DescriptiveStatistics.tsx`、`LinearRegressionForm.tsx`、`ConfidenceIntervalForm.tsx`、`StatisticalTestView.tsx`、`LeftSideMenu.tsx`
   - 新パターン使用ファイル: `CorrelationMatrix.tsx`、`GroupStatistics.tsx`、Dialog 系全般
 - **修正方針**: 旧パターンを新パターン（`buildCaughtErrorMessage` / `buildResponseErrorMessage`）に統一する。`paramMap` が不要な場合は空オブジェクトを省略できる。
+- **実装ステップ**:
+  1. 各ファイルの `extractApiErrorMessage` インポートを削除し、`buildCaughtErrorMessage` に置き換える
+     ```ts
+     // Before
+     setError(extractApiErrorMessage(error, t("Error.UnexpectedError")));
+     // After
+     setError(buildCaughtErrorMessage(error, t("Error.UnexpectedError")));
+     ```
+  2. `getResponseErrorMessage` インポートを削除し、`buildResponseErrorMessage` に置き換える
+     ```ts
+     // Before
+     setError(getResponseErrorMessage(response, t("Error.UnexpectedError")));
+     // After
+     setError(buildResponseErrorMessage(response, t("Error.UnexpectedError")));
+     ```
+  3. パラメータ名の置換が必要な場合は第 3 引数に `paramMap` オブジェクトを渡す（`RenameColumnForm`, `FilterColumnForm` 等の既存実装を参照）
+  4. 対象ファイル: `DescriptiveStatistics.tsx`・`LinearRegressionForm.tsx`・`ConfidenceIntervalForm.tsx`・`StatisticalTestView.tsx`・`LeftSideMenu.tsx`（計 5 ファイル）
+  5. 修正後、`extractApiErrorMessage` と `getResponseErrorMessage` が他に使用箇所がなければ `@/lib/utils/apiError.ts` から export を残しつつ deprecated コメントを付与する
 
 #### RF-05: `persistedWorkTab?.draftValues as SomeType` 型アサーションの重複
 
 - **問題**: `DescriptiveStatistics.tsx`、`CorrelationMatrix.tsx`、`GroupStatistics.tsx`、`StatisticalTestView.tsx` の 4 コンポーネントが、`state.tabs.find(...)` で work tab を取得したあとに `persistedWorkTab?.draftValues as FormValues` という unsafe cast を繰り返している。`WorkspaceWorkTab.draftValues` が `unknown` 型のため回避できていない。
 - **修正方針**: `workspaceTabs.ts` に `selectWorkTabDraft<T>(featureKey, schema: ZodSchema<T>)` 等の型安全なセレクタを追加し、Zod の `safeParse` で検証してから返す。または `WorkspaceWorkTab` にジェネリクス `<TDraft = unknown>` を導入して featureKey と対応づける。
+- **実装ステップ**（`selectWorkTabDraft` アプローチ推奨）:
+  1. `app/src/stores/workspaceTabs.ts` に以下のユーティリティを追加する
+     ```ts
+     import type { ZodSchema } from "zod";
+     export const selectWorkTabDraft = <T>(
+       tabs: WorkspaceTab[],
+       featureKey: WorkFeatureKey,
+       schema: ZodSchema<T>,
+     ): T | undefined => {
+       const tab = tabs.find(
+         (t): t is WorkspaceWorkTab =>
+           t.kind === "work" && t.featureKey === featureKey,
+       );
+       if (!tab?.draftValues) return undefined;
+       const result = schema.safeParse(tab.draftValues);
+       return result.success ? result.data : undefined;
+     };
+     ```
+  2. 各コンポーネントで `persistedWorkTab?.draftValues as FormValues` を `selectWorkTabDraft(tabs, "FeatureKey", FormSchema)` に置き換える
+  3. `FormSchema` は各コンポーネントの `useForm` の `validators.onSubmit` に使っている Zod スキーマを流用する（`RegressionBody`、`GroupStatisticsBody` 等）
+  4. `safeParse` が失敗した場合（スキーマ変更後など）は `undefined` が返り、フォームのデフォルト値にフォールバックするため、既存の `?? defaultValues` パターンで安全に処理できる
 
 #### RF-06: `DescriptiveStatistics` — `@tanstack/react-form` 未統合・手動バリデーション
 
 - **問題**: 他の分析フォーム（`CorrelationMatrix`、`GroupStatistics`、`ConfidenceIntervalForm`、`LinearRegressionForm` 等）は `useForm` + `validators.onSubmit: ZodSchema` でバリデーションを行っているが、`DescriptiveStatistics.tsx` だけが `useState<FormErrors>` + `handleSubmit` 内手動バリデーションを採用している。Orval 生成の `DescriptiveStatisticsBody` スキーマが存在するが未使用。
 - **修正方針**: `useForm` + `DescriptiveStatisticsBody` への移行を検討する。ただし checkbox 系の多段 state（`checkedCols`、`checkedStats`）を `@tanstack/react-form` のフィールドとして扱う改修コストが高い場合は、フォーム外 state を維持しつつ submit 直前に `DescriptiveStatisticsBody.safeParse` でバリデーションする方式でも可。
+- **実装ステップ**（submit 前 safeParse 方式推奨）:
+  1. `DescriptiveStatisticsBody` を `@/api/zod/statistics/statistics` から import する
+  2. `FormErrors` 型と `useState<FormErrors>` を削除する
+  3. `handleSubmit` 内の手動バリデーション（`if (!formValues.tableName) { errors.tableName = t(...) }` 等）を削除し、代わりに以下のように書き換える
+     ```ts
+     const parsed = DescriptiveStatisticsBody.safeParse({
+       tableName,
+       columns: [...checkedCols],
+       statistics: [...checkedStats],
+     });
+     if (!parsed.success) {
+       // parsed.error.issues からフィールド別エラーを抽出して setState
+       return;
+     }
+     ```
+  4. エラー表示 state（`formError` 等）は `string | null` の `useState` で十分。Zod の `issues[0].message` を直接使うか、i18n キーにマッピングする
+  5. `DescriptiveStatisticsBody` の `columns`・`statistics` フィールドが `min(1)` 等の制約を持つ場合は、それを活用してバリデーションメッセージを統一する
 
 ---
 

@@ -6,7 +6,7 @@ import type { OutputResultDialogTargetType } from "@/components/organisms/Dialog
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { extractApiErrorMessage } from "@/lib/utils/apiError";
+import { buildCaughtErrorMessage } from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
 import { getTableInfo } from "@/lib/utils/internal";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
@@ -129,7 +129,7 @@ export const LeftSideMenu = () => {
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
         );
       }
     })();
@@ -155,7 +155,7 @@ export const LeftSideMenu = () => {
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     }
   };
@@ -176,7 +176,7 @@ export const LeftSideMenu = () => {
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     }
   };
@@ -200,7 +200,7 @@ export const LeftSideMenu = () => {
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     }
   };
@@ -253,7 +253,7 @@ export const LeftSideMenu = () => {
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     }
   };
@@ -303,7 +303,7 @@ export const LeftSideMenu = () => {
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     } finally {
       clearLoading();
