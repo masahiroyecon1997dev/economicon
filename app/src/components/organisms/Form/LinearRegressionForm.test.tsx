@@ -220,13 +220,14 @@ describe("LinearRegressionForm", () => {
     });
 
     it("説明変数が0件でサブミット → ExplanatoryVariablesRequiredエラーが表示される", async () => {
+      const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      // 目的変数のみ設定して説明変数は空のまま
-      const [depAddBtn] = screen.getAllByRole("button", {
-        name: "add-variable",
-      });
-      await userEvent.setup().click(depAddBtn);
+      // 被説明変数を Select で設定（説明変数は空のまま）
+      await user.click(
+        screen.getByLabelText("LinearRegressionForm.DependentVariable"),
+      );
+      await user.click(await screen.findByRole("option", { name: "price" }));
 
       await submitForm();
 
@@ -252,11 +253,13 @@ describe("LinearRegressionForm", () => {
       const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
-        name: "add-variable",
-      });
-      await user.click(depAddBtn);
-      await user.click(expAddBtn);
+      // 被説明変数を Select で設定
+      await user.click(
+        screen.getByLabelText("LinearRegressionForm.DependentVariable"),
+      );
+      await user.click(await screen.findByRole("option", { name: "price" }));
+      // 説明変数を VariableSelectorField mock で設定
+      await user.click(screen.getByRole("button", { name: "add-variable" }));
 
       await submitForm();
 
@@ -279,11 +282,13 @@ describe("LinearRegressionForm", () => {
       const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
-        name: "add-variable",
-      });
-      await user.click(depAddBtn);
-      await user.click(expAddBtn);
+      // 被説明変数を Select で設定
+      await user.click(
+        screen.getByLabelText("LinearRegressionForm.DependentVariable"),
+      );
+      await user.click(await screen.findByRole("option", { name: "price" }));
+      // 説明変数を VariableSelectorField mock で設定
+      await user.click(screen.getByRole("button", { name: "add-variable" }));
 
       await submitForm();
 
@@ -309,11 +314,13 @@ describe("LinearRegressionForm", () => {
       const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
-        name: "add-variable",
-      });
-      await user.click(depAddBtn);
-      await user.click(expAddBtn);
+      // 被説明変数を Select で設定
+      await user.click(
+        screen.getByLabelText("LinearRegressionForm.DependentVariable"),
+      );
+      await user.click(await screen.findByRole("option", { name: "price" }));
+      // 説明変数を VariableSelectorField mock で設定
+      await user.click(screen.getByRole("button", { name: "add-variable" }));
 
       await submitForm();
 
@@ -331,11 +338,13 @@ describe("LinearRegressionForm", () => {
       const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
-        name: "add-variable",
-      });
-      await user.click(depAddBtn);
-      await user.click(expAddBtn);
+      // 被説明変数を Select で設定
+      await user.click(
+        screen.getByLabelText("LinearRegressionForm.DependentVariable"),
+      );
+      await user.click(await screen.findByRole("option", { name: "price" }));
+      // 説明変数を VariableSelectorField mock で設定
+      await user.click(screen.getByRole("button", { name: "add-variable" }));
 
       await submitForm();
 

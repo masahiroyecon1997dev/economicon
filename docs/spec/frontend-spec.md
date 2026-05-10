@@ -202,6 +202,50 @@ canonical order:
 - 再読込は既存の getFiles(directoryPath) を使い、一覧から削除済みファイルが消えた状態を正とする。現在ディレクトリが失効していた場合は既存の safe reload 方針にフォールバックする。
 - 本機能の主目的は、不要なデータファイルを ImportDataFile 画面から即座に整理できることと、E2E テストで保存済みファイルを後片付けしやすくすることにある。
 
+## リファクタリング backlog
+
+コードレビューで検出した改善候補。Critical は即時修正必須、Warning は次の整理サイクルで対応する。
+
+### 🚨 Critical（即時修正必須）
+
+#### RF-01: `LinearRegressionForm` — 手書き Zod スキーマ（Orval 生成スキーマ再定義禁止違反）
+
+- **対象**: `app/src/components/organisms/Form/LinearRegressionForm.tsx`
+- **問題**: `createRegressionSchema(t)` という手書き Zod スキーマを定義し `validators.onSubmit` に渡している。Orval 生成の `RegressionBody`（`@/api/zod/analysis/analysis.ts`）が存在するが未使用。
+- **修正方針**: `validators.onSubmit` を `RegressionBody` ベースに置き換える。バリデーションメッセージは `@tanstack/react-form` の `field.state.meta.errors` からとり、i18n キーで上書きする。
+
+#### RF-02: `FilterColumnForm` — `form: any` 使用（`any` 禁止ルール違反）
+
+- **対象**: `app/src/components/organisms/Dialog/ColumnOperationForms/FilterColumnForm.tsx` L315 付近
+- **問題**: `ConditionBlock` コンポーネントの Props 型に `// eslint-disable-next-line @typescript-eslint/no-explicit-any` とコメントしたうえで `form: any` を使っている。
+- **修正方針**: `form` の型を `ReturnType<typeof useForm<FormValues>>` に変更し、`any` を排除する。フォームの型変数が複雑な場合は `ConditionBlock` を `form.Field` の Render Prop に移動することも検討する。
+
+### ⚠️ Warning（次サイクルで対応）
+
+#### RF-03: `ALL_STAT_TYPES` 定数の重複（DRY 違反）
+
+- **対象**: `DescriptiveStatistics.tsx` と `GroupStatistics.tsx` の両方に同一の `ALL_STAT_TYPES: DescriptiveStatisticType[]`（15 項目）を宣言
+- **修正方針**: `src/constants/statisticTypes.ts` に切り出し、両コンポーネントから import する。`DEFAULT_STAT_TYPES` は内容が異なるため各コンポーネントに残してよい。
+
+#### RF-04: エラーハンドラーヘルパーの不統一
+
+- **問題**: `extractApiErrorMessage` / `getResponseErrorMessage`（旧プリミティブ）と `buildCaughtErrorMessage` / `buildResponseErrorMessage`（新 composite）が混在している。
+  - 旧パターン使用ファイル: `DescriptiveStatistics.tsx`、`LinearRegressionForm.tsx`、`ConfidenceIntervalForm.tsx`、`StatisticalTestView.tsx`、`LeftSideMenu.tsx`
+  - 新パターン使用ファイル: `CorrelationMatrix.tsx`、`GroupStatistics.tsx`、Dialog 系全般
+- **修正方針**: 旧パターンを新パターン（`buildCaughtErrorMessage` / `buildResponseErrorMessage`）に統一する。`paramMap` が不要な場合は空オブジェクトを省略できる。
+
+#### RF-05: `persistedWorkTab?.draftValues as SomeType` 型アサーションの重複
+
+- **問題**: `DescriptiveStatistics.tsx`、`CorrelationMatrix.tsx`、`GroupStatistics.tsx`、`StatisticalTestView.tsx` の 4 コンポーネントが、`state.tabs.find(...)` で work tab を取得したあとに `persistedWorkTab?.draftValues as FormValues` という unsafe cast を繰り返している。`WorkspaceWorkTab.draftValues` が `unknown` 型のため回避できていない。
+- **修正方針**: `workspaceTabs.ts` に `selectWorkTabDraft<T>(featureKey, schema: ZodSchema<T>)` 等の型安全なセレクタを追加し、Zod の `safeParse` で検証してから返す。または `WorkspaceWorkTab` にジェネリクス `<TDraft = unknown>` を導入して featureKey と対応づける。
+
+#### RF-06: `DescriptiveStatistics` — `@tanstack/react-form` 未統合・手動バリデーション
+
+- **問題**: 他の分析フォーム（`CorrelationMatrix`、`GroupStatistics`、`ConfidenceIntervalForm`、`LinearRegressionForm` 等）は `useForm` + `validators.onSubmit: ZodSchema` でバリデーションを行っているが、`DescriptiveStatistics.tsx` だけが `useState<FormErrors>` + `handleSubmit` 内手動バリデーションを採用している。Orval 生成の `DescriptiveStatisticsBody` スキーマが存在するが未使用。
+- **修正方針**: `useForm` + `DescriptiveStatisticsBody` への移行を検討する。ただし checkbox 系の多段 state（`checkedCols`、`checkedStats`）を `@tanstack/react-form` のフィールドとして扱う改修コストが高い場合は、フォーム外 state を維持しつつ submit 直前に `DescriptiveStatisticsBody.safeParse` でバリデーションする方式でも可。
+
+---
+
 ## 未修正 backlog
 
 - [pending] ImportDataFile のファイル選択タブに Rust ベースのファイル削除導線を追加し、削除不可 / 確認 / 完了ダイアログと一覧再読込まで実装する。

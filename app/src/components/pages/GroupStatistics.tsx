@@ -243,7 +243,10 @@ export const GroupStatistics = ({
 
   useEffect(() => {
     if (!selectedTableName || formValues.newTableName.trim()) return;
-    form.setFieldValue("newTableName", buildDefaultOutputName(selectedTableName));
+    form.setFieldValue(
+      "newTableName",
+      buildDefaultOutputName(selectedTableName),
+    );
   }, [form, formValues.newTableName, selectedTableName]);
 
   useEffect(() => {
@@ -277,7 +280,9 @@ export const GroupStatistics = ({
   };
 
   const toggleGroupRole = (columnName: string) => {
-    const targetColumn = columnList.find((column) => column.name === columnName);
+    const targetColumn = columnList.find(
+      (column) => column.name === columnName,
+    );
     if (!targetColumn || isFloatColumn(targetColumn)) return;
 
     if (groupByColumnSet.has(columnName)) {
@@ -404,7 +409,9 @@ export const GroupStatistics = ({
                               {t(`GroupStatistics.Step${step}Description`)}
                             </p>
                           </div>
-                          {step === 1 && <div className="mx-1 h-px w-6 bg-border-color" />}
+                          {step === 1 && (
+                            <div className="mx-1 h-px w-6 bg-border-color" />
+                          )}
                         </div>
                       );
                     })}
@@ -539,7 +546,7 @@ export const GroupStatistics = ({
                     selectText={t("GroupStatistics.NextStep")}
                     onCancel={handleCancel}
                     onSelect={() => setCurrentStep(2)}
-                    disabled={isSubmitting || !canProceedToStep2}
+                    disabled={isSubmitting || !canProceedToStep2 || isLoading}
                   />
                 </div>
               </>
@@ -566,7 +573,9 @@ export const GroupStatistics = ({
                         <InputText
                           id="group-statistics-column-filter"
                           value={columnFilter}
-                          onChange={(event) => setColumnFilter(event.target.value)}
+                          onChange={(event) =>
+                            setColumnFilter(event.target.value)
+                          }
                           placeholder={t("Common.FilterColumns")}
                           disabled={isSubmitting}
                         />
@@ -575,7 +584,7 @@ export const GroupStatistics = ({
                   </div>
 
                   <div
-                    className="flex min-h-0 flex-1 flex-col rounded-xl border border-border-color bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                    className="flex min-h-0 flex-2 flex-col rounded-xl border border-border-color bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
                     data-testid="group-statistics-role-matrix"
                   >
                     <div className="grid grid-cols-[minmax(0,1fr)_140px_140px] gap-3 border-b border-border-color px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-brand-text-sub">
@@ -613,9 +622,8 @@ export const GroupStatistics = ({
                     ) : (
                       <div className="app-scrollbar min-h-0 flex-1 overflow-y-auto">
                         {filteredColumns.map((column) => {
-                          const isGroupColumn = formValues.groupByColumns.includes(
-                            column.name,
-                          );
+                          const isGroupColumn =
+                            formValues.groupByColumns.includes(column.name);
                           const isStatColumn = formValues.statColumns.includes(
                             column.name,
                           );
@@ -640,7 +648,9 @@ export const GroupStatistics = ({
                                   {isGroupDisabled
                                     ? t("GroupStatistics.RoleHintFloatDisabled")
                                     : isStatDisabled
-                                      ? t("GroupStatistics.RoleHintAlreadyGroup")
+                                      ? t(
+                                          "GroupStatistics.RoleHintAlreadyGroup",
+                                        )
                                       : t("GroupStatistics.RoleHintAvailable")}
                                 </p>
                               </div>
@@ -678,6 +688,46 @@ export const GroupStatistics = ({
                       {groupByError ?? statColumnsError}
                     </div>
                   )}
+
+                  <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border-color bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
+                      <h3 className="text-sm font-semibold text-text-heading dark:text-gray-100">
+                        {t("GroupStatistics.StatisticsLabel")}
+                      </h3>
+                      <SelectAllBar
+                        selectAllLabel={t("GroupStatistics.SelectAll")}
+                        deselectAllLabel={t("GroupStatistics.DeselectAll")}
+                        onSelectAll={() =>
+                          form.setFieldValue(
+                            "statistics",
+                            ALL_STAT_TYPES as DescriptiveStatisticType[],
+                          )
+                        }
+                        onDeselectAll={() =>
+                          form.setFieldValue("statistics", [])
+                        }
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    <p className="mb-3 shrink-0 text-xs text-brand-text-sub">
+                      {t("GroupStatistics.Step2StatisticsHint")}
+                    </p>
+                    <div className="app-scrollbar min-h-0 flex-1 overflow-y-auto">
+                      <CheckboxTagGroup
+                        items={ALL_STAT_TYPES.map((stat) => ({
+                          value: stat,
+                          label: t(`DescriptiveStatistics.Stat_${stat}`),
+                        }))}
+                        checked={checkedStats}
+                        onToggle={(value) =>
+                          toggleStat(value as DescriptiveStatisticType)
+                        }
+                        disabled={isSubmitting}
+                        columns={2}
+                        error={statisticsError}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex min-h-0 flex-col gap-3">
@@ -729,44 +779,6 @@ export const GroupStatistics = ({
                           )}
                         </div>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="flex min-h-0 flex-col rounded-xl border border-border-color bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
-                      <h3 className="text-sm font-semibold text-text-heading dark:text-gray-100">
-                        {t("GroupStatistics.StatisticsLabel")}
-                      </h3>
-                      <SelectAllBar
-                        selectAllLabel={t("GroupStatistics.SelectAll")}
-                        deselectAllLabel={t("GroupStatistics.DeselectAll")}
-                        onSelectAll={() =>
-                          form.setFieldValue(
-                            "statistics",
-                            ALL_STAT_TYPES as DescriptiveStatisticType[],
-                          )
-                        }
-                        onDeselectAll={() => form.setFieldValue("statistics", [])}
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                    <p className="mb-3 text-xs text-brand-text-sub">
-                      {t("GroupStatistics.Step2StatisticsHint")}
-                    </p>
-                    <div className="app-scrollbar min-h-0 flex-1 overflow-y-auto">
-                      <CheckboxTagGroup
-                        items={ALL_STAT_TYPES.map((stat) => ({
-                          value: stat,
-                          label: t(`DescriptiveStatistics.Stat_${stat}`),
-                        }))}
-                        checked={checkedStats}
-                        onToggle={(value) =>
-                          toggleStat(value as DescriptiveStatisticType)
-                        }
-                        disabled={isSubmitting}
-                        columns={2}
-                        error={statisticsError}
-                      />
                     </div>
                   </div>
 

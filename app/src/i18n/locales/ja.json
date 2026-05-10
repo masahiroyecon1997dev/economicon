@@ -365,6 +365,14 @@
     "NoNumericColumns": "数値列がありません",
     "EmptyTitle": "グラフを表示するには列を選択してください",
     "EmptyDescription": "左のパネルでデータと軸の列を選択すると、ここにグラフが表示されます。",
+    "EmptyNeedTable": "まずデータを選択してください",
+    "EmptyNeedTableDesc": "左パネルの「データ」からテーブルを選んでください。",
+    "EmptyNeedXColumn": "X軸の列を選択してください",
+    "EmptyNeedXColumnDesc": "テーブルを選択したら、X軸に使う列を指定してください。",
+    "EmptyNeedYColumn": "Y軸の列を選択してください",
+    "EmptyNeedYColumnDesc": "散布図には X 軸と Y 軸の両方が必要です。",
+    "EmptyNeedYColumns": "Y軸の列を1つ以上選択してください",
+    "EmptyNeedYColumnsDesc": "折れ線グラフには少なくとも1つの Y 軸列が必要です。",
     "Loading": "グラフを生成中..."
   },
   "AnalysisEmptyState": {
@@ -503,7 +511,15 @@
     "MissingValueHandling": "欠損値の処理",
     "MissingValue_remove": "除外（リストワイズ）",
     "MissingValue_ignore": "そのまま使用",
-    "MissingValue_error": "エラーとして扱う"
+    "MissingValue_error": "エラーとして扱う",
+    "SelectVariable": "変数を選択",
+    "SE_tooltip_nonrobust": "均一分散を仮定した通常の OLS 標準誤差。一般的なベースラインです。",
+    "SE_tooltip_HC0": "不均一分散頑健な White (1980) 標準誤差。小標本補正なし。",
+    "SE_tooltip_HC1": "HC0 に自由度補正 (n/(n-k)) を加えた標準誤差。Stata の robust と同等。",
+    "SE_tooltip_HC2": "レバレッジを考慮した不均一分散頑健標準誤差。",
+    "SE_tooltip_HC3": "影響点に対してより保守的な頑健標準誤差。小標本で推奨。",
+    "SE_tooltip_hac": "系列相関と不均一分散の両方に頑健な Newey-West 型標準誤差。時系列データ向け。",
+    "SE_tooltip_cluster": "クラスター内の相関を許容するクラスター頑健標準誤差。"
   },
   "RegressionResult": {
     "AnalysisSummary": "分析概要",

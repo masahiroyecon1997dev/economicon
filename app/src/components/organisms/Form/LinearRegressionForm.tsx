@@ -6,6 +6,7 @@ import {
 } from "@/api/model";
 import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
 import { VariableSelectorField } from "@/components/molecules/Field/VariableSelectorField";
@@ -23,6 +24,7 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
+import { HelpCircle } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -139,6 +141,10 @@ export const LinearRegressionForm = ({
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
   const seMethod = useStore(form.store, (s) => s.values.standardErrorMethod);
+  const dependentVariable = useStore(
+    form.store,
+    (s) => s.values.dependentVariable,
+  );
   const [optionsOpen, setOptionsOpen] = useState(false);
 
   const handleTableSelect = (value: string) => {
@@ -202,27 +208,41 @@ export const LinearRegressionForm = ({
               <h2 className="mb-2 shrink-0 text-sm font-bold leading-tight text-text-heading">
                 {t("LinearRegressionForm.SelectVariables")}
               </h2>
-              <div className="flex min-h-0 flex-1 gap-3">
+              <div className="flex min-h-0 flex-1 flex-col gap-3">
                 <form.Field name="dependentVariable">
                   {(field) => (
-                    <VariableSelectorField
+                    <FormField
                       label={t("LinearRegressionForm.DependentVariable")}
-                      description={t(
-                        "LinearRegressionForm.DependentVariableDescription",
-                      )}
-                      mode="single"
-                      columns={columnList}
-                      selectedValue={field.state.value}
-                      onSingleChange={(v) => field.handleChange(v)}
+                      htmlFor="dependent-variable"
                       error={extractFieldError(field.state.meta.errors)}
-                      disabled={isSubmitting}
-                      name="dependentVariable"
-                      className="flex min-h-0 w-[33%] flex-col"
-                    />
+                    >
+                      <Select
+                        id="dependent-variable"
+                        value={field.state.value}
+                        onValueChange={(v) => {
+                          field.handleChange(v);
+                          const currentExp =
+                            form.store.state.values.explanatoryVariables;
+                          if (currentExp.includes(v)) {
+                            form.setFieldValue(
+                              "explanatoryVariables",
+                              currentExp.filter((x: string) => x !== v),
+                            );
+                          }
+                        }}
+                        disabled={isSubmitting}
+                        placeholder={t("LinearRegressionForm.SelectVariable")}
+                        error={extractFieldError(field.state.meta.errors)}
+                      >
+                        {columnList.map((col) => (
+                          <SelectItem key={col.name} value={col.name}>
+                            {col.name}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </FormField>
                   )}
                 </form.Field>
-
-                <div className="w-px shrink-0 bg-border-color" />
 
                 <form.Field name="explanatoryVariables">
                   {(field) => (
@@ -232,7 +252,9 @@ export const LinearRegressionForm = ({
                         "LinearRegressionForm.ExplanatoryVariablesDescription",
                       )}
                       mode="multiple"
-                      columns={columnList}
+                      columns={columnList.filter(
+                        (col) => col.name !== dependentVariable,
+                      )}
                       selectedValues={field.state.value}
                       onMultipleChange={(v) => field.handleChange(v)}
                       error={extractFieldError(field.state.meta.errors)}
@@ -273,10 +295,32 @@ export const LinearRegressionForm = ({
                 {/* 標準誤差 */}
                 <form.Field name="standardErrorMethod">
                   {(field) => (
-                    <FormField
-                      label={t("LinearRegressionForm.StandardErrorMethod")}
-                      htmlFor="standard-error-method"
-                    >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1">
+                        <label
+                          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                          htmlFor="standard-error-method"
+                        >
+                          {t("LinearRegressionForm.StandardErrorMethod")}
+                        </label>
+                        <Tooltip
+                          content={t(
+                            `LinearRegressionForm.SE_tooltip_${seMethod}`,
+                          )}
+                          position="right"
+                          maxWidth={240}
+                        >
+                          <button
+                            type="button"
+                            className="text-brand-text-sub hover:text-brand-text-main"
+                            aria-label={t(
+                              "LinearRegressionForm.StandardErrorMethod",
+                            )}
+                          >
+                            <HelpCircle className="h-3.5 w-3.5" />
+                          </button>
+                        </Tooltip>
+                      </div>
                       <Select
                         id="standard-error-method"
                         value={field.state.value}
@@ -297,7 +341,7 @@ export const LinearRegressionForm = ({
                           {t("LinearRegressionForm.StandardError_cluster")}
                         </SelectItem>
                       </Select>
-                    </FormField>
+                    </div>
                   )}
                 </form.Field>
 

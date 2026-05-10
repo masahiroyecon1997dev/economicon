@@ -365,6 +365,14 @@
     "NoNumericColumns": "No numeric columns available",
     "EmptyTitle": "Select columns to display chart",
     "EmptyDescription": "Choose data and axis columns in the left panel to render a chart here.",
+    "EmptyNeedTable": "Select a dataset first",
+    "EmptyNeedTableDesc": "Choose a table from the Data selector on the left panel.",
+    "EmptyNeedXColumn": "Select the X-axis column",
+    "EmptyNeedXColumnDesc": "Pick a column for the X axis to proceed.",
+    "EmptyNeedYColumn": "Select the Y-axis column",
+    "EmptyNeedYColumnDesc": "Scatter plots require both X and Y axis columns.",
+    "EmptyNeedYColumns": "Select at least one Y-axis column",
+    "EmptyNeedYColumnsDesc": "Line charts need at least one Y-axis column to render.",
     "Loading": "Rendering chart..."
   },
   "AnalysisEmptyState": {
@@ -503,7 +511,15 @@
     "MissingValueHandling": "Missing Value Handling",
     "MissingValue_remove": "Remove (Listwise)",
     "MissingValue_ignore": "Ignore",
-    "MissingValue_error": "Error"
+    "MissingValue_error": "Error",
+    "SelectVariable": "Select variable",
+    "SE_tooltip_nonrobust": "Standard OLS standard errors assuming homoskedasticity. Use as the baseline.",
+    "SE_tooltip_HC0": "White (1980) heteroskedasticity-robust SE without small-sample correction.",
+    "SE_tooltip_HC1": "HC0 with degrees-of-freedom correction (n/(n\u2212k)). Equivalent to Stata \u2018robust\u2019.",
+    "SE_tooltip_HC2": "Heteroskedasticity-robust SE accounting for leverage.",
+    "SE_tooltip_HC3": "More conservative robust SE for influential observations. Recommended for small samples.",
+    "SE_tooltip_hac": "Newey-West SE robust to both autocorrelation and heteroskedasticity. Use for time-series data.",
+    "SE_tooltip_cluster": "Cluster-robust SE allowing for within-cluster correlation."
   },
   "RegressionResult": {
     "AnalysisSummary": "Analysis Summary",

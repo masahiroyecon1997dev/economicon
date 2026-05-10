@@ -291,6 +291,37 @@ export const ChartView = ({
   }, []);
 
   // ---------------------------------------------------------------------------
+  // Render helpers
+  // ---------------------------------------------------------------------------
+
+  const emptyHint = (() => {
+    if (!tableName)
+      return {
+        title: t("ChartView.EmptyNeedTable"),
+        description: t("ChartView.EmptyNeedTableDesc"),
+      };
+    if (!xColumn)
+      return {
+        title: t("ChartView.EmptyNeedXColumn"),
+        description: t("ChartView.EmptyNeedXColumnDesc"),
+      };
+    if (chartType === "scatter" && !yColumn)
+      return {
+        title: t("ChartView.EmptyNeedYColumn"),
+        description: t("ChartView.EmptyNeedYColumnDesc"),
+      };
+    if (chartType === "line" && yColumns.length === 0)
+      return {
+        title: t("ChartView.EmptyNeedYColumns"),
+        description: t("ChartView.EmptyNeedYColumnsDesc"),
+      };
+    return {
+      title: t("ChartView.EmptyTitle"),
+      description: t("ChartView.EmptyDescription"),
+    };
+  })();
+
+  // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
 
@@ -458,8 +489,8 @@ export const ChartView = ({
                 <AnalysisEmptyState
                   testId="chart-view-empty"
                   icon={<BarChart2 className="h-10 w-10" />}
-                  title={t("ChartView.EmptyTitle")}
-                  description={t("ChartView.EmptyDescription")}
+                  title={emptyHint.title}
+                  description={emptyHint.description}
                   className="max-w-xs"
                 />
               </div>
