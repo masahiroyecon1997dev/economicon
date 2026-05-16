@@ -2,7 +2,7 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { SaveData } from "@/components/pages/SaveData";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useFilesStore } from "@/stores/files";
 import { useSettingsStore } from "@/stores/settings";
 import { useTableInfosStore } from "@/stores/tableInfos";

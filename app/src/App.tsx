@@ -5,7 +5,7 @@ import {
 } from "@/api/bridge/tauri-commands";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useLoadingStore } from "@/stores/loading";
 import { useSettingsStore } from "@/stores/settings";
 import { useTableListStore } from "@/stores/tableList";

@@ -9,7 +9,7 @@ import {
   extractApiErrorMessage,
   getResponseErrorMessage,
 } from "@/lib/utils/apiError";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { useState } from "react";

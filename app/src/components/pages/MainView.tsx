@@ -1,7 +1,7 @@
 import { ImportDataFile } from "@/components/pages/ImportDataFile";
 import { SaveData } from "@/components/pages/SaveData";
 import { WorkspaceSurface } from "@/components/pages/WorkspaceSurface";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 
 export const MainView = () => {
   const currentView = useCurrentPageStore((state) => state.currentView);

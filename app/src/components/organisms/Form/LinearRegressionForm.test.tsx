@@ -2,7 +2,7 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import {

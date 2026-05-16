@@ -1,5 +1,5 @@
-import type { CurrentPageValue, ShellPageValue } from "@/stores/currentView";
-import { useCurrentPageStore } from "@/stores/currentView";
+import type { CurrentPageValue, ShellPageValue } from "@/stores/currentPage";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { beforeEach, describe, expect, it } from "vitest";
 
 beforeEach(() => {

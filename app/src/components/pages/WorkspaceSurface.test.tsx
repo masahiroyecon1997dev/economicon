@@ -1,7 +1,7 @@
 import { WorkspaceSurface } from "@/components/pages/WorkspaceSurface";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";

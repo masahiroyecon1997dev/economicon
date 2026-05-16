@@ -10,7 +10,7 @@ import { buildCaughtErrorMessage } from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
 import { getTableInfo } from "@/lib/utils/internal";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useLoadingStore } from "@/stores/loading";
 import { useTableChunkStore } from "@/stores/tableChunkStore";
 import { useTableInfosStore } from "@/stores/tableInfos";

@@ -2,7 +2,7 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { CorrelationMethod, MissingHandlingMethod } from "@/api/model";
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";

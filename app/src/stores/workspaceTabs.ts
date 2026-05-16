@@ -1,5 +1,5 @@
 import type { AnalysisResultDetail } from "@/api/model";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import type { ZodType } from "zod";
 import { create } from "zustand";
 

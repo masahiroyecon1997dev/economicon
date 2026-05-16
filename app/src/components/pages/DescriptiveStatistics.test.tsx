@@ -3,7 +3,7 @@ import { DescriptiveStatisticType } from "@/api/model";
 import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { render, screen, waitFor } from "@testing-library/react";

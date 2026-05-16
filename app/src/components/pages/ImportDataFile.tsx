@@ -21,7 +21,7 @@ import {
 } from "@/lib/utils/apiError";
 import type { ImportConfigSettings } from "@/lib/utils/importSchema";
 import { getTableInfo } from "@/lib/utils/internal";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useFilesStore } from "@/stores/files";
 import { LOADING_DELAY_DIR, useLoadingStore } from "@/stores/loading";
 import { useSettingsStore } from "@/stores/settings";

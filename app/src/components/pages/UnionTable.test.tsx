@@ -1,7 +1,7 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { UnionTable as UnionTablePage } from "@/components/pages/UnionTable";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { render, screen, waitFor } from "@testing-library/react";

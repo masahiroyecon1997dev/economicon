@@ -10,7 +10,7 @@ import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { buildCaughtErrorMessage } from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { ColumnType } from "@/types/commonTypes";

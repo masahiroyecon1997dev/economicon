@@ -1,7 +1,7 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";

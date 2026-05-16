@@ -7,7 +7,7 @@ import {
 } from "@/api/bridge/tauri-commands";
 import { ImportDataFile } from "@/components/pages/ImportDataFile";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useFilesStore } from "@/stores/files";
 import { useSettingsStore } from "@/stores/settings";
 import { render, screen, waitFor } from "@testing-library/react";

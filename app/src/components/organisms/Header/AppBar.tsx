@@ -6,7 +6,7 @@ import { SettingsDialog } from "@/components/organisms/Dialog/SettingsDialog";
 import { WindowControls } from "@/components/organisms/Header/WindowControls";
 import { WORK_TAB_ENTRIES } from "@/constants/workspaceTabs";
 import { cn } from "@/lib/utils/helpers";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useSettingsStore } from "@/stores/settings";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { DropmenuPositionType } from "@/types/commonTypes";
