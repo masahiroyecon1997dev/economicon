@@ -100,7 +100,8 @@ export const ChartView = ({
   const { t } = useTranslation();
   const tableList = useTableListStore((s) => s.tableList);
   const initialTableName = useTableInfosStore((s) => s.activeTableName) ?? "";
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const navigateToShell = useCurrentPageStore((s) => s.navigateToShell);
+  const navigateToWorkspace = useCurrentPageStore((s) => s.navigateToWorkspace);
 
   // Form state (no submission — pure visualization)
   const [tableName, setTableName] = useState(initialTableName);
@@ -165,7 +166,7 @@ export const ChartView = ({
       void onCancel();
       return;
     }
-    setCurrentView("DataPreview");
+    navigateToWorkspace();
   };
 
   // ---------------------------------------------------------------------------
@@ -334,7 +335,7 @@ export const ChartView = ({
         <AnalysisNoTablesState
           className="flex-1"
           onCancel={handleCancel}
-          onSelect={() => setCurrentView("ImportDataFile")}
+          onSelect={() => navigateToShell("ImportDataFile")}
         />
       ) : (
         <div className="flex min-h-0 flex-1 gap-3">

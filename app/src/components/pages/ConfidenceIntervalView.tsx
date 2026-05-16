@@ -1,6 +1,6 @@
 import { ConfidenceIntervalForm } from "@/components/organisms/Form/ConfidenceIntervalForm";
 import { PageLayout } from "@/components/templates/PageLayout";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 
 type ConfidenceIntervalViewProps = {
   className?: string;
@@ -9,15 +9,11 @@ type ConfidenceIntervalViewProps = {
 export const ConfidenceIntervalView = ({
   className: _className,
 }: ConfidenceIntervalViewProps) => {
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
-
-  const handleCancel = () => {
-    setCurrentView("DataPreview");
-  };
+  const closeActiveWorkTab = useWorkspaceTabsStore((s) => s.closeActiveWorkTab);
 
   return (
     <PageLayout>
-      <ConfidenceIntervalForm onCancel={handleCancel} />
+      <ConfidenceIntervalForm onCancel={closeActiveWorkTab} />
     </PageLayout>
   );
 };

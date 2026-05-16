@@ -24,7 +24,6 @@ import {
 } from "@/lib/utils/apiError";
 import { createFieldError } from "@/lib/utils/formHelpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
@@ -48,8 +47,10 @@ export const LinearRegressionForm = ({
       numericOnly: false,
       autoLoadOnMount: true,
     });
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
 
   const form = useForm({
     defaultValues: {
@@ -104,9 +105,9 @@ export const LinearRegressionForm = ({
           const resultResponse = await api.getAnalysisResult(resultId);
           if (resultResponse.code === "OK" && resultResponse.result) {
             const detail: AnalysisResultDetail = resultResponse.result;
+            closeActiveWorkTab();
             openResultTab(detail);
             await useAnalysisResultsStore.getState().fetchSummaries();
-            setCurrentView("DataPreview");
             return;
           }
           await showMessageDialog(

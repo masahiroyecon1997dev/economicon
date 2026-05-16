@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import {
   getAuthToken,
   getFilesSafe,
@@ -11,12 +9,9 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useLoadingStore } from "@/stores/loading";
 import { useSettingsStore } from "@/stores/settings";
 import { useTableListStore } from "@/stores/tableList";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
-import {
-  Panel,
-  Group as PanelGroup,
-  Separator as PanelResizeHandle,
-} from "react-resizable-panels";
 import { ConfirmDialog } from "@/components/molecules/Dialog/ConfirmDialog";
 import { MessageDialog } from "@/components/molecules/Dialog/MessageDialog";
 import { LoadingOverlay } from "@/components/molecules/Loading/LoadingOverlay";
@@ -24,13 +19,18 @@ import { AppBar } from "@/components/organisms/Header/AppBar";
 import { LeftSideMenu } from "@/components/pages/LeftSideMenu";
 import { MainView } from "@/components/pages/MainView";
 import { useFilesStore } from "@/stores/files";
+import {
+  Panel,
+  Group as PanelGroup,
+  Separator as PanelResizeHandle,
+} from "react-resizable-panels";
 
 export const App = () => {
   const { t } = useTranslation();
   const setSettings = useSettingsStore((state) => state.setSettings);
   const setOsInfo = useSettingsStore((state) => state.setOsInfo);
   const setTableList = useTableListStore((state) => state.setTableList);
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
   const setFiles = useFilesStore((state) => state.setFiles);
   const { isLoading, loadingMessage } = useLoadingStore();
   const { setLoading, clearLoading } = useLoadingStore();
@@ -131,7 +131,7 @@ export const App = () => {
         // 全て成功した場合のみストアを更新
         if (isMounted) {
           setSettings(apiSettings);
-          setCurrentView("ImportDataFile");
+          navigateToShell("ImportDataFile");
           setTableList(resGetTableNames.result.tableNameList);
           setFiles(files);
           clearLoading();
@@ -157,7 +157,7 @@ export const App = () => {
     };
   }, [
     clearLoading,
-    setCurrentView,
+    navigateToShell,
     setFiles,
     setLoading,
     setOsInfo,

@@ -1,7 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import { SaveData } from "@/components/pages/SaveData";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useCurrentPageStore } from "@/stores/currentView";
@@ -9,7 +7,9 @@ import { useFilesStore } from "@/stores/files";
 import { useSettingsStore } from "@/stores/settings";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
-import { SaveData } from "@/components/pages/SaveData";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -114,8 +114,7 @@ describe("SaveData コンポーネント", () => {
 
   describe("上書き確認", () => {
     it("既存ファイルあり + 確認でキャンセル → 保存されない", async () => {
-      const { checkFileExists } =
-        await import("@/api/bridge/tauri-commands");
+      const { checkFileExists } = await import("@/api/bridge/tauri-commands");
       vi.mocked(checkFileExists).mockResolvedValue(true);
       vi.mocked(showConfirmDialog).mockResolvedValue(false);
 
@@ -138,8 +137,7 @@ describe("SaveData コンポーネント", () => {
     });
 
     it("既存ファイルあり + 確認でOK → exportFile を呼ぶ", async () => {
-      const { checkFileExists } =
-        await import("@/api/bridge/tauri-commands");
+      const { checkFileExists } = await import("@/api/bridge/tauri-commands");
       vi.mocked(checkFileExists).mockResolvedValue(true);
       vi.mocked(showConfirmDialog).mockResolvedValue(true);
       mockApi.exportFile.mockResolvedValue({
@@ -166,7 +164,7 @@ describe("SaveData コンポーネント", () => {
   });
 
   describe("API成功時", () => {
-    it("exportFile が OK → 成功ダイアログ表示 → DataPreview に遷移する", async () => {
+    it("exportFile が OK → 成功ダイアログ表示 → Workspace に遷移する", async () => {
       mockApi.exportFile.mockResolvedValue({
         code: "OK",
         result: { filePath: "/tmp/output.csv" },
@@ -189,7 +187,7 @@ describe("SaveData コンポーネント", () => {
           expect.stringContaining("SaveDataView.SaveSuccess"),
         );
       });
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
   });
 
@@ -243,14 +241,14 @@ describe("SaveData コンポーネント", () => {
   });
 
   describe("キャンセル", () => {
-    it("キャンセルボタンをクリックすると DataPreview に遷移する", async () => {
+    it("キャンセルボタンをクリックすると Workspace に遷移する", async () => {
       const user = userEvent.setup();
       render(<SaveData />);
 
       const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
       await user.click(cancelBtn);
 
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
 
     it("テーブルなし時のキャンセルは ImportDataFile に遷移する", async () => {

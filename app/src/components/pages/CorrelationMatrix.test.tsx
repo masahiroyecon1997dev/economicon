@@ -99,7 +99,7 @@ beforeEach(() => {
     tableInfos: [],
     activeTableName: null,
   });
-  useCurrentPageStore.setState({ currentView: "CorrelationMatrix" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
   useWorkspaceTabsStore.setState({
     tabs: [],
     activeTabId: null,
@@ -160,7 +160,7 @@ describe("CorrelationMatrix フォーム", () => {
       await submitForm();
 
       await waitFor(() => {
-        // テーブル未選択エラーと出力名エラーが出る
+        // テーブル未選択エラーと出力名エラーが表示される
         expect(
           screen.getAllByText(/ErrorDataRequired|ErrorOutputNameRequired/),
         ).toBeTruthy();
@@ -186,7 +186,7 @@ describe("CorrelationMatrix フォーム", () => {
       });
     });
 
-    it("詳細オプションを2回クリックすると折りたたまれる", async () => {
+    it("詳細オプションボタンを再度クリックすると折りたたまれる", async () => {
       const user = userEvent.setup();
       render(<CorrelationMatrix />);
 
@@ -203,7 +203,7 @@ describe("CorrelationMatrix フォーム", () => {
   });
 
   describe("API成功時", () => {
-    it("createCorrelationTable が OK → DataPreview へ遷移する", async () => {
+    it("createCorrelationTable が OK → Workspace へ遷移する", async () => {
       mockApi.createCorrelationTable.mockResolvedValue({
         code: "OK",
         result: { tableName: "corr_result" },
@@ -222,12 +222,12 @@ describe("CorrelationMatrix フォーム", () => {
       await waitFor(() => {
         expect(mockApi.createCorrelationTable).toHaveBeenCalledTimes(1);
       });
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
       expect(useTableListStore.getState().tableList).toContain("corr_result");
       expect(vi.mocked(showMessageDialog)).not.toHaveBeenCalled();
     });
 
-    it("work tab モードでは成功時に onSuccess を呼び、dirty を false に戻す", async () => {
+    it("work tab モードでは成功時に onSuccess を呼び、dirty が false に戻る", async () => {
       mockApi.createCorrelationTable.mockResolvedValue({
         code: "OK",
         result: { tableName: "corr_result" },
@@ -355,15 +355,15 @@ describe("CorrelationMatrix フォーム", () => {
   });
 
   describe("キャンセル", () => {
-    it("キャンセルボタンをクリックすると DataPreview に遷移する", async () => {
+    it("キャンセルボタンをクリックすると Workspace に遷移する", async () => {
       const user = userEvent.setup();
-      useCurrentPageStore.setState({ currentView: "CorrelationMatrix" });
+      useCurrentPageStore.setState({ currentView: "Workspace" });
       render(<CorrelationMatrix />);
 
       const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
       await user.click(cancelBtn);
 
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
 
     it("work tab モードではキャンセル時に onCancel を呼ぶ", async () => {

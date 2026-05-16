@@ -17,9 +17,9 @@ import {
 } from "@/lib/utils/apiError";
 import { cn, generateId } from "@/lib/utils/helpers";
 import { getTableInfo } from "@/lib/utils/internal";
-import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { ColumnType } from "@/types/commonTypes";
 import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
 import { useState } from "react";
@@ -38,7 +38,7 @@ export const JoinTable = () => {
   const tableList = useTableListStore((s) => s.tableList);
   const addTableName = useTableListStore((s) => s.addTableName);
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const closeActiveWorkTab = useWorkspaceTabsStore((s) => s.closeActiveWorkTab);
 
   const [leftTable, setLeftTable] = useState("");
   const [rightTable, setRightTable] = useState("");
@@ -177,7 +177,7 @@ export const JoinTable = () => {
         const tableInfo = await getTableInfo(newTableName.trim());
         addTableName(newTableName.trim());
         addTableInfo(tableInfo);
-        setCurrentView("DataPreview");
+        closeActiveWorkTab();
       } else {
         await showMessageDialog(
           t("Error.Error"),
@@ -388,7 +388,7 @@ export const JoinTable = () => {
         selectText={
           isSubmitting ? t("JoinTable.Processing") : t("JoinTable.RunJoin")
         }
-        onCancel={() => setCurrentView("DataPreview")}
+        onCancel={closeActiveWorkTab}
         onSelect={handleSubmit}
         isLoading={isSubmitting}
       />

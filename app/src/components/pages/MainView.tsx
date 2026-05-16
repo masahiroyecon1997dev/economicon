@@ -1,26 +1,7 @@
 import { ImportDataFile } from "@/components/pages/ImportDataFile";
 import { SaveData } from "@/components/pages/SaveData";
 import { WorkspaceSurface } from "@/components/pages/WorkspaceSurface";
-import type { CurrentPageValue } from "@/stores/currentView";
 import { useCurrentPageStore } from "@/stores/currentView";
-
-const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
-  ImportDataFile: <ImportDataFile />,
-  JoinTable: <WorkspaceSurface />,
-  UnionTable: <WorkspaceSurface />,
-  ChartView: <WorkspaceSurface />,
-  DescriptiveStatistics: <WorkspaceSurface />,
-  StatisticalTestView: <WorkspaceSurface />,
-  CorrelationMatrix: <WorkspaceSurface />,
-  GroupStatistics: <WorkspaceSurface />,
-  ConfidenceIntervalView: <WorkspaceSurface />,
-  LinearRegressionForm: <WorkspaceSurface />,
-  CreateSimulationDataTable: <WorkspaceSurface />,
-  CalculationView: <WorkspaceSurface />,
-  SaveData: <SaveData />,
-  AnalysisResultPreview: <WorkspaceSurface />,
-  DataPreview: <WorkspaceSurface />,
-};
 
 export const MainView = () => {
   const currentView = useCurrentPageStore((state) => state.currentView);
@@ -28,7 +9,9 @@ export const MainView = () => {
   return (
     <main className="flex-1 flex flex-col overflow-hidden h-full bg-brand-secondary">
       <div className="flex-1 overflow-hidden p-2 flex flex-col min-h-0">
-        {PAGE_COMPONENTS[currentView]}
+        {currentView === "ImportDataFile" && <ImportDataFile />}
+        {currentView === "SaveData" && <SaveData />}
+        {currentView === "Workspace" && <WorkspaceSurface />}
       </div>
     </main>
   );

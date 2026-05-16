@@ -365,7 +365,7 @@ describe("ImportDataFile コンポーネント", () => {
       const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
       await user.click(cancelBtn);
 
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
   });
 });

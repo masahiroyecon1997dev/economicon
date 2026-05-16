@@ -1,12 +1,12 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import { JoinTable } from "@/components/pages/JoinTable";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
-import { JoinTable } from "@/components/pages/JoinTable";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -52,7 +52,7 @@ beforeEach(() => {
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales", "inventory"] });
   useTableInfosStore.setState({ tableInfos: [], activeTableName: null });
-  useCurrentPageStore.setState({ currentView: "JoinTable" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
 
   // テーブル選択時のカラムリスト取得モック
   mockApi.getColumnList.mockImplementation(
@@ -84,9 +84,9 @@ describe("JoinTable フォーム", () => {
       expect(screen.getByText("JoinTable.Title")).toBeInTheDocument();
     });
 
-    it("初期状態でキーペアが1行存在する", () => {
+    it("初期状態でキーペア行が存在する", () => {
       render(<JoinTable />);
-      // キーペア行のSelect要素（左右それぞれ）が初期2つ表示される
+      // キーペア行とSelect要素が左右それぞれ初期2つ表示されることを確認
       const combos = screen.getAllByRole("combobox");
       // 左テーブル + 右テーブル + 結合タイプ + キーペア左 + キーペア右 の Select
       expect(combos.length).toBeGreaterThanOrEqual(2);
@@ -131,7 +131,7 @@ describe("JoinTable フォーム", () => {
 
       // 出力名を空にする
       const newTableNameInput =
-        screen.getByPlaceholderText(/NewDataName|新しいデータ名/i);
+        screen.getByPlaceholderText(/NewDataName|新しいテーブル名/i);
       await user.clear(newTableNameInput);
 
       const submitBtn = screen.getByRole("button", {
@@ -194,7 +194,7 @@ describe("JoinTable フォーム", () => {
   });
 
   describe("API成功時", () => {
-    it("createJoinTable が OK → DataPreview に遷移する", async () => {
+    it("createJoinTable がOK → Workspace に遷移する", async () => {
       mockApi.createJoinTable.mockResolvedValue({
         code: "OK",
         result: { tableName: "sales_inventory_joined" },
@@ -232,7 +232,7 @@ describe("JoinTable フォーム", () => {
       await waitFor(() => {
         expect(mockApi.createJoinTable).toHaveBeenCalledTimes(1);
       });
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
   });
 
@@ -277,14 +277,14 @@ describe("JoinTable フォーム", () => {
   });
 
   describe("キャンセル", () => {
-    it("キャンセルボタンをクリックすると DataPreview に遷移する", async () => {
+    it("キャンセルボタンをクリックすると Workspace に遷移する", async () => {
       const user = userEvent.setup();
       render(<JoinTable />);
 
       const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
       await user.click(cancelBtn);
 
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
   });
 });

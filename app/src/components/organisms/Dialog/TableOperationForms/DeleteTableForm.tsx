@@ -36,7 +36,7 @@ export const DeleteTableForm = ({
   const setTableList = useTableListStore((s) => s.setTableList);
   const removeTableInfo = useTableInfosStore((s) => s.removeTableInfo);
   const activeTableName = useTableInfosStore((s) => s.activeTableName);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const navigateToShell = useCurrentPageStore((s) => s.navigateToShell);
 
   const handleDelete = async () => {
     setIsSubmitting(true);
@@ -54,7 +54,7 @@ export const DeleteTableForm = ({
         // アクティブなテーブルが削除された場合はファイル選択画面へ
         if (activeTableName === tableName) {
           useTableInfosStore.setState({ activeTableName: null });
-          setCurrentView("ImportDataFile");
+          navigateToShell("ImportDataFile");
         }
         onSuccess();
       } else {

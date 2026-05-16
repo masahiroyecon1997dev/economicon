@@ -87,7 +87,8 @@ export const GroupStatistics = ({
   const addTableName = useTableListStore((s) => s.addTableName);
   const initialTableName = useTableInfosStore((s) => s.activeTableName) ?? "";
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const navigateToShell = useCurrentPageStore((s) => s.navigateToShell);
+  const navigateToWorkspace = useCurrentPageStore((s) => s.navigateToWorkspace);
   const ensureWorkTabState = useWorkspaceTabsStore((s) => s.ensureWorkTabState);
   const updateWorkTabDraft = useWorkspaceTabsStore((s) => s.updateWorkTabDraft);
   const commitWorkTab = useWorkspaceTabsStore((s) => s.commitWorkTab);
@@ -181,7 +182,7 @@ export const GroupStatistics = ({
           if (onSuccess) {
             onSuccess(resp.result.tableName);
           } else {
-            setCurrentView("DataPreview");
+            navigateToWorkspace();
           }
         } else {
           await showMessageDialog(
@@ -309,7 +310,7 @@ export const GroupStatistics = ({
       void onCancel();
       return;
     }
-    setCurrentView("DataPreview");
+    navigateToWorkspace();
   };
 
   const tErr = createFieldError(t);
@@ -340,7 +341,7 @@ export const GroupStatistics = ({
         <AnalysisNoTablesState
           className="flex-1"
           onCancel={handleCancel}
-          onSelect={() => setCurrentView("ImportDataFile")}
+          onSelect={() => navigateToShell("ImportDataFile")}
         />
       ) : (
         <form

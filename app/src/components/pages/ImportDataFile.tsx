@@ -79,7 +79,9 @@ export const ImportDataFile = () => {
   const setFiles = useFilesStore((state) => state.setFiles);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
   const addTableList = useTableListStore((state) => state.addTableName);
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToWorkspace = useCurrentPageStore(
+    (state) => state.navigateToWorkspace,
+  );
 
   const { setLoading, clearLoading } = useLoadingStore();
 
@@ -375,7 +377,7 @@ export const ImportDataFile = () => {
         const resTableInfo = await getTableInfo(loadTableName);
         addTableList(loadTableName);
         addTableInfo(resTableInfo);
-        setCurrentView("DataPreview");
+        navigateToWorkspace();
       }
     } catch (e: unknown) {
       console.error(e);
@@ -444,7 +446,7 @@ export const ImportDataFile = () => {
     }
   };
 
-  const handleCancel = () => setCurrentView("DataPreview");
+  const handleCancel = () => navigateToWorkspace();
 
   const canRenderDeleteAction = (file: FileType) => {
     return file.isFile && isSupportedImportFile(file.name);

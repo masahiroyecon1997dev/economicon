@@ -164,7 +164,7 @@ beforeEach(() => {
   });
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales"] });
-  useCurrentPageStore.setState({ currentView: "LinearRegressionForm" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
   useWorkspaceTabsStore.setState({ tabs: [], activeTabId: null });
   useAnalysisResultsStore.setState({
     pane: "data",
@@ -267,7 +267,7 @@ describe("LinearRegressionForm", () => {
         expect(mockApi.getAnalysisResult).toHaveBeenCalledWith("r-001");
       });
       expect(vi.mocked(showMessageDialog)).not.toHaveBeenCalled();
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
       expect(useWorkspaceTabsStore.getState().activeTabId).toBe("result:r-001");
     });
   });

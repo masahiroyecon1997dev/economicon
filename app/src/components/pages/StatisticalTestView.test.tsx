@@ -66,7 +66,7 @@ const mockGetAnalysisResult = vi.fn();
 
 beforeEach(() => {
   vi.clearAllMocks();
-  useCurrentPageStore.setState({ currentView: "StatisticalTestView" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
   useTableListStore.setState({ tableList: ["sales", "orders"] });
   useTableInfosStore.setState({
     tableInfos: [
@@ -139,15 +139,13 @@ beforeEach(() => {
 });
 
 describe("StatisticalTestView", () => {
-  it("テーブルが 0 件なら NoTables state を表示し、ImportDataFile に遷移できる", async () => {
+  it("テーブルが 0 件の場合 NoTables state を表示し、ImportDataFile に遷移できる", async () => {
     const user = userEvent.setup();
     useTableListStore.setState({ tableList: [] });
 
     render(<StatisticalTestView />);
 
-    expect(
-      screen.getByTestId("analysis-no-tables-state"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("analysis-no-tables-state")).toBeInTheDocument();
 
     await user.click(
       screen.getByRole("button", {
@@ -155,9 +153,7 @@ describe("StatisticalTestView", () => {
       }),
     );
 
-    expect(useCurrentPageStore.getState().currentView).toBe(
-      "ImportDataFile",
-    );
+    expect(useCurrentPageStore.getState().currentView).toBe("ImportDataFile");
   });
 
   it("対象列がないサンプルでは共通 no-columns state を表示する", async () => {
@@ -187,7 +183,7 @@ describe("StatisticalTestView", () => {
     });
   });
 
-  it("成功時は分析結果タブを開いて DataPreview に戻る", async () => {
+  it("成功時に結果タブを開いて Workspace に戻る", async () => {
     const user = userEvent.setup();
     render(<StatisticalTestView />);
 
@@ -216,7 +212,7 @@ describe("StatisticalTestView", () => {
       expect(useWorkspaceTabsStore.getState().activeTabId).toBe(
         "result:stat-test-id",
       );
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
   });
 });

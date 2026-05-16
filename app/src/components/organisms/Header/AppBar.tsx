@@ -43,7 +43,7 @@ type AppBarMenuType = {
 export const AppBar = () => {
   const { t } = useTranslation();
   const osName = useSettingsStore((s) => s.osName);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const navigateToShell = useCurrentPageStore((s) => s.navigateToShell);
   const openWorkTab = useWorkspaceTabsStore((s) => s.openWorkTab);
   const [isMaximized, setIsMaximized] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -191,7 +191,6 @@ export const AppBar = () => {
     title: string,
   ) => {
     openWorkTab(featureKey, title);
-    setCurrentView(featureKey);
     close();
   };
 
@@ -206,7 +205,7 @@ export const AppBar = () => {
           id: "import",
           label: t("HeaderMenu.ImportData"),
           handleSelect: () => {
-            setCurrentView("ImportDataFile");
+            navigateToShell("ImportDataFile");
             close();
           },
         },
@@ -214,7 +213,7 @@ export const AppBar = () => {
           id: "save",
           label: t("HeaderMenu.SaveData"),
           handleSelect: () => {
-            setCurrentView("SaveData");
+            navigateToShell("SaveData");
             close();
           },
         },

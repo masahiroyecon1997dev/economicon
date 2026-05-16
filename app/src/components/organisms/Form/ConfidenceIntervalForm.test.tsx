@@ -90,7 +90,7 @@ beforeEach(() => {
     { name: "quantity", type: "Int64" },
   ];
   mockTableLoader.isLoading = false;
-  useCurrentPageStore.setState({ currentView: "ConfidenceIntervalView" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
   useTableListStore.setState({ tableList: ["sales", "orders"] });
 
   vi.mocked(getEconomiconAppAPI).mockReturnValue({

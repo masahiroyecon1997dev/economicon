@@ -297,8 +297,14 @@ export const StatisticalTestView = ({
   const tableList = useTableListStore((state) => state.tableList);
   const initialTableName =
     useTableInfosStore((state) => state.activeTableName) ?? "";
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
+  const navigateToWorkspace = useCurrentPageStore(
+    (state) => state.navigateToWorkspace,
+  );
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
   const ensureWorkTabState = useWorkspaceTabsStore(
     (state) => state.ensureWorkTabState,
   );
@@ -398,7 +404,7 @@ export const StatisticalTestView = ({
       void onCancel();
       return;
     }
-    setCurrentView("DataPreview");
+    navigateToWorkspace();
   };
 
   const clearErrors = () => {
@@ -517,9 +523,9 @@ export const StatisticalTestView = ({
           if (workTabId) {
             commitWorkTab(workTabId, values);
           }
+          closeActiveWorkTab();
           openResultTab(detailResponse.result);
           await useAnalysisResultsStore.getState().fetchSummaries();
-          setCurrentView("DataPreview");
           return;
         }
 
@@ -551,7 +557,7 @@ export const StatisticalTestView = ({
         <AnalysisNoTablesState
           className="flex-1"
           onCancel={handleCancel}
-          onSelect={() => setCurrentView("ImportDataFile")}
+          onSelect={() => navigateToShell("ImportDataFile")}
         />
       ) : (
         <form

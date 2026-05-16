@@ -1,12 +1,12 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import { UnionTable as UnionTablePage } from "@/components/pages/UnionTable";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
-import { UnionTable as UnionTablePage } from "@/components/pages/UnionTable";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -45,7 +45,7 @@ beforeEach(() => {
     tableList: ["sales_q1", "sales_q2", "sales_q3"],
   });
   useTableInfosStore.setState({ tableInfos: [], activeTableName: null });
-  useCurrentPageStore.setState({ currentView: "UnionTable" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
 
   mockApi.getColumnList.mockResolvedValue({
     code: "OK",
@@ -90,9 +90,9 @@ describe("UnionTable フォーム", () => {
 
     it("初期状態ではテーブルが追加されていない", () => {
       render(<UnionTablePage />);
-      // 追加済みテーブルのバッジが0個
+      // 追加済みテーブルのバッジが存在しないことを確認
       const removeBtns = screen.queryAllByRole("button", {
-        name: /RemoveTable|削除/i,
+        name: /UnionTable.RemoveData|削除/i,
       });
       expect(removeBtns).toHaveLength(0);
     });
@@ -110,7 +110,7 @@ describe("UnionTable フォーム", () => {
       });
     });
 
-    it("同じテーブルは重複追加されない", async () => {
+    it("同じテーブルは重複して追加されない", async () => {
       const user = userEvent.setup();
       render(<UnionTablePage />);
 
@@ -190,7 +190,7 @@ describe("UnionTable フォーム", () => {
   });
 
   describe("API成功時", () => {
-    it("createUnionTable が OK → DataPreview に遷移する", async () => {
+    it("createUnionTable が OK を返した場合、Workspace に遷移する", async () => {
       mockApi.createUnionTable.mockResolvedValue({
         code: "OK",
         result: { tableName: "union_result" },
@@ -210,7 +210,7 @@ describe("UnionTable フォーム", () => {
       await waitFor(() => {
         expect(mockApi.createUnionTable).toHaveBeenCalledTimes(1);
       });
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
   });
 
@@ -239,14 +239,14 @@ describe("UnionTable フォーム", () => {
   });
 
   describe("キャンセル", () => {
-    it("キャンセルボタンをクリックすると DataPreview に遷移する", async () => {
+    it("キャンセルボタンをクリックすると Workspace に遷移する", async () => {
       const user = userEvent.setup();
       render(<UnionTablePage />);
 
       const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
       await user.click(cancelBtn);
 
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
   });
 });

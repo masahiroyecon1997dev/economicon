@@ -49,7 +49,7 @@ vi.mock("../../lib/utils/internal", () => ({
 }));
 
 // TableNav は外部依存コンポーネントだが、実体をテストするため未スタブ化
-// ただし内部でapiを呼ぶ可能性があるためスタブ化する
+// ただし一部でapiを呼ぶ可能性があるためスタブ化する
 vi.mock("../molecules/List/TableNav", () => ({
   TableNav: ({
     onTableClick,
@@ -169,14 +169,14 @@ describe("LeftSideMenu コンポーネント", () => {
     expect(screen.getByTestId("left-menu-reset-workspace")).toBeDisabled();
   });
 
-  it("既存テーブルをクリックすると DataPreview に遷移する", async () => {
+  it("既存テーブルをクリックすると Workspace に遷移する", async () => {
     const user = userEvent.setup();
     render(<LeftSideMenu />);
 
     await user.click(screen.getByText("sales"));
 
     await waitFor(() => {
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
       expect(useTableInfosStore.getState().activeTableName).toBe("sales");
     });
   });
@@ -200,7 +200,7 @@ describe("LeftSideMenu コンポーネント", () => {
     });
   });
 
-  it("結果項目クリックで結果タブが開き DataPreview に遷移する", async () => {
+  it("結果タブをクリックすると結果タブが開き Workspace に遷移する", async () => {
     const user = userEvent.setup();
     const openResult = vi.fn().mockResolvedValue(MOCK_RESULT_DETAIL);
     useAnalysisResultsStore.setState({
@@ -226,7 +226,7 @@ describe("LeftSideMenu コンポーネント", () => {
 
     await waitFor(() => {
       expect(openResult).toHaveBeenCalledWith("result-1");
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
       expect(useWorkspaceTabsStore.getState().activeTabId).toBe(
         "result:result-1",
       );
@@ -360,7 +360,7 @@ describe("LeftSideMenu コンポーネント", () => {
     });
   });
 
-  it("statistical_test の出力ボタンでも OutputResultDialog を開ける", async () => {
+  it("statistical_test の出力で OutputResultDialog を開ける", async () => {
     const user = userEvent.setup();
     useAnalysisResultsStore.setState({
       pane: "results",

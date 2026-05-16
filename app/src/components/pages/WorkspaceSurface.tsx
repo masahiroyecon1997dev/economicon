@@ -13,11 +13,9 @@ import { GroupStatistics } from "@/components/pages/GroupStatistics";
 import { JoinTable } from "@/components/pages/JoinTable";
 import { StatisticalTestView } from "@/components/pages/StatisticalTestView";
 import { UnionTable } from "@/components/pages/UnionTable";
-import { isWorkFeatureKey } from "@/constants/workspaceTabs";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import type {
   WorkFeatureKey,
@@ -57,16 +55,6 @@ const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
   ConfidenceIntervalView: <ConfidenceIntervalView />,
 };
 
-const findLastNonWorkTab = (tabs: WorkspaceTab[], excludedId: string) => {
-  for (let index = tabs.length - 1; index >= 0; index -= 1) {
-    const tab = tabs[index];
-    if (tab.id !== excludedId && tab.kind !== "work") {
-      return tab;
-    }
-  }
-  return null;
-};
-
 const isCorrelationMatrixWorkTab = (
   tab: WorkspaceWorkTab,
 ): tab is WorkspaceWorkTab & {
@@ -104,8 +92,6 @@ const isChartViewWorkTab = (
 
 export const WorkspaceSurface = () => {
   const { t } = useTranslation();
-  const currentView = useCurrentPageStore((state) => state.currentView);
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const tableInfos = useTableInfosStore((state) => state.tableInfos);
   const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const activateTableInfo = useTableInfosStore(
@@ -121,6 +107,9 @@ export const WorkspaceSurface = () => {
   const closeTab = useWorkspaceTabsStore((state) => state.closeTab);
   const moveTab = useWorkspaceTabsStore((state) => state.moveTab);
   const openDataTab = useWorkspaceTabsStore((state) => state.openDataTab);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
   const syncDataTabs = useWorkspaceTabsStore((state) => state.syncDataTabs);
   const pruneMissingDataTabs = useWorkspaceTabsStore(
     (state) => state.pruneMissingDataTabs,
@@ -134,8 +123,6 @@ export const WorkspaceSurface = () => {
   );
   const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<TabDropTarget | null>(null);
-  const previousViewRef = useRef(currentView);
-  const suppressWorkTabCleanupRef = useRef(false);
   const workTabContainerRef = useRef<HTMLDivElement | null>(null);
   const pointerDragRef = useRef<{
     tabId: string;
@@ -159,45 +146,6 @@ export const WorkspaceSurface = () => {
       activeTab?.kind !== "data",
     );
   }, [activeTab?.kind, activeTableName, syncDataTabs, tableInfos]);
-
-  useEffect(() => {
-    const previousView = previousViewRef.current;
-    previousViewRef.current = currentView;
-
-    if (suppressWorkTabCleanupRef.current) {
-      suppressWorkTabCleanupRef.current = false;
-      return;
-    }
-
-    if (
-      activeTab?.kind !== "work" ||
-      currentView !== "DataPreview" ||
-      !isWorkFeatureKey(previousView)
-    ) {
-      return;
-    }
-
-    const fallbackTab = findLastNonWorkTab(tabs, activeTab.id);
-    if (fallbackTab) {
-      activateTab(fallbackTab.id);
-      if (fallbackTab.kind === "data") {
-        activateTableInfo(fallbackTab.tableName);
-      } else {
-        setActiveResult(fallbackTab.resultId, fallbackTab.detail);
-      }
-      return;
-    }
-
-    closeTab(activeTab.id);
-  }, [
-    activateTab,
-    activateTableInfo,
-    activeTab,
-    closeTab,
-    currentView,
-    setActiveResult,
-    tabs,
-  ]);
 
   useEffect(() => {
     if (activeTab?.kind !== "work") return;
@@ -229,15 +177,12 @@ export const WorkspaceSurface = () => {
     activateTab(tab.id);
     if (tab.kind === "data") {
       activateTableInfo(tab.tableName);
-      setCurrentView("DataPreview");
       return;
     }
     if (tab.kind === "result") {
       setActiveResult(tab.resultId, tab.detail);
-      setCurrentView("DataPreview");
       return;
     }
-    setCurrentView(tab.featureKey);
   };
 
   const handleActivateTab = (tabId: string) => {
@@ -258,10 +203,6 @@ export const WorkspaceSurface = () => {
       if (!confirmed) return;
     }
 
-    if (tab.kind === "work" && activeTabId === tabId) {
-      suppressWorkTabCleanupRef.current = true;
-    }
-
     closeTab(tabId);
     if (tab.kind === "data") {
       removeTableInfo(tab.tableName);
@@ -270,9 +211,6 @@ export const WorkspaceSurface = () => {
     if (tab.kind === "result") {
       setActiveResult(null, null);
       return;
-    }
-    if (activeTabId === tabId) {
-      setCurrentView("DataPreview");
     }
   };
 
@@ -361,8 +299,8 @@ export const WorkspaceSurface = () => {
         <CorrelationMatrix
           workTabId={tab.id}
           onSuccess={(tableName) => {
+            closeActiveWorkTab();
             openDataTab(tableName);
-            setCurrentView("DataPreview");
           }}
           onCancel={() => void handleCloseTab(tab.id)}
         />
@@ -392,8 +330,8 @@ export const WorkspaceSurface = () => {
         <GroupStatistics
           workTabId={tab.id}
           onSuccess={(tableName) => {
+            closeActiveWorkTab();
             openDataTab(tableName);
-            setCurrentView("DataPreview");
           }}
           onCancel={() => void handleCloseTab(tab.id)}
         />

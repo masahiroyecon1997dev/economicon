@@ -1,31 +1,16 @@
 import { create } from "zustand";
 
-export type CurrentPageValue =
-  | "ImportDataFile"
-  | "JoinTable"
-  | "UnionTable"
-  | "DescriptiveStatistics"
-  | "StatisticalTestView"
-  | "CorrelationMatrix"
-  | "GroupStatistics"
-  | "ConfidenceIntervalView"
-  | "LinearRegressionForm"
-  | "CreateSimulationDataTable"
-  | "CalculationView"
-  | "ChartView"
-  | "SaveData"
-  | "AnalysisResultPreview"
-  | "DataPreview";
-
-export type CurrentPageActions = {
-  setCurrentView: (view: CurrentPageValue) => void;
-};
+export type ShellPageValue = "ImportDataFile" | "SaveData";
+export type CurrentPageValue = ShellPageValue | "Workspace";
 
 type CurrentPageStore = {
   currentView: CurrentPageValue;
-} & CurrentPageActions;
+  navigateToShell: (shell: ShellPageValue) => void;
+  navigateToWorkspace: () => void;
+};
 
 export const useCurrentPageStore = create<CurrentPageStore>((set) => ({
   currentView: "ImportDataFile",
-  setCurrentView: (view) => set({ currentView: view }),
+  navigateToShell: (shell) => set({ currentView: shell }),
+  navigateToWorkspace: () => set({ currentView: "Workspace" }),
 }));

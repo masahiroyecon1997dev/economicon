@@ -90,7 +90,10 @@ export const LeftSideMenu = () => {
   const activateTableInfo = useTableInfosStore(
     (state) => state.activateTableInfo,
   );
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
+  const navigateToWorkspace = useCurrentPageStore(
+    (state) => state.navigateToWorkspace,
+  );
   const tableList = useTableListStore((state) => state.tableList);
   const setTableList = useTableListStore((state) => state.setTableList);
   const pane = useAnalysisResultsStore((state) => state.pane);
@@ -151,7 +154,6 @@ export const LeftSideMenu = () => {
         addTableInfo(tableInfo);
       }
       openDataTab(tableName);
-      setCurrentView("DataPreview");
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
@@ -165,14 +167,12 @@ export const LeftSideMenu = () => {
     if (existingTab?.kind === "result") {
       activateTab(existingTab.id);
       setActiveResult(existingTab.resultId, existingTab.detail);
-      setCurrentView("DataPreview");
       return;
     }
 
     try {
       const detail = await openResult(resultId);
       openResultTab(detail);
-      setCurrentView("DataPreview");
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
@@ -195,7 +195,11 @@ export const LeftSideMenu = () => {
       removeResultTab(resultId);
       if (activeTabId === `result:${resultId}`) {
         setActiveResult(null, null);
-        setCurrentView(tableList.length > 0 ? "DataPreview" : "ImportDataFile");
+        if (tableList.length > 0) {
+          navigateToWorkspace();
+        } else {
+          navigateToShell("ImportDataFile");
+        }
       }
     } catch (error) {
       await showMessageDialog(
@@ -299,7 +303,7 @@ export const LeftSideMenu = () => {
         isListLoading: false,
         isDetailLoading: false,
       });
-      setCurrentView("ImportDataFile");
+      navigateToShell("ImportDataFile");
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),

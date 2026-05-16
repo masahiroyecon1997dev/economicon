@@ -39,7 +39,10 @@ export const SaveData = () => {
   const pathSeparator = useSettingsStore((state) => state.pathSeparator);
   const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const tableNameList = useTableListStore((state) => state.tableList);
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
+  const navigateToWorkspace = useCurrentPageStore(
+    (state) => state.navigateToWorkspace,
+  );
 
   const { setLoading, clearLoading } = useLoadingStore();
 
@@ -99,7 +102,7 @@ export const SaveData = () => {
             t("Common.OK"),
             t("SaveDataView.SaveSuccess", { path: response.result.filePath }),
           );
-          setCurrentView("DataPreview");
+          navigateToWorkspace();
         } else {
           await showMessageDialog(
             t("Error.Error"),
@@ -228,11 +231,11 @@ export const SaveData = () => {
   };
 
   const hadleCancelNoTables = async () => {
-    setCurrentView("ImportDataFile");
+    navigateToShell("ImportDataFile");
   };
 
   const handleCancel = () => {
-    setCurrentView("DataPreview");
+    navigateToWorkspace();
   };
 
   const filteredFiles = files.filter((file) => {

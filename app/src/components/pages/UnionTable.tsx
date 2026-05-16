@@ -17,9 +17,9 @@ import {
 } from "@/lib/utils/apiError";
 import { cn, generateId } from "@/lib/utils/helpers";
 import { getTableInfo } from "@/lib/utils/internal";
-import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { ColumnType } from "@/types/commonTypes";
 import { Plus, X } from "lucide-react";
 import { useRef, useState } from "react";
@@ -38,7 +38,7 @@ export const UnionTable = () => {
   const tableList = useTableListStore((s) => s.tableList);
   const addTableName = useTableListStore((s) => s.addTableName);
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const closeActiveWorkTab = useWorkspaceTabsStore((s) => s.closeActiveWorkTab);
 
   const [selectedTables, setSelectedTables] = useState<TableEntry[]>([]);
   const [addingTable, setAddingTable] = useState("");
@@ -171,7 +171,7 @@ export const UnionTable = () => {
         const tableInfo = await getTableInfo(newTableName.trim());
         addTableName(newTableName.trim());
         addTableInfo(tableInfo);
-        setCurrentView("DataPreview");
+        closeActiveWorkTab();
       } else {
         await showMessageDialog(
           t("Error.Error"),
@@ -339,7 +339,7 @@ export const UnionTable = () => {
         selectText={
           isSubmitting ? t("UnionTable.Processing") : t("UnionTable.RunUnion")
         }
-        onCancel={() => setCurrentView("DataPreview")}
+        onCancel={closeActiveWorkTab}
         onSelect={handleSubmit}
         isLoading={isSubmitting}
       />

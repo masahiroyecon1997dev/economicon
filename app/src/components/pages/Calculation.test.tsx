@@ -1,3 +1,9 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { Calculation } from "@/components/pages/Calculation";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
 import {
   act,
   fireEvent,
@@ -7,12 +13,6 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "@/api/endpoints";
-import { showMessageDialog } from "@/lib/dialog/message";
-import { useCurrentPageStore } from "@/stores/currentView";
-import { useTableInfosStore } from "@/stores/tableInfos";
-import { useTableListStore } from "@/stores/tableList";
-import { Calculation } from "@/components/pages/Calculation";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -81,7 +81,7 @@ beforeEach(() => {
     ],
     activeTableName: "sales",
   });
-  useCurrentPageStore.setState({ currentView: "DataPreview" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
 });
 
 // ---------------------------------------------------------------------------
@@ -120,7 +120,7 @@ describe("Calculation フォーム", () => {
   });
 
   describe("API成功時", () => {
-    it("calculateColumn が OK → DataPreviewへ遷移する", async () => {
+    it("calculateColumn が OK → Workspaceへ遷移する", async () => {
       mockApi.calculateColumn.mockResolvedValue({ code: "OK", result: {} });
       const user = userEvent.setup();
       render(<Calculation />);
@@ -140,7 +140,7 @@ describe("Calculation フォーム", () => {
       await waitFor(() => {
         expect(mockApi.calculateColumn).toHaveBeenCalledTimes(1);
       });
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
       expect(vi.mocked(showMessageDialog)).not.toHaveBeenCalled();
     });
   });

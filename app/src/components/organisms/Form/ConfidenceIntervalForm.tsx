@@ -81,8 +81,11 @@ export const ConfidenceIntervalForm = ({
   const tableList = useTableListStore((s) => s.tableList);
   const { selectedTableName, setSelectedTableName, columnList, isLoading } =
     useTableColumnLoader({ numericOnly: true, autoLoadOnMount: true });
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
   const [levelMode, setLevelMode] = useState<"select" | "manual">("select");
   const [infoDialogKey, setInfoDialogKey] = useState<string | null>(null);
 
@@ -116,9 +119,9 @@ export const ConfidenceIntervalForm = ({
           const { resultId } = response.result;
           const detailResponse = await api.getAnalysisResult(resultId);
           if (detailResponse.code === "OK") {
+            closeActiveWorkTab();
             openResultTab(detailResponse.result);
             await useAnalysisResultsStore.getState().fetchSummaries();
-            setCurrentView("DataPreview");
             return;
           }
 
@@ -152,7 +155,7 @@ export const ConfidenceIntervalForm = ({
       <AnalysisNoTablesState
         className="flex-1"
         onCancel={onCancel}
-        onSelect={() => setCurrentView("ImportDataFile")}
+        onSelect={() => navigateToShell("ImportDataFile")}
       />
     );
   }
