@@ -131,6 +131,20 @@ _COL_NEG_BINOMIAL = {
         "successProbability": 0.3,
     },
 }
+# 単独カラム設定（カイ二乗分布）
+_COL_CHI_SQUARE = {
+    "columnName": "chi_square_col",
+    "distribution": {"type": "chi_square", "degreesOfFreedom": 5},
+}
+# 単独カラム設定（F分布）
+_COL_F_DISTRIBUTION = {
+    "columnName": "f_dist_col",
+    "distribution": {
+        "type": "f_distribution",
+        "numeratorDf": 5,
+        "denominatorDf": 10,
+    },
+}
 # 単独カラム設定（等差数列）
 _COL_SEQUENCE = {
     "columnName": "sequence_col",
@@ -251,6 +265,48 @@ def test_create_table_with_multiple_columns(client, tables_store):
     assert "exp_col" in df.columns
 
 
+def test_create_table_with_chi_square_distribution(client, tables_store):
+    """カイ二乗分布カラムを持つテーブルを正常に作成できる"""
+    payload = {
+        "tableName": "ChiSquareTable",
+        "rowCount": 50,
+        "simulationColumns": [_COL_CHI_SQUARE],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["tableName"] == "ChiSquareTable"
+
+    df = tables_store.get_table("ChiSquareTable").table
+    expected_row_count = 50
+    assert len(df) == expected_row_count
+    assert "chi_square_col" in df.columns
+    # カイ二乗分布は非負の実数
+    assert all(v >= 0 for v in df["chi_square_col"])
+
+
+def test_create_table_with_f_distribution(client, tables_store):
+    """F分布カラムを持つテーブルを正常に作成できる"""
+    payload = {
+        "tableName": "FDistTable",
+        "rowCount": 50,
+        "simulationColumns": [_COL_F_DISTRIBUTION],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["tableName"] == "FDistTable"
+
+    df = tables_store.get_table("FDistTable").table
+    expected_row_count = 50
+    assert len(df) == expected_row_count
+    assert "f_dist_col" in df.columns
+    # F分布は非負の実数
+    assert all(v >= 0 for v in df["f_dist_col"])
+
+
 def test_create_table_with_sequence_distribution(client, tables_store):
     """等差数列カラムを持つテーブルを正常に作成できる"""
     row_count = 5
@@ -298,7 +354,7 @@ def test_create_table_with_sequence_distribution_descending(
 
 
 def test_create_table_with_all_distributions(client, tables_store):
-    """全 15 分布タイプを含むテーブルを正常に作成できる"""
+    """全 17 分布タイプを含むテーブルを正常に作成できる"""
     all_cols = [
         _COL_NORMAL,
         _COL_UNIFORM,
@@ -308,6 +364,8 @@ def test_create_table_with_all_distributions(client, tables_store):
         _COL_BETA,
         _COL_WEIBULL,
         _COL_LOGNORMAL,
+        _COL_CHI_SQUARE,
+        _COL_F_DISTRIBUTION,
         _COL_BINOMIAL,
         _COL_BERNOULLI,
         _COL_POISSON,
@@ -342,6 +400,8 @@ def test_create_table_with_all_distributions(client, tables_store):
     assert all(0 <= v <= 1 for v in df["beta_col"])
     assert all(v >= 0 for v in df["weibull_col"])
     assert all(v > 0 for v in df["lognormal_col"])
+    assert all(v >= 0 for v in df["chi_square_col"])
+    assert all(v >= 0 for v in df["f_dist_col"])
     assert all(0 <= v <= binomial_n for v in df["binomial_col"])
     assert all(v in (0, bernoulli_upper) for v in df["bernoulli_col"])
     assert all(v >= 0 for v in df["poisson_col"])
@@ -349,7 +409,8 @@ def test_create_table_with_all_distributions(client, tables_store):
     assert all(0 <= v <= hypergeometric_max for v in df["hypergeometric_col"])
     assert all(v >= 0 for v in df["neg_binomial_col"])
     # sequence_col: start=1, step=1 → [1, 2, ..., 50]
-    assert df["sequence_col"].to_list() == list(range(1, 51))
+    expected_sequence = list(range(1, expected_row_count + 1))
+    assert df["sequence_col"].to_list() == expected_sequence
 
 
 # ─────────────────────────────────────────────────────────────

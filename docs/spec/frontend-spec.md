@@ -86,10 +86,10 @@
 
 FIXED・SEQUENCE（確率分布ではない）は除外する。
 
-| 区分     | 対象分布（7 + 6 種）                                                       |
-| -------- | -------------------------------------------------------------------------- |
-| 連続分布 | uniform, exponential, normal, gamma, beta, weibull, lognormal              |
-| 離散分布 | binomial, bernoulli, poisson, geometric, hypergeometric, negative_binomial |
+| 区分     | 対象分布（9 + 6 種）                                                                      |
+| -------- | ----------------------------------------------------------------------------------------- |
+| 連続分布 | uniform, exponential, normal, gamma, beta, weibull, lognormal, chi_square, f_distribution |
+| 離散分布 | binomial, bernoulli, poisson, geometric, hypergeometric, negative_binomial                |
 
 ### グラフ表示仕様
 
@@ -123,6 +123,46 @@ FIXED・SEQUENCE（確率分布ではない）は除外する。
 - Plotly.js グラフ（`react-plotly.js` を使用）
 - API ロード中はスケルトンローダー表示
 - API エラー時はエラーアラート表示
+
+### スライダー パラメータ範囲（フロントエンド定数）
+
+**連続分布**
+
+| 分布           | パラメータ             | 最小値 | 最大値 | デフォルト | ステップ |
+| -------------- | ---------------------- | -----: | -----: | ---------: | -------: |
+| uniform        | low                    |    -10 |     10 |          0 |      0.1 |
+| uniform        | high                   |    -10 |     10 |          1 |      0.1 |
+| exponential    | scale_parameter        |    0.1 |     10 |          1 |      0.1 |
+| normal         | mean                   |    -10 |     10 |          0 |      0.1 |
+| normal         | standard_deviation     |    0.1 |      5 |          1 |      0.1 |
+| gamma          | shape_parameter        |    0.1 |     10 |          2 |      0.1 |
+| gamma          | scale_parameter        |    0.1 |     10 |          1 |      0.1 |
+| beta           | alpha                  |    0.1 |     10 |          2 |      0.1 |
+| beta           | beta                   |    0.1 |     10 |          5 |      0.1 |
+| weibull        | shape_parameter        |    0.1 |     10 |        1.5 |      0.1 |
+| weibull        | scale_parameter        |    0.1 |     10 |          1 |      0.1 |
+| lognormal      | log_mean               |     -3 |      3 |          0 |      0.1 |
+| lognormal      | log_standard_deviation |    0.1 |      3 |          1 |      0.1 |
+| chi_square     | degrees_of_freedom     |      1 |     30 |          5 |        1 |
+| f_distribution | numerator_df           |      1 |     50 |          5 |        1 |
+| f_distribution | denominator_df         |      1 |    100 |         10 |        1 |
+
+**離散分布**
+
+| 分布              | パラメータ           | 最小値 | 最大値              | デフォルト | ステップ |
+| ----------------- | -------------------- | -----: | ------------------- | ---------: | -------: |
+| binomial          | trial_count          |      1 | 100                 |         10 |        1 |
+| binomial          | success_probability  |   0.01 | 0.99                |        0.5 |     0.01 |
+| bernoulli         | success_probability  |   0.01 | 0.99                |        0.5 |     0.01 |
+| poisson           | rate                 |    0.1 | 30                  |          5 |      0.1 |
+| geometric         | success_probability  |   0.01 | 0.99                |        0.3 |     0.01 |
+| hypergeometric    | population_size      |     10 | 200                 |         50 |        1 |
+| hypergeometric    | success_count        |      1 | ≤ population_size ★ |         20 |        1 |
+| hypergeometric    | sample_size          |      1 | ≤ population_size ★ |         10 |        1 |
+| negative_binomial | target_success_count |      1 | 50                  |          5 |        1 |
+| negative_binomial | success_probability  |   0.01 | 0.99                |        0.5 |     0.01 |
+
+★ success_count / sample_size のスライダー上限は population_size の現在値に動的に追従する。
 
 ### コンテキスト引き継ぎ
 
@@ -200,7 +240,9 @@ DistributionPreview の `draftValues` として初期化する。
 | `DistributionPreview.tsx`        | 新規コンポーネント（左右ペイン・スライダー・Plotly.js）                         |
 | `SimulationColumnEditDialog.tsx` | 「分布プレビュー」ボタンを追加                                                  |
 | `AddSimulationColumnForm.tsx`    | 「分布プレビュー」ボタンを追加                                                  |
-| i18n                             | 「可視化」メニュー名・DistributionPreview 内の文言を追加                        |
+| `SimulationColumnConfig.tsx`     | χ²・F 分布を連続分布タブに追加                                                  |
+| `constants/simulation.ts`        | χ²・F 分布のパラメータ定数・デフォルト値を追加                                  |
+| i18n                             | 「可視化」メニュー名・DistributionPreview 内の文言・χ² / F 分布の表示名を追加   |
 
 ### 実装スコープ（バックエンド）
 
@@ -210,11 +252,6 @@ DistributionPreview の `draftValues` として初期化する。
 | `services/` | `DistributionPreview` サービスを追加（`scipy.stats` で PDF/CDF/PMF/CMF を計算） |
 | `routers/`  | `/api/distribution/preview` エンドポイントを追加                                |
 | i18n        | エラーメッセージ等を追加（必要な場合）                                          |
-
-### 未決定事項
-
-- [ ] スライダーのパラメータ範囲（各分布の上下限値）はフロントエンド定数で管理するか、API レスポンスに含めるか。
-- [ ] `react-plotly.js` を新規依存として追加するか、生の Plotly.js を使うか（バンドルサイズ考慮）。
 
 ---
 

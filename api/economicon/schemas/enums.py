@@ -15,6 +15,8 @@ class DistributionType(StrEnum):
     GEOMETRIC = "geometric"
     HYPERGEOMETRIC = "hypergeometric"
     NEGATIVE_BINOMIAL = "negative_binomial"
+    CHI_SQUARE = "chi_square"
+    F_DISTRIBUTION = "f_distribution"
     FIXED = "fixed"
     SEQUENCE = "sequence"
 
