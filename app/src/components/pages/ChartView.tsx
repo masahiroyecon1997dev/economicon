@@ -8,7 +8,7 @@ import {
 import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { extractApiErrorMessage } from "@/lib/utils/apiError";
+import { buildCaughtErrorMessage } from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
@@ -267,7 +267,7 @@ export const ChartView = ({
         } catch (error) {
           await showMessageDialog(
             t("Error.Error"),
-            extractApiErrorMessage(error, t("Error.UnexpectedError")),
+            buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
           );
         } finally {
           setIsRendering(false);
