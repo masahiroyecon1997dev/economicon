@@ -5,8 +5,10 @@ import { RegressionResult } from "@/components/organisms/Result/RegressionResult
 import { StatisticalTestResult } from "@/components/organisms/Result/StatisticalTestResult";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import type { ConfidenceIntervalResultEntry } from "@/stores/confidenceIntervalResults";
-import type { LinearRegressionResultType } from "@/types/commonTypes";
+import type {
+  ConfidenceIntervalResultData,
+  LinearRegressionResultType,
+} from "@/types/commonTypes";
 import { Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -35,10 +37,10 @@ const toRegressionResult = (
 
 const toConfidenceIntervalResult = (
   detail: AnalysisResultDetail,
-): ConfidenceIntervalResultEntry => {
+): ConfidenceIntervalResultData => {
   return {
     ...(detail.resultData as unknown as Omit<
-      ConfidenceIntervalResultEntry,
+      ConfidenceIntervalResultData,
       "resultId"
     >),
     resultId: detail.id,

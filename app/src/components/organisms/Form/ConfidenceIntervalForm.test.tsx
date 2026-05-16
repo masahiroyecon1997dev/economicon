@@ -1,7 +1,6 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { ConfidenceIntervalForm } from "@/components/organisms/Form/ConfidenceIntervalForm";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { useConfidenceIntervalResultsStore } from "@/stores/confidenceIntervalResults";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
 import {
@@ -91,7 +90,6 @@ beforeEach(() => {
     { name: "quantity", type: "Int64" },
   ];
   mockTableLoader.isLoading = false;
-  useConfidenceIntervalResultsStore.setState({ results: [] });
   useCurrentPageStore.setState({ currentView: "ConfidenceIntervalView" });
   useTableListStore.setState({ tableList: ["sales", "orders"] });
 
@@ -122,9 +120,7 @@ describe("ConfidenceIntervalForm", () => {
         }),
       );
 
-      expect(useCurrentPageStore.getState().currentView).toBe(
-        "ImportDataFile",
-      );
+      expect(useCurrentPageStore.getState().currentView).toBe("ImportDataFile");
     });
 
     it("test_noEligibleColumns_showsSharedEmptyState", () => {
@@ -235,13 +231,7 @@ describe("ConfidenceIntervalForm", () => {
 
   describe("API 呼び出しと結果保存", () => {
     it("test_submit_success_callsOnAnalysisComplete", async () => {
-      const onAnalysisComplete = vi.fn();
-      render(
-        <ConfidenceIntervalForm
-          onCancel={vi.fn()}
-          onAnalysisComplete={onAnalysisComplete}
-        />,
-      );
+      render(<ConfidenceIntervalForm onCancel={vi.fn()} />);
 
       // columnName と statisticType を直接 store に注入して submit する
       // （Radix UI Select は JSDOM で操作不可のためフォーム値直接設定）
@@ -255,7 +245,9 @@ describe("ConfidenceIntervalForm", () => {
       // テーブル名未入力なのでバリデーションエラーが出るが、
       // API 呼び出しなしのためコールバックは呼ばれない
       await waitFor(() => {
-        expect(onAnalysisComplete).not.toHaveBeenCalled();
+        expect(
+          screen.getByText("ConfidenceIntervalView.ErrorStatisticTypeRequired"),
+        ).toBeInTheDocument();
       });
     });
 
