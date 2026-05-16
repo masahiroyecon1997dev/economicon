@@ -1,11 +1,13 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { DescriptiveStatisticType } from "@/api/model";
+import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useAnalysisResultsStore } from "@/stores/analysisResults";
+import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { DescriptiveStatisticType } from "../../api/model";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { useTableListStore } from "../../stores/tableList";
-import { DescriptiveStatistics } from "./DescriptiveStatistics";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -28,8 +30,15 @@ vi.mock("../../api/endpoints");
 vi.mock("../../lib/dialog/message", () => ({
   showMessageDialog: vi.fn().mockResolvedValue(undefined),
 }));
+const mockSetCurrentView = vi.fn();
 vi.mock("../../stores/currentView", () => ({
-  useCurrentPageStore: vi.fn(() => ({ setCurrentView: vi.fn() })),
+  useCurrentPageStore: vi.fn(
+    (
+      selector: (state: {
+        setCurrentView: typeof mockSetCurrentView;
+      }) => unknown,
+    ) => selector({ setCurrentView: mockSetCurrentView }),
+  ),
 }));
 
 // ---------------------------------------------------------------------------
@@ -43,19 +52,97 @@ const COLUMNS = [
 const mockApi = {
   getColumnList: vi.fn(),
   descriptiveStatistics: vi.fn(),
+  getAnalysisResult: vi.fn(),
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockSetCurrentView.mockReset();
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales"] });
+  useWorkspaceTabsStore.setState({ tabs: [], activeTabId: null });
+  useAnalysisResultsStore.setState((state) => ({
+    ...state,
+    fetchSummaries: vi.fn().mockResolvedValue(undefined),
+  }));
 });
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 describe("DescriptiveStatistics フォーム", () => {
+  describe("empty state", () => {
+    it("テーブルが 0 件なら NoTables state を表示し、ImportDataFile に遷移できる", async () => {
+      const user = userEvent.setup();
+      useTableListStore.setState({ tableList: [] });
+
+      render(<DescriptiveStatistics />);
+
+      expect(
+        screen.getByTestId("analysis-no-tables-state"),
+      ).toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", {
+          name: "AnalysisEmptyState.NoTablesAction",
+        }),
+      );
+
+      expect(mockSetCurrentView).toHaveBeenCalledWith("ImportDataFile");
+    });
+
+    it("列ロード中は共通 loading state を表示する", async () => {
+      mockApi.getColumnList.mockReturnValue(new Promise(() => {}));
+      const user = userEvent.setup();
+
+      render(<DescriptiveStatistics />);
+
+      const selectTrigger = screen.getByRole("combobox");
+      await user.click(selectTrigger);
+      const option = await screen.findByRole("option", { name: "sales" });
+      await user.click(option);
+
+      expect(
+        await screen.findByTestId(
+          "descriptive-statistics-loading-columns-state",
+        ),
+      ).toBeInTheDocument();
+    });
+  });
+
   describe("バリデーション", () => {
+    it("詳細統計量は初期表示で隠れ、展開すると選択肢が見える", async () => {
+      mockApi.getColumnList.mockResolvedValue({
+        code: "OK",
+        result: { columnInfoList: COLUMNS },
+      });
+      const user = userEvent.setup();
+
+      render(<DescriptiveStatistics />);
+
+      const selectTrigger = screen.getByRole("combobox");
+      await user.click(selectTrigger);
+      const option = await screen.findByRole("option", { name: "sales" });
+      await user.click(option);
+
+      await waitFor(() =>
+        expect(screen.getByText("DescriptiveStatistics.Stat_mean")).toBeInTheDocument(),
+      );
+      expect(
+        screen.queryByText("DescriptiveStatistics.Stat_skewness"),
+      ).not.toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", {
+          name: "DescriptiveStatistics.AdvancedStatisticsLabel",
+        }),
+      );
+
+      expect(
+        await screen.findByText("DescriptiveStatistics.Stat_skewness"),
+      ).toBeInTheDocument();
+    });
+
     it("テーブル未選択でサブミットするとテーブル選択エラーが表示される", async () => {
       const user = userEvent.setup();
       render(<DescriptiveStatistics />);
@@ -108,16 +195,91 @@ describe("DescriptiveStatistics フォーム", () => {
     });
   });
 
-  describe("API成功時 — 統計値の表示", () => {
-    const setupWithResult = async (statistics: Record<string, unknown>) => {
+  describe("API成功時", () => {
+    it("初期状態のまま送信すると既定の統計量セットだけを送る", async () => {
+      mockApi.getColumnList.mockResolvedValue({
+        code: "OK",
+        result: { columnInfoList: COLUMNS },
+      });
+      mockApi.descriptiveStatistics.mockResolvedValue({
+        code: "OK",
+        result: { resultId: "test-result-id" },
+      });
+      mockApi.getAnalysisResult.mockResolvedValue({
+        code: "OK",
+        result: {
+          id: "test-result-id",
+          name: "sales descriptive statistics",
+          resultType: "descriptive_statistics",
+          resultData: {
+            statistics: {
+              price: { [DescriptiveStatisticType.mean]: 24.5 },
+            },
+          },
+        },
+      });
+
+      const user = userEvent.setup();
+      render(<DescriptiveStatistics />);
+
+      const selectTrigger = screen.getByRole("combobox");
+      await user.click(selectTrigger);
+      const option = await screen.findByRole("option", { name: "sales" });
+      await user.click(option);
+
+      await waitFor(() =>
+        expect(screen.getByText("price")).toBeInTheDocument(),
+      );
+
+      await user.click(
+        screen.getByRole("button", {
+          name: "DescriptiveStatistics.RunCalculation",
+        }),
+      );
+
+      await waitFor(() => {
+        expect(mockApi.descriptiveStatistics).toHaveBeenCalledWith({
+          tableName: "sales",
+          columnNameList: ["price", "quantity"],
+          statistics: [
+            DescriptiveStatisticType.count,
+            DescriptiveStatisticType.mean,
+            DescriptiveStatisticType.median,
+            DescriptiveStatisticType.std_dev,
+            DescriptiveStatisticType.min,
+            DescriptiveStatisticType.max,
+          ],
+        });
+      });
+    });
+
+    it("計算成功時は result tab を開いて DataPreview に戻る", async () => {
       mockApi.getColumnList.mockResolvedValue({
         code: "OK",
         result: { columnInfoList: [{ name: "price", type: "Float64" }] },
       });
       mockApi.descriptiveStatistics.mockResolvedValue({
         code: "OK",
-        result: { statistics },
+        result: { resultId: "test-result-id" },
       });
+      mockApi.getAnalysisResult.mockResolvedValue({
+        code: "OK",
+        result: {
+          id: "test-result-id",
+          name: "sales descriptive statistics",
+          resultType: "descriptive_statistics",
+          resultData: {
+            statistics: {
+              price: { [DescriptiveStatisticType.mean]: 24.5 },
+            },
+          },
+        },
+      });
+      const fetchSummaries = vi.fn().mockResolvedValue(undefined);
+      useAnalysisResultsStore.setState((state) => ({
+        ...state,
+        fetchSummaries,
+      }));
 
       const user = userEvent.setup();
       render(<DescriptiveStatistics />);
@@ -136,44 +298,83 @@ describe("DescriptiveStatistics フォーム", () => {
       });
       await user.click(submitBtn);
 
+      await waitFor(() => {
+        expect(useWorkspaceTabsStore.getState().activeTabId).toBe(
+          "result:test-result-id",
+        );
+        expect(fetchSummaries).toHaveBeenCalled();
+        expect(mockSetCurrentView).toHaveBeenCalledWith("DataPreview");
+      });
+      expect(
+        screen.queryByText("DescriptiveStatistics.ResultTitle"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("work tab モードでは保存済み draft を使ってそのまま送信できる", async () => {
+      mockApi.getColumnList.mockResolvedValue({
+        code: "OK",
+        result: { columnInfoList: [{ name: "price", type: "Float64" }] },
+      });
+      mockApi.descriptiveStatistics.mockResolvedValue({
+        code: "OK",
+        result: { resultId: "test-result-id" },
+      });
+      mockApi.getAnalysisResult.mockResolvedValue({
+        code: "OK",
+        result: {
+          id: "test-result-id",
+          name: "sales descriptive statistics",
+          resultType: "descriptive_statistics",
+          resultData: {
+            statistics: {
+              price: { [DescriptiveStatisticType.mean]: 24.5 },
+            },
+          },
+        },
+      });
+      useWorkspaceTabsStore.setState({
+        tabs: [
+          {
+            id: "work:DescriptiveStatistics",
+            kind: "work",
+            title: "基本統計量",
+            featureKey: "DescriptiveStatistics",
+            dirty: true,
+            createdAt: Date.now(),
+            draftValues: {
+              tableName: "sales",
+              columnNames: ["price"],
+              statistics: [DescriptiveStatisticType.mean],
+            },
+            committedValues: {
+              tableName: "sales",
+              columnNames: [],
+              statistics: [],
+            },
+          },
+        ],
+        activeTabId: "work:DescriptiveStatistics",
+      });
+
+      const user = userEvent.setup();
+      render(<DescriptiveStatistics workTabId="work:DescriptiveStatistics" />);
+
       await waitFor(() =>
-        expect(
-          screen.getByText("DescriptiveStatistics.ResultTitle"),
-        ).toBeInTheDocument(),
+        expect(screen.getByText("price")).toBeInTheDocument(),
       );
-    };
 
-    it("数値の平均値が小数点4桁でフォーマットされて表示される", async () => {
-      await setupWithResult({
-        price: { [DescriptiveStatisticType.mean]: 24.5 },
+      const submitBtn = screen.getByRole("button", {
+        name: "DescriptiveStatistics.RunCalculation",
       });
-      expect(screen.getByText("24.5000")).toBeInTheDocument();
-    });
+      await user.click(submitBtn);
 
-    it("null値は '—' として表示される（'null' 文字列は表示されない）", async () => {
-      await setupWithResult({
-        price: { [DescriptiveStatisticType.mean]: null },
+      await waitFor(() => {
+        expect(mockApi.descriptiveStatistics).toHaveBeenCalledWith({
+          tableName: "sales",
+          columnNameList: ["price"],
+          statistics: [DescriptiveStatisticType.mean],
+        });
       });
-      // null は "—" でレンダリングされる（他の未指定統計量も "—" になるため getAllByText を使用）
-      const dashCells = screen.getAllByText("—");
-      expect(dashCells.length).toBeGreaterThan(0);
-      expect(screen.queryByText("null")).not.toBeInTheDocument();
-    });
-
-    it("mode が配列値の場合はカンマ区切りで表示される", async () => {
-      await setupWithResult({
-        price: { [DescriptiveStatisticType.mode]: [1, 2, 3] },
-      });
-      expect(screen.getByText("1, 2, 3")).toBeInTheDocument();
-    });
-
-    it("整数値はlocale形式（桁区切り）で表示される", async () => {
-      await setupWithResult({
-        price: { [DescriptiveStatisticType.mean]: 1000 },
-      });
-      // toLocaleString() の結果（環境により1,000 or 1000）
-      const cell = screen.getByText(/1.000|1000/);
-      expect(cell).toBeInTheDocument();
     });
   });
 
@@ -222,6 +423,67 @@ describe("DescriptiveStatistics フォーム", () => {
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalled();
       });
+    });
+
+    it("getAnalysisResult がthrowした場合 → エラーダイアログを表示する", async () => {
+      mockApi.getColumnList.mockResolvedValue({
+        code: "OK",
+        result: { columnInfoList: [{ name: "price", type: "Float64" }] },
+      });
+      mockApi.descriptiveStatistics.mockResolvedValue({
+        code: "OK",
+        result: { resultId: "test-result-id" },
+      });
+      mockApi.getAnalysisResult.mockRejectedValue(new Error("詳細取得エラー"));
+
+      const user = userEvent.setup();
+      render(<DescriptiveStatistics />);
+
+      const selectTrigger = screen.getByRole("combobox");
+      await user.click(selectTrigger);
+      const option = await screen.findByRole("option", { name: "sales" });
+      await user.click(option);
+
+      await waitFor(() =>
+        expect(screen.getByText("price")).toBeInTheDocument(),
+      );
+
+      const submitBtn = screen.getByRole("button", {
+        name: "DescriptiveStatistics.RunCalculation",
+      });
+      await user.click(submitBtn);
+
+      await waitFor(() => {
+        expect(vi.mocked(showMessageDialog)).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe("キャンセル", () => {
+    it("通常モードでは DataPreview に戻る", async () => {
+      const user = userEvent.setup();
+      render(<DescriptiveStatistics />);
+
+      const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
+      await user.click(cancelBtn);
+
+      expect(mockSetCurrentView).toHaveBeenCalledWith("DataPreview");
+    });
+
+    it("work tab モードでは onCancel を呼ぶ", async () => {
+      const user = userEvent.setup();
+      const onCancel = vi.fn();
+      render(
+        <DescriptiveStatistics
+          workTabId="work:DescriptiveStatistics"
+          onCancel={onCancel}
+        />,
+      );
+
+      const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
+      await user.click(cancelBtn);
+
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
   });
 });

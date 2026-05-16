@@ -10,6 +10,8 @@
 
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import { mkdir, rm } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 // ---------------------------------------------------------------------------
@@ -28,6 +30,8 @@ const __dirname = path.dirname(__filename);
 export const SAMPLE_DIR =
   process.env.ECONOMICON_TEST_SAMPLE_DIR ??
   path.resolve(__dirname, "../../sample");
+
+export const E2E_OUTPUT_ROOT = path.join(os.tmpdir(), "economicon-e2e-exports");
 
 /** ローディングオーバーレイが消えるまでの最大待機時間 (ms) */
 const LOADING_TIMEOUT_MS = 90_000;
@@ -80,6 +84,16 @@ export async function waitForAppReady(page: Page): Promise<void> {
  * 現在のパンくずに含まれていない部分をフォルダクリックで降りていく。
  */
 export async function navigateToSampleDir(page: Page): Promise<void> {
+  await navigateFileBrowserToDir(page, SAMPLE_DIR);
+}
+
+/**
+ * ImportDataFile / SaveData のファイルブラウザで任意ディレクトリへ移動する。
+ */
+export async function navigateFileBrowserToDir(
+  page: Page,
+  dirPath: string,
+): Promise<void> {
   // "ファイル選択" タブに切り替え
   const fileSelectTab = page.getByRole("tab", {
     name: /ファイル選択|Select File/i,
@@ -92,8 +106,7 @@ export async function navigateToSampleDir(page: Page): Promise<void> {
   // Windows: "C:\Users\..." → ["C:", "Users", ...]
   // Unix:    "/home/..." → ["home", ...]
   const sep: string = path.sep;
-  console.log(`SAMPLE_DIR: ${SAMPLE_DIR}, sep: ${sep}`);
-  const segments = SAMPLE_DIR.split(sep).filter((s: string) => s.length > 0);
+  const segments = dirPath.split(sep).filter((s: string) => s.length > 0);
 
   // ブレッドクラム取得（現在のパスを読み取る）
   // パスが既に正しければ何もしない
@@ -114,6 +127,17 @@ export async function navigateToSampleDir(page: Page): Promise<void> {
       await page.waitForLoadState("domcontentloaded");
     }
   }
+}
+
+export async function ensureE2EOutputDir(dirName: string): Promise<string> {
+  const outputDir = path.join(E2E_OUTPUT_ROOT, dirName);
+  await rm(outputDir, { recursive: true, force: true });
+  await mkdir(outputDir, { recursive: true });
+  return outputDir;
+}
+
+export async function cleanupE2EOutputDir(dirPath: string): Promise<void> {
+  await rm(dirPath, { recursive: true, force: true });
 }
 
 // ---------------------------------------------------------------------------
@@ -185,6 +209,33 @@ export async function clickHeaderMenu(
   await item.click();
 }
 
+/**
+ * UI からワークスペースを初期化し、テーブルと分析結果を全削除する。
+ * ワークスペースが空で初期化ボタンが非活性の場合は何もしない。
+ */
+export async function clearWorkspaceFromUi(page: Page): Promise<void> {
+  const resetButton = page.getByTestId("left-menu-reset-workspace");
+  await resetButton.waitFor({ state: "visible", timeout: LOADING_TIMEOUT_MS });
+
+  if (await resetButton.isDisabled()) {
+    await expect(
+      page.getByRole("heading", { name: /ファイルをインポート|Select File/i }),
+    ).toBeVisible({ timeout: LOADING_TIMEOUT_MS });
+    return;
+  }
+
+  await resetButton.click();
+
+  const dialog = page.getByRole("dialog").or(page.getByRole("alertdialog"));
+  await expect(dialog).toBeVisible({ timeout: API_TIMEOUT_MS });
+  await dialog.getByRole("button", { name: /^OK$/i }).click();
+  await expect(dialog).toBeHidden({ timeout: API_TIMEOUT_MS });
+
+  await expect(
+    page.getByRole("heading", { name: /ファイルをインポート|Select File/i }),
+  ).toBeVisible({ timeout: LOADING_TIMEOUT_MS });
+}
+
 // ---------------------------------------------------------------------------
 // 列コンテキストメニュー
 // ---------------------------------------------------------------------------
@@ -247,33 +298,13 @@ export async function openTableContextMenu(
   page: Page,
   tableName: string,
 ): Promise<void> {
-  // サイドバー内のテーブル名 span を hover
-  const tableItem = page
-    .getByRole("navigation")
-    .locator(`span[title="${tableName}"]`)
-    .filter({ hasText: tableName })
-    .first();
+  const tableItem = page.getByTestId(`left-menu-table-item-${tableName}`);
   await expect(tableItem).toBeVisible({ timeout: API_TIMEOUT_MS });
   await tableItem.hover();
 
-  // MoreVertical ボタンが現れるまで待機してクリック
-  const moreBtn = page
-    .getByRole("navigation")
-    .locator(`span:has-text("${tableName}")`)
-    .locator("xpath=..")
-    .getByRole("button", { name: /データメニュー|DataMenu/i });
-
-  // aria-label は AreaLabels.DataMenu キーによる翻訳テキスト
-  // 念のため parent の sibling button も探す
-  const moreBtnFallback = page
-    .getByRole("navigation")
-    .filter({ hasText: tableName })
-    .locator("button")
-    .last();
-
-  const btn = (await moreBtn.isVisible()) ? moreBtn : moreBtnFallback;
-  await btn.waitFor({ state: "visible", timeout: 5000 });
-  await btn.click();
+  const menuButton = page.getByTestId(`left-menu-table-menu-${tableName}`);
+  await menuButton.waitFor({ state: "visible", timeout: 5000 });
+  await menuButton.click();
 }
 
 /**
@@ -283,12 +314,9 @@ export async function clickTableInSidebar(
   page: Page,
   tableName: string,
 ): Promise<void> {
-  const span = page
-    .getByRole("navigation")
-    .getByText(tableName, { exact: true })
-    .first();
-  await expect(span).toBeVisible({ timeout: API_TIMEOUT_MS });
-  await span.click();
+  const tableItem = page.getByTestId(`left-menu-table-item-${tableName}`);
+  await expect(tableItem).toBeVisible({ timeout: API_TIMEOUT_MS });
+  await tableItem.click();
 
   // DataPreview（テーブルタブ）が表示されるまで待機
   await expect(page.getByRole("tab", { name: tableName })).toBeVisible({
@@ -362,6 +390,21 @@ export async function closeMessageDialog(page: Page): Promise<void> {
   } catch {
     // ダイアログが存在しない場合は無視
   }
+}
+
+/**
+ * 保存成功メッセージを確認して閉じる。
+ */
+export async function closeSaveSuccessDialog(page: Page): Promise<void> {
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible({ timeout: API_TIMEOUT_MS });
+  await expect(
+    dialog.getByText(/ファイルを保存しました|File saved successfully/i),
+  ).toBeVisible({ timeout: API_TIMEOUT_MS });
+
+  const okBtn = dialog.getByRole("button", { name: /^OK$/i });
+  await okBtn.click();
+  await expect(dialog).toBeHidden({ timeout: API_TIMEOUT_MS });
 }
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,6 @@
+import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react-swc";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import path from "node:path";
 import license from "rollup-plugin-license";
 import { defineConfig } from "vitest/config";
@@ -7,12 +8,30 @@ import { defineConfig } from "vitest/config";
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    babel({
+      presets: [
+        reactCompilerPreset({
+          target: "19",
+        }),
+      ],
+      // node_modules は除外してビルド速度を維持
+      exclude: /node_modules/,
+    }),
+    tailwindcss(),
+  ],
   resolve: {
     // `@` を `src` ディレクトリへのエイリアスとして設定
     alias: {
       "@": path.resolve(__dirname, "src"),
+      // plotly.js のブラウザビルドを使用（Node.js 依存モジュールを含む plotly.js を回避）
+      "plotly.js": "plotly.js-dist-min",
     },
+  },
+
+  optimizeDeps: {
+    include: ["plotly.js-dist-min"],
   },
 
   // Tauri CLI出力を見やすくするための設定
@@ -28,7 +47,7 @@ export default defineConfig({
           host,
           port: 5173,
         }
-      : undefined,
+      : false,
     watch: {
       ignored: ["**/src-tauri/**"],
     },
@@ -65,6 +84,18 @@ export default defineConfig({
       "src/lib/**/*.test.ts",
       "src/hooks/**/*.test.ts",
       "src/stores/**/*.test.ts",
+      "src/constants/**/*.test.ts",
     ],
+    coverage: {
+      provider: "v8",
+      include: [
+        "src/stores/**/*.ts",
+        "src/hooks/**/*.ts",
+        "src/constants/**/*.ts",
+        "src/lib/**/*.ts",
+        "src/components/**/*.tsx",
+      ],
+      exclude: ["**/*.test.ts", "**/*.test.tsx", "src/test/**", "src/tests/**"],
+    },
   },
 });

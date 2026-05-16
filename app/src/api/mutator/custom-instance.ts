@@ -1,4 +1,4 @@
-import { client } from "../bridge/api-gateway"; // 既存のclient.tsをインポート
+import { client } from "@/api/bridge/api-gateway"; // 既存のclient.tsをインポート
 
 export const customInstance = async <T>(
   config: {
@@ -22,6 +22,9 @@ export const customInstance = async <T>(
       break;
     case "POST":
       response = await client.post<T>(url, data);
+      break;
+    case "PATCH":
+      response = await client.patch<T>(url, data);
       break;
     case "PUT":
       response = await client.put<T>(url, data);

@@ -1,3 +1,12 @@
+import { OutputResultFormat } from "@/api/model/outputResultFormat";
+import { RegressionOutputOptionsStatInParentheses } from "@/api/model/regressionOutputOptionsStatInParentheses";
+import { Button } from "@/components/atoms/Button/Button";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
+import { useOutputResult } from "@/hooks/useOutputResult";
+import { cn } from "@/lib/utils/helpers";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
+import * as RadixDialog from "@radix-ui/react-dialog";
 import {
   Check,
   ChevronDown,
@@ -7,14 +16,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { OutputResultRequestFormat } from "../../../api/model/outputResultRequestFormat";
-import { OutputResultRequestStatInParentheses } from "../../../api/model/outputResultRequestStatInParentheses";
-import { useOutputResult } from "../../../hooks/useOutputResult";
-import { cn } from "../../../lib/utils/helpers";
-import type { LinearRegressionResultType } from "../../../types/commonTypes";
-import { Button } from "../../atoms/Button/Button";
-import { Select, SelectItem } from "../../atoms/Input/Select";
-import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
 
 // ─── 型定義 ──────────────────────────────────────────────────────────────────
 
@@ -23,56 +24,144 @@ type VarEntryType = {
   label: string;
 };
 
-export type OutputResultDialogPropsType = {
+type BaseOutputResultDialogPropsType = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+type RegressionOutputResultDialogPropsType =
+  BaseOutputResultDialogPropsType & {
+    resultKind: "regression";
+    result: LinearRegressionResultType;
+  };
+
+type NonRegressionResultKindType =
+  | "descriptive_statistics"
+  | "confidence_interval"
+  | "statistical_test";
+
+type NonRegressionOutputResultDialogPropsType =
+  BaseOutputResultDialogPropsType & {
+    resultKind: NonRegressionResultKindType;
+    resultId: string;
+    title: string;
+  };
+
+export type OutputResultDialogPropsType =
+  | RegressionOutputResultDialogPropsType
+  | NonRegressionOutputResultDialogPropsType;
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
+  ? Omit<T, K>
+  : never;
+
+export type OutputResultDialogTargetType = DistributiveOmit<
+  OutputResultDialogPropsType,
+  "open" | "onOpenChange"
+>;
+
+type RegressionOutputResultDialogContentPropsType = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   result: LinearRegressionResultType;
+  format: OutputResultFormat;
+  setFormat: (value: OutputResultFormat) => void;
+  statInParentheses: RegressionOutputOptionsStatInParentheses;
+  setStatInParentheses: (
+    value: RegressionOutputOptionsStatInParentheses,
+  ) => void;
+  constAtBottom: boolean;
+  setConstAtBottom: (value: boolean) => void;
+};
+
+type NonRegressionOutputResultDialogContentPropsType = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  resultId: string;
+  title: string;
+  resultType: NonRegressionResultKindType;
+  format: OutputResultFormat;
+  setFormat: (value: OutputResultFormat) => void;
+};
+
+const createInitialVarEntries = (
+  result: LinearRegressionResultType,
+): VarEntryType[] =>
+  result.parameters.map((parameter) => ({
+    original: parameter.variable,
+    label: "",
+  }));
+
+const createNonRegressionOutputRequest = ({
+  resultId,
+  resultType,
+  format,
+}: {
+  resultId: string;
+  resultType: NonRegressionResultKindType;
+  format: OutputResultFormat;
+}) => {
+  switch (resultType) {
+    case "descriptive_statistics":
+      return {
+        resultType,
+        resultIds: [resultId],
+        format,
+        options: {
+          includeResultName: false,
+          includeTableName: false,
+        },
+      };
+    case "confidence_interval":
+      return {
+        resultType,
+        resultIds: [resultId],
+        format,
+        options: {
+          includeResultName: false,
+          includeTableName: false,
+          includeConfidenceLevel: true,
+        },
+      };
+    case "statistical_test":
+      return {
+        resultType,
+        resultIds: [resultId],
+        format,
+      };
+  }
 };
 
 // ─── コンポーネント ───────────────────────────────────────────────────────────
 
-export const OutputResultDialog = ({
+const RegressionOutputResultDialogContent = ({
   open,
   onOpenChange,
   result,
-}: OutputResultDialogPropsType) => {
+  format,
+  setFormat,
+  statInParentheses,
+  setStatInParentheses,
+  constAtBottom,
+  setConstAtBottom,
+}: RegressionOutputResultDialogContentPropsType) => {
   const { t } = useTranslation();
-
-  // ── オプション state ─────────────────────────────────────────────────────
-  const [format, setFormat] = useState<OutputResultRequestFormat>(
-    OutputResultRequestFormat.markdown,
-  );
-  const [statInParentheses, setStatInParentheses] =
-    useState<OutputResultRequestStatInParentheses>(
-      OutputResultRequestStatInParentheses.se,
-    );
-  const [constAtBottom, setConstAtBottom] = useState(false);
+  const initialVarEntries = createInitialVarEntries(result);
 
   // ── 変数エントリー（順序 + ラベル） ──────────────────────────────────────
-  const [varEntries, setVarEntries] = useState<VarEntryType[]>([]);
+  const [varEntries, setVarEntries] = useState<VarEntryType[]>(
+    () => initialVarEntries,
+  );
 
   // ── ラベル変更をデバウンス（API 呼び出し頻度を抑制） ─────────────────────
   const [debouncedVarEntries, setDebouncedVarEntries] = useState<
     VarEntryType[]
-  >([]);
+  >(() => initialVarEntries);
 
   // ── コピー状態 ────────────────────────────────────────────────────────────
   const [isCopied, setIsCopied] = useState(false);
 
   const { content, isLoading, error, fetchOutput } = useOutputResult();
-
-  // ── ダイアログを開くたびに変数リストを初期化 ─────────────────────────────
-  useEffect(() => {
-    if (open) {
-      const entries = result.parameters.map((p) => ({
-        original: p.variable,
-        label: "",
-      }));
-      setVarEntries(entries);
-      setDebouncedVarEntries(entries);
-      setIsCopied(false);
-    }
-  }, [open, result.parameters]);
 
   // ── varEntries 変更を 600ms デバウンス ────────────────────────────────────
   useEffect(() => {
@@ -95,16 +184,17 @@ export const OutputResultDialog = ({
     const variableOrder = entries.map((e) => e.original);
 
     void fetchOutput({
+      resultType: "regression",
       resultIds: [result.resultId],
       format,
-      statInParentheses,
-      constAtBottom,
-      variableLabels:
-        Object.keys(variableLabels).length > 0 ? variableLabels : undefined,
-      variableOrder,
+      options: {
+        statInParentheses,
+        constAtBottom,
+        variableLabels:
+          Object.keys(variableLabels).length > 0 ? variableLabels : undefined,
+        variableOrder,
+      },
     });
-    // fetchOutput は useCallback で安定しているため依存に含める
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     open,
     result.resultId,
@@ -112,6 +202,7 @@ export const OutputResultDialog = ({
     statInParentheses,
     constAtBottom,
     debouncedVarEntriesJson,
+    fetchOutput,
   ]);
 
   // ── 変数操作 ──────────────────────────────────────────────────────────────
@@ -168,16 +259,16 @@ export const OutputResultDialog = ({
           </label>
           <Select
             value={format}
-            onValueChange={(v) => setFormat(v as OutputResultRequestFormat)}
+            onValueChange={(v) => setFormat(v as OutputResultFormat)}
             data-testid="output-format-select"
           >
-            <SelectItem value={OutputResultRequestFormat.text}>
+            <SelectItem value={OutputResultFormat.text}>
               {t("OutputResultDialog.FormatText")}
             </SelectItem>
-            <SelectItem value={OutputResultRequestFormat.markdown}>
+            <SelectItem value={OutputResultFormat.markdown}>
               {t("OutputResultDialog.FormatMarkdown")}
             </SelectItem>
-            <SelectItem value={OutputResultRequestFormat.latex}>
+            <SelectItem value={OutputResultFormat.latex}>
               {t("OutputResultDialog.FormatLatex")}
             </SelectItem>
           </Select>
@@ -190,20 +281,22 @@ export const OutputResultDialog = ({
           <Select
             value={statInParentheses}
             onValueChange={(v) =>
-              setStatInParentheses(v as OutputResultRequestStatInParentheses)
+              setStatInParentheses(
+                v as RegressionOutputOptionsStatInParentheses,
+              )
             }
             data-testid="output-stat-select"
           >
-            <SelectItem value={OutputResultRequestStatInParentheses.se}>
+            <SelectItem value={RegressionOutputOptionsStatInParentheses.se}>
               {t("OutputResultDialog.StatSE")}
             </SelectItem>
-            <SelectItem value={OutputResultRequestStatInParentheses.t}>
+            <SelectItem value={RegressionOutputOptionsStatInParentheses.t}>
               {t("OutputResultDialog.StatT")}
             </SelectItem>
-            <SelectItem value={OutputResultRequestStatInParentheses.p}>
+            <SelectItem value={RegressionOutputOptionsStatInParentheses.p}>
               {t("OutputResultDialog.StatP")}
             </SelectItem>
-            <SelectItem value={OutputResultRequestStatInParentheses.none}>
+            <SelectItem value={RegressionOutputOptionsStatInParentheses.none}>
               {t("OutputResultDialog.StatNone")}
             </SelectItem>
           </Select>
@@ -342,9 +435,9 @@ export const OutputResultDialog = ({
 
       {/* ── フッター（コピー + 閉じる） ── */}
       <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-700 pt-3">
-        <Button variant="outline" onClick={() => onOpenChange(false)}>
-          {t("Common.Close")}
-        </Button>
+        <RadixDialog.Close asChild>
+          <Button variant="outline">{t("Common.Close")}</Button>
+        </RadixDialog.Close>
         <button
           type="button"
           onClick={() => void handleCopy()}
@@ -374,4 +467,176 @@ export const OutputResultDialog = ({
       </div>
     </BaseDialog>
   );
+};
+
+// ─── 基本統計量出力ダイアログ内容 ──────────────────────────────────────────────
+
+const NonRegressionOutputResultDialogContent = ({
+  open,
+  onOpenChange,
+  resultId,
+  title,
+  resultType,
+  format,
+  setFormat,
+}: NonRegressionOutputResultDialogContentPropsType) => {
+  const { t } = useTranslation();
+  const [isCopied, setIsCopied] = useState(false);
+  const { content, isLoading, error, fetchOutput } = useOutputResult();
+
+  useEffect(() => {
+    if (!open) return;
+    void fetchOutput(
+      createNonRegressionOutputRequest({
+        resultId,
+        resultType,
+        format,
+      }),
+    );
+  }, [open, resultId, resultType, format, fetchOutput]);
+
+  const handleCopy = async () => {
+    if (!content) return;
+    await navigator.clipboard.writeText(content);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  return (
+    <BaseDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("OutputResultDialog.Title")}
+      subtitle={title}
+      maxWidth="2xl"
+      footerVariant="none"
+    >
+      {/* ── 出力フォーマット ── */}
+      <div className="mb-4 max-w-xs">
+        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+          {t("OutputResultDialog.Format")}
+        </label>
+        <Select
+          value={format}
+          onValueChange={(v) => setFormat(v as OutputResultFormat)}
+          data-testid="output-format-select"
+        >
+          <SelectItem value={OutputResultFormat.text}>
+            {t("OutputResultDialog.FormatText")}
+          </SelectItem>
+          <SelectItem value={OutputResultFormat.markdown}>
+            {t("OutputResultDialog.FormatMarkdown")}
+          </SelectItem>
+          <SelectItem value={OutputResultFormat.latex}>
+            {t("OutputResultDialog.FormatLatex")}
+          </SelectItem>
+        </Select>
+      </div>
+
+      {/* ── プレビュー ── */}
+      <div className="mb-4">
+        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          {t("OutputResultDialog.Preview")}
+        </h4>
+        <div className="relative max-h-64 min-h-20 overflow-auto rounded-md border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+          {isLoading && (
+            <div className="flex h-20 items-center justify-center gap-2 text-sm text-gray-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {t("OutputResultDialog.Loading")}
+            </div>
+          )}
+          {error && !isLoading && (
+            <div className="flex h-20 items-center justify-center text-sm text-red-500">
+              {t("OutputResultDialog.Error")}
+            </div>
+          )}
+          {content && !isLoading && (
+            <pre
+              className="p-3 text-xs font-mono leading-relaxed whitespace-pre text-gray-800 dark:text-gray-200"
+              data-testid="output-preview"
+            >
+              {content}
+            </pre>
+          )}
+        </div>
+      </div>
+
+      {/* ── フッター ── */}
+      <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-700 pt-3">
+        <RadixDialog.Close asChild>
+          <Button variant="outline">{t("Common.Close")}</Button>
+        </RadixDialog.Close>
+        <button
+          type="button"
+          onClick={() => void handleCopy()}
+          disabled={!content || isLoading}
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-md px-6 py-2.5 text-sm font-semibold transition-colors cursor-pointer",
+            "focus-visible:outline-2 focus-visible:outline-offset-2",
+            isCopied
+              ? "bg-green-600 text-white focus-visible:outline-green-600"
+              : "bg-brand-accent text-white hover:bg-brand-accent/90 focus-visible:outline-brand-accent",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+          )}
+          data-testid="output-copy-btn"
+        >
+          {isCopied ? (
+            <>
+              <Check className="h-4 w-4" />
+              {t("OutputResultDialog.Copied")}
+            </>
+          ) : (
+            <>
+              <Clipboard className="h-4 w-4" />
+              {t("OutputResultDialog.CopyButton")}
+            </>
+          )}
+        </button>
+      </div>
+    </BaseDialog>
+  );
+};
+
+export const OutputResultDialog = (props: OutputResultDialogPropsType) => {
+  const [format, setFormat] = useState<OutputResultFormat>(
+    OutputResultFormat.markdown,
+  );
+  const [statInParentheses, setStatInParentheses] =
+    useState<RegressionOutputOptionsStatInParentheses>(
+      RegressionOutputOptionsStatInParentheses.se,
+    );
+  const [constAtBottom, setConstAtBottom] = useState(false);
+
+  switch (props.resultKind) {
+    case "descriptive_statistics":
+    case "confidence_interval":
+    case "statistical_test":
+      return (
+        <NonRegressionOutputResultDialogContent
+          key={props.resultId}
+          open={props.open}
+          onOpenChange={props.onOpenChange}
+          resultId={props.resultId}
+          title={props.title}
+          resultType={props.resultKind}
+          format={format}
+          setFormat={setFormat}
+        />
+      );
+    case "regression":
+      return (
+        <RegressionOutputResultDialogContent
+          key={props.result.resultId}
+          open={props.open}
+          onOpenChange={props.onOpenChange}
+          result={props.result}
+          format={format}
+          setFormat={setFormat}
+          statInParentheses={statInParentheses}
+          setStatInParentheses={setStatInParentheses}
+          constAtBottom={constAtBottom}
+          setConstAtBottom={setConstAtBottom}
+        />
+      );
+  }
 };

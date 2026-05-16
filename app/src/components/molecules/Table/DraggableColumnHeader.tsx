@@ -10,7 +10,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import type { ReactNode } from "react";
-import { cn } from "../../../lib/utils/helpers";
+import { cn } from "@/lib/utils/helpers";
 
 type DraggableColumnHeaderProps = {
   id: string;

@@ -1,3 +1,4 @@
+import type { FileType, SortDirection, SortField } from "@/types/commonTypes";
 import {
   ArrowDown,
   ArrowUp,
@@ -5,12 +6,8 @@ import {
   FileText,
   Folder,
 } from "lucide-react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import type {
-  FileType,
-  SortDirection,
-  SortField,
-} from "../../../types/commonTypes";
 
 type FileListTableProps = {
   files: FileType[];
@@ -23,6 +20,8 @@ type FileListTableProps = {
   sortField?: SortField | null;
   sortDirection?: SortDirection;
   onSort?: (field: SortField) => void;
+  actionsHeader?: string;
+  renderRowActions?: (file: FileType) => ReactNode;
 };
 
 export const FileListTable = ({
@@ -36,6 +35,8 @@ export const FileListTable = ({
   sortField = null,
   sortDirection = null,
   onSort,
+  actionsHeader,
+  renderRowActions,
 }: FileListTableProps) => {
   const { t } = useTranslation();
 
@@ -65,7 +66,7 @@ export const FileListTable = ({
       className={`overflow-hidden rounded-xl border border-brand-primary/20 w-full${className ? ` ${className}` : ""}`}
     >
       <div
-        className="overflow-y-auto overflow-x-auto"
+        className="app-scrollbar overflow-y-auto overflow-x-auto"
         style={{ maxHeight, height: maxHeight === "100%" ? "100%" : undefined }}
       >
         <table
@@ -116,6 +117,16 @@ export const FileListTable = ({
                   {onSort && getSortIcon("modifiedTime")}
                 </div>
               </th>
+              {renderRowActions && (
+                <th
+                  className="px-2 sm:px-3 md:px-4 py-3 text-right text-xs text-white font-medium uppercase tracking-wider"
+                  style={{ width: "1%", minWidth: "64px" }}
+                >
+                  <span className="sr-only">
+                    {actionsHeader ?? t("Common.Delete")}
+                  </span>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-brand-primary/20 bg-background-light">
@@ -126,7 +137,7 @@ export const FileListTable = ({
                 onClick={() => onFileClick(file)}
               >
                 <td
-                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm font-medium text-black min-w-0"
+                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm font-medium text-black dark:text-gray-100 min-w-0"
                   style={{ width: "50%", minWidth: "120px" }}
                 >
                   <div className="flex items-center gap-2 min-w-0">
@@ -146,7 +157,7 @@ export const FileListTable = ({
                   </div>
                 </td>
                 <td
-                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm text-black/60 min-w-0 hidden sm:table-cell"
+                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm text-black/60 dark:text-gray-400 min-w-0 hidden sm:table-cell"
                   style={{ width: "25%", minWidth: "80px" }}
                 >
                   {file.isFile && (
@@ -154,13 +165,24 @@ export const FileListTable = ({
                   )}
                 </td>
                 <td
-                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm text-black/60 min-w-0"
+                  className="px-2 sm:px-3 md:px-6 py-2.5 text-sm text-black/60 dark:text-gray-400 min-w-0"
                   style={{ width: "25%", minWidth: "100px" }}
                 >
                   {file.isFile && (
                     <span className="truncate block">{file.modifiedTime}</span>
                   )}
                 </td>
+                {renderRowActions && (
+                  <td
+                    className="px-2 sm:px-3 md:px-4 py-2.5 text-right"
+                    style={{ width: "1%", minWidth: "64px" }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-end">
+                      {renderRowActions(file)}
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

@@ -4,26 +4,26 @@ import {
   getAuthToken,
   getFilesSafe,
   getOsInfo,
-} from "./api/bridge/tauri-commands";
-import { getEconomiconAppAPI } from "./api/endpoints";
-import { showMessageDialog } from "./lib/dialog/message";
-import { useCurrentPageStore } from "./stores/currentView";
-import { useLoadingStore } from "./stores/loading";
-import { useSettingsStore } from "./stores/settings";
-import { useTableListStore } from "./stores/tableList";
+} from "@/api/bridge/tauri-commands";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useLoadingStore } from "@/stores/loading";
+import { useSettingsStore } from "@/stores/settings";
+import { useTableListStore } from "@/stores/tableList";
 
 import {
   Panel,
   Group as PanelGroup,
   Separator as PanelResizeHandle,
 } from "react-resizable-panels";
-import { ConfirmDialog } from "./components/molecules/Dialog/ConfirmDialog";
-import { MessageDialog } from "./components/molecules/Dialog/MessageDialog";
-import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
-import { AppBar } from "./components/organisms/Header/AppBar";
-import { LeftSideMenu } from "./components/pages/LeftSideMenu";
-import { MainView } from "./components/pages/MainView";
-import { useFilesStore } from "./stores/files";
+import { ConfirmDialog } from "@/components/molecules/Dialog/ConfirmDialog";
+import { MessageDialog } from "@/components/molecules/Dialog/MessageDialog";
+import { LoadingOverlay } from "@/components/molecules/Loading/LoadingOverlay";
+import { AppBar } from "@/components/organisms/Header/AppBar";
+import { LeftSideMenu } from "@/components/pages/LeftSideMenu";
+import { MainView } from "@/components/pages/MainView";
+import { useFilesStore } from "@/stores/files";
 
 export const App = () => {
   const { t } = useTranslation();
@@ -51,8 +51,8 @@ export const App = () => {
     const waitForServer = async (
       api: ReturnType<typeof getEconomiconAppAPI>,
     ) => {
-      const MAX_RETRIES = 120; // 1秒 × 120 = 2分
-      const INTERVAL_MS = 1000;
+      const MAX_RETRIES = 100; // ヘルスチェック時間1000ミリ秒×待機時間500ミリ秒 × 100 = 150秒
+      const INTERVAL_MS = 500; // 500ミリ秒ごとに再試行
       // reqwest クライアントのグローバルタイムアウトは 300 秒だが、ヘルスチェックが
       // それだけブロックすると全体タイムアウトが大幅に延びる。
       // JS レベルで 1 回あたり 1 秒のタイムアウトを設けることで

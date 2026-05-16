@@ -6,11 +6,14 @@ from pydantic import Field, StringConstraints, field_validator, model_validator
 
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import BaseRequest, BaseResult
-from economicon.schemas.entities import SimulationColumnConfig, SortInstruction
 from economicon.schemas.enums import (
     DistributionType,
     DummyMode,
     NullStrategy,
+)
+from economicon.schemas.shared_entities import (
+    SimulationColumnConfig,
+    SortInstruction,
 )
 from economicon.schemas.types import (
     ColumnName,
@@ -106,59 +109,6 @@ class RenameColumnResult(BaseResult):
         Field(
             title="Column Name",
             description="変更後のカラム名",
-        ),
-    ]
-
-
-# ---------------------------------------------------------------------------
-# カラム複製
-# ---------------------------------------------------------------------------
-
-
-class DuplicateColumnRequestBody(BaseRequest):
-    """カラム複製リクエスト"""
-
-    table_name: Annotated[
-        TableName,
-        Field(
-            description="操作対象のテーブル名。ワークスペースに存在するテーブルの中から指定してください。"
-        ),
-    ]
-    source_column_name: Annotated[
-        ColumnName,
-        Field(
-            description="元となるカラム名。ワークスペースに存在するテーブルの中から指定してください。"
-        ),
-    ]
-    new_column_name: Annotated[
-        NewColumnName,
-        Field(
-            description="新しいカラム名。既存のカラム名と重複しない名前を指定してください。"
-        ),
-    ]
-    add_position_column: Annotated[
-        ColumnName,
-        Field(
-            description="追加位置のカラム名。指定したカラムの右隣に新しいカラムが追加されます。既存のカラム名から指定してください。",
-        ),
-    ]
-
-
-class DuplicateColumnResult(BaseResult):
-    """カラム複製レスポンス"""
-
-    table_name: Annotated[
-        str,
-        Field(
-            title="Table Name",
-            description="複製操作を行ったテーブル名",
-        ),
-    ]
-    column_name: Annotated[
-        str,
-        Field(
-            title="Column Name",
-            description="複製後の新しいカラム名",
         ),
     ]
 
@@ -835,5 +785,104 @@ class MoveColumnResult(BaseResult):
         Field(
             title="Column Names",
             description="移動後の全列名リスト（順序付き）",
+        ),
+    ]
+
+
+# ---------------------------------------------------------------------------
+# パネル時間カラム追加
+# ---------------------------------------------------------------------------
+
+
+class AddPanelTimeColumnRequestBody(BaseRequest):
+    """パネル時間カラム追加リクエスト
+
+    個体ID列でグループ化し、グループ内の行順に
+    start_value から step ずつ増加する整数列を追加する。
+    パネルデータの年次・期次変数生成に使用する。
+    """
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            description=(
+                "操作対象のテーブル名。"
+                "ワークスペースに存在するテーブルの中から"
+                "指定してください。"
+            )
+        ),
+    ]
+    id_column: Annotated[
+        ColumnName,
+        Field(
+            description=(
+                "グループ化キーとなる個体ID列名。"
+                "既存の列名から指定してください。"
+            )
+        ),
+    ]
+    new_column_name: Annotated[
+        NewColumnName,
+        Field(
+            description=(
+                "新しいカラム名。"
+                "既存のカラム名と重複しない名前を指定してください。"
+            )
+        ),
+    ]
+    add_position_column: Annotated[
+        ColumnName,
+        Field(
+            description=(
+                "追加位置のカラム名。指定したカラムの右隣に"
+                "新しいカラムが追加されます。"
+                "既存のカラム名から指定してください。"
+            ),
+        ),
+    ]
+    start_value: Annotated[
+        int,
+        Field(
+            default=1,
+            description=(
+                "各グループ内の最初の値。"
+                "例: 2000 を指定すると 2000, 2001, 2002, ... となる。"
+            ),
+        ),
+    ]
+    step: Annotated[
+        int,
+        Field(
+            default=1,
+            description=(
+                "増分。負の値で降順も可能。"
+                "0 は禁止（全行同値になるため固定値列を使用すること）。"
+            ),
+        ),
+    ]
+
+    @field_validator("step")
+    @classmethod
+    def _validate_step_nonzero(cls, v: int) -> int:
+        if v == 0:
+            raise ValueError(_("step must not be 0."))
+        return v
+
+
+class AddPanelTimeColumnResult(BaseResult):
+    """パネル時間カラム追加レスポンス"""
+
+    table_name: Annotated[
+        str,
+        Field(
+            title="Table Name",
+            description="パネル時間カラムを追加したテーブル名",
+        ),
+    ]
+    column_name: Annotated[
+        str,
+        Field(
+            title="Column Name",
+            description="追加したパネル時間カラム名",
         ),
     ]

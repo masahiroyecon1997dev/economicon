@@ -1,0 +1,66 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+    pull-request-branch-name:
+      separator: "-"
+
+  - package-ecosystem: "npm"
+    directory: "/app"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:30"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+
+  - package-ecosystem: "uv"
+    directory: "/api"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "api"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+
+  - package-ecosystem: "cargo"
+    directory: "/app/src-tauri"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:30"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "rust"
+    commit-message:
+      prefix: "deps"

@@ -1,12 +1,13 @@
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
+import type { TableOperation } from "@/components/organisms/Dialog/TableOperationDialog";
+import { TableOperationDialog } from "@/components/organisms/Dialog/TableOperationDialog";
+import { cn } from "@/lib/utils/helpers";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Copy, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "../../../lib/utils/helpers";
-import type { TableOperation } from "../../organisms/Dialog/TableOperationDialog";
-import { TableOperationDialog } from "../../organisms/Dialog/TableOperationDialog";
 
 // ---------------------------------------------------------------------------
 // 共通スロット型: ContextMenu / DropdownMenu 両方と互換
@@ -99,13 +100,13 @@ export const TableNavItem = ({
                 : "font-normal text-white/70 hover:bg-white/10 hover:text-white",
             )}
             onClick={() => onClick(tableName)}
+            data-testid={`left-menu-table-item-${tableName}`}
           >
-            <span
-              className="flex-1 min-w-0 block truncate text-sm"
-              title={tableName}
-            >
-              {tableName}
-            </span>
+            <Tooltip content={tableName}>
+              <span className="flex-1 min-w-0 block truncate text-sm">
+                {tableName}
+              </span>
+            </Tooltip>
 
             {/* 縦三点リーダー: ホバー時 or メニュー開放時のみ表示 */}
             <DropdownMenu.Root>
@@ -120,6 +121,7 @@ export const TableNavItem = ({
                   )}
                   aria-label={t("AreaLabels.DataMenu")}
                   onClick={(e) => e.stopPropagation()}
+                  data-testid={`left-menu-table-menu-${tableName}`}
                 >
                   <MoreVertical size={14} />
                 </button>

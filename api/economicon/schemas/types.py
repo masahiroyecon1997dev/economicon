@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, Field, StringConstraints
 
 from economicon.i18n.translation import gettext as _
-from economicon.schemas.common import (
+from economicon.schemas.distribution_params import (
     BernoulliParams,
     BetaParams,
     BinomialParams,
@@ -13,14 +13,17 @@ from economicon.schemas.common import (
     GeometricParams,
     HypergeometricParams,
     LognormalParams,
-    LogParams,
     NegativeBinomialParams,
     NormalParams,
     PoissonParams,
-    PowerParams,
-    RootParams,
+    SequenceParams,
     UniformParams,
     WeibullParams,
+)
+from economicon.schemas.transform_params import (
+    LogParams,
+    PowerParams,
+    RootParams,
 )
 
 NAME_PATTERN = r"^[^\x00-\x1f\x7f]+$"
@@ -113,6 +116,26 @@ ColumnName = Annotated[
         title="Column Name",
         examples=["population", "人口"],
         description="カラム名",
+    ),
+]
+
+ResultName = Annotated[
+    str,
+    Field(
+        default="",
+        title="Result Name",
+        max_length=128,
+        description="分析結果の名前（省略時は自動生成）",
+    ),
+]
+
+ResultDescription = Annotated[
+    str,
+    Field(
+        default="",
+        title="Description",
+        max_length=512,
+        description="分析結果の説明メモ",
     ),
 ]
 
@@ -229,6 +252,7 @@ type DistributionParams = (
     | HypergeometricParams
     | NegativeBinomialParams
     | FixedParams
+    | SequenceParams
 )
 
 type DistributionConfig = Annotated[

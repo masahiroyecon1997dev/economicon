@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { useCurrentPageStore } from "../../../../stores/currentView";
-import { useTableInfosStore } from "../../../../stores/tableInfos";
-import { useTableListStore } from "../../../../stores/tableList";
-import { DeleteTableForm } from "./DeleteTableForm";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { DeleteTableForm } from "@/components/organisms/Dialog/TableOperationForms/DeleteTableForm";
 
 // ---------------------------------------------------------------------------
 // Mocks

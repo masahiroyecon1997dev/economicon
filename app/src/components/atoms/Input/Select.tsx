@@ -1,7 +1,7 @@
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown } from "lucide-react";
 import { type ReactNode } from "react";
-import { cn } from "../../../lib/utils/helpers";
+import { cn } from "@/lib/utils/helpers";
 
 type SelectProps = {
   value: string;

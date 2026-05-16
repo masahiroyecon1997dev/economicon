@@ -1,15 +1,20 @@
-from typing import ClassVar
+from typing import ClassVar, cast
 
 import numpy as np
 from scipy import stats
+from statsmodels.stats.proportion import proportion_confint
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.schemas import ConfidenceIntervalRequestBody
 from economicon.schemas.enums import ConfidenceIntervalStatisticsType
+from economicon.services.data.analysis_result import AnalysisResult
+from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils import ProcessingError, ValidationError
 from economicon.utils.validators import validate_existence
+
+_RESULT_TYPE = "confidence_interval"
 
 
 class ConfidenceInterval:
@@ -31,12 +36,16 @@ class ConfidenceInterval:
         self,
         body: ConfidenceIntervalRequestBody,
         tables_store: TablesStore,
+        result_store: AnalysisResultStore,
     ):
         self.tables_store = tables_store
+        self.result_store = result_store
         self.table_name = body.table_name
         self.column_name = body.column_name
         self.confidence_level = body.confidence_level
         self.statistic_type = body.statistic_type
+        self.bootstrap_n_resamples = body.bootstrap_n_resamples
+        self.bootstrap_seed = body.bootstrap_seed
 
     def validate(self):
         # テーブル名の検証
@@ -109,7 +118,24 @@ class ConfidenceInterval:
                 "confidenceInterval": {"lower": ci_lower, "upper": ci_upper},
                 "confidenceLevel": self.confidence_level,
             }
-            return result
+
+            # AnalysisResultStore に保存
+            # （自動命名: "{column} の {stat_type} 信頼区間 #{n}"）
+            seq = self.result_store.next_sequence(_RESULT_TYPE)
+            name = _("{column} の {stat_type} 信頼区間 #{seq}").format(
+                column=self.column_name,
+                stat_type=self.statistic_type.value,
+                seq=seq,
+            )
+            analysis_result = AnalysisResult(
+                name=name,
+                description="",
+                table_name=self.table_name,
+                result_data=result,
+                result_type=_RESULT_TYPE,
+            )
+            result_id = self.result_store.save_result(analysis_result)
+            return {"resultId": result_id}
 
         except ValidationError:
             # ValidationErrorは再発生させる
@@ -146,9 +172,9 @@ class ConfidenceInterval:
 
         # Bootstrap法で信頼区間を計算
         bootstrap_medians = []
-        rng = np.random.default_rng()
+        rng = np.random.default_rng(self.bootstrap_seed)
 
-        for _index in range(1000):
+        for _index in range(self.bootstrap_n_resamples):
             bootstrap_sample = rng.choice(data, size=n, replace=True)
             bootstrap_medians.append(np.median(bootstrap_sample))
 
@@ -158,9 +184,10 @@ class ConfidenceInterval:
 
         return float(median_val), float(ci_lower), float(ci_upper)
 
-    def _calculate_proportion_ci(self, data):
-        """比率の信頼区間を計算（二項分布）"""
-        # データを0または1の二項データとして扱う
+    def _calculate_proportion_ci(
+        self, data: np.ndarray
+    ) -> tuple[float, float, float]:
+        """比率の信頼区間を計算（statsmodels Wilson score）"""
         unique_vals = np.unique(data)
         supremum = 2
         if not (
@@ -176,23 +203,19 @@ class ConfidenceInterval:
             )
 
         n = len(data)
-        successes = np.sum(data)
+        successes = int(np.sum(data))
         proportion = successes / n
-
-        # Wilson score interval（正確な信頼区間）
-        z = stats.norm.ppf((1 + self.confidence_level) / 2)
-        denominator = 1 + z**2 / n
-        center = (proportion + z**2 / (2 * n)) / denominator
-        margin = (
-            z
-            * np.sqrt((proportion * (1 - proportion) + z**2 / (4 * n)) / n)
-            / denominator
+        ci_lower, ci_upper = proportion_confint(
+            successes,
+            n,
+            alpha=1.0 - self.confidence_level,
+            method="wilson",
         )
-
-        ci_lower = max(0, center - margin)
-        ci_upper = min(1, center + margin)
-
-        return float(proportion), float(ci_lower), float(ci_upper)
+        return (
+            float(proportion),
+            float(cast(float, ci_lower)),
+            float(cast(float, ci_upper)),
+        )
 
     def _calculate_variance_ci(self, data):
         """分散の信頼区間を計算（カイ二乗分布）"""

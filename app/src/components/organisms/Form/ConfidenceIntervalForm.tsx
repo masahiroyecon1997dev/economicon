@@ -5,15 +5,24 @@ import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { FormField } from "@/components/molecules/Form/FormField";
 import { StatisticsInfoDialog } from "@/components/organisms/Dialog/StatisticsInfoDialog";
+import {
+  AnalysisEmptyState,
+  AnalysisNoTablesState,
+} from "@/components/organisms/EmptyState/AnalysisNoTablesState";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { extractApiErrorMessage } from "@/lib/utils/apiError";
+import {
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
+} from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
-import { useConfidenceIntervalResultsStore } from "@/stores/confidenceIntervalResults";
+import { useAnalysisResultsStore } from "@/stores/analysisResults";
+import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
-import { Info } from "lucide-react";
+import { Info, Loader2, SearchX } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -72,9 +81,10 @@ export const ConfidenceIntervalForm = ({
 }: ConfidenceIntervalFormProps) => {
   const { t } = useTranslation();
   const tableList = useTableListStore((s) => s.tableList);
-  const { selectedTableName, setSelectedTableName, columnList } =
+  const { selectedTableName, setSelectedTableName, columnList, isLoading } =
     useTableColumnLoader({ numericOnly: true, autoLoadOnMount: true });
-  const addResult = useConfidenceIntervalResultsStore((s) => s.addResult);
+  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
   const [levelMode, setLevelMode] = useState<"select" | "manual">("select");
   const [infoDialogKey, setInfoDialogKey] = useState<string | null>(null);
 
@@ -105,23 +115,50 @@ export const ConfidenceIntervalForm = ({
           confidenceLevel,
         });
         if (response.code === "OK" && response.result) {
-          addResult(response.result);
-          const newIndex =
-            useConfidenceIntervalResultsStore.getState().results.length - 1;
-          onAnalysisComplete?.(newIndex);
+          const { resultId } = response.result;
+          const detailResponse = await api.getAnalysisResult(resultId);
+          if (detailResponse.code === "OK") {
+            openResultTab(detailResponse.result);
+            await useAnalysisResultsStore.getState().fetchSummaries();
+            setCurrentView("DataPreview");
+            onAnalysisComplete?.(0);
+            return;
+          }
+
+          await showMessageDialog(
+            t("Error.Error"),
+            buildResponseErrorMessage(
+              detailResponse,
+              t("Error.UnexpectedError"),
+            ),
+          );
           return;
         }
-        await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
+
+        await showMessageDialog(
+          t("Error.Error"),
+          buildResponseErrorMessage(response, t("Error.UnexpectedError")),
+        );
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
         );
       }
     },
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+
+  if (tableList.length === 0) {
+    return (
+      <AnalysisNoTablesState
+        className="flex-1"
+        onCancel={onCancel}
+        onSelect={() => setCurrentView("ImportDataFile")}
+      />
+    );
+  }
 
   return (
     <form
@@ -132,7 +169,7 @@ export const ConfidenceIntervalForm = ({
       }}
       className="flex flex-col flex-1 min-h-0"
     >
-      <div className="flex flex-col gap-4 max-w-lg overflow-y-auto flex-1 min-h-0 pb-2 px-1">
+      <div className="app-scrollbar flex flex-col gap-4 max-w-lg overflow-y-auto flex-1 min-h-0 pb-2 px-1">
         {/* 対象データ */}
         <form.Field name="tableName">
           {(field) => (
@@ -170,20 +207,41 @@ export const ConfidenceIntervalForm = ({
               htmlFor="ci-column-name"
               error={extractFieldError(field.state.meta.errors)}
             >
-              <Select
-                id="ci-column-name"
-                value={field.state.value}
-                placeholder={t("ConfidenceIntervalView.SelectColumn")}
-                error={extractFieldError(field.state.meta.errors)}
-                onValueChange={field.handleChange}
-                disabled={columnList.length === 0}
-              >
-                {columnList.map((col) => (
-                  <SelectItem key={col.name} value={col.name}>
-                    {col.name}
-                  </SelectItem>
-                ))}
-              </Select>
+              {selectedTableName !== "" && isLoading ? (
+                <AnalysisEmptyState
+                  compact
+                  testId="confidence-interval-loading-columns-state"
+                  icon={<Loader2 className="h-6 w-6 animate-spin" />}
+                  title={t("AnalysisEmptyState.LoadingColumnsTitle")}
+                  description={t(
+                    "AnalysisEmptyState.LoadingColumnsDescription",
+                  )}
+                />
+              ) : selectedTableName !== "" && columnList.length === 0 ? (
+                <AnalysisEmptyState
+                  compact
+                  testId="confidence-interval-no-columns-state"
+                  icon={<SearchX className="h-6 w-6" />}
+                  title={t("AnalysisEmptyState.NoEligibleColumnsTitle")}
+                  description={t("ConfidenceIntervalView.NoColumns")}
+                  hint={t("AnalysisEmptyState.NoEligibleColumnsHint")}
+                />
+              ) : (
+                <Select
+                  id="ci-column-name"
+                  value={field.state.value}
+                  placeholder={t("ConfidenceIntervalView.SelectColumn")}
+                  error={extractFieldError(field.state.meta.errors)}
+                  onValueChange={field.handleChange}
+                  disabled={columnList.length === 0}
+                >
+                  {columnList.map((col) => (
+                    <SelectItem key={col.name} value={col.name}>
+                      {col.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+              )}
             </FormField>
           )}
         </form.Field>
@@ -250,7 +308,7 @@ export const ConfidenceIntervalForm = ({
                 "px-3 py-1 text-xs rounded-md border transition-colors",
                 levelMode === "select"
                   ? "bg-brand-accent text-white border-brand-accent"
-                  : "bg-white text-gray-600 border-gray-300 hover:border-gray-400",
+                  : "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500",
               )}
             >
               {t("ConfidenceIntervalView.ConfidenceLevelModeSelect")}
@@ -265,7 +323,7 @@ export const ConfidenceIntervalForm = ({
                 "px-3 py-1 text-xs rounded-md border transition-colors",
                 levelMode === "manual"
                   ? "bg-brand-accent text-white border-brand-accent"
-                  : "bg-white text-gray-600 border-gray-300 hover:border-gray-400",
+                  : "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500",
               )}
             >
               {t("ConfidenceIntervalView.ConfidenceLevelModeManual")}
@@ -327,6 +385,7 @@ export const ConfidenceIntervalForm = ({
         onSelect={() => {}}
         onSelectType="submit"
         disabled={isSubmitting}
+        isLoading={isSubmitting}
       />
 
       {/* 統計量説明ダイアログ */}

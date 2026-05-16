@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T15:46:34+0900",
+    "r_version": "4.5.2",
+    "sandwich_version": "3.1.1",
+    "plm_version": "2.6.7",
+    "aer_version": "1.2.16",
+    "glmnet_version": "4.1.10",
+    "censReg_version": "0.5.38",
+    "sampleSelection_version": "1.2.14",
+    "rdrobust_version": "3.0.0",
+    "seed": 2024,
+    "tolerance_guide": {
+      "ols_coef": "atol=1e-8 (nonrobust)",
+      "ols_se_hc1": "atol=1e-6 (sandwich::vcovHC vs statsmodels HC1)",
+      "logit_probit_coef": "atol=1e-6 (MLE 収束差)",
+      "fe_re_coef": "atol=1e-8",
+      "iv_coef": "atol=1e-8 (AER::ivreg vs linearmodels::IV2SLS)",
+      "tobit_coef": "atol=1e-4 (censReg vs py4etrics MLE 実装差)",
+      "heckman_coef": "atol=1e-6 (sampleSelection vs statsmodels 手動 2 段階)",
+      "rdd_coef": "atol=1e-4 (rdrobust 共通実装なので高精度一致期待)",
+      "lasso_ridge_scaled": "atol=1e-5 (sklearn / glmnet 同一目的関数)"
+    },
+    "data_file": "synthetic_ols.csv",
+    "model": "logit"
+  },
+  "estimates": {
+    "dep_var": "y_binary",
+    "n_obs": 300,
+    "n_positive": 72,
+    "coefficients": {
+      "const": 0.032008974923262,
+      "x1": 0.139530961597571,
+      "x2": -0.106799203555201,
+      "x3": 0.0792540247805744
+    },
+    "std_errors": {
+      "const": 0.2765343289164,
+      "x1": 0.0332558454604654,
+      "x2": 0.0204636696309578,
+      "x3": 0.035827272318484
+    },
+    "t_values": {
+      "const": 0.115750456909597,
+      "x1": 4.19568228278681,
+      "x2": -5.21896636728504,
+      "x3": 2.21211439363989
+    },
+    "p_values": {
+      "const": 0.907850316142878,
+      "x1": 2.72051386488753e-05,
+      "x2": 1.79924429094382e-07,
+      "x3": 0.0269587618299662
+    },
+    "conf_int": {
+      "const": {
+        "lower": -0.509988350241835,
+        "upper": 0.574006300088359
+      },
+      "x1": {
+        "lower": 0.0743507022196288,
+        "upper": 0.204711220975513
+      },
+      "x2": {
+        "lower": -0.146907259023404,
+        "upper": -0.0666911480869977
+      },
+      "x3": {
+        "lower": 0.00903386137203688,
+        "upper": 0.149474188189112
+      }
+    },
+    "pseudo_r_squared": 0.147014910082353,
+    "log_likelihood": -141.018888603323,
+    "log_likelihood_null": -165.323978426092,
+    "aic": 290.037777206646,
+    "bic": 304.852907105271,
+    "lr_test": {
+      "statistic": 48.6101796455374,
+      "df": 3,
+      "p_value": 1.57910440385776e-10
+    }
+  }
+}

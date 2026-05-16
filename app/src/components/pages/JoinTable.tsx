@@ -1,29 +1,29 @@
 import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { JoinType } from "../../api/model";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { JoinType } from "@/api/model";
 import {
   createJoinTableBodyJoinTableNameMax,
   createJoinTableBodyJoinTableNameRegExp,
-} from "../../api/zod/table/table";
-import { showMessageDialog } from "../../lib/dialog/message";
+} from "@/api/zod/table/table";
+import { showMessageDialog } from "@/lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
-} from "../../lib/utils/apiError";
-import { cn, generateId } from "../../lib/utils/helpers";
-import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import type { ColumnType } from "../../types/commonTypes";
-import { InputText } from "../atoms/Input/InputText";
-import { Select, SelectItem } from "../atoms/Input/Select";
-import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
-import { SectionCard } from "../molecules/Card/SectionCard";
-import { FormField } from "../molecules/Form/FormField";
-import { PageLayout } from "../templates/PageLayout";
+} from "@/lib/utils/apiError";
+import { cn, generateId } from "@/lib/utils/helpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import type { ColumnType } from "@/types/commonTypes";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { SectionCard } from "@/components/molecules/Card/SectionCard";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { PageLayout } from "@/components/templates/PageLayout";
 
 type KeyPair = { id: string; left: string; right: string };
 
@@ -201,7 +201,7 @@ export const JoinTable = () => {
       title={t("JoinTable.Title")}
       description={t("JoinTable.Description")}
     >
-      <div className="flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
+      <div className="app-scrollbar flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
         {/* ── Section 1: テーブル・結合タイプ ── */}
         <SectionCard title={t("JoinTable.SelectData")}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -390,6 +390,7 @@ export const JoinTable = () => {
         }
         onCancel={() => setCurrentView("DataPreview")}
         onSelect={handleSubmit}
+        isLoading={isSubmitting}
       />
     </PageLayout>
   );

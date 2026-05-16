@@ -19,6 +19,7 @@ from economicon.schemas import (
     FetchDataToArrowRequestBody,
     FetchDataToJsonRequestBody,
     FetchDataToJsonResult,
+    FetchPlotDataRequestBody,
     FilterRequestBody,
     FilterResult,
     GetTableListResult,
@@ -38,6 +39,9 @@ from economicon.services.tables.delete_table import DeleteTable
 from economicon.services.tables.duplicate_table import DuplicateTable
 from economicon.services.tables.fetch_data_to_arrow import FetchDataToArrow
 from economicon.services.tables.fetch_data_to_json import FetchDataToJson
+from economicon.services.tables.fetch_plot_data_to_arrow import (
+    FetchPlotDataToArrow,
+)
 from economicon.services.tables.filter import FilterTable
 from economicon.services.tables.get_table_list import GetTableList
 from economicon.services.tables.rename_table import RenameTable
@@ -361,6 +365,54 @@ async def fetch_data_to_arrow(
         Arrow IPC形式生バイナリ
     """
     api = FetchDataToArrow(body, tables_store)
+    arrow_bytes = cast(bytes, run_operation(api))
+    return Response(
+        content=arrow_bytes,
+        media_type="application/vnd.apache.arrow.stream",
+    )
+
+
+@router.post(
+    "/fetch-plot-data",
+    response_class=Response,
+    responses={
+        200: {
+            "content": {"application/vnd.apache.arrow.stream": {}},
+            "description": (
+                "指定列のみの Apache Arrow IPC ファイル形式の生バイナリ。"
+                "スキーマメタデータに"
+                " tableName / columnNames / totalRows を含む。"
+            ),
+        }
+    },
+)
+async def fetch_plot_data(
+    request: Request,
+    body: FetchPlotDataRequestBody,
+    tables_store: TablesStoreDep,
+) -> Response:
+    """プロット用列指定データを Apache Arrow IPC 形式で返すエンドポイント
+
+    グラフ描画に必要な列のみを取得することで、メモリ・転送量を削減する。
+    JSON 包装なしで Arrow IPC 形式生バイナリを直接返す。
+    メタデータ（tableName / columnNames / totalRows）は
+    Arrow スキーマメタデータに埋め込む。
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    body : FetchPlotDataRequestBody
+        tableName / columnNames（1〜50列）
+    tables_store : TablesStoreDep
+        テーブルストア依存性
+
+    Returns
+    -------
+    Response
+        Arrow IPC 形式生バイナリ
+    """
+    api = FetchPlotDataToArrow(body, tables_store)
     arrow_bytes = cast(bytes, run_operation(api))
     return Response(
         content=arrow_bytes,

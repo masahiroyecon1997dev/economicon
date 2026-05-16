@@ -5,12 +5,16 @@ export type CurrentPageValue =
   | "JoinTable"
   | "UnionTable"
   | "DescriptiveStatistics"
+  | "StatisticalTestView"
   | "CorrelationMatrix"
+  | "GroupStatistics"
   | "ConfidenceIntervalView"
   | "LinearRegressionForm"
   | "CreateSimulationDataTable"
   | "CalculationView"
+  | "ChartView"
   | "SaveData"
+  | "AnalysisResultPreview"
   | "DataPreview";
 
 export type CurrentPageActions = {

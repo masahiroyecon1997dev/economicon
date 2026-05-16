@@ -23,7 +23,11 @@ _BASE_PAYLOAD: dict = {
     "simulationColumns": [
         {
             "columnName": "col1",
-            "distribution": {"type": "normal", "loc": 0.0, "scale": 1.0},
+            "distribution": {
+                "type": "normal",
+                "mean": 0.0,
+                "standardDeviation": 1.0,
+            },
         }
     ],
 }
@@ -31,7 +35,11 @@ _BASE_PAYLOAD: dict = {
 # 単独カラム設定（正規分布）
 _COL_NORMAL = {
     "columnName": "normal_col",
-    "distribution": {"type": "normal", "loc": 0.0, "scale": 1.0},
+    "distribution": {
+        "type": "normal",
+        "mean": 0.0,
+        "standardDeviation": 1.0,
+    },
 }
 # 単独カラム設定（一様分布）
 _COL_UNIFORM = {
@@ -41,7 +49,7 @@ _COL_UNIFORM = {
 # 単独カラム設定（指数分布）
 _COL_EXP = {
     "columnName": "exp_col",
-    "distribution": {"type": "exponential", "scale": 2.0},
+    "distribution": {"type": "exponential", "scaleParameter": 2.0},
 }
 # 単独カラム設定（固定値）
 _COL_FIXED = {
@@ -51,42 +59,58 @@ _COL_FIXED = {
 # 単独カラム設定（ガンマ分布）
 _COL_GAMMA = {
     "columnName": "gamma_col",
-    "distribution": {"type": "gamma", "shape": 2.0, "scale": 1.0},
+    "distribution": {
+        "type": "gamma",
+        "shapeParameter": 2.0,
+        "scaleParameter": 1.0,
+    },
 }
 # 単独カラム設定（ベータ分布）
 _COL_BETA = {
     "columnName": "beta_col",
-    "distribution": {"type": "beta", "a": 2.0, "b": 5.0},
+    "distribution": {"type": "beta", "alpha": 2.0, "beta": 5.0},
 }
 # 単独カラム設定（ワイブル分布）
 _COL_WEIBULL = {
     "columnName": "weibull_col",
-    "distribution": {"type": "weibull", "a": 1.5, "scale": 1.0},
+    "distribution": {
+        "type": "weibull",
+        "shapeParameter": 1.5,
+        "scaleParameter": 1.0,
+    },
 }
 # 単独カラム設定（対数正規分布）
 _COL_LOGNORMAL = {
     "columnName": "lognormal_col",
-    "distribution": {"type": "lognormal", "mean": 0.0, "sigma": 1.0},
+    "distribution": {
+        "type": "lognormal",
+        "logMean": 0.0,
+        "logStandardDeviation": 1.0,
+    },
 }
 # 単独カラム設定（二項分布）
 _COL_BINOMIAL = {
     "columnName": "binomial_col",
-    "distribution": {"type": "binomial", "n": 10, "p": 0.5},
+    "distribution": {
+        "type": "binomial",
+        "trialCount": 10,
+        "successProbability": 0.5,
+    },
 }
 # 単独カラム設定（ベルヌーイ分布）
 _COL_BERNOULLI = {
     "columnName": "bernoulli_col",
-    "distribution": {"type": "bernoulli", "p": 0.5},
+    "distribution": {"type": "bernoulli", "successProbability": 0.5},
 }
 # 単独カラム設定（ポアソン分布）
 _COL_POISSON = {
     "columnName": "poisson_col",
-    "distribution": {"type": "poisson", "lam": 3.0},
+    "distribution": {"type": "poisson", "rate": 3.0},
 }
 # 単独カラム設定（幾何分布）
 _COL_GEOMETRIC = {
     "columnName": "geometric_col",
-    "distribution": {"type": "geometric", "p": 0.3},
+    "distribution": {"type": "geometric", "successProbability": 0.3},
 }
 # 単独カラム設定（超幾何分布）
 _COL_HYPERGEOMETRIC = {
@@ -101,7 +125,16 @@ _COL_HYPERGEOMETRIC = {
 # 単独カラム設定（負の二項分布）
 _COL_NEG_BINOMIAL = {
     "columnName": "neg_binomial_col",
-    "distribution": {"type": "negative_binomial", "n": 5, "p": 0.3},
+    "distribution": {
+        "type": "negative_binomial",
+        "targetSuccessCount": 5,
+        "successProbability": 0.3,
+    },
+}
+# 単独カラム設定（等差数列）
+_COL_SEQUENCE = {
+    "columnName": "sequence_col",
+    "distribution": {"type": "sequence", "start": 1, "step": 1},
 }
 
 
@@ -218,8 +251,54 @@ def test_create_table_with_multiple_columns(client, tables_store):
     assert "exp_col" in df.columns
 
 
+def test_create_table_with_sequence_distribution(client, tables_store):
+    """等差数列カラムを持つテーブルを正常に作成できる"""
+    row_count = 5
+    payload = {
+        "tableName": "SequenceTable",
+        "rowCount": row_count,
+        "simulationColumns": [_COL_SEQUENCE],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["tableName"] == "SequenceTable"
+
+    df = tables_store.get_table("SequenceTable").table
+    assert len(df) == row_count
+    assert "sequence_col" in df.columns
+    # デフォルト start=1, step=1 → [1, 2, 3, 4, 5]
+    assert df["sequence_col"].to_list() == list(range(1, row_count + 1))
+
+
+def test_create_table_with_sequence_distribution_descending(
+    client, tables_store
+):
+    """step=-1 の等差数列カラムで降順になることを確認"""
+    row_count = 5
+    payload = {
+        "tableName": "SeqDescTable",
+        "rowCount": row_count,
+        "simulationColumns": [
+            {
+                "columnName": "seq_desc_col",
+                "distribution": {"type": "sequence", "start": 1, "step": -1},
+            }
+        ],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+
+    df = tables_store.get_table("SeqDescTable").table
+    # start=1, step=-1 → [1, 0, -1, -2, -3]
+    assert df["seq_desc_col"].to_list() == [1, 0, -1, -2, -3]
+
+
 def test_create_table_with_all_distributions(client, tables_store):
-    """全 14 分布タイプを含むテーブルを正常に作成できる"""
+    """全 15 分布タイプを含むテーブルを正常に作成できる"""
     all_cols = [
         _COL_NORMAL,
         _COL_UNIFORM,
@@ -235,6 +314,7 @@ def test_create_table_with_all_distributions(client, tables_store):
         _COL_GEOMETRIC,
         _COL_HYPERGEOMETRIC,
         _COL_NEG_BINOMIAL,
+        _COL_SEQUENCE,
     ]
     payload = {
         "tableName": "AllDistTable",
@@ -268,6 +348,8 @@ def test_create_table_with_all_distributions(client, tables_store):
     assert all(v >= 1 for v in df["geometric_col"])
     assert all(0 <= v <= hypergeometric_max for v in df["hypergeometric_col"])
     assert all(v >= 0 for v in df["neg_binomial_col"])
+    # sequence_col: start=1, step=1 → [1, 2, ..., 50]
+    assert df["sequence_col"].to_list() == list(range(1, 51))
 
 
 # ─────────────────────────────────────────────────────────────
@@ -407,7 +489,13 @@ def test_create_simulation_data_table_pydantic_missing_column_name(
     payload = {
         **_BASE_PAYLOAD,
         "simulationColumns": [
-            {"distribution": {"type": "normal", "loc": 0.0, "scale": 1.0}}
+            {
+                "distribution": {
+                    "type": "normal",
+                    "mean": 0.0,
+                    "standardDeviation": 1.0,
+                }
+            }
         ],
     }
     response = client.post("/api/table/create-simulation-data", json=payload)
@@ -559,8 +647,8 @@ def test_create_table_neg_binomial_probability_zero(client, tables_store):
                 "columnName": "col1",
                 "distribution": {
                     "type": "negative_binomial",
-                    "n": 5,
-                    "p": 0.0,
+                    "targetSuccessCount": 5,
+                    "successProbability": 0.0,
                 },
             }
         ],
@@ -572,7 +660,7 @@ def test_create_table_neg_binomial_probability_zero(client, tables_store):
     assert "simulationColumns.0.distribution" in response_data["message"]
     assert (
         "simulationColumns.0.distribution.negative_binomial"
-        ".NegativeBinomialParams.pは0.0より大きい値で入力してください。"
+        ".successProbabilityは0.0より大きい値で入力してください。"
         in response_data["details"]
     )
 
@@ -586,8 +674,8 @@ def test_create_table_neg_binomial_probability_over_one(client, tables_store):
                 "columnName": "col1",
                 "distribution": {
                     "type": "negative_binomial",
-                    "n": 5,
-                    "p": 1.5,
+                    "targetSuccessCount": 5,
+                    "successProbability": 1.5,
                 },
             }
         ],
@@ -599,7 +687,7 @@ def test_create_table_neg_binomial_probability_over_one(client, tables_store):
     assert "simulationColumns.0.distribution" in response_data["message"]
     assert (
         "simulationColumns.0.distribution.negative_binomial"
-        ".NegativeBinomialParams.pは1.0以下で入力してください。"
+        ".successProbabilityは1.0以下で入力してください。"
         in response_data["details"]
     )
 
@@ -613,8 +701,8 @@ def test_create_table_neg_binomial_n_zero(client, tables_store):
                 "columnName": "col1",
                 "distribution": {
                     "type": "negative_binomial",
-                    "n": 0,
-                    "p": 0.3,
+                    "targetSuccessCount": 0,
+                    "successProbability": 0.3,
                 },
             }
         ],
@@ -626,7 +714,7 @@ def test_create_table_neg_binomial_n_zero(client, tables_store):
     assert "simulationColumns.0.distribution" in response_data["message"]
     assert (
         "simulationColumns.0.distribution.negative_binomial"
-        ".NegativeBinomialParams.nは0より大きい値で入力してください。"
+        ".targetSuccessCountは0より大きい値で入力してください。"
         in response_data["details"]
     )
 
@@ -640,7 +728,11 @@ def test_create_table_with_seed_is_reproducible(client, tables_store):
     """S1: 同一シード・単一カラムで作成した2テーブルは同じ値を持つ"""
     col_config = {
         "columnName": "col_normal",
-        "distribution": {"type": "normal", "loc": 0.0, "scale": 1.0},
+        "distribution": {
+            "type": "normal",
+            "mean": 0.0,
+            "standardDeviation": 1.0,
+        },
     }
     row_count = 50
 

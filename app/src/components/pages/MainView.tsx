@@ -1,29 +1,25 @@
-import type { CurrentPageValue } from "../../stores/currentView";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { Calculation } from "./Calculation";
-import { ConfidenceIntervalView } from "./ConfidenceIntervalView";
-import { CorrelationMatrix } from "./CorrelationMatrix";
-import { CreateSimulationDataTable } from "./CreateSimulationDataTable";
-import { DescriptiveStatistics } from "./DescriptiveStatistics";
-import { ImportDataFile } from "./ImportDataFile";
-import { JoinTable } from "./JoinTable";
-import { Regression } from "./RegressionView";
-import { SaveData } from "./SaveData";
-import { Table } from "./Table";
-import { UnionTable } from "./UnionTable";
+import { ImportDataFile } from "@/components/pages/ImportDataFile";
+import { SaveData } from "@/components/pages/SaveData";
+import { WorkspaceSurface } from "@/components/pages/WorkspaceSurface";
+import type { CurrentPageValue } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentView";
 
 const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
   ImportDataFile: <ImportDataFile />,
-  JoinTable: <JoinTable />,
-  UnionTable: <UnionTable />,
-  DescriptiveStatistics: <DescriptiveStatistics />,
-  CorrelationMatrix: <CorrelationMatrix />,
-  ConfidenceIntervalView: <ConfidenceIntervalView />,
-  LinearRegressionForm: <Regression />,
-  CreateSimulationDataTable: <CreateSimulationDataTable />,
-  CalculationView: <Calculation />,
+  JoinTable: <WorkspaceSurface />,
+  UnionTable: <WorkspaceSurface />,
+  ChartView: <WorkspaceSurface />,
+  DescriptiveStatistics: <WorkspaceSurface />,
+  StatisticalTestView: <WorkspaceSurface />,
+  CorrelationMatrix: <WorkspaceSurface />,
+  GroupStatistics: <WorkspaceSurface />,
+  ConfidenceIntervalView: <WorkspaceSurface />,
+  LinearRegressionForm: <WorkspaceSurface />,
+  CreateSimulationDataTable: <WorkspaceSurface />,
+  CalculationView: <WorkspaceSurface />,
   SaveData: <SaveData />,
-  DataPreview: <Table />,
+  AnalysisResultPreview: <WorkspaceSurface />,
+  DataPreview: <WorkspaceSurface />,
 };
 
 export const MainView = () => {
@@ -31,7 +27,7 @@ export const MainView = () => {
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden h-full bg-brand-secondary">
-      <div className="flex-1 overflow-hidden p-4 flex flex-col min-h-0">
+      <div className="flex-1 overflow-hidden p-2 flex flex-col min-h-0">
         {PAGE_COMPONENTS[currentView]}
       </div>
     </main>

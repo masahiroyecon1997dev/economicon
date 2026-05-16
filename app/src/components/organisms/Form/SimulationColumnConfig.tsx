@@ -1,27 +1,35 @@
-import { useForm, useStore } from "@tanstack/react-form";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { z } from "zod";
 import {
   addSimulationColumnBodySimulationColumnColumnNameMax,
   addSimulationColumnBodySimulationColumnColumnNameRegExp,
-} from "../../../api/zod/column/column";
+} from "@/api/zod/column/column";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { RadioTagGroup } from "@/components/molecules/Field/RadioTagGroup";
+import { FormField } from "@/components/molecules/Form/FormField";
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/organisms/Tab/BaseTab";
+import {
+  CONTINUOUS_DIST_TYPES,
+  DETERMINISTIC_DIST_TYPES,
+  DISCRETE_DIST_TYPES,
   DIST_PARAM_DEFAULTS,
   DIST_PARAM_LABEL_KEYS,
   DIST_PARAM_SCHEMAS,
   DIST_PARAMS,
-  DIST_TYPES,
-} from "../../../constants/simulation";
-import { extractFieldError } from "../../../lib/utils/formHelpers";
+  getDistributionCategory,
+} from "@/constants/simulation";
+import { extractFieldError } from "@/lib/utils/formHelpers";
 import type {
   DistributionType,
   SimulationColumnSetting,
-} from "../../../types/commonTypes";
-import { InputText } from "../../atoms/Input/InputText";
-import { Select, SelectItem } from "../../atoms/Input/Select";
-import { RadioTagGroup } from "../../molecules/Field/RadioTagGroup";
-import { FormField } from "../../molecules/Form/FormField";
+} from "@/types/commonTypes";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 type SimulationColumnConfigProps = {
   formId: string;
@@ -34,21 +42,38 @@ type SimulationColumnConfigProps = {
 type ParamKey = [
   "low",
   "high",
-  "scale",
-  "loc",
-  "shape",
-  "a",
-  "b",
+  "scaleParameter",
   "mean",
-  "sigma",
-  "n",
-  "p",
-  "lam",
+  "standardDeviation",
+  "shapeParameter",
+  "alpha",
+  "beta",
+  "logMean",
+  "logStandardDeviation",
+  "trialCount",
+  "successProbability",
+  "rate",
   "populationSize",
   "successCount",
   "sampleSize",
+  "targetSuccessCount",
+  "start",
+  "step",
   "value",
 ][number];
+
+type DistributionTab = "continuous" | "discrete" | "deterministic";
+
+const getInitialTab = (distributionType: DistributionType): DistributionTab => {
+  switch (getDistributionCategory(distributionType)) {
+    case "continuous":
+      return "continuous";
+    case "discrete":
+      return "discrete";
+    case "deterministic":
+      return "deterministic";
+  }
+};
 
 export const SimulationColumnConfig = ({
   formId,
@@ -59,7 +84,14 @@ export const SimulationColumnConfig = ({
   const { t } = useTranslation();
   const [paramsError, setParamsError] = useState<Record<string, string>>({});
 
-  const currentDistType = column.distributionType ?? "uniform";
+  const currentDistType: DistributionType =
+    column.dataType === "fixed"
+      ? "fixed"
+      : (column.distributionType ?? "uniform");
+
+  const [distributionTab, setDistributionTab] = useState<DistributionTab>(
+    getInitialTab(currentDistType),
+  );
 
   const initParam = (key: string): string => {
     if (column.distributionParams?.[key] !== undefined) {
@@ -78,28 +110,33 @@ export const SimulationColumnConfig = ({
       // 全パラメータをフラット文字列で保持
       low: initParam("low"),
       high: initParam("high"),
-      scale: initParam("scale"),
-      loc: initParam("loc"),
-      shape: initParam("shape"),
-      a: initParam("a"),
-      b: initParam("b"),
+      scaleParameter: initParam("scaleParameter"),
       mean: initParam("mean"),
-      sigma: initParam("sigma"),
-      n: initParam("n"),
-      p: initParam("p"),
-      lam: initParam("lam"),
+      standardDeviation: initParam("standardDeviation"),
+      shapeParameter: initParam("shapeParameter"),
+      alpha: initParam("alpha"),
+      beta: initParam("beta"),
+      logMean: initParam("logMean"),
+      logStandardDeviation: initParam("logStandardDeviation"),
+      trialCount: initParam("trialCount"),
+      successProbability: initParam("successProbability"),
+      rate: initParam("rate"),
       populationSize: initParam("populationSize"),
       successCount: initParam("successCount"),
       sampleSize: initParam("sampleSize"),
+      targetSuccessCount: initParam("targetSuccessCount"),
+      start: initParam("start"),
+      step: initParam("step"),
       value:
         column.dataType === "fixed" ? String(column.fixedValue || "0") : "0",
     },
     onSubmit: ({ value }) => {
       setParamsError({});
 
-      if (value.dataType === "distribution") {
-        const paramNames =
-          DIST_PARAMS[value.distributionType as DistributionType];
+      const selectedType = value.distributionType as DistributionType;
+
+      if (selectedType !== "fixed") {
+        const paramNames = DIST_PARAMS[selectedType];
         const errors: Record<string, string> = {};
         for (const param of paramNames) {
           const result = DIST_PARAM_SCHEMAS[param]().safeParse(
@@ -119,7 +156,7 @@ export const SimulationColumnConfig = ({
         onSaved({
           columnName: value.columnName,
           dataType: "distribution",
-          distributionType: value.distributionType as DistributionType,
+          distributionType: selectedType,
           distributionParams,
           fixedValue: "",
         });
@@ -140,7 +177,6 @@ export const SimulationColumnConfig = ({
     },
   });
 
-  const dataType = useStore(form.store, (s) => s.values.dataType);
   const distributionType = useStore(
     form.store,
     (s) => s.values.distributionType,
@@ -148,11 +184,31 @@ export const SimulationColumnConfig = ({
 
   const handleDistributionTypeChange = (newType: DistributionType) => {
     form.setFieldValue("distributionType", newType);
+    form.setFieldValue(
+      "dataType",
+      newType === "fixed" ? "fixed" : "distribution",
+    );
     setParamsError({});
     const defaults = DIST_PARAM_DEFAULTS[newType];
     for (const p of DIST_PARAMS[newType]) {
       form.setFieldValue(p as ParamKey, String(defaults[p] ?? "0"));
     }
+  };
+
+  const handleTabChange = (tab: DistributionTab) => {
+    setDistributionTab(tab);
+    setParamsError({});
+    const typesByTab: Record<DistributionTab, DistributionType[]> = {
+      continuous: CONTINUOUS_DIST_TYPES,
+      discrete: DISCRETE_DIST_TYPES,
+      deterministic: DETERMINISTIC_DIST_TYPES,
+    };
+    const candidateTypes = typesByTab[tab];
+    const nextType = candidateTypes.includes(distributionType)
+      ? distributionType
+      : candidateTypes[0];
+
+    handleDistributionTypeChange(nextType);
   };
 
   return (
@@ -201,51 +257,83 @@ export const SimulationColumnConfig = ({
         )}
       </form.Field>
 
-      {/* データタイプ */}
-      <form.Field name="dataType">
-        {(field) => (
+      {/* 連続 / 離散 / 決定的系列 タブ */}
+      <Tabs
+        value={distributionTab}
+        onValueChange={(v) => handleTabChange(v as DistributionTab)}
+      >
+        <TabsList>
+          <TabsTrigger value="continuous" disabled={disabled}>
+            {t("AddSimulationColumnForm.TabContinuous")}
+          </TabsTrigger>
+          <TabsTrigger value="discrete" disabled={disabled}>
+            {t("AddSimulationColumnForm.TabDiscrete")}
+          </TabsTrigger>
+          <TabsTrigger value="deterministic" disabled={disabled}>
+            {t("AddSimulationColumnForm.TabDeterministic")}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="continuous" className="pt-3">
           <FormField
-            label={t("CreateSimulationDataTableView.DataType")}
-            htmlFor={`${formId}-data-type`}
+            label={t("CreateSimulationDataTableView.DistributionType")}
           >
-            <Select
-              id={`${formId}-data-type`}
-              value={field.state.value}
-              onValueChange={(v) => {
-                field.handleChange(v as "distribution" | "fixed");
-                setParamsError({});
-              }}
+            <RadioTagGroup
+              name={`${formId}-dist-type`}
+              items={CONTINUOUS_DIST_TYPES.map((dt) => ({
+                value: dt,
+                label: t(`AddSimulationColumnForm.${dt}`),
+              }))}
+              value={distributionType}
+              onChange={(v) =>
+                handleDistributionTypeChange(v as DistributionType)
+              }
               disabled={disabled}
-            >
-              <SelectItem value="distribution">
-                {t("Common.Distribution")}
-              </SelectItem>
-              <SelectItem value="fixed">{t("Common.Constant")}</SelectItem>
-            </Select>
+            />
           </FormField>
-        )}
-      </form.Field>
+        </TabsContent>
 
-      {/* 分布の種類（distribution 時のみ） */}
-      {dataType === "distribution" && (
-        <FormField label={t("CreateSimulationDataTableView.DistributionType")}>
-          <RadioTagGroup
-            name={`${formId}-dist-type`}
-            items={DIST_TYPES.filter((d) => d !== "fixed").map((dt) => ({
-              value: dt,
-              label: t(`AddSimulationColumnForm.${dt}`),
-            }))}
-            value={distributionType}
-            onChange={(v) =>
-              handleDistributionTypeChange(v as DistributionType)
-            }
-            disabled={disabled}
-          />
-        </FormField>
-      )}
+        <TabsContent value="discrete" className="pt-3">
+          <FormField
+            label={t("CreateSimulationDataTableView.DistributionType")}
+          >
+            <RadioTagGroup
+              name={`${formId}-dist-type`}
+              items={DISCRETE_DIST_TYPES.map((dt) => ({
+                value: dt,
+                label: t(`AddSimulationColumnForm.${dt}`),
+              }))}
+              value={distributionType}
+              onChange={(v) =>
+                handleDistributionTypeChange(v as DistributionType)
+              }
+              disabled={disabled}
+            />
+          </FormField>
+        </TabsContent>
 
-      {/* 分布パラメータ（distribution 時） */}
-      {dataType === "distribution" &&
+        <TabsContent value="deterministic" className="pt-3">
+          <FormField
+            label={t("CreateSimulationDataTableView.DistributionType")}
+          >
+            <RadioTagGroup
+              name={`${formId}-dist-type`}
+              items={DETERMINISTIC_DIST_TYPES.map((dt) => ({
+                value: dt,
+                label: t(`AddSimulationColumnForm.${dt}`),
+              }))}
+              value={distributionType}
+              onChange={(v) =>
+                handleDistributionTypeChange(v as DistributionType)
+              }
+              disabled={disabled}
+            />
+          </FormField>
+        </TabsContent>
+      </Tabs>
+
+      {/* 分布パラメータ */}
+      {distributionType !== "fixed" &&
         DIST_PARAMS[distributionType].map((param) => (
           <form.Field
             key={`${distributionType}-${param}`}
@@ -265,10 +353,11 @@ export const SimulationColumnConfig = ({
                   onBlur={field.handleBlur}
                   disabled={disabled}
                   step={
-                    param === "n" ||
+                    param === "trialCount" ||
                     param === "populationSize" ||
                     param === "successCount" ||
-                    param === "sampleSize"
+                    param === "sampleSize" ||
+                    param === "targetSuccessCount"
                       ? 1
                       : "any"
                   }
@@ -279,8 +368,8 @@ export const SimulationColumnConfig = ({
           </form.Field>
         ))}
 
-      {/* 固定値（fixed 時） */}
-      {dataType === "fixed" && (
+      {/* 固定値 */}
+      {distributionType === "fixed" && (
         <form.Field name="value">
           {(field) => (
             <FormField

@@ -6,10 +6,10 @@
  */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
-import { DeleteTableForm } from "./TableOperationForms/DeleteTableForm";
-import { DuplicateTableForm } from "./TableOperationForms/DuplicateTableForm";
-import { RenameTableForm } from "./TableOperationForms/RenameTableForm";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
+import { DeleteTableForm } from "@/components/organisms/Dialog/TableOperationForms/DeleteTableForm";
+import { DuplicateTableForm } from "@/components/organisms/Dialog/TableOperationForms/DuplicateTableForm";
+import { RenameTableForm } from "@/components/organisms/Dialog/TableOperationForms/RenameTableForm";
 
 export type TableOperation = "rename" | "duplicate" | "delete";
 

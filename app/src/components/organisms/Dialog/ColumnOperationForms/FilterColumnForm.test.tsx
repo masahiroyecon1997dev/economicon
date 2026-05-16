@@ -13,11 +13,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { getTableInfo } from "../../../../lib/utils/internal";
-import { useTableInfosStore } from "../../../../stores/tableInfos";
-import { useTableListStore } from "../../../../stores/tableList";
-import { FilterColumnForm } from "./FilterColumnForm";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { FilterColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/FilterColumnForm";
 
 // ---------------------------------------------------------------------------
 // Mocks

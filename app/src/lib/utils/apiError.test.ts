@@ -8,7 +8,7 @@ import {
   extractApiErrorMessage,
   getResponseErrorMessage,
   replaceParamNames,
-} from "./apiError";
+} from "@/lib/utils/apiError";
 
 // ---------------------------------------------------------------------------
 // getResponseErrorMessage

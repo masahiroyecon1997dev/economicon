@@ -68,3 +68,25 @@ def test_settings_info_to_dict(client, settings_manager):
     assert "theme" in settings_dict
     assert "encoding" in settings_dict
     assert "logPath" in settings_dict
+
+
+@pytest.mark.parametrize(
+    ("system_locale", "expected_language"),
+    [
+        ("ja_JP", "ja"),
+        ("en_US", "en"),
+        (None, "en"),
+    ],
+)
+def test_get_default_language_from_os_locale(
+    monkeypatch,
+    system_locale,
+    expected_language,
+):
+    """OSロケールに応じて初期言語が切り替わる"""
+    monkeypatch.setattr(
+        "economicon.services.data.settings_store.locale.getlocale",
+        lambda: (system_locale, "UTF-8"),
+    )
+
+    assert expected_language == SettingsStore._get_default_language()

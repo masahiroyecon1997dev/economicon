@@ -7,6 +7,8 @@ from economicon.schemas import (
     AddDummyColumnResult,
     AddLagLeadColumnRequestBody,
     AddLagLeadColumnResult,
+    AddPanelTimeColumnRequestBody,
+    AddPanelTimeColumnResult,
     AddSimulationColumnRequestBody,
     AddSimulationColumnResult,
     CalculateColumnRequestBody,
@@ -15,8 +17,6 @@ from economicon.schemas import (
     CastColumnResult,
     DeleteColumnRequestBody,
     DeleteColumnResult,
-    DuplicateColumnRequestBody,
-    DuplicateColumnResult,
     GetColumnListRequestBody,
     GetColumnListResult,
     MoveColumnRequestBody,
@@ -33,13 +33,15 @@ from economicon.schemas import (
 # 各ビジネスロジック（既存のpython_apis）
 from economicon.services.columns.add_dummy_column import AddDummyColumn
 from economicon.services.columns.add_lag_lead_column import AddLagLeadColumn
+from economicon.services.columns.add_panel_time_column import (
+    AddPanelTimeColumn,
+)
 from economicon.services.columns.add_simulation_column import (
     AddSimulationColumn,
 )
 from economicon.services.columns.calculate_column import CalculateColumn
 from economicon.services.columns.cast_column import CastColumn
 from economicon.services.columns.delete_column import DeleteColumn
-from economicon.services.columns.duplicate_column import DuplicateColumn
 from economicon.services.columns.get_column_list import GetColumnList
 from economicon.services.columns.move_column import MoveColumn
 from economicon.services.columns.rename_column import RenameColumn
@@ -239,36 +241,6 @@ async def calculate_column(
 
 
 @router.post(
-    "/duplicate", response_model=SuccessResponse[DuplicateColumnResult]
-)
-async def duplicate_column(
-    request: Request,
-    body: DuplicateColumnRequestBody,
-    tables_store: TablesStoreDep,
-):
-    """カラムを複製するエンドポイント
-
-    Parameters
-    ----------
-    request : Request
-        FastAPIのリクエストオブジェクト
-    body : DuplicateColumnRequestBody
-        リクエストボディ
-
-    Returns
-    -------
-    JSONResponse
-        処理結果
-    """
-    # ビジネスロジックの実行
-    api = DuplicateColumn(body, tables_store)
-    result = run_operation(api)
-    return create_success_response(
-        status_code=http_status.HTTP_200_OK, response_object=result
-    )
-
-
-@router.post(
     "/transform", response_model=SuccessResponse[TransformColumnResult]
 )
 async def transform_column(
@@ -411,6 +383,36 @@ async def move_column(
         処理結果
     """
     api = MoveColumn(body, tables_store)
+    result = run_operation(api)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.post(
+    "/add-panel-time",
+    response_model=SuccessResponse[AddPanelTimeColumnResult],
+)
+async def add_panel_time_column(
+    request: Request,
+    body: AddPanelTimeColumnRequestBody,
+    tables_store: TablesStoreDep,
+):
+    """パネル時間カラムを追加するエンドポイント
+
+    Parameters
+    ----------
+    request : Request
+        FastAPIのリクエストオブジェクト
+    body : AddPanelTimeColumnRequestBody
+        リクエストボディ
+
+    Returns
+    -------
+    JSONResponse
+        処理結果
+    """
+    api = AddPanelTimeColumn(body, tables_store)
     result = run_operation(api)
     return create_success_response(
         status_code=http_status.HTTP_200_OK, response_object=result

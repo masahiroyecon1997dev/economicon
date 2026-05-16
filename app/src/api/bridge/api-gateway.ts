@@ -15,6 +15,10 @@ export const client = {
     return invokeRequest<T>("POST", path, data);
   },
 
+  patch: async <T>(path: string, data?: unknown): Promise<{ data: T }> => {
+    return invokeRequest<T>("PATCH", path, data);
+  },
+
   put: async <T>(path: string, data?: unknown): Promise<{ data: T }> => {
     return invokeRequest<T>("PUT", path, data);
   },

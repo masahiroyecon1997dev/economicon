@@ -5,35 +5,34 @@
  * - sort_asc / sort_desc は直接 API コール（ダイアログなし）
  * - その他の操作は親コンポーネントへ operation イベントを伝達
  */
+import { cn } from "@/lib/utils/helpers";
+import type { ColumnType } from "@/types/commonTypes";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
-  ArrowDownAZ,
-  ArrowUpAZ,
-  CopyPlus,
-  Dices,
-  FileClock,
-  Filter,
-  FlipHorizontal,
-  MoreVertical,
-  Sigma,
-  Tags,
-  Trash2,
+    ArrowDownAZ,
+    ArrowUpAZ,
+    Dices,
+    FileClock,
+    Filter,
+    FlipHorizontal,
+    MoreVertical,
+    Sigma,
+    Tags,
+    Trash2,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "../../../lib/utils/helpers";
-import type { ColumnType } from "../../../types/commonTypes";
 
 export type ColumnOperation =
   | "sort_asc"
   | "sort_desc"
   | "rename"
-  | "duplicate"
   | "cast"
   | "transform"
   | "addDummy"
   | "addLagLead"
+  | "addPanelTime"
   | "addSimulation"
   | "filter"
   | "delete";
@@ -116,10 +115,6 @@ const ColumnMenuItems = ({
           <FlipHorizontal className="h-4 w-4 text-gray-500 shrink-0" />
           {t("ColumnMenu.Rename")}
         </Item>
-        <Item className={menuItemClass} onSelect={() => onAction("duplicate")}>
-          <CopyPlus className="h-4 w-4 text-gray-500 shrink-0" />
-          {t("ColumnMenu.Duplicate")}
-        </Item>
       </Group>
       <Separator className="h-px bg-gray-100 dark:bg-gray-700 mx-1" />
       {/* 列追加系 */}
@@ -139,6 +134,13 @@ const ColumnMenuItems = ({
         <Item className={menuItemClass} onSelect={() => onAction("addLagLead")}>
           <FileClock className="h-4 w-4 text-gray-500 shrink-0" />
           {t("ColumnMenu.AddLagLead")}
+        </Item>
+        <Item
+          className={menuItemClass}
+          onSelect={() => onAction("addPanelTime")}
+        >
+          <FileClock className="h-4 w-4 text-gray-500 shrink-0" />
+          {t("ColumnMenu.AddPanelTime")}
         </Item>
         <Item
           className={menuItemClass}

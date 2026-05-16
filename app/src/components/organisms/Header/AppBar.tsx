@@ -1,27 +1,41 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import logo from "@/assets/app-icon.svg";
+import { MenuItem } from "@/components/atoms/Menu/MenuItem";
+import { DropdownMenu } from "@/components/molecules/Menu/DropdownMenu";
+import { SettingsDialog } from "@/components/organisms/Dialog/SettingsDialog";
+import { WindowControls } from "@/components/organisms/Header/WindowControls";
+import { WORK_TAB_ENTRIES } from "@/constants/workspaceTabs";
+import { cn } from "@/lib/utils/helpers";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useSettingsStore } from "@/stores/settings";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import type { DropmenuPositionType } from "@/types/commonTypes";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import type { LucideIcon } from "lucide-react";
 import { ChevronDown, MoreHorizontal, Settings } from "lucide-react";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../../api/endpoints";
-import logo from "../../../assets/app-icon.svg";
-import { cn } from "../../../lib/utils/helpers";
-import { useCurrentPageStore } from "../../../stores/currentView";
-import { useSettingsStore } from "../../../stores/settings";
-import type { DropmenuPositionType } from "../../../types/commonTypes";
-import { MenuItem } from "../../atoms/Menu/MenuItem";
-import { DropdownMenu } from "../../molecules/Menu/DropdownMenu";
-import { SettingsDialog } from "../Dialog/SettingsDialog";
-import { WindowControls } from "./WindowControls";
 
 const MENU_POSITION: DropmenuPositionType = "bottom-right";
 
+type AppBarMenuItemType = {
+  id: string;
+  label: string;
+  handleSelect: () => void;
+  icon?: LucideIcon;
+  variant?: "default" | "danger";
+};
+
+type AppBarMenuType = {
+  id: string;
+  menuName: string;
+  isOpen: boolean;
+  onClose: () => void;
+  items: AppBarMenuItemType[];
+};
+
 /**
  * 統合アプリバー
- *
- * TitleBar（ウィンドウ制御） + HeaderMenu（ナビゲーション）を1本に統合。
- * - mousedown で起点を記録し、mousemove の閾値超えで startDragging() を呼び出す
- *   （mousedown 即呼び出しだと OS がマウスを捕捉して dblclick が届かなくなるため）
- * - ダブルクリックで最大化 ⇔ 復元をトグル（最大化中でも正しく動作）
  * - ボタン等のインタラクティブ要素上ではドラッグを開始しない
  * - osName が "macOS" の場合は左端にトラフィックライト、
  *   Windows / Linux は右端に Fluent スタイルのウィンドウ制御を表示
@@ -30,6 +44,7 @@ export const AppBar = () => {
   const { t } = useTranslation();
   const osName = useSettingsStore((s) => s.osName);
   const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const openWorkTab = useWorkspaceTabsStore((s) => s.openWorkTab);
   const [isMaximized, setIsMaximized] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -171,7 +186,16 @@ export const AppBar = () => {
 
   const close = () => setOpenMenuId(null);
 
-  const menus = [
+  const handleOpenWorkTab = (
+    featureKey: (typeof WORK_TAB_ENTRIES)[number]["featureKey"],
+    title: string,
+  ) => {
+    openWorkTab(featureKey, title);
+    setCurrentView(featureKey);
+    close();
+  };
+
+  const menus: AppBarMenuType[] = [
     {
       id: "file",
       menuName: t("HeaderMenu.File"),
@@ -205,34 +229,35 @@ export const AppBar = () => {
         {
           id: "join-table",
           label: t("HeaderMenu.JoinTable"),
-          handleSelect: () => {
-            setCurrentView("JoinTable");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab("JoinTable", t("HeaderMenu.JoinTable")),
         },
         {
           id: "union-table",
           label: t("HeaderMenu.UnionTable"),
-          handleSelect: () => {
-            setCurrentView("UnionTable");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab("UnionTable", t("HeaderMenu.UnionTable")),
         },
         {
           id: "data-generation",
           label: t("HeaderMenu.DataGeneration"),
-          handleSelect: () => {
-            setCurrentView("CreateSimulationDataTable");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "CreateSimulationDataTable",
+              t("HeaderMenu.DataGeneration"),
+            ),
         },
         {
           id: "calculate",
           label: t("HeaderMenu.Calculate"),
-          handleSelect: () => {
-            setCurrentView("CalculationView");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab("CalculationView", t("HeaderMenu.Calculate")),
+        },
+        {
+          id: "chart-view",
+          label: t("HeaderMenu.ChartView"),
+          handleSelect: () =>
+            handleOpenWorkTab("ChartView", t("HeaderMenu.ChartView")),
         },
       ],
     },
@@ -245,26 +270,47 @@ export const AppBar = () => {
         {
           id: "basic-statistics",
           label: t("HeaderMenu.BasicStatistics"),
-          handleSelect: () => {
-            setCurrentView("DescriptiveStatistics");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "DescriptiveStatistics",
+              t("HeaderMenu.BasicStatistics"),
+            ),
         },
         {
           id: "correlation-matrix",
           label: t("HeaderMenu.CorrelationMatrix"),
-          handleSelect: () => {
-            setCurrentView("CorrelationMatrix");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "CorrelationMatrix",
+              t("HeaderMenu.CorrelationMatrix"),
+            ),
+        },
+        {
+          id: "group-statistics",
+          label: t("HeaderMenu.GroupStatistics"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "GroupStatistics",
+              t("HeaderMenu.GroupStatistics"),
+            ),
         },
         {
           id: "confidence-interval",
           label: t("HeaderMenu.ConfidenceInterval"),
-          handleSelect: () => {
-            setCurrentView("ConfidenceIntervalView");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "ConfidenceIntervalView",
+              t("HeaderMenu.ConfidenceInterval"),
+            ),
+        },
+        {
+          id: "hypothesis-test",
+          label: t("HeaderMenu.HypothesisTest"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "StatisticalTestView",
+              t("HeaderMenu.HypothesisTest"),
+            ),
         },
       ],
     },
@@ -277,10 +323,11 @@ export const AppBar = () => {
         {
           id: "linear-regression-item",
           label: t("HeaderMenu.OrdinaryLeastSquares"),
-          handleSelect: () => {
-            setCurrentView("LinearRegressionForm");
-            close();
-          },
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "LinearRegressionForm",
+              t("HeaderMenu.OrdinaryLeastSquares"),
+            ),
         },
         // {
         //   id: "lasso-regression",
@@ -440,8 +487,9 @@ export const AppBar = () => {
               {menu.items.map((item, i) => (
                 <MenuItem
                   key={item.id}
+                  icon={item.icon}
                   label={item.label}
-                  variant="default"
+                  variant={item.variant ?? "default"}
                   isFirst={i === 0}
                   isLast={i === menu.items.length - 1}
                   handleSelect={item.handleSelect}
@@ -486,8 +534,9 @@ export const AppBar = () => {
                   {menu.items.map((item, i) => (
                     <MenuItem
                       key={item.id}
+                      icon={item.icon}
                       label={item.label}
-                      variant="default"
+                      variant={item.variant ?? "default"}
                       isFirst={i === 0}
                       isLast={i === menu.items.length - 1}
                       handleSelect={item.handleSelect}

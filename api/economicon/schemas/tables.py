@@ -7,12 +7,12 @@ from pydantic_core import PydanticCustomError
 
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.common import BaseRequest, BaseResult
-from economicon.schemas.entities import SimulationColumnConfig
 from economicon.schemas.enums import (
     FilterOperatorType,
     JoinType,
     LogicalOperatorType,
 )
+from economicon.schemas.shared_entities import SimulationColumnConfig
 from economicon.schemas.types import (
     ColumnName,
     NewTableName,
@@ -422,31 +422,38 @@ class FetchDataToArrowRequestBody(BaseRequest):
     ]
 
 
-class FetchDataToArrowResult(BaseResult):
-    """テーブルデータ Arrow IPC 形式取得レスポンス"""
+# ---------------------------------------------------------------------------
+# プロット用列指定 Arrow 取得
+# ---------------------------------------------------------------------------
 
-    table_name: str = Field(
-        title="Table Name",
-        description="データを取得したテーブル名",
-    )
-    arrow_data: bytes = Field(
-        title="Arrow Data",
-        description=(
-            "Apache Arrow IPC 形式のバイナリデータ（Base64エンコード）"
+
+class FetchPlotDataRequestBody(BaseRequest):
+    """プロット用列指定データ Arrow 取得リクエスト
+
+    グラフ描画に必要な列のみを選択して Arrow IPC 形式で返す。
+    列を絞ることでメモリ使用量と転送量を削減する。
+    """
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            description=(
+                "データを取得するテーブル名。"
+                "ワークスペースに存在するテーブルの中から指定してください。"
+            ),
         ),
-    )
-    total_rows: int = Field(
-        title="Total Rows",
-        description="テーブル全体の行数",
-    )
-    start_row: int = Field(
-        title="Start Row",
-        description="取得開始行番号",
-    )
-    end_row: int = Field(
-        title="End Row",
-        description="取得終了行番号",
-    )
+    ]
+    column_names: Annotated[
+        list[ColumnName],
+        Field(
+            min_length=1,
+            max_length=50,
+            description=(
+                "取得する列名のリスト（1〜50列）。"
+                "重複した列名は無視されます。"
+            ),
+        ),
+    ]
 
 
 # ---------------------------------------------------------------------------

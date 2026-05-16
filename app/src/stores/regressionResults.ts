@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { LinearRegressionResultType } from "../types/commonTypes";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
 
 export type RegressionResultsActions = {
   addResult: (result: LinearRegressionResultType) => void;

@@ -1,15 +1,15 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { showConfirmDialog } from "../../lib/dialog/confirm";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useFilesStore } from "../../stores/files";
-import { useSettingsStore } from "../../stores/settings";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import { SaveData } from "./SaveData";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { showConfirmDialog } from "@/lib/dialog/confirm";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useFilesStore } from "@/stores/files";
+import { useSettingsStore } from "@/stores/settings";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { SaveData } from "@/components/pages/SaveData";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -115,7 +115,7 @@ describe("SaveData コンポーネント", () => {
   describe("上書き確認", () => {
     it("既存ファイルあり + 確認でキャンセル → 保存されない", async () => {
       const { checkFileExists } =
-        await import("../../api/bridge/tauri-commands");
+        await import("@/api/bridge/tauri-commands");
       vi.mocked(checkFileExists).mockResolvedValue(true);
       vi.mocked(showConfirmDialog).mockResolvedValue(false);
 
@@ -139,7 +139,7 @@ describe("SaveData コンポーネント", () => {
 
     it("既存ファイルあり + 確認でOK → exportFile を呼ぶ", async () => {
       const { checkFileExists } =
-        await import("../../api/bridge/tauri-commands");
+        await import("@/api/bridge/tauri-commands");
       vi.mocked(checkFileExists).mockResolvedValue(true);
       vi.mocked(showConfirmDialog).mockResolvedValue(true);
       mockApi.exportFile.mockResolvedValue({

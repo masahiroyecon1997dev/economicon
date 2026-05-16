@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import { UnionTable as UnionTablePage } from "./UnionTable";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { UnionTable as UnionTablePage } from "@/components/pages/UnionTable";
 
 // ---------------------------------------------------------------------------
 // Mocks

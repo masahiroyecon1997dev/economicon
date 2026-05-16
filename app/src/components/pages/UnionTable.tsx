@@ -1,29 +1,29 @@
-import { Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../api/endpoints";
+import { getEconomiconAppAPI } from "@/api/endpoints";
 import {
   createUnionTableBodyUnionTableNameMax,
   createUnionTableBodyUnionTableNameRegExp,
-} from "../../api/zod/table/table";
-import { showMessageDialog } from "../../lib/dialog/message";
+} from "@/api/zod/table/table";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { SectionCard } from "@/components/molecules/Card/SectionCard";
+import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { PageLayout } from "@/components/templates/PageLayout";
+import { showMessageDialog } from "@/lib/dialog/message";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
-} from "../../lib/utils/apiError";
-import { cn, generateId } from "../../lib/utils/helpers";
-import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import type { ColumnType } from "../../types/commonTypes";
-import { InputText } from "../atoms/Input/InputText";
-import { Select, SelectItem } from "../atoms/Input/Select";
-import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
-import { SectionCard } from "../molecules/Card/SectionCard";
-import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
-import { FormField } from "../molecules/Form/FormField";
-import { PageLayout } from "../templates/PageLayout";
+} from "@/lib/utils/apiError";
+import { cn, generateId } from "@/lib/utils/helpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useCurrentPageStore } from "@/stores/currentView";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import type { ColumnType } from "@/types/commonTypes";
+import { Plus, X } from "lucide-react";
+import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type TableEntry = { id: string; name: string };
 
@@ -48,6 +48,7 @@ export const UnionTable = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const recalcRequestIdRef = useRef(0);
 
   /* ── Fetch column names for a table ───────────────────────── */
 
@@ -63,28 +64,33 @@ export const UnionTable = () => {
     return [];
   };
 
-  /* ── Recalculate common columns whenever selectedTables changes ── */
-  useEffect(() => {
-    const recalc = async () => {
-      if (selectedTables.length === 0) {
-        setCommonCols([]);
-        setCheckedCols(new Set());
-        return;
-      }
-      setIsLoading(true);
-      const allColSets = await Promise.all(
-        selectedTables.map((t) => fetchColNames(t.name)),
-      );
-      const intersection = allColSets.reduce((acc, cols) => {
-        const colSet = new Set(cols);
-        return acc.filter((c) => colSet.has(c));
-      });
-      setCommonCols(intersection);
-      setCheckedCols(new Set(intersection));
+  const recalculateCommonColumns = async (nextSelectedTables: TableEntry[]) => {
+    const requestId = ++recalcRequestIdRef.current;
+    if (nextSelectedTables.length === 0) {
+      setCommonCols([]);
+      setCheckedCols(new Set());
       setIsLoading(false);
-    };
-    void recalc();
-  }, [selectedTables]);
+      return;
+    }
+
+    setIsLoading(true);
+    const allColSets = await Promise.all(
+      nextSelectedTables.map((table) => fetchColNames(table.name)),
+    );
+
+    if (requestId !== recalcRequestIdRef.current) {
+      return;
+    }
+
+    const intersection = allColSets.reduce((acc, cols) => {
+      const colSet = new Set(cols);
+      return acc.filter((columnName) => colSet.has(columnName));
+    });
+
+    setCommonCols(intersection);
+    setCheckedCols(new Set(intersection));
+    setIsLoading(false);
+  };
 
   /* ── Table list operations ────────────────────────────────── */
 
@@ -96,6 +102,7 @@ export const UnionTable = () => {
     }
     const next = [...selectedTables, { id: generateId(), name: addingTable }];
     setSelectedTables(next);
+    void recalculateCommonColumns(next);
     if (next.length === 1) {
       setNewTableName(`${addingTable}_union`);
     }
@@ -103,7 +110,9 @@ export const UnionTable = () => {
   };
 
   const handleRemoveTable = (id: string) => {
-    setSelectedTables((prev) => prev.filter((t) => t.id !== id));
+    const next = selectedTables.filter((table) => table.id !== id);
+    setSelectedTables(next);
+    void recalculateCommonColumns(next);
   };
 
   /* ── Column checkbox operations ───────────────────────────── */
@@ -191,7 +200,7 @@ export const UnionTable = () => {
       title={t("UnionTable.Title")}
       description={t("UnionTable.Description")}
     >
-      <div className="flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
+      <div className="app-scrollbar flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
         {/* ── Section 1: 対象テーブル ── */}
         <SectionCard title={t("UnionTable.SelectDataList")}>
           {/* テーブル追加行 */}
@@ -215,7 +224,7 @@ export const UnionTable = () => {
               onClick={handleAddTable}
               disabled={!addingTable || isDisabled}
               className={cn(
-                "flex shrink-0 items-center gap-1 rounded-md border border-border-color bg-white px-3 py-1.5 text-sm font-medium",
+                "flex shrink-0 items-center gap-1 rounded-md border border-border-color bg-white dark:bg-gray-800 dark:border-gray-600 px-3 py-1.5 text-sm font-medium",
                 "transition-colors hover:bg-secondary",
                 "disabled:cursor-not-allowed disabled:opacity-40",
               )}
@@ -332,6 +341,7 @@ export const UnionTable = () => {
         }
         onCancel={() => setCurrentView("DataPreview")}
         onSelect={handleSubmit}
+        isLoading={isSubmitting}
       />
     </PageLayout>
   );

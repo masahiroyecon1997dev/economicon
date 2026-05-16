@@ -1,0 +1,243 @@
+{
+  "metadata": {
+    "model": "grunfeld_real",
+    "dataset": "plm_grunfeld.parquet",
+    "generated_at": "2026-04-29T05:42:07.694813+00:00",
+    "libraries": {
+      "statsmodels": "0.14.6",
+      "linearmodels": "7.0",
+      "scikit_learn": "1.8.0"
+    },
+    "n_obs": 200,
+    "n_obs_iv": 190,
+    "n_firms": 10,
+    "n_years": 20,
+    "nan_policy": "Drop rows created by lag construction for IV only; otherwise no NaN rows are removed.",
+    "dummy_policy": "inv_high is derived as 1(inv > median(inv)); no category dummy expansion is used."
+  },
+  "estimates": {
+    "meta": {
+      "inv_median": 57.485,
+      "n_inv_high": 100
+    },
+    "ols": {
+      "coefficients": {
+        "const": -42.71436943655937,
+        "value": 0.11556215636055213,
+        "capital": 0.2306784887319697
+      },
+      "std_errors": {
+        "const": 9.511676031423873,
+        "value": 0.005835709557220635,
+        "capital": 0.025475801476508936
+      },
+      "t_values": {
+        "const": -4.4907300559273935,
+        "value": 19.8025887387704,
+        "capital": 9.054807910348837
+      },
+      "p_values": {
+        "const": 1.2073565413848233e-05,
+        "value": 9.542702685784383e-49,
+        "capital": 1.3473701051203834e-16
+      },
+      "conf_int": {
+        "const": {
+          "lower": -61.4721463142239,
+          "upper": -23.956592558894847
+        },
+        "value": {
+          "lower": 0.10405367589553649,
+          "upper": 0.12707063682556777
+        },
+        "capital": {
+          "lower": 0.18043819477144302,
+          "upper": 0.28091878269249637
+        }
+      },
+      "r_squared": 0.8124080125447284,
+      "adj_r_squared": 0.8105035253624413,
+      "f_test": {
+        "statistic": 426.57573130481273,
+        "p_value": 2.579924707194412e-72
+      }
+    },
+    "fe": {
+      "coefficients": {
+        "value": 0.11012380412071855,
+        "capital": 0.3100653413001392
+      },
+      "std_errors": {
+        "value": 0.01185669421404384,
+        "capital": 0.01735450277555256
+      },
+      "t_values": {
+        "value": 9.28790117487223,
+        "capital": 17.86656439024752
+      },
+      "p_values": {
+        "value": 0.0,
+        "capital": 0.0
+      },
+      "conf_int": {
+        "value": {
+          "lower": 0.08673454578970105,
+          "upper": 0.13351306245173605
+        },
+        "capital": {
+          "lower": 0.27583076112997895,
+          "upper": 0.3442999214702994
+        }
+      },
+      "r_squared_within": 0.7667575837481405
+    },
+    "re": {
+      "coefficients": {
+        "value": 0.10220350148362137,
+        "capital": 0.30701233138313283
+      },
+      "std_errors": {
+        "value": 0.009822032637450125,
+        "capital": 0.01735632088843861
+      },
+      "t_values": {
+        "value": 10.405534705100937,
+        "capital": 17.688790922714496
+      },
+      "p_values": {
+        "value": 0.0,
+        "capital": 0.0
+      },
+      "conf_int": {
+        "value": {
+          "lower": 0.082834281454691,
+          "upper": 0.12157272151255173
+        },
+        "capital": {
+          "lower": 0.27278536324019637,
+          "upper": 0.3412392995260693
+        }
+      },
+      "r_squared_within": 0.7659398971652878
+    },
+    "logit": {
+      "coefficients": {
+        "const": -3.351088126630724,
+        "value": 0.0026224001884331727,
+        "capital": 0.006343909549703134
+      },
+      "std_errors": {
+        "const": 0.49630692421413036,
+        "value": 0.0005142647740435878,
+        "capital": 0.0012611832471852644
+      },
+      "t_values": {
+        "const": -6.752047902488875,
+        "value": 5.099319107186028,
+        "capital": 5.030125133569294
+      },
+      "p_values": {
+        "const": 1.457727267353298e-11,
+        "value": 3.4087745859324844e-07,
+        "capital": 4.901598312559333e-07
+      },
+      "conf_int": {
+        "const": {
+          "lower": -4.32383182336827,
+          "upper": -2.378344429893178
+        },
+        "value": {
+          "lower": 0.0016144597527901119,
+          "upper": 0.0036303406240762335
+        },
+        "capital": {
+          "lower": 0.003872035807314739,
+          "upper": 0.008815783292091529
+        }
+      },
+      "pseudo_r_squared": 0.46969920368041873,
+      "log_likelihood": -73.5153003635223,
+      "log_likelihood_null": -138.62943611198904,
+      "aic": 153.0306007270446,
+      "bic": 162.92555282668872
+    },
+    "probit": {
+      "coefficients": {
+        "const": -1.9412628758815593,
+        "value": 0.0013809981488287757,
+        "capital": 0.003766592130855587
+      },
+      "std_errors": {
+        "const": 0.2591621955674192,
+        "value": 0.00022048487154014473,
+        "capital": 0.0007090655529533481
+      },
+      "t_values": {
+        "const": -7.490532605001618,
+        "value": 6.26345988811904,
+        "capital": 5.312050649149789
+      },
+      "p_values": {
+        "const": 6.859468255985266e-14,
+        "value": 3.7652804354724334e-10,
+        "capital": 1.0839846413308916e-07
+      },
+      "conf_int": {
+        "const": {
+          "lower": -2.449211445348027,
+          "upper": -1.4333143064150917
+        },
+        "value": {
+          "lower": 0.0009488557414741517,
+          "upper": 0.0018131405561833997
+        },
+        "capital": {
+          "lower": 0.002376849184389046,
+          "upper": 0.005156335077322128
+        }
+      },
+      "pseudo_r_squared": 0.46860317771218707,
+      "log_likelihood": -73.66724182546236,
+      "log_likelihood_null": -138.62943611198904,
+      "aic": 153.3344836509247,
+      "bic": 163.22943575056883
+    },
+    "iv": {
+      "coefficients": {
+        "const": -42.36946232507772,
+        "value": 0.11728616142224091,
+        "capital": 0.21932642401471222
+      },
+      "std_errors": {
+        "const": 10.003301735869359,
+        "value": 0.006033628634808466,
+        "capital": 0.026584678863381575
+      },
+      "t_values": {
+        "const": -4.2355477665090655,
+        "value": 19.438743834118004,
+        "capital": 8.2501062037209
+      },
+      "p_values": {
+        "const": 2.279952288386511e-05,
+        "value": 0.0,
+        "capital": 2.220446049250313e-16
+      },
+      "r_squared": 0.8111655375194157
+    },
+    "lasso": {
+      "alpha": 0.1,
+      "coef_scaled": {
+        "value": 151.45704614747277,
+        "capital": 69.2164259410448
+      }
+    },
+    "ridge": {
+      "alpha": 1.0,
+      "coef_scaled": {
+        "value": 150.7549419023112,
+        "capital": 69.31298345478147
+      }
+    }
+  }
+}

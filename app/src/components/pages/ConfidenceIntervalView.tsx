@@ -35,7 +35,7 @@ export const ConfidenceIntervalView = ({
     setActiveTab(`result-${resultIndex}`);
   };
 
-  const handleDeleteResult = (id: string, index: number) => {
+  const handleCloseResult = (id: string, index: number) => {
     removeResult(id);
     if (activeTab === `result-${index}`) {
       setActiveTab("analysis-settings");
@@ -57,25 +57,28 @@ export const ConfidenceIntervalView = ({
 
           {/* 結果タブ */}
           {results.map((result, index) => (
-            <TabsTrigger key={`result-${result.id}`} value={`result-${index}`}>
+            <TabsTrigger
+              key={`result-${result.resultId}`}
+              value={`result-${index}`}
+            >
               <span>
                 {t("ConfidenceIntervalView.ResultLabel", { number: index + 1 })}
               </span>
               <span
                 role="button"
                 tabIndex={0}
-                aria-label={t("ConfidenceIntervalView.DeleteResult")}
+                aria-label={t("ConfidenceIntervalView.CloseResult")}
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDeleteResult(result.id, index);
+                  handleCloseResult(result.resultId, index);
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.stopPropagation();
-                    handleDeleteResult(result.id, index);
-                  }
+                  if (e.key !== "Enter" && e.key !== " ") return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCloseResult(result.resultId, index);
                 }}
-                className="ml-1.5 rounded p-0.5 opacity-60 hover:bg-white/20 hover:opacity-100 transition-opacity cursor-pointer"
+                className="ml-1.5 rounded p-0.5 opacity-60 hover:bg-white/20 hover:opacity-100 transition-opacity"
               >
                 <X size={11} aria-hidden="true" />
               </span>
@@ -99,11 +102,11 @@ export const ConfidenceIntervalView = ({
         {/* 結果タブコンテンツ */}
         {results.map((result, index) => (
           <TabsContent
-            key={`result-${result.id}`}
+            key={`result-${result.resultId}`}
             value={`result-${index}`}
             className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="mx-auto w-full max-w-4xl overflow-y-auto pt-4">
+            <div className="app-scrollbar mx-auto w-full max-w-4xl overflow-y-auto pt-4">
               <ConfidenceIntervalResult result={result} />
             </div>
           </TabsContent>

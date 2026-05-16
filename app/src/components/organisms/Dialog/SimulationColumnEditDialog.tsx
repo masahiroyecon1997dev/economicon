@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import type { SimulationColumnSetting } from "../../../types/commonTypes";
-import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
-import { SimulationColumnConfig } from "../Form/SimulationColumnConfig";
+import type { SimulationColumnSetting } from "@/types/commonTypes";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
+import { SimulationColumnConfig } from "@/components/organisms/Form/SimulationColumnConfig";
 
 const FORM_ID = "simulation-column-config-form";
 
@@ -40,7 +40,7 @@ export const SimulationColumnEditDialog = ({
       submitFormId={FORM_ID}
       isSubmitDisabled={disabled}
     >
-      <div className="overflow-y-auto max-h-[calc(90vh-160px)]">
+      <div className="app-scrollbar overflow-y-auto max-h-[calc(90vh-160px)]">
         <SimulationColumnConfig
           formId={FORM_ID}
           column={column}

@@ -16,6 +16,7 @@ class DistributionType(StrEnum):
     HYPERGEOMETRIC = "hypergeometric"
     NEGATIVE_BINOMIAL = "negative_binomial"
     FIXED = "fixed"
+    SEQUENCE = "sequence"
 
 
 class TransformMethodType(StrEnum):
@@ -72,6 +73,33 @@ class NullStrategy(StrEnum):
     ERROR = "error"
 
 
+class RDDKernelType(StrEnum):
+    TRIANGULAR = "triangular"
+    EPANECHNIKOV = "epanechnikov"
+    UNIFORM = "uniform"
+
+
+class RDDBandwidthSelectType(StrEnum):
+    MSERD = "mserd"
+    MSETWO = "msetwo"
+    MSESUM = "msesum"
+    MSECOMB1 = "msecomb1"
+    MSECOMB2 = "msecomb2"
+    CERRD = "cerrd"
+    CERTWO = "certwo"
+    CERSUM = "cersum"
+    CERCOMB1 = "cercomb1"
+    CERCOMB2 = "cercomb2"
+
+
+class RDDVceType(StrEnum):
+    NN = "nn"
+    HC1 = "hc1"
+    HC3 = "hc3"
+    CLUSTER = "cluster"
+    NNCLUSTER = "nncluster"
+
+
 class DescriptiveStatisticType(StrEnum):
     MEAN = "mean"
     MEDIAN = "median"
@@ -84,6 +112,10 @@ class DescriptiveStatisticType(StrEnum):
     NULL_COUNT = "null_count"
     NULL_RATIO = "null_ratio"
     POPULATION_VARIANCE = "population_variance"
+    MIN = "min"
+    MAX = "max"
+    SKEWNESS = "skewness"
+    KURTOSIS = "kurtosis"
 
 
 class JoinType(StrEnum):

@@ -5,15 +5,18 @@ use reqwest::Client;
 use serde::Serialize;
 use std::net::TcpListener;
 use std::time::Duration;
-use tauri::State;
 use tauri::Manager;
+use tauri::State;
 use uuid::Uuid;
 
 use std::sync::Mutex;
-use tauri_plugin_shell::ShellExt;
 use tauri_plugin_shell::process::CommandChild;
+use tauri_plugin_shell::ShellExt;
 
-use files::{get_files_internal, get_files_with_fallback, check_file_exists_internal, FileError, GetFilesResponse};
+use files::{
+    can_delete_file_internal, check_file_exists_internal, delete_file_internal, get_files_internal,
+    get_files_with_fallback, FileError, GetFilesResponse,
+};
 use os_info::{get_os_info_internal, OsInfoResponse};
 
 // HTTPクライアントを保持するState
@@ -94,6 +97,7 @@ async fn proxy_request(
         "GET" => state.client.get(&url),
         "POST" => state.client.post(&url),
         "PUT" => state.client.put(&url),
+        "PATCH" => state.client.patch(&url),
         "DELETE" => state.client.delete(&url),
         _ => {
             return Err(ApiError {
@@ -145,6 +149,7 @@ async fn fetch_binary(
         "GET" => state.client.get(&url),
         "POST" => state.client.post(&url),
         "PUT" => state.client.put(&url),
+        "PATCH" => state.client.patch(&url),
         "DELETE" => state.client.delete(&url),
         _ => {
             return Err(ApiError {
@@ -232,6 +237,18 @@ fn check_file_exists(file_path: String) -> bool {
     check_file_exists_internal(&file_path)
 }
 
+/// 指定したファイルが削除候補として有効か事前に検証する。
+#[tauri::command]
+fn can_delete_file(file_path: String) -> Result<(), FileError> {
+    can_delete_file_internal(&file_path)
+}
+
+/// 指定したファイルを OS 上から即時削除する。
+#[tauri::command]
+fn delete_file(file_path: String) -> Result<(), FileError> {
+    delete_file_internal(&file_path)
+}
+
 /// エラーを返さない安全版 get_files。
 /// パスが存在しない・空の場合はホームディレクトリ等にフォールバックする。
 /// アプリ初期化時（設定に保存されたパスが消えた場合など）に使用する。
@@ -279,7 +296,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(ClientState { client })
         .manage(AuthTokenState { token: auth_token }) // 生成したトークンをStateとして登録
-        .manage(PortState { port: api_port })          // 確保したポート番号をStateとして登録
+        .manage(PortState { port: api_port }) // 確保したポート番号をStateとして登録
         .setup(|app| {
             let is_dev_mode = std::env::var("ECONOMICON_DEV_RUN")
                 .map(|v| v.to_lowercase() == "true")
@@ -295,15 +312,17 @@ pub fn run() {
                 let main_py_path = resource_dir
                     .join("resources")
                     .join("main.py")
-                    .to_string_lossy().into_owned();
+                    .to_string_lossy()
+                    .into_owned();
 
                 let runime_path = resource_dir
                     .join("resources")
-                    .join("runtime") // packaging/build.ps1 で runtime フォルダに展開する前提
-                    .to_string_lossy().into_owned();
+                    .join("runtime") // packaging/build/build.ps1 で runtime フォルダに展開する前提
+                    .to_string_lossy()
+                    .into_owned();
 
                 let auth_token = app.state::<AuthTokenState>().token.clone();
-                let api_port   = app.state::<PortState>().port;
+                let api_port = app.state::<PortState>().port;
 
                 let (mut rx, child) = app
                     .shell()
@@ -360,7 +379,9 @@ pub fn run() {
             get_os_info,
             get_auth_token,
             get_api_port,
-            check_file_exists
+            check_file_exists,
+            can_delete_file,
+            delete_file
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

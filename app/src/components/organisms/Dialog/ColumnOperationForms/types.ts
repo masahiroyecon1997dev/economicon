@@ -1,4 +1,4 @@
-import type { ColumnType } from "../../../../types/commonTypes";
+import type { ColumnType } from "@/types/commonTypes";
 
 /**
  * 列操作フォームの共通 Props 型

@@ -1,5 +1,5 @@
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import type { ColumnType } from "../../../../types/commonTypes";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import type { ColumnType } from "@/types/commonTypes";
 
 /**
  * 列操作後に最新の columnList を取得して返す

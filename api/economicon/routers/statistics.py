@@ -7,19 +7,27 @@ from economicon.schemas import (
     ConfidenceIntervalResult,
     CreateCorrelationTableRequestBody,
     CreateCorrelationTableResult,
+    CreateGroupStatisticsTableRequestBody,
+    CreateGroupStatisticsTableResult,
     DescriptiveStatisticsRequestBody,
     DescriptiveStatisticsResult,
     StatisticalTestRequestBody,
     StatisticalTestResult,
     SuccessResponse,
 )
-from economicon.services.data.dependencies import TablesStoreDep
+from economicon.services.data.dependencies import (
+    AnalysisResultStoreDep,
+    TablesStoreDep,
+)
 from economicon.services.operation import run_operation
 from economicon.services.statistics.confidence_interval import (
     ConfidenceInterval,
 )
 from economicon.services.statistics.create_correlation_table import (
     CreateCorrelationTable,
+)
+from economicon.services.statistics.create_group_statistics_table import (
+    CreateGroupStatisticsTable,
 )
 from economicon.services.statistics.descriptive_statistics import (
     DescriptiveStatistics,
@@ -44,6 +52,7 @@ async def confidence_interval(
     request: Request,
     body: ConfidenceIntervalRequestBody,
     tables_store: TablesStoreDep,
+    result_store: AnalysisResultStoreDep,
 ):
     """信頼区間計算を行うエンドポイント
 
@@ -60,7 +69,7 @@ async def confidence_interval(
         処理結果
     """
     # ビジネスロジックの実行
-    api = ConfidenceInterval(body, tables_store)
+    api = ConfidenceInterval(body, tables_store, result_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -75,6 +84,7 @@ async def descriptive_statistics(
     request: Request,
     body: DescriptiveStatisticsRequestBody,
     tables_store: TablesStoreDep,
+    result_store: AnalysisResultStoreDep,
 ):
     """記述統計を計算するエンドポイント
 
@@ -91,7 +101,7 @@ async def descriptive_statistics(
         処理結果
     """
     # ビジネスロジックの実行
-    api = DescriptiveStatistics(body, tables_store)
+    api = DescriptiveStatistics(body, tables_store, result_store)
     result = run_operation(api)
 
     return create_success_response(
@@ -144,6 +154,7 @@ async def statistical_test(
     request: Request,
     body: StatisticalTestRequestBody,
     tables_store: TablesStoreDep,
+    result_store: AnalysisResultStoreDep,
 ):
     """統計的検定を実行するエンドポイント
 
@@ -164,7 +175,43 @@ async def statistical_test(
     JSONResponse
         処理結果
     """
-    api = StatisticalTest(body, tables_store)
+    api = StatisticalTest(body, tables_store, result_store)
+    result = run_operation(api)
+
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
+@router.post(
+    "/create-group-statistics-table",
+    response_model=SuccessResponse[CreateGroupStatisticsTableResult],
+)
+async def create_group_statistics_table(
+    request: Request,
+    body: CreateGroupStatisticsTableRequestBody,
+    tables_store: TablesStoreDep,
+):
+    """GroupBy 統計テーブルを作成するエンドポイント
+
+    指定されたグループキーでグループ化し、各列の記述統計を計算して
+    新しいテーブルとして保存します。
+
+    Parameters
+    ----------
+    request : Request
+        FastAPI のリクエストオブジェクト
+    body : CreateGroupStatisticsTableRequestBody
+        リクエストボディ
+    tables_store : TablesStoreDep
+        テーブルストア依存性
+
+    Returns
+    -------
+    JSONResponse
+        処理結果（新規作成されたテーブル名）
+    """
+    api = CreateGroupStatisticsTable(body, tables_store)
     result = run_operation(api)
 
     return create_success_response(

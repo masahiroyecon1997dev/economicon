@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T15:46:34+0900",
+    "r_version": "4.5.2",
+    "sandwich_version": "3.1.1",
+    "plm_version": "2.6.7",
+    "aer_version": "1.2.16",
+    "glmnet_version": "4.1.10",
+    "censReg_version": "0.5.38",
+    "sampleSelection_version": "1.2.14",
+    "rdrobust_version": "3.0.0",
+    "seed": 2024,
+    "tolerance_guide": {
+      "ols_coef": "atol=1e-8 (nonrobust)",
+      "ols_se_hc1": "atol=1e-6 (sandwich::vcovHC vs statsmodels HC1)",
+      "logit_probit_coef": "atol=1e-6 (MLE 収束差)",
+      "fe_re_coef": "atol=1e-8",
+      "iv_coef": "atol=1e-8 (AER::ivreg vs linearmodels::IV2SLS)",
+      "tobit_coef": "atol=1e-4 (censReg vs py4etrics MLE 実装差)",
+      "heckman_coef": "atol=1e-6 (sampleSelection vs statsmodels 手動 2 段階)",
+      "rdd_coef": "atol=1e-4 (rdrobust 共通実装なので高精度一致期待)",
+      "lasso_ridge_scaled": "atol=1e-5 (sklearn / glmnet 同一目的関数)"
+    },
+    "data_file": "synthetic_iv.csv",
+    "model": "iv"
+  },
+  "estimates": {
+    "dep_var": "y",
+    "exog_vars": "x_exog",
+    "endog_vars": "x_endog",
+    "instruments": ["z1", "z2"],
+    "n_obs": 400,
+    "r_squared": 0.955476423544937,
+    "nonrobust": {
+      "coefficients": {
+        "const": 2.04237533676187,
+        "x_exog": 1.48824830691428,
+        "x_endog": 3.04104822669549
+      },
+      "std_errors": {
+        "const": 0.0536329464888526,
+        "x_exog": 0.0197234358793132,
+        "x_endog": 0.068405103840102
+      },
+      "t_values": {
+        "const": 38.0806103424948,
+        "x_exog": 75.4558341670692,
+        "x_endog": 44.4564521647973
+      },
+      "p_values": {
+        "const": 1.30182861401747e-134,
+        "x_exog": 1.66710917288397e-237,
+        "x_endog": 3.10064840227037e-156
+      },
+      "conf_int": {
+        "const": {
+          "lower": 1.93725669325895,
+          "upper": 2.14749398026478
+        },
+        "x_exog": {
+          "lower": 1.44959108293944,
+          "upper": 1.52690553088912
+        },
+        "x_endog": {
+          "lower": 2.90697668681017,
+          "upper": 3.17511976658081
+        }
+      }
+    },
+    "hc1": {
+      "coefficients": {
+        "const": 2.04237533676187,
+        "x_exog": 1.48824830691428,
+        "x_endog": 3.04104822669549
+      },
+      "std_errors": {
+        "const": 0.054103602729944,
+        "x_exog": 0.0188309137978748,
+        "x_endog": 0.0674553892589597
+      },
+      "t_values": {
+        "const": 37.7493407778462,
+        "x_exog": 79.0321873324192,
+        "x_endog": 45.0823612479794
+      },
+      "p_values": {
+        "const": 1.97604254345443e-133,
+        "x_exog": 5.43338328212877e-245,
+        "x_endog": 3.00938359152809e-158
+      },
+      "conf_int": {
+        "const": {
+          "lower": 1.93633422397731,
+          "upper": 2.14841644954642
+        },
+        "x_exog": {
+          "lower": 1.45134039407447,
+          "upper": 1.52515621975409
+        },
+        "x_endog": {
+          "lower": 2.9088380931848,
+          "upper": 3.17325836020618
+        }
+      }
+    },
+    "wu_hausman": {
+      "statistic": 52.4968061843253,
+      "df1": 1,
+      "df2": 396,
+      "p_value": 2.27013053278211e-12
+    },
+    "sargan": {
+      "statistic": 0.245091217759974,
+      "df": 1,
+      "p_value": 0.620552910256697
+    }
+  }
+}

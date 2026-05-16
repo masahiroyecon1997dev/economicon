@@ -17,6 +17,7 @@
 
 import { expect, test } from "@playwright/test";
 import {
+  clearWorkspaceFromUi,
   clickHeaderMenu,
   closeMessageDialog,
   importFile,
@@ -42,6 +43,9 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
   // =========================================================================
   test("Step 1: Parquet ファイルをインポートする", async ({ playwright }) => {
     const page = await setupTauriApp(playwright);
+
+    await clearWorkspaceFromUi(page);
+
     const fileSelectTab = page.getByRole("tab", {
       name: /ファイル選択|Select File/i,
     });

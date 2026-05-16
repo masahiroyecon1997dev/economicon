@@ -7,7 +7,7 @@
  */
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { useFormSubmitting } from "./useFormSubmitting";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
 
 describe("useFormSubmitting", () => {
   it("mount 時に isSubmitting=false で onIsSubmittingChange が呼ばれる", () => {

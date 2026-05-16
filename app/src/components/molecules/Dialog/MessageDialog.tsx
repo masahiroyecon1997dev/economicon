@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { useMessageDialogStore } from "../../../stores/messageDialog";
-import { BaseDialog } from "./BaseDialog";
+import { useMessageDialogStore } from "@/stores/messageDialog";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 
 export const MessageDialog = () => {
   const { t } = useTranslation();
@@ -16,7 +16,7 @@ export const MessageDialog = () => {
       submitLabel={t("Common.OK")}
       onSubmit={closeMessageDialog}
     >
-      <p className="text-sm text-gray-900 dark:text-gray-200 whitespace-pre-wrap">
+      <p className="text-sm text-gray-900 dark:text-gray-200 whitespace-pre-wrap break-all">
         {message}
       </p>
     </BaseDialog>
