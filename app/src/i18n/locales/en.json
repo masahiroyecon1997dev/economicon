@@ -78,7 +78,9 @@
     "HypothesisTest": "Hypothesis Test",
     "Regression": "Regression",
     "LinearRegressionMenu": "Linear Regression",
-    "OrdinaryLeastSquares": "Ordinary Least Squares"
+    "OrdinaryLeastSquares": "Ordinary Least Squares",
+    "Visualization": "Visualization",
+    "DistributionPreview": "Distribution Preview"
   },
   "LeftSideMenu": {
     "Title": "Workspace",
@@ -807,6 +809,8 @@
     "beta": "Beta",
     "weibull": "Weibull",
     "lognormal": "Log-Normal",
+    "chi_square": "Chi-Square",
+    "f_distribution": "F-Distribution",
     "binomial": "Binomial",
     "bernoulli": "Bernoulli",
     "poisson": "Poisson",
@@ -825,6 +829,9 @@
     "Beta": "Shape parameter beta",
     "LogMean": "Log mean",
     "LogStandardDeviation": "Log std dev",
+    "DegreesOfFreedom": "Degrees of Freedom",
+    "NumeratorDf": "Numerator df",
+    "DenominatorDf": "Denominator df",
     "TrialCount": "Trials",
     "SuccessProbability": "Success probability",
     "Rate": "Rate",
@@ -840,6 +847,18 @@
     "TabDeterministic": "Deterministic",
     "TabFixed": "Fixed Value",
     "Submit": "Add"
+  },
+  "DistributionPreview": {
+    "TabContinuous": "Continuous",
+    "TabDiscrete": "Discrete",
+    "TabPdfPmf": "PDF / PMF",
+    "TabCdfCmf": "CDF / CMF",
+    "XAxisLabel": "Random variable x",
+    "YAxisDensity": "Density",
+    "YAxisProbability": "Probability",
+    "YAxisCumulative": "Cumulative Probability",
+    "Loading": "Computing distribution...",
+    "ErrorTitle": "Preview Error"
   },
   "FilterColumnForm": {
     "Title": "Filter",

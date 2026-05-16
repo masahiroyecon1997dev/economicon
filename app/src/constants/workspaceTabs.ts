@@ -50,4 +50,8 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     featureKey: "ChartView",
     titleKey: "HeaderMenu.ChartView",
   },
+  {
+    featureKey: "DistributionPreview",
+    titleKey: "HeaderMenu.DistributionPreview",
+  },
 ];

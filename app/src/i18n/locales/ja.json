@@ -78,7 +78,9 @@
     "HypothesisTest": "仮説検定",
     "Regression": "回帰分析",
     "LinearRegressionMenu": "線形回帰",
-    "OrdinaryLeastSquares": "最小二乗法"
+    "OrdinaryLeastSquares": "最小二乗法",
+    "Visualization": "可視化",
+    "DistributionPreview": "分布プレビュー"
   },
   "LeftSideMenu": {
     "Title": "ワークスペース",
@@ -807,6 +809,8 @@
     "beta": "ベータ分布",
     "weibull": "ワイブル分布",
     "lognormal": "対数正規分布",
+    "chi_square": "カイ二乗分布",
+    "f_distribution": "F 分布",
     "binomial": "二項分布",
     "bernoulli": "ベルヌーイ分布",
     "poisson": "ポアソン分布",
@@ -825,6 +829,9 @@
     "Beta": "形状パラメータ beta",
     "LogMean": "対数平均",
     "LogStandardDeviation": "対数標準偏差",
+    "DegreesOfFreedom": "自由度",
+    "NumeratorDf": "分子自由度",
+    "DenominatorDf": "分母自由度",
     "TrialCount": "試行回数",
     "SuccessProbability": "成功確率",
     "Rate": "発生率",
@@ -840,6 +847,18 @@
     "TabDeterministic": "決定的系列",
     "TabFixed": "固定値",
     "Submit": "追加"
+  },
+  "DistributionPreview": {
+    "TabContinuous": "連続分布",
+    "TabDiscrete": "離散分布",
+    "TabPdfPmf": "PDF / PMF",
+    "TabCdfCmf": "CDF / CMF",
+    "XAxisLabel": "確率変数 x",
+    "YAxisDensity": "密度",
+    "YAxisProbability": "確率",
+    "YAxisCumulative": "累積確率",
+    "Loading": "分布を計算しています...",
+    "ErrorTitle": "プレビューエラー"
   },
   "FilterColumnForm": {
     "Title": "フィルタ",
