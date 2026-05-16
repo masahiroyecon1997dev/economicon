@@ -13,8 +13,8 @@ import { useInitializeFileListOnMount } from "@/hooks/useInitializeFileListOnMou
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { useCurrentPageStore } from "@/stores/currentView";
@@ -103,13 +103,13 @@ export const SaveData = () => {
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError")),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
         );
       } finally {
         clearLoading();

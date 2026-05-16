@@ -16,8 +16,8 @@ import { PageLayout } from "@/components/templates/PageLayout";
 import { useInitializeFileListOnMount } from "@/hooks/useInitializeFileListOnMount";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import type { ImportConfigSettings } from "@/lib/utils/importSchema";
 import { getTableInfo } from "@/lib/utils/internal";
@@ -306,7 +306,7 @@ export const ImportDataFile = () => {
       } else {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(e, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(e, t("Error.UnexpectedError")),
         );
       }
     } finally {
@@ -314,7 +314,6 @@ export const ImportDataFile = () => {
     }
   };
 
-  // 上位ディレクトリへ移動
   const goUpDirectory = async () => {
     const segments = getPathSegments();
     if (segments.length > 0) {
@@ -366,7 +365,7 @@ export const ImportDataFile = () => {
       if (response && response.code !== "OK") {
         await showMessageDialog(
           t("Error.Error"),
-          getResponseErrorMessage(response, t("Error.UnexpectedError")),
+          buildResponseErrorMessage(response, t("Error.UnexpectedError")),
         );
         return;
       }
@@ -382,7 +381,7 @@ export const ImportDataFile = () => {
       console.error(e);
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(e, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(e, t("Error.UnexpectedError")),
       );
     } finally {
       clearLoading();

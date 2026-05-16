@@ -1,16 +1,19 @@
-import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { JoinType } from "@/api/model";
 import {
   createJoinTableBodyJoinTableNameMax,
   createJoinTableBodyJoinTableNameRegExp,
 } from "@/api/zod/table/table";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { SectionCard } from "@/components/molecules/Card/SectionCard";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { PageLayout } from "@/components/templates/PageLayout";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { cn, generateId } from "@/lib/utils/helpers";
 import { getTableInfo } from "@/lib/utils/internal";
@@ -18,12 +21,9 @@ import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { ColumnType } from "@/types/commonTypes";
-import { InputText } from "@/components/atoms/Input/InputText";
-import { Select, SelectItem } from "@/components/atoms/Input/Select";
-import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
-import { SectionCard } from "@/components/molecules/Card/SectionCard";
-import { FormField } from "@/components/molecules/Form/FormField";
-import { PageLayout } from "@/components/templates/PageLayout";
+import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type KeyPair = { id: string; left: string; right: string };
 
@@ -181,13 +181,13 @@ export const JoinTable = () => {
       } else {
         await showMessageDialog(
           t("Error.Error"),
-          getResponseErrorMessage(resp, t("Error.UnexpectedError")),
+          buildResponseErrorMessage(resp, t("Error.UnexpectedError")),
         );
       }
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     } finally {
       setIsSubmitting(false);

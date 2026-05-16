@@ -12,8 +12,8 @@ import { FormField } from "@/components/molecules/Form/FormField";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { cn, generateId } from "@/lib/utils/helpers";
 import { getTableInfo } from "@/lib/utils/internal";
@@ -175,13 +175,13 @@ export const UnionTable = () => {
       } else {
         await showMessageDialog(
           t("Error.Error"),
-          getResponseErrorMessage(resp, t("Error.UnexpectedError")),
+          buildResponseErrorMessage(resp, t("Error.UnexpectedError")),
         );
       }
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     } finally {
       setIsSubmitting(false);
