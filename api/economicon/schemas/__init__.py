@@ -58,6 +58,10 @@ from economicon.schemas.distribution_params import (
     UniformParams,
     WeibullParams,
 )
+from economicon.schemas.distribution_preview import (
+    DistributionPreviewRequestBody,
+    DistributionPreviewResult,
+)
 from economicon.schemas.enums import (
     AlternativeHypothesis,
     ConfidenceIntervalStatisticsType,
@@ -345,4 +349,7 @@ __all__ = [
     "StatisticalTestOutputRequest",
     "OutputResultRequest",
     "OutputResultResult",
+    # Distribution
+    "DistributionPreviewRequestBody",
+    "DistributionPreviewResult",
 ]
