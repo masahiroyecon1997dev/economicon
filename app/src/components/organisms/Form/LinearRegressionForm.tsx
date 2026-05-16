@@ -1,9 +1,13 @@
-import { getEconomiconAppAPI } from "@/api/endpoints";
+﻿import { getEconomiconAppAPI } from "@/api/endpoints";
 import type { AnalysisResultDetail, StandardErrorSettings } from "@/api/model";
 import {
   MissingValueHandlingType,
   RobustStandardErrorHcType,
 } from "@/api/model";
+import {
+  regressionBodyDescriptionMax,
+  regressionBodyResultNameMax,
+} from "@/api/zod/analysis/analysis";
 import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
@@ -15,10 +19,10 @@ import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
-import { extractFieldError } from "@/lib/utils/formHelpers";
+import { createFieldError } from "@/lib/utils/formHelpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableListStore } from "@/stores/tableList";
@@ -29,22 +33,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
-const createRegressionSchema = (t: (key: string) => string) =>
-  z.object({
-    tableName: z.string().min(1, t("ValidationMessages.DataNameSelect")),
-    dependentVariable: z
-      .string()
-      .min(1, t("ValidationMessages.DependentVariableRequired")),
-    explanatoryVariables: z
-      .array(z.string())
-      .min(1, t("ValidationMessages.ExplanatoryVariablesRequired")),
-    standardErrorMethod: z.string(),
-    hacMaxlags: z.number().min(0),
-    clusterGroups: z.array(z.string()),
-    hasConst: z.boolean(),
-    missingValueHandling: z.enum(["ignore", "remove", "error"]),
-  });
-
 type LinearRegressionFormProps = {
   onCancel: () => void;
 };
@@ -53,6 +41,7 @@ export const LinearRegressionForm = ({
   onCancel,
 }: LinearRegressionFormProps) => {
   const { t } = useTranslation();
+  const tErr = createFieldError(t);
   const tableList = useTableListStore((state) => state.tableList);
   const { selectedTableName, setSelectedTableName, columnList, setColumnList } =
     useTableColumnLoader({
@@ -65,46 +54,49 @@ export const LinearRegressionForm = ({
   const form = useForm({
     defaultValues: {
       tableName: selectedTableName,
+      resultName: "",
+      description: "",
       dependentVariable: "",
       explanatoryVariables: [] as string[],
-      standardErrorMethod: "nonrobust",
-      hacMaxlags: 1,
-      clusterGroups: [] as string[],
       hasConst: true,
       missingValueHandling: MissingValueHandlingType.remove as
         | "ignore"
         | "remove"
         | "error",
+      analysis: { method: "ols" } as const,
+      standardError: { method: "nonrobust" } as StandardErrorSettings,
     },
     validators: {
-      onSubmit: createRegressionSchema(t),
+      onSubmit: z.object({
+        tableName: z.string().min(1, t("ValidationMessages.DataNameSelect")),
+        resultName: z.string().max(regressionBodyResultNameMax),
+        description: z.string().max(regressionBodyDescriptionMax),
+        dependentVariable: z
+          .string()
+          .min(1, t("ValidationMessages.DependentVariableRequired")),
+        explanatoryVariables: z
+          .array(z.string().min(1))
+          .min(1, t("ValidationMessages.ExplanatoryVariablesRequired")),
+        hasConst: z.boolean(),
+        missingValueHandling: z.enum(["ignore", "remove", "error"] as const),
+        analysis: z.object({ method: z.literal("ols") }),
+        standardError: z.custom<StandardErrorSettings>(),
+      }),
     },
     onSubmit: async ({ value }) => {
       try {
         const api = getEconomiconAppAPI();
-        const seMethod = value.standardErrorMethod;
-        let standardError: StandardErrorSettings;
-        if (seMethod === "hac") {
-          standardError = { method: "hac", maxlags: value.hacMaxlags };
-        } else if (seMethod === "cluster") {
-          standardError = { method: "cluster", groups: value.clusterGroups };
-        } else if (["HC0", "HC1", "HC2", "HC3"].includes(seMethod)) {
-          standardError = {
-            method: "robust",
-            hcType: seMethod as RobustStandardErrorHcType,
-          };
-        } else {
-          standardError = { method: "nonrobust" } as StandardErrorSettings;
-        }
         const regressionResponse = await api.regression({
           tableName: value.tableName,
+          resultName: value.resultName,
+          description: value.description,
           dependentVariable: value.dependentVariable,
           explanatoryVariables: value.explanatoryVariables,
           hasConst: value.hasConst,
           missingValueHandling:
             value.missingValueHandling as MissingValueHandlingType,
-          analysis: { method: "ols" },
-          standardError,
+          analysis: value.analysis,
+          standardError: value.standardError,
         });
 
         if (regressionResponse.code === "OK" && regressionResponse.result) {
@@ -119,12 +111,15 @@ export const LinearRegressionForm = ({
           }
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(resultResponse, t("Error.UnexpectedError")),
+            buildResponseErrorMessage(
+              resultResponse,
+              t("Error.UnexpectedError"),
+            ),
           );
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(
+            buildResponseErrorMessage(
               regressionResponse,
               t("Error.UnexpectedError"),
             ),
@@ -133,14 +128,23 @@ export const LinearRegressionForm = ({
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
         );
       }
     },
   });
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-  const seMethod = useStore(form.store, (s) => s.values.standardErrorMethod);
+  const seMethod = useStore(form.store, (s) => {
+    const se = s.values.standardError;
+    if (se.method === "robust") {
+      return (
+        (se as Extract<StandardErrorSettings, { method: "robust" }>).hcType ??
+        "HC1"
+      );
+    }
+    return se.method;
+  });
   const dependentVariable = useStore(
     form.store,
     (s) => s.values.dependentVariable,
@@ -182,7 +186,10 @@ export const LinearRegressionForm = ({
                     value={field.state.value}
                     onValueChange={handleTableSelect}
                     disabled={isSubmitting}
-                    error={extractFieldError(field.state.meta.errors)}
+                    error={tErr(
+                      field.state.meta.errors,
+                      "ValidationMessages.DataNameSelect",
+                    )}
                   >
                     {tableList.map((table, index) => (
                       <SelectItem key={index} value={table}>
@@ -191,9 +198,15 @@ export const LinearRegressionForm = ({
                     ))}
                   </Select>
                 </div>
-                {extractFieldError(field.state.meta.errors) && (
+                {tErr(
+                  field.state.meta.errors,
+                  "ValidationMessages.DataNameSelect",
+                ) && (
                   <p className="shrink-0 text-xs text-red-600">
-                    {extractFieldError(field.state.meta.errors)}
+                    {tErr(
+                      field.state.meta.errors,
+                      "ValidationMessages.DataNameSelect",
+                    )}
                   </p>
                 )}
               </div>
@@ -214,7 +227,10 @@ export const LinearRegressionForm = ({
                     <FormField
                       label={t("LinearRegressionForm.DependentVariable")}
                       htmlFor="dependent-variable"
-                      error={extractFieldError(field.state.meta.errors)}
+                      error={tErr(
+                        field.state.meta.errors,
+                        "ValidationMessages.DependentVariableRequired",
+                      )}
                     >
                       <Select
                         id="dependent-variable"
@@ -232,7 +248,10 @@ export const LinearRegressionForm = ({
                         }}
                         disabled={isSubmitting}
                         placeholder={t("LinearRegressionForm.SelectVariable")}
-                        error={extractFieldError(field.state.meta.errors)}
+                        error={tErr(
+                          field.state.meta.errors,
+                          "ValidationMessages.DependentVariableRequired",
+                        )}
                       >
                         {columnList.map((col) => (
                           <SelectItem key={col.name} value={col.name}>
@@ -257,7 +276,10 @@ export const LinearRegressionForm = ({
                       )}
                       selectedValues={field.state.value}
                       onMultipleChange={(v) => field.handleChange(v)}
-                      error={extractFieldError(field.state.meta.errors)}
+                      error={tErr(
+                        field.state.meta.errors,
+                        "ValidationMessages.ExplanatoryVariablesRequired",
+                      )}
                       disabled={isSubmitting}
                       name="explanatoryVariables"
                       className="flex min-h-0 flex-1 flex-col"
@@ -275,74 +297,210 @@ export const LinearRegressionForm = ({
               onToggle={() => setOptionsOpen((v) => !v)}
               summary={
                 <form.Subscribe selector={(s) => s.values}>
-                  {(values) =>
-                    t("LinearRegressionForm.AdvancedOptionsSummary", {
-                      se: t(
-                        `LinearRegressionForm.StandardError_${values.standardErrorMethod}`,
-                      ),
+                  {(values) => {
+                    const se = values.standardError;
+                    const seDisplay =
+                      se.method === "robust"
+                        ? ((
+                            se as Extract<
+                              StandardErrorSettings,
+                              { method: "robust" }
+                            >
+                          ).hcType ?? "HC1")
+                        : se.method;
+                    return t("LinearRegressionForm.AdvancedOptionsSummary", {
+                      se: t(`LinearRegressionForm.StandardError_${seDisplay}`),
                       const: values.hasConst
                         ? t("LinearRegressionForm.HasConstYes")
                         : t("LinearRegressionForm.HasConstNo"),
                       missing: t(
                         `LinearRegressionForm.MissingValue_${values.missingValueHandling}`,
                       ),
-                    })
-                  }
+                    });
+                  }}
                 </form.Subscribe>
               }
             >
               <div className="flex flex-col gap-3">
                 {/* 標準誤差 */}
-                <form.Field name="standardErrorMethod">
-                  {(field) => (
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1">
-                        <label
-                          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                          htmlFor="standard-error-method"
-                        >
-                          {t("LinearRegressionForm.StandardErrorMethod")}
-                        </label>
-                        <Tooltip
-                          content={t(
-                            `LinearRegressionForm.SE_tooltip_${seMethod}`,
-                          )}
-                          position="right"
-                          maxWidth={240}
-                        >
-                          <button
-                            type="button"
-                            className="text-brand-text-sub hover:text-brand-text-main"
-                            aria-label={t(
-                              "LinearRegressionForm.StandardErrorMethod",
-                            )}
+                <form.Field name="standardError">
+                  {(field) => {
+                    const se = field.state.value;
+                    const displayMethod =
+                      se.method === "robust"
+                        ? ((
+                            se as Extract<
+                              StandardErrorSettings,
+                              { method: "robust" }
+                            >
+                          ).hcType ?? "HC1")
+                        : se.method;
+                    return (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1">
+                          <label
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            htmlFor="standard-error-method"
                           >
-                            <HelpCircle className="h-3.5 w-3.5" />
-                          </button>
-                        </Tooltip>
+                            {t("LinearRegressionForm.StandardErrorMethod")}
+                          </label>
+                          <Tooltip
+                            content={t(
+                              `LinearRegressionForm.SE_tooltip_${seMethod}`,
+                            )}
+                            position="right"
+                            maxWidth={240}
+                          >
+                            <button
+                              type="button"
+                              className="text-brand-text-sub hover:text-brand-text-main"
+                              aria-label={t(
+                                "LinearRegressionForm.StandardErrorMethod",
+                              )}
+                            >
+                              <HelpCircle className="h-3.5 w-3.5" />
+                            </button>
+                          </Tooltip>
+                        </div>
+                        <Select
+                          id="standard-error-method"
+                          value={displayMethod}
+                          onValueChange={(v) => {
+                            if (v === "hac") {
+                              form.setFieldValue("standardError", {
+                                method: "hac",
+                                maxlags: 1,
+                              });
+                            } else if (v === "cluster") {
+                              form.setFieldValue("standardError", {
+                                method: "cluster",
+                                groups: [],
+                              });
+                            } else if (
+                              ["HC0", "HC1", "HC2", "HC3"].includes(v)
+                            ) {
+                              form.setFieldValue("standardError", {
+                                method: "robust",
+                                hcType: v as RobustStandardErrorHcType,
+                              });
+                            } else {
+                              form.setFieldValue("standardError", {
+                                method: "nonrobust",
+                              });
+                            }
+                          }}
+                          disabled={isSubmitting}
+                        >
+                          <SelectItem value="nonrobust">
+                            {t("LinearRegressionForm.StandardError_nonrobust")}
+                          </SelectItem>
+                          <SelectItem value="HC0">HC0</SelectItem>
+                          <SelectItem value="HC1">HC1</SelectItem>
+                          <SelectItem value="HC2">HC2</SelectItem>
+                          <SelectItem value="HC3">HC3</SelectItem>
+                          <SelectItem value="hac">
+                            {t("LinearRegressionForm.StandardError_hac")}
+                          </SelectItem>
+                          <SelectItem value="cluster">
+                            {t("LinearRegressionForm.StandardError_cluster")}
+                          </SelectItem>
+                        </Select>
+
+                        {/* ── HAC 標準誤差── */}
+                        {se.method === "hac" && (
+                          <div className="rounded-lg border border-border-color bg-secondary/50 p-2">
+                            <FormField
+                              label={t("LinearRegressionForm.HacMaxlags")}
+                              htmlFor="hac-maxlags"
+                            >
+                              <InputText
+                                id="hac-maxlags"
+                                type="number"
+                                value={(
+                                  se as Extract<
+                                    StandardErrorSettings,
+                                    { method: "hac" }
+                                  >
+                                ).maxlags.toString()}
+                                onChange={(e) => {
+                                  const hacSe = se as Extract<
+                                    StandardErrorSettings,
+                                    { method: "hac" }
+                                  >;
+                                  field.handleChange({
+                                    ...hacSe,
+                                    maxlags: parseInt(e.target.value) || 0,
+                                  });
+                                }}
+                                onBlur={field.handleBlur}
+                                disabled={isSubmitting}
+                              />
+                            </FormField>
+                          </div>
+                        )}
+
+                        {/* ── Cluster 標準誤差── */}
+                        {se.method === "cluster" && (
+                          <div className="rounded-lg border border-border-color bg-secondary/50 p-2">
+                            <FormField
+                              label={t("LinearRegressionForm.ClusterGroups")}
+                              htmlFor="cluster-groups"
+                            >
+                              <div className="app-scrollbar max-h-32 overflow-y-auto rounded-md border border-border-color bg-white dark:bg-gray-800 p-1.5">
+                                {columnList.length === 0 ? (
+                                  <p className="text-xs text-brand-text-main/60">
+                                    {t("Common.NoColumnsAvailable")}
+                                  </p>
+                                ) : (
+                                  columnList.map((col) => {
+                                    const clusterSe = se as Extract<
+                                      StandardErrorSettings,
+                                      { method: "cluster" }
+                                    >;
+                                    return (
+                                      <label
+                                        key={col.name}
+                                        className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-secondary"
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          className="h-3.5 w-3.5 rounded border-gray-300 text-accent focus:ring-accent"
+                                          checked={clusterSe.groups.includes(
+                                            col.name,
+                                          )}
+                                          onChange={() => {
+                                            const next =
+                                              clusterSe.groups.includes(
+                                                col.name,
+                                              )
+                                                ? clusterSe.groups.filter(
+                                                    (v) => v !== col.name,
+                                                  )
+                                                : [
+                                                    ...clusterSe.groups,
+                                                    col.name,
+                                                  ];
+                                            field.handleChange({
+                                              ...clusterSe,
+                                              groups: next,
+                                            });
+                                          }}
+                                          disabled={isSubmitting}
+                                        />
+                                        <span className="text-brand-text-main">
+                                          {col.name}
+                                        </span>
+                                      </label>
+                                    );
+                                  })
+                                )}
+                              </div>
+                            </FormField>
+                          </div>
+                        )}
                       </div>
-                      <Select
-                        id="standard-error-method"
-                        value={field.state.value}
-                        onValueChange={(v) => field.handleChange(v)}
-                        disabled={isSubmitting}
-                      >
-                        <SelectItem value="nonrobust">
-                          {t("LinearRegressionForm.StandardError_nonrobust")}
-                        </SelectItem>
-                        <SelectItem value="HC0">HC0</SelectItem>
-                        <SelectItem value="HC1">HC1</SelectItem>
-                        <SelectItem value="HC2">HC2</SelectItem>
-                        <SelectItem value="HC3">HC3</SelectItem>
-                        <SelectItem value="hac">
-                          {t("LinearRegressionForm.StandardError_hac")}
-                        </SelectItem>
-                        <SelectItem value="cluster">
-                          {t("LinearRegressionForm.StandardError_cluster")}
-                        </SelectItem>
-                      </Select>
-                    </div>
-                  )}
+                    );
+                  }}
                 </form.Field>
 
                 {/* 定数項 */}
@@ -397,82 +555,6 @@ export const LinearRegressionForm = ({
                     </FormField>
                   )}
                 </form.Field>
-
-                {/* HAC 追加パラメータ */}
-                {seMethod === "hac" && (
-                  <div className="rounded-lg border border-border-color bg-secondary/50 p-2">
-                    <form.Field name="hacMaxlags">
-                      {(field) => (
-                        <FormField
-                          label={t("LinearRegressionForm.HacMaxlags")}
-                          htmlFor="hac-maxlags"
-                        >
-                          <InputText
-                            id="hac-maxlags"
-                            type="number"
-                            value={field.state.value.toString()}
-                            onChange={(e) =>
-                              field.handleChange(parseInt(e.target.value) || 0)
-                            }
-                            onBlur={field.handleBlur}
-                            disabled={isSubmitting}
-                          />
-                        </FormField>
-                      )}
-                    </form.Field>
-                  </div>
-                )}
-
-                {/* Cluster 追加パラメータ */}
-                {seMethod === "cluster" && (
-                  <div className="rounded-lg border border-border-color bg-secondary/50 p-2">
-                    <form.Field name="clusterGroups">
-                      {(field) => (
-                        <FormField
-                          label={t("LinearRegressionForm.ClusterGroups")}
-                          htmlFor="cluster-groups"
-                        >
-                          <div className="app-scrollbar max-h-32 overflow-y-auto rounded-md border border-border-color bg-white dark:bg-gray-800 p-1.5">
-                            {columnList.length === 0 ? (
-                              <p className="text-xs text-brand-text-main/60">
-                                {t("Common.NoColumnsAvailable")}
-                              </p>
-                            ) : (
-                              columnList.map((col) => (
-                                <label
-                                  key={col.name}
-                                  className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-secondary"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    className="h-3.5 w-3.5 rounded border-gray-300 text-accent focus:ring-accent"
-                                    checked={field.state.value.includes(
-                                      col.name,
-                                    )}
-                                    onChange={() => {
-                                      const next = field.state.value.includes(
-                                        col.name,
-                                      )
-                                        ? field.state.value.filter(
-                                            (v) => v !== col.name,
-                                          )
-                                        : [...field.state.value, col.name];
-                                      field.handleChange(next);
-                                    }}
-                                    disabled={isSubmitting}
-                                  />
-                                  <span className="text-brand-text-main">
-                                    {col.name}
-                                  </span>
-                                </label>
-                              ))
-                            )}
-                          </div>
-                        </FormField>
-                      )}
-                    </form.Field>
-                  </div>
-                )}
               </div>
             </AnalysisOptionsCard>
           </div>
