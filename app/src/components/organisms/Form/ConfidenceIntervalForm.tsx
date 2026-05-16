@@ -72,12 +72,10 @@ const createSchema = (t: (key: string) => string) =>
 
 type ConfidenceIntervalFormProps = {
   onCancel: () => void;
-  onAnalysisComplete?: (resultIndex: number) => void;
 };
 
 export const ConfidenceIntervalForm = ({
   onCancel,
-  onAnalysisComplete,
 }: ConfidenceIntervalFormProps) => {
   const { t } = useTranslation();
   const tableList = useTableListStore((s) => s.tableList);
@@ -121,7 +119,6 @@ export const ConfidenceIntervalForm = ({
             openResultTab(detailResponse.result);
             await useAnalysisResultsStore.getState().fetchSummaries();
             setCurrentView("DataPreview");
-            onAnalysisComplete?.(0);
             return;
           }
 
