@@ -1,7 +1,10 @@
-import { useTranslation } from "react-i18next";
-import type { SimulationColumnSetting } from "@/types/commonTypes";
+import { Button } from "@/components/atoms/Button/Button";
 import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
 import { SimulationColumnConfig } from "@/components/organisms/Form/SimulationColumnConfig";
+import { DIST_PARAM_DEFAULTS } from "@/constants/simulation";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import type { SimulationColumnSetting } from "@/types/commonTypes";
+import { useTranslation } from "react-i18next";
 
 const FORM_ID = "simulation-column-config-form";
 
@@ -25,6 +28,18 @@ export const SimulationColumnEditDialog = ({
   disabled = false,
 }: SimulationColumnEditDialogProps) => {
   const { t } = useTranslation();
+  const openWorkTab = useWorkspaceTabsStore((s) => s.openWorkTab);
+
+  const handleOpenPreview = () => {
+    const distributionType = column.distributionType ?? "normal";
+    const distributionParams = column.distributionParams ?? {
+      ...DIST_PARAM_DEFAULTS[distributionType],
+    };
+    openWorkTab("DistributionPreview", t("HeaderMenu.DistributionPreview"), {
+      distributionType,
+      distributionParams,
+    });
+  };
 
   return (
     <BaseDialog
@@ -39,6 +54,16 @@ export const SimulationColumnEditDialog = ({
       submitLabel={t("Common.Save")}
       submitFormId={FORM_ID}
       isSubmitDisabled={disabled}
+      footerLeft={
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleOpenPreview}
+          data-testid="open-distribution-preview-btn"
+        >
+          {t("HeaderMenu.DistributionPreview")}
+        </Button>
+      }
     >
       <div className="app-scrollbar overflow-y-auto max-h-[calc(90vh-160px)]">
         <SimulationColumnConfig
