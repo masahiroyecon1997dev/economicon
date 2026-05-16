@@ -50,7 +50,17 @@
 - [fixed] RF-03: `ALL_STAT_TYPES` 定数を `app/src/constants/statisticTypes.ts` に切り出し、`DescriptiveStatistics.tsx` と `GroupStatistics.tsx` の両方から import するよう変更した。`ADVANCED_STAT_TYPES` は `DescriptiveStatistics.tsx` に残した。
 - [fixed] RF-05: `workspaceTabs.ts` に `selectWorkTabDraft<T>(tabs, featureKey, schema)` を追加し、4 コンポーネント（DescriptiveStatistics / CorrelationMatrix / GroupStatistics / StatisticalTestView）の `draftValues as FormValues` 型アサーションを置き換えた。
 - [fixed] RF-06: `DescriptiveStatistics.tsx` から `FormErrors` 型と手動バリデーションを削除し、`DescriptiveStatisticsBody.safeParse` を使う方式へ移行した。エラーハンドラーも `buildResponseErrorMessage` / `buildCaughtErrorMessage` に統一した。
-- [fixed] RF-04（DescriptiveStatistics / ConfidenceIntervalForm / StatisticalTestView / LeftSideMenu）: 旧エラーヘルパー（`extractApiErrorMessage` / `getResponseErrorMessage`）を新ヘルパー（`buildCaughtErrorMessage` / `buildResponseErrorMessage`）に置き換えた。残り 1 ファイル（LinearRegressionForm）は RF-01 と同時対応予定。
+- [fixed] RF-04（DescriptiveStatistics / ConfidenceIntervalForm / StatisticalTestView / LeftSideMenu）: 旧エラーヘルパー（`extractApiErrorMessage` / `getResponseErrorMessage`）を新ヘルパー（`buildCaughtErrorMessage` / `buildResponseErrorMessage`）に置き換えた。LinearRegressionForm は RF-01 対応時に完了。
+- [fixed] RF-01（LinearRegressionForm）: `createRegressionSchema` を削除し、`validators.onSubmit` を Orval 定数（`regressionBodyResultNameMax` 等）を活用したローカル `z.object` スキーマに置き換えた。`RegressionBody` は `ZodDefault` フィールドの型不一致でそのまま使用不可だったため、フォーム値型と完全一致するスキーマを定義した。`defaultValues` に `resultName` / `description` / `standardError` を追加し、エラーハンドラーも `buildCaughtErrorMessage` / `buildResponseErrorMessage` に統一した（RF-04 の LinearRegressionForm 分を含む）。
+- [fixed] RF-02（FilterColumnForm）: `ConditionBlock` の `form: any` を `ReactFormExtendedApi<FilterFormValues>` に変更し、`eslint-disable` コメントを削除した。ただし `ReactFormExtendedApi` は 12 型引数が必要なため、`FilterFormType` エイリアス定義と呼び出し元での `as FilterFormType` キャストによる追加対応が残課題。
+- [fixed] RF-07（validation.ts）: 参照ゼロを確認のうえ `app/src/lib/utils/validation.ts` を削除した。
+- [fixed] RF-08（apiTypes.ts）: 参照ゼロを確認のうえ `app/src/types/apiTypes.ts` を削除した。
+- [fixed] RF-09（TalbeDataRowType）: `vscode_renameSymbol` を使って `TalbeDataRowType` → `TableDataRowType` に一括リネームした（commonTypes.ts / useVirtualTableData.ts / VirtualTableCompilerBoundary.tsx / VirtualTable.tsx の 4 ファイル）。
+- [fixed] RF-10（checkInputType）: `commonTypes.ts` から未使用・命名規則違反（camelCase）の `checkInputType` 型定義を削除した。
+- [fixed] RF-11（regressionResults.ts）: `app/src/stores/regressionResults.ts` とそのテストファイルを削除した。
+- [fixed] RF-12（ConfidenceIntervalView / confidenceIntervalResults.ts）: `ConfidenceIntervalView` を `ConfidenceIntervalForm` の薄いラッパーに整理し、`confidenceIntervalResults.ts` ストアとテストを削除した。型定義（`ConfidenceIntervalResultData`）は `commonTypes.ts` に移動し、`onAnalysisComplete` コールバックも削除した。なお `ConfidenceIntervalResultData` は `ConfidenceIntervalResultData` の同義エイリアスとして残存しており、将来的には削除して直接 `ConfidenceIntervalResultData` を使う形に統一すること。
+- [fixed] RF-13（ChartView.tsx）: `extractApiErrorMessage` を `buildCaughtErrorMessage` に置き換えた。
+- [fixed] RF-14（Calculation / SaveData / JoinTable / UnionTable / ImportDataFile）: 旧エラーヘルパーを `buildCaughtErrorMessage` / `buildResponseErrorMessage` に置き換えた。ImportDataFile.tsx の `changeDirectory` 関数 else ブロック（旧 line 309）に破損テキスト（`",へ移動"`）が残存しており、`);` および `} finally { clearLoading(); }` の補完が別途必要。
 
 ### WorkspaceSurface タブ D&D 実装メモ
 
@@ -212,106 +222,20 @@ canonical order:
 
 ### 🚨 Critical（即時修正必須）
 
-#### RF-01: `LinearRegressionForm` — 手書き Zod スキーマ（Orval 生成スキーマ再定義禁止違反）
-
-> ⚠️ RF-04（LinearRegressionForm の旧エラーハンドラー置き換え）もこの対応に含める。
-
-- **対象**: `app/src/components/organisms/Form/LinearRegressionForm.tsx`
-- **問題**: `createRegressionSchema(t)` という手書き Zod スキーマを定義し `validators.onSubmit` に渡している。Orval 生成の `RegressionBody`（`@/api/zod/analysis/analysis.ts`）が存在するが未使用。
-- **修正方針**: `validators.onSubmit` を `RegressionBody` ベースに置き換える。バリデーションメッセージは `@tanstack/react-form` の `field.state.meta.errors` からとり、i18n キーで上書きする。
-- **実装ステップ**:
-  1. `createRegressionSchema` 関数および呼び出し箇所を削除する
-  2. `useForm` の `validators.onSubmit` を `RegressionBody` に変更する
-     ```ts
-     import { RegressionBody } from "@/api/zod/analysis/analysis";
-     validators: {
-       onSubmit: RegressionBody;
-     }
-     ```
-  3. フォームの `defaultValues` に `resultName: ""` / `description: ""` を追加する（`RegressionBody` のデフォルト値に合わせる）
-  4. `standardError` は `RegressionBody` 内の discriminated union（`method` フィールドで分岐）なので、submit 時に `standardErrorMethod` 文字列から union オブジェクトへ変換する既存ロジックはそのまま維持する
-  5. フィールドエラー表示は `extractFieldError(field.state.meta.errors)` から `tErr(field.state.meta.errors, "ValidationMessages.XXX")` パターンへ統一する
-  6. `LinearRegressionForm.test.tsx` でバリデーションエラーメッセージが変わる場合はアサーションを更新する
-
-#### RF-02: `FilterColumnForm` — `form: any` 使用（`any` 禁止ルール違反）
-
-- **対象**: `app/src/components/organisms/Dialog/ColumnOperationForms/FilterColumnForm.tsx` L315 付近
-- **問題**: `ConditionBlock` コンポーネントの Props 型に `// eslint-disable-next-line @typescript-eslint/no-explicit-any` とコメントしたうえで `form: any` を使っている。
-- **修正方針**: `form` の型を `ReturnType<typeof useForm<FormValues>>` に変更し、`any` を排除する。フォームの型変数が複雑な場合は `ConditionBlock` を `form.Field` の Render Prop に移動することも検討する。
-- **実装ステップ**:
-  1. `FilterColumnForm` 内の `useForm({...})` の戻り値型を確認する。`defaultValues` から型推論される `FormValues` が `typeof defaultValues` として取り出せる
-  2. `ConditionBlock` の `form: any` を `form: ReturnType<typeof useForm<typeof defaultValues>>` に変更し、ESLint コメントを削除する
-  3. ただし `@tanstack/react-form` の `useForm` の型パラメータ取り出しが難しい場合は、`ConditionBlock` を `form.Field` の Render Prop（`form.Field` の children 引数 `field` を直接受け取る）に変換して props の `form` を削除する方式も可
+（すべて対応済み — 「今回修正済み」一覧を参照。RF-02 は `ReactFormExtendedApi` の 12 型引数問題が残課題。）
 
 ### ⚠️ Warning（次サイクルで対応）
 
-#### RF-07: `validation.ts` — 未使用エクスポート関数 3 つ
-
-- **対象**: `app/src/lib/utils/validation.ts`
-- **問題**: `validateTableName` / `validateNumRows` / `validateColumnName` の 3 関数が定義・エクスポートされているが、ワークスペース全体でこのファイルから import している箇所が一切ない。各コンポーネントは Zod スキーマ or `@tanstack/react-form` バリデーションへ移行済みで、これらの関数は使われなくなっている。
-- **修正方針**: `validation.ts` ファイルごと削除する。削除前に `grep -r 'from.*validation'` で参照がないことを最終確認する。
-
-#### RF-08: `types/apiTypes.ts` — 削除可能な空の非推奨ファイル
-
-- **対象**: `app/src/types/apiTypes.ts`
-- **問題**: `@deprecated` コメントのみが残る空ファイル。このファイルを import しているソースは存在しない。
-- **修正方針**: ファイルを削除する。
-
-#### RF-09: `TalbeDataRowType` — タイポによる命名不一致
-
-- **対象**: `app/src/types/commonTypes.ts` および参照先ファイル
-  - `app/src/hooks/useVirtualTableData.ts`
-  - `app/src/components/organisms/Table/VirtualTableCompilerBoundary.tsx`
-  - `app/src/components/organisms/Table/VirtualTable.tsx`
-- **問題**: `TalbeDataRowType`（`Table` → `Talbe` のタイポ）として定義・使用されている。正しくは `TableDataRowType`。
-- **修正方針**: `vscode_renameSymbol` を使って `TalbeDataRowType` → `TableDataRowType` に一括リネームする。型定義のみの変更のため実動作への影響はない。
-
-#### RF-10: `checkInputType` — 未使用型定義
-
-- **対象**: `app/src/types/commonTypes.ts` L35
-- **問題**: `export type checkInputType = { isError: boolean; message: string }` が定義されているが、このファイル以外での使用箇所が一切ない。また型名が `camelCase` になっており命名規則（`PascalCase`）にも違反している。
-- **修正方針**: 型定義を削除する。
-
-#### RF-11: `regressionResults.ts` / `confidenceIntervalResults.ts` — 死蔵ストア
-
-- **対象**:
-  - `app/src/stores/regressionResults.ts`
-  - `app/src/stores/confidenceIntervalResults.ts`
-- **問題**: 両ストアの `addResult` アクションは本番コンポーネントから一切呼ばれていない（テストファイルのみ）。`regressionResults` はコンポーネントから完全に参照されていない。`confidenceIntervalResults` は `ConfidenceIntervalView` から参照されているが、データが投入されることはなく `results` は常に空配列となる（`ConfidenceIntervalForm` は `openResultTab` で workspace result tab へ遷移する設計になった）。
-- **修正方針**:
-  1. `regressionResults.ts` ストアとそのテストファイルを削除する
-  2. `confidenceIntervalResults.ts` の `addResult` 削除および `ConfidenceIntervalView` の内部タブ構造整理は RF-12 と合わせて対応する
-
-#### RF-12: `ConfidenceIntervalView` — 死蔵の内部タブ UI
-
-- **対象**: `app/src/components/pages/ConfidenceIntervalView.tsx`
-- **問題**: `ConfidenceIntervalView` は `useState<string>` による内部タブ管理と `useConfidenceIntervalResultsStore` の `results` を使って結果タブを描画しているが、`ConfidenceIntervalForm` の成功ハンドラーは `openResultTab`（workspace result tab）→ `setCurrentView("DataPreview")` の順で処理するためこの内部タブには結果が格納されない。`handleAnalysisComplete` コールバックは呼ばれるが、すでに DataPreview へ遷移済みのため状態更新は意味をなさない。
-- **修正方針**:
-  1. `ConfidenceIntervalView` を `ConfidenceIntervalForm` の薄いラッパーにリファクタリングする。内部タブ（`activeTab` state、`results` mapping、`TabsList`/`TabsContent` 構造）を削除し、他の静的 work tab（JoinTable / UnionTable 等）と同じシンプルな構造にする
-  2. `onAnalysisComplete` コールバック props を削除する
-  3. `ConfidenceIntervalView` の `onCancel` が内部で `setCurrentView("DataPreview")` を呼ぶ現状は、他の静的 work tab と同様に WorkspaceSurface の `handleCloseTab` を通じる設計に揃えることも検討する
-  4. `confidenceIntervalResults.ts` ストアとそのテストファイルを削除する
-
-#### RF-13: `ChartView.tsx` — 旧エラーハンドラーパターン使用
-
-- **対象**: `app/src/components/pages/ChartView.tsx`
-- **問題**: `extractApiErrorMessage` を使用している。RF-04 スコープ外の新規追加ファイルだが、他の画面と統一するため `buildCaughtErrorMessage` へ変更が望ましい。
-- **修正方針**: `extractApiErrorMessage` を `buildCaughtErrorMessage` に置き換える（paramMap 不要なため第 3 引数は省略可）。
-
-#### RF-14: `Calculation.tsx` / `SaveData.tsx` / `JoinTable.tsx` / `UnionTable.tsx` — 旧エラーヘルパー残存
-
-- **問題**: RF-04 の当初スコープ外だったため、上記 4 ファイルは `extractApiErrorMessage` / `getResponseErrorMessage` をそのまま使用している。RF-04 完了後に `extractApiErrorMessage` と `getResponseErrorMessage` の残存使用箇所となっている。
-- **修正方針**: `buildCaughtErrorMessage` / `buildResponseErrorMessage` に置き換える。`replaceParamNames` を別途呼んでいる箇所は `paramMap` 引数へ統合する。対応後、`extractApiErrorMessage` と `getResponseErrorMessage` への参照がなくなった時点で `apiError.ts` から deprecated コメントを付与するか削除する。
+（RF-07 ～ RF-14 は対応済み — 「今回修正済み」一覧を参照）
 
 #### RF-03: `ALL_STAT_TYPES` 定数の重複（DRY 違反）（対応済み）
 
 - **対象**: `DescriptiveStatistics.tsx` と `GroupStatistics.tsx` の両方に同一の `ALL_STAT_TYPES: DescriptiveStatisticType[]`（15 項目）を宣言
 - ✅ **対応済み**: `app/src/constants/statisticTypes.ts` を新規作成し、両コンポーネントから import する形に変更済み。`ADVANCED_STAT_TYPES` は `DescriptiveStatistics.tsx` に残置。
 
-#### RF-04: エラーハンドラーヘルパーの不統一（部分対応済み）
+#### RF-04: エラーハンドラーヘルパーの不統一（対応済み）
 
-- **状況**: 当初対象 5 ファイルのうち 4 ファイル（DescriptiveStatistics / ConfidenceIntervalForm / StatisticalTestView / LeftSideMenu）は新パターン（`buildCaughtErrorMessage` / `buildResponseErrorMessage`）に移行済み。`LinearRegressionForm.tsx` のみ未対応（RF-01 と同時に対応予定）。
-- **残タスク**: RF-01 対応時に `LinearRegressionForm.tsx` の旧エラーハンドラーも置き換える。また RF-14 として Calculation / SaveData / JoinTable / UnionTable の旧パターン残存も別途追加済み。
+- ✅ **対応済み**: 全対象ファイル（DescriptiveStatistics / ConfidenceIntervalForm / StatisticalTestView / LeftSideMenu / LinearRegressionForm / Calculation / SaveData / JoinTable / UnionTable / ChartView / ImportDataFile）において `buildCaughtErrorMessage` / `buildResponseErrorMessage` への置き換え完了。ImportDataFile.tsx の line 309 の破損残存については「今回修正済み」の RF-14 を参照。
 
 #### RF-05: `persistedWorkTab?.draftValues as SomeType` 型アサーションの重複（対応済み）
 
