@@ -394,6 +394,23 @@ export const AppBar = () => {
     //     },
     //   ],
     // },
+    {
+      id: "visualization",
+      menuName: t("HeaderMenu.Visualization"),
+      isOpen: openMenuId === "visualization",
+      onClose: close,
+      items: [
+        {
+          id: "distribution-preview",
+          label: t("HeaderMenu.DistributionPreview"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "DistributionPreview",
+              t("HeaderMenu.DistributionPreview"),
+            ),
+        },
+      ],
+    },
   ];
 
   return (

@@ -9,6 +9,7 @@ import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalVie
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
+import { DistributionPreview } from "@/components/pages/DistributionPreview";
 import { GroupStatistics } from "@/components/pages/GroupStatistics";
 import { JoinTable } from "@/components/pages/JoinTable";
 import { StatisticalTestView } from "@/components/pages/StatisticalTestView";
@@ -53,6 +54,7 @@ const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
   CreateSimulationDataTable: <CreateSimulationDataTable />,
   CalculationView: <Calculation />,
   ConfidenceIntervalView: <ConfidenceIntervalView />,
+  DistributionPreview: <DistributionPreview />,
 };
 
 const isCorrelationMatrixWorkTab = (
