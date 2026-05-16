@@ -47,6 +47,10 @@
 - [fixed] StatisticalTestView: 14 inch 画面を想定し、検定タイプ行・サンプルカード・オプション領域の余白を圧縮して縦方向の情報密度を改善した。
 - [fixed] WorkspaceSurface: タブのドラッグ&ドロップ並び替えを追加し、Alt+Shift+ArrowLeft / ArrowRight でも左右移動できるようにした。
 - [fixed] Group Statistics: 2 ステップ Wizard を実装し、Step 2 を Role Assignment Matrix ベースに再構成した。列検索、役割の排他制御、summary、統計量選択、出力データ名を同一ステップに集約した。
+- [fixed] RF-03: `ALL_STAT_TYPES` 定数を `app/src/constants/statisticTypes.ts` に切り出し、`DescriptiveStatistics.tsx` と `GroupStatistics.tsx` の両方から import するよう変更した。`ADVANCED_STAT_TYPES` は `DescriptiveStatistics.tsx` に残した。
+- [fixed] RF-05: `workspaceTabs.ts` に `selectWorkTabDraft<T>(tabs, featureKey, schema)` を追加し、4 コンポーネント（DescriptiveStatistics / CorrelationMatrix / GroupStatistics / StatisticalTestView）の `draftValues as FormValues` 型アサーションを置き換えた。
+- [fixed] RF-06: `DescriptiveStatistics.tsx` から `FormErrors` 型と手動バリデーションを削除し、`DescriptiveStatisticsBody.safeParse` を使う方式へ移行した。エラーハンドラーも `buildResponseErrorMessage` / `buildCaughtErrorMessage` に統一した。
+- [fixed] RF-04（DescriptiveStatistics / ConfidenceIntervalForm / StatisticalTestView / LeftSideMenu）: 旧エラーヘルパー（`extractApiErrorMessage` / `getResponseErrorMessage`）を新ヘルパー（`buildCaughtErrorMessage` / `buildResponseErrorMessage`）に置き換えた。残り 1 ファイル（LinearRegressionForm）は RF-01 と同時対応予定。
 
 ### WorkspaceSurface タブ D&D 実装メモ
 
@@ -210,6 +214,8 @@ canonical order:
 
 #### RF-01: `LinearRegressionForm` — 手書き Zod スキーマ（Orval 生成スキーマ再定義禁止違反）
 
+> ⚠️ RF-04（LinearRegressionForm の旧エラーハンドラー置き換え）もこの対応に含める。
+
 - **対象**: `app/src/components/organisms/Form/LinearRegressionForm.tsx`
 - **問題**: `createRegressionSchema(t)` という手書き Zod スキーマを定義し `validators.onSubmit` に渡している。Orval 生成の `RegressionBody`（`@/api/zod/analysis/analysis.ts`）が存在するが未使用。
 - **修正方針**: `validators.onSubmit` を `RegressionBody` ベースに置き換える。バリデーションメッセージは `@tanstack/react-form` の `field.state.meta.errors` からとり、i18n キーで上書きする。
@@ -239,108 +245,81 @@ canonical order:
 
 ### ⚠️ Warning（次サイクルで対応）
 
-#### RF-03: `ALL_STAT_TYPES` 定数の重複（DRY 違反）
+#### RF-07: `validation.ts` — 未使用エクスポート関数 3 つ
+
+- **対象**: `app/src/lib/utils/validation.ts`
+- **問題**: `validateTableName` / `validateNumRows` / `validateColumnName` の 3 関数が定義・エクスポートされているが、ワークスペース全体でこのファイルから import している箇所が一切ない。各コンポーネントは Zod スキーマ or `@tanstack/react-form` バリデーションへ移行済みで、これらの関数は使われなくなっている。
+- **修正方針**: `validation.ts` ファイルごと削除する。削除前に `grep -r 'from.*validation'` で参照がないことを最終確認する。
+
+#### RF-08: `types/apiTypes.ts` — 削除可能な空の非推奨ファイル
+
+- **対象**: `app/src/types/apiTypes.ts`
+- **問題**: `@deprecated` コメントのみが残る空ファイル。このファイルを import しているソースは存在しない。
+- **修正方針**: ファイルを削除する。
+
+#### RF-09: `TalbeDataRowType` — タイポによる命名不一致
+
+- **対象**: `app/src/types/commonTypes.ts` および参照先ファイル
+  - `app/src/hooks/useVirtualTableData.ts`
+  - `app/src/components/organisms/Table/VirtualTableCompilerBoundary.tsx`
+  - `app/src/components/organisms/Table/VirtualTable.tsx`
+- **問題**: `TalbeDataRowType`（`Table` → `Talbe` のタイポ）として定義・使用されている。正しくは `TableDataRowType`。
+- **修正方針**: `vscode_renameSymbol` を使って `TalbeDataRowType` → `TableDataRowType` に一括リネームする。型定義のみの変更のため実動作への影響はない。
+
+#### RF-10: `checkInputType` — 未使用型定義
+
+- **対象**: `app/src/types/commonTypes.ts` L35
+- **問題**: `export type checkInputType = { isError: boolean; message: string }` が定義されているが、このファイル以外での使用箇所が一切ない。また型名が `camelCase` になっており命名規則（`PascalCase`）にも違反している。
+- **修正方針**: 型定義を削除する。
+
+#### RF-11: `regressionResults.ts` / `confidenceIntervalResults.ts` — 死蔵ストア
+
+- **対象**:
+  - `app/src/stores/regressionResults.ts`
+  - `app/src/stores/confidenceIntervalResults.ts`
+- **問題**: 両ストアの `addResult` アクションは本番コンポーネントから一切呼ばれていない（テストファイルのみ）。`regressionResults` はコンポーネントから完全に参照されていない。`confidenceIntervalResults` は `ConfidenceIntervalView` から参照されているが、データが投入されることはなく `results` は常に空配列となる（`ConfidenceIntervalForm` は `openResultTab` で workspace result tab へ遷移する設計になった）。
+- **修正方針**:
+  1. `regressionResults.ts` ストアとそのテストファイルを削除する
+  2. `confidenceIntervalResults.ts` の `addResult` 削除および `ConfidenceIntervalView` の内部タブ構造整理は RF-12 と合わせて対応する
+
+#### RF-12: `ConfidenceIntervalView` — 死蔵の内部タブ UI
+
+- **対象**: `app/src/components/pages/ConfidenceIntervalView.tsx`
+- **問題**: `ConfidenceIntervalView` は `useState<string>` による内部タブ管理と `useConfidenceIntervalResultsStore` の `results` を使って結果タブを描画しているが、`ConfidenceIntervalForm` の成功ハンドラーは `openResultTab`（workspace result tab）→ `setCurrentView("DataPreview")` の順で処理するためこの内部タブには結果が格納されない。`handleAnalysisComplete` コールバックは呼ばれるが、すでに DataPreview へ遷移済みのため状態更新は意味をなさない。
+- **修正方針**:
+  1. `ConfidenceIntervalView` を `ConfidenceIntervalForm` の薄いラッパーにリファクタリングする。内部タブ（`activeTab` state、`results` mapping、`TabsList`/`TabsContent` 構造）を削除し、他の静的 work tab（JoinTable / UnionTable 等）と同じシンプルな構造にする
+  2. `onAnalysisComplete` コールバック props を削除する
+  3. `ConfidenceIntervalView` の `onCancel` が内部で `setCurrentView("DataPreview")` を呼ぶ現状は、他の静的 work tab と同様に WorkspaceSurface の `handleCloseTab` を通じる設計に揃えることも検討する
+  4. `confidenceIntervalResults.ts` ストアとそのテストファイルを削除する
+
+#### RF-13: `ChartView.tsx` — 旧エラーハンドラーパターン使用
+
+- **対象**: `app/src/components/pages/ChartView.tsx`
+- **問題**: `extractApiErrorMessage` を使用している。RF-04 スコープ外の新規追加ファイルだが、他の画面と統一するため `buildCaughtErrorMessage` へ変更が望ましい。
+- **修正方針**: `extractApiErrorMessage` を `buildCaughtErrorMessage` に置き換える（paramMap 不要なため第 3 引数は省略可）。
+
+#### RF-14: `Calculation.tsx` / `SaveData.tsx` / `JoinTable.tsx` / `UnionTable.tsx` — 旧エラーヘルパー残存
+
+- **問題**: RF-04 の当初スコープ外だったため、上記 4 ファイルは `extractApiErrorMessage` / `getResponseErrorMessage` をそのまま使用している。RF-04 完了後に `extractApiErrorMessage` と `getResponseErrorMessage` の残存使用箇所となっている。
+- **修正方針**: `buildCaughtErrorMessage` / `buildResponseErrorMessage` に置き換える。`replaceParamNames` を別途呼んでいる箇所は `paramMap` 引数へ統合する。対応後、`extractApiErrorMessage` と `getResponseErrorMessage` への参照がなくなった時点で `apiError.ts` から deprecated コメントを付与するか削除する。
+
+#### RF-03: `ALL_STAT_TYPES` 定数の重複（DRY 違反）（対応済み）
 
 - **対象**: `DescriptiveStatistics.tsx` と `GroupStatistics.tsx` の両方に同一の `ALL_STAT_TYPES: DescriptiveStatisticType[]`（15 項目）を宣言
-- **修正方針**: `src/constants/statisticTypes.ts` に切り出し、両コンポーネントから import する。`DEFAULT_STAT_TYPES` は内容が異なるため各コンポーネントに残してよい。
-- **実装ステップ**:
-  1. `app/src/constants/statisticTypes.ts` を新規作成する
-     ```ts
-     import type { DescriptiveStatisticType } from "@/api/model";
-     export const ALL_STAT_TYPES: DescriptiveStatisticType[] = [
-       "count",
-       "mean",
-       "median",
-       "mode",
-       "variance",
-       "std_dev",
-       "min",
-       "max",
-       "range",
-       "iqr",
-       "null_count",
-       "null_ratio",
-       "skewness",
-       "kurtosis",
-       "population_variance",
-     ];
-     ```
-  2. `DescriptiveStatistics.tsx` の `ALL_STAT_TYPES` 定義を削除し、`@/constants/statisticTypes` から import する
-  3. `GroupStatistics.tsx` の `ALL_STAT_TYPES` 定義を削除し、同様に import する
-  4. `ADVANCED_STAT_TYPES` は `DescriptiveStatistics.tsx` のみで使用しているため、同ファイルに残す
+- ✅ **対応済み**: `app/src/constants/statisticTypes.ts` を新規作成し、両コンポーネントから import する形に変更済み。`ADVANCED_STAT_TYPES` は `DescriptiveStatistics.tsx` に残置。
 
-#### RF-04: エラーハンドラーヘルパーの不統一
+#### RF-04: エラーハンドラーヘルパーの不統一（部分対応済み）
 
-- **問題**: `extractApiErrorMessage` / `getResponseErrorMessage`（旧プリミティブ）と `buildCaughtErrorMessage` / `buildResponseErrorMessage`（新 composite）が混在している。
-  - 旧パターン使用ファイル: `DescriptiveStatistics.tsx`、`LinearRegressionForm.tsx`、`ConfidenceIntervalForm.tsx`、`StatisticalTestView.tsx`、`LeftSideMenu.tsx`
-  - 新パターン使用ファイル: `CorrelationMatrix.tsx`、`GroupStatistics.tsx`、Dialog 系全般
-- **修正方針**: 旧パターンを新パターン（`buildCaughtErrorMessage` / `buildResponseErrorMessage`）に統一する。`paramMap` が不要な場合は空オブジェクトを省略できる。
-- **実装ステップ**:
-  1. 各ファイルの `extractApiErrorMessage` インポートを削除し、`buildCaughtErrorMessage` に置き換える
-     ```ts
-     // Before
-     setError(extractApiErrorMessage(error, t("Error.UnexpectedError")));
-     // After
-     setError(buildCaughtErrorMessage(error, t("Error.UnexpectedError")));
-     ```
-  2. `getResponseErrorMessage` インポートを削除し、`buildResponseErrorMessage` に置き換える
-     ```ts
-     // Before
-     setError(getResponseErrorMessage(response, t("Error.UnexpectedError")));
-     // After
-     setError(buildResponseErrorMessage(response, t("Error.UnexpectedError")));
-     ```
-  3. パラメータ名の置換が必要な場合は第 3 引数に `paramMap` オブジェクトを渡す（`RenameColumnForm`, `FilterColumnForm` 等の既存実装を参照）
-  4. 対象ファイル: `DescriptiveStatistics.tsx`・`LinearRegressionForm.tsx`・`ConfidenceIntervalForm.tsx`・`StatisticalTestView.tsx`・`LeftSideMenu.tsx`（計 5 ファイル）
-  5. 修正後、`extractApiErrorMessage` と `getResponseErrorMessage` が他に使用箇所がなければ `@/lib/utils/apiError.ts` から export を残しつつ deprecated コメントを付与する
+- **状況**: 当初対象 5 ファイルのうち 4 ファイル（DescriptiveStatistics / ConfidenceIntervalForm / StatisticalTestView / LeftSideMenu）は新パターン（`buildCaughtErrorMessage` / `buildResponseErrorMessage`）に移行済み。`LinearRegressionForm.tsx` のみ未対応（RF-01 と同時に対応予定）。
+- **残タスク**: RF-01 対応時に `LinearRegressionForm.tsx` の旧エラーハンドラーも置き換える。また RF-14 として Calculation / SaveData / JoinTable / UnionTable の旧パターン残存も別途追加済み。
 
-#### RF-05: `persistedWorkTab?.draftValues as SomeType` 型アサーションの重複
+#### RF-05: `persistedWorkTab?.draftValues as SomeType` 型アサーションの重複（対応済み）
 
-- **問題**: `DescriptiveStatistics.tsx`、`CorrelationMatrix.tsx`、`GroupStatistics.tsx`、`StatisticalTestView.tsx` の 4 コンポーネントが、`state.tabs.find(...)` で work tab を取得したあとに `persistedWorkTab?.draftValues as FormValues` という unsafe cast を繰り返している。`WorkspaceWorkTab.draftValues` が `unknown` 型のため回避できていない。
-- **修正方針**: `workspaceTabs.ts` に `selectWorkTabDraft<T>(featureKey, schema: ZodSchema<T>)` 等の型安全なセレクタを追加し、Zod の `safeParse` で検証してから返す。または `WorkspaceWorkTab` にジェネリクス `<TDraft = unknown>` を導入して featureKey と対応づける。
-- **実装ステップ**（`selectWorkTabDraft` アプローチ推奨）:
-  1. `app/src/stores/workspaceTabs.ts` に以下のユーティリティを追加する
-     ```ts
-     import type { ZodSchema } from "zod";
-     export const selectWorkTabDraft = <T>(
-       tabs: WorkspaceTab[],
-       featureKey: WorkFeatureKey,
-       schema: ZodSchema<T>,
-     ): T | undefined => {
-       const tab = tabs.find(
-         (t): t is WorkspaceWorkTab =>
-           t.kind === "work" && t.featureKey === featureKey,
-       );
-       if (!tab?.draftValues) return undefined;
-       const result = schema.safeParse(tab.draftValues);
-       return result.success ? result.data : undefined;
-     };
-     ```
-  2. 各コンポーネントで `persistedWorkTab?.draftValues as FormValues` を `selectWorkTabDraft(tabs, "FeatureKey", FormSchema)` に置き換える
-  3. `FormSchema` は各コンポーネントの `useForm` の `validators.onSubmit` に使っている Zod スキーマを流用する（`RegressionBody`、`GroupStatisticsBody` 等）
-  4. `safeParse` が失敗した場合（スキーマ変更後など）は `undefined` が返り、フォームのデフォルト値にフォールバックするため、既存の `?? defaultValues` パターンで安全に処理できる
+- ✅ **対応済み**: `workspaceTabs.ts` に `selectWorkTabDraft<T>` を追加し、DescriptiveStatistics / CorrelationMatrix / GroupStatistics / StatisticalTestView の 4 コンポーネントで `draftValues as FormValues` 型アサーションを置き換えた。`persistedWorkTab` 変数名も `persistedDraft` に変更された。
 
-#### RF-06: `DescriptiveStatistics` — `@tanstack/react-form` 未統合・手動バリデーション
+#### RF-06: `DescriptiveStatistics` — `@tanstack/react-form` 未統合・手動バリデーション（対応済み）
 
-- **問題**: 他の分析フォーム（`CorrelationMatrix`、`GroupStatistics`、`ConfidenceIntervalForm`、`LinearRegressionForm` 等）は `useForm` + `validators.onSubmit: ZodSchema` でバリデーションを行っているが、`DescriptiveStatistics.tsx` だけが `useState<FormErrors>` + `handleSubmit` 内手動バリデーションを採用している。Orval 生成の `DescriptiveStatisticsBody` スキーマが存在するが未使用。
-- **修正方針**: `useForm` + `DescriptiveStatisticsBody` への移行を検討する。ただし checkbox 系の多段 state（`checkedCols`、`checkedStats`）を `@tanstack/react-form` のフィールドとして扱う改修コストが高い場合は、フォーム外 state を維持しつつ submit 直前に `DescriptiveStatisticsBody.safeParse` でバリデーションする方式でも可。
-- **実装ステップ**（submit 前 safeParse 方式推奨）:
-  1. `DescriptiveStatisticsBody` を `@/api/zod/statistics/statistics` から import する
-  2. `FormErrors` 型と `useState<FormErrors>` を削除する
-  3. `handleSubmit` 内の手動バリデーション（`if (!formValues.tableName) { errors.tableName = t(...) }` 等）を削除し、代わりに以下のように書き換える
-     ```ts
-     const parsed = DescriptiveStatisticsBody.safeParse({
-       tableName,
-       columns: [...checkedCols],
-       statistics: [...checkedStats],
-     });
-     if (!parsed.success) {
-       // parsed.error.issues からフィールド別エラーを抽出して setState
-       return;
-     }
-     ```
-  4. エラー表示 state（`formError` 等）は `string | null` の `useState` で十分。Zod の `issues[0].message` を直接使うか、i18n キーにマッピングする
-  5. `DescriptiveStatisticsBody` の `columns`・`statistics` フィールドが `min(1)` 等の制約を持つ場合は、それを活用してバリデーションメッセージを統一する
+- ✅ **対応済み**: `FormErrors` 型と手動バリデーション（`if (!tableName)` 等）を削除し、`DescriptiveStatisticsBody.safeParse` を使う方式へ移行済み。エラーハンドラーも `buildResponseErrorMessage` / `buildCaughtErrorMessage` に統一済み。
 
 ---
 
