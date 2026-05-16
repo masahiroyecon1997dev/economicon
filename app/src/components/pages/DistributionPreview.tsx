@@ -21,9 +21,10 @@ import { cn } from "@/lib/utils/helpers";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { DistributionType } from "@/types/commonTypes";
 import { Loader2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import type { Config, Layout } from "plotly.js";
+import * as Plotly from "plotly.js-dist-min";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import Plot from "react-plotly.js";
 
 type DistCategory = "continuous" | "discrete";
 type FunctionTab = "density" | "cumulative";
@@ -73,6 +74,8 @@ export const DistributionPreview = () => {
   );
 
   const { loading, error, result } = useDistributionPreview(distribution);
+
+  const plotDivRef = useRef<HTMLDivElement>(null);
 
   const handleCategoryChange = (cat: DistCategory) => {
     setCategory(cat);
@@ -139,6 +142,32 @@ export const DistributionPreview = () => {
       ? t("DistributionPreview.YAxisDensity")
       : t("DistributionPreview.YAxisCumulative");
 
+  useEffect(() => {
+    if (!plotDivRef.current) return;
+    if (!result || error) {
+      Plotly.purge(plotDivRef.current);
+      return;
+    }
+    const layout: Partial<Layout> = {
+      autosize: true,
+      margin: { t: 20, r: 20, b: 60, l: 60 },
+      xaxis: { title: { text: t("DistributionPreview.XAxisLabel") } },
+      yaxis: { title: { text: yAxisLabel } },
+      paper_bgcolor: "transparent",
+      plot_bgcolor: "transparent",
+      font: { color: "#cbd5e1" },
+    };
+    const config: Partial<Config> = { displayModeBar: false, responsive: true };
+    void Plotly.react(plotDivRef.current, plotData, layout, config);
+  }, [plotData, result, error, yAxisLabel, t]);
+
+  useEffect(() => {
+    const div = plotDivRef.current;
+    return () => {
+      if (div) Plotly.purge(div);
+    };
+  }, []);
+
   return (
     <PageLayout>
       <div
@@ -161,7 +190,7 @@ export const DistributionPreview = () => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="continuous" className="pt-3">
+            <TabsContent value="continuous" className="pt-3" forceMount>
               <RadioTagGroup
                 name="dist-type-continuous"
                 items={CONTINUOUS_DIST_TYPES.map((dt) => ({
@@ -173,7 +202,7 @@ export const DistributionPreview = () => {
               />
             </TabsContent>
 
-            <TabsContent value="discrete" className="pt-3">
+            <TabsContent value="discrete" className="pt-3" forceMount>
               <RadioTagGroup
                 name="dist-type-discrete"
                 items={DISCRETE_DIST_TYPES.map((dt) => ({
@@ -264,27 +293,15 @@ export const DistributionPreview = () => {
             </div>
           )}
 
-          {result && !error && (
-            <Plot
-              data={plotData}
-              layout={{
-                autosize: true,
-                margin: { t: 20, r: 20, b: 60, l: 60 },
-                xaxis: {
-                  title: { text: t("DistributionPreview.XAxisLabel") },
-                },
-                yaxis: {
-                  title: { text: yAxisLabel },
-                },
-                paper_bgcolor: "transparent",
-                plot_bgcolor: "transparent",
-                font: { color: "#cbd5e1" },
-              }}
-              useResizeHandler
-              className={cn("w-full h-full", loading && "opacity-30")}
-              config={{ displayModeBar: false, responsive: true }}
-            />
-          )}
+          <div
+            ref={plotDivRef}
+            className={cn(
+              "w-full h-full",
+              (!result || !!error) && "hidden",
+              loading && "opacity-30",
+            )}
+            data-testid="distribution-preview-plot"
+          />
         </div>
       </div>
     </PageLayout>
