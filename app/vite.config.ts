@@ -26,7 +26,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "src"),
       // plotly.js のブラウザビルドを使用（Node.js 依存モジュールを含む plotly.js を回避）
-      "plotly.js": "plotly.js-dist-min",
+      "plotly.js/dist/plotly": "plotly.js-dist-min",
     },
   },
 
