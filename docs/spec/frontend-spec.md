@@ -253,6 +253,167 @@ DistributionPreview の `draftValues` として初期化する。
 | `routers/`  | `/api/distribution/preview` エンドポイントを追加                                |
 | i18n        | エラーメッセージ等を追加（必要な場合）                                          |
 
+### Phase 3 — `stores/workspaceTabs.ts` 拡張
+
+**対象ファイル**: workspaceTabs.ts
+
+| 変更箇所                 | 内容                                                                   |
+| ------------------------ | ---------------------------------------------------------------------- |
+| `WorkFeatureKey`         | `"DistributionPreview"` を追加                                         |
+| `openWorkTab` シグネチャ | 第 3 引数に `initialValues?: unknown` を追加（コンテキスト引き継ぎ用） |
+| `openWorkTab` 実装       | 新規タブ作成時に `initialValues` があれば `draftValues` にセット       |
+
+> **設計判断**: `SimulationColumnEditDialog` / `AddSimulationColumnForm` から「分布プレビュー」を開く際、現在の分布 + パラメータを `initialValues` として渡します。既存タブを再アクティブにする場合は `initialValues` を無視します（既存の `openWorkTab` の挙動を継承）。
+
+---
+
+### Phase 4 — `constants/workspaceTabs.ts` 拡張
+
+**対象ファイル**: workspaceTabs.ts
+
+`WORK_TAB_ENTRIES` に 1 エントリを追加します。
+
+```ts
+{ featureKey: "DistributionPreview", titleKey: "HeaderMenu.DistributionPreview" }
+```
+
+---
+
+### Phase 5 — i18n キー追加 (ja.json / en.json)
+
+| キー                                       | 日本語           | 英語                 |
+| ------------------------------------------ | ---------------- | -------------------- |
+| `HeaderMenu.Visualization`                 | 可視化           | Visualization        |
+| `HeaderMenu.DistributionPreview`           | 分布プレビュー   | Distribution Preview |
+| `AddSimulationColumnForm.chi_square`       | カイ二乗分布     | Chi-Square           |
+| `AddSimulationColumnForm.f_distribution`   | F 分布           | F-Distribution       |
+| `AddSimulationColumnForm.DegreesOfFreedom` | 自由度           | Degrees of Freedom   |
+| `AddSimulationColumnForm.NumeratorDf`      | 分子自由度       | Numerator df         |
+| `AddSimulationColumnForm.DenominatorDf`    | 分母自由度       | Denominator df       |
+| `DistributionPreview.*`                    | ページ内の全文言 | 同上                 |
+
+---
+
+### Phase 6 — AppBar.tsx に「可視化」メニュー追加
+
+**対象ファイル**: AppBar.tsx
+
+`menus` 配列の末尾（線形回帰メニューの後）に新メニューを追加します。
+
+```ts
+{
+  id: "visualization",
+  menuName: t("HeaderMenu.Visualization"),
+  items: [
+    {
+      id: "distribution-preview",
+      label: t("HeaderMenu.DistributionPreview"),
+      handleSelect: () => handleOpenWorkTab("DistributionPreview", t("HeaderMenu.DistributionPreview")),
+    },
+  ],
+}
+```
+
+---
+
+### Phase 7 — バックエンド `POST /api/distribution/preview` 追加
+
+`new-api-endpoint` スキルに従い、以下 4 ステップで実装します。
+
+| ファイル（新規）                   | 内容                                                                                                                                                                         |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schemas/distribution_preview.py`  | `DistributionPreviewRequestBody`（`distribution: DistributionConfig`, `x_count: int = 200`）+ `DistributionPreviewResult`（`is_discrete`, `x`, `y_density`, `y_cumulative`） |
+| `services/distribution_preview.py` | `scipy.stats` で PDF/CDF（連続）・PMF/CMF（離散）を計算。X 軸範囲をバックエンドで決定（連続: 0.5〜99.5 パーセンタイル、離散: PMF > 1e-6 の整数範囲）                         |
+| `routers/distribution.py`          | `POST /api/distribution/preview`                                                                                                                                             |
+| `main.py`                          | 新ルーターを登録                                                                                                                                                             |
+
+その後 `pnpm gen:all` を再実行してフロントエンドの型を同期します。
+
+---
+
+### Phase 8 — WorkspaceSurface.tsx に `DistributionPreview` 登録
+
+**対象ファイル**: WorkspaceSurface.tsx
+
+- `import { DistributionPreview } from "@/components/pages/DistributionPreview"` を追加
+- `WORK_TAB_COMPONENTS` に `DistributionPreview: <DistributionPreview />` を追加
+
+`DistributionPreview` は自身で `useWorkspaceTabsStore` から `draftValues` を読むため、**型ガード関数は不要**（`JoinTable` と同じ "static" 扱い）。
+
+---
+
+### Phase 9 — `DistributionPreview.tsx` 新規作成 (最大実装)
+
+**対象ファイル**: `app/src/components/pages/DistributionPreview.tsx`（新規）
+
+#### レイアウト
+
+```
+<PageLayout>
+  <div class="grid grid-cols-[320px_1fr] gap-4 h-full">
+    ←左ペイン（コントロール）  右ペイン（グラフ）→
+  </div>
+</PageLayout>
+```
+
+#### 左ペイン
+
+1. **分布カテゴリタブ** — `Tabs` / `TabsList` / `TabsTrigger`（連続 / 離散）
+2. **分布選択** — `RadioTagGroup`（`CONTINUOUS_DIST_TYPES` / `DISCRETE_DIST_TYPES`）
+3. **パラメータスライダー** — 分布切り替え時に動的レンダリング
+   - `<input type="range">` + `<InputText>` の組み合わせ（双方向同期）
+   - `DIST_PREVIEW_PARAM_RANGES` から min / max / step を読む
+   - `hypergeometric` の `successCount` / `sampleSize` 上限は `populationSize` の現在値に動的追従
+   - 300ms デバウンス → API 呼び出し
+4. **表示関数タブ** — 「PDF / PMF」「CDF / CMF」
+
+#### 右ペイン
+
+- `react-plotly.js` の `<Plot>` コンポーネント
+  - 連続分布: `scatter` トレース（mode: `"lines"`）
+  - 離散分布: `bar` トレース
+- ローディング中: スケルトン（`Loader2` アイコン + `animate-spin`）
+- エラー時: `ErrorAlert`
+
+#### カスタム hook
+
+`useDistributionPreview(distribution, functionType)`:
+
+- `invoke("preview_distribution", { body })` をコール
+- `loading` / `error` / `result` を返す
+
+#### コンテキスト引き継ぎ
+
+- `useWorkspaceTabsStore` で active tab の `draftValues` を読み、型 narrow 後に初期分布・パラメータとして使用
+
+---
+
+### Phase 10 — 「分布プレビュー」ボタンを既存フォームに追加
+
+| 対象ファイル                   | 変更                                                                    |
+| ------------------------------ | ----------------------------------------------------------------------- |
+| SimulationColumnEditDialog.tsx | ダイアログフッターに「分布プレビュー」ボタン（`variant="outline"`）追加 |
+| AddSimulationColumnForm.tsx    | フォーム末尾に「分布プレビュー」ボタン追加                              |
+
+どちらも `openWorkTab("DistributionPreview", ..., { distributionType, distributionParams })` を呼びます。
+
+---
+
+### 実装順序と依存関係
+
+```
+Phase 0 (gen:all)
+   ↓
+Phase 1 (simulation.ts) + Phase 5 (i18n) ← 並列可
+   ↓
+Phase 2 (distributionPreview.ts) + Phase 3 (store) + Phase 4 (tabs) ← 並列可
+   ↓
+Phase 6 (AppBar) + Phase 7 (backend + gen:all) ← 並列可
+   ↓
+Phase 8 (WorkspaceSurface) + Phase 9 (DistributionPreview) ← Phase 7 の型が必要
+   ↓
+Phase 10 (ボタン追加)
+
 ---
 
 ## 将来検討
@@ -262,3 +423,4 @@ DistributionPreview の `draftValues` として初期化する。
 - [future] 「可視化」メニューへの追加候補として保持する。
 - [future] 信頼区間シミュレーション、回帰係数の分布、一致性・不偏性の教育用シミュレーション。
 - [future] 既存の業務用チャート機能（ChartView）とは切り分けて検討する。
+```

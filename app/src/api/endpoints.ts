@@ -24,6 +24,7 @@ import type {
   DeleteTableRequestBody,
   DescriptiveStatisticsOutputRequest,
   DescriptiveStatisticsRequestBody,
+  DistributionPreviewRequestBody,
   DuplicateTableRequestBody,
   ExportFileRequestBody,
   FetchDataToArrowRequestBody,
@@ -63,6 +64,7 @@ import type {
   SuccessResponseDeleteColumnResult,
   SuccessResponseDeleteTableResult,
   SuccessResponseDescriptiveStatisticsResult,
+  SuccessResponseDistributionPreviewResult,
   SuccessResponseDuplicateTableResult,
   SuccessResponseExportFileResult,
   SuccessResponseFetchDataToJsonResult,
@@ -1418,7 +1420,22 @@ const shutdown = (
       options);
     }
 
-return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,fetchPlotData,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,updateAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,createGroupStatisticsTable,getSettings,updateSettings,shutdown}};
+/**
+ * 分布プレビュー計算エンドポイント
+ * @summary Preview Distribution
+ */
+const previewDistribution = (
+    distributionPreviewRequestBody: DistributionPreviewRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseDistributionPreviewResult>>,) => {
+      return customInstance<SuccessResponseDistributionPreviewResult>(
+      {url: `/api/distribution/preview`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: distributionPreviewRequestBody
+    },
+      options);
+    }
+
+return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,fetchPlotData,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,updateAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,createGroupStatisticsTable,getSettings,updateSettings,shutdown,previewDistribution}};
 export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['healthCheck']>>>
 export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDummyColumn']>>>
 export type DeleteColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteColumn']>>>
@@ -1465,3 +1482,4 @@ export type CreateGroupStatisticsTableResult = NonNullable<Awaited<ReturnType<Re
 export type GetSettingsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getSettings']>>>
 export type UpdateSettingsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['updateSettings']>>>
 export type ShutdownResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['shutdown']>>>
+export type PreviewDistributionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['previewDistribution']>>>
