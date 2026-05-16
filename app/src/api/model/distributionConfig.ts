@@ -7,7 +7,9 @@
 import type { BernoulliParams } from './bernoulliParams';
 import type { BetaParams } from './betaParams';
 import type { BinomialParams } from './binomialParams';
+import type { ChiSquareParams } from './chiSquareParams';
 import type { ExponentialParams } from './exponentialParams';
+import type { FDistributionParams } from './fDistributionParams';
 import type { FixedParams } from './fixedParams';
 import type { GammaParams } from './gammaParams';
 import type { GeometricParams } from './geometricParams';
@@ -23,4 +25,4 @@ import type { WeibullParams } from './weibullParams';
 /**
  * 分布設定
  */
-export type DistributionConfig = UniformParams | ExponentialParams | NormalParams | GammaParams | BetaParams | WeibullParams | LognormalParams | BinomialParams | BernoulliParams | PoissonParams | GeometricParams | HypergeometricParams | NegativeBinomialParams | FixedParams | SequenceParams;
+export type DistributionConfig = UniformParams | ExponentialParams | NormalParams | GammaParams | BetaParams | WeibullParams | LognormalParams | ChiSquareParams | FDistributionParams | BinomialParams | BernoulliParams | PoissonParams | GeometricParams | HypergeometricParams | NegativeBinomialParams | FixedParams | SequenceParams;

@@ -4363,6 +4363,30 @@
         "title": "CastColumnResult",
         "description": "\u5217\u578b\u5909\u63db\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
+      "ChiSquareParams": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "chi_square",
+            "title": "Type",
+            "description": "\u5206\u5e03\u306e\u7a2e\u985e"
+          },
+          "degreesOfFreedom": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Degreesoffreedom",
+            "description": "\u81ea\u7531\u5ea6"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "degreesOfFreedom"
+        ],
+        "title": "ChiSquareParams",
+        "description": "\u30ab\u30a4\u4e8c\u4e57\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
+      },
       "ClearAllAnalysisResultsResult": {
         "properties": {
           "message": {
@@ -5516,6 +5540,12 @@
             "$ref": "#/components/schemas/LognormalParams"
           },
           {
+            "$ref": "#/components/schemas/ChiSquareParams"
+          },
+          {
+            "$ref": "#/components/schemas/FDistributionParams"
+          },
+          {
             "$ref": "#/components/schemas/BinomialParams"
           },
           {
@@ -5547,7 +5577,9 @@
             "bernoulli": "#/components/schemas/BernoulliParams",
             "beta": "#/components/schemas/BetaParams",
             "binomial": "#/components/schemas/BinomialParams",
+            "chi_square": "#/components/schemas/ChiSquareParams",
             "exponential": "#/components/schemas/ExponentialParams",
+            "f_distribution": "#/components/schemas/FDistributionParams",
             "fixed": "#/components/schemas/FixedParams",
             "gamma": "#/components/schemas/GammaParams",
             "geometric": "#/components/schemas/GeometricParams",
@@ -5578,6 +5610,8 @@
           "geometric",
           "hypergeometric",
           "negative_binomial",
+          "chi_square",
+          "f_distribution",
           "fixed",
           "sequence"
         ],
@@ -5821,6 +5855,38 @@
         ],
         "title": "ExportFileResult",
         "description": "\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u5171\u901a\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "FDistributionParams": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "f_distribution",
+            "title": "Type",
+            "description": "\u5206\u5e03\u306e\u7a2e\u985e"
+          },
+          "numeratorDf": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Numeratordf",
+            "description": "\u5206\u5b50\u81ea\u7531\u5ea6"
+          },
+          "denominatorDf": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Denominatordf",
+            "description": "\u5206\u6bcd\u81ea\u7531\u5ea6"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "numeratorDf",
+          "denominatorDf"
+        ],
+        "title": "FDistributionParams",
+        "description": "F\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
       },
       "FEParams": {
         "properties": {
