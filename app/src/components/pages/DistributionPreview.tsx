@@ -273,7 +273,7 @@ export const DistributionPreview = () => {
           </Tabs>
         </div>
 
-        {/* 右ペイン: グラフ */}
+        {/* 右ペイン: プロット */}
         <div
           className="relative flex items-center justify-center"
           data-testid="distribution-preview-plot-area"

@@ -30,7 +30,7 @@ export type WorkFeatureKey =
   | "LinearRegressionForm"
   | "CorrelationMatrix"
   | "GroupStatistics"
-  | "ChartView"
+  | "PlotView"
   | "DistributionPreview";
 
 export type WorkspaceWorkTab = {

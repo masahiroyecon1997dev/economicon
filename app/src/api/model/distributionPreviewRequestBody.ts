@@ -4,7 +4,7 @@
  * Economicon App API
  * OpenAPI spec version: 0.4.0
  */
-import type { DistributionConfig } from './distributionConfig';
+import type { DistributionConfig } from "./distributionConfig";
 
 /**
  * 分布プレビューリクエスト
@@ -12,9 +12,9 @@ import type { DistributionConfig } from './distributionConfig';
 export type DistributionPreviewRequestBody = {
   distribution: DistributionConfig;
   /**
-     * グラフ点数（連続分布）
-     * @minimum 50
-     * @maximum 2000
-     */
+   * プロット点数（連続分布）
+   * @minimum 50
+   * @maximum 2000
+   */
   xCount?: number;
 };

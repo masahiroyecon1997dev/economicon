@@ -25,7 +25,7 @@ import { useTranslation } from "react-i18next";
 // Constants & helpers
 // ---------------------------------------------------------------------------
 
-type ChartType = "scatter" | "histogram" | "line";
+type PlotType = "scatter" | "histogram" | "line";
 
 const NUMERIC_TYPES = new Set([
   "Float32",
@@ -78,25 +78,25 @@ const getColValues = (arrowTable: ArrowTable, colName: string): Datum[] => {
 // Types
 // ---------------------------------------------------------------------------
 
-type ChartViewProps = {
-  workTabId?: `work:ChartView`;
+type PlotViewProps = {
+  workTabId?: `work:PlotView`;
   onCancel?: () => void | Promise<void>;
 };
 
-const CHART_TYPE_KEYS: { type: ChartType; labelKey: string }[] = [
-  { type: "scatter", labelKey: "ChartView.ChartTypeScatter" },
-  { type: "histogram", labelKey: "ChartView.ChartTypeHistogram" },
-  { type: "line", labelKey: "ChartView.ChartTypeLine" },
+const CHART_TYPE_KEYS: { type: PlotType; labelKey: string }[] = [
+  { type: "scatter", labelKey: "PlotView.PlotTypeScatter" },
+  { type: "histogram", labelKey: "PlotView.PlotTypeHistogram" },
+  { type: "line", labelKey: "PlotView.PlotTypeLine" },
 ];
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export const ChartView = ({
+export const PlotView = ({
   workTabId: _workTabId,
   onCancel,
-}: ChartViewProps) => {
+}: PlotViewProps) => {
   const { t } = useTranslation();
   const tableList = useTableListStore((s) => s.tableList);
   const initialTableName = useTableInfosStore((s) => s.activeTableName) ?? "";
@@ -105,14 +105,14 @@ export const ChartView = ({
 
   // Form state (no submission — pure visualization)
   const [tableName, setTableName] = useState(initialTableName);
-  const [chartType, setChartType] = useState<ChartType>("scatter");
+  const [plotType, setPlotType] = useState<PlotType>("scatter");
   const [xColumn, setXColumn] = useState("");
   const [yColumn, setYColumn] = useState(""); // scatter only
   const [yColumns, setYColumns] = useState<string[]>([]); // line only
 
-  // Chart render state
+  // Plot render state
   const [isRendering, setIsRendering] = useState(false);
-  const [hasChartData, setHasChartData] = useState(false);
+  const [hasPlotData, setHasPlotData] = useState(false);
 
   const plotDivRef = useRef<HTMLDivElement>(null);
 
@@ -130,15 +130,15 @@ export const ChartView = ({
 
   const numericColumns = columnList.filter(isNumericColumn);
   // X-axis: numeric for scatter/histogram, any for line
-  const xAxisColumns = chartType === "line" ? columnList : numericColumns;
+  const xAxisColumns = plotType === "line" ? columnList : numericColumns;
   const yAxisColumns = numericColumns;
 
   // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------
 
-  const clearChart = () => {
-    setHasChartData(false);
+  const clearPlot = () => {
+    setHasPlotData(false);
     if (plotDivRef.current) {
       Plotly.purge(plotDivRef.current);
     }
@@ -151,14 +151,14 @@ export const ChartView = ({
     setXColumn("");
     setYColumn("");
     setYColumns([]);
-    clearChart();
+    clearPlot();
   };
 
-  const handleChartTypeChange = (type: ChartType) => {
-    setChartType(type);
+  const handlePlotTypeChange = (type: PlotType) => {
+    setPlotType(type);
     setYColumn("");
     setYColumns([]);
-    clearChart();
+    clearPlot();
   };
 
   const handleCancel = () => {
@@ -177,23 +177,23 @@ export const ChartView = ({
     const isReady =
       !!tableName &&
       !!xColumn &&
-      (chartType === "scatter"
+      (plotType === "scatter"
         ? !!yColumn
-        : chartType === "histogram"
+        : plotType === "histogram"
           ? true
           : yColumns.length > 0);
 
     if (!isReady) return;
 
     const requiredColumns =
-      chartType === "scatter"
+      plotType === "scatter"
         ? [xColumn, yColumn]
-        : chartType === "histogram"
+        : plotType === "histogram"
           ? [xColumn]
           : [xColumn, ...yColumns];
 
     const timer = setTimeout(() => {
-      const renderChart = async () => {
+      const renderPlot = async () => {
         if (!plotDivRef.current) return;
         setIsRendering(true);
         try {
@@ -202,7 +202,7 @@ export const ChartView = ({
 
           let traces: Data[];
 
-          if (chartType === "scatter") {
+          if (plotType === "scatter") {
             traces = [
               {
                 type: "scatter",
@@ -213,7 +213,7 @@ export const ChartView = ({
                 marker: { opacity: 0.65, size: 6 },
               },
             ];
-          } else if (chartType === "histogram") {
+          } else if (plotType === "histogram") {
             traces = [
               {
                 type: "histogram",
@@ -245,14 +245,14 @@ export const ChartView = ({
             },
             yaxis: {
               title: {
-                text: chartType === "line" ? "" : yColumn,
+                text: plotType === "line" ? "" : yColumn,
               },
               gridcolor: "rgba(156,163,175,0.3)",
               linecolor: "rgba(156,163,175,0.5)",
               zerolinecolor: "rgba(156,163,175,0.3)",
             },
             font: { size: 12, color: "#374151" },
-            showlegend: chartType === "line",
+            showlegend: plotType === "line",
             legend: { orientation: "h", y: -0.2 },
           };
 
@@ -263,7 +263,7 @@ export const ChartView = ({
 
           if (plotDivRef.current) {
             await Plotly.react(plotDivRef.current, traces, layout, config);
-            setHasChartData(true);
+            setHasPlotData(true);
           }
         } catch (error) {
           await showMessageDialog(
@@ -275,11 +275,11 @@ export const ChartView = ({
         }
       };
 
-      void renderChart();
+      void renderPlot();
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [tableName, chartType, xColumn, yColumn, yColumns, t]);
+  }, [tableName, plotType, xColumn, yColumn, yColumns, t]);
 
   // Cleanup Plotly on unmount
   useEffect(() => {
@@ -298,27 +298,27 @@ export const ChartView = ({
   const emptyHint = (() => {
     if (!tableName)
       return {
-        title: t("ChartView.EmptyNeedTable"),
-        description: t("ChartView.EmptyNeedTableDesc"),
+        title: t("PlotView.EmptyNeedTable"),
+        description: t("PlotView.EmptyNeedTableDesc"),
       };
     if (!xColumn)
       return {
-        title: t("ChartView.EmptyNeedXColumn"),
-        description: t("ChartView.EmptyNeedXColumnDesc"),
+        title: t("PlotView.EmptyNeedXColumn"),
+        description: t("PlotView.EmptyNeedXColumnDesc"),
       };
-    if (chartType === "scatter" && !yColumn)
+    if (plotType === "scatter" && !yColumn)
       return {
-        title: t("ChartView.EmptyNeedYColumn"),
-        description: t("ChartView.EmptyNeedYColumnDesc"),
+        title: t("PlotView.EmptyNeedYColumn"),
+        description: t("PlotView.EmptyNeedYColumnDesc"),
       };
-    if (chartType === "line" && yColumns.length === 0)
+    if (plotType === "line" && yColumns.length === 0)
       return {
-        title: t("ChartView.EmptyNeedYColumns"),
-        description: t("ChartView.EmptyNeedYColumnsDesc"),
+        title: t("PlotView.EmptyNeedYColumns"),
+        description: t("PlotView.EmptyNeedYColumnsDesc"),
       };
     return {
-      title: t("ChartView.EmptyTitle"),
-      description: t("ChartView.EmptyDescription"),
+      title: t("PlotView.EmptyTitle"),
+      description: t("PlotView.EmptyDescription"),
     };
   })();
 
@@ -328,8 +328,8 @@ export const ChartView = ({
 
   return (
     <PageLayout
-      title={t("ChartView.Title")}
-      description={t("ChartView.Description")}
+      title={t("PlotView.Title")}
+      description={t("PlotView.Description")}
     >
       {tableList.length === 0 ? (
         <AnalysisNoTablesState
@@ -345,14 +345,14 @@ export const ChartView = ({
             <div className="rounded-xl border border-border-color bg-white px-3 py-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <div className="flex items-center gap-3">
                 <label className="shrink-0 text-xs font-medium text-brand-text-main">
-                  {t("ChartView.DataLabel")}
+                  {t("PlotView.DataLabel")}
                 </label>
                 <div className="flex-1">
                   <Select
                     value={tableName}
                     onValueChange={handleTableChange}
-                    placeholder={t("ChartView.SelectData")}
-                    data-testid="chart-view-table-select"
+                    placeholder={t("PlotView.SelectData")}
+                    data-testid="plot-view-table-select"
                   >
                     {tableList.map((name) => (
                       <SelectItem key={name} value={name}>
@@ -364,21 +364,21 @@ export const ChartView = ({
               </div>
             </div>
 
-            {/* Chart type selector */}
+            {/* Plot type selector */}
             <div className="rounded-xl border border-border-color bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-sm font-bold leading-tight text-text-heading dark:text-gray-100">
-                {t("ChartView.ChartTypeLabel")}
+                {t("PlotView.PlotTypeLabel")}
               </h2>
               <div className="mt-2 flex gap-1">
                 {CHART_TYPE_KEYS.map(({ type, labelKey }) => (
                   <button
                     key={type}
                     type="button"
-                    data-testid={`chart-type-${type}`}
-                    onClick={() => handleChartTypeChange(type)}
+                    data-testid={`plot-type-${type}`}
+                    onClick={() => handlePlotTypeChange(type)}
                     className={cn(
                       "flex flex-1 items-center justify-center rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors",
-                      chartType === type
+                      plotType === type
                         ? "border-brand-primary bg-brand-primary/10 text-brand-primary"
                         : "border-border-color text-brand-text-sub hover:border-brand-primary/40 hover:text-brand-text-main",
                     )}
@@ -393,13 +393,13 @@ export const ChartView = ({
             {selectedTableName && (
               <div className="flex flex-1 flex-col rounded-xl border border-border-color bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <h2 className="mb-2 shrink-0 text-sm font-bold leading-tight text-text-heading dark:text-gray-100">
-                  {t("ChartView.ColumnsLabel")}
+                  {t("PlotView.ColumnsLabel")}
                 </h2>
 
                 {isLoading ? (
                   <AnalysisEmptyState
                     compact
-                    testId="chart-view-loading-columns"
+                    testId="plot-view-loading-columns"
                     icon={<Loader2 className="h-6 w-6 animate-spin" />}
                     title={t("AnalysisEmptyState.LoadingColumnsTitle")}
                     description={t(
@@ -411,13 +411,13 @@ export const ChartView = ({
                     {/* X axis */}
                     <div>
                       <label className="mb-1 block text-xs font-medium text-brand-text-main">
-                        {t("ChartView.XColumnLabel")}
+                        {t("PlotView.XColumnLabel")}
                       </label>
                       <Select
                         value={xColumn}
                         onValueChange={setXColumn}
-                        placeholder={t("ChartView.XColumnPlaceholder")}
-                        data-testid="chart-view-x-column"
+                        placeholder={t("PlotView.XColumnPlaceholder")}
+                        data-testid="plot-view-x-column"
                       >
                         {xAxisColumns.map((col) => (
                           <SelectItem key={col.name} value={col.name}>
@@ -427,22 +427,22 @@ export const ChartView = ({
                       </Select>
                       {xAxisColumns.length === 0 && (
                         <p className="mt-1 text-xs text-brand-text-sub">
-                          {t("ChartView.NoNumericColumns")}
+                          {t("PlotView.NoNumericColumns")}
                         </p>
                       )}
                     </div>
 
                     {/* Y axis (scatter) */}
-                    {chartType === "scatter" && (
+                    {plotType === "scatter" && (
                       <div>
                         <label className="mb-1 block text-xs font-medium text-brand-text-main">
-                          {t("ChartView.YColumnLabel")}
+                          {t("PlotView.YColumnLabel")}
                         </label>
                         <Select
                           value={yColumn}
                           onValueChange={setYColumn}
-                          placeholder={t("ChartView.YColumnPlaceholder")}
-                          data-testid="chart-view-y-column"
+                          placeholder={t("PlotView.YColumnPlaceholder")}
+                          data-testid="plot-view-y-column"
                         >
                           {yAxisColumns.map((col) => (
                             <SelectItem key={col.name} value={col.name}>
@@ -452,17 +452,17 @@ export const ChartView = ({
                         </Select>
                         {yAxisColumns.length === 0 && (
                           <p className="mt-1 text-xs text-brand-text-sub">
-                            {t("ChartView.NoNumericColumns")}
+                            {t("PlotView.NoNumericColumns")}
                           </p>
                         )}
                       </div>
                     )}
 
                     {/* Y columns (line, multiple) */}
-                    {chartType === "line" && (
+                    {plotType === "line" && (
                       <div className="min-h-0 flex-1">
                         <VariableSelectorField
-                          label={t("ChartView.YColumnsLabel")}
+                          label={t("PlotView.YColumnsLabel")}
                           mode="multiple"
                           columns={yAxisColumns}
                           selectedValues={yColumns}
@@ -476,19 +476,19 @@ export const ChartView = ({
             )}
           </div>
 
-          {/* ── Right: Chart Panel ── */}
+          {/* ── Right: Plot Panel ── */}
           <div
             className="relative flex flex-1 flex-col overflow-hidden rounded-xl border border-border-color bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
-            data-testid="chart-view-panel"
+            data-testid="plot-view-panel"
           >
             {/* Plotly mount target (always in DOM) */}
             <div ref={plotDivRef} className="absolute inset-0" />
 
             {/* Empty state overlay */}
-            {!hasChartData && !isRendering && (
+            {!hasPlotData && !isRendering && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <AnalysisEmptyState
-                  testId="chart-view-empty"
+                  testId="plot-view-empty"
                   icon={<BarChart2 className="h-10 w-10" />}
                   title={emptyHint.title}
                   description={emptyHint.description}
@@ -502,7 +502,7 @@ export const ChartView = ({
               <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-gray-800/70">
                 <div className="flex items-center gap-2 text-sm text-brand-text-sub">
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>{t("ChartView.Loading")}</span>
+                  <span>{t("PlotView.Loading")}</span>
                 </div>
               </div>
             )}

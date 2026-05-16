@@ -18,7 +18,7 @@ class DistributionPreviewRequestBody(BaseRequest):
             default=200,
             ge=50,
             le=2000,
-            description="グラフ点数（連続分布）",
+            description="プロット点数（連続分布）",
         ),
     ] = 200
 

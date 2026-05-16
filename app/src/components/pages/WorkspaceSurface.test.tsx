@@ -54,8 +54,8 @@ vi.mock("./CorrelationMatrix", () => ({
 vi.mock("./GroupStatistics", () => ({
   GroupStatistics: () => <div data-testid="work-group-stats" />,
 }));
-vi.mock("./ChartView", () => ({
-  ChartView: () => <div data-testid="work-chart-view" />,
+vi.mock("./PlotView", () => ({
+  PlotView: () => <div data-testid="work-plot-view" />,
 }));
 
 const TABLE_SALES = {

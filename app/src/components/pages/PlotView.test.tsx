@@ -1,4 +1,4 @@
-import { ChartView } from "@/components/pages/ChartView";
+import { PlotView } from "@/components/pages/PlotView";
 import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
@@ -94,18 +94,18 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
-describe("ChartView", () => {
+describe("PlotView", () => {
   describe("テーブルなしの場合", () => {
     it("test_render_noTables_showsNoTablesState", () => {
-      render(<ChartView />);
+      render(<PlotView />);
       expect(
         screen.getByTestId("analysis-no-tables-state"),
       ).toBeInTheDocument();
     });
 
-    it("test_render_noTables_doesNotShowChartPanel", () => {
-      render(<ChartView />);
-      expect(screen.queryByTestId("chart-view-panel")).not.toBeInTheDocument();
+    it("test_render_noTables_doesNotShowPlotPanel", () => {
+      render(<PlotView />);
+      expect(screen.queryByTestId("plot-view-panel")).not.toBeInTheDocument();
     });
   });
 
@@ -115,25 +115,25 @@ describe("ChartView", () => {
     });
 
     it("test_render_withTables_showsTableSelector", () => {
-      render(<ChartView />);
-      expect(screen.getByTestId("chart-view-table-select")).toBeInTheDocument();
+      render(<PlotView />);
+      expect(screen.getByTestId("plot-view-table-select")).toBeInTheDocument();
     });
 
-    it("test_render_withTables_showsChartPanel", () => {
-      render(<ChartView />);
-      expect(screen.getByTestId("chart-view-panel")).toBeInTheDocument();
+    it("test_render_withTables_showsPlotPanel", () => {
+      render(<PlotView />);
+      expect(screen.getByTestId("plot-view-panel")).toBeInTheDocument();
     });
 
-    it("test_render_withTables_showsChartTypButtons", () => {
-      render(<ChartView />);
-      expect(screen.getByTestId("chart-type-scatter")).toBeInTheDocument();
-      expect(screen.getByTestId("chart-type-histogram")).toBeInTheDocument();
-      expect(screen.getByTestId("chart-type-line")).toBeInTheDocument();
+    it("test_render_withTables_showsPlotTypButtons", () => {
+      render(<PlotView />);
+      expect(screen.getByTestId("plot-type-scatter")).toBeInTheDocument();
+      expect(screen.getByTestId("plot-type-histogram")).toBeInTheDocument();
+      expect(screen.getByTestId("plot-type-line")).toBeInTheDocument();
     });
 
     it("test_render_initialEmpty_showsEmptyState", () => {
-      render(<ChartView />);
-      expect(screen.getByTestId("chart-view-empty")).toBeInTheDocument();
+      render(<PlotView />);
+      expect(screen.getByTestId("plot-view-empty")).toBeInTheDocument();
     });
   });
 
@@ -142,22 +142,22 @@ describe("ChartView", () => {
       useTableListStore.setState({ tableList: ["sales"] });
     });
 
-    it("test_chartType_scatter_isDefaultSelected", () => {
-      render(<ChartView />);
-      const btn = screen.getByTestId("chart-type-scatter");
+    it("test_plotType_scatter_isDefaultSelected", () => {
+      render(<PlotView />);
+      const btn = screen.getByTestId("plot-type-scatter");
       expect(btn.className).toMatch(/border-brand-primary/);
     });
 
-    it("test_chartType_clickHistogram_changesSelection", () => {
-      render(<ChartView />);
-      const histBtn = screen.getByTestId("chart-type-histogram");
+    it("test_plotType_clickHistogram_changesSelection", () => {
+      render(<PlotView />);
+      const histBtn = screen.getByTestId("plot-type-histogram");
       fireEvent.click(histBtn);
       expect(histBtn.className).toMatch(/border-brand-primary/);
     });
 
-    it("test_chartType_clickLine_changesSelection", () => {
-      render(<ChartView />);
-      const lineBtn = screen.getByTestId("chart-type-line");
+    it("test_plotType_clickLine_changesSelection", () => {
+      render(<PlotView />);
+      const lineBtn = screen.getByTestId("plot-type-line");
       fireEvent.click(lineBtn);
       expect(lineBtn.className).toMatch(/border-brand-primary/);
     });
@@ -174,20 +174,20 @@ describe("ChartView", () => {
     });
 
     it("test_columnPanel_showsXColumnSelector", () => {
-      render(<ChartView />);
-      expect(screen.getByTestId("chart-view-x-column")).toBeInTheDocument();
+      render(<PlotView />);
+      expect(screen.getByTestId("plot-view-x-column")).toBeInTheDocument();
     });
 
     it("test_columnPanel_scatter_showsYColumnSelector", () => {
-      render(<ChartView />);
-      expect(screen.getByTestId("chart-view-y-column")).toBeInTheDocument();
+      render(<PlotView />);
+      expect(screen.getByTestId("plot-view-y-column")).toBeInTheDocument();
     });
 
     it("test_columnPanel_histogram_hidesYColumnSelector", () => {
-      render(<ChartView />);
-      fireEvent.click(screen.getByTestId("chart-type-histogram"));
+      render(<PlotView />);
+      fireEvent.click(screen.getByTestId("plot-type-histogram"));
       expect(
-        screen.queryByTestId("chart-view-y-column"),
+        screen.queryByTestId("plot-view-y-column"),
       ).not.toBeInTheDocument();
     });
   });
@@ -200,9 +200,9 @@ describe("ChartView", () => {
     });
 
     it("test_loading_showsLoadingColumns", () => {
-      render(<ChartView />);
+      render(<PlotView />);
       expect(
-        screen.getByTestId("chart-view-loading-columns"),
+        screen.getByTestId("plot-view-loading-columns"),
       ).toBeInTheDocument();
     });
   });
@@ -213,7 +213,7 @@ describe("ChartView", () => {
     });
 
     it("test_cancel_withoutProp_navigatesToWorkspace", () => {
-      render(<ChartView />);
+      render(<PlotView />);
       const cancelBtn = screen.getByRole("button", { name: /Common\.Cancel/i });
       fireEvent.click(cancelBtn);
       expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
@@ -221,7 +221,7 @@ describe("ChartView", () => {
 
     it("test_cancel_withProp_callsCallback", () => {
       const onCancel = vi.fn().mockResolvedValue(undefined);
-      render(<ChartView onCancel={onCancel} />);
+      render(<PlotView onCancel={onCancel} />);
       fireEvent.click(screen.getByRole("button", { name: /Common\.Cancel/i }));
       expect(onCancel).toHaveBeenCalledOnce();
     });

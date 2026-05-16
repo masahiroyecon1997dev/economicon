@@ -89,30 +89,28 @@ import type {
   SuccessResponseUpdateSettingsResult,
   TransformColumnRequestBody,
   UpdateAnalysisResultRequest,
-  UpdateSettingsRequestBody
-} from './model';
+  UpdateSettingsRequestBody,
+} from "./model";
 
-import { customInstance } from './mutator/custom-instance';
-
+import { customInstance } from "./mutator/custom-instance";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
+export const getEconomiconAppAPI = () => {
+  /**
+   * ヘルスチェック
+   * @summary Health Check
+   */
+  const healthCheck = (
+    options?: SecondParameter<typeof customInstance<unknown>>,
+  ) => {
+    return customInstance<unknown>(
+      { url: `/api/health`, method: "GET" },
+      options,
+    );
+  };
 
-  export const getEconomiconAppAPI = () => {
-/**
- * ヘルスチェック
- * @summary Health Check
- */
-const healthCheck = (
-
- options?: SecondParameter<typeof customInstance<unknown>>,) => {
-      return customInstance<unknown>(
-      {url: `/api/health`, method: 'GET'
-    },
-      options);
-    }
-
-/**
+  /**
  * ダミー変数カラムを追加するエンドポイント
 
 Parameters
@@ -128,18 +126,24 @@ JSONResponse
     処理結果
  * @summary Add Dummy Column
  */
-const addDummyColumn = (
+  const addDummyColumn = (
     addDummyColumnRequestBody: AddDummyColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseAddDummyColumnResult>>,) => {
-      return customInstance<SuccessResponseAddDummyColumnResult>(
-      {url: `/api/column/add-dummy`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: addDummyColumnRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseAddDummyColumnResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseAddDummyColumnResult>(
+      {
+        url: `/api/column/add-dummy`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: addDummyColumnRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * カラムを削除するエンドポイント
 
 Parameters
@@ -155,18 +159,24 @@ JSONResponse
     処理結果
  * @summary Delete Column
  */
-const deleteColumn = (
+  const deleteColumn = (
     deleteColumnRequestBody: DeleteColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseDeleteColumnResult>>,) => {
-      return customInstance<SuccessResponseDeleteColumnResult>(
-      {url: `/api/column/delete`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: deleteColumnRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseDeleteColumnResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseDeleteColumnResult>(
+      {
+        url: `/api/column/delete`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: deleteColumnRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 列名変更エンドポイント
 
 Parameters
@@ -185,18 +195,24 @@ JSONResponse
     処理結果
  * @summary Rename Column
  */
-const renameColumn = (
+  const renameColumn = (
     renameColumnRequestBody: RenameColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseRenameColumnResult>>,) => {
-      return customInstance<SuccessResponseRenameColumnResult>(
-      {url: `/api/column/rename`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: renameColumnRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseRenameColumnResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseRenameColumnResult>(
+      {
+        url: `/api/column/rename`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: renameColumnRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * ラグ・リードカラムを追加するエンドポイント
 
 Parameters
@@ -212,18 +228,24 @@ JSONResponse
     処理結果
  * @summary Add Lag Lead Column
  */
-const addLagLeadColumn = (
+  const addLagLeadColumn = (
     addLagLeadColumnRequestBody: AddLagLeadColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseAddLagLeadColumnResult>>,) => {
-      return customInstance<SuccessResponseAddLagLeadColumnResult>(
-      {url: `/api/column/add-lag-lead`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: addLagLeadColumnRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseAddLagLeadColumnResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseAddLagLeadColumnResult>(
+      {
+        url: `/api/column/add-lag-lead`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: addLagLeadColumnRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * シミュレーションカラムを追加するエンドポイント
 
 Parameters
@@ -239,18 +261,24 @@ JSONResponse
     処理結果
  * @summary Add Simulation Column
  */
-const addSimulationColumn = (
+  const addSimulationColumn = (
     addSimulationColumnRequestBody: AddSimulationColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseAddSimulationColumnResult>>,) => {
-      return customInstance<SuccessResponseAddSimulationColumnResult>(
-      {url: `/api/column/add-simulation`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: addSimulationColumnRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseAddSimulationColumnResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseAddSimulationColumnResult>(
+      {
+        url: `/api/column/add-simulation`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: addSimulationColumnRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * カラム計算を実行するエンドポイント
 
 Parameters
@@ -266,18 +294,24 @@ JSONResponse
     処理結果
  * @summary Calculate Column
  */
-const calculateColumn = (
+  const calculateColumn = (
     calculateColumnRequestBody: CalculateColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseCalculateColumnResult>>,) => {
-      return customInstance<SuccessResponseCalculateColumnResult>(
-      {url: `/api/column/calculate`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: calculateColumnRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseCalculateColumnResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseCalculateColumnResult>(
+      {
+        url: `/api/column/calculate`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: calculateColumnRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 列の変換処理エンドポイント
 
 Parameters
@@ -293,18 +327,24 @@ JSONResponse
     処理結果
  * @summary Transform Column
  */
-const transformColumn = (
+  const transformColumn = (
     transformColumnRequestBody: TransformColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseTransformColumnResult>>,) => {
-      return customInstance<SuccessResponseTransformColumnResult>(
-      {url: `/api/column/transform`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: transformColumnRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseTransformColumnResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseTransformColumnResult>(
+      {
+        url: `/api/column/transform`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: transformColumnRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * カラムリストを取得するエンドポイント
 
 Parameters
@@ -320,18 +360,24 @@ JSONResponse
     処理結果
  * @summary Get Column List
  */
-const getColumnList = (
+  const getColumnList = (
     getColumnListRequestBody: GetColumnListRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseGetColumnListResult>>,) => {
-      return customInstance<SuccessResponseGetColumnListResult>(
-      {url: `/api/column/get-list`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: getColumnListRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseGetColumnListResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseGetColumnListResult>(
+      {
+        url: `/api/column/get-list`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: getColumnListRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 列のソート処理エンドポイント
 
 Parameters
@@ -349,18 +395,24 @@ JSONResponse
     処理結果
  * @summary Sort Columns
  */
-const sortColumns = (
+  const sortColumns = (
     sortColumnsRequestBody: SortColumnsRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseSortColumnsResult>>,) => {
-      return customInstance<SuccessResponseSortColumnsResult>(
-      {url: `/api/column/sort`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: sortColumnsRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseSortColumnsResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseSortColumnsResult>(
+      {
+        url: `/api/column/sort`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: sortColumnsRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 列型変換エンドポイント
 
 Parameters
@@ -376,18 +428,24 @@ JSONResponse
     処理結果
  * @summary Cast Column
  */
-const castColumn = (
+  const castColumn = (
     castColumnRequestBody: CastColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseCastColumnResult>>,) => {
-      return customInstance<SuccessResponseCastColumnResult>(
-      {url: `/api/column/cast`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: castColumnRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseCastColumnResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseCastColumnResult>(
+      {
+        url: `/api/column/cast`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: castColumnRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 列を指定した位置に移動するエンドポイント
 
 Parameters
@@ -406,18 +464,24 @@ JSONResponse
     処理結果
  * @summary Move Column
  */
-const moveColumn = (
+  const moveColumn = (
     moveColumnRequestBody: MoveColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseMoveColumnResult>>,) => {
-      return customInstance<SuccessResponseMoveColumnResult>(
-      {url: `/api/column/move`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: moveColumnRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseMoveColumnResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseMoveColumnResult>(
+      {
+        url: `/api/column/move`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: moveColumnRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * パネル時間カラムを追加するエンドポイント
 
 Parameters
@@ -433,18 +497,24 @@ JSONResponse
     処理結果
  * @summary Add Panel Time Column
  */
-const addPanelTimeColumn = (
+  const addPanelTimeColumn = (
     addPanelTimeColumnRequestBody: AddPanelTimeColumnRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseAddPanelTimeColumnResult>>,) => {
-      return customInstance<SuccessResponseAddPanelTimeColumnResult>(
-      {url: `/api/column/add-panel-time`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: addPanelTimeColumnRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseAddPanelTimeColumnResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseAddPanelTimeColumnResult>(
+      {
+        url: `/api/column/add-panel-time`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: addPanelTimeColumnRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 結合テーブルを作成するエンドポイント
 
 Parameters
@@ -460,18 +530,24 @@ JSONResponse
     処理結果
  * @summary Create Join Table
  */
-const createJoinTable = (
+  const createJoinTable = (
     createJoinTableRequestBody: CreateJoinTableRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseCreateJoinTableResult>>,) => {
-      return customInstance<SuccessResponseCreateJoinTableResult>(
-      {url: `/api/table/create-join`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createJoinTableRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseCreateJoinTableResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseCreateJoinTableResult>(
+      {
+        url: `/api/table/create-join`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: createJoinTableRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * ユニオンテーブルを作成するエンドポイント
 
 Parameters
@@ -487,18 +563,24 @@ JSONResponse
     処理結果
  * @summary Create Union Table
  */
-const createUnionTable = (
+  const createUnionTable = (
     createUnionTableRequestBody: CreateUnionTableRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseCreateUnionTableResult>>,) => {
-      return customInstance<SuccessResponseCreateUnionTableResult>(
-      {url: `/api/table/create-union`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createUnionTableRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseCreateUnionTableResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseCreateUnionTableResult>(
+      {
+        url: `/api/table/create-union`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: createUnionTableRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * シミュレーションデータテーブルを作成するエンドポイント
 
 Parameters
@@ -514,18 +596,24 @@ JSONResponse
     処理結果
  * @summary Create Simulation Data Table
  */
-const createSimulationDataTable = (
+  const createSimulationDataTable = (
     createSimulationDataTableRequestBody: CreateSimulationDataTableRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseCreateSimulationDataTableResult>>,) => {
-      return customInstance<SuccessResponseCreateSimulationDataTableResult>(
-      {url: `/api/table/create-simulation-data`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createSimulationDataTableRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseCreateSimulationDataTableResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseCreateSimulationDataTableResult>(
+      {
+        url: `/api/table/create-simulation-data`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: createSimulationDataTableRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * テーブルを削除するエンドポイント
 
 Parameters
@@ -541,18 +629,24 @@ JSONResponse
     処理結果
  * @summary Delete Table
  */
-const deleteTable = (
+  const deleteTable = (
     deleteTableRequestBody: DeleteTableRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseDeleteTableResult>>,) => {
-      return customInstance<SuccessResponseDeleteTableResult>(
-      {url: `/api/table/delete`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: deleteTableRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseDeleteTableResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseDeleteTableResult>(
+      {
+        url: `/api/table/delete`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: deleteTableRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * テーブルを複製するエンドポイント
 
 Parameters
@@ -568,18 +662,24 @@ JSONResponse
     処理結果
  * @summary Duplicate Table
  */
-const duplicateTable = (
+  const duplicateTable = (
     duplicateTableRequestBody: DuplicateTableRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseDuplicateTableResult>>,) => {
-      return customInstance<SuccessResponseDuplicateTableResult>(
-      {url: `/api/table/duplicate`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: duplicateTableRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseDuplicateTableResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseDuplicateTableResult>(
+      {
+        url: `/api/table/duplicate`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: duplicateTableRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * テーブル名変更エンドポイント
 
 Parameters
@@ -597,18 +697,24 @@ JSONResponse
     処理結果
  * @summary Rename Table
  */
-const renameTable = (
+  const renameTable = (
     renameTableRequestBody: RenameTableRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseRenameTableResult>>,) => {
-      return customInstance<SuccessResponseRenameTableResult>(
-      {url: `/api/table/rename`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: renameTableRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseRenameTableResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseRenameTableResult>(
+      {
+        url: `/api/table/rename`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: renameTableRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * テーブルリストを取得するエンドポイント
 
 Parameters
@@ -622,16 +728,18 @@ JSONResponse
     処理結果
  * @summary Get Table List
  */
-const getTableList = (
+  const getTableList = (
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseGetTableListResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseGetTableListResult>(
+      { url: `/api/table/get-list`, method: "GET" },
+      options,
+    );
+  };
 
- options?: SecondParameter<typeof customInstance<SuccessResponseGetTableListResult>>,) => {
-      return customInstance<SuccessResponseGetTableListResult>(
-      {url: `/api/table/get-list`, method: 'GET'
-    },
-      options);
-    }
-
-/**
+  /**
  * 全テーブルをクリアするエンドポイント
 
 Parameters
@@ -645,16 +753,18 @@ JSONResponse
     処理結果
  * @summary Clear Tables
  */
-const clearTables = (
+  const clearTables = (
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseClearTablesResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseClearTablesResult>(
+      { url: `/api/table/clear-all`, method: "DELETE" },
+      options,
+    );
+  };
 
- options?: SecondParameter<typeof customInstance<SuccessResponseClearTablesResult>>,) => {
-      return customInstance<SuccessResponseClearTablesResult>(
-      {url: `/api/table/clear-all`, method: 'DELETE'
-    },
-      options);
-    }
-
-/**
+  /**
  * データをJSON形式で取得するエンドポイント
 
 Parameters
@@ -670,18 +780,24 @@ JSONResponse
     処理結果
  * @summary Fetch Data To Json
  */
-const fetchDataToJson = (
+  const fetchDataToJson = (
     fetchDataToJsonRequestBody: FetchDataToJsonRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseFetchDataToJsonResult>>,) => {
-      return customInstance<SuccessResponseFetchDataToJsonResult>(
-      {url: `/api/table/fetch-data-to-json`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: fetchDataToJsonRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseFetchDataToJsonResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseFetchDataToJsonResult>(
+      {
+        url: `/api/table/fetch-data-to-json`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: fetchDataToJsonRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * データをApache Arrow IPC形式の生バイナリで返すエンドポイント
 
 仮想スクロール用のチャンク取得API。
@@ -702,22 +818,26 @@ Response
     Arrow IPC形式生バイナリ
  * @summary Fetch Data To Arrow
  */
-const fetchDataToArrow = (
+  const fetchDataToArrow = (
     fetchDataToArrowRequestBody: FetchDataToArrowRequestBody,
- options?: SecondParameter<typeof customInstance<Blob>>,) => {
-      return customInstance<Blob>(
-      {url: `/api/table/fetch-data-to-arrow`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: fetchDataToArrowRequestBody,
-        responseType: 'blob'
-    },
-      options);
-    }
+    options?: SecondParameter<typeof customInstance<Blob>>,
+  ) => {
+    return customInstance<Blob>(
+      {
+        url: `/api/table/fetch-data-to-arrow`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: fetchDataToArrowRequestBody,
+        responseType: "blob",
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * プロット用列指定データを Apache Arrow IPC 形式で返すエンドポイント
 
-グラフ描画に必要な列のみを取得することで、メモリ・転送量を削減する。
+プロット描画に必要な列のみを取得することで、メモリ・転送量を削減する。
 JSON 包装なしで Arrow IPC 形式生バイナリを直接返す。
 メタデータ（tableName / columnNames / totalRows）は
 Arrow スキーマメタデータに埋め込む。
@@ -737,19 +857,23 @@ Response
     Arrow IPC 形式生バイナリ
  * @summary Fetch Plot Data
  */
-const fetchPlotData = (
+  const fetchPlotData = (
     fetchPlotDataRequestBody: FetchPlotDataRequestBody,
- options?: SecondParameter<typeof customInstance<Blob>>,) => {
-      return customInstance<Blob>(
-      {url: `/api/table/fetch-plot-data`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: fetchPlotDataRequestBody,
-        responseType: 'blob'
-    },
-      options);
-    }
+    options?: SecondParameter<typeof customInstance<Blob>>,
+  ) => {
+    return customInstance<Blob>(
+      {
+        url: `/api/table/fetch-plot-data`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: fetchPlotDataRequestBody,
+        responseType: "blob",
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * テーブルフィルタリングを実行するエンドポイント
 
 Parameters
@@ -765,18 +889,24 @@ JSONResponse
     処理結果
  * @summary Filter Table
  */
-const filterTable = (
+  const filterTable = (
     filterRequestBody: FilterRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseFilterResult>>,) => {
-      return customInstance<SuccessResponseFilterResult>(
-      {url: `/api/table/filter`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: filterRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseFilterResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseFilterResult>(
+      {
+        url: `/api/table/filter`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: filterRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 統合回帰分析エンドポイント
 
 typeフィールドに応じて適切な分析手法を選択し、実行します。
@@ -800,18 +930,24 @@ JSONResponse
     分析結果またはエラーメッセージ
  * @summary Regression
  */
-const regression = (
+  const regression = (
     regressionRequestBody: RegressionRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseRegressionResult>>,) => {
-      return customInstance<SuccessResponseRegressionResult>(
-      {url: `/api/analysis/regression`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: regressionRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseRegressionResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseRegressionResult>(
+      {
+        url: `/api/analysis/regression`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: regressionRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 推定済みモデルから予測値・残差を抽出してテーブルに列追加する
 
 指定された分析結果 ID に対応するモデルをロードし、予測値・残差などの
@@ -835,18 +971,24 @@ JSONResponse
     追加したテーブル名と列名リスト
  * @summary Add Diagnostic Columns
  */
-const addDiagnosticColumns = (
+  const addDiagnosticColumns = (
     addDiagnosticColumnsRequestBody: AddDiagnosticColumnsRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseAddDiagnosticColumnsResult>>,) => {
-      return customInstance<SuccessResponseAddDiagnosticColumnsResult>(
-      {url: `/api/analysis/regression/add-diagnostic-columns`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: addDiagnosticColumnsRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseAddDiagnosticColumnsResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseAddDiagnosticColumnsResult>(
+      {
+        url: `/api/analysis/regression/add-diagnostic-columns`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: addDiagnosticColumnsRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * ヘックマン2段階推定エンドポイント
 
 Step 1 で Probit により選択方程式を推定し逆ミルズ比 (IMR)
@@ -871,18 +1013,24 @@ JSONResponse
     分析結果 ID またはエラーメッセージ
  * @summary Heckman Regression
  */
-const heckmanRegression = (
+  const heckmanRegression = (
     heckmanRequestBody: HeckmanRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseHeckmanResult>>,) => {
-      return customInstance<SuccessResponseHeckmanResult>(
-      {url: `/api/analysis/heckman-regression`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: heckmanRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseHeckmanResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseHeckmanResult>(
+      {
+        url: `/api/analysis/heckman-regression`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: heckmanRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 差の差（DID）分析エンドポイント
 
 Two-Way Fixed Effects（TWFE）による DID 推定を実行します。
@@ -914,18 +1062,22 @@ JSONResponse
     分析結果は GET /analysis/results/{resultId} で取得可能。
  * @summary Did Analysis
  */
-const didAnalysis = (
+  const didAnalysis = (
     dIDRequestBody: DIDRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseDIDResult>>,) => {
-      return customInstance<SuccessResponseDIDResult>(
-      {url: `/api/analysis/did`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: dIDRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<typeof customInstance<SuccessResponseDIDResult>>,
+  ) => {
+    return customInstance<SuccessResponseDIDResult>(
+      {
+        url: `/api/analysis/did`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: dIDRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 回帰不連続デザイン（RDD）分析エンドポイント
 
 rdrobust による局所多項式推定で RDD の LATE を推定します。
@@ -957,18 +1109,22 @@ JSONResponse
     分析結果は GET /analysis/results/{resultId} で取得可能。
  * @summary Rdd Analysis
  */
-const rddAnalysis = (
+  const rddAnalysis = (
     rDDRequestBody: RDDRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseRDDResult>>,) => {
-      return customInstance<SuccessResponseRDDResult>(
-      {url: `/api/analysis/rdd`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: rDDRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<typeof customInstance<SuccessResponseRDDResult>>,
+  ) => {
+    return customInstance<SuccessResponseRDDResult>(
+      {
+        url: `/api/analysis/rdd`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: rDDRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * すべての分析結果のサマリーを取得
 
 Returns
@@ -977,16 +1133,18 @@ JSONResponse
     分析結果のサマリーリスト
  * @summary Get All Analysis Results
  */
-const getAllAnalysisResults = (
+  const getAllAnalysisResults = (
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseGetAllAnalysisResultsResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseGetAllAnalysisResultsResult>(
+      { url: `/api/analysis/results`, method: "GET" },
+      options,
+    );
+  };
 
- options?: SecondParameter<typeof customInstance<SuccessResponseGetAllAnalysisResultsResult>>,) => {
-      return customInstance<SuccessResponseGetAllAnalysisResultsResult>(
-      {url: `/api/analysis/results`, method: 'GET'
-    },
-      options);
-    }
-
-/**
+  /**
  * すべての分析結果を削除
 
 Returns
@@ -995,16 +1153,18 @@ JSONResponse
     削除成功メッセージ
  * @summary Clear All Analysis Results
  */
-const clearAllAnalysisResults = (
+  const clearAllAnalysisResults = (
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseClearAllAnalysisResultsResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseClearAllAnalysisResultsResult>(
+      { url: `/api/analysis/results`, method: "DELETE" },
+      options,
+    );
+  };
 
- options?: SecondParameter<typeof customInstance<SuccessResponseClearAllAnalysisResultsResult>>,) => {
-      return customInstance<SuccessResponseClearAllAnalysisResultsResult>(
-      {url: `/api/analysis/results`, method: 'DELETE'
-    },
-      options);
-    }
-
-/**
+  /**
  * 指定されたIDの分析結果を取得
 
 Parameters
@@ -1020,32 +1180,41 @@ JSONResponse
     分析結果の詳細
  * @summary Get Analysis Result
  */
-const getAnalysisResult = (
+  const getAnalysisResult = (
     resultId: string,
- options?: SecondParameter<typeof customInstance<SuccessResponseAnalysisResultDetail>>,) => {
-      return customInstance<SuccessResponseAnalysisResultDetail>(
-      {url: `/api/analysis/results/${resultId}`, method: 'GET'
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseAnalysisResultDetail>
+    >,
+  ) => {
+    return customInstance<SuccessResponseAnalysisResultDetail>(
+      { url: `/api/analysis/results/${resultId}`, method: "GET" },
+      options,
+    );
+  };
 
-/**
- * 指定されたIDの分析結果メタデータを更新する。
- * @summary Update Analysis Result
- */
-const updateAnalysisResult = (
+  /**
+   * 指定されたIDの分析結果メタデータを更新する。
+   * @summary Update Analysis Result
+   */
+  const updateAnalysisResult = (
     resultId: string,
     updateAnalysisResultRequest: UpdateAnalysisResultRequest,
- options?: SecondParameter<typeof customInstance<SuccessResponseUpdateAnalysisResultResult>>,) => {
-      return customInstance<SuccessResponseUpdateAnalysisResultResult>(
-      {url: `/api/analysis/results/${resultId}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: updateAnalysisResultRequest
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseUpdateAnalysisResultResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseUpdateAnalysisResultResult>(
+      {
+        url: `/api/analysis/results/${resultId}`,
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        data: updateAnalysisResultRequest,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 指定されたIDの分析結果を削除
 
 Parameters
@@ -1061,16 +1230,19 @@ JSONResponse
     削除成功メッセージ
  * @summary Delete Analysis Result
  */
-const deleteAnalysisResult = (
+  const deleteAnalysisResult = (
     resultId: string,
- options?: SecondParameter<typeof customInstance<SuccessResponseDeleteAnalysisResultResult>>,) => {
-      return customInstance<SuccessResponseDeleteAnalysisResultResult>(
-      {url: `/api/analysis/results/${resultId}`, method: 'DELETE'
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseDeleteAnalysisResultResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseDeleteAnalysisResultResult>(
+      { url: `/api/analysis/results/${resultId}`, method: "DELETE" },
+      options,
+    );
+  };
 
-/**
+  /**
  * 推定結果をテキスト / Markdown / LaTeX 形式で整形出力する
 
 指定した分析結果 ID のリストから係数表などを生成します。
@@ -1094,18 +1266,28 @@ JSONResponse
     整形済み出力テキストを含む成功レスポンス
  * @summary Output Result
  */
-const outputResult = (
-    regressionOutputRequestDescriptiveStatisticsOutputRequestConfidenceIntervalOutputRequestStatisticalTestOutputRequest: RegressionOutputRequest | DescriptiveStatisticsOutputRequest | ConfidenceIntervalOutputRequest | StatisticalTestOutputRequest,
- options?: SecondParameter<typeof customInstance<SuccessResponseOutputResultResult>>,) => {
-      return customInstance<SuccessResponseOutputResultResult>(
-      {url: `/api/analysis/results/output`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: regressionOutputRequestDescriptiveStatisticsOutputRequestConfidenceIntervalOutputRequestStatisticalTestOutputRequest
-    },
-      options);
-    }
+  const outputResult = (
+    regressionOutputRequestDescriptiveStatisticsOutputRequestConfidenceIntervalOutputRequestStatisticalTestOutputRequest:
+      | RegressionOutputRequest
+      | DescriptiveStatisticsOutputRequest
+      | ConfidenceIntervalOutputRequest
+      | StatisticalTestOutputRequest,
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseOutputResultResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseOutputResultResult>(
+      {
+        url: `/api/analysis/results/output`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: regressionOutputRequestDescriptiveStatisticsOutputRequestConfidenceIntervalOutputRequestStatisticalTestOutputRequest,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 拡張子に基づいてファイルをインポートしてテーブルを作成するエンドポイント
 
 対応拡張子:
@@ -1134,18 +1316,24 @@ JSONResponse
     処理結果
  * @summary Import File
  */
-const importFile = (
+  const importFile = (
     importFileRequestBody: ImportFileRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseImportFileResult>>,) => {
-      return customInstance<SuccessResponseImportFileResult>(
-      {url: `/api/data/import`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: importFileRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseImportFileResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseImportFileResult>(
+      {
+        url: `/api/data/import`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: importFileRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * format に基づいてテーブルをファイルにエクスポートするエンドポイント
 
 対応形式：
@@ -1174,18 +1362,24 @@ JSONResponse
     処理結果
  * @summary Export File
  */
-const exportFile = (
+  const exportFile = (
     exportFileRequestBody: ExportFileRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseExportFileResult>>,) => {
-      return customInstance<SuccessResponseExportFileResult>(
-      {url: `/api/data/export`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: exportFileRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseExportFileResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseExportFileResult>(
+      {
+        url: `/api/data/export`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: exportFileRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 信頼区間計算を行うエンドポイント
 
 Parameters
@@ -1201,18 +1395,24 @@ JSONResponse
     処理結果
  * @summary Confidence Interval
  */
-const confidenceInterval = (
+  const confidenceInterval = (
     confidenceIntervalRequestBody: ConfidenceIntervalRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseConfidenceIntervalResult>>,) => {
-      return customInstance<SuccessResponseConfidenceIntervalResult>(
-      {url: `/api/statistics/confidence-interval`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: confidenceIntervalRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseConfidenceIntervalResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseConfidenceIntervalResult>(
+      {
+        url: `/api/statistics/confidence-interval`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: confidenceIntervalRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 記述統計を計算するエンドポイント
 
 Parameters
@@ -1228,18 +1428,24 @@ JSONResponse
     処理結果
  * @summary Descriptive Statistics
  */
-const descriptiveStatistics = (
+  const descriptiveStatistics = (
     descriptiveStatisticsRequestBody: DescriptiveStatisticsRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseDescriptiveStatisticsResult>>,) => {
-      return customInstance<SuccessResponseDescriptiveStatisticsResult>(
-      {url: `/api/statistics/descriptive`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: descriptiveStatisticsRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseDescriptiveStatisticsResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseDescriptiveStatisticsResult>(
+      {
+        url: `/api/statistics/descriptive`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: descriptiveStatisticsRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 相関係数テーブル作成を行うエンドポイント
 
 指定されたテーブルの各列間の相関係数行列を計算し、
@@ -1260,18 +1466,24 @@ JSONResponse
     処理結果（新規作成されたテーブル名）
  * @summary Create Correlation Table
  */
-const createCorrelationTable = (
+  const createCorrelationTable = (
     createCorrelationTableRequestBody: CreateCorrelationTableRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseCreateCorrelationTableResult>>,) => {
-      return customInstance<SuccessResponseCreateCorrelationTableResult>(
-      {url: `/api/statistics/create-correlation-table`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createCorrelationTableRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseCreateCorrelationTableResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseCreateCorrelationTableResult>(
+      {
+        url: `/api/statistics/create-correlation-table`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: createCorrelationTableRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * 統計的検定を実行するエンドポイント
 
 t 検定・z 検定・F 検定（分散比検定 / ANOVA）を実行し、
@@ -1292,18 +1504,24 @@ JSONResponse
     処理結果
  * @summary Statistical Test
  */
-const statisticalTest = (
+  const statisticalTest = (
     statisticalTestRequestBody: StatisticalTestRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseStatisticalTestResult>>,) => {
-      return customInstance<SuccessResponseStatisticalTestResult>(
-      {url: `/api/statistics/test`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: statisticalTestRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseStatisticalTestResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseStatisticalTestResult>(
+      {
+        url: `/api/statistics/test`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: statisticalTestRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * GroupBy 統計テーブルを作成するエンドポイント
 
 指定されたグループキーでグループ化し、各列の記述統計を計算して
@@ -1324,18 +1542,24 @@ JSONResponse
     処理結果（新規作成されたテーブル名）
  * @summary Create Group Statistics Table
  */
-const createGroupStatisticsTable = (
+  const createGroupStatisticsTable = (
     createGroupStatisticsTableRequestBody: CreateGroupStatisticsTableRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseCreateGroupStatisticsTableResult>>,) => {
-      return customInstance<SuccessResponseCreateGroupStatisticsTableResult>(
-      {url: `/api/statistics/create-group-statistics-table`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createGroupStatisticsTableRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseCreateGroupStatisticsTableResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseCreateGroupStatisticsTableResult>(
+      {
+        url: `/api/statistics/create-group-statistics-table`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: createGroupStatisticsTableRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * アプリケーション設定を取得するエンドポイント
 
 Parameters
@@ -1349,16 +1573,18 @@ JSONResponse
     処理結果
  * @summary Get Settings
  */
-const getSettings = (
+  const getSettings = (
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseGetSettingsResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseGetSettingsResult>(
+      { url: `/api/settings`, method: "GET" },
+      options,
+    );
+  };
 
- options?: SecondParameter<typeof customInstance<SuccessResponseGetSettingsResult>>,) => {
-      return customInstance<SuccessResponseGetSettingsResult>(
-      {url: `/api/settings`, method: 'GET'
-    },
-      options);
-    }
-
-/**
+  /**
  * アプリケーション設定を更新するエンドポイント
 
 指定されたフィールドのみを部分更新します。省略したフィールドは
@@ -1379,18 +1605,24 @@ JSONResponse
     更新後の設定情報
  * @summary Update Settings
  */
-const updateSettings = (
+  const updateSettings = (
     updateSettingsRequestBody: UpdateSettingsRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseUpdateSettingsResult>>,) => {
-      return customInstance<SuccessResponseUpdateSettingsResult>(
-      {url: `/api/settings`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
-      data: updateSettingsRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseUpdateSettingsResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseUpdateSettingsResult>(
+      {
+        url: `/api/settings`,
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        data: updateSettingsRequestBody,
+      },
+      options,
+    );
+  };
 
-/**
+  /**
  * アプリ終了前クリーンアップエンドポイント
 
 フロントエンドの CloseRequested ハンドラから呼び出される。
@@ -1411,75 +1643,268 @@ JSONResponse
     処理結果
  * @summary Shutdown
  */
-const shutdown = (
+  const shutdown = (
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseShutdownResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseShutdownResult>(
+      { url: `/api/shutdown`, method: "POST" },
+      options,
+    );
+  };
 
- options?: SecondParameter<typeof customInstance<SuccessResponseShutdownResult>>,) => {
-      return customInstance<SuccessResponseShutdownResult>(
-      {url: `/api/shutdown`, method: 'POST'
-    },
-      options);
-    }
-
-/**
- * 分布プレビュー計算エンドポイント
- * @summary Preview Distribution
- */
-const previewDistribution = (
+  /**
+   * 分布プレビュー計算エンドポイント
+   * @summary Preview Distribution
+   */
+  const previewDistribution = (
     distributionPreviewRequestBody: DistributionPreviewRequestBody,
- options?: SecondParameter<typeof customInstance<SuccessResponseDistributionPreviewResult>>,) => {
-      return customInstance<SuccessResponseDistributionPreviewResult>(
-      {url: `/api/distribution/preview`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: distributionPreviewRequestBody
-    },
-      options);
-    }
+    options?: SecondParameter<
+      typeof customInstance<SuccessResponseDistributionPreviewResult>
+    >,
+  ) => {
+    return customInstance<SuccessResponseDistributionPreviewResult>(
+      {
+        url: `/api/distribution/preview`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: distributionPreviewRequestBody,
+      },
+      options,
+    );
+  };
 
-return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,fetchPlotData,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,updateAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,createGroupStatisticsTable,getSettings,updateSettings,shutdown,previewDistribution}};
-export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['healthCheck']>>>
-export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDummyColumn']>>>
-export type DeleteColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteColumn']>>>
-export type RenameColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['renameColumn']>>>
-export type AddLagLeadColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addLagLeadColumn']>>>
-export type AddSimulationColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addSimulationColumn']>>>
-export type CalculateColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['calculateColumn']>>>
-export type TransformColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['transformColumn']>>>
-export type GetColumnListResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getColumnList']>>>
-export type SortColumnsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['sortColumns']>>>
-export type CastColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['castColumn']>>>
-export type MoveColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['moveColumn']>>>
-export type AddPanelTimeColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addPanelTimeColumn']>>>
-export type CreateJoinTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createJoinTable']>>>
-export type CreateUnionTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createUnionTable']>>>
-export type CreateSimulationDataTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createSimulationDataTable']>>>
-export type DeleteTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteTable']>>>
-export type DuplicateTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['duplicateTable']>>>
-export type RenameTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['renameTable']>>>
-export type GetTableListResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getTableList']>>>
-export type ClearTablesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['clearTables']>>>
-export type FetchDataToJsonResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['fetchDataToJson']>>>
-export type FetchDataToArrowResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['fetchDataToArrow']>>>
-export type FetchPlotDataResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['fetchPlotData']>>>
-export type FilterTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['filterTable']>>>
-export type RegressionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['regression']>>>
-export type AddDiagnosticColumnsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDiagnosticColumns']>>>
-export type HeckmanRegressionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['heckmanRegression']>>>
-export type DidAnalysisResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['didAnalysis']>>>
-export type RddAnalysisResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['rddAnalysis']>>>
-export type GetAllAnalysisResultsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getAllAnalysisResults']>>>
-export type ClearAllAnalysisResultsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['clearAllAnalysisResults']>>>
-export type GetAnalysisResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getAnalysisResult']>>>
-export type UpdateAnalysisResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['updateAnalysisResult']>>>
-export type DeleteAnalysisResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteAnalysisResult']>>>
-export type OutputResultResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['outputResult']>>>
-export type ImportFileResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['importFile']>>>
-export type ExportFileResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['exportFile']>>>
-export type ConfidenceIntervalResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['confidenceInterval']>>>
-export type DescriptiveStatisticsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['descriptiveStatistics']>>>
-export type CreateCorrelationTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createCorrelationTable']>>>
-export type StatisticalTestResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['statisticalTest']>>>
-export type CreateGroupStatisticsTableResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['createGroupStatisticsTable']>>>
-export type GetSettingsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getSettings']>>>
-export type UpdateSettingsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['updateSettings']>>>
-export type ShutdownResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['shutdown']>>>
-export type PreviewDistributionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['previewDistribution']>>>
+  return {
+    healthCheck,
+    addDummyColumn,
+    deleteColumn,
+    renameColumn,
+    addLagLeadColumn,
+    addSimulationColumn,
+    calculateColumn,
+    transformColumn,
+    getColumnList,
+    sortColumns,
+    castColumn,
+    moveColumn,
+    addPanelTimeColumn,
+    createJoinTable,
+    createUnionTable,
+    createSimulationDataTable,
+    deleteTable,
+    duplicateTable,
+    renameTable,
+    getTableList,
+    clearTables,
+    fetchDataToJson,
+    fetchDataToArrow,
+    fetchPlotData,
+    filterTable,
+    regression,
+    addDiagnosticColumns,
+    heckmanRegression,
+    didAnalysis,
+    rddAnalysis,
+    getAllAnalysisResults,
+    clearAllAnalysisResults,
+    getAnalysisResult,
+    updateAnalysisResult,
+    deleteAnalysisResult,
+    outputResult,
+    importFile,
+    exportFile,
+    confidenceInterval,
+    descriptiveStatistics,
+    createCorrelationTable,
+    statisticalTest,
+    createGroupStatisticsTable,
+    getSettings,
+    updateSettings,
+    shutdown,
+    previewDistribution,
+  };
+};
+export type HealthCheckResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["healthCheck"]>>
+>;
+export type AddDummyColumnResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["addDummyColumn"]>>
+>;
+export type DeleteColumnResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["deleteColumn"]>>
+>;
+export type RenameColumnResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["renameColumn"]>>
+>;
+export type AddLagLeadColumnResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["addLagLeadColumn"]>
+  >
+>;
+export type AddSimulationColumnResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["addSimulationColumn"]>
+  >
+>;
+export type CalculateColumnResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["calculateColumn"]>>
+>;
+export type TransformColumnResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["transformColumn"]>>
+>;
+export type GetColumnListResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["getColumnList"]>>
+>;
+export type SortColumnsResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["sortColumns"]>>
+>;
+export type CastColumnResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["castColumn"]>>
+>;
+export type MoveColumnResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["moveColumn"]>>
+>;
+export type AddPanelTimeColumnResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["addPanelTimeColumn"]>
+  >
+>;
+export type CreateJoinTableResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["createJoinTable"]>>
+>;
+export type CreateUnionTableResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["createUnionTable"]>
+  >
+>;
+export type CreateSimulationDataTableResult = NonNullable<
+  Awaited<
+    ReturnType<
+      ReturnType<typeof getEconomiconAppAPI>["createSimulationDataTable"]
+    >
+  >
+>;
+export type DeleteTableResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["deleteTable"]>>
+>;
+export type DuplicateTableResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["duplicateTable"]>>
+>;
+export type RenameTableResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["renameTable"]>>
+>;
+export type GetTableListResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["getTableList"]>>
+>;
+export type ClearTablesResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["clearTables"]>>
+>;
+export type FetchDataToJsonResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["fetchDataToJson"]>>
+>;
+export type FetchDataToArrowResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["fetchDataToArrow"]>
+  >
+>;
+export type FetchPlotDataResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["fetchPlotData"]>>
+>;
+export type FilterTableResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["filterTable"]>>
+>;
+export type RegressionResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["regression"]>>
+>;
+export type AddDiagnosticColumnsResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["addDiagnosticColumns"]>
+  >
+>;
+export type HeckmanRegressionResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["heckmanRegression"]>
+  >
+>;
+export type DidAnalysisResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["didAnalysis"]>>
+>;
+export type RddAnalysisResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["rddAnalysis"]>>
+>;
+export type GetAllAnalysisResultsResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["getAllAnalysisResults"]>
+  >
+>;
+export type ClearAllAnalysisResultsResult = NonNullable<
+  Awaited<
+    ReturnType<
+      ReturnType<typeof getEconomiconAppAPI>["clearAllAnalysisResults"]
+    >
+  >
+>;
+export type GetAnalysisResultResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["getAnalysisResult"]>
+  >
+>;
+export type UpdateAnalysisResultResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["updateAnalysisResult"]>
+  >
+>;
+export type DeleteAnalysisResultResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["deleteAnalysisResult"]>
+  >
+>;
+export type OutputResultResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["outputResult"]>>
+>;
+export type ImportFileResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["importFile"]>>
+>;
+export type ExportFileResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["exportFile"]>>
+>;
+export type ConfidenceIntervalResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["confidenceInterval"]>
+  >
+>;
+export type DescriptiveStatisticsResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["descriptiveStatistics"]>
+  >
+>;
+export type CreateCorrelationTableResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["createCorrelationTable"]>
+  >
+>;
+export type StatisticalTestResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["statisticalTest"]>>
+>;
+export type CreateGroupStatisticsTableResult = NonNullable<
+  Awaited<
+    ReturnType<
+      ReturnType<typeof getEconomiconAppAPI>["createGroupStatisticsTable"]
+    >
+  >
+>;
+export type GetSettingsResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["getSettings"]>>
+>;
+export type UpdateSettingsResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["updateSettings"]>>
+>;
+export type ShutdownResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>["shutdown"]>>
+>;
+export type PreviewDistributionResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getEconomiconAppAPI>["previewDistribution"]>
+  >
+>;

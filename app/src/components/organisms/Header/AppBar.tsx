@@ -395,10 +395,10 @@ export const AppBar = () => {
       onClose: close,
       items: [
         {
-          id: "chart-view",
-          label: t("HeaderMenu.ChartView"),
+          id: "plot-view",
+          label: t("HeaderMenu.PlotView"),
           handleSelect: () =>
-            handleOpenWorkTab("ChartView", t("HeaderMenu.ChartView")),
+            handleOpenWorkTab("PlotView", t("HeaderMenu.PlotView")),
         },
         {
           id: "distribution-preview",

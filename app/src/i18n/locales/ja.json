@@ -79,7 +79,7 @@
     "LinearRegressionMenu": "線形回帰",
     "OrdinaryLeastSquares": "最小二乗法",
     "Visualization": "可視化",
-    "ChartView": "グラフビュー",
+    "PlotView": "プロットビュー",
     "DistributionPreview": "分布プレビュー"
   },
   "LeftSideMenu": {
@@ -349,15 +349,15 @@
     "ErrorStatisticsRequired": "1つ以上の統計量を選択してください",
     "ErrorOutputNameRequired": "出力データ名を入力してください"
   },
-  "ChartView": {
-    "Title": "グラフビュー",
-    "Description": "テーブルのデータを使って散布図・ヒストグラム・折れ線グラフを描画します。",
+  "PlotView": {
+    "Title": "プロットビュー",
+    "Description": "テーブルのデータを使って散布図・ヒストグラム・折れ線プロットを描画します。",
     "DataLabel": "データ",
     "SelectData": "データを選択",
-    "ChartTypeLabel": "グラフの種類",
-    "ChartTypeScatter": "散布図",
-    "ChartTypeHistogram": "ヒストグラム",
-    "ChartTypeLine": "折れ線",
+    "PlotTypeLabel": "プロットの種類",
+    "PlotTypeScatter": "散布図",
+    "PlotTypeHistogram": "ヒストグラム",
+    "PlotTypeLine": "折れ線",
     "ColumnsLabel": "軸の設定",
     "XColumnLabel": "X軸",
     "XColumnPlaceholder": "列を選択",
@@ -365,8 +365,8 @@
     "YColumnPlaceholder": "列を選択",
     "YColumnsLabel": "Y軸（複数選択可）",
     "NoNumericColumns": "数値列がありません",
-    "EmptyTitle": "グラフを表示するには列を選択してください",
-    "EmptyDescription": "左のパネルでデータと軸の列を選択すると、ここにグラフが表示されます。",
+    "EmptyTitle": "プロットを表示するには列を選択してください",
+    "EmptyDescription": "左のパネルでデータと軸の列を選択すると、ここにプロットが表示されます。",
     "EmptyNeedTable": "まずデータを選択してください",
     "EmptyNeedTableDesc": "左パネルの「データ」からテーブルを選んでください。",
     "EmptyNeedXColumn": "X軸の列を選択してください",
@@ -374,8 +374,8 @@
     "EmptyNeedYColumn": "Y軸の列を選択してください",
     "EmptyNeedYColumnDesc": "散布図には X 軸と Y 軸の両方が必要です。",
     "EmptyNeedYColumns": "Y軸の列を1つ以上選択してください",
-    "EmptyNeedYColumnsDesc": "折れ線グラフには少なくとも1つの Y 軸列が必要です。",
-    "Loading": "グラフを生成中..."
+    "EmptyNeedYColumnsDesc": "折れ線プロットには少なくとも1つの Y 軸列が必要です。",
+    "Loading": "プロットを生成中..."
   },
   "AnalysisEmptyState": {
     "NoTablesTitle": "分析対象のデータがまだありません",

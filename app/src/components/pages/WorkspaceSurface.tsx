@@ -4,7 +4,6 @@ import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressi
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
 import { Calculation } from "@/components/pages/Calculation";
-import { ChartView } from "@/components/pages/ChartView";
 import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
@@ -12,6 +11,7 @@ import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics"
 import { DistributionPreview } from "@/components/pages/DistributionPreview";
 import { GroupStatistics } from "@/components/pages/GroupStatistics";
 import { JoinTable } from "@/components/pages/JoinTable";
+import { PlotView } from "@/components/pages/PlotView";
 import { StatisticalTestView } from "@/components/pages/StatisticalTestView";
 import { UnionTable } from "@/components/pages/UnionTable";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
@@ -45,7 +45,7 @@ type StaticWorkFeatureKey = Exclude<
   | "StatisticalTestView"
   | "LinearRegressionForm"
   | "GroupStatistics"
-  | "ChartView"
+  | "PlotView"
 >;
 
 const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
@@ -85,12 +85,12 @@ const isGroupStatisticsWorkTab = (
   id: "work:GroupStatistics";
 } => tab.featureKey === "GroupStatistics";
 
-const isChartViewWorkTab = (
+const isPlotViewWorkTab = (
   tab: WorkspaceWorkTab,
 ): tab is WorkspaceWorkTab & {
-  featureKey: "ChartView";
-  id: "work:ChartView";
-} => tab.featureKey === "ChartView";
+  featureKey: "PlotView";
+  id: "work:PlotView";
+} => tab.featureKey === "PlotView";
 
 export const WorkspaceSurface = () => {
   const { t } = useTranslation();
@@ -340,9 +340,9 @@ export const WorkspaceSurface = () => {
       );
     }
 
-    if (isChartViewWorkTab(tab)) {
+    if (isPlotViewWorkTab(tab)) {
       return (
-        <ChartView
+        <PlotView
           workTabId={tab.id}
           onCancel={() => void handleCloseTab(tab.id)}
         />

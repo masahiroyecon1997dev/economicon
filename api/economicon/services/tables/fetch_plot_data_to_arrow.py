@@ -19,7 +19,7 @@ class FetchPlotDataToArrow:
     """
     指定列のみを Apache Arrow IPC 形式（生バイト）で取得するAPIクラス
 
-    グラフ描画に必要な列だけを選択して返すことで、メモリ使用量と
+    プロット描画に必要な列だけを選択して返すことで、メモリ使用量と
     転送量を削減する。レスポンスは JSON 包装なしの Arrow IPC 生バイナリ。
     メタデータ（tableName / columnNames / totalRows）は
     Arrow スキーマのカスタムメタデータとして埋め込む。
@@ -55,9 +55,7 @@ class FetchPlotDataToArrow:
         )
         validate_existence(
             value=self.column_names,
-            valid_list=self.tables_store.get_column_name_list(
-                self.table_name
-            ),
+            valid_list=self.tables_store.get_column_name_list(self.table_name),
             target=self.PARAM_NAMES["column_names"],
         )
         row_count = self.tables_store.get_table_row_count(self.table_name)
@@ -67,9 +65,7 @@ class FetchPlotDataToArrow:
                 message=_(
                     "Table '{}' has too many rows for plotting"
                     " ({} rows). The maximum is {} rows."
-                ).format(
-                    self.table_name, row_count, self.MAX_PLOT_ROWS
-                ),
+                ).format(self.table_name, row_count, self.MAX_PLOT_ROWS),
                 target=self.PARAM_NAMES["table_name"],
             )
 

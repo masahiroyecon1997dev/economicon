@@ -79,7 +79,7 @@
     "LinearRegressionMenu": "Linear Regression",
     "OrdinaryLeastSquares": "Ordinary Least Squares",
     "Visualization": "Visualization",
-    "ChartView": "Chart View",
+    "PlotView": "Plot View",
     "DistributionPreview": "Distribution Preview"
   },
   "LeftSideMenu": {
@@ -349,15 +349,15 @@
     "ErrorStatisticsRequired": "Please select at least 1 statistic",
     "ErrorOutputNameRequired": "Please enter an output table name"
   },
-  "ChartView": {
-    "Title": "Chart View",
-    "Description": "Visualize table data as scatter plot, histogram, or line chart.",
+  "PlotView": {
+    "Title": "Plot View",
+    "Description": "Visualize table data as scatter plot, histogram, or line plot.",
     "DataLabel": "Data",
     "SelectData": "Select data",
-    "ChartTypeLabel": "Chart Type",
-    "ChartTypeScatter": "Scatter",
-    "ChartTypeHistogram": "Histogram",
-    "ChartTypeLine": "Line",
+    "PlotTypeLabel": "Plot Type",
+    "PlotTypeScatter": "Scatter",
+    "PlotTypeHistogram": "Histogram",
+    "PlotTypeLine": "Line",
     "ColumnsLabel": "Axis Settings",
     "XColumnLabel": "X Axis",
     "XColumnPlaceholder": "Select column",
@@ -365,8 +365,8 @@
     "YColumnPlaceholder": "Select column",
     "YColumnsLabel": "Y Axis (multi-select)",
     "NoNumericColumns": "No numeric columns available",
-    "EmptyTitle": "Select columns to display chart",
-    "EmptyDescription": "Choose data and axis columns in the left panel to render a chart here.",
+    "EmptyTitle": "Select columns to display plot",
+    "EmptyDescription": "Choose data and axis columns in the left panel to render a plot here.",
     "EmptyNeedTable": "Select a dataset first",
     "EmptyNeedTableDesc": "Choose a table from the Data selector on the left panel.",
     "EmptyNeedXColumn": "Select the X-axis column",
@@ -374,8 +374,8 @@
     "EmptyNeedYColumn": "Select the Y-axis column",
     "EmptyNeedYColumnDesc": "Scatter plots require both X and Y axis columns.",
     "EmptyNeedYColumns": "Select at least one Y-axis column",
-    "EmptyNeedYColumnsDesc": "Line charts need at least one Y-axis column to render.",
-    "Loading": "Rendering chart..."
+    "EmptyNeedYColumnsDesc": "Line plots need at least one Y-axis column to render.",
+    "Loading": "Rendering plot..."
   },
   "AnalysisEmptyState": {
     "NoTablesTitle": "No analysis data available yet",
