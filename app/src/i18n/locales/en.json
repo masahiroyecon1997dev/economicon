@@ -73,13 +73,13 @@
     "BasicStatistics": "Basic Statistics",
     "CorrelationMatrix": "Correlation Matrix",
     "GroupStatistics": "Group Statistics",
-    "ChartView": "Chart View",
     "ConfidenceInterval": "Confidence Interval",
     "HypothesisTest": "Hypothesis Test",
     "Regression": "Regression",
     "LinearRegressionMenu": "Linear Regression",
     "OrdinaryLeastSquares": "Ordinary Least Squares",
     "Visualization": "Visualization",
+    "ChartView": "Chart View",
     "DistributionPreview": "Distribution Preview"
   },
   "LeftSideMenu": {

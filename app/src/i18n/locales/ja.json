@@ -73,13 +73,13 @@
     "BasicStatistics": "基本統計量",
     "CorrelationMatrix": "相関行列",
     "GroupStatistics": "グループ別統計量",
-    "ChartView": "グラフビュー",
     "ConfidenceInterval": "信頼区間",
     "HypothesisTest": "仮説検定",
     "Regression": "回帰分析",
     "LinearRegressionMenu": "線形回帰",
     "OrdinaryLeastSquares": "最小二乗法",
     "Visualization": "可視化",
+    "ChartView": "グラフビュー",
     "DistributionPreview": "分布プレビュー"
   },
   "LeftSideMenu": {

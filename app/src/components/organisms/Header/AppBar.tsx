@@ -252,12 +252,6 @@ export const AppBar = () => {
           handleSelect: () =>
             handleOpenWorkTab("CalculationView", t("HeaderMenu.Calculate")),
         },
-        {
-          id: "chart-view",
-          label: t("HeaderMenu.ChartView"),
-          handleSelect: () =>
-            handleOpenWorkTab("ChartView", t("HeaderMenu.ChartView")),
-        },
       ],
     },
     {
@@ -400,6 +394,12 @@ export const AppBar = () => {
       isOpen: openMenuId === "visualization",
       onClose: close,
       items: [
+        {
+          id: "chart-view",
+          label: t("HeaderMenu.ChartView"),
+          handleSelect: () =>
+            handleOpenWorkTab("ChartView", t("HeaderMenu.ChartView")),
+        },
         {
           id: "distribution-preview",
           label: t("HeaderMenu.DistributionPreview"),
