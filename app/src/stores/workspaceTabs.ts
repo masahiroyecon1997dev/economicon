@@ -30,7 +30,8 @@ export type WorkFeatureKey =
   | "LinearRegressionForm"
   | "CorrelationMatrix"
   | "GroupStatistics"
-  | "ChartView";
+  | "ChartView"
+  | "DistributionPreview";
 
 export type WorkspaceWorkTab = {
   id: `work:${WorkFeatureKey}`;
@@ -56,7 +57,11 @@ type WorkspaceTabsState = {
 type WorkspaceTabsActions = {
   openDataTab: (tableName: string) => void;
   openResultTab: (detail: AnalysisResultDetail) => void;
-  openWorkTab: (featureKey: WorkFeatureKey, title: string) => string;
+  openWorkTab: (
+    featureKey: WorkFeatureKey,
+    title: string,
+    initialValues?: unknown,
+  ) => string;
   closeActiveWorkTab: () => void;
   moveTab: (tabId: string, targetIndex: number) => void;
   setWorkTabDirty: (tabId: string, dirty: boolean) => void;
@@ -275,7 +280,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set, get) => ({
       };
     }),
 
-  openWorkTab: (featureKey, title) => {
+  openWorkTab: (featureKey, title, initialValues) => {
     const tabId = toWorkTabId(featureKey);
     set((state) => {
       const existingIndex = state.tabs.findIndex((tab) => tab.id === tabId);
@@ -291,18 +296,19 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set, get) => ({
         };
       }
 
+      const newTab: WorkspaceWorkTab = {
+        id: tabId,
+        kind: "work",
+        title,
+        featureKey,
+        dirty: false,
+        createdAt: Date.now(),
+      };
+      if (initialValues !== undefined) {
+        newTab.draftValues = cloneWorkTabValues(initialValues);
+      }
       return {
-        tabs: [
-          ...state.tabs,
-          {
-            id: tabId,
-            kind: "work" as const,
-            title,
-            featureKey,
-            dirty: false,
-            createdAt: Date.now(),
-          },
-        ],
+        tabs: [...state.tabs, newTab],
         activeTabId: tabId,
       };
     });
