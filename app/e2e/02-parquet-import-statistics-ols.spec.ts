@@ -17,10 +17,13 @@
 
 import { expect, test } from "@playwright/test";
 import {
+  cleanupE2EOutputDir,
   clearWorkspaceFromUi,
   clickHeaderMenu,
   closeMessageDialog,
+  ensureE2EOutputDir,
   importFile,
+  navigateFileBrowserToDir,
   navigateToSampleDir,
 } from "./helpers/appHelpers";
 import { setupTauriApp } from "./helpers/setupHelpers";
@@ -34,10 +37,20 @@ const TABLE_NAME = "grunfeld";
 const DEPENDENT_VAR = "invest";
 const EXPLANATORY_VARS = ["value", "capital"];
 
+const OUTPUT_DIR_NAME = "02-parquet-ols";
+let outputDirPath = "";
+
 // ---------------------------------------------------------------------------
 // テストスイート
 // ---------------------------------------------------------------------------
 test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
+  test.beforeAll(async () => {
+    outputDirPath = await ensureE2EOutputDir(OUTPUT_DIR_NAME);
+  });
+
+  test.afterAll(async () => {
+    await cleanupE2EOutputDir(outputDirPath);
+  });
   // =========================================================================
   // STEP 1: Parquet ファイルをインポート
   // =========================================================================
@@ -174,51 +187,30 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
     await tableOption.waitFor({ state: "visible" });
     await tableOption.click();
 
-    // ---- 被説明変数を選択 ----
-    // 「被説明変数」というラベルの隣の combobox
+    // ---- 被説明変数を選択（Select コンポーネント / id="dependent-variable"）----
     await expect(
       page.getByText(/列情報を読み込んでいます|Loading/i),
     ).toBeHidden({ timeout: 15_000 });
 
-    const dependentSection = page
-      .locator("div")
-      .filter({ hasText: /^被説明変数|Dependent Variable/ })
-      .last();
-    const dependentRadio = dependentSection.getByRole("radio").first();
-    await dependentRadio.click();
-    const dependentOption = page.getByRole("radio", {
+    const dependentSelect = page.getByLabel(/被説明変数|Dependent Variable/i);
+    await dependentSelect.click();
+    const dependentOption = page.getByRole("option", {
       name: DEPENDENT_VAR,
       exact: true,
     });
     await dependentOption.waitFor({ state: "visible" });
     await dependentOption.click();
 
-    // ---- 説明変数を選択（value, capital）----
-    const explanatorySection = page
-      .locator("div")
-      .filter({ hasText: /^説明変数|Explanatory Variables/ })
-      .last();
-
+    // ---- 説明変数を選択（VariableSelectorField のチェックボックス）----
     for (const varName of EXPLANATORY_VARS) {
-      const varCheckbox = explanatorySection.getByRole("checkbox", {
+      const varCheckbox = page.getByRole("checkbox", {
         name: varName,
+        exact: true,
       });
-      if (await varCheckbox.isVisible()) {
-        if (!(await varCheckbox.isChecked())) {
-          await varCheckbox.click();
-        }
-      } else {
-        // combobox 形式の場合
-        const triggerBtn = explanatorySection.getByRole("button").last();
-        await triggerBtn.click();
-        const option = page.getByRole("option", { name: varName, exact: true });
-        await option.waitFor({ state: "visible" });
-        await option.click();
+      if (!(await varCheckbox.isChecked())) {
+        await varCheckbox.click();
       }
     }
-
-    // Dropdown を閉じる
-    await page.keyboard.press("Escape");
 
     // ---- 分析実行 ----
     await page.getByRole("button", { name: /分析実行|Run Analysis/i }).click();
@@ -266,6 +258,9 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
     await expect(
       page.getByRole("heading", { name: /データを保存|Save Data/i }),
     ).toBeVisible();
+
+    // 保存先ディレクトリへ移動
+    await navigateFileBrowserToDir(page, outputDirPath);
 
     // データ名を選択
     const tableNameSelect = page.getByLabel(/保存するデータ|Data to Save/i);

@@ -11,7 +11,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import { mkdir, rm } from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 // ---------------------------------------------------------------------------
@@ -29,9 +28,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const SAMPLE_DIR =
   process.env.ECONOMICON_TEST_SAMPLE_DIR ??
-  path.resolve(__dirname, "../../sample");
+  path.resolve(__dirname, "../../../sample");
 
-export const E2E_OUTPUT_ROOT = path.join(os.tmpdir(), "economicon-e2e-exports");
+export const E2E_OUTPUT_ROOT = path.join(SAMPLE_DIR, "output");
 
 /** ローディングオーバーレイが消えるまでの最大待機時間 (ms) */
 const LOADING_TIMEOUT_MS = 90_000;
