@@ -441,8 +441,13 @@ export const SettingsDialog = ({
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
-      document.documentElement.classList.toggle("dark", theme === "dark");
-      void i18n.changeLanguage(language);
+      const currentTheme = useSettingsStore.getState().theme;
+      const currentLanguage = useSettingsStore.getState().language;
+      document.documentElement.classList.toggle(
+        "dark",
+        currentTheme === "dark",
+      );
+      void i18n.changeLanguage(currentLanguage);
     }
     onOpenChange(nextOpen);
   };

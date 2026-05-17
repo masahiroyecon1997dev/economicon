@@ -4,12 +4,13 @@ import {
   getOsInfo,
 } from "@/api/bridge/tauri-commands";
 import { getEconomiconAppAPI } from "@/api/endpoints";
+import i18n from "@/i18n/config";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useCurrentPageStore } from "@/stores/currentPage";
 import { useLoadingStore } from "@/stores/loading";
 import { useSettingsStore } from "@/stores/settings";
 import { useTableListStore } from "@/stores/tableList";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ConfirmDialog } from "@/components/molecules/Dialog/ConfirmDialog";
@@ -34,6 +35,7 @@ export const App = () => {
   const setFiles = useFilesStore((state) => state.setFiles);
   const { isLoading, loadingMessage } = useLoadingStore();
   const { setLoading, clearLoading } = useLoadingStore();
+  const initialized = useRef(false);
 
   // テーマを <html> の class に反映する（Tailwind dark:プレフィックスを有効化）
   const theme = useSettingsStore((state) => state.theme);
@@ -43,9 +45,8 @@ export const App = () => {
 
   useEffect(() => {
     // Strict Mode対応: 初期化が既に実行されている場合はスキップ
-    // if (initialized.current) return;
-
-    let isMounted = true;
+    if (initialized.current) return;
+    initialized.current = true;
 
     // FastAPI サイドカーが起動するまで最大2分ポーリングする（1秒に1回）
     const waitForServer = async (
@@ -79,6 +80,7 @@ export const App = () => {
     };
 
     const initialize = async () => {
+      console.log("Initializing app...");
       const api = getEconomiconAppAPI();
       setLoading(true, t("Loading.Launching"));
       try {
@@ -92,23 +94,18 @@ export const App = () => {
         // RustからOS情報を取得（ファイルシステム認識のため最初に取得）
         const osInfo = await getOsInfo();
 
-        if (isMounted) setOsInfo(osInfo);
+        setOsInfo(osInfo);
 
         // FastAPI サーバーが起動するまで待機
-        if (isMounted) setLoading(true, t("Loading.ConnectingServer"));
+        setLoading(true, t("Loading.ConnectingServer"));
         await waitForServer(api);
 
         // 設定を取得
-        if (isMounted) setLoading(true, t("Loading.Processing"));
+        setLoading(true, t("Loading.Processing"));
         const resGetSettings = await api.getSettings();
         if (resGetSettings.code !== "OK") {
-          if (isMounted) {
-            clearLoading();
-            await showMessageDialog(
-              t("Error.Error"),
-              t("Error.UnexpectedError"),
-            );
-          }
+          clearLoading();
+          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
           return;
         }
         // GetSettingsResultをアプリのSettingsType形式にマッピング
@@ -119,42 +116,30 @@ export const App = () => {
         // テーブル名一覧を取得
         const resGetTableNames = await api.getTableList();
         if (resGetTableNames.code !== "OK") {
-          if (isMounted) {
-            clearLoading();
-            await showMessageDialog(
-              t("Error.Error"),
-              t("Error.UnexpectedError"),
-            );
-          }
+          clearLoading();
+          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
           return;
         }
         // 全て成功した場合のみストアを更新
-        if (isMounted) {
-          setSettings(apiSettings);
-          navigateToShell("ImportDataFile");
-          setTableList(resGetTableNames.result.tableNameList);
-          setFiles(files);
-          clearLoading();
-        }
+        setSettings(apiSettings);
+        void i18n.changeLanguage(apiSettings.language);
+        navigateToShell("ImportDataFile");
+        setTableList(resGetTableNames.result.tableNameList);
+        setFiles(files);
+        clearLoading();
       } catch (error) {
         console.error("App initialization error:", error);
-        if (isMounted) {
-          clearLoading();
-          const isTimeout =
-            error instanceof Error && error.message === "SERVER_TIMEOUT";
-          await showMessageDialog(
-            t("Error.Error"),
-            isTimeout ? t("Loading.ServerTimeout") : t("Error.UnexpectedError"),
-          );
-        }
+        clearLoading();
+        const isTimeout =
+          error instanceof Error && error.message === "SERVER_TIMEOUT";
+        await showMessageDialog(
+          t("Error.Error"),
+          isTimeout ? t("Loading.ServerTimeout") : t("Error.UnexpectedError"),
+        );
       }
     };
 
     initialize();
-
-    return () => {
-      isMounted = false;
-    };
   }, [
     clearLoading,
     navigateToShell,
