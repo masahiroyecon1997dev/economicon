@@ -146,11 +146,12 @@ jobs:
 
           Copy-Item (Join-Path $RUNTIME_DIR "python.exe") -Destination (Join-Path $BINARIES_DIR "python-x86_64-pc-windows-msvc.exe") -Force
 
+          $SITE_PACKAGES_DIR_ABS = (Resolve-Path $SITE_PACKAGES_DIR).Path
           Push-Location "api"
           try {
             uv export --frozen --no-dev --no-hashes --no-annotate --quiet --output-file $REQ_FILE_TMP
             uv python install $PYTHON_VERSION
-            uv pip install --python $PYTHON_VERSION --target (Resolve-Path $SITE_PACKAGES_DIR) --no-cache -r $REQ_FILE_TMP
+            uv pip install --python $PYTHON_VERSION --target $SITE_PACKAGES_DIR_ABS --no-cache -r $REQ_FILE_TMP
           }
           finally {
             Pop-Location
