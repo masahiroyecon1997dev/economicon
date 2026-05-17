@@ -1028,5 +1028,21 @@
     "TrueBetaLabel": "真の値 β",
     "ProbabilityLimitLabel": "確率極限",
     "XAxisLabel": "サンプルサイズ n"
+  },
+  "Unbiasedness": {
+    "Title": "不偏性シミュレーション",
+    "Description": "OLS 推定量の不偏性：試行平均 E[β̂] が真の値 β に一致することを確認する",
+    "NumTrials": "試行回数 M",
+    "SampleSize": "サンプルサイズ n",
+    "TrueBeta": "真の回帰係数 β",
+    "ErrorVariance": "誤差分散 σ²",
+    "AdvancedSettings": "詳細設定",
+    "XMean": "X 母平均 μ",
+    "XVariance": "X 母分散 σ²",
+    "Loading": "シミュレーション実行中...",
+    "TrueBetaLabel": "真の値 β",
+    "RunningMeanLabel": "試行平均 E[β̂]",
+    "YAxisCount": "回数",
+    "XAxisTrials": "試行数"
   }
 }

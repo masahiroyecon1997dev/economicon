@@ -1028,5 +1028,21 @@
     "TrueBetaLabel": "True β",
     "ProbabilityLimitLabel": "Probability limit",
     "XAxisLabel": "Sample size n"
+  },
+  "Unbiasedness": {
+    "Title": "Unbiasedness Simulation",
+    "Description": "Unbiasedness of the OLS estimator: verifies that the average estimate E[β̂] matches the true value β",
+    "NumTrials": "Number of trials M",
+    "SampleSize": "Sample size n",
+    "TrueBeta": "True coefficient β",
+    "ErrorVariance": "Error variance σ²",
+    "AdvancedSettings": "Advanced settings",
+    "XMean": "X mean μ",
+    "XVariance": "X variance σ²",
+    "Loading": "Running simulation...",
+    "TrueBetaLabel": "True β",
+    "RunningMeanLabel": "Running mean E[β̂]",
+    "YAxisCount": "Count",
+    "XAxisTrials": "Trial"
   }
 }
