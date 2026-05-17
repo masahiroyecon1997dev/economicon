@@ -90,14 +90,15 @@
 
 #### リクエスト `AsymptoticNormalityRequestBody`
 
-| フィールド        | 型                                         | 制約        | デフォルト                   | 説明                                                |
-| ----------------- | ------------------------------------------ | ----------- | ---------------------------- | --------------------------------------------------- |
-| `sample_size`     | `Literal[10, 20, 30, 50, 100, 1000]`       | -           | 100                          | サンプルサイズ n                                    |
-| `num_simulations` | `int`                                      | 10 〜 2000  | 1000                         | シミュレーション回数                                |
-| `true_beta`       | `float`                                    | -3.0 〜 3.0 | 1.0                          | 真の回帰係数 β                                      |
-| `error_variance`  | `float`                                    | 0.1 〜 10.0 | 1.0                          | 誤差項の分散 σ²（`error_type="normal"` 時のみ使用） |
-| `error_type`      | `"normal"` \| `"cauchy"` \| `"endogenous"` | -           | `"normal"`                   | 誤差分布の種類                                      |
-| `x_distribution`  | `XDistributionParams`                      | -           | `{x_mean: 0, x_variance: 1}` | 説明変数 x の分布                                   |
+| フィールド             | 型                                         | 制約        | デフォルト                   | 説明                                                   |
+| ---------------------- | ------------------------------------------ | ----------- | ---------------------------- | ------------------------------------------------------ |
+| `sample_size`          | `Literal[10, 20, 30, 50, 100, 1000]`       | -           | 100                          | サンプルサイズ n                                       |
+| `num_simulations`      | `int`                                      | 10 〜 2000  | 1000                         | シミュレーション回数                                   |
+| `true_beta`            | `float`                                    | -3.0 〜 3.0 | 1.0                          | 真の回帰係数 β                                         |
+| `error_variance`       | `float`                                    | 0.1 〜 10.0 | 1.0                          | 誤差項の分散 σ²（`error_type="normal"` 時のみ使用）    |
+| `error_type`           | `"normal"` \| `"cauchy"` \| `"endogenous"` | -           | `"normal"`                   | 誤差分布の種類                                         |
+| `endogeneity_strength` | `float`                                    | 0.1 〜 3.0  | 1.0                          | 内生性の強さ γ（`error_type="endogenous"` 時のみ使用） |
+| `x_distribution`       | `XDistributionParams`                      | -           | `{x_mean: 0, x_variance: 1}` | 説明変数 x の分布                                      |
 
 #### レスポンス `SuccessResponse[AsymptoticNormalityResult]`
 
@@ -111,13 +112,13 @@
 
 #### 計算仕様
 
-| `error_type`   | 生成式                                                       | `is_asymptotically_normal` | `asymptotic_mean` | `asymptotic_variance`   |
-| -------------- | ------------------------------------------------------------ | -------------------------- | ----------------- | ----------------------- |
-| `"normal"`     | ε_i ~ N(0, σ²)                                               | `true`                     | `true_beta`       | σ² / (n · Var(x))       |
-| `"cauchy"`     | ε_i ~ Cauchy(0, 1)                                           | `false`                    | `None`            | `None`                  |
-| `"endogenous"` | z_i ~ N(0,1)、x_i = z_i + v_i、ε_i = z_i + η_i (η_i~N(0,σ²)) | `true`                     | `true_beta + 0.5` | σ²_total / (n · Var(x)) |
+| `error_type`   | 生成式                                                         | `is_asymptotically_normal` | `asymptotic_mean` | `asymptotic_variance` |
+| -------------- | -------------------------------------------------------------- | -------------------------- | ----------------- | --------------------- |
+| `"normal"`     | ε_i ~ N(0, σ²)                                                 | `true`                     | `true_beta`       | σ² / (n · Var(x))     |
+| `"cauchy"`     | ε_i ~ Cauchy(0, 1)                                             | `false`                    | `None`            | `None`                |
+| `"endogenous"` | z_i ~ N(0,1)、x_i = z_i + v_i、ε_i = γ·z_i + η_i (η_i~N(0,σ²)) | `true`                     | `true_beta + γ/2` | (γ²+σ²) / (2n)        |
 
-内生性モデルの詳細: z_i ~ N(0,1)、v_i ~ N(0,1)（x と独立）、η_i ~ N(0, σ²)（v, z と独立）。OLS の確率極限は `β + Cov(x,z)/Var(x) = β + 1/2`。
+内生性モデルの詳細: z_i ~ N(0,1)、v_i ~ N(0,1)（x と独立）、η_i ~ N(0, σ²)（v, z と独立）。γ = `endogeneity_strength`。OLS の確率極限は `β + γ·Cov(x,z)/Var(x) = β + γ/2`。
 
 ---
 
@@ -127,13 +128,14 @@
 
 #### リクエスト `ConsistencyRequestBody`
 
-| フィールド       | 型                    | 制約        | デフォルト                   | 説明                                 |
-| ---------------- | --------------------- | ----------- | ---------------------------- | ------------------------------------ |
-| `n_max`          | `int`                 | 50 〜 5000  | 500                          | 最大サンプルサイズ                   |
-| `true_beta`      | `float`               | -3.0 〜 3.0 | 1.0                          | 真の回帰係数 β                       |
-| `error_variance` | `float`               | 0.1 〜 10.0 | 1.0                          | 誤差項の分散 σ²                      |
-| `endogenous`     | `bool`                | -           | `false`                      | 内生性ありかどうか（省略変数モデル） |
-| `x_distribution` | `XDistributionParams` | -           | `{x_mean: 0, x_variance: 1}` | 説明変数 x の分布                    |
+| フィールド             | 型                    | 制約        | デフォルト                   | 説明                                           |
+| ---------------------- | --------------------- | ----------- | ---------------------------- | ---------------------------------------------- |
+| `n_max`                | `int`                 | 50 〜 5000  | 500                          | 最大サンプルサイズ                             |
+| `true_beta`            | `float`               | -3.0 〜 3.0 | 1.0                          | 真の回帰係数 β                                 |
+| `error_variance`       | `float`               | 0.1 〜 10.0 | 1.0                          | 誤差項の分散 σ²                                |
+| `endogenous`           | `bool`                | -           | `false`                      | 内生性ありかどうか（省略変数モデル）           |
+| `endogeneity_strength` | `float`               | 0.1 〜 3.0  | 1.0                          | 内生性の強さ γ（`endogenous=true` 時のみ使用） |
+| `x_distribution`       | `XDistributionParams` | -           | `{x_mean: 0, x_variance: 1}` | 説明変数 x の分布                              |
 
 #### レスポンス `SuccessResponse[ConsistencyResult]`
 
@@ -142,12 +144,12 @@
 | `n_values`          | `list[int]`   | サンプルサイズの系列（2, 3, ..., n_max）                                         |
 | `beta_estimates`    | `list[float]` | 各 n での OLS 推定値 β̂                                                           |
 | `true_beta`         | `float`       | 真の値 β（グラフの水平破線）                                                     |
-| `probability_limit` | `float`       | 推定量の確率極限（外生性成立なら `true_beta`、内生性ありなら `true_beta + 0.5`） |
+| `probability_limit` | `float`       | 推定量の確率極限（外生性成立なら `true_beta`、内生性ありなら `true_beta + γ/2`） |
 
 #### 計算仕様
 
 - n_max のデータを 1 回生成し、n=2, 3, ..., n_max の各サイズで OLS を実行（累積推定）
-- `endogenous=true` の場合: z_i ~ N(0,1)、x_i = z_i + v_i (v_i~N(0,1))、y_i = α + β·x_i + z_i + η_i (η_i~N(0,σ²))
+- `endogenous=true` の場合: z_i ~ N(0,1)、x_i = z_i + v_i (v_i~N(0,1))、y_i = α + β·x_i + γ·z_i + η_i (η_i~N(0,σ²))、γ = `endogeneity_strength`
 
 ---
 
