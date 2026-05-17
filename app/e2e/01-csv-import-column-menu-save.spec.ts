@@ -407,10 +407,8 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
 
     // サイドバーに新しい名前が表示されること
     await expect(
-      page
-        .getByTestId(`left-menu-table-item-${TABLE_NAME}_v2`)
-        .locator(`span[title="${TABLE_NAME}_v2"]`),
-    ).toBeVisible();
+      page.getByTestId(`left-menu-table-item-${TABLE_NAME}_v2`),
+    ).toContainText(`${TABLE_NAME}_v2`);
   });
 
   // =========================================================================
@@ -438,8 +436,8 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
 
     // サイドバーに複製データが追加されること
     await expect(
-      page.getByRole("navigation").locator(`span[title="${TABLE_NAME}_copy"]`),
-    ).toBeVisible();
+      page.getByTestId(`left-menu-table-item-${TABLE_NAME}_copy`),
+    ).toContainText(`${TABLE_NAME}_copy`);
   });
 
   // =========================================================================
@@ -464,9 +462,7 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
     await expect(dialog).toBeHidden();
 
     // サイドバーから複製データが消えること
-    await expect(
-      page.getByRole("navigation").locator(`span[title="${copyName}"]`),
-    ).toBeHidden();
+    await expect(page.getByRole("navigation").getByText(copyName)).toBeHidden();
   });
 
   // =========================================================================
