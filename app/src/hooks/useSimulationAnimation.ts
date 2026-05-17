@@ -8,7 +8,7 @@ export const SPEED_INTERVAL_MS: Record<AnimationSpeed, number> = {
   fast: 20,
 };
 
-type AnimState = { frame: number; playing: boolean };
+type AnimState = { frame: number; playing: boolean; syncedTotal: number };
 
 /**
  * シミュレーション・アニメーション共通ロジック。
@@ -21,9 +21,10 @@ export const useSimulationAnimation = (
   totalFrames: number,
   speed: AnimationSpeed,
 ) => {
-  const [{ frame, playing }, setAnimState] = useState<AnimState>({
+  const [{ frame, playing, syncedTotal }, setAnimState] = useState<AnimState>({
     frame: 0,
     playing: false,
+    syncedTotal: totalFrames,
   });
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -32,8 +33,11 @@ export const useSimulationAnimation = (
   /** stale closure を避けるため最新総フレーム数を ref で管理 */
   const totalRef = useRef(totalFrames);
 
-  // totalRef をレンダー中に直接更新（useEffect 不要）
-  totalRef.current = totalFrames;
+  // totalFrames 変化時はレンダー中に状態をリセット（getDerivedStateFromProps パターン）
+  // effect 内の setState による cascading render を回避する
+  if (syncedTotal !== totalFrames) {
+    setAnimState({ frame: 0, playing: false, syncedTotal: totalFrames });
+  }
 
   const clear = useCallback(() => {
     if (intervalRef.current !== null) {
@@ -42,12 +46,11 @@ export const useSimulationAnimation = (
     }
   }, []);
 
-  // totalFrames が変わったらリセット（新しいシミュレーション結果受信）
-  // setState は1回のみ → cascading render を回避
+  // totalFrames 変化後の ref 同期とインターバルクリア（setState は行わない）
   useEffect(() => {
+    totalRef.current = totalFrames;
     clear();
     frameRef.current = 0;
-    setAnimState({ frame: 0, playing: false });
   }, [totalFrames, clear]);
 
   // playing / speed が変わったらインターバルを再起動
@@ -63,7 +66,7 @@ export const useSimulationAnimation = (
       if (next >= totalRef.current) {
         clearInterval(intervalRef.current!);
         intervalRef.current = null;
-        setAnimState({ frame: next, playing: false });
+        setAnimState((prev) => ({ ...prev, frame: next, playing: false }));
       } else {
         setAnimState((prev) => ({ ...prev, frame: next }));
       }
@@ -86,7 +89,7 @@ export const useSimulationAnimation = (
   const reset = useCallback(() => {
     clear();
     frameRef.current = 0;
-    setAnimState({ frame: 0, playing: false });
+    setAnimState((prev) => ({ ...prev, frame: 0, playing: false }));
   }, [clear]);
 
   return { frame, playing, play, pause, reset };
