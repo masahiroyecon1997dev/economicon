@@ -72,7 +72,20 @@ export const DistributionPreview = () => {
     [selectedType, params],
   );
 
-  const { loading, error, result } = useDistributionPreview(distribution);
+  const paramValidationError = useMemo<string | null>(() => {
+    if (selectedType === "uniform") {
+      const low = params.low ?? 0;
+      const high = params.high ?? 1;
+      if (low >= high) {
+        return t("DistributionPreview.UniformLowMustBeLessThanHigh");
+      }
+    }
+    return null;
+  }, [selectedType, params, t]);
+
+  const { loading, error, result } = useDistributionPreview(
+    paramValidationError ? null : distribution,
+  );
 
   const plotDivRef = useRef<HTMLDivElement>(null);
 
@@ -261,7 +274,7 @@ export const DistributionPreview = () => {
         <PlotPanel
           plotRef={plotDivRef}
           loading={loading}
-          error={error}
+          error={paramValidationError ?? error}
           hasData={!!result}
           loadingText={t("DistributionPreview.Loading")}
           testId="distribution-preview-plot-area"

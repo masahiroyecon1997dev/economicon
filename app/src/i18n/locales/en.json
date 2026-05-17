@@ -862,7 +862,8 @@
     "YAxisProbability": "Probability",
     "YAxisCumulative": "Cumulative Probability",
     "Loading": "Computing distribution...",
-    "ErrorTitle": "Preview Error"
+    "ErrorTitle": "Preview Error",
+    "UniformLowMustBeLessThanHigh": "For uniform distribution, the minimum must be less than the maximum"
   },
   "FilterColumnForm": {
     "Title": "Filter",

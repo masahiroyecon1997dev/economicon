@@ -862,7 +862,8 @@
     "YAxisProbability": "確率",
     "YAxisCumulative": "累積確率",
     "Loading": "分布を計算しています...",
-    "ErrorTitle": "プレビューエラー"
+    "ErrorTitle": "プレビューエラー",
+    "UniformLowMustBeLessThanHigh": "一様分布では最小値は最大値より小さくなければなりません"
   },
   "FilterColumnForm": {
     "Title": "フィルタ",
