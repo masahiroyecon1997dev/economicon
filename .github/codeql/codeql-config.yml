@@ -1,0 +1,7 @@
+name: "CodeQL custom configuration"
+
+# 💡 スキャン対象から完全に除外するパスを指定する
+paths-ignore:
+  - "app/src/api/zod/**"
+  - "app/src/api/model/**"
+  - "app/src/api/endpoints.ts"
