@@ -171,7 +171,7 @@ export const App = () => {
       <div className="flex h-screen flex-col overflow-hidden bg-white dark:bg-gray-900">
         <AppBar />
         <PanelGroup orientation="horizontal" className="flex-1 overflow-hidden">
-          <Panel defaultSize={256} minSize={160} maxSize={480}>
+          <Panel defaultSize={"15rem"} minSize={"12rem"} maxSize={"27rem"}>
             <LeftSideMenu />
           </Panel>
           <PanelResizeHandle className="w-1 cursor-col-resize bg-brand-border/50 transition-colors hover:bg-white/20 focus:outline-none" />
