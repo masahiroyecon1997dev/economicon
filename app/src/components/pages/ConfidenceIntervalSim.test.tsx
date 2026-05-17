@@ -20,7 +20,15 @@ const { mockUseConfidenceIntervalSim } = vi.hoisted(() => ({
     (_params: ConfidenceIntervalSimRequestBody) => ({
       loading: false,
       error: null as string | null,
-      result: null,
+      result: null as {
+        trueValue: number;
+        confidenceLevel: number;
+        intervals: {
+          lower: number;
+          upper: number;
+          containsTrue: boolean;
+        }[];
+      } | null,
     }),
   ),
 }));
@@ -40,7 +48,15 @@ beforeEach(() => {
     (_params: ConfidenceIntervalSimRequestBody) => ({
       loading: false,
       error: null as string | null,
-      result: null,
+      result: null as {
+        trueValue: number;
+        confidenceLevel: number;
+        intervals: {
+          lower: number;
+          upper: number;
+          containsTrue: boolean;
+        }[];
+      } | null,
     }),
   );
 });
