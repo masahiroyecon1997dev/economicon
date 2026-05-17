@@ -1,6 +1,7 @@
 import type { DistributionConfig } from "@/api/model";
-import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
 import { RadioTagGroup } from "@/components/molecules/Field/RadioTagGroup";
+import { SimParamSlider } from "@/components/molecules/Field/SimParamSlider";
+import { PlotPanel } from "@/components/molecules/Loading/PlotPanel";
 import {
   Tabs,
   TabsContent,
@@ -17,10 +18,8 @@ import {
   DIST_PARAMS,
 } from "@/constants/simulation";
 import { useDistributionPreview } from "@/hooks/useDistributionPreview";
-import { cn } from "@/lib/utils/helpers";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { DistributionType } from "@/types/commonTypes";
-import { Loader2 } from "lucide-react";
 import type { Config, Layout } from "plotly.js";
 import * as Plotly from "plotly.js-dist-min";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -225,34 +224,19 @@ export const DistributionPreview = () => {
               const labelKey = DIST_PARAM_LABEL_KEYS[key];
               const label = labelKey ? t(labelKey) : key;
               return (
-                <div key={key} className="flex flex-col gap-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-text-main/80">{label}</span>
-                    <span
-                      className="font-mono text-brand-accent"
-                      data-testid={`param-value-${key}`}
-                    >
-                      {value}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min={range.min}
-                    max={max}
-                    step={range.step}
-                    value={value}
-                    className="w-full accent-brand-accent"
-                    data-testid={`param-slider-${key}`}
-                    onChange={(e) => {
-                      const next = parseFloat(e.target.value);
-                      setParams((prev) => ({ ...prev, [key]: next }));
-                    }}
-                  />
-                  <div className="flex justify-between text-xs text-text-main/40">
-                    <span>{range.min}</span>
-                    <span>{max}</span>
-                  </div>
-                </div>
+                <SimParamSlider
+                  key={key}
+                  label={label}
+                  min={range.min}
+                  max={max}
+                  step={range.step}
+                  value={value}
+                  onChange={(next) =>
+                    setParams((prev) => ({ ...prev, [key]: next }))
+                  }
+                  sliderTestId={`param-slider-${key}`}
+                  valueTestId={`param-value-${key}`}
+                />
               );
             })}
           </div>
@@ -274,35 +258,15 @@ export const DistributionPreview = () => {
         </div>
 
         {/* 右ペイン: プロット */}
-        <div
-          className="relative flex items-center justify-center"
-          data-testid="distribution-preview-plot-area"
-        >
-          {loading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-bg-base/60 z-10">
-              <Loader2 className="h-6 w-6 animate-spin text-brand-accent" />
-              <span className="text-sm text-text-main/60">
-                {t("DistributionPreview.Loading")}
-              </span>
-            </div>
-          )}
-
-          {error && !loading && (
-            <div className="w-full max-w-sm">
-              <ErrorAlert message={error} />
-            </div>
-          )}
-
-          <div
-            ref={plotDivRef}
-            className={cn(
-              "w-full h-full",
-              (!result || !!error) && "hidden",
-              loading && "opacity-30",
-            )}
-            data-testid="distribution-preview-plot"
-          />
-        </div>
+        <PlotPanel
+          plotRef={plotDivRef}
+          loading={loading}
+          error={error}
+          hasData={!!result}
+          loadingText={t("DistributionPreview.Loading")}
+          testId="distribution-preview-plot-area"
+          plotTestId="distribution-preview-plot"
+        />
       </div>
     </PageLayout>
   );

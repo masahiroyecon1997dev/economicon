@@ -975,5 +975,14 @@
       "Label": "Log file path",
       "NotSet": "(not set)"
     }
+  },
+  "AnimationControls": {
+    "Play": "Play",
+    "Pause": "Pause",
+    "Reset": "Reset",
+    "SpeedSlow": "Slow",
+    "SpeedNormal": "Normal",
+    "SpeedFast": "Fast",
+    "SpeedLabel": "Speed"
   }
 }

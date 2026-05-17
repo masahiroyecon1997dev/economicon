@@ -975,5 +975,14 @@
       "Label": "ログファイルのパス",
       "NotSet": "（未設定）"
     }
+  },
+  "AnimationControls": {
+    "Play": "再生",
+    "Pause": "一時停止",
+    "Reset": "リセット",
+    "SpeedSlow": "遅",
+    "SpeedNormal": "普通",
+    "SpeedFast": "速",
+    "SpeedLabel": "速度"
   }
 }
