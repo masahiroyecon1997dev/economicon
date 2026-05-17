@@ -118,5 +118,49 @@ describe("ConfidenceIntervalSim", () => {
 
       expect(screen.getByTestId("true-variance-slider")).toBeInTheDocument();
     });
+
+    it("test_ciType_variance_hookCalledWithVariance: variance タブ切り替え後 hook が ciType='variance' で呼ばれる", async () => {
+      const user = userEvent.setup();
+      render(<ConfidenceIntervalSim />);
+      mockUseConfidenceIntervalSim.mockClear();
+
+      await user.click(screen.getByText("ConfidenceIntervalSim.TabVariance"));
+
+      expect(mockUseConfidenceIntervalSim).toHaveBeenCalledWith(
+        expect.objectContaining({ ciType: "variance" }),
+      );
+    });
+  });
+
+  describe("カウンター表示", () => {
+    it("test_counterLabel_formattedCorrectly: result ありの場合 counterLabel が k/M (xx.x%) 形式で表示される", () => {
+      mockUseConfidenceIntervalSim.mockReturnValue({
+        loading: false,
+        error: null,
+        result: {
+          trueValue: 0.0,
+          confidenceLevel: 0.95,
+          intervals: [
+            { lower: -0.3, upper: 0.4, containsTrue: true },
+            { lower: 0.1, upper: 0.8, containsTrue: false },
+          ],
+        },
+      });
+
+      render(<ConfidenceIntervalSim />);
+
+      // frame=0, totalFrames=2, intervals[0].containsTrue=true → coverage=100.0%
+      expect(screen.getByTestId("animation-counter")).toHaveTextContent(
+        "1/2 (100.0%)",
+      );
+    });
+
+    it("test_counterLabel_undefined_whenNoResult: result なしではデフォルト表示（0 / 0）になり % 表示はない", () => {
+      render(<ConfidenceIntervalSim />);
+      // result=null のとき counterLabel=undefined → AnimationControls は "0 / 0" を表示
+      const counter = screen.getByTestId("animation-counter");
+      expect(counter).toHaveTextContent("0 / 0");
+      expect(counter).not.toHaveTextContent("%");
+    });
   });
 });

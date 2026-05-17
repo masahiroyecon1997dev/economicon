@@ -71,6 +71,17 @@ describe("AsymptoticNormality", () => {
 
       expect(radio10).toBeChecked();
     });
+
+    it("test_sampleSize_hookCalledWithNewSampleSize: n=1000 選択後 hook が sampleSize=1000 で呼ばれる", () => {
+      render(<AsymptoticNormality />);
+      mockUseAsymptoticNormality.mockClear();
+
+      fireEvent.click(screen.getByDisplayValue("1000"));
+
+      expect(mockUseAsymptoticNormality).toHaveBeenCalledWith(
+        expect.objectContaining({ sampleSize: 1000 }),
+      );
+    });
   });
 
   describe("誤差タイプと通知テキスト", () => {

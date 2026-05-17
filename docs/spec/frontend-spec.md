@@ -373,7 +373,51 @@ app/src/
 
 ---
 
-### 実装順序
+## テスト注意事項
+
+### Radix UI コンポーネントのクリックシミュレーション
+
+**問題**: `fireEvent.click()` は Radix UI のインタラクティブ要素（`TabsTrigger` 等）に対して機能しない。
+Radix UI は `onPointerDown` / `onClick` の組み合わせで状態遷移するため、`fireEvent.click` が
+pointer イベントを伴わずに click イベントのみを発火させると状態が更新されない。
+
+**解決策**: `@testing-library/user-event` の `userEvent.setup().click()` を使用する。
+
+```typescript
+import userEvent from "@testing-library/user-event";
+
+it("タブを切り替えると対応するコンテンツが表示される", async () => {
+  const user = userEvent.setup();
+  render(<MyComponent />);
+
+  // ❌ 機能しない
+  // fireEvent.click(screen.getByText("VarianceTab"));
+
+  // ✅ 正しい方法
+  await user.click(screen.getByText("VarianceTab"));
+
+  expect(screen.getByTestId("variance-content")).toBeInTheDocument();
+});
+```
+
+**適用対象**: `TabsTrigger`、`SelectTrigger` など Radix UI Primitive が提供する button 系要素全般。
+
+> **注意**: `userEvent.setup()` は各テストケース内で毎回呼ぶ。`beforeEach` で共有しない。
+
+### 制御済みラジオ入力のクリックシミュレーション
+
+**問題**: `checked={value === selected}` で制御する `<input type="radio">` に対して `userEvent.click()` が機能しない。
+jsdom 上では制御済みラジオ入力の `onChange` が `userEvent` によって発火されない場合がある。
+
+**解決策**: `fireEvent.click(screen.getByDisplayValue(value))` を使用する。
+
+```typescript
+// ❌ 機能しない場合がある
+// await userEvent.click(screen.getByRole("radio", { name: "内生性あり" }));
+
+// ✅ 正しい方法（displayValue はラジオの value 属性値）
+fireEvent.click(screen.getByDisplayValue("true"));
+```
 
 #### Phase 1: 共通基盤
 

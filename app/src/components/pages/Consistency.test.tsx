@@ -72,6 +72,17 @@ describe("Consistency", () => {
       ).toBeInTheDocument();
     });
 
+    it("test_endogenous_on_hookCalledWithEndogenousTrue: 内生性あり選択後 hook が endogenous=true で呼ばれる", () => {
+      render(<Consistency />);
+      mockUseConsistency.mockClear();
+
+      fireEvent.click(screen.getByDisplayValue("true"));
+
+      expect(mockUseConsistency).toHaveBeenCalledWith(
+        expect.objectContaining({ endogenous: true }),
+      );
+    });
+
     it("test_endogenous_off_hidesGammaSlider: 外生性に戻すと γ スライダーが消える", () => {
       render(<Consistency />);
 
@@ -111,6 +122,18 @@ describe("Consistency", () => {
       render(<Consistency />);
 
       expect(screen.getByTestId("consistency-plot-area")).toBeInTheDocument();
+    });
+  });
+
+  describe("AnimationControls", () => {
+    it("test_animationControls_present: AnimationControls が表示される", () => {
+      render(<Consistency />);
+      expect(screen.getByTestId("animation-play-btn")).toBeInTheDocument();
+    });
+
+    it("test_animationControls_canPlay_false_whenNoResult: result なしでは再生ボタンが disabled", () => {
+      render(<Consistency />);
+      expect(screen.getByTestId("animation-play-btn")).toBeDisabled();
     });
   });
 });

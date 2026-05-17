@@ -96,4 +96,16 @@ describe("Unbiasedness", () => {
       expect(screen.getByTestId("unbiasedness-hist-area")).toBeInTheDocument();
     });
   });
+
+  describe("AnimationControls", () => {
+    it("test_animationControls_present: AnimationControls が表示される", () => {
+      render(<Unbiasedness />);
+      expect(screen.getByTestId("animation-play-btn")).toBeInTheDocument();
+    });
+
+    it("test_animationControls_canPlay_false_whenNoResult: result なしでは再生ボタンが disabled", () => {
+      render(<Unbiasedness />);
+      expect(screen.getByTestId("animation-play-btn")).toBeDisabled();
+    });
+  });
 });
