@@ -82,9 +82,9 @@
     "PlotView": "Plot View",
     "DistributionPreview": "Distribution Preview",
     "ConfidenceIntervalSim": "Confidence Interval Simulation",
-    "AsymptoticNormality": "Asymptotic Normality",
-    "Consistency": "Consistency",
-    "Unbiasedness": "Unbiasedness"
+    "AsymptoticNormality": "Asymptotic Normality Simulation",
+    "Consistency": "Consistency Simulation",
+    "Unbiasedness": "Unbiasedness Simulation"
   },
   "LeftSideMenu": {
     "Title": "Workspace",
@@ -988,5 +988,26 @@
     "SpeedNormal": "Normal",
     "SpeedFast": "Fast",
     "SpeedLabel": "Speed"
+  },
+  "AsymptoticNormality": {
+    "Title": "Asymptotic Normality",
+    "Description": "Simulation of the asymptotic normality of the OLS estimator",
+    "SampleSize": "Sample size n",
+    "TrueBeta": "True coefficient β",
+    "ErrorVariance": "Error variance σ²",
+    "ErrorType": "Error type",
+    "ErrorTypeNormal": "Normal errors",
+    "ErrorTypeCauchy": "Cauchy errors (heavy-tailed)",
+    "ErrorTypeEndogenous": "Endogenous",
+    "EndogeneityStrength": "Endogeneity strength γ",
+    "AdvancedSettings": "Advanced settings",
+    "XMean": "X mean μ",
+    "XVariance": "X variance σ²",
+    "Loading": "Running simulation...",
+    "CauchyNotice": "Cauchy errors have no finite variance, so the CLT does not apply and the distribution does not converge to normal even for large n",
+    "EndogeneousNotice": "Endogeneity causes the estimator to be inconsistent; the center of the distribution is systematically shifted away from the true value",
+    "NormalCurveLabel": "Asymptotic normal",
+    "TrueBetaLabel": "True β",
+    "YAxisDensity": "Density"
   }
 }

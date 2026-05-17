@@ -82,9 +82,9 @@
     "PlotView": "プロットビュー",
     "DistributionPreview": "分布プレビュー",
     "ConfidenceIntervalSim": "信頼区間シミュレーション",
-    "AsymptoticNormality": "漸近正規性",
-    "Consistency": "一致性",
-    "Unbiasedness": "不偏性"
+    "AsymptoticNormality": "漸近正規性シミュレーション",
+    "Consistency": "一致性シミュレーション",
+    "Unbiasedness": "不偏性シミュレーション"
   },
   "LeftSideMenu": {
     "Title": "ワークスペース",
@@ -988,5 +988,26 @@
     "SpeedNormal": "普通",
     "SpeedFast": "速",
     "SpeedLabel": "速度"
+  },
+  "AsymptoticNormality": {
+    "Title": "漸近正規性シミュレーション",
+    "Description": "OLS 推定量の漸近正規性のシミュレーション",
+    "SampleSize": "サンプルサイズ n",
+    "TrueBeta": "真の回帰係数 β",
+    "ErrorVariance": "誤差分散 σ²",
+    "ErrorType": "誤差タイプ",
+    "ErrorTypeNormal": "正規誤差",
+    "ErrorTypeCauchy": "コーシー誤差（厚裾）",
+    "ErrorTypeEndogenous": "内生性あり",
+    "EndogeneityStrength": "内生性の強さ γ",
+    "AdvancedSettings": "詳細設定",
+    "XMean": "X 母平均 μ",
+    "XVariance": "X 母分散 σ²",
+    "Loading": "シミュレーション実行中...",
+    "CauchyNotice": "コーシー分布の分散は存在しないため CLT が成立せず、n を増やしても正規分布に収束しません",
+    "EndogeneousNotice": "内生性があるため不一致推定量となり、分布の中心が真の値からずれています",
+    "NormalCurveLabel": "漸近正規分布",
+    "TrueBetaLabel": "真の値 β",
+    "YAxisDensity": "密度"
   }
 }
