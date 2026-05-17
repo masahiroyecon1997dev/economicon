@@ -1009,5 +1009,24 @@
     "NormalCurveLabel": "漸近正規分布",
     "TrueBetaLabel": "真の値 β",
     "YAxisDensity": "密度"
+  },
+  "Consistency": {
+    "Title": "一致性シミュレーション",
+    "Description": "OLS 推定量の一致性：サンプルサイズ n が大きくなるにつれ推定量が真の値に収束するかを確認する",
+    "EndogenousLabel": "推定の設定",
+    "EndogenousOff": "外生性成立",
+    "EndogenousOn": "内生性あり",
+    "NMax": "最大サンプルサイズ n_max",
+    "TrueBeta": "真の回帰係数 β",
+    "ErrorVariance": "誤差分散 σ²",
+    "EndogeneityStrength": "内生性の強さ γ",
+    "AdvancedSettings": "詳細設定",
+    "XMean": "X 母平均 μ",
+    "XVariance": "X 母分散 σ²",
+    "Loading": "シミュレーション実行中...",
+    "BetaEstimateLabel": "β̂ の推移",
+    "TrueBetaLabel": "真の値 β",
+    "ProbabilityLimitLabel": "確率極限",
+    "XAxisLabel": "サンプルサイズ n"
   }
 }

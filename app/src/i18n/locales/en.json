@@ -1009,5 +1009,24 @@
     "NormalCurveLabel": "Asymptotic normal",
     "TrueBetaLabel": "True β",
     "YAxisDensity": "Density"
+  },
+  "Consistency": {
+    "Title": "Consistency Simulation",
+    "Description": "Consistency of the OLS estimator: verifies whether the estimator converges to the true value as the sample size n grows",
+    "EndogenousLabel": "Estimation setup",
+    "EndogenousOff": "Exogeneity holds",
+    "EndogenousOn": "Endogenous",
+    "NMax": "Maximum sample size n_max",
+    "TrueBeta": "True coefficient β",
+    "ErrorVariance": "Error variance σ²",
+    "EndogeneityStrength": "Endogeneity strength γ",
+    "AdvancedSettings": "Advanced settings",
+    "XMean": "X mean μ",
+    "XVariance": "X variance σ²",
+    "Loading": "Running simulation...",
+    "BetaEstimateLabel": "β̂ path",
+    "TrueBetaLabel": "True β",
+    "ProbabilityLimitLabel": "Probability limit",
+    "XAxisLabel": "Sample size n"
   }
 }
