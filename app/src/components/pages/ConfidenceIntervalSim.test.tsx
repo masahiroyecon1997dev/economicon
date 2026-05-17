@@ -165,9 +165,9 @@ describe("ConfidenceIntervalSim", () => {
 
       render(<ConfidenceIntervalSim />);
 
-      // frame=0, totalFrames=2, intervals[0].containsTrue=true → coverage=100.0%
+      // frame=0, totalFrames=2 → count=0 (empty initial state), coverage=0.0%
       expect(screen.getByTestId("animation-counter")).toHaveTextContent(
-        "1/2 (100.0%)",
+        "0/2 (0.0%)",
       );
     });
 

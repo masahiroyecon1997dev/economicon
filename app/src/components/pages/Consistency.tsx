@@ -54,7 +54,7 @@ export const Consistency = () => {
 
   const { loading, error, result } = useConsistency(params);
 
-  const totalFrames = result?.nValues.length ?? 0;
+  const totalFrames = result ? result.nValues.length + 1 : 0;
   const { frame, playing, play, pause, reset } = useSimulationAnimation(
     totalFrames,
     speed,
@@ -64,8 +64,8 @@ export const Consistency = () => {
 
   const plotData = useMemo(() => {
     if (!result) return [];
-    const visibleN = result.nValues.slice(0, frame + 1);
-    const visibleBeta = result.betaEstimates.slice(0, frame + 1);
+    const visibleN = result.nValues.slice(0, frame);
+    const visibleBeta = result.betaEstimates.slice(0, frame);
     if (visibleN.length === 0) return [];
 
     return [

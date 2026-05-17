@@ -69,8 +69,8 @@ export const ConfidenceIntervalSim = () => {
     () =>
       result
         ? result.intervals.slice(
-            Math.max(0, frame + 1 - MAX_VISIBLE_INTERVALS),
-            frame + 1,
+            Math.max(0, frame - MAX_VISIBLE_INTERVALS),
+            frame,
           )
         : [],
     [result, frame],
@@ -78,8 +78,8 @@ export const ConfidenceIntervalSim = () => {
 
   // カバレッジ率（累積）
   const coverageRate = useMemo(() => {
-    if (!result || frame < 0) return 0;
-    const shown = result.intervals.slice(0, frame + 1);
+    if (!result || frame <= 0) return 0;
+    const shown = result.intervals.slice(0, frame);
     if (shown.length === 0) return 0;
     return shown.filter((iv) => iv.containsTrue).length / shown.length;
   }, [result, frame]);
@@ -87,14 +87,14 @@ export const ConfidenceIntervalSim = () => {
   // AnimationControls の counterLabel: "k/M (xx.x%)"
   const counterLabel =
     result != null
-      ? `${frame + 1}/${totalFrames} (${(coverageRate * 100).toFixed(1)}%)`
+      ? `${frame}/${totalFrames} (${(coverageRate * 100).toFixed(1)}%)`
       : undefined;
 
   // 横棒グラフ用プロットデータ
   const barPlotData = useMemo(() => {
     if (!result || visibleIntervals.length === 0) return [];
 
-    const startIdx = Math.max(0, frame + 1 - MAX_VISIBLE_INTERVALS);
+    const startIdx = Math.max(0, frame - MAX_VISIBLE_INTERVALS);
     const greens: { x: number[]; y: number[]; err: number[] } = {
       x: [],
       y: [],
@@ -161,8 +161,8 @@ export const ConfidenceIntervalSim = () => {
 
   // カバレッジ折れ線プロットデータ
   const linePlotData = useMemo(() => {
-    if (!result || frame < 0) return [];
-    const xs = Array.from({ length: frame + 1 }, (_, i) => i + 1);
+    if (!result || frame <= 0) return [];
+    const xs = Array.from({ length: frame }, (_, i) => i + 1);
     const ys = xs.map((_, i) => {
       const shown = result.intervals.slice(0, i + 1);
       return shown.filter((iv) => iv.containsTrue).length / shown.length;
@@ -187,8 +187,8 @@ export const ConfidenceIntervalSim = () => {
       return;
     }
 
-    const startIdx = Math.max(0, frame + 1 - MAX_VISIBLE_INTERVALS);
-    const endIdx = frame + 1;
+    const startIdx = Math.max(0, frame - MAX_VISIBLE_INTERVALS);
+    const endIdx = frame;
 
     const layout: Partial<Layout> = {
       autosize: true,
