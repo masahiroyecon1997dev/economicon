@@ -126,7 +126,7 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
     }
 
     // ---- 計算ボタンをクリック ----
-    await page.getByRole("button", { name: /計算する|Calculate/i }).click();
+    await page.getByRole("button", { name: /^(計算する|Calculate)$/i }).click();
 
     // ---- 結果テーブルの表示を確認 ----
     // 結果テーブルが表示されること
@@ -159,8 +159,8 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
 
     // LinearRegressionForm ビューのタイトルを確認
     await expect(
-      page.getByRole("tab", {
-        name: /分析設定\(最小二乗法\)|Analysis Settings\(OLS\)/i,
+      page.getByRole("heading", {
+        name: /^(最小二乗法|Ordinary Least Squares)$/i,
       }),
     ).toBeVisible();
 
