@@ -62,12 +62,11 @@ export const Consistency = () => {
 
   const plotDivRef = useRef<HTMLDivElement>(null);
 
-  // frame 分の data を slice してプロット
-  const visibleN = result ? result.nValues.slice(0, frame + 1) : [];
-  const visibleBeta = result ? result.betaEstimates.slice(0, frame + 1) : [];
-
   const plotData = useMemo(() => {
-    if (!result || visibleN.length === 0) return [];
+    if (!result) return [];
+    const visibleN = result.nValues.slice(0, frame + 1);
+    const visibleBeta = result.betaEstimates.slice(0, frame + 1);
+    if (visibleN.length === 0) return [];
 
     return [
       {
@@ -79,7 +78,7 @@ export const Consistency = () => {
         line: { color: "#6366f1", width: 2 },
       },
     ];
-  }, [result, visibleN, visibleBeta, t]);
+  }, [result, frame, t]);
 
   useEffect(() => {
     if (!plotDivRef.current) return;

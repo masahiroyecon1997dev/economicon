@@ -65,12 +65,16 @@ export const ConfidenceIntervalSim = () => {
   const linePlotRef = useRef<HTMLDivElement>(null);
 
   // 表示する区間（最新 MAX_VISIBLE_INTERVALS 件）
-  const visibleIntervals: CIBound[] = result
-    ? result.intervals.slice(
-        Math.max(0, frame + 1 - MAX_VISIBLE_INTERVALS),
-        frame + 1,
-      )
-    : [];
+  const visibleIntervals = useMemo<CIBound[]>(
+    () =>
+      result
+        ? result.intervals.slice(
+            Math.max(0, frame + 1 - MAX_VISIBLE_INTERVALS),
+            frame + 1,
+          )
+        : [],
+    [result, frame],
+  );
 
   // カバレッジ率（累積）
   const coverageRate = useMemo(() => {

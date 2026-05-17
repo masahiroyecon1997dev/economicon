@@ -47,9 +47,10 @@ export const Unbiasedness = () => {
   const histPlotRef = useRef<HTMLDivElement>(null);
   const linePlotRef = useRef<HTMLDivElement>(null);
 
-  const visibleEstimates = result
-    ? result.betaEstimates.slice(0, frame + 1)
-    : [];
+  const visibleEstimates = useMemo(
+    () => (result ? result.betaEstimates.slice(0, frame + 1) : []),
+    [result, frame],
+  );
 
   // 累積平均（各試行時点での β̂ の平均）
   const runningMean = useMemo(() => {
