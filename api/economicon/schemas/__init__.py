@@ -137,6 +137,18 @@ from economicon.schemas.shared_entities import (
     SortInstruction,
 )
 from economicon.schemas.shutdown import ShutdownResult
+from economicon.schemas.simulation import (
+    AsymptoticNormalityRequestBody,
+    AsymptoticNormalityResult,
+    CIBound,
+    ConfidenceIntervalSimRequestBody,
+    ConfidenceIntervalSimResult,
+    ConsistencyRequestBody,
+    ConsistencyResult,
+    UnbiasednessRequestBody,
+    UnbiasednessResult,
+    XDistributionParams,
+)
 from economicon.schemas.standard_error_settings import (
     ClusteredStandardError,
     HacStandardError,
@@ -352,4 +364,15 @@ __all__ = [
     # Distribution
     "DistributionPreviewRequestBody",
     "DistributionPreviewResult",
+    # Simulation
+    "XDistributionParams",
+    "ConfidenceIntervalSimRequestBody",
+    "CIBound",
+    "ConfidenceIntervalSimResult",
+    "AsymptoticNormalityRequestBody",
+    "AsymptoticNormalityResult",
+    "ConsistencyRequestBody",
+    "ConsistencyResult",
+    "UnbiasednessRequestBody",
+    "UnbiasednessResult",
 ]

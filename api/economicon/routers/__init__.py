@@ -12,6 +12,7 @@ from economicon.routers import (
     results,
     settings,
     shutdown,
+    simulation,
     statistics,
     tables,
 )
@@ -32,3 +33,4 @@ api_router.include_router(statistics.router)
 api_router.include_router(settings.router)
 api_router.include_router(shutdown.router)
 api_router.include_router(distribution.router)
+api_router.include_router(simulation.router)
