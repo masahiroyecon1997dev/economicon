@@ -80,7 +80,11 @@
     "OrdinaryLeastSquares": "Ordinary Least Squares",
     "Visualization": "Visualization",
     "PlotView": "Plot View",
-    "DistributionPreview": "Distribution Preview"
+    "DistributionPreview": "Distribution Preview",
+    "ConfidenceIntervalSim": "Confidence Interval Simulation",
+    "AsymptoticNormality": "Asymptotic Normality",
+    "Consistency": "Consistency",
+    "Unbiasedness": "Unbiasedness"
   },
   "LeftSideMenu": {
     "Title": "Workspace",

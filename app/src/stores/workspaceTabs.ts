@@ -31,7 +31,11 @@ export type WorkFeatureKey =
   | "CorrelationMatrix"
   | "GroupStatistics"
   | "PlotView"
-  | "DistributionPreview";
+  | "DistributionPreview"
+  | "ConfidenceIntervalSim"
+  | "AsymptoticNormality"
+  | "Consistency"
+  | "Unbiasedness";
 
 export type WorkspaceWorkTab = {
   id: `work:${WorkFeatureKey}`;

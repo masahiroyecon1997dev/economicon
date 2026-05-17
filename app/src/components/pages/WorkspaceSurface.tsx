@@ -3,8 +3,11 @@ import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnal
 import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
+import { AsymptoticNormality } from "@/components/pages/AsymptoticNormality";
 import { Calculation } from "@/components/pages/Calculation";
+import { ConfidenceIntervalSim } from "@/components/pages/ConfidenceIntervalSim";
 import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
+import { Consistency } from "@/components/pages/Consistency";
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
@@ -13,6 +16,7 @@ import { GroupStatistics } from "@/components/pages/GroupStatistics";
 import { JoinTable } from "@/components/pages/JoinTable";
 import { PlotView } from "@/components/pages/PlotView";
 import { StatisticalTestView } from "@/components/pages/StatisticalTestView";
+import { Unbiasedness } from "@/components/pages/Unbiasedness";
 import { UnionTable } from "@/components/pages/UnionTable";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { cn } from "@/lib/utils/helpers";
@@ -55,6 +59,10 @@ const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
   CalculationView: <Calculation />,
   ConfidenceIntervalView: <ConfidenceIntervalView />,
   DistributionPreview: <DistributionPreview />,
+  ConfidenceIntervalSim: <ConfidenceIntervalSim />,
+  AsymptoticNormality: <AsymptoticNormality />,
+  Consistency: <Consistency />,
+  Unbiasedness: <Unbiasedness />,
 };
 
 const isCorrelationMatrixWorkTab = (

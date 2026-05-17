@@ -80,7 +80,11 @@
     "OrdinaryLeastSquares": "最小二乗法",
     "Visualization": "可視化",
     "PlotView": "プロットビュー",
-    "DistributionPreview": "分布プレビュー"
+    "DistributionPreview": "分布プレビュー",
+    "ConfidenceIntervalSim": "信頼区間シミュレーション",
+    "AsymptoticNormality": "漸近正規性",
+    "Consistency": "一致性",
+    "Unbiasedness": "不偏性"
   },
   "LeftSideMenu": {
     "Title": "ワークスペース",

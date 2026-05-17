@@ -409,6 +409,36 @@ export const AppBar = () => {
               t("HeaderMenu.DistributionPreview"),
             ),
         },
+        {
+          id: "confidence-interval-sim",
+          label: t("HeaderMenu.ConfidenceIntervalSim"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "ConfidenceIntervalSim",
+              t("HeaderMenu.ConfidenceIntervalSim"),
+            ),
+        },
+        {
+          id: "asymptotic-normality",
+          label: t("HeaderMenu.AsymptoticNormality"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "AsymptoticNormality",
+              t("HeaderMenu.AsymptoticNormality"),
+            ),
+        },
+        {
+          id: "consistency",
+          label: t("HeaderMenu.Consistency"),
+          handleSelect: () =>
+            handleOpenWorkTab("Consistency", t("HeaderMenu.Consistency")),
+        },
+        {
+          id: "unbiasedness",
+          label: t("HeaderMenu.Unbiasedness"),
+          handleSelect: () =>
+            handleOpenWorkTab("Unbiasedness", t("HeaderMenu.Unbiasedness")),
+        },
       ],
     },
   ];

@@ -8,6 +8,8 @@ export const SPEED_INTERVAL_MS: Record<AnimationSpeed, number> = {
   fast: 20,
 };
 
+type AnimState = { frame: number; playing: boolean };
+
 /**
  * シミュレーション・アニメーション共通ロジック。
  * フレームを一定間隔でインクリメントし、末尾に達したら自動停止する。
@@ -19,8 +21,10 @@ export const useSimulationAnimation = (
   totalFrames: number,
   speed: AnimationSpeed,
 ) => {
-  const [frame, setFrame] = useState(0);
-  const [playing, setPlaying] = useState(false);
+  const [{ frame, playing }, setAnimState] = useState<AnimState>({
+    frame: 0,
+    playing: false,
+  });
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   /** stale closure を避けるため最新フレームを ref で管理 */
@@ -28,10 +32,8 @@ export const useSimulationAnimation = (
   /** stale closure を避けるため最新総フレーム数を ref で管理 */
   const totalRef = useRef(totalFrames);
 
-  // totalRef を最新に保つ
-  useEffect(() => {
-    totalRef.current = totalFrames;
-  });
+  // totalRef をレンダー中に直接更新（useEffect 不要）
+  totalRef.current = totalFrames;
 
   const clear = useCallback(() => {
     if (intervalRef.current !== null) {
@@ -41,11 +43,11 @@ export const useSimulationAnimation = (
   }, []);
 
   // totalFrames が変わったらリセット（新しいシミュレーション結果受信）
+  // setState は1回のみ → cascading render を回避
   useEffect(() => {
     clear();
     frameRef.current = 0;
-    setFrame(0);
-    setPlaying(false);
+    setAnimState({ frame: 0, playing: false });
   }, [totalFrames, clear]);
 
   // playing / speed が変わったらインターバルを再起動
@@ -58,11 +60,12 @@ export const useSimulationAnimation = (
     intervalRef.current = setInterval(() => {
       frameRef.current += 1;
       const next = frameRef.current;
-      setFrame(next);
       if (next >= totalRef.current) {
         clearInterval(intervalRef.current!);
         intervalRef.current = null;
-        setPlaying(false);
+        setAnimState({ frame: next, playing: false });
+      } else {
+        setAnimState((prev) => ({ ...prev, frame: next }));
       }
     }, ms);
     return clear;
@@ -73,18 +76,17 @@ export const useSimulationAnimation = (
 
   const play = useCallback(() => {
     if (frameRef.current >= totalRef.current) return;
-    setPlaying(true);
+    setAnimState((prev) => ({ ...prev, playing: true }));
   }, []);
 
   const pause = useCallback(() => {
-    setPlaying(false);
+    setAnimState((prev) => ({ ...prev, playing: false }));
   }, []);
 
   const reset = useCallback(() => {
     clear();
     frameRef.current = 0;
-    setFrame(0);
-    setPlaying(false);
+    setAnimState({ frame: 0, playing: false });
   }, [clear]);
 
   return { frame, playing, play, pause, reset };
