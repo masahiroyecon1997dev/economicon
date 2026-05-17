@@ -4,18 +4,16 @@
  * Economicon App API
  * OpenAPI spec version: 0.4.0
  */
-import * as zod from "zod";
+import * as zod from 'zod';
+
 
 /**
  * 分布プレビュー計算エンドポイント
  * @summary Preview Distribution
  */
 export const PreviewDistributionHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
 
 export const previewDistributionBodyDistributionTwoScaleParameterExclusiveMin = 0;
 
@@ -74,277 +72,85 @@ export const previewDistributionBodyXCountDefault = 200;
 export const previewDistributionBodyXCountMin = 50;
 export const previewDistributionBodyXCountMax = 2000;
 
-export const PreviewDistributionBody = zod
-  .object({
-    distribution: zod
-      .union([
-        zod
-          .object({
-            type: zod.enum(["uniform"]).describe("分布の種類"),
-            low: zod.number().describe("分布の下限"),
-            high: zod.number().describe("分布の上限"),
-          })
-          .describe("一様分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["exponential"]).describe("分布の種類"),
-            scaleParameter: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionTwoScaleParameterExclusiveMin,
-              )
-              .describe("尺度パラメータ"),
-          })
-          .describe("指数分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["normal"]).describe("分布の種類"),
-            mean: zod.number().describe("平均"),
-            standardDeviation: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionThreeStandardDeviationExclusiveMin,
-              )
-              .describe("標準偏差"),
-          })
-          .describe("正規分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["gamma"]).describe("分布の種類"),
-            shapeParameter: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionFourShapeParameterExclusiveMin,
-              )
-              .describe("形状パラメータ"),
-            scaleParameter: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionFourScaleParameterExclusiveMin,
-              )
-              .describe("尺度パラメータ"),
-          })
-          .describe("ガンマ分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["beta"]).describe("分布の種類"),
-            alpha: zod
-              .number()
-              .gt(previewDistributionBodyDistributionFiveAlphaExclusiveMin)
-              .describe("形状パラメータalpha"),
-            beta: zod
-              .number()
-              .gt(previewDistributionBodyDistributionFiveBetaExclusiveMin)
-              .describe("形状パラメータbeta"),
-          })
-          .describe("ベータ分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["weibull"]).describe("分布の種類"),
-            shapeParameter: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionSixShapeParameterExclusiveMin,
-              )
-              .describe("形状パラメータ"),
-            scaleParameter: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionSixScaleParameterExclusiveMin,
-              )
-              .describe("尺度パラメータ"),
-          })
-          .describe("ワイブル分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["lognormal"]).describe("分布の種類"),
-            logMean: zod.number().describe("対数空間での平均"),
-            logStandardDeviation: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionSevenLogStandardDeviationExclusiveMin,
-              )
-              .describe("対数空間での標準偏差"),
-          })
-          .describe("対数正規分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["chi_square"]).describe("分布の種類"),
-            degreesOfFreedom: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionEightDegreesOfFreedomExclusiveMin,
-              )
-              .max(previewDistributionBodyDistributionEightDegreesOfFreedomMax)
-              .describe("自由度"),
-          })
-          .describe("カイ二乗分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["f_distribution"]).describe("分布の種類"),
-            numeratorDf: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionNineNumeratorDfExclusiveMin,
-              )
-              .max(previewDistributionBodyDistributionNineNumeratorDfMax)
-              .describe("分子自由度"),
-            denominatorDf: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionNineDenominatorDfExclusiveMin,
-              )
-              .max(previewDistributionBodyDistributionNineDenominatorDfMax)
-              .describe("分母自由度"),
-          })
-          .describe("F分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["binomial"]).describe("分布の種類"),
-            trialCount: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionOnezeroTrialCountExclusiveMin,
-              )
-              .describe("試行回数"),
-            successProbability: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionOnezeroSuccessProbabilityExclusiveMin,
-              )
-              .max(
-                previewDistributionBodyDistributionOnezeroSuccessProbabilityMax,
-              )
-              .describe("成功確率"),
-          })
-          .describe("二項分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["bernoulli"]).describe("分布の種類"),
-            successProbability: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionOneoneSuccessProbabilityExclusiveMin,
-              )
-              .max(
-                previewDistributionBodyDistributionOneoneSuccessProbabilityMax,
-              )
-              .describe("成功確率"),
-          })
-          .describe("ベルヌーイ分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["poisson"]).describe("分布の種類"),
-            rate: zod
-              .number()
-              .gt(previewDistributionBodyDistributionOnetwoRateExclusiveMin)
-              .describe("発生率"),
-          })
-          .describe("ポアソン分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["geometric"]).describe("分布の種類"),
-            successProbability: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionOnethreeSuccessProbabilityExclusiveMin,
-              )
-              .max(
-                previewDistributionBodyDistributionOnethreeSuccessProbabilityMax,
-              )
-              .describe("成功確率"),
-          })
-          .describe("幾何分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["hypergeometric"]).describe("分布の種類"),
-            populationSize: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionOnefourPopulationSizeExclusiveMin,
-              )
-              .describe("母集団サイズ"),
-            successCount: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionOnefourSuccessCountExclusiveMin,
-              )
-              .describe("成功要素数"),
-            sampleSize: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionOnefourSampleSizeExclusiveMin,
-              )
-              .describe("標本サイズ"),
-          })
-          .describe("超幾何分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["negative_binomial"]).describe("分布の種類"),
-            targetSuccessCount: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionOnefiveTargetSuccessCountExclusiveMin,
-              )
-              .describe("成功回数"),
-            successProbability: zod
-              .number()
-              .gt(
-                previewDistributionBodyDistributionOnefiveSuccessProbabilityExclusiveMin,
-              )
-              .max(
-                previewDistributionBodyDistributionOnefiveSuccessProbabilityMax,
-              )
-              .describe("成功確率"),
-          })
-          .describe("負の二項分布のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["fixed"]).describe("分布の種類"),
-            value: zod.union([zod.number(), zod.number()]).describe("固定値"),
-          })
-          .describe("固定値のパラメータ"),
-        zod
-          .object({
-            type: zod.enum(["sequence"]).describe("分布の種類"),
-            start: zod
-              .number()
-              .default(previewDistributionBodyDistributionOnesevenStartDefault)
-              .describe("開始値"),
-            step: zod
-              .number()
-              .default(previewDistributionBodyDistributionOnesevenStepDefault)
-              .describe("増分（負値で降順連番）"),
-          })
-          .describe("連番のパラメータ"),
-      ])
-      .describe("分布設定"),
-    xCount: zod
-      .number()
-      .min(previewDistributionBodyXCountMin)
-      .max(previewDistributionBodyXCountMax)
-      .default(previewDistributionBodyXCountDefault)
-      .describe("プロット点数（連続分布）"),
-  })
-  .describe("分布プレビューリクエスト");
+
+
+export const PreviewDistributionBody = zod.object({
+  "distribution": zod.union([zod.object({
+  "type": zod.enum(['uniform']).describe('分布の種類'),
+  "low": zod.number().describe('分布の下限'),
+  "high": zod.number().describe('分布の上限')
+}).describe('一様分布のパラメータ'),zod.object({
+  "type": zod.enum(['exponential']).describe('分布の種類'),
+  "scaleParameter": zod.number().gt(previewDistributionBodyDistributionTwoScaleParameterExclusiveMin).describe('尺度パラメータ')
+}).describe('指数分布のパラメータ'),zod.object({
+  "type": zod.enum(['normal']).describe('分布の種類'),
+  "mean": zod.number().describe('平均'),
+  "standardDeviation": zod.number().gt(previewDistributionBodyDistributionThreeStandardDeviationExclusiveMin).describe('標準偏差')
+}).describe('正規分布のパラメータ'),zod.object({
+  "type": zod.enum(['gamma']).describe('分布の種類'),
+  "shapeParameter": zod.number().gt(previewDistributionBodyDistributionFourShapeParameterExclusiveMin).describe('形状パラメータ'),
+  "scaleParameter": zod.number().gt(previewDistributionBodyDistributionFourScaleParameterExclusiveMin).describe('尺度パラメータ')
+}).describe('ガンマ分布のパラメータ'),zod.object({
+  "type": zod.enum(['beta']).describe('分布の種類'),
+  "alpha": zod.number().gt(previewDistributionBodyDistributionFiveAlphaExclusiveMin).describe('形状パラメータalpha'),
+  "beta": zod.number().gt(previewDistributionBodyDistributionFiveBetaExclusiveMin).describe('形状パラメータbeta')
+}).describe('ベータ分布のパラメータ'),zod.object({
+  "type": zod.enum(['weibull']).describe('分布の種類'),
+  "shapeParameter": zod.number().gt(previewDistributionBodyDistributionSixShapeParameterExclusiveMin).describe('形状パラメータ'),
+  "scaleParameter": zod.number().gt(previewDistributionBodyDistributionSixScaleParameterExclusiveMin).describe('尺度パラメータ')
+}).describe('ワイブル分布のパラメータ'),zod.object({
+  "type": zod.enum(['lognormal']).describe('分布の種類'),
+  "logMean": zod.number().describe('対数空間での平均'),
+  "logStandardDeviation": zod.number().gt(previewDistributionBodyDistributionSevenLogStandardDeviationExclusiveMin).describe('対数空間での標準偏差')
+}).describe('対数正規分布のパラメータ'),zod.object({
+  "type": zod.enum(['chi_square']).describe('分布の種類'),
+  "degreesOfFreedom": zod.number().gt(previewDistributionBodyDistributionEightDegreesOfFreedomExclusiveMin).max(previewDistributionBodyDistributionEightDegreesOfFreedomMax).describe('自由度')
+}).describe('カイ二乗分布のパラメータ'),zod.object({
+  "type": zod.enum(['f_distribution']).describe('分布の種類'),
+  "numeratorDf": zod.number().gt(previewDistributionBodyDistributionNineNumeratorDfExclusiveMin).max(previewDistributionBodyDistributionNineNumeratorDfMax).describe('分子自由度'),
+  "denominatorDf": zod.number().gt(previewDistributionBodyDistributionNineDenominatorDfExclusiveMin).max(previewDistributionBodyDistributionNineDenominatorDfMax).describe('分母自由度')
+}).describe('F分布のパラメータ'),zod.object({
+  "type": zod.enum(['binomial']).describe('分布の種類'),
+  "trialCount": zod.number().gt(previewDistributionBodyDistributionOnezeroTrialCountExclusiveMin).describe('試行回数'),
+  "successProbability": zod.number().gt(previewDistributionBodyDistributionOnezeroSuccessProbabilityExclusiveMin).max(previewDistributionBodyDistributionOnezeroSuccessProbabilityMax).describe('成功確率')
+}).describe('二項分布のパラメータ'),zod.object({
+  "type": zod.enum(['bernoulli']).describe('分布の種類'),
+  "successProbability": zod.number().gt(previewDistributionBodyDistributionOneoneSuccessProbabilityExclusiveMin).max(previewDistributionBodyDistributionOneoneSuccessProbabilityMax).describe('成功確率')
+}).describe('ベルヌーイ分布のパラメータ'),zod.object({
+  "type": zod.enum(['poisson']).describe('分布の種類'),
+  "rate": zod.number().gt(previewDistributionBodyDistributionOnetwoRateExclusiveMin).describe('発生率')
+}).describe('ポアソン分布のパラメータ'),zod.object({
+  "type": zod.enum(['geometric']).describe('分布の種類'),
+  "successProbability": zod.number().gt(previewDistributionBodyDistributionOnethreeSuccessProbabilityExclusiveMin).max(previewDistributionBodyDistributionOnethreeSuccessProbabilityMax).describe('成功確率')
+}).describe('幾何分布のパラメータ'),zod.object({
+  "type": zod.enum(['hypergeometric']).describe('分布の種類'),
+  "populationSize": zod.number().gt(previewDistributionBodyDistributionOnefourPopulationSizeExclusiveMin).describe('母集団サイズ'),
+  "successCount": zod.number().gt(previewDistributionBodyDistributionOnefourSuccessCountExclusiveMin).describe('成功要素数'),
+  "sampleSize": zod.number().gt(previewDistributionBodyDistributionOnefourSampleSizeExclusiveMin).describe('標本サイズ')
+}).describe('超幾何分布のパラメータ'),zod.object({
+  "type": zod.enum(['negative_binomial']).describe('分布の種類'),
+  "targetSuccessCount": zod.number().gt(previewDistributionBodyDistributionOnefiveTargetSuccessCountExclusiveMin).describe('成功回数'),
+  "successProbability": zod.number().gt(previewDistributionBodyDistributionOnefiveSuccessProbabilityExclusiveMin).max(previewDistributionBodyDistributionOnefiveSuccessProbabilityMax).describe('成功確率')
+}).describe('負の二項分布のパラメータ'),zod.object({
+  "type": zod.enum(['fixed']).describe('分布の種類'),
+  "value": zod.union([zod.number(),zod.number()]).describe('固定値')
+}).describe('固定値のパラメータ'),zod.object({
+  "type": zod.enum(['sequence']).describe('分布の種類'),
+  "start": zod.number().default(previewDistributionBodyDistributionOnesevenStartDefault).describe('開始値'),
+  "step": zod.number().default(previewDistributionBodyDistributionOnesevenStepDefault).describe('増分（負値で降順連番）')
+}).describe('連番のパラメータ')]).describe('分布設定'),
+  "xCount": zod.number().min(previewDistributionBodyXCountMin).max(previewDistributionBodyXCountMax).default(previewDistributionBodyXCountDefault).describe('プロット点数（連続分布）')
+}).describe('分布プレビューリクエスト')
 
 export const previewDistributionResponseCodeDefault = `OK`;
 
 export const PreviewDistributionResponse = zod.object({
-  code: zod
-    .string()
-    .default(previewDistributionResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod
-    .object({
-      isDiscrete: zod.boolean().describe("離散分布のとき True"),
-      x: zod.array(zod.number()).describe("X 軸の値のリスト"),
-      yDensity: zod
-        .array(zod.number())
-        .describe("PDF（連続）または PMF（離散）の値"),
-      yCumulative: zod
-        .array(zod.number())
-        .describe("CDF（連続）または CMF（離散）の値"),
-    })
-    .describe("処理結果"),
-});
+  "code": zod.string().default(previewDistributionResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "isDiscrete": zod.boolean().describe('離散分布のとき True'),
+  "x": zod.array(zod.number()).describe('X 軸の値のリスト'),
+  "yDensity": zod.array(zod.number()).describe('PDF（連続）または PMF（離散）の値'),
+  "yCumulative": zod.array(zod.number()).describe('CDF（連続）または CMF（離散）の値')
+}).describe('処理結果')
+})
+

@@ -13,14 +13,14 @@
  */
 export type FetchPlotDataRequestBody = {
   /**
-   * データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。
-   * @minLength 1
-   */
+     * データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。
+     * @minLength 1
+     */
   tableName: string;
   /**
-   * 取得する列名のリスト（1〜50列）。重複した列名は無視されます。
-   * @minItems 1
-   * @maxItems 50
-   */
+     * 取得する列名のリスト（1〜50列）。重複した列名は無視されます。
+     * @minItems 1
+     * @maxItems 50
+     */
   columnNames: string[];
 };

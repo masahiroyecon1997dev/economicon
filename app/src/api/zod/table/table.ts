@@ -4,7 +4,8 @@
  * Economicon App API
  * OpenAPI spec version: 0.4.0
  */
-import * as zod from "zod";
+import * as zod from 'zod';
+
 
 /**
  * 結合テーブルを作成するエンドポイント
@@ -23,72 +24,38 @@ JSONResponse
  * @summary Create Join Table
  */
 export const CreateJoinTableHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
 
 export const createJoinTableBodyJoinTableNameMax = 128;
 
-export const createJoinTableBodyJoinTableNameRegExp = new RegExp(
-  "^[^\\x00-\\x1f\\x7f]+$",
-);
+
+export const createJoinTableBodyJoinTableNameRegExp = new RegExp('^[^\\x00-\\x1f\\x7f]+$');
+
+
+
+
+
 
 export const createJoinTableBodyJoinTypeDefault = `inner`;
 
-export const CreateJoinTableBody = zod
-  .object({
-    joinTableName: zod
-      .string()
-      .min(1)
-      .max(createJoinTableBodyJoinTableNameMax)
-      .regex(createJoinTableBodyJoinTableNameRegExp)
-      .describe(
-        "結合後に作成される新しいテーブル名。ワークスペース内に存在しない名前を指定してください。",
-      ),
-    leftTableName: zod
-      .string()
-      .min(1)
-      .describe(
-        "結合の左側テーブル名。ワークスペース内に存在するテーブル名を指定してください。",
-      ),
-    rightTableName: zod
-      .string()
-      .min(1)
-      .describe(
-        "結合の右側テーブル名。ワークスペース内に存在するテーブル名を指定してください。",
-      ),
-    leftKeyColumnNames: zod
-      .array(zod.string().min(1).describe("カラム名"))
-      .min(1)
-      .describe("左側テーブルの結合キーカラム名のリスト"),
-    rightKeyColumnNames: zod
-      .array(zod.string().min(1).describe("カラム名"))
-      .min(1)
-      .describe("右側テーブルの結合キーカラム名のリスト"),
-    joinType: zod
-      .enum(["inner", "left", "right", "full"])
-      .default(createJoinTableBodyJoinTypeDefault)
-      .describe(
-        "結合タイプ（inner: 内部結合、left: 左外部結合、right: 右外部結合、full: 完全外部結合）",
-      ),
-  })
-  .describe("結合テーブル作成リクエスト");
+export const CreateJoinTableBody = zod.object({
+  "joinTableName": zod.string().min(1).max(createJoinTableBodyJoinTableNameMax).regex(createJoinTableBodyJoinTableNameRegExp).describe('結合後に作成される新しいテーブル名。ワークスペース内に存在しない名前を指定してください。'),
+  "leftTableName": zod.string().min(1).describe('結合の左側テーブル名。ワークスペース内に存在するテーブル名を指定してください。'),
+  "rightTableName": zod.string().min(1).describe('結合の右側テーブル名。ワークスペース内に存在するテーブル名を指定してください。'),
+  "leftKeyColumnNames": zod.array(zod.string().min(1).describe('カラム名')).min(1).describe('左側テーブルの結合キーカラム名のリスト'),
+  "rightKeyColumnNames": zod.array(zod.string().min(1).describe('カラム名')).min(1).describe('右側テーブルの結合キーカラム名のリスト'),
+  "joinType": zod.enum(['inner', 'left', 'right', 'full']).default(createJoinTableBodyJoinTypeDefault).describe('結合タイプ（inner: 内部結合、left: 左外部結合、right: 右外部結合、full: 完全外部結合）')
+}).describe('結合テーブル作成リクエスト')
 
 export const createJoinTableResponseCodeDefault = `OK`;
 
 export const CreateJoinTableResponse = zod.object({
-  code: zod
-    .string()
-    .default(createJoinTableResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod
-    .object({
-      tableName: zod.string().describe("操作対象または生成されたテーブル名"),
-    })
-    .describe("処理結果"),
-});
+  "code": zod.string().default(createJoinTableResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('操作対象または生成されたテーブル名')
+}).describe('処理結果')
+})
 
 /**
  * ユニオンテーブルを作成するエンドポイント
@@ -107,56 +74,34 @@ JSONResponse
  * @summary Create Union Table
  */
 export const CreateUnionTableHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
 
 export const createUnionTableBodyUnionTableNameMax = 128;
 
-export const createUnionTableBodyUnionTableNameRegExp = new RegExp(
-  "^[^\\x00-\\x1f\\x7f]+$",
-);
+
+export const createUnionTableBodyUnionTableNameRegExp = new RegExp('^[^\\x00-\\x1f\\x7f]+$');
 
 export const createUnionTableBodyTableNamesMin = 2;
 
-export const CreateUnionTableBody = zod
-  .object({
-    unionTableName: zod
-      .string()
-      .min(1)
-      .max(createUnionTableBodyUnionTableNameMax)
-      .regex(createUnionTableBodyUnionTableNameRegExp)
-      .describe("ユニオン後に作成される新しいテーブル名"),
-    tableNames: zod
-      .array(zod.string().min(1).describe("テーブル名"))
-      .min(createUnionTableBodyTableNamesMin)
-      .describe(
-        "ユニオンするテーブル名のリスト（2テーブル以上）。ワークスペース内に存在するテーブル名を指定してください。",
-      ),
-    columnNames: zod
-      .array(zod.string().min(1).describe("カラム名"))
-      .min(1)
-      .describe(
-        "ユニオンの対象とするカラム名のリスト。指定されたテーブルすべてに存在するカラム名を指定してください。",
-      ),
-  })
-  .describe("ユニオンテーブル作成リクエスト");
+
+
+
+
+export const CreateUnionTableBody = zod.object({
+  "unionTableName": zod.string().min(1).max(createUnionTableBodyUnionTableNameMax).regex(createUnionTableBodyUnionTableNameRegExp).describe('ユニオン後に作成される新しいテーブル名'),
+  "tableNames": zod.array(zod.string().min(1).describe('テーブル名')).min(createUnionTableBodyTableNamesMin).describe('ユニオンするテーブル名のリスト（2テーブル以上）。ワークスペース内に存在するテーブル名を指定してください。'),
+  "columnNames": zod.array(zod.string().min(1).describe('カラム名')).min(1).describe('ユニオンの対象とするカラム名のリスト。指定されたテーブルすべてに存在するカラム名を指定してください。')
+}).describe('ユニオンテーブル作成リクエスト')
 
 export const createUnionTableResponseCodeDefault = `OK`;
 
 export const CreateUnionTableResponse = zod.object({
-  code: zod
-    .string()
-    .default(createUnionTableResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod
-    .object({
-      tableName: zod.string().describe("操作対象または生成されたテーブル名"),
-    })
-    .describe("処理結果"),
-});
+  "code": zod.string().default(createUnionTableResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('操作対象または生成されたテーブル名')
+}).describe('処理結果')
+})
 
 /**
  * シミュレーションデータテーブルを作成するエンドポイント
@@ -175,22 +120,18 @@ JSONResponse
  * @summary Create Simulation Data Table
  */
 export const CreateSimulationDataTableHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
 
 export const createSimulationDataTableBodyTableNameMax = 128;
 
-export const createSimulationDataTableBodyTableNameRegExp = new RegExp(
-  "^[^\\x00-\\x1f\\x7f]+$",
-);
+
+export const createSimulationDataTableBodyTableNameRegExp = new RegExp('^[^\\x00-\\x1f\\x7f]+$');
 
 export const createSimulationDataTableBodySimulationColumnsItemColumnNameMax = 128;
 
-export const createSimulationDataTableBodySimulationColumnsItemColumnNameRegExp =
-  new RegExp("^[^\\x00-\\x1f\\x7f]+$");
+
+export const createSimulationDataTableBodySimulationColumnsItemColumnNameRegExp = new RegExp('^[^\\x00-\\x1f\\x7f]+$');
 export const createSimulationDataTableBodySimulationColumnsItemDistributionTwoScaleParameterExclusiveMin = 0;
 
 export const createSimulationDataTableBodySimulationColumnsItemDistributionThreeStandardDeviationExclusiveMin = 0;
@@ -247,329 +188,89 @@ export const createSimulationDataTableBodySimulationColumnsItemDistributionOnese
 export const createSimulationDataTableBodyRandomSeedOneMin = 0;
 export const createSimulationDataTableBodyRandomSeedOneMax = 100000000;
 
-export const CreateSimulationDataTableBody = zod
-  .object({
-    tableName: zod
-      .string()
-      .min(1)
-      .max(createSimulationDataTableBodyTableNameMax)
-      .regex(createSimulationDataTableBodyTableNameRegExp)
-      .describe(
-        "作成するシミュレーションデータテーブルの名前。ワークスペース内に存在しない名前を指定してください。",
-      ),
-    rowCount: zod.number().min(1).describe("生成するテーブルの行数"),
-    simulationColumns: zod
-      .array(
-        zod
-          .object({
-            columnName: zod
-              .string()
-              .min(1)
-              .max(
-                createSimulationDataTableBodySimulationColumnsItemColumnNameMax,
-              )
-              .regex(
-                createSimulationDataTableBodySimulationColumnsItemColumnNameRegExp,
-              )
-              .describe("新しいカラム名"),
-            distribution: zod
-              .union([
-                zod
-                  .object({
-                    type: zod.enum(["uniform"]).describe("分布の種類"),
-                    low: zod.number().describe("分布の下限"),
-                    high: zod.number().describe("分布の上限"),
-                  })
-                  .describe("一様分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["exponential"]).describe("分布の種類"),
-                    scaleParameter: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionTwoScaleParameterExclusiveMin,
-                      )
-                      .describe("尺度パラメータ"),
-                  })
-                  .describe("指数分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["normal"]).describe("分布の種類"),
-                    mean: zod.number().describe("平均"),
-                    standardDeviation: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionThreeStandardDeviationExclusiveMin,
-                      )
-                      .describe("標準偏差"),
-                  })
-                  .describe("正規分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["gamma"]).describe("分布の種類"),
-                    shapeParameter: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionFourShapeParameterExclusiveMin,
-                      )
-                      .describe("形状パラメータ"),
-                    scaleParameter: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionFourScaleParameterExclusiveMin,
-                      )
-                      .describe("尺度パラメータ"),
-                  })
-                  .describe("ガンマ分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["beta"]).describe("分布の種類"),
-                    alpha: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionFiveAlphaExclusiveMin,
-                      )
-                      .describe("形状パラメータalpha"),
-                    beta: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionFiveBetaExclusiveMin,
-                      )
-                      .describe("形状パラメータbeta"),
-                  })
-                  .describe("ベータ分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["weibull"]).describe("分布の種類"),
-                    shapeParameter: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionSixShapeParameterExclusiveMin,
-                      )
-                      .describe("形状パラメータ"),
-                    scaleParameter: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionSixScaleParameterExclusiveMin,
-                      )
-                      .describe("尺度パラメータ"),
-                  })
-                  .describe("ワイブル分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["lognormal"]).describe("分布の種類"),
-                    logMean: zod.number().describe("対数空間での平均"),
-                    logStandardDeviation: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionSevenLogStandardDeviationExclusiveMin,
-                      )
-                      .describe("対数空間での標準偏差"),
-                  })
-                  .describe("対数正規分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["chi_square"]).describe("分布の種類"),
-                    degreesOfFreedom: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionEightDegreesOfFreedomExclusiveMin,
-                      )
-                      .max(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionEightDegreesOfFreedomMax,
-                      )
-                      .describe("自由度"),
-                  })
-                  .describe("カイ二乗分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["f_distribution"]).describe("分布の種類"),
-                    numeratorDf: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionNineNumeratorDfExclusiveMin,
-                      )
-                      .max(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionNineNumeratorDfMax,
-                      )
-                      .describe("分子自由度"),
-                    denominatorDf: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionNineDenominatorDfExclusiveMin,
-                      )
-                      .max(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionNineDenominatorDfMax,
-                      )
-                      .describe("分母自由度"),
-                  })
-                  .describe("F分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["binomial"]).describe("分布の種類"),
-                    trialCount: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnezeroTrialCountExclusiveMin,
-                      )
-                      .describe("試行回数"),
-                    successProbability: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnezeroSuccessProbabilityExclusiveMin,
-                      )
-                      .max(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnezeroSuccessProbabilityMax,
-                      )
-                      .describe("成功確率"),
-                  })
-                  .describe("二項分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["bernoulli"]).describe("分布の種類"),
-                    successProbability: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOneoneSuccessProbabilityExclusiveMin,
-                      )
-                      .max(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOneoneSuccessProbabilityMax,
-                      )
-                      .describe("成功確率"),
-                  })
-                  .describe("ベルヌーイ分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["poisson"]).describe("分布の種類"),
-                    rate: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnetwoRateExclusiveMin,
-                      )
-                      .describe("発生率"),
-                  })
-                  .describe("ポアソン分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["geometric"]).describe("分布の種類"),
-                    successProbability: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeSuccessProbabilityExclusiveMin,
-                      )
-                      .max(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeSuccessProbabilityMax,
-                      )
-                      .describe("成功確率"),
-                  })
-                  .describe("幾何分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["hypergeometric"]).describe("分布の種類"),
-                    populationSize: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnefourPopulationSizeExclusiveMin,
-                      )
-                      .describe("母集団サイズ"),
-                    successCount: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnefourSuccessCountExclusiveMin,
-                      )
-                      .describe("成功要素数"),
-                    sampleSize: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnefourSampleSizeExclusiveMin,
-                      )
-                      .describe("標本サイズ"),
-                  })
-                  .describe("超幾何分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod
-                      .enum(["negative_binomial"])
-                      .describe("分布の種類"),
-                    targetSuccessCount: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnefiveTargetSuccessCountExclusiveMin,
-                      )
-                      .describe("成功回数"),
-                    successProbability: zod
-                      .number()
-                      .gt(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnefiveSuccessProbabilityExclusiveMin,
-                      )
-                      .max(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnefiveSuccessProbabilityMax,
-                      )
-                      .describe("成功確率"),
-                  })
-                  .describe("負の二項分布のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["fixed"]).describe("分布の種類"),
-                    value: zod
-                      .union([zod.number(), zod.number()])
-                      .describe("固定値"),
-                  })
-                  .describe("固定値のパラメータ"),
-                zod
-                  .object({
-                    type: zod.enum(["sequence"]).describe("分布の種類"),
-                    start: zod
-                      .number()
-                      .default(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnesevenStartDefault,
-                      )
-                      .describe("開始値"),
-                    step: zod
-                      .number()
-                      .default(
-                        createSimulationDataTableBodySimulationColumnsItemDistributionOnesevenStepDefault,
-                      )
-                      .describe("増分（負値で降順連番）"),
-                  })
-                  .describe("連番のパラメータ"),
-              ])
-              .describe("分布設定"),
-          })
-          .describe(
-            "新しい列名とその生成規則のペア。\n複数のAPI（列追加、シミュレーション設定等）で共通利用される。",
-          ),
-      )
-      .min(1)
-      .describe("シミュレーションカラムの設定リスト"),
-    randomSeed: zod
-      .union([
-        zod
-          .number()
-          .min(createSimulationDataTableBodyRandomSeedOneMin)
-          .max(createSimulationDataTableBodyRandomSeedOneMax),
-        zod.null(),
-      ])
-      .optional()
-      .describe(
-        "乱数シード値（0以上1億以下の整数）。同じシードを指定すると同じ結果が再現されます。None の場合は毎回異なる結果になります。",
-      ),
-  })
-  .describe("シミュレーションデータテーブル作成リクエスト");
+
+
+export const CreateSimulationDataTableBody = zod.object({
+  "tableName": zod.string().min(1).max(createSimulationDataTableBodyTableNameMax).regex(createSimulationDataTableBodyTableNameRegExp).describe('作成するシミュレーションデータテーブルの名前。ワークスペース内に存在しない名前を指定してください。'),
+  "rowCount": zod.number().min(1).describe('生成するテーブルの行数'),
+  "simulationColumns": zod.array(zod.object({
+  "columnName": zod.string().min(1).max(createSimulationDataTableBodySimulationColumnsItemColumnNameMax).regex(createSimulationDataTableBodySimulationColumnsItemColumnNameRegExp).describe('新しいカラム名'),
+  "distribution": zod.union([zod.object({
+  "type": zod.enum(['uniform']).describe('分布の種類'),
+  "low": zod.number().describe('分布の下限'),
+  "high": zod.number().describe('分布の上限')
+}).describe('一様分布のパラメータ'),zod.object({
+  "type": zod.enum(['exponential']).describe('分布の種類'),
+  "scaleParameter": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionTwoScaleParameterExclusiveMin).describe('尺度パラメータ')
+}).describe('指数分布のパラメータ'),zod.object({
+  "type": zod.enum(['normal']).describe('分布の種類'),
+  "mean": zod.number().describe('平均'),
+  "standardDeviation": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionThreeStandardDeviationExclusiveMin).describe('標準偏差')
+}).describe('正規分布のパラメータ'),zod.object({
+  "type": zod.enum(['gamma']).describe('分布の種類'),
+  "shapeParameter": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFourShapeParameterExclusiveMin).describe('形状パラメータ'),
+  "scaleParameter": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFourScaleParameterExclusiveMin).describe('尺度パラメータ')
+}).describe('ガンマ分布のパラメータ'),zod.object({
+  "type": zod.enum(['beta']).describe('分布の種類'),
+  "alpha": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFiveAlphaExclusiveMin).describe('形状パラメータalpha'),
+  "beta": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionFiveBetaExclusiveMin).describe('形状パラメータbeta')
+}).describe('ベータ分布のパラメータ'),zod.object({
+  "type": zod.enum(['weibull']).describe('分布の種類'),
+  "shapeParameter": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionSixShapeParameterExclusiveMin).describe('形状パラメータ'),
+  "scaleParameter": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionSixScaleParameterExclusiveMin).describe('尺度パラメータ')
+}).describe('ワイブル分布のパラメータ'),zod.object({
+  "type": zod.enum(['lognormal']).describe('分布の種類'),
+  "logMean": zod.number().describe('対数空間での平均'),
+  "logStandardDeviation": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionSevenLogStandardDeviationExclusiveMin).describe('対数空間での標準偏差')
+}).describe('対数正規分布のパラメータ'),zod.object({
+  "type": zod.enum(['chi_square']).describe('分布の種類'),
+  "degreesOfFreedom": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionEightDegreesOfFreedomExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionEightDegreesOfFreedomMax).describe('自由度')
+}).describe('カイ二乗分布のパラメータ'),zod.object({
+  "type": zod.enum(['f_distribution']).describe('分布の種類'),
+  "numeratorDf": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionNineNumeratorDfExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionNineNumeratorDfMax).describe('分子自由度'),
+  "denominatorDf": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionNineDenominatorDfExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionNineDenominatorDfMax).describe('分母自由度')
+}).describe('F分布のパラメータ'),zod.object({
+  "type": zod.enum(['binomial']).describe('分布の種類'),
+  "trialCount": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnezeroTrialCountExclusiveMin).describe('試行回数'),
+  "successProbability": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnezeroSuccessProbabilityExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionOnezeroSuccessProbabilityMax).describe('成功確率')
+}).describe('二項分布のパラメータ'),zod.object({
+  "type": zod.enum(['bernoulli']).describe('分布の種類'),
+  "successProbability": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOneoneSuccessProbabilityExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionOneoneSuccessProbabilityMax).describe('成功確率')
+}).describe('ベルヌーイ分布のパラメータ'),zod.object({
+  "type": zod.enum(['poisson']).describe('分布の種類'),
+  "rate": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnetwoRateExclusiveMin).describe('発生率')
+}).describe('ポアソン分布のパラメータ'),zod.object({
+  "type": zod.enum(['geometric']).describe('分布の種類'),
+  "successProbability": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeSuccessProbabilityExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionOnethreeSuccessProbabilityMax).describe('成功確率')
+}).describe('幾何分布のパラメータ'),zod.object({
+  "type": zod.enum(['hypergeometric']).describe('分布の種類'),
+  "populationSize": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnefourPopulationSizeExclusiveMin).describe('母集団サイズ'),
+  "successCount": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnefourSuccessCountExclusiveMin).describe('成功要素数'),
+  "sampleSize": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnefourSampleSizeExclusiveMin).describe('標本サイズ')
+}).describe('超幾何分布のパラメータ'),zod.object({
+  "type": zod.enum(['negative_binomial']).describe('分布の種類'),
+  "targetSuccessCount": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnefiveTargetSuccessCountExclusiveMin).describe('成功回数'),
+  "successProbability": zod.number().gt(createSimulationDataTableBodySimulationColumnsItemDistributionOnefiveSuccessProbabilityExclusiveMin).max(createSimulationDataTableBodySimulationColumnsItemDistributionOnefiveSuccessProbabilityMax).describe('成功確率')
+}).describe('負の二項分布のパラメータ'),zod.object({
+  "type": zod.enum(['fixed']).describe('分布の種類'),
+  "value": zod.union([zod.number(),zod.number()]).describe('固定値')
+}).describe('固定値のパラメータ'),zod.object({
+  "type": zod.enum(['sequence']).describe('分布の種類'),
+  "start": zod.number().default(createSimulationDataTableBodySimulationColumnsItemDistributionOnesevenStartDefault).describe('開始値'),
+  "step": zod.number().default(createSimulationDataTableBodySimulationColumnsItemDistributionOnesevenStepDefault).describe('増分（負値で降順連番）')
+}).describe('連番のパラメータ')]).describe('分布設定')
+}).describe('新しい列名とその生成規則のペア。\n複数のAPI（列追加、シミュレーション設定等）で共通利用される。')).min(1).describe('シミュレーションカラムの設定リスト'),
+  "randomSeed": zod.union([zod.number().min(createSimulationDataTableBodyRandomSeedOneMin).max(createSimulationDataTableBodyRandomSeedOneMax),zod.null()]).optional().describe('乱数シード値（0以上1億以下の整数）。同じシードを指定すると同じ結果が再現されます。None の場合は毎回異なる結果になります。')
+}).describe('シミュレーションデータテーブル作成リクエスト')
 
 export const createSimulationDataTableResponseCodeDefault = `OK`;
 
 export const CreateSimulationDataTableResponse = zod.object({
-  code: zod
-    .string()
-    .default(createSimulationDataTableResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod
-    .object({
-      tableName: zod.string().describe("操作対象または生成されたテーブル名"),
-    })
-    .describe("処理結果"),
-});
+  "code": zod.string().default(createSimulationDataTableResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('操作対象または生成されたテーブル名')
+}).describe('処理結果')
+})
 
 /**
  * テーブルを削除するエンドポイント
@@ -588,36 +289,24 @@ JSONResponse
  * @summary Delete Table
  */
 export const DeleteTableHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
 
-export const DeleteTableBody = zod
-  .object({
-    tableName: zod
-      .string()
-      .min(1)
-      .describe(
-        "削除するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
-      ),
-  })
-  .describe("テーブル削除リクエスト");
+
+
+
+export const DeleteTableBody = zod.object({
+  "tableName": zod.string().min(1).describe('削除するテーブル名。ワークスペースに存在するテーブルの中から指定してください。')
+}).describe('テーブル削除リクエスト')
 
 export const deleteTableResponseCodeDefault = `OK`;
 
 export const DeleteTableResponse = zod.object({
-  code: zod
-    .string()
-    .default(deleteTableResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod
-    .object({
-      tableName: zod.string().describe("操作対象または生成されたテーブル名"),
-    })
-    .describe("処理結果"),
-});
+  "code": zod.string().default(deleteTableResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('操作対象または生成されたテーブル名')
+}).describe('処理結果')
+})
 
 /**
  * テーブルを複製するエンドポイント
@@ -636,50 +325,29 @@ JSONResponse
  * @summary Duplicate Table
  */
 export const DuplicateTableHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
 
 export const duplicateTableBodyNewTableNameMax = 128;
 
-export const duplicateTableBodyNewTableNameRegExp = new RegExp(
-  "^[^\\x00-\\x1f\\x7f]+$",
-);
 
-export const DuplicateTableBody = zod
-  .object({
-    tableName: zod
-      .string()
-      .min(1)
-      .describe(
-        "複製元のテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
-      ),
-    newTableName: zod
-      .string()
-      .min(1)
-      .max(duplicateTableBodyNewTableNameMax)
-      .regex(duplicateTableBodyNewTableNameRegExp)
-      .describe(
-        "複製後の新しいテーブル名。ワークスペースに存在しない名前を指定してください。",
-      ),
-  })
-  .describe("テーブル複製リクエスト");
+export const duplicateTableBodyNewTableNameRegExp = new RegExp('^[^\\x00-\\x1f\\x7f]+$');
+
+
+export const DuplicateTableBody = zod.object({
+  "tableName": zod.string().min(1).describe('複製元のテーブル名。ワークスペースに存在するテーブルの中から指定してください。'),
+  "newTableName": zod.string().min(1).max(duplicateTableBodyNewTableNameMax).regex(duplicateTableBodyNewTableNameRegExp).describe('複製後の新しいテーブル名。ワークスペースに存在しない名前を指定してください。')
+}).describe('テーブル複製リクエスト')
 
 export const duplicateTableResponseCodeDefault = `OK`;
 
 export const DuplicateTableResponse = zod.object({
-  code: zod
-    .string()
-    .default(duplicateTableResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod
-    .object({
-      tableName: zod.string().describe("操作対象または生成されたテーブル名"),
-    })
-    .describe("処理結果"),
-});
+  "code": zod.string().default(duplicateTableResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('操作対象または生成されたテーブル名')
+}).describe('処理結果')
+})
 
 /**
  * テーブル名変更エンドポイント
@@ -700,43 +368,29 @@ JSONResponse
  * @summary Rename Table
  */
 export const RenameTableHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
 
 export const renameTableBodyNewTableNameMax = 128;
 
-export const renameTableBodyNewTableNameRegExp = new RegExp(
-  "^[^\\x00-\\x1f\\x7f]+$",
-);
 
-export const RenameTableBody = zod
-  .object({
-    oldTableName: zod.string().min(1).describe("変更前のテーブル名"),
-    newTableName: zod
-      .string()
-      .min(1)
-      .max(renameTableBodyNewTableNameMax)
-      .regex(renameTableBodyNewTableNameRegExp)
-      .describe("変更後の新しいテーブル名"),
-  })
-  .describe("テーブル名変更リクエスト");
+export const renameTableBodyNewTableNameRegExp = new RegExp('^[^\\x00-\\x1f\\x7f]+$');
+
+
+export const RenameTableBody = zod.object({
+  "oldTableName": zod.string().min(1).describe('変更前のテーブル名'),
+  "newTableName": zod.string().min(1).max(renameTableBodyNewTableNameMax).regex(renameTableBodyNewTableNameRegExp).describe('変更後の新しいテーブル名')
+}).describe('テーブル名変更リクエスト')
 
 export const renameTableResponseCodeDefault = `OK`;
 
 export const RenameTableResponse = zod.object({
-  code: zod
-    .string()
-    .default(renameTableResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod
-    .object({
-      tableName: zod.string().describe("操作対象または生成されたテーブル名"),
-    })
-    .describe("処理結果"),
-});
+  "code": zod.string().default(renameTableResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('操作対象または生成されたテーブル名')
+}).describe('処理結果')
+})
 
 /**
  * テーブルリストを取得するエンドポイント
@@ -753,27 +407,17 @@ JSONResponse
  * @summary Get Table List
  */
 export const GetTableListHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
 
 export const getTableListResponseCodeDefault = `OK`;
 
 export const GetTableListResponse = zod.object({
-  code: zod
-    .string()
-    .default(getTableListResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod
-    .object({
-      tableNameList: zod
-        .array(zod.string())
-        .describe("ワークスペースに存在するテーブル名のリスト"),
-    })
-    .describe("処理結果"),
-});
+  "code": zod.string().default(getTableListResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableNameList": zod.array(zod.string()).describe('ワークスペースに存在するテーブル名のリスト')
+}).describe('処理結果')
+})
 
 /**
  * 全テーブルをクリアするエンドポイント
@@ -790,21 +434,17 @@ JSONResponse
  * @summary Clear Tables
  */
 export const ClearTablesHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
 
 export const clearTablesResponseCodeDefault = `OK`;
 
 export const ClearTablesResponse = zod.object({
-  code: zod
-    .string()
-    .default(clearTablesResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod.looseObject({}).describe("処理結果"),
-});
+  "code": zod.string().default(clearTablesResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.looseObject({
+
+}).describe('処理結果')
+})
 
 /**
  * データをJSON形式で取得するエンドポイント
@@ -823,55 +463,35 @@ JSONResponse
  * @summary Fetch Data To Json
  */
 export const FetchDataToJsonHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
 
 export const fetchDataToJsonBodyStartRowMin = 0;
 
 export const fetchDataToJsonBodyFetchRowsDefault = 500;
 export const fetchDataToJsonBodyFetchRowsMax = 10000;
 
-export const FetchDataToJsonBody = zod
-  .object({
-    tableName: zod
-      .string()
-      .min(1)
-      .describe(
-        "データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
-      ),
-    startRow: zod
-      .number()
-      .min(fetchDataToJsonBodyStartRowMin)
-      .describe("取得を開始する行番号（0始まり）"),
-    fetchRows: zod
-      .number()
-      .min(1)
-      .max(fetchDataToJsonBodyFetchRowsMax)
-      .default(fetchDataToJsonBodyFetchRowsDefault)
-      .describe("取得する行数（1〜10000、デフォルト500）"),
-  })
-  .describe("データJSON取得リクエスト");
+
+
+export const FetchDataToJsonBody = zod.object({
+  "tableName": zod.string().min(1).describe('データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。'),
+  "startRow": zod.number().min(fetchDataToJsonBodyStartRowMin).describe('取得を開始する行番号（0始まり）'),
+  "fetchRows": zod.number().min(1).max(fetchDataToJsonBodyFetchRowsMax).default(fetchDataToJsonBodyFetchRowsDefault).describe('取得する行数（1〜10000、デフォルト500）')
+}).describe('データJSON取得リクエスト')
 
 export const fetchDataToJsonResponseCodeDefault = `OK`;
 
 export const FetchDataToJsonResponse = zod.object({
-  code: zod
-    .string()
-    .default(fetchDataToJsonResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod
-    .object({
-      tableName: zod.string().describe("データを取得したテーブル名"),
-      data: zod.string().describe("JSON 文字列形式のテーブルデータ"),
-      totalRows: zod.number().describe("テーブル全体の行数"),
-      startRow: zod.number().describe("取得開始行番号"),
-      endRow: zod.number().describe("取得終了行番号"),
-    })
-    .describe("処理結果"),
-});
+  "code": zod.string().default(fetchDataToJsonResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('データを取得したテーブル名'),
+  "data": zod.string().describe('JSON 文字列形式のテーブルデータ'),
+  "totalRows": zod.number().describe('テーブル全体の行数'),
+  "startRow": zod.number().describe('取得開始行番号'),
+  "endRow": zod.number().describe('取得終了行番号')
+}).describe('処理結果')
+})
 
 /**
  * データをApache Arrow IPC形式の生バイナリで返すエンドポイント
@@ -895,37 +515,22 @@ Response
  * @summary Fetch Data To Arrow
  */
 export const FetchDataToArrowHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
 
 export const fetchDataToArrowBodyStartRowMin = 0;
 
 export const fetchDataToArrowBodyChunkSizeDefault = 500;
 export const fetchDataToArrowBodyChunkSizeMax = 10000;
 
-export const FetchDataToArrowBody = zod
-  .object({
-    tableName: zod
-      .string()
-      .min(1)
-      .describe(
-        "データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
-      ),
-    startRow: zod
-      .number()
-      .min(fetchDataToArrowBodyStartRowMin)
-      .describe("取得を開始する行番号（0始まり）"),
-    chunkSize: zod
-      .number()
-      .min(1)
-      .max(fetchDataToArrowBodyChunkSizeMax)
-      .default(fetchDataToArrowBodyChunkSizeDefault)
-      .describe("1リクエストで取得する行数（1〜10000、デフォルト500）"),
-  })
-  .describe("データArrow取得リクエスト");
+
+
+export const FetchDataToArrowBody = zod.object({
+  "tableName": zod.string().min(1).describe('データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。'),
+  "startRow": zod.number().min(fetchDataToArrowBodyStartRowMin).describe('取得を開始する行番号（0始まり）'),
+  "chunkSize": zod.number().min(1).max(fetchDataToArrowBodyChunkSizeMax).default(fetchDataToArrowBodyChunkSizeDefault).describe('1リクエストで取得する行数（1〜10000、デフォルト500）')
+}).describe('データArrow取得リクエスト')
 
 /**
  * プロット用列指定データを Apache Arrow IPC 形式で返すエンドポイント
@@ -951,33 +556,19 @@ Response
  * @summary Fetch Plot Data
  */
 export const FetchPlotDataHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
+
 
 export const fetchPlotDataBodyColumnNamesMax = 50;
 
-export const FetchPlotDataBody = zod
-  .object({
-    tableName: zod
-      .string()
-      .min(1)
-      .describe(
-        "データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
-      ),
-    columnNames: zod
-      .array(zod.string().min(1).describe("カラム名"))
-      .min(1)
-      .max(fetchPlotDataBodyColumnNamesMax)
-      .describe(
-        "取得する列名のリスト（1〜50列）。重複した列名は無視されます。",
-      ),
-  })
-  .describe(
-    "プロット用列指定データ Arrow 取得リクエスト\n\nプロット描画に必要な列のみを選択して Arrow IPC 形式で返す。\n列を絞ることでメモリ使用量と転送量を削減する。",
-  );
+
+
+export const FetchPlotDataBody = zod.object({
+  "tableName": zod.string().min(1).describe('データを取得するテーブル名。ワークスペースに存在するテーブルの中から指定してください。'),
+  "columnNames": zod.array(zod.string().min(1).describe('カラム名')).min(1).max(fetchPlotDataBodyColumnNamesMax).describe('取得する列名のリスト（1〜50列）。重複した列名は無視されます。')
+}).describe('プロット用列指定データ Arrow 取得リクエスト\n\nプロット描画に必要な列のみを選択して Arrow IPC 形式で返す。\n列を絞ることでメモリ使用量と転送量を削減する。')
 
 /**
  * テーブルフィルタリングを実行するエンドポイント
@@ -996,87 +587,36 @@ JSONResponse
  * @summary Filter Table
  */
 export const FilterTableHeader = zod.object({
-  "X-Auth-Token": zod
-    .string()
-    .optional()
-    .describe("Tauri 起動時に生成された認証トークン"),
-});
+  "X-Auth-Token": zod.string().optional().describe('Tauri 起動時に生成された認証トークン')
+})
+
 
 export const filterTableBodyNewTableNameMax = 128;
 
-export const filterTableBodyNewTableNameRegExp = new RegExp(
-  "^[^\\x00-\\x1f\\x7f]+$",
-);
+
+export const filterTableBodyNewTableNameRegExp = new RegExp('^[^\\x00-\\x1f\\x7f]+$');
 export const filterTableBodyLogicalOperatorDefault = `and`;
 
-export const FilterTableBody = zod
-  .object({
-    tableName: zod
-      .string()
-      .min(1)
-      .describe(
-        "フィルタ条件を適用するテーブル名。ワークスペースに存在するテーブルの中から指定してください。",
-      ),
-    newTableName: zod
-      .string()
-      .min(1)
-      .max(filterTableBodyNewTableNameMax)
-      .regex(filterTableBodyNewTableNameRegExp)
-      .describe(
-        "フィルタ結果を格納する新しいテーブル名。ワークスペースに存在しない名前を指定してください。",
-      ),
-    logicalOperator: zod
-      .enum(["and", "or"])
-      .default(filterTableBodyLogicalOperatorDefault)
-      .describe("複数条件を結合する論理演算子（and \/ or）。省略時は and。"),
-    conditions: zod
-      .array(
-        zod
-          .object({
-            columnName: zod
-              .string()
-              .min(1)
-              .describe("フィルタ条件を適用するカラム名。"),
-            condition: zod
-              .enum([
-                "equals",
-                "notEquals",
-                "greaterThan",
-                "lessThan",
-                "greaterThanOrEquals",
-                "lessThanOrEquals",
-              ])
-              .describe(
-                "フィルタ条件の演算子（equals, notEquals, greaterThan, lessThan 等）",
-              ),
-            isCompareColumn: zod
-              .boolean()
-              .describe(
-                "比較対象がカラムかどうか。true: compareValue をカラム名として解釈、false: 定数値として解釈。",
-              ),
-            compareValue: zod
-              .unknown()
-              .describe(
-                "比較する値またはカラム名。isCompareColumn が true の場合はカラム名を指定。",
-              ),
-          })
-          .describe("フィルタ条件の1要素"),
-      )
-      .min(1)
-      .describe("フィルタ条件のリスト（1件以上）"),
-  })
-  .describe("テーブルフィルタリクエスト（複数条件 AND \/ OR）");
+
+
+export const FilterTableBody = zod.object({
+  "tableName": zod.string().min(1).describe('フィルタ条件を適用するテーブル名。ワークスペースに存在するテーブルの中から指定してください。'),
+  "newTableName": zod.string().min(1).max(filterTableBodyNewTableNameMax).regex(filterTableBodyNewTableNameRegExp).describe('フィルタ結果を格納する新しいテーブル名。ワークスペースに存在しない名前を指定してください。'),
+  "logicalOperator": zod.enum(['and', 'or']).default(filterTableBodyLogicalOperatorDefault).describe('複数条件を結合する論理演算子（and \/ or）。省略時は and。'),
+  "conditions": zod.array(zod.object({
+  "columnName": zod.string().min(1).describe('フィルタ条件を適用するカラム名。'),
+  "condition": zod.enum(['equals', 'notEquals', 'greaterThan', 'lessThan', 'greaterThanOrEquals', 'lessThanOrEquals']).describe('フィルタ条件の演算子（equals, notEquals, greaterThan, lessThan 等）'),
+  "isCompareColumn": zod.boolean().describe('比較対象がカラムかどうか。true: compareValue をカラム名として解釈、false: 定数値として解釈。'),
+  "compareValue": zod.unknown().describe('比較する値またはカラム名。isCompareColumn が true の場合はカラム名を指定。')
+}).describe('フィルタ条件の1要素')).min(1).describe('フィルタ条件のリスト（1件以上）')
+}).describe('テーブルフィルタリクエスト（複数条件 AND \/ OR）')
 
 export const filterTableResponseCodeDefault = `OK`;
 
 export const FilterTableResponse = zod.object({
-  code: zod
-    .string()
-    .default(filterTableResponseCodeDefault)
-    .describe("レスポンスコード"),
-  result: zod
-    .object({
-      tableName: zod.string().describe("操作対象または生成されたテーブル名"),
-    })
-    .describe("処理結果"),
-});
+  "code": zod.string().default(filterTableResponseCodeDefault).describe('レスポンスコード'),
+  "result": zod.object({
+  "tableName": zod.string().describe('操作対象または生成されたテーブル名')
+}).describe('処理結果')
+})
+
