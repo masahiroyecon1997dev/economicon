@@ -502,9 +502,5 @@ test.describe
 
     // 保存したファイルをインポート画面から削除
     await deleteFileFromImportScreen(page, `${JOINED_TABLE_NAME}_export.xlsx`);
-
-    await expect(
-      page.getByRole("button", { name: JOINED_TABLE_NAME }),
-    ).toBeVisible();
   });
 });

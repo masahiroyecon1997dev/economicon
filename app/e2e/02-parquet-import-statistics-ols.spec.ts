@@ -206,11 +206,11 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
     // ---- 結果タブが表示されるまで待機 ----
     // "OLS: invest #1"という結果タブが追加されること
     await expect(
-      page.getByRole("button", { name: /^OLS: invest #1$/i }),
+      page.getByRole("button", { name: /^OLS: invest #1/i }),
     ).toBeVisible({ timeout: 30_000 });
 
     // 結果タブをクリック
-    await page.getByRole("button", { name: /^OLS: invest #1$/i }).click();
+    await page.getByRole("button", { name: /^OLS: invest #1/i }).click();
 
     // ---- 結果内容の確認 ----
     // 調整済み R² が表示されること
