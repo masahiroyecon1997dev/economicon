@@ -2,7 +2,7 @@
  * AddSimulationColumnForm のテスト
  * - 列名フィールドのデフォルト値は "sim_price"
  * - デフォルト分布タイプ "normal" のラジオが選択済み
- * - normal のパラメータ (Loc / Scale) が表示される
+ * - normal のパラメータ (Mean / StandardDeviation) が表示される
  * - 分布タイプ切り替え（全14種）: 対応するパラメータフィールドが表示される
  * - 列名を空にして blur → ValidationMessages.NewColumnNameRequired が表示される
  * - 乱数シードに負数を入力してサブミット → ValidationMessages.RandomSeedRange（ErrorAlert）
@@ -11,17 +11,17 @@
  * - API失敗 → ErrorAlert に APIのmessage が表示される
  * - throw → ErrorAlert にエラーメッセージが表示される
  */
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { act } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { AddSimulationColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/AddSimulationColumnForm";
 import {
   DIST_PARAM_LABEL_KEYS,
   DIST_PARAMS,
   DIST_TYPES,
-} from "../../../../constants/simulation";
-import { AddSimulationColumnForm } from "./AddSimulationColumnForm";
+} from "@/constants/simulation";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -56,6 +56,12 @@ const defaultProps = {
   onSuccess: vi.fn(),
 };
 
+const submitForm = () => {
+  const form = document.getElementById("sim-col-form");
+  expect(form).toBeInstanceOf(HTMLFormElement);
+  fireEvent.submit(form as HTMLFormElement);
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
@@ -79,13 +85,13 @@ describe("AddSimulationColumnForm", () => {
       expect(radio).toBeChecked();
     });
 
-    it("normal のパラメータ (Loc / Scale) が表示される", () => {
+    it("normal のパラメータ (Mean / StandardDeviation) が表示される", () => {
       render(<AddSimulationColumnForm {...defaultProps} />);
       expect(
-        screen.getByText("AddSimulationColumnForm.Loc"),
+        screen.getByText("AddSimulationColumnForm.Mean"),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("AddSimulationColumnForm.Scale"),
+        screen.getByText("AddSimulationColumnForm.StandardDeviation"),
       ).toBeInTheDocument();
     });
   });
@@ -99,9 +105,7 @@ describe("AddSimulationColumnForm", () => {
         const radio = screen.getByRole("radio", {
           name: new RegExp(`AddSimulationColumnForm\\.${distType}`, "i"),
         });
-        await act(async () => {
-          radio.click();
-        });
+        fireEvent.click(radio);
 
         for (const param of DIST_PARAMS[distType]) {
           await waitFor(() => {
@@ -133,15 +137,16 @@ describe("AddSimulationColumnForm", () => {
     });
 
     it("乱数シードに負数を入力してサブミット → ErrorAlert に ValidationMessages.RandomSeedRange が表示される", async () => {
+      const user = userEvent.setup();
       render(<AddSimulationColumnForm {...defaultProps} />);
 
       const seedInput = screen.getByRole("spinbutton", {
         name: /Common\.RandomSeed/i,
       });
-      fireEvent.change(seedInput, { target: { value: "-1" } });
+      await user.clear(seedInput);
+      await user.type(seedInput, "-1");
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -151,15 +156,16 @@ describe("AddSimulationColumnForm", () => {
     });
 
     it("乱数シードに小数を入力してサブミット → ErrorAlert に ValidationMessages.RandomSeedRange が表示される", async () => {
+      const user = userEvent.setup();
       render(<AddSimulationColumnForm {...defaultProps} />);
 
       const seedInput = screen.getByRole("spinbutton", {
         name: /Common\.RandomSeed/i,
       });
-      fireEvent.change(seedInput, { target: { value: "1.5" } });
+      await user.clear(seedInput);
+      await user.type(seedInput, "1.5");
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -175,14 +181,58 @@ describe("AddSimulationColumnForm", () => {
 
       render(<AddSimulationColumnForm {...defaultProps} />);
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(defaultProps.onSuccess).toHaveBeenCalledWith([
           { name: "price", type: "Float64" },
           { name: "sim_price", type: "Float64" },
         ]);
+      });
+    });
+
+    it("distributionType = sequence で start と step を送信できる", async () => {
+      const user = userEvent.setup();
+      mockApi.addSimulationColumn.mockResolvedValue({ code: "OK", result: {} });
+
+      render(<AddSimulationColumnForm {...defaultProps} />);
+
+      const radio = screen.getByRole("radio", {
+        name: /AddSimulationColumnForm\.sequence/i,
+      });
+      fireEvent.click(radio);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("AddSimulationColumnForm.Start"),
+        ).toBeInTheDocument();
+      });
+
+      const startInput = document.getElementById("sim-param-start");
+      const stepInput = document.getElementById("sim-param-step");
+
+      expect(startInput).toBeInstanceOf(HTMLInputElement);
+      expect(stepInput).toBeInstanceOf(HTMLInputElement);
+
+      await user.clear(startInput as HTMLInputElement);
+      await user.type(startInput as HTMLInputElement, "10");
+      await user.clear(stepInput as HTMLInputElement);
+      await user.type(stepInput as HTMLInputElement, "-2");
+
+      submitForm();
+
+      await waitFor(() => {
+        expect(mockApi.addSimulationColumn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            simulationColumn: expect.objectContaining({
+              distribution: {
+                type: "sequence",
+                start: 10,
+                step: -2,
+              },
+            }),
+          }),
+        );
       });
     });
   });
@@ -196,8 +246,7 @@ describe("AddSimulationColumnForm", () => {
 
       render(<AddSimulationColumnForm {...defaultProps} />);
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(
@@ -213,12 +262,70 @@ describe("AddSimulationColumnForm", () => {
 
       render(<AddSimulationColumnForm {...defaultProps} />);
 
-      const form = document.getElementById("sim-col-form")!;
-      form.dispatchEvent(new Event("submit", { bubbles: true }));
+      submitForm();
 
       await waitFor(() => {
         expect(screen.getByText("接続タイムアウト")).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("分布プレビューボタン", () => {
+    beforeEach(() => {
+      useWorkspaceTabsStore.setState({ tabs: [], activeTabId: null });
+    });
+
+    it("test_previewButton_rendersInForm", () => {
+      render(<AddSimulationColumnForm {...defaultProps} />);
+      expect(
+        screen.getByTestId("open-distribution-preview-btn"),
+      ).toBeInTheDocument();
+    });
+
+    it("test_previewButton_opensDistributionPreviewTab_withNormalDefault", async () => {
+      const user = userEvent.setup();
+      render(<AddSimulationColumnForm {...defaultProps} />);
+
+      await user.click(screen.getByTestId("open-distribution-preview-btn"));
+
+      const { tabs, activeTabId } = useWorkspaceTabsStore.getState();
+      const tab = tabs.find((t) => t.id === "work:DistributionPreview");
+      expect(tab).toBeDefined();
+      expect(activeTabId).toBe("work:DistributionPreview");
+      if (tab?.kind === "work") {
+        const draft = tab.draftValues as {
+          distributionType: string;
+          distributionParams: Record<string, number>;
+        };
+        expect(draft.distributionType).toBe("normal");
+        expect(draft.distributionParams.mean).toBe(0);
+        expect(draft.distributionParams.standardDeviation).toBe(1);
+      }
+    });
+
+    it("test_previewButton_afterSwitchToBinomial_passesBinomialParams", async () => {
+      const user = userEvent.setup();
+      render(<AddSimulationColumnForm {...defaultProps} />);
+
+      const radio = screen.getByRole("radio", {
+        name: /AddSimulationColumnForm\.binomial/i,
+      });
+      fireEvent.click(radio);
+
+      await user.click(screen.getByTestId("open-distribution-preview-btn"));
+
+      const { tabs } = useWorkspaceTabsStore.getState();
+      const tab = tabs.find((t) => t.id === "work:DistributionPreview");
+      expect(tab?.kind).toBe("work");
+      if (tab?.kind === "work") {
+        const draft = tab.draftValues as {
+          distributionType: string;
+          distributionParams: Record<string, number>;
+        };
+        expect(draft.distributionType).toBe("binomial");
+        expect(draft.distributionParams).toHaveProperty("trialCount");
+        expect(draft.distributionParams).toHaveProperty("successProbability");
+      }
     });
   });
 });

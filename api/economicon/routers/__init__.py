@@ -4,10 +4,15 @@ from economicon.core.auth import verify_token
 from economicon.routers import (
     columns,
     data_io,
+    did,
+    distribution,
+    heckman_regression,
+    rdd,
     regressions,
     results,
     settings,
     shutdown,
+    simulation,
     statistics,
     tables,
 )
@@ -19,8 +24,13 @@ api_router = APIRouter(dependencies=[Depends(verify_token)])
 api_router.include_router(columns.router)
 api_router.include_router(tables.router)
 api_router.include_router(regressions.router)
+api_router.include_router(heckman_regression.router)
+api_router.include_router(did.router)
+api_router.include_router(rdd.router)
 api_router.include_router(results.router)
 api_router.include_router(data_io.router)
 api_router.include_router(statistics.router)
 api_router.include_router(settings.router)
 api_router.include_router(shutdown.router)
+api_router.include_router(distribution.router)
+api_router.include_router(simulation.router)

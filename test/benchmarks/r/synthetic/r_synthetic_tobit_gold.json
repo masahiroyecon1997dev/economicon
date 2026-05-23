@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T15:46:34+0900",
+    "r_version": "4.5.2",
+    "sandwich_version": "3.1.1",
+    "plm_version": "2.6.7",
+    "aer_version": "1.2.16",
+    "glmnet_version": "4.1.10",
+    "censReg_version": "0.5.38",
+    "sampleSelection_version": "1.2.14",
+    "rdrobust_version": "3.0.0",
+    "seed": 2024,
+    "tolerance_guide": {
+      "ols_coef": "atol=1e-8 (nonrobust)",
+      "ols_se_hc1": "atol=1e-6 (sandwich::vcovHC vs statsmodels HC1)",
+      "logit_probit_coef": "atol=1e-6 (MLE 収束差)",
+      "fe_re_coef": "atol=1e-8",
+      "iv_coef": "atol=1e-8 (AER::ivreg vs linearmodels::IV2SLS)",
+      "tobit_coef": "atol=1e-4 (censReg vs py4etrics MLE 実装差)",
+      "heckman_coef": "atol=1e-6 (sampleSelection vs statsmodels 手動 2 段階)",
+      "rdd_coef": "atol=1e-4 (rdrobust 共通実装なので高精度一致期待)",
+      "lasso_ridge_scaled": "atol=1e-5 (sklearn / glmnet 同一目的関数)"
+    },
+    "data_file": "synthetic_tobit.csv",
+    "model": "tobit"
+  },
+  "estimates": {
+    "dep_var": "y",
+    "left_censoring_limit": 0,
+    "n_obs": 300,
+    "censoring_ratio": 0.346666666666667,
+    "sigma": 2.06053886230082,
+    "log_likelihood": -458.549543045711,
+    "aic": 925.099086091421,
+    "bic": 939.914215990046,
+    "coefficients": {
+      "const": 2.06439967085626,
+      "x1": 1.93648294939341,
+      "x2": 1.36369776890643
+    },
+    "std_errors": {
+      "const": 0.158749019702243,
+      "x1": 0.0795536331180628,
+      "x2": 0.073718844514663
+    },
+    "t_values": {
+      "const": 13.0041727169613,
+      "x1": 24.3418543376836,
+      "x2": 18.4986319018496
+    },
+    "p_values": {
+      "const": 1.15845761648375e-38,
+      "x1": 7.07128087384638e-131,
+      "x2": 2.11781858897656e-76
+    },
+    "conf_int": {
+      "const": {
+        "lower": 1.75325730965882,
+        "upper": 2.3755420320537
+      },
+      "x1": {
+        "lower": 1.78056069364269,
+        "upper": 2.09240520514412
+      },
+      "x2": {
+        "lower": 1.21921148867578,
+        "upper": 1.50818404913708
+      }
+    }
+  }
+}

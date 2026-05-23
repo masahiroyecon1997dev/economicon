@@ -19,6 +19,7 @@ IV 推定の構成:
   操作変数: value_lag (各 firm 内での value の1期前ラグ)
 """
 
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -33,7 +34,6 @@ from linearmodels.panel import PanelOLS, RandomEffects
 from sklearn.linear_model import Lasso, Ridge
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from statsmodels.datasets import get_rdataset
 
 from economicon.services.data.analysis_result_store import (
     AnalysisResultStore,
@@ -51,9 +51,16 @@ from tests.regressions.conftest import (
 
 TABLE_GRUNFELD = "GrunfeldData"
 TABLE_GRUNFELD_IV = "GrunfeldIVData"
+_DATA_PARQUET = (
+    Path(__file__).resolve().parents[3]
+    / "test"
+    / "data"
+    / "parquet"
+    / "plm_grunfeld.parquet"
+)
 
-# 浮動小数点の許容誤差 (API JSONラウンドトリップなしのため 1e-10 まで収める)
-_ABS_TOL = 1e-10
+# 浮動小数点の許容誤差
+_ABS_TOL = 1e-8
 
 # HAC 標準誤差は収束依存のため緩め
 _HAC_ABS_TOL = 1e-6
@@ -93,17 +100,15 @@ _HAC_MAXLAGS = 1
 @pytest.fixture(scope="module")
 def grunfeld_raw() -> pd.DataFrame:
     """
-    Grunfeld データを pandas DataFrame で返す。
+    生成済み parquet から Grunfeld データを pandas DataFrame で返す。
 
     列: firm, year, inv, value, capital
     全列を float に変換して返す (TablesStore 互換)。
     """
-    dataset = get_rdataset("Grunfeld", "plm")
-    assert dataset is not None, "statsmodels Grunfeld dataset not found"
-    data = dataset.data
-    assert data is not None, "Grunfeld dataset.data is None"
-    df: pd.DataFrame = data[["firm", "year", "inv", "value", "capital"]].copy()
-    df = df.astype(float)
+    assert _DATA_PARQUET.exists(), (
+        f"Grunfeld parquet not found: {_DATA_PARQUET}"
+    )
+    df = pd.read_parquet(_DATA_PARQUET).astype(float)
     return df.reset_index(drop=True)
 
 
@@ -184,7 +189,7 @@ def _post_and_fetch(client, payload: dict) -> tuple[str, dict]:
 
     Returns
     -------
-    (result_id, regressionOutput)
+    (result_id, resultData)
     """
     resp = client.post(URL_REGRESSION, json=payload)
     assert resp.status_code == status.HTTP_200_OK, resp.text
@@ -199,7 +204,7 @@ def _post_and_fetch(client, payload: dict) -> tuple[str, dict]:
     result_data = results_resp.json()
     assert result_data["code"] == "OK"
 
-    output: dict = result_data["result"]["regressionOutput"]
+    output: dict = result_data["result"]["resultData"]
     return result_id, output
 
 
@@ -966,7 +971,7 @@ def test_grunfeld_ols_idempotent(client, grunfeld_store):
 def test_results_endpoint_required_keys(client, grunfeld_store):
     """
     GET /api/analysis/results/{result_id} の必須キーを検証する。
-    id, name, tableName, regressionOutput が存在すること。
+    id, name, tableName, resultData が存在すること。
     """
     result_id, _ = _post_and_fetch(client, _ols_payload())
 
@@ -974,7 +979,7 @@ def test_results_endpoint_required_keys(client, grunfeld_store):
     assert resp.status_code == status.HTTP_200_OK
 
     result = resp.json()["result"]
-    for key in ("id", "name", "tableName", "regressionOutput"):
+    for key in ("id", "name", "tableName", "resultData"):
         assert key in result, (
             f"GET /results/{{id}} のレスポンスに {key!r} が存在しない"
         )

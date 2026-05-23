@@ -1,51 +1,55 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { CalculateColumnBody } from "@/api/zod/column/column";
+import { ExpressionHelperButton } from "@/components/atoms/Button/ExpressionHelperButton";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { SearchInput } from "@/components/molecules/Form/SearchInput";
+import { PageLayout } from "@/components/templates/PageLayout";
+import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
+import { showMessageDialog } from "@/lib/dialog/message";
+import {
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
+} from "@/lib/utils/apiError";
+import { getPolarsTypeColor } from "@/lib/utils/columnTypeColor";
+import { createFieldError } from "@/lib/utils/formHelpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
 import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { CalculateColumnBody } from "../../api/zod/column/column";
-import { useTableColumnLoader } from "../../hooks/useTableColumnLoader";
-import { showMessageDialog } from "../../lib/dialog/message";
-import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-} from "../../lib/utils/apiError";
-import { getPolarsTypeColor } from "../../lib/utils/columnTypeColor";
-import { createFieldError } from "../../lib/utils/formHelpers";
-import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import { ExpressionHelperButton } from "../atoms/Button/ExpressionHelperButton";
-import { InputText } from "../atoms/Input/InputText";
-import { Select, SelectItem } from "../atoms/Input/Select";
-import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
-import { FormField } from "../molecules/Form/FormField";
-import { SearchInput } from "../molecules/Form/SearchInput";
-import { PageLayout } from "../templates/PageLayout";
 
 export const Calculation = () => {
   const { t } = useTranslation();
   const tErr = createFieldError(t);
   const tableList = useTableListStore((state) => state.tableList);
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
+  const initialTableName =
+    useTableInfosStore((state) => state.activeTableName) ?? "";
   const { tableInfos, addTableInfo, invalidateTable, activateTableInfo } =
     useTableInfosStore();
 
-  const { selectedTableName, setSelectedTableName, columnList } =
-    useTableColumnLoader({
-      numericOnly: false,
-      autoLoadOnMount: true,
-    });
+  const { setSelectedTableName, columnList } = useTableColumnLoader({
+    numericOnly: false,
+    autoLoadOnMount: true,
+  });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [filterValue, setFilterValue] = useState<string>("");
 
   const form = useForm({
     defaultValues: {
-      tableName: selectedTableName,
+      tableName: initialTableName,
       newColumnName: "",
-      addPositionColumn: "",
+      addPositionColumn: columnList[columnList.length - 1]?.name ?? "",
       calculationExpression: "",
     },
     validators: {
@@ -78,34 +82,28 @@ export const Calculation = () => {
           } else {
             addTableInfo(updatedTableInfo);
           }
-          setCurrentView("DataPreview");
+          closeActiveWorkTab();
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError")),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
         );
       }
     },
   });
 
-  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
-
-  // columnList が更新されたら末尾列を追加位置のデフォルトとして設定
   useEffect(() => {
-    if (columnList.length > 0) {
-      form.setFieldValue(
-        "addPositionColumn",
-        columnList[columnList.length - 1].name,
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnList]);
+    const defaultColumn = columnList[columnList.length - 1]?.name ?? "";
+    form.setFieldValue("addPositionColumn", defaultColumn);
+  }, [columnList, form]);
+
+  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
   const handleTableChange = (value: string) => {
     setSelectedTableName(value);
@@ -145,7 +143,7 @@ export const Calculation = () => {
     textareaRef.current?.focus();
   };
 
-  const handleCancel = () => setCurrentView("DataPreview");
+  const handleCancel = () => closeActiveWorkTab();
 
   const filteredColumns = columnList.filter((column) =>
     column.name.toLowerCase().includes(filterValue.toLowerCase()),
@@ -164,7 +162,7 @@ export const Calculation = () => {
         }}
         className="flex flex-col flex-1 min-h-0 gap-4"
       >
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="app-scrollbar flex-1 overflow-y-auto min-h-0">
           <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-color overflow-hidden">
             <div className="p-4 border-b border-border-color grid grid-cols-1 md:grid-cols-2 gap-4 bg-neutral-50/50 dark:bg-neutral-800/30">
               {/* テーブル選択 */}
@@ -317,17 +315,21 @@ export const Calculation = () => {
                     )
                   </ExpressionHelperButton>
                   <div className="ml-auto flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleClearClick}
-                      className="text-neutral-400 hover:text-accent transition-colors"
-                      title={t("CalculationView.ClearAll")}
-                      disabled={isSubmitting}
-                    >
-                      <span className="material-symbols-outlined text-[20px]">
-                        <Eraser />
+                    <Tooltip content={t("CalculationView.ClearAll")}>
+                      <span className="inline-flex">
+                        <button
+                          type="button"
+                          onClick={handleClearClick}
+                          className="text-neutral-400 hover:text-accent transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                          aria-label={t("CalculationView.ClearAll")}
+                          disabled={isSubmitting}
+                        >
+                          <span className="material-symbols-outlined text-[20px]">
+                            <Eraser />
+                          </span>
+                        </button>
                       </span>
-                    </button>
+                    </Tooltip>
                   </div>
                 </div>
 
@@ -390,7 +392,7 @@ export const Calculation = () => {
                     />
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                <div className="app-scrollbar flex-1 overflow-y-auto p-2 space-y-1">
                   {filteredColumns.map((column, index) => {
                     const typeColor = getPolarsTypeColor(column.type);
                     return (
@@ -433,6 +435,7 @@ export const Calculation = () => {
           onCancel={handleCancel}
           onSelect={() => {}}
           onSelectType="submit"
+          isLoading={isSubmitting}
         />
       </form>
     </PageLayout>

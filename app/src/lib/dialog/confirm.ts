@@ -1,4 +1,7 @@
-import { useConfirmDialogStore } from "../../stores/confirmDialog";
+import {
+  type ShowConfirmDialogOptionsType,
+  useConfirmDialogStore,
+} from "@/stores/confirmDialog";
 
 /**
  * 確認ダイアログを表示する汎用関数
@@ -9,6 +12,9 @@ import { useConfirmDialogStore } from "../../stores/confirmDialog";
 export const showConfirmDialog = (
   title: string,
   message: string,
+  options?: ShowConfirmDialogOptionsType,
 ): Promise<boolean> => {
-  return useConfirmDialogStore.getState().showConfirmDialog(title, message);
+  return useConfirmDialogStore
+    .getState()
+    .showConfirmDialog(title, message, options);
 };

@@ -8,9 +8,9 @@
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { useCallback, useState } from "react";
-import { getEconomiconAppAPI } from "../api/endpoints";
-import { useTableInfosStore } from "../stores/tableInfos";
-import type { ColumnType } from "../types/commonTypes";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import type { ColumnType } from "@/types/commonTypes";
 
 type UseDragColumnReorderOptions = {
   tableName: string;

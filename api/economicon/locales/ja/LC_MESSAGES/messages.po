@@ -18,6 +18,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
+#: economicon/services/data/analysis_result.py
+msgid "regression"
+msgstr "回帰分析"
+
+msgid "confidence_interval"
+msgstr "信頼区間"
+
+msgid "descriptive_statistics"
+msgstr "基本統計量"
+
+msgid "statistical_test"
+msgstr "仮説検定"
+
+msgid "did"
+msgstr "差の差分析"
+
+msgid "rdd"
+msgstr "回帰不連続デザイン"
+
+msgid "heckman"
+msgstr "ヘキットモデル"
+
 #: economicon/exception_handlers.py:34
 msgid "An unexpected error occurred during processing"
 msgstr "処理中に予期しないエラーが発生しました"
@@ -77,10 +99,6 @@ msgstr "テーブルの削除処理中に予期しないエラーが発生しま
 #: economicon/services/descriptive_statistics.py:148
 msgid "An unexpected error occurred during descriptive statistics processing"
 msgstr "記述統計の処理中に予期しないエラーが発生しました"
-
-#: economicon/services/duplicate_column.py:82
-msgid "An unexpected error occurred during duplicating column processing"
-msgstr "列の複製処理中に予期しないエラーが発生しました"
 
 #: economicon/services/duplicate_table.py:64
 msgid "An unexpected error occurred during table duplication processing"
@@ -185,8 +203,18 @@ msgstr "{} '{}'は存在しません。"
 msgid "{} '{}' already exists."
 msgstr "{} '{}'は既に存在します。"
 
+#, python-brace-format
+msgid "Table '{}' has too many rows for plotting ({} rows). The maximum is {} rows."
+msgstr "テーブル '{}'のプロット対象行数（{}行）が上限（{}行）を超えています。"
+
 msgid "For uniform distribution, 'low' must be less than 'high'"
 msgstr "一様分布では、'low'は'high'より小さい必要があります"
+
+msgid "For hypergeometric distribution, 'successCount' must not exceed 'populationSize'"
+msgstr "超幾何分布では、'successCount'は'populationSize'を超えてはいけません"
+
+msgid "For hypergeometric distribution, 'sampleSize' must not exceed 'populationSize'"
+msgstr "超幾何分布では、'sampleSize'は'populationSize'を超えてはいけません"
 
 msgid "For proportion confidence interval, data must contain only 0 and 1 values"
 msgstr "データには0と1の値のみが含まれる必要があります"
@@ -196,6 +224,17 @@ msgstr "CSVファイルが空であるか、有効なデータが含まれてい
 
 msgid "Column contains no valid data"
 msgstr "カラムに有効なデータが含まれていません"
+
+msgid "All analysis results must have the same result type for output."
+msgstr "出力対象の分析結果はすべて同じ resultType である必要があります。"
+
+#, python-format
+msgid "Requested result type '%(requested)s' does not match stored analysis result type '%(actual)s'."
+msgstr "要求された resultType '%(requested)s' は、保存済み分析結果の resultType '%(actual)s' と一致しません。"
+
+#, python-format
+msgid "Requested result type '%(requested)s' is not supported for formatted output."
+msgstr "要求された resultType '%(requested)s' は整形出力をサポートしていません。"
 
 # フィールド名の翻訳
 msgid "Field.tableName"
@@ -355,3 +394,27 @@ msgstr "'{}' 構文"
 #: economicon/utils/algorithms/formula_parser.py
 msgid "keyword arguments in function calls"
 msgstr "関数呼び出しへのキーワード引数"
+
+# 分析結果名自動生成フォーマット
+#, python-brace-format
+msgid "{column} の {stat_type} 信頼区間 #{seq}"
+msgstr "{column} の {stat_type} 信頼区間 #{seq}"
+
+#, python-brace-format
+msgid "{table} 記述統計 #{seq}"
+msgstr "{table} 記述統計 #{seq}"
+
+#, python-brace-format
+msgid "{test_type}（{n}群） #{seq}"
+msgstr "{test_type}（{n}群） #{seq}"
+
+#, python-brace-format
+msgid "{model_type}: {dependent} #{seq}"
+msgstr "{model_type}: {dependent} #{seq}"
+
+msgid "An unexpected error occurred during group statistics table creation processing"
+msgstr "グループ別統計量テーブルの作成処理中に予期しないエラーが発生しました"
+
+#, python-brace-format
+msgid "The following columns cannot be used as group keys because they are floating-point type: {}"
+msgstr "以下の列は浮動小数点型のためグループキーとして使用できません: {}"

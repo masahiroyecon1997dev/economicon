@@ -21,10 +21,13 @@
  * 7. Excel 形式で保存
  */
 
+import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
+  clearWorkspaceFromUi,
   clickHeaderMenu,
-  closeMessageDialog,
+  closeSaveSuccessDialog,
+  deleteFileFromImportScreen,
   importFile,
   navigateToSampleDir,
 } from "./helpers/appHelpers";
@@ -37,26 +40,37 @@ const EXCEL_FILE_1 = "ジョイン1.xlsx";
 const EXCEL_FILE_2 = "ジョイン2.xlsx";
 const CSV_FILE_1 = "ユニオン1.csv";
 const CSV_FILE_2 = "ユニオン2.csv";
+const RUN_ID = `e2e${Date.now().toString(36)}`;
 
-const JOIN_LEFT_TABLE = "join1";
-const JOIN_RIGHT_TABLE = "join2";
-const UNION_TABLE_1 = "union1";
-const UNION_TABLE_2 = "union2";
-const JOINED_TABLE_NAME = "joined_result";
-const UNIONED_TABLE_NAME = "unioned_result";
-const SIMULATION_TABLE_NAME = "sim_data";
+const JOIN_LEFT_TABLE = `join1_${RUN_ID}`;
+const JOIN_RIGHT_TABLE = `join2_${RUN_ID}`;
+const UNION_TABLE_1 = `union1_${RUN_ID}`;
+const UNION_TABLE_2 = `union2_${RUN_ID}`;
+const JOINED_TABLE_NAME = `joined_result_${RUN_ID}`;
+const UNIONED_TABLE_NAME = `unioned_result_${RUN_ID}`;
+const SIMULATION_TABLE_NAME = `sim_data_${RUN_ID}`;
+const STEP_TIMEOUT_MS = 90_000;
+
+let page: Page;
 
 // ---------------------------------------------------------------------------
 // テストスイート
 // ---------------------------------------------------------------------------
-test.describe("03: Excel 取り込み → Join → Union → データ生成 → 計算列", () => {
+test.describe
+  .serial("03: Excel 取り込み → Join → Union → データ生成 → 計算列", () => {
+  test.beforeAll(async ({ playwright }) => {
+    page = await setupTauriApp(playwright);
+    await clearWorkspaceFromUi(page);
+  });
+
   // =========================================================================
   // STEP 1: Excel ファイル 2 件をインポート
   // =========================================================================
-  test("Step 1: Excel ファイル（ジョイン1・ジョイン2）をインポートする", async ({
-    playwright,
-  }) => {
-    const page = await setupTauriApp(playwright);
+  test("Step 1: Excel ファイル（ジョイン1・ジョイン2）をインポートする", async () => {
+    test.setTimeout(STEP_TIMEOUT_MS);
+
+    await clickHeaderMenu(page, /ファイル|File/i, /^取り込み$|^Import$/);
+
     // ファイル選択タブに切り替え
     const fileSelectTab = page.getByRole("tab", {
       name: /ファイル選択|Select File/i,
@@ -89,10 +103,9 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 2: CSV ファイル 2 件をインポート
   // =========================================================================
-  test("Step 2: CSV ファイル（ユニオン1・ユニオン2）をインポートする", async ({
-    playwright,
-  }) => {
-    const page = await setupTauriApp(playwright);
+  test("Step 2: CSV ファイル（ユニオン1・ユニオン2）をインポートする", async () => {
+    test.setTimeout(STEP_TIMEOUT_MS);
+
     // ユニオン1.csv をインポート
     await clickHeaderMenu(page, /ファイル|File/i, /^取り込み$|^Import$/);
     const fileSelectTab = page.getByRole("tab", {
@@ -121,8 +134,9 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 3: データ → ジョイン
   // =========================================================================
-  test("Step 3: データ → ジョインを実行する", async ({ playwright }) => {
-    const page = await setupTauriApp(playwright);
+  test("Step 3: データ → ジョインを実行する", async () => {
+    test.setTimeout(STEP_TIMEOUT_MS);
+
     // ヘッダーメニュー: データ → ジョイン
     await clickHeaderMenu(page, /^データ$|^Data$/i, /ジョイン|Join/i);
 
@@ -208,8 +222,9 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 4: データ → ユニオン
   // =========================================================================
-  test("Step 4: データ → ユニオンを実行する", async ({ playwright }) => {
-    const page = await setupTauriApp(playwright);
+  test("Step 4: データ → ユニオンを実行する", async () => {
+    test.setTimeout(STEP_TIMEOUT_MS);
+
     // ヘッダーメニュー: データ → ユニオン
     await clickHeaderMenu(page, /^データ$|^Data$/i, /ユニオン|Union/i);
 
@@ -285,10 +300,9 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 5: データ → データ生成
   // =========================================================================
-  test("Step 5: データ生成（シミュレーションデータ作成）", async ({
-    playwright,
-  }) => {
-    const page = await setupTauriApp(playwright);
+  test("Step 5: データ生成（シミュレーションデータ作成）", async () => {
+    test.setTimeout(STEP_TIMEOUT_MS);
+
     // ヘッダーメニュー: データ → データ生成
     await clickHeaderMenu(
       page,
@@ -323,23 +337,12 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
     const nameInput = colDialog.getByRole("textbox").first();
     await nameInput.fill("sim_col_1");
 
-    // データタイプ: 確率変数を選択
-    const typeTrigger = colDialog.locator(`button[id^="data-type-"]`);
-    await typeTrigger.click();
-    const probabilityOption = page.getByRole("option", {
-      name: /^(確率分布|Probability Distribution)$/i,
-    });
-    await probabilityOption.waitFor({ state: "visible" });
-    await probabilityOption.click();
-
-    // 分布: 正規分布を選択
-    const distTrigger = colDialog.locator('button[id^="distribution-type-"]');
-    await distTrigger.click();
-    const normalOption = page.getByRole("option", {
+    // 現行UIでは分布種別はタブ + radio で選択する
+    const normalRadio = colDialog.getByRole("radio", {
       name: /^(正規分布|Normal)$/i,
     });
-    await normalOption.waitFor({ state: "visible" });
-    await normalOption.click({ force: true });
+    await normalRadio.waitFor({ state: "visible" });
+    await normalRadio.click();
 
     // ダイアログを保存（submitLabel = t("Common.Save") = "設定"）
     await colDialog.getByRole("button", { name: "設定" }).click();
@@ -357,8 +360,9 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 6: データ → 計算列の追加
   // =========================================================================
-  test("Step 6: データ → 計算列を追加する", async ({ playwright }) => {
-    const page = await setupTauriApp(playwright);
+  test("Step 6: データ → 計算列を追加する", async () => {
+    test.setTimeout(STEP_TIMEOUT_MS);
+
     // ヘッダーメニュー: データ → 計算
     await clickHeaderMenu(page, /^データ$|^Data$/i, /^計算$|^Calculate$/i);
 
@@ -438,14 +442,17 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
   // =========================================================================
   // STEP 7: Excel 形式で保存
   // =========================================================================
-  test("Step 7: Excel 形式で保存する", async ({ playwright }) => {
-    const page = await setupTauriApp(playwright);
+  test("Step 7: Excel 形式で保存する", async () => {
+    test.setTimeout(STEP_TIMEOUT_MS);
+
     // ヘッダーメニュー: ファイル → 保存
     await clickHeaderMenu(page, /ファイル|File/i, /^保存$|^Save$/);
 
     await expect(
       page.getByRole("heading", { name: /データを保存|Save Data/i }),
     ).toBeVisible();
+
+    await navigateToSampleDir(page);
 
     // 保存対象データを選択（ジョイン結果を選択）
     const tableNameSelect = page.getByLabel(/保存するデータ|Data to Save/i);
@@ -481,11 +488,19 @@ test.describe("03: Excel 取り込み → Join → Union → データ生成 →
 
     // 上書き確認があれば OK
     const confirmDlg = page.getByRole("dialog");
-    if (await confirmDlg.isVisible()) {
+    if (
+      await confirmDlg
+        .getByText(/上書き|Overwrite/i)
+        .isVisible()
+        .catch(() => false)
+    ) {
       await confirmDlg.getByRole("button", { name: /OK|はい/i }).click();
     }
 
     // 成功メッセージを閉じる
-    await closeMessageDialog(page);
+    await closeSaveSuccessDialog(page);
+
+    // 保存したファイルをインポート画面から削除
+    await deleteFileFromImportScreen(page, `${JOINED_TABLE_NAME}_export.xlsx`);
   });
 });

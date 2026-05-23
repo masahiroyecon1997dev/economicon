@@ -1,29 +1,29 @@
-import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { JoinType } from "../../api/model";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { JoinType } from "@/api/model";
 import {
   createJoinTableBodyJoinTableNameMax,
   createJoinTableBodyJoinTableNameRegExp,
-} from "../../api/zod/table/table";
-import { showMessageDialog } from "../../lib/dialog/message";
+} from "@/api/zod/table/table";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { SectionCard } from "@/components/molecules/Card/SectionCard";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { PageLayout } from "@/components/templates/PageLayout";
+import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-} from "../../lib/utils/apiError";
-import { cn, generateId } from "../../lib/utils/helpers";
-import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import type { ColumnType } from "../../types/commonTypes";
-import { InputText } from "../atoms/Input/InputText";
-import { Select, SelectItem } from "../atoms/Input/Select";
-import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
-import { SectionCard } from "../molecules/Card/SectionCard";
-import { FormField } from "../molecules/Form/FormField";
-import { PageLayout } from "../templates/PageLayout";
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
+} from "@/lib/utils/apiError";
+import { cn, generateId } from "@/lib/utils/helpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import type { ColumnType } from "@/types/commonTypes";
+import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type KeyPair = { id: string; left: string; right: string };
 
@@ -38,7 +38,7 @@ export const JoinTable = () => {
   const tableList = useTableListStore((s) => s.tableList);
   const addTableName = useTableListStore((s) => s.addTableName);
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const closeActiveWorkTab = useWorkspaceTabsStore((s) => s.closeActiveWorkTab);
 
   const [leftTable, setLeftTable] = useState("");
   const [rightTable, setRightTable] = useState("");
@@ -177,17 +177,17 @@ export const JoinTable = () => {
         const tableInfo = await getTableInfo(newTableName.trim());
         addTableName(newTableName.trim());
         addTableInfo(tableInfo);
-        setCurrentView("DataPreview");
+        closeActiveWorkTab();
       } else {
         await showMessageDialog(
           t("Error.Error"),
-          getResponseErrorMessage(resp, t("Error.UnexpectedError")),
+          buildResponseErrorMessage(resp, t("Error.UnexpectedError")),
         );
       }
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     } finally {
       setIsSubmitting(false);
@@ -201,7 +201,7 @@ export const JoinTable = () => {
       title={t("JoinTable.Title")}
       description={t("JoinTable.Description")}
     >
-      <div className="flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
+      <div className="app-scrollbar flex flex-col flex-1 min-h-0 gap-4 overflow-y-auto pb-2">
         {/* ── Section 1: テーブル・結合タイプ ── */}
         <SectionCard title={t("JoinTable.SelectData")}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -388,8 +388,9 @@ export const JoinTable = () => {
         selectText={
           isSubmitting ? t("JoinTable.Processing") : t("JoinTable.RunJoin")
         }
-        onCancel={() => setCurrentView("DataPreview")}
+        onCancel={closeActiveWorkTab}
         onSelect={handleSubmit}
+        isLoading={isSubmitting}
       />
     </PageLayout>
   );

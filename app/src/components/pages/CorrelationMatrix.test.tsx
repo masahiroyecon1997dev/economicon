@@ -1,3 +1,11 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { CorrelationMethod, MissingHandlingMethod } from "@/api/model";
+import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentPage";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import {
   act,
   fireEvent,
@@ -7,12 +15,6 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import { CorrelationMatrix } from "./CorrelationMatrix";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -41,16 +43,22 @@ vi.mock("../../lib/utils/internal", () => ({
     isActive: true,
   }),
 }));
-vi.mock("../../hooks/useTableColumnLoader", () => ({
-  useTableColumnLoader: () => ({
-    selectedTableName: "",
-    setSelectedTableName: vi.fn(),
-    columnList: [
-      { name: "price", type: "Float64" },
-      { name: "quantity", type: "Float64" },
-    ],
-    setColumnList: vi.fn(),
+const mockTableLoader = vi.hoisted(() => ({
+  selectedTableName: "",
+  setSelectedTableName: vi.fn((tableName: string) => {
+    mockTableLoader.selectedTableName = tableName;
   }),
+  columnList: [
+    { name: "price", type: "Float64" },
+    { name: "quantity", type: "Float64" },
+  ],
+  setColumnList: vi.fn((columnList: Array<{ name: string; type: string }>) => {
+    mockTableLoader.columnList = columnList;
+  }),
+  isLoading: false,
+}));
+vi.mock("../../hooks/useTableColumnLoader", () => ({
+  useTableColumnLoader: () => ({ ...mockTableLoader }),
 }));
 
 // ---------------------------------------------------------------------------
@@ -69,19 +77,71 @@ const submitForm = async () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockTableLoader.selectedTableName = "";
+  mockTableLoader.columnList = [
+    { name: "price", type: "Float64" },
+    { name: "quantity", type: "Float64" },
+  ];
+  mockTableLoader.isLoading = false;
+  mockTableLoader.setSelectedTableName.mockImplementation(
+    (tableName: string) => {
+      mockTableLoader.selectedTableName = tableName;
+    },
+  );
+  mockTableLoader.setColumnList.mockImplementation(
+    (columnList: Array<{ name: string; type: string }>) => {
+      mockTableLoader.columnList = columnList;
+    },
+  );
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales", "costs"] });
   useTableInfosStore.setState({
     tableInfos: [],
     activeTableName: null,
   });
-  useCurrentPageStore.setState({ currentView: "CorrelationMatrix" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
+  useWorkspaceTabsStore.setState({
+    tabs: [],
+    activeTabId: null,
+  });
 });
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 describe("CorrelationMatrix フォーム", () => {
+  describe("empty state", () => {
+    it("テーブルが 0 件なら NoTables state を表示し、ImportDataFile に遷移できる", async () => {
+      const user = userEvent.setup();
+      useTableListStore.setState({ tableList: [] });
+
+      render(<CorrelationMatrix />);
+
+      expect(
+        screen.getByTestId("analysis-no-tables-state"),
+      ).toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", {
+          name: "AnalysisEmptyState.NoTablesAction",
+        }),
+      );
+
+      expect(useCurrentPageStore.getState().currentView).toBe("ImportDataFile");
+    });
+
+    it("対象列がないときは共通 no-columns state を表示する", () => {
+      mockTableLoader.selectedTableName = "sales";
+      mockTableLoader.columnList = [];
+
+      render(<CorrelationMatrix />);
+
+      expect(
+        screen.getByTestId("correlation-matrix-no-columns-state"),
+      ).toBeInTheDocument();
+    });
+  });
+
   describe("バリデーション", () => {
     it("テーブル未選択でサブミットするとエラーが表示される", async () => {
       render(<CorrelationMatrix />);
@@ -100,7 +160,7 @@ describe("CorrelationMatrix フォーム", () => {
       await submitForm();
 
       await waitFor(() => {
-        // テーブル未選択エラーと出力名エラーが出る
+        // テーブル未選択エラーと出力名エラーが表示される
         expect(
           screen.getAllByText(/ErrorDataRequired|ErrorOutputNameRequired/),
         ).toBeTruthy();
@@ -126,7 +186,7 @@ describe("CorrelationMatrix フォーム", () => {
       });
     });
 
-    it("詳細オプションを2回クリックすると折りたたまれる", async () => {
+    it("詳細オプションボタンを再度クリックすると折りたたまれる", async () => {
       const user = userEvent.setup();
       render(<CorrelationMatrix />);
 
@@ -143,19 +203,15 @@ describe("CorrelationMatrix フォーム", () => {
   });
 
   describe("API成功時", () => {
-    it("createCorrelationTable が OK → DataPreview へ遷移する", async () => {
+    it("createCorrelationTable が OK → Workspace へ遷移する", async () => {
       mockApi.createCorrelationTable.mockResolvedValue({
         code: "OK",
         result: { tableName: "corr_result" },
       });
+      mockTableLoader.selectedTableName = "sales";
+      useTableInfosStore.setState({ tableInfos: [], activeTableName: "sales" });
       const user = userEvent.setup();
       render(<CorrelationMatrix />);
-
-      // テーブルを選択
-      const selectTrigger = screen.getByRole("combobox");
-      await user.click(selectTrigger);
-      const option = await screen.findByRole("option", { name: "sales" });
-      await user.click(option);
 
       // 出力データ名を入力
       const outputInput = screen.getByRole("textbox");
@@ -166,8 +222,88 @@ describe("CorrelationMatrix フォーム", () => {
       await waitFor(() => {
         expect(mockApi.createCorrelationTable).toHaveBeenCalledTimes(1);
       });
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
+      expect(useTableListStore.getState().tableList).toContain("corr_result");
       expect(vi.mocked(showMessageDialog)).not.toHaveBeenCalled();
+    });
+
+    it("work tab モードでは成功時に onSuccess を呼び、dirty が false に戻る", async () => {
+      mockApi.createCorrelationTable.mockResolvedValue({
+        code: "OK",
+        result: { tableName: "corr_result" },
+      });
+      const onSuccess = vi.fn();
+      useWorkspaceTabsStore.setState({
+        tabs: [
+          {
+            id: "work:CorrelationMatrix",
+            kind: "work",
+            title: "相関行列",
+            featureKey: "CorrelationMatrix",
+            dirty: true,
+            createdAt: Date.now(),
+            draftValues: {
+              tableName: "sales",
+              columnNames: ["price", "quantity"],
+              newTableName: "corr_result",
+              method: CorrelationMethod.pearson,
+              decimalPlaces: 3,
+              lowerTriangleOnly: false,
+              missingHandling: MissingHandlingMethod.pairwise,
+            },
+            committedValues: {
+              tableName: "sales",
+              columnNames: ["price"],
+              newTableName: "corr_old",
+              method: CorrelationMethod.pearson,
+              decimalPlaces: 3,
+              lowerTriangleOnly: false,
+              missingHandling: MissingHandlingMethod.pairwise,
+            },
+          },
+        ],
+        activeTabId: "work:CorrelationMatrix",
+      });
+
+      render(
+        <CorrelationMatrix
+          workTabId="work:CorrelationMatrix"
+          onSuccess={onSuccess}
+        />,
+      );
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(onSuccess).toHaveBeenCalledWith("corr_result", {
+          tableName: "sales",
+          columnNames: ["price", "quantity"],
+          newTableName: "corr_result",
+          method: CorrelationMethod.pearson,
+          decimalPlaces: 3,
+          lowerTriangleOnly: false,
+          missingHandling: MissingHandlingMethod.pairwise,
+        });
+      });
+
+      expect(
+        useWorkspaceTabsStore
+          .getState()
+          .tabs.find((tab) => tab.id === "work:CorrelationMatrix"),
+      ).toMatchObject({
+        kind: "work",
+        dirty: false,
+        draftValues: {
+          tableName: "sales",
+          columnNames: ["price", "quantity"],
+          newTableName: "corr_result",
+        },
+        committedValues: {
+          tableName: "sales",
+          columnNames: ["price", "quantity"],
+          newTableName: "corr_result",
+        },
+      });
     });
   });
 
@@ -175,15 +311,12 @@ describe("CorrelationMatrix フォーム", () => {
     it("code ≠ OK → エラーダイアログを表示する", async () => {
       mockApi.createCorrelationTable.mockResolvedValue({
         code: "UNEXPECTED_ERROR",
-        message: "相関計算に失敗しました",
+        message: "newTableName 'corr_result'は既に存在します。",
       });
+      mockTableLoader.selectedTableName = "sales";
+      useTableInfosStore.setState({ tableInfos: [], activeTableName: "sales" });
       const user = userEvent.setup();
       render(<CorrelationMatrix />);
-
-      const selectTrigger = screen.getByRole("combobox");
-      await user.click(selectTrigger);
-      const option = await screen.findByRole("option", { name: "sales" });
-      await user.click(option);
 
       const outputInput = screen.getByRole("textbox");
       await user.type(outputInput, "corr_result");
@@ -193,7 +326,7 @@ describe("CorrelationMatrix フォーム", () => {
       await waitFor(() => {
         expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
           "Error.Error",
-          "Error.UnexpectedError",
+          "CorrelationMatrix.OutputDataLabel 'corr_result'は既に存在します。",
         );
       });
     });
@@ -202,13 +335,10 @@ describe("CorrelationMatrix フォーム", () => {
       mockApi.createCorrelationTable.mockRejectedValue(
         new Error("ネットワークエラー"),
       );
+      mockTableLoader.selectedTableName = "sales";
+      useTableInfosStore.setState({ tableInfos: [], activeTableName: "sales" });
       const user = userEvent.setup();
       render(<CorrelationMatrix />);
-
-      const selectTrigger = screen.getByRole("combobox");
-      await user.click(selectTrigger);
-      const option = await screen.findByRole("option", { name: "sales" });
-      await user.click(option);
 
       const outputInput = screen.getByRole("textbox");
       await user.type(outputInput, "corr_result");
@@ -225,15 +355,32 @@ describe("CorrelationMatrix フォーム", () => {
   });
 
   describe("キャンセル", () => {
-    it("キャンセルボタンをクリックすると DataPreview に遷移する", async () => {
+    it("キャンセルボタンをクリックすると Workspace に遷移する", async () => {
       const user = userEvent.setup();
-      useCurrentPageStore.setState({ currentView: "CorrelationMatrix" });
+      useCurrentPageStore.setState({ currentView: "Workspace" });
       render(<CorrelationMatrix />);
 
       const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
       await user.click(cancelBtn);
 
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
+    });
+
+    it("work tab モードではキャンセル時に onCancel を呼ぶ", async () => {
+      const user = userEvent.setup();
+      const onCancel = vi.fn();
+
+      render(
+        <CorrelationMatrix
+          workTabId="work:CorrelationMatrix"
+          onCancel={onCancel}
+        />,
+      );
+
+      const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
+      await user.click(cancelBtn);
+
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
   });
 });

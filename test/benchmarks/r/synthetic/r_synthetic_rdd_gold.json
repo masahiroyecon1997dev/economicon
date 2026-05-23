@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T15:46:34+0900",
+    "r_version": "4.5.2",
+    "sandwich_version": "3.1.1",
+    "plm_version": "2.6.7",
+    "aer_version": "1.2.16",
+    "glmnet_version": "4.1.10",
+    "censReg_version": "0.5.38",
+    "sampleSelection_version": "1.2.14",
+    "rdrobust_version": "3.0.0",
+    "seed": 2024,
+    "tolerance_guide": {
+      "ols_coef": "atol=1e-8 (nonrobust)",
+      "ols_se_hc1": "atol=1e-6 (sandwich::vcovHC vs statsmodels HC1)",
+      "logit_probit_coef": "atol=1e-6 (MLE 収束差)",
+      "fe_re_coef": "atol=1e-8",
+      "iv_coef": "atol=1e-8 (AER::ivreg vs linearmodels::IV2SLS)",
+      "tobit_coef": "atol=1e-4 (censReg vs py4etrics MLE 実装差)",
+      "heckman_coef": "atol=1e-6 (sampleSelection vs statsmodels 手動 2 段階)",
+      "rdd_coef": "atol=1e-4 (rdrobust 共通実装なので高精度一致期待)",
+      "lasso_ridge_scaled": "atol=1e-5 (sklearn / glmnet 同一目的関数)"
+    },
+    "data_file": "synthetic_rdd.csv",
+    "model": "rdd"
+  },
+  "estimates": {
+    "dep_var": "y",
+    "running_var": "running_var",
+    "cutoff": 0,
+    "n_total": 1000,
+    "n_left": 175,
+    "n_right": 203,
+    "bandwidth": {
+      "bw_left": 0.79033371074543,
+      "bw_right": 0.79033371074543,
+      "bw_bias_left": 1.19027596543107,
+      "bw_bias_right": 1.19027596543107
+    },
+    "conventional": {
+      "coef": 4.30603737000268,
+      "std_err": 0.336654708814917,
+      "t_stat": {},
+      "p_value": 1.84886700135357e-37,
+      "ci_lower": 3.64620626549962,
+      "ci_upper": 4.96586847450573
+    },
+    "bias_corrected": {
+      "coef": 4.24589068712274,
+      "std_err": 0.336654708814917,
+      "t_stat": {},
+      "p_value": 1.81321909057647e-36,
+      "ci_lower": 3.58605958261969,
+      "ci_upper": 4.9057217916258
+    },
+    "robust": {
+      "coef": 4.24589068712274,
+      "std_err": 0.399810989310601,
+      "t_stat": {},
+      "p_value": 2.41219591289082e-26,
+      "ci_lower": 3.46227554745064,
+      "ci_upper": 5.02950582679485
+    }
+  }
+}

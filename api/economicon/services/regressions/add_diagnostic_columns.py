@@ -19,6 +19,7 @@ from economicon.services.regressions.diagnostics import (
     DiagnosticExtractOptions,
     PanelExtractConfig,
     TobitExtractConfig,
+    extract_from_heckman,
     extract_from_linearmodels_iv,
     extract_from_linearmodels_panel,
     extract_from_regularized,
@@ -27,6 +28,7 @@ from economicon.services.regressions.diagnostics import (
 )
 from economicon.services.regressions.fitters import RegularizedResult
 from economicon.utils import ProcessingError, ValidationError
+from economicon.utils.column_names import generate_unique_column_name
 from economicon.utils.validators import validate_existence
 
 
@@ -192,7 +194,7 @@ class AddDiagnosticColumns:
                 existing_cols = df.columns
 
                 # 分析結果の被説明変数名を接頭辞として取得
-                dep_var = analysis_result.regression_output.get(
+                dep_var = analysis_result.result_data.get(
                     "dependentVariable", "y"
                 )
 
@@ -249,7 +251,7 @@ class AddDiagnosticColumns:
     # 内部ヘルパー
     # ------------------------------------------------------------------
 
-    def _dispatch_extract(
+    def _dispatch_extract(  # noqa: C901
         self,
         raw_model: object,
         model_type: str,
@@ -283,7 +285,7 @@ class AddDiagnosticColumns:
         if model_type == "tobit":
             # Eco-Note B: 打ち切り値を regression_output から取得し
             # observable 期待値の計算に使用する
-            _diag = analysis_result.regression_output.get("diagnostics", {})  # type: ignore[union-attr]
+            _diag = analysis_result.result_data.get("diagnostics", {})  # type: ignore[union-attr]
             _cens = (
                 _diag.get("censoringLimits", {})
                 if isinstance(_diag, dict)
@@ -356,6 +358,20 @@ class AddDiagnosticColumns:
                 options=opts,
             )
 
+        if model_type == "heckman":
+            opts = DiagnosticExtractOptions(
+                dep_var=dep_var,
+                existing_cols=existing_cols,
+                target=self.target,
+                standardized=self.standardized,
+                include_interval=self.include_interval,
+            )
+            return extract_from_heckman(
+                raw_model=raw_model,  # type: ignore[arg-type]
+                options=opts,
+                row_indices=analysis_result.row_indices,  # type: ignore[union-attr]
+            )
+
         raise ProcessingError(
             error_code=ErrorCode.MODEL_TYPE_NOT_SUPPORTED,
             message=_("Unsupported model type: %(type)s")
@@ -374,7 +390,7 @@ class AddDiagnosticColumns:
         元テーブルと診断値 DataFrame を left_join する。
 
         FE/RE は entity_id_column + time_column の 2 キー結合。
-        それ以外は ``__row_idx__`` を一時キーとして結合。
+        それ以外は一意な内部行番号キーを一時的に付与して結合。
 
         欠損値を含む行は join 結果が null になるが、
         これは元データに欠損があるためであり仕様どおり。
@@ -406,15 +422,22 @@ class AddDiagnosticColumns:
                 how="left",
             )
         else:
-            # __row_idx__ を一時キーとして使用
+            row_idx_col = generate_unique_column_name(
+                "__row_idx__",
+                df.columns,
+            )
+            values_join_df = values_df
+            if row_idx_col != "__row_idx__":
+                values_join_df = values_df.rename({"__row_idx__": row_idx_col})
+
             joined = (
-                df.with_row_index("__row_idx__")
+                df.with_row_index(row_idx_col)
                 .join(
-                    values_df,
-                    on="__row_idx__",
+                    values_join_df,
+                    on=row_idx_col,
                     how="left",
                 )
-                .drop("__row_idx__")
+                .drop(row_idx_col)
             )
 
         return joined

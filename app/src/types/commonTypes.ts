@@ -1,3 +1,5 @@
+import type { DistributionType as ApiDistributionType } from "@/api/model";
+
 export type FileType = {
   name: string;
   isFile: boolean;
@@ -11,7 +13,7 @@ export type FilesType = {
 };
 
 export type TableDataCellType = string | number | boolean | null;
-export type TalbeDataRowType = { [key: string]: TableDataCellType };
+export type TableDataRowType = { [key: string]: TableDataCellType };
 export type ColumnType = { name: string; type: string };
 
 /** テーブルメタ情報（行データはtableChunkStoreで管理） */
@@ -30,23 +32,7 @@ export type SortField = "name" | "size" | "modifiedTime";
 
 export type SelectListType = { value: string; name: string }[];
 
-export type checkInputType = { isError: boolean; message: string };
-
-export type DistributionType =
-  | "uniform"
-  | "exponential"
-  | "normal"
-  | "gamma"
-  | "beta"
-  | "weibull"
-  | "lognormal"
-  | "binomial"
-  | "bernoulli"
-  | "poisson"
-  | "geometric"
-  | "hypergeometric"
-  | "negative_binomial"
-  | "fixed";
+export type DistributionType = ApiDistributionType;
 
 export type SimulationColumnSetting = {
   id: string;
@@ -99,3 +85,13 @@ export type LinearRegressionResultType = {
 };
 
 export type TauriFile = File & { path: string };
+
+// GET /api/analysis/results/{id} の resultData に格納される信頼区間の計算結果
+export type ConfidenceIntervalResultData = {
+  resultId: string;
+  tableName: string;
+  columnName: string;
+  statistic: { type: string; value: number | null };
+  confidenceInterval: { lower: number; upper: number };
+  confidenceLevel: number;
+};

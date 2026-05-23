@@ -11,8 +11,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { CastColumnForm } from "./CastColumnForm";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { CastColumnForm } from "@/components/organisms/Dialog/ColumnOperationForms/CastColumnForm";
 
 // ---------------------------------------------------------------------------
 // Mocks

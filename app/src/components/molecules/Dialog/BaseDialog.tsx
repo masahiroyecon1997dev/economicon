@@ -10,12 +10,12 @@
  * - submitFormId を指定すると HTML5 フォーム関連付けで送信
  * - ダークモード完全対応
  */
+import { Button } from "@/components/atoms/Button/Button";
+import { cn } from "@/lib/utils/helpers";
 import * as RadixDialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "../../../lib/utils/helpers";
-import { Button } from "../../atoms/Button/Button";
 
 // ─── 型定義 ──────────────────────────────────────────────────────────────────
 
@@ -70,6 +70,8 @@ export type BaseDialogPropsType = {
   className?: string;
   /** コンテンツ領域のクラス名。デフォルト: "px-5 py-4" */
   contentClassName?: string;
+  /** フッター左側に配置する任意コンテンツ（追加アクションボタン等） */
+  footerLeft?: ReactNode;
 };
 
 // ─── BaseDialog ──────────────────────────────────────────────────────────────
@@ -90,6 +92,7 @@ export const BaseDialog = ({
   children,
   className,
   contentClassName,
+  footerLeft,
 }: BaseDialogPropsType) => {
   const { t } = useTranslation();
 
@@ -138,7 +141,7 @@ export const BaseDialog = ({
           {/* ── コンテンツ ── */}
           <div
             className={cn(
-              "flex-1 min-h-0 overflow-y-auto px-5 py-4 dark:text-gray-200",
+              "app-scrollbar flex-1 min-h-0 overflow-y-auto px-5 py-4 dark:text-gray-200",
               contentClassName,
             )}
           >
@@ -147,25 +150,26 @@ export const BaseDialog = ({
 
           {/* ── フッター ── */}
           {footerVariant !== "none" && (
-            <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-700 px-5 py-3">
-              {footerVariant === "confirm" && (
+            <div className="flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700 px-5 py-3">
+              <div>{footerLeft}</div>
+              <div className="flex items-center gap-2">
+                {footerVariant === "confirm" && (
+                  <RadixDialog.Close asChild>
+                    <Button variant="outline" disabled={isSubmitting}>
+                      {t("Common.Cancel")}
+                    </Button>
+                  </RadixDialog.Close>
+                )}
                 <Button
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={isSubmitting}
+                  variant={submitVariant}
+                  type={submitFormId ? "submit" : "button"}
+                  form={submitFormId}
+                  onClick={!submitFormId ? onSubmit : undefined}
+                  disabled={isSubmitting || isSubmitDisabled}
                 >
-                  {t("Common.Cancel")}
+                  {isSubmitting ? "..." : resolvedSubmitLabel}
                 </Button>
-              )}
-              <Button
-                variant={submitVariant}
-                type={submitFormId ? "submit" : "button"}
-                form={submitFormId}
-                onClick={!submitFormId ? onSubmit : undefined}
-                disabled={isSubmitting || isSubmitDisabled}
-              >
-                {isSubmitting ? "..." : resolvedSubmitLabel}
-              </Button>
+              </div>
             </div>
           )}
         </RadixDialog.Content>

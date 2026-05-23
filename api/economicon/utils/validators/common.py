@@ -113,6 +113,43 @@ def validate_numeric_types(
         )
 
 
+def validate_no_overlap(
+    *,
+    values: list[str],
+    reserved: set[str],
+    target: str,
+    reserved_target: str,
+) -> None:
+    """
+    values と reserved の間に重複がないことを検証する。
+
+    純粋なパラメータ間の整合性チェック用。
+    テーブル存在確認などストアへのアクセスは不要。
+
+    使用例:
+    - explanatoryVariables が dependentVariable と重複しないこと
+    - explanatoryVariables が treatmentColumn 等の予約列と重複しないこと
+
+    Args:
+        values: チェック対象の値リスト
+        reserved: 重複を許可しない値の集合
+        target: values 側のパラメータ名（エラーメッセージに使用）
+        reserved_target: reserved 側のパラメータ名（エラーメッセージに使用）
+
+    Raises:
+        ValidationError: 重複がある場合
+    """
+    overlap = reserved & set(values)
+    if overlap:
+        raise ValidationError(
+            error_code=ErrorCode.VALIDATION_ERROR,
+            message=_(
+                "{} must not overlap with {}: {}"
+            ).format(target, reserved_target, ", ".join(sorted(overlap))),
+            target=target,
+        )
+
+
 def validate_row_count_limit(
     *,
     current_row_count: int,  # dfそのものではなく数値を受け取る

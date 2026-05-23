@@ -1,10 +1,10 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { DeleteTableForm } from "@/components/organisms/Dialog/TableOperationForms/DeleteTableForm";
+import { useCurrentPageStore } from "@/stores/currentPage";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { useCurrentPageStore } from "../../../../stores/currentView";
-import { useTableInfosStore } from "../../../../stores/tableInfos";
-import { useTableListStore } from "../../../../stores/tableList";
-import { DeleteTableForm } from "./DeleteTableForm";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -52,7 +52,7 @@ beforeEach(() => {
     ],
     activeTableName: "sales",
   });
-  useCurrentPageStore.setState({ currentView: "DataPreview" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
 });
 
 // ---------------------------------------------------------------------------

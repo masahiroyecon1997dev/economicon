@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   importFileBodyTableNameMax,
   importFileBodyTableNameRegExp,
-} from "../../api/zod/data/data";
+} from "@/api/zod/data/data";
 
 /**
  * バックエンド api/economicon/models/types.py の制約を移植した

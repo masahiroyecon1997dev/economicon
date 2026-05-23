@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "generated_at": "2026-04-29T05:02:27.648853+00:00",
+    "python_version": "3.14.3",
+    "libraries": {
+      "scikit-learn": "1.8.0"
+    },
+    "seed": 2024,
+    "tolerance_guide": {
+      "lasso_ridge_coef_scaled": "atol=1e-8 (sklearn Pipeline)"
+    },
+    "data_file": "synthetic_ols.parquet",
+    "model": "lasso",
+    "standardization": "StandardScaler(ddof=0)"
+  },
+  "estimates": {
+    "dep_var": "y_cont",
+    "alpha": 0.1,
+    "n_obs": 300,
+    "coef_scaled": {
+      "x1": 12.311781383847322,
+      "x2": -14.872968912429675,
+      "x3": 3.984896458013139
+    },
+    "coef_orig": {
+      "const": 3.3279479895018973,
+      "x1": 2.511442381682721,
+      "x2": -1.8174411852586092,
+      "x3": 0.9512037542449937
+    },
+    "note": "coef_scaled は StandardScaler(ddof=0) 後の Lasso 係数。 coef_orig は元スケールへ逆変換した係数。"
+  }
+}

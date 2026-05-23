@@ -1,4 +1,5 @@
-import { cn } from "../../../lib/utils/helpers";
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
+import { cn } from "@/lib/utils/helpers";
 
 type ExpressionHelperButtonProps = {
   onClick: () => void;
@@ -15,7 +16,7 @@ export const ExpressionHelperButton = ({
   className,
   disabled,
 }: ExpressionHelperButtonProps) => {
-  return (
+  const button = (
     <button
       type="button"
       onClick={onClick}
@@ -29,10 +30,20 @@ export const ExpressionHelperButton = ({
         "font-mono text-xs font-medium",
         className,
       )}
-      title={title}
+      aria-label={title}
       disabled={disabled}
     >
       {children}
     </button>
+  );
+
+  if (!title) {
+    return button;
+  }
+
+  return (
+    <Tooltip content={title}>
+      <span className="inline-flex">{button}</span>
+    </Tooltip>
   );
 };

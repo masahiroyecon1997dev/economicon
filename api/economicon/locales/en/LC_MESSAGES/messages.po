@@ -18,6 +18,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
+#: economicon/services/data/analysis_result.py
+msgid "regression"
+msgstr "Regression"
+
+msgid "confidence_interval"
+msgstr "Confidence interval"
+
+msgid "descriptive_statistics"
+msgstr "Descriptive statistics"
+
+msgid "statistical_test"
+msgstr "Statistical test"
+
+msgid "did"
+msgstr "Difference-In-Differences"
+
+msgid "rdd"
+msgstr "Regression Discontinuity Design"
+
+msgid "heckman"
+msgstr "Heckman"
+
 #: economicon/exception_handlers.py:34
 msgid "An unexpected error occurred during processing"
 msgstr ""
@@ -76,10 +98,6 @@ msgstr ""
 
 #: economicon/services/descriptive_statistics.py:148
 msgid "An unexpected error occurred during descriptive statistics processing"
-msgstr ""
-
-#: economicon/services/duplicate_column.py:82
-msgid "An unexpected error occurred during duplicating column processing"
 msgstr ""
 
 #: economicon/services/duplicate_table.py:64
@@ -185,8 +203,18 @@ msgstr "{} '{}' does not exist."
 msgid "{} '{}' already exists."
 msgstr "{} '{}' already exists."
 
+#, python-brace-format
+msgid "Table '{}' has too many rows for plotting ({} rows). The maximum is {} rows."
+msgstr "Table '{}' has too many rows for plotting ({} rows). The maximum is {} rows."
+
 #: economicon/utils/validator/statistics_validators.py:40
 msgid "For uniform distribution, 'low' must be less than 'high'"
+msgstr ""
+
+msgid "For hypergeometric distribution, 'successCount' must not exceed 'populationSize'"
+msgstr ""
+
+msgid "For hypergeometric distribution, 'sampleSize' must not exceed 'populationSize'"
 msgstr ""
 
 msgid "For proportion confidence interval, data must contain only 0 and 1 values"
@@ -196,6 +224,17 @@ msgid "The CSV file is empty or contains no valid data."
 msgstr ""
 
 msgid "Column contains no valid data"
+msgstr ""
+
+msgid "All analysis results must have the same result type for output."
+msgstr ""
+
+#, python-format
+msgid "Requested result type '%(requested)s' does not match stored analysis result type '%(actual)s'."
+msgstr ""
+
+#, python-format
+msgid "Requested result type '%(requested)s' is not supported for formatted output."
 msgstr ""
 
 # Translate field name
@@ -357,3 +396,27 @@ msgstr "'{}' syntax"
 #: economicon/utils/algorithms/formula_parser.py
 msgid "keyword arguments in function calls"
 msgstr "keyword arguments in function calls"
+
+# Auto-generated analysis result name formats
+#, python-brace-format
+msgid "{column} の {stat_type} 信頼区間 #{seq}"
+msgstr "{column} {stat_type} confidence interval #{seq}"
+
+#, python-brace-format
+msgid "{table} 記述統計 #{seq}"
+msgstr "{table} descriptive statistics #{seq}"
+
+#, python-brace-format
+msgid "{test_type}（{n}群） #{seq}"
+msgstr "{test_type} ({n}-sample) #{seq}"
+
+#, python-brace-format
+msgid "{model_type}: {dependent} #{seq}"
+msgstr "{model_type}: {dependent} #{seq}"
+
+msgid "An unexpected error occurred during group statistics table creation processing"
+msgstr "An unexpected error occurred during group statistics table creation processing"
+
+#, python-brace-format
+msgid "The following columns cannot be used as group keys because they are floating-point type: {}"
+msgstr "The following columns cannot be used as group keys because they are floating-point type: {}"

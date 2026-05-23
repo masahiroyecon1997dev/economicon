@@ -62,7 +62,7 @@ test.describe("ImportDataFileView - ファイル選択画面", () => {
 
     // ヘッダー列数: ファイル名・サイズ・最終更新日時 の3列
     const headers = table.locator("thead th");
-    await expect(headers).toHaveCount(3);
+    await expect(headers).toHaveCount(4);
   });
 
   test("ファイル名でソートできる", async () => {

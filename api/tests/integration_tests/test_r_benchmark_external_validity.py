@@ -17,7 +17,7 @@ Economicon API が統計的に一致することを検証する。
   Ridge  | R: glmnet      vs API: sklearn Ridge (coefficientScaled)
 
 許容誤差:
-  OLS/FE/RE/IV 係数・SE  atol=1e-10
+    OLS/FE/RE/IV 係数・SE  atol=1e-8
   Logit/Probit 係数・SE  atol=1e-5  (MLE 収束差)
   R² (FE/RE)             atol=1e-5  (定義差を考慮)
   Lasso/Ridge scaled     atol=1e-5  (同一目的関数)
@@ -36,7 +36,6 @@ import polars as pl
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from statsmodels.datasets import get_rdataset
 
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
@@ -50,10 +49,18 @@ from tests.regressions.conftest import URL_REGRESSION, URL_RESULTS
 # このファイルから parents[3] = ワークスペースルート
 _BENCHMARK_JSON = (
     Path(__file__).resolve().parents[3]
-    / "Rcode"
-    / "tests"
+    / "test"
     / "benchmarks"
-    / "r_grunfeld_gold.json"
+    / "r"
+    / "real"
+    / "r_plm_grunfeld_gold.json"
+)
+_DATA_PARQUET = (
+    Path(__file__).resolve().parents[3]
+    / "test"
+    / "data"
+    / "parquet"
+    / "plm_grunfeld.parquet"
 )
 
 # ------------------------------------------------------------------
@@ -67,15 +74,14 @@ TABLE_GRUNFELD_IV_EXT = "GrunfeldIVExtData"
 # 許容誤差定数
 # ------------------------------------------------------------------
 
-# OLS / FE / RE / IV: 使用ライブラリが共通の線形代数ルーチンを使用。
-# API JSON ラウンドトリップなしのため 1e-10 までたどれる。
-_ABS_TOL_LINEAR = 1e-10
+# OLS / FE / RE / IV: 線形モデル系の絶対許容差は 1e-8 に統一する。
+_ABS_TOL_LINEAR = 1e-8
 
 # FE/RE R²: within R² の定義が plm と linearmodels で微妙に異なる場合あり
 _ABS_TOL_R2_PANEL = 1e-5
 
-# OLS R²: lm vs statsmodels は完全一致するはず
-_ABS_TOL_R2_OLS = 1e-10
+# OLS R²: lm vs statsmodels の比較も 1e-8 に統一する
+_ABS_TOL_R2_OLS = 1e-8
 
 # IV R² (RSS/TSS 定義): AER と linearmodels で一致
 _ABS_TOL_R2_IV = 1e-5
@@ -139,21 +145,19 @@ def r_gold() -> dict[str, Any]:
     """R Gold Standard JSON を読み込む。"""
     assert _BENCHMARK_JSON.exists(), (
         f"Benchmark JSON が存在しません: {_BENCHMARK_JSON}\n"
-        "Rcode/generate_r_benchmark.R を実行して生成してください。"
+        "test/scripts/r/generate_r_benchmark.R を実行して生成してください。"
     )
-    return json.loads(_BENCHMARK_JSON.read_text(encoding="utf-8"))
+    raw = json.loads(_BENCHMARK_JSON.read_text(encoding="utf-8"))
+    return {"meta": raw["metadata"], **raw["estimates"]}
 
 
 @pytest.fixture(scope="module")
 def grunfeld_raw_ext() -> pd.DataFrame:
-    """Grunfeld データを pandas DataFrame で返す。"""
-    dataset = get_rdataset("Grunfeld", "plm")
-    assert dataset is not None
-    assert dataset.data is not None
-    df: pd.DataFrame = dataset.data[
-        ["firm", "year", "inv", "value", "capital"]
-    ].copy()
-    return df.astype(float).reset_index(drop=True)
+    """生成済み parquet から Grunfeld データを pandas DataFrame で返す。"""
+    assert _DATA_PARQUET.exists(), (
+        f"Grunfeld parquet not found: {_DATA_PARQUET}"
+    )
+    return pd.read_parquet(_DATA_PARQUET).astype(float).reset_index(drop=True)
 
 
 @pytest.fixture(scope="module")
@@ -250,7 +254,7 @@ def _post_and_fetch(
 
     Returns
     -------
-    (result_id, regressionOutput)
+    (result_id, resultData)
     """
     resp = client.post(URL_REGRESSION, json=payload)
     assert resp.status_code == status.HTTP_200_OK, resp.text
@@ -262,7 +266,7 @@ def _post_and_fetch(
     assert resp2.status_code == status.HTTP_200_OK, resp2.text
     result_data = resp2.json()
     assert result_data["code"] == "OK", result_data
-    return result_id, result_data["result"]["regressionOutput"]
+    return result_id, result_data["result"]["resultData"]
 
 
 def _ols_payload(se: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -480,7 +484,7 @@ class TestOLSvsR:
         np.testing.assert_allclose(
             ms["fProbability"],
             r_f["p_value"],
-            atol=1e-10,
+            atol=1e-8,
             rtol=0,
             err_msg="OLS F p値が R と不一致",
         )

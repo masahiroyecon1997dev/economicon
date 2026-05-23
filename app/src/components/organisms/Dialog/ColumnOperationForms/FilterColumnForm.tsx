@@ -4,33 +4,31 @@
  * 列メニューから起動。選択列を初期値として最大 2 条件で
  * テーブルをフィルタリングし、新テーブルとして保存する。
  */
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import type { FilterOperatorType } from "@/api/model";
+import { LogicalOperatorType } from "@/api/model";
+import { FilterTableBody } from "@/api/zod/table/table";
+import { Button } from "@/components/atoms/Button/Button";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { Select, SelectItem } from "@/components/atoms/Input/Select";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { FormField } from "@/components/molecules/Form/FormField";
+import type { ColumnOperationFormPropsType } from "@/components/organisms/Dialog/ColumnOperationForms/types";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
+import {
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
+} from "@/lib/utils/apiError";
+import { createFieldError, extractFieldError } from "@/lib/utils/formHelpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import type { ReactFormExtendedApi } from "@tanstack/react-form";
 import { useForm, useStore } from "@tanstack/react-form";
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import type { FilterOperatorType } from "../../../../api/model";
-import { LogicalOperatorType } from "../../../../api/model";
-import { FilterTableBody } from "../../../../api/zod/table/table";
-import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
-import {
-  buildCaughtErrorMessage,
-  buildResponseErrorMessage,
-} from "../../../../lib/utils/apiError";
-import {
-  createFieldError,
-  extractFieldError,
-} from "../../../../lib/utils/formHelpers";
-import { getTableInfo } from "../../../../lib/utils/internal";
-import { useTableInfosStore } from "../../../../stores/tableInfos";
-import { useTableListStore } from "../../../../stores/tableList";
-import { Button } from "../../../atoms/Button/Button";
-import { InputText } from "../../../atoms/Input/InputText";
-import { Select, SelectItem } from "../../../atoms/Input/Select";
-import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
-import { FormField } from "../../../molecules/Form/FormField";
-import type { ColumnOperationFormPropsType } from "./types";
 
 const ALL_OPERATORS: FilterOperatorType[] = [
   "equals",
@@ -46,6 +44,32 @@ const toCompareValue = (v: string): string | number => {
   const n = Number(v);
   return v.trim() !== "" && !isNaN(n) ? n : v;
 };
+
+type FilterFormValues = {
+  newTableName: string;
+  logicalOperator: (typeof LogicalOperatorType)[keyof typeof LogicalOperatorType];
+  c1Column: string;
+  c1Operator: FilterOperatorType;
+  c1Value: string;
+  c2Column: string;
+  c2Operator: FilterOperatorType;
+  c2Value: string;
+};
+
+type FilterFormType = ReactFormExtendedApi<
+  FilterFormValues,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined
+>;
 
 export const FilterColumnForm = ({
   tableName,
@@ -224,7 +248,7 @@ export const FilterColumnForm = ({
         valId="filter-c1-val"
         required
         allColumns={allColumns}
-        form={form}
+        form={form as unknown as FilterFormType}
         isSubmitting={isSubmitting}
         autoFocusValue
         t={t}
@@ -282,7 +306,7 @@ export const FilterColumnForm = ({
             valId="filter-c2-val"
             required={hasSecondCondition}
             allColumns={allColumns}
-            form={form}
+            form={form as unknown as FilterFormType}
             isSubmitting={isSubmitting}
             autoFocusValue={false}
             t={t}
@@ -310,9 +334,7 @@ type ConditionBlockProps = {
   valId: string;
   required?: boolean;
   allColumns: { name: string; type: string }[];
-  // 型システムが複雑になるため any で受ける
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  form: any;
+  form: FilterFormType;
   isSubmitting: boolean;
   autoFocusValue: boolean;
   t: (key: string) => string;

@@ -5,7 +5,9 @@
 回帰分析・検定・因果推論など、あらゆる分析の結果を統一して管理します。
 """
 
-from fastapi import APIRouter, Request
+from typing import Annotated
+
+from fastapi import APIRouter, Path, Request
 from fastapi import status as http_status
 
 from economicon.schemas import (
@@ -13,12 +15,14 @@ from economicon.schemas import (
     SuccessResponse,
 )
 from economicon.schemas.results import (
+    AnalysisResultDetail,
     ClearAllAnalysisResultsResult,
     DeleteAnalysisResultResult,
     GetAllAnalysisResultsResult,
-    GetAnalysisResultResult,
     OutputResultRequest,
     OutputResultResult,
+    UpdateAnalysisResultRequest,
+    UpdateAnalysisResultResult,
 )
 from economicon.services.data.dependencies import AnalysisResultStoreDep
 from economicon.services.operation import run_operation
@@ -28,6 +32,7 @@ from economicon.services.results.result import (
     DeleteAnalysisResult,
     GetAllAnalysisResults,
     GetAnalysisResult,
+    UpdateAnalysisResult,
 )
 from economicon.utils import create_success_response
 
@@ -62,11 +67,11 @@ async def get_all_analysis_results(
 
 @router.get(
     "/results/{result_id}",
-    response_model=SuccessResponse[GetAnalysisResultResult],
+    response_model=SuccessResponse[AnalysisResultDetail],
 )
 async def get_analysis_result(
     request: Request,
-    result_id: str,
+    result_id: Annotated[str, Path(min_length=1)],
     result_store: AnalysisResultStoreDep,
 ):
     """
@@ -91,13 +96,31 @@ async def get_analysis_result(
     )
 
 
+@router.patch(
+    "/results/{result_id}",
+    response_model=SuccessResponse[UpdateAnalysisResultResult],
+)
+async def update_analysis_result(
+    request: Request,
+    result_id: Annotated[str, Path(min_length=1)],
+    body: UpdateAnalysisResultRequest,
+    result_store: AnalysisResultStoreDep,
+):
+    """指定されたIDの分析結果メタデータを更新する。"""
+    api = UpdateAnalysisResult(result_id, body, result_store)
+    result = run_operation(api)
+    return create_success_response(
+        status_code=http_status.HTTP_200_OK, response_object=result
+    )
+
+
 @router.delete(
     "/results/{result_id}",
     response_model=SuccessResponse[DeleteAnalysisResultResult],
 )
 async def delete_analysis_result(
     request: Request,
-    result_id: str,
+    result_id: Annotated[str, Path(min_length=1)],
     result_store: AnalysisResultStoreDep,
 ):
     """

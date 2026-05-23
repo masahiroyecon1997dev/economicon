@@ -4,36 +4,38 @@
  * POST /api/column/add-simulation をコールし、
  * 選択した確率分布からランダム値を持つ列をテーブルに追加する。
  */
-import { useForm, useStore } from "@tanstack/react-form";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { z } from "zod";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "@/api/endpoints";
 import {
   addSimulationColumnBodySimulationColumnColumnNameMax,
   addSimulationColumnBodySimulationColumnColumnNameRegExp,
-} from "../../../../api/zod/column/column";
+} from "@/api/zod/column/column";
+import { Button } from "@/components/atoms/Button/Button";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { RadioTagGroup } from "@/components/molecules/Field/RadioTagGroup";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { RandomSeedField } from "@/components/molecules/Form/RandomSeedField";
+import { fetchUpdatedColumnList } from "@/components/organisms/Dialog/ColumnOperationForms/fetchUpdatedColumnList";
+import type { ColumnOperationFormPropsType } from "@/components/organisms/Dialog/ColumnOperationForms/types";
 import {
   buildDistributionFromParams,
   DIST_PARAM_LABEL_KEYS,
   DIST_PARAM_SCHEMAS,
   DIST_PARAMS,
   DIST_TYPES,
-} from "../../../../constants/simulation";
-import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
+} from "@/constants/simulation";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
 import {
   buildCaughtErrorMessage,
   buildResponseErrorMessage,
-} from "../../../../lib/utils/apiError";
-import { extractFieldError } from "../../../../lib/utils/formHelpers";
-import type { DistributionType } from "../../../../types/commonTypes";
-import { InputText } from "../../../atoms/Input/InputText";
-import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
-import { RadioTagGroup } from "../../../molecules/Field/RadioTagGroup";
-import { FormField } from "../../../molecules/Form/FormField";
-import { RandomSeedField } from "../../../molecules/Form/RandomSeedField";
-import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
-import type { ColumnOperationFormPropsType } from "./types";
+} from "@/lib/utils/apiError";
+import { extractFieldError } from "@/lib/utils/formHelpers";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import type { DistributionType } from "@/types/commonTypes";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 // -----------------------------------------------------------------------
 // フォームコンポーネント
@@ -56,19 +58,26 @@ export const AddSimulationColumnForm = ({
       // 全パラメータをフラットに保持（使わないものはサブミット時に無視）
       low: "0",
       high: "1",
-      scale: "1",
-      loc: "0",
-      shape: "1",
-      a: "1",
-      b: "1",
+      scaleParameter: "1",
       mean: "0",
-      sigma: "1",
-      n: "10",
-      p: "0.5",
-      lam: "1",
+      standardDeviation: "1",
+      shapeParameter: "1",
+      alpha: "1",
+      beta: "1",
+      logMean: "0",
+      logStandardDeviation: "1",
+      degreesOfFreedom: "5",
+      numeratorDf: "5",
+      denominatorDf: "10",
+      trialCount: "10",
+      successProbability: "0.5",
+      rate: "1",
       populationSize: "100",
       successCount: "50",
       sampleSize: "10",
+      targetSuccessCount: "5",
+      start: "1",
+      step: "1",
       value: "0",
     },
     onSubmit: async ({ value }) => {
@@ -148,6 +157,22 @@ export const AddSimulationColumnForm = ({
 
   const currentParams = DIST_PARAMS[distributionType];
 
+  const openWorkTab = useWorkspaceTabsStore((s) => s.openWorkTab);
+
+  const handleOpenPreview = () => {
+    const values = form.state.values;
+    const distributionParams = Object.fromEntries(
+      DIST_PARAMS[distributionType].map((k) => [
+        k,
+        Number(values[k as keyof typeof values] ?? "0"),
+      ]),
+    );
+    openWorkTab("DistributionPreview", t("HeaderMenu.DistributionPreview"), {
+      distributionType,
+      distributionParams,
+    });
+  };
+
   return (
     <form
       id={formId}
@@ -225,10 +250,11 @@ export const AddSimulationColumnForm = ({
                 onBlur={field.handleBlur}
                 disabled={isSubmitting}
                 step={
-                  param === "n" ||
+                  param === "trialCount" ||
                   param === "populationSize" ||
                   param === "successCount" ||
-                  param === "sampleSize"
+                  param === "sampleSize" ||
+                  param === "targetSuccessCount"
                     ? 1
                     : "any"
                 }
@@ -252,6 +278,16 @@ export const AddSimulationColumnForm = ({
       </form.Field>
 
       {apiError && <ErrorAlert message={apiError} />}
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={handleOpenPreview}
+        disabled={isSubmitting}
+        data-testid="open-distribution-preview-btn"
+      >
+        {t("HeaderMenu.DistributionPreview")}
+      </Button>
     </form>
   );
 };

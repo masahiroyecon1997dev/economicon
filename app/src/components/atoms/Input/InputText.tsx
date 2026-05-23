@@ -1,5 +1,5 @@
 import { forwardRef, type ChangeEvent } from "react";
-import { cn } from "../../../lib/utils/helpers";
+import { cn } from "@/lib/utils/helpers";
 
 // 1. React標準のinput属性を継承しつつ、既存の独自プロパティ(change等)も許容する
 type InputTextProps = Omit<

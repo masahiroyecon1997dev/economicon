@@ -1,31 +1,37 @@
-import { useForm, useStore } from "@tanstack/react-form";
-import { AlertCircle, Dices, Edit2, Hash, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { z } from "zod";
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import type { SimulationColumnConfig } from "../../api/model";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import type { SimulationColumnConfig } from "@/api/model";
 import {
   createSimulationDataTableBodyTableNameMax,
   createSimulationDataTableBodyTableNameRegExp,
-} from "../../api/zod/table/table";
-import { DISTRIBUTION_OPTIONS } from "../../constants/app";
-import { buildDistributionFromParams } from "../../constants/simulation";
-import { showMessageDialog } from "../../lib/dialog/message";
-import { extractFieldError } from "../../lib/utils/formHelpers";
-import { cn } from "../../lib/utils/helpers";
-import { getTableInfo } from "../../lib/utils/internal";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useTableInfosStore } from "../../stores/tableInfos";
-import { useTableListStore } from "../../stores/tableList";
-import type { SimulationColumnSetting } from "../../types/commonTypes";
-import { Button } from "../atoms/Button/Button";
-import { InputText } from "../atoms/Input/InputText";
-import { ActionButtonBar } from "../molecules/ActionBar/ActionButtonBar";
-import { FormField } from "../molecules/Form/FormField";
-import { RandomSeedField } from "../molecules/Form/RandomSeedField";
-import { SimulationColumnEditDialog } from "../organisms/Dialog/SimulationColumnEditDialog";
-import { PageLayout } from "../templates/PageLayout";
+} from "@/api/zod/table/table";
+import { Button } from "@/components/atoms/Button/Button";
+import { InputText } from "@/components/atoms/Input/InputText";
+import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { FormField } from "@/components/molecules/Form/FormField";
+import { RandomSeedField } from "@/components/molecules/Form/RandomSeedField";
+import { SimulationColumnEditDialog } from "@/components/organisms/Dialog/SimulationColumnEditDialog";
+import { PageLayout } from "@/components/templates/PageLayout";
+import {
+  buildDistributionFromParams,
+  DIST_PARAM_LABEL_KEYS,
+  DIST_PARAMS,
+} from "@/constants/simulation";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { extractFieldError } from "@/lib/utils/formHelpers";
+import { cn } from "@/lib/utils/helpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useCurrentPageStore } from "@/stores/currentPage";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import type { SimulationColumnSetting } from "@/types/commonTypes";
+import { useForm, useStore } from "@tanstack/react-form";
+import { AlertCircle, Dices, Edit2, Hash, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
+
+const DIALOG_CLOSE_ANIMATION_MS = 220;
 
 const createSimulationSchema = (t: (key: string) => string) =>
   z.object({
@@ -78,7 +84,10 @@ const hasColumnError = (col: SimulationColumnSetting): boolean =>
 
 export const CreateSimulationDataTable = () => {
   const { t } = useTranslation();
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
   const addTableName = useTableListStore((state) => state.addTableName);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
 
@@ -87,6 +96,17 @@ export const CreateSimulationDataTable = () => {
   ]);
 
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (isEditDialogOpen || !editingColumnId) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setEditingColumnId(null);
+    }, DIALOG_CLOSE_ANIMATION_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isEditDialogOpen, editingColumnId]);
 
   const form = useForm({
     defaultValues: {
@@ -137,7 +157,7 @@ export const CreateSimulationDataTable = () => {
               col.dataType === "fixed"
                 ? { value: Number(col.fixedValue) }
                 : col.distributionParams!,
-            ) as SimulationColumnConfig["distribution"],
+            ),
           }),
         );
 
@@ -155,7 +175,7 @@ export const CreateSimulationDataTable = () => {
           const resTableInfo = await getTableInfo(response.result.tableName);
           addTableName(response.result.tableName);
           addTableInfo(resTableInfo);
-          setCurrentView("DataPreview");
+          closeActiveWorkTab();
         } else {
           await showMessageDialog(
             t("Error.Error"),
@@ -196,8 +216,12 @@ export const CreateSimulationDataTable = () => {
   };
 
   const handleCancel = () => {
-    setCurrentView("ImportDataFile");
+    navigateToShell("ImportDataFile");
   };
+
+  const editingColumn = editingColumnId
+    ? (columns.find((col) => col.id === editingColumnId) ?? null)
+    : null;
 
   return (
     <PageLayout
@@ -215,31 +239,13 @@ export const CreateSimulationDataTable = () => {
         className="flex flex-col h-full min-h-0 gap-4"
       >
         {/* ── スクロール領域 ── */}
-        <div className="flex flex-col gap-4 overflow-y-auto min-h-0 pb-2">
+        <div className="app-scrollbar flex flex-col gap-4 overflow-y-auto min-h-0 pb-2">
           {/* テーブル設定 */}
           <div className="rounded-xl border border-border-color dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm">
             <h2 className="mb-3 text-sm font-bold leading-tight text-text-heading dark:text-white">
               {t("CreateSimulationDataTableView.DataSettings")}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <form.Field name="randomSeed">
-                {(field) => {
-                  const errorMsg = field.state.meta.isTouched
-                    ? extractFieldError(field.state.meta.errors)
-                    : undefined;
-                  return (
-                    <RandomSeedField
-                      id="sim-table-random-seed"
-                      value={field.state.value}
-                      onChange={field.handleChange}
-                      onBlur={field.handleBlur}
-                      disabled={isSubmitting}
-                      error={errorMsg}
-                    />
-                  );
-                }}
-              </form.Field>
-
               <form.Field
                 name="tableName"
                 validators={{
@@ -344,12 +350,7 @@ export const CreateSimulationDataTable = () => {
             <div className="flex flex-col gap-2">
               {columns.map((column) => {
                 const colHasError = hasColumnError(column);
-                const distOption =
-                  column.dataType === "distribution"
-                    ? DISTRIBUTION_OPTIONS.find(
-                        (d) => d.value === column.distributionType,
-                      )
-                    : null;
+                const distributionType = column.distributionType;
 
                 return (
                   <div
@@ -393,9 +394,9 @@ export const CreateSimulationDataTable = () => {
                         </span>
 
                         {/* 分布 / 固定値バッジ */}
-                        {distOption && (
+                        {distributionType && (
                           <span className="rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 text-xs font-medium text-indigo-600 dark:text-indigo-400">
-                            {t(distOption.label)}
+                            {t(`AddSimulationColumnForm.${distributionType}`)}
                           </span>
                         )}
                         {column.dataType === "fixed" && (
@@ -417,11 +418,11 @@ export const CreateSimulationDataTable = () => {
                       <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
                         {column.dataType === "fixed"
                           ? `${t("Common.Constant")} = ${column.fixedValue || "-"}`
-                          : distOption
-                            ? distOption.params
+                          : distributionType
+                            ? DIST_PARAMS[distributionType]
                                 .map(
                                   (p) =>
-                                    `${p} = ${column.distributionParams?.[p] ?? "?"}`,
+                                    `${t(DIST_PARAM_LABEL_KEYS[p])} = ${column.distributionParams?.[p] ?? "?"}`,
                                 )
                                 .join("  /  ")
                             : "-"}
@@ -439,7 +440,10 @@ export const CreateSimulationDataTable = () => {
                     <div className="flex items-center gap-0.5 shrink-0">
                       <button
                         type="button"
-                        onClick={() => setEditingColumnId(column.id)}
+                        onClick={() => {
+                          setEditingColumnId(column.id);
+                          setIsEditDialogOpen(true);
+                        }}
                         className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={isSubmitting}
                         aria-label={t("Common.Edit")}
@@ -468,6 +472,25 @@ export const CreateSimulationDataTable = () => {
               })}
             </div>
           </div>
+
+          {/* 乱数シード（省略可） */}
+          <form.Field name="randomSeed">
+            {(field) => {
+              const errorMsg = field.state.meta.isTouched
+                ? extractFieldError(field.state.meta.errors)
+                : undefined;
+              return (
+                <RandomSeedField
+                  id="sim-table-random-seed"
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  onBlur={field.handleBlur}
+                  disabled={isSubmitting}
+                  error={errorMsg}
+                />
+              );
+            }}
+          </form.Field>
         </div>
 
         {/* ── アクションバー（常に最下部固定）── */}
@@ -481,21 +504,23 @@ export const CreateSimulationDataTable = () => {
           onCancel={handleCancel}
           onSelect={() => {}}
           onSelectType="submit"
+          isLoading={isSubmitting}
         />
       </form>
 
-      {editingColumnId && (
+      {editingColumn && (
         <SimulationColumnEditDialog
-          key={editingColumnId}
-          isOpen={!!editingColumnId}
-          column={columns.find((col) => col.id === editingColumnId)!}
-          index={columns.findIndex((col) => col.id === editingColumnId)}
+          key={editingColumn.id}
+          isOpen={isEditDialogOpen}
+          column={editingColumn}
+          index={columns.findIndex((col) => col.id === editingColumn.id)}
           onSave={updateColumn}
           onRemove={(id) => {
             removeColumn(id);
+            setIsEditDialogOpen(false);
             setEditingColumnId(null);
           }}
-          onClose={() => setEditingColumnId(null)}
+          onClose={() => setIsEditDialogOpen(false)}
           canRemove={columns.length > 1}
           disabled={isSubmitting}
         />

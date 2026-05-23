@@ -1,13 +1,17 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { OutputResultFormat } from "@/api/model/outputResultFormat";
+import { RegressionOutputOptionsStatInParentheses } from "@/api/model/regressionOutputOptionsStatInParentheses";
+import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
+import {
+  ResultSection,
+  StatItem,
+} from "@/components/molecules/Result/ResultSection";
+import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
+import { cn } from "@/lib/utils/helpers";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
 import { Check, Clipboard, FileDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../../api/endpoints";
-import { OutputResultRequestFormat } from "../../../api/model/outputResultRequestFormat";
-import { OutputResultRequestStatInParentheses } from "../../../api/model/outputResultRequestStatInParentheses";
-import { cn } from "../../../lib/utils/helpers";
-import type { LinearRegressionResultType } from "../../../types/commonTypes";
-import { ResultSection, StatItem } from "../../molecules/Result/ResultSection";
-import { OutputResultDialog } from "../Dialog/OutputResultDialog";
 
 type RegressionResultProps = {
   result: LinearRegressionResultType;
@@ -20,6 +24,7 @@ export const RegressionResult = ({
 }: RegressionResultProps) => {
   const { t } = useTranslation();
   const [isOutputDialogOpen, setIsOutputDialogOpen] = useState(false);
+  const [outputDialogSessionKey, setOutputDialogSessionKey] = useState(0);
   const [isQuickCopying, setIsQuickCopying] = useState(false);
   const [isQuickCopied, setIsQuickCopied] = useState(false);
 
@@ -43,9 +48,12 @@ export const RegressionResult = ({
     setIsQuickCopying(true);
     try {
       const response = await getEconomiconAppAPI().outputResult({
+        resultType: "regression",
         resultIds: [result.resultId],
-        format: OutputResultRequestFormat.markdown,
-        statInParentheses: OutputResultRequestStatInParentheses.se,
+        format: OutputResultFormat.markdown,
+        options: {
+          statInParentheses: RegressionOutputOptionsStatInParentheses.se,
+        },
       });
       if (response.code === "OK" && response.result) {
         await navigator.clipboard.writeText(response.result.content);
@@ -57,52 +65,65 @@ export const RegressionResult = ({
     }
   };
 
+  const openOutputDialog = () => {
+    setOutputDialogSessionKey((prev) => prev + 1);
+    setIsOutputDialogOpen(true);
+  };
+
   return (
-    <div className={cn("flex flex-col gap-4 p-4", className)}>
+    <div className={cn("flex flex-col gap-4 p-2", className)}>
       {/* 分析概要 */}
       <ResultSection title={t("RegressionResult.AnalysisSummary")}>
         {/* ── ヘッダー右端: 出力ボタン群 ── */}
         <div className="mb-3 flex justify-end gap-1.5">
-          <button
-            type="button"
-            onClick={() => void handleQuickCopy()}
-            disabled={isQuickCopying}
-            title={t("RegressionResult.QuickCopyMd")}
-            className={cn(
-              "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
-              "border border-gray-300 dark:border-gray-600",
-              "hover:bg-gray-100 dark:hover:bg-gray-700",
-              "disabled:cursor-not-allowed disabled:opacity-50",
-              isQuickCopied
-                ? "border-green-500 text-green-600 dark:text-green-400"
-                : "text-gray-600 dark:text-gray-400",
-            )}
-            data-testid="quick-copy-md-btn"
-          >
-            {isQuickCopying ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : isQuickCopied ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Clipboard className="h-3.5 w-3.5" />
-            )}
-            MD
-          </button>
+          <Tooltip content={t("RegressionResult.QuickCopyMd")}>
+            <span className="inline-flex">
+              <button
+                type="button"
+                onClick={() => void handleQuickCopy()}
+                disabled={isQuickCopying}
+                aria-label={t("RegressionResult.QuickCopyMd")}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                  "border border-gray-300 dark:border-gray-600",
+                  "hover:bg-gray-100 dark:hover:bg-gray-700",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
+                  isQuickCopied
+                    ? "border-green-500 text-green-600 dark:text-green-400"
+                    : "text-gray-600 dark:text-gray-400",
+                )}
+                data-testid="quick-copy-md-btn"
+              >
+                {isQuickCopying ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : isQuickCopied ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  <Clipboard className="h-3.5 w-3.5" />
+                )}
+                MD
+              </button>
+            </span>
+          </Tooltip>
 
-          <button
-            type="button"
-            onClick={() => setIsOutputDialogOpen(true)}
-            title={t("RegressionResult.OutputDialog")}
-            className={cn(
-              "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
-              "border border-gray-300 dark:border-gray-600",
-              "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            data-testid="open-output-dialog-btn"
-          >
-            <FileDown className="h-3.5 w-3.5" />
-            {t("RegressionResult.OutputDialog")}
-          </button>
+          <Tooltip content={t("RegressionResult.OutputDialog")}>
+            <span className="inline-flex">
+              <button
+                type="button"
+                onClick={openOutputDialog}
+                aria-label={t("RegressionResult.OutputDialog")}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                  "border border-gray-300 dark:border-gray-600",
+                  "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+                )}
+                data-testid="open-output-dialog-btn"
+              >
+                <FileDown className="h-3.5 w-3.5" />
+                {t("RegressionResult.OutputDialog")}
+              </button>
+            </span>
+          </Tooltip>
         </div>
 
         <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm md:grid-cols-2">
@@ -127,14 +148,16 @@ export const RegressionResult = ({
 
       {/* 出力ダイアログ */}
       <OutputResultDialog
+        key={`${result.resultId}:${outputDialogSessionKey}`}
         open={isOutputDialogOpen}
         onOpenChange={setIsOutputDialogOpen}
+        resultKind="regression"
         result={result}
       />
 
       {/* 係数テーブル */}
       <ResultSection title={t("RegressionResult.Coefficients")}>
-        <div className="overflow-x-auto">
+        <div className="app-scrollbar overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10">
               <tr className="border-b border-border-color bg-secondary">

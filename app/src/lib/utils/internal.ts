@@ -1,5 +1,5 @@
-import { getEconomiconAppAPI } from "../../api/endpoints";
-import type { TableInfoType } from "../../types/commonTypes";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import type { TableInfoType } from "@/types/commonTypes";
 
 /**
  * テーブルメタ情報を取得する（軽量版）。

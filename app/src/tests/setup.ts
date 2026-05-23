@@ -5,8 +5,7 @@ import { afterEach, beforeAll, vi } from "vitest";
 // --- Tauri API Mock ---
 // @tauri-apps/api/core モジュールをモック化
 vi.mock("@tauri-apps/api/core", () => ({
-  invoke: vi.fn(async (cmd: string, args: Record<string, unknown>) => {
-    console.log(`[Tauri Mock] invoke called: ${cmd}`, args);
+  invoke: vi.fn(async (cmd: string) => {
     // コマンドに応じたレスポンスを定義
     switch (cmd) {
       case "proxy_request":

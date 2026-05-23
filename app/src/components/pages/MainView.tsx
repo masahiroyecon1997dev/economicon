@@ -1,38 +1,17 @@
-import type { CurrentPageValue } from "../../stores/currentView";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { Calculation } from "./Calculation";
-import { ConfidenceIntervalView } from "./ConfidenceIntervalView";
-import { CorrelationMatrix } from "./CorrelationMatrix";
-import { CreateSimulationDataTable } from "./CreateSimulationDataTable";
-import { DescriptiveStatistics } from "./DescriptiveStatistics";
-import { ImportDataFile } from "./ImportDataFile";
-import { JoinTable } from "./JoinTable";
-import { Regression } from "./RegressionView";
-import { SaveData } from "./SaveData";
-import { Table } from "./Table";
-import { UnionTable } from "./UnionTable";
-
-const PAGE_COMPONENTS: Record<CurrentPageValue, React.ReactElement> = {
-  ImportDataFile: <ImportDataFile />,
-  JoinTable: <JoinTable />,
-  UnionTable: <UnionTable />,
-  DescriptiveStatistics: <DescriptiveStatistics />,
-  CorrelationMatrix: <CorrelationMatrix />,
-  ConfidenceIntervalView: <ConfidenceIntervalView />,
-  LinearRegressionForm: <Regression />,
-  CreateSimulationDataTable: <CreateSimulationDataTable />,
-  CalculationView: <Calculation />,
-  SaveData: <SaveData />,
-  DataPreview: <Table />,
-};
+import { ImportDataFile } from "@/components/pages/ImportDataFile";
+import { SaveData } from "@/components/pages/SaveData";
+import { WorkspaceSurface } from "@/components/pages/WorkspaceSurface";
+import { useCurrentPageStore } from "@/stores/currentPage";
 
 export const MainView = () => {
   const currentView = useCurrentPageStore((state) => state.currentView);
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden h-full bg-brand-secondary">
-      <div className="flex-1 overflow-hidden p-4 flex flex-col min-h-0">
-        {PAGE_COMPONENTS[currentView]}
+      <div className="flex-1 overflow-hidden p-2 flex flex-col min-h-0">
+        {currentView === "ImportDataFile" && <ImportDataFile />}
+        {currentView === "SaveData" && <SaveData />}
+        {currentView === "Workspace" && <WorkspaceSurface />}
       </div>
     </main>
   );

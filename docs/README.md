@@ -34,6 +34,10 @@
 - **[バックエンドセットアップ](docs/setup/backend.md)** - Python 3.14、uv、FastAPIの環境構築
 - **[フロントエンドセットアップ](docs/setup/frontend.md)** - fnm、Node.js、pnpm、Vite、Tauriの環境構築
 
+## 設計メモ
+
+- **[分析結果ナビゲーション仕様](docs/tips/analysis-results-navigation-spec.md)** - 左サイドメニューで分析結果を扱うための画面仕様、一覧項目仕様、API レスポンス案
+
 ### クイックスタート
 
 ```powershell
@@ -71,6 +75,17 @@ Docker を使用した開発環境も提供しています。詳細は[共通セ
 - **api-server**: REST API サーバーのデバッグ (Python/FastAPI)
 - **pytest**: バックエンドテストのデバッグ (pytest)
 - **Launch Chrome**: フロントエンドのデバッグ (React)
+
+## Packaging スクリプト一覧
+
+- packaging/build/build.ps1: Windows 向け配布 runtime の組み立てと Tauri ビルドを行うメインスクリプト
+- packaging/build/sync-api-runtime.ps1: 既存 runtime に対して API ソースだけを増分同期する開発用スクリプト
+- packaging/build/about.toml: cargo-about のライセンス収集設定
+- packaging/build/about.hbs: Rust サードパーティライセンス出力テンプレート
+- packaging/build/release/: build.ps1 が生成物を集約する出力先
+- packaging/versioning/bump-version.ps1: app、api、Tauri、build スクリプトのバージョンを一括更新する
+- packaging/deps/safe_update_deps.py: 更新候補のうち一定日数以上経過した依存だけを抽出または適用する
+- packaging/deps/check_new_packages.py: lock file 差分に含まれる新規依存の freshness を CI で検査する
 
 ## 開発コマンド
 

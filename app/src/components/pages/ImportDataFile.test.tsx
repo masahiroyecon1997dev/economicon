@@ -1,11 +1,18 @@
+import {
+  canDeleteFile,
+  deleteFile,
+  getFiles,
+  getFilesSafe,
+  TauriFileError,
+} from "@/api/bridge/tauri-commands";
+import { ImportDataFile } from "@/components/pages/ImportDataFile";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentPage";
+import { useFilesStore } from "@/stores/files";
+import { useSettingsStore } from "@/stores/settings";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getFiles } from "../../api/bridge/tauri-commands";
-import { useCurrentPageStore } from "../../stores/currentView";
-import { useFilesStore } from "../../stores/files";
-import { useSettingsStore } from "../../stores/settings";
-import { ImportDataFile } from "./ImportDataFile";
 
 const { mockFileListTable } = vi.hoisted(() => ({
   mockFileListTable: vi.fn(),
@@ -27,6 +34,8 @@ vi.mock("../../lib/dialog/message", () => ({
 vi.mock("../../api/bridge/tauri-commands", () => ({
   getFiles: vi.fn().mockResolvedValue({ directoryPath: "/tmp", files: [] }),
   getFilesSafe: vi.fn().mockResolvedValue({ directoryPath: "", files: [] }),
+  canDeleteFile: vi.fn().mockResolvedValue(undefined),
+  deleteFile: vi.fn().mockResolvedValue(undefined),
   TauriFileError: class TauriFileError extends Error {
     errorType: string;
     originalMessage: string;
@@ -51,12 +60,24 @@ vi.mock("../organisms/Dialog/ImportConfigDialog", () => ({
   ImportConfigDialog: () => <div data-testid="import-config-dialog" />,
 }));
 vi.mock("../molecules/Table/FileListTable", () => ({
-  FileListTable: (props: { files: Array<{ name: string }> }) => {
+  FileListTable: (props: {
+    files: Array<{ name: string; isFile?: boolean }>;
+    onFileClick?: (file: { name: string; isFile?: boolean }) => void;
+    renderRowActions?: (file: {
+      name: string;
+      isFile?: boolean;
+    }) => React.ReactNode;
+  }) => {
     mockFileListTable(props);
     return (
       <div data-testid="file-list-table">
         {props.files.map((file) => (
-          <div key={file.name}>{file.name}</div>
+          <div key={file.name}>
+            <button type="button" onClick={() => props.onFileClick?.(file)}>
+              {file.name}
+            </button>
+            {props.renderRowActions?.(file)}
+          </div>
         ))}
       </div>
     );
@@ -76,18 +97,33 @@ beforeEach(() => {
   useCurrentPageStore.setState({ currentView: "ImportDataFile" });
 });
 
+const renderImportDataFile = async (
+  expectedLoader: "safe" | "current" = "safe",
+) => {
+  render(<ImportDataFile />);
+
+  await waitFor(() => {
+    if (expectedLoader === "safe") {
+      expect(vi.mocked(getFilesSafe)).toHaveBeenCalled();
+      return;
+    }
+
+    expect(vi.mocked(getFiles)).toHaveBeenCalled();
+  });
+};
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 describe("ImportDataFile コンポーネント", () => {
   describe("初期レンダリング", () => {
-    it("タイトルが表示される", () => {
-      render(<ImportDataFile />);
+    it("タイトルが表示される", async () => {
+      await renderImportDataFile();
       expect(screen.getByText("ImportDataFileView.Title")).toBeInTheDocument();
     });
 
-    it("ドラッグ&ドロップタブとファイル選択タブが表示される", () => {
-      render(<ImportDataFile />);
+    it("ドラッグ&ドロップタブとファイル選択タブが表示される", async () => {
+      await renderImportDataFile();
       expect(
         screen.getByText("ImportDataFileView.DragAndDropTab"),
       ).toBeInTheDocument();
@@ -96,8 +132,8 @@ describe("ImportDataFile コンポーネント", () => {
       ).toBeInTheDocument();
     });
 
-    it("ドラッグ&ドロップエリアのタイトルが表示される", () => {
-      render(<ImportDataFile />);
+    it("ドラッグ&ドロップエリアのタイトルが表示される", async () => {
+      await renderImportDataFile();
       expect(
         screen.getByText("ImportDataFileView.DragDropAreaTitle"),
       ).toBeInTheDocument();
@@ -107,7 +143,7 @@ describe("ImportDataFile コンポーネント", () => {
   describe("タブ切替", () => {
     it("ファイル選択タブをクリックするとファイルフィルターが表示される", async () => {
       const user = userEvent.setup();
-      render(<ImportDataFile />);
+      await renderImportDataFile();
 
       const fileSelectTab = screen.getByText(
         "ImportDataFileView.FileSelectTab",
@@ -123,7 +159,7 @@ describe("ImportDataFile コンポーネント", () => {
 
     it("ファイル選択タブでCSVフィルターが表示される", async () => {
       const user = userEvent.setup();
-      render(<ImportDataFile />);
+      await renderImportDataFile();
 
       const fileSelectTab = screen.getByText(
         "ImportDataFileView.FileSelectTab",
@@ -170,7 +206,7 @@ describe("ImportDataFile コンポーネント", () => {
       });
 
       const user = userEvent.setup();
-      render(<ImportDataFile />);
+      await renderImportDataFile("current");
 
       const fileSelectTab = screen.getByText(
         "ImportDataFileView.FileSelectTab",
@@ -186,17 +222,150 @@ describe("ImportDataFile コンポーネント", () => {
         );
       });
     });
+
+    it("非対応形式のファイルを選ぶと警告ダイアログを表示する", async () => {
+      vi.mocked(getFiles).mockResolvedValue({
+        directoryPath: "/tmp",
+        files: [
+          {
+            name: "notes.json",
+            isFile: true,
+            size: 256,
+            modifiedTime: new Date().toISOString(),
+          },
+        ],
+      });
+      useFilesStore.setState({
+        files: [
+          {
+            name: "notes.json",
+            isFile: true,
+            size: 256,
+            modifiedTime: new Date().toISOString(),
+          },
+        ],
+        directoryPath: "/tmp",
+      });
+      const user = userEvent.setup();
+
+      await renderImportDataFile("current");
+
+      await user.click(screen.getByText("ImportDataFileView.FileSelectTab"));
+      await user.click(screen.getByRole("button", { name: "notes.json" }));
+
+      await waitFor(() => {
+        expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
+          "ImportDataFileView.UnsupportedFileTitle",
+          "ImportDataFileView.UnsupportedFileMessage",
+        );
+      });
+    });
+
+    it("削除ボタンから確認後にファイルを削除して一覧を再読込する", async () => {
+      vi.mocked(getFiles).mockResolvedValue({
+        directoryPath: "/tmp",
+        files: [
+          {
+            name: "test.csv",
+            isFile: true,
+            size: 1024,
+            modifiedTime: new Date().toISOString(),
+          },
+        ],
+      });
+      useFilesStore.setState({
+        files: [
+          {
+            name: "test.csv",
+            isFile: true,
+            size: 1024,
+            modifiedTime: new Date().toISOString(),
+          },
+        ],
+        directoryPath: "/tmp",
+      });
+      const user = userEvent.setup();
+
+      await renderImportDataFile("current");
+      await user.click(screen.getByText("ImportDataFileView.FileSelectTab"));
+      await user.click(screen.getByTestId("delete-file-button-test.csv"));
+
+      expect(vi.mocked(canDeleteFile)).toHaveBeenCalledWith("/tmp\\test.csv");
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("ImportDataFileView.DeleteFileConfirmTitle"),
+        ).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByRole("button", { name: "Common.Delete" }));
+
+      await waitFor(() => {
+        expect(vi.mocked(deleteFile)).toHaveBeenCalledWith("/tmp\\test.csv");
+      });
+
+      await waitFor(() => {
+        expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
+          "ImportDataFileView.DeleteFileSuccessTitle",
+          "ImportDataFileView.DeleteFileSuccessMessage",
+        );
+      });
+
+      expect(vi.mocked(getFiles)).toHaveBeenCalledWith("/tmp");
+    });
+
+    it("削除できないファイルは確認前にエラーダイアログを表示する", async () => {
+      vi.mocked(getFiles).mockResolvedValue({
+        directoryPath: "/tmp",
+        files: [
+          {
+            name: "locked.csv",
+            isFile: true,
+            size: 1024,
+            modifiedTime: new Date().toISOString(),
+          },
+        ],
+      });
+      useFilesStore.setState({
+        files: [
+          {
+            name: "locked.csv",
+            isFile: true,
+            size: 1024,
+            modifiedTime: new Date().toISOString(),
+          },
+        ],
+        directoryPath: "/tmp",
+      });
+      vi.mocked(canDeleteFile).mockRejectedValue(
+        new TauriFileError("FileInUse", "locked"),
+      );
+      const user = userEvent.setup();
+
+      await renderImportDataFile("current");
+      await user.click(screen.getByText("ImportDataFileView.FileSelectTab"));
+      await user.click(screen.getByTestId("delete-file-button-locked.csv"));
+
+      await waitFor(() => {
+        expect(vi.mocked(showMessageDialog)).toHaveBeenCalledWith(
+          "ImportDataFileView.DeleteFileBlockedTitle",
+          "ImportDataFileView.DeleteFileBlockedFileInUse",
+        );
+      });
+
+      expect(vi.mocked(deleteFile)).not.toHaveBeenCalled();
+    });
   });
 
   describe("キャンセル", () => {
     it("キャンセルボタンをクリックすると DataPreview に遷移する", async () => {
       const user = userEvent.setup();
-      render(<ImportDataFile />);
+      await renderImportDataFile();
 
       const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
       await user.click(cancelBtn);
 
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
   });
 });

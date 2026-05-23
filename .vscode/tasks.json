@@ -27,7 +27,7 @@
       "type": "shell",
       "command": "cd app; pnpm run gen:all",
       "label": "Generate API Client (OpenAPI & Types)",
-      "detail": "Runs pnpm gen:all to regenerate openapi.json and Orval clients",
+      "detail": "Runs pnpm gen:all to regenerate openapi.json and clean/rebuild Orval clients",
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
@@ -107,32 +107,12 @@
     },
     {
       "type": "shell",
-      "command": "pnpm run dev",
-      "label": "Economicon: Vite Dev",
-      "detail": "Run Vite development server for Economicon app for E2E testing",
-      "options": {
-        "cwd": "${workspaceFolder}/app"
-      },
-      "isBackground": true,
-      "problemMatcher": {
-        "owner": "custom",
-        "pattern": { "regexp": "^.*$" },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": ".*VITE.*",
-          "endsPattern": ".*ready in.*"
-        }
-      }
-    },
-    {
-      "type": "shell",
-      "command": "$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9222'; .\\src-tauri\\target\\debug\\Economicon.exe",
+      "command": "$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9222'; pnpm tauri dev",
       "label": "Economicon: App (Debug Port)",
       "detail": "Run Economicon app with debug port for E2E testing",
       "options": {
         "cwd": "${workspaceFolder}/app"
       },
-      "dependsOn": ["Economicon: Vite Dev"],
       "isBackground": true,
       "problemMatcher": {
         "owner": "custom",
@@ -160,7 +140,7 @@
     },
     {
       "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File packaging/bump-version.ps1 -Version ${input:newVersion}",
+      "command": "powershell -ExecutionPolicy Bypass -File packaging/versioning/bump-version.ps1 -Version ${input:newVersion}",
       "label": "Economicon: Bump Version",
       "detail": "6つのファイルのバージョンを一括更新する (pyproject.toml / Cargo.toml / package.json / tauri.conf.json / build.ps1 / gen_openapi.py)",
       "options": {
@@ -175,9 +155,39 @@
     },
     {
       "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File packaging/bump-version.ps1 -Version ${input:newVersion} -DryRun",
+      "command": "powershell -ExecutionPolicy Bypass -File packaging/versioning/bump-version.ps1 -Version ${input:newVersion} -DryRun",
       "label": "Economicon: Bump Version (DryRun)",
       "detail": "変更内容を確認のみ（ファイルは変更されない）",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": true
+      }
+    },
+    {
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File packaging/build/sync-api-runtime.ps1",
+      "label": "Economicon: Sync API Runtime",
+      "detail": "既存 runtime に API ソースだけを再同期する",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": true
+      }
+    },
+    {
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File packaging/build/sync-api-runtime.ps1 -Compile",
+      "label": "Economicon: Sync API Runtime + Compile",
+      "detail": "API ソース再同期後に main.py と economicon をプリコンパイルする",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -205,7 +215,7 @@
     },
     {
       "type": "shell",
-      "command": "chcp 65001 | Out-Null; uv run python packaging/safe_update_deps.py --mode outdated --days 10",
+      "command": "chcp 65001 | Out-Null; uv run python packaging/deps/safe_update_deps.py --mode outdated --days 10",
       "label": "Deps: Safe Update (Dry Run)",
       "detail": "リリースから 10 日以上経過した安全なパッケージのみをリストアップ（変更なし）",
       "options": {
@@ -220,7 +230,7 @@
     },
     {
       "type": "shell",
-      "command": "chcp 65001 | Out-Null; uv run python packaging/safe_update_deps.py --mode apply --days 10",
+      "command": "chcp 65001 | Out-Null; uv run python packaging/deps/safe_update_deps.py --mode apply --days 10",
       "label": "Deps: Safe Update (Apply + Verify)",
       "detail": "安全なパッケージを更新し、lock ファイル再生成 → 整合性検証まで一括実行",
       "options": {

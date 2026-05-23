@@ -9,11 +9,9 @@ from statsmodels.stats.weightstats import ztest as sm_ztest
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.enums import AlternativeHypothesis, StatisticalTestType
-from economicon.schemas.statistics import (
-    ConfidenceIntervalBounds,
-    StatisticalTestRequestBody,
-    StatisticalTestResult,
-)
+from economicon.schemas.statistics import StatisticalTestRequestBody
+from economicon.services.data.analysis_result import AnalysisResult
+from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.utils.exceptions import ProcessingError, ValidationError
 from economicon.utils.validators import validate_existence
@@ -21,10 +19,7 @@ from economicon.utils.validators import validate_existence
 # paired チェック・F 検定分岐で使用する定数
 _TWO_SAMPLES: int = 2
 
-# z 検定の 95% 信頼区間に使用する定数
-# z_crit = norm.ppf(1 - α/2) = norm.ppf(0.975) ≈ 1.95996...
-_ALPHA_95: float = 0.05
-_Z_CRIT_95: float = float(stats.norm.ppf(1.0 - _ALPHA_95 / 2))
+_RESULT_TYPE = "statistical_test"
 
 
 class StatisticalTest:
@@ -47,8 +42,10 @@ class StatisticalTest:
         self,
         body: StatisticalTestRequestBody,
         tables_store: TablesStore,
+        result_store: AnalysisResultStore,
     ) -> None:
         self.tables_store = tables_store
+        self.result_store = result_store
         self.test_type = body.test_type
         self.samples = body.samples
         self.options = body.options
@@ -123,11 +120,32 @@ class StatisticalTest:
 
             match self.test_type:
                 case StatisticalTestType.T_TEST:
-                    return self._run_ttest(arrays)
+                    result = self._run_ttest(arrays)
                 case StatisticalTestType.Z_TEST:
-                    return self._run_ztest(arrays)
+                    result = self._run_ztest(arrays)
                 case StatisticalTestType.F_TEST:
-                    return self._run_ftest(arrays)
+                    result = self._run_ftest(arrays)
+
+            # AnalysisResultStore に保存
+            # 自動命名: "{test_type}（{n}群） #{seq}"
+            n_samples = len(self.samples)
+            seq = self.result_store.next_sequence(_RESULT_TYPE)
+            name = _("{test_type}（{n}群） #{seq}").format(
+                test_type=self.test_type.value,
+                n=n_samples,
+                seq=seq,
+            )
+            # 複数テーブルにまたがる場合は主テーブル名のみ保存
+            table_name = self.samples[0].table_name
+            analysis_result = AnalysisResult(
+                name=name,
+                description="",
+                table_name=table_name,
+                result_data=result,
+                result_type=_RESULT_TYPE,
+            )
+            result_id = self.result_store.save_result(analysis_result)
+            return {"resultId": result_id}
 
         except ValidationError, ProcessingError:
             raise
@@ -183,7 +201,9 @@ class StatisticalTest:
                 arrays[0], popmean=mu, alternative="two-sided"
             )
             df = float(res.df)
-            ci = ci_res.confidence_interval(confidence_level=0.95)
+            ci = ci_res.confidence_interval(
+                confidence_level=self.options.confidence_level
+            )
             effect_size = self._cohen_d_1samp(arrays[0], mu)
 
         elif self.options.paired:
@@ -192,7 +212,9 @@ class StatisticalTest:
                 arrays[0], arrays[1], alternative="two-sided"
             )
             df = float(res.df)
-            ci = ci_res.confidence_interval(confidence_level=0.95)
+            ci = ci_res.confidence_interval(
+                confidence_level=self.options.confidence_level
+            )
             effect_size = self._cohen_d_paired(arrays[0], arrays[1])
 
         else:
@@ -209,20 +231,24 @@ class StatisticalTest:
                 alternative="two-sided",
             )
             df = float(res.df)
-            ci = ci_res.confidence_interval(confidence_level=0.95)
+            ci = ci_res.confidence_interval(
+                confidence_level=self.options.confidence_level
+            )
             effect_size = self._cohen_d_2samp(
                 arrays[0], arrays[1], self.options.equal_var
             )
 
-        return StatisticalTestResult(
-            statistic=float(res.statistic),
-            p_value=float(res.pvalue),
-            df=df,
-            confidence_interval=ConfidenceIntervalBounds(
-                lower=float(ci.low), upper=float(ci.high)
-            ),
-            effect_size=effect_size,
-        ).model_dump(by_alias=True)
+        return {
+            "statistic": float(res.statistic),
+            "pValue": float(res.pvalue),
+            "df": df,
+            "confidenceInterval": {
+                "lower": float(ci.low),
+                "upper": float(ci.high),
+            },
+            "confidenceLevel": self.options.confidence_level,
+            "effectSize": effect_size,
+        }
 
     def _run_ztest(self, arrays: list[np.ndarray]) -> dict:
         """
@@ -257,17 +283,21 @@ class StatisticalTest:
                 )
             )
 
-        # 95% 信頼区間（モジュール定数 _Z_CRIT_95 を使用）
-        return StatisticalTestResult(
-            statistic=float(stat),
-            p_value=float(p_val),
-            df=None,
-            confidence_interval=ConfidenceIntervalBounds(
-                lower=center - _Z_CRIT_95 * se,
-                upper=center + _Z_CRIT_95 * se,
-            ),
-            effect_size=None,
-        ).model_dump(by_alias=True)
+        # 信頼区間（options.confidence_level に基づく z 臨界値を使用）
+        z_crit = float(
+            stats.norm.ppf(1.0 - (1.0 - self.options.confidence_level) / 2)
+        )
+        return {
+            "statistic": float(stat),
+            "pValue": float(p_val),
+            "df": None,
+            "confidenceInterval": {
+                "lower": center - z_crit * se,
+                "upper": center + z_crit * se,
+            },
+            "confidenceLevel": self.options.confidence_level,
+            "effectSize": None,
+        }
 
     def _run_ftest(self, arrays: list[np.ndarray]) -> dict:
         """
@@ -292,14 +322,14 @@ class StatisticalTest:
             float(stats.f.cdf(f_stat, df1, df2)),
             float(stats.f.sf(f_stat, df1, df2)),
         )
-        return StatisticalTestResult(
-            statistic=float(f_stat),
-            p_value=p_val,
-            df=float(df1),
-            df2=float(df2),
-            confidence_interval=None,
-            effect_size=None,
-        ).model_dump(by_alias=True)
+        return {
+            "statistic": float(f_stat),
+            "pValue": p_val,
+            "df": float(df1),
+            "df2": float(df2),
+            "confidenceInterval": None,
+            "effectSize": None,
+        }
 
     def _f_oneway_anova(self, arrays: list[np.ndarray]) -> dict:
         """一元配置分散分析（ANOVA）。効果量として η² を返す。"""
@@ -309,14 +339,14 @@ class StatisticalTest:
             sum(len(a) for a in arrays) - len(arrays)
         )
         eta_sq = self._eta_squared(arrays)
-        return StatisticalTestResult(
-            statistic=float(res.statistic),
-            p_value=float(res.pvalue),
-            df=dfn,
-            df2=dfd,
-            confidence_interval=None,
-            effect_size=eta_sq,
-        ).model_dump(by_alias=True)
+        return {
+            "statistic": float(res.statistic),
+            "pValue": float(res.pvalue),
+            "df": dfn,
+            "df2": dfd,
+            "confidenceInterval": None,
+            "effectSize": eta_sq,
+        }
 
     # ------------------------------------------------------------------ #
     # 効果量計算                                                            #

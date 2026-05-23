@@ -1,3 +1,10 @@
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useAnalysisResultsStore } from "@/stores/analysisResults";
+import { useCurrentPageStore } from "@/stores/currentPage";
+import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import {
   act,
   fireEvent,
@@ -7,11 +14,6 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getEconomiconAppAPI } from "../../../api/endpoints";
-import { showMessageDialog } from "../../../lib/dialog/message";
-import { useRegressionResultsStore } from "../../../stores/regressionResults";
-import { useTableListStore } from "../../../stores/tableList";
-import { LinearRegressionForm } from "./LinearRegressionForm";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -103,7 +105,17 @@ const REGRESSION_RESULT = {
 };
 
 const ANALYSIS_DETAIL = {
-  regressionOutput: {
+  id: "r-001",
+  name: "OLS 1",
+  description: "desc",
+  tableName: "sales",
+  resultType: "regression",
+  createdAt: "2026-04-29T10:15:30Z",
+  modelPath: null,
+  modelType: "ols",
+  entityIdColumn: null,
+  timeColumn: null,
+  resultData: {
     tableName: "sales",
     dependentVariable: "price",
     explanatoryVariables: ["quantity"],
@@ -135,7 +147,6 @@ const mockApi = {
 };
 
 const onCancel = vi.fn();
-const onAnalysisComplete = vi.fn();
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -153,10 +164,35 @@ beforeEach(() => {
   });
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales"] });
-  useRegressionResultsStore.setState({ results: [] });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
+  useWorkspaceTabsStore.setState({ tabs: [], activeTabId: null });
+  useAnalysisResultsStore.setState({
+    pane: "data",
+    summaries: [],
+    activeResultId: null,
+    activeResultDetail: null,
+    isListLoading: false,
+    isDetailLoading: false,
+    setPane: useAnalysisResultsStore.getState().setPane,
+    setActiveResult: useAnalysisResultsStore.getState().setActiveResult,
+    fetchSummaries: vi.fn().mockResolvedValue(undefined),
+    openResult: vi.fn(),
+    removeSummary: vi.fn(),
+    upsertSummary: vi.fn(),
+    clearActiveResult: useAnalysisResultsStore.getState().clearActiveResult,
+  });
 });
 
 describe("LinearRegressionForm", () => {
+  it("タイトルと説明を表示する", () => {
+    render(<LinearRegressionForm onCancel={onCancel} />);
+
+    expect(screen.getByText("LinearRegressionForm.Title")).toBeInTheDocument();
+    expect(
+      screen.getByText("LinearRegressionForm.Description"),
+    ).toBeInTheDocument();
+  });
+
   describe("バリデーション", () => {
     it("テーブル未選択でサブミット → DataNameSelectエラーが表示される", async () => {
       mockTableLoader.selectedTableName = "";
@@ -184,18 +220,14 @@ describe("LinearRegressionForm", () => {
     });
 
     it("説明変数が0件でサブミット → ExplanatoryVariablesRequiredエラーが表示される", async () => {
-      render(
-        <LinearRegressionForm
-          onCancel={onCancel}
-          onAnalysisComplete={onAnalysisComplete}
-        />,
-      );
+      const user = userEvent.setup();
+      render(<LinearRegressionForm onCancel={onCancel} />);
 
-      // 目的変数のみ設定して説明変数は空のまま
-      const [depAddBtn] = screen.getAllByRole("button", {
-        name: "add-variable",
-      });
-      await userEvent.setup().click(depAddBtn);
+      // 被説明変数を Select で設定（説明変数は空のまま）
+      await user.click(
+        screen.getByLabelText("LinearRegressionForm.DependentVariable"),
+      );
+      await user.click(await screen.findByRole("option", { name: "price" }));
 
       await submitForm();
 
@@ -208,7 +240,7 @@ describe("LinearRegressionForm", () => {
   });
 
   describe("API成功時（2段連鎖）", () => {
-    it("regression → getAnalysisResult が両方成功すると addResult と onAnalysisComplete が呼ばれる", async () => {
+    it("regression → getAnalysisResult が両方成功すると共通タブを開いて DataPreview に戻る", async () => {
       mockApi.regression.mockResolvedValue({
         code: "OK",
         result: REGRESSION_RESULT,
@@ -219,26 +251,24 @@ describe("LinearRegressionForm", () => {
       });
 
       const user = userEvent.setup();
-      render(
-        <LinearRegressionForm
-          onCancel={onCancel}
-          onAnalysisComplete={onAnalysisComplete}
-        />,
-      );
+      render(<LinearRegressionForm onCancel={onCancel} />);
 
-      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
-        name: "add-variable",
-      });
-      await user.click(depAddBtn);
-      await user.click(expAddBtn);
+      // 被説明変数を Select で設定
+      await user.click(
+        screen.getByLabelText("LinearRegressionForm.DependentVariable"),
+      );
+      await user.click(await screen.findByRole("option", { name: "price" }));
+      // 説明変数を VariableSelectorField mock で設定
+      await user.click(screen.getByRole("button", { name: "add-variable" }));
 
       await submitForm();
 
       await waitFor(() => {
-        expect(onAnalysisComplete).toHaveBeenCalledWith(0);
+        expect(mockApi.getAnalysisResult).toHaveBeenCalledWith("r-001");
       });
       expect(vi.mocked(showMessageDialog)).not.toHaveBeenCalled();
-      expect(useRegressionResultsStore.getState().results).toHaveLength(1);
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
+      expect(useWorkspaceTabsStore.getState().activeTabId).toBe("result:r-001");
     });
   });
 
@@ -252,11 +282,13 @@ describe("LinearRegressionForm", () => {
       const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
-        name: "add-variable",
-      });
-      await user.click(depAddBtn);
-      await user.click(expAddBtn);
+      // 被説明変数を Select で設定
+      await user.click(
+        screen.getByLabelText("LinearRegressionForm.DependentVariable"),
+      );
+      await user.click(await screen.findByRole("option", { name: "price" }));
+      // 説明変数を VariableSelectorField mock で設定
+      await user.click(screen.getByRole("button", { name: "add-variable" }));
 
       await submitForm();
 
@@ -282,11 +314,13 @@ describe("LinearRegressionForm", () => {
       const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
-        name: "add-variable",
-      });
-      await user.click(depAddBtn);
-      await user.click(expAddBtn);
+      // 被説明変数を Select で設定
+      await user.click(
+        screen.getByLabelText("LinearRegressionForm.DependentVariable"),
+      );
+      await user.click(await screen.findByRole("option", { name: "price" }));
+      // 説明変数を VariableSelectorField mock で設定
+      await user.click(screen.getByRole("button", { name: "add-variable" }));
 
       await submitForm();
 
@@ -304,11 +338,13 @@ describe("LinearRegressionForm", () => {
       const user = userEvent.setup();
       render(<LinearRegressionForm onCancel={onCancel} />);
 
-      const [depAddBtn, expAddBtn] = screen.getAllByRole("button", {
-        name: "add-variable",
-      });
-      await user.click(depAddBtn);
-      await user.click(expAddBtn);
+      // 被説明変数を Select で設定
+      await user.click(
+        screen.getByLabelText("LinearRegressionForm.DependentVariable"),
+      );
+      await user.click(await screen.findByRole("option", { name: "price" }));
+      // 説明変数を VariableSelectorField mock で設定
+      await user.click(screen.getByRole("button", { name: "add-variable" }));
 
       await submitForm();
 

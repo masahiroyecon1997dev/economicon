@@ -78,56 +78,47 @@ class ConfidenceIntervalRequestBody(BaseRequest):
             "variance: 分散、standard_deviation: 標準偏差）",
         ),
     ]
-
-
-class StatisticValue(BaseResult):
-    """統計量の種別と値"""
-
-    type: str = Field(
-        title="Type",
-        description="統計量のタイプ（mean, median 等）",
-    )
-    value: Any = Field(
-        title="Value",
-        description="統計量の計算値",
-    )
-
-
-class ConfidenceIntervalBounds(BaseResult):
-    """信頼区間の下限・上限"""
-
-    lower: float = Field(
-        title="Lower",
-        description="信頼区間の下限値",
-    )
-    upper: float = Field(
-        title="Upper",
-        description="信頼区間の上限値",
-    )
+    bootstrap_n_resamples: Annotated[
+        int,
+        Field(
+            title="Bootstrap N Resamples",
+            description=(
+                "Bootstrap 法（中央値 CI）のリサンプリング回数。"
+                "statisticType が median のときのみ有効。"
+                "（デフォルト: 1000、100〜100000）"
+            ),
+            ge=100,
+            le=100_000,
+            default=1000,
+        ),
+    ] = 1000
+    bootstrap_seed: Annotated[
+        int | None,
+        Field(
+            title="Bootstrap Seed",
+            description=(
+                "Bootstrap 法の乱数シード。"
+                "None の場合は毎回異なる結果になる。"
+                "再現性が必要な場合に整数を指定してください。"
+                "（デフォルト: None）"
+            ),
+            default=None,
+        ),
+    ] = None
 
 
 class ConfidenceIntervalResult(BaseResult):
-    """信頼区間計算レスポンス"""
+    """
+    信頼区間計算レスポンス。
+    詳細は GET /api/analysis/results/{resultId} で取得できる
+    """
 
-    table_name: str = Field(
-        title="Table Name",
-        description="計算対象のテーブル名",
-    )
-    column_name: str = Field(
-        title="Column Name",
-        description="計算対象のカラム名",
-    )
-    statistic: StatisticValue = Field(
-        title="Statistic",
-        description="計算した統計量のタイプと値",
-    )
-    confidence_interval: ConfidenceIntervalBounds = Field(
-        title="Confidence Interval",
-        description="信頼区間の下限値と上限値",
-    )
-    confidence_level: float = Field(
-        title="Confidence Level",
-        description="計算に使用した信頼水準",
+    result_id: str = Field(
+        title="Result ID",
+        description=(
+            "分析結果の一意 ID。"
+            "詳細は GET /api/analysis/results/{resultId} で取得可能。"
+        ),
     )
 
 
@@ -164,7 +155,9 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
             "range: 範囲、iqr: 四分位数範囲、"
             "count: 有効サンプル数、null_count: null数、"
             "null_ratio: null割合、"
-            "population_variance: 母分散）",
+            "population_variance: 母分散、"
+            "min: 最小値、max: 最大値、"
+            "skewness: 歪度、kurtosis: 超過尖度）",
             min_length=1,
         ),
     ]
@@ -197,17 +190,16 @@ class DescriptiveStatisticsRequestBody(BaseRequest):
 
 
 class DescriptiveStatisticsResult(BaseResult):
-    """記述統計レスポンス"""
+    """
+    記述統計レスポンス。
+    詳細は GET /api/analysis/results/{resultId} で取得できる
+    """
 
-    table_name: str = Field(
-        title="Table Name",
-        description="計算対象のテーブル名",
-    )
-    statistics: dict[str, dict[str, float | None]] = Field(
-        title="Statistics",
+    result_id: str = Field(
+        title="Result ID",
         description=(
-            "記述統計の計算結果。"
-            "カラム名をキー、{統計量名: 値} を値とする辞書型データ。"
+            "分析結果の一意 ID。"
+            "詳細は GET /api/analysis/results/{resultId} で取得可能。"
         ),
     )
 
@@ -445,6 +437,20 @@ class StatisticalTestOptions(BaseRequest):
             default=True,
         ),
     ] = True
+    confidence_level: Annotated[
+        float,
+        Field(
+            title="Confidence Level",
+            description=(
+                "検定結果に付与する信頼区間の信頼水準。"
+                "例: 0.95 = 95%信頼区間（デフォルト: 0.95）。"
+                "t 検定・z 検定に適用。f 検定は信頼区間なし。"
+            ),
+            gt=0.0,
+            lt=1.0,
+            default=0.95,
+        ),
+    ] = 0.95
 
 
 class StatisticalTestRequestBody(BaseRequest):
@@ -520,36 +526,113 @@ class StatisticalTestRequestBody(BaseRequest):
 
 
 class StatisticalTestResult(BaseResult):
-    """統計検定レスポンス"""
+    """
+    統計検定レスポンス。
+    詳細は GET /api/analysis/results/{resultId} で取得できる
+    """
 
-    statistic: float = Field(
-        title="Statistic",
-        description="検定統計量（t 値 / Z 値 / F 値）",
-    )
-    p_value: float = Field(
-        title="P Value",
-        description="有意確率（p 値）",
-    )
-    df: float | None = Field(
-        title="Degrees of Freedom",
-        description="自由度（t 検定: 分子自由度、F 検定: df1、z 検定は None）",
-    )
-    df2: float | None = Field(
-        default=None,
-        title="Degrees of Freedom (Denominator)",
+    result_id: str = Field(
+        title="Result ID",
         description=(
-            "分母自由度（F 検定のみ設定。df=分子自由度、df2=分母自由度）"
+            "分析結果の一意 ID。"
+            "詳細は GET /api/analysis/results/{resultId} で取得可能。"
         ),
     )
-    confidence_interval: ConfidenceIntervalBounds | None = Field(
-        title="Confidence Interval",
-        description="95% 信頼区間（F 検定では None）",
-    )
-    effect_size: float | None = Field(
-        title="Effect Size",
-        description=(
-            "効果量"
-            "（t 検定: Cohen's d、ANOVA: η²、"
-            "z 検定・分散比 F 検定では None）"
+
+
+# ---------------------------------------------------------------------------
+# GroupBy 統計テーブル作成
+# ---------------------------------------------------------------------------
+
+
+class CreateGroupStatisticsTableRequestBody(BaseRequest):
+    """GroupBy 統計テーブル作成リクエスト"""
+
+    table_name: Annotated[
+        TableName,
+        Field(
+            title="Table Name",
+            description="集計対象の元テーブル名。",
         ),
+    ]
+    group_by_columns: Annotated[
+        list[ColumnName],
+        Field(
+            title="Group By Columns",
+            description=(
+                "グループ化キーとする列名のリスト。"
+                "浮動小数点型（Float32/Float64）の列は指定不可。"
+            ),
+            min_length=1,
+        ),
+    ]
+    stat_columns: Annotated[
+        list[ColumnName],
+        Field(
+            title="Stat Columns",
+            description=(
+                "統計量を計算する対象列名のリスト。"
+                "groupByColumns との重複は不可。"
+            ),
+            min_length=1,
+        ),
+    ]
+    statistics: Annotated[
+        list[DescriptiveStatisticType],
+        Field(
+            title="Statistics",
+            description=(
+                "計算する統計量のリスト。"
+                "（mean: 平均、median: 中央値、mode: 最頻値、"
+                "variance: 不偏分散、std_dev: 標準偏差、"
+                "range: 範囲、iqr: 四分位数範囲、"
+                "count: 有効サンプル数、null_count: null数、"
+                "null_ratio: null割合、population_variance: 母分散、"
+                "min: 最小値、max: 最大値、"
+                "skewness: 歪度、kurtosis: 超過尖度）"
+            ),
+            min_length=1,
+        ),
+    ]
+    new_table_name: Annotated[
+        TableName,
+        Field(
+            title="New Table Name",
+            description="結果を格納する新規テーブル名。",
+        ),
+    ]
+
+    @field_validator("statistics", mode="before")
+    @classmethod
+    def coerce_group_statistics(cls, v: Any) -> Any:
+        """JSON文字列をDescriptiveStatisticTypeに変換するfield_validator"""
+        if not isinstance(v, list):
+            return v
+        result = []
+        for item in v:
+            if isinstance(item, DescriptiveStatisticType):
+                result.append(item)
+            elif isinstance(item, str):
+                try:
+                    result.append(DescriptiveStatisticType(item))
+                except ValueError:
+                    valid = ", ".join(
+                        e.value for e in DescriptiveStatisticType
+                    )
+                    raise PydanticCustomError(
+                        "literal_error",
+                        "statistics must be one of: {expected}",
+                        {"expected": valid},
+                    ) from None
+            else:
+                result.append(item)
+        return result
+
+
+class CreateGroupStatisticsTableResult(BaseResult):
+    """GroupBy 統計テーブル作成レスポンス"""
+
+    table_name: str = Field(
+        title="Table Name",
+        description="新規作成された GroupBy 統計テーブルの名前。",
     )

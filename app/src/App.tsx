@@ -1,39 +1,41 @@
-import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import {
   getAuthToken,
   getFilesSafe,
   getOsInfo,
-} from "./api/bridge/tauri-commands";
-import { getEconomiconAppAPI } from "./api/endpoints";
-import { showMessageDialog } from "./lib/dialog/message";
-import { useCurrentPageStore } from "./stores/currentView";
-import { useLoadingStore } from "./stores/loading";
-import { useSettingsStore } from "./stores/settings";
-import { useTableListStore } from "./stores/tableList";
+} from "@/api/bridge/tauri-commands";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import i18n from "@/i18n/config";
+import { showMessageDialog } from "@/lib/dialog/message";
+import { useCurrentPageStore } from "@/stores/currentPage";
+import { useLoadingStore } from "@/stores/loading";
+import { useSettingsStore } from "@/stores/settings";
+import { useTableListStore } from "@/stores/tableList";
+import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
+import { ConfirmDialog } from "@/components/molecules/Dialog/ConfirmDialog";
+import { MessageDialog } from "@/components/molecules/Dialog/MessageDialog";
+import { LoadingOverlay } from "@/components/molecules/Loading/LoadingOverlay";
+import { AppBar } from "@/components/organisms/Header/AppBar";
+import { LeftSideMenu } from "@/components/pages/LeftSideMenu";
+import { MainView } from "@/components/pages/MainView";
+import { useFilesStore } from "@/stores/files";
 import {
   Panel,
   Group as PanelGroup,
   Separator as PanelResizeHandle,
 } from "react-resizable-panels";
-import { ConfirmDialog } from "./components/molecules/Dialog/ConfirmDialog";
-import { MessageDialog } from "./components/molecules/Dialog/MessageDialog";
-import { LoadingOverlay } from "./components/molecules/Loading/LoadingOverlay";
-import { AppBar } from "./components/organisms/Header/AppBar";
-import { LeftSideMenu } from "./components/pages/LeftSideMenu";
-import { MainView } from "./components/pages/MainView";
-import { useFilesStore } from "./stores/files";
 
 export const App = () => {
   const { t } = useTranslation();
   const setSettings = useSettingsStore((state) => state.setSettings);
   const setOsInfo = useSettingsStore((state) => state.setOsInfo);
   const setTableList = useTableListStore((state) => state.setTableList);
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
   const setFiles = useFilesStore((state) => state.setFiles);
   const { isLoading, loadingMessage } = useLoadingStore();
   const { setLoading, clearLoading } = useLoadingStore();
+  const initialized = useRef(false);
 
   // テーマを <html> の class に反映する（Tailwind dark:プレフィックスを有効化）
   const theme = useSettingsStore((state) => state.theme);
@@ -43,16 +45,15 @@ export const App = () => {
 
   useEffect(() => {
     // Strict Mode対応: 初期化が既に実行されている場合はスキップ
-    // if (initialized.current) return;
-
-    let isMounted = true;
+    if (initialized.current) return;
+    initialized.current = true;
 
     // FastAPI サイドカーが起動するまで最大2分ポーリングする（1秒に1回）
     const waitForServer = async (
       api: ReturnType<typeof getEconomiconAppAPI>,
     ) => {
-      const MAX_RETRIES = 120; // 1秒 × 120 = 2分
-      const INTERVAL_MS = 1000;
+      const MAX_RETRIES = 100; // ヘルスチェック時間1000ミリ秒×待機時間500ミリ秒 × 100 = 150秒
+      const INTERVAL_MS = 500; // 500ミリ秒ごとに再試行
       // reqwest クライアントのグローバルタイムアウトは 300 秒だが、ヘルスチェックが
       // それだけブロックすると全体タイムアウトが大幅に延びる。
       // JS レベルで 1 回あたり 1 秒のタイムアウトを設けることで
@@ -79,6 +80,7 @@ export const App = () => {
     };
 
     const initialize = async () => {
+      console.log("Initializing app...");
       const api = getEconomiconAppAPI();
       setLoading(true, t("Loading.Launching"));
       try {
@@ -92,23 +94,18 @@ export const App = () => {
         // RustからOS情報を取得（ファイルシステム認識のため最初に取得）
         const osInfo = await getOsInfo();
 
-        if (isMounted) setOsInfo(osInfo);
+        setOsInfo(osInfo);
 
         // FastAPI サーバーが起動するまで待機
-        if (isMounted) setLoading(true, t("Loading.ConnectingServer"));
+        setLoading(true, t("Loading.ConnectingServer"));
         await waitForServer(api);
 
         // 設定を取得
-        if (isMounted) setLoading(true, t("Loading.Processing"));
+        setLoading(true, t("Loading.Processing"));
         const resGetSettings = await api.getSettings();
         if (resGetSettings.code !== "OK") {
-          if (isMounted) {
-            clearLoading();
-            await showMessageDialog(
-              t("Error.Error"),
-              t("Error.UnexpectedError"),
-            );
-          }
+          clearLoading();
+          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
           return;
         }
         // GetSettingsResultをアプリのSettingsType形式にマッピング
@@ -119,45 +116,33 @@ export const App = () => {
         // テーブル名一覧を取得
         const resGetTableNames = await api.getTableList();
         if (resGetTableNames.code !== "OK") {
-          if (isMounted) {
-            clearLoading();
-            await showMessageDialog(
-              t("Error.Error"),
-              t("Error.UnexpectedError"),
-            );
-          }
+          clearLoading();
+          await showMessageDialog(t("Error.Error"), t("Error.UnexpectedError"));
           return;
         }
         // 全て成功した場合のみストアを更新
-        if (isMounted) {
-          setSettings(apiSettings);
-          setCurrentView("ImportDataFile");
-          setTableList(resGetTableNames.result.tableNameList);
-          setFiles(files);
-          clearLoading();
-        }
+        setSettings(apiSettings);
+        void i18n.changeLanguage(apiSettings.language);
+        navigateToShell("ImportDataFile");
+        setTableList(resGetTableNames.result.tableNameList);
+        setFiles(files);
+        clearLoading();
       } catch (error) {
         console.error("App initialization error:", error);
-        if (isMounted) {
-          clearLoading();
-          const isTimeout =
-            error instanceof Error && error.message === "SERVER_TIMEOUT";
-          await showMessageDialog(
-            t("Error.Error"),
-            isTimeout ? t("Loading.ServerTimeout") : t("Error.UnexpectedError"),
-          );
-        }
+        clearLoading();
+        const isTimeout =
+          error instanceof Error && error.message === "SERVER_TIMEOUT";
+        await showMessageDialog(
+          t("Error.Error"),
+          isTimeout ? t("Loading.ServerTimeout") : t("Error.UnexpectedError"),
+        );
       }
     };
 
     initialize();
-
-    return () => {
-      isMounted = false;
-    };
   }, [
     clearLoading,
-    setCurrentView,
+    navigateToShell,
     setFiles,
     setLoading,
     setOsInfo,
@@ -171,7 +156,7 @@ export const App = () => {
       <div className="flex h-screen flex-col overflow-hidden bg-white dark:bg-gray-900">
         <AppBar />
         <PanelGroup orientation="horizontal" className="flex-1 overflow-hidden">
-          <Panel defaultSize={256} minSize={160} maxSize={480}>
+          <Panel defaultSize={"15rem"} minSize={"12rem"} maxSize={"27rem"}>
             <LeftSideMenu />
           </Panel>
           <PanelResizeHandle className="w-1 cursor-col-resize bg-brand-border/50 transition-colors hover:bg-white/20 focus:outline-none" />

@@ -1,4 +1,4 @@
-import { useMessageDialogStore } from "../../stores/messageDialog";
+import { useMessageDialogStore } from "@/stores/messageDialog";
 
 /**
  * メッセージダイアログを表示する汎用関数

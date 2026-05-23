@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T15:46:34+0900",
+    "r_version": "4.5.2",
+    "sandwich_version": "3.1.1",
+    "plm_version": "2.6.7",
+    "aer_version": "1.2.16",
+    "glmnet_version": "4.1.10",
+    "censReg_version": "0.5.38",
+    "sampleSelection_version": "1.2.14",
+    "rdrobust_version": "3.0.0",
+    "seed": 2024,
+    "tolerance_guide": {
+      "ols_coef": "atol=1e-8 (nonrobust)",
+      "ols_se_hc1": "atol=1e-6 (sandwich::vcovHC vs statsmodels HC1)",
+      "logit_probit_coef": "atol=1e-6 (MLE 収束差)",
+      "fe_re_coef": "atol=1e-8",
+      "iv_coef": "atol=1e-8 (AER::ivreg vs linearmodels::IV2SLS)",
+      "tobit_coef": "atol=1e-4 (censReg vs py4etrics MLE 実装差)",
+      "heckman_coef": "atol=1e-6 (sampleSelection vs statsmodels 手動 2 段階)",
+      "rdd_coef": "atol=1e-4 (rdrobust 共通実装なので高精度一致期待)",
+      "lasso_ridge_scaled": "atol=1e-5 (sklearn / glmnet 同一目的関数)"
+    },
+    "data_file": "synthetic_panel.csv",
+    "model": "fe"
+  },
+  "estimates": {
+    "n_obs": 100,
+    "n_entities": 10,
+    "n_periods": 10,
+    "r_squared_within": 0.989744522285362,
+    "r_squared_between": [],
+    "r_squared_overall": [],
+    "f_test": {
+      "statistic": 4246.39009437818,
+      "p_value": 3.03430609839476e-88
+    },
+    "nonrobust": {
+      "coefficients": {
+        "x1": 3.00015831728692,
+        "x2": -2.0465826437191
+      },
+      "std_errors": {
+        "x1": 0.036256536546217,
+        "x2": 0.0454319670996559
+      },
+      "t_values": {
+        "x1": 82.748067054407,
+        "x2": -45.0471941756316
+      },
+      "p_values": {
+        "x1": 3.03180016734826e-85,
+        "x2": 1.44790565985405e-62
+      },
+      "conf_int": {
+        "x1": {
+          "lower": 2.92810606967474,
+          "upper": 3.0722105648991
+        },
+        "x2": {
+          "lower": -2.13686913147559,
+          "upper": -1.95629615596262
+        }
+      }
+    },
+    "clustered_entity": {
+      "coefficients": {
+        "x1": 3.00015831728692,
+        "x2": -2.0465826437191
+      },
+      "std_errors": {
+        "x1": 0.0231360198473242,
+        "x2": 0.0336381257008248
+      },
+      "t_values": {
+        "x1": 129.67478144837,
+        "x2": -60.8411616604704
+      },
+      "p_values": {
+        "x1": 4.90027505687291e-16,
+        "x2": 4.41345641185435e-13
+      },
+      "conf_int": {
+        "x1": {
+          "lower": 2.94782100427066,
+          "upper": 3.05249563030319
+        },
+        "x2": {
+          "lower": -2.12267737071633,
+          "upper": -1.97048791672188
+        }
+      }
+    }
+  }
+}

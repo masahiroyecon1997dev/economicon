@@ -29,13 +29,19 @@ beforeAll(() => {
 
   global.PointerEvent = class PointerEvent extends Event {
     button: number;
+    clientX: number;
+    clientY: number;
     ctrlKey: boolean;
+    pointerId: number;
     pointerType: string;
 
     constructor(type: string, props: PointerEventInit = {}) {
       super(type, props);
       this.button = props.button ?? 0;
+      this.clientX = props.clientX ?? 0;
+      this.clientY = props.clientY ?? 0;
       this.ctrlKey = props.ctrlKey ?? false;
+      this.pointerId = props.pointerId ?? 0;
       this.pointerType = props.pointerType ?? "mouse";
     }
   } as unknown as typeof PointerEvent;

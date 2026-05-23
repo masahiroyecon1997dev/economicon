@@ -33,11 +33,17 @@ pub enum FileError {
     #[error("Path not found: {0}")]
     PathNotFound(String),
 
+    #[error("Not a file: {0}")]
+    NotAFile(String),
+
     #[error("Not a directory: {0}")]
     NotADirectory(String),
 
     #[error("Permission denied: {0}")]
     PermissionDenied(String),
+
+    #[error("File is in use: {0}")]
+    FileInUse(String),
 
     #[error("Failed to canonicalize path: {0}")]
     CanonicalizationError(String),

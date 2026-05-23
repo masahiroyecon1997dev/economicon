@@ -151,10 +151,6 @@ msgstr ""
 msgid "An unexpected error occurred during descriptive statistics processing"
 msgstr ""
 
-#: economicon/services/duplicate_column.py:82
-msgid "An unexpected error occurred during duplicating column processing"
-msgstr ""
-
 #: economicon/services/duplicate_table.py:64
 msgid "An unexpected error occurred during table duplication processing"
 msgstr ""
@@ -604,6 +600,12 @@ msgstr ""
 
 #: economicon/utils/validator/statistics_validators.py:152
 msgid "For hypergeometric distribution, 'n' must not exceed 'N'"
+msgstr ""
+
+msgid "For hypergeometric distribution, 'successCount' must not exceed 'populationSize'"
+msgstr ""
+
+msgid "For hypergeometric distribution, 'sampleSize' must not exceed 'populationSize'"
 msgstr ""
 
 #: economicon/utils/validator/statistics_validators.py:198

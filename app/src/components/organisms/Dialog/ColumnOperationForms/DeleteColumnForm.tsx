@@ -3,16 +3,16 @@
  */
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
-import { useFormSubmitting } from "../../../../hooks/useFormSubmitting";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
 import {
   buildCaughtErrorMessage,
   buildResponseErrorMessage,
-} from "../../../../lib/utils/apiError";
-import { DangerAlert } from "../../../molecules/Alert/DangerAlert";
-import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
-import { fetchUpdatedColumnList } from "./fetchUpdatedColumnList";
-import type { ColumnOperationFormPropsType } from "./types";
+} from "@/lib/utils/apiError";
+import { DangerAlert } from "@/components/molecules/Alert/DangerAlert";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { fetchUpdatedColumnList } from "@/components/organisms/Dialog/ColumnOperationForms/fetchUpdatedColumnList";
+import type { ColumnOperationFormPropsType } from "@/components/organisms/Dialog/ColumnOperationForms/types";
 
 export const DeleteColumnForm = ({
   tableName,

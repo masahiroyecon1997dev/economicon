@@ -1,5 +1,5 @@
+import { cn } from "@/lib/utils/helpers";
 import type { ReactNode } from "react";
-import { cn } from "../../../lib/utils/helpers";
 
 // セクションカード（タイトル + コンテンツ）
 type ResultSectionProps = {
@@ -15,7 +15,7 @@ export const ResultSection = ({
 }: ResultSectionProps) => (
   <div
     className={cn(
-      "rounded-xl border border-border-color bg-white p-4 shadow-sm",
+      "rounded-xl border border-border-color bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800",
       className,
     )}
   >

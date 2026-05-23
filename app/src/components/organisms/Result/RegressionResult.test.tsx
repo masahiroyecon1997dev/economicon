@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { LinearRegressionResultType } from "../../../types/commonTypes";
-import { RegressionResult } from "./RegressionResult";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
+import { RegressionResult } from "@/components/organisms/Result/RegressionResult";
 
 // ---------------------------------------------------------------------------
 // Mocks

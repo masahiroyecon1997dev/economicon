@@ -1,18 +1,19 @@
 /**
  * テーブル削除確認フォーム
  */
-import { useEffect, useState } from "react";
-import { Trans, useTranslation } from "react-i18next";
-import { getEconomiconAppAPI } from "../../../../api/endpoints";
+import { getEconomiconAppAPI } from "@/api/endpoints";
+import { DangerAlert } from "@/components/molecules/Alert/DangerAlert";
+import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
+import { useFormSubmitting } from "@/hooks/useFormSubmitting";
 import {
   extractApiErrorMessage,
   getResponseErrorMessage,
-} from "../../../../lib/utils/apiError";
-import { useCurrentPageStore } from "../../../../stores/currentView";
-import { useTableInfosStore } from "../../../../stores/tableInfos";
-import { useTableListStore } from "../../../../stores/tableList";
-import { DangerAlert } from "../../../molecules/Alert/DangerAlert";
-import { ErrorAlert } from "../../../molecules/Alert/ErrorAlert";
+} from "@/lib/utils/apiError";
+import { useCurrentPageStore } from "@/stores/currentPage";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
 type DeleteTableFormProps = {
   tableName: string;
@@ -30,14 +31,12 @@ export const DeleteTableForm = ({
   const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  useEffect(() => {
-    onIsSubmittingChange(isSubmitting);
-  }, [isSubmitting, onIsSubmittingChange]);
+  useFormSubmitting(isSubmitting, onIsSubmittingChange);
 
   const setTableList = useTableListStore((s) => s.setTableList);
   const removeTableInfo = useTableInfosStore((s) => s.removeTableInfo);
   const activeTableName = useTableInfosStore((s) => s.activeTableName);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const navigateToShell = useCurrentPageStore((s) => s.navigateToShell);
 
   const handleDelete = async () => {
     setIsSubmitting(true);
@@ -55,7 +54,7 @@ export const DeleteTableForm = ({
         // アクティブなテーブルが削除された場合はファイル選択画面へ
         if (activeTableName === tableName) {
           useTableInfosStore.setState({ activeTableName: null });
-          setCurrentView("ImportDataFile");
+          navigateToShell("ImportDataFile");
         }
         onSuccess();
       } else {

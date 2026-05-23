@@ -1,4 +1,4 @@
-import type { ErrorResponse } from "../../api/model/errorResponse";
+import type { ErrorResponse } from "@/api/model/errorResponse";
 
 /**
  * レスポンスオブジェクト（code !== "OK"）からエラーメッセージを取得する。

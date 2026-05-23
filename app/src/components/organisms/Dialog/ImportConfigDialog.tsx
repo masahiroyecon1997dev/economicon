@@ -1,11 +1,6 @@
-import * as RadixSelect from "@radix-ui/react-select";
-import * as ToggleGroup from "@radix-ui/react-toggle-group";
-import { useForm, useStore } from "@tanstack/react-form";
-import { Check, ChevronDown } from "lucide-react";
-import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { extractFieldError } from "../../../lib/utils/formHelpers";
-import { cn } from "../../../lib/utils/helpers";
+import { BaseDialog } from "@/components/molecules/Dialog/BaseDialog";
+import { extractFieldError } from "@/lib/utils/formHelpers";
+import { cn } from "@/lib/utils/helpers";
 import {
   CSV_ENCODINGS,
   createImportConfigSchema,
@@ -14,8 +9,12 @@ import {
   validateSeparatorCustom,
   validateSheetName,
   type ImportConfigSettings,
-} from "../../../lib/utils/importSchema";
-import { BaseDialog } from "../../molecules/Dialog/BaseDialog";
+} from "@/lib/utils/importSchema";
+import * as RadixSelect from "@radix-ui/react-select";
+import * as ToggleGroup from "@radix-ui/react-toggle-group";
+import { useForm, useStore } from "@tanstack/react-form";
+import { Check, ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type ImportConfigDialogProps = {
   isOpen: boolean;
@@ -24,23 +23,31 @@ type ImportConfigDialogProps = {
   onImport: (settings: ImportConfigSettings) => void;
 };
 
-export const ImportConfigDialog = ({
+type ImportConfigDialogContentProps = {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  fileInfo: { path: string; name: string };
+  onImport: (settings: ImportConfigSettings) => void;
+};
+
+const ImportConfigDialogContent = ({
   isOpen,
   onOpenChange,
   fileInfo,
   onImport,
-}: ImportConfigDialogProps) => {
+}: ImportConfigDialogContentProps) => {
   const { t } = useTranslation();
 
-  const fileType = fileInfo ? getImportFileType(fileInfo.name) : "other";
+  const fileType = getImportFileType(fileInfo.name);
   const isCsv = fileType === "csv";
   const isExcel = fileType === "excel";
 
   const importSchema = createImportConfigSchema(t);
+  const defaultTableName = fileInfo.name.replace(/\.[^/.]+$/, "");
 
   const form = useForm({
     defaultValues: {
-      tableName: "",
+      tableName: defaultTableName,
       separatorMode: "comma" as "comma" | "tab" | "other",
       separatorCustom: "",
       encoding: "utf8" as (typeof CSV_ENCODINGS)[number],
@@ -54,26 +61,11 @@ export const ImportConfigDialog = ({
 
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
-  // フォーム初期化（ダイアログを開くたびにファイル名を反映）
-  useEffect(() => {
-    if (isOpen && fileInfo) {
-      const nameWithoutExt = fileInfo.name.replace(/\.[^/.]+$/, "");
-      form.reset();
-      form.setFieldValue("tableName", nameWithoutExt);
-      form.setFieldValue("separatorMode", "comma");
-      form.setFieldValue("separatorCustom", "");
-      form.setFieldValue("encoding", "utf8");
-      form.setFieldValue("sheetName", "");
-    }
-  }, [isOpen, fileInfo, form]);
-
-  if (!fileInfo) return null;
-
   const pillClass = cn(
     "rounded-full border px-3 py-0.5 text-xs font-medium transition-colors",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50",
     "data-[state=on]:border-brand-primary data-[state=on]:bg-brand-primary data-[state=on]:text-white",
-    "data-[state=off]:border-gray-300 data-[state=off]:bg-white data-[state=off]:text-gray-600",
+    "data-[state=off]:border-gray-300 data-[state=off]:bg-white data-[state=off]:text-gray-600 dark:data-[state=off]:border-gray-600 dark:data-[state=off]:bg-gray-700 dark:data-[state=off]:text-gray-300",
     "data-[state=off]:hover:border-brand-primary/50 data-[state=off]:hover:bg-brand-primary/5",
   );
 
@@ -257,7 +249,7 @@ export const ImportConfigDialog = ({
                     </RadixSelect.Trigger>
                     <RadixSelect.Portal>
                       <RadixSelect.Content
-                        className="z-50 overflow-hidden rounded-md border border-gray-200 bg-white shadow-md"
+                        className="z-50 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md"
                         position="popper"
                         sideOffset={4}
                       >
@@ -333,5 +325,24 @@ export const ImportConfigDialog = ({
         )}
       </form>
     </BaseDialog>
+  );
+};
+
+export const ImportConfigDialog = ({
+  isOpen,
+  onOpenChange,
+  fileInfo,
+  onImport,
+}: ImportConfigDialogProps) => {
+  if (!fileInfo) return null;
+
+  return (
+    <ImportConfigDialogContent
+      key={fileInfo.path}
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      fileInfo={fileInfo}
+      onImport={onImport}
+    />
   );
 };

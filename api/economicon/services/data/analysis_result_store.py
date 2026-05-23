@@ -2,6 +2,8 @@ import threading
 
 from economicon.services.data.analysis_result import AnalysisResult
 
+_UNSET = object()
+
 
 class AnalysisResultStore:
     """
@@ -23,6 +25,8 @@ class AnalysisResultStore:
         # 初期化が一度だけ行われるようにする
         if not hasattr(self, "_initialized"):
             self._results: dict[str, AnalysisResult] = {}
+            # result_type ごとの連番カウンタ（自動命名用）
+            self._counters: dict[str, int] = {}
             self._lock = threading.RLock()
             self._initialized = True
 
@@ -39,6 +43,26 @@ class AnalysisResultStore:
         with self._lock:
             self._results[result.id] = result
             return result.id
+
+    def next_sequence(self, result_type: str) -> int:
+        """
+        指定した result_type の連番をインクリメントして返す。
+
+        同一セッション内で複数回実行したときに
+        名前が重複しないよう連番を付与するために使用する。
+
+        Args:
+            result_type: 分析種別文字列
+                ("regression" / "confidence_interval" /
+                 "descriptive_statistics" / "statistical_test" 等)
+
+        Returns:
+            1 始まりの連番整数
+        """
+        with self._lock:
+            n = self._counters.get(result_type, 0) + 1
+            self._counters[result_type] = n
+            return n
 
     def get_result(self, result_id: str) -> AnalysisResult:
         """
@@ -62,13 +86,15 @@ class AnalysisResultStore:
                     f"Analysis result with ID '{result_id}' does not exist."
                 )
 
-    def get_all_summaries(self) -> list[dict[str, str]]:
+    def get_all_summaries(self) -> list[dict[str, str | None]]:
         """
         すべての分析結果のサマリー情報を取得
 
         Returns:
             サマリー情報のリスト
-            (id, name, description, createdAt を含む)
+            (id, name, description, createdAt, tableName,
+             resultType, resultTypeLabel, modelType, summaryText
+             を含む。modelType は None になる場合がある。)
         """
         with self._lock:
             return [
@@ -102,6 +128,31 @@ class AnalysisResultStore:
                     f"Analysis result with ID '{result_id}' does not exist."
                 )
 
+    def update_metadata(
+        self,
+        result_id: str,
+        *,
+        name: str | None = None,
+        description: str | None = None,
+        summary_text_override: str | None | object = _UNSET,
+    ) -> AnalysisResult:
+        """指定された結果のメタデータを更新して返す。"""
+        with self._lock:
+            result = self._results.get(result_id)
+            if not result:
+                raise KeyError(
+                    f"Analysis result with ID '{result_id}' does not exist."
+                )
+
+            result.update_metadata(
+                name=name,
+                description=description,
+                summary_text_override=summary_text_override,
+                update_summary_text_override=summary_text_override
+                is not _UNSET,
+            )
+            return result
+
     def clear_all(self) -> bool:
         """
         すべての分析結果を削除
@@ -115,4 +166,5 @@ class AnalysisResultStore:
             for result in self._results.values():
                 result.delete_model_file()
             self._results.clear()
+            self._counters.clear()
             return True

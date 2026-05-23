@@ -1,0 +1,134 @@
+{
+  "meta": {
+    "generated_at": "2026-04-19T15:46:34+0900",
+    "r_version": "4.5.2",
+    "sandwich_version": "3.1.1",
+    "plm_version": "2.6.7",
+    "aer_version": "1.2.16",
+    "glmnet_version": "4.1.10",
+    "censReg_version": "0.5.38",
+    "sampleSelection_version": "1.2.14",
+    "rdrobust_version": "3.0.0",
+    "seed": 2024,
+    "tolerance_guide": {
+      "ols_coef": "atol=1e-8 (nonrobust)",
+      "ols_se_hc1": "atol=1e-6 (sandwich::vcovHC vs statsmodels HC1)",
+      "logit_probit_coef": "atol=1e-6 (MLE 収束差)",
+      "fe_re_coef": "atol=1e-8",
+      "iv_coef": "atol=1e-8 (AER::ivreg vs linearmodels::IV2SLS)",
+      "tobit_coef": "atol=1e-4 (censReg vs py4etrics MLE 実装差)",
+      "heckman_coef": "atol=1e-6 (sampleSelection vs statsmodels 手動 2 段階)",
+      "rdd_coef": "atol=1e-4 (rdrobust 共通実装なので高精度一致期待)",
+      "lasso_ridge_scaled": "atol=1e-5 (sklearn / glmnet 同一目的関数)"
+    },
+    "data_file": "synthetic_heckman.csv",
+    "model": "heckman"
+  },
+  "estimates": {
+    "n_total": 600,
+    "n_selected": 327,
+    "selection_ratio": 0.545,
+    "step1_probit": {
+      "dep_var": "employed",
+      "sel_vars": ["educ", "exp", "kids"],
+      "n_obs": 600,
+      "coefficients": {
+        "XS(Intercept)": -2.73389507723496,
+        "XSeduc": 0.230785300480287,
+        "XSexp": 0.170565766957454,
+        "XSkids": -0.525821874420551
+      },
+      "std_errors": {
+        "XS(Intercept)": 0.40691468659119,
+        "XSeduc": 0.0323660925948267,
+        "XSexp": 0.0209213234606679,
+        "XSkids": 0.0562244826607238
+      },
+      "t_values": {
+        "XS(Intercept)": -6.71859524200853,
+        "XSeduc": 7.13046531039015,
+        "XSexp": 8.15272357306257,
+        "XSkids": -9.35218697508565
+      },
+      "p_values": {
+        "XS(Intercept)": 1.83484797781064e-11,
+        "XSeduc": 1.00030184610649e-12,
+        "XSexp": 3.55818305954708e-16,
+        "XSkids": 8.58538344780473e-21
+      },
+      "conf_int": {
+        "XS(Intercept)": {
+          "lower": -3.53143320773409,
+          "upper": -1.93635694673582
+        },
+        "XSeduc": {
+          "lower": 0.167348924674138,
+          "upper": 0.294221676286436
+        },
+        "XSexp": {
+          "lower": 0.129560726465632,
+          "upper": 0.211570807449276
+        },
+        "XSkids": {
+          "lower": -0.636019835484966,
+          "upper": -0.415623913356135
+        }
+      },
+      "pseudo_r_squared": 0.247446058568242,
+      "log_likelihood": -311.147202769089
+    },
+    "step2_ols": {
+      "dep_var": "wage",
+      "outcome_vars": ["educ", "exp"],
+      "n_obs": 327,
+      "coefficients": {
+        "const": -2.73389507723496,
+        "educ": 0.230785300480287,
+        "exp": 0.170565766957454,
+        "invMillsRatio": -0.501855656102137
+      },
+      "std_errors": {
+        "const": 0.40691468659119,
+        "educ": 0.0323660925948267,
+        "exp": 0.0209213234606679,
+        "invMillsRatio": 0.390226713692396
+      },
+      "t_values": {
+        "const": -6.71859524200853,
+        "educ": 7.13046531039015,
+        "exp": 8.15272357306257,
+        "invMillsRatio": -1.28606176484815
+      },
+      "p_values": {
+        "const": 8.29544735378764e-11,
+        "educ": 6.59037644651524e-12,
+        "exp": 7.94107157996133e-15,
+        "invMillsRatio": 0.199342645937537
+      },
+      "conf_int": {
+        "const": {
+          "lower": -3.53443282931155,
+          "upper": -1.93335732515837
+        },
+        "educ": {
+          "lower": 0.167110334048328,
+          "upper": 0.294460266912246
+        },
+        "exp": {
+          "lower": 0.129406502360803,
+          "upper": 0.211725031554106
+        },
+        "invMillsRatio": {
+          "lower": -1.26956256488076,
+          "upper": 0.265851252676488
+        }
+      }
+    },
+    "imr": {
+      "coefficient": -0.501855656102137,
+      "std_error": 0.390226713692396,
+      "t_value": -1.28606176484815,
+      "p_value": 0.199342645937537
+    }
+  }
+}

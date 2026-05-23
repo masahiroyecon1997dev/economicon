@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { FilesType } from "../types/commonTypes";
+import type { FilesType } from "@/types/commonTypes";
 
 export type FilesActions = {
   setFiles: (newFiles: FilesType) => void;
