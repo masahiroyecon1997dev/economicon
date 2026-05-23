@@ -17,13 +17,11 @@
 
 import { expect, test } from "@playwright/test";
 import {
-  cleanupE2EOutputDir,
   clearWorkspaceFromUi,
   clickHeaderMenu,
   closeMessageDialog,
-  ensureE2EOutputDir,
+  deleteFileFromImportScreen,
   importFile,
-  navigateFileBrowserToDir,
   navigateToSampleDir,
 } from "./helpers/appHelpers";
 import { setupTauriApp } from "./helpers/setupHelpers";
@@ -37,20 +35,10 @@ const TABLE_NAME = "grunfeld";
 const DEPENDENT_VAR = "invest";
 const EXPLANATORY_VARS = ["value", "capital"];
 
-const OUTPUT_DIR_NAME = "02-parquet-ols";
-let outputDirPath = "";
-
 // ---------------------------------------------------------------------------
 // テストスイート
 // ---------------------------------------------------------------------------
 test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
-  test.beforeAll(async () => {
-    outputDirPath = await ensureE2EOutputDir(OUTPUT_DIR_NAME);
-  });
-
-  test.afterAll(async () => {
-    await cleanupE2EOutputDir(outputDirPath);
-  });
   // =========================================================================
   // STEP 1: Parquet ファイルをインポート
   // =========================================================================
@@ -260,7 +248,7 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
     ).toBeVisible();
 
     // 保存先ディレクトリへ移動
-    await navigateFileBrowserToDir(page, outputDirPath);
+    await navigateToSampleDir(page);
 
     // データ名を選択
     const tableNameSelect = page.getByLabel(/保存するデータ|Data to Save/i);
@@ -284,5 +272,8 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
 
     // 成功メッセージを閉じる
     await closeMessageDialog(page);
+
+    // 保存したファイルをインポート画面から削除
+    await deleteFileFromImportScreen(page, `${TABLE_NAME}_exported.parquet`);
   });
 });
