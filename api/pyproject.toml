@@ -17,7 +17,7 @@ dependencies = [
     "py4etrics==0.1.9",
     "loguru==0.7.3",
     "pydantic-settings==2.13.1",
-    "pydantic==2.13.2",
+    "pydantic==2.13.4",
     "pandas==3.0.2",
     "xlsxwriter==3.2.9",
     "fastexcel==0.19.0",
