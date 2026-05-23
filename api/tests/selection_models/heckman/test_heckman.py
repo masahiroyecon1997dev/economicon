@@ -1,5 +1,6 @@
 """ヘックマン2段階推定テスト"""
 
+import pytest
 from fastapi import status
 
 from economicon.services.data.analysis_result_store import AnalysisResultStore
@@ -115,9 +116,12 @@ def test_heckman_result_stored(client, tables_store):
     saved = AnalysisResultStore().get_result(result_id)
     assert saved is not None
     assert saved.model_type == "heckman"
-    assert saved.has_model_file()
+    assert not saved.has_model_file()
 
 
+@pytest.mark.skip(
+    reason="pickle保存無効化中 (Option A: numpy BLOB→SQLite 移行後に再有効化)"
+)
 def test_heckman_model_has_both_stages(client, tables_store):
     """pickle に step1_probit と step2_ols が保存されることを確認。"""
     resp = client.post(URL_HECKMAN, json=_payload())
