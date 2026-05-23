@@ -20,6 +20,7 @@ import {
   clearWorkspaceFromUi,
   clickHeaderMenu,
   closeMessageDialog,
+  deleteFileFromImportScreen,
   importFile,
   navigateToSampleDir,
 } from "./helpers/appHelpers";
@@ -126,7 +127,7 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
     }
 
     // ---- 計算ボタンをクリック ----
-    await page.getByRole("button", { name: /計算する|Calculate/i }).click();
+    await page.getByRole("button", { name: /^(計算する|Calculate)$/i }).click();
 
     // ---- 結果テーブルの表示を確認 ----
     // 結果テーブルが表示されること
@@ -159,8 +160,8 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
 
     // LinearRegressionForm ビューのタイトルを確認
     await expect(
-      page.getByRole("tab", {
-        name: /分析設定\(最小二乗法\)|Analysis Settings\(OLS\)/i,
+      page.getByRole("heading", {
+        name: /^(最小二乗法|Ordinary Least Squares)$/i,
       }),
     ).toBeVisible();
 
@@ -174,63 +175,42 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
     await tableOption.waitFor({ state: "visible" });
     await tableOption.click();
 
-    // ---- 被説明変数を選択 ----
-    // 「被説明変数」というラベルの隣の combobox
+    // ---- 被説明変数を選択（Select コンポーネント / id="dependent-variable"）----
     await expect(
       page.getByText(/列情報を読み込んでいます|Loading/i),
     ).toBeHidden({ timeout: 15_000 });
 
-    const dependentSection = page
-      .locator("div")
-      .filter({ hasText: /^被説明変数|Dependent Variable/ })
-      .last();
-    const dependentRadio = dependentSection.getByRole("radio").first();
-    await dependentRadio.click();
-    const dependentOption = page.getByRole("radio", {
+    const dependentSelect = page.getByLabel(/被説明変数|Dependent Variable/i);
+    await dependentSelect.click();
+    const dependentOption = page.getByRole("option", {
       name: DEPENDENT_VAR,
       exact: true,
     });
     await dependentOption.waitFor({ state: "visible" });
     await dependentOption.click();
 
-    // ---- 説明変数を選択（value, capital）----
-    const explanatorySection = page
-      .locator("div")
-      .filter({ hasText: /^説明変数|Explanatory Variables/ })
-      .last();
-
+    // ---- 説明変数を選択（VariableSelectorField のチェックボックス）----
     for (const varName of EXPLANATORY_VARS) {
-      const varCheckbox = explanatorySection.getByRole("checkbox", {
+      const varCheckbox = page.getByRole("checkbox", {
         name: varName,
+        exact: true,
       });
-      if (await varCheckbox.isVisible()) {
-        if (!(await varCheckbox.isChecked())) {
-          await varCheckbox.click();
-        }
-      } else {
-        // combobox 形式の場合
-        const triggerBtn = explanatorySection.getByRole("button").last();
-        await triggerBtn.click();
-        const option = page.getByRole("option", { name: varName, exact: true });
-        await option.waitFor({ state: "visible" });
-        await option.click();
+      if (!(await varCheckbox.isChecked())) {
+        await varCheckbox.click();
       }
     }
-
-    // Dropdown を閉じる
-    await page.keyboard.press("Escape");
 
     // ---- 分析実行 ----
     await page.getByRole("button", { name: /分析実行|Run Analysis/i }).click();
 
     // ---- 結果タブが表示されるまで待機 ----
-    // 結果 1（または Result 1）タブが追加されること
+    // "OLS: invest #1"という結果タブが追加されること
     await expect(
-      page.getByRole("tab", { name: /結果 1|Result 1/i }),
+      page.getByRole("button", { name: /^OLS: invest #1/i }),
     ).toBeVisible({ timeout: 30_000 });
 
     // 結果タブをクリック
-    await page.getByRole("tab", { name: /結果 1|Result 1/i }).click();
+    await page.getByRole("button", { name: /^OLS: invest #1/i }).click();
 
     // ---- 結果内容の確認 ----
     // 調整済み R² が表示されること
@@ -267,6 +247,9 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
       page.getByRole("heading", { name: /データを保存|Save Data/i }),
     ).toBeVisible();
 
+    // 保存先ディレクトリへ移動
+    await navigateToSampleDir(page);
+
     // データ名を選択
     const tableNameSelect = page.getByLabel(/保存するデータ|Data to Save/i);
     await tableNameSelect.waitFor({ state: "visible" });
@@ -289,5 +272,8 @@ test.describe("02: Parquet 取り込み → 基本統計量 → OLS", () => {
 
     // 成功メッセージを閉じる
     await closeMessageDialog(page);
+
+    // 保存したファイルをインポート画面から削除
+    await deleteFileFromImportScreen(page, `${TABLE_NAME}_exported.parquet`);
   });
 });

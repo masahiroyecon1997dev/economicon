@@ -11,6 +11,7 @@ pnpm-lock.yaml / uv.lock / Cargo.lock を base-ref と HEAD で比較し、
         --days 7 \\
         --mode error
 """
+
 from __future__ import annotations
 
 import argparse
@@ -173,7 +174,10 @@ def fetch_json(
                 return None  # パッケージが見つからない → スキップ
             if exc.code == 429 and attempt < retries:
                 wait = 2 ** (attempt + 1)
-                print(f"    429 Too Many Requests. {wait}s 待機してリトライ…", file=sys.stderr)
+                print(
+                    f"    429 Too Many Requests. {wait}s 待機してリトライ…",
+                    file=sys.stderr,
+                )
                 time.sleep(wait)
                 continue
             print(f"    WARNING: HTTP {exc.code} — {url}", file=sys.stderr)
@@ -374,7 +378,9 @@ def main() -> None:
     print("\n" + "=" * 60)
 
     if flagged:
-        print(f"  ⚠  {len(flagged)} 件のパッケージがリリースから {args.days} 日以内です！")
+        print(
+            f"  ⚠  {len(flagged)} 件のパッケージがリリースから {args.days} 日以内です！"
+        )
         print("=" * 60)
         for pkg in flagged:
             print(f"    •  {pkg}")
@@ -382,7 +388,7 @@ def main() -> None:
             "\n  サプライチェーン攻撃の可能性を排除するため、以下を手動確認してください:\n"
             "    1. パッケージのリリースノートおよび git 履歴\n"
             "    2. メンテナーが正当な人物であること\n"
-            "    3. マージ前に一定期間（7 日以上）待機することを検討する\n"
+            "    3. マージ前に一定期間（10 日以上）待機することを検討する\n"
         )
         if args.mode == "error":
             print("  [error モード] フラグ付きパッケージが存在するため終了します。")

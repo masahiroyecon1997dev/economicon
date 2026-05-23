@@ -70,6 +70,8 @@ export type BaseDialogPropsType = {
   className?: string;
   /** コンテンツ領域のクラス名。デフォルト: "px-5 py-4" */
   contentClassName?: string;
+  /** フッター左側に配置する任意コンテンツ（追加アクションボタン等） */
+  footerLeft?: ReactNode;
 };
 
 // ─── BaseDialog ──────────────────────────────────────────────────────────────
@@ -90,6 +92,7 @@ export const BaseDialog = ({
   children,
   className,
   contentClassName,
+  footerLeft,
 }: BaseDialogPropsType) => {
   const { t } = useTranslation();
 
@@ -147,23 +150,26 @@ export const BaseDialog = ({
 
           {/* ── フッター ── */}
           {footerVariant !== "none" && (
-            <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-700 px-5 py-3">
-              {footerVariant === "confirm" && (
-                <RadixDialog.Close asChild>
-                  <Button variant="outline" disabled={isSubmitting}>
-                    {t("Common.Cancel")}
-                  </Button>
-                </RadixDialog.Close>
-              )}
-              <Button
-                variant={submitVariant}
-                type={submitFormId ? "submit" : "button"}
-                form={submitFormId}
-                onClick={!submitFormId ? onSubmit : undefined}
-                disabled={isSubmitting || isSubmitDisabled}
-              >
-                {isSubmitting ? "..." : resolvedSubmitLabel}
-              </Button>
+            <div className="flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700 px-5 py-3">
+              <div>{footerLeft}</div>
+              <div className="flex items-center gap-2">
+                {footerVariant === "confirm" && (
+                  <RadixDialog.Close asChild>
+                    <Button variant="outline" disabled={isSubmitting}>
+                      {t("Common.Cancel")}
+                    </Button>
+                  </RadixDialog.Close>
+                )}
+                <Button
+                  variant={submitVariant}
+                  type={submitFormId ? "submit" : "button"}
+                  form={submitFormId}
+                  onClick={!submitFormId ? onSubmit : undefined}
+                  disabled={isSubmitting || isSubmitDisabled}
+                >
+                  {isSubmitting ? "..." : resolvedSubmitLabel}
+                </Button>
+              </div>
             </div>
           )}
         </RadixDialog.Content>

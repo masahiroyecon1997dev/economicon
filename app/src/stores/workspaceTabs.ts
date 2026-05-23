@@ -1,4 +1,5 @@
 import type { AnalysisResultDetail } from "@/api/model";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import type { ZodType } from "zod";
 import { create } from "zustand";
 
@@ -29,7 +30,12 @@ export type WorkFeatureKey =
   | "LinearRegressionForm"
   | "CorrelationMatrix"
   | "GroupStatistics"
-  | "ChartView";
+  | "PlotView"
+  | "DistributionPreview"
+  | "ConfidenceIntervalSim"
+  | "AsymptoticNormality"
+  | "Consistency"
+  | "Unbiasedness";
 
 export type WorkspaceWorkTab = {
   id: `work:${WorkFeatureKey}`;
@@ -55,7 +61,12 @@ type WorkspaceTabsState = {
 type WorkspaceTabsActions = {
   openDataTab: (tableName: string) => void;
   openResultTab: (detail: AnalysisResultDetail) => void;
-  openWorkTab: (featureKey: WorkFeatureKey, title: string) => string;
+  openWorkTab: (
+    featureKey: WorkFeatureKey,
+    title: string,
+    initialValues?: unknown,
+  ) => string;
+  closeActiveWorkTab: () => void;
   moveTab: (tabId: string, targetIndex: number) => void;
   setWorkTabDirty: (tabId: string, dirty: boolean) => void;
   ensureWorkTabState: (tabId: string, initialValues: unknown) => void;
@@ -91,6 +102,17 @@ const cloneWorkTabValues = <T>(values: T): T => {
 
 const areWorkTabValuesEqual = (left: unknown, right: unknown) =>
   JSON.stringify(left) === JSON.stringify(right);
+
+const findLastNonWorkTab = (
+  tabs: WorkspaceTab[],
+  excludedId: string,
+): WorkspaceTab | null => {
+  for (let i = tabs.length - 1; i >= 0; i--) {
+    const tab = tabs[i];
+    if (tab && tab.id !== excludedId && tab.kind !== "work") return tab;
+  }
+  return null;
+};
 
 const nextActiveTabId = (
   tabs: WorkspaceTab[],
@@ -129,11 +151,11 @@ const reorderTabs = (
   return nextTabs;
 };
 
-export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
+export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set, get) => ({
   tabs: [],
   activeTabId: null,
 
-  openDataTab: (tableName) =>
+  openDataTab: (tableName) => {
     set((state) => {
       const tabId = `data:${tableName}` as const;
       const existingTab = state.tabs.find((tab) => tab.id === tabId);
@@ -153,9 +175,11 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
         ],
         activeTabId: tabId,
       };
-    }),
+    });
+    useCurrentPageStore.getState().navigateToWorkspace();
+  },
 
-  openResultTab: (detail) =>
+  openResultTab: (detail) => {
     set((state) => {
       const tabId = `result:${detail.id}` as const;
       const nextTab: WorkspaceResultTab = {
@@ -178,7 +202,9 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
         tabs: [...state.tabs, nextTab],
         activeTabId: tabId,
       };
-    }),
+    });
+    useCurrentPageStore.getState().navigateToWorkspace();
+  },
 
   activateTab: (tabId) => set({ activeTabId: tabId }),
 
@@ -258,7 +284,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
       };
     }),
 
-  openWorkTab: (featureKey, title) => {
+  openWorkTab: (featureKey, title, initialValues) => {
     const tabId = toWorkTabId(featureKey);
     set((state) => {
       const existingIndex = state.tabs.findIndex((tab) => tab.id === tabId);
@@ -274,22 +300,37 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set) => ({
         };
       }
 
+      const newTab: WorkspaceWorkTab = {
+        id: tabId,
+        kind: "work",
+        title,
+        featureKey,
+        dirty: false,
+        createdAt: Date.now(),
+      };
+      if (initialValues !== undefined) {
+        newTab.draftValues = cloneWorkTabValues(initialValues);
+      }
       return {
-        tabs: [
-          ...state.tabs,
-          {
-            id: tabId,
-            kind: "work" as const,
-            title,
-            featureKey,
-            dirty: false,
-            createdAt: Date.now(),
-          },
-        ],
+        tabs: [...state.tabs, newTab],
         activeTabId: tabId,
       };
     });
+    useCurrentPageStore.getState().navigateToWorkspace();
     return tabId;
+  },
+
+  closeActiveWorkTab: () => {
+    const { activeTabId, tabs } = get();
+    if (!activeTabId?.startsWith("work:")) return;
+    const fallback = findLastNonWorkTab(tabs, activeTabId);
+    set({
+      tabs: tabs.filter((t) => t.id !== activeTabId),
+      activeTabId:
+        fallback?.id ??
+        tabs.find((t) => t.id !== activeTabId && t.kind !== "work")?.id ??
+        null,
+    });
   },
 
   setWorkTabDirty: (tabId, dirty) =>

@@ -18,15 +18,13 @@
 
 import { expect, test } from "@playwright/test";
 import {
-  cleanupE2EOutputDir,
   clearWorkspaceFromUi,
   clickColumnMenuItem,
   clickHeaderMenu,
   closeSaveSuccessDialog,
-  ensureE2EOutputDir,
+  deleteFileFromImportScreen,
   fillDialogAndSubmit,
   importFile,
-  navigateFileBrowserToDir,
   navigateToSampleDir,
   openColumnMenu,
   openTableContextMenu,
@@ -41,22 +39,11 @@ const RUN_ID = `e2e${Date.now().toString(36)}`;
 const TABLE_NAME = `union1_test_${RUN_ID}`;
 /** ソート・削除用に使いまわす列（ユニオン1.csv の数値列） */
 const TARGET_COL = "amount";
-const OUTPUT_DIR_NAME = "csv-column-save";
-
-let outputDirPath = "";
 
 // ---------------------------------------------------------------------------
 // テストスイート
 // ---------------------------------------------------------------------------
 test.describe("01: CSV 取り込み → 列メニュー → データメニュー → 保存", async () => {
-  test.beforeAll(async () => {
-    outputDirPath = await ensureE2EOutputDir(OUTPUT_DIR_NAME);
-  });
-
-  test.afterAll(async () => {
-    await cleanupE2EOutputDir(outputDirPath);
-  });
-
   // =========================================================================
   // STEP 1: CSV ファイルを取り込む
   // =========================================================================
@@ -407,10 +394,8 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
 
     // サイドバーに新しい名前が表示されること
     await expect(
-      page
-        .getByTestId(`left-menu-table-item-${TABLE_NAME}_v2`)
-        .locator(`span[title="${TABLE_NAME}_v2"]`),
-    ).toBeVisible();
+      page.getByTestId(`left-menu-table-item-${TABLE_NAME}_v2`),
+    ).toContainText(`${TABLE_NAME}_v2`);
   });
 
   // =========================================================================
@@ -438,8 +423,8 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
 
     // サイドバーに複製データが追加されること
     await expect(
-      page.getByRole("navigation").locator(`span[title="${TABLE_NAME}_copy"]`),
-    ).toBeVisible();
+      page.getByTestId(`left-menu-table-item-${TABLE_NAME}_copy`),
+    ).toContainText(`${TABLE_NAME}_copy`);
   });
 
   // =========================================================================
@@ -464,9 +449,7 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
     await expect(dialog).toBeHidden();
 
     // サイドバーから複製データが消えること
-    await expect(
-      page.getByRole("navigation").locator(`span[title="${copyName}"]`),
-    ).toBeHidden();
+    await expect(page.getByRole("navigation").getByText(copyName)).toBeHidden();
   });
 
   // =========================================================================
@@ -474,12 +457,9 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
   // =========================================================================
   test("Step 14: CSV 形式で保存", async ({ playwright }) => {
     const page = await setupTauriApp(playwright);
-    await _saveCurrentData(
-      page,
-      `${TABLE_NAME}_v2`,
-      `${TABLE_NAME}_export.csv`,
-      "csv",
-    );
+    const fileName = `${TABLE_NAME}_export.csv`;
+    await _saveCurrentData(page, `${TABLE_NAME}_v2`, fileName, "csv");
+    await deleteFileFromImportScreen(page, fileName);
   });
 
   // =========================================================================
@@ -487,13 +467,9 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
   // =========================================================================
   test("Step 15: Excel 形式で保存", async ({ playwright }) => {
     const page = await setupTauriApp(playwright);
-
-    await _saveCurrentData(
-      page,
-      `${TABLE_NAME}_v2`,
-      `${TABLE_NAME}_export.xlsx`,
-      "excel",
-    );
+    const fileName = `${TABLE_NAME}_export.xlsx`;
+    await _saveCurrentData(page, `${TABLE_NAME}_v2`, fileName, "excel");
+    await deleteFileFromImportScreen(page, fileName);
   });
 
   // =========================================================================
@@ -501,13 +477,9 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
   // =========================================================================
   test("Step 16: Parquet 形式で保存", async ({ playwright }) => {
     const page = await setupTauriApp(playwright);
-
-    await _saveCurrentData(
-      page,
-      `${TABLE_NAME}_v2`,
-      `${TABLE_NAME}_export.parquet`,
-      "parquet",
-    );
+    const fileName = `${TABLE_NAME}_export.parquet`;
+    await _saveCurrentData(page, `${TABLE_NAME}_v2`, fileName, "parquet");
+    await deleteFileFromImportScreen(page, fileName);
   });
 });
 
@@ -518,7 +490,7 @@ test.describe("01: CSV 取り込み → 列メニュー → データメニュ�
 /**
  * ヘッダーメニューから SaveData ビューに遷移し、指定データを指定フォーマットで保存する。
  *
- * 保存先ディレクトリは SAMPLE_DIR（現在のファイルブラウザが開いていると仮定）。
+ * 保存先ディレクトリは SAMPLE_DIR 直下。
  */
 async function _saveCurrentData(
   page: import("@playwright/test").Page,
@@ -534,7 +506,7 @@ async function _saveCurrentData(
     page.getByRole("heading", { name: /データを保存|Save Data/i }),
   ).toBeVisible();
 
-  await navigateFileBrowserToDir(page, outputDirPath);
+  await navigateToSampleDir(page);
 
   // データ名を選択
   const tableNameSelect = page.getByLabel(/保存するデータ|Data to Save/i);

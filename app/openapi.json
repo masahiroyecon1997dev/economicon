@@ -1654,7 +1654,7 @@
           "table"
         ],
         "summary": "Fetch Plot Data",
-        "description": "\u30d7\u30ed\u30c3\u30c8\u7528\u5217\u6307\u5b9a\u30c7\u30fc\u30bf\u3092 Apache Arrow IPC \u5f62\u5f0f\u3067\u8fd4\u3059\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u30b0\u30e9\u30d5\u63cf\u753b\u306b\u5fc5\u8981\u306a\u5217\u306e\u307f\u3092\u53d6\u5f97\u3059\u308b\u3053\u3068\u3067\u3001\u30e1\u30e2\u30ea\u30fb\u8ee2\u9001\u91cf\u3092\u524a\u6e1b\u3059\u308b\u3002\nJSON \u5305\u88c5\u306a\u3057\u3067 Arrow IPC \u5f62\u5f0f\u751f\u30d0\u30a4\u30ca\u30ea\u3092\u76f4\u63a5\u8fd4\u3059\u3002\n\u30e1\u30bf\u30c7\u30fc\u30bf\uff08tableName / columnNames / totalRows\uff09\u306f\nArrow \u30b9\u30ad\u30fc\u30de\u30e1\u30bf\u30c7\u30fc\u30bf\u306b\u57cb\u3081\u8fbc\u3080\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : FetchPlotDataRequestBody\n    tableName / columnNames\uff081\u301c50\u5217\uff09\ntables_store : TablesStoreDep\n    \u30c6\u30fc\u30d6\u30eb\u30b9\u30c8\u30a2\u4f9d\u5b58\u6027\n\nReturns\n-------\nResponse\n    Arrow IPC \u5f62\u5f0f\u751f\u30d0\u30a4\u30ca\u30ea",
+        "description": "\u30d7\u30ed\u30c3\u30c8\u7528\u5217\u6307\u5b9a\u30c7\u30fc\u30bf\u3092 Apache Arrow IPC \u5f62\u5f0f\u3067\u8fd4\u3059\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n\n\u30d7\u30ed\u30c3\u30c8\u63cf\u753b\u306b\u5fc5\u8981\u306a\u5217\u306e\u307f\u3092\u53d6\u5f97\u3059\u308b\u3053\u3068\u3067\u3001\u30e1\u30e2\u30ea\u30fb\u8ee2\u9001\u91cf\u3092\u524a\u6e1b\u3059\u308b\u3002\nJSON \u5305\u88c5\u306a\u3057\u3067 Arrow IPC \u5f62\u5f0f\u751f\u30d0\u30a4\u30ca\u30ea\u3092\u76f4\u63a5\u8fd4\u3059\u3002\n\u30e1\u30bf\u30c7\u30fc\u30bf\uff08tableName / columnNames / totalRows\uff09\u306f\nArrow \u30b9\u30ad\u30fc\u30de\u30e1\u30bf\u30c7\u30fc\u30bf\u306b\u57cb\u3081\u8fbc\u3080\u3002\n\nParameters\n----------\nrequest : Request\n    FastAPI\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\nbody : FetchPlotDataRequestBody\n    tableName / columnNames\uff081\u301c50\u5217\uff09\ntables_store : TablesStoreDep\n    \u30c6\u30fc\u30d6\u30eb\u30b9\u30c8\u30a2\u4f9d\u5b58\u6027\n\nReturns\n-------\nResponse\n    Arrow IPC \u5f62\u5f0f\u751f\u30d0\u30a4\u30ca\u30ea",
         "operationId": "fetch_plot_data",
         "parameters": [
           {
@@ -3353,6 +3353,381 @@
           }
         }
       }
+    },
+    "/api/distribution/preview": {
+      "post": {
+        "tags": [
+          "distribution"
+        ],
+        "summary": "Preview Distribution",
+        "description": "\u5206\u5e03\u30d7\u30ec\u30d3\u30e5\u30fc\u8a08\u7b97\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8",
+        "operationId": "preview_distribution",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributionPreviewRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_DistributionPreviewResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/simulation/confidence-interval": {
+      "post": {
+        "tags": [
+          "simulation"
+        ],
+        "summary": "Confidence Interval Sim",
+        "description": "\u4fe1\u983c\u533a\u9593\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\n\nM \u56de\u30b5\u30f3\u30d7\u30ea\u30f3\u30b0\u3092\u884c\u3044\u3001\u5404\u8a66\u884c\u306e\u4fe1\u983c\u533a\u9593\u3068\n\u771f\u306e\u5024\u3068\u306e\u5305\u542b\u95a2\u4fc2\u3092\u8fd4\u3059\u3002",
+        "operationId": "confidence_interval_sim",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfidenceIntervalSimRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_ConfidenceIntervalSimResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/simulation/asymptotic-normality": {
+      "post": {
+        "tags": [
+          "simulation"
+        ],
+        "summary": "Asymptotic Normality",
+        "description": "\u6f38\u8fd1\u6b63\u898f\u6027\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\n\n\u540c\u4e00\u30d1\u30e9\u30e1\u30fc\u30bf\u3067 num_simulations \u56de OLS \u3092\u884c\u3044\u3001\n\u03b2\u0302 \u306e\u6a19\u672c\u5206\u5e03\u3068\u6f38\u8fd1\u5206\u5e03\u306e\u7406\u8ad6\u5024\u3092\u8fd4\u3059\u3002",
+        "operationId": "asymptotic_normality",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AsymptoticNormalityRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_AsymptoticNormalityResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/simulation/consistency": {
+      "post": {
+        "tags": [
+          "simulation"
+        ],
+        "summary": "Consistency",
+        "description": "\u4e00\u81f4\u6027\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\n\nn=2 \u304b\u3089 n_max \u307e\u3067\u9010\u6b21 OLS \u3092\u884c\u3044\u3001\n\u30b5\u30f3\u30d7\u30eb\u30b5\u30a4\u30ba\u5897\u52a0\u306b\u4f34\u3046 \u03b2\u0302 \u306e\u53ce\u675f\u8ecc\u8de1\u3092\u8fd4\u3059\u3002",
+        "operationId": "consistency",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsistencyRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_ConsistencyResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/simulation/unbiasedness": {
+      "post": {
+        "tags": [
+          "simulation"
+        ],
+        "summary": "Unbiasedness",
+        "description": "\u4e0d\u504f\u6027\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\n\n\u540c\u4e00\u6bcd\u96c6\u56e3\u304b\u3089 num_trials \u56de\u72ec\u7acb\u306b\u30b5\u30f3\u30d7\u30ea\u30f3\u30b0\u3057\u3066\nOLS \u3092\u884c\u3044\u3001\u03b2\u0302 \u306e\u6a19\u672c\u5206\u5e03\u3092\u8fd4\u3059\u3002",
+        "operationId": "unbiasedness",
+        "parameters": [
+          {
+            "name": "X-Auth-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3",
+              "title": "X-Auth-Token"
+            },
+            "description": "Tauri \u8d77\u52d5\u6642\u306b\u751f\u6210\u3055\u308c\u305f\u8a8d\u8a3c\u30c8\u30fc\u30af\u30f3"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnbiasednessRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_UnbiasednessResult_"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u30d0\u30ea\u30c7\u30fc\u30b7\u30e7\u30f3/\u30c7\u30fc\u30bf\u6574\u5408\u6027\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\u30ea\u30af\u30a8\u30b9\u30c8\u30dc\u30c7\u30a3\u306e\u5f62\u5f0f\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u30b5\u30fc\u30d0\u30fc\u5185\u90e8\u30a8\u30e9\u30fc",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4058,6 +4433,127 @@
         "title": "AnalysisResultSummary",
         "description": "\u5206\u6790\u7d50\u679c\u30b5\u30de\u30ea\u30fc\uff08\u4e00\u89a7\u53d6\u5f97\u7528\u306e\u5404\u8981\u7d20\uff09"
       },
+      "AsymptoticNormalityRequestBody": {
+        "properties": {
+          "sampleSize": {
+            "type": "integer",
+            "enum": [
+              10,
+              20,
+              30,
+              50,
+              100,
+              1000
+            ],
+            "title": "Samplesize",
+            "default": 100
+          },
+          "numSimulations": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 10.0,
+            "title": "Num Simulations",
+            "description": "OLS \u306e\u53cd\u5fa9\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u56de\u6570",
+            "default": 1000
+          },
+          "trueBeta": {
+            "type": "number",
+            "maximum": 3.0,
+            "minimum": -3.0,
+            "title": "True Beta",
+            "description": "\u771f\u306e\u50be\u304d\u30d1\u30e9\u30e1\u30fc\u30bf",
+            "default": 1.0
+          },
+          "errorVariance": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.1,
+            "title": "Error Variance",
+            "description": "\u8aa4\u5dee\u306e\u5206\u6563",
+            "default": 1.0
+          },
+          "errorType": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "cauchy",
+              "endogenous"
+            ],
+            "title": "Errortype",
+            "default": "normal"
+          },
+          "endogeneityStrength": {
+            "type": "number",
+            "maximum": 3.0,
+            "minimum": 0.1,
+            "title": "Endogeneity Strength",
+            "description": "\u5185\u751f\u6027\u306e\u5f37\u3055\uff08\u03b3\uff09: endogenous \u6642\u306e\u307f\u6709\u52b9",
+            "default": 1.0
+          },
+          "xDistribution": {
+            "$ref": "#/components/schemas/XDistributionParams"
+          }
+        },
+        "type": "object",
+        "title": "AsymptoticNormalityRequestBody",
+        "description": "\u6f38\u8fd1\u6b63\u898f\u6027\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "AsymptoticNormalityResult": {
+        "properties": {
+          "betaEstimates": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Betaestimates",
+            "description": "OLS \u03b2\u0302 \u306e\u6a19\u672c\u30ea\u30b9\u30c8"
+          },
+          "trueBeta": {
+            "type": "number",
+            "title": "Truebeta",
+            "description": "\u771f\u306e\u50be\u304d\u30d1\u30e9\u30e1\u30fc\u30bf"
+          },
+          "isAsymptoticallyNormal": {
+            "type": "boolean",
+            "title": "Isasymptoticallynormal",
+            "description": "\u6f38\u8fd1\u6b63\u898f\u6027\u304c\u6210\u7acb\u3059\u308b\u304b\u5426\u304b"
+          },
+          "asymptoticMean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asymptoticmean",
+            "description": "\u6f38\u8fd1\u5206\u5e03\u306e\u5e73\u5747\uff08\u30b3\u30fc\u30b7\u30fc\u6642\u306f None\uff09"
+          },
+          "asymptoticVariance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asymptoticvariance",
+            "description": "\u6f38\u8fd1\u5206\u5e03\u306e\u5206\u6563\uff08\u30b3\u30fc\u30b7\u30fc\u6642\u306f None\uff09"
+          }
+        },
+        "type": "object",
+        "required": [
+          "betaEstimates",
+          "trueBeta",
+          "isAsymptoticallyNormal",
+          "asymptoticMean",
+          "asymptoticVariance"
+        ],
+        "title": "AsymptoticNormalityResult",
+        "description": "\u6f38\u8fd1\u6b63\u898f\u6027\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u7d50\u679c"
+      },
       "BernoulliParams": {
         "properties": {
           "type": {
@@ -4163,6 +4659,33 @@
         ],
         "title": "BinomialParams",
         "description": "\u4e8c\u9805\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
+      },
+      "CIBound": {
+        "properties": {
+          "lower": {
+            "type": "number",
+            "title": "Lower",
+            "description": "\u4fe1\u983c\u533a\u9593\u4e0b\u9650"
+          },
+          "upper": {
+            "type": "number",
+            "title": "Upper",
+            "description": "\u4fe1\u983c\u533a\u9593\u4e0a\u9650"
+          },
+          "containsTrue": {
+            "type": "boolean",
+            "title": "Containstrue",
+            "description": "\u771f\u306e\u5024\u3092\u542b\u3080\u304b\u5426\u304b"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lower",
+          "upper",
+          "containsTrue"
+        ],
+        "title": "CIBound",
+        "description": "\u4fe1\u983c\u533a\u9593\u306e\u5883\u754c\u5024\u3068\u5305\u542b\u30d5\u30e9\u30b0"
       },
       "CalculateColumnRequestBody": {
         "properties": {
@@ -4362,6 +4885,30 @@
         ],
         "title": "CastColumnResult",
         "description": "\u5217\u578b\u5909\u63db\u30ec\u30b9\u30dd\u30f3\u30b9"
+      },
+      "ChiSquareParams": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "chi_square",
+            "title": "Type",
+            "description": "\u5206\u5e03\u306e\u7a2e\u985e"
+          },
+          "degreesOfFreedom": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Degreesoffreedom",
+            "description": "\u81ea\u7531\u5ea6"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "degreesOfFreedom"
+        ],
+        "title": "ChiSquareParams",
+        "description": "\u30ab\u30a4\u4e8c\u4e57\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
       },
       "ClearAllAnalysisResultsResult": {
         "properties": {
@@ -4581,6 +5128,90 @@
         "title": "ConfidenceIntervalResult",
         "description": "\u4fe1\u983c\u533a\u9593\u8a08\u7b97\u30ec\u30b9\u30dd\u30f3\u30b9\u3002\n\u8a73\u7d30\u306f GET /api/analysis/results/{resultId} \u3067\u53d6\u5f97\u3067\u304d\u308b"
       },
+      "ConfidenceIntervalSimRequestBody": {
+        "properties": {
+          "ciType": {
+            "type": "string",
+            "enum": [
+              "mean",
+              "variance"
+            ],
+            "title": "Citype",
+            "default": "mean"
+          },
+          "trials": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 10.0,
+            "title": "Trials",
+            "description": "\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u8a66\u884c\u56de\u6570",
+            "default": 100
+          },
+          "sampleSize": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 5.0,
+            "title": "Sample Size",
+            "description": "\u5404\u8a66\u884c\u306e\u30b5\u30f3\u30d7\u30eb\u30b5\u30a4\u30ba",
+            "default": 30
+          },
+          "confidenceLevel": {
+            "type": "number",
+            "title": "Confidencelevel",
+            "description": "\u4fe1\u983c\u6c34\u6e96\uff080.90 / 0.95 / 0.99\uff09",
+            "default": 0.95
+          },
+          "trueMean": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": -100.0,
+            "title": "True Mean",
+            "description": "\u6bcd\u5e73\u5747\u306e\u771f\u306e\u5024",
+            "default": 0.0
+          },
+          "trueVariance": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.01,
+            "title": "True Variance",
+            "description": "\u6bcd\u5206\u6563\u306e\u771f\u306e\u5024",
+            "default": 1.0
+          }
+        },
+        "type": "object",
+        "title": "ConfidenceIntervalSimRequestBody",
+        "description": "\u4fe1\u983c\u533a\u9593\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "ConfidenceIntervalSimResult": {
+        "properties": {
+          "trueValue": {
+            "type": "number",
+            "title": "Truevalue",
+            "description": "\u771f\u306e\u5024"
+          },
+          "confidenceLevel": {
+            "type": "number",
+            "title": "Confidencelevel",
+            "description": "\u4fe1\u983c\u6c34\u6e96"
+          },
+          "intervals": {
+            "items": {
+              "$ref": "#/components/schemas/CIBound"
+            },
+            "type": "array",
+            "title": "Intervals",
+            "description": "\u5404\u8a66\u884c\u306e\u4fe1\u983c\u533a\u9593\u30ea\u30b9\u30c8"
+          }
+        },
+        "type": "object",
+        "required": [
+          "trueValue",
+          "confidenceLevel",
+          "intervals"
+        ],
+        "title": "ConfidenceIntervalSimResult",
+        "description": "\u4fe1\u983c\u533a\u9593\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u7d50\u679c"
+      },
       "ConfidenceIntervalStatisticsType": {
         "type": "string",
         "enum": [
@@ -4591,6 +5222,93 @@
           "standard_deviation"
         ],
         "title": "ConfidenceIntervalStatisticsType"
+      },
+      "ConsistencyRequestBody": {
+        "properties": {
+          "nMax": {
+            "type": "integer",
+            "maximum": 5000.0,
+            "minimum": 50.0,
+            "title": "N Max",
+            "description": "\u30b5\u30f3\u30d7\u30eb\u30b5\u30a4\u30ba\u306e\u4e0a\u9650",
+            "default": 500
+          },
+          "trueBeta": {
+            "type": "number",
+            "maximum": 3.0,
+            "minimum": -3.0,
+            "title": "True Beta",
+            "description": "\u771f\u306e\u50be\u304d\u30d1\u30e9\u30e1\u30fc\u30bf",
+            "default": 1.0
+          },
+          "errorVariance": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.1,
+            "title": "Error Variance",
+            "description": "\u8aa4\u5dee\u306e\u5206\u6563",
+            "default": 1.0
+          },
+          "endogenous": {
+            "type": "boolean",
+            "title": "Endogenous",
+            "description": "\u5185\u751f\u6027\u3042\u308a (True) / \u5916\u751f\u6027\u6210\u7acb (False)",
+            "default": false
+          },
+          "endogeneityStrength": {
+            "type": "number",
+            "maximum": 3.0,
+            "minimum": 0.1,
+            "title": "Endogeneity Strength",
+            "description": "\u5185\u751f\u6027\u306e\u5f37\u3055\uff08\u03b3\uff09: endogenous=True \u6642\u306e\u307f\u6709\u52b9",
+            "default": 1.0
+          },
+          "xDistribution": {
+            "$ref": "#/components/schemas/XDistributionParams"
+          }
+        },
+        "type": "object",
+        "title": "ConsistencyRequestBody",
+        "description": "\u4e00\u81f4\u6027\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "ConsistencyResult": {
+        "properties": {
+          "nValues": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Nvalues",
+            "description": "\u5404\u63a8\u5b9a\u306b\u4f7f\u7528\u3057\u305f\u30b5\u30f3\u30d7\u30eb\u30b5\u30a4\u30ba\u306e\u30ea\u30b9\u30c8"
+          },
+          "betaEstimates": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Betaestimates",
+            "description": "\u5404 n \u306b\u304a\u3051\u308b OLS \u03b2\u0302 \u306e\u30ea\u30b9\u30c8"
+          },
+          "trueBeta": {
+            "type": "number",
+            "title": "Truebeta",
+            "description": "\u771f\u306e\u50be\u304d\u30d1\u30e9\u30e1\u30fc\u30bf"
+          },
+          "probabilityLimit": {
+            "type": "number",
+            "title": "Probabilitylimit",
+            "description": "\u78ba\u7387\u6975\u9650\uff08\u5916\u751f\u6027: \u03b2, \u5185\u751f\u6027: \u03b2 + \u03b3/2\uff09"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nValues",
+          "betaEstimates",
+          "trueBeta",
+          "probabilityLimit"
+        ],
+        "title": "ConsistencyResult",
+        "description": "\u4e00\u81f4\u6027\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u7d50\u679c"
       },
       "CorrelationMethod": {
         "type": "string",
@@ -5516,6 +6234,12 @@
             "$ref": "#/components/schemas/LognormalParams"
           },
           {
+            "$ref": "#/components/schemas/ChiSquareParams"
+          },
+          {
+            "$ref": "#/components/schemas/FDistributionParams"
+          },
+          {
             "$ref": "#/components/schemas/BinomialParams"
           },
           {
@@ -5547,7 +6271,9 @@
             "bernoulli": "#/components/schemas/BernoulliParams",
             "beta": "#/components/schemas/BetaParams",
             "binomial": "#/components/schemas/BinomialParams",
+            "chi_square": "#/components/schemas/ChiSquareParams",
             "exponential": "#/components/schemas/ExponentialParams",
+            "f_distribution": "#/components/schemas/FDistributionParams",
             "fixed": "#/components/schemas/FixedParams",
             "gamma": "#/components/schemas/GammaParams",
             "geometric": "#/components/schemas/GeometricParams",
@@ -5561,6 +6287,69 @@
             "weibull": "#/components/schemas/WeibullParams"
           }
         }
+      },
+      "DistributionPreviewRequestBody": {
+        "properties": {
+          "distribution": {
+            "$ref": "#/components/schemas/DistributionConfig"
+          },
+          "xCount": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 50.0,
+            "title": "Xcount",
+            "description": "\u30d7\u30ed\u30c3\u30c8\u70b9\u6570\uff08\u9023\u7d9a\u5206\u5e03\uff09",
+            "default": 200
+          }
+        },
+        "type": "object",
+        "required": [
+          "distribution"
+        ],
+        "title": "DistributionPreviewRequestBody",
+        "description": "\u5206\u5e03\u30d7\u30ec\u30d3\u30e5\u30fc\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "DistributionPreviewResult": {
+        "properties": {
+          "isDiscrete": {
+            "type": "boolean",
+            "title": "Isdiscrete",
+            "description": "\u96e2\u6563\u5206\u5e03\u306e\u3068\u304d True"
+          },
+          "x": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "X",
+            "description": "X \u8ef8\u306e\u5024\u306e\u30ea\u30b9\u30c8"
+          },
+          "yDensity": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Ydensity",
+            "description": "PDF\uff08\u9023\u7d9a\uff09\u307e\u305f\u306f PMF\uff08\u96e2\u6563\uff09\u306e\u5024"
+          },
+          "yCumulative": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Ycumulative",
+            "description": "CDF\uff08\u9023\u7d9a\uff09\u307e\u305f\u306f CMF\uff08\u96e2\u6563\uff09\u306e\u5024"
+          }
+        },
+        "type": "object",
+        "required": [
+          "isDiscrete",
+          "x",
+          "yDensity",
+          "yCumulative"
+        ],
+        "title": "DistributionPreviewResult",
+        "description": "\u5206\u5e03\u30d7\u30ec\u30d3\u30e5\u30fc\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
       "DistributionType": {
         "type": "string",
@@ -5578,6 +6367,8 @@
           "geometric",
           "hypergeometric",
           "negative_binomial",
+          "chi_square",
+          "f_distribution",
           "fixed",
           "sequence"
         ],
@@ -5822,6 +6613,38 @@
         "title": "ExportFileResult",
         "description": "\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u5171\u901a\u30ec\u30b9\u30dd\u30f3\u30b9"
       },
+      "FDistributionParams": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "f_distribution",
+            "title": "Type",
+            "description": "\u5206\u5e03\u306e\u7a2e\u985e"
+          },
+          "numeratorDf": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Numeratordf",
+            "description": "\u5206\u5b50\u81ea\u7531\u5ea6"
+          },
+          "denominatorDf": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Denominatordf",
+            "description": "\u5206\u6bcd\u81ea\u7531\u5ea6"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "numeratorDf",
+          "denominatorDf"
+        ],
+        "title": "FDistributionParams",
+        "description": "F\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
+      },
       "FEParams": {
         "properties": {
           "entityIdColumn": {
@@ -6041,7 +6864,7 @@
           "columnNames"
         ],
         "title": "FetchPlotDataRequestBody",
-        "description": "\u30d7\u30ed\u30c3\u30c8\u7528\u5217\u6307\u5b9a\u30c7\u30fc\u30bf Arrow \u53d6\u5f97\u30ea\u30af\u30a8\u30b9\u30c8\n\n\u30b0\u30e9\u30d5\u63cf\u753b\u306b\u5fc5\u8981\u306a\u5217\u306e\u307f\u3092\u9078\u629e\u3057\u3066 Arrow IPC \u5f62\u5f0f\u3067\u8fd4\u3059\u3002\n\u5217\u3092\u7d5e\u308b\u3053\u3068\u3067\u30e1\u30e2\u30ea\u4f7f\u7528\u91cf\u3068\u8ee2\u9001\u91cf\u3092\u524a\u6e1b\u3059\u308b\u3002"
+        "description": "\u30d7\u30ed\u30c3\u30c8\u7528\u5217\u6307\u5b9a\u30c7\u30fc\u30bf Arrow \u53d6\u5f97\u30ea\u30af\u30a8\u30b9\u30c8\n\n\u30d7\u30ed\u30c3\u30c8\u63cf\u753b\u306b\u5fc5\u8981\u306a\u5217\u306e\u307f\u3092\u9078\u629e\u3057\u3066 Arrow IPC \u5f62\u5f0f\u3067\u8fd4\u3059\u3002\n\u5217\u3092\u7d5e\u308b\u3053\u3068\u3067\u30e1\u30e2\u30ea\u4f7f\u7528\u91cf\u3068\u8ee2\u9001\u91cf\u3092\u524a\u6e1b\u3059\u308b\u3002"
       },
       "FilterCondition": {
         "properties": {
@@ -8513,6 +9336,25 @@
         ],
         "title": "SuccessResponse[AnalysisResultDetail]"
       },
+      "SuccessResponse_AsymptoticNormalityResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/AsymptoticNormalityResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[AsymptoticNormalityResult]"
+      },
       "SuccessResponse_CalculateColumnResult_": {
         "properties": {
           "code": {
@@ -8607,6 +9449,44 @@
           "result"
         ],
         "title": "SuccessResponse[ConfidenceIntervalResult]"
+      },
+      "SuccessResponse_ConfidenceIntervalSimResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ConfidenceIntervalSimResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[ConfidenceIntervalSimResult]"
+      },
+      "SuccessResponse_ConsistencyResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ConsistencyResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[ConsistencyResult]"
       },
       "SuccessResponse_CreateCorrelationTableResult_": {
         "properties": {
@@ -8797,6 +9677,25 @@
           "result"
         ],
         "title": "SuccessResponse[DescriptiveStatisticsResult]"
+      },
+      "SuccessResponse_DistributionPreviewResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/DistributionPreviewResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[DistributionPreviewResult]"
       },
       "SuccessResponse_DuplicateTableResult_": {
         "properties": {
@@ -9178,6 +10077,25 @@
         ],
         "title": "SuccessResponse[TransformColumnResult]"
       },
+      "SuccessResponse_UnbiasednessResult_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "\u30ec\u30b9\u30dd\u30f3\u30b9\u30b3\u30fc\u30c9",
+            "default": "OK"
+          },
+          "result": {
+            "$ref": "#/components/schemas/UnbiasednessResult",
+            "description": "\u51e6\u7406\u7d50\u679c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "title": "SuccessResponse[UnbiasednessResult]"
+      },
       "SuccessResponse_UpdateAnalysisResultResult_": {
         "properties": {
           "code": {
@@ -9356,6 +10274,72 @@
             "root": "#/components/schemas/RootParams"
           }
         }
+      },
+      "UnbiasednessRequestBody": {
+        "properties": {
+          "numTrials": {
+            "type": "integer",
+            "maximum": 2000.0,
+            "minimum": 10.0,
+            "title": "Num Trials",
+            "description": "OLS \u306e\u53cd\u5fa9\u8a66\u884c\u56de\u6570",
+            "default": 200
+          },
+          "sampleSize": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 5.0,
+            "title": "Sample Size",
+            "description": "\u5404\u8a66\u884c\u306e\u30b5\u30f3\u30d7\u30eb\u30b5\u30a4\u30ba",
+            "default": 50
+          },
+          "trueBeta": {
+            "type": "number",
+            "maximum": 3.0,
+            "minimum": -3.0,
+            "title": "True Beta",
+            "description": "\u771f\u306e\u50be\u304d\u30d1\u30e9\u30e1\u30fc\u30bf",
+            "default": 1.0
+          },
+          "errorVariance": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.1,
+            "title": "Error Variance",
+            "description": "\u8aa4\u5dee\u306e\u5206\u6563",
+            "default": 1.0
+          },
+          "xDistribution": {
+            "$ref": "#/components/schemas/XDistributionParams"
+          }
+        },
+        "type": "object",
+        "title": "UnbiasednessRequestBody",
+        "description": "\u4e0d\u504f\u6027\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u30ea\u30af\u30a8\u30b9\u30c8"
+      },
+      "UnbiasednessResult": {
+        "properties": {
+          "betaEstimates": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Betaestimates",
+            "description": "\u5404\u8a66\u884c\u306e OLS \u03b2\u0302 \u30ea\u30b9\u30c8"
+          },
+          "trueBeta": {
+            "type": "number",
+            "title": "Truebeta",
+            "description": "\u771f\u306e\u50be\u304d\u30d1\u30e9\u30e1\u30fc\u30bf"
+          }
+        },
+        "type": "object",
+        "required": [
+          "betaEstimates",
+          "trueBeta"
+        ],
+        "title": "UnbiasednessResult",
+        "description": "\u4e0d\u504f\u6027\u30b7\u30df\u30e5\u30ec\u30fc\u30b7\u30e7\u30f3\u7d50\u679c"
       },
       "UniformParams": {
         "properties": {
@@ -9602,6 +10586,29 @@
         ],
         "title": "WeibullParams",
         "description": "\u30ef\u30a4\u30d6\u30eb\u5206\u5e03\u306e\u30d1\u30e9\u30e1\u30fc\u30bf"
+      },
+      "XDistributionParams": {
+        "properties": {
+          "xMean": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": -10.0,
+            "title": "X Mean",
+            "description": "\u8aac\u660e\u5909\u6570 x \u306e\u6bcd\u5e73\u5747",
+            "default": 0.0
+          },
+          "xVariance": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.1,
+            "title": "X Variance",
+            "description": "\u8aac\u660e\u5909\u6570 x \u306e\u6bcd\u5206\u6563",
+            "default": 1.0
+          }
+        },
+        "type": "object",
+        "title": "XDistributionParams",
+        "description": "\u8aac\u660e\u5909\u6570 x \u306e\u6bcd\u96c6\u56e3\u5206\u5e03\u30d1\u30e9\u30e1\u30fc\u30bf"
       }
     }
   }

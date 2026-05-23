@@ -3,6 +3,7 @@ import { DescriptiveStatisticType } from "@/api/model";
 import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -30,16 +31,6 @@ vi.mock("../../api/endpoints");
 vi.mock("../../lib/dialog/message", () => ({
   showMessageDialog: vi.fn().mockResolvedValue(undefined),
 }));
-const mockSetCurrentView = vi.fn();
-vi.mock("../../stores/currentView", () => ({
-  useCurrentPageStore: vi.fn(
-    (
-      selector: (state: {
-        setCurrentView: typeof mockSetCurrentView;
-      }) => unknown,
-    ) => selector({ setCurrentView: mockSetCurrentView }),
-  ),
-}));
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -57,8 +48,8 @@ const mockApi = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockSetCurrentView.mockReset();
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
+  useCurrentPageStore.setState({ currentView: "Workspace" });
   useTableListStore.setState({ tableList: ["sales"] });
   useWorkspaceTabsStore.setState({ tabs: [], activeTabId: null });
   useAnalysisResultsStore.setState((state) => ({
@@ -88,7 +79,7 @@ describe("DescriptiveStatistics フォーム", () => {
         }),
       );
 
-      expect(mockSetCurrentView).toHaveBeenCalledWith("ImportDataFile");
+      expect(useCurrentPageStore.getState().currentView).toBe("ImportDataFile");
     });
 
     it("列ロード中は共通 loading state を表示する", async () => {
@@ -126,7 +117,9 @@ describe("DescriptiveStatistics フォーム", () => {
       await user.click(option);
 
       await waitFor(() =>
-        expect(screen.getByText("DescriptiveStatistics.Stat_mean")).toBeInTheDocument(),
+        expect(
+          screen.getByText("DescriptiveStatistics.Stat_mean"),
+        ).toBeInTheDocument(),
       );
       expect(
         screen.queryByText("DescriptiveStatistics.Stat_skewness"),
@@ -303,7 +296,7 @@ describe("DescriptiveStatistics フォーム", () => {
           "result:test-result-id",
         );
         expect(fetchSummaries).toHaveBeenCalled();
-        expect(mockSetCurrentView).toHaveBeenCalledWith("DataPreview");
+        expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
       });
       expect(
         screen.queryByText("DescriptiveStatistics.ResultTitle"),
@@ -467,7 +460,7 @@ describe("DescriptiveStatistics フォーム", () => {
       const cancelBtn = screen.getByRole("button", { name: "Common.Cancel" });
       await user.click(cancelBtn);
 
-      expect(mockSetCurrentView).toHaveBeenCalledWith("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
 
     it("work tab モードでは onCancel を呼ぶ", async () => {

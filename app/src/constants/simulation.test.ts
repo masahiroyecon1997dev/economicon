@@ -25,6 +25,8 @@ describe("CONTINUOUS_DIST_TYPES", () => {
       "beta",
       "weibull",
       "lognormal",
+      "chi_square",
+      "f_distribution",
     ];
     expect(CONTINUOUS_DIST_TYPES).toEqual(expected);
   });

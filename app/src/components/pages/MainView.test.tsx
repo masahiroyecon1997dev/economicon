@@ -1,6 +1,6 @@
 import { MainView } from "@/components/pages/MainView";
-import type { CurrentPageValue } from "@/stores/currentView";
-import { useCurrentPageStore } from "@/stores/currentView";
+import type { CurrentPageValue } from "@/stores/currentPage";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -34,18 +34,8 @@ describe("MainView コンポーネント", () => {
 
   const PAGE_CASES: Array<[CurrentPageValue, string]> = [
     ["ImportDataFile", "page-ImportDataFile"],
-    ["JoinTable", "page-WorkspaceSurface"],
-    ["UnionTable", "page-WorkspaceSurface"],
-    ["DescriptiveStatistics", "page-WorkspaceSurface"],
-    ["StatisticalTestView", "page-WorkspaceSurface"],
-    ["CorrelationMatrix", "page-WorkspaceSurface"],
-    ["ConfidenceIntervalView", "page-WorkspaceSurface"],
-    ["LinearRegressionForm", "page-WorkspaceSurface"],
-    ["CreateSimulationDataTable", "page-WorkspaceSurface"],
-    ["CalculationView", "page-WorkspaceSurface"],
     ["SaveData", "page-SaveData"],
-    ["AnalysisResultPreview", "page-WorkspaceSurface"],
-    ["DataPreview", "page-WorkspaceSurface"],
+    ["Workspace", "page-WorkspaceSurface"],
   ];
 
   it.each(PAGE_CASES)(
@@ -64,6 +54,7 @@ describe("MainView コンポーネント", () => {
     // ImportDataFile のみ表示
     expect(screen.getByTestId("page-ImportDataFile")).toBeInTheDocument();
     // 他のページは表示されない（MainView は currentView に応じて切り替える）
-    expect(screen.queryByTestId("page-JoinTable")).toBeNull();
+    expect(screen.queryByTestId("page-SaveData")).toBeNull();
+    expect(screen.queryByTestId("page-WorkspaceSurface")).toBeNull();
   });
 });

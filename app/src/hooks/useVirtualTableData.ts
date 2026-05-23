@@ -12,7 +12,7 @@
 import { fetchDataToArrow } from "@/api/bridge/tauri-commands";
 import { CHUNK_SIZE, useTableChunkStore } from "@/stores/tableChunkStore";
 import { useTableInfosStore } from "@/stores/tableInfos";
-import type { TalbeDataRowType } from "@/types/commonTypes";
+import type { TableDataRowType } from "@/types/commonTypes";
 import { tableFromIPC, type Table as ArrowTable } from "apache-arrow";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -23,15 +23,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type ParsedChunk = {
   /** 同一性比較用（バイトが差し換わったら再パース） */
   bytes: Uint8Array;
-  rows: TalbeDataRowType[];
+  rows: TableDataRowType[];
 };
 
-const arrowTableToRows = (table: ArrowTable): TalbeDataRowType[] => {
-  const rows: TalbeDataRowType[] = [];
+const arrowTableToRows = (table: ArrowTable): TableDataRowType[] => {
+  const rows: TableDataRowType[] = [];
   const numRows = table.numRows;
   const fields = table.schema.fields;
   for (let i = 0; i < numRows; i++) {
-    const row: TalbeDataRowType = {};
+    const row: TableDataRowType = {};
     for (const field of fields) {
       const col = table.getChild(field.name);
       row[field.name] = col?.get(i) ?? null;
@@ -156,7 +156,7 @@ export const useVirtualTableData = ({
   // ---------------------------------------------------------------------------
 
   const getRowData = useCallback(
-    (rowIndex: number): TalbeDataRowType | undefined => {
+    (rowIndex: number): TableDataRowType | undefined => {
       const chunkIndex = Math.floor(rowIndex / CHUNK_SIZE);
       // ストア直読み（購読なし）: 再レンダーはバージョン購読が担う
       const chunkBytes = useTableChunkStore
@@ -165,7 +165,7 @@ export const useVirtualTableData = ({
       if (!chunkBytes) return undefined;
 
       const cached = parsedChunksRef.current.get(chunkIndex);
-      let rows: TalbeDataRowType[];
+      let rows: TableDataRowType[];
       if (cached && cached.bytes === chunkBytes) {
         rows = cached.rows;
       } else {

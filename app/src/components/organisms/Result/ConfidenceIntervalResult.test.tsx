@@ -1,6 +1,6 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { ConfidenceIntervalResult } from "@/components/organisms/Result/ConfidenceIntervalResult";
-import type { ConfidenceIntervalResultEntry } from "@/stores/confidenceIntervalResults";
+import type { ConfidenceIntervalResultData } from "@/types/commonTypes";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -27,8 +27,8 @@ vi.mock("@/components/organisms/Dialog/OutputResultDialog", () => ({
 // Fixture
 // ---------------------------------------------------------------------------
 const makeEntry = (
-  overrides: Partial<ConfidenceIntervalResultEntry> = {},
-): ConfidenceIntervalResultEntry => ({
+  overrides: Partial<ConfidenceIntervalResultData> = {},
+): ConfidenceIntervalResultData => ({
   resultId: "test-result-id",
   tableName: "sales",
   columnName: "price",

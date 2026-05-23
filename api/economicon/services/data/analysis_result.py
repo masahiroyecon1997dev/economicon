@@ -1,6 +1,3 @@
-import os
-import pickle
-import platform
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -72,25 +69,6 @@ class AnalysisResult:
         self._time_column = time_column
         self._row_indices = row_indices
 
-    @staticmethod
-    def get_tmp_models_dir() -> Path:
-        """
-        OS 別に一時モデル保存ディレクトリを解決・作成して返す。
-
-        - Windows : %LOCALAPPDATA%/economicon/tmp/models/
-        - macOS/Linux : ~/.cache/economicon/tmp/models/
-        """
-        os_system = platform.system()
-        if os_system == "Windows":
-            local_appdata = os.getenv("LOCALAPPDATA") or str(
-                Path.home() / "AppData" / "Local"
-            )
-            tmp_dir = Path(local_appdata) / "economicon" / "tmp" / "models"
-        else:
-            tmp_dir = Path.home() / ".cache" / "economicon" / "tmp" / "models"
-        tmp_dir.mkdir(parents=True, exist_ok=True)
-        return tmp_dir
-
     @property
     def id(self) -> str:
         return self._id
@@ -160,37 +138,12 @@ class AnalysisResult:
     # モデルファイル操作
     # ------------------------------------------------------------------
 
-    def save_model(self, model_object: Any) -> str:
-        """
-        推定済みモデルを pickle ファイルに保存する。
-
-        保存パスは {get_tmp_models_dir()}/{self._id}.pkl に固定される。
-        保存後、self._model_path を更新する。
-
-        Args:
-            model_object: pickle シリアライズ可能な推定済みモデル
-
-        Returns:
-            保存先ファイルパス（文字列）
-        """
-        tmp_dir = self.get_tmp_models_dir()
-        file_path = tmp_dir / f"{self._id}.pkl"
-        with open(file_path, "wb") as f:
-            pickle.dump(model_object, f, protocol=pickle.HIGHEST_PROTOCOL)
-        self._model_path = str(file_path)
-        return self._model_path
+    def save_model(self, model_object: Any) -> str:  # noqa: ARG002
+        """pickle 保存を一時停止中（Option A: numpy BLOB→SQLite 移行待ち）。"""
+        return ""
 
     def load_model(self) -> Any:
-        """
-        保存済み pickle ファイルからモデルを読み込んで返す。
-
-        Returns:
-            pickle でデシリアライズされたモデルオブジェクト
-
-        Raises:
-            FileNotFoundError: モデルファイルが存在しない場合
-            ValueError: model_path が設定されていない場合
-        """
+        """pickle ロードを一時停止中（Option A: numpy BLOB→SQLite 移行待ち）。"""  # noqa: E501
         if not self._model_path:
             raise ValueError(f"Model path is not set for result '{self._id}'.")
         path = Path(self._model_path)
@@ -198,14 +151,10 @@ class AnalysisResult:
             raise FileNotFoundError(
                 f"Model file not found: '{self._model_path}'"
             )
-        with open(path, "rb") as f:
-            # NOTE: pickle.load はデシリアライズ時に任意コードを実行できる形式
-            # だが、ここでロードするファイルは必ず同一プロセスが
-            # get_tmp_models_dir() 配下に書き出した {uuid}.pkl に限定される
-            # ため通常運用でのリスクはない。ただし PC がマルウェアに侵害
-            # されている状況では tmpDir への細工により悪用される可能性がある
-            # 点は認識しておく。
-            return pickle.load(f)
+        raise NotImplementedError(
+            "pickle.load has been removed. "
+            "Awaiting Option A (numpy BLOB / SQLite) migration."
+        )
 
     def delete_model_file(self) -> None:
         """

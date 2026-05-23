@@ -20,9 +20,10 @@ import { showMessageDialog } from "@/lib/dialog/message";
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
 import { getTableInfo } from "@/lib/utils/internal";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { SimulationColumnSetting } from "@/types/commonTypes";
 import { useForm, useStore } from "@tanstack/react-form";
 import { AlertCircle, Dices, Edit2, Hash, Plus, Trash2 } from "lucide-react";
@@ -83,7 +84,10 @@ const hasColumnError = (col: SimulationColumnSetting): boolean =>
 
 export const CreateSimulationDataTable = () => {
   const { t } = useTranslation();
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
   const addTableName = useTableListStore((state) => state.addTableName);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
 
@@ -171,7 +175,7 @@ export const CreateSimulationDataTable = () => {
           const resTableInfo = await getTableInfo(response.result.tableName);
           addTableName(response.result.tableName);
           addTableInfo(resTableInfo);
-          setCurrentView("DataPreview");
+          closeActiveWorkTab();
         } else {
           await showMessageDialog(
             t("Error.Error"),
@@ -212,7 +216,7 @@ export const CreateSimulationDataTable = () => {
   };
 
   const handleCancel = () => {
-    setCurrentView("ImportDataFile");
+    navigateToShell("ImportDataFile");
   };
 
   const editingColumn = editingColumnId

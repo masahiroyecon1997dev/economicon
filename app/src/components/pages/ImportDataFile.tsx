@@ -16,12 +16,12 @@ import { PageLayout } from "@/components/templates/PageLayout";
 import { useInitializeFileListOnMount } from "@/hooks/useInitializeFileListOnMount";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import type { ImportConfigSettings } from "@/lib/utils/importSchema";
 import { getTableInfo } from "@/lib/utils/internal";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useFilesStore } from "@/stores/files";
 import { LOADING_DELAY_DIR, useLoadingStore } from "@/stores/loading";
 import { useSettingsStore } from "@/stores/settings";
@@ -79,7 +79,9 @@ export const ImportDataFile = () => {
   const setFiles = useFilesStore((state) => state.setFiles);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
   const addTableList = useTableListStore((state) => state.addTableName);
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToWorkspace = useCurrentPageStore(
+    (state) => state.navigateToWorkspace,
+  );
 
   const { setLoading, clearLoading } = useLoadingStore();
 
@@ -306,7 +308,7 @@ export const ImportDataFile = () => {
       } else {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(e, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(e, t("Error.UnexpectedError")),
         );
       }
     } finally {
@@ -314,7 +316,6 @@ export const ImportDataFile = () => {
     }
   };
 
-  // 上位ディレクトリへ移動
   const goUpDirectory = async () => {
     const segments = getPathSegments();
     if (segments.length > 0) {
@@ -366,7 +367,7 @@ export const ImportDataFile = () => {
       if (response && response.code !== "OK") {
         await showMessageDialog(
           t("Error.Error"),
-          getResponseErrorMessage(response, t("Error.UnexpectedError")),
+          buildResponseErrorMessage(response, t("Error.UnexpectedError")),
         );
         return;
       }
@@ -376,13 +377,13 @@ export const ImportDataFile = () => {
         const resTableInfo = await getTableInfo(loadTableName);
         addTableList(loadTableName);
         addTableInfo(resTableInfo);
-        setCurrentView("DataPreview");
+        navigateToWorkspace();
       }
     } catch (e: unknown) {
       console.error(e);
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(e, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(e, t("Error.UnexpectedError")),
       );
     } finally {
       clearLoading();
@@ -445,7 +446,7 @@ export const ImportDataFile = () => {
     }
   };
 
-  const handleCancel = () => setCurrentView("DataPreview");
+  const handleCancel = () => navigateToWorkspace();
 
   const canRenderDeleteAction = (file: FileType) => {
     return file.isFile && isSupportedImportFile(file.name);

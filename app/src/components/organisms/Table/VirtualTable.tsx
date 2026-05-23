@@ -37,8 +37,8 @@ import { useTableInfosStore } from "@/stores/tableInfos";
 import type {
   ColumnType,
   TableDataCellType,
+  TableDataRowType,
   TableInfoType,
-  TalbeDataRowType,
 } from "@/types/commonTypes";
 
 type VirtualTableProps = {
@@ -196,8 +196,8 @@ export const VirtualTable = ({ tableInfo }: VirtualTableProps) => {
   // ---------------------------------------------------------------------------
   // TanStack Table 列定義
   // ---------------------------------------------------------------------------
-  const columns = useMemo<ColumnDef<TalbeDataRowType>[]>(() => {
-    const cols: ColumnDef<TalbeDataRowType>[] = [
+  const columns = useMemo<ColumnDef<TableDataRowType>[]>(() => {
+    const cols: ColumnDef<TableDataRowType>[] = [
       {
         id: "rowNumber",
         header: "#",

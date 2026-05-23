@@ -24,13 +24,11 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
-  cleanupE2EOutputDir,
   clearWorkspaceFromUi,
   clickHeaderMenu,
   closeSaveSuccessDialog,
-  ensureE2EOutputDir,
+  deleteFileFromImportScreen,
   importFile,
-  navigateFileBrowserToDir,
   navigateToSampleDir,
 } from "./helpers/appHelpers";
 import { setupTauriApp } from "./helpers/setupHelpers";
@@ -51,24 +49,18 @@ const UNION_TABLE_2 = `union2_${RUN_ID}`;
 const JOINED_TABLE_NAME = `joined_result_${RUN_ID}`;
 const UNIONED_TABLE_NAME = `unioned_result_${RUN_ID}`;
 const SIMULATION_TABLE_NAME = `sim_data_${RUN_ID}`;
-const OUTPUT_DIR_NAME = "excel-join-union-calc";
 const STEP_TIMEOUT_MS = 90_000;
 
-let outputDirPath = "";
 let page: Page;
 
 // ---------------------------------------------------------------------------
 // テストスイート
 // ---------------------------------------------------------------------------
-test.describe.serial("03: Excel 取り込み → Join → Union → データ生成 → 計算列", () => {
+test.describe
+  .serial("03: Excel 取り込み → Join → Union → データ生成 → 計算列", () => {
   test.beforeAll(async ({ playwright }) => {
-    outputDirPath = await ensureE2EOutputDir(OUTPUT_DIR_NAME);
     page = await setupTauriApp(playwright);
     await clearWorkspaceFromUi(page);
-  });
-
-  test.afterAll(async () => {
-    await cleanupE2EOutputDir(outputDirPath);
   });
 
   // =========================================================================
@@ -460,7 +452,7 @@ test.describe.serial("03: Excel 取り込み → Join → Union → データ生
       page.getByRole("heading", { name: /データを保存|Save Data/i }),
     ).toBeVisible();
 
-    await navigateFileBrowserToDir(page, outputDirPath);
+    await navigateToSampleDir(page);
 
     // 保存対象データを選択（ジョイン結果を選択）
     const tableNameSelect = page.getByLabel(/保存するデータ|Data to Save/i);
@@ -508,8 +500,7 @@ test.describe.serial("03: Excel 取り込み → Join → Union → データ生
     // 成功メッセージを閉じる
     await closeSaveSuccessDialog(page);
 
-    await expect(
-      page.getByRole("button", { name: JOINED_TABLE_NAME }),
-    ).toBeVisible();
+    // 保存したファイルをインポート画面から削除
+    await deleteFileFromImportScreen(page, `${JOINED_TABLE_NAME}_export.xlsx`);
   });
 });

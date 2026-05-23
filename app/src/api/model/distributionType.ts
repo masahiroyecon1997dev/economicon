@@ -22,6 +22,8 @@ export const DistributionType = {
   geometric: 'geometric',
   hypergeometric: 'hypergeometric',
   negative_binomial: 'negative_binomial',
+  chi_square: 'chi_square',
+  f_distribution: 'f_distribution',
   fixed: 'fixed',
   sequence: 'sequence',
 } as const;

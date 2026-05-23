@@ -11,15 +11,15 @@ import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { getPolarsTypeColor } from "@/lib/utils/columnTypeColor";
 import { createFieldError } from "@/lib/utils/formHelpers";
 import { getTableInfo } from "@/lib/utils/internal";
-import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
 import { CirclePlus, Columns3, Eraser, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -29,7 +29,9 @@ export const Calculation = () => {
   const { t } = useTranslation();
   const tErr = createFieldError(t);
   const tableList = useTableListStore((state) => state.tableList);
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
   const initialTableName =
     useTableInfosStore((state) => state.activeTableName) ?? "";
   const { tableInfos, addTableInfo, invalidateTable, activateTableInfo } =
@@ -80,17 +82,17 @@ export const Calculation = () => {
           } else {
             addTableInfo(updatedTableInfo);
           }
-          setCurrentView("DataPreview");
+          closeActiveWorkTab();
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError")),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
         );
       }
     },
@@ -141,7 +143,7 @@ export const Calculation = () => {
     textareaRef.current?.focus();
   };
 
-  const handleCancel = () => setCurrentView("DataPreview");
+  const handleCancel = () => closeActiveWorkTab();
 
   const filteredColumns = columnList.filter((column) =>
     column.name.toLowerCase().includes(filterValue.toLowerCase()),

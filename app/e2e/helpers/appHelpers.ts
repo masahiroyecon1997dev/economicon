@@ -10,8 +10,6 @@
 
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
-import { mkdir, rm } from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 // ---------------------------------------------------------------------------
@@ -29,9 +27,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const SAMPLE_DIR =
   process.env.ECONOMICON_TEST_SAMPLE_DIR ??
-  path.resolve(__dirname, "../../sample");
-
-export const E2E_OUTPUT_ROOT = path.join(os.tmpdir(), "economicon-e2e-exports");
+  path.resolve(__dirname, "../../../sample");
 
 /** ローディングオーバーレイが消えるまでの最大待機時間 (ms) */
 const LOADING_TIMEOUT_MS = 90_000;
@@ -129,15 +125,41 @@ export async function navigateFileBrowserToDir(
   }
 }
 
-export async function ensureE2EOutputDir(dirName: string): Promise<string> {
-  const outputDir = path.join(E2E_OUTPUT_ROOT, dirName);
-  await rm(outputDir, { recursive: true, force: true });
-  await mkdir(outputDir, { recursive: true });
-  return outputDir;
-}
+// ---------------------------------------------------------------------------
+// ファイル削除（インポート画面 UI 経由）
+// ---------------------------------------------------------------------------
 
-export async function cleanupE2EOutputDir(dirPath: string): Promise<void> {
-  await rm(dirPath, { recursive: true, force: true });
+/**
+ * ImportDataFile ビューでファイルを削除する。
+ *
+ * 保存後のクリーンアップに使用する。
+ * ファイルは SAMPLE_DIR 直下に存在することを前提とする。
+ *
+ * @param page - Playwright Page
+ * @param fileName - 削除するファイル名（拡張子込み）
+ */
+export async function deleteFileFromImportScreen(
+  page: Page,
+  fileName: string,
+): Promise<void> {
+  // インポート画面へ遷移
+  await clickHeaderMenu(page, /ファイル|File/i, /^取り込み$|^Import$/);
+
+  // ファイル選択タブに切り替え & SAMPLE_DIR へ移動
+  await navigateToSampleDir(page);
+
+  // 削除ボタンをクリック
+  const deleteBtn = page.getByTestId(`delete-file-button-${fileName}`);
+  await deleteBtn.waitFor({ state: "visible", timeout: API_TIMEOUT_MS });
+  await deleteBtn.click();
+
+  // 確認ダイアログで削除を確定
+  const confirmDialog = page.getByRole("dialog");
+  await expect(confirmDialog).toBeVisible({ timeout: API_TIMEOUT_MS });
+  await confirmDialog.getByRole("button", { name: /^削除$|^Delete$/i }).click();
+
+  // 成功メッセージを閉じる
+  await closeMessageDialog(page);
 }
 
 // ---------------------------------------------------------------------------

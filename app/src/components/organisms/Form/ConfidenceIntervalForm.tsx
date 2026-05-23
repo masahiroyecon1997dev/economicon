@@ -18,7 +18,7 @@ import {
 import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
@@ -72,19 +72,20 @@ const createSchema = (t: (key: string) => string) =>
 
 type ConfidenceIntervalFormProps = {
   onCancel: () => void;
-  onAnalysisComplete?: (resultIndex: number) => void;
 };
 
 export const ConfidenceIntervalForm = ({
   onCancel,
-  onAnalysisComplete,
 }: ConfidenceIntervalFormProps) => {
   const { t } = useTranslation();
   const tableList = useTableListStore((s) => s.tableList);
   const { selectedTableName, setSelectedTableName, columnList, isLoading } =
     useTableColumnLoader({ numericOnly: true, autoLoadOnMount: true });
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
   const [levelMode, setLevelMode] = useState<"select" | "manual">("select");
   const [infoDialogKey, setInfoDialogKey] = useState<string | null>(null);
 
@@ -118,10 +119,9 @@ export const ConfidenceIntervalForm = ({
           const { resultId } = response.result;
           const detailResponse = await api.getAnalysisResult(resultId);
           if (detailResponse.code === "OK") {
+            closeActiveWorkTab();
             openResultTab(detailResponse.result);
             await useAnalysisResultsStore.getState().fetchSummaries();
-            setCurrentView("DataPreview");
-            onAnalysisComplete?.(0);
             return;
           }
 
@@ -155,7 +155,7 @@ export const ConfidenceIntervalForm = ({
       <AnalysisNoTablesState
         className="flex-1"
         onCancel={onCancel}
-        onSelect={() => setCurrentView("ImportDataFile")}
+        onSelect={() => navigateToShell("ImportDataFile")}
       />
     );
   }

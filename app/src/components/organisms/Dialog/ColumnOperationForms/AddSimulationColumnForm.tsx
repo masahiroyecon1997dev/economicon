@@ -9,6 +9,7 @@ import {
   addSimulationColumnBodySimulationColumnColumnNameMax,
   addSimulationColumnBodySimulationColumnColumnNameRegExp,
 } from "@/api/zod/column/column";
+import { Button } from "@/components/atoms/Button/Button";
 import { InputText } from "@/components/atoms/Input/InputText";
 import { ErrorAlert } from "@/components/molecules/Alert/ErrorAlert";
 import { RadioTagGroup } from "@/components/molecules/Field/RadioTagGroup";
@@ -29,6 +30,7 @@ import {
   buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { DistributionType } from "@/types/commonTypes";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useState } from "react";
@@ -64,6 +66,9 @@ export const AddSimulationColumnForm = ({
       beta: "1",
       logMean: "0",
       logStandardDeviation: "1",
+      degreesOfFreedom: "5",
+      numeratorDf: "5",
+      denominatorDf: "10",
       trialCount: "10",
       successProbability: "0.5",
       rate: "1",
@@ -151,6 +156,22 @@ export const AddSimulationColumnForm = ({
   useFormSubmitting(isSubmitting, onIsSubmittingChange);
 
   const currentParams = DIST_PARAMS[distributionType];
+
+  const openWorkTab = useWorkspaceTabsStore((s) => s.openWorkTab);
+
+  const handleOpenPreview = () => {
+    const values = form.state.values;
+    const distributionParams = Object.fromEntries(
+      DIST_PARAMS[distributionType].map((k) => [
+        k,
+        Number(values[k as keyof typeof values] ?? "0"),
+      ]),
+    );
+    openWorkTab("DistributionPreview", t("HeaderMenu.DistributionPreview"), {
+      distributionType,
+      distributionParams,
+    });
+  };
 
   return (
     <form
@@ -257,6 +278,16 @@ export const AddSimulationColumnForm = ({
       </form.Field>
 
       {apiError && <ErrorAlert message={apiError} />}
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={handleOpenPreview}
+        disabled={isSubmitting}
+        data-testid="open-distribution-preview-btn"
+      >
+        {t("HeaderMenu.DistributionPreview")}
+      </Button>
     </form>
   );
 };

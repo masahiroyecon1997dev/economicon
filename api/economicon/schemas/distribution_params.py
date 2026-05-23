@@ -144,6 +144,25 @@ class HypergeometricParams(BaseRequest):
         return self
 
 
+class ChiSquareParams(BaseRequest):
+    """カイ二乗分布のパラメータ"""
+
+    type: Literal[DistributionType.CHI_SQUARE] = Field(
+        description="分布の種類"
+    )
+    degrees_of_freedom: int = Field(gt=0, le=1000, description="自由度")
+
+
+class FDistributionParams(BaseRequest):
+    """F分布のパラメータ"""
+
+    type: Literal[DistributionType.F_DISTRIBUTION] = Field(
+        description="分布の種類"
+    )
+    numerator_df: int = Field(gt=0, le=1000, description="分子自由度")
+    denominator_df: int = Field(gt=0, le=1000, description="分母自由度")
+
+
 class FixedParams(BaseRequest):
     """固定値のパラメータ"""
 

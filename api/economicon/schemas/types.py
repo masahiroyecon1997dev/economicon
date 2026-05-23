@@ -7,7 +7,9 @@ from economicon.schemas.distribution_params import (
     BernoulliParams,
     BetaParams,
     BinomialParams,
+    ChiSquareParams,
     ExponentialParams,
+    FDistributionParams,
     FixedParams,
     GammaParams,
     GeometricParams,
@@ -245,6 +247,8 @@ type DistributionParams = (
     | BetaParams
     | WeibullParams
     | LognormalParams
+    | ChiSquareParams
+    | FDistributionParams
     | BinomialParams
     | BernoulliParams
     | PoissonParams

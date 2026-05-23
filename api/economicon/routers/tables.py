@@ -393,7 +393,7 @@ async def fetch_plot_data(
 ) -> Response:
     """プロット用列指定データを Apache Arrow IPC 形式で返すエンドポイント
 
-    グラフ描画に必要な列のみを取得することで、メモリ・転送量を削減する。
+    プロット描画に必要な列のみを取得することで、メモリ・転送量を削減する。
     JSON 包装なしで Arrow IPC 形式生バイナリを直接返す。
     メタデータ（tableName / columnNames / totalRows）は
     Arrow スキーマメタデータに埋め込む。

@@ -1,7 +1,7 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -86,7 +86,7 @@ beforeEach(() => {
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: [] });
   useTableInfosStore.setState({ tableInfos: [], activeTableName: null });
-  useCurrentPageStore.setState({ currentView: "CreateSimulationDataTable" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
 });
 
 // ---------------------------------------------------------------------------
@@ -107,7 +107,7 @@ describe("CreateSimulationDataTable フォーム", () => {
 
     it("初期状態で列が1行表示される", () => {
       render(<CreateSimulationDataTable />);
-      // 列設定の行（Editアイコン + Deleteアイコン）が1セット存在する
+      // 列設定セクションには Edit アイコン + Delete アイコンが1セット存在する
       const editBtns = screen.getAllByRole("button", {
         name: /Edit|編集/i,
       });
@@ -169,7 +169,7 @@ describe("CreateSimulationDataTable フォーム", () => {
   });
 
   describe("API成功時", () => {
-    it("createSimulationDataTable が OK → DataPreview に遷移する", async () => {
+    it("createSimulationDataTable が OK → Workspace へ遷移する", async () => {
       mockApi.createSimulationDataTable.mockResolvedValue({
         code: "OK",
         result: { tableName: "sim_table" },
@@ -188,7 +188,7 @@ describe("CreateSimulationDataTable フォーム", () => {
       await waitFor(() => {
         expect(mockApi.createSimulationDataTable).toHaveBeenCalledTimes(1);
       });
-      expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+      expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
     });
   });
 

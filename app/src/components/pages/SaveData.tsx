@@ -13,11 +13,11 @@ import { useInitializeFileListOnMount } from "@/hooks/useInitializeFileListOnMou
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { extractFieldError } from "@/lib/utils/formHelpers";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useFilesStore } from "@/stores/files";
 import { useLoadingStore } from "@/stores/loading";
 import { useSettingsStore } from "@/stores/settings";
@@ -39,7 +39,10 @@ export const SaveData = () => {
   const pathSeparator = useSettingsStore((state) => state.pathSeparator);
   const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const tableNameList = useTableListStore((state) => state.tableList);
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
+  const navigateToWorkspace = useCurrentPageStore(
+    (state) => state.navigateToWorkspace,
+  );
 
   const { setLoading, clearLoading } = useLoadingStore();
 
@@ -99,17 +102,17 @@ export const SaveData = () => {
             t("Common.OK"),
             t("SaveDataView.SaveSuccess", { path: response.result.filePath }),
           );
-          setCurrentView("DataPreview");
+          navigateToWorkspace();
         } else {
           await showMessageDialog(
             t("Error.Error"),
-            getResponseErrorMessage(response, t("Error.UnexpectedError")),
+            buildResponseErrorMessage(response, t("Error.UnexpectedError")),
           );
         }
       } catch (error) {
         await showMessageDialog(
           t("Error.Error"),
-          extractApiErrorMessage(error, t("Error.UnexpectedError")),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
         );
       } finally {
         clearLoading();
@@ -228,11 +231,11 @@ export const SaveData = () => {
   };
 
   const hadleCancelNoTables = async () => {
-    setCurrentView("ImportDataFile");
+    navigateToShell("ImportDataFile");
   };
 
   const handleCancel = () => {
-    setCurrentView("DataPreview");
+    navigateToWorkspace();
   };
 
   const filteredFiles = files.filter((file) => {

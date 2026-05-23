@@ -1,29 +1,29 @@
-import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { JoinType } from "@/api/model";
 import {
   createJoinTableBodyJoinTableNameMax,
   createJoinTableBodyJoinTableNameRegExp,
 } from "@/api/zod/table/table";
-import { showMessageDialog } from "@/lib/dialog/message";
-import {
-  extractApiErrorMessage,
-  getResponseErrorMessage,
-} from "@/lib/utils/apiError";
-import { cn, generateId } from "@/lib/utils/helpers";
-import { getTableInfo } from "@/lib/utils/internal";
-import { useCurrentPageStore } from "@/stores/currentView";
-import { useTableInfosStore } from "@/stores/tableInfos";
-import { useTableListStore } from "@/stores/tableList";
-import type { ColumnType } from "@/types/commonTypes";
 import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { SectionCard } from "@/components/molecules/Card/SectionCard";
 import { FormField } from "@/components/molecules/Form/FormField";
 import { PageLayout } from "@/components/templates/PageLayout";
+import { showMessageDialog } from "@/lib/dialog/message";
+import {
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
+} from "@/lib/utils/apiError";
+import { cn, generateId } from "@/lib/utils/helpers";
+import { getTableInfo } from "@/lib/utils/internal";
+import { useTableInfosStore } from "@/stores/tableInfos";
+import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
+import type { ColumnType } from "@/types/commonTypes";
+import { ArrowRight, Plus, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type KeyPair = { id: string; left: string; right: string };
 
@@ -38,7 +38,7 @@ export const JoinTable = () => {
   const tableList = useTableListStore((s) => s.tableList);
   const addTableName = useTableListStore((s) => s.addTableName);
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const closeActiveWorkTab = useWorkspaceTabsStore((s) => s.closeActiveWorkTab);
 
   const [leftTable, setLeftTable] = useState("");
   const [rightTable, setRightTable] = useState("");
@@ -177,17 +177,17 @@ export const JoinTable = () => {
         const tableInfo = await getTableInfo(newTableName.trim());
         addTableName(newTableName.trim());
         addTableInfo(tableInfo);
-        setCurrentView("DataPreview");
+        closeActiveWorkTab();
       } else {
         await showMessageDialog(
           t("Error.Error"),
-          getResponseErrorMessage(resp, t("Error.UnexpectedError")),
+          buildResponseErrorMessage(resp, t("Error.UnexpectedError")),
         );
       }
     } catch (error) {
       await showMessageDialog(
         t("Error.Error"),
-        extractApiErrorMessage(error, t("Error.UnexpectedError")),
+        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
       );
     } finally {
       setIsSubmitting(false);
@@ -388,7 +388,7 @@ export const JoinTable = () => {
         selectText={
           isSubmitting ? t("JoinTable.Processing") : t("JoinTable.RunJoin")
         }
-        onCancel={() => setCurrentView("DataPreview")}
+        onCancel={closeActiveWorkTab}
         onSelect={handleSubmit}
         isLoading={isSubmitting}
       />

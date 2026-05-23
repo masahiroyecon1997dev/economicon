@@ -72,6 +72,13 @@ FIXED_VALUE = 42.0
 SEQUENCE_START = 1
 SEQUENCE_STEP = 1
 
+# カイ二乗分布
+CHI_SQUARE_DF = 5
+
+# F分布
+F_NUMERATOR_DF = 5
+F_DENOMINATOR_DF = 10
+
 # シード値テスト用
 SEED_VALUE = 42
 SEED_VALUE_MAX = 100_000_000
@@ -565,6 +572,63 @@ def test_add_sequence_column_custom_start(client, tables_store):
     assert df["YearCol"].to_list() == list(range(2000, 2000 + ROW_COUNT))
 
 
+def test_add_chi_square_column_success(client, tables_store):
+    """カイ二乗分布の列追加が正常に動作する"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "ChiSquareCol",
+                "distribution": {
+                    "type": "chi_square",
+                    "degreesOfFreedom": CHI_SQUARE_DF,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["distributionType"] == "chi_square"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == [COL_A, "ChiSquareCol", COL_B]
+    assert len(df["ChiSquareCol"]) == ROW_COUNT
+    # カイ二乗分布は非負の実数
+    assert all(v >= 0 for v in df["ChiSquareCol"])
+
+
+def test_add_f_distribution_column_success(client, tables_store):
+    """F分布の列追加が正常に動作する"""
+    response = client.post(
+        "/api/column/add-simulation",
+        json={
+            "tableName": TABLE_NAME,
+            "simulationColumn": {
+                "columnName": "FDistCol",
+                "distribution": {
+                    "type": "f_distribution",
+                    "numeratorDf": F_NUMERATOR_DF,
+                    "denominatorDf": F_DENOMINATOR_DF,
+                },
+            },
+            "addPositionColumn": COL_A,
+        },
+    )
+    response_data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data["code"] == "OK"
+    assert response_data["result"]["distributionType"] == "f_distribution"
+
+    df = tables_store.get_table(TABLE_NAME).table
+    assert df.columns == [COL_A, "FDistCol", COL_B]
+    assert len(df["FDistCol"]) == ROW_COUNT
+    # F分布は非負の実数
+    assert all(v >= 0 for v in df["FDistCol"])
+
+
 # ========================================
 # 異常系テスト（Pydantic バリデーション: 422）
 # ========================================
@@ -747,8 +811,7 @@ def test_missing_required_distribution_param(client, tables_store):
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.normal"
-        ".standardDeviationは必須です。"
-        in response_data["details"]
+        ".standardDeviationは必須です。" in response_data["details"]
     )
 
     df_after = tables_store.get_table(TABLE_NAME).table
@@ -781,8 +844,7 @@ def test_invalid_distribution_param_type(client, tables_store):
     assert "simulationColumn.distribution" in response_data["message"]
     assert (
         "simulationColumn.distribution.normal"
-        ".meanは数値で入力してください。"
-        in response_data["details"]
+        ".meanは数値で入力してください。" in response_data["details"]
     )
 
     df_after = tables_store.get_table(TABLE_NAME).table
@@ -890,8 +952,7 @@ def test_hypergeometric_invalid_k_exceeds_n(client, tables_store):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     expected_msg = (
-        "超幾何分布では、'successCount'は'populationSize'を"
-        "超えてはいけません"
+        "超幾何分布では、'successCount'は'populationSize'を超えてはいけません"
     )
     assert response_data["message"] == expected_msg
     assert expected_msg in response_data["details"]
@@ -1428,8 +1489,7 @@ def test_add_simulation_column_hypergeometric_k_exceeds_n(
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response_data["code"] == ErrorCode.VALIDATION_ERROR
     expected_msg = (
-        "超幾何分布では、'successCount'は'populationSize'を"
-        "超えてはいけません"
+        "超幾何分布では、'successCount'は'populationSize'を超えてはいけません"
     )
     assert response_data["message"] == expected_msg
     assert expected_msg in response_data["details"]

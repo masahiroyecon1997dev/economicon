@@ -47,10 +47,11 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     titleKey: "HeaderMenu.GroupStatistics",
   },
   {
-    featureKey: "ChartView",
-    titleKey: "HeaderMenu.ChartView",
+    featureKey: "PlotView",
+    titleKey: "HeaderMenu.PlotView",
+  },
+  {
+    featureKey: "DistributionPreview",
+    titleKey: "HeaderMenu.DistributionPreview",
   },
 ];
-
-export const isWorkFeatureKey = (value: string): value is WorkFeatureKey =>
-  WORK_TAB_ENTRIES.some((entry) => entry.featureKey === value);

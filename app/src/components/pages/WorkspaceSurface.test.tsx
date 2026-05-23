@@ -1,7 +1,7 @@
 import { WorkspaceSurface } from "@/components/pages/WorkspaceSurface";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -54,8 +54,8 @@ vi.mock("./CorrelationMatrix", () => ({
 vi.mock("./GroupStatistics", () => ({
   GroupStatistics: () => <div data-testid="work-group-stats" />,
 }));
-vi.mock("./ChartView", () => ({
-  ChartView: () => <div data-testid="work-chart-view" />,
+vi.mock("./PlotView", () => ({
+  PlotView: () => <div data-testid="work-plot-view" />,
 }));
 
 const TABLE_SALES = {
@@ -65,7 +65,6 @@ const TABLE_SALES = {
   isActive: true,
 };
 
-
 beforeEach(() => {
   vi.clearAllMocks();
   // JSDOM は Pointer Capture API を実装していないため no-op で定義
@@ -73,7 +72,7 @@ beforeEach(() => {
     setPointerCapture: vi.fn(),
     releasePointerCapture: vi.fn(),
   });
-  useCurrentPageStore.setState({ currentView: "DataPreview" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
   useTableInfosStore.setState({
     tableInfos: [TABLE_SALES],
     activeTableName: "sales",
@@ -119,7 +118,7 @@ describe("WorkspaceSurface コンポーネント", () => {
       ],
       activeTabId: "work:JoinTable",
     });
-    useCurrentPageStore.setState({ currentView: "JoinTable" });
+    useCurrentPageStore.setState({ currentView: "Workspace" });
 
     render(<WorkspaceSurface />);
 
@@ -143,7 +142,7 @@ describe("WorkspaceSurface コンポーネント", () => {
       ],
       activeTabId: "work:CorrelationMatrix",
     });
-    useCurrentPageStore.setState({ currentView: "CorrelationMatrix" });
+    useCurrentPageStore.setState({ currentView: "Workspace" });
 
     render(<WorkspaceSurface />);
 
@@ -167,7 +166,7 @@ describe("WorkspaceSurface コンポーネント", () => {
       ],
       activeTabId: "work:StatisticalTestView",
     });
-    useCurrentPageStore.setState({ currentView: "StatisticalTestView" });
+    useCurrentPageStore.setState({ currentView: "Workspace" });
 
     render(<WorkspaceSurface />);
 
@@ -191,7 +190,7 @@ describe("WorkspaceSurface コンポーネント", () => {
       ],
       activeTabId: "work:DescriptiveStatistics",
     });
-    useCurrentPageStore.setState({ currentView: "DescriptiveStatistics" });
+    useCurrentPageStore.setState({ currentView: "Workspace" });
 
     render(<WorkspaceSurface />);
 
@@ -215,7 +214,7 @@ describe("WorkspaceSurface コンポーネント", () => {
       ],
       activeTabId: "work:LinearRegressionForm",
     });
-    useCurrentPageStore.setState({ currentView: "LinearRegressionForm" });
+    useCurrentPageStore.setState({ currentView: "Workspace" });
 
     render(<WorkspaceSurface />);
 
@@ -241,7 +240,7 @@ describe("WorkspaceSurface コンポーネント", () => {
       ],
       activeTabId: "work:JoinTable",
     });
-    useCurrentPageStore.setState({ currentView: "JoinTable" });
+    useCurrentPageStore.setState({ currentView: "Workspace" });
 
     render(<WorkspaceSurface />);
 
@@ -285,7 +284,7 @@ describe("WorkspaceSurface コンポーネント", () => {
       ],
       activeTabId: "work:UnionTable",
     });
-    useCurrentPageStore.setState({ currentView: "UnionTable" });
+    useCurrentPageStore.setState({ currentView: "Workspace" });
 
     render(<WorkspaceSurface />);
 

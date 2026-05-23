@@ -33,6 +33,12 @@ def generate_simulation_data(
         DistributionType.LOGNORMAL: lambda d: rng.lognormal(
             d.log_mean, d.log_standard_deviation, row_count
         ),
+        DistributionType.CHI_SQUARE: lambda d: rng.chisquare(
+            d.degrees_of_freedom, row_count
+        ),
+        DistributionType.F_DISTRIBUTION: lambda d: rng.f(
+            d.numerator_df, d.denominator_df, row_count
+        ),
         DistributionType.BINOMIAL: lambda d: rng.binomial(
             d.trial_count, d.success_probability, row_count
         ),

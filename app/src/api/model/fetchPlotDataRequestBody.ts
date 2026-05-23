@@ -8,7 +8,7 @@
 /**
  * プロット用列指定データ Arrow 取得リクエスト
 
-グラフ描画に必要な列のみを選択して Arrow IPC 形式で返す。
+プロット描画に必要な列のみを選択して Arrow IPC 形式で返す。
 列を絞ることでメモリ使用量と転送量を削減する。
  */
 export type FetchPlotDataRequestBody = {

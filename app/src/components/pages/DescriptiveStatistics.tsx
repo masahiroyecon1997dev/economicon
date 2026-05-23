@@ -7,26 +7,26 @@ import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup"
 import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
 import { FormField } from "@/components/molecules/Form/FormField";
 import {
-  AnalysisEmptyState,
-  AnalysisNoTablesState,
+    AnalysisEmptyState,
+    AnalysisNoTablesState,
 } from "@/components/organisms/EmptyState/AnalysisNoTablesState";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { ALL_STAT_TYPES } from "@/constants/statisticTypes";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-  buildCaughtErrorMessage,
-  buildResponseErrorMessage,
+    buildCaughtErrorMessage,
+    buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
 import {
-  selectWorkTabDraft,
-  useWorkspaceTabsStore,
+    selectWorkTabDraft,
+    useWorkspaceTabsStore,
 } from "@/stores/workspaceTabs";
 import { ChevronDown, Loader2, SearchX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -92,8 +92,14 @@ export const DescriptiveStatistics = ({
   const tableList = useTableListStore((state) => state.tableList);
   const initialTableName =
     useTableInfosStore((state) => state.activeTableName) ?? "";
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
+  const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
+  const navigateToWorkspace = useCurrentPageStore(
+    (state) => state.navigateToWorkspace,
+  );
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
   const ensureWorkTabState = useWorkspaceTabsStore(
     (state) => state.ensureWorkTabState,
   );
@@ -141,7 +147,7 @@ export const DescriptiveStatistics = ({
       void onCancel();
       return;
     }
-    setCurrentView("DataPreview");
+    navigateToWorkspace();
   };
 
   const {
@@ -285,9 +291,9 @@ export const DescriptiveStatistics = ({
               buildFormValues(selectedTable, orderedCols, orderedStats),
             );
           }
+          closeActiveWorkTab();
           openResultTab(detailResponse.result);
           await useAnalysisResultsStore.getState().fetchSummaries();
-          setCurrentView("DataPreview");
           return;
         }
 
@@ -321,7 +327,7 @@ export const DescriptiveStatistics = ({
         <AnalysisNoTablesState
           className="flex-1"
           onCancel={handleCancel}
-          onSelect={() => setCurrentView("ImportDataFile")}
+          onSelect={() => navigateToShell("ImportDataFile")}
         />
       ) : (
         <div className="app-scrollbar flex-1 min-h-0 space-y-4 overflow-y-auto pb-2">

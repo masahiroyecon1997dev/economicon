@@ -6,7 +6,7 @@ import { SettingsDialog } from "@/components/organisms/Dialog/SettingsDialog";
 import { WindowControls } from "@/components/organisms/Header/WindowControls";
 import { WORK_TAB_ENTRIES } from "@/constants/workspaceTabs";
 import { cn } from "@/lib/utils/helpers";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useSettingsStore } from "@/stores/settings";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { DropmenuPositionType } from "@/types/commonTypes";
@@ -43,7 +43,7 @@ type AppBarMenuType = {
 export const AppBar = () => {
   const { t } = useTranslation();
   const osName = useSettingsStore((s) => s.osName);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const navigateToShell = useCurrentPageStore((s) => s.navigateToShell);
   const openWorkTab = useWorkspaceTabsStore((s) => s.openWorkTab);
   const [isMaximized, setIsMaximized] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -191,7 +191,6 @@ export const AppBar = () => {
     title: string,
   ) => {
     openWorkTab(featureKey, title);
-    setCurrentView(featureKey);
     close();
   };
 
@@ -206,7 +205,7 @@ export const AppBar = () => {
           id: "import",
           label: t("HeaderMenu.ImportData"),
           handleSelect: () => {
-            setCurrentView("ImportDataFile");
+            navigateToShell("ImportDataFile");
             close();
           },
         },
@@ -214,7 +213,7 @@ export const AppBar = () => {
           id: "save",
           label: t("HeaderMenu.SaveData"),
           handleSelect: () => {
-            setCurrentView("SaveData");
+            navigateToShell("SaveData");
             close();
           },
         },
@@ -252,12 +251,6 @@ export const AppBar = () => {
           label: t("HeaderMenu.Calculate"),
           handleSelect: () =>
             handleOpenWorkTab("CalculationView", t("HeaderMenu.Calculate")),
-        },
-        {
-          id: "chart-view",
-          label: t("HeaderMenu.ChartView"),
-          handleSelect: () =>
-            handleOpenWorkTab("ChartView", t("HeaderMenu.ChartView")),
         },
       ],
     },
@@ -395,6 +388,59 @@ export const AppBar = () => {
     //     },
     //   ],
     // },
+    {
+      id: "visualization",
+      menuName: t("HeaderMenu.Visualization"),
+      isOpen: openMenuId === "visualization",
+      onClose: close,
+      items: [
+        {
+          id: "plot-view",
+          label: t("HeaderMenu.PlotView"),
+          handleSelect: () =>
+            handleOpenWorkTab("PlotView", t("HeaderMenu.PlotView")),
+        },
+        {
+          id: "distribution-preview",
+          label: t("HeaderMenu.DistributionPreview"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "DistributionPreview",
+              t("HeaderMenu.DistributionPreview"),
+            ),
+        },
+        {
+          id: "confidence-interval-sim",
+          label: t("HeaderMenu.ConfidenceIntervalSim"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "ConfidenceIntervalSim",
+              t("HeaderMenu.ConfidenceIntervalSim"),
+            ),
+        },
+        {
+          id: "asymptotic-normality",
+          label: t("HeaderMenu.AsymptoticNormality"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "AsymptoticNormality",
+              t("HeaderMenu.AsymptoticNormality"),
+            ),
+        },
+        {
+          id: "consistency",
+          label: t("HeaderMenu.Consistency"),
+          handleSelect: () =>
+            handleOpenWorkTab("Consistency", t("HeaderMenu.Consistency")),
+        },
+        {
+          id: "unbiasedness",
+          label: t("HeaderMenu.Unbiasedness"),
+          handleSelect: () =>
+            handleOpenWorkTab("Unbiasedness", t("HeaderMenu.Unbiasedness")),
+        },
+      ],
+    },
   ];
 
   return (

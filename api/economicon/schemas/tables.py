@@ -430,7 +430,7 @@ class FetchDataToArrowRequestBody(BaseRequest):
 class FetchPlotDataRequestBody(BaseRequest):
     """プロット用列指定データ Arrow 取得リクエスト
 
-    グラフ描画に必要な列のみを選択して Arrow IPC 形式で返す。
+    プロット描画に必要な列のみを選択して Arrow IPC 形式で返す。
     列を絞ることでメモリ使用量と転送量を削減する。
     """
 
@@ -449,8 +449,7 @@ class FetchPlotDataRequestBody(BaseRequest):
             min_length=1,
             max_length=50,
             description=(
-                "取得する列名のリスト（1〜50列）。"
-                "重複した列名は無視されます。"
+                "取得する列名のリスト（1〜50列）。重複した列名は無視されます。"
             ),
         ),
     ]

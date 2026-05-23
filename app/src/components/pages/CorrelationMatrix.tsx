@@ -21,7 +21,7 @@ import {
 } from "@/lib/utils/apiError";
 import { createFieldError } from "@/lib/utils/formHelpers";
 import { getTableInfo } from "@/lib/utils/internal";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
@@ -69,7 +69,8 @@ export const CorrelationMatrix = ({
   const addTableName = useTableListStore((s) => s.addTableName);
   const initialTableName = useTableInfosStore((s) => s.activeTableName) ?? "";
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
-  const setCurrentView = useCurrentPageStore((s) => s.setCurrentView);
+  const navigateToShell = useCurrentPageStore((s) => s.navigateToShell);
+  const navigateToWorkspace = useCurrentPageStore((s) => s.navigateToWorkspace);
   const ensureWorkTabState = useWorkspaceTabsStore(
     (state) => state.ensureWorkTabState,
   );
@@ -154,7 +155,7 @@ export const CorrelationMatrix = ({
           if (onSuccess) {
             onSuccess(resp.result.tableName, submittedValues);
           } else {
-            setCurrentView("DataPreview");
+            navigateToWorkspace();
           }
         } else {
           await showMessageDialog(
@@ -221,7 +222,7 @@ export const CorrelationMatrix = ({
       void onCancel();
       return;
     }
-    setCurrentView("DataPreview");
+    navigateToWorkspace();
   };
 
   // ---------------------------------------------------------------------------
@@ -236,7 +237,7 @@ export const CorrelationMatrix = ({
         <AnalysisNoTablesState
           className="flex-1"
           onCancel={handleCancel}
-          onSelect={() => setCurrentView("ImportDataFile")}
+          onSelect={() => navigateToShell("ImportDataFile")}
         />
       ) : (
         <form

@@ -2,11 +2,17 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { DescriptiveStatisticType } from "@/api/model";
 import { GroupStatistics } from "@/components/pages/GroupStatistics";
 import { showMessageDialog } from "@/lib/dialog/message";
-import { useCurrentPageStore } from "@/stores/currentView";
+import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -76,7 +82,7 @@ beforeEach(() => {
   vi.mocked(getEconomiconAppAPI).mockReturnValue(mockApi as never);
   useTableListStore.setState({ tableList: ["sales"] });
   useTableInfosStore.setState({ tableInfos: [], activeTableName: "sales" });
-  useCurrentPageStore.setState({ currentView: "GroupStatistics" });
+  useCurrentPageStore.setState({ currentView: "Workspace" });
   useWorkspaceTabsStore.setState({
     tabs: [
       {
@@ -116,14 +122,16 @@ describe("GroupStatistics", () => {
     await goToStep2(user);
 
     expect(screen.getByText("GroupStatistics.Step2Lead")).toBeInTheDocument();
-    expect(screen.getByTestId("group-statistics-role-matrix")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("group-statistics-role-matrix"),
+    ).toBeInTheDocument();
 
     await user.click(screen.getByText("Common.Back"));
 
     expect(screen.getByText("GroupStatistics.Step1Lead")).toBeInTheDocument();
   });
 
-  it("成功時は新しいテーブル名を tableList に追加して DataPreview に戻る", async () => {
+  it("成功時は新しいテーブル名を tableList に追加して Workspace に戻る", async () => {
     const user = userEvent.setup();
     mockApi.createGroupStatisticsTable.mockResolvedValue({
       code: "OK",
@@ -140,7 +148,7 @@ describe("GroupStatistics", () => {
     });
 
     expect(useTableListStore.getState().tableList).toContain("grouped_sales");
-    expect(useCurrentPageStore.getState().currentView).toBe("DataPreview");
+    expect(useCurrentPageStore.getState().currentView).toBe("Workspace");
   });
 
   it("newTableName を含む API エラーはフォーム入力名に置換して表示する", async () => {

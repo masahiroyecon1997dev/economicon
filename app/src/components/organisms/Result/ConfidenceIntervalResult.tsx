@@ -3,13 +3,13 @@ import { OutputResultFormat } from "@/api/model/outputResultFormat";
 import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { cn } from "@/lib/utils/helpers";
-import type { ConfidenceIntervalResultEntry } from "@/stores/confidenceIntervalResults";
+import type { ConfidenceIntervalResultData } from "@/types/commonTypes";
 import { Check, Clipboard, FileDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 type ConfidenceIntervalResultProps = {
-  result: ConfidenceIntervalResultEntry;
+  result: ConfidenceIntervalResultData;
 };
 
 function formatNumber(value: unknown): string {

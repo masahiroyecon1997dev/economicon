@@ -20,13 +20,13 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils/helpers";
-import type { TalbeDataRowType } from "@/types/commonTypes";
+import type { TableDataRowType } from "@/types/commonTypes";
 
 const OVERSCAN_COUNT = 15;
 const PREFETCH_BUFFER = 50;
 
 type VirtualTableCompilerBoundaryProps = {
-  columns: ColumnDef<TalbeDataRowType>[];
+  columns: ColumnDef<TableDataRowType>[];
   totalRows: number;
   columnSizing: ColumnSizingState;
   setColumnSizing: Dispatch<SetStateAction<ColumnSizingState>>;
@@ -58,7 +58,7 @@ export const VirtualTableCompilerBoundary = ({
   const parentRef = useRef<HTMLDivElement>(null);
 
   const virtualData = useMemo(
-    () => new Array(totalRows).fill(null) as TalbeDataRowType[],
+    () => new Array(totalRows).fill(null) as TableDataRowType[],
     [totalRows],
   );
 

@@ -10,10 +10,13 @@ import type {
   AddLagLeadColumnRequestBody,
   AddPanelTimeColumnRequestBody,
   AddSimulationColumnRequestBody,
+  AsymptoticNormalityRequestBody,
   CalculateColumnRequestBody,
   CastColumnRequestBody,
   ConfidenceIntervalOutputRequest,
   ConfidenceIntervalRequestBody,
+  ConfidenceIntervalSimRequestBody,
+  ConsistencyRequestBody,
   CreateCorrelationTableRequestBody,
   CreateGroupStatisticsTableRequestBody,
   CreateJoinTableRequestBody,
@@ -24,6 +27,7 @@ import type {
   DeleteTableRequestBody,
   DescriptiveStatisticsOutputRequest,
   DescriptiveStatisticsRequestBody,
+  DistributionPreviewRequestBody,
   DuplicateTableRequestBody,
   ExportFileRequestBody,
   FetchDataToArrowRequestBody,
@@ -48,11 +52,14 @@ import type {
   SuccessResponseAddPanelTimeColumnResult,
   SuccessResponseAddSimulationColumnResult,
   SuccessResponseAnalysisResultDetail,
+  SuccessResponseAsymptoticNormalityResult,
   SuccessResponseCalculateColumnResult,
   SuccessResponseCastColumnResult,
   SuccessResponseClearAllAnalysisResultsResult,
   SuccessResponseClearTablesResult,
   SuccessResponseConfidenceIntervalResult,
+  SuccessResponseConfidenceIntervalSimResult,
+  SuccessResponseConsistencyResult,
   SuccessResponseCreateCorrelationTableResult,
   SuccessResponseCreateGroupStatisticsTableResult,
   SuccessResponseCreateJoinTableResult,
@@ -63,6 +70,7 @@ import type {
   SuccessResponseDeleteColumnResult,
   SuccessResponseDeleteTableResult,
   SuccessResponseDescriptiveStatisticsResult,
+  SuccessResponseDistributionPreviewResult,
   SuccessResponseDuplicateTableResult,
   SuccessResponseExportFileResult,
   SuccessResponseFetchDataToJsonResult,
@@ -83,9 +91,11 @@ import type {
   SuccessResponseSortColumnsResult,
   SuccessResponseStatisticalTestResult,
   SuccessResponseTransformColumnResult,
+  SuccessResponseUnbiasednessResult,
   SuccessResponseUpdateAnalysisResultResult,
   SuccessResponseUpdateSettingsResult,
   TransformColumnRequestBody,
+  UnbiasednessRequestBody,
   UpdateAnalysisResultRequest,
   UpdateSettingsRequestBody
 } from './model';
@@ -715,7 +725,7 @@ const fetchDataToArrow = (
 /**
  * プロット用列指定データを Apache Arrow IPC 形式で返すエンドポイント
 
-グラフ描画に必要な列のみを取得することで、メモリ・転送量を削減する。
+プロット描画に必要な列のみを取得することで、メモリ・転送量を削減する。
 JSON 包装なしで Arrow IPC 形式生バイナリを直接返す。
 メタデータ（tableName / columnNames / totalRows）は
 Arrow スキーマメタデータに埋め込む。
@@ -1418,7 +1428,94 @@ const shutdown = (
       options);
     }
 
-return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,fetchPlotData,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,updateAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,createGroupStatisticsTable,getSettings,updateSettings,shutdown}};
+/**
+ * 分布プレビュー計算エンドポイント
+ * @summary Preview Distribution
+ */
+const previewDistribution = (
+    distributionPreviewRequestBody: DistributionPreviewRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseDistributionPreviewResult>>,) => {
+      return customInstance<SuccessResponseDistributionPreviewResult>(
+      {url: `/api/distribution/preview`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: distributionPreviewRequestBody
+    },
+      options);
+    }
+
+/**
+ * 信頼区間シミュレーション
+
+M 回サンプリングを行い、各試行の信頼区間と
+真の値との包含関係を返す。
+ * @summary Confidence Interval Sim
+ */
+const confidenceIntervalSim = (
+    confidenceIntervalSimRequestBody: ConfidenceIntervalSimRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseConfidenceIntervalSimResult>>,) => {
+      return customInstance<SuccessResponseConfidenceIntervalSimResult>(
+      {url: `/api/simulation/confidence-interval`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: confidenceIntervalSimRequestBody
+    },
+      options);
+    }
+
+/**
+ * 漸近正規性シミュレーション
+
+同一パラメータで num_simulations 回 OLS を行い、
+β̂ の標本分布と漸近分布の理論値を返す。
+ * @summary Asymptotic Normality
+ */
+const asymptoticNormality = (
+    asymptoticNormalityRequestBody: AsymptoticNormalityRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseAsymptoticNormalityResult>>,) => {
+      return customInstance<SuccessResponseAsymptoticNormalityResult>(
+      {url: `/api/simulation/asymptotic-normality`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: asymptoticNormalityRequestBody
+    },
+      options);
+    }
+
+/**
+ * 一致性シミュレーション
+
+n=2 から n_max まで逐次 OLS を行い、
+サンプルサイズ増加に伴う β̂ の収束軌跡を返す。
+ * @summary Consistency
+ */
+const consistency = (
+    consistencyRequestBody: ConsistencyRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseConsistencyResult>>,) => {
+      return customInstance<SuccessResponseConsistencyResult>(
+      {url: `/api/simulation/consistency`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: consistencyRequestBody
+    },
+      options);
+    }
+
+/**
+ * 不偏性シミュレーション
+
+同一母集団から num_trials 回独立にサンプリングして
+OLS を行い、β̂ の標本分布を返す。
+ * @summary Unbiasedness
+ */
+const unbiasedness = (
+    unbiasednessRequestBody: UnbiasednessRequestBody,
+ options?: SecondParameter<typeof customInstance<SuccessResponseUnbiasednessResult>>,) => {
+      return customInstance<SuccessResponseUnbiasednessResult>(
+      {url: `/api/simulation/unbiasedness`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: unbiasednessRequestBody
+    },
+      options);
+    }
+
+return {healthCheck,addDummyColumn,deleteColumn,renameColumn,addLagLeadColumn,addSimulationColumn,calculateColumn,transformColumn,getColumnList,sortColumns,castColumn,moveColumn,addPanelTimeColumn,createJoinTable,createUnionTable,createSimulationDataTable,deleteTable,duplicateTable,renameTable,getTableList,clearTables,fetchDataToJson,fetchDataToArrow,fetchPlotData,filterTable,regression,addDiagnosticColumns,heckmanRegression,didAnalysis,rddAnalysis,getAllAnalysisResults,clearAllAnalysisResults,getAnalysisResult,updateAnalysisResult,deleteAnalysisResult,outputResult,importFile,exportFile,confidenceInterval,descriptiveStatistics,createCorrelationTable,statisticalTest,createGroupStatisticsTable,getSettings,updateSettings,shutdown,previewDistribution,confidenceIntervalSim,asymptoticNormality,consistency,unbiasedness}};
 export type HealthCheckResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['healthCheck']>>>
 export type AddDummyColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['addDummyColumn']>>>
 export type DeleteColumnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['deleteColumn']>>>
@@ -1465,3 +1562,8 @@ export type CreateGroupStatisticsTableResult = NonNullable<Awaited<ReturnType<Re
 export type GetSettingsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['getSettings']>>>
 export type UpdateSettingsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['updateSettings']>>>
 export type ShutdownResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['shutdown']>>>
+export type PreviewDistributionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['previewDistribution']>>>
+export type ConfidenceIntervalSimResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['confidenceIntervalSim']>>>
+export type AsymptoticNormalityResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['asymptoticNormality']>>>
+export type ConsistencyResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['consistency']>>>
+export type UnbiasednessResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEconomiconAppAPI>['unbiasedness']>>>

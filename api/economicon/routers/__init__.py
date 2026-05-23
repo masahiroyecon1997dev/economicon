@@ -5,12 +5,14 @@ from economicon.routers import (
     columns,
     data_io,
     did,
+    distribution,
     heckman_regression,
     rdd,
     regressions,
     results,
     settings,
     shutdown,
+    simulation,
     statistics,
     tables,
 )
@@ -30,3 +32,5 @@ api_router.include_router(data_io.router)
 api_router.include_router(statistics.router)
 api_router.include_router(settings.router)
 api_router.include_router(shutdown.router)
+api_router.include_router(distribution.router)
+api_router.include_router(simulation.router)

@@ -3,21 +3,24 @@ import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnal
 import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
+import { AsymptoticNormality } from "@/components/pages/AsymptoticNormality";
 import { Calculation } from "@/components/pages/Calculation";
-import { ChartView } from "@/components/pages/ChartView";
+import { ConfidenceIntervalSim } from "@/components/pages/ConfidenceIntervalSim";
 import { ConfidenceIntervalView } from "@/components/pages/ConfidenceIntervalView";
+import { Consistency } from "@/components/pages/Consistency";
 import { CorrelationMatrix } from "@/components/pages/CorrelationMatrix";
 import { CreateSimulationDataTable } from "@/components/pages/CreateSimulationDataTable";
 import { DescriptiveStatistics } from "@/components/pages/DescriptiveStatistics";
+import { DistributionPreview } from "@/components/pages/DistributionPreview";
 import { GroupStatistics } from "@/components/pages/GroupStatistics";
 import { JoinTable } from "@/components/pages/JoinTable";
+import { PlotView } from "@/components/pages/PlotView";
 import { StatisticalTestView } from "@/components/pages/StatisticalTestView";
+import { Unbiasedness } from "@/components/pages/Unbiasedness";
 import { UnionTable } from "@/components/pages/UnionTable";
-import { isWorkFeatureKey } from "@/constants/workspaceTabs";
 import { showConfirmDialog } from "@/lib/dialog/confirm";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
-import { useCurrentPageStore } from "@/stores/currentView";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import type {
   WorkFeatureKey,
@@ -46,7 +49,7 @@ type StaticWorkFeatureKey = Exclude<
   | "StatisticalTestView"
   | "LinearRegressionForm"
   | "GroupStatistics"
-  | "ChartView"
+  | "PlotView"
 >;
 
 const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
@@ -55,16 +58,11 @@ const WORK_TAB_COMPONENTS: Record<StaticWorkFeatureKey, React.ReactElement> = {
   CreateSimulationDataTable: <CreateSimulationDataTable />,
   CalculationView: <Calculation />,
   ConfidenceIntervalView: <ConfidenceIntervalView />,
-};
-
-const findLastNonWorkTab = (tabs: WorkspaceTab[], excludedId: string) => {
-  for (let index = tabs.length - 1; index >= 0; index -= 1) {
-    const tab = tabs[index];
-    if (tab.id !== excludedId && tab.kind !== "work") {
-      return tab;
-    }
-  }
-  return null;
+  DistributionPreview: <DistributionPreview />,
+  ConfidenceIntervalSim: <ConfidenceIntervalSim />,
+  AsymptoticNormality: <AsymptoticNormality />,
+  Consistency: <Consistency />,
+  Unbiasedness: <Unbiasedness />,
 };
 
 const isCorrelationMatrixWorkTab = (
@@ -95,17 +93,15 @@ const isGroupStatisticsWorkTab = (
   id: "work:GroupStatistics";
 } => tab.featureKey === "GroupStatistics";
 
-const isChartViewWorkTab = (
+const isPlotViewWorkTab = (
   tab: WorkspaceWorkTab,
 ): tab is WorkspaceWorkTab & {
-  featureKey: "ChartView";
-  id: "work:ChartView";
-} => tab.featureKey === "ChartView";
+  featureKey: "PlotView";
+  id: "work:PlotView";
+} => tab.featureKey === "PlotView";
 
 export const WorkspaceSurface = () => {
   const { t } = useTranslation();
-  const currentView = useCurrentPageStore((state) => state.currentView);
-  const setCurrentView = useCurrentPageStore((state) => state.setCurrentView);
   const tableInfos = useTableInfosStore((state) => state.tableInfos);
   const activeTableName = useTableInfosStore((state) => state.activeTableName);
   const activateTableInfo = useTableInfosStore(
@@ -121,6 +117,9 @@ export const WorkspaceSurface = () => {
   const closeTab = useWorkspaceTabsStore((state) => state.closeTab);
   const moveTab = useWorkspaceTabsStore((state) => state.moveTab);
   const openDataTab = useWorkspaceTabsStore((state) => state.openDataTab);
+  const closeActiveWorkTab = useWorkspaceTabsStore(
+    (state) => state.closeActiveWorkTab,
+  );
   const syncDataTabs = useWorkspaceTabsStore((state) => state.syncDataTabs);
   const pruneMissingDataTabs = useWorkspaceTabsStore(
     (state) => state.pruneMissingDataTabs,
@@ -134,8 +133,6 @@ export const WorkspaceSurface = () => {
   );
   const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<TabDropTarget | null>(null);
-  const previousViewRef = useRef(currentView);
-  const suppressWorkTabCleanupRef = useRef(false);
   const workTabContainerRef = useRef<HTMLDivElement | null>(null);
   const pointerDragRef = useRef<{
     tabId: string;
@@ -159,45 +156,6 @@ export const WorkspaceSurface = () => {
       activeTab?.kind !== "data",
     );
   }, [activeTab?.kind, activeTableName, syncDataTabs, tableInfos]);
-
-  useEffect(() => {
-    const previousView = previousViewRef.current;
-    previousViewRef.current = currentView;
-
-    if (suppressWorkTabCleanupRef.current) {
-      suppressWorkTabCleanupRef.current = false;
-      return;
-    }
-
-    if (
-      activeTab?.kind !== "work" ||
-      currentView !== "DataPreview" ||
-      !isWorkFeatureKey(previousView)
-    ) {
-      return;
-    }
-
-    const fallbackTab = findLastNonWorkTab(tabs, activeTab.id);
-    if (fallbackTab) {
-      activateTab(fallbackTab.id);
-      if (fallbackTab.kind === "data") {
-        activateTableInfo(fallbackTab.tableName);
-      } else {
-        setActiveResult(fallbackTab.resultId, fallbackTab.detail);
-      }
-      return;
-    }
-
-    closeTab(activeTab.id);
-  }, [
-    activateTab,
-    activateTableInfo,
-    activeTab,
-    closeTab,
-    currentView,
-    setActiveResult,
-    tabs,
-  ]);
 
   useEffect(() => {
     if (activeTab?.kind !== "work") return;
@@ -229,15 +187,12 @@ export const WorkspaceSurface = () => {
     activateTab(tab.id);
     if (tab.kind === "data") {
       activateTableInfo(tab.tableName);
-      setCurrentView("DataPreview");
       return;
     }
     if (tab.kind === "result") {
       setActiveResult(tab.resultId, tab.detail);
-      setCurrentView("DataPreview");
       return;
     }
-    setCurrentView(tab.featureKey);
   };
 
   const handleActivateTab = (tabId: string) => {
@@ -258,10 +213,6 @@ export const WorkspaceSurface = () => {
       if (!confirmed) return;
     }
 
-    if (tab.kind === "work" && activeTabId === tabId) {
-      suppressWorkTabCleanupRef.current = true;
-    }
-
     closeTab(tabId);
     if (tab.kind === "data") {
       removeTableInfo(tab.tableName);
@@ -270,9 +221,6 @@ export const WorkspaceSurface = () => {
     if (tab.kind === "result") {
       setActiveResult(null, null);
       return;
-    }
-    if (activeTabId === tabId) {
-      setCurrentView("DataPreview");
     }
   };
 
@@ -361,8 +309,8 @@ export const WorkspaceSurface = () => {
         <CorrelationMatrix
           workTabId={tab.id}
           onSuccess={(tableName) => {
+            closeActiveWorkTab();
             openDataTab(tableName);
-            setCurrentView("DataPreview");
           }}
           onCancel={() => void handleCloseTab(tab.id)}
         />
@@ -392,17 +340,17 @@ export const WorkspaceSurface = () => {
         <GroupStatistics
           workTabId={tab.id}
           onSuccess={(tableName) => {
+            closeActiveWorkTab();
             openDataTab(tableName);
-            setCurrentView("DataPreview");
           }}
           onCancel={() => void handleCloseTab(tab.id)}
         />
       );
     }
 
-    if (isChartViewWorkTab(tab)) {
+    if (isPlotViewWorkTab(tab)) {
       return (
-        <ChartView
+        <PlotView
           workTabId={tab.id}
           onCancel={() => void handleCloseTab(tab.id)}
         />
