@@ -72,3 +72,39 @@ updates:
       - "rust"
     commit-message:
       prefix: "deps"
+
+  - package-ecosystem: "npm"
+    directory: "/video/playwright"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "Asia/Tokyo"
+    cooldown:
+      default-days: 10
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "video"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+
+  - package-ecosystem: "npm"
+    directory: "/video/remotion"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:30"
+      timezone: "Asia/Tokyo"
+    cooldown:
+      default-days: 10
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "video"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"

@@ -91,6 +91,66 @@ jobs:
         working-directory: ./app/src-tauri
         run: cargo audit
 
+  video-playwright-audit:
+    name: Video Playwright Dependency Check (pnpm audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24.12.0
+          cache: "pnpm"
+          cache-dependency-path: "video/playwright/pnpm-lock.yaml"
+
+      - name: Install Video Playwright dependencies
+        working-directory: ./video/playwright
+        run: pnpm install --frozen-lockfile
+
+      - name: Video Playwright Dependency Check (pnpm audit)
+        working-directory: ./video/playwright
+        run: pnpm audit --audit-level high
+
+  video-remotion-audit:
+    name: Video Remotion Dependency Check (pnpm audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24.12.0
+          cache: "pnpm"
+          cache-dependency-path: "video/remotion/pnpm-lock.yaml"
+
+      - name: Install Video Remotion dependencies
+        working-directory: ./video/remotion
+        run: pnpm install --frozen-lockfile
+
+      - name: Video Remotion Dependency Check (pnpm audit)
+        working-directory: ./video/remotion
+        run: pnpm audit --audit-level high
+
   supply-chain-freshness-check:
     name: Supply Chain Freshness Check (新規パッケージ日齢確認)
     runs-on: ubuntu-latest
