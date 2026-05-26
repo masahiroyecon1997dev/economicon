@@ -1,0 +1,15 @@
+{
+  "C09": {
+    "title": "Descriptive Statistics",
+    "titleSubtitle": "Understand your data distribution at a glance",
+    "steps": [
+      "After importing data, click \"Basic Analysis\" in the header",
+      "Select \"Descriptive Statistics\"",
+      "Check the columns you want to analyze",
+      "Select the statistics you need (mean, median, etc.)",
+      "Click \"Run\" to see the results",
+      "Results are saved in the \"Results\" tab on the left panel"
+    ],
+    "ending": "Next: Group Statistics"
+  }
+}

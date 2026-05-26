@@ -1,0 +1,23 @@
+{
+  "name": "video-remotion",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio src/Root.tsx",
+    "render:c09:ja": "remotion render src/Root.tsx C09DescriptiveStatistics ../output/ja/c09-descriptive-statistics-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c09:en": "remotion render src/Root.tsx C09DescriptiveStatistics ../output/en/c09-descriptive-statistics-en.mp4 --props={\"lang\":\"en\"}"
+  },
+  "dependencies": {
+    "@remotion/google-fonts": "4.0.457",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "remotion": "4.0.457"
+  },
+  "devDependencies": {
+    "@remotion/cli": "4.0.457",
+    "@remotion/eslint-plugin": "4.0.457",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "typescript": "6.0.3"
+  }
+}

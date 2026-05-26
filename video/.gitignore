@@ -1,0 +1,12 @@
+# Playwright 収録済みクリップ・スクリーンショット
+playwright/captured/
+
+# Remotion レンダリング済み MP4
+output/
+
+# 依存パッケージ
+playwright/node_modules/
+remotion/node_modules/
+
+# TypeScript ビルドキャッシュ
+**/.tsbuildinfo
