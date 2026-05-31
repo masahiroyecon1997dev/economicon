@@ -86,7 +86,7 @@ export const C19DistributionPreview: React.FC<C19Props> = ({
     <AbsoluteFill>
       {/* TitleCard */}
       <Sequence durationInFrames={TITLE_FRAMES}>
-        <TitleCard title={t.title} subtitle={t.titleSubtitle} />
+        <TitleCard title={t.title} subtitle={t.titleSubtitle} lang={lang} />
       </Sequence>
 
       {/* 収録映像 */}
@@ -95,7 +95,12 @@ export const C19DistributionPreview: React.FC<C19Props> = ({
           <FrameSequence sceneId="c19" meta={_meta} />
         ) : (
           <AbsoluteFill
-            style={{ background: "#000", color: "#fff", justifyContent: "center", alignItems: "center" }}
+            style={{
+              background: "#000",
+              color: "#fff",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
             <span>収録映像なし（収録後に再レンダリングしてください）</span>
           </AbsoluteFill>
@@ -103,10 +108,16 @@ export const C19DistributionPreview: React.FC<C19Props> = ({
         {_meta?.cues?.map((cue, i) => {
           const startF = Math.round((cue.timeMs / 1000) * FPS);
           const nextMs = _meta.cues[i + 1]?.timeMs ?? _meta.durationMs;
-          const dur = Math.max(30, Math.round(((nextMs - cue.timeMs) / 1000) * FPS) - 10);
+          const dur = Math.max(
+            30,
+            Math.round(((nextMs - cue.timeMs) / 1000) * FPS) - 10,
+          );
           return (
             <Sequence key={i} from={startF} durationInFrames={dur}>
-              <Subtitle text={lang === "ja" ? cue.textJa : cue.textEn} />
+              <Subtitle
+                text={lang === "ja" ? cue.textJa : cue.textEn}
+                lang={lang}
+              />
             </Sequence>
           );
         })}
@@ -117,7 +128,7 @@ export const C19DistributionPreview: React.FC<C19Props> = ({
         from={TITLE_FRAMES + recordingFrames}
         durationInFrames={ENDING_FRAMES}
       >
-        <Ending message={t.ending} />
+        <Ending lang={lang} note={t.ending} />
       </Sequence>
     </AbsoluteFill>
   );

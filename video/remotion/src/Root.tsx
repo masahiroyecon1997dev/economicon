@@ -59,10 +59,7 @@ import {
   C13HypothesisTest,
   calculateC13Metadata,
 } from "./compositions/C13HypothesisTest";
-import {
-  C18PlotView,
-  calculateC18Metadata,
-} from "./compositions/C18PlotView";
+import { C18PlotView, calculateC18Metadata } from "./compositions/C18PlotView";
 import {
   C19DistributionPreview,
   calculateC19Metadata,
