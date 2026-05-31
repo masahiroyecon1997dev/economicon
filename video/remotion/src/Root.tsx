@@ -59,6 +59,30 @@ import {
   C13HypothesisTest,
   calculateC13Metadata,
 } from "./compositions/C13HypothesisTest";
+import {
+  C18PlotView,
+  calculateC18Metadata,
+} from "./compositions/C18PlotView";
+import {
+  C19DistributionPreview,
+  calculateC19Metadata,
+} from "./compositions/C19DistributionPreview";
+import {
+  C20SimulationData,
+  calculateC20Metadata,
+} from "./compositions/C20SimulationData";
+import {
+  C21OutputResult,
+  calculateC21Metadata,
+} from "./compositions/C21OutputResult";
+import {
+  C22CiSimulation,
+  calculateC22Metadata,
+} from "./compositions/C22CiSimulation";
+import {
+  C23OlsSimulation,
+  calculateC23Metadata,
+} from "./compositions/C23OlsSimulation";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -225,6 +249,78 @@ export const RemotionRoot: React.FC = () => {
         component={C13HypothesisTest}
         calculateMetadata={calculateC13Metadata}
         durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-18 散布図・ヒストグラムの作成 */}
+      <Composition
+        id="C18PlotView"
+        component={C18PlotView}
+        calculateMetadata={calculateC18Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-19 確率分布プレビュー */}
+      <Composition
+        id="C19DistributionPreview"
+        component={C19DistributionPreview}
+        calculateMetadata={calculateC19Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-20 シミュレーションデータ生成 */}
+      <Composition
+        id="C20SimulationData"
+        component={C20SimulationData}
+        calculateMetadata={calculateC20Metadata}
+        durationInFrames={1920}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-21 分析結果の出力（LaTeX/Markdown） */}
+      <Composition
+        id="C21OutputResult"
+        component={C21OutputResult}
+        calculateMetadata={calculateC21Metadata}
+        durationInFrames={1920}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-22 信頼区間シミュレーション */}
+      <Composition
+        id="C22CiSimulation"
+        component={C22CiSimulation}
+        calculateMetadata={calculateC22Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-23 OLS 推定量シミュレーション */}
+      <Composition
+        id="C23OlsSimulation"
+        component={C23OlsSimulation}
+        calculateMetadata={calculateC23Metadata}
+        durationInFrames={1920}
         fps={30}
         width={1920}
         height={1080}

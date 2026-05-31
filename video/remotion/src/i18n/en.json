@@ -98,5 +98,35 @@
     "title": "Hypothesis Testing",
     "titleSubtitle": "Run t-tests, z-tests, and F-tests",
     "ending": "Next: OLS Linear Regression"
+  },
+  "C18": {
+    "title": "Scatter Plots & Histograms",
+    "titleSubtitle": "Visualize your data with charts",
+    "ending": "Next: Distribution Preview"
+  },
+  "C19": {
+    "title": "Distribution Preview",
+    "titleSubtitle": "Visualize the shape of probability distributions",
+    "ending": "Next: Simulation Data Generation"
+  },
+  "C20": {
+    "title": "Simulation Data Generation",
+    "titleSubtitle": "Generate synthetic data from probability distributions",
+    "ending": "Next: Exporting Results"
+  },
+  "C21": {
+    "title": "Exporting Results",
+    "titleSubtitle": "Export analysis results as LaTeX or Markdown",
+    "ending": "Next: Confidence Interval Simulation"
+  },
+  "C22": {
+    "title": "Confidence Interval Simulation",
+    "titleSubtitle": "Understand CI properties through repeated sampling",
+    "ending": "Next: OLS Estimator Simulation"
+  },
+  "C23": {
+    "title": "OLS Estimator Simulation",
+    "titleSubtitle": "Visualize asymptotic normality, consistency, and unbiasedness",
+    "ending": "Back to video list"
   }
 }

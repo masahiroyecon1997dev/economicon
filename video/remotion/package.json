@@ -31,7 +31,19 @@
     "render:c12:ja": "remotion render src/Root.tsx C12ConfidenceInterval ../output/ja/c12-confidence-interval-ja.mp4 --props={\"lang\":\"ja\"}",
     "render:c12:en": "remotion render src/Root.tsx C12ConfidenceInterval ../output/en/c12-confidence-interval-en.mp4 --props={\"lang\":\"en\"}",
     "render:c13:ja": "remotion render src/Root.tsx C13HypothesisTest ../output/ja/c13-hypothesis-test-ja.mp4 --props={\"lang\":\"ja\"}",
-    "render:c13:en": "remotion render src/Root.tsx C13HypothesisTest ../output/en/c13-hypothesis-test-en.mp4 --props={\"lang\":\"en\"}"
+    "render:c13:en": "remotion render src/Root.tsx C13HypothesisTest ../output/en/c13-hypothesis-test-en.mp4 --props={\"lang\":\"en\"}",
+    "render:c18:ja": "remotion render src/Root.tsx C18PlotView ../output/ja/c18-plot-view-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c18:en": "remotion render src/Root.tsx C18PlotView ../output/en/c18-plot-view-en.mp4 --props={\"lang\":\"en\"}",
+    "render:c19:ja": "remotion render src/Root.tsx C19DistributionPreview ../output/ja/c19-distribution-preview-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c19:en": "remotion render src/Root.tsx C19DistributionPreview ../output/en/c19-distribution-preview-en.mp4 --props={\"lang\":\"en\"}",
+    "render:c20:ja": "remotion render src/Root.tsx C20SimulationData ../output/ja/c20-simulation-data-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c20:en": "remotion render src/Root.tsx C20SimulationData ../output/en/c20-simulation-data-en.mp4 --props={\"lang\":\"en\"}",
+    "render:c21:ja": "remotion render src/Root.tsx C21OutputResult ../output/ja/c21-output-result-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c21:en": "remotion render src/Root.tsx C21OutputResult ../output/en/c21-output-result-en.mp4 --props={\"lang\":\"en\"}",
+    "render:c22:ja": "remotion render src/Root.tsx C22CiSimulation ../output/ja/c22-ci-simulation-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c22:en": "remotion render src/Root.tsx C22CiSimulation ../output/en/c22-ci-simulation-en.mp4 --props={\"lang\":\"en\"}",
+    "render:c23:ja": "remotion render src/Root.tsx C23OlsSimulation ../output/ja/c23-ols-simulation-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c23:en": "remotion render src/Root.tsx C23OlsSimulation ../output/en/c23-ols-simulation-en.mp4 --props={\"lang\":\"en\"}"
   },
   "dependencies": {
     "@remotion/google-fonts": "4.0.457",

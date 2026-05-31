@@ -17,7 +17,13 @@
     "capture:c10": "tsx scenes/c10-group-statistics.ts",
     "capture:c11": "tsx scenes/c11-correlation-matrix.ts",
     "capture:c12": "tsx scenes/c12-confidence-interval.ts",
-    "capture:c13": "tsx scenes/c13-hypothesis-test.ts"
+    "capture:c13": "tsx scenes/c13-hypothesis-test.ts",
+    "capture:c18": "tsx scenes/c18-plot-view.ts",
+    "capture:c19": "tsx scenes/c19-distribution-preview.ts",
+    "capture:c20": "tsx scenes/c20-simulation-data.ts",
+    "capture:c21": "tsx scenes/c21-output-result.ts",
+    "capture:c22": "tsx scenes/c22-ci-simulation.ts",
+    "capture:c23": "tsx scenes/c23-ols-simulation.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.60.0",
