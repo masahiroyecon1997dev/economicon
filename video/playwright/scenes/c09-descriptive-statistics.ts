@@ -18,6 +18,7 @@ import path from "node:path";
 
 import {
   connectToApp,
+  highlightElements,
   humanCheck,
   humanClick,
   Recorder,
@@ -31,10 +32,17 @@ import {
 const SCENE_ID = "c09";
 const FILE_NAME = "grunfeld.parquet";
 const TABLE_NAME = "grunfeld";
-/** チェックする列（grunfeld.parquet の数値列） */
+/** 結果テーブルで強調表示する列（初期チェック済みのため外さない） */
 const COLUMNS = ["invest", "value", "capital"];
-/** 統計量チェックボックス名パターン */
-const STAT_PATTERNS: RegExp[] = [/^平均$|^Mean$/i, /^標準偏差$|^Std Dev$/i];
+/** 初期チェックを外す列（動画では invest/value/capital のみ残す） */
+const UNCHECK_COLUMNS = ["firm", "year"];
+/** 初期チェックを外す統計量パターン（動画では 平均/標準偏差 のみ残す） */
+const UNCHECK_STAT_PATTERNS: RegExp[] = [
+  /^有効サンプル数$|^N$|^Count$/i,
+  /^中央値$|^Median$/i,
+  /^最小値$|^Min(imum)?$/i,
+  /^最大値$|^Max(imum)?$/i,
+];
 
 // ---------------------------------------------------------------------------
 // ヘルパー
@@ -175,30 +183,30 @@ async function main(): Promise<void> {
       .waitFor({ state: "hidden", timeout: 15_000 })
       .catch(() => {});
 
-    // ── step-C: 列を選択 ─────────────────────────────────────────────────
+    // ── step-C: 不要な列のチェックを外す ────────────────────────────────
     rec.addCue(
-      "分析する列にチェックを入れます",
-      "Check the columns to analyze",
+      "invest・value・capital の列だけを選択します（firm・year のチェックを外します）",
+      "Keep only invest, value, and capital — uncheck firm and year",
     );
 
-    for (const col of COLUMNS) {
+    for (const col of UNCHECK_COLUMNS) {
       const checkbox = page.getByRole("checkbox", { name: col });
       if (await checkbox.isVisible()) {
-        await humanCheck(page, checkbox, true, 350);
+        await humanCheck(page, checkbox, false, 350);
       }
     }
     await page.waitForTimeout(500);
 
-    // ── step-D: 統計量を選択 ─────────────────────────────────────────────
+    // ── step-D: 不要な統計量のチェックを外す ────────────────────────────
     rec.addCue(
-      "計算する統計量を選択します",
-      "Select the statistics to compute",
+      "平均と標準偏差だけを残し、他の統計量のチェックを外します",
+      "Keep only mean and std dev — uncheck the other statistics",
     );
 
-    for (const pattern of STAT_PATTERNS) {
+    for (const pattern of UNCHECK_STAT_PATTERNS) {
       const checkbox = page.getByRole("checkbox", { name: pattern });
       if (await checkbox.isVisible()) {
-        await humanCheck(page, checkbox, true, 350);
+        await humanCheck(page, checkbox, false, 350);
       }
     }
     await page.waitForTimeout(500);
@@ -219,12 +227,50 @@ async function main(): Promise<void> {
       .getByRole("table")
       .waitFor({ state: "visible", timeout: 30_000 });
 
-    // ── step-E: 結果を確認 ───────────────────────────────────────────────
+    // ── step-E: 結果概要 ────────────────────────────────────────────────
     rec.addCue(
       "基本統計量の計算結果が表示されました",
       "Descriptive statistics results are displayed",
     );
-    await page.waitForTimeout(2500);
+    await page.waitForTimeout(2000);
+
+    // ── step-F: 選択した列を強調 ─────────────────────────────────────────
+    rec.addCue(
+      "選択した invest・value・capital の列が結果に表示されています",
+      "The selected columns invest, value, and capital appear in the results",
+    );
+    const resultTable = page.getByRole("table");
+    const colLocators = COLUMNS.map((col) =>
+      resultTable
+        .locator("th, td")
+        .filter({ hasText: new RegExp(`^${col}$`) })
+        .first(),
+    );
+    await highlightElements(page, colLocators, 3000);
+
+    // ── step-G: 選択した統計量行を強調 ───────────────────────────────────
+    rec.addCue(
+      "平均と標準偏差の行が選択した統計量に対応しています",
+      "The mean and std dev rows correspond to the selected statistics",
+    );
+    const statLocators = [
+      resultTable
+        .locator("th, td")
+        .filter({ hasText: /^(平均|Mean)$/ })
+        .first(),
+      resultTable
+        .locator("th, td")
+        .filter({ hasText: /^(標準偏差|Std Dev)$/ })
+        .first(),
+    ];
+    await highlightElements(page, statLocators, 3000);
+
+    // ── step-H: まとめ ────────────────────────────────────────────────────
+    rec.addCue(
+      "列と統計量の組み合わせが一覧で確認できます",
+      "View all column-statistic combinations at a glance",
+    );
+    await page.waitForTimeout(3000);
 
     // ── 録画停止 ──────────────────────────────────────────────────────────
     const info = await rec.stop();

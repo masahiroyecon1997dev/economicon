@@ -310,6 +310,84 @@ export async function humanCheck(
   await humanClick(page, locator, afterMs);
 }
 
+/**
+ * 複数要素を指定時間だけハイライト枠で囲む。
+ * 結果テーブルの列ヘッダーや統計量行を強調表示するときに使用。
+ *
+ * @param page       Playwright Page
+ * @param locators   ハイライト対象のロケーター配列
+ * @param durationMs 表示時間 (ms)
+ * @param color      枠の色（CSS color 値）
+ */
+export async function highlightElements(
+  page: Page,
+  locators: Locator[],
+  durationMs = 3000,
+  color = "#ff6b35",
+): Promise<void> {
+  const boxes = await Promise.all(
+    locators.map(async (loc) => {
+      try {
+        await loc.waitFor({ state: "visible", timeout: 5_000 });
+        return await loc.boundingBox();
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  const validBoxes = boxes.filter(
+    (b): b is NonNullable<typeof b> => b !== null,
+  );
+
+  if (validBoxes.length > 0) {
+    await page.evaluate(
+      ({
+        boxList,
+        dur,
+        col,
+      }: {
+        boxList: Array<{ x: number; y: number; width: number; height: number }>;
+        dur: number;
+        col: string;
+      }) => {
+        const ids: string[] = [];
+        for (const box of boxList) {
+          const el = document.createElement("div");
+          const id = `__ec_hl_${Math.random().toString(36).slice(2)}__`;
+          el.id = id;
+          el.style.cssText = [
+            "position:fixed",
+            `left:${box.x - 2}px`,
+            `top:${box.y - 2}px`,
+            `width:${box.width + 4}px`,
+            `height:${box.height + 4}px`,
+            `box-shadow:0 0 0 3px ${col}`,
+            "border-radius:3px",
+            "pointer-events:none",
+            "z-index:2147483646",
+            "transition:opacity 0.4s ease",
+          ].join(";");
+          document.body.appendChild(el);
+          ids.push(id);
+        }
+        setTimeout(() => {
+          for (const id of ids) {
+            const el = document.getElementById(id);
+            if (el) {
+              el.style.opacity = "0";
+              setTimeout(() => el.remove(), 400);
+            }
+          }
+        }, dur - 400);
+      },
+      { boxList: validBoxes, dur: durationMs, col: color },
+    );
+  }
+
+  await page.waitForTimeout(durationMs);
+}
+
 // ---------------------------------------------------------------------------
 // DOM インジェクション
 // ---------------------------------------------------------------------------
