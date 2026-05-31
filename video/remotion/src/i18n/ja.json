@@ -46,6 +46,26 @@
     "titleSubtitle": "複数のデータを縦に積み上げる",
     "ending": "次の動画：列フィルタ・型変換"
   },
+  "C05": {
+    "title": "列フィルタと型変換",
+    "titleSubtitle": "列のデータを絞り込み・型を変換する",
+    "ending": "次の動画：変換列・ダミー変数の追加"
+  },
+  "C06": {
+    "title": "変換列・ダミー変数の追加",
+    "titleSubtitle": "列に変換・ダミー変数を追加する",
+    "ending": "次の動画：計算列の追加"
+  },
+  "C07": {
+    "title": "計算列の追加",
+    "titleSubtitle": "数式で新しい列を作成する",
+    "ending": "次の動画：データの保存"
+  },
+  "C08": {
+    "title": "データの保存",
+    "titleSubtitle": "加工済みデータを CSV・Excel・Parquet に保存する",
+    "ending": "次の動画：基本統計量"
+  },
   "C09": {
     "title": "基本統計量",
     "titleSubtitle": "データの分布を瞬時に把握する",

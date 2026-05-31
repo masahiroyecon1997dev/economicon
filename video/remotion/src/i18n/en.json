@@ -46,6 +46,26 @@
     "titleSubtitle": "Stack multiple tables vertically",
     "ending": "Next: Column Filter & Type Cast"
   },
+  "C05": {
+    "title": "Column Filter & Type Cast",
+    "titleSubtitle": "Filter rows and cast column types",
+    "ending": "Next: Transform & Dummy Columns"
+  },
+  "C06": {
+    "title": "Transform & Dummy Columns",
+    "titleSubtitle": "Add transformed and dummy variable columns",
+    "ending": "Next: Calculated Columns"
+  },
+  "C07": {
+    "title": "Calculated Columns",
+    "titleSubtitle": "Create new columns with formulas",
+    "ending": "Next: Saving Data"
+  },
+  "C08": {
+    "title": "Saving Data",
+    "titleSubtitle": "Export your data as CSV, Excel, or Parquet",
+    "ending": "Next: Descriptive Statistics"
+  },
   "C09": {
     "title": "Descriptive Statistics",
     "titleSubtitle": "Understand your data distribution at a glance",

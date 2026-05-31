@@ -9,6 +9,10 @@
     "capture:c02": "tsx scenes/c02-excel-parquet-import.ts",
     "capture:c03": "tsx scenes/c03-join.ts",
     "capture:c04": "tsx scenes/c04-union.ts",
+    "capture:c05": "tsx scenes/c05-column-filter-cast.ts",
+    "capture:c06": "tsx scenes/c06-transform-dummy.ts",
+    "capture:c07": "tsx scenes/c07-calculation.ts",
+    "capture:c08": "tsx scenes/c08-save-data.ts",
     "capture:c09": "tsx scenes/c09-descriptive-statistics.ts"
   },
   "devDependencies": {

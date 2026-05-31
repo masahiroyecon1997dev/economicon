@@ -27,6 +27,19 @@ import {
 import { C03Join, calculateC03Metadata } from "./compositions/C03Join";
 import { C04Union, calculateC04Metadata } from "./compositions/C04Union";
 import {
+  C05ColumnFilterCast,
+  calculateC05Metadata,
+} from "./compositions/C05ColumnFilterCast";
+import {
+  C06TransformDummy,
+  calculateC06Metadata,
+} from "./compositions/C06TransformDummy";
+import {
+  C07Calculation,
+  calculateC07Metadata,
+} from "./compositions/C07Calculation";
+import { C08SaveData, calculateC08Metadata } from "./compositions/C08SaveData";
+import {
   C09DescriptiveStatistics,
   calculateC09Metadata,
 } from "./compositions/C09DescriptiveStatistics";
@@ -88,6 +101,54 @@ export const RemotionRoot: React.FC = () => {
         component={C04Union}
         calculateMetadata={calculateC04Metadata}
         durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-05 列フィルタ・型変換 */}
+      <Composition
+        id="C05ColumnFilterCast"
+        component={C05ColumnFilterCast}
+        calculateMetadata={calculateC05Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-06 変換列・ダミー変数の追加 */}
+      <Composition
+        id="C06TransformDummy"
+        component={C06TransformDummy}
+        calculateMetadata={calculateC06Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-07 計算列の追加 */}
+      <Composition
+        id="C07Calculation"
+        component={C07Calculation}
+        calculateMetadata={calculateC07Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-08 データの保存 */}
+      <Composition
+        id="C08SaveData"
+        component={C08SaveData}
+        calculateMetadata={calculateC08Metadata}
+        durationInFrames={1980}
         fps={30}
         width={1920}
         height={1080}
