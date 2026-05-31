@@ -17,6 +17,16 @@ import {
   calculateA01Metadata,
 } from "./compositions/A01Introduction";
 import {
+  C01CsvImport,
+  calculateC01Metadata,
+} from "./compositions/C01CsvImport";
+import {
+  C02ExcelParquetImport,
+  calculateC02Metadata,
+} from "./compositions/C02ExcelParquetImport";
+import { C03Join, calculateC03Metadata } from "./compositions/C03Join";
+import { C04Union, calculateC04Metadata } from "./compositions/C04Union";
+import {
   C09DescriptiveStatistics,
   calculateC09Metadata,
 } from "./compositions/C09DescriptiveStatistics";
@@ -30,6 +40,54 @@ export const RemotionRoot: React.FC = () => {
         component={A01Introduction}
         calculateMetadata={calculateA01Metadata}
         durationInFrames={1890}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-01 CSV ファイルのインポート */}
+      <Composition
+        id="C01CsvImport"
+        component={C01CsvImport}
+        calculateMetadata={calculateC01Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-02 Excel / Parquet のインポート */}
+      <Composition
+        id="C02ExcelParquetImport"
+        component={C02ExcelParquetImport}
+        calculateMetadata={calculateC02Metadata}
+        durationInFrames={1980}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-03 テーブルの Join */}
+      <Composition
+        id="C03Join"
+        component={C03Join}
+        calculateMetadata={calculateC03Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-04 テーブルの Union */}
+      <Composition
+        id="C04Union"
+        component={C04Union}
+        calculateMetadata={calculateC04Metadata}
+        durationInFrames={1530}
         fps={30}
         width={1920}
         height={1080}

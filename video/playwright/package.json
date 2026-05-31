@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "capture:a01": "tsx scenes/a01-introduction.ts",
+    "capture:c01": "tsx scenes/c01-csv-import.ts",
+    "capture:c02": "tsx scenes/c02-excel-parquet-import.ts",
+    "capture:c03": "tsx scenes/c03-join.ts",
+    "capture:c04": "tsx scenes/c04-union.ts",
     "capture:c09": "tsx scenes/c09-descriptive-statistics.ts"
   },
   "devDependencies": {

@@ -26,6 +26,26 @@
     ],
     "ending": "Watch the feature-specific tutorials in this playlist"
   },
+  "C01": {
+    "title": "Importing CSV Files",
+    "titleSubtitle": "Your first step to loading data",
+    "ending": "Next: Importing Excel & Parquet"
+  },
+  "C02": {
+    "title": "Importing Excel & Parquet",
+    "titleSubtitle": "Load data from multiple formats",
+    "ending": "Next: Table Join"
+  },
+  "C03": {
+    "title": "Table Join",
+    "titleSubtitle": "Combine two tables side by side",
+    "ending": "Next: Table Union"
+  },
+  "C04": {
+    "title": "Table Union",
+    "titleSubtitle": "Stack multiple tables vertically",
+    "ending": "Next: Column Filter & Type Cast"
+  },
   "C09": {
     "title": "Descriptive Statistics",
     "titleSubtitle": "Understand your data distribution at a glance",

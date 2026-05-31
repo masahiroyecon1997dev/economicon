@@ -26,6 +26,26 @@
     ],
     "ending": "各機能の使い方動画もご覧ください"
   },
+  "C01": {
+    "title": "CSV ファイルのインポート",
+    "titleSubtitle": "学習データを取り込む第一歩",
+    "ending": "次の動画：Excel / Parquet のインポート"
+  },
+  "C02": {
+    "title": "Excel / Parquet のインポート",
+    "titleSubtitle": "複数の形式からデータを読み込む",
+    "ending": "次の動画：テーブルの Join（結合）"
+  },
+  "C03": {
+    "title": "テーブルの Join（結合）",
+    "titleSubtitle": "2 つのデータを横に結合する",
+    "ending": "次の動画：テーブルの Union（縦結合）"
+  },
+  "C04": {
+    "title": "テーブルの Union（縦結合）",
+    "titleSubtitle": "複数のデータを縦に積み上げる",
+    "ending": "次の動画：列フィルタ・型変換"
+  },
   "C09": {
     "title": "基本統計量",
     "titleSubtitle": "データの分布を瞬時に把握する",
