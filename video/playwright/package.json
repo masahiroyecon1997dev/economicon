@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "capture:a01": "tsx scenes/a01-introduction.ts",
     "capture:c09": "tsx scenes/c09-descriptive-statistics.ts"
   },
   "devDependencies": {

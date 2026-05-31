@@ -13,6 +13,10 @@
 
 import { Composition, registerRoot } from "remotion";
 import {
+  A01Introduction,
+  calculateA01Metadata,
+} from "./compositions/A01Introduction";
+import {
   C09DescriptiveStatistics,
   calculateC09Metadata,
 } from "./compositions/C09DescriptiveStatistics";
@@ -20,6 +24,18 @@ import {
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      {/* A-01 紹介動画（全体ダイジェスト） */}
+      <Composition
+        id="A01Introduction"
+        component={A01Introduction}
+        calculateMetadata={calculateA01Metadata}
+        durationInFrames={1890}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
       {/* C-09 基本統計量 */}
       <Composition
         id="C09DescriptiveStatistics"

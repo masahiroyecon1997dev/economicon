@@ -1,4 +1,31 @@
 {
+  "A01": {
+    "title": "Economicon",
+    "titleSubtitle": "A desktop analytics tool for economics & econometrics",
+    "problemLines": [
+      "Have you ever felt the gap between an econometrics textbook and real data analysis?",
+      "Economicon is an econometrics tool — learn by doing."
+    ],
+    "problemSolution": "Bridge the gap between theory and practice",
+    "featureHighlightTitle": "6 Key Features",
+    "featureLabels": [
+      "Data Import",
+      "Statistical Analysis",
+      "Linear Regression",
+      "Visualization",
+      "Export Results",
+      "Simulation"
+    ],
+    "featureDescs": [
+      "CSV / Excel / Parquet",
+      "Descriptive stats & correlation",
+      "OLS with HAC robust SE",
+      "Scatter plots & histograms",
+      "LaTeX / Markdown",
+      "Asymptotic properties of estimators"
+    ],
+    "ending": "Watch the feature-specific tutorials in this playlist"
+  },
   "C09": {
     "title": "Descriptive Statistics",
     "titleSubtitle": "Understand your data distribution at a glance",

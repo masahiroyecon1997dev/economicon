@@ -1,4 +1,31 @@
 {
+  "A01": {
+    "title": "Economicon",
+    "titleSubtitle": "経済学・計量経済学のためのデスクトップ分析ツール",
+    "problemLines": [
+      "計量経済学のテキストと実データ分析のギャップを感じたことはありませんか？",
+      "Economicon は使いながら学べる計量経済分析ツールです"
+    ],
+    "problemSolution": "テキストと実践の橋渡しに",
+    "featureHighlightTitle": "6 つの主要機能",
+    "featureLabels": [
+      "データ取り込み",
+      "統計分析",
+      "線形回帰",
+      "可視化",
+      "結果出力",
+      "シミュレーション"
+    ],
+    "featureDescs": [
+      "CSV / Excel / Parquet",
+      "基本統計量・相関行列",
+      "OLS・HAC 頑健標準誤差",
+      "散布図・ヒストグラム",
+      "LaTeX / Markdown",
+      "推定量の漸近特性"
+    ],
+    "ending": "各機能の使い方動画もご覧ください"
+  },
   "C09": {
     "title": "基本統計量",
     "titleSubtitle": "データの分布を瞬時に把握する",
