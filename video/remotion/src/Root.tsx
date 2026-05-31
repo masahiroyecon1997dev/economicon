@@ -11,10 +11,10 @@
  *   output file    : c09-descriptive-statistics-{lang}.mp4
  */
 
-import { Composition } from "remotion";
+import { Composition, registerRoot } from "remotion";
 import {
   C09DescriptiveStatistics,
-  C09_TOTAL_FRAMES,
+  calculateC09Metadata,
 } from "./compositions/C09DescriptiveStatistics";
 
 export const RemotionRoot: React.FC = () => {
@@ -24,7 +24,8 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="C09DescriptiveStatistics"
         component={C09DescriptiveStatistics}
-        durationInFrames={C09_TOTAL_FRAMES}
+        calculateMetadata={calculateC09Metadata}
+        durationInFrames={300}
         fps={30}
         width={1920}
         height={1080}
@@ -33,3 +34,5 @@ export const RemotionRoot: React.FC = () => {
     </>
   );
 };
+
+registerRoot(RemotionRoot);

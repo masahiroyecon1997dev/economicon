@@ -1,5 +1,5 @@
 /**
- * C-09 基本統計量 — Playwright キャプチャスクリプト
+ * C-09 基本統計量 — Playwright 動画収録スクリプト
  *
  * 実行前提:
  *   - VS Code タスク「Economicon: App (Debug Port)」でアプリが起動済みであること
@@ -10,14 +10,17 @@
  *   pnpm capture:c09
  *
  * 出力:
- *   captured/c09/step-01.png … step-06.png
+ *   captured/c09/frames/0001.jpg … NNNN.jpg
+ *   captured/c09/meta.json
  */
 
 import path from "node:path";
 
 import {
-  captureStep,
   connectToApp,
+  humanCheck,
+  humanClick,
+  Recorder,
   SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
 
@@ -32,8 +35,6 @@ const TABLE_NAME = "grunfeld";
 const COLUMNS = ["invest", "value", "capital"];
 /** 統計量チェックボックス名パターン */
 const STAT_PATTERNS: RegExp[] = [/^平均$|^Mean$/i, /^標準偏差$|^Std Dev$/i];
-/** 操作後の安定待機 (ms) */
-const PAUSE_MS = 800;
 
 // ---------------------------------------------------------------------------
 // ヘルパー
@@ -63,7 +64,7 @@ async function navigateToSampleDir(
 
     if (await folderRow.isVisible()) {
       await folderRow.click();
-      await page.waitForTimeout(PAUSE_MS / 2);
+      await page.waitForTimeout(300);
     }
   }
 }
@@ -73,7 +74,7 @@ async function navigateToSampleDir(
 // ---------------------------------------------------------------------------
 
 async function main(): Promise<void> {
-  const { browser, page } = await connectToApp();
+  const { browser, context, page } = await connectToApp();
 
   try {
     // ── ① ワークスペースをリセット ──────────────────────────────────────
@@ -99,124 +100,138 @@ async function main(): Promise<void> {
 
     const fileRow = page.getByRole("row", { name: FILE_NAME });
     await fileRow.waitFor({ state: "visible", timeout: 15_000 });
-    await fileRow.click();
+    await humanClick(page, fileRow);
 
     const importDialog = page.getByRole("dialog");
     await importDialog.waitFor({ state: "visible", timeout: 10_000 });
 
-    // データ名はデフォルト（grunfeld）のまま
     const importBtn = importDialog.getByRole("button", {
       name: /^インポート$|^Import$/,
     });
-    await importBtn.click();
+    await humanClick(page, importBtn, 2000);
     await importDialog.waitFor({ state: "hidden", timeout: 30_000 });
 
     // DataPreview に遷移してテーブルタブが表示されるまで待機
     await page
       .getByRole("button", { name: TABLE_NAME })
       .waitFor({ state: "visible", timeout: 15_000 });
-    await page.waitForTimeout(PAUSE_MS);
+    await page.waitForTimeout(500);
 
-    // ── step-01: データプレビュー（インポート完了状態） ───────────────────
-    await captureStep(page, SCENE_ID, 1);
-    console.log("  📸 step-01: DataPreview");
+    // ── ③ 録画開始 ────────────────────────────────────────────────────────
+    const rec = await Recorder.create(context, page, SCENE_ID);
+    await rec.start();
+    console.log("  ▶ 録画開始");
 
-    // ── ③ 「基本分析」メニューを開く ─────────────────────────────────────
+    // ── step-A: データプレビュー ──────────────────────────────────────────
+    rec.addCue(
+      "Grunfeld データが取り込まれました",
+      "Grunfeld data has been imported",
+    );
+    await page.waitForTimeout(1500);
+
+    // ── ④ 「基本分析」メニューを開く ─────────────────────────────────────
+    rec.addCue(
+      "「基本分析」→「基本統計量」を選択します",
+      "Select 'Basic Analysis' → 'Descriptive Statistics'",
+    );
+
     const menuBtn = page.getByRole("banner").getByRole("button", {
       name: /基本分析|Basic Analysis/i,
     });
-    await menuBtn.click();
+    await humanClick(page, menuBtn, 500);
 
     const basicStatsItem = page.getByRole("menuitem", {
-      name: /基本統計量|Basic Statistics/i,
+      name: /基本統計量|Descriptive Statistics/i,
     });
     await basicStatsItem.waitFor({ state: "visible", timeout: 5_000 });
-    await page.waitForTimeout(PAUSE_MS);
+    await page.waitForTimeout(400);
 
-    // ── step-02: 「基本分析」メニューが開いた状態 ─────────────────────────
-    await captureStep(page, SCENE_ID, 2);
-    console.log("  📸 step-02: メニューが開いた状態");
-
-    // ── ④ 「基本統計量」をクリック ──────────────────────────────────────
-    await basicStatsItem.click();
+    // ── ⑤ 「基本統計量」をクリック ──────────────────────────────────────
+    await humanClick(page, basicStatsItem, 1000);
 
     await page
       .getByRole("heading", { name: /基本統計量|Descriptive Statistics/i })
       .waitFor({ state: "visible", timeout: 10_000 });
-    await page.waitForTimeout(PAUSE_MS);
 
-    // ── step-03: 基本統計量フォームが表示された状態 ────────────────────────
-    await captureStep(page, SCENE_ID, 3);
-    console.log("  📸 step-03: フォーム初期状態");
+    // ── step-B: テーブルを選択 ────────────────────────────────────────────
+    rec.addCue("集計するテーブルを選択します", "Select the table to analyze");
 
-    // ── ⑤ テーブルを選択 ────────────────────────────────────────────────
     const dataSelect = page
       .getByLabel(/対象データ|Target Data/i)
       .first()
       .or(page.getByRole("combobox").first());
-    await dataSelect.click();
+    await humanClick(page, dataSelect, 400);
 
     const tableOption = page.getByRole("option", {
       name: TABLE_NAME,
       exact: true,
     });
     await tableOption.waitFor({ state: "visible", timeout: 10_000 });
-    await tableOption.click();
+    await humanClick(page, tableOption, 800);
 
     // 列リストのロード完了を待機
     await page
       .getByText(/列情報を読み込んでいます|Loading column info/i)
       .waitFor({ state: "hidden", timeout: 15_000 })
-      .catch(() => {
-        // 既にロード済みの場合は無視
-      });
-    await page.waitForTimeout(PAUSE_MS);
+      .catch(() => {});
 
-    // ── ⑥ 列を選択 ───────────────────────────────────────────────────────
+    // ── step-C: 列を選択 ─────────────────────────────────────────────────
+    rec.addCue(
+      "分析する列にチェックを入れます",
+      "Check the columns to analyze",
+    );
+
     for (const col of COLUMNS) {
       const checkbox = page.getByRole("checkbox", { name: col });
       if (await checkbox.isVisible()) {
-        if (!(await checkbox.isChecked())) {
-          await checkbox.click();
-        }
+        await humanCheck(page, checkbox, true, 350);
       }
     }
-    await page.waitForTimeout(PAUSE_MS);
+    await page.waitForTimeout(500);
 
-    // ── step-04: 列が選択された状態 ─────────────────────────────────────
-    await captureStep(page, SCENE_ID, 4);
-    console.log("  📸 step-04: 列が選択された状態");
+    // ── step-D: 統計量を選択 ─────────────────────────────────────────────
+    rec.addCue(
+      "計算する統計量を選択します",
+      "Select the statistics to compute",
+    );
 
-    // ── ⑦ 統計量を選択 ───────────────────────────────────────────────────
     for (const pattern of STAT_PATTERNS) {
       const checkbox = page.getByRole("checkbox", { name: pattern });
       if (await checkbox.isVisible()) {
-        if (!(await checkbox.isChecked())) {
-          await checkbox.click();
-        }
+        await humanCheck(page, checkbox, true, 350);
       }
     }
-    await page.waitForTimeout(PAUSE_MS);
+    await page.waitForTimeout(500);
 
-    // ── step-05: 統計量が選択された状態 ─────────────────────────────────
-    await captureStep(page, SCENE_ID, 5);
-    console.log("  📸 step-05: 統計量が選択された状態");
+    // ── ⑥ 「計算する」をクリック ────────────────────────────────────────
+    rec.addCue(
+      "「計算する」をクリックして実行します",
+      "Click 'Calculate' to run",
+    );
 
-    // ── ⑧ 「計算する」をクリック ────────────────────────────────────────
-    await page.getByRole("button", { name: /^(計算する|Calculate)$/i }).click();
+    const calcBtn = page.getByRole("button", {
+      name: /^(計算する|Calculate)$/i,
+    });
+    await humanClick(page, calcBtn, 500);
 
     // 結果テーブルが表示されるまで待機
     await page
       .getByRole("table")
       .waitFor({ state: "visible", timeout: 30_000 });
-    await page.waitForTimeout(PAUSE_MS);
 
-    // ── step-06: 結果テーブルが表示された状態 ────────────────────────────
-    await captureStep(page, SCENE_ID, 6);
-    console.log("  📸 step-06: 結果テーブル");
+    // ── step-E: 結果を確認 ───────────────────────────────────────────────
+    rec.addCue(
+      "基本統計量の計算結果が表示されました",
+      "Descriptive statistics results are displayed",
+    );
+    await page.waitForTimeout(2500);
 
+    // ── 録画停止 ──────────────────────────────────────────────────────────
+    const info = await rec.stop();
     console.log("");
-    console.log("✅ C-09 キャプチャ完了");
+    console.log("✅ C-09 収録完了");
+    console.log(`   フレーム数: ${info.totalFrames}`);
+    console.log(`   長さ: ${(info.durationMs / 1000).toFixed(1)}s`);
     console.log(`   出力先: video/playwright/captured/${SCENE_ID}/`);
   } finally {
     await browser.close();
@@ -224,6 +239,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  console.error("❌ キャプチャ失敗:", err);
+  console.error("❌ 収録失敗:", err);
   process.exit(1);
 });
