@@ -23,7 +23,15 @@
     "render:c08:ja": "remotion render src/Root.tsx C08SaveData ../output/ja/c08-save-data-ja.mp4 --props={\"lang\":\"ja\"}",
     "render:c08:en": "remotion render src/Root.tsx C08SaveData ../output/en/c08-save-data-en.mp4 --props={\"lang\":\"en\"}",
     "render:c09:ja": "remotion render src/Root.tsx C09DescriptiveStatistics ../output/ja/c09-descriptive-statistics-ja.mp4 --props={\"lang\":\"ja\"}",
-    "render:c09:en": "remotion render src/Root.tsx C09DescriptiveStatistics ../output/en/c09-descriptive-statistics-en.mp4 --props={\"lang\":\"en\"}"
+    "render:c09:en": "remotion render src/Root.tsx C09DescriptiveStatistics ../output/en/c09-descriptive-statistics-en.mp4 --props={\"lang\":\"en\"}",
+    "render:c10:ja": "remotion render src/Root.tsx C10GroupStatistics ../output/ja/c10-group-statistics-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c10:en": "remotion render src/Root.tsx C10GroupStatistics ../output/en/c10-group-statistics-en.mp4 --props={\"lang\":\"en\"}",
+    "render:c11:ja": "remotion render src/Root.tsx C11CorrelationMatrix ../output/ja/c11-correlation-matrix-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c11:en": "remotion render src/Root.tsx C11CorrelationMatrix ../output/en/c11-correlation-matrix-en.mp4 --props={\"lang\":\"en\"}",
+    "render:c12:ja": "remotion render src/Root.tsx C12ConfidenceInterval ../output/ja/c12-confidence-interval-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c12:en": "remotion render src/Root.tsx C12ConfidenceInterval ../output/en/c12-confidence-interval-en.mp4 --props={\"lang\":\"en\"}",
+    "render:c13:ja": "remotion render src/Root.tsx C13HypothesisTest ../output/ja/c13-hypothesis-test-ja.mp4 --props={\"lang\":\"ja\"}",
+    "render:c13:en": "remotion render src/Root.tsx C13HypothesisTest ../output/en/c13-hypothesis-test-en.mp4 --props={\"lang\":\"en\"}"
   },
   "dependencies": {
     "@remotion/google-fonts": "4.0.457",

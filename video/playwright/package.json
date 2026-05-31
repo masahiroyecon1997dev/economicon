@@ -13,7 +13,11 @@
     "capture:c06": "tsx scenes/c06-transform-dummy.ts",
     "capture:c07": "tsx scenes/c07-calculation.ts",
     "capture:c08": "tsx scenes/c08-save-data.ts",
-    "capture:c09": "tsx scenes/c09-descriptive-statistics.ts"
+    "capture:c09": "tsx scenes/c09-descriptive-statistics.ts",
+    "capture:c10": "tsx scenes/c10-group-statistics.ts",
+    "capture:c11": "tsx scenes/c11-correlation-matrix.ts",
+    "capture:c12": "tsx scenes/c12-confidence-interval.ts",
+    "capture:c13": "tsx scenes/c13-hypothesis-test.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.60.0",

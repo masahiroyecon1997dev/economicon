@@ -88,7 +88,7 @@ async function resetWorkspace(page: AppPage): Promise<void> {
 /** SaveData 画面に遷移して 1 つのフォーマットで保存する */
 async function saveCurrentData(
   page: AppPage,
-  rec: InstanceType<typeof Recorder>,
+  rec: Recorder,
   tableName: string,
   baseName: string,
   format: Format,

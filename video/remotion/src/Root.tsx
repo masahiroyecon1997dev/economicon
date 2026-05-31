@@ -43,6 +43,22 @@ import {
   C09DescriptiveStatistics,
   calculateC09Metadata,
 } from "./compositions/C09DescriptiveStatistics";
+import {
+  C10GroupStatistics,
+  calculateC10Metadata,
+} from "./compositions/C10GroupStatistics";
+import {
+  C11CorrelationMatrix,
+  calculateC11Metadata,
+} from "./compositions/C11CorrelationMatrix";
+import {
+  C12ConfidenceInterval,
+  calculateC12Metadata,
+} from "./compositions/C12ConfidenceInterval";
+import {
+  C13HypothesisTest,
+  calculateC13Metadata,
+} from "./compositions/C13HypothesisTest";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -161,6 +177,54 @@ export const RemotionRoot: React.FC = () => {
         component={C09DescriptiveStatistics}
         calculateMetadata={calculateC09Metadata}
         durationInFrames={300}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-10 グループ別統計量 */}
+      <Composition
+        id="C10GroupStatistics"
+        component={C10GroupStatistics}
+        calculateMetadata={calculateC10Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-11 相関行列 */}
+      <Composition
+        id="C11CorrelationMatrix"
+        component={C11CorrelationMatrix}
+        calculateMetadata={calculateC11Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-12 信頼区間の計算 */}
+      <Composition
+        id="C12ConfidenceInterval"
+        component={C12ConfidenceInterval}
+        calculateMetadata={calculateC12Metadata}
+        durationInFrames={1530}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ lang: "ja" }}
+      />
+
+      {/* C-13 仮説検定 */}
+      <Composition
+        id="C13HypothesisTest"
+        component={C13HypothesisTest}
+        calculateMetadata={calculateC13Metadata}
+        durationInFrames={1530}
         fps={30}
         width={1920}
         height={1080}

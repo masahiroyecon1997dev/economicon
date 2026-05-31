@@ -78,5 +78,25 @@
       "Results are saved in the \"Results\" tab on the left panel"
     ],
     "ending": "Next: Group Statistics"
+  },
+  "C10": {
+    "title": "Group Statistics",
+    "titleSubtitle": "Aggregate data by group",
+    "ending": "Next: Correlation Matrix"
+  },
+  "C11": {
+    "title": "Correlation Matrix",
+    "titleSubtitle": "View pairwise correlations at a glance",
+    "ending": "Next: Confidence Intervals"
+  },
+  "C12": {
+    "title": "Confidence Intervals",
+    "titleSubtitle": "Estimate confidence intervals for means and ratios",
+    "ending": "Next: Hypothesis Testing"
+  },
+  "C13": {
+    "title": "Hypothesis Testing",
+    "titleSubtitle": "Run t-tests, z-tests, and F-tests",
+    "ending": "Next: OLS Linear Regression"
   }
 }
