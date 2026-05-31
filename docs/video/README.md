@@ -2,8 +2,21 @@
 
 Playwright でアプリ操作を自動収録し、Remotion で字幕・タイトルを合成して MP4 を出力するパイプラインの手順書。
 
+## 収録方式の概要
+
+| 項目                 | 内容                                                                                                        |
+| -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **収録方式**         | CDP Screencast（`Page.startScreencast`）で JPEG フレームを連番保存し、Remotion 側で画像シーケンスとして再生 |
+| **出力フォーマット** | `captured/{sceneId}/frames/0001.jpg` ～ `NNNN.jpg` ＋ `meta.json`（フレーム数・タイムスタンプ・字幕キュー） |
+| **操作速度**         | `humanClick` / `humanCheck` ヘルパーによる人間的なマウス移動（25 ステップ）＋自然なポーズ                   |
+| **クリック演出**     | クリック位置にオレンジ色の拡散円アニメーションを DOM inject（収録フレームに焼き込まれる）                   |
+| **ハイライト演出**   | `highlightElements` ヘルパーで複数要素をオレンジ枠で囲んで強調表示できる                                    |
+| **字幕タイミング**   | `rec.addCue()` を操作直前に呼ぶことで実際の経過時刻を記録し、Remotion がその時刻に合わせて字幕を表示        |
+| **結果説明**         | 計算結果表示後に字幕 ＋ ハイライト枠で列名・統計量の見どころを段階的に解説                                  |
+
 ## 目次
 
+- [収録方式の概要](#収録方式の概要)
 - [ディレクトリ構成](#ディレクトリ構成)
 - [初回セットアップ](#初回セットアップ)
 - [動画を作成する（基本フロー）](#動画を作成する基本フロー)
@@ -20,13 +33,15 @@ Playwright でアプリ操作を自動収録し、Remotion で字幕・タイト
 video/
 ├── playwright/                  # Playwright 収録プロジェクト
 │   ├── helpers/
-│   │   └── connectToApp.ts      # CDP 接続・スクリーンショットヘルパー
+│   │   └── connectToApp.ts      # CDP 接続・収録・人間操作ヘルパー
 │   ├── scenes/                  # シーンごとの収録スクリプト
 │   │   └── c09-descriptive-statistics.ts
-│   ├── captured/                # 収録済みスクリーンショット出力先（.gitignore）
+│   ├── captured/                # 収録済みフレーム出力先（.gitignore）
 │   │   └── c09/
-│   │       ├── step-01.png
-│   │       └── ...
+│   │       ├── frames/
+│   │       │   ├── 0001.jpg
+│   │       │   └── ...          # 連番 JPEG（CDP Screencast）
+│   │       └── meta.json        # フレーム数・タイムスタンプ・字幕キュー
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── playwright.config.ts
@@ -39,7 +54,7 @@ video/
 │   │   ├── scenes/              # 共通シーンコンポーネント
 │   │   │   ├── TitleCard.tsx
 │   │   │   ├── Subtitle.tsx
-│   │   │   ├── ScreenshotSlide.tsx
+│   │   │   ├── FrameSequence.tsx # 連番 JPEG を再生するコンポーネント
 │   │   │   └── Ending.tsx
 │   │   └── i18n/
 │   │       ├── ja.json          # 日本語字幕
@@ -54,6 +69,7 @@ video/
 ```
 
 > **`captured/` と `output/` は `.gitignore` 対象。** Git には含まれません。
+> プレビューおよびレンダリングの前に必ず `pnpm capture:{id}` でフレームを生成してください。
 
 ---
 
@@ -104,7 +120,7 @@ pnpm tauri dev
 
 > アプリが完全に起動してファイルインポート画面が表示されるまで待ってから次の手順へ進んでください。
 
-### Step 2 — スクリーンショットを収録する
+### Step 2 — 操作を収録する
 
 ```powershell
 cd video/playwright
@@ -116,7 +132,21 @@ $env:ECONOMICON_TEST_SAMPLE_DIR = "<リポジトリ格納場所>/economicon/samp
 pnpm capture:c09
 ```
 
-収録が完了すると `captured/c09/step-01.png` ～ `step-06.png` が生成されます。
+収録が完了すると以下のファイルが生成されます：
+
+```
+captured/c09/
+├── frames/
+│   ├── 0001.jpg   # 収録開始フレーム
+│   └── NNNN.jpg   # 収録終了フレーム（操作時間に応じて変動）
+└── meta.json      # フレーム数・タイムスタンプ・字幕キュー
+```
+
+> **収録中の演出について**
+>
+> - クリック時にオレンジ色の拡散円が DOM に inject され、そのままフレームに焼き込まれます
+> - チェックボックス操作・ボタンクリックはすべて人間的なマウス移動（25 ステップ）で実行されます
+> - `rec.addCue("字幕テキスト")` を呼んだ時刻が `meta.json` に記録され、Remotion 側の字幕表示タイミングに使われます
 
 ### Step 3 — Remotion Studio でプレビューする
 
@@ -203,30 +233,55 @@ pnpm render:c09:en
 
 ```typescript
 import {
-  captureStep,
   connectToApp,
+  highlightElements,
+  humanCheck,
+  humanClick,
+  Recorder,
   SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
 
 const SCENE_ID = "c10";
 
 async function main(): Promise<void> {
-  const { browser, page } = await connectToApp();
+  const { browser, context, page } = await connectToApp();
   try {
     // 1. ワークスペースをリセット
-    // 2. データをインポート
-    // 3. 各ステップで captureStep(page, SCENE_ID, N) を呼ぶ
-    // 4. コンソールに完了メッセージを出力
+    // 2. データをインポート（録画開始前）
+
+    const rec = await Recorder.create(context, page, SCENE_ID);
+    await rec.start();
+
+    // 3. 各操作の直前に rec.addCue("字幕テキスト") を呼ぶ
+    //    → 実際の経過時刻が meta.json に記録され、字幕タイミングに使われる
+    rec.addCue("操作の説明", "Description of action");
+    await humanClick(page, someLocator, 800);
+
+    // 4. 結果表示後は highlightElements で見どころを枠強調する
+    rec.addCue("結果の説明", "Description of result");
+    await highlightElements(page, [resultTable.locator("th").first()], 3000);
+
+    const info = await rec.stop();
+    console.log(`✅ 収録完了: ${info.totalFrames} フレーム`);
   } finally {
     await browser.close();
   }
 }
 
 main().catch((err: unknown) => {
-  console.error("❌ キャプチャ失敗:", err);
+  console.error("❌ 収録失敗:", err);
   process.exit(1);
 });
 ```
+
+#### ヘルパー関数リファレンス
+
+| 関数                                                     | 用途                                                               |
+| -------------------------------------------------------- | ------------------------------------------------------------------ |
+| `humanClick(page, locator, afterMs?)`                    | ハイライト枠 ＋ クリックパルス ＋ 人間的マウス移動でクリック       |
+| `humanCheck(page, locator, check, afterMs?)`             | チェックボックスをオン／オフにする（既に目的の状態なら何もしない） |
+| `highlightElements(page, locators, durationMs?, color?)` | 複数要素をオレンジ枠で囲んで `durationMs` ms 待機（結果説明用）    |
+| `rec.addCue(textJa, textEn?)`                            | 現在時刻を字幕キューとして記録する（操作直前に呼ぶ）               |
 
 ### 3. Remotion コンポジションを作成する
 
@@ -281,8 +336,8 @@ pnpm studio
 | 右クリック → "Edit Props"     | `lang` を `"en"` に変更して英語版をプレビュー |
 | `J` / `L` キー                | コマ送り                                      |
 
-> **スクリーンショットが表示されない場合**
-> `captured/c09/` にファイルが存在するか確認してください。
+> **フレームが表示されない場合**
+> `captured/c09/frames/` にファイルが存在するか確認してください。
 > `pnpm capture:c09` を先に実行する必要があります（アプリ起動が前提）。
 
 ---
@@ -294,10 +349,22 @@ pnpm studio
 アプリが起動していないか、デバッグポートが有効になっていません。
 VS Code タスク「**Economicon: App (Debug Port)**」でアプリを起動してから再実行してください。
 
-### スクリーンショットが真っ黒になる
+### 収録フレームが真っ黒になる
 
 - アプリの起動が完了していない状態で収録を開始した可能性があります
-- ターミナルで `pnpm capture:c09` を実行する前にアプリのファイルインポート画面が表示されていることを確認してください
+- `pnpm capture:c09` を実行する前にアプリのファイルインポート画面が表示されていることを確認してください
+
+### `meta.json` が生成されない
+
+`rec.stop()` が呼ばれていない可能性があります。収録スクリプトの `finally` ブロックではなく `try` ブロック内で `rec.stop()` を呼んでいることを確認してください。
+
+### 字幕のタイミングがズレる
+
+字幕は `rec.addCue()` を呼んだ時刻に表示されます。操作の**直前**に呼ぶと「これから何をするか」を示す字幕になります。操作の**直後**に呼ぶと結果説明字幕として機能します。意図するタイミングに合わせて呼び出し位置を調整してください。
+
+### `highlightElements` で枠が表示されない
+
+対象要素の `data-testid` やロールが動的に変わる場合、要素の特定に失敗してもエラーにならずスキップされます。ロケーターを確認し、`waitFor` のタイムアウト（デフォルト 5 秒）以内に要素が表示される状態を確認してください。
 
 ### Remotion Studio で `Cannot find module` エラー
 
