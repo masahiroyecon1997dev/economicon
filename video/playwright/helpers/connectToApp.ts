@@ -31,6 +31,29 @@ export const SAMPLE_DIR =
   process.env.ECONOMICON_TEST_SAMPLE_DIR ??
   path.resolve(__dirname, "../../../sample");
 
+/**
+ * 動画収録時にユーザー名が画面へ出ないよう、
+ * Windows の "C:\\Users\\<username>\\..." 形式は先頭3セグメントを除外する。
+ *
+ * 例:
+ * - ["C:", "Users", "alice", "Desktop", "repos", "economicon", "sample"]
+ *   -> ["Desktop", "repos", "economicon", "sample"]
+ */
+export function getSafeFolderSegmentsForRecording(dirPath: string): string[] {
+  const segments = dirPath.split(path.sep).filter((s) => s.length > 0);
+
+  if (
+    process.platform === "win32" &&
+    segments.length >= 4 &&
+    /^[A-Za-z]:$/.test(segments[0]) &&
+    /^users$/i.test(segments[1])
+  ) {
+    return segments.slice(3);
+  }
+
+  return segments;
+}
+
 // ---------------------------------------------------------------------------
 // 接続
 // ---------------------------------------------------------------------------
