@@ -104,7 +104,6 @@ async function recordImportClip(
   context: AppContext,
   page: AppPage,
 ): Promise<void> {
-  await maskDirUsername(page);
   console.log("\n📼 CLIP 1: Parquet インポート 収録開始");
 
   // ── 録画開始 ──────────────────────────────────────────────────────────────
@@ -344,6 +343,7 @@ async function main(): Promise<void> {
   try {
     // ── 初期リセット ─────────────────────────────────────────────────────────
     await resetWorkspace(page);
+    await maskDirUsername(page);
 
     // ── CLIP 1: CSV インポート ─────────────────────────────────────────────
     await recordImportClip(context, page);
