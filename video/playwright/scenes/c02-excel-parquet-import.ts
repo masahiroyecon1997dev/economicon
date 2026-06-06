@@ -30,7 +30,7 @@ import {
 // ---------------------------------------------------------------------------
 
 const SCENE_ID = "c02";
-const EXCEL_FILE_NAME = "ジョイン1.xlsx";
+const EXCEL_FILE_NAME = "Excelデータ.xlsx";
 const PARQUET_FILE_NAME = "grunfeld.parquet";
 
 // ---------------------------------------------------------------------------
