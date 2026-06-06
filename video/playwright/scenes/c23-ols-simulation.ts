@@ -29,6 +29,7 @@ import {
   connectToApp,
   highlightElements,
   humanClick,
+  maskDirUsername,
   Recorder,
 } from "../helpers/connectToApp.js";
 
@@ -72,10 +73,7 @@ async function openVizMenu(page: AppPage, itemName: RegExp): Promise<void> {
 }
 
 /** アニメーション再生して数秒後に一時停止 */
-async function playAndPause(
-  page: AppPage,
-  waitMs: number,
-): Promise<void> {
+async function playAndPause(page: AppPage, waitMs: number): Promise<void> {
   const playBtn = page.getByRole("button", { name: /^再生$|^Play$/i });
   if (await playBtn.isVisible({ timeout: 3_000 })) {
     await humanClick(page, playBtn, 400);
@@ -98,6 +96,7 @@ async function main(): Promise<void> {
     // ── 録画前準備 ─────────────────────────────────────────────────────────
     await resetWorkspace(page);
     await page.waitForTimeout(500);
+    await maskDirUsername(page);
 
     // ── 録画開始 ──────────────────────────────────────────────────────────
     const rec = await Recorder.create(context, page, SCENE_ID);
@@ -118,10 +117,7 @@ async function main(): Promise<void> {
       "「可視化」→「漸近正規性シミュレーション」を選択します",
       "Select 'Visualization' → 'Asymptotic Normality Simulation'",
     );
-    await openVizMenu(
-      page,
-      /漸近正規性|Asymptotic Normality/i,
-    );
+    await openVizMenu(page, /漸近正規性|Asymptotic Normality/i);
 
     await page
       .getByRole("heading", { name: /漸近正規性|Asymptotic Normality/i })
@@ -220,10 +216,7 @@ async function main(): Promise<void> {
 
     await page.waitForTimeout(400);
 
-    rec.addCue(
-      "アニメーションを再生します",
-      "Start the animation",
-    );
+    rec.addCue("アニメーションを再生します", "Start the animation");
     await playAndPause(page, 3500);
 
     rec.addCue(

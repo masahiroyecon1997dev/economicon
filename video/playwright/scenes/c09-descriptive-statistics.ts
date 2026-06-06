@@ -21,6 +21,7 @@ import {
   highlightElements,
   humanCheck,
   humanClick,
+  maskDirUsername,
   Recorder,
   SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
@@ -88,6 +89,7 @@ async function main(): Promise<void> {
     // ── ① ワークスペースをリセット ──────────────────────────────────────
     const resetButton = page.getByTestId("left-menu-reset-workspace");
     await resetButton.waitFor({ state: "visible", timeout: 90_000 });
+    await maskDirUsername(page);
 
     if (await resetButton.isEnabled()) {
       await resetButton.click();

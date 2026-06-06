@@ -21,6 +21,7 @@ import {
   connectToApp,
   highlightElements,
   humanClick,
+  maskDirUsername,
   Recorder,
 } from "../helpers/connectToApp.js";
 
@@ -62,6 +63,7 @@ async function main(): Promise<void> {
     // ── 録画前準備 ─────────────────────────────────────────────────────────
     await resetWorkspace(page);
     await page.waitForTimeout(500);
+    await maskDirUsername(page);
 
     // ── 録画開始 ──────────────────────────────────────────────────────────
     const rec = await Recorder.create(context, page, SCENE_ID);
@@ -91,7 +93,9 @@ async function main(): Promise<void> {
     await humanClick(page, ciSimItem, 1000);
 
     await page
-      .getByRole("heading", { name: /信頼区間シミュレーション|Confidence Interval Simulation/i })
+      .getByRole("heading", {
+        name: /信頼区間シミュレーション|Confidence Interval Simulation/i,
+      })
       .waitFor({ state: "visible", timeout: 10_000 });
     await page.waitForTimeout(500);
 

@@ -23,6 +23,7 @@ import {
   connectToApp,
   highlightElements,
   humanClick,
+  maskDirUsername,
   Recorder,
   SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
@@ -141,6 +142,7 @@ async function main(): Promise<void> {
   try {
     // ── ① 録画前: ワークスペースリセット ─────────────────────────────────
     await resetWorkspace(page);
+    await maskDirUsername(page);
 
     // ── ② 録画前: 2 つの Excel ファイルをインポート ───────────────────────
     console.log("  ⏳ join1 / join2 をインポート中（録画前）...");

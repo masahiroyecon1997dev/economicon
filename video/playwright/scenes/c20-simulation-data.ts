@@ -17,14 +17,12 @@
  *   captured/c20/meta.json
  */
 
-import path from "node:path";
-
 import {
   connectToApp,
   highlightElements,
   humanClick,
+  maskDirUsername,
   Recorder,
-  SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
 
 // ---------------------------------------------------------------------------
@@ -68,6 +66,7 @@ async function main(): Promise<void> {
     // ── 録画前準備 ─────────────────────────────────────────────────────────
     await resetWorkspace(page);
     await page.waitForTimeout(500);
+    await maskDirUsername(page);
 
     // ── 録画開始 ──────────────────────────────────────────────────────────
     const rec = await Recorder.create(context, page, SCENE_ID);
@@ -97,7 +96,9 @@ async function main(): Promise<void> {
     await humanClick(page, genItem, 1000);
 
     await page
-      .getByRole("heading", { name: /新しいデータテーブルを作成|Create.*Table/i })
+      .getByRole("heading", {
+        name: /新しいデータテーブルを作成|Create.*Table/i,
+      })
       .waitFor({ state: "visible", timeout: 10_000 });
 
     // ── step-C: データ名・行数を入力 ──────────────────────────────────────
@@ -120,7 +121,9 @@ async function main(): Promise<void> {
       "「編集」ボタンで列の分布を設定します",
       "Click 'Edit' to configure the column distribution",
     );
-    const editBtn = page.getByRole("button", { name: /^編集$|^Edit$/i }).first();
+    const editBtn = page
+      .getByRole("button", { name: /^編集$|^Edit$/i })
+      .first();
     await editBtn.waitFor({ state: "visible", timeout: 5_000 });
     await humanClick(page, editBtn, 500);
 

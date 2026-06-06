@@ -32,26 +32,31 @@ export const SAMPLE_DIR =
   path.resolve(__dirname, "../../../sample");
 
 /**
- * 動画収録時にユーザー名が画面へ出ないよう、
- * Windows の "C:\\Users\\<username>\\..." 形式は先頭3セグメントを除外する。
+ * 動画収録時にユーザ名やPC名などの個人情報が画面に表示されないようにするための関数。
  *
  * 例:
  * - ["C:", "Users", "alice", "Desktop", "repos", "economicon", "sample"]
- *   -> ["Desktop", "repos", "economicon", "sample"]
+ *   -> ["C:", "Users", "Economicon User", "Desktop", "econometrics", "data", "sample"]
  */
-export function getSafeFolderSegmentsForRecording(dirPath: string): string[] {
-  const segments = dirPath.split(path.sep).filter((s) => s.length > 0);
+export async function maskDirUsername(page: Page): Promise<void> {
+  const breadcrumbNav = page.getByRole("navigation", { name: "Breadcrumb" });
+  const breadcrumbs = breadcrumbNav.locator("li button");
+  if ((await breadcrumbs.count()) >= 6) {
+    // 💡 3番目（インデックス: 2）を書き換え
+    await breadcrumbs.nth(2).evaluate((el) => {
+      el.textContent = "Economicon User";
+    });
 
-  if (
-    process.platform === "win32" &&
-    segments.length >= 4 &&
-    /^[A-Za-z]:$/.test(segments[0]) &&
-    /^users$/i.test(segments[1])
-  ) {
-    return segments.slice(3);
+    // 💡 5番目（インデックス: 4）を書き換え
+    await breadcrumbs.nth(4).evaluate((el) => {
+      el.textContent = "econometrics";
+    });
+
+    // 💡 6番目（インデックス: 5）を書き換え
+    await breadcrumbs.nth(5).evaluate((el) => {
+      el.textContent = "data";
+    });
   }
-
-  return segments;
 }
 
 // ---------------------------------------------------------------------------

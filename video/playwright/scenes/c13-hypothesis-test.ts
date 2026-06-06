@@ -24,6 +24,7 @@ import {
   connectToApp,
   highlightElements,
   humanClick,
+  maskDirUsername,
   Recorder,
   SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
@@ -87,6 +88,7 @@ async function main(): Promise<void> {
     // ── 録画前準備 ─────────────────────────────────────────────────────────
     await resetWorkspace(page);
     await navigateToSampleDir(page);
+    await maskDirUsername(page);
 
     const fileRow = page.getByRole("row", { name: FILE_NAME });
     await fileRow.waitFor({ state: "visible", timeout: 15_000 });

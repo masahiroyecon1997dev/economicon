@@ -21,6 +21,7 @@ import path from "node:path";
 import {
   connectToApp,
   humanClick,
+  maskDirUsername,
   Recorder,
   SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
@@ -111,6 +112,7 @@ async function main(): Promise<void> {
     await resetWorkspace(page);
     await navigateToSampleDir(page);
     await page.waitForTimeout(500);
+    await maskDirUsername(page);
 
     // ── 録画開始 ────────────────────────────────────────────────────────────
     const rec = await Recorder.create(context, page, SCENE_ID);

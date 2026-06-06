@@ -23,6 +23,7 @@ import {
   connectToApp,
   highlightElements,
   humanClick,
+  maskDirUsername,
   Recorder,
   SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
@@ -85,6 +86,7 @@ async function main(): Promise<void> {
     // ── 録画前準備 ─────────────────────────────────────────────────────────
     await resetWorkspace(page);
     await navigateToSampleDir(page);
+    await maskDirUsername(page);
 
     const fileRow = page.getByRole("row", { name: FILE_NAME });
     await fileRow.waitFor({ state: "visible", timeout: 15_000 });
@@ -170,7 +172,10 @@ async function main(): Promise<void> {
       .first()
       .or(page.getByRole("combobox").nth(1));
     await humanClick(page, xTrigger, 400);
-    const capitalOpt = page.getByRole("option", { name: "capital", exact: true });
+    const capitalOpt = page.getByRole("option", {
+      name: "capital",
+      exact: true,
+    });
     await capitalOpt.waitFor({ state: "visible" });
     await humanClick(page, capitalOpt, 500);
     await page.waitForTimeout(300);
@@ -203,10 +208,7 @@ async function main(): Promise<void> {
     await highlightElements(page, [plotArea], 2000);
 
     // ── step-E: ヒストグラムに切替 ────────────────────────────────────────
-    rec.addCue(
-      "ヒストグラムに切り替えます",
-      "Switch to histogram view",
-    );
+    rec.addCue("ヒストグラムに切り替えます", "Switch to histogram view");
     const histBtn = page.getByRole("radio", {
       name: /^ヒストグラム$|^Histogram$/i,
     });
@@ -218,7 +220,10 @@ async function main(): Promise<void> {
       .first()
       .or(page.getByRole("combobox").nth(1));
     await humanClick(page, histXTrigger, 400);
-    const investHistOpt = page.getByRole("option", { name: "invest", exact: true });
+    const investHistOpt = page.getByRole("option", {
+      name: "invest",
+      exact: true,
+    });
     await investHistOpt.waitFor({ state: "visible" });
     await humanClick(page, investHistOpt, 500);
 

@@ -23,6 +23,7 @@ import {
   connectToApp,
   highlightElements,
   humanClick,
+  maskDirUsername,
   Recorder,
   SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
@@ -87,6 +88,7 @@ async function main(): Promise<void> {
     // ── 録画前準備 ─────────────────────────────────────────────────────────
     await resetWorkspace(page);
     await navigateToSampleDir(page);
+    await maskDirUsername(page);
 
     const fileRow = page.getByRole("row", { name: FILE_NAME });
     await fileRow.waitFor({ state: "visible", timeout: 15_000 });
@@ -150,9 +152,7 @@ async function main(): Promise<void> {
     }
 
     // 分析実行
-    await page
-      .getByRole("button", { name: /分析実行|Run Analysis/i })
-      .click();
+    await page.getByRole("button", { name: /分析実行|Run Analysis/i }).click();
     await page
       .getByRole("button", { name: new RegExp(`OLS: ${DEPENDENT_VAR} #1`) })
       .waitFor({ state: "visible", timeout: 30_000 });
@@ -236,7 +236,9 @@ async function main(): Promise<void> {
 
     // コピー完了メッセージ
     const copiedMsg = outputDialog.getByText(/コピーしました|Copied/i);
-    await copiedMsg.waitFor({ state: "visible", timeout: 5_000 }).catch(() => {});
+    await copiedMsg
+      .waitFor({ state: "visible", timeout: 5_000 })
+      .catch(() => {});
     await page.waitForTimeout(1000);
 
     // ── step-E: Markdown に切替 ───────────────────────────────────────────

@@ -24,6 +24,7 @@ import {
   connectToApp,
   highlightElements,
   humanClick,
+  maskDirUsername,
   Recorder,
   SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
@@ -103,6 +104,7 @@ async function recordImportClip(
   context: AppContext,
   page: AppPage,
 ): Promise<void> {
+  await maskDirUsername(page);
   console.log("\n📼 CLIP 1: Parquet インポート 収録開始");
 
   // ── 録画開始 ──────────────────────────────────────────────────────────────

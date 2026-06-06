@@ -27,6 +27,7 @@ import path from "node:path";
 import {
   connectToApp,
   humanClick,
+  maskDirUsername,
   Recorder,
   SAMPLE_DIR,
 } from "../helpers/connectToApp.js";
@@ -185,6 +186,7 @@ async function main(): Promise<void> {
     // ── 録画前: ワークスペースリセット → CSV インポート ──────────────────
     await resetWorkspace(page);
     await navigateToSampleDir(page);
+    await maskDirUsername(page);
 
     const fileRow = page.getByRole("row", { name: CSV_FILE_NAME });
     await fileRow.waitFor({ state: "visible", timeout: 15_000 });
