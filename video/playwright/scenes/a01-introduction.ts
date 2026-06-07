@@ -296,9 +296,6 @@ async function recordOlsClip(
   });
   await resultTab.waitFor({ state: "visible", timeout: 30_000 });
 
-  // 結果タブをクリック
-  await humanClick(page, resultTab, 1000);
-
   // ── 結果を確認 ────────────────────────────────────────────────────────────
   rec.addCue(
     "OLS の推定結果が表示されました",

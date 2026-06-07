@@ -1,10 +1,10 @@
 {
   "A01": {
     "title": "Economicon",
-    "titleSubtitle": "計量経済学のためのデスクトップ分析ツール",
+    "titleSubtitle": "計量経済学のためのデスクトップ分析アプリケーション",
     "problemLines": [
       "計量経済学のテキストと実データ分析のギャップを感じたことはありませんか？",
-      "Economicon は使いながら学べる計量経済分析ツールです"
+      "Economicon は使いながら学べる計量経済分析アプリケーションです"
     ],
     "problemSolution": "テキストと実践の橋渡しに",
     "featureHighlightTitle": "6 つの主要機能",
