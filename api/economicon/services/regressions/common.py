@@ -146,6 +146,32 @@ def prepare_basic_data(
     x_data = df[explanatory_variables].to_numpy()
 
     if has_const:
+        # has_const=True の場合、定数列（全行同値）が既に含まれていると
+        # 定数項と完全多重共線性になる。事前に検出して明確なエラーを返す。
+        if x_data.ndim == 1:
+            _check_cols = x_data.reshape(-1, 1)
+        else:
+            _check_cols = x_data
+        _non_nan_mask = ~np.isnan(_check_cols).any(axis=1)
+        _valid = _check_cols[_non_nan_mask]
+        if len(_valid) > 0:
+            _zero_var_cols = [
+                explanatory_variables[i]
+                for i in range(_valid.shape[1])
+                if np.allclose(_valid[:, i], _valid[0, i])
+            ]
+            if _zero_var_cols:
+                raise ProcessingError(
+                    error_code=ErrorCode.REGRESSION_SINGULAR_MATRIX_ERROR,
+                    message=_(
+                        "Column(s) %(cols)s have zero variance and cannot"
+                        " be used with hasConst=True because they create"
+                        " perfect multicollinearity with the constant term."
+                        " Either remove these columns or set hasConst=False."
+                    )
+                    % {"cols": ", ".join(_zero_var_cols)},
+                )
+
         # has_constant='skip'で既存の定数列をチェック（通常は存在しないはず）
         x_data = sm.add_constant(x_data, has_constant="skip")
 

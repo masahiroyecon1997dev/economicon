@@ -57,7 +57,7 @@ def build_groups_arrays(
 # ---------------------------------------------------------------------------
 
 
-def format_statsmodels_result(
+def format_statsmodels_result(  # noqa: C901
     model_result: Any,
     table_name: str,
     dependent_variable: str,
@@ -101,6 +101,7 @@ def format_statsmodels_result(
         "tableName": table_name,
         "dependentVariable": dependent_variable,
         "explanatoryVariables": explanatory_variables,
+        "hasConst": has_const,
         "regressionResult": summary_text,
         "parameters": params_info,
         "modelStatistics": model_stats,
