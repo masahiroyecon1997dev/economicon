@@ -112,8 +112,8 @@ export const VariableSelectorField = ({
           </p>
         ) : (
           <ul className="flex flex-col gap-1">
-            {visibleColumns.map((column, index) => (
-              <li key={index}>
+            {visibleColumns.map((column) => (
+              <li key={column.name}>
                 {(() => {
                   const isItemDisabled =
                     disabled || (disabledValues?.has(column.name) ?? false);
