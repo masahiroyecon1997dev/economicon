@@ -84,7 +84,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # 1.16.0
+        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # 1.16.1
 
       - name: Cache Rust dependencies
         uses: swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
