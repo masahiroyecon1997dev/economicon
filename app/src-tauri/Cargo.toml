@@ -23,7 +23,7 @@ serde = { version = "=1.0.228", features = ["derive"] }
 log = "=0.4.29"
 tauri = { version = "=2.10.3", features = [] }
 tauri-plugin-log = "=2.8.0"
-tauri-plugin-opener = "=2.5.3"
+tauri-plugin-opener = "=2.5.4"
 reqwest = { version = "=0.13.3", features = ["json", "multipart", "query", "stream"] }
 tokio = { version = "=1.52.3", features = ["full"] }
 thiserror = "=2.0.18"
