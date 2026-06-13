@@ -27,6 +27,7 @@ import { LOADING_DELAY_DIR, useLoadingStore } from "@/stores/loading";
 import { useSettingsStore } from "@/stores/settings";
 import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
+import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { FileType, SortDirection, SortField } from "@/types/commonTypes";
 import * as RadixTabs from "@radix-ui/react-tabs";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
@@ -82,6 +83,7 @@ export const ImportDataFile = () => {
   const navigateToWorkspace = useCurrentPageStore(
     (state) => state.navigateToWorkspace,
   );
+  const openDataTab = useWorkspaceTabsStore((state) => state.openDataTab);
 
   const { setLoading, clearLoading } = useLoadingStore();
 
@@ -377,7 +379,7 @@ export const ImportDataFile = () => {
         const resTableInfo = await getTableInfo(loadTableName);
         addTableList(loadTableName);
         addTableInfo(resTableInfo);
-        navigateToWorkspace();
+        openDataTab(loadTableName);
       }
     } catch (e: unknown) {
       console.error(e);
