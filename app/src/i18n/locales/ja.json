@@ -533,12 +533,12 @@
     "SE_tooltip_cluster": "クラスター内の相関を許容するクラスター頑健標準誤差。"
   },
   "LogitRegressionForm": {
-    "Title": "ロジット回帰",
-    "Description": "データを選択し、被説明変数と説明変数を指定してロジット回帰を実行します。平均限界効果は既定で有効です。"
+    "Title": "ロジットモデル",
+    "Description": "データを選択し、被説明変数と説明変数を指定してロジットモデルを推定します。平均限界効果は既定で有効です。"
   },
   "ProbitRegressionForm": {
-    "Title": "プロビット回帰",
-    "Description": "データを選択し、被説明変数と説明変数を指定してプロビット回帰を実行します。平均限界効果は既定で有効です。"
+    "Title": "プロビットモデル",
+    "Description": "データを選択し、被説明変数と説明変数を指定してプロビットモデルを推定します。平均限界効果は既定で有効です。"
   },
   "RegressionResult": {
     "AnalysisSummary": "分析概要",
@@ -549,6 +549,13 @@
     "FValue": "F値",
     "FProbability": "F確率",
     "LogLikelihood": "対数尤度",
+    "LogLikelihoodNull": "対数尤度（Null）",
+    "PseudoR2": "疑似R²（McFadden）",
+    "LRStatistic": "尤度比検定統計量",
+    "LRDf": "尤度比自由度",
+    "LRPValue": "尤度比p値",
+    "MarginalEffect": "平均限界効果（AME）",
+    "MarginalEffects": "平均限界効果",
     "Observations": "観測数",
     "Coefficients": "係数",
     "Variable": "変数",

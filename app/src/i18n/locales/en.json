@@ -533,12 +533,12 @@
     "SE_tooltip_cluster": "Cluster-robust SE allowing for within-cluster correlation."
   },
   "LogitRegressionForm": {
-    "Title": "Logit Regression",
-    "Description": "Select data, assign the dependent and explanatory variables, then run a logit regression. Average marginal effects are enabled by default."
+    "Title": "Logit Model",
+    "Description": "Select data, assign the dependent and explanatory variables, then estimate a logit model. Average marginal effects are enabled by default."
   },
   "ProbitRegressionForm": {
-    "Title": "Probit Regression",
-    "Description": "Select data, assign the dependent and explanatory variables, then run a probit regression. Average marginal effects are enabled by default."
+    "Title": "Probit Model",
+    "Description": "Select data, assign the dependent and explanatory variables, then estimate a probit model. Average marginal effects are enabled by default."
   },
   "RegressionResult": {
     "AnalysisSummary": "Analysis Summary",
@@ -549,6 +549,13 @@
     "FValue": "F-value",
     "FProbability": "F-probability",
     "LogLikelihood": "Log Likelihood",
+    "LogLikelihoodNull": "Log Likelihood (Null)",
+    "PseudoR2": "Pseudo R² (McFadden)",
+    "LRStatistic": "LR Statistic",
+    "LRDf": "LR df",
+    "LRPValue": "LR p-value",
+    "MarginalEffect": "Avg. Marg. Effect (AME)",
+    "MarginalEffects": "Average Marginal Effects",
     "Observations": "Observations",
     "Coefficients": "Coefficients",
     "Variable": "Variable",

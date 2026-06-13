@@ -71,6 +71,15 @@ export type LinearRegressionResultType = {
     confidenceIntervalLower: number | null;
     confidenceIntervalUpper: number | null;
   }>;
+  marginalEffects?: Array<{
+    variable: string;
+    marginalEffect: number;
+    standardError: number | null;
+    tValue: number | null;
+    pValue: number | null;
+    confidenceIntervalLower: number | null;
+    confidenceIntervalUpper: number | null;
+  }>;
   modelStatistics: {
     nObservations: number;
     R2?: number;
@@ -81,6 +90,10 @@ export type LinearRegressionResultType = {
     BIC?: number;
     logLikelihood?: number;
     pseudoRSquared?: number;
+    logLikelihoodNull?: number;
+    lrStatistic?: number;
+    lrDf?: number;
+    lrPValue?: number;
   };
 };
 

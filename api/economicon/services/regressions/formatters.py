@@ -87,6 +87,15 @@ def format_statsmodels_result(
         model_stats["logLikelihood"] = float(model_result.llf)
     if hasattr(model_result, "prsquared"):
         model_stats["pseudoRSquared"] = float(model_result.prsquared)
+    # Logit / Probit の尤度比検定（llnull が存在する場合）
+    if hasattr(model_result, "llnull"):
+        model_stats["logLikelihoodNull"] = float(model_result.llnull)
+    if hasattr(model_result, "llr"):
+        model_stats["lrStatistic"] = float(model_result.llr)
+    if hasattr(model_result, "llr_pvalue"):
+        model_stats["lrPValue"] = float(model_result.llr_pvalue)
+    if hasattr(model_result, "df_model"):
+        model_stats["lrDf"] = int(model_result.df_model)
 
     return {
         "tableName": table_name,
