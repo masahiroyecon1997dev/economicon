@@ -17,6 +17,7 @@ export const Breadcrumb = ({ segments, onSegmentClick }: BreadcrumbProps) => {
           {segments.map((segment, index) => (
             <li key={index} className="inline-flex items-center shrink-0">
               <button
+                type="button"
                 className="inline-flex items-center text-[10px] sm:text-xs font-medium text-gray-700 hover:text-gray-950 transition-colors cursor-pointer max-w-16 sm:max-w-24 md:max-w-32 lg:max-w-none truncate"
                 onClick={() => onSegmentClick(index)}
                 aria-label={segment}
