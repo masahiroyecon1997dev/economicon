@@ -8,11 +8,13 @@
 import gc
 from typing import ClassVar, Literal
 
+import numpy as np
 import polars as pl
 
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.regressions import AddDiagnosticColumnsRequestBody
+from economicon.services.data.analysis_result import AnalysisResult
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from economicon.services.data.tables_store import TablesStore
 from economicon.services.regressions.diagnostics import (
@@ -25,6 +27,7 @@ from economicon.services.regressions.diagnostics import (
     extract_from_regularized,
     extract_from_statsmodels,
     extract_from_tobit,
+    resolve_column_name,
 )
 from economicon.services.regressions.fitters import RegularizedResult
 from economicon.utils import ProcessingError, ValidationError
@@ -120,8 +123,10 @@ class AddDiagnosticColumns:
                 % {"id": self.result_id},
             ) from None
 
-        # pkl ファイルの存在確認
-        if not analysis_result.has_model_file():
+        model_type = analysis_result.model_type
+
+        # pkl ファイルの存在確認（OLS はパラメータベース計算のためスキップ）
+        if model_type != "ols" and not analysis_result.has_model_file():
             raise ValidationError(
                 error_code=ErrorCode.MODEL_FILE_NOT_FOUND,
                 message=_("Model file not found for result: resultId = %(id)s")
@@ -129,7 +134,6 @@ class AddDiagnosticColumns:
             )
 
         # FE/RE の場合、entity_id_column / time_column をテーブルで確認
-        model_type = analysis_result.model_type
         if model_type in ("fe", "re"):
             column_name_list = self.tables_store.get_column_name_list(
                 self.table_name
@@ -185,32 +189,34 @@ class AddDiagnosticColumns:
                     % {"id": self.result_id},
                 )
 
-            # pkl からモデルをロード（処理後にすぐ解放）
-            raw_model = analysis_result.load_model()
+            table_info = self.tables_store.get_table(self.table_name)
+            df = table_info.table
+            existing_cols = df.columns
+            dep_var = analysis_result.result_data.get(
+                "dependentVariable", "y"
+            )
 
-            try:
-                table_info = self.tables_store.get_table(self.table_name)
-                df = table_info.table
-                existing_cols = df.columns
-
-                # 分析結果の被説明変数名を接頭辞として取得
-                dep_var = analysis_result.result_data.get(
-                    "dependentVariable", "y"
-                )
-
-                # モデル種別に応じたデータ抽出
-                values_df, added_cols = self._dispatch_extract(
-                    raw_model=raw_model,
-                    model_type=model_type,
+            if model_type == "ols":
+                # OLS はパラメータから直接計算 - モデルファイル不要
+                values_df, added_cols = self._extract_from_ols_params(
                     dep_var=dep_var,
                     existing_cols=existing_cols,
                     analysis_result=analysis_result,
                 )
-
-            finally:
-                # メモリ節約：ロードしたモデルを即座に解放
-                del raw_model
-                gc.collect()
+            else:
+                # pkl からモデルをロード（処理後にすぐ解放）
+                raw_model = analysis_result.load_model()
+                try:
+                    values_df, added_cols = self._dispatch_extract(
+                        raw_model=raw_model,
+                        model_type=model_type,
+                        dep_var=dep_var,
+                        existing_cols=existing_cols,
+                        analysis_result=analysis_result,
+                    )
+                finally:
+                    del raw_model
+                    gc.collect()
 
             if not added_cols:
                 return {
@@ -235,7 +241,7 @@ class AddDiagnosticColumns:
                 "addedColumns": added_cols,
             }
 
-        except ProcessingError, ValidationError:
+        except (ProcessingError, ValidationError):
             raise
         except Exception as e:
             raise ProcessingError(
@@ -250,6 +256,94 @@ class AddDiagnosticColumns:
     # ------------------------------------------------------------------
     # 内部ヘルパー
     # ------------------------------------------------------------------
+
+    def _extract_from_ols_params(
+        self,
+        dep_var: str,
+        existing_cols: list[str],
+        analysis_result: AnalysisResult,
+    ) -> tuple[pl.DataFrame, list[str]]:
+        """OLS 保存済みパラメータから予測値・残差を計算する。
+
+        standardized=True / include_interval=True の場合は
+        ValidationError (400) を送出する（未サポート）。
+        """
+        if self.standardized:
+            raise ValidationError(
+                error_code=ErrorCode.MODEL_TYPE_NOT_SUPPORTED,
+                message=_(
+                    "standardized residuals are not yet supported"
+                    " for OLS parameter-based calculation"
+                ),
+            )
+        if self.include_interval:
+            raise ValidationError(
+                error_code=ErrorCode.MODEL_TYPE_NOT_SUPPORTED,
+                message=_(
+                    "confidence intervals are not yet supported"
+                    " for OLS parameter-based calculation"
+                ),
+            )
+
+        result_data = analysis_result.result_data
+        has_const: bool = result_data.get("hasConst", True)
+        explanatory_variables: list[str] = result_data["explanatoryVariables"]
+        coef_map: dict[str, float] = {
+            p["variable"]: p["coefficient"]
+            for p in result_data["parameters"]
+        }
+
+        df = self.tables_store.get_table(self.table_name).table
+        n = df.height
+
+        # β ベクトルと X 行列を構築（定数項を先頭に配置）
+        x_components: list[np.ndarray] = []
+        beta: list[float] = []
+        if has_const:
+            x_components.append(np.ones(n, dtype=np.float64))
+            beta.append(coef_map["const"])
+        for v in explanatory_variables:
+            x_components.append(df[v].cast(pl.Float64).to_numpy())
+            beta.append(coef_map[v])
+
+        beta_arr = np.array(beta, dtype=np.float64)
+        # np.array(...).T: (k, n) → (n, k)。単一列でも常に 2D になる
+        x_arr = np.array(x_components, dtype=np.float64).T
+        y_arr = df[dep_var].cast(pl.Float64).to_numpy()
+
+        # NaN は行列乗算で自然に伝播し、欠損行の結果が NaN になる
+        fitted_arr: np.ndarray = x_arr @ beta_arr
+        resid_arr: np.ndarray = y_arr - fitted_arr
+
+        # 列名の衝突を解決
+        fitted_name = resolve_column_name(existing_cols, f"{dep_var}_fitted")
+        resid_name = resolve_column_name(
+            [*existing_cols, fitted_name], f"{dep_var}_resid"
+        )
+
+        added_cols: list[str] = []
+        # _join_to_table が left_join に使う行インデックス列
+        series_list: list[pl.Series] = [
+            pl.Series("__row_idx__", range(n), dtype=pl.UInt32)
+        ]
+
+        if self.target in ("fitted", "both"):
+            series_list.append(
+                pl.Series(
+                    fitted_name, fitted_arr, dtype=pl.Float64
+                ).fill_nan(None)
+            )
+            added_cols.append(fitted_name)
+
+        if self.target in ("residual", "both"):
+            series_list.append(
+                pl.Series(
+                    resid_name, resid_arr, dtype=pl.Float64
+                ).fill_nan(None)
+            )
+            added_cols.append(resid_name)
+
+        return pl.DataFrame(series_list), added_cols
 
     def _dispatch_extract(  # noqa: C901
         self,
