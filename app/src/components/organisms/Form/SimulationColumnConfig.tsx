@@ -152,6 +152,14 @@ export const SimulationColumnConfig = ({
             errors[param] = result.error.issues[0]?.message ?? "";
           }
         }
+        // 一様分布: 最小値 < 最大値のクロスバリデーション
+        if (selectedType === "uniform" && !errors["low"] && !errors["high"]) {
+          if (Number(value.low) >= Number(value.high)) {
+            errors["high"] = t(
+              "ValidationMessages.UniformLowMustBeLessThanHigh",
+            );
+          }
+        }
         if (Object.keys(errors).length > 0) {
           setParamsError(errors);
           return;
