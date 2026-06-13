@@ -44,17 +44,18 @@ Economicon はスタンドアロン型計量経済分析デスクトップアプ
 
 ## カスタムエージェント
 
-10 種類のエージェントを [agents/](agents/) で定義:
+11 種類のエージェントを [agents/](agents/) で定義:
 
-| エージェント             | 用途                                   |
-| ------------------------ | -------------------------------------- |
-| `api-architect`          | FastAPI / Polars 設計・実装            |
-| `app-architect`          | React / Tauri フロントエンド設計・実装 |
-| `api-reviewer`           | API コードレビュー                     |
-| `app-reviewer`           | フロントエンドコードレビュー           |
-| `api-test-engineer`      | pytest テスト設計・実装                |
-| `app-test-engineer`      | Vitest / Playwright テスト設計・実装   |
-| `app-design-reviewer`    | UI/UX レビュー                         |
-| `ci-cd-build-specialist` | CI/CD・リリース管理                    |
-| `document-writer`        | ドキュメント作成・更新                 |
-| `agent-manager`          | エージェント定義・instructions の保守  |
+| エージェント             | 用途                                                        |
+| ------------------------ | ----------------------------------------------------------- |
+| `api-architect`          | FastAPI / Polars 設計・実装                                 |
+| `app-architect`          | React / Tauri フロントエンド設計・実装                      |
+| `api-reviewer`           | API コードレビュー                                          |
+| `app-reviewer`           | フロントエンドコードレビュー                                |
+| `api-test-engineer`      | pytest テスト設計・実装                                     |
+| `app-test-engineer`      | Vitest / Playwright テスト設計・実装                        |
+| `app-design-reviewer`    | UI/UX レビュー                                              |
+| `ci-cd-build-specialist` | CI/CD・リリース管理                                         |
+| `document-writer`        | ドキュメント作成・更新                                      |
+| `agent-manager`          | エージェント定義・instructions の保守                       |
+| `video-producer`         | Playwright 収録 × Remotion 合成による紹介動画パイプライン   |

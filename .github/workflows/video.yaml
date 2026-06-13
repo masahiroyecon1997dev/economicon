@@ -1,0 +1,190 @@
+name: "Video CI"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["dev"]
+    paths:
+      - "video/**"
+  pull_request:
+    branches: ["dev", "main"]
+    paths:
+      - "video/**"
+
+permissions: {}
+
+jobs:
+  typecheck-playwright:
+    name: TypeScript Type Check (video/playwright)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "video/playwright/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ./video/playwright
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript type check
+        working-directory: ./video/playwright
+        run: pnpm exec tsc --noEmit
+
+  typecheck-remotion:
+    name: TypeScript Type Check (video/remotion)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "video/remotion/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ./video/remotion
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript type check
+        working-directory: ./video/remotion
+        run: pnpm exec tsc --noEmit
+
+  remotion-compositions:
+    name: Remotion Composition Validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    # typecheck-remotion が通過してから実行
+    needs: typecheck-remotion
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "video/remotion/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ./video/remotion
+        run: pnpm install --frozen-lockfile
+
+      - name: Create publicDir (playwright/captured)
+        # remotion.config.ts が "../playwright/captured" を publicDir に設定しているため事前作成
+        run: mkdir -p video/playwright/captured
+
+      - name: Validate Remotion compositions
+        working-directory: ./video/remotion
+        run: pnpm exec remotion compositions src/Root.tsx
+
+  lock-integrity:
+    name: Lock File Integrity (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        package: ["playwright", "remotion"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "video/${{ matrix.package }}/pnpm-lock.yaml"
+
+      - name: Check lock file integrity
+        working-directory: ./video/${{ matrix.package }}
+        run: pnpm install --frozen-lockfile
+
+  playwright-dry-run:
+    name: Playwright Scene Dry-Run (tsx transpile check)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    # 型チェック通過後にトランスパイル互換性を検証
+    needs: typecheck-playwright
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: "video/playwright/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        working-directory: ./video/playwright
+        run: pnpm install --frozen-lockfile
+
+      - name: Scene file dry-run (tsx transpile + import check)
+        working-directory: ./video/playwright
+        run: |
+          # tsx で各シーンをトランスパイル・ロード検証
+          # アプリ未起動による接続失敗（ECONNREFUSED）は正常、構文/import エラーのみ失敗とする
+          for f in scenes/*.ts; do
+            echo "Checking: $f"
+            set +e
+            output=$(timeout 5 pnpm exec tsx "$f" 2>&1)
+            code=$?
+            set -e
+            if [ "$code" -eq 0 ] || [ "$code" -eq 124 ]; then
+              echo "  OK"
+            elif echo "$output" | grep -qE "ECONNREFUSED|browserType\.connect|connect ENOENT"; then
+              echo "  OK (connection refused — app not running, expected in CI)"
+            else
+              echo "::error::Unexpected failure in $f (exit $code):"
+              echo "$output"
+              exit 1
+            fi
+          done
