@@ -1,6 +1,8 @@
 import type { AnalysisResultDetail } from "@/api/model";
 import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnalysisResultDialog";
 import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
+import { LogitRegressionForm } from "@/components/organisms/Form/LogitRegressionForm";
+import { ProbitRegressionForm } from "@/components/organisms/Form/ProbitRegressionForm";
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
 import { AsymptoticNormality } from "@/components/pages/AsymptoticNormality";
@@ -48,6 +50,8 @@ type StaticWorkFeatureKey = Exclude<
   | "DescriptiveStatistics"
   | "StatisticalTestView"
   | "LinearRegressionForm"
+  | "LogitRegressionForm"
+  | "ProbitRegressionForm"
   | "GroupStatistics"
   | "PlotView"
 >;
@@ -360,6 +364,18 @@ export const WorkspaceSurface = () => {
     if (tab.featureKey === "LinearRegressionForm") {
       return (
         <LinearRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
+      );
+    }
+
+    if (tab.featureKey === "LogitRegressionForm") {
+      return (
+        <LogitRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
+      );
+    }
+
+    if (tab.featureKey === "ProbitRegressionForm") {
+      return (
+        <ProbitRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
       );
     }
 

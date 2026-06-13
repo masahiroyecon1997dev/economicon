@@ -46,7 +46,9 @@
     "NumberOfSuccesses": "成功数",
     "SampleSize": "標本サイズ",
     "RandomSeed": "乱数シード",
-    "RandomSeedPlaceholder": "省略可（0〜100,000,000）"
+    "RandomSeedPlaceholder": "省略可（0〜100,000,000）",
+    "CalculateMarginalEffects": "平均限界効果を計算",
+    "CalculateMarginalEffectsDescription": "平均限界効果 (AME) を結果に含めます。"
   },
   "AppBar": {
     "Minimize": "最小化",
@@ -77,7 +79,10 @@
     "HypothesisTest": "仮説検定",
     "Regression": "回帰分析",
     "LinearRegressionMenu": "線形回帰",
+    "NonlinearRegressionMenu": "非線形回帰",
     "OrdinaryLeastSquares": "最小二乗法",
+    "LogitAnalysis": "ロジット",
+    "ProbitAnalysis": "プロビット",
     "Visualization": "可視化",
     "PlotView": "プロットビュー",
     "DistributionPreview": "分布プレビュー",
@@ -506,7 +511,7 @@
     "AdvancedOptions": "詳細オプション",
     "AdvancedOptionsSummary": "標準誤差: {{se}} | 定数項: {{const}} | 欠損値: {{missing}}",
     "StandardErrorMethod": "標準誤差の計算方法",
-    "StandardError_nonrobust": "通常 (OLS)",
+    "StandardError_nonrobust": "通常",
     "StandardError_hac": "HAC (系列相関・不均一分散)",
     "StandardError_cluster": "クラスター",
     "HacMaxlags": "最大ラグ数",
@@ -519,13 +524,21 @@
     "MissingValue_ignore": "そのまま使用",
     "MissingValue_error": "エラーとして扱う",
     "SelectVariable": "変数を選択",
-    "SE_tooltip_nonrobust": "均一分散を仮定した通常の OLS 標準誤差。一般的なベースラインです。",
+    "SE_tooltip_nonrobust": "追加の補正を行わない標準誤差です。ベースラインとして使います。",
     "SE_tooltip_HC0": "不均一分散頑健な White (1980) 標準誤差。小標本補正なし。",
     "SE_tooltip_HC1": "HC0 に自由度補正 (n/(n-k)) を加えた標準誤差。Stata の robust と同等。",
     "SE_tooltip_HC2": "レバレッジを考慮した不均一分散頑健標準誤差。",
     "SE_tooltip_HC3": "影響点に対してより保守的な頑健標準誤差。小標本で推奨。",
     "SE_tooltip_hac": "系列相関と不均一分散の両方に頑健な Newey-West 型標準誤差。時系列データ向け。",
     "SE_tooltip_cluster": "クラスター内の相関を許容するクラスター頑健標準誤差。"
+  },
+  "LogitRegressionForm": {
+    "Title": "ロジット回帰",
+    "Description": "データを選択し、被説明変数と説明変数を指定してロジット回帰を実行します。平均限界効果は既定で有効です。"
+  },
+  "ProbitRegressionForm": {
+    "Title": "プロビット回帰",
+    "Description": "データを選択し、被説明変数と説明変数を指定してプロビット回帰を実行します。平均限界効果は既定で有効です。"
   },
   "RegressionResult": {
     "AnalysisSummary": "分析概要",

@@ -46,7 +46,9 @@
     "NumberOfSuccesses": "Number of Successes",
     "SampleSize": "Sample size",
     "RandomSeed": "Random Seed",
-    "RandomSeedPlaceholder": "Optional (0–100,000,000)"
+    "RandomSeedPlaceholder": "Optional (0–100,000,000)",
+    "CalculateMarginalEffects": "Calculate marginal effects",
+    "CalculateMarginalEffectsDescription": "Include average marginal effects (AME) in the result."
   },
   "AppBar": {
     "Minimize": "Minimize",
@@ -77,7 +79,10 @@
     "HypothesisTest": "Hypothesis Test",
     "Regression": "Regression",
     "LinearRegressionMenu": "Linear Regression",
+    "NonlinearRegressionMenu": "Nonlinear Regression",
     "OrdinaryLeastSquares": "Ordinary Least Squares",
+    "LogitAnalysis": "Logit",
+    "ProbitAnalysis": "Probit",
     "Visualization": "Visualization",
     "PlotView": "Plot View",
     "DistributionPreview": "Distribution Preview",
@@ -506,7 +511,7 @@
     "AdvancedOptions": "Advanced Options",
     "AdvancedOptionsSummary": "SE: {{se}} | Constant: {{const}} | Missing: {{missing}}",
     "StandardErrorMethod": "Standard Error Method",
-    "StandardError_nonrobust": "Non-robust (OLS)",
+    "StandardError_nonrobust": "Non-robust",
     "StandardError_hac": "HAC (Autocorrelation/Heteroskedasticity)",
     "StandardError_cluster": "Cluster",
     "HacMaxlags": "Max Lags",
@@ -519,13 +524,21 @@
     "MissingValue_ignore": "Ignore",
     "MissingValue_error": "Error",
     "SelectVariable": "Select variable",
-    "SE_tooltip_nonrobust": "Standard OLS standard errors assuming homoskedasticity. Use as the baseline.",
+    "SE_tooltip_nonrobust": "Standard errors without additional correction. Use as the baseline.",
     "SE_tooltip_HC0": "White (1980) heteroskedasticity-robust SE without small-sample correction.",
     "SE_tooltip_HC1": "HC0 with degrees-of-freedom correction (n/(n\u2212k)). Equivalent to Stata \u2018robust\u2019.",
     "SE_tooltip_HC2": "Heteroskedasticity-robust SE accounting for leverage.",
     "SE_tooltip_HC3": "More conservative robust SE for influential observations. Recommended for small samples.",
     "SE_tooltip_hac": "Newey-West SE robust to both autocorrelation and heteroskedasticity. Use for time-series data.",
     "SE_tooltip_cluster": "Cluster-robust SE allowing for within-cluster correlation."
+  },
+  "LogitRegressionForm": {
+    "Title": "Logit Regression",
+    "Description": "Select data, assign the dependent and explanatory variables, then run a logit regression. Average marginal effects are enabled by default."
+  },
+  "ProbitRegressionForm": {
+    "Title": "Probit Regression",
+    "Description": "Select data, assign the dependent and explanatory variables, then run a probit regression. Average marginal effects are enabled by default."
   },
   "RegressionResult": {
     "AnalysisSummary": "Analysis Summary",
