@@ -9,7 +9,7 @@ type BreadcrumbProps = {
 export const Breadcrumb = ({ segments, onSegmentClick }: BreadcrumbProps) => {
   return (
     <nav
-      className="flex h-8 px-2 sm:px-2.5 md:px-4 text-gray-700 border border-gray-200 rounded-lg bg-gray-50 min-w-0 max-w-full overflow-hidden"
+      className="flex h-8 px-2 sm:px-2.5 md:px-4 text-gray-700 border border-gray-200 rounded-lg bg-gray-50 min-w-0 max-w-full overflow-hidden dark:bg-gray-700 dark:border-gray-500"
       aria-label="Breadcrumb"
     >
       <div className="overflow-x-auto scrollbar-hide w-full flex items-center">
@@ -18,7 +18,7 @@ export const Breadcrumb = ({ segments, onSegmentClick }: BreadcrumbProps) => {
             <li key={index} className="inline-flex items-center shrink-0">
               <button
                 type="button"
-                className="inline-flex items-center text-[10px] sm:text-xs font-medium text-gray-700 hover:text-gray-950 transition-colors cursor-pointer max-w-16 sm:max-w-24 md:max-w-32 lg:max-w-none truncate"
+                className="inline-flex items-center text-[10px] sm:text-xs font-medium text-gray-700 hover:text-gray-950 transition-colors cursor-pointer max-w-16 sm:max-w-24 md:max-w-32 lg:max-w-none truncate dark:text-gray-400 dark:hover:text-gray-200"
                 onClick={() => onSegmentClick(index)}
                 aria-label={segment}
               >
