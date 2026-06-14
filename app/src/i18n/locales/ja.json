@@ -81,8 +81,8 @@
     "LinearRegressionMenu": "線形回帰",
     "NonlinearRegressionMenu": "非線形回帰",
     "OrdinaryLeastSquares": "最小二乗法",
-    "LogitAnalysis": "ロジット",
-    "ProbitAnalysis": "プロビット",
+    "LogitAnalysis": "ロジットモデル",
+    "ProbitAnalysis": "プロビットモデル",
     "Visualization": "可視化",
     "PlotView": "プロットビュー",
     "DistributionPreview": "分布プレビュー",
@@ -732,7 +732,8 @@
     "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください",
     "NewColumnNameRequired": "新しいカラム名を入力してください。",
     "CalculationExpressionRequired": "計算式を入力してください。",
-    "RandomSeedRange": "乱数シードは0以上1億以下の整数を入力してください。"
+    "RandomSeedRange": "乱数シードは0以上1億以下の整数を入力してください。",
+    "UniformLowMustBeLessThanHigh": "一様分布では最小値は最大値より小さくなければなりません"
   },
   "ColumnMenu": {
     "SortAsc": "昇順ソート",

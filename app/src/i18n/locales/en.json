@@ -81,8 +81,8 @@
     "LinearRegressionMenu": "Linear Regression",
     "NonlinearRegressionMenu": "Nonlinear Regression",
     "OrdinaryLeastSquares": "Ordinary Least Squares",
-    "LogitAnalysis": "Logit",
-    "ProbitAnalysis": "Probit",
+    "LogitAnalysis": "Logit Model",
+    "ProbitAnalysis": "Probit Model",
     "Visualization": "Visualization",
     "PlotView": "Plot View",
     "DistributionPreview": "Distribution Preview",
@@ -732,7 +732,8 @@
     "ExplanatoryVariablesRequired": "Please select at least one explanatory variable.",
     "NewColumnNameRequired": "Please enter a new column name.",
     "CalculationExpressionRequired": "Please enter a calculation expression.",
-    "RandomSeedRange": "Random seed must be an integer between 0 and 100,000,000."
+    "RandomSeedRange": "Random seed must be an integer between 0 and 100,000,000.",
+    "UniformLowMustBeLessThanHigh": "For uniform distribution, the minimum must be less than the maximum"
   },
   "ColumnMenu": {
     "SortAsc": "Sort Ascending",
