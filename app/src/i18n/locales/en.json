@@ -568,10 +568,21 @@
     "SignificanceNote": "Significance: *** p<0.001 / ** p<0.01 / * p<0.05",
     "NA": "N/A",
     "QuickCopyMd": "Copy as Markdown",
-    "OutputDialog": "Export..."
+    "OutputDialog": "Export...",
+    "AddDiagnosticColumns": "Add Residuals/Fitted"
+  },
+  "AddDiagnosticColumns": {
+    "Title": "Add Residuals / Fitted Values",
+    "Subtitle": "Append residual or fitted value columns to the selected table",
+    "TableName": "Target Table",
+    "TargetLabel": "Columns to Add",
+    "TargetFitted": "Fitted values",
+    "TargetResidual": "Residuals",
+    "Submit": "Add Columns",
+    "SuccessMessage": "Columns added: {{columns}}",
+    "ErrorSelectTarget": "Please select at least one option (fitted or residual)"
   },
   "OutputResultDialog": {
-    "Title": "Export Result",
     "Format": "Format",
     "FormatText": "Plain Text",
     "FormatMarkdown": "Markdown",

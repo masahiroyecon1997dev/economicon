@@ -6,10 +6,11 @@ import {
   ResultSection,
   StatItem,
 } from "@/components/molecules/Result/ResultSection";
+import { AddDiagnosticColumnsDialog } from "@/components/organisms/Dialog/AddDiagnosticColumnsDialog";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { cn } from "@/lib/utils/helpers";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
-import { Check, Clipboard, FileDown, Loader2 } from "lucide-react";
+import { Check, Clipboard, FileDown, Loader2, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -27,6 +28,7 @@ export const RegressionResult = ({
   const [outputDialogSessionKey, setOutputDialogSessionKey] = useState(0);
   const [isQuickCopying, setIsQuickCopying] = useState(false);
   const [isQuickCopied, setIsQuickCopied] = useState(false);
+  const [isDiagnosticDialogOpen, setIsDiagnosticDialogOpen] = useState(false);
 
   const formatNumber = (
     num: number | null | undefined,
@@ -83,6 +85,27 @@ export const RegressionResult = ({
       <ResultSection title={t("RegressionResult.AnalysisSummary")}>
         {/* ── ヘッダー右端: 出力ボタン群 ── */}
         <div className="mb-3 flex justify-end gap-1.5">
+          {!isDiscreteModel && (
+            <Tooltip content={t("RegressionResult.AddDiagnosticColumns")}>
+              <span className="inline-flex">
+                <button
+                  type="button"
+                  onClick={() => setIsDiagnosticDialogOpen(true)}
+                  aria-label={t("RegressionResult.AddDiagnosticColumns")}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                    "border border-gray-300 dark:border-gray-600",
+                    "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+                  )}
+                  data-testid="add-diagnostic-columns-btn"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  {t("RegressionResult.AddDiagnosticColumns")}
+                </button>
+              </span>
+            </Tooltip>
+          )}
+
           <Tooltip content={t("RegressionResult.QuickCopyMd")}>
             <span className="inline-flex">
               <button
@@ -160,6 +183,14 @@ export const RegressionResult = ({
         onOpenChange={setIsOutputDialogOpen}
         resultKind="regression"
         result={result}
+      />
+
+      {/* 診断列追加ダイアログ */}
+      <AddDiagnosticColumnsDialog
+        open={isDiagnosticDialogOpen}
+        onOpenChange={setIsDiagnosticDialogOpen}
+        resultId={result.resultId}
+        defaultTableName={result.tableName}
       />
 
       {/* 係数テーブル */}

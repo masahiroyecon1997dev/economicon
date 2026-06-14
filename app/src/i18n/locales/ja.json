@@ -568,10 +568,21 @@
     "SignificanceNote": "有意水準: *** p<0.001 / ** p<0.01 / * p<0.05",
     "NA": "N/A",
     "QuickCopyMd": "Markdownをクリップボードにコピー",
-    "OutputDialog": "出力..."
+    "OutputDialog": "出力...",
+    "AddDiagnosticColumns": "残差/予測値を追加"
+  },
+  "AddDiagnosticColumns": {
+    "Title": "残差/予測値を追加",
+    "Subtitle": "指定のテーブルに残差・予測値列を追加します",
+    "TableName": "追加先テーブル",
+    "TargetLabel": "追加する列",
+    "TargetFitted": "予測値",
+    "TargetResidual": "残差",
+    "Submit": "列を追加",
+    "SuccessMessage": "列を追加しました: {{columns}}",
+    "ErrorSelectTarget": "予測値または残差を少なくとも一つ選択してください"
   },
   "OutputResultDialog": {
-    "Title": "結果出力",
     "Format": "フォーマット",
     "FormatText": "テキスト",
     "FormatMarkdown": "Markdown",
