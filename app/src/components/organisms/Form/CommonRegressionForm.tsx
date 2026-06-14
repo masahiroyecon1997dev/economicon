@@ -26,6 +26,7 @@ import {
 import { createFieldError } from "@/lib/utils/formHelpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentPage";
+import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
@@ -87,15 +88,19 @@ export const CommonRegressionForm = ({
   const tErr = createFieldError(t);
   const tableList = useTableListStore((state) => state.tableList);
   const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
+  const activeTableName = useTableInfosStore((state) => state.activeTableName);
+  // アクティブテーブルが削除済みの場合は空文字をデフォルトにする
+  const safeInitialTable =
+    activeTableName && tableList.includes(activeTableName)
+      ? activeTableName
+      : (tableList[0] ?? "");
   const { selectedTableName, setSelectedTableName, columnList, setColumnList } =
     useTableColumnLoader({
       numericOnly: false,
       autoLoadOnMount: true,
+      initialSelectedTableName: safeInitialTable,
     });
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
-  const closeActiveWorkTab = useWorkspaceTabsStore(
-    (state) => state.closeActiveWorkTab,
-  );
 
   const form = useForm({
     defaultValues: {
@@ -162,7 +167,6 @@ export const CommonRegressionForm = ({
           const resultResponse = await api.getAnalysisResult(resultId);
           if (resultResponse.code === "OK" && resultResponse.result) {
             const detail: AnalysisResultDetail = resultResponse.result;
-            closeActiveWorkTab();
             openResultTab(detail);
             await useAnalysisResultsStore.getState().fetchSummaries();
             return;
