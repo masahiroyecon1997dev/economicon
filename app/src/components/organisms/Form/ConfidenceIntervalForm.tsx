@@ -83,9 +83,6 @@ export const ConfidenceIntervalForm = ({
     useTableColumnLoader({ numericOnly: true, autoLoadOnMount: true });
   const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
-  const closeActiveWorkTab = useWorkspaceTabsStore(
-    (state) => state.closeActiveWorkTab,
-  );
   const [levelMode, setLevelMode] = useState<"select" | "manual">("select");
   const [infoDialogKey, setInfoDialogKey] = useState<string | null>(null);
 
@@ -119,7 +116,6 @@ export const ConfidenceIntervalForm = ({
           const { resultId } = response.result;
           const detailResponse = await api.getAnalysisResult(resultId);
           if (detailResponse.code === "OK") {
-            closeActiveWorkTab();
             openResultTab(detailResponse.result);
             await useAnalysisResultsStore.getState().fetchSummaries();
             return;

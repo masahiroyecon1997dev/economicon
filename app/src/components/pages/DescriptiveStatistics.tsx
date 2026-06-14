@@ -7,16 +7,16 @@ import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup"
 import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
 import { FormField } from "@/components/molecules/Form/FormField";
 import {
-    AnalysisEmptyState,
-    AnalysisNoTablesState,
+  AnalysisEmptyState,
+  AnalysisNoTablesState,
 } from "@/components/organisms/EmptyState/AnalysisNoTablesState";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { ALL_STAT_TYPES } from "@/constants/statisticTypes";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-    buildCaughtErrorMessage,
-    buildResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
@@ -25,8 +25,8 @@ import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
 import {
-    selectWorkTabDraft,
-    useWorkspaceTabsStore,
+  selectWorkTabDraft,
+  useWorkspaceTabsStore,
 } from "@/stores/workspaceTabs";
 import { ChevronDown, Loader2, SearchX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -97,9 +97,6 @@ export const DescriptiveStatistics = ({
     (state) => state.navigateToWorkspace,
   );
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
-  const closeActiveWorkTab = useWorkspaceTabsStore(
-    (state) => state.closeActiveWorkTab,
-  );
   const ensureWorkTabState = useWorkspaceTabsStore(
     (state) => state.ensureWorkTabState,
   );
@@ -291,7 +288,6 @@ export const DescriptiveStatistics = ({
               buildFormValues(selectedTable, orderedCols, orderedStats),
             );
           }
-          closeActiveWorkTab();
           openResultTab(detailResponse.result);
           await useAnalysisResultsStore.getState().fetchSummaries();
           return;

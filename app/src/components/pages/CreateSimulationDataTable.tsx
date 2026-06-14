@@ -84,9 +84,7 @@ const hasColumnError = (col: SimulationColumnSetting): boolean =>
 
 export const CreateSimulationDataTable = () => {
   const { t } = useTranslation();
-  const closeActiveWorkTab = useWorkspaceTabsStore(
-    (state) => state.closeActiveWorkTab,
-  );
+  const openDataTab = useWorkspaceTabsStore((state) => state.openDataTab);
   const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
   const addTableName = useTableListStore((state) => state.addTableName);
   const addTableInfo = useTableInfosStore((state) => state.addTableInfo);
@@ -175,7 +173,7 @@ export const CreateSimulationDataTable = () => {
           const resTableInfo = await getTableInfo(response.result.tableName);
           addTableName(response.result.tableName);
           addTableInfo(resTableInfo);
-          closeActiveWorkTab();
+          openDataTab(response.result.tableName);
         } else {
           await showMessageDialog(
             t("Error.Error"),

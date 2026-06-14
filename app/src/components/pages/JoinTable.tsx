@@ -38,7 +38,7 @@ export const JoinTable = () => {
   const tableList = useTableListStore((s) => s.tableList);
   const addTableName = useTableListStore((s) => s.addTableName);
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
-  const closeActiveWorkTab = useWorkspaceTabsStore((s) => s.closeActiveWorkTab);
+  const openDataTab = useWorkspaceTabsStore((s) => s.openDataTab);
 
   const [leftTable, setLeftTable] = useState("");
   const [rightTable, setRightTable] = useState("");
@@ -177,7 +177,7 @@ export const JoinTable = () => {
         const tableInfo = await getTableInfo(newTableName.trim());
         addTableName(newTableName.trim());
         addTableInfo(tableInfo);
-        closeActiveWorkTab();
+        openDataTab(newTableName.trim());
       } else {
         await showMessageDialog(
           t("Error.Error"),
@@ -388,7 +388,7 @@ export const JoinTable = () => {
         selectText={
           isSubmitting ? t("JoinTable.Processing") : t("JoinTable.RunJoin")
         }
-        onCancel={closeActiveWorkTab}
+        onCancel={() => useWorkspaceTabsStore.getState().closeActiveWorkTab()}
         onSelect={handleSubmit}
         isLoading={isSubmitting}
       />
