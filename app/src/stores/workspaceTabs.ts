@@ -69,6 +69,8 @@ type WorkspaceTabsActions = {
     initialValues?: unknown,
   ) => string;
   closeActiveWorkTab: () => void;
+  /** アクティブな work タブはそのまま残し、指定タブ（data / result）をアクティブにする */
+  focusTab: (tabId: string) => void;
   moveTab: (tabId: string, targetIndex: number) => void;
   setWorkTabDirty: (tabId: string, dirty: boolean) => void;
   ensureWorkTabState: (tabId: string, initialValues: unknown) => void;
@@ -333,6 +335,10 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsStore>((set, get) => ({
         tabs.find((t) => t.id !== activeTabId && t.kind !== "work")?.id ??
         null,
     });
+  },
+
+  focusTab: (tabId) => {
+    set({ activeTabId: tabId });
   },
 
   setWorkTabDirty: (tabId, dirty) =>
