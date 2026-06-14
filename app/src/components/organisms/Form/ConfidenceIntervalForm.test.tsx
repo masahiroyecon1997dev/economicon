@@ -35,8 +35,8 @@ vi.mock("../../../api/endpoints");
 vi.mock("../../../lib/dialog/message", () => ({
   showMessageDialog: vi.fn().mockResolvedValue(undefined),
 }));
-vi.mock("../../../components/organisms/Dialog/StatisticsInfoDialog", () => ({
-  StatisticsInfoDialog: () => <div data-testid="statistics-info-dialog" />,
+vi.mock("../../../stores/explainerDialog", () => ({
+  openExplainerDialog: vi.fn(),
 }));
 
 // useTableColumnLoader モック: 数値列リストを返す

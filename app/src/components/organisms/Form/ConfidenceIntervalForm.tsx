@@ -4,7 +4,6 @@ import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { FormField } from "@/components/molecules/Form/FormField";
-import { StatisticsInfoDialog } from "@/components/organisms/Dialog/StatisticsInfoDialog";
 import {
   AnalysisEmptyState,
   AnalysisNoTablesState,
@@ -19,6 +18,7 @@ import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentPage";
+import { openExplainerDialog } from "@/stores/explainerDialog";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
@@ -84,7 +84,6 @@ export const ConfidenceIntervalForm = ({
   const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
   const [levelMode, setLevelMode] = useState<"select" | "manual">("select");
-  const [infoDialogKey, setInfoDialogKey] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -260,7 +259,7 @@ export const ConfidenceIntervalForm = ({
                     aria-label={t(
                       "ConfidenceIntervalView.StatisticTypeInfoLabel",
                     )}
-                    onClick={() => setInfoDialogKey(field.state.value)}
+                    onClick={() => openExplainerDialog(field.state.value)}
                     className="text-gray-400 hover:text-brand-accent transition-colors"
                     data-testid="statistic-type-info-btn"
                   >
@@ -383,18 +382,6 @@ export const ConfidenceIntervalForm = ({
         disabled={isSubmitting}
         isLoading={isSubmitting}
       />
-
-      {/* 統計量説明ダイアログ */}
-      {infoDialogKey && (
-        <StatisticsInfoDialog
-          open={infoDialogKey !== null}
-          onOpenChange={(open) => {
-            if (!open) setInfoDialogKey(null);
-          }}
-          statisticKey={infoDialogKey}
-          category="confidence_interval"
-        />
-      )}
     </form>
   );
 };
