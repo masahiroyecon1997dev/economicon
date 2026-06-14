@@ -624,6 +624,7 @@
     "StatisticTypeLabel": "Statistic Type",
     "SelectStatisticType": "Select type",
     "StatisticTypeInfoLabel": "Show statistic description",
+    "ExplainerButtonLabel": "Learn about confidence intervals",
     "StatisticType_mean": "Mean (t-dist)",
     "StatisticType_median": "Median (Bootstrap)",
     "StatisticType_proportion": "Proportion (Wilson)",

@@ -624,6 +624,7 @@
     "StatisticTypeLabel": "統計量タイプ",
     "SelectStatisticType": "タイプを選択",
     "StatisticTypeInfoLabel": "統計量の説明を表示",
+    "ExplainerButtonLabel": "信頼区間についての解説を見る",
     "StatisticType_mean": "平均（t分布）",
     "StatisticType_median": "中央値（ブートストラップ）",
     "StatisticType_proportion": "比率（Wilson区間）",

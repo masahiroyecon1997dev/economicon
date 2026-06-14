@@ -1,6 +1,25 @@
 import type { ExplainerContentMap } from "./types";
 
 export const enExplainer = {
+  confidence_interval: {
+    title: "What Is a Confidence Interval?",
+    description:
+      'A confidence interval gives you an upper and lower bound for an estimated value. Typically, 90%, 95%, or 99% intervals are used.\n\nWhen you hear "95% confidence interval", it\'s tempting to think "there is a 95% probability that the true value lies within this interval" — but this is incorrect. In frequentist statistics, the true value is a single fixed number. What varies is the confidence interval itself (both its upper and lower bounds) calculated from our data.\n\nThe correct interpretation: "If we repeated this with 100 independent datasets, approximately 95 of the resulting intervals would contain the true fixed value." This is the meaning of a 95% confidence interval.',
+    sections: [
+      {
+        heading: "Why use the distribution of the estimator?",
+        body: 'The width of a confidence interval is not determined by the spread of the raw data, but by the sampling distribution — how the estimated mean or coefficient would vary across hypothetical repeated samples.\n\nAs sample size increases, estimated values cluster more tightly around the true value. We use this "spread of the estimator (standard error)" to determine the interval width.',
+      },
+      {
+        heading: "Why the estimator follows a bell-shaped distribution",
+        body: "On the shape of the estimator's distribution:\n\nSmall samples (n), data approximately normal: By the Student-Fisher theorem, the standardized estimator follows a t-distribution (a bell curve with slightly heavier tails) exactly. This is a mathematical result derived from the normality assumption — not the Central Limit Theorem. Note: for small samples with non-normal data, the t-distribution may not be appropriate.\n\nLarge samples (n): Regardless of how skewed the raw data is, the Central Limit Theorem tells us that the estimator's distribution converges toward a normal (Gaussian) bell curve. Note that \"large enough\" depends on the shape of the data distribution.\n\nBecause the estimator distribution becomes bell-shaped, we can calculate the exact interval width that will capture the true value approximately 95% of the time.",
+      },
+      {
+        heading: "Connection to hypothesis tests, t-values and p-values",
+        body: 'The confidence interval framework is the flip side of hypothesis testing, t-values, and p-values.\n\nHypothesis testing asks: "Is the effect of this variable truly zero?" (null hypothesis).\n\nIf the 95% confidence interval does not contain 0, the estimated value is far enough from zero that the interval cannot capture it. In this case:\n\u2022 p-value \u2264 0.05 (5%)\n\u2022 |t-value| \u2265 1.96 for large samples (normal approximation), or \u2265 degrees-of-freedom-dependent critical value (typically > 2) for small samples (t-distribution)\n\nConclusion: "The effect is statistically significant (we cannot claim it is zero)."',
+      },
+    ],
+  },
   mean: {
     title: "Confidence Interval for the Mean (t-distribution)",
     description:
