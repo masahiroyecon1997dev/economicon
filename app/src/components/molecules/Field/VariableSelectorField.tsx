@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils/helpers";
 import type { ColumnType } from "@/types/commonTypes";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 type VariableSelectorMode = "single" | "multiple";
@@ -38,6 +38,8 @@ export const VariableSelectorField = ({
   name,
 }: VariableSelectorFieldProps) => {
   const { t } = useTranslation();
+  const uid = useId();
+  const effectiveName = name ? `${name}-${uid}` : uid;
 
   const handleRadioChange = (columnName: string) => {
     if (mode === "single" && onSingleChange) {
@@ -75,7 +77,7 @@ export const VariableSelectorField = ({
   return (
     <div className={cn("flex flex-col", className)}>
       <label
-        htmlFor={`variable-selector-field-search-${name || "default"}`}
+        htmlFor={`variable-selector-field-search-${effectiveName}`}
         className="mb-1.5 block text-xs font-medium text-brand-text-main"
       >
         {label}
@@ -86,7 +88,7 @@ export const VariableSelectorField = ({
       {columns.length > 0 && (
         <input
           type="text"
-          id={`variable-selector-field-search-${name || "default"}`}
+          id={`variable-selector-field-search-${effectiveName}`}
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
           placeholder={t("Common.FilterColumns")}
@@ -119,7 +121,7 @@ export const VariableSelectorField = ({
                     disabled || (disabledValues?.has(column.name) ?? false);
                   return (
                     <label
-                      htmlFor={`variable-selector-field-${column.name}-${name || "default"}`}
+                      htmlFor={`variable-selector-field-${column.name}-${effectiveName}`}
                       className={cn(
                         "flex w-full cursor-pointer items-center gap-3 rounded-md p-0.5",
                         isItemDisabled
@@ -129,10 +131,10 @@ export const VariableSelectorField = ({
                     >
                       {mode === "single" ? (
                         <input
-                          id={`variable-selector-field-${column.name}-${name || "default"}`}
+                          id={`variable-selector-field-${column.name}-${effectiveName}`}
                           className="h-4 w-4 border-gray-300 text-accent focus:ring-accent"
                           type="radio"
-                          name={name || "variable-selector-single"}
+                          name={effectiveName}
                           value={column.name}
                           checked={selectedValue === column.name}
                           onChange={() => handleRadioChange(column.name)}
@@ -140,10 +142,10 @@ export const VariableSelectorField = ({
                         />
                       ) : (
                         <input
-                          id={`variable-selector-field-${column.name}-${name || "default"}`}
+                          id={`variable-selector-field-${column.name}-${effectiveName}`}
                           className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent"
                           type="checkbox"
-                          name={name || "variable-selector-multiple"}
+                          name={effectiveName}
                           value={column.name}
                           checked={selectedValues.includes(column.name)}
                           onChange={() => handleCheckboxChange(column.name)}
