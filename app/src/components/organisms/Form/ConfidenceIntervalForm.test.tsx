@@ -2,6 +2,7 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { ConfidenceIntervalForm } from "@/components/organisms/Form/ConfidenceIntervalForm";
 import { showMessageDialog } from "@/lib/dialog/message";
 import { useCurrentPageStore } from "@/stores/currentPage";
+import { openExplainerDialog } from "@/stores/explainerDialog";
 import { useTableListStore } from "@/stores/tableList";
 import {
   act,
@@ -170,6 +171,29 @@ describe("ConfidenceIntervalForm", () => {
       const cancelBtn = screen.getByText("Common.Cancel");
       await user.click(cancelBtn);
       expect(onCancel).toHaveBeenCalledOnce();
+    });
+
+    it("test_render_statisticInfoButtonOpensExplainer", async () => {
+      const user = userEvent.setup();
+      render(<ConfidenceIntervalForm onCancel={vi.fn()} />);
+
+      await user.click(
+        screen.getByRole("combobox", {
+          name: "ConfidenceIntervalView.StatisticTypeLabel",
+        }),
+      );
+      await user.click(
+        screen.getByRole("option", {
+          name: "ConfidenceIntervalView.StatisticType_mean",
+        }),
+      );
+      await user.click(screen.getByTestId("statistic-type-info-btn"));
+
+      expect(openExplainerDialog).toHaveBeenCalledTimes(1);
+      expect(openExplainerDialog).toHaveBeenCalledWith(
+        "mean",
+        expect.anything(),
+      );
     });
   });
 

@@ -3,6 +3,7 @@ import { ConfidenceIntervalStatisticsType } from "@/api/model";
 import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import { FormField } from "@/components/molecules/Form/FormField";
 import {
   AnalysisEmptyState,
@@ -18,7 +19,6 @@ import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentPage";
-import { openExplainerDialog } from "@/stores/explainerDialog";
 import { useTableListStore } from "@/stores/tableList";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
@@ -254,17 +254,16 @@ export const ConfidenceIntervalForm = ({
                   {t("ConfidenceIntervalView.StatisticTypeLabel")}
                 </label>
                 {field.state.value && (
-                  <button
-                    type="button"
+                  <ExplainerButton
+                    explainerKey={field.state.value}
                     aria-label={t(
                       "ConfidenceIntervalView.StatisticTypeInfoLabel",
                     )}
-                    onClick={() => openExplainerDialog(field.state.value)}
                     className="text-gray-400 hover:text-brand-accent transition-colors"
                     data-testid="statistic-type-info-btn"
                   >
                     <Info size={14} aria-hidden="true" />
-                  </button>
+                  </ExplainerButton>
                 )}
               </div>
               <Select
