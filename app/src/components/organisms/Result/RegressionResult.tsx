@@ -2,6 +2,7 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { OutputResultFormat } from "@/api/model/outputResultFormat";
 import { RegressionOutputOptionsStatInParentheses } from "@/api/model/regressionOutputOptionsStatInParentheses";
 import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
+import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import {
   ResultSection,
   StatItem,
@@ -10,7 +11,14 @@ import { AddDiagnosticColumnsDialog } from "@/components/organisms/Dialog/AddDia
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { cn } from "@/lib/utils/helpers";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
-import { Check, Clipboard, FileDown, Loader2, PlusCircle } from "lucide-react";
+import {
+  Check,
+  Clipboard,
+  FileDown,
+  HelpCircle,
+  Loader2,
+  PlusCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -194,7 +202,18 @@ export const RegressionResult = ({
       />
 
       {/* 係数テーブル */}
-      <ResultSection title={t("RegressionResult.Coefficients")}>
+      <ResultSection
+        title={t("RegressionResult.Coefficients")}
+        titleAction={
+          <ExplainerButton
+            explainerKey="ols_result_coefficients"
+            aria-label={t("RegressionResult.CoefficientsExplainerLabel")}
+            data-testid="coefficients-explainer-btn"
+          >
+            <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
+          </ExplainerButton>
+        }
+      >
         <div className="app-scrollbar overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10">
@@ -291,7 +310,18 @@ export const RegressionResult = ({
       </ResultSection>
 
       {/* モデル統計量 */}
-      <ResultSection title={t("RegressionResult.ModelStatistics")}>
+      <ResultSection
+        title={t("RegressionResult.ModelStatistics")}
+        titleAction={
+          <ExplainerButton
+            explainerKey="ols_result_model_stats"
+            aria-label={t("RegressionResult.ModelStatisticsExplainerLabel")}
+            data-testid="model-stats-explainer-btn"
+          >
+            <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
+          </ExplainerButton>
+        }
+      >
         <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
           {isDiscreteModel ? (
             <>

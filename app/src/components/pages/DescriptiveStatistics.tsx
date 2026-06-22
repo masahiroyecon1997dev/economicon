@@ -2,6 +2,7 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { DescriptiveStatisticType } from "@/api/model";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
 import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
 import { FormField } from "@/components/molecules/Form/FormField";
@@ -29,7 +30,7 @@ import {
   useWorkspaceTabsStore,
 } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
-import { ChevronDown, Loader2, SearchX } from "lucide-react";
+import { ChevronDown, HelpCircle, Loader2, SearchX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -391,9 +392,23 @@ export const DescriptiveStatistics = ({
                     )}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-medium text-brand-text-main dark:text-gray-100">
-                          {t("DescriptiveStatistics.PrimaryStatisticsLabel")}
-                        </p>
+                        <div className="flex items-center gap-1">
+                          <p className="text-sm font-medium text-brand-text-main dark:text-gray-100">
+                            {t("DescriptiveStatistics.PrimaryStatisticsLabel")}
+                          </p>
+                          <ExplainerButton
+                            explainerKey="descriptive_stats_primary"
+                            aria-label={t(
+                              "DescriptiveStatistics.PrimaryStatisticsExplainer",
+                            )}
+                            data-testid="primary-stats-explainer-btn"
+                          >
+                            <HelpCircle
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </ExplainerButton>
+                        </div>
                         <SelectAllBar
                           selectAllLabel={t("DescriptiveStatistics.SelectAll")}
                           deselectAllLabel={t(
@@ -419,21 +434,35 @@ export const DescriptiveStatistics = ({
                     </div>
 
                     <div className="space-y-2 rounded-lg border border-border-color/70 bg-white/70 p-3 dark:border-gray-700 dark:bg-gray-800/40">
-                      <button
-                        type="button"
-                        onClick={() => setAdvancedStatsOpen((prev) => !prev)}
-                        className="flex w-full items-center justify-between text-left text-sm font-medium text-gray-700 transition-colors hover:text-brand-accent dark:text-gray-300"
-                      >
-                        <span>
-                          {t("DescriptiveStatistics.AdvancedStatisticsLabel")}
-                        </span>
-                        <ChevronDown
-                          className={cn(
-                            "h-4 w-4 text-brand-text-main/60 transition-transform duration-200",
-                            advancedStatsOpen && "rotate-180",
+                      <div className="flex w-full items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => setAdvancedStatsOpen((prev) => !prev)}
+                          className="flex flex-1 items-center justify-between text-left text-sm font-medium text-gray-700 transition-colors hover:text-brand-accent dark:text-gray-300"
+                        >
+                          <span>
+                            {t("DescriptiveStatistics.AdvancedStatisticsLabel")}
+                          </span>
+                          <ChevronDown
+                            className={cn(
+                              "h-4 w-4 text-brand-text-main/60 transition-transform duration-200",
+                              advancedStatsOpen && "rotate-180",
+                            )}
+                          />
+                        </button>
+                        <ExplainerButton
+                          explainerKey="descriptive_stats_advanced"
+                          aria-label={t(
+                            "DescriptiveStatistics.AdvancedStatisticsExplainer",
                           )}
-                        />
-                      </button>
+                          data-testid="advanced-stats-explainer-btn"
+                        >
+                          <HelpCircle
+                            className="h-3.5 w-3.5"
+                            aria-hidden="true"
+                          />
+                        </ExplainerButton>
+                      </div>
 
                       {advancedStatsOpen && (
                         <div className="space-y-2">

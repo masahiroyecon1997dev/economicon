@@ -5,6 +5,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
 import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
 import { FormField } from "@/components/molecules/Form/FormField";
@@ -37,6 +38,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  HelpCircle,
   Loader2,
   SearchX,
 } from "lucide-react";
@@ -336,6 +338,15 @@ export const GroupStatistics = ({
     <PageLayout
       title={t("GroupStatistics.Title")}
       description={t("GroupStatistics.Description")}
+      titleAction={
+        <ExplainerButton
+          explainerKey="group_statistics"
+          aria-label={t("GroupStatistics.ExplainerButtonLabel")}
+          data-testid="group-statistics-explainer-btn"
+        >
+          <HelpCircle className="h-4 w-4" aria-hidden="true" />
+        </ExplainerButton>
+      }
     >
       {tableList.length === 0 ? (
         <AnalysisNoTablesState

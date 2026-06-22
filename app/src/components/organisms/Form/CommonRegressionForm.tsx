@@ -10,9 +10,9 @@ import {
 } from "@/api/zod/analysis/analysis";
 import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
-import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
+import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import { VariableSelectorField } from "@/components/molecules/Field/VariableSelectorField";
 import { FormField } from "@/components/molecules/Form/FormField";
 import { AnalysisNoTablesState } from "@/components/organisms/EmptyState/AnalysisNoTablesState";
@@ -222,7 +222,25 @@ export const CommonRegressionForm = ({
   };
 
   return (
-    <PageLayout title={t(titleKey)} description={t(descriptionKey)}>
+    <PageLayout
+      title={t(titleKey)}
+      description={t(descriptionKey)}
+      titleAction={
+        <ExplainerButton
+          explainerKey={
+            method === "ols"
+              ? "ols_method"
+              : method === "logit"
+                ? "logit_model"
+                : "probit_model"
+          }
+          aria-label={t("LinearRegressionForm.MethodExplainerButtonLabel")}
+          data-testid={`${method}-method-explainer-btn`}
+        >
+          <HelpCircle className="h-4 w-4" aria-hidden="true" />
+        </ExplainerButton>
+      }
+    >
       {tableList.length === 0 ? (
         <AnalysisNoTablesState
           onCancel={onCancel}
@@ -409,23 +427,26 @@ export const CommonRegressionForm = ({
                             >
                               {t("LinearRegressionForm.StandardErrorMethod")}
                             </label>
-                            <Tooltip
-                              content={t(
-                                `LinearRegressionForm.SE_tooltip_${seMethod}`,
+                            <ExplainerButton
+                              explainerKey={
+                                ["HC0", "HC1", "HC2", "HC3"].includes(seMethod)
+                                  ? "ols_se_robust"
+                                  : seMethod === "hac"
+                                    ? "ols_se_hac"
+                                    : seMethod === "cluster"
+                                      ? "ols_se_cluster"
+                                      : "ols_se_nonrobust"
+                              }
+                              aria-label={t(
+                                "LinearRegressionForm.SEExplainerButtonLabel",
                               )}
-                              position="right"
-                              maxWidth={240}
+                              data-testid="se-method-explainer-btn"
                             >
-                              <button
-                                type="button"
-                                className="text-brand-text-sub hover:text-brand-text-main"
-                                aria-label={t(
-                                  "LinearRegressionForm.StandardErrorMethod",
-                                )}
-                              >
-                                <HelpCircle className="h-3.5 w-3.5" />
-                              </button>
-                            </Tooltip>
+                              <HelpCircle
+                                className="h-3.5 w-3.5"
+                                aria-hidden="true"
+                              />
+                            </ExplainerButton>
                           </div>
                           <Select
                             id="standard-error-method"

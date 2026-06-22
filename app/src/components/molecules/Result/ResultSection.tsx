@@ -6,12 +6,15 @@ type ResultSectionProps = {
   title: string;
   children: ReactNode;
   className?: string;
+  /** タイトル右側に配置する追加要素（? ボタンなど） */
+  titleAction?: ReactNode;
 };
 
 export const ResultSection = ({
   title,
   children,
   className,
+  titleAction,
 }: ResultSectionProps) => (
   <div
     className={cn(
@@ -19,7 +22,10 @@ export const ResultSection = ({
       className,
     )}
   >
-    <h3 className="mb-3 text-base font-bold text-text-heading">{title}</h3>
+    <div className="mb-3 flex items-center gap-1.5">
+      <h3 className="text-base font-bold text-text-heading">{title}</h3>
+      {titleAction}
+    </div>
     {children}
   </div>
 );
