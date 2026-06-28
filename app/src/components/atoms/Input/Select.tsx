@@ -13,6 +13,7 @@ type SelectProps = {
   name?: string;
   placeholder?: string;
   disabled?: boolean;
+  "data-testid"?: string;
 };
 
 export const Select = ({
@@ -25,6 +26,7 @@ export const Select = ({
   name,
   placeholder,
   disabled = false,
+  "data-testid": dataTestId,
 }: SelectProps) => {
   return (
     <SelectPrimitive.Root
@@ -36,6 +38,7 @@ export const Select = ({
       <SelectPrimitive.Trigger
         id={id}
         name={name}
+        data-testid={dataTestId}
         className={cn(
           "flex w-full items-center justify-between px-2.5 py-1.5 text-sm font-normal",
           "text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border rounded-md shadow-sm",
