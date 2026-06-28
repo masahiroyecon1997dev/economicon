@@ -203,7 +203,7 @@ export const DistributionPreview = () => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="continuous" className="pt-3" forceMount>
+            <TabsContent value="continuous" className="pt-3">
               <RadioTagGroup
                 name="dist-type-continuous"
                 items={CONTINUOUS_DIST_TYPES.map((dt) => ({
@@ -215,7 +215,7 @@ export const DistributionPreview = () => {
               />
             </TabsContent>
 
-            <TabsContent value="discrete" className="pt-3" forceMount>
+            <TabsContent value="discrete" className="pt-3">
               <RadioTagGroup
                 name="dist-type-discrete"
                 items={DISCRETE_DIST_TYPES.map((dt) => ({
