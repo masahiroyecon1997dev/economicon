@@ -350,6 +350,8 @@
     "StatisticsLabel": "計算する統計量",
     "SelectAll": "すべて選択",
     "DeselectAll": "すべて解除",
+    "ShowAdvancedStats": "詳細統計量を表示",
+    "HideAdvancedStats": "詳細統計量を非表示",
     "OutputDataLabel": "出力データ名",
     "OutputDataPlaceholder": "例: group_statistics",
     "RunCalculation": "作成する",

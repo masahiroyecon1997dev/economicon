@@ -350,6 +350,8 @@
     "StatisticsLabel": "Statistics",
     "SelectAll": "Select all",
     "DeselectAll": "Deselect all",
+    "ShowAdvancedStats": "Show advanced stats",
+    "HideAdvancedStats": "Hide advanced stats",
     "OutputDataLabel": "Output Table Name",
     "OutputDataPlaceholder": "e.g. group_statistics",
     "RunCalculation": "Create",
