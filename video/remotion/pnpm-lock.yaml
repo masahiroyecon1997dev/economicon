@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  js-yaml@<=4.1.1: '>=4.2.0'
+  ws@>=8.0.0 <8.20.1: '>=8.20.1'
+  ws@>=8.0.0 <8.21.0: '>=8.21.0'
+
 importers:
 
   .:
@@ -337,21 +342,25 @@ packages:
     resolution: {integrity: sha512-OjkJZdXz6Y7TaNpWujBJ755wy/ymQDKpnbO6MvL68FAw3qt+lyyRy/a50bGcjvYBNkdYTdAiVeE0EsVnJT/Rag==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@remotion/compositor-linux-arm64-musl@4.0.457':
     resolution: {integrity: sha512-IvpOPvV+g+5KBnNLERDAZNUPprhR9MU27bgZhaa10d8m5Af66wBgjSXnFPBwWFl2am7CAADLmYqP536+Xxl/uw==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@remotion/compositor-linux-x64-gnu@4.0.457':
     resolution: {integrity: sha512-xnzGIMsjmVU1tuwUIpx3IVQGy98BKYoqOppSwixWW1v6rU5/njf4mlsfKXLSJajyYB+zT6EAdyJeIl421ruNdA==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@remotion/compositor-linux-x64-musl@4.0.457':
     resolution: {integrity: sha512-JfReVu48F02ppVcuOqWj4kUkoAbz084dxgeTmxa79yvRs6b03oyVA8vRkW1U64ETv19nstQDnYSh5j5dR/RJHg==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@remotion/compositor-win32-x64-msvc@4.0.457':
     resolution: {integrity: sha512-AoX4xgMGNRQGluDozy8Ln6o0AKrHdl6wZkxpdFvtA9JVAsZnEE1URnwS0SFwRnp9dMJcSva8utJemRUtMxX71g==}
@@ -430,21 +439,25 @@ packages:
     resolution: {integrity: sha512-eQfcsaxhFrv5FmtaA7+O1F9/2yFDNIoPZzV/ZvqvFz5bBXVc4FAm/1fVpBg8Po/kX1h0chBc7Xkpry3cabFW8w==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rspack/binding-linux-arm64-musl@1.7.6':
     resolution: {integrity: sha512-DfQXKiyPIl7i1yECHy4eAkSmlUzzsSAbOjgMuKn7pudsWf483jg0UUYutNgXSlBjc/QSUp7906Cg8oty9OfwPA==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rspack/binding-linux-x64-gnu@1.7.6':
     resolution: {integrity: sha512-NdA+2X3lk2GGrMMnTGyYTzM3pn+zNjaqXqlgKmFBXvjfZqzSsKq3pdD1KHZCd5QHN+Fwvoszj0JFsquEVhE1og==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rspack/binding-linux-x64-musl@1.7.6':
     resolution: {integrity: sha512-rEy6MHKob02t/77YNgr6dREyJ0e0tv1X6Xsg8Z5E7rPXead06zefUbfazj4RELYySWnM38ovZyJAkPx/gOn3VA==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rspack/binding-wasm32-wasi@1.7.6':
     resolution: {integrity: sha512-YupOrz0daSG+YBbCIgpDgzfMM38YpChv+afZpaxx5Ml7xPeAZIIdgWmLHnQ2rts73N2M1NspAiBwV00Xx0N4Vg==}
@@ -1004,8 +1017,8 @@ packages:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
 
-  js-yaml@4.1.1:
-    resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
+  js-yaml@5.2.0:
+    resolution: {integrity: sha512-YeLUMlvR4Ou1B119LIaM0r65JvbOBooJDc9yEu0dClb/uSC5P4FrLU8OCCz/HXWvtPoIrR0dRzABTjo1sTN9Bw==}
     hasBin: true
 
   json-buffer@3.0.1:
@@ -1471,8 +1484,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  ws@8.17.1:
-    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
+  ws@8.21.0:
+    resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -1618,7 +1631,7 @@ snapshots:
       globals: 13.24.0
       ignore: 5.3.2
       import-fresh: 3.3.1
-      js-yaml: 4.1.1
+      js-yaml: 5.2.0
       minimatch: 3.1.5
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
@@ -1845,7 +1858,7 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       remotion: 4.0.457(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       source-map: 0.8.0-beta.0
-      ws: 8.17.1
+      ws: 8.21.0
     optionalDependencies:
       '@remotion/compositor-darwin-arm64': 4.0.457
       '@remotion/compositor-darwin-x64': 4.0.457
@@ -2387,7 +2400,7 @@ snapshots:
       imurmurhash: 0.1.4
       is-glob: 4.0.3
       is-path-inside: 3.0.3
-      js-yaml: 4.1.1
+      js-yaml: 5.2.0
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash.merge: 4.6.2
@@ -2584,7 +2597,7 @@ snapshots:
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
-  js-yaml@4.1.1:
+  js-yaml@5.2.0:
     dependencies:
       argparse: 2.0.1
 
@@ -2979,7 +2992,7 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@8.17.1: {}
+  ws@8.21.0: {}
 
   yallist@4.0.0: {}
 
