@@ -213,7 +213,7 @@ jobs:
           $samplePath = "${{ github.workspace }}/app/sample" -replace '\\', '/'
 
           # テンプレートを読み込み、パスを置換してターゲットラインに書き出し
-          $template = Get-Content -Raw -Path "app/e2e/fixtures/ci_test.config.json"
+          $template = Get-Content -Raw -Path "${{ github.workspace }}/app/e2e/fixtures/cicd_test.config.json"
           $configContent = $template -replace 'TARGET_PATH', $samplePath
 
           $configContent | Out-File -FilePath "$configDir\economicon.config.json" -Encoding utf8
