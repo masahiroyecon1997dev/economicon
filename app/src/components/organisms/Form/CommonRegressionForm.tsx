@@ -136,18 +136,6 @@ export const CommonRegressionForm = ({
     },
     onSubmit: async ({ value }) => {
       try {
-        console.log("Submitting regression with values:", {
-          tableName: value.tableName,
-          resultName: value.resultName,
-          description: value.description,
-          dependentVariable: value.dependentVariable,
-          explanatoryVariables: value.explanatoryVariables,
-          hasConst: value.hasConst,
-          missingValueHandling:
-            value.missingValueHandling as MissingValueHandlingType,
-          analysis: value.analysis,
-          standardError: value.standardError,
-        });
         const api = getEconomiconAppAPI();
         const regressionResponse = await api.regression({
           tableName: value.tableName,
