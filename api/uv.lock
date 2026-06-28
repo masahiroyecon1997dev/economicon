@@ -335,7 +335,7 @@ requires-dist = [
     { name = "py4etrics", specifier = "==0.1.9" },
     { name = "pyarrow", specifier = "==24.0.0" },
     { name = "pydantic", specifier = "==2.13.4" },
-    { name = "pydantic-settings", specifier = ">=2.14.2" },
+    { name = "pydantic-settings", specifier = "==2.14.2" },
     { name = "rddensity", specifier = "==2.4.6" },
     { name = "rdrobust", specifier = "==1.3.0" },
     { name = "scipy", specifier = "==1.17.1" },
