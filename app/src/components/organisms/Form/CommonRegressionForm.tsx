@@ -265,7 +265,7 @@ export const CommonRegressionForm = ({
                   </label>
                   <div className="flex-1">
                     <Select
-                      id="data-table"
+                      id={`${method}-data-table`}
                       value={field.state.value}
                       onValueChange={handleTableSelect}
                       disabled={isSubmitting}
@@ -308,14 +308,14 @@ export const CommonRegressionForm = ({
                     {(field) => (
                       <FormField
                         label={t("LinearRegressionForm.DependentVariable")}
-                        htmlFor="dependent-variable"
+                        htmlFor={`${method}-dependent-variable`}
                         error={tErr(
                           field.state.meta.errors,
                           "ValidationMessages.DependentVariableRequired",
                         )}
                       >
                         <Select
-                          id="dependent-variable"
+                          id={`${method}-dependent-variable`}
                           value={field.state.value}
                           onValueChange={(v) => {
                             field.handleChange(v);
@@ -423,7 +423,7 @@ export const CommonRegressionForm = ({
                           <div className="flex items-center gap-1">
                             <label
                               className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                              htmlFor="standard-error-method"
+                              htmlFor={`${method}-standard-error-method`}
                             >
                               {t("LinearRegressionForm.StandardErrorMethod")}
                             </label>
@@ -449,7 +449,7 @@ export const CommonRegressionForm = ({
                             </ExplainerButton>
                           </div>
                           <Select
-                            id="standard-error-method"
+                            id={`${method}-standard-error-method`}
                             value={displayMethod}
                             onValueChange={(v) => {
                               if (v === "hac") {
@@ -498,10 +498,10 @@ export const CommonRegressionForm = ({
                             <div className="rounded-lg border border-border-color bg-secondary/50 p-2">
                               <FormField
                                 label={t("LinearRegressionForm.HacMaxlags")}
-                                htmlFor="hac-maxlags"
+                                htmlFor={`${method}-hac-maxlags`}
                               >
                                 <InputText
-                                  id="hac-maxlags"
+                                  id={`${method}-hac-maxlags`}
                                   type="number"
                                   value={(
                                     se as Extract<
@@ -530,7 +530,7 @@ export const CommonRegressionForm = ({
                             <div className="rounded-lg border border-border-color bg-secondary/50 p-2">
                               <FormField
                                 label={t("LinearRegressionForm.ClusterGroups")}
-                                htmlFor="cluster-groups"
+                                htmlFor={`${method}-cluster-groups`}
                               >
                                 <div className="app-scrollbar max-h-32 overflow-y-auto rounded-md border border-border-color bg-white p-1.5 dark:bg-gray-800">
                                   {columnList.length === 0 ? (
@@ -593,10 +593,10 @@ export const CommonRegressionForm = ({
                     {(field) => (
                       <FormField
                         label={t("LinearRegressionForm.HasConst")}
-                        htmlFor="has-const"
+                        htmlFor={`${method}-has-const`}
                       >
                         <Select
-                          id="has-const"
+                          id={`${method}-has-const`}
                           value={field.state.value ? "true" : "false"}
                           onValueChange={(v) =>
                             field.handleChange(v === "true")
@@ -624,14 +624,14 @@ export const CommonRegressionForm = ({
                         return (
                           <FormField
                             label={t("Common.CalculateMarginalEffects")}
-                            htmlFor="calculate-marginal-effects"
+                            htmlFor={`${method}-calculate-marginal-effects`}
                           >
                             <label
-                              htmlFor="calculate-marginal-effects"
+                              htmlFor={`${method}-calculate-marginal-effects`}
                               className="flex cursor-pointer items-start gap-2 rounded-lg border border-border-color bg-secondary/40 px-3 py-2"
                             >
                               <input
-                                id="calculate-marginal-effects"
+                                id={`${method}-calculate-marginal-effects`}
                                 data-testid="calculate-marginal-effects-checkbox"
                                 type="checkbox"
                                 className="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-500 text-accent focus:ring-accent"
@@ -670,10 +670,10 @@ export const CommonRegressionForm = ({
                     {(field) => (
                       <FormField
                         label={t("LinearRegressionForm.MissingValueHandling")}
-                        htmlFor="missing-value-handling"
+                        htmlFor={`${method}-missing-value-handling`}
                       >
                         <Select
-                          id="missing-value-handling"
+                          id={`${method}-missing-value-handling`}
                           value={field.state.value}
                           onValueChange={(v) =>
                             field.handleChange(v as MissingValueHandlingType)
