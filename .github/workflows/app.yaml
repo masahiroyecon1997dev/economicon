@@ -200,6 +200,27 @@ jobs:
         working-directory: ./app
         run: pnpm exec playwright install-deps chromium
 
+      - name: Setup economicon configuration for CI
+        shell: powershell
+        run: |
+          # アプリの設定ファイルの配置先ディレクトリを作成
+          $configDir = "C:\Users\runneradmin\AppData\Roaming\economicon"
+          if (!(Test-Path $configDir)) {
+              New-Item -ItemType Directory -Force -Path $configDir
+          }
+
+          # テスト用データ（sampleフォルダ）の絶対パスを取得（スラッシュ区切りに変換）
+          $samplePath = "${{ github.workspace }}/app/sample" -replace '\\', '/'
+
+          # テンプレートを読み込み、パスを置換してターゲットラインに書き出し
+          $template = Get-Content -Raw -Path "app/e2e/fixtures/ci_test-config.json"
+          $configContent = $template -replace 'TARGET_PATH', $samplePath
+
+          $configContent | Out-File -FilePath "$configDir\economicon.config.json" -Encoding utf8
+
+          # 念のため配置された内容を確認（デバッグ用）
+          Get-Content -Path "$configDir\economicon.config.json"
+
       - name: Start Economicon with CDP debug port
         # sidecar を含む通常起動で実行し、CDP ポートが実際に開くまで待機する
         # WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: WebView2 に CDP ポートを開放させる
