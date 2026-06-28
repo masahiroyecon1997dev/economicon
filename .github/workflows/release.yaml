@@ -1,5 +1,5 @@
-name: Release Build (Windows Installer)
-# Windows NSIS インストーラー（.exe）をビルドして Artifacts に格納する。
+name: Release Build (Windows Installer + Portable)
+# Windows NSIS インストーラー（.exe）とポータブル版（.zip）をビルドして Artifacts に格納する。
 # 現在はテスト段階のため workflow_dispatch のみで手動実行。
 # 正式リリース時は tag トリガー (tags: ["v*"]) に切り替えること。
 
@@ -9,8 +9,8 @@ on:
 permissions: {}
 
 jobs:
-  build-windows-installer:
-    name: Build Windows Installer (NSIS)
+  build-windows-release:
+    name: Build Windows Release Artifacts
     runs-on: windows-latest
     permissions:
       contents: read
@@ -56,13 +56,20 @@ jobs:
       # build/build.ps1 STEP 1-9 相当
       # -CI スイッチにより STEP 0（前提ツール確認・対話プロンプト）をスキップして実行
       # -----------------------------------------------------------------------
-      - name: Build Windows installer (packaging/build/build.ps1 -CI)
+      - name: Build Windows release artifacts (packaging/build/build.ps1 -CI -PackageTarget all)
         shell: pwsh
-        run: .\packaging\build\build.ps1 -CI
+        run: .\packaging\build\build.ps1 -CI -PackageTarget all
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: economicon-windows-installer
           path: packaging/build/release/*.exe
+          retention-days: 14
+
+      - name: Upload portable artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: economicon-windows-portable
+          path: packaging/build/release/*.zip
           retention-days: 14

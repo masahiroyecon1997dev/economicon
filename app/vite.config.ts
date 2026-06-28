@@ -47,7 +47,7 @@ export default defineConfig({
           host,
           port: 5173,
         }
-      : false,
+      : true, // ローカル開発時もHMRを有効にする
     watch: {
       ignored: ["**/src-tauri/**"],
     },

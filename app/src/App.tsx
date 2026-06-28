@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { ConfirmDialog } from "@/components/molecules/Dialog/ConfirmDialog";
 import { MessageDialog } from "@/components/molecules/Dialog/MessageDialog";
 import { LoadingOverlay } from "@/components/molecules/Loading/LoadingOverlay";
+import { ExplainerDialog } from "@/components/organisms/Dialog/ExplainerDialog";
 import { AppBar } from "@/components/organisms/Header/AppBar";
 import { LeftSideMenu } from "@/components/pages/LeftSideMenu";
 import { MainView } from "@/components/pages/MainView";
@@ -168,6 +169,7 @@ export const App = () => {
       <LoadingOverlay isVisible={isLoading} message={loadingMessage} />
       <MessageDialog />
       <ConfirmDialog />
+      <ExplainerDialog />
     </>
   );
 };

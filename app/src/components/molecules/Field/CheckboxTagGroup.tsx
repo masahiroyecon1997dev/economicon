@@ -11,7 +11,8 @@ type CheckboxTagGroupProps = {
   onToggle: (value: string) => void;
   disabled?: boolean;
   error?: string;
-  columns?: 2 | 3 | 4;
+  columns?: 1 | 2 | 3 | 4;
+  compact?: boolean;
 };
 
 export const CheckboxTagGroup = ({
@@ -21,6 +22,7 @@ export const CheckboxTagGroup = ({
   disabled = false,
   error,
   columns,
+  compact = false,
 }: CheckboxTagGroupProps) => {
   const containerClass =
     columns === 4
@@ -29,7 +31,9 @@ export const CheckboxTagGroup = ({
         ? "grid grid-cols-3 gap-2"
         : columns === 2
           ? "grid grid-cols-2 gap-2"
-          : "flex flex-wrap gap-2";
+          : columns === 1
+            ? "grid grid-cols-1 gap-2"
+            : "flex flex-wrap gap-2";
 
   return (
     <div>
@@ -40,7 +44,8 @@ export const CheckboxTagGroup = ({
             <label
               key={item.value}
               className={cn(
-                "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors",
+                "flex cursor-pointer items-center gap-2 rounded-md border transition-colors",
+                compact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm",
                 isChecked
                   ? "border-brand-accent bg-brand-accent/5 text-brand-accent"
                   : "border-border-color bg-secondary text-brand-text-main hover:border-brand-accent/50",

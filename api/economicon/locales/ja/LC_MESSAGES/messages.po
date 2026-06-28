@@ -350,6 +350,19 @@ msgstr "行数の不一致: CSVには{csv_rows}行ありますが、テーブル
 msgid "Explanatory variable matrix is singular. Perfect multicollinearity detected. Please review your explanatory variable selection."
 msgstr "説明変数行列が特異です。完全な多重共線性が検出されました。説明変数の組み合わせを見直してください。"
 
+#: economicon/services/regressions/common.py
+#, python-brace-format
+msgid "Column(s) %(cols)s have zero variance and cannot be used with hasConst=True because they create perfect multicollinearity with the constant term. Either remove these columns or set hasConst=False."
+msgstr "列 %(cols)s は分散が 0 のため、hasConst=True では定数項と完全多重共線性を起こします。これらの列を説明変数から外すか、hasConst=False を指定してください。"
+
+#: economicon/services/regressions/add_diagnostic_columns.py
+msgid "standardized residuals are not yet supported for OLS parameter-based calculation"
+msgstr "OLS のパラメータベース計算では標準化残差はまだサポートされていません。"
+
+#: economicon/services/regressions/add_diagnostic_columns.py
+msgid "confidence intervals are not yet supported for OLS parameter-based calculation"
+msgstr "OLS のパラメータベース計算では信頼区間はまだサポートされていません。"
+
 #: economicon/models/tables.py
 msgid "newTableName must differ from oldTableName."
 msgstr "newTableName には oldTableName と異なる名前を指定してください。"

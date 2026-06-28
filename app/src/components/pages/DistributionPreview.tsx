@@ -18,6 +18,7 @@ import {
   DIST_PARAMS,
 } from "@/constants/simulation";
 import { useDistributionPreview } from "@/hooks/useDistributionPreview";
+import { cn } from "@/lib/utils/helpers";
 import { useWorkspaceTabsStore } from "@/stores/workspaceTabs";
 import type { DistributionType } from "@/types/commonTypes";
 import type { Config, Layout } from "plotly.js";
@@ -202,7 +203,7 @@ export const DistributionPreview = () => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="continuous" className="pt-3" forceMount>
+            <TabsContent value="continuous" className="pt-3">
               <RadioTagGroup
                 name="dist-type-continuous"
                 items={CONTINUOUS_DIST_TYPES.map((dt) => ({
@@ -214,7 +215,7 @@ export const DistributionPreview = () => {
               />
             </TabsContent>
 
-            <TabsContent value="discrete" className="pt-3" forceMount>
+            <TabsContent value="discrete" className="pt-3">
               <RadioTagGroup
                 name="dist-type-discrete"
                 items={DISCRETE_DIST_TYPES.map((dt) => ({
@@ -254,20 +255,26 @@ export const DistributionPreview = () => {
             })}
           </div>
 
-          {/* PDF/PMF vs CDF/CMF タブ */}
-          <Tabs
-            value={functionTab}
-            onValueChange={(v) => setFunctionTab(v as FunctionTab)}
-          >
-            <TabsList>
-              <TabsTrigger value="density">
-                {t("DistributionPreview.TabPdfPmf")}
-              </TabsTrigger>
-              <TabsTrigger value="cumulative">
-                {t("DistributionPreview.TabCdfCmf")}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* PDF/PMF vs CDF/CMF セグメントコントロール */}
+          <div className="flex rounded-lg border border-border-color bg-secondary p-0.5 dark:border-gray-600 dark:bg-gray-700">
+            {(["density", "cumulative"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setFunctionTab(tab)}
+                className={cn(
+                  "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                  functionTab === tab
+                    ? "bg-white text-brand-primary shadow-sm dark:bg-gray-600 dark:text-gray-100"
+                    : "text-brand-text-sub hover:text-brand-text-main dark:text-gray-400 dark:hover:text-gray-200",
+                )}
+              >
+                {tab === "density"
+                  ? t("DistributionPreview.TabPdfPmf")
+                  : t("DistributionPreview.TabCdfCmf")}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* 右ペイン: プロット */}

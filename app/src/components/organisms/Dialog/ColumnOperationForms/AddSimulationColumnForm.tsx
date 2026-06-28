@@ -97,6 +97,14 @@ export const AddSimulationColumnForm = ({
         }
       }
 
+      // 一様分布: 最小値 < 最大値のクロスバリデーション
+      if (value.distributionType === "uniform") {
+        if (Number(value.low) >= Number(value.high)) {
+          setApiError(t("ValidationMessages.UniformLowMustBeLessThanHigh"));
+          return;
+        }
+      }
+
       // randomSeed バリデーション
       const rawSeed = value.randomSeed;
       if (

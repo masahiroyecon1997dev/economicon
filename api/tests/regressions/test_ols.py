@@ -1,7 +1,9 @@
 """OLS回帰テスト"""
 
+import polars as pl
 from fastapi import status
 
+from economicon.core.enums import ErrorCode
 from economicon.services.data.analysis_result_store import AnalysisResultStore
 from tests.regressions.conftest import (
     TABLE_BASIC,
@@ -243,3 +245,63 @@ def test_ols_hac_numerical(client, tables_store):
             f"{var} HAC SE: got {p['standardError']!r},"
             f" expected {gold_se[var]!r}"
         )
+
+
+# -----------------------------------------------------------
+# 定数列 (零分散列) を explanatory_variables に含めるケース
+# -----------------------------------------------------------
+
+
+def test_ols_const_col_in_explanatory_vars_with_has_const(
+    client, tables_store
+):
+    """定数列（全行同値）をexplanatoryVariablesに含めhasConst=Trueの場合、
+    多重共線性エラー (500 REGRESSION_SINGULAR_MATRIX_ERROR) が返る"""
+    df = pl.DataFrame(
+        {
+            "y": [1.0, 2.0, 3.0, 4.0, 5.0],
+            "x1": [1.1, 2.2, 3.3, 4.4, 5.5],
+            "const_col": [1.0, 1.0, 1.0, 1.0, 1.0],
+        }
+    )
+    tables_store.store_table("ConstColTable", df)
+
+    payload = {
+        "tableName": "ConstColTable",
+        "dependentVariable": "y",
+        "explanatoryVariables": ["x1", "const_col"],
+        "hasConst": True,
+        "analysis": {"method": "ols"},
+        "standardError": {"method": "nonrobust"},
+    }
+    resp = client.post(URL_REGRESSION, json=payload)
+    data = resp.json()
+    assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert data["code"] == ErrorCode.REGRESSION_SINGULAR_MATRIX_ERROR
+
+
+def test_ols_const_col_in_explanatory_vars_without_has_const(
+    client, tables_store
+):
+    """定数列（全行同値）をexplanatoryVariablesに含めhasConst=Falseの場合、
+    定数項を自前で指定した回帰として正常処理される"""
+    df = pl.DataFrame(
+        {
+            "y": [1.0, 2.0, 3.0, 4.0, 5.0],
+            "x1": [1.1, 2.2, 3.3, 4.4, 5.5],
+            "const_col": [1.0, 1.0, 1.0, 1.0, 1.0],
+        }
+    )
+    tables_store.store_table("ConstColTable", df)
+
+    payload = {
+        "tableName": "ConstColTable",
+        "dependentVariable": "y",
+        "explanatoryVariables": ["x1", "const_col"],
+        "hasConst": False,
+        "analysis": {"method": "ols"},
+        "standardError": {"method": "nonrobust"},
+    }
+    resp = client.post(URL_REGRESSION, json=payload)
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json()["code"] == "OK"

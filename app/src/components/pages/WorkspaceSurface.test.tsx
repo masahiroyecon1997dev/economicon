@@ -42,6 +42,12 @@ vi.mock("./ConfidenceIntervalView", () => ({
 vi.mock("../organisms/Form/LinearRegressionForm", () => ({
   LinearRegressionForm: () => <div data-testid="work-reg-form" />,
 }));
+vi.mock("../organisms/Form/LogitRegressionForm", () => ({
+  LogitRegressionForm: () => <div data-testid="work-logit-form" />,
+}));
+vi.mock("../organisms/Form/ProbitRegressionForm", () => ({
+  ProbitRegressionForm: () => <div data-testid="work-probit-form" />,
+}));
 vi.mock("./StatisticalTestView", () => ({
   StatisticalTestView: () => <div data-testid="work-stat-test" />,
 }));
@@ -222,6 +228,54 @@ describe("WorkspaceSurface コンポーネント", () => {
       screen.getByTestId("workspace-work-tab-LinearRegressionForm"),
     ).toBeInTheDocument();
     expect(screen.getByTestId("work-reg-form")).toBeInTheDocument();
+  });
+
+  it("LogitRegressionForm の work tab はフォーム本体を表示する", () => {
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "work:LogitRegressionForm",
+          kind: "work",
+          title: "ロジット",
+          featureKey: "LogitRegressionForm",
+          dirty: false,
+          createdAt: Date.now(),
+        },
+      ],
+      activeTabId: "work:LogitRegressionForm",
+    });
+    useCurrentPageStore.setState({ currentView: "Workspace" });
+
+    render(<WorkspaceSurface />);
+
+    expect(
+      screen.getByTestId("workspace-work-tab-LogitRegressionForm"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("work-logit-form")).toBeInTheDocument();
+  });
+
+  it("ProbitRegressionForm の work tab はフォーム本体を表示する", () => {
+    useWorkspaceTabsStore.setState({
+      tabs: [
+        {
+          id: "work:ProbitRegressionForm",
+          kind: "work",
+          title: "プロビット",
+          featureKey: "ProbitRegressionForm",
+          dirty: false,
+          createdAt: Date.now(),
+        },
+      ],
+      activeTabId: "work:ProbitRegressionForm",
+    });
+    useCurrentPageStore.setState({ currentView: "Workspace" });
+
+    render(<WorkspaceSurface />);
+
+    expect(
+      screen.getByTestId("workspace-work-tab-ProbitRegressionForm"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("work-probit-form")).toBeInTheDocument();
   });
 
   it("work tab で入力すると dirty になり、閉じる時に確認する", async () => {

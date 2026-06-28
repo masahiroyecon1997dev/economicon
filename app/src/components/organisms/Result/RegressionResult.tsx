@@ -2,14 +2,23 @@ import { getEconomiconAppAPI } from "@/api/endpoints";
 import { OutputResultFormat } from "@/api/model/outputResultFormat";
 import { RegressionOutputOptionsStatInParentheses } from "@/api/model/regressionOutputOptionsStatInParentheses";
 import { Tooltip } from "@/components/atoms/Tooltip/Tooltip";
+import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import {
   ResultSection,
   StatItem,
 } from "@/components/molecules/Result/ResultSection";
+import { AddDiagnosticColumnsDialog } from "@/components/organisms/Dialog/AddDiagnosticColumnsDialog";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
 import { cn } from "@/lib/utils/helpers";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
-import { Check, Clipboard, FileDown, Loader2 } from "lucide-react";
+import {
+  Check,
+  Clipboard,
+  FileDown,
+  HelpCircle,
+  Loader2,
+  PlusCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -27,6 +36,7 @@ export const RegressionResult = ({
   const [outputDialogSessionKey, setOutputDialogSessionKey] = useState(0);
   const [isQuickCopying, setIsQuickCopying] = useState(false);
   const [isQuickCopied, setIsQuickCopied] = useState(false);
+  const [isDiagnosticDialogOpen, setIsDiagnosticDialogOpen] = useState(false);
 
   const formatNumber = (
     num: number | null | undefined,
@@ -70,12 +80,40 @@ export const RegressionResult = ({
     setIsOutputDialogOpen(true);
   };
 
+  const isDiscreteModel = result.modelStatistics.pseudoRSquared !== undefined;
+  const hasMarginalEffects =
+    result.marginalEffects && result.marginalEffects.length > 0;
+
+  const getMarginalEffect = (variable: string) =>
+    result.marginalEffects?.find((m) => m.variable === variable);
+
   return (
     <div className={cn("flex flex-col gap-4 p-2", className)}>
       {/* 分析概要 */}
       <ResultSection title={t("RegressionResult.AnalysisSummary")}>
         {/* ── ヘッダー右端: 出力ボタン群 ── */}
         <div className="mb-3 flex justify-end gap-1.5">
+          {!isDiscreteModel && (
+            <Tooltip content={t("RegressionResult.AddDiagnosticColumns")}>
+              <span className="inline-flex">
+                <button
+                  type="button"
+                  onClick={() => setIsDiagnosticDialogOpen(true)}
+                  aria-label={t("RegressionResult.AddDiagnosticColumns")}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                    "border border-gray-300 dark:border-gray-600",
+                    "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+                  )}
+                  data-testid="add-diagnostic-columns-btn"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  {t("RegressionResult.AddDiagnosticColumns")}
+                </button>
+              </span>
+            </Tooltip>
+          )}
+
           <Tooltip content={t("RegressionResult.QuickCopyMd")}>
             <span className="inline-flex">
               <button
@@ -155,18 +193,42 @@ export const RegressionResult = ({
         result={result}
       />
 
+      {/* 診断列追加ダイアログ */}
+      <AddDiagnosticColumnsDialog
+        open={isDiagnosticDialogOpen}
+        onOpenChange={setIsDiagnosticDialogOpen}
+        resultId={result.resultId}
+        defaultTableName={result.tableName}
+      />
+
       {/* 係数テーブル */}
-      <ResultSection title={t("RegressionResult.Coefficients")}>
+      <ResultSection
+        title={t("RegressionResult.Coefficients")}
+        titleAction={
+          <ExplainerButton
+            explainerKey="ols_result_coefficients"
+            aria-label={t("RegressionResult.CoefficientsExplainerLabel")}
+            data-testid="coefficients-explainer-btn"
+          >
+            <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
+          </ExplainerButton>
+        }
+      >
         <div className="app-scrollbar overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10">
               <tr className="border-b border-border-color bg-secondary">
-                <th className="px-3 py-2 text-left font-semibold text-text-heading">
+                <th className="px-3 py-2 text-right font-semibold text-text-heading">
                   {t("RegressionResult.Variable")}
                 </th>
                 <th className="px-3 py-2 text-right font-semibold text-text-heading">
                   {t("RegressionResult.Coefficient")}
                 </th>
+                {hasMarginalEffects && (
+                  <th className="px-3 py-2 text-right font-semibold text-text-heading">
+                    {t("RegressionResult.MarginalEffect")}
+                  </th>
+                )}
                 <th className="px-3 py-2 text-right font-semibold text-text-heading">
                   {t("RegressionResult.StandardError")}
                 </th>
@@ -185,50 +247,60 @@ export const RegressionResult = ({
               </tr>
             </thead>
             <tbody>
-              {result.parameters.map((param, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-border-color hover:bg-secondary/50"
-                >
-                  <td className="px-3 py-2 font-medium text-brand-text-main">
-                    {param.variable}
-                  </td>
-                  <td className="px-3 py-2 text-right text-brand-text-main">
-                    {formatNumber(param.coefficient)}
-                  </td>
-                  <td className="px-3 py-2 text-right text-brand-text-main">
-                    {formatNumber(param.standardError)}
-                  </td>
-                  <td className="px-3 py-2 text-right text-brand-text-main">
-                    {formatNumber(param.tValue)}
-                  </td>
-                  <td
-                    className={cn(
-                      "px-3 py-2 text-right font-medium",
-                      param.pValue !== null && param.pValue < 0.001
-                        ? "text-green-600"
-                        : param.pValue !== null && param.pValue < 0.01
-                          ? "text-green-500"
-                          : param.pValue !== null && param.pValue < 0.05
-                            ? "text-yellow-600"
-                            : "text-brand-text-main",
-                    )}
+              {result.parameters.map((param, index) => {
+                const ame = getMarginalEffect(param.variable);
+                return (
+                  <tr
+                    key={index}
+                    className="border-b border-border-color hover:bg-secondary/50"
                   >
-                    {formatNumber(param.pValue)}
-                    {significanceMarker(param.pValue) && (
-                      <span className="ml-1 font-bold">
-                        {significanceMarker(param.pValue)}
-                      </span>
+                    <td className="px-3 py-2 font-medium text-brand-text-main">
+                      {param.variable}
+                    </td>
+                    <td className="px-3 py-2 text-right text-brand-text-main">
+                      {formatNumber(param.coefficient)}
+                    </td>
+                    {hasMarginalEffects && (
+                      <td className="px-3 py-2 text-right text-brand-text-main">
+                        {ame
+                          ? formatNumber(ame.marginalEffect)
+                          : t("RegressionResult.NA")}
+                      </td>
                     )}
-                  </td>
-                  <td className="px-3 py-2 text-right text-brand-text-main">
-                    {formatNumber(param.confidenceIntervalLower)}
-                  </td>
-                  <td className="px-3 py-2 text-right text-brand-text-main">
-                    {formatNumber(param.confidenceIntervalUpper)}
-                  </td>
-                </tr>
-              ))}
+                    <td className="px-3 py-2 text-right text-brand-text-main">
+                      {formatNumber(param.standardError)}
+                    </td>
+                    <td className="px-3 py-2 text-right text-brand-text-main">
+                      {formatNumber(param.tValue)}
+                    </td>
+                    <td
+                      className={cn(
+                        "px-3 py-2 text-right font-medium",
+                        param.pValue !== null && param.pValue < 0.001
+                          ? "text-green-600"
+                          : param.pValue !== null && param.pValue < 0.01
+                            ? "text-green-500"
+                            : param.pValue !== null && param.pValue < 0.05
+                              ? "text-yellow-600"
+                              : "text-brand-text-main",
+                      )}
+                    >
+                      {formatNumber(param.pValue)}
+                      {significanceMarker(param.pValue) && (
+                        <span className="ml-1 font-bold">
+                          {significanceMarker(param.pValue)}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-right text-brand-text-main">
+                      {formatNumber(param.confidenceIntervalLower)}
+                    </td>
+                    <td className="px-3 py-2 text-right text-brand-text-main">
+                      {formatNumber(param.confidenceIntervalUpper)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -238,40 +310,94 @@ export const RegressionResult = ({
       </ResultSection>
 
       {/* モデル統計量 */}
-      <ResultSection title={t("RegressionResult.ModelStatistics")}>
+      <ResultSection
+        title={t("RegressionResult.ModelStatistics")}
+        titleAction={
+          <ExplainerButton
+            explainerKey="ols_result_model_stats"
+            aria-label={t("RegressionResult.ModelStatisticsExplainerLabel")}
+            data-testid="model-stats-explainer-btn"
+          >
+            <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
+          </ExplainerButton>
+        }
+      >
         <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
-          <StatItem
-            label="R²"
-            value={formatNumber(result.modelStatistics.R2)}
-          />
-          <StatItem
-            label={t("RegressionResult.AdjustedR2")}
-            value={formatNumber(result.modelStatistics.adjustedR2)}
-          />
-          <StatItem
-            label="AIC"
-            value={formatNumber(result.modelStatistics.AIC)}
-          />
-          <StatItem
-            label="BIC"
-            value={formatNumber(result.modelStatistics.BIC)}
-          />
-          <StatItem
-            label={t("RegressionResult.FValue")}
-            value={formatNumber(result.modelStatistics.fValue)}
-          />
-          <StatItem
-            label={t("RegressionResult.FProbability")}
-            value={formatNumber(result.modelStatistics.fProbability)}
-          />
-          <StatItem
-            label={t("RegressionResult.LogLikelihood")}
-            value={formatNumber(result.modelStatistics.logLikelihood)}
-          />
-          <StatItem
-            label={t("RegressionResult.Observations")}
-            value={result.modelStatistics.nObservations}
-          />
+          {isDiscreteModel ? (
+            <>
+              <StatItem
+                label={t("RegressionResult.PseudoR2")}
+                value={formatNumber(result.modelStatistics.pseudoRSquared)}
+              />
+              <StatItem
+                label={t("RegressionResult.LogLikelihood")}
+                value={formatNumber(result.modelStatistics.logLikelihood)}
+              />
+              <StatItem
+                label={t("RegressionResult.LogLikelihoodNull")}
+                value={formatNumber(result.modelStatistics.logLikelihoodNull)}
+              />
+              <StatItem
+                label={t("RegressionResult.LRStatistic")}
+                value={formatNumber(result.modelStatistics.lrStatistic)}
+              />
+              <StatItem
+                label={t("RegressionResult.LRDf")}
+                value={result.modelStatistics.lrDf ?? t("RegressionResult.NA")}
+              />
+              <StatItem
+                label={t("RegressionResult.LRPValue")}
+                value={formatNumber(result.modelStatistics.lrPValue)}
+              />
+              <StatItem
+                label="AIC"
+                value={formatNumber(result.modelStatistics.AIC)}
+              />
+              <StatItem
+                label="BIC"
+                value={formatNumber(result.modelStatistics.BIC)}
+              />
+              <StatItem
+                label={t("RegressionResult.Observations")}
+                value={result.modelStatistics.nObservations}
+              />
+            </>
+          ) : (
+            <>
+              <StatItem
+                label="R²"
+                value={formatNumber(result.modelStatistics.R2)}
+              />
+              <StatItem
+                label={t("RegressionResult.AdjustedR2")}
+                value={formatNumber(result.modelStatistics.adjustedR2)}
+              />
+              <StatItem
+                label="AIC"
+                value={formatNumber(result.modelStatistics.AIC)}
+              />
+              <StatItem
+                label="BIC"
+                value={formatNumber(result.modelStatistics.BIC)}
+              />
+              <StatItem
+                label={t("RegressionResult.FValue")}
+                value={formatNumber(result.modelStatistics.fValue)}
+              />
+              <StatItem
+                label={t("RegressionResult.FProbability")}
+                value={formatNumber(result.modelStatistics.fProbability)}
+              />
+              <StatItem
+                label={t("RegressionResult.LogLikelihood")}
+                value={formatNumber(result.modelStatistics.logLikelihood)}
+              />
+              <StatItem
+                label={t("RegressionResult.Observations")}
+                value={result.modelStatistics.nObservations}
+              />
+            </>
+          )}
         </div>
       </ResultSection>
     </div>

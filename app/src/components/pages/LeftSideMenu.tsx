@@ -370,14 +370,14 @@ export const LeftSideMenu = () => {
         className="px-4 pb-2 pt-1.5"
         data-testid="workspace-navigator-toggle"
       >
-        <div className="grid grid-cols-2 rounded-lg bg-white/10 p-0.5">
+        <div className="grid grid-cols-2 rounded-lg bg-white/10 dark:bg-gray-700/50 p-0.5">
           <button
             type="button"
             className={cn(
               "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
               pane === "data"
-                ? "bg-white text-brand-primary"
-                : "text-white/70 hover:text-white",
+                ? "bg-white dark:bg-gray-200 text-brand-primary dark:text-gray-900"
+                : "text-white/70 dark:text-gray-400 hover:text-white dark:hover:text-gray-200",
             )}
             onClick={() => setPane("data")}
             data-testid="left-menu-tab-data"
@@ -389,8 +389,8 @@ export const LeftSideMenu = () => {
             className={cn(
               "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
               pane === "results"
-                ? "bg-white text-brand-primary"
-                : "text-white/70 hover:text-white",
+                ? "bg-white dark:bg-gray-200 text-brand-primary dark:text-gray-900"
+                : "text-white/70 dark:text-gray-400 hover:text-white dark:hover:text-gray-200",
             )}
             onClick={() => setPane("results")}
             data-testid="left-menu-tab-results"

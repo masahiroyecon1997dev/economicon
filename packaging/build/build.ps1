@@ -12,6 +12,13 @@ param (
     [ValidateSet("dev", "build")]
     [string]$Mode = "build",
 
+    # 生成する成果物を指定する
+    # - installer: NSIS インストーラーのみ
+    # - portable : 展開してそのまま起動できる ZIP のみ
+    # - all      : インストーラーとポータブル版の両方
+    [ValidateSet("installer", "portable", "all")]
+    [string]$PackageTarget = "installer",
+
     # CI モード: GitHub Actions から呼び出す際に指定する
     # - STEP 0（前提ツール確認・対話的プロンプト）をスキップ
     # - ツール類は GitHub Actions の Setup ステップで準備済みとみなす
@@ -39,7 +46,8 @@ $PYTHON_VERSION_SHORT  = ($PYTHON_VERSION -split '\.')[0..1] -join ''
 
 # --- アプリ情報 ----------------------------------------------------------------
 $APP_NAME    = "economicon"
-$APP_VERSION = "0.4.0"    # tauri.conf.json の version と合わせてください
+$PRODUCT_NAME = "Economicon"
+$APP_VERSION = "0.5.0"    # tauri.conf.json の version と合わせてください
 
 # --- ディレクトリ --------------------------------------------------------------
 $SCRIPT_DIR    = $PSScriptRoot                          # packaging/build/
@@ -99,19 +107,104 @@ function Invoke-Step {
     }
 }
 
+function Initialize-ReleaseDirectory {
+    if (Test-Path $RELEASE_DIR) {
+        Remove-Item -Recurse -Force $RELEASE_DIR
+    }
+
+    New-Item -ItemType Directory -Path $RELEASE_DIR | Out-Null
+}
+
+function Copy-InstallerArtifacts {
+    $bundleDir = Join-Path $TAURI_DIR "target\release\bundle"
+    $installerDir = Join-Path $bundleDir "nsis"
+    $copied = 0
+
+    $exeFiles = Get-ChildItem $installerDir -Filter "*.exe" -ErrorAction SilentlyContinue
+    foreach ($file in $exeFiles) {
+        Copy-Item $file.FullName -Destination $RELEASE_DIR -Force
+        Write-Info "コピー: $($file.Name) → $RELEASE_DIR"
+        $copied++
+    }
+
+    if ($copied -eq 0) {
+        Write-Warn "NSIS インストーラー成果物が見つかりませんでした。bundle ディレクトリを確認してください:"
+        Write-Info $bundleDir
+        exit 1
+    }
+
+    Write-Success "$copied 個のインストーラー成果物を $RELEASE_DIR にコピーしました。"
+}
+
+function New-PortableArtifact {
+    $releaseBuildDir = Join-Path $TAURI_DIR "target\release"
+    $portableStageDir = Join-Path $SCRIPT_DIR "portable-stage"
+    $portableZipPath = Join-Path $RELEASE_DIR "$APP_NAME-windows-portable.zip"
+    $portableExePath = Join-Path $releaseBuildDir "$PRODUCT_NAME.exe"
+    $portablePythonPath = Join-Path $releaseBuildDir "python.exe"
+    $portableResourcesDir = Join-Path $releaseBuildDir "resources"
+
+    if (-not (Test-Path $portableExePath)) {
+        Write-Fail "ポータブル版の実行ファイルが見つかりません: $portableExePath"
+        exit 1
+    }
+
+    if (-not (Test-Path $portablePythonPath)) {
+        Write-Fail "ポータブル版の sidecar 実行ファイルが見つかりません: $portablePythonPath"
+        exit 1
+    }
+
+    if (-not (Test-Path $portableResourcesDir)) {
+        Write-Fail "ポータブル版の resources ディレクトリが見つかりません: $portableResourcesDir"
+        exit 1
+    }
+
+    if (Test-Path $portableStageDir) {
+        Remove-Item -Recurse -Force $portableStageDir
+    }
+
+    New-Item -ItemType Directory -Path $portableStageDir | Out-Null
+
+    Copy-Item $portableExePath -Destination (Join-Path $portableStageDir "$PRODUCT_NAME.exe") -Force
+    Copy-Item $portablePythonPath -Destination (Join-Path $portableStageDir "python.exe") -Force
+    Copy-Item $portableResourcesDir -Destination (Join-Path $portableStageDir "resources") -Recurse -Force
+
+    $dllFiles = Get-ChildItem $releaseBuildDir -Filter "*.dll" -File -ErrorAction SilentlyContinue
+    foreach ($dllFile in $dllFiles) {
+        Copy-Item $dllFile.FullName -Destination (Join-Path $portableStageDir $dllFile.Name) -Force
+    }
+
+    if (Test-Path $portableZipPath) {
+        Remove-Item -Force $portableZipPath
+    }
+
+    Compress-Archive -Path (Join-Path $portableStageDir "*") -DestinationPath $portableZipPath -Force
+    Remove-Item -Recurse -Force $portableStageDir
+
+    Write-Success "ポータブル版 ZIP を生成しました: $portableZipPath"
+}
+
+function Get-TauriBuildCommand {
+    switch ($PackageTarget) {
+        "portable" { return "pnpm tauri build --no-bundle" }
+        default { return "pnpm tauri build" }
+    }
+}
+
 # ==============================================================================
 #  ヘッダー表示
 # ==============================================================================
 
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║   Economicon - Windows インストーラー ビルド         ║" -ForegroundColor Cyan
+Write-Host "║   Economicon - Windows リリースビルド               ║" -ForegroundColor Cyan
 Write-Host "║   Python $PYTHON_VERSION (Embedded) + React + Tauri v2   ║" -ForegroundColor Cyan
 Write-Host "╚══════════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 Write-Info "プロジェクトルート : $PROJECT_ROOT"
 Write-Info "runtime 出力先  : $RUNTIME_DIR"
 Write-Info "成果物集約先       : $RELEASE_DIR"
+Write-Info "成果物種別         : $PackageTarget"
 
 
 # ==============================================================================
@@ -152,6 +245,8 @@ if ($CI) {
         if ($ans -ne 'y' -and $ans -ne 'Y') { exit 1 }
     }
 }
+
+Initialize-ReleaseDirectory
 
 
 # ==============================================================================
@@ -509,17 +604,19 @@ if ($Mode -eq "dev") {
 
 
 # ==============================================================================
-#  STEP 8: Tauri ビルド（MSI / EXE インストーラー生成）
+#  STEP 8: Tauri ビルド（リリース EXE / 必要に応じて NSIS 生成）
 # ==============================================================================
 
-Write-Step "[9/11] Tauri ビルド (pnpm tauri build)"
+$tauriBuildCommand = Get-TauriBuildCommand
+
+Write-Step "[9/11] Tauri ビルド ($tauriBuildCommand)"
 
 Push-Location $APP_DIR
 try {
     # NOTE: tauri.conf.json の bundle.resources に runtime が設定されている前提。
     #       設定がないと runtime はインストーラーに含まれません。
     Invoke-Step -ErrorMsg "pnpm tauri build に失敗しました。" -Block {
-        pnpm tauri build
+        Invoke-Expression $tauriBuildCommand
     }
 } finally {
     Pop-Location
@@ -534,29 +631,12 @@ Write-Success "Tauri ビルド完了。"
 
 Write-Step "[10/11] 成果物を release/ へ集約"
 
-# 出力先を初期化
-if (Test-Path $RELEASE_DIR) {
-    Remove-Item -Recurse -Force $RELEASE_DIR
-}
-New-Item -ItemType Directory -Path $RELEASE_DIR | Out-Null
-
-$bundleDir = Join-Path $TAURI_DIR "target\release\bundle"
-$copied    = 0
-
-# NSIS exe
-$exeFiles = Get-ChildItem (Join-Path $bundleDir "nsis") -Filter "*.exe" -ErrorAction SilentlyContinue
-foreach ($f in $exeFiles) {
-    Copy-Item $f.FullName -Destination $RELEASE_DIR -Force
-    Write-Info "コピー: $($f.Name) → $RELEASE_DIR"
-    $copied++
+if ($PackageTarget -eq "installer" -or $PackageTarget -eq "all") {
+    Copy-InstallerArtifacts
 }
 
-# exe（WiX などその他）
-if ($copied -eq 0) {
-    Write-Warn "MSI / NSIS 成果物が見つかりませんでした。bundle ディレクトリを確認してください:"
-    Write-Info $bundleDir
-} else {
-    Write-Success "$copied 個の成果物を $RELEASE_DIR にコピーしました。"
+if ($PackageTarget -eq "portable" -or $PackageTarget -eq "all") {
+    New-PortableArtifact
 }
 
 

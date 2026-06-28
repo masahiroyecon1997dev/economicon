@@ -29,9 +29,7 @@ export const Calculation = () => {
   const { t } = useTranslation();
   const tErr = createFieldError(t);
   const tableList = useTableListStore((state) => state.tableList);
-  const closeActiveWorkTab = useWorkspaceTabsStore(
-    (state) => state.closeActiveWorkTab,
-  );
+  const openDataTab = useWorkspaceTabsStore((state) => state.openDataTab);
   const initialTableName =
     useTableInfosStore((state) => state.activeTableName) ?? "";
   const { tableInfos, addTableInfo, invalidateTable, activateTableInfo } =
@@ -82,7 +80,7 @@ export const Calculation = () => {
           } else {
             addTableInfo(updatedTableInfo);
           }
-          closeActiveWorkTab();
+          openDataTab(value.tableName);
         } else {
           await showMessageDialog(
             t("Error.Error"),
@@ -143,7 +141,8 @@ export const Calculation = () => {
     textareaRef.current?.focus();
   };
 
-  const handleCancel = () => closeActiveWorkTab();
+  const handleCancel = () =>
+    useWorkspaceTabsStore.getState().closeActiveWorkTab();
 
   const filteredColumns = columnList.filter((column) =>
     column.name.toLowerCase().includes(filterValue.toLowerCase()),

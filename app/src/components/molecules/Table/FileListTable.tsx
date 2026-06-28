@@ -149,7 +149,7 @@ export const FileListTable = ({
                       )}
                     </span>
                     <span
-                      className={`truncate block min-w-0 ${file.isFile ? "" : "font-semibold"}`}
+                      className={`truncate block min-w-0 ${file.isFile ? "" : "font-semibold"} dark:text-gray-400`}
                       style={{ maxWidth: "min(400px, calc(50vw - 100px))" }}
                     >
                       {file.name}
