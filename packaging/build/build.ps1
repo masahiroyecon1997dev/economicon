@@ -528,7 +528,20 @@ Invoke-Step -ErrorMsg "cargo-about によるライセンス収集に失敗しま
         --manifest-path (Join-Path $TAURI_DIR "Cargo.toml") `
         --config (Join-Path $SCRIPT_DIR "about.toml") `
         --output-file $rustLicOut `
-        (Join-Path $SCRIPT_DIR "about.hbs")
+        (Join-Path $SCRIPT_DIR "about.hbs") 2>&1 | ForEach-Object {
+            $line = $_.ToString()
+            Write-Host $line
+
+            # エラー文の中に原因となるキーワードが含まれているかチェック
+            if ($line -like "*deprecated license identifier*" -or $line -like "*failed to parse license*") {
+                $hasLicenseError = $true
+            }
+        }
+
+    # 不正なライセンス識別子を検知した場合は、明示的に例外を投げてスクリプトを落とす
+    if ($hasLicenseError) {
+        throw "非推奨または解析できないライセンス識別子（GPL-2.0等）が検出されたため、処理を中断しました。"
+    }
 }
 Write-Success "Rust ライセンス → $rustLicOut"
 
