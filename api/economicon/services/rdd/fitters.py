@@ -1,46 +1,44 @@
 """
 RDD 推定ヘルパー関数
 
-- rdrobust 呼び出し・結果抽出
-- rddensity (McCrary) 密度検定
-- Polars によるビンデータ生成
-- 核重み付き局所多項式フィット評価
-- プラシーボテスト
+NOTE: rdrobust / rddensity は GPL ライセンスのため削除済み。
+      推定・密度検定・プラシーボ検定は NotImplementedError を返す。
+
+現在有効な関数:
+- Polars によるビンデータ生成 (compute_bins_data)
+- 核重み付き局所多項式フィット評価 (compute_poly_fit_data)
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 import polars as pl
 
-from economicon.core.enums import ErrorCode
-from economicon.i18n.translation import gettext as _
-from economicon.utils import ProcessingError
 from economicon.utils.column_names import generate_unique_column_name
 
 # ---------------------------------------------------------------------------
 # rdrobust 共通パラメータ集約クラス
+# NOTE: rdrobust は GPL ライセンスのため削除済み。以下はコメントアウト。
 # ---------------------------------------------------------------------------
 
 
-@dataclass
-class RDDRunConfig:
-    """
-    rdrobust 呼び出しに共通するパラメータ群。
-
-    run_placebo_tests など引数が多い関数の引数数削減に使用する。
-    """
-
-    cutoff: float
-    kernel: str
-    bw_select: str
-    h: float | None
-    p: int
-    vce: str
-    level: int
+# @dataclass
+# class RDDRunConfig:
+#     """
+#     rdrobust 呼び出しに共通するパラメータ群。
+#
+#     run_placebo_tests など引数が多い関数の引数数削減に使用する。
+#     """
+#
+#     cutoff: float
+#     kernel: str
+#     bw_select: str
+#     h: float | None
+#     p: int
+#     vce: str
+#     level: int
 
 
 # ---------------------------------------------------------------------------
@@ -316,371 +314,287 @@ def compute_bins_data(
 # ---------------------------------------------------------------------------
 
 
-def run_rdrobust(
-    y: np.ndarray,
-    x: np.ndarray,
-    *,
-    cutoff: float,
-    kernel: str,
-    bw_select: str,
-    h: float | None,
-    p: int,
-    vce: str,
-    level: int,
-) -> Any:
-    """
-    rdrobust を実行して結果オブジェクトを返す。
+# ---------------------------------------------------------------------------
+# NOTE: rdrobust は GPL ライセンスのため削除済み。以下はコメントアウト。
+# ---------------------------------------------------------------------------
 
-    Eco-Note: rdrobust は conventional / bias-corrected / robust の
-    3 種類の推定値を返す。bias-corrected 推定値は局所 p+1 次多項式で
-    バイアス項を推定し、conventional 推定値から引いたもの。
-    信頼区間は robust CI（bias-corrected 点推定 + robust SE）を推奨。
-
-    Parameters
-    ----------
-    level : int
-        信頼区間水準 (0-100)。rdrobust に直接渡す。
-
-    Raises
-    ------
-    ProcessingError
-        推定失敗（サンプル不足・特異行列等）の場合
-    """
-    try:
-        from rdrobust import rdrobust  # noqa: PLC0415
-
-        kwargs: dict[str, Any] = {
-            "c": cutoff,
-            "kernel": kernel,
-            "bwselect": bw_select,
-            "p": p,
-            "vce": vce,
-            "level": level,
-            "all": True,
-        }
-        if h is not None:
-            kwargs["h"] = h
-
-        return rdrobust(y=y, x=x, **kwargs)
-    except ProcessingError:
-        raise
-    except Exception as exc:
-        raise ProcessingError(
-            error_code=ErrorCode.RDD_PROCESS_ERROR,
-            message=_("RDD estimation failed: {}").format(str(exc)),
-            detail=str(exc),
-        ) from exc
+# def run_rdrobust(
+#     y: np.ndarray,
+#     x: np.ndarray,
+#     *,
+#     cutoff: float,
+#     kernel: str,
+#     bw_select: str,
+#     h: float | None,
+#     p: int,
+#     vce: str,
+#     level: int,
+# ) -> Any:
+#     """
+#     rdrobust を実行して結果オブジェクトを返す。
+#     """
+#     try:
+#         from rdrobust import rdrobust  # noqa: PLC0415
+#
+#         kwargs: dict[str, Any] = {
+#             "c": cutoff,
+#             "kernel": kernel,
+#             "bwselect": bw_select,
+#             "p": p,
+#             "vce": vce,
+#             "level": level,
+#             "all": True,
+#         }
+#         if h is not None:
+#             kwargs["h"] = h
+#
+#         return rdrobust(y=y, x=x, **kwargs)
+#     except ProcessingError:
+#         raise
+#     except Exception as exc:
+#         raise ProcessingError(
+#             error_code=ErrorCode.RDD_PROCESS_ERROR,
+#             message=_("RDD estimation failed: {}").format(str(exc)),
+#             detail=str(exc),
+#         ) from exc
 
 
-def extract_rdrobust_results(result: Any) -> dict[str, Any]:
-    """
-    rdrobust 結果オブジェクトから推定統計値を抽出する。
+# def extract_rdrobust_results(result: Any) -> dict[str, Any]:
+#     """
+#     rdrobust 結果オブジェクトから推定統計値を抽出する。
+#
+#     NOTE: rdrobust は GPL ライセンスのため削除済み。
+#     """
+#     coef = np.asarray(result.coef).flatten()
+#     se = np.asarray(result.se).flatten()
+#     z_stat = np.asarray(result.t).flatten()
+#     pv = np.asarray(result.pv).flatten()
+#     ci = np.asarray(result.ci)  # shape (3, 2)
+#     bws = np.asarray(result.bws)  # shape (2, 2)
+#
+#     # conventional
+#     conv_coef = float(coef[0])
+#     conv_se = float(se[0])
+#     conv_z = float(z_stat[0])
+#     conv_pv = float(pv[0])
+#     conv_ci_lower = float(ci[0, 0])
+#     conv_ci_upper = float(ci[0, 1])
+#
+#     # bias-corrected 点推定値（coef[1] または coef[2]）
+#     bc_coef = float(coef[1]) if len(coef) > 1 else conv_coef
+#
+#     # Eco-Note: robust z 統計量・p 値は行インデックス 2。
+#     # Calonico et al. (2014) が推奨する推論は
+#     # bias-corrected 点推定 + robust SE に基づく。
+#     # 行インデックス 2 が存在しない場合は 1 → 0 の順にフォールバック。
+#     if len(z_stat) >= 3:  # noqa: PLR2004
+#         bc_z = float(z_stat[2])
+#         bc_pv = float(pv[2])
+#     elif len(z_stat) >= 2:  # noqa: PLR2004
+#         bc_z = float(z_stat[1])
+#         bc_pv = float(pv[1])
+#     else:
+#         bc_z = float("nan")
+#         bc_pv = float("nan")
+#
+#     # robust CI（行インデックス 2）または bias-corrected CI（行インデックス 1）# noqa: E501
+#     if ci.shape[0] >= 3:  # noqa: PLR2004
+#         bc_ci_lower = float(ci[2, 0])
+#         bc_ci_upper = float(ci[2, 1])
+#     elif ci.shape[0] >= 2:  # noqa: PLR2004
+#         bc_ci_lower = float(ci[1, 0])
+#         bc_ci_upper = float(ci[1, 1])
+#     else:
+#         bc_ci_lower = float("nan")
+#         bc_ci_upper = float("nan")
+#
+#     # バンド幅: bws[0] = h (main), bws[1] = b (bias)
+#     h_left = float(bws[0, 0])
+#     h_right = float(bws[0, 1])
+#     b_left = float(bws[1, 0])
+#     b_right = float(bws[1, 1])
+#
+#     # Eco-Note: rho = h / b。rdrobust が結果に rho 属性を持つ場合は優先使用。
+#     rho_val: float
+#     if hasattr(result, "rho") and result.rho is not None:
+#         rho_arr = np.asarray(result.rho).flatten()
+#         rho_val = float(rho_arr[0])
+#     else:
+#         rho_val = h_left / b_left if b_left != 0 else float("nan")
+#
+#     # サンプル数: N_h = バンド幅内有効サンプル数
+#     n_left, n_right, n_total = _extract_sample_sizes(result)
 
-    rdrobust Python の result オブジェクトは numpy 配列または
-    pandas DataFrame の属性を持つ。防御的に np.asarray() で変換する。
-
-    Eco-Note:
-        coef[0] = conventional（局所 p 次多項式の係数）
-        coef[1] = bias-corrected（p+1 次バイアス項を補正）
-        coef[2] = robust（= bias-corrected 点推定値）
-        se[2]   = robust SE
-        t[2]    = robust z 統計量（bias-corrected / robust SE）
-        pv[2]   = robust p 値（Calonico et al. 2014 推奨）
-        ci[0, :] = conventional CI
-        ci[2, :] = robust CI（bias-corrected 点推定 + robust SE）
-        rho     = h / b（バンド幅比率）
-    """
-    coef = np.asarray(result.coef).flatten()
-    se = np.asarray(result.se).flatten()
-    z_stat = np.asarray(result.t).flatten()
-    pv = np.asarray(result.pv).flatten()
-    ci = np.asarray(result.ci)  # shape (3, 2)
-    bws = np.asarray(result.bws)  # shape (2, 2)
-
-    # conventional
-    conv_coef = float(coef[0])
-    conv_se = float(se[0])
-    conv_z = float(z_stat[0])
-    conv_pv = float(pv[0])
-    conv_ci_lower = float(ci[0, 0])
-    conv_ci_upper = float(ci[0, 1])
-
-    # bias-corrected 点推定値（coef[1] または coef[2]）
-    bc_coef = float(coef[1]) if len(coef) > 1 else conv_coef
-
-    # Eco-Note: robust z 統計量・p 値は行インデックス 2。
-    # Calonico et al. (2014) が推奨する推論は
-    # bias-corrected 点推定 + robust SE に基づく。
-    # 行インデックス 2 が存在しない場合は 1 → 0 の順にフォールバック。
-    if len(z_stat) >= 3:  # noqa: PLR2004
-        bc_z = float(z_stat[2])
-        bc_pv = float(pv[2])
-    elif len(z_stat) >= 2:  # noqa: PLR2004
-        bc_z = float(z_stat[1])
-        bc_pv = float(pv[1])
-    else:
-        bc_z = float("nan")
-        bc_pv = float("nan")
-
-    # robust CI（行インデックス 2）または bias-corrected CI（行インデックス 1）
-    if ci.shape[0] >= 3:  # noqa: PLR2004
-        bc_ci_lower = float(ci[2, 0])
-        bc_ci_upper = float(ci[2, 1])
-    elif ci.shape[0] >= 2:  # noqa: PLR2004
-        bc_ci_lower = float(ci[1, 0])
-        bc_ci_upper = float(ci[1, 1])
-    else:
-        bc_ci_lower = float("nan")
-        bc_ci_upper = float("nan")
-
-    # バンド幅: bws[0] = h (main), bws[1] = b (bias)
-    h_left = float(bws[0, 0])
-    h_right = float(bws[0, 1])
-    b_left = float(bws[1, 0])
-    b_right = float(bws[1, 1])
-
-    # Eco-Note: rho = h / b。rdrobust が結果に rho 属性を持つ場合は優先使用。
-    rho_val: float
-    if hasattr(result, "rho") and result.rho is not None:
-        rho_arr = np.asarray(result.rho).flatten()
-        rho_val = float(rho_arr[0])
-    else:
-        rho_val = h_left / b_left if b_left != 0 else float("nan")
-
-    # サンプル数: N_h = バンド幅内有効サンプル数
-    n_left, n_right, n_total = _extract_sample_sizes(result)
-
-    return {
-        "conv_coef": conv_coef,
-        "conv_se": conv_se,
-        "conv_z": conv_z,
-        "conv_pv": conv_pv,
-        "conv_ci_lower": conv_ci_lower,
-        "conv_ci_upper": conv_ci_upper,
-        "bc_coef": bc_coef,
-        "bc_z": bc_z,
-        "bc_pv": bc_pv,
-        "bc_ci_lower": bc_ci_lower,
-        "bc_ci_upper": bc_ci_upper,
-        "rho": rho_val,
-        "h_left": h_left,
-        "h_right": h_right,
-        "b_left": b_left,
-        "b_right": b_right,
-        "n_left": n_left,
-        "n_right": n_right,
-        "n_total": n_total,
-    }
+#     return {
+#         "conv_coef": conv_coef,
+#         "conv_se": conv_se,
+#         "conv_z": conv_z,
+#         "conv_pv": conv_pv,
+#         "conv_ci_lower": conv_ci_lower,
+#         "conv_ci_upper": conv_ci_upper,
+#         "bc_coef": bc_coef,
+#         "bc_z": bc_z,
+#         "bc_pv": bc_pv,
+#         "bc_ci_lower": bc_ci_lower,
+#         "bc_ci_upper": bc_ci_upper,
+#         "rho": rho_val,
+#         "h_left": h_left,
+#         "h_right": h_right,
+#         "b_left": b_left,
+#         "b_right": b_right,
+#         "n_left": n_left,
+#         "n_right": n_right,
+#         "n_total": n_total,
+#     }
 
 
-def _extract_sample_sizes(result: Any) -> tuple[int, int, int]:
-    """
-    rdrobust 結果から有効サンプル数と全サンプル数を抽出する。
-
-    rdrobust Python の属性名は版によって異なる可能性があるため
-    複数の候補属性を試みる。
-    """
-    # 全サンプル数
-    n_total = 0
-    if hasattr(result, "N"):
-        n_arr = np.asarray(result.N).flatten()
-        if len(n_arr) >= 2:  # noqa: PLR2004
-            n_total = int(n_arr[0]) + int(n_arr[1])
-        elif len(n_arr) == 1:
-            n_total = int(n_arr[0])
-
-    # バンド幅内有効サンプル数
-    n_left, n_right = 0, 0
-    for attr in ("N_h", "Nh", "N_eff"):
-        if hasattr(result, attr):
-            nh_arr = np.asarray(getattr(result, attr)).flatten()
-            if len(nh_arr) >= 2:  # noqa: PLR2004
-                n_left = int(nh_arr[0])
-                n_right = int(nh_arr[1])
-                break
-
-    # N_h が取れなかった場合は全サンプル数の半分を代入（フォールバック）
-    if n_left == 0 and n_right == 0 and hasattr(result, "N"):
-        n_arr = np.asarray(result.N).flatten()
-        if len(n_arr) >= 2:  # noqa: PLR2004
-            n_left = int(n_arr[0])
-            n_right = int(n_arr[1])
-
-    return n_left, n_right, n_total
+# def _extract_sample_sizes(result: Any) -> tuple[int, int, int]:
+#     """
+#     rdrobust 結果から有効サンプル数と全サンプル数を抽出する。
+#     NOTE: rdrobust は GPL ライセンスのため削除済み。
+#     """
+#     n_total = 0
+#     if hasattr(result, "N"):
+#         n_arr = np.asarray(result.N).flatten()
+#         if len(n_arr) >= 2:  # noqa: PLR2004
+#             n_total = int(n_arr[0]) + int(n_arr[1])
+#         elif len(n_arr) == 1:
+#             n_total = int(n_arr[0])
+#
+#     n_left, n_right = 0, 0
+#     for attr in ("N_h", "Nh", "N_eff"):
+#         if hasattr(result, attr):
+#             nh_arr = np.asarray(getattr(result, attr)).flatten()
+#             if len(nh_arr) >= 2:  # noqa: PLR2004
+#                 n_left = int(nh_arr[0])
+#                 n_right = int(nh_arr[1])
+#                 break
+#
+#     if n_left == 0 and n_right == 0 and hasattr(result, "N"):
+#         n_arr = np.asarray(result.N).flatten()
+#         if len(n_arr) >= 2:  # noqa: PLR2004
+#             n_left = int(n_arr[0])
+#             n_right = int(n_arr[1])
+#
+#     return n_left, n_right, n_total
 
 
 # ---------------------------------------------------------------------------
-# McCrary 密度検定 (rddensity)
+# NOTE: rddensity は GPL ライセンスのため削除済み。以下はコメントアウト。
 # ---------------------------------------------------------------------------
 
-
-def run_density_test(
-    x: np.ndarray,
-    cutoff: float,
-) -> dict[str, Any] | None:
-    """
-    rddensity による McCrary 密度検定を実行する。
-
-    帰無仮説 H0: カットオフにおいて実行変数の密度は連続（操作なし）。
-    p 値が小さい（例: < 0.05）場合はサンプル操作の可能性を示す。
-
-    Parameters
-    ----------
-    x : np.ndarray
-        実行変数
-    cutoff : float
-        カットオフ値
-
-    Returns
-    -------
-    dict | None
-        {"test_statistic": float, "p_value": float, "description": str}
-        rddensity が利用不可の場合は None。
-    """
-    try:
-        from rddensity import rddensity  # noqa: PLC0415
-
-        rd = rddensity(X=x, c=cutoff)  # type: ignore[arg-type]
-        test = rd.test
-
-        # test は dict または DataFrame または SimpleNamespace の可能性
-        if isinstance(test, dict):
-            t_stat = float(
-                test.get("t_jk", test.get("statistic", float("nan")))
-            )
-            p_val = float(test.get("p_jk", test.get("p_value", float("nan"))))
-        elif hasattr(test, "t_jk"):
-            t_stat = float(test.t_jk)
-            p_val = float(test.p_jk)
-        else:
-            # pandas DataFrame 形式 (index = 行名, 列 = 統計量)
-            test_arr = np.asarray(test).flatten()
-            t_stat = float(test_arr[0]) if len(test_arr) > 0 else float("nan")
-            p_val = float(test_arr[1]) if len(test_arr) > 1 else float("nan")
-
-        if p_val > 0.05:  # noqa: PLR2004
-            desc = (
-                "Non-significant p-value supports no manipulation "
-                "at the cutoff (RDD validity supported)."
-            )
-        else:
-            desc = (
-                "Significant p-value may indicate manipulation "
-                "at the cutoff (RDD validity in question)."
-            )
-
-        return {
-            "test_statistic": t_stat,
-            "p_value": p_val,
-            "description": desc,
-        }
-    except ImportError:
-        return None
-    except Exception:  # noqa: BLE001
-        return None
+# def run_density_test(
+#     x: np.ndarray,
+#     cutoff: float,
+# ) -> dict[str, Any] | None:
+#     """rddensity による McCrary 密度検定。NOTE: GPL のため削除済み。"""
+#     try:
+#         from rddensity import rddensity  # noqa: PLC0415
+#
+#         rd = rddensity(X=x, c=cutoff)  # type: ignore[arg-type]
+#         test = rd.test
+#
+#         if isinstance(test, dict):
+#             t_stat = float(
+#                 test.get("t_jk", test.get("statistic", float("nan")))
+#             )
+#             p_val = float(test.get("p_jk", test.get("p_value", float("nan")))) # noqa: E501
+#         elif hasattr(test, "t_jk"):
+#             t_stat = float(test.t_jk)
+#             p_val = float(test.p_jk)
+#         else:
+#             test_arr = np.asarray(test).flatten()
+#             t_stat = float(test_arr[0]) if len(test_arr) > 0 else float("nan") # noqa: E501
+#             p_val = float(test_arr[1]) if len(test_arr) > 1 else float("nan")
+#
+#         if p_val > 0.05:  # noqa: PLR2004
+#             desc = (
+#                 "Non-significant p-value supports no manipulation "
+#                 "at the cutoff (RDD validity supported)."
+#             )
+#         else:
+#             desc = (
+#                 "Significant p-value may indicate manipulation "
+#                 "at the cutoff (RDD validity in question)."
+#             )
+#
+#         return {"test_statistic": t_stat, "p_value": p_val, "description": desc} # noqa: E501
+#     except ImportError:
+#         return None
+#     except Exception:  # noqa: BLE001
+#         return None
 
 
 # ---------------------------------------------------------------------------
-# プラシーボ検定
+# NOTE: プラシーボ検定は rdrobust 依存のためコメントアウト。
 # ---------------------------------------------------------------------------
 
-
-def _default_placebo_cutoffs(
-    x: np.ndarray,
-    cutoff: float,
-) -> list[float]:
-    """
-    プラシーボ境界値のデフォルトを自動生成する。
-
-    実行変数の総範囲の ±5% をカットオフから左右に置く。
-    これにより処置・対照それぞれの内側で偽境界を検定できる。
-
-    Eco-Note: プラシーボカットオフは処置割り当て範囲内（left: x < cutoff,
-    right: x >= cutoff）に置くことで、local 推定の安定性を確認する。
-    """
-    x_min = float(x.min())
-    x_max = float(x.max())
-    span = x_max - x_min
-    if span == 0:
-        return []
-    offset = span * 0.05
-    left_placebo = cutoff - offset
-    right_placebo = cutoff + offset
-    result = []
-    if left_placebo > x_min:
-        result.append(left_placebo)
-    if right_placebo < x_max:
-        result.append(right_placebo)
-    return result
+# def _default_placebo_cutoffs(
+#     x: np.ndarray,
+#     cutoff: float,
+# ) -> list[float]:
+#     """プラシーボ境界値の自動生成。NOTE: rdrobust 依存のため削除済み。"""
+#     x_min = float(x.min())
+#     x_max = float(x.max())
+#     span = x_max - x_min
+#     if span == 0:
+#         return []
+#     offset = span * 0.05
+#     left_placebo = cutoff - offset
+#     right_placebo = cutoff + offset
+#     result = []
+#     if left_placebo > x_min:
+#         result.append(left_placebo)
+#     if right_placebo < x_max:
+#         result.append(right_placebo)
+#     return result
 
 
-def run_placebo_tests(
-    y: np.ndarray,
-    x: np.ndarray,
-    *,
-    config: RDDRunConfig,
-    placebo_cutoffs: list[float] | None,
-) -> list[dict[str, Any]]:
-    """
-    指定された偽境界値でRDD推定を実行しプラシーボ検定を行う。
-
-    プラシーボ境界で有意な推定値が得られた場合、それは偶然の
-    不連続または交絡要因の存在を示唆する。
-    本来の RDD 推定値が有意かつプラシーボが非有意であることが
-    識別戦略の妥当性を支持する。
-
-    Parameters
-    ----------
-    config : RDDRunConfig
-        rdrobust 共通パラメータ。
-    placebo_cutoffs : list[float] | None
-        None の場合は _default_placebo_cutoffs() で自動生成する。
-
-    Returns
-    -------
-    list[dict]
-        プラシーボ検定結果のリスト。失敗した境界値はスキップする。
-    """
-    if placebo_cutoffs is None:
-        placebo_cutoffs = _default_placebo_cutoffs(x, config.cutoff)
-
-    results: list[dict[str, Any]] = []
-    for pc in placebo_cutoffs:
-        try:
-            from rdrobust import rdrobust as _rdrobust  # noqa: PLC0415
-
-            kwargs: dict[str, Any] = {
-                "c": pc,
-                "kernel": config.kernel,
-                "bwselect": config.bw_select,
-                "p": config.p,
-                "vce": config.vce,
-                "level": config.level,
-                "all": False,
-            }
-            if config.h is not None:
-                kwargs["h"] = config.h
-
-            pr = _rdrobust(y=y, x=x, **kwargs)
-            pr_coef = np.asarray(pr.coef).flatten()
-            pr_se = np.asarray(pr.se).flatten()
-            pr_pv = np.asarray(pr.pv).flatten()
-            pr_ci = np.asarray(pr.ci)
-
-            pv = float(pr_pv[0])
-            results.append(
-                {
-                    "cutoff": pc,
-                    "coef": float(pr_coef[0]),
-                    "std_err": float(pr_se[0]),
-                    "p_value": pv,
-                    "ci_lower": float(pr_ci[0, 0]),
-                    "ci_upper": float(pr_ci[0, 1]),
-                    "is_significant": pv < 0.05,  # noqa: PLR2004
-                }
-            )
-        except Exception:  # noqa: BLE001
-            # 境界値付近でサンプルが不足している場合はスキップ
-            continue
-
-    return results
+# def run_placebo_tests(
+#     y: np.ndarray,
+#     x: np.ndarray,
+#     *,
+#     config: "RDDRunConfig",
+#     placebo_cutoffs: list[float] | None,
+# ) -> list[dict[str, Any]]:
+#     """プラシーボ検定。NOTE: rdrobust 依存のため削除済み。"""
+#     if placebo_cutoffs is None:
+#         placebo_cutoffs = _default_placebo_cutoffs(x, config.cutoff)
+#
+#     results: list[dict[str, Any]] = []
+#     for pc in placebo_cutoffs:
+#         try:
+#             from rdrobust import rdrobust as _rdrobust  # noqa: PLC0415
+#
+#             kwargs: dict[str, Any] = {
+#                 "c": pc,
+#                 "kernel": config.kernel,
+#                 "bwselect": config.bw_select,
+#                 "p": config.p,
+#                 "vce": config.vce,
+#                 "level": config.level,
+#                 "all": False,
+#             }
+#             if config.h is not None:
+#                 kwargs["h"] = config.h
+#
+#             pr = _rdrobust(y=y, x=x, **kwargs)
+#             pr_coef = np.asarray(pr.coef).flatten()
+#             pr_se = np.asarray(pr.se).flatten()
+#             pr_pv = np.asarray(pr.pv).flatten()
+#             pr_ci = np.asarray(pr.ci)
+#
+#             pv = float(pr_pv[0])
+#             results.append({
+#                 "cutoff": pc,
+#                 "coef": float(pr_coef[0]),
+#                 "std_err": float(pr_se[0]),
+#                 "p_value": pv,
+#                 "ci_lower": float(pr_ci[0, 0]),
+#                 "ci_upper": float(pr_ci[0, 1]),
+#                 "is_significant": pv < 0.05,  # noqa: PLR2004
+#             })
+#         except Exception:  # noqa: BLE001
+#             continue
+#
+#     return results
