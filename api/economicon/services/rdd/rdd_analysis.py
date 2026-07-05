@@ -25,30 +25,18 @@ DataOperation プロトコル実装。
 
 from __future__ import annotations
 
-import numpy as np
-
 from economicon.core.enums import ErrorCode
 from economicon.i18n.translation import gettext as _
 from economicon.schemas.rdd import RDDRequestBody
-from economicon.services.data.analysis_result import AnalysisResult
 from economicon.services.data.analysis_result_store import (
     AnalysisResultStore,
 )
 from economicon.services.data.tables_store import TablesStore
-from economicon.services.rdd.fitters import (
-    RDDRunConfig,
-    compute_bins_data,
-    compute_poly_fit_data,
-    extract_rdrobust_results,
-    run_density_test,
-    run_placebo_tests,
-    run_rdrobust,
-)
-from economicon.services.rdd.formatters import (
-    RDDFormatConfig,
-    format_rdd_result,
-)
-from economicon.utils import ProcessingError, ValidationError
+
+# NOTE: fitters のうち rdrobust/rddensity 依存シンボルは GPL のため削除済み。
+# compute_bins_data, compute_poly_fit_data は残存するが execute() は
+# NotImplementedError を送出するため現在は未使用。
+from economicon.utils import ValidationError
 from economicon.utils.validators import (
     validate_existence,
     validate_numeric_types,
@@ -187,117 +175,9 @@ class RDDAnalysis:
         ------
         ProcessingError
             rdrobust 実行失敗・収束エラー等
+        NOTE: rdrobust は GPL のため削除済み。NotImplementedError を送出。
         """
-        try:
-            table_info = self.tables_store.get_table(self.table_name)
-            df_pl = table_info.table.drop_nulls(
-                subset=[self.outcome_variable, self.running_variable]
-            )
-
-            # Polars → numpy（rdrobust は numpy 配列を要求）
-            y: np.ndarray = df_pl[self.outcome_variable].to_numpy(
-                allow_copy=True
-            )
-            x: np.ndarray = df_pl[self.running_variable].to_numpy(
-                allow_copy=True
-            )
-
-            # 信頼区間水準を 0-100 スケールに変換（rdrobust 要求仕様）
-            level = int(round(self.confidence_level * 100))
-
-            # ① rdrobust 推定
-            rdd_result = run_rdrobust(
-                y,
-                x,
-                cutoff=self.cutoff,
-                kernel=self.kernel,
-                bw_select=self.bw_select,
-                h=self.h,
-                p=self.p,
-                vce=self.vce,
-                level=level,
-            )
-            rd_stats = extract_rdrobust_results(rdd_result)
-
-            # ② ビンデータ生成
-            bins_data = compute_bins_data(
-                df_pl,
-                self.outcome_variable,
-                self.running_variable,
-                self.cutoff,
-                self.n_bins,
-            )
-
-            # ③ 多項式フィット曲線生成
-            poly_fit = compute_poly_fit_data(
-                y,
-                x,
-                cutoff=self.cutoff,
-                bw_left=rd_stats["h_left"],
-                bw_right=rd_stats["h_right"],
-                p=self.p,
-                kernel=self.kernel,
-            )
-
-            # ④ McCrary 密度検定
-            density_test = run_density_test(x, self.cutoff)
-
-            # ⑤ プラシーボ検定
-            run_cfg = RDDRunConfig(
-                cutoff=self.cutoff,
-                kernel=self.kernel,
-                bw_select=self.bw_select,
-                h=self.h,
-                p=self.p,
-                vce=self.vce,
-                level=level,
-            )
-            placebo_tests = run_placebo_tests(
-                y,
-                x,
-                config=run_cfg,
-                placebo_cutoffs=self.placebo_cutoffs,
-            )
-
-            # ⑥ 結果フォーマット
-            config = RDDFormatConfig(
-                table_name=self.table_name,
-                outcome_variable=self.outcome_variable,
-                running_variable=self.running_variable,
-                cutoff=self.cutoff,
-                kernel=self.kernel,
-                p=self.p,
-                vce=self.vce,
-                confidence_level=self.confidence_level,
-            )
-            result_data = format_rdd_result(
-                rd_stats,
-                bins_data,
-                poly_fit,
-                density_test,
-                placebo_tests,
-                config,
-            )
-
-            # ⑦ 結果ストアへ保存
-            seq = self.result_store.next_sequence("rdd")
-            name = self.result_name if self.result_name else f"RDD-{seq}"
-            analysis_result = AnalysisResult(
-                name=name,
-                description=self.description,
-                table_name=self.table_name,
-                result_data=result_data,
-                result_type="rdd",
-            )
-            result_id = self.result_store.save_result(analysis_result)
-
-        except ProcessingError:
-            raise
-        except Exception as exc:
-            raise ProcessingError(
-                error_code=ErrorCode.RDD_PROCESS_ERROR,
-                message=_("RDD analysis failed: {}").format(str(exc)),
-                detail=str(exc),
-            ) from exc
-
-        return {"resultId": result_id}
+        # NOTE: rdrobust / rddensity は GPL ライセンスのため削除済み。
+        # ルーター側で NotImplementedError を送出するため、このメソッドは
+        # 到達しないが、静的解析エラーを避けるために raise しておく。
+        raise NotImplementedError()
