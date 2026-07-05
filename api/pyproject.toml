@@ -45,7 +45,7 @@ dev = [
     "wooldridge==0.5.0",
     "pip==26.1.2",
     "msgpack==1.2.1",
-    "rdrobust==1.3.0",
+    "rdrobust==2.0.0",
     "rddensity==2.4.6",
 ]
 
