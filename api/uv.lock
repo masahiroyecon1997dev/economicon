@@ -356,7 +356,7 @@ dev = [
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "radon", specifier = "==6.0.1" },
     { name = "rddensity", specifier = "==2.4.6" },
-    { name = "rdrobust", specifier = "==1.3.0" },
+    { name = "rdrobust", specifier = "==2.0.0" },
     { name = "ruff", specifier = "==0.15.17" },
     { name = "scikit-learn", specifier = "==1.9.0" },
     { name = "wooldridge", specifier = "==0.5.0" },
@@ -1421,7 +1421,7 @@ wheels = [
 
 [[package]]
 name = "rdrobust"
-version = "1.3.0"
+version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "matplotlib" },
@@ -1429,12 +1429,11 @@ dependencies = [
     { name = "pandas" },
     { name = "plotnine", version = "0.15.3", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'emscripten'" },
     { name = "plotnine", version = "0.15.7", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'emscripten'" },
-    { name = "scikit-learn" },
     { name = "scipy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/40/8a/e8ae926da333a82d597c874a59f888838616651de6bc815d9d78c2f76c64/rdrobust-1.3.0.tar.gz", hash = "sha256:994528ca6c7351b2ef8a1f9f57a524d8caa9d40f5f40f8a16c6533bd53109d53", size = 29187, upload-time = "2024-09-14T15:23:56.396Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ab/c1/b90b40d15a5d345b36acbeb5144d1318270f3cf468a7e9e805355cef4053/rdrobust-2.0.0.tar.gz", hash = "sha256:649c59040b6c5a9c0dc49040cd6d064150cdd264cea1c7697cb1148591cc3be3", size = 96862, upload-time = "2026-05-15T11:40:25.514Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/90/d6/c2faba19eea47e62c9cb07abd9a4ef735d43d1f85ba562eb549b7540af12/rdrobust-1.3.0-py3-none-any.whl", hash = "sha256:611ae2c07dc4e7969596800987953747c7dd9a68c0536c86cb1c53af90b9a2de", size = 30285, upload-time = "2024-09-14T15:23:55.245Z" },
+    { url = "https://files.pythonhosted.org/packages/89/d4/427b04fadb494feee692d18bc8ef0571eda3577feccb8a0a46e85fd710ce/rdrobust-2.0.0-py3-none-any.whl", hash = "sha256:0d2cf08d35ec301da2159b2bf5f9ca4ebf0e7875cc3a2b3bb5f39179a5578f02", size = 95304, upload-time = "2026-05-15T11:40:23.771Z" },
 ]
 
 [[package]]
