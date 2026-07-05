@@ -26,7 +26,7 @@
     "capture:c23": "tsx scenes/c23-ols-simulation.ts"
   },
   "devDependencies": {
-    "@playwright/test": "1.60.0",
+    "@playwright/test": "1.61.1",
     "tsx": "4.21.1",
     "typescript": "6.0.3",
     "@types/node": "25.5.0"
