@@ -7,7 +7,7 @@ requires-python = ">=3.14"
 dependencies = [
     "fastapi==0.136.3",
     "numpy==2.4.6",
-    "polars==1.39.3",
+    "polars==1.42.0",
     "pyarrow==24.0.0",
     "scipy==1.17.1",
     "statsmodels==0.14.6",
@@ -22,19 +22,15 @@ dependencies = [
     "xlsxwriter==3.2.9",
     "fastexcel==0.20.2",
     "jinja2==3.1.6",
-    "rdrobust==1.3.0",
-    "rddensity==2.4.6",
-    "idna>=3.15",
-    "msgpack>=1.2.1",
-    "pip>=26.1.2",
-    "starlette>=1.3.1",
+    "idna==3.18",
+    "starlette==1.3.1",
 ]
 [tool.setuptools.packages.find]
 where = ["."]
 
 [dependency-groups]
 dev = [
-    "coverage==7.13.5",
+    "coverage==7.14.3",
     "deptry==0.24.0",
     "httpx==0.28.1",
     "palmerpenguins==0.1.6",
@@ -47,6 +43,8 @@ dev = [
     "ruff==0.15.17",
     "scikit-learn==1.9.0",
     "wooldridge==0.5.0",
+    "pip==26.1.2",
+    "msgpack==1.2.1",
 ]
 
 [tool.pytest.ini_options]
