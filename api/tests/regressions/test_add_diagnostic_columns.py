@@ -61,7 +61,6 @@ def _get_table_columns(table_name: str) -> list[str]:
 # -----------------------------------------------------------
 
 
-@_SKIP_DIAGNOSTIC
 def test_ols_fitted_values_added(client, tables_store):
     """OLS モデルから fitted values が追加されることを確認"""
     result_id = _run_regression(client, OlsPayload().build())
@@ -88,7 +87,6 @@ def test_ols_fitted_values_added(client, tables_store):
     assert "y_cont_fitted" in cols
 
 
-@_SKIP_DIAGNOSTIC
 def test_ols_residuals_added(client, tables_store):
     """OLS モデルから残差が追加されることを確認"""
     result_id = _run_regression(client, OlsPayload().build())
@@ -108,9 +106,8 @@ def test_ols_residuals_added(client, tables_store):
     assert "y_cont_fitted" not in added_cols
 
 
-@_SKIP_DIAGNOSTIC
 def test_ols_residuals_standardized(client, tables_store):
-    """OLS モデルから標準化残差が追加されることを確認"""
+    """OLS パラメータ計算で standardized=True は 400 エラー（未サポート）"""
     result_id = _run_regression(client, OlsPayload().build())
 
     resp = _add_diagnostic(
@@ -123,15 +120,13 @@ def test_ols_residuals_standardized(client, tables_store):
         },
     )
 
-    assert resp.status_code == status.HTTP_200_OK, resp.text
-    added_cols = resp.json()["result"]["addedColumns"]
-    assert "y_cont_resid" in added_cols
-    assert "y_cont_resid_std" in added_cols
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST, resp.text
+    data = resp.json()
+    assert data["code"] == ErrorCode.MODEL_TYPE_NOT_SUPPORTED
 
 
-@_SKIP_DIAGNOSTIC
 def test_ols_both_with_interval(client, tables_store):
-    """OLS から fitted + resid + 95%CI が同時追加されることを確認"""
+    """OLS パラメータ計算で includeInterval=True は 400 エラー（未サポート）"""
     result_id = _run_regression(client, OlsPayload().build())
 
     resp = _add_diagnostic(
@@ -144,15 +139,11 @@ def test_ols_both_with_interval(client, tables_store):
         },
     )
 
-    assert resp.status_code == status.HTTP_200_OK, resp.text
-    added_cols = resp.json()["result"]["addedColumns"]
-    assert "y_cont_fitted" in added_cols
-    assert "y_cont_fitted_lower_95" in added_cols
-    assert "y_cont_fitted_upper_95" in added_cols
-    assert "y_cont_resid" in added_cols
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST, resp.text
+    data = resp.json()
+    assert data["code"] == ErrorCode.MODEL_TYPE_NOT_SUPPORTED
 
 
-@_SKIP_DIAGNOSTIC
 def test_ols_column_values_are_finite(client, tables_store):
     """追加された列の値が有限値（NaN/null なし）であることを確認"""
     result_id = _run_regression(client, OlsPayload().build())
@@ -175,7 +166,6 @@ def test_ols_column_values_are_finite(client, tables_store):
 # -----------------------------------------------------------
 
 
-@_SKIP_DIAGNOSTIC
 def test_column_name_deduplication(client, tables_store):
     """同名列が存在する場合に _0, _1 が付くことを確認"""
     result_id = _run_regression(client, OlsPayload().build())
@@ -223,7 +213,6 @@ def test_column_name_deduplication(client, tables_store):
 # -----------------------------------------------------------
 
 
-@_SKIP_DIAGNOSTIC
 def test_missing_row_alignment(client, tables_store):
     """
     欠損値を含むデータで推定後の診断列が正しく join されることを確認
@@ -747,13 +736,13 @@ def test_table_not_found(client, tables_store):
 
 
 def test_model_file_not_found(client, tables_store):
-    """pkl ファイルが存在しない場合に 400 が返ることを確認"""
+    """OLS はパラメータベース計算のため pkl 不要 → pkl なしでも 200 OK"""
     result_id = _run_regression(client, OlsPayload().build())
 
-    # pkl ファイルを手動削除して「ファイルなし」状態を作る
+    # pkl は保存されていない (save_model は no-op)
     result_store = AnalysisResultStore()
     analysis_result = result_store.get_result(result_id)
-    analysis_result.delete_model_file()
+    assert not analysis_result.has_model_file()
 
     resp = _add_diagnostic(
         client,
@@ -764,9 +753,10 @@ def test_model_file_not_found(client, tables_store):
         },
     )
 
-    assert resp.status_code == status.HTTP_400_BAD_REQUEST, resp.text
+    assert resp.status_code == status.HTTP_200_OK, resp.text
     data = resp.json()
-    assert data["code"] == ErrorCode.MODEL_FILE_NOT_FOUND
+    assert data["code"] == "OK"
+    assert "y_cont_fitted" in data["result"]["addedColumns"]
 
 
 @_SKIP_DIAGNOSTIC

@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup uv
         uses: astral-sh/setup-uv@22695119d769bdb6f7032ad67b9bca0ef8c4a174 # v5.4.0
@@ -40,15 +40,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 10.28.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 24.12.0
           cache: "pnpm"
@@ -70,13 +70,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # 1.16.0
+        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # 1.16.1
 
       - name: Cache cargo-audit
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.cargo/bin/cargo-audit
           key: v1-${{ runner.os }}-cargo-audit
@@ -91,6 +91,66 @@ jobs:
         working-directory: ./app/src-tauri
         run: cargo audit
 
+  video-playwright-audit:
+    name: Video Playwright Dependency Check (pnpm audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24.12.0
+          cache: "pnpm"
+          cache-dependency-path: "video/playwright/pnpm-lock.yaml"
+
+      - name: Install Video Playwright dependencies
+        working-directory: ./video/playwright
+        run: pnpm install --frozen-lockfile
+
+      - name: Video Playwright Dependency Check (pnpm audit)
+        working-directory: ./video/playwright
+        run: pnpm audit --audit-level high
+
+  video-remotion-audit:
+    name: Video Remotion Dependency Check (pnpm audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 10.28.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24.12.0
+          cache: "pnpm"
+          cache-dependency-path: "video/remotion/pnpm-lock.yaml"
+
+      - name: Install Video Remotion dependencies
+        working-directory: ./video/remotion
+        run: pnpm install --frozen-lockfile
+
+      - name: Video Remotion Dependency Check (pnpm audit)
+        working-directory: ./video/remotion
+        run: pnpm audit --audit-level high
+
   supply-chain-freshness-check:
     name: Supply Chain Freshness Check (新規パッケージ日齢確認)
     runs-on: ubuntu-latest
@@ -99,13 +159,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           # base ブランチの履歴を git show で参照するため全履歴が必要
           fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           # 3.11+ で tomllib が標準搭載。外部依存ゼロで動作する。
           python-version: "3.14"

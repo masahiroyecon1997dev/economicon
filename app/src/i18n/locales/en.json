@@ -46,7 +46,9 @@
     "NumberOfSuccesses": "Number of Successes",
     "SampleSize": "Sample size",
     "RandomSeed": "Random Seed",
-    "RandomSeedPlaceholder": "Optional (0–100,000,000)"
+    "RandomSeedPlaceholder": "Optional (0–100,000,000)",
+    "CalculateMarginalEffects": "Calculate marginal effects",
+    "CalculateMarginalEffectsDescription": "Include average marginal effects (AME) in the result."
   },
   "AppBar": {
     "Minimize": "Minimize",
@@ -77,7 +79,10 @@
     "HypothesisTest": "Hypothesis Test",
     "Regression": "Regression",
     "LinearRegressionMenu": "Linear Regression",
+    "NonlinearRegressionMenu": "Nonlinear Regression",
     "OrdinaryLeastSquares": "Ordinary Least Squares",
+    "LogitAnalysis": "Logit Model",
+    "ProbitAnalysis": "Probit Model",
     "Visualization": "Visualization",
     "PlotView": "Plot View",
     "DistributionPreview": "Distribution Preview",
@@ -265,6 +270,7 @@
   "CorrelationMatrix": {
     "Title": "Correlation Matrix",
     "Description": "Select numeric columns to create a correlation coefficient matrix. The result is saved as a new dataset.",
+    "ExplainerButtonLabel": "View explanation of the correlation matrix",
     "DataLabel": "Target Data",
     "SelectData": "Select data",
     "ColumnsLabel": "Target Columns (Numeric)",
@@ -295,6 +301,7 @@
   "GroupStatistics": {
     "Title": "Group Statistics",
     "Description": "Group rows by column values and compute statistics per group. Results are saved as a new table.",
+    "ExplainerButtonLabel": "View explanation of group statistics",
     "WizardLabel": "2 STEP WIZARD",
     "Step1Title": "Step 1: Choose the source table",
     "Step1Description": "Confirm which table to summarize",
@@ -343,6 +350,8 @@
     "StatisticsLabel": "Statistics",
     "SelectAll": "Select all",
     "DeselectAll": "Deselect all",
+    "ShowAdvancedStats": "Show advanced stats",
+    "HideAdvancedStats": "Hide advanced stats",
     "OutputDataLabel": "Output Table Name",
     "OutputDataPlaceholder": "e.g. group_statistics",
     "RunCalculation": "Create",
@@ -402,7 +411,9 @@
     "DeselectAll": "Deselect all",
     "StatisticsLabel": "Statistics to Calculate",
     "PrimaryStatisticsLabel": "Commonly used statistics",
+    "PrimaryStatisticsExplainer": "View explanation of commonly used statistics",
     "AdvancedStatisticsLabel": "Advanced statistics",
+    "AdvancedStatisticsExplainer": "View explanation of advanced statistics",
     "Stat_mean": "Mean",
     "Stat_median": "Median",
     "Stat_mode": "Mode",
@@ -432,6 +443,9 @@
   "StatisticalTestView": {
     "Title": "Hypothesis Test",
     "Description": "Run one-sample and two-sample t-tests, z-tests, and F-tests / ANOVA. Results are saved as analysis result tabs.",
+    "ExplainerButtonLabel": "View explanation of hypothesis testing",
+    "TestTypeExplainerButtonLabel": "View explanation of this test",
+    "TestTypeExplainerLabel": "About this test",
     "TestTypeLabel": "Test Type",
     "TestType_t-test": "t-test",
     "TestType_z-test": "z-test",
@@ -506,7 +520,7 @@
     "AdvancedOptions": "Advanced Options",
     "AdvancedOptionsSummary": "SE: {{se}} | Constant: {{const}} | Missing: {{missing}}",
     "StandardErrorMethod": "Standard Error Method",
-    "StandardError_nonrobust": "Non-robust (OLS)",
+    "StandardError_nonrobust": "Non-robust",
     "StandardError_hac": "HAC (Autocorrelation/Heteroskedasticity)",
     "StandardError_cluster": "Cluster",
     "HacMaxlags": "Max Lags",
@@ -519,7 +533,9 @@
     "MissingValue_ignore": "Ignore",
     "MissingValue_error": "Error",
     "SelectVariable": "Select variable",
-    "SE_tooltip_nonrobust": "Standard OLS standard errors assuming homoskedasticity. Use as the baseline.",
+    "SEExplainerButtonLabel": "View detailed explanation of this standard error type",
+    "MethodExplainerButtonLabel": "View explanation of this method",
+    "SE_tooltip_nonrobust": "Standard errors without additional correction. Use as the baseline.",
     "SE_tooltip_HC0": "White (1980) heteroskedasticity-robust SE without small-sample correction.",
     "SE_tooltip_HC1": "HC0 with degrees-of-freedom correction (n/(n\u2212k)). Equivalent to Stata \u2018robust\u2019.",
     "SE_tooltip_HC2": "Heteroskedasticity-robust SE accounting for leverage.",
@@ -527,17 +543,34 @@
     "SE_tooltip_hac": "Newey-West SE robust to both autocorrelation and heteroskedasticity. Use for time-series data.",
     "SE_tooltip_cluster": "Cluster-robust SE allowing for within-cluster correlation."
   },
+  "LogitRegressionForm": {
+    "Title": "Logit Model",
+    "Description": "Select data, assign the dependent and explanatory variables, then estimate a logit model. Average marginal effects are enabled by default."
+  },
+  "ProbitRegressionForm": {
+    "Title": "Probit Model",
+    "Description": "Select data, assign the dependent and explanatory variables, then estimate a probit model. Average marginal effects are enabled by default."
+  },
   "RegressionResult": {
     "AnalysisSummary": "Analysis Summary",
     "DataName": "Data Name",
     "DependentVariable": "Dependent Variable",
     "ModelStatistics": "Model Statistics",
+    "ModelStatisticsExplainerLabel": "View explanation of model statistics",
     "AdjustedR2": "Adjusted R²",
     "FValue": "F-value",
     "FProbability": "F-probability",
     "LogLikelihood": "Log Likelihood",
+    "LogLikelihoodNull": "Log Likelihood (Null)",
+    "PseudoR2": "Pseudo R² (McFadden)",
+    "LRStatistic": "LR Statistic",
+    "LRDf": "LR df",
+    "LRPValue": "LR p-value",
+    "MarginalEffect": "Avg. Marg. Effect (AME)",
+    "MarginalEffects": "Average Marginal Effects",
     "Observations": "Observations",
     "Coefficients": "Coefficients",
+    "CoefficientsExplainerLabel": "View explanation of the coefficient table",
     "Variable": "Variable",
     "Coefficient": "Coefficient",
     "StandardError": "Standard Error",
@@ -548,10 +581,21 @@
     "SignificanceNote": "Significance: *** p<0.001 / ** p<0.01 / * p<0.05",
     "NA": "N/A",
     "QuickCopyMd": "Copy as Markdown",
-    "OutputDialog": "Export..."
+    "OutputDialog": "Export...",
+    "AddDiagnosticColumns": "Add Residuals/Fitted"
+  },
+  "AddDiagnosticColumns": {
+    "Title": "Add Residuals / Fitted Values",
+    "Subtitle": "Append residual or fitted value columns to the selected table",
+    "TableName": "Target Table",
+    "TargetLabel": "Columns to Add",
+    "TargetFitted": "Fitted values",
+    "TargetResidual": "Residuals",
+    "Submit": "Add Columns",
+    "SuccessMessage": "Columns added: {{columns}}",
+    "ErrorSelectTarget": "Please select at least one option (fitted or residual)"
   },
   "OutputResultDialog": {
-    "Title": "Export Result",
     "Format": "Format",
     "FormatText": "Plain Text",
     "FormatMarkdown": "Markdown",
@@ -593,6 +637,7 @@
     "StatisticTypeLabel": "Statistic Type",
     "SelectStatisticType": "Select type",
     "StatisticTypeInfoLabel": "Show statistic description",
+    "ExplainerButtonLabel": "Learn about confidence intervals",
     "StatisticType_mean": "Mean (t-dist)",
     "StatisticType_median": "Median (Bootstrap)",
     "StatisticType_proportion": "Proportion (Wilson)",
@@ -622,39 +667,9 @@
     "QuickCopyMd": "Copy as Markdown",
     "OutputDialog": "Export..."
   },
-  "StatisticsInfo": {
+  "Explainer": {
     "FormulaLabel": "Formula",
-    "AssumptionsLabel": "Assumptions & Notes",
-    "mean": {
-      "Title": "Confidence Interval for the Mean (t-distribution)",
-      "Description": "Computes a confidence interval for the population mean μ using the sample mean x̄ as a point estimate. Applies when data come from a normal distribution or the sample size is large.",
-      "Formula": "x̄ ± t(α/2, n-1) × (s / √n)",
-      "Assumptions": "Data are i.i.d. For small samples the distribution should be approximately normal."
-    },
-    "median": {
-      "Title": "Confidence Interval for the Median (Bootstrap)",
-      "Description": "Estimates the confidence interval for the median using the Bootstrap method (1,000 resamples). This is a non-parametric approach that requires no distributional assumptions.",
-      "Formula": "α/2 to (1-α/2) percentile of the bootstrap median distribution",
-      "Assumptions": "Data should be a representative sample of the population. Accuracy decreases for very small samples."
-    },
-    "proportion": {
-      "Title": "Confidence Interval for a Proportion (Wilson Score)",
-      "Description": "Computes the Wilson score interval for the success proportion p̂ of binary data (0 or 1 only). Outperforms the Wald interval in small-sample coverage. The column must contain only 0 and 1 values.",
-      "Formula": "(p̂ + z²/2n ± z√(p̂(1-p̂)/n + z²/4n²)) / (1 + z²/n)",
-      "Assumptions": "Column values must be binary (0 or 1 only). The API will return an error if other values are present."
-    },
-    "variance": {
-      "Title": "Confidence Interval for the Variance (Chi-squared)",
-      "Description": "Computes a confidence interval for the population variance σ² using the sample variance s² and the chi-squared distribution. Exact when data are normally distributed.",
-      "Formula": "[ (n-1)s² / χ²(α/2, n-1),  (n-1)s² / χ²(1-α/2, n-1) ]",
-      "Assumptions": "Data must be normally distributed. Coverage degrades when the normality assumption is violated."
-    },
-    "standard_deviation": {
-      "Title": "Confidence Interval for the Standard Deviation",
-      "Description": "Derives the confidence interval for the standard deviation as the square root of the variance CI bounds. The same normality assumption as the variance CI applies.",
-      "Formula": "[ √(lower variance CI), √(upper variance CI) ]",
-      "Assumptions": "Data must be normally distributed (same as the variance CI assumption)."
-    }
+    "AssumptionsLabel": "Assumptions & Notes"
   },
   "CalculationView": {
     "Title": "Add Column with Calculation",
@@ -712,7 +727,8 @@
     "ExplanatoryVariablesRequired": "Please select at least one explanatory variable.",
     "NewColumnNameRequired": "Please enter a new column name.",
     "CalculationExpressionRequired": "Please enter a calculation expression.",
-    "RandomSeedRange": "Random seed must be an integer between 0 and 100,000,000."
+    "RandomSeedRange": "Random seed must be an integer between 0 and 100,000,000.",
+    "UniformLowMustBeLessThanHigh": "For uniform distribution, the minimum must be less than the maximum"
   },
   "ColumnMenu": {
     "SortAsc": "Sort Ascending",

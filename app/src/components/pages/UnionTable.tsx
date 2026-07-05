@@ -38,7 +38,7 @@ export const UnionTable = () => {
   const tableList = useTableListStore((s) => s.tableList);
   const addTableName = useTableListStore((s) => s.addTableName);
   const addTableInfo = useTableInfosStore((s) => s.addTableInfo);
-  const closeActiveWorkTab = useWorkspaceTabsStore((s) => s.closeActiveWorkTab);
+  const openDataTab = useWorkspaceTabsStore((s) => s.openDataTab);
 
   const [selectedTables, setSelectedTables] = useState<TableEntry[]>([]);
   const [addingTable, setAddingTable] = useState("");
@@ -171,7 +171,7 @@ export const UnionTable = () => {
         const tableInfo = await getTableInfo(newTableName.trim());
         addTableName(newTableName.trim());
         addTableInfo(tableInfo);
-        closeActiveWorkTab();
+        openDataTab(newTableName.trim());
       } else {
         await showMessageDialog(
           t("Error.Error"),
@@ -339,7 +339,7 @@ export const UnionTable = () => {
         selectText={
           isSubmitting ? t("UnionTable.Processing") : t("UnionTable.RunUnion")
         }
-        onCancel={closeActiveWorkTab}
+        onCancel={() => useWorkspaceTabsStore.getState().closeActiveWorkTab()}
         onSelect={handleSubmit}
         isLoading={isSubmitting}
       />

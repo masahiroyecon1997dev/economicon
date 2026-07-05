@@ -36,6 +36,15 @@ export const useTableColumnLoader = (
     onLoadedColumns?.(columns);
   });
 
+  // tableInfosStore の列リストが変化したとき（列追加・削除操作後）に再読込するための変化検知キー
+  const storeColumnListKey = useTableInfosStore((state) => {
+    if (!selectedTableName) return "";
+    const info = state.tableInfos.find(
+      (t) => t.tableName === selectedTableName,
+    );
+    return info?.columnList.map((c) => c.name).join(",") ?? "";
+  });
+
   useEffect(() => {
     let cancelled = false;
     if (!selectedTableName) {
@@ -87,6 +96,7 @@ export const useTableColumnLoader = (
     numericOnly,
     setLoading,
     t,
+    storeColumnListKey,
   ]);
 
   return {

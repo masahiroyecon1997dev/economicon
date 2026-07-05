@@ -13,6 +13,7 @@ import { StatisticalTestBody } from "@/api/zod/statistics/statistics";
 import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import { FormField } from "@/components/molecules/Form/FormField";
 import {
   AnalysisEmptyState,
@@ -36,7 +37,7 @@ import {
 } from "@/stores/workspaceTabs";
 import type { ColumnType } from "@/types/commonTypes";
 import { useForm, useStore } from "@tanstack/react-form";
-import { Loader2, Minus, Plus, SearchX } from "lucide-react";
+import { HelpCircle, Loader2, Minus, Plus, SearchX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -552,6 +553,15 @@ export const StatisticalTestView = ({
     <PageLayout
       title={t("StatisticalTestView.Title")}
       description={t("StatisticalTestView.Description")}
+      titleAction={
+        <ExplainerButton
+          explainerKey="statistical_test"
+          aria-label={t("StatisticalTestView.ExplainerButtonLabel")}
+          data-testid="statistical-test-explainer-btn"
+        >
+          <HelpCircle className="h-4 w-4" aria-hidden="true" />
+        </ExplainerButton>
+      }
     >
       {tableList.length === 0 ? (
         <AnalysisNoTablesState
@@ -613,6 +623,20 @@ export const StatisticalTestView = ({
               <p className="mt-2 text-xs text-brand-text-sub dark:text-gray-400">
                 {t(`StatisticalTestView.SamplesHint_${values.testType}`)}
               </p>
+              <div className="mt-1 flex items-center gap-1">
+                <ExplainerButton
+                  explainerKey={`statistical_test_${values.testType.replace("-", "_")}`}
+                  aria-label={t(
+                    "StatisticalTestView.TestTypeExplainerButtonLabel",
+                  )}
+                  data-testid="statistical-test-type-explainer-btn"
+                >
+                  <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                </ExplainerButton>
+                <span className="text-xs text-brand-text-sub dark:text-gray-400">
+                  {t("StatisticalTestView.TestTypeExplainerLabel")}
+                </span>
+              </div>
             </section>
 
             <section className="space-y-2.5 rounded-lg border border-border-color bg-white p-3 dark:border-gray-700 dark:bg-gray-800">

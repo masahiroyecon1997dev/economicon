@@ -1,0 +1,132 @@
+{
+  "A01": {
+    "title": "Economicon",
+    "titleSubtitle": "A desktop analytics application for economics & econometrics",
+    "problemLines": [
+      "Have you ever felt the gap between an econometrics textbook and real data analysis?",
+      "Economicon is an econometrics application — learn by doing."
+    ],
+    "problemSolution": "Bridge the gap between theory and practice",
+    "featureHighlightTitle": "6 Key Features",
+    "featureLabels": [
+      "Data Import",
+      "Statistical Analysis",
+      "Linear Regression",
+      "Visualization",
+      "Export Results",
+      "Simulation"
+    ],
+    "featureDescs": [
+      "CSV / Excel / Parquet",
+      "Descriptive stats & correlation",
+      "OLS with HAC robust SE",
+      "Scatter plots & histograms",
+      "LaTeX / Markdown",
+      "Asymptotic properties of estimators"
+    ],
+    "ending": "Watch the feature-specific tutorials in this playlist"
+  },
+  "C01": {
+    "title": "Importing CSV Files",
+    "titleSubtitle": "Your first step to loading data",
+    "ending": "Next: Importing Excel & Parquet"
+  },
+  "C02": {
+    "title": "Importing Excel & Parquet",
+    "titleSubtitle": "Load data from multiple formats",
+    "ending": "Next: Table Join"
+  },
+  "C03": {
+    "title": "Table Join",
+    "titleSubtitle": "Combine two tables side by side",
+    "ending": "Next: Table Union"
+  },
+  "C04": {
+    "title": "Table Union",
+    "titleSubtitle": "Stack multiple tables vertically",
+    "ending": "Next: Column Filter & Type Cast"
+  },
+  "C05": {
+    "title": "Column Filter & Type Cast",
+    "titleSubtitle": "Filter rows and cast column types",
+    "ending": "Next: Transform & Dummy Columns"
+  },
+  "C06": {
+    "title": "Transform & Dummy Columns",
+    "titleSubtitle": "Add transformed and dummy variable columns",
+    "ending": "Next: Calculated Columns"
+  },
+  "C07": {
+    "title": "Calculated Columns",
+    "titleSubtitle": "Create new columns with formulas",
+    "ending": "Next: Saving Data"
+  },
+  "C08": {
+    "title": "Saving Data",
+    "titleSubtitle": "Export your data as CSV, Excel, or Parquet",
+    "ending": "Next: Descriptive Statistics"
+  },
+  "C09": {
+    "title": "Descriptive Statistics",
+    "titleSubtitle": "Understand your data distribution at a glance",
+    "steps": [
+      "After importing data, click \"Basic Analysis\" in the header",
+      "Select \"Descriptive Statistics\"",
+      "Check the columns you want to analyze",
+      "Select the statistics you need (mean, median, etc.)",
+      "Click \"Run\" to see the results",
+      "Results are saved in the \"Results\" tab on the left panel"
+    ],
+    "ending": "Next: Group Statistics"
+  },
+  "C10": {
+    "title": "Group Statistics",
+    "titleSubtitle": "Aggregate data by group",
+    "ending": "Next: Correlation Matrix"
+  },
+  "C11": {
+    "title": "Correlation Matrix",
+    "titleSubtitle": "View pairwise correlations at a glance",
+    "ending": "Next: Confidence Intervals"
+  },
+  "C12": {
+    "title": "Confidence Intervals",
+    "titleSubtitle": "Estimate confidence intervals for means and ratios",
+    "ending": "Next: Hypothesis Testing"
+  },
+  "C13": {
+    "title": "Hypothesis Testing",
+    "titleSubtitle": "Run t-tests, z-tests, and F-tests",
+    "ending": "Next: OLS Linear Regression"
+  },
+  "C18": {
+    "title": "Scatter Plots & Histograms",
+    "titleSubtitle": "Visualize your data with charts",
+    "ending": "Next: Distribution Preview"
+  },
+  "C19": {
+    "title": "Distribution Preview",
+    "titleSubtitle": "Visualize the shape of probability distributions",
+    "ending": "Next: Simulation Data Generation"
+  },
+  "C20": {
+    "title": "Simulation Data Generation",
+    "titleSubtitle": "Generate synthetic data from probability distributions",
+    "ending": "Next: Exporting Results"
+  },
+  "C21": {
+    "title": "Exporting Results",
+    "titleSubtitle": "Export analysis results as LaTeX or Markdown",
+    "ending": "Next: Confidence Interval Simulation"
+  },
+  "C22": {
+    "title": "Confidence Interval Simulation",
+    "titleSubtitle": "Understand CI properties through repeated sampling",
+    "ending": "Next: OLS Estimator Simulation"
+  },
+  "C23": {
+    "title": "OLS Estimator Simulation",
+    "titleSubtitle": "Visualize asymptotic normality, consistency, and unbiasedness",
+    "ending": "Back to video list"
+  }
+}

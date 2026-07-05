@@ -351,6 +351,19 @@ msgstr "Row count mismatch: CSV has {csv_rows} rows, but table has {expected_row
 msgid "Explanatory variable matrix is singular. Perfect multicollinearity detected. Please review your explanatory variable selection."
 msgstr "Explanatory variable matrix is singular. Perfect multicollinearity detected. Please review your explanatory variable selection."
 
+#: economicon/services/regressions/common.py
+#, python-brace-format
+msgid "Column(s) %(cols)s have zero variance and cannot be used with hasConst=True because they create perfect multicollinearity with the constant term. Either remove these columns or set hasConst=False."
+msgstr "Column(s) %(cols)s have zero variance and cannot be used with hasConst=True because they create perfect multicollinearity with the constant term. Either remove these columns or set hasConst=False."
+
+#: economicon/services/regressions/add_diagnostic_columns.py
+msgid "standardized residuals are not yet supported for OLS parameter-based calculation"
+msgstr "standardized residuals are not yet supported for OLS parameter-based calculation"
+
+#: economicon/services/regressions/add_diagnostic_columns.py
+msgid "confidence intervals are not yet supported for OLS parameter-based calculation"
+msgstr "confidence intervals are not yet supported for OLS parameter-based calculation"
+
 #: economicon/models/tables.py
 msgid "newTableName must differ from oldTableName."
 msgstr "newTableName must differ from oldTableName."

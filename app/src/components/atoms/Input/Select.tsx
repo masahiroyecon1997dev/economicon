@@ -1,7 +1,7 @@
+import { cn } from "@/lib/utils/helpers";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown } from "lucide-react";
 import { type ReactNode } from "react";
-import { cn } from "@/lib/utils/helpers";
 
 type SelectProps = {
   value: string;
@@ -13,6 +13,7 @@ type SelectProps = {
   name?: string;
   placeholder?: string;
   disabled?: boolean;
+  "data-testid"?: string;
 };
 
 export const Select = ({
@@ -25,20 +26,28 @@ export const Select = ({
   name,
   placeholder,
   disabled = false,
+  "data-testid": dataTestId,
 }: SelectProps) => {
   return (
-    <SelectPrimitive.Root name={name} value={value} onValueChange={onValueChange} disabled={disabled}>
+    <SelectPrimitive.Root
+      name={name}
+      value={value}
+      onValueChange={onValueChange}
+      disabled={disabled}
+    >
       <SelectPrimitive.Trigger
         id={id}
         name={name}
+        data-testid={dataTestId}
         className={cn(
-          "flex w-full items-center justify-between px-2.5 py-1.5 text-sm font-normal text-gray-900 bg-white border rounded-md shadow-sm",
+          "flex w-full items-center justify-between px-2.5 py-1.5 text-sm font-normal",
+          "text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border rounded-md shadow-sm",
           "focus:outline-none focus:ring-2 focus:ring-offset-1 transition-colors duration-200 cursor-pointer",
           "disabled:cursor-not-allowed disabled:opacity-50",
           error
             ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-            : "border-gray-300 focus:ring-gray-700 focus:border-gray-700 hover:border-gray-400",
-          className
+            : "border-gray-300 dark:border-gray-600 focus:ring-gray-700 dark:focus:ring-gray-400 focus:border-gray-700 dark:focus:border-gray-400 hover:border-gray-400 dark:hover:border-gray-500",
+          className,
         )}
       >
         <SelectPrimitive.Value placeholder={placeholder} />
@@ -49,13 +58,14 @@ export const Select = ({
       <SelectPrimitive.Portal>
         <SelectPrimitive.Content
           className={cn(
-            "relative z-50 min-w-32 overflow-hidden rounded-md border border-gray-200 bg-white text-gray-900 shadow-md",
+            "relative z-50 min-w-32 overflow-hidden rounded-md border",
+            "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-md",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
             "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",
             "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-            "min-w-(--radix-select-trigger-width)"
+            "min-w-(--radix-select-trigger-width)",
           )}
           position="popper"
           sideOffset={4}
@@ -87,9 +97,10 @@ export const SelectItem = ({
       value={value}
       className={cn(
         "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none",
-        "focus:bg-gray-100 focus:text-gray-900",
+        "text-gray-900 dark:text-gray-100",
+        "focus:bg-gray-100 dark:focus:bg-gray-700 focus:text-gray-900 dark:focus:text-gray-100",
         "data-disabled:pointer-events-none data-disabled:opacity-50",
-        className
+        className,
       )}
       disabled={disabled}
     >

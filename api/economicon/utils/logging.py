@@ -29,9 +29,9 @@ class LogManager:
 
         # 新しいハンドラを追加し、属性を更新
         self._file_handler_id = logger.add(
-            log_path.parent / "api_{time:YYYY-MM-DD}.log",
-            rotation="10 MB",
-            retention="10 days",
+            log_path.parent / "api.log",
+            rotation="2 MB",
+            retention=2,
             compression="zip",
             level="INFO",
         )

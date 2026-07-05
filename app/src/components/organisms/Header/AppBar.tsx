@@ -308,87 +308,6 @@ export const AppBar = () => {
       ],
     },
     {
-      id: "linear-regression",
-      menuName: t("HeaderMenu.LinearRegressionMenu"),
-      isOpen: openMenuId === "linear-regression",
-      onClose: close,
-      items: [
-        {
-          id: "linear-regression-item",
-          label: t("HeaderMenu.OrdinaryLeastSquares"),
-          handleSelect: () =>
-            handleOpenWorkTab(
-              "LinearRegressionForm",
-              t("HeaderMenu.OrdinaryLeastSquares"),
-            ),
-        },
-        // {
-        //   id: "lasso-regression",
-        //   label: t("HeaderMenu.LassoRegression"),
-        //   handleSelect: () => {},
-        // },
-        // {
-        //   id: "ridge-regression",
-        //   label: t("HeaderMenu.RidgeRegression"),
-        //   handleSelect: () => {},
-        // },
-      ],
-    },
-    // {
-    //   id: "nonlinear-regression",
-    //   menuName: t("HeaderMenu.NonlinearRegressionMenu"),
-    //   isOpen: openMenuId === "nonlinear-regression",
-    //   onClose: close,
-    //   items: [
-    //     {
-    //       id: "logit",
-    //       label: t("HeaderMenu.LogitAnalysis"),
-    //       handleSelect: () => {},
-    //     },
-    //     {
-    //       id: "probit",
-    //       label: t("HeaderMenu.ProbitAnalysis"),
-    //       handleSelect: () => {},
-    //     },
-    //     {
-    //       id: "tobit",
-    //       label: t("HeaderMenu.TobitAnalysis"),
-    //       handleSelect: () => {},
-    //     },
-    //   ],
-    // },
-    // {
-    //   id: "panel-data",
-    //   menuName: t("HeaderMenu.PanelDataMenu"),
-    //   isOpen: openMenuId === "panel-data",
-    //   onClose: close,
-    //   items: [
-    //     {
-    //       id: "fixed-effect",
-    //       label: t("HeaderMenu.FixedEffect"),
-    //       handleSelect: () => {},
-    //     },
-    //     {
-    //       id: "random-effect",
-    //       label: t("HeaderMenu.RandomEffect"),
-    //       handleSelect: () => {},
-    //     },
-    //   ],
-    // },
-    // {
-    //   id: "causal-inference",
-    //   menuName: t("HeaderMenu.CausalInferenceMenu"),
-    //   isOpen: openMenuId === "causal-inference",
-    //   onClose: close,
-    //   items: [
-    //     {
-    //       id: "instrumental-variables",
-    //       label: t("HeaderMenu.InstrumentalVariables"),
-    //       handleSelect: () => {},
-    //     },
-    //   ],
-    // },
-    {
       id: "visualization",
       menuName: t("HeaderMenu.Visualization"),
       isOpen: openMenuId === "visualization",
@@ -441,6 +360,80 @@ export const AppBar = () => {
         },
       ],
     },
+    {
+      id: "linear-regression",
+      menuName: t("HeaderMenu.LinearRegressionMenu"),
+      isOpen: openMenuId === "linear-regression",
+      onClose: close,
+      items: [
+        {
+          id: "linear-regression-item",
+          label: t("HeaderMenu.OrdinaryLeastSquares"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "LinearRegressionForm",
+              t("HeaderMenu.OrdinaryLeastSquares"),
+            ),
+        },
+      ],
+    },
+    {
+      id: "nonlinear-regression",
+      menuName: t("HeaderMenu.NonlinearRegressionMenu"),
+      isOpen: openMenuId === "nonlinear-regression",
+      onClose: close,
+      items: [
+        {
+          id: "logit",
+          label: t("HeaderMenu.LogitAnalysis"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "LogitRegressionForm",
+              t("HeaderMenu.LogitAnalysis"),
+            ),
+        },
+        {
+          id: "probit",
+          label: t("HeaderMenu.ProbitAnalysis"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "ProbitRegressionForm",
+              t("HeaderMenu.ProbitAnalysis"),
+            ),
+        },
+      ],
+    },
+    // {
+    //   id: "panel-data",
+    //   menuName: t("HeaderMenu.PanelDataMenu"),
+    //   isOpen: openMenuId === "panel-data",
+    //   onClose: close,
+    //   items: [
+    //     {
+    //       id: "fixed-effect",
+    //       label: t("HeaderMenu.FixedEffect"),
+    //       handleSelect: () => {},
+    //     },
+    //     {
+    //       id: "random-effect",
+    //       label: t("HeaderMenu.RandomEffect"),
+    //       handleSelect: () => {},
+    //     },
+    //   ],
+    // },
+    // {
+    //   id: "causal-inference",
+    //   menuName: t("HeaderMenu.CausalInferenceMenu"),
+    //   isOpen: openMenuId === "causal-inference",
+    //   onClose: close,
+    //   items: [
+    //     {
+    //       id: "instrumental-variables",
+    //       label: t("HeaderMenu.InstrumentalVariables"),
+    //       handleSelect: () => {},
+    //     },
+    //   ],
+    // },
   ];
 
   return (

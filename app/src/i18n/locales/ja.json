@@ -46,7 +46,9 @@
     "NumberOfSuccesses": "成功数",
     "SampleSize": "標本サイズ",
     "RandomSeed": "乱数シード",
-    "RandomSeedPlaceholder": "省略可（0〜100,000,000）"
+    "RandomSeedPlaceholder": "省略可（0〜100,000,000）",
+    "CalculateMarginalEffects": "平均限界効果を計算",
+    "CalculateMarginalEffectsDescription": "平均限界効果 (AME) を結果に含めます。"
   },
   "AppBar": {
     "Minimize": "最小化",
@@ -77,7 +79,10 @@
     "HypothesisTest": "仮説検定",
     "Regression": "回帰分析",
     "LinearRegressionMenu": "線形回帰",
+    "NonlinearRegressionMenu": "非線形回帰",
     "OrdinaryLeastSquares": "最小二乗法",
+    "LogitAnalysis": "ロジットモデル",
+    "ProbitAnalysis": "プロビットモデル",
     "Visualization": "可視化",
     "PlotView": "プロットビュー",
     "DistributionPreview": "分布プレビュー",
@@ -265,6 +270,7 @@
   "CorrelationMatrix": {
     "Title": "相関行列",
     "Description": "数値列を選択し、相関係数の行列を作成します。結果は新しいデータとして保存されます。",
+    "ExplainerButtonLabel": "相関行列の解説を見る",
     "DataLabel": "対象データ",
     "SelectData": "データを選択",
     "ColumnsLabel": "対象列（数値）",
@@ -295,6 +301,7 @@
   "GroupStatistics": {
     "Title": "グループ別統計量",
     "Description": "列の値でグループ化し、グループごとの統計量を計算します。結果は新しいデータとして保存されます。",
+    "ExplainerButtonLabel": "グループ別統計量の解説を見る",
     "WizardLabel": "2 STEP WIZARD",
     "Step1Title": "Step 1: 対象データを選ぶ",
     "Step1Description": "集計するテーブルを確定します",
@@ -343,6 +350,8 @@
     "StatisticsLabel": "計算する統計量",
     "SelectAll": "すべて選択",
     "DeselectAll": "すべて解除",
+    "ShowAdvancedStats": "詳細統計量を表示",
+    "HideAdvancedStats": "詳細統計量を非表示",
     "OutputDataLabel": "出力データ名",
     "OutputDataPlaceholder": "例: group_statistics",
     "RunCalculation": "作成する",
@@ -402,7 +411,9 @@
     "DeselectAll": "すべて解除",
     "StatisticsLabel": "計算する統計量",
     "PrimaryStatisticsLabel": "通常よく使う統計量",
+    "PrimaryStatisticsExplainer": "通常よく使う統計量の解説を見る",
     "AdvancedStatisticsLabel": "詳細統計量",
+    "AdvancedStatisticsExplainer": "詳細統計量の解説を見る",
     "Stat_mean": "平均",
     "Stat_median": "中央値",
     "Stat_mode": "最頻値",
@@ -432,6 +443,9 @@
   "StatisticalTestView": {
     "Title": "仮説検定",
     "Description": "1群・2群の t 検定、z 検定、F 検定 / ANOVA を実行します。結果は分析結果タブに保存されます。",
+    "ExplainerButtonLabel": "仮説検定の解説を見る",
+    "TestTypeExplainerButtonLabel": "この検定の解説を見る",
+    "TestTypeExplainerLabel": "この検定の解説",
     "TestTypeLabel": "検定タイプ",
     "TestType_t-test": "t 検定",
     "TestType_z-test": "z 検定",
@@ -506,7 +520,7 @@
     "AdvancedOptions": "詳細オプション",
     "AdvancedOptionsSummary": "標準誤差: {{se}} | 定数項: {{const}} | 欠損値: {{missing}}",
     "StandardErrorMethod": "標準誤差の計算方法",
-    "StandardError_nonrobust": "通常 (OLS)",
+    "StandardError_nonrobust": "通常",
     "StandardError_hac": "HAC (系列相関・不均一分散)",
     "StandardError_cluster": "クラスター",
     "HacMaxlags": "最大ラグ数",
@@ -519,7 +533,9 @@
     "MissingValue_ignore": "そのまま使用",
     "MissingValue_error": "エラーとして扱う",
     "SelectVariable": "変数を選択",
-    "SE_tooltip_nonrobust": "均一分散を仮定した通常の OLS 標準誤差。一般的なベースラインです。",
+    "SEExplainerButtonLabel": "標準誤差の詳細解説を見る",
+    "MethodExplainerButtonLabel": "この法の解説を見る",
+    "SE_tooltip_nonrobust": "追加の補正を行わない標準誤差です。ベースラインとして使います。",
     "SE_tooltip_HC0": "不均一分散頑健な White (1980) 標準誤差。小標本補正なし。",
     "SE_tooltip_HC1": "HC0 に自由度補正 (n/(n-k)) を加えた標準誤差。Stata の robust と同等。",
     "SE_tooltip_HC2": "レバレッジを考慮した不均一分散頑健標準誤差。",
@@ -527,17 +543,34 @@
     "SE_tooltip_hac": "系列相関と不均一分散の両方に頑健な Newey-West 型標準誤差。時系列データ向け。",
     "SE_tooltip_cluster": "クラスター内の相関を許容するクラスター頑健標準誤差。"
   },
+  "LogitRegressionForm": {
+    "Title": "ロジットモデル",
+    "Description": "データを選択し、被説明変数と説明変数を指定してロジットモデルを推定します。平均限界効果は既定で有効です。"
+  },
+  "ProbitRegressionForm": {
+    "Title": "プロビットモデル",
+    "Description": "データを選択し、被説明変数と説明変数を指定してプロビットモデルを推定します。平均限界効果は既定で有効です。"
+  },
   "RegressionResult": {
     "AnalysisSummary": "分析概要",
     "DataName": "データ名",
     "DependentVariable": "被説明変数",
     "ModelStatistics": "モデル統計量",
+    "ModelStatisticsExplainerLabel": "モデル統計量の説明を見る",
     "AdjustedR2": "調整済みR²",
     "FValue": "F値",
     "FProbability": "F確率",
     "LogLikelihood": "対数尤度",
+    "LogLikelihoodNull": "対数尤度（Null）",
+    "PseudoR2": "疑似R²（McFadden）",
+    "LRStatistic": "尤度比検定統計量",
+    "LRDf": "尤度比自由度",
+    "LRPValue": "尤度比p値",
+    "MarginalEffect": "平均限界効果（AME）",
+    "MarginalEffects": "平均限界効果",
     "Observations": "観測数",
     "Coefficients": "係数",
+    "CoefficientsExplainerLabel": "係数テーブルの説明を見る",
     "Variable": "変数",
     "Coefficient": "係数",
     "StandardError": "標準誤差",
@@ -548,10 +581,21 @@
     "SignificanceNote": "有意水準: *** p<0.001 / ** p<0.01 / * p<0.05",
     "NA": "N/A",
     "QuickCopyMd": "Markdownをクリップボードにコピー",
-    "OutputDialog": "出力..."
+    "OutputDialog": "出力...",
+    "AddDiagnosticColumns": "残差/予測値を追加"
+  },
+  "AddDiagnosticColumns": {
+    "Title": "残差/予測値を追加",
+    "Subtitle": "指定のテーブルに残差・予測値列を追加します",
+    "TableName": "追加先テーブル",
+    "TargetLabel": "追加する列",
+    "TargetFitted": "予測値",
+    "TargetResidual": "残差",
+    "Submit": "列を追加",
+    "SuccessMessage": "列を追加しました: {{columns}}",
+    "ErrorSelectTarget": "予測値または残差を少なくとも一つ選択してください"
   },
   "OutputResultDialog": {
-    "Title": "結果出力",
     "Format": "フォーマット",
     "FormatText": "テキスト",
     "FormatMarkdown": "Markdown",
@@ -593,6 +637,7 @@
     "StatisticTypeLabel": "統計量タイプ",
     "SelectStatisticType": "タイプを選択",
     "StatisticTypeInfoLabel": "統計量の説明を表示",
+    "ExplainerButtonLabel": "信頼区間についての解説を見る",
     "StatisticType_mean": "平均（t分布）",
     "StatisticType_median": "中央値（ブートストラップ）",
     "StatisticType_proportion": "比率（Wilson区間）",
@@ -622,39 +667,9 @@
     "QuickCopyMd": "Markdownをクリップボードにコピー",
     "OutputDialog": "出力..."
   },
-  "StatisticsInfo": {
+  "Explainer": {
     "FormulaLabel": "計算式",
-    "AssumptionsLabel": "前提条件・注意",
-    "mean": {
-      "Title": "平均の信頼区間（t 分布）",
-      "Description": "標本平均 x̄ を点推定値とし、t 分布を用いて母平均 μ の信頼区間を計算します。標本が正規分布（または大標本）から得られている場合に適用できます。",
-      "Formula": "x̄ ± t(α/2, n-1) × (s / √n)",
-      "Assumptions": "データが独立同一分布に従うこと。標本数が少ない場合は正規分布に近いことが望ましい。"
-    },
-    "median": {
-      "Title": "中央値の信頼区間（ブートストラップ）",
-      "Description": "ブートストラップ法（1,000 回再サンプリング）で中央値の信頼区間を推定します。分布形状への仮定が不要なノンパラメトリックな手法です。",
-      "Formula": "再サンプリング中央値分布の α/2 パーセンタイル ～ (1-α/2) パーセンタイル",
-      "Assumptions": "データが元の母集団の代表的な標本であること。標本数が小さい場合は区間の精度が下がる。"
-    },
-    "proportion": {
-      "Title": "比率の信頼区間（Wilson スコア区間）",
-      "Description": "二値データ（0 または 1 のみ）の成功割合 p̂ に対して、Wilson スコア区間を計算します。Wald 区間より小標本での被覆率が良好です。列の値が 0 と 1 のみであることが必要です。",
-      "Formula": "(p̂ + z²/2n ± z√(p̂(1-p̂)/n + z²/4n²)) / (1 + z²/n)",
-      "Assumptions": "列の値が 0 または 1（二値）のみであること。それ以外の値を含む場合は API エラーが返される。"
-    },
-    "variance": {
-      "Title": "分散の信頼区間（カイ二乗分布）",
-      "Description": "標本分散 s² を点推定値とし、カイ二乗分布を用いて母分散 σ² の信頼区間を計算します。データが正規分布に従う場合に正確な区間が得られます。",
-      "Formula": "[ (n-1)s² / χ²(α/2, n-1),  (n-1)s² / χ²(1-α/2, n-1) ]",
-      "Assumptions": "データが正規分布に従うこと。正規性から大きく外れる場合は区間の信頼性が低下する。"
-    },
-    "standard_deviation": {
-      "Title": "標準偏差の信頼区間",
-      "Description": "分散の信頼区間の平方根として標準偏差の信頼区間を算出します。分散の信頼区間と同じ前提条件（正規分布仮定）が適用されます。",
-      "Formula": "[ √(分散CIの下限), √(分散CIの上限) ]",
-      "Assumptions": "データが正規分布に従うこと（分散 CI の前提と同様）。"
-    }
+    "AssumptionsLabel": "前提条件・注意"
   },
   "CalculationView": {
     "Title": "計算式でカラムを追加",
@@ -712,7 +727,8 @@
     "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください",
     "NewColumnNameRequired": "新しいカラム名を入力してください。",
     "CalculationExpressionRequired": "計算式を入力してください。",
-    "RandomSeedRange": "乱数シードは0以上1億以下の整数を入力してください。"
+    "RandomSeedRange": "乱数シードは0以上1億以下の整数を入力してください。",
+    "UniformLowMustBeLessThanHigh": "一様分布では最小値は最大値より小さくなければなりません"
   },
   "ColumnMenu": {
     "SortAsc": "昇順ソート",

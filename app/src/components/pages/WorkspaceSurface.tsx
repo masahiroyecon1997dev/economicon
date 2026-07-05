@@ -1,6 +1,8 @@
 import type { AnalysisResultDetail } from "@/api/model";
 import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnalysisResultDialog";
 import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
+import { LogitRegressionForm } from "@/components/organisms/Form/LogitRegressionForm";
+import { ProbitRegressionForm } from "@/components/organisms/Form/ProbitRegressionForm";
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
 import { AsymptoticNormality } from "@/components/pages/AsymptoticNormality";
@@ -48,6 +50,8 @@ type StaticWorkFeatureKey = Exclude<
   | "DescriptiveStatistics"
   | "StatisticalTestView"
   | "LinearRegressionForm"
+  | "LogitRegressionForm"
+  | "ProbitRegressionForm"
   | "GroupStatistics"
   | "PlotView"
 >;
@@ -363,13 +367,25 @@ export const WorkspaceSurface = () => {
       );
     }
 
+    if (tab.featureKey === "LogitRegressionForm") {
+      return (
+        <LogitRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
+      );
+    }
+
+    if (tab.featureKey === "ProbitRegressionForm") {
+      return (
+        <ProbitRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
+      );
+    }
+
     const staticFeatureKey = tab.featureKey as StaticWorkFeatureKey;
     return WORK_TAB_COMPONENTS[staticFeatureKey];
   };
 
   return (
     <div className="h-full flex flex-col min-h-0">
-      <div className="border-b border-gray-200 shrink-0">
+      <div className="border-b border-gray-200 dark:border-gray-700 shrink-0">
         <nav className="app-scrollbar -mb-px flex space-x-1 overflow-x-auto">
           {tabs.map((tab, index) => (
             <Fragment key={tab.id}>
@@ -412,8 +428,8 @@ export const WorkspaceSurface = () => {
                   "group flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors select-none touch-none",
                   tab.kind === "result" && "min-w-44 max-w-64 pr-3",
                   activeTabId === tab.id
-                    ? "border-brand-primary text-brand-primary"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
+                    ? "border-brand-primary text-brand-primary dark:border-brand-accent dark:text-brand-accent"
+                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600",
                   draggedTabId === tab.id
                     ? "opacity-60 cursor-grabbing"
                     : "cursor-grab",
@@ -462,8 +478,8 @@ export const WorkspaceSurface = () => {
                     "rounded-full w-4 h-4 flex items-center justify-center transition-colors shrink-0",
                     "opacity-0 group-hover:opacity-100 focus:opacity-100",
                     activeTabId === tab.id
-                      ? "hover:bg-brand-primary/20 text-brand-primary"
-                      : "hover:bg-gray-200 text-gray-400 hover:text-gray-600",
+                      ? "hover:bg-brand-primary/20 dark:hover:bg-brand-accent/20 text-brand-primary dark:text-brand-accent"
+                      : "hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300",
                   )}
                 >
                   <X className="w-2.5 h-2.5" />
@@ -512,16 +528,29 @@ export const WorkspaceSurface = () => {
           />
         </div>
       )}
-      {activeTab?.kind === "work" && (
-        <div
-          ref={workTabContainerRef}
-          key={activeTab.id}
-          className="app-scrollbar flex-1 min-h-0 overflow-y-auto"
-          data-testid={`workspace-work-tab-${activeTab.featureKey}`}
-        >
-          {renderWorkTab(activeTab)}
-        </div>
-      )}
+      {tabs
+        .filter((t) => t.kind === "work")
+        .map((tab) => {
+          const workTab = tab as WorkspaceWorkTab;
+          const isActive = activeTab?.id === tab.id;
+          return (
+            <div
+              key={tab.id}
+              ref={isActive ? workTabContainerRef : null}
+              className={cn(
+                "app-scrollbar flex-1 min-h-0 overflow-y-auto",
+                !isActive && "hidden",
+              )}
+              data-testid={
+                isActive
+                  ? `workspace-work-tab-${workTab.featureKey}`
+                  : undefined
+              }
+            >
+              {renderWorkTab(workTab)}
+            </div>
+          );
+        })}
 
       {editTarget && (
         <EditAnalysisResultDialog

@@ -21,16 +21,16 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: latest-10
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
           cache: "pnpm"
@@ -49,7 +49,7 @@ jobs:
         run: pnpm test:coverage --run
 
       - name: Upload coverage reports
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4.6.0
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           files: ./app/coverage/coverage-final.json
           flags: unittests
@@ -64,18 +64,18 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: latest-10
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: "24"
+          node-version: "24.15.0"
           cache: "pnpm"
           cache-dependency-path: "app/pnpm-lock.yaml"
 
@@ -84,10 +84,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # 1.16.0
+        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # 1.16.1
 
       - name: Cache Rust dependencies
-        uses: swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
         with:
           workspaces: "app/src-tauri -> target"
 
@@ -176,9 +176,50 @@ jobs:
         working-directory: ./app
         run: pnpm exec tauri build --debug --no-bundle
 
+      - name: Get Playwright version
+        id: playwright-version
+        working-directory: ./app
+        run: |
+          echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~\AppData\Local\ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ./app
         run: pnpm exec playwright install chromium --with-deps
+
+      - name: Install Playwright System Deps (Cache Hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        working-directory: ./app
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Setup economicon configuration for CI
+        shell: powershell
+        run: |
+          # アプリの設定ファイルの配置先ディレクトリを作成
+          $configDir = "C:\Users\runneradmin\AppData\Roaming\economicon"
+          if (!(Test-Path $configDir)) {
+              New-Item -ItemType Directory -Force -Path $configDir
+          }
+
+          # テスト用データ（sampleフォルダ）の絶対パスを取得（スラッシュ区切りに変換）
+          $samplePath = "${{ github.workspace }}/app/sample" -replace '\\', '/'
+
+          # テンプレートを読み込み、パスを置換してターゲットラインに書き出し
+          $template = Get-Content -Raw -Path "${{ github.workspace }}/app/e2e/fixtures/cicd_test.config.json"
+          $configContent = $template -replace 'TARGET_PATH', $samplePath
+
+          $configContent | Out-File -FilePath "$configDir\economicon.config.json" -Encoding utf8
+
+          # 念のため配置された内容を確認（デバッグ用）
+          Get-Content -Path "$configDir\economicon.config.json"
 
       - name: Start Economicon with CDP debug port
         # sidecar を含む通常起動で実行し、CDP ポートが実際に開くまで待機する
@@ -218,7 +259,7 @@ jobs:
         run: pnpm test:e2e --project=tauri
 
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: playwright-report-tauri
@@ -232,16 +273,16 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: latest-10
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
           cache: "pnpm"

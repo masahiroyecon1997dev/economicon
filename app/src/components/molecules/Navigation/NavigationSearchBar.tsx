@@ -19,7 +19,7 @@ export const NavigationSearchBar = ({
   upDirectoryTitle,
   onUpDirectory,
   onBreadcrumbClick,
-  onSearchChange
+  onSearchChange,
 }: NavigationSearchBarProps) => {
   return (
     <div className="w-full">
@@ -74,4 +74,4 @@ export const NavigationSearchBar = ({
       </div>
     </div>
   );
-}
+};

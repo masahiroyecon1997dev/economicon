@@ -5,6 +5,7 @@ import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
+import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
 import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
 import { FormField } from "@/components/molecules/Form/FormField";
@@ -30,7 +31,7 @@ import {
   useWorkspaceTabsStore,
 } from "@/stores/workspaceTabs";
 import { useForm, useStore } from "@tanstack/react-form";
-import { Loader2, SearchX } from "lucide-react";
+import { HelpCircle, Loader2, SearchX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -232,6 +233,15 @@ export const CorrelationMatrix = ({
     <PageLayout
       title={t("CorrelationMatrix.Title")}
       description={t("CorrelationMatrix.Description")}
+      titleAction={
+        <ExplainerButton
+          explainerKey="correlation_matrix"
+          aria-label={t("CorrelationMatrix.ExplainerButtonLabel")}
+          data-testid="correlation-matrix-explainer-btn"
+        >
+          <HelpCircle className="h-4 w-4" aria-hidden="true" />
+        </ExplainerButton>
+      }
     >
       {tableList.length === 0 ? (
         <AnalysisNoTablesState

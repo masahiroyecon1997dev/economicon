@@ -918,3 +918,55 @@ def test_create_table_seed_date_format_is_valid(client, tables_store):
     response = client.post("/api/table/create-simulation-data", json=payload)
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["code"] == "OK"
+
+
+# ─────────────────────────────────────────────────────────────
+# 異常系 422：一様分布パラメータバリデーション（low >= high）
+# ─────────────────────────────────────────────────────────────
+
+
+def test_create_table_uniform_low_equals_high(client, tables_store):
+    """U1: 一様分布で low=high の場合は 422 VALIDATION_ERROR"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "simulationColumns": [
+            {
+                "columnName": "col1",
+                "distribution": {
+                    "type": "uniform",
+                    "low": 5.0,
+                    "high": 5.0,
+                },
+            }
+        ],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    # 翻訳メッセージ内に 'low' と 'high' の両方が含まれることを確認
+    assert "'low'" in response_data["message"]
+    assert "'high'" in response_data["message"]
+
+
+def test_create_table_uniform_low_greater_than_high(client, tables_store):
+    """U2: 一様分布で low > high の場合は 422 VALIDATION_ERROR"""
+    payload = {
+        **_BASE_PAYLOAD,
+        "simulationColumns": [
+            {
+                "columnName": "col1",
+                "distribution": {
+                    "type": "uniform",
+                    "low": 10.0,
+                    "high": 5.0,
+                },
+            }
+        ],
+    }
+    response = client.post("/api/table/create-simulation-data", json=payload)
+    response_data = response.json()
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response_data["code"] == ErrorCode.VALIDATION_ERROR
+    assert "'low'" in response_data["message"]
+    assert "'high'" in response_data["message"]

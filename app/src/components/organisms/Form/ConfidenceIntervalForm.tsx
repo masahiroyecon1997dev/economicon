@@ -3,8 +3,8 @@ import { ConfidenceIntervalStatisticsType } from "@/api/model";
 import { InputText } from "@/components/atoms/Input/InputText";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import { FormField } from "@/components/molecules/Form/FormField";
-import { StatisticsInfoDialog } from "@/components/organisms/Dialog/StatisticsInfoDialog";
 import {
   AnalysisEmptyState,
   AnalysisNoTablesState,
@@ -83,11 +83,7 @@ export const ConfidenceIntervalForm = ({
     useTableColumnLoader({ numericOnly: true, autoLoadOnMount: true });
   const navigateToShell = useCurrentPageStore((state) => state.navigateToShell);
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
-  const closeActiveWorkTab = useWorkspaceTabsStore(
-    (state) => state.closeActiveWorkTab,
-  );
   const [levelMode, setLevelMode] = useState<"select" | "manual">("select");
-  const [infoDialogKey, setInfoDialogKey] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -119,7 +115,6 @@ export const ConfidenceIntervalForm = ({
           const { resultId } = response.result;
           const detailResponse = await api.getAnalysisResult(resultId);
           if (detailResponse.code === "OK") {
-            closeActiveWorkTab();
             openResultTab(detailResponse.result);
             await useAnalysisResultsStore.getState().fetchSummaries();
             return;
@@ -259,17 +254,16 @@ export const ConfidenceIntervalForm = ({
                   {t("ConfidenceIntervalView.StatisticTypeLabel")}
                 </label>
                 {field.state.value && (
-                  <button
-                    type="button"
+                  <ExplainerButton
+                    explainerKey={field.state.value}
                     aria-label={t(
                       "ConfidenceIntervalView.StatisticTypeInfoLabel",
                     )}
-                    onClick={() => setInfoDialogKey(field.state.value)}
                     className="text-gray-400 hover:text-brand-accent transition-colors"
                     data-testid="statistic-type-info-btn"
                   >
                     <Info size={14} aria-hidden="true" />
-                  </button>
+                  </ExplainerButton>
                 )}
               </div>
               <Select
@@ -387,18 +381,6 @@ export const ConfidenceIntervalForm = ({
         disabled={isSubmitting}
         isLoading={isSubmitting}
       />
-
-      {/* 統計量説明ダイアログ */}
-      {infoDialogKey && (
-        <StatisticsInfoDialog
-          open={infoDialogKey !== null}
-          onOpenChange={(open) => {
-            if (!open) setInfoDialogKey(null);
-          }}
-          statisticKey={infoDialogKey}
-          category="confidence_interval"
-        />
-      )}
     </form>
   );
 };

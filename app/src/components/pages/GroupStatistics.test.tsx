@@ -12,8 +12,8 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("react-i18next", () => ({
@@ -66,12 +66,6 @@ const submitForm = async () => {
   });
 };
 
-const goToStep2 = async (user: ReturnType<typeof userEvent.setup>) => {
-  await act(async () => {
-    await user.click(screen.getByText("GroupStatistics.NextStep"));
-  });
-};
-
 beforeEach(() => {
   vi.clearAllMocks();
   mockTableLoader.selectedTableName = "sales";
@@ -113,26 +107,29 @@ beforeEach(() => {
 });
 
 describe("GroupStatistics", () => {
-  it("2 ステップ Wizard で Step 1 と Step 2 を往復できる", async () => {
-    const user = userEvent.setup();
+  it("初期表示時にロールマトリクスと統計量が即座に表示される", () => {
     render(<GroupStatistics workTabId="work:GroupStatistics" />);
 
-    expect(screen.getByText("GroupStatistics.Step1Lead")).toBeInTheDocument();
+    // ロールマトリクスがステップ遷移なしで即座に表示されること
+    const matrix = screen.getByTestId("group-statistics-role-matrix");
+    expect(matrix).toBeInTheDocument();
 
-    await goToStep2(user);
+    // ロールマトリクス内に列名が表示されること
+    expect(within(matrix).getByText("region")).toBeInTheDocument();
+    expect(within(matrix).getByText("sales")).toBeInTheDocument();
 
-    expect(screen.getByText("GroupStatistics.Step2Lead")).toBeInTheDocument();
+    // 出力データ名の入力欄が表示されること
     expect(
-      screen.getByTestId("group-statistics-role-matrix"),
+      screen.getByTestId("group-statistics-new-table-name"),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByText("Common.Back"));
-
-    expect(screen.getByText("GroupStatistics.Step1Lead")).toBeInTheDocument();
+    // 作成するボタンが表示されること
+    expect(
+      screen.getByText("GroupStatistics.RunCalculation"),
+    ).toBeInTheDocument();
   });
 
   it("成功時は新しいテーブル名を tableList に追加して Workspace に戻る", async () => {
-    const user = userEvent.setup();
     mockApi.createGroupStatisticsTable.mockResolvedValue({
       code: "OK",
       result: { tableName: "grouped_sales" },
@@ -140,7 +137,6 @@ describe("GroupStatistics", () => {
 
     render(<GroupStatistics workTabId="work:GroupStatistics" />);
 
-    await goToStep2(user);
     await submitForm();
 
     await waitFor(() => {
@@ -152,7 +148,6 @@ describe("GroupStatistics", () => {
   });
 
   it("newTableName を含む API エラーはフォーム入力名に置換して表示する", async () => {
-    const user = userEvent.setup();
     mockApi.createGroupStatisticsTable.mockResolvedValue({
       code: "TABLE_ALREADY_EXISTS",
       message: "newTableName 'grouped_sales'は既に存在します。",
@@ -160,7 +155,6 @@ describe("GroupStatistics", () => {
 
     render(<GroupStatistics workTabId="work:GroupStatistics" />);
 
-    await goToStep2(user);
     await submitForm();
 
     await waitFor(() => {

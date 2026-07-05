@@ -180,15 +180,18 @@ describe("DistributionPreview", () => {
   });
 
   describe("カテゴリタブ（連続 / 離散）切り替え", () => {
-    it("test_categorySwitch_toDiscrete_showsBinomialRadio", () => {
+    it("test_categorySwitch_toDiscrete_showsBinomialRadio", async () => {
+      const user = userEvent.setup();
       const { container } = render(<DistributionPreview />);
       const discreteTab = screen.getByText("DistributionPreview.TabDiscrete");
-      fireEvent.click(discreteTab);
+      await user.click(discreteTab);
       // 離散タブに切り替え後、binomial のラジオが存在する
-      const binomialRadio = container.querySelector(
-        'input[type="radio"][value="binomial"]',
-      );
-      expect(binomialRadio).not.toBeNull();
+      await waitFor(() => {
+        const binomialRadio = container.querySelector(
+          'input[type="radio"][value="binomial"]',
+        );
+        expect(binomialRadio).not.toBeNull();
+      });
     });
   });
 

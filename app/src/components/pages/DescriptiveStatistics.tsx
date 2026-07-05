@@ -1,23 +1,24 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { DescriptiveStatisticType } from "@/api/model";
-import { DescriptiveStatisticsBody } from "@/api/zod/statistics/statistics";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
+import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
 import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
 import { FormField } from "@/components/molecules/Form/FormField";
 import {
-    AnalysisEmptyState,
-    AnalysisNoTablesState,
+  AnalysisEmptyState,
+  AnalysisNoTablesState,
 } from "@/components/organisms/EmptyState/AnalysisNoTablesState";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { ALL_STAT_TYPES } from "@/constants/statisticTypes";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
 import {
-    buildCaughtErrorMessage,
-    buildResponseErrorMessage,
+  buildCaughtErrorMessage,
+  buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
+import { extractFieldError } from "@/lib/utils/formHelpers";
 import { cn } from "@/lib/utils/helpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentPage";
@@ -25,10 +26,11 @@ import { useTableInfosStore } from "@/stores/tableInfos";
 import { useTableListStore } from "@/stores/tableList";
 import type { WorkspaceWorkTab } from "@/stores/workspaceTabs";
 import {
-    selectWorkTabDraft,
-    useWorkspaceTabsStore,
+  selectWorkTabDraft,
+  useWorkspaceTabsStore,
 } from "@/stores/workspaceTabs";
-import { ChevronDown, Loader2, SearchX } from "lucide-react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { ChevronDown, HelpCircle, Loader2, SearchX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -66,7 +68,7 @@ const ADVANCED_STAT_TYPES: DescriptiveStatisticType[] = ALL_STAT_TYPES.filter(
 type DescriptiveStatisticsFormValues = {
   tableName: string;
   columnNames: string[];
-  statistics: DescriptiveStatisticType[];
+  statistics: string[];
 };
 
 type DescriptiveStatisticsProps = {
@@ -74,15 +76,16 @@ type DescriptiveStatisticsProps = {
   onCancel?: () => void | Promise<void>;
 };
 
-const buildFormValues = (
-  tableName: string,
-  columnNames: string[],
-  statistics: DescriptiveStatisticType[],
-): DescriptiveStatisticsFormValues => ({
-  tableName,
-  columnNames,
-  statistics,
-});
+const createSchema = (t: (key: string) => string) =>
+  z.object({
+    tableName: z.string().min(1, t("DescriptiveStatistics.ErrorDataRequired")),
+    columnNames: z
+      .array(z.string())
+      .min(1, t("DescriptiveStatistics.ErrorColumnsRequired")),
+    statistics: z
+      .array(z.string())
+      .min(1, t("DescriptiveStatistics.ErrorStatsRequired")),
+  });
 
 export const DescriptiveStatistics = ({
   workTabId,
@@ -97,9 +100,6 @@ export const DescriptiveStatistics = ({
     (state) => state.navigateToWorkspace,
   );
   const openResultTab = useWorkspaceTabsStore((state) => state.openResultTab);
-  const closeActiveWorkTab = useWorkspaceTabsStore(
-    (state) => state.closeActiveWorkTab,
-  );
   const ensureWorkTabState = useWorkspaceTabsStore(
     (state) => state.ensureWorkTabState,
   );
@@ -130,16 +130,6 @@ export const DescriptiveStatistics = ({
   const shouldAutoSelectColumnsRef = useRef(
     !persistedDraft || persistedDraft.columnNames.length === 0,
   );
-
-  const [checkedCols, setCheckedCols] = useState<Set<string>>(
-    () => new Set(persistedDraft?.columnNames ?? []),
-  );
-  const [checkedStats, setCheckedStats] = useState<
-    Set<DescriptiveStatisticType>
-  >(() => new Set(persistedDraft?.statistics ?? DEFAULT_STAT_TYPES));
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const [statsOpen, setStatsOpen] = useState(true);
   const [advancedStatsOpen, setAdvancedStatsOpen] = useState(false);
 
   const handleCancel = () => {
@@ -150,6 +140,74 @@ export const DescriptiveStatistics = ({
     navigateToWorkspace();
   };
 
+  const form = useForm({
+    defaultValues: {
+      tableName: persistedDraft?.tableName ?? initialTableName,
+      columnNames: persistedDraft?.columnNames ?? [],
+      statistics: persistedDraft?.statistics ?? DEFAULT_STAT_TYPES,
+    } satisfies DescriptiveStatisticsFormValues,
+    validators: {
+      onSubmit: createSchema(t),
+    },
+    onSubmit: async ({ value }) => {
+      const orderedCols = columns
+        .map((column) => column.name)
+        .filter((name) => value.columnNames.includes(name));
+      const orderedStats = ALL_STAT_TYPES.filter((stat) =>
+        value.statistics.includes(stat),
+      );
+
+      try {
+        const api = getEconomiconAppAPI();
+        const response = await api.descriptiveStatistics({
+          tableName: value.tableName,
+          columnNameList: orderedCols,
+          statistics: orderedStats,
+        });
+
+        if (response.code === "OK" && response.result) {
+          const detailResponse = await api.getAnalysisResult(
+            response.result.resultId,
+          );
+          if (detailResponse.code === "OK") {
+            if (workTabId) {
+              commitWorkTab(workTabId, {
+                tableName: value.tableName,
+                columnNames: orderedCols,
+                statistics: orderedStats,
+              });
+            }
+            openResultTab(detailResponse.result);
+            await useAnalysisResultsStore.getState().fetchSummaries();
+            return;
+          }
+
+          await showMessageDialog(
+            t("Error.Error"),
+            buildResponseErrorMessage(
+              detailResponse,
+              t("Error.UnexpectedError"),
+            ),
+          );
+          return;
+        }
+
+        await showMessageDialog(
+          t("Error.Error"),
+          buildResponseErrorMessage(response, t("Error.UnexpectedError")),
+        );
+      } catch (error) {
+        await showMessageDialog(
+          t("Error.Error"),
+          buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
+        );
+      }
+    },
+  });
+
+  const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
+  const formValues = useStore(form.store, (s) => s.values);
+
   const {
     selectedTableName: selectedTable,
     setSelectedTableName,
@@ -159,163 +217,55 @@ export const DescriptiveStatistics = ({
     initialSelectedTableName: persistedDraft?.tableName ?? initialTableName,
     onLoadedColumns: (loadedColumns) => {
       if (shouldAutoSelectColumnsRef.current) {
-        setCheckedCols(new Set(loadedColumns.map((column) => column.name)));
+        form.setFieldValue(
+          "columnNames",
+          loadedColumns.map((column) => column.name),
+        );
         shouldAutoSelectColumnsRef.current = false;
         return;
       }
 
-      const nextColumns = new Set(
+      form.setFieldValue(
+        "columnNames",
         loadedColumns
           .map((column) => column.name)
           .filter((columnName) =>
             initialDraftRef.current?.columnNames.includes(columnName),
           ),
       );
-      setCheckedCols(nextColumns);
     },
   });
 
   useEffect(() => {
-    if (!workTabId || !selectedTable) {
-      return;
-    }
+    if (!workTabId) return;
+    ensureWorkTabState(workTabId, formValues);
+  }, [ensureWorkTabState, formValues, workTabId]);
 
-    const nextValues = buildFormValues(
-      selectedTable,
-      columns
-        .map((column) => column.name)
-        .filter((name) => checkedCols.has(name)),
-      ALL_STAT_TYPES.filter((stat) => checkedStats.has(stat)),
-    );
-    ensureWorkTabState(workTabId, nextValues);
-    updateWorkTabDraft(workTabId, nextValues);
-  }, [
-    checkedCols,
-    checkedStats,
-    columns,
-    ensureWorkTabState,
-    selectedTable,
-    updateWorkTabDraft,
-    workTabId,
-  ]);
+  useEffect(() => {
+    if (!workTabId) return;
+    updateWorkTabDraft(workTabId, formValues);
+  }, [formValues, updateWorkTabDraft, workTabId]);
 
-  const toggleCol = (name: string) => {
-    setCheckedCols((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
-      return next;
-    });
-  };
+  const checkedCols = new Set(formValues.columnNames);
+  const checkedStats = new Set(formValues.statistics);
 
-  const toggleStat = (stat: DescriptiveStatisticType) => {
-    setCheckedStats((prev) => {
-      const next = new Set(prev);
-      if (next.has(stat)) {
-        next.delete(stat);
-      } else {
-        next.add(stat);
-      }
-      return next;
-    });
+  const toggleStat = (stat: string) => {
+    const next = new Set(checkedStats);
+    if (next.has(stat)) next.delete(stat);
+    else next.add(stat);
+    form.setFieldValue("statistics", [...next]);
   };
 
   const selectStats = (stats: DescriptiveStatisticType[]) => {
-    setCheckedStats((prev) => {
-      const next = new Set(prev);
-      for (const stat of stats) {
-        next.add(stat);
-      }
-      return next;
-    });
+    const next = new Set(checkedStats);
+    for (const stat of stats) next.add(stat);
+    form.setFieldValue("statistics", [...next]);
   };
 
   const deselectStats = (stats: DescriptiveStatisticType[]) => {
-    setCheckedStats((prev) => {
-      const next = new Set(prev);
-      for (const stat of stats) {
-        next.delete(stat);
-      }
-      return next;
-    });
-  };
-
-  const handleSubmit = async () => {
-    const orderedCols = columns
-      .map((column) => column.name)
-      .filter((name) => checkedCols.has(name));
-    const orderedStats = ALL_STAT_TYPES.filter((stat) =>
-      checkedStats.has(stat),
-    );
-
-    const parsed = DescriptiveStatisticsBody.safeParse({
-      tableName: selectedTable ?? "",
-      columnNameList: orderedCols,
-      statistics: orderedStats,
-    });
-
-    if (!parsed.success) {
-      const firstPath = parsed.error.issues[0]?.path[0];
-      let msg = t("Error.UnexpectedError");
-      if (firstPath === "tableName")
-        msg = t("DescriptiveStatistics.ErrorDataRequired");
-      else if (firstPath === "columnNameList")
-        msg = t("DescriptiveStatistics.ErrorColumnsRequired");
-      else if (firstPath === "statistics")
-        msg = t("DescriptiveStatistics.ErrorStatsRequired");
-      setValidationError(msg);
-      return;
-    }
-    setValidationError(null);
-
-    setIsCalculating(true);
-    try {
-      const api = getEconomiconAppAPI();
-      const response = await api.descriptiveStatistics({
-        tableName: selectedTable,
-        columnNameList: orderedCols,
-        statistics: orderedStats,
-      });
-
-      if (response.code === "OK" && response.result) {
-        const detailResponse = await api.getAnalysisResult(
-          response.result.resultId,
-        );
-        if (detailResponse.code === "OK") {
-          if (workTabId) {
-            commitWorkTab(
-              workTabId,
-              buildFormValues(selectedTable, orderedCols, orderedStats),
-            );
-          }
-          closeActiveWorkTab();
-          openResultTab(detailResponse.result);
-          await useAnalysisResultsStore.getState().fetchSummaries();
-          return;
-        }
-
-        await showMessageDialog(
-          t("Error.Error"),
-          buildResponseErrorMessage(detailResponse, t("Error.UnexpectedError")),
-        );
-        return;
-      }
-
-      await showMessageDialog(
-        t("Error.Error"),
-        buildResponseErrorMessage(response, t("Error.UnexpectedError")),
-      );
-    } catch (error) {
-      await showMessageDialog(
-        t("Error.Error"),
-        buildCaughtErrorMessage(error, t("Error.UnexpectedError")),
-      );
-    } finally {
-      setIsCalculating(false);
-    }
+    const next = new Set(checkedStats);
+    for (const stat of stats) next.delete(stat);
+    form.setFieldValue("statistics", [...next]);
   };
 
   return (
@@ -330,175 +280,238 @@ export const DescriptiveStatistics = ({
           onSelect={() => navigateToShell("ImportDataFile")}
         />
       ) : (
-        <div className="app-scrollbar flex-1 min-h-0 space-y-4 overflow-y-auto pb-2">
-          <FormField label={t("DescriptiveStatistics.DataLabel")}>
-            <Select
-              value={selectedTable}
-              onValueChange={(value) => {
-                setSelectedTableName(value);
-                shouldAutoSelectColumnsRef.current = true;
-                setCheckedCols(new Set());
-                setValidationError(null);
-              }}
-              placeholder={t("DescriptiveStatistics.SelectData")}
-            >
-              {tableList.map((name) => (
-                <SelectItem key={name} value={name}>
-                  {name}
-                </SelectItem>
-              ))}
-            </Select>
-          </FormField>
-
-          {selectedTable && (
-            <FormField label={t("DescriptiveStatistics.ColumnsLabel")}>
-              {isLoadingCols ? (
-                <AnalysisEmptyState
-                  compact
-                  testId="descriptive-statistics-loading-columns-state"
-                  icon={<Loader2 className="h-6 w-6 animate-spin" />}
-                  title={t("AnalysisEmptyState.LoadingColumnsTitle")}
-                  description={t(
-                    "AnalysisEmptyState.LoadingColumnsDescription",
-                  )}
-                />
-              ) : columns.length === 0 ? (
-                <AnalysisEmptyState
-                  compact
-                  testId="descriptive-statistics-no-columns-state"
-                  icon={<SearchX className="h-6 w-6" />}
-                  title={t("AnalysisEmptyState.NoEligibleColumnsTitle")}
-                  description={t("DescriptiveStatistics.NoColumns")}
-                  hint={t("AnalysisEmptyState.NoEligibleColumnsHint")}
-                />
-              ) : (
-                <div className="space-y-2">
-                  <SelectAllBar
-                    selectAllLabel={t("DescriptiveStatistics.SelectAll")}
-                    deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
-                    onSelectAll={() =>
-                      setCheckedCols(
-                        new Set(columns.map((column) => column.name)),
-                      )
-                    }
-                    onDeselectAll={() => setCheckedCols(new Set())}
-                  />
-                  <CheckboxTagGroup
-                    items={columns.map((column) => ({
-                      value: column.name,
-                      label: column.name,
-                    }))}
-                    checked={checkedCols}
-                    onToggle={toggleCol}
-                  />
-                </div>
-              )}
-            </FormField>
-          )}
-
-          <div className="space-y-1">
-            <button
-              type="button"
-              onClick={() => setStatsOpen((prev) => !prev)}
-              className="flex w-full items-center justify-between py-0.5 text-sm font-medium text-gray-700 transition-colors hover:text-brand-accent dark:text-gray-300"
-            >
-              <span>{t("DescriptiveStatistics.StatisticsLabel")}</span>
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 text-brand-text-main/60 transition-transform duration-200",
-                  statsOpen && "rotate-180",
-                )}
-              />
-            </button>
-            {statsOpen && (
-              <div className="space-y-2">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium text-brand-text-main dark:text-gray-100">
-                      {t("DescriptiveStatistics.PrimaryStatisticsLabel")}
-                    </p>
-                    <SelectAllBar
-                      selectAllLabel={t("DescriptiveStatistics.SelectAll")}
-                      deselectAllLabel={t("DescriptiveStatistics.DeselectAll")}
-                      onSelectAll={() => selectStats(PRIMARY_STAT_TYPES)}
-                      onDeselectAll={() => deselectStats(PRIMARY_STAT_TYPES)}
-                    />
-                  </div>
-                  <CheckboxTagGroup
-                    items={PRIMARY_STAT_TYPES.map((stat) => ({
-                      value: stat,
-                      label: t(`DescriptiveStatistics.Stat_${stat}`),
-                    }))}
-                    checked={checkedStats as Set<string>}
-                    onToggle={(value) =>
-                      toggleStat(value as DescriptiveStatisticType)
-                    }
-                    columns={3}
-                  />
-                </div>
-
-                <div className="space-y-2 rounded-lg border border-border-color/70 bg-white/70 p-3 dark:border-gray-700 dark:bg-gray-800/40">
-                  <button
-                    type="button"
-                    onClick={() => setAdvancedStatsOpen((prev) => !prev)}
-                    className="flex w-full items-center justify-between text-left text-sm font-medium text-gray-700 transition-colors hover:text-brand-accent dark:text-gray-300"
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            void form.handleSubmit();
+          }}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div className="app-scrollbar flex-1 min-h-0 space-y-4 overflow-y-auto pb-2">
+            <form.Field name="tableName">
+              {(field) => (
+                <FormField
+                  label={t("DescriptiveStatistics.DataLabel")}
+                  error={extractFieldError(field.state.meta.errors)}
+                >
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(value) => {
+                      field.handleChange(value);
+                      setSelectedTableName(value);
+                      shouldAutoSelectColumnsRef.current = true;
+                      form.setFieldValue("columnNames", []);
+                    }}
+                    placeholder={t("DescriptiveStatistics.SelectData")}
+                    disabled={isSubmitting}
                   >
-                    <span>
-                      {t("DescriptiveStatistics.AdvancedStatisticsLabel")}
-                    </span>
-                    <ChevronDown
-                      className={cn(
-                        "h-4 w-4 text-brand-text-main/60 transition-transform duration-200",
-                        advancedStatsOpen && "rotate-180",
-                      )}
-                    />
-                  </button>
+                    {tableList.map((name) => (
+                      <SelectItem key={name} value={name}>
+                        {name}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </FormField>
+              )}
+            </form.Field>
 
-                  {advancedStatsOpen && (
-                    <div className="space-y-2">
-                      <SelectAllBar
-                        selectAllLabel={t("DescriptiveStatistics.SelectAll")}
-                        deselectAllLabel={t(
-                          "DescriptiveStatistics.DeselectAll",
+            {selectedTable && (
+              <form.Field name="columnNames">
+                {(field) => (
+                  <FormField
+                    label={t("DescriptiveStatistics.ColumnsLabel")}
+                    error={extractFieldError(field.state.meta.errors)}
+                  >
+                    {isLoadingCols ? (
+                      <AnalysisEmptyState
+                        compact
+                        testId="descriptive-statistics-loading-columns-state"
+                        icon={<Loader2 className="h-6 w-6 animate-spin" />}
+                        title={t("AnalysisEmptyState.LoadingColumnsTitle")}
+                        description={t(
+                          "AnalysisEmptyState.LoadingColumnsDescription",
                         )}
-                        onSelectAll={() => selectStats(ADVANCED_STAT_TYPES)}
-                        onDeselectAll={() => deselectStats(ADVANCED_STAT_TYPES)}
                       />
+                    ) : columns.length === 0 ? (
+                      <AnalysisEmptyState
+                        compact
+                        testId="descriptive-statistics-no-columns-state"
+                        icon={<SearchX className="h-6 w-6" />}
+                        title={t("AnalysisEmptyState.NoEligibleColumnsTitle")}
+                        description={t("DescriptiveStatistics.NoColumns")}
+                        hint={t("AnalysisEmptyState.NoEligibleColumnsHint")}
+                      />
+                    ) : (
+                      <div className="space-y-2">
+                        <SelectAllBar
+                          selectAllLabel={t("DescriptiveStatistics.SelectAll")}
+                          deselectAllLabel={t(
+                            "DescriptiveStatistics.DeselectAll",
+                          )}
+                          onSelectAll={() =>
+                            form.setFieldValue(
+                              "columnNames",
+                              columns.map((column) => column.name),
+                            )
+                          }
+                          onDeselectAll={() =>
+                            form.setFieldValue("columnNames", [])
+                          }
+                          disabled={isSubmitting}
+                        />
+                        <CheckboxTagGroup
+                          items={columns.map((column) => ({
+                            value: column.name,
+                            label: column.name,
+                          }))}
+                          checked={checkedCols}
+                          onToggle={(name) => {
+                            const next = new Set(checkedCols);
+                            if (next.has(name)) next.delete(name);
+                            else next.add(name);
+                            field.handleChange([...next]);
+                          }}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                    )}
+                  </FormField>
+                )}
+              </form.Field>
+            )}
+
+            <div className="space-y-1">
+              <form.Field name="statistics">
+                {(field) => (
+                  <div className="space-y-2">
+                    {extractFieldError(field.state.meta.errors) && (
+                      <p className="text-xs text-red-600 dark:text-red-400">
+                        {extractFieldError(field.state.meta.errors)}
+                      </p>
+                    )}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-1">
+                          <p className="text-sm font-medium text-brand-text-main dark:text-gray-100">
+                            {t("DescriptiveStatistics.PrimaryStatisticsLabel")}
+                          </p>
+                          <ExplainerButton
+                            explainerKey="descriptive_stats_primary"
+                            aria-label={t(
+                              "DescriptiveStatistics.PrimaryStatisticsExplainer",
+                            )}
+                            data-testid="primary-stats-explainer-btn"
+                          >
+                            <HelpCircle
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </ExplainerButton>
+                        </div>
+                        <SelectAllBar
+                          selectAllLabel={t("DescriptiveStatistics.SelectAll")}
+                          deselectAllLabel={t(
+                            "DescriptiveStatistics.DeselectAll",
+                          )}
+                          onSelectAll={() => selectStats(PRIMARY_STAT_TYPES)}
+                          onDeselectAll={() =>
+                            deselectStats(PRIMARY_STAT_TYPES)
+                          }
+                          disabled={isSubmitting}
+                        />
+                      </div>
                       <CheckboxTagGroup
-                        items={ADVANCED_STAT_TYPES.map((stat) => ({
+                        items={PRIMARY_STAT_TYPES.map((stat) => ({
                           value: stat,
                           label: t(`DescriptiveStatistics.Stat_${stat}`),
                         }))}
-                        checked={checkedStats as Set<string>}
-                        onToggle={(value) =>
-                          toggleStat(value as DescriptiveStatisticType)
-                        }
+                        checked={checkedStats}
+                        onToggle={toggleStat}
                         columns={3}
+                        disabled={isSubmitting}
                       />
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
+
+                    <div className="space-y-2 rounded-lg border border-border-color/70 bg-white/70 p-3 dark:border-gray-700 dark:bg-gray-800/40">
+                      <div className="flex w-full items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => setAdvancedStatsOpen((prev) => !prev)}
+                          className="flex flex-1 items-center justify-between text-left text-sm font-medium text-gray-700 transition-colors hover:text-brand-accent dark:text-gray-300"
+                        >
+                          <span>
+                            {t("DescriptiveStatistics.AdvancedStatisticsLabel")}
+                          </span>
+                          <ChevronDown
+                            className={cn(
+                              "h-4 w-4 text-brand-text-main/60 transition-transform duration-200",
+                              advancedStatsOpen && "rotate-180",
+                            )}
+                          />
+                        </button>
+                        <ExplainerButton
+                          explainerKey="descriptive_stats_advanced"
+                          aria-label={t(
+                            "DescriptiveStatistics.AdvancedStatisticsExplainer",
+                          )}
+                          data-testid="advanced-stats-explainer-btn"
+                        >
+                          <HelpCircle
+                            className="h-3.5 w-3.5"
+                            aria-hidden="true"
+                          />
+                        </ExplainerButton>
+                      </div>
+
+                      {advancedStatsOpen && (
+                        <div className="space-y-2">
+                          <SelectAllBar
+                            selectAllLabel={t(
+                              "DescriptiveStatistics.SelectAll",
+                            )}
+                            deselectAllLabel={t(
+                              "DescriptiveStatistics.DeselectAll",
+                            )}
+                            onSelectAll={() => selectStats(ADVANCED_STAT_TYPES)}
+                            onDeselectAll={() =>
+                              deselectStats(ADVANCED_STAT_TYPES)
+                            }
+                            disabled={isSubmitting}
+                          />
+                          <CheckboxTagGroup
+                            items={ADVANCED_STAT_TYPES.map((stat) => ({
+                              value: stat,
+                              label: t(`DescriptiveStatistics.Stat_${stat}`),
+                            }))}
+                            checked={checkedStats}
+                            onToggle={toggleStat}
+                            columns={3}
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </form.Field>
+            </div>
           </div>
-          {validationError && (
-            <p className="text-xs text-red-600 dark:text-red-400">
-              {validationError}
-            </p>
-          )}
+
           <ActionButtonBar
             cancelText={t("Common.Cancel")}
             selectText={
-              isCalculating
+              isSubmitting
                 ? t("DescriptiveStatistics.Processing")
                 : t("DescriptiveStatistics.RunCalculation")
             }
             onCancel={handleCancel}
-            onSelect={handleSubmit}
-            disabled={isCalculating}
-            isLoading={isCalculating}
+            onSelect={() => void form.handleSubmit()}
+            onSelectType="submit"
+            disabled={isSubmitting}
+            isLoading={isSubmitting}
           />
-        </div>
+        </form>
       )}
     </PageLayout>
   );

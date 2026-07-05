@@ -24,6 +24,12 @@
     --scrollbar-track-border: rgba(255, 255, 255, 0.05);
     --scrollbar-thumb: #51657b;
     --scrollbar-thumb-hover: #6b829a;
+
+    /* ダークモード汎用テキスト・背景デフォルト */
+    --color-dark-text: #d1d5db; /* gray-300: 通常テキスト */
+    --color-dark-text-hover: #e5e7eb; /* gray-200: ホバーテキスト */
+    --color-dark-bg-element: #374151; /* gray-700: 要素背景 */
+    --color-dark-border: #4b5563; /* gray-600: ボーダー */
   }
 
   button,
@@ -61,6 +67,12 @@
   --color-brand-border: #e5e7eb;
   /* テキストのメインカラー */
   --color-brand-text-main: #2c3e50;
+  /* テキストのサブカラー */
+  --color-brand-text-sub: #64748b;
+  /* テキスト見出しカラー */
+  --color-text-heading: #1e293b;
+  /* テキストメインカラー（エイリアス） */
+  --color-text-main: #2c3e50;
 }
 
 /* =============================================================
