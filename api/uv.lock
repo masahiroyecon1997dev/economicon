@@ -351,7 +351,7 @@ dev = [
     { name = "pip", specifier = "==26.1.2" },
     { name = "pip-audit", specifier = "==2.10.1" },
     { name = "pip-licenses", specifier = "==5.5.5" },
-    { name = "pipdeptree", specifier = "==2.34.0" },
+    { name = "pipdeptree", specifier = "==3.1.0" },
     { name = "pytest", specifier = "==9.0.3" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "radon", specifier = "==6.0.1" },
@@ -1065,14 +1065,14 @@ wheels = [
 
 [[package]]
 name = "pipdeptree"
-version = "2.34.0"
+version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/39/fc/e05f4629ea01e0218c0858d4f1676349787558ce830b39c741ae169ea4a5/pipdeptree-2.34.0.tar.gz", hash = "sha256:9a43a0b4a16a5cbc4e6ab02966dfd5411b949ff8c7cb1de7ade960bef2db3537", size = 66683, upload-time = "2026-03-23T18:25:11.429Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/77/6589d08fecd19365164e4c963177d8a8f70f0784fb22d9a2504a9e118d5c/pipdeptree-3.1.0.tar.gz", hash = "sha256:52ecadd6e0dd95aaf61e83ed2810a9ba6af3154482583149d0e8bb0c1b6d7c46", size = 119892, upload-time = "2026-06-03T15:32:13.598Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fc/e7/6d83535bc50609473af9fcc687bb2b31b3d2dcf416ac9e11b8a113989d51/pipdeptree-2.34.0-py3-none-any.whl", hash = "sha256:4f5b77c07871103f6cf3c402093263609cbfd4e2ce3402bc8b9a7e984b2c6265", size = 44858, upload-time = "2026-03-23T18:25:09.947Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/1a/f18780c37434637d6d07f464a0eff0efbff81ee4d772248aac7bf755a202/pipdeptree-3.1.0-py3-none-any.whl", hash = "sha256:8b525aa1d0ef96dbe8a95b9f526984ed6d055a9c2035a48d33c8bb57bbfc585a", size = 72439, upload-time = "2026-06-03T15:32:12.314Z" },
 ]
 
 [[package]]
