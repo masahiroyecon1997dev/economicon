@@ -48,7 +48,11 @@
     "RandomSeed": "Random Seed",
     "RandomSeedPlaceholder": "Optional (0–100,000,000)",
     "CalculateMarginalEffects": "Calculate marginal effects",
-    "CalculateMarginalEffectsDescription": "Include average marginal effects (AME) in the result."
+    "CalculateMarginalEffectsDescription": "Include average marginal effects (AME) in the result.",
+    "AddColumn": "+ Add Column",
+    "SelectedCount": "{{count}} / {{total}} selected",
+    "SelectAll": "Select All",
+    "DeselectAll": "Deselect All"
   },
   "AppBar": {
     "Minimize": "Minimize",

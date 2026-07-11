@@ -1,6 +1,7 @@
 import { getEconomiconAppAPI } from "@/api/endpoints";
 import { ConfidenceIntervalStatisticsType } from "@/api/model";
 import { InputText } from "@/components/atoms/Input/InputText";
+import { SearchableSelect } from "@/components/atoms/Input/SearchableSelect";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
@@ -222,20 +223,18 @@ export const ConfidenceIntervalForm = ({
                   hint={t("AnalysisEmptyState.NoEligibleColumnsHint")}
                 />
               ) : (
-                <Select
+                <SearchableSelect
                   id="ci-column-name"
                   value={field.state.value}
                   placeholder={t("ConfidenceIntervalView.SelectColumn")}
                   error={extractFieldError(field.state.meta.errors)}
                   onValueChange={field.handleChange}
+                  options={columnList.map((col) => ({
+                    value: col.name,
+                    label: col.name,
+                  }))}
                   disabled={columnList.length === 0}
-                >
-                  {columnList.map((col) => (
-                    <SelectItem key={col.name} value={col.name}>
-                      {col.name}
-                    </SelectItem>
-                  ))}
-                </Select>
+                />
               )}
             </FormField>
           )}
