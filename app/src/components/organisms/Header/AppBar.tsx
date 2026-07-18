@@ -375,6 +375,15 @@ export const AppBar = () => {
               t("HeaderMenu.OrdinaryLeastSquares"),
             ),
         },
+        {
+          id: "weighted-least-squares",
+          label: t("HeaderMenu.WeightedLeastSquares"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "WLSRegressionForm",
+              t("HeaderMenu.WeightedLeastSquares"),
+            ),
+        },
       ],
     },
     {

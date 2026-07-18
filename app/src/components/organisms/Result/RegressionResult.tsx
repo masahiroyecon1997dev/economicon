@@ -206,7 +206,11 @@ export const RegressionResult = ({
         title={t("RegressionResult.Coefficients")}
         titleAction={
           <ExplainerButton
-            explainerKey="ols_result_coefficients"
+            explainerKey={
+              result.modelType === "wls"
+                ? "wls_result_coefficients"
+                : "ols_result_coefficients"
+            }
             aria-label={t("RegressionResult.CoefficientsExplainerLabel")}
             data-testid="coefficients-explainer-btn"
           >
@@ -314,7 +318,11 @@ export const RegressionResult = ({
         title={t("RegressionResult.ModelStatistics")}
         titleAction={
           <ExplainerButton
-            explainerKey="ols_result_model_stats"
+            explainerKey={
+              result.modelType === "wls"
+                ? "wls_result_model_stats"
+                : "ols_result_model_stats"
+            }
             aria-label={t("RegressionResult.ModelStatisticsExplainerLabel")}
             data-testid="model-stats-explainer-btn"
           >

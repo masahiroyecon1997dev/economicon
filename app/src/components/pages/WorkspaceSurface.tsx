@@ -3,6 +3,7 @@ import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnal
 import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 import { LogitRegressionForm } from "@/components/organisms/Form/LogitRegressionForm";
 import { ProbitRegressionForm } from "@/components/organisms/Form/ProbitRegressionForm";
+import { WLSRegressionForm } from "@/components/organisms/Form/WLSRegressionForm";
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
 import { AsymptoticNormality } from "@/components/pages/AsymptoticNormality";
@@ -50,6 +51,7 @@ type StaticWorkFeatureKey = Exclude<
   | "DescriptiveStatistics"
   | "StatisticalTestView"
   | "LinearRegressionForm"
+  | "WLSRegressionForm"
   | "LogitRegressionForm"
   | "ProbitRegressionForm"
   | "GroupStatistics"
@@ -365,6 +367,10 @@ export const WorkspaceSurface = () => {
       return (
         <LinearRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
       );
+    }
+
+    if (tab.featureKey === "WLSRegressionForm") {
+      return <WLSRegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
     }
 
     if (tab.featureKey === "LogitRegressionForm") {

@@ -24,7 +24,10 @@ import {
   buildCaughtErrorMessage,
   buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
-import { createFieldError } from "@/lib/utils/formHelpers";
+import {
+  createFieldError,
+  extractFieldError,
+} from "@/lib/utils/formHelpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
@@ -36,12 +39,13 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
-type RegressionMethod = "ols" | "logit" | "probit";
+type RegressionMethod = "ols" | "logit" | "probit" | "wls";
 
 type RegressionAnalysis =
   | { method: "ols" }
   | { method: "logit"; calculateMarginalEffects: boolean }
-  | { method: "probit"; calculateMarginalEffects: boolean };
+  | { method: "probit"; calculateMarginalEffects: boolean }
+  | { method: "wls" };
 
 type CommonRegressionFormProps = {
   onCancel: () => void;
@@ -51,8 +55,8 @@ type CommonRegressionFormProps = {
 };
 
 const buildDefaultAnalysis = (method: RegressionMethod): RegressionAnalysis => {
-  if (method === "ols") {
-    return { method: "ols" };
+  if (method === "ols" || method === "wls") {
+    return { method };
   }
 
   return {
@@ -64,6 +68,10 @@ const buildDefaultAnalysis = (method: RegressionMethod): RegressionAnalysis => {
 const buildAnalysisSchema = (method: RegressionMethod) => {
   if (method === "ols") {
     return z.object({ method: z.literal("ols") });
+  }
+
+  if (method === "wls") {
+    return z.object({ method: z.literal("wls") });
   }
 
   if (method === "logit") {
@@ -110,6 +118,7 @@ export const CommonRegressionForm = ({
       description: "",
       dependentVariable: "",
       explanatoryVariables: [] as string[],
+      weightsColumn: "",
       hasConst: true,
       missingValueHandling: MissingValueHandlingType.remove as
         | "ignore"
@@ -129,6 +138,10 @@ export const CommonRegressionForm = ({
         explanatoryVariables: z
           .array(z.string().min(1))
           .min(1, t("ValidationMessages.ExplanatoryVariablesRequired")),
+        weightsColumn:
+          method === "wls"
+            ? z.string().min(1, t("ValidationMessages.WeightsColumnRequired"))
+            : z.string(),
         hasConst: z.boolean(),
         missingValueHandling: z.enum(["ignore", "remove", "error"] as const),
         analysis: buildAnalysisSchema(method),
@@ -147,7 +160,10 @@ export const CommonRegressionForm = ({
           hasConst: value.hasConst,
           missingValueHandling:
             value.missingValueHandling as MissingValueHandlingType,
-          analysis: value.analysis,
+          analysis:
+            value.analysis.method === "wls"
+              ? { method: "wls" as const, weightsColumn: value.weightsColumn }
+              : value.analysis,
           standardError: value.standardError,
         });
 
@@ -208,6 +224,7 @@ export const CommonRegressionForm = ({
     form.setFieldValue("tableName", value);
     form.setFieldValue("dependentVariable", "");
     form.setFieldValue("explanatoryVariables", []);
+    form.setFieldValue("weightsColumn", "");
   };
 
   return (
@@ -217,11 +234,13 @@ export const CommonRegressionForm = ({
       titleAction={
         <ExplainerButton
           explainerKey={
-            method === "ols"
-              ? "ols_method"
-              : method === "logit"
-                ? "logit_model"
-                : "probit_model"
+            method === "wls"
+              ? "wls_method"
+              : method === "ols"
+                ? "ols_method"
+                : method === "logit"
+                  ? "logit_model"
+                  : "probit_model"
           }
           aria-label={t("LinearRegressionForm.MethodExplainerButtonLabel")}
           data-testid={`${method}-method-explainer-btn`}
@@ -355,6 +374,50 @@ export const CommonRegressionForm = ({
                       />
                     )}
                   </form.Field>
+
+                  {method === "wls" && (
+                    <>
+                      <div className="border-t border-border-color" />
+                      <form.Field
+                        name="weightsColumn"
+                        validators={{
+                          onChange: ({ value }) => {
+                            const dep =
+                              form.store.state.values.dependentVariable;
+                            if (value && dep && value === dep) {
+                              return t(
+                                "ValidationMessages.WeightsColumnSameAsDependent",
+                              );
+                            }
+                            return undefined;
+                          },
+                        }}
+                      >
+                        {(field) => (
+                          <FormField
+                            label={t("WLSRegressionForm.WeightsColumn")}
+                            htmlFor="wls-weights-column"
+                            error={extractFieldError(field.state.meta.errors)}
+                          >
+                            <SearchableSelect
+                              id="wls-weights-column"
+                              value={field.state.value}
+                              onValueChange={(v) => field.handleChange(v)}
+                              disabled={isSubmitting}
+                              placeholder={t(
+                                "LinearRegressionForm.SelectVariable",
+                              )}
+                              error={extractFieldError(field.state.meta.errors)}
+                              options={columnList.map((col) => ({
+                                value: col.name,
+                                label: col.name,
+                              }))}
+                            />
+                          </FormField>
+                        )}
+                      </form.Field>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -473,9 +536,11 @@ export const CommonRegressionForm = ({
                             <SelectItem value="HC1">HC1</SelectItem>
                             <SelectItem value="HC2">HC2</SelectItem>
                             <SelectItem value="HC3">HC3</SelectItem>
-                            <SelectItem value="hac">
-                              {t("LinearRegressionForm.StandardError_hac")}
-                            </SelectItem>
+                            {method !== "wls" && (
+                              <SelectItem value="hac">
+                                {t("LinearRegressionForm.StandardError_hac")}
+                              </SelectItem>
+                            )}
                             <SelectItem value="cluster">
                               {t("LinearRegressionForm.StandardError_cluster")}
                             </SelectItem>
@@ -601,10 +666,13 @@ export const CommonRegressionForm = ({
                     )}
                   </form.Field>
 
-                  {method !== "ols" && (
+                  {method !== "ols" && method !== "wls" && (
                     <form.Field name="analysis">
                       {(field) => {
-                        if (field.state.value.method === "ols") {
+                        if (
+                          field.state.value.method === "ols" ||
+                          field.state.value.method === "wls"
+                        ) {
                           return null;
                         }
 
@@ -627,7 +695,11 @@ export const CommonRegressionForm = ({
                                 }
                                 onChange={(e) => {
                                   const prev = field.state.value;
-                                  if (prev.method === "ols") return;
+                                  if (
+                                    prev.method === "ols" ||
+                                    prev.method === "wls"
+                                  )
+                                    return;
                                   field.handleChange({
                                     ...prev,
                                     calculateMarginalEffects:

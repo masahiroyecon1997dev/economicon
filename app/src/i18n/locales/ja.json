@@ -85,6 +85,7 @@
     "LinearRegressionMenu": "線形回帰",
     "NonlinearRegressionMenu": "非線形回帰",
     "OrdinaryLeastSquares": "最小二乗法",
+    "WeightedLeastSquares": "加重最小二乗法（WLS）",
     "LogitAnalysis": "ロジットモデル",
     "ProbitAnalysis": "プロビットモデル",
     "Visualization": "可視化",
@@ -555,6 +556,12 @@
     "Title": "プロビットモデル",
     "Description": "データを選択し、被説明変数と説明変数を指定してプロビットモデルを推定します。平均限界効果は既定で有効です。"
   },
+  "WLSRegressionForm": {
+    "Title": "加重最小二乗法（WLS）",
+    "Description": "観測値ごとの重み（1/σ²ᵢ）を指定して WLS を実行します。不均一分散の構造が既知の場合に OLS より効率的な推定が得られます。",
+    "WeightsColumn": "重み列",
+    "WeightsColumnDescription": "各観測値の重み（1/σ²ᵢ）を格納した数値列"
+  },
   "RegressionResult": {
     "AnalysisSummary": "分析概要",
     "DataName": "データ名",
@@ -729,6 +736,8 @@
     "NumRowsMoreThan0": "行数は1以上で入力してください。",
     "DependentVariableRequired": "被説明変数を選択してください",
     "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください",
+    "WeightsColumnRequired": "重み列を選択してください",
+    "WeightsColumnSameAsDependent": "重み列と被説明変数に同じ列は指定できません",
     "NewColumnNameRequired": "新しいカラム名を入力してください。",
     "CalculationExpressionRequired": "計算式を入力してください。",
     "RandomSeedRange": "乱数シードは0以上1億以下の整数を入力してください。",

@@ -62,6 +62,8 @@ export type LinearRegressionResultType = {
   dependentVariable: string;
   explanatoryVariables: string[];
   regressionResult: string;
+  /** モデル種別（ols / wls / logit / probit 等）。AnalysisResultDetail.modelType に対応 */
+  modelType?: string | null;
   parameters: Array<{
     variable: string;
     coefficient: number;

@@ -28,6 +28,7 @@ export type WorkFeatureKey =
   | "ConfidenceIntervalView"
   | "StatisticalTestView"
   | "LinearRegressionForm"
+  | "WLSRegressionForm"
   | "LogitRegressionForm"
   | "ProbitRegressionForm"
   | "CorrelationMatrix"

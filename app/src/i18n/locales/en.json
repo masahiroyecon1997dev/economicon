@@ -85,6 +85,7 @@
     "LinearRegressionMenu": "Linear Regression",
     "NonlinearRegressionMenu": "Nonlinear Regression",
     "OrdinaryLeastSquares": "Ordinary Least Squares",
+    "WeightedLeastSquares": "Weighted Least Squares (WLS)",
     "LogitAnalysis": "Logit Model",
     "ProbitAnalysis": "Probit Model",
     "Visualization": "Visualization",
@@ -555,6 +556,12 @@
     "Title": "Probit Model",
     "Description": "Select data, assign the dependent and explanatory variables, then estimate a probit model. Average marginal effects are enabled by default."
   },
+  "WLSRegressionForm": {
+    "Title": "Weighted Least Squares (WLS)",
+    "Description": "Specify a column of observation weights (1/σ²ᵢ) and run WLS. When the heteroskedastic structure is known, WLS yields more efficient estimates than OLS.",
+    "WeightsColumn": "Weights Column",
+    "WeightsColumnDescription": "Numeric column containing per-observation weights (1/σ²ᵢ)"
+  },
   "RegressionResult": {
     "AnalysisSummary": "Analysis Summary",
     "DataName": "Data Name",
@@ -729,6 +736,8 @@
     "NumRowsMoreThan0": "The number of rows must be at least 1.",
     "DependentVariableRequired": "Please select a dependent variable.",
     "ExplanatoryVariablesRequired": "Please select at least one explanatory variable.",
+    "WeightsColumnRequired": "Please select a weights column.",
+    "WeightsColumnSameAsDependent": "The weights column cannot be the same as the dependent variable.",
     "NewColumnNameRequired": "Please enter a new column name.",
     "CalculationExpressionRequired": "Please enter a calculation expression.",
     "RandomSeedRange": "Random seed must be an integer between 0 and 100,000,000.",

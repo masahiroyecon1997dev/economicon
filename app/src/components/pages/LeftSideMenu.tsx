@@ -219,6 +219,7 @@ export const LeftSideMenu = () => {
     return {
       ...(detail.resultData as unknown as LinearRegressionResultType),
       resultId: detail.id,
+      modelType: detail.modelType,
     };
   };
 

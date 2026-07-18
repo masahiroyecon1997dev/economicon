@@ -267,6 +267,38 @@ $$
   // ---------------------------------------------------------------------------
   // OLS regression
   // ---------------------------------------------------------------------------
+  wls_method: {
+    title: "What Is Weighted Least Squares (WLS)?",
+    body: `Weighted Least Squares (WLS) is an extension of OLS that assigns a weight w\u1d62 = 1/\u03c3\u00b2\u1d62 to each observation so that observations with smaller variance receive greater influence in estimation. When the heteroskedastic structure is known (or reliably estimated), WLS yields the Best Linear Unbiased Estimator (BLUE) under the Gauss\u2013Markov theorem.
+
+Under OLS with heteroskedasticity, coefficients remain unbiased but lose minimum variance (BLUE), and the classical t/F tests are incorrect. WLS corrects for the known variance structure by scaling down the influence of high-variance observations.
+
+### Setting Up the Weights Column
+
+Specify a numeric column containing w\u1d62 = 1/\u03c3\u00b2\u1d62 for each row. Common strategies:
+
+\u2460 Variance proportional to a known regressor: if Var(u\u1d62) \u221d x\u1d62, set w\u1d62 = 1/x\u1d62.
+
+\u2461 Two-step FGLS: first run OLS, then regress squared residuals on predictors to estimate \u03c3\u00b2\u1d62, and use the inverse as weights.
+
+\u2462 Known group variances: use the inverse of the sample variance for each group.
+
+**Important: the weights column must contain strictly positive numeric values. Non-positive or missing values will cause an API error.**
+
+$$
+\\hat{\\beta}_{WLS} = (X'WX)^{-1}X'Wy, \\quad W = \\mathrm{diag}(w_1, \\ldots, w_n)
+$$
+
+### WLS vs OLS vs Robust Standard Errors
+
+| Method | Assumption | BLUE | Note |
+|---|---|---|---|
+| OLS + Classical SE | Homoscedasticity | Under homoscedasticity only | Simplest |
+| OLS + HC SE | None required | No | Unbiased estimates, valid inference |
+| WLS (known structure) | Var \u221d 1/w\u1d62 | **Yes** | Most efficient when correctly specified |
+
+If the variance structure is uncertain, OLS with HC robust standard errors is the safer default. WLS outperforms OLS only when the weights are correctly specified.`,
+  },
   ols_method: {
     title: "What Is Ordinary Least Squares (OLS)?",
     body: `Ordinary Least Squares (OLS) estimates the coefficient vector β in the linear model y = Xβ + u by minimizing the sum of squared residuals Σ(yᵢ − xᵢ'β)². It is the most widely used estimation method in econometrics.
@@ -365,6 +397,44 @@ $$
 **Assumptions**
 
 ① Independence across clusters is required (arbitrary within-cluster correlation is permitted). ② The number of clusters G must be sufficiently large — the rule of thumb is G ≥ 50. With few clusters, standard errors are downward-biased and t-statistics are inflated. ③ When G is small (< 50), use Wild Cluster Bootstrap for inference. ④ The clustering level should match the unit at which treatment is assigned or at which correlation naturally arises.`,
+  },
+  wls_result_coefficients: {
+    title: "How to Read the WLS Coefficient Table",
+    body: `The WLS coefficient table has the same structure as OLS (coef, std err, t-stat, p-value, 95% CI), but all estimates are derived from the **weighted least-squares criterion**.
+
+[coef (Coefficient)] The estimated change in y per unit increase in x\u2c7c, holding other predictors constant. Under correctly specified weights, these estimates are unbiased and more efficient than OLS.
+
+[std err (Standard Error)] The WLS-based standard error. When weights are correctly specified, std err is smaller than OLS (efficiency gain). If the weights are misspecified, std err can be misleadingly small.
+
+[t-stat / p-value / 95% CI] Interpreted the same as in OLS. A large sample approximation of coef \u00b1 1.96 \u00d7 std err is used for the 95% CI.
+
+### WLS-Specific Cautions
+
+**Misspecified weights introduce bias risk**: even though the coefficient is still unbiased, an incorrect variance structure leads to incorrect standard errors and invalid inference. If the variance structure is uncertain, consider adding HC robust standard errors on top of WLS.
+
+**Weights must be strictly positive**: the specified column must contain values > 0 in every row used for estimation. Zero, negative, or missing weights will cause an API error.`,
+  },
+  wls_result_model_stats: {
+    title: "How to Read WLS Model Statistics",
+    body: `WLS model statistics follow the same layout as OLS (R\u00b2, Adjusted R\u00b2, F-stat, Log-Likelihood, Observations), but the **R\u00b2 is a \u2018weighted R\u00b2\u2019** based on the weighted residual sum of squares.
+
+### Weighted R\u00b2
+
+$$
+R^2_{WLS} = 1 - \\frac{\\sum_i w_i (y_i - \\hat{y}_i)^2}{\\sum_i w_i (y_i - \\bar{y}_w)^2}, \\quad \\bar{y}_w = \\frac{\\sum_i w_i y_i}{\\sum_i w_i}
+$$
+
+When all weights equal 1 (i.e., OLS), this reduces to the ordinary R\u00b2. Because high-variance observations receive low weights, the weighted R\u00b2 can differ substantially from the unweighted OLS R\u00b2 on the same data.
+
+### Other Statistics
+
+[F-stat / F-prob] Test that all slope coefficients are jointly zero. Interpreted the same as OLS. Due to WLS efficiency gains, F values tend to be higher than OLS on the same data.
+
+[Log-Likelihood] The maximum-likelihood value for the WLS model. Used to compute AIC/BIC for model comparison.
+
+### Caution When Comparing WLS and OLS
+
+Do not directly compare the WLS R\u00b2 to the OLS R\u00b2 on the same data\u2014their definitions differ. The advantage of WLS lies in **smaller coefficient standard errors (efficiency) and correct inference**, not in a higher R\u00b2.`,
   },
   // ---------------------------------------------------------------------------
   // Reading regression output
