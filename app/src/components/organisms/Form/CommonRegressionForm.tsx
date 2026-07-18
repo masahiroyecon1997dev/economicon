@@ -9,6 +9,7 @@ import {
   regressionBodyResultNameMax,
 } from "@/api/zod/analysis/analysis";
 import { InputText } from "@/components/atoms/Input/InputText";
+import { SearchableSelect } from "@/components/atoms/Input/SearchableSelect";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
@@ -302,7 +303,7 @@ export const CommonRegressionForm = ({
                           "ValidationMessages.DependentVariableRequired",
                         )}
                       >
-                        <Select
+                        <SearchableSelect
                           id={`${method}-dependent-variable`}
                           value={field.state.value}
                           onValueChange={(v) => {
@@ -322,13 +323,11 @@ export const CommonRegressionForm = ({
                             field.state.meta.errors,
                             "ValidationMessages.DependentVariableRequired",
                           )}
-                        >
-                          {columnList.map((col) => (
-                            <SelectItem key={col.name} value={col.name}>
-                              {col.name}
-                            </SelectItem>
-                          ))}
-                        </Select>
+                          options={columnList.map((col) => ({
+                            value: col.name,
+                            label: col.name,
+                          }))}
+                        />
                       </FormField>
                     )}
                   </form.Field>

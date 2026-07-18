@@ -6,8 +6,7 @@ import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { AnalysisOptionsCard } from "@/components/molecules/Card/AnalysisOptionsCard";
 import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
-import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
-import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
+import { TagCombobox } from "@/components/molecules/Field/TagCombobox";
 import { FormField } from "@/components/molecules/Form/FormField";
 import {
   AnalysisEmptyState,
@@ -308,20 +307,6 @@ export const CorrelationMatrix = ({
                 <h2 className="text-sm font-bold leading-tight text-text-heading dark:text-gray-100">
                   {t("CorrelationMatrix.ColumnsLabel")}
                 </h2>
-                {columnList.length > 0 && (
-                  <SelectAllBar
-                    selectAllLabel={t("CorrelationMatrix.SelectAll")}
-                    deselectAllLabel={t("CorrelationMatrix.DeselectAll")}
-                    onSelectAll={() =>
-                      form.setFieldValue(
-                        "columnNames",
-                        columnList.map((c) => c.name),
-                      )
-                    }
-                    onDeselectAll={() => form.setFieldValue("columnNames", [])}
-                    disabled={isSubmitting}
-                  />
-                )}
               </div>
 
               <div className="app-scrollbar min-h-0 flex-1 overflow-y-auto">
@@ -353,18 +338,13 @@ export const CorrelationMatrix = ({
                 ) : (
                   <form.Field name="columnNames">
                     {(field) => (
-                      <CheckboxTagGroup
-                        items={columnList.map((c) => ({
+                      <TagCombobox
+                        options={columnList.map((c) => ({
                           value: c.name,
                           label: c.name,
                         }))}
-                        checked={new Set(field.state.value)}
-                        onToggle={(name) => {
-                          const current = new Set(field.state.value);
-                          if (current.has(name)) current.delete(name);
-                          else current.add(name);
-                          field.handleChange([...current]);
-                        }}
+                        selectedValues={field.state.value}
+                        onMultipleChange={(vals) => field.handleChange(vals)}
                         disabled={isSubmitting}
                         error={tErr(
                           field.state.meta.errors,

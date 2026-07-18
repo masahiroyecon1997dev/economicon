@@ -11,6 +11,7 @@ import {
 } from "@/api/model";
 import { StatisticalTestBody } from "@/api/zod/statistics/statistics";
 import { InputText } from "@/components/atoms/Input/InputText";
+import { SearchableSelect } from "@/components/atoms/Input/SearchableSelect";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
@@ -731,22 +732,20 @@ export const StatisticalTestView = ({
                             hint={t("AnalysisEmptyState.NoEligibleColumnsHint")}
                           />
                         ) : (
-                          <Select
+                          <SearchableSelect
                             value={sample.columnName}
                             onValueChange={(value) =>
                               handleSampleColumnChange(index, value)
                             }
                             placeholder={t("StatisticalTestView.SelectColumn")}
+                            options={numericColumns.map((column) => ({
+                              value: column.name,
+                              label: column.name,
+                            }))}
                             disabled={
                               sample.tableName === "" || isLoadingColumns
                             }
-                          >
-                            {numericColumns.map((column) => (
-                              <SelectItem key={column.name} value={column.name}>
-                                {column.name}
-                              </SelectItem>
-                            ))}
-                          </Select>
+                          />
                         )}
                       </FormField>
                     </div>

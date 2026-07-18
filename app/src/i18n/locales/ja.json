@@ -48,7 +48,11 @@
     "RandomSeed": "乱数シード",
     "RandomSeedPlaceholder": "省略可（0〜100,000,000）",
     "CalculateMarginalEffects": "平均限界効果を計算",
-    "CalculateMarginalEffectsDescription": "平均限界効果 (AME) を結果に含めます。"
+    "CalculateMarginalEffectsDescription": "平均限界効果 (AME) を結果に含めます。",
+    "AddColumn": "+ 列を追加",
+    "SelectedCount": "{{count}} / {{total}} 列選択中",
+    "SelectAll": "すべて選択",
+    "DeselectAll": "すべて解除"
   },
   "AppBar": {
     "Minimize": "最小化",

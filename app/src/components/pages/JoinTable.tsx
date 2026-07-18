@@ -5,6 +5,7 @@ import {
   createJoinTableBodyJoinTableNameRegExp,
 } from "@/api/zod/table/table";
 import { InputText } from "@/components/atoms/Input/InputText";
+import { SearchableSelect } from "@/components/atoms/Input/SearchableSelect";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { SectionCard } from "@/components/molecules/Card/SectionCard";
@@ -300,33 +301,29 @@ export const JoinTable = () => {
                 key={pair.id}
                 className="grid grid-cols-[1fr_20px_1fr_32px] items-center gap-2"
               >
-                <Select
+                <SearchableSelect
                   value={pair.left}
                   onValueChange={(v) => updateKeyPair(pair.id, "left", v)}
                   placeholder={t("JoinTable.SelectColumn")}
+                  options={leftCols.map((c) => ({
+                    value: c.name,
+                    label: c.name,
+                  }))}
                   disabled={!leftTable || isDisabled}
-                >
-                  {leftCols.map((c) => (
-                    <SelectItem key={c.name} value={c.name}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </Select>
+                />
 
                 <ArrowRight className="h-4 w-4 shrink-0 text-brand-text-main/30" />
 
-                <Select
+                <SearchableSelect
                   value={pair.right}
                   onValueChange={(v) => updateKeyPair(pair.id, "right", v)}
                   placeholder={t("JoinTable.SelectColumn")}
+                  options={rightCols.map((c) => ({
+                    value: c.name,
+                    label: c.name,
+                  }))}
                   disabled={!rightTable || isDisabled}
-                >
-                  {rightCols.map((c) => (
-                    <SelectItem key={c.name} value={c.name}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </Select>
+                />
 
                 <button
                   type="button"
