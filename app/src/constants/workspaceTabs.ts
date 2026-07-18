@@ -51,6 +51,10 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     titleKey: "HeaderMenu.ProbitAnalysis",
   },
   {
+    featureKey: "IVRegressionForm",
+    titleKey: "HeaderMenu.InstrumentalVariables",
+  },
+  {
     featureKey: "CorrelationMatrix",
     titleKey: "HeaderMenu.CorrelationMatrix",
   },

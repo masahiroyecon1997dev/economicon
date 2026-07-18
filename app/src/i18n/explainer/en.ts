@@ -540,4 +540,58 @@ $$
 
 [Choosing among LPM, Logit, and Probit] LPM offers the simplest coefficient interpretation and straightforward compatibility with fixed effects and robust standard errors. Logit/Probit ensure predicted probabilities stay within (0,1) but require reporting AME. In causal inference contexts where the focus is on the average effect rather than distributional fit, LPM is often preferred for its transparency.`,
   },
+  iv_method: {
+    title: "What Is the Instrumental Variables (IV / 2SLS) Method?",
+    size: "lg",
+    body: `Instrumental Variables (IV) estimation is used when explanatory variables are **endogenous** — correlated with the error term. Endogeneity arises from ① omitted variable bias, ② reverse causality, or ③ measurement error, all of which make OLS biased and inconsistent.
+
+An instrument z must satisfy two conditions:
+
+**① Relevance**: z is correlated with the endogenous regressor x (E[z'x] ≠ 0)
+**② Exogeneity / Exclusion Restriction**: z affects y only through x, not directly (E[z'u] = 0)
+
+### How 2SLS Works
+
+**Two-Stage Least Squares (2SLS)** is the most widely used IV estimator.
+
+**First stage**: Regress the endogenous variable x on instruments z to obtain fitted values $\\hat{x}$.
+
+$$\\hat{x} = Z(Z'Z)^{-1}Z'x$$
+
+**Second stage**: Replace x with $\\hat{x}$ in the structural equation and estimate by OLS.
+
+$$\\hat{\\beta}_{2SLS} = (\\hat{X}'\\hat{X})^{-1}\\hat{X}'y$$
+
+The key idea: the first stage extracts only the exogenous variation in x (driven by z), purging the endogenous part. The 2SLS estimator is consistent in large samples (though biased in finite samples).
+
+### Identification Conditions
+
+| Condition | # Instruments | Result |
+|---|---|---|
+| Under-identified | \\|Z\\| < \\|X_{endog}\\| | Not estimable |
+| Exactly identified | \\|Z\\| = \\|X_{endog}\\| | 2SLS only |
+| Over-identified | \\|Z\\| > \\|X_{endog}\\| | 2SLS or GMM valid |
+
+**This app requires the number of instruments ≥ number of endogenous variables.**
+
+### The Weak Instruments Problem
+
+When instruments are only weakly correlated with the endogenous regressor, 2SLS can be severely biased and unstable in finite samples.
+
+The standard diagnostic is the **first-stage F-statistic**. A common rule of thumb is **F > 10** (Stock & Yogo, 2005) as evidence of strong instruments. This value is included in the analysis results.
+
+If the F-statistic is low, reconsider your choice of instruments. Weak instruments can produce estimates worse than OLS.
+
+### 2SLS vs. GMM
+
+**2SLS** assumes homoskedastic errors and is efficient under that assumption. It works well for exactly-identified or over-identified models with homoskedastic errors.
+
+**GMM (Generalized Method of Moments)** uses a weighting matrix to optimally combine the moment conditions and is more efficient than 2SLS when errors are heteroskedastic and the model is over-identified. However, GMM has poorer finite-sample properties in small samples.
+
+Intuitively, GMM "optimally weights the information from multiple instruments." When in doubt, start with 2SLS.
+
+### ⚠️ Risk of Omitting the Constant
+
+Dropping the constant term risks violating the exogeneity condition E[z'u] = 0 by absorbing the intercept into the error term. Unless you have a specific theoretical justification, **always include the constant**.`,
+  },
 } satisfies ExplainerContentMap;

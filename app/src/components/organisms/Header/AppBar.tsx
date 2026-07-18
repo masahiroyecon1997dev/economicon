@@ -430,19 +430,23 @@ export const AppBar = () => {
     //     },
     //   ],
     // },
-    // {
-    //   id: "causal-inference",
-    //   menuName: t("HeaderMenu.CausalInferenceMenu"),
-    //   isOpen: openMenuId === "causal-inference",
-    //   onClose: close,
-    //   items: [
-    //     {
-    //       id: "instrumental-variables",
-    //       label: t("HeaderMenu.InstrumentalVariables"),
-    //       handleSelect: () => {},
-    //     },
-    //   ],
-    // },
+    {
+      id: "causal-inference",
+      menuName: t("HeaderMenu.CausalInferenceMenu"),
+      isOpen: openMenuId === "causal-inference",
+      onClose: close,
+      items: [
+        {
+          id: "instrumental-variables",
+          label: t("HeaderMenu.InstrumentalVariables"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "IVRegressionForm",
+              t("HeaderMenu.InstrumentalVariables"),
+            ),
+        },
+      ],
+    },
   ];
 
   return (
