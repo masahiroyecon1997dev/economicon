@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "fastapi==0.136.3",
+    "fastapi==0.139.0",
     "numpy==2.5.0",
     "polars==1.42.0",
     "pyarrow==24.0.0",
@@ -31,7 +31,7 @@ where = ["."]
 [dependency-groups]
 dev = [
     "coverage==7.14.3",
-    "deptry==0.24.0",
+    "deptry==0.25.1",
     "httpx==0.28.1",
     "palmerpenguins==0.1.6",
     "pip-audit==2.10.1",
@@ -40,7 +40,7 @@ dev = [
     "pytest==9.0.3",
     "pytest-cov==7.1.0",
     "radon==6.0.1",
-    "ruff==0.15.17",
+    "ruff==0.15.20",
     "scikit-learn==1.9.0",
     "wooldridge==0.5.0",
     "pip==26.1.2",
