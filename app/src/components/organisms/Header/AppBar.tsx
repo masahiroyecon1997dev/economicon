@@ -442,6 +442,15 @@ export const AppBar = () => {
           handleSelect: () =>
             handleOpenWorkTab("FERegressionForm", t("HeaderMenu.FixedEffects")),
         },
+        {
+          id: "random-effect",
+          label: t("HeaderMenu.RandomEffects"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "RERegressionForm",
+              t("HeaderMenu.RandomEffects"),
+            ),
+        },
       ],
     },
     {

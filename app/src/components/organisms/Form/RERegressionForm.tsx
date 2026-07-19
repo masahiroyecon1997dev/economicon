@@ -34,11 +34,11 @@ import { z } from "zod";
 
 const TIME_COLUMN_NONE = "";
 
-type FERegressionFormProps = {
+type RERegressionFormProps = {
   onCancel: () => void;
 };
 
-export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
+export const RERegressionForm = ({ onCancel }: RERegressionFormProps) => {
   const { t } = useTranslation();
   const tErr = createFieldError(t);
   const tableList = useTableListStore((state) => state.tableList);
@@ -101,7 +101,7 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
           missingValueHandling:
             value.missingValueHandling as MissingValueHandlingType,
           analysis: {
-            method: "fe" as const,
+            method: "re" as const,
             entityIdColumn: value.entityIdColumn,
             timeColumn:
               value.timeColumn === TIME_COLUMN_NONE ? null : value.timeColumn,
@@ -183,13 +183,13 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
 
   return (
     <PageLayout
-      title={t("FERegressionForm.Title")}
-      description={t("FERegressionForm.Description")}
+      title={t("RERegressionForm.Title")}
+      description={t("RERegressionForm.Description")}
       titleAction={
         <ExplainerButton
           explainerKey="fe_method"
-          aria-label={t("FERegressionForm.MethodExplainerButtonLabel")}
-          data-testid="fe-method-explainer-btn"
+          aria-label={t("RERegressionForm.MethodExplainerButtonLabel")}
+          data-testid="re-method-explainer-btn"
         >
           <HelpCircle className="h-4 w-4" aria-hidden="true" />
         </ExplainerButton>
@@ -208,7 +208,7 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
             void form.handleSubmit();
           }}
           className="flex min-h-0 flex-1 flex-col gap-3"
-          data-testid="fe-regression-form"
+          data-testid="re-regression-form"
         >
           {/* ── データ選択 ── */}
           <div className="shrink-0 rounded-xl border border-border-color bg-white px-3 py-2 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -220,7 +220,7 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                   </label>
                   <div className="flex-1">
                     <Select
-                      id="fe-data-table"
+                      id="re-data-table"
                       value={field.state.value}
                       onValueChange={handleTableSelect}
                       disabled={isSubmitting}
@@ -255,14 +255,14 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                     {(field) => (
                       <FormField
                         label={t("LinearRegressionForm.DependentVariable")}
-                        htmlFor="fe-dependent-variable"
+                        htmlFor="re-dependent-variable"
                         error={tErr(
                           field.state.meta.errors,
                           "ValidationMessages.DependentVariableRequired",
                         )}
                       >
                         <SearchableSelect
-                          id="fe-dependent-variable"
+                          id="re-dependent-variable"
                           value={field.state.value}
                           onValueChange={(v) => {
                             field.handleChange(v);
@@ -332,18 +332,17 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                       {(field) => (
                         <FormField
                           label={t("FERegressionForm.EntityIdColumn")}
-                          htmlFor="fe-entity-id-column"
+                          htmlFor="re-entity-id-column"
                           error={tErr(
                             field.state.meta.errors,
                             "ValidationMessages.EntityIdColumnRequired",
                           )}
                         >
                           <SearchableSelect
-                            id="fe-entity-id-column"
+                            id="re-entity-id-column"
                             value={field.state.value}
                             onValueChange={(v) => {
                               field.handleChange(v);
-                              // 他の変数と重複する場合は除去
                               const currentExp =
                                 form.store.state.values.explanatoryVariables;
                               if (currentExp.includes(v)) {
@@ -387,10 +386,10 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                       {(field) => (
                         <FormField
                           label={t("FERegressionForm.TimeColumn")}
-                          htmlFor="fe-time-column"
+                          htmlFor="re-time-column"
                         >
                           <SearchableSelect
-                            id="fe-time-column"
+                            id="re-time-column"
                             value={field.state.value}
                             onValueChange={(v) => {
                               field.handleChange(v);
@@ -438,8 +437,8 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                 cancelText={t("Common.Cancel")}
                 selectText={
                   isSubmitting
-                    ? t("FERegressionForm.Processing")
-                    : t("FERegressionForm.RunAnalysis")
+                    ? t("RERegressionForm.Processing")
+                    : t("RERegressionForm.RunAnalysis")
                 }
                 onCancel={onCancel}
                 onSelect={() => {}}
@@ -467,7 +466,7 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                               >
                             ).hcType ?? "HC1")
                           : se.method;
-                      return t("FERegressionForm.AdvancedOptionsSummary", {
+                      return t("RERegressionForm.AdvancedOptionsSummary", {
                         se: t(
                           `LinearRegressionForm.StandardError_${seDisplay}`,
                         ),
@@ -498,7 +497,7 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                           <div className="flex items-center gap-1">
                             <label
                               className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                              htmlFor="fe-standard-error-method"
+                              htmlFor="re-standard-error-method"
                             >
                               {t("LinearRegressionForm.StandardErrorMethod")}
                             </label>
@@ -524,7 +523,7 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                             </ExplainerButton>
                           </div>
                           <Select
-                            id="fe-standard-error-method"
+                            id="re-standard-error-method"
                             value={displayMethod}
                             onValueChange={(v) => {
                               if (v === "hac") {
@@ -637,10 +636,10 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                     {(field) => (
                       <FormField
                         label={t("LinearRegressionForm.MissingValueHandling")}
-                        htmlFor="fe-missing-value"
+                        htmlFor="re-missing-value"
                       >
                         <Select
-                          id="fe-missing-value"
+                          id="re-missing-value"
                           value={field.state.value}
                           onValueChange={(v) =>
                             field.handleChange(

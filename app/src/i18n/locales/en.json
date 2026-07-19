@@ -581,6 +581,14 @@
     "RunAnalysis": "Run Analysis",
     "Processing": "Processing..."
   },
+  "RERegressionForm": {
+    "Title": "Random Effects (RE)",
+    "Description": "Runs GLS estimation treating individual effects as random errors. Can identify time-invariant variable effects, but requires individual effects to be uncorrelated with regressors.",
+    "AdvancedOptionsSummary": "SE: {{se}} | Missing: {{missing}}",
+    "MethodExplainerButtonLabel": "View explanation of Random Effects",
+    "RunAnalysis": "Run Analysis",
+    "Processing": "Processing..."
+  },
   "IVRegressionForm": {
     "Title": "Instrumental Variables (IV / 2SLS)",
     "Description": "Remove endogeneity bias by instrumenting endogenous regressors. The number of instruments must be at least equal to the number of endogenous variables.",

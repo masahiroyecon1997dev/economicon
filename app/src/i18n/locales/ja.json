@@ -581,6 +581,14 @@
     "RunAnalysis": "分析実行",
     "Processing": "処理中..."
   },
+  "RERegressionForm": {
+    "Title": "変量効果法（RE）",
+    "Description": "個体効果をランダム誤差として扱い、GLS 推定を実行します。時間不変変数の効果も識別できますが、個体効果と説明変数の独立性が必要です。",
+    "AdvancedOptionsSummary": "標準誤差: {{se}} | 欠損値: {{missing}}",
+    "MethodExplainerButtonLabel": "変量効果法の解説を見る",
+    "RunAnalysis": "分析実行",
+    "Processing": "処理中..."
+  },
   "IVRegressionForm": {
     "Title": "操作変数法（IV / 2SLS）",
     "Description": "内生性のある説明変数を操作変数で除去し、一致推定量を得ます。操作変数の数は内生変数の数以上が必要です。",

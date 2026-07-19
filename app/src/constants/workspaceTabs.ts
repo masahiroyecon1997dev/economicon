@@ -59,6 +59,10 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     titleKey: "HeaderMenu.FixedEffects",
   },
   {
+    featureKey: "RERegressionForm",
+    titleKey: "HeaderMenu.RandomEffects",
+  },
+  {
     featureKey: "CorrelationMatrix",
     titleKey: "HeaderMenu.CorrelationMatrix",
   },

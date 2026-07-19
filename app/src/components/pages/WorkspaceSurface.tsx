@@ -5,6 +5,7 @@ import { IVRegressionForm } from "@/components/organisms/Form/IVRegressionForm";
 import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 import { LogitRegressionForm } from "@/components/organisms/Form/LogitRegressionForm";
 import { ProbitRegressionForm } from "@/components/organisms/Form/ProbitRegressionForm";
+import { RERegressionForm } from "@/components/organisms/Form/RERegressionForm";
 import { WLSRegressionForm } from "@/components/organisms/Form/WLSRegressionForm";
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
@@ -58,6 +59,7 @@ type StaticWorkFeatureKey = Exclude<
   | "ProbitRegressionForm"
   | "IVRegressionForm"
   | "FERegressionForm"
+  | "RERegressionForm"
   | "GroupStatistics"
   | "PlotView"
 >;
@@ -314,6 +316,13 @@ export const WorkspaceSurface = () => {
   };
 
   const renderWorkTab = (tab: WorkspaceWorkTab) => {
+    if (tab.featureKey === "FERegressionForm") {
+      return <FERegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
+    }
+    if (tab.featureKey === "RERegressionForm") {
+      return <RERegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
+    }
+
     if (isCorrelationMatrixWorkTab(tab)) {
       return (
         <CorrelationMatrix
@@ -391,12 +400,6 @@ export const WorkspaceSurface = () => {
 
     if (tab.featureKey === "IVRegressionForm") {
       return <IVRegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
-    }
-    if (tab.featureKey === "FERegressionForm") {
-      return <FERegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
-    }
-    if (tab.featureKey === "FERegressionForm") {
-      return <FERegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
     }
 
     const staticFeatureKey = tab.featureKey as StaticWorkFeatureKey;
