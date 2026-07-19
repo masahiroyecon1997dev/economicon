@@ -80,6 +80,7 @@ export default defineConfig({
     css: true,
     include: [
       "src/components/**/**/*.test.tsx",
+      "src/components/**/**/*.test.ts",
       "src/function/**/*.test.ts",
       "src/lib/**/*.test.ts",
       "src/hooks/**/*.test.ts",

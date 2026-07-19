@@ -17,6 +17,11 @@ import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
 import { VariableSelectorField } from "@/components/molecules/Field/VariableSelectorField";
 import { FormField } from "@/components/molecules/Form/FormField";
 import { AnalysisNoTablesState } from "@/components/organisms/EmptyState/AnalysisNoTablesState";
+import {
+  buildTobitDefaultAnalysis,
+  buildTobitRequestParams,
+  type TobitFormAnalysis,
+} from "@/components/organisms/Form/CommonRegressionForm.utils";
 import { PageLayout } from "@/components/templates/PageLayout";
 import { useTableColumnLoader } from "@/hooks/useTableColumnLoader";
 import { showMessageDialog } from "@/lib/dialog/message";
@@ -43,13 +48,7 @@ type RegressionAnalysis =
   | { method: "logit"; calculateMarginalEffects: boolean }
   | { method: "probit"; calculateMarginalEffects: boolean }
   | { method: "wls" }
-  | {
-      method: "tobit";
-      leftCensoringEnabled: boolean;
-      leftCensoringLimit: number;
-      rightCensoringEnabled: boolean;
-      rightCensoringLimit: number;
-    };
+  | TobitFormAnalysis;
 
 type CommonRegressionFormProps = {
   onCancel: () => void;
@@ -64,13 +63,7 @@ const buildDefaultAnalysis = (method: RegressionMethod): RegressionAnalysis => {
   }
 
   if (method === "tobit") {
-    return {
-      method: "tobit",
-      leftCensoringEnabled: true,
-      leftCensoringLimit: 0,
-      rightCensoringEnabled: false,
-      rightCensoringLimit: 0,
-    };
+    return buildTobitDefaultAnalysis();
   }
 
   return {
@@ -188,15 +181,7 @@ export const CommonRegressionForm = ({
             value.analysis.method === "wls"
               ? { method: "wls" as const, weightsColumn: value.weightsColumn }
               : value.analysis.method === "tobit"
-                ? {
-                    method: "tobit" as const,
-                    leftCensoringLimit: value.analysis.leftCensoringEnabled
-                      ? value.analysis.leftCensoringLimit
-                      : null,
-                    rightCensoringLimit: value.analysis.rightCensoringEnabled
-                      ? value.analysis.rightCensoringLimit
-                      : null,
-                  }
+                ? buildTobitRequestParams(value.analysis)
                 : value.analysis,
           standardError: value.standardError,
         });
