@@ -32,6 +32,7 @@ export type WorkFeatureKey =
   | "LogitRegressionForm"
   | "ProbitRegressionForm"
   | "IVRegressionForm"
+  | "FERegressionForm"
   | "CorrelationMatrix"
   | "GroupStatistics"
   | "PlotView"

@@ -431,6 +431,20 @@ export const AppBar = () => {
     //   ],
     // },
     {
+      id: "panel-data",
+      menuName: t("HeaderMenu.PanelDataMenu"),
+      isOpen: openMenuId === "panel-data",
+      onClose: close,
+      items: [
+        {
+          id: "fixed-effect",
+          label: t("HeaderMenu.FixedEffects"),
+          handleSelect: () =>
+            handleOpenWorkTab("FERegressionForm", t("HeaderMenu.FixedEffects")),
+        },
+      ],
+    },
+    {
       id: "causal-inference",
       menuName: t("HeaderMenu.CausalInferenceMenu"),
       isOpen: openMenuId === "causal-inference",

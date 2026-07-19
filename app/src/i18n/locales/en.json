@@ -90,6 +90,9 @@
     "ProbitAnalysis": "Probit Model",
     "CausalInferenceMenu": "Causal Inference",
     "InstrumentalVariables": "Instrumental Variables (IV)",
+    "PanelDataMenu": "Panel Data Analysis",
+    "FixedEffects": "Fixed Effects (FE)",
+    "RandomEffects": "Random Effects (RE)",
     "Visualization": "Visualization",
     "PlotView": "Plot View",
     "DistributionPreview": "Distribution Preview",
@@ -564,6 +567,20 @@
     "WeightsColumn": "Weights Column",
     "WeightsColumnDescription": "Numeric column containing per-observation weights (1/σ²ᵢ)"
   },
+  "FERegressionForm": {
+    "Title": "Fixed Effects (FE)",
+    "Description": "Runs Within estimation that removes individual fixed effects. Specify an entity ID column and optionally a time column for panel data analysis.",
+    "PanelSettings": "Panel Settings",
+    "EntityIdColumn": "Entity ID Column",
+    "EntityIdColumnDescription": "Column that identifies the panel entity (individual)",
+    "TimeColumn": "Time Column",
+    "TimeColumnDescription": "Column indicating the time dimension (optional)",
+    "TimeColumnNone": "None",
+    "AdvancedOptionsSummary": "SE: {{se}} | Missing: {{missing}}",
+    "MethodExplainerButtonLabel": "View explanation of Fixed Effects",
+    "RunAnalysis": "Run Analysis",
+    "Processing": "Processing..."
+  },
   "IVRegressionForm": {
     "Title": "Instrumental Variables (IV / 2SLS)",
     "Description": "Remove endogeneity bias by instrumenting endogenous regressors. The number of instruments must be at least equal to the number of endogenous variables.",
@@ -612,7 +629,15 @@
     "NA": "N/A",
     "QuickCopyMd": "Copy as Markdown",
     "OutputDialog": "Export...",
-    "AddDiagnosticColumns": "Add Residuals/Fitted"
+    "AddDiagnosticColumns": "Add Residuals/Fitted",
+    "PanelModelStatistics": "Panel Model Statistics",
+    "PanelModelStatisticsExplainerLabel": "View explanation of panel model statistics",
+    "R2Within": "Within R²",
+    "R2Between": "Between R²",
+    "R2Overall": "Overall R²",
+    "NEntities": "Entities",
+    "FPooledStatistic": "Pooled F-stat",
+    "FPooledPValue": "Pooled F p-value"
   },
   "AddDiagnosticColumns": {
     "Title": "Add Residuals / Fitted Values",
@@ -759,6 +784,7 @@
     "WeightsColumnSameAsDependent": "The weights column cannot be the same as the dependent variable.",
     "EndogenousVariablesRequired": "Please select at least one endogenous variable",
     "InstrumentalVariablesRequired": "Please select at least one instrumental variable",
+    "EntityIdColumnRequired": "Please select an entity ID column",
     "NewColumnNameRequired": "Please enter a new column name.",
     "CalculationExpressionRequired": "Please enter a calculation expression.",
     "RandomSeedRange": "Random seed must be an integer between 0 and 100,000,000.",

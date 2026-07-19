@@ -90,6 +90,9 @@
     "ProbitAnalysis": "プロビットモデル",
     "CausalInferenceMenu": "因果推論",
     "InstrumentalVariables": "操作変数法（IV）",
+    "PanelDataMenu": "パネルデータ分析",
+    "FixedEffects": "固定効果法（FE）",
+    "RandomEffects": "変量効果法（RE）",
     "Visualization": "可視化",
     "PlotView": "プロットビュー",
     "DistributionPreview": "分布プレビュー",
@@ -564,6 +567,20 @@
     "WeightsColumn": "重み列",
     "WeightsColumnDescription": "各観測値の重み（1/σ²ᵢ）を格納した数値列"
   },
+  "FERegressionForm": {
+    "Title": "固定効果法（FE）",
+    "Description": "個体固定効果を除去した Within 推定を実行します。個体IDと時間列を指定してパネルデータを分析します。",
+    "PanelSettings": "パネル設定",
+    "EntityIdColumn": "個体ID列",
+    "EntityIdColumnDescription": "パネルの個体（エンティティ）を識別する列",
+    "TimeColumn": "時間列",
+    "TimeColumnDescription": "時系列方向を示す列（省略可）",
+    "TimeColumnNone": "指定なし",
+    "AdvancedOptionsSummary": "標準誤差: {{se}} | 欠損値: {{missing}}",
+    "MethodExplainerButtonLabel": "固定効果法の解説を見る",
+    "RunAnalysis": "分析実行",
+    "Processing": "処理中..."
+  },
   "IVRegressionForm": {
     "Title": "操作変数法（IV / 2SLS）",
     "Description": "内生性のある説明変数を操作変数で除去し、一致推定量を得ます。操作変数の数は内生変数の数以上が必要です。",
@@ -612,7 +629,15 @@
     "NA": "N/A",
     "QuickCopyMd": "Markdownをクリップボードにコピー",
     "OutputDialog": "出力...",
-    "AddDiagnosticColumns": "残差/予測値を追加"
+    "AddDiagnosticColumns": "残差/予測値を追加",
+    "PanelModelStatistics": "パネルモデル統計量",
+    "PanelModelStatisticsExplainerLabel": "パネルモデル統計量の説明を見る",
+    "R2Within": "Within R²",
+    "R2Between": "Between R²",
+    "R2Overall": "Overall R²",
+    "NEntities": "エンティティ数",
+    "FPooledStatistic": "プールドF統計量",
+    "FPooledPValue": "プールドF p値"
   },
   "AddDiagnosticColumns": {
     "Title": "残差/予測値を追加",
@@ -759,6 +784,7 @@
     "WeightsColumnSameAsDependent": "重み列と被説明変数に同じ列は指定できません",
     "EndogenousVariablesRequired": "内生変数を1つ以上選択してください",
     "InstrumentalVariablesRequired": "操作変数を1つ以上選択してください",
+    "EntityIdColumnRequired": "個体ID列を選択してください",
     "NewColumnNameRequired": "新しいカラム名を入力してください。",
     "CalculationExpressionRequired": "計算式を入力してください。",
     "RandomSeedRange": "乱数シードは0以上1億以下の整数を入力してください。",

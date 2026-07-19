@@ -96,6 +96,15 @@ export type LinearRegressionResultType = {
     lrStatistic?: number;
     lrDf?: number;
     lrPValue?: number;
+    /** パネル固定効果・変量効果モデル固有 */
+    nEntities?: number;
+    R2Within?: number;
+    R2Between?: number;
+    R2Overall?: number;
+    fPooled?: {
+      statistic: number;
+      pValue: number;
+    };
   };
 };
 

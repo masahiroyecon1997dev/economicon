@@ -540,6 +540,61 @@ $$
 
 [Choosing among LPM, Logit, and Probit] LPM offers the simplest coefficient interpretation and straightforward compatibility with fixed effects and robust standard errors. Logit/Probit ensure predicted probabilities stay within (0,1) but require reporting AME. In causal inference contexts where the focus is on the average effect rather than distributional fit, LPM is often preferred for its transparency.`,
   },
+  fe_method: {
+    title: "What Is the Fixed Effects (FE) Method?",
+    size: "lg",
+    body: `Fixed Effects (FE) estimation is used with **panel data** (repeated observations of the same units over time) to remove time-invariant unobserved heterogeneity that may be correlated with the regressors.
+
+The data-generating process for unit $i$ at time $t$ is:
+
+$$y_{it} = \\alpha_i + X_{it}\\beta + \\varepsilon_{it}$$
+
+$\\alpha_i$ is the individual fixed effect — a unit-specific intercept that captures all time-invariant characteristics of unit $i$. If $\\alpha_i$ is correlated with $X_{it}$, OLS is inconsistent. FE eliminates this problem.
+
+### How Within Estimation Works
+
+The FE (Within) estimator **demeans each variable within each unit** — subtracting the individual-level time average:
+
+$$\\tilde{y}_{it} = y_{it} - \\bar{y}_i, \\quad \\tilde{X}_{it} = X_{it} - \\bar{X}_i$$
+
+Applying OLS to the demeaned data eliminates $\\alpha_i$ and yields a consistent estimator. Since FE uses only **within-unit variation over time**, **the effects of time-invariant variables (e.g., gender, country) cannot be identified**.
+
+### Within R², Between R², and Overall R²
+
+| Statistic | Meaning |
+|---|---|
+| **Within R²** | How well the model explains variation within each unit over time (the primary fit measure for FE) |
+| **Between R²** | How well cross-unit averages are explained |
+| **Overall R²** | Proportion of total variance explained |
+
+**Within R² is the key fit measure for FE models.** A low Between R² is not a concern since FE estimation is entirely based on within-unit variation.
+
+### Pooled F-test (Test for Individual Effects)
+
+Tests whether individual effects are jointly zero ($H_0$: all $\\alpha_i$ are equal). A **small p-value** suggests that fixed effects are significant and FE is preferred over pooled OLS.
+
+### FE vs. RE: The Hausman Test
+
+| | Fixed Effects (FE) | Random Effects (RE) |
+|---|---|---|
+| Assumption on $\\alpha_i$ | Can be correlated with $X_{it}$ | Must be uncorrelated with $X_{it}$ |
+| Time-invariant variables | Not identified | Can be identified |
+| Consistency | Always | Only if correctly specified |
+| Efficiency | Less efficient if RE is correct | More efficient if RE is correct |
+
+Use the **Hausman test** ($H_0$: RE is correct) to choose between FE and RE. If you reject $H_0$, use FE.
+
+### Choosing Standard Errors
+
+| Method | Use when |
+|---|---|
+| Unadjusted | Homoskedastic, no serial correlation |
+| Robust | Heteroskedastic errors |
+| **Clustered** | Serial correlation within units (most recommended for panel data) |
+| HAC (kernel) | Both serial correlation and heteroskedasticity |
+
+For FE models, **clustered standard errors** (clustering by the entity column) are generally recommended, since error terms within the same unit are likely correlated over time. Using uncorrected standard errors can lead to underestimated standard errors.`,
+  },
   iv_method: {
     title: "What Is the Instrumental Variables (IV / 2SLS) Method?",
     size: "lg",

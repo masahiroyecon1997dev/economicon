@@ -55,6 +55,10 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     titleKey: "HeaderMenu.InstrumentalVariables",
   },
   {
+    featureKey: "FERegressionForm",
+    titleKey: "HeaderMenu.FixedEffects",
+  },
+  {
     featureKey: "CorrelationMatrix",
     titleKey: "HeaderMenu.CorrelationMatrix",
   },

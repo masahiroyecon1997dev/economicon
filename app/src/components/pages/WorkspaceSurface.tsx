@@ -1,5 +1,6 @@
 import type { AnalysisResultDetail } from "@/api/model";
 import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnalysisResultDialog";
+import { FERegressionForm } from "@/components/organisms/Form/FERegressionForm";
 import { IVRegressionForm } from "@/components/organisms/Form/IVRegressionForm";
 import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 import { LogitRegressionForm } from "@/components/organisms/Form/LogitRegressionForm";
@@ -56,6 +57,7 @@ type StaticWorkFeatureKey = Exclude<
   | "LogitRegressionForm"
   | "ProbitRegressionForm"
   | "IVRegressionForm"
+  | "FERegressionForm"
   | "GroupStatistics"
   | "PlotView"
 >;
@@ -389,6 +391,12 @@ export const WorkspaceSurface = () => {
 
     if (tab.featureKey === "IVRegressionForm") {
       return <IVRegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
+    }
+    if (tab.featureKey === "FERegressionForm") {
+      return <FERegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
+    }
+    if (tab.featureKey === "FERegressionForm") {
+      return <FERegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
     }
 
     const staticFeatureKey = tab.featureKey as StaticWorkFeatureKey;
