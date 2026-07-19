@@ -88,6 +88,7 @@
     "WeightedLeastSquares": "加重最小二乗法（WLS）",
     "LogitAnalysis": "ロジットモデル",
     "ProbitAnalysis": "プロビットモデル",
+    "TobitAnalysis": "トービットモデル",
     "CausalInferenceMenu": "因果推論",
     "InstrumentalVariables": "操作変数法（IV）",
     "PanelDataMenu": "パネルデータ分析",
@@ -560,6 +561,23 @@
   "ProbitRegressionForm": {
     "Title": "プロビットモデル",
     "Description": "データを選択し、被説明変数と説明変数を指定してプロビットモデルを推定します。平均限界効果は既定で有効です。"
+  },
+  "TobitRegressionForm": {
+    "Title": "トービットモデル",
+    "Description": "データを選択し、被説明変数と説明変数を指定してトービットモデルを推定します。下限・上限で打ち切られた被説明変数（非負の支出額など）に適したモデルです。",
+    "CensoringLimits": "打ち切り設定",
+    "LeftCensoring": "左側打ち切り値（下限）",
+    "RightCensoring": "右側打ち切り値（上限）"
+  },
+  "TobitDiagnostics": {
+    "Title": "診断統計量（Tobit固有）",
+    "LeftCensoringLimit": "左側打ち切り値",
+    "RightCensoringLimit": "右側打ち切り値",
+    "LRTest": "層度比検定（定数のみモデル対比）",
+    "WaldTest": "Wald 検定",
+    "TestStatistic": "検定統計量",
+    "PValue": "p 値",
+    "DF": "自由度"
   },
   "WLSRegressionForm": {
     "Title": "加重最小二乗法（WLS）",

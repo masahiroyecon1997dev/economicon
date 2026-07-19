@@ -410,6 +410,15 @@ export const AppBar = () => {
               t("HeaderMenu.ProbitAnalysis"),
             ),
         },
+        {
+          id: "tobit",
+          label: t("HeaderMenu.TobitAnalysis"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "TobitRegressionForm",
+              t("HeaderMenu.TobitAnalysis"),
+            ),
+        },
       ],
     },
     // {

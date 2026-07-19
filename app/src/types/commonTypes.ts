@@ -106,6 +106,22 @@ export type LinearRegressionResultType = {
       pValue: number;
     };
   };
+  diagnostics?: {
+    censoringLimits?: { left: number | null; right: number | null } | null;
+    sigma?: number | null;
+    waldTest?: {
+      statistic: number;
+      pValue: number;
+      df: number;
+      description: string;
+    } | null;
+    lrTest?: {
+      statistic: number;
+      pValue: number;
+      df: number;
+      description: string;
+    } | null;
+  } | null;
 };
 
 export type TauriFile = File & { path: string };

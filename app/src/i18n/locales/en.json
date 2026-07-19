@@ -88,6 +88,7 @@
     "WeightedLeastSquares": "Weighted Least Squares (WLS)",
     "LogitAnalysis": "Logit Model",
     "ProbitAnalysis": "Probit Model",
+    "TobitAnalysis": "Tobit Model",
     "CausalInferenceMenu": "Causal Inference",
     "InstrumentalVariables": "Instrumental Variables (IV)",
     "PanelDataMenu": "Panel Data Analysis",
@@ -560,6 +561,23 @@
   "ProbitRegressionForm": {
     "Title": "Probit Model",
     "Description": "Select data, assign the dependent and explanatory variables, then estimate a probit model. Average marginal effects are enabled by default."
+  },
+  "TobitRegressionForm": {
+    "Title": "Tobit Model",
+    "Description": "Select data, assign the dependent and explanatory variables, then estimate a Tobit model. Suitable for dependent variables censored at a lower or upper bound (e.g., non-negative expenditure).",
+    "CensoringLimits": "Censoring Settings",
+    "LeftCensoring": "Left censoring value (lower bound)",
+    "RightCensoring": "Right censoring value (upper bound)"
+  },
+  "TobitDiagnostics": {
+    "Title": "Diagnostics (Tobit-specific)",
+    "LeftCensoringLimit": "Left Censoring Limit",
+    "RightCensoringLimit": "Right Censoring Limit",
+    "LRTest": "Likelihood Ratio Test (vs. constant-only model)",
+    "WaldTest": "Wald Test",
+    "TestStatistic": "Test Statistic",
+    "PValue": "p-value",
+    "DF": "df"
   },
   "WLSRegressionForm": {
     "Title": "Weighted Least Squares (WLS)",

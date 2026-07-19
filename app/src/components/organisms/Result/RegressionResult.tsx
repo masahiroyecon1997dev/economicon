@@ -9,6 +9,7 @@ import {
 } from "@/components/molecules/Result/ResultSection";
 import { AddDiagnosticColumnsDialog } from "@/components/organisms/Dialog/AddDiagnosticColumnsDialog";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
+import { TobitDiagnostics } from "@/components/organisms/Result/TobitDiagnostics";
 import { cn } from "@/lib/utils/helpers";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
 import {
@@ -458,6 +459,14 @@ export const RegressionResult = ({
             )}
           </div>
         </ResultSection>
+      )}
+
+      {/* Tobit 診断統計量 */}
+      {result.modelType === "tobit" && result.diagnostics && (
+        <TobitDiagnostics
+          diagnostics={result.diagnostics}
+          formatNumber={formatNumber}
+        />
       )}
     </div>
   );

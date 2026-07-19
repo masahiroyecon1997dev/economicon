@@ -24,10 +24,7 @@ import {
   buildCaughtErrorMessage,
   buildResponseErrorMessage,
 } from "@/lib/utils/apiError";
-import {
-  createFieldError,
-  extractFieldError,
-} from "@/lib/utils/formHelpers";
+import { createFieldError, extractFieldError } from "@/lib/utils/formHelpers";
 import { useAnalysisResultsStore } from "@/stores/analysisResults";
 import { useCurrentPageStore } from "@/stores/currentPage";
 import { useTableInfosStore } from "@/stores/tableInfos";
@@ -39,13 +36,20 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
-type RegressionMethod = "ols" | "logit" | "probit" | "wls";
+type RegressionMethod = "ols" | "logit" | "probit" | "wls" | "tobit";
 
 type RegressionAnalysis =
   | { method: "ols" }
   | { method: "logit"; calculateMarginalEffects: boolean }
   | { method: "probit"; calculateMarginalEffects: boolean }
-  | { method: "wls" };
+  | { method: "wls" }
+  | {
+      method: "tobit";
+      leftCensoringEnabled: boolean;
+      leftCensoringLimit: number;
+      rightCensoringEnabled: boolean;
+      rightCensoringLimit: number;
+    };
 
 type CommonRegressionFormProps = {
   onCancel: () => void;
@@ -57,6 +61,16 @@ type CommonRegressionFormProps = {
 const buildDefaultAnalysis = (method: RegressionMethod): RegressionAnalysis => {
   if (method === "ols" || method === "wls") {
     return { method };
+  }
+
+  if (method === "tobit") {
+    return {
+      method: "tobit",
+      leftCensoringEnabled: true,
+      leftCensoringLimit: 0,
+      rightCensoringEnabled: false,
+      rightCensoringLimit: 0,
+    };
   }
 
   return {
@@ -78,6 +92,16 @@ const buildAnalysisSchema = (method: RegressionMethod) => {
     return z.object({
       method: z.literal("logit"),
       calculateMarginalEffects: z.boolean(),
+    });
+  }
+
+  if (method === "tobit") {
+    return z.object({
+      method: z.literal("tobit"),
+      leftCensoringEnabled: z.boolean(),
+      leftCensoringLimit: z.number(),
+      rightCensoringEnabled: z.boolean(),
+      rightCensoringLimit: z.number(),
     });
   }
 
@@ -163,7 +187,17 @@ export const CommonRegressionForm = ({
           analysis:
             value.analysis.method === "wls"
               ? { method: "wls" as const, weightsColumn: value.weightsColumn }
-              : value.analysis,
+              : value.analysis.method === "tobit"
+                ? {
+                    method: "tobit" as const,
+                    leftCensoringLimit: value.analysis.leftCensoringEnabled
+                      ? value.analysis.leftCensoringLimit
+                      : null,
+                    rightCensoringLimit: value.analysis.rightCensoringEnabled
+                      ? value.analysis.rightCensoringLimit
+                      : null,
+                  }
+                : value.analysis,
           standardError: value.standardError,
         });
 
@@ -240,7 +274,9 @@ export const CommonRegressionForm = ({
                 ? "ols_method"
                 : method === "logit"
                   ? "logit_model"
-                  : "probit_model"
+                  : method === "tobit"
+                    ? "logit_model"
+                    : "probit_model"
           }
           aria-label={t("LinearRegressionForm.MethodExplainerButtonLabel")}
           data-testid={`${method}-method-explainer-btn`}
@@ -418,6 +454,97 @@ export const CommonRegressionForm = ({
                       </form.Field>
                     </>
                   )}
+
+                  {method === "tobit" && (
+                    <>
+                      <div className="border-t border-border-color" />
+                      <form.Field name="analysis">
+                        {(field) => {
+                          if (field.state.value.method !== "tobit") return null;
+                          const tobitAnalysis = field.state.value;
+                          return (
+                            <div className="space-y-2">
+                              <label className="block text-xs font-medium text-brand-text-main">
+                                {t("TobitRegressionForm.CensoringLimits")}
+                              </label>
+                              {/* 左側打ち切り */}
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  className="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-500 text-accent focus:ring-accent"
+                                  checked={tobitAnalysis.leftCensoringEnabled}
+                                  onChange={(e) => {
+                                    field.handleChange({
+                                      ...tobitAnalysis,
+                                      leftCensoringEnabled:
+                                        e.currentTarget.checked,
+                                    });
+                                  }}
+                                  disabled={isSubmitting}
+                                />
+                                <span className="text-xs text-brand-text-main">
+                                  {t("TobitRegressionForm.LeftCensoring")}
+                                </span>
+                              </label>
+                              {tobitAnalysis.leftCensoringEnabled && (
+                                <div className="ml-5">
+                                  <InputText
+                                    id="tobit-left-censoring-limit"
+                                    type="number"
+                                    value={tobitAnalysis.leftCensoringLimit.toString()}
+                                    onChange={(e) => {
+                                      const v = parseFloat(e.target.value);
+                                      field.handleChange({
+                                        ...tobitAnalysis,
+                                        leftCensoringLimit: isNaN(v) ? 0 : v,
+                                      });
+                                    }}
+                                    disabled={isSubmitting}
+                                  />
+                                </div>
+                              )}
+                              {/* 右側打ち切り */}
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  className="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-500 text-accent focus:ring-accent"
+                                  checked={tobitAnalysis.rightCensoringEnabled}
+                                  onChange={(e) => {
+                                    field.handleChange({
+                                      ...tobitAnalysis,
+                                      rightCensoringEnabled:
+                                        e.currentTarget.checked,
+                                    });
+                                  }}
+                                  disabled={isSubmitting}
+                                />
+                                <span className="text-xs text-brand-text-main">
+                                  {t("TobitRegressionForm.RightCensoring")}
+                                </span>
+                              </label>
+                              {tobitAnalysis.rightCensoringEnabled && (
+                                <div className="ml-5">
+                                  <InputText
+                                    id="tobit-right-censoring-limit"
+                                    type="number"
+                                    value={tobitAnalysis.rightCensoringLimit.toString()}
+                                    onChange={(e) => {
+                                      const v = parseFloat(e.target.value);
+                                      field.handleChange({
+                                        ...tobitAnalysis,
+                                        rightCensoringLimit: isNaN(v) ? 0 : v,
+                                      });
+                                    }}
+                                    disabled={isSubmitting}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }}
+                      </form.Field>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -536,7 +663,7 @@ export const CommonRegressionForm = ({
                             <SelectItem value="HC1">HC1</SelectItem>
                             <SelectItem value="HC2">HC2</SelectItem>
                             <SelectItem value="HC3">HC3</SelectItem>
-                            {method !== "wls" && (
+                            {method !== "wls" && method !== "tobit" && (
                               <SelectItem value="hac">
                                 {t("LinearRegressionForm.StandardError_hac")}
                               </SelectItem>
@@ -666,64 +793,68 @@ export const CommonRegressionForm = ({
                     )}
                   </form.Field>
 
-                  {method !== "ols" && method !== "wls" && (
-                    <form.Field name="analysis">
-                      {(field) => {
-                        if (
-                          field.state.value.method === "ols" ||
-                          field.state.value.method === "wls"
-                        ) {
-                          return null;
-                        }
+                  {method !== "ols" &&
+                    method !== "wls" &&
+                    method !== "tobit" && (
+                      <form.Field name="analysis">
+                        {(field) => {
+                          if (
+                            field.state.value.method === "ols" ||
+                            field.state.value.method === "wls" ||
+                            field.state.value.method === "tobit"
+                          ) {
+                            return null;
+                          }
 
-                        return (
-                          <FormField
-                            label={t("Common.CalculateMarginalEffects")}
-                            htmlFor={`${method}-calculate-marginal-effects`}
-                          >
-                            <label
+                          return (
+                            <FormField
+                              label={t("Common.CalculateMarginalEffects")}
                               htmlFor={`${method}-calculate-marginal-effects`}
-                              className="flex cursor-pointer items-start gap-2 rounded-lg border border-border-color bg-secondary/40 px-3 py-2"
                             >
-                              <input
-                                id={`${method}-calculate-marginal-effects`}
-                                data-testid="calculate-marginal-effects-checkbox"
-                                type="checkbox"
-                                className="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-500 text-accent focus:ring-accent"
-                                checked={
-                                  field.state.value.calculateMarginalEffects
-                                }
-                                onChange={(e) => {
-                                  const prev = field.state.value;
-                                  if (
-                                    prev.method === "ols" ||
-                                    prev.method === "wls"
-                                  )
-                                    return;
-                                  field.handleChange({
-                                    ...prev,
-                                    calculateMarginalEffects:
-                                      e.currentTarget.checked,
-                                  });
-                                }}
-                                disabled={isSubmitting}
-                              />
-                              <span className="space-y-1">
-                                <span className="block text-sm font-medium text-brand-text-main">
-                                  {t("Common.CalculateMarginalEffects")}
+                              <label
+                                htmlFor={`${method}-calculate-marginal-effects`}
+                                className="flex cursor-pointer items-start gap-2 rounded-lg border border-border-color bg-secondary/40 px-3 py-2"
+                              >
+                                <input
+                                  id={`${method}-calculate-marginal-effects`}
+                                  data-testid="calculate-marginal-effects-checkbox"
+                                  type="checkbox"
+                                  className="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-500 text-accent focus:ring-accent"
+                                  checked={
+                                    field.state.value.calculateMarginalEffects
+                                  }
+                                  onChange={(e) => {
+                                    const prev = field.state.value;
+                                    if (
+                                      prev.method === "ols" ||
+                                      prev.method === "wls" ||
+                                      prev.method === "tobit"
+                                    )
+                                      return;
+                                    field.handleChange({
+                                      ...prev,
+                                      calculateMarginalEffects:
+                                        e.currentTarget.checked,
+                                    });
+                                  }}
+                                  disabled={isSubmitting}
+                                />
+                                <span className="space-y-1">
+                                  <span className="block text-sm font-medium text-brand-text-main">
+                                    {t("Common.CalculateMarginalEffects")}
+                                  </span>
+                                  <span className="block text-xs text-brand-text-sub">
+                                    {t(
+                                      "Common.CalculateMarginalEffectsDescription",
+                                    )}
+                                  </span>
                                 </span>
-                                <span className="block text-xs text-brand-text-sub">
-                                  {t(
-                                    "Common.CalculateMarginalEffectsDescription",
-                                  )}
-                                </span>
-                              </span>
-                            </label>
-                          </FormField>
-                        );
-                      }}
-                    </form.Field>
-                  )}
+                              </label>
+                            </FormField>
+                          );
+                        }}
+                      </form.Field>
+                    )}
 
                   <form.Field name="missingValueHandling">
                     {(field) => (

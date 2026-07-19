@@ -34,6 +34,7 @@ export type WorkFeatureKey =
   | "IVRegressionForm"
   | "FERegressionForm"
   | "RERegressionForm"
+  | "TobitRegressionForm"
   | "CorrelationMatrix"
   | "GroupStatistics"
   | "PlotView"

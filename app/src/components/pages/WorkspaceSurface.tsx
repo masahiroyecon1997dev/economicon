@@ -6,6 +6,7 @@ import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressi
 import { LogitRegressionForm } from "@/components/organisms/Form/LogitRegressionForm";
 import { ProbitRegressionForm } from "@/components/organisms/Form/ProbitRegressionForm";
 import { RERegressionForm } from "@/components/organisms/Form/RERegressionForm";
+import { TobitRegressionForm } from "@/components/organisms/Form/TobitRegressionForm";
 import { WLSRegressionForm } from "@/components/organisms/Form/WLSRegressionForm";
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
@@ -57,6 +58,7 @@ type StaticWorkFeatureKey = Exclude<
   | "WLSRegressionForm"
   | "LogitRegressionForm"
   | "ProbitRegressionForm"
+  | "TobitRegressionForm"
   | "IVRegressionForm"
   | "FERegressionForm"
   | "RERegressionForm"
@@ -395,6 +397,12 @@ export const WorkspaceSurface = () => {
     if (tab.featureKey === "ProbitRegressionForm") {
       return (
         <ProbitRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
+      );
+    }
+
+    if (tab.featureKey === "TobitRegressionForm") {
+      return (
+        <TobitRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
       );
     }
 
