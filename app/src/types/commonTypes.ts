@@ -62,6 +62,8 @@ export type LinearRegressionResultType = {
   dependentVariable: string;
   explanatoryVariables: string[];
   regressionResult: string;
+  /** モデル種別（ols / wls / logit / probit 等）。AnalysisResultDetail.modelType に対応 */
+  modelType?: string | null;
   parameters: Array<{
     variable: string;
     coefficient: number;
@@ -94,7 +96,32 @@ export type LinearRegressionResultType = {
     lrStatistic?: number;
     lrDf?: number;
     lrPValue?: number;
+    /** パネル固定効果・変量効果モデル固有 */
+    nEntities?: number;
+    R2Within?: number;
+    R2Between?: number;
+    R2Overall?: number;
+    fPooled?: {
+      statistic: number;
+      pValue: number;
+    };
   };
+  diagnostics?: {
+    censoringLimits?: { left: number | null; right: number | null } | null;
+    sigma?: number | null;
+    waldTest?: {
+      statistic: number;
+      pValue: number;
+      df: number;
+      description: string;
+    } | null;
+    lrTest?: {
+      statistic: number;
+      pValue: number;
+      df: number;
+      description: string;
+    } | null;
+  } | null;
 };
 
 export type TauriFile = File & { path: string };

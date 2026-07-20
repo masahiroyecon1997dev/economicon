@@ -267,6 +267,38 @@ $$
   // ---------------------------------------------------------------------------
   // OLS regression
   // ---------------------------------------------------------------------------
+  wls_method: {
+    title: "What Is Weighted Least Squares (WLS)?",
+    body: `Weighted Least Squares (WLS) is an extension of OLS that assigns a weight w\u1d62 = 1/\u03c3\u00b2\u1d62 to each observation so that observations with smaller variance receive greater influence in estimation. When the heteroskedastic structure is known (or reliably estimated), WLS yields the Best Linear Unbiased Estimator (BLUE) under the Gauss\u2013Markov theorem.
+
+Under OLS with heteroskedasticity, coefficients remain unbiased but lose minimum variance (BLUE), and the classical t/F tests are incorrect. WLS corrects for the known variance structure by scaling down the influence of high-variance observations.
+
+### Setting Up the Weights Column
+
+Specify a numeric column containing w\u1d62 = 1/\u03c3\u00b2\u1d62 for each row. Common strategies:
+
+\u2460 Variance proportional to a known regressor: if Var(u\u1d62) \u221d x\u1d62, set w\u1d62 = 1/x\u1d62.
+
+\u2461 Two-step FGLS: first run OLS, then regress squared residuals on predictors to estimate \u03c3\u00b2\u1d62, and use the inverse as weights.
+
+\u2462 Known group variances: use the inverse of the sample variance for each group.
+
+**Important: the weights column must contain strictly positive numeric values. Non-positive or missing values will cause an API error.**
+
+$$
+\\hat{\\beta}_{WLS} = (X'WX)^{-1}X'Wy, \\quad W = \\mathrm{diag}(w_1, \\ldots, w_n)
+$$
+
+### WLS vs OLS vs Robust Standard Errors
+
+| Method | Assumption | BLUE | Note |
+|---|---|---|---|
+| OLS + Classical SE | Homoscedasticity | Under homoscedasticity only | Simplest |
+| OLS + HC SE | None required | No | Unbiased estimates, valid inference |
+| WLS (known structure) | Var \u221d 1/w\u1d62 | **Yes** | Most efficient when correctly specified |
+
+If the variance structure is uncertain, OLS with HC robust standard errors is the safer default. WLS outperforms OLS only when the weights are correctly specified.`,
+  },
   ols_method: {
     title: "What Is Ordinary Least Squares (OLS)?",
     body: `Ordinary Least Squares (OLS) estimates the coefficient vector β in the linear model y = Xβ + u by minimizing the sum of squared residuals Σ(yᵢ − xᵢ'β)². It is the most widely used estimation method in econometrics.
@@ -365,6 +397,44 @@ $$
 **Assumptions**
 
 ① Independence across clusters is required (arbitrary within-cluster correlation is permitted). ② The number of clusters G must be sufficiently large — the rule of thumb is G ≥ 50. With few clusters, standard errors are downward-biased and t-statistics are inflated. ③ When G is small (< 50), use Wild Cluster Bootstrap for inference. ④ The clustering level should match the unit at which treatment is assigned or at which correlation naturally arises.`,
+  },
+  wls_result_coefficients: {
+    title: "How to Read the WLS Coefficient Table",
+    body: `The WLS coefficient table has the same structure as OLS (coef, std err, t-stat, p-value, 95% CI), but all estimates are derived from the **weighted least-squares criterion**.
+
+[coef (Coefficient)] The estimated change in y per unit increase in x\u2c7c, holding other predictors constant. Under correctly specified weights, these estimates are unbiased and more efficient than OLS.
+
+[std err (Standard Error)] The WLS-based standard error. When weights are correctly specified, std err is smaller than OLS (efficiency gain). If the weights are misspecified, std err can be misleadingly small.
+
+[t-stat / p-value / 95% CI] Interpreted the same as in OLS. A large sample approximation of coef \u00b1 1.96 \u00d7 std err is used for the 95% CI.
+
+### WLS-Specific Cautions
+
+**Misspecified weights introduce bias risk**: even though the coefficient is still unbiased, an incorrect variance structure leads to incorrect standard errors and invalid inference. If the variance structure is uncertain, consider adding HC robust standard errors on top of WLS.
+
+**Weights must be strictly positive**: the specified column must contain values > 0 in every row used for estimation. Zero, negative, or missing weights will cause an API error.`,
+  },
+  wls_result_model_stats: {
+    title: "How to Read WLS Model Statistics",
+    body: `WLS model statistics follow the same layout as OLS (R\u00b2, Adjusted R\u00b2, F-stat, Log-Likelihood, Observations), but the **R\u00b2 is a \u2018weighted R\u00b2\u2019** based on the weighted residual sum of squares.
+
+### Weighted R\u00b2
+
+$$
+R^2_{WLS} = 1 - \\frac{\\sum_i w_i (y_i - \\hat{y}_i)^2}{\\sum_i w_i (y_i - \\bar{y}_w)^2}, \\quad \\bar{y}_w = \\frac{\\sum_i w_i y_i}{\\sum_i w_i}
+$$
+
+When all weights equal 1 (i.e., OLS), this reduces to the ordinary R\u00b2. Because high-variance observations receive low weights, the weighted R\u00b2 can differ substantially from the unweighted OLS R\u00b2 on the same data.
+
+### Other Statistics
+
+[F-stat / F-prob] Test that all slope coefficients are jointly zero. Interpreted the same as OLS. Due to WLS efficiency gains, F values tend to be higher than OLS on the same data.
+
+[Log-Likelihood] The maximum-likelihood value for the WLS model. Used to compute AIC/BIC for model comparison.
+
+### Caution When Comparing WLS and OLS
+
+Do not directly compare the WLS R\u00b2 to the OLS R\u00b2 on the same data\u2014their definitions differ. The advantage of WLS lies in **smaller coefficient standard errors (efficiency) and correct inference**, not in a higher R\u00b2.`,
   },
   // ---------------------------------------------------------------------------
   // Reading regression output
@@ -469,5 +539,114 @@ $$
 [AME (Average Marginal Effect)] The sample average of ∂p/∂xⱼ = φ(Xᵢβ)βⱼ, where φ is the standard normal PDF. Interpretation is the same as in logit: 'a one-unit increase in xⱼ is associated with an average change in the probability of AME percentage points.'
 
 [Choosing among LPM, Logit, and Probit] LPM offers the simplest coefficient interpretation and straightforward compatibility with fixed effects and robust standard errors. Logit/Probit ensure predicted probabilities stay within (0,1) but require reporting AME. In causal inference contexts where the focus is on the average effect rather than distributional fit, LPM is often preferred for its transparency.`,
+  },
+  fe_method: {
+    title: "What Is the Fixed Effects (FE) Method?",
+    size: "lg",
+    body: `Fixed Effects (FE) estimation is used with **panel data** (repeated observations of the same units over time) to remove time-invariant unobserved heterogeneity that may be correlated with the regressors.
+
+The data-generating process for unit $i$ at time $t$ is:
+
+$$y_{it} = \\alpha_i + X_{it}\\beta + \\varepsilon_{it}$$
+
+$\\alpha_i$ is the individual fixed effect — a unit-specific intercept that captures all time-invariant characteristics of unit $i$. If $\\alpha_i$ is correlated with $X_{it}$, OLS is inconsistent. FE eliminates this problem.
+
+### How Within Estimation Works
+
+The FE (Within) estimator **demeans each variable within each unit** — subtracting the individual-level time average:
+
+$$\\tilde{y}_{it} = y_{it} - \\bar{y}_i, \\quad \\tilde{X}_{it} = X_{it} - \\bar{X}_i$$
+
+Applying OLS to the demeaned data eliminates $\\alpha_i$ and yields a consistent estimator. Since FE uses only **within-unit variation over time**, **the effects of time-invariant variables (e.g., gender, country) cannot be identified**.
+
+### Within R², Between R², and Overall R²
+
+| Statistic | Meaning |
+|---|---|
+| **Within R²** | How well the model explains variation within each unit over time (the primary fit measure for FE) |
+| **Between R²** | How well cross-unit averages are explained |
+| **Overall R²** | Proportion of total variance explained |
+
+**Within R² is the key fit measure for FE models.** A low Between R² is not a concern since FE estimation is entirely based on within-unit variation.
+
+### Pooled F-test (Test for Individual Effects)
+
+Tests whether individual effects are jointly zero ($H_0$: all $\\alpha_i$ are equal). A **small p-value** suggests that fixed effects are significant and FE is preferred over pooled OLS.
+
+### FE vs. RE: The Hausman Test
+
+| | Fixed Effects (FE) | Random Effects (RE) |
+|---|---|---|
+| Assumption on $\\alpha_i$ | Can be correlated with $X_{it}$ | Must be uncorrelated with $X_{it}$ |
+| Time-invariant variables | Not identified | Can be identified |
+| Consistency | Always | Only if correctly specified |
+| Efficiency | Less efficient if RE is correct | More efficient if RE is correct |
+
+Use the **Hausman test** ($H_0$: RE is correct) to choose between FE and RE. If you reject $H_0$, use FE.
+
+### Choosing Standard Errors
+
+| Method | Use when |
+|---|---|
+| Unadjusted | Homoskedastic, no serial correlation |
+| Robust | Heteroskedastic errors |
+| **Clustered** | Serial correlation within units (most recommended for panel data) |
+| HAC (kernel) | Both serial correlation and heteroskedasticity |
+
+For FE models, **clustered standard errors** (clustering by the entity column) are generally recommended, since error terms within the same unit are likely correlated over time. Using uncorrected standard errors can lead to underestimated standard errors.`,
+  },
+  iv_method: {
+    title: "What Is the Instrumental Variables (IV / 2SLS) Method?",
+    size: "lg",
+    body: `Instrumental Variables (IV) estimation is used when explanatory variables are **endogenous** — correlated with the error term. Endogeneity arises from ① omitted variable bias, ② reverse causality, or ③ measurement error, all of which make OLS biased and inconsistent.
+
+An instrument z must satisfy two conditions:
+
+**① Relevance**: z is correlated with the endogenous regressor x (E[z'x] ≠ 0)
+**② Exogeneity / Exclusion Restriction**: z affects y only through x, not directly (E[z'u] = 0)
+
+### How 2SLS Works
+
+**Two-Stage Least Squares (2SLS)** is the most widely used IV estimator.
+
+**First stage**: Regress the endogenous variable x on instruments z to obtain fitted values $\\hat{x}$.
+
+$$\\hat{x} = Z(Z'Z)^{-1}Z'x$$
+
+**Second stage**: Replace x with $\\hat{x}$ in the structural equation and estimate by OLS.
+
+$$\\hat{\\beta}_{2SLS} = (\\hat{X}'\\hat{X})^{-1}\\hat{X}'y$$
+
+The key idea: the first stage extracts only the exogenous variation in x (driven by z), purging the endogenous part. The 2SLS estimator is consistent in large samples (though biased in finite samples).
+
+### Identification Conditions
+
+| Condition | # Instruments | Result |
+|---|---|---|
+| Under-identified | \\|Z\\| < \\|X_{endog}\\| | Not estimable |
+| Exactly identified | \\|Z\\| = \\|X_{endog}\\| | 2SLS only |
+| Over-identified | \\|Z\\| > \\|X_{endog}\\| | 2SLS or GMM valid |
+
+**This app requires the number of instruments ≥ number of endogenous variables.**
+
+### The Weak Instruments Problem
+
+When instruments are only weakly correlated with the endogenous regressor, 2SLS can be severely biased and unstable in finite samples.
+
+The standard diagnostic is the **first-stage F-statistic**. A common rule of thumb is **F > 10** (Stock & Yogo, 2005) as evidence of strong instruments. This value is included in the analysis results.
+
+If the F-statistic is low, reconsider your choice of instruments. Weak instruments can produce estimates worse than OLS.
+
+### 2SLS vs. GMM
+
+**2SLS** assumes homoskedastic errors and is efficient under that assumption. It works well for exactly-identified or over-identified models with homoskedastic errors.
+
+**GMM (Generalized Method of Moments)** uses a weighting matrix to optimally combine the moment conditions and is more efficient than 2SLS when errors are heteroskedastic and the model is over-identified. However, GMM has poorer finite-sample properties in small samples.
+
+Intuitively, GMM "optimally weights the information from multiple instruments." When in doubt, start with 2SLS.
+
+### ⚠️ Risk of Omitting the Constant
+
+Dropping the constant term risks violating the exogeneity condition E[z'u] = 0 by absorbing the intercept into the error term. Unless you have a specific theoretical justification, **always include the constant**.`,
   },
 } satisfies ExplainerContentMap;

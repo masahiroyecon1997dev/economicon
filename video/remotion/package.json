@@ -49,10 +49,10 @@
     "@remotion/google-fonts": "4.0.483",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "remotion": "4.0.482"
+    "remotion": "4.0.483"
   },
   "devDependencies": {
-    "@remotion/cli": "4.0.482",
+    "@remotion/cli": "4.0.484",
     "@remotion/eslint-plugin": "4.0.484",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",

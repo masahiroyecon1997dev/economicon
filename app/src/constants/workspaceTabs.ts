@@ -39,12 +39,28 @@ export const WORK_TAB_ENTRIES: WorkTabEntry[] = [
     titleKey: "HeaderMenu.OrdinaryLeastSquares",
   },
   {
+    featureKey: "WLSRegressionForm",
+    titleKey: "HeaderMenu.WeightedLeastSquares",
+  },
+  {
     featureKey: "LogitRegressionForm",
     titleKey: "HeaderMenu.LogitAnalysis",
   },
   {
     featureKey: "ProbitRegressionForm",
     titleKey: "HeaderMenu.ProbitAnalysis",
+  },
+  {
+    featureKey: "IVRegressionForm",
+    titleKey: "HeaderMenu.InstrumentalVariables",
+  },
+  {
+    featureKey: "FERegressionForm",
+    titleKey: "HeaderMenu.FixedEffects",
+  },
+  {
+    featureKey: "RERegressionForm",
+    titleKey: "HeaderMenu.RandomEffects",
   },
   {
     featureKey: "CorrelationMatrix",

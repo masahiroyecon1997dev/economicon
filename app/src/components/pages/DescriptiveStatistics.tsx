@@ -3,8 +3,7 @@ import { DescriptiveStatisticType } from "@/api/model";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { ActionButtonBar } from "@/components/molecules/ActionBar/ActionButtonBar";
 import { ExplainerButton } from "@/components/molecules/Dialog/ExplainerButton";
-import { CheckboxTagGroup } from "@/components/molecules/Field/CheckboxTagGroup";
-import { SelectAllBar } from "@/components/molecules/Field/SelectAllBar";
+import { TagCombobox } from "@/components/molecules/Field/TagCombobox";
 import { FormField } from "@/components/molecules/Form/FormField";
 import {
   AnalysisEmptyState,
@@ -34,6 +33,8 @@ import { ChevronDown, HelpCircle, Loader2, SearchX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { CheckboxTagGroup } from "../molecules/Field/CheckboxTagGroup";
+import { SelectAllBar } from "../molecules/Field/SelectAllBar";
 
 const descriptiveStatisticsDraftSchema = z.object({
   tableName: z.string(),
@@ -246,7 +247,6 @@ export const DescriptiveStatistics = ({
     updateWorkTabDraft(workTabId, formValues);
   }, [formValues, updateWorkTabDraft, workTabId]);
 
-  const checkedCols = new Set(formValues.columnNames);
   const checkedStats = new Set(formValues.statistics);
 
   const toggleStat = (stat: string) => {
@@ -319,10 +319,7 @@ export const DescriptiveStatistics = ({
             {selectedTable && (
               <form.Field name="columnNames">
                 {(field) => (
-                  <FormField
-                    label={t("DescriptiveStatistics.ColumnsLabel")}
-                    error={extractFieldError(field.state.meta.errors)}
-                  >
+                  <FormField label={t("DescriptiveStatistics.ColumnsLabel")}>
                     {isLoadingCols ? (
                       <AnalysisEmptyState
                         compact
@@ -343,38 +340,16 @@ export const DescriptiveStatistics = ({
                         hint={t("AnalysisEmptyState.NoEligibleColumnsHint")}
                       />
                     ) : (
-                      <div className="space-y-2">
-                        <SelectAllBar
-                          selectAllLabel={t("DescriptiveStatistics.SelectAll")}
-                          deselectAllLabel={t(
-                            "DescriptiveStatistics.DeselectAll",
-                          )}
-                          onSelectAll={() =>
-                            form.setFieldValue(
-                              "columnNames",
-                              columns.map((column) => column.name),
-                            )
-                          }
-                          onDeselectAll={() =>
-                            form.setFieldValue("columnNames", [])
-                          }
-                          disabled={isSubmitting}
-                        />
-                        <CheckboxTagGroup
-                          items={columns.map((column) => ({
-                            value: column.name,
-                            label: column.name,
-                          }))}
-                          checked={checkedCols}
-                          onToggle={(name) => {
-                            const next = new Set(checkedCols);
-                            if (next.has(name)) next.delete(name);
-                            else next.add(name);
-                            field.handleChange([...next]);
-                          }}
-                          disabled={isSubmitting}
-                        />
-                      </div>
+                      <TagCombobox
+                        options={columns.map((column) => ({
+                          value: column.name,
+                          label: column.name,
+                        }))}
+                        selectedValues={field.state.value}
+                        onMultipleChange={(vals) => field.handleChange(vals)}
+                        error={extractFieldError(field.state.meta.errors)}
+                        disabled={isSubmitting}
+                      />
                     )}
                   </FormField>
                 )}

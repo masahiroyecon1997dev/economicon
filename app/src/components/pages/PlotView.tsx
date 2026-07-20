@@ -1,4 +1,5 @@
 import { fetchPlotDataBinary } from "@/api/bridge/tauri-commands";
+import { SearchableSelect } from "@/components/atoms/Input/SearchableSelect";
 import { Select, SelectItem } from "@/components/atoms/Input/Select";
 import { VariableSelectorField } from "@/components/molecules/Field/VariableSelectorField";
 import {
@@ -413,18 +414,16 @@ export const PlotView = ({
                       <label className="mb-1 block text-xs font-medium text-brand-text-main">
                         {t("PlotView.XColumnLabel")}
                       </label>
-                      <Select
+                      <SearchableSelect
                         value={xColumn}
                         onValueChange={setXColumn}
                         placeholder={t("PlotView.XColumnPlaceholder")}
+                        options={xAxisColumns.map((col) => ({
+                          value: col.name,
+                          label: col.name,
+                        }))}
                         data-testid="plot-view-x-column"
-                      >
-                        {xAxisColumns.map((col) => (
-                          <SelectItem key={col.name} value={col.name}>
-                            {col.name}
-                          </SelectItem>
-                        ))}
-                      </Select>
+                      />
                       {xAxisColumns.length === 0 && (
                         <p className="mt-1 text-xs text-brand-text-sub">
                           {t("PlotView.NoNumericColumns")}
@@ -438,18 +437,16 @@ export const PlotView = ({
                         <label className="mb-1 block text-xs font-medium text-brand-text-main">
                           {t("PlotView.YColumnLabel")}
                         </label>
-                        <Select
+                        <SearchableSelect
                           value={yColumn}
                           onValueChange={setYColumn}
                           placeholder={t("PlotView.YColumnPlaceholder")}
+                          options={yAxisColumns.map((col) => ({
+                            value: col.name,
+                            label: col.name,
+                          }))}
                           data-testid="plot-view-y-column"
-                        >
-                          {yAxisColumns.map((col) => (
-                            <SelectItem key={col.name} value={col.name}>
-                              {col.name}
-                            </SelectItem>
-                          ))}
-                        </Select>
+                        />
                         {yAxisColumns.length === 0 && (
                           <p className="mt-1 text-xs text-brand-text-sub">
                             {t("PlotView.NoNumericColumns")}

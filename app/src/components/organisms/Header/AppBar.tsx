@@ -375,6 +375,15 @@ export const AppBar = () => {
               t("HeaderMenu.OrdinaryLeastSquares"),
             ),
         },
+        {
+          id: "weighted-least-squares",
+          label: t("HeaderMenu.WeightedLeastSquares"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "WLSRegressionForm",
+              t("HeaderMenu.WeightedLeastSquares"),
+            ),
+        },
       ],
     },
     {
@@ -401,6 +410,15 @@ export const AppBar = () => {
               t("HeaderMenu.ProbitAnalysis"),
             ),
         },
+        {
+          id: "tobit",
+          label: t("HeaderMenu.TobitAnalysis"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "TobitRegressionForm",
+              t("HeaderMenu.TobitAnalysis"),
+            ),
+        },
       ],
     },
     // {
@@ -421,19 +439,46 @@ export const AppBar = () => {
     //     },
     //   ],
     // },
-    // {
-    //   id: "causal-inference",
-    //   menuName: t("HeaderMenu.CausalInferenceMenu"),
-    //   isOpen: openMenuId === "causal-inference",
-    //   onClose: close,
-    //   items: [
-    //     {
-    //       id: "instrumental-variables",
-    //       label: t("HeaderMenu.InstrumentalVariables"),
-    //       handleSelect: () => {},
-    //     },
-    //   ],
-    // },
+    {
+      id: "panel-data",
+      menuName: t("HeaderMenu.PanelDataMenu"),
+      isOpen: openMenuId === "panel-data",
+      onClose: close,
+      items: [
+        {
+          id: "fixed-effect",
+          label: t("HeaderMenu.FixedEffects"),
+          handleSelect: () =>
+            handleOpenWorkTab("FERegressionForm", t("HeaderMenu.FixedEffects")),
+        },
+        {
+          id: "random-effect",
+          label: t("HeaderMenu.RandomEffects"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "RERegressionForm",
+              t("HeaderMenu.RandomEffects"),
+            ),
+        },
+      ],
+    },
+    {
+      id: "causal-inference",
+      menuName: t("HeaderMenu.CausalInferenceMenu"),
+      isOpen: openMenuId === "causal-inference",
+      onClose: close,
+      items: [
+        {
+          id: "instrumental-variables",
+          label: t("HeaderMenu.InstrumentalVariables"),
+          handleSelect: () =>
+            handleOpenWorkTab(
+              "IVRegressionForm",
+              t("HeaderMenu.InstrumentalVariables"),
+            ),
+        },
+      ],
+    },
   ];
 
   return (

@@ -48,7 +48,11 @@
     "RandomSeed": "乱数シード",
     "RandomSeedPlaceholder": "省略可（0〜100,000,000）",
     "CalculateMarginalEffects": "平均限界効果を計算",
-    "CalculateMarginalEffectsDescription": "平均限界効果 (AME) を結果に含めます。"
+    "CalculateMarginalEffectsDescription": "平均限界効果 (AME) を結果に含めます。",
+    "AddColumn": "+ 列を追加",
+    "SelectedCount": "{{count}} / {{total}} 列選択中",
+    "SelectAll": "すべて選択",
+    "DeselectAll": "すべて解除"
   },
   "AppBar": {
     "Minimize": "最小化",
@@ -81,8 +85,15 @@
     "LinearRegressionMenu": "線形回帰",
     "NonlinearRegressionMenu": "非線形回帰",
     "OrdinaryLeastSquares": "最小二乗法",
+    "WeightedLeastSquares": "加重最小二乗法（WLS）",
     "LogitAnalysis": "ロジットモデル",
     "ProbitAnalysis": "プロビットモデル",
+    "TobitAnalysis": "トービットモデル",
+    "CausalInferenceMenu": "因果推論",
+    "InstrumentalVariables": "操作変数法（IV）",
+    "PanelDataMenu": "パネルデータ分析",
+    "FixedEffects": "固定効果法（FE）",
+    "RandomEffects": "変量効果法（RE）",
     "Visualization": "可視化",
     "PlotView": "プロットビュー",
     "DistributionPreview": "分布プレビュー",
@@ -551,6 +562,68 @@
     "Title": "プロビットモデル",
     "Description": "データを選択し、被説明変数と説明変数を指定してプロビットモデルを推定します。平均限界効果は既定で有効です。"
   },
+  "TobitRegressionForm": {
+    "Title": "トービットモデル",
+    "Description": "データを選択し、被説明変数と説明変数を指定してトービットモデルを推定します。下限・上限で打ち切られた被説明変数（非負の支出額など）に適したモデルです。",
+    "CensoringLimits": "打ち切り設定",
+    "LeftCensoring": "左側打ち切り値（下限）",
+    "RightCensoring": "右側打ち切り値（上限）"
+  },
+  "TobitDiagnostics": {
+    "Title": "診断統計量（Tobit固有）",
+    "LeftCensoringLimit": "左側打ち切り値",
+    "RightCensoringLimit": "右側打ち切り値",
+    "LRTest": "層度比検定（定数のみモデル対比）",
+    "WaldTest": "Wald 検定",
+    "TestStatistic": "検定統計量",
+    "PValue": "p 値",
+    "DF": "自由度"
+  },
+  "WLSRegressionForm": {
+    "Title": "加重最小二乗法（WLS）",
+    "Description": "観測値ごとの重み（1/σ²ᵢ）を指定して WLS を実行します。不均一分散の構造が既知の場合に OLS より効率的な推定が得られます。",
+    "WeightsColumn": "重み列",
+    "WeightsColumnDescription": "各観測値の重み（1/σ²ᵢ）を格納した数値列"
+  },
+  "FERegressionForm": {
+    "Title": "固定効果法（FE）",
+    "Description": "個体固定効果を除去した Within 推定を実行します。個体IDと時間列を指定してパネルデータを分析します。",
+    "PanelSettings": "パネル設定",
+    "EntityIdColumn": "個体ID列",
+    "EntityIdColumnDescription": "パネルの個体（エンティティ）を識別する列",
+    "TimeColumn": "時間列",
+    "TimeColumnDescription": "時系列方向を示す列（省略可）",
+    "TimeColumnNone": "指定なし",
+    "AdvancedOptionsSummary": "標準誤差: {{se}} | 欠損値: {{missing}}",
+    "MethodExplainerButtonLabel": "固定効果法の解説を見る",
+    "RunAnalysis": "分析実行",
+    "Processing": "処理中..."
+  },
+  "RERegressionForm": {
+    "Title": "変量効果法（RE）",
+    "Description": "個体効果をランダム誤差として扱い、GLS 推定を実行します。時間不変変数の効果も識別できますが、個体効果と説明変数の独立性が必要です。",
+    "AdvancedOptionsSummary": "標準誤差: {{se}} | 欠損値: {{missing}}",
+    "MethodExplainerButtonLabel": "変量効果法の解説を見る",
+    "RunAnalysis": "分析実行",
+    "Processing": "処理中..."
+  },
+  "IVRegressionForm": {
+    "Title": "操作変数法（IV / 2SLS）",
+    "Description": "内生性のある説明変数を操作変数で除去し、一致推定量を得ます。操作変数の数は内生変数の数以上が必要です。",
+    "EndogenousVariables": "内生変数",
+    "EndogenousVariablesDescription": "内生性が疑われる変数（操作変数で対処）",
+    "InstrumentalVariables": "操作変数",
+    "InstrumentalVariablesDescription": "内生変数と相関し、被説明変数には直接影響しない変数",
+    "IdentificationStatus": "操作変数 {{nIv}} 個 / 内生変数 {{nEndog}} 個",
+    "IdentificationHint": "操作変数の数 ≥ 内生変数の数が必要です（識別条件）",
+    "IvMethodLabel": "推定手法",
+    "IvMethod_2sls": "2SLS（二段階最小二乗法）",
+    "IvMethod_gmm": "GMM（一般化積率法）",
+    "GmmWeightMatrixLabel": "GMM 重み行列",
+    "GmmWeightMatrix_uncentered": "無補正",
+    "GmmWeightMatrix_robust": "頑健（推奨）",
+    "GmmWeightMatrix_hac": "HAC"
+  },
   "RegressionResult": {
     "AnalysisSummary": "分析概要",
     "DataName": "データ名",
@@ -582,7 +655,15 @@
     "NA": "N/A",
     "QuickCopyMd": "Markdownをクリップボードにコピー",
     "OutputDialog": "出力...",
-    "AddDiagnosticColumns": "残差/予測値を追加"
+    "AddDiagnosticColumns": "残差/予測値を追加",
+    "PanelModelStatistics": "パネルモデル統計量",
+    "PanelModelStatisticsExplainerLabel": "パネルモデル統計量の説明を見る",
+    "R2Within": "Within R²",
+    "R2Between": "Between R²",
+    "R2Overall": "Overall R²",
+    "NEntities": "エンティティ数",
+    "FPooledStatistic": "プールドF統計量",
+    "FPooledPValue": "プールドF p値"
   },
   "AddDiagnosticColumns": {
     "Title": "残差/予測値を追加",
@@ -725,6 +806,11 @@
     "NumRowsMoreThan0": "行数は1以上で入力してください。",
     "DependentVariableRequired": "被説明変数を選択してください",
     "ExplanatoryVariablesRequired": "説明変数を1つ以上選択してください",
+    "WeightsColumnRequired": "重み列を選択してください",
+    "WeightsColumnSameAsDependent": "重み列と被説明変数に同じ列は指定できません",
+    "EndogenousVariablesRequired": "内生変数を1つ以上選択してください",
+    "InstrumentalVariablesRequired": "操作変数を1つ以上選択してください",
+    "EntityIdColumnRequired": "個体ID列を選択してください",
     "NewColumnNameRequired": "新しいカラム名を入力してください。",
     "CalculationExpressionRequired": "計算式を入力してください。",
     "RandomSeedRange": "乱数シードは0以上1億以下の整数を入力してください。",

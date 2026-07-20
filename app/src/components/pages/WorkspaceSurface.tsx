@@ -1,8 +1,13 @@
 import type { AnalysisResultDetail } from "@/api/model";
 import { EditAnalysisResultDialog } from "@/components/organisms/Dialog/EditAnalysisResultDialog";
+import { FERegressionForm } from "@/components/organisms/Form/FERegressionForm";
+import { IVRegressionForm } from "@/components/organisms/Form/IVRegressionForm";
 import { LinearRegressionForm } from "@/components/organisms/Form/LinearRegressionForm";
 import { LogitRegressionForm } from "@/components/organisms/Form/LogitRegressionForm";
 import { ProbitRegressionForm } from "@/components/organisms/Form/ProbitRegressionForm";
+import { RERegressionForm } from "@/components/organisms/Form/RERegressionForm";
+import { TobitRegressionForm } from "@/components/organisms/Form/TobitRegressionForm";
+import { WLSRegressionForm } from "@/components/organisms/Form/WLSRegressionForm";
 import { VirtualTable } from "@/components/organisms/Table/VirtualTable";
 import { AnalysisResultPanel } from "@/components/pages/AnalysisResultPreview";
 import { AsymptoticNormality } from "@/components/pages/AsymptoticNormality";
@@ -50,8 +55,13 @@ type StaticWorkFeatureKey = Exclude<
   | "DescriptiveStatistics"
   | "StatisticalTestView"
   | "LinearRegressionForm"
+  | "WLSRegressionForm"
   | "LogitRegressionForm"
   | "ProbitRegressionForm"
+  | "TobitRegressionForm"
+  | "IVRegressionForm"
+  | "FERegressionForm"
+  | "RERegressionForm"
   | "GroupStatistics"
   | "PlotView"
 >;
@@ -308,6 +318,13 @@ export const WorkspaceSurface = () => {
   };
 
   const renderWorkTab = (tab: WorkspaceWorkTab) => {
+    if (tab.featureKey === "FERegressionForm") {
+      return <FERegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
+    }
+    if (tab.featureKey === "RERegressionForm") {
+      return <RERegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
+    }
+
     if (isCorrelationMatrixWorkTab(tab)) {
       return (
         <CorrelationMatrix
@@ -367,6 +384,10 @@ export const WorkspaceSurface = () => {
       );
     }
 
+    if (tab.featureKey === "WLSRegressionForm") {
+      return <WLSRegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
+    }
+
     if (tab.featureKey === "LogitRegressionForm") {
       return (
         <LogitRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
@@ -377,6 +398,16 @@ export const WorkspaceSurface = () => {
       return (
         <ProbitRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
       );
+    }
+
+    if (tab.featureKey === "TobitRegressionForm") {
+      return (
+        <TobitRegressionForm onCancel={() => void handleCloseTab(tab.id)} />
+      );
+    }
+
+    if (tab.featureKey === "IVRegressionForm") {
+      return <IVRegressionForm onCancel={() => void handleCloseTab(tab.id)} />;
     }
 
     const staticFeatureKey = tab.featureKey as StaticWorkFeatureKey;

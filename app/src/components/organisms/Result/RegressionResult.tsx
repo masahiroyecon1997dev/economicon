@@ -9,6 +9,7 @@ import {
 } from "@/components/molecules/Result/ResultSection";
 import { AddDiagnosticColumnsDialog } from "@/components/organisms/Dialog/AddDiagnosticColumnsDialog";
 import { OutputResultDialog } from "@/components/organisms/Dialog/OutputResultDialog";
+import { TobitDiagnostics } from "@/components/organisms/Result/TobitDiagnostics";
 import { cn } from "@/lib/utils/helpers";
 import type { LinearRegressionResultType } from "@/types/commonTypes";
 import {
@@ -206,7 +207,11 @@ export const RegressionResult = ({
         title={t("RegressionResult.Coefficients")}
         titleAction={
           <ExplainerButton
-            explainerKey="ols_result_coefficients"
+            explainerKey={
+              result.modelType === "wls"
+                ? "wls_result_coefficients"
+                : "ols_result_coefficients"
+            }
             aria-label={t("RegressionResult.CoefficientsExplainerLabel")}
             data-testid="coefficients-explainer-btn"
           >
@@ -314,7 +319,11 @@ export const RegressionResult = ({
         title={t("RegressionResult.ModelStatistics")}
         titleAction={
           <ExplainerButton
-            explainerKey="ols_result_model_stats"
+            explainerKey={
+              result.modelType === "wls"
+                ? "wls_result_model_stats"
+                : "ols_result_model_stats"
+            }
             aria-label={t("RegressionResult.ModelStatisticsExplainerLabel")}
             data-testid="model-stats-explainer-btn"
           >
@@ -400,6 +409,65 @@ export const RegressionResult = ({
           )}
         </div>
       </ResultSection>
+
+      {/* パネルモデル固有統計量（FE / RE） */}
+      {result.modelStatistics.R2Within !== undefined && (
+        <ResultSection
+          title={t("RegressionResult.PanelModelStatistics")}
+          titleAction={
+            <ExplainerButton
+              explainerKey="fe_method"
+              aria-label={t(
+                "RegressionResult.PanelModelStatisticsExplainerLabel",
+              )}
+              data-testid="panel-stats-explainer-btn"
+            >
+              <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
+            </ExplainerButton>
+          }
+        >
+          <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
+            <StatItem
+              label={t("RegressionResult.R2Within")}
+              value={formatNumber(result.modelStatistics.R2Within)}
+            />
+            <StatItem
+              label={t("RegressionResult.R2Between")}
+              value={formatNumber(result.modelStatistics.R2Between)}
+            />
+            <StatItem
+              label={t("RegressionResult.R2Overall")}
+              value={formatNumber(result.modelStatistics.R2Overall)}
+            />
+            {result.modelStatistics.nEntities !== undefined && (
+              <StatItem
+                label={t("RegressionResult.NEntities")}
+                value={result.modelStatistics.nEntities}
+              />
+            )}
+            {result.modelStatistics.fPooled !== undefined && (
+              <>
+                <StatItem
+                  label={t("RegressionResult.FPooledStatistic")}
+                  value={formatNumber(result.modelStatistics.fPooled.statistic)}
+                />
+                <StatItem
+                  label={t("RegressionResult.FPooledPValue")}
+                  value={formatNumber(result.modelStatistics.fPooled.pValue)}
+                />
+              </>
+            )}
+          </div>
+        </ResultSection>
+      )}
+
+      {/* Tobit 診断統計量 */}
+      {result.modelType === "tobit" && result.diagnostics && (
+        <TobitDiagnostics
+          diagnostics={result.diagnostics}
+          formatNumber={formatNumber}
+        />
+      )}
     </div>
   );
 };

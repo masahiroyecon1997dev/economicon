@@ -39,6 +39,44 @@ vi.mock("../../../lib/dialog/message", () => ({
   showMessageDialog: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock("../../atoms/Input/SearchableSelect", () => ({
+  SearchableSelect: ({
+    id,
+    value,
+    onValueChange,
+    options,
+    placeholder,
+    disabled,
+  }: {
+    id?: string;
+    value: string;
+    onValueChange: (value: string) => void;
+    options: Array<{ value: string; label: string }>;
+    placeholder?: string;
+    disabled?: boolean;
+  }) => (
+    <div>
+      <button id={id} type="button" disabled={disabled}>
+        {value || placeholder || "select"}
+      </button>
+      <div role="listbox">
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            role="option"
+            aria-selected={option.value === value}
+            onClick={() => onValueChange(option.value)}
+            disabled={disabled}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  ),
+}));
+
 vi.mock("../../molecules/Field/VariableSelectorField", () => ({
   VariableSelectorField: ({
     label,
