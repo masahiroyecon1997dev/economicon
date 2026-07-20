@@ -1,7 +1,7 @@
+import { RegressionResult } from "@/components/organisms/Result/RegressionResult";
+import type { LinearRegressionResultType } from "@/types/commonTypes";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { LinearRegressionResultType } from "@/types/commonTypes";
-import { RegressionResult } from "@/components/organisms/Result/RegressionResult";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -186,6 +186,81 @@ describe("RegressionResult — 表示テスト", () => {
     it("F統計量の値が表示される", () => {
       render(<RegressionResult result={buildResult()} />);
       expect(screen.getByText("156.2500")).toBeInTheDocument();
+    });
+  });
+
+  // =========================================================================
+  describe("パネルモデル統計量セクション（FE / RE）", () => {
+    it("R2Within が undefined のとき（OLS等）→ パネルセクションが表示されない", () => {
+      render(<RegressionResult result={buildResult()} />);
+      expect(
+        screen.queryByText("RegressionResult.PanelModelStatistics"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("FE モデル: R2Within / R2Between / R2Overall / nEntities / fPooled が全て表示される", () => {
+      const result = buildResult({
+        modelType: "fe",
+        modelStatistics: {
+          nObservations: 100,
+          nEntities: 10,
+          R2Within: 0.9897,
+          R2Between: 0.1215,
+          R2Overall: 0.8195,
+          fValue: 4246.4,
+          fProbability: 0.0,
+          fPooled: { statistic: 87.2, pValue: 0.0 },
+        },
+      });
+      render(<RegressionResult result={result} />);
+
+      // セクションタイトル
+      expect(
+        screen.getByText("RegressionResult.PanelModelStatistics"),
+      ).toBeInTheDocument();
+
+      // Within / Between / Overall R²
+      expect(screen.getByText("0.9897")).toBeInTheDocument();
+      expect(screen.getByText("0.1215")).toBeInTheDocument();
+      expect(screen.getByText("0.8195")).toBeInTheDocument();
+
+      // エンティティ数（数値はそのまま表示）
+      expect(screen.getByText("10")).toBeInTheDocument();
+
+      // プールドF統計量
+      expect(screen.getByText("87.2000")).toBeInTheDocument();
+    });
+
+    it("RE モデル: R2Within / R2Between / R2Overall が表示され nEntities は非表示", () => {
+      const result = buildResult({
+        modelType: "re",
+        modelStatistics: {
+          nObservations: 100,
+          // nEntities は RE では含まれない
+          R2Within: 0.9888,
+          R2Between: 0.1924,
+          R2Overall: 0.8344,
+        },
+      });
+      render(<RegressionResult result={result} />);
+
+      expect(
+        screen.getByText("RegressionResult.PanelModelStatistics"),
+      ).toBeInTheDocument();
+
+      expect(screen.getByText("0.9888")).toBeInTheDocument();
+      expect(screen.getByText("0.1924")).toBeInTheDocument();
+      expect(screen.getByText("0.8344")).toBeInTheDocument();
+
+      // nEntities はフォーマット不要（undefined なので StatItem ごと非表示）
+      expect(
+        screen.queryByText("RegressionResult.NEntities"),
+      ).not.toBeInTheDocument();
+
+      // fPooled も非表示
+      expect(
+        screen.queryByText("RegressionResult.FPooledStatistic"),
+      ).not.toBeInTheDocument();
     });
   });
 });
