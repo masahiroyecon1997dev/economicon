@@ -42,7 +42,7 @@
     "clsx": "2.1.1",
     "i18next": "26.0.4",
     "katex": "0.17.0",
-    "lucide-react": "1.7.0",
+    "lucide-react": "1.24.0",
     "plotly.js": "3.6.0",
     "plotly.js-dist-min": "3.6.0",
     "react": "19.2.4",
