@@ -236,6 +236,17 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                       ))}
                     </Select>
                   </div>
+                  {tErr(
+                    field.state.meta.errors,
+                    "ValidationMessages.DataNameSelect",
+                  ) && (
+                    <p className="shrink-0 text-xs text-red-600">
+                      {tErr(
+                        field.state.meta.errors,
+                        "ValidationMessages.DataNameSelect",
+                      )}
+                    </p>
+                  )}
                 </div>
               )}
             </form.Field>
