@@ -325,7 +325,7 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                         onMultipleChange={(v) => field.handleChange(v)}
                         disabled={isSubmitting}
                         name="explanatoryVariables"
-                        className="flex flex-col"
+                        className="flex min-h-0 flex-1 flex-col"
                       />
                     )}
                   </form.Field>
@@ -333,7 +333,7 @@ export const FERegressionForm = ({ onCancel }: FERegressionFormProps) => {
                   <div className="border-t border-border-color" />
 
                   {/* パネル設定 */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex shrink-0 flex-col gap-2">
                     <h3 className="text-xs font-semibold text-text-heading">
                       {t("FERegressionForm.PanelSettings")}
                     </h3>
