@@ -23,8 +23,8 @@ importers:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
       remotion:
-        specifier: 4.0.483
-        version: 4.0.483(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: 4.0.490
+        version: 4.0.490(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     devDependencies:
       '@remotion/cli':
         specifier: 4.0.490
@@ -1367,6 +1367,12 @@ packages:
 
   remotion@4.0.483:
     resolution: {integrity: sha512-lf4xq4Twn75TQeTavFLrTE4zdck7EKBSx07ZrPv4om40Sist+3G0kq7NNzSjMeJ6G2Wx6vI+0oICD/vv4sGWtg==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
+  remotion@4.0.490:
+    resolution: {integrity: sha512-acyJNHljJvH7+I9kXJAK5bVVN7FAyM3tILGhnwZKJoB27Xp2WQ3cMyGIh8XFwlR66/ZESWkw74s49GItHejOWQ==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -2986,6 +2992,11 @@ snapshots:
       tslib: 2.8.1
 
   remotion@4.0.483(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+
+  remotion@4.0.490(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
