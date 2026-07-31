@@ -52,7 +52,7 @@
     "remotion": "4.0.483"
   },
   "devDependencies": {
-    "@remotion/cli": "4.0.487",
+    "@remotion/cli": "4.0.490",
     "@remotion/eslint-plugin": "4.0.487",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
