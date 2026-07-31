@@ -30,7 +30,7 @@ where = ["."]
 
 [dependency-groups]
 dev = [
-    "coverage==7.15.0",
+    "coverage==7.15.2",
     "deptry==0.25.1",
     "httpx==0.28.1",
     "palmerpenguins==0.1.6",
