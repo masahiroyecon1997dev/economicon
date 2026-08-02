@@ -1,3 +1,10 @@
+# Video Spec
+
+Economicon 動画生成パイプラインの設計仕様書。
+Claude Code などの AI エージェントが収録スクリプト・Remotion コンポジションを追加・修正する際の参照ドキュメント。
+
+---
+
 # Economicon 動画仕様書
 
 ## 1. 概要
@@ -456,12 +463,321 @@ Remotion 側は `<Audio src={staticFile("narration/c01-step1.mp3")} />` を字�
 
 ## 12. 未確定事項・要確認
 
-| #   | 項目                                                                    | 状態        | 優先度 |
-| --- | ----------------------------------------------------------------------- | ----------- | ------ |
-| 1   | DID / RDD / Heckman の使い方動画：フロント未実装 → C-15〜17 は将来追加  | ✅ 確定     | —      |
-| 2   | Playwright CDP 接続：`--remote-debugging-port=9222` で既存 E2E と同方式 | ✅ 確定     | —      |
-| 3   | サンプルデータ：`sample/` フォルダのファイルをそのまま流用              | ✅ 確定     | —      |
-| 4   | **試作動画（C-09）でパイプライン全体を検証してから残りに展開**          | 🔲 対応待ち | 高     |
-| 5   | BGM の調達（著作権フリーの楽曲ライブラリ選定）                          | 🔲 対応待ち | 低     |
-| 6   | YouTube チャンネル名・説明文の策定                                      | 🔲 対応待ち | 低     |
-| 7   | 動画サムネイル（Remotion で静止画生成 or 別途作成）                     | 🔲 対応待ち | 低     |
+| #   | 項目                                                                      | 状態        | 優先度 |
+| --- | ------------------------------------------------------------------------- | ----------- | ------ |
+| 1   | DID / RDD / Heckman の使い方動画：フロント未実装 → C-15〜17 は将来追加    | ✅ 確定     | —      |
+| 2   | Playwright CDP 接続：`--remote-debugging-port=9222` で既存 E2E と同方式   | ✅ 確定     | —      |
+| 3   | サンプルデータ：`sample/` フォルダのファイルをそのまま流用                | ✅ 確定     | —      |
+| 4   | **試作動画（C-09）でパイプライン全体を検証してから残りに展開**            | ✅ 完了     | —      |
+| 5   | BGM の調達（著作権フリーの楽曲ライブラリ選定）                            | 🔲 対応待ち | 低     |
+| 6   | YouTube チャンネル名・説明文の策定                                        | 🔲 対応待ち | 低     |
+| 7   | 動画サムネイル（Remotion で静止画生成 or 別途作成）                       | 🔲 対応待ち | 低     |
+| 8   | C-14（OLS 回帰）の収録スクリプト・コンポジション未実装                    | 🔲 対応待ち | 中     |
+| 9   | B-01 / B-02 / B-03 ダイジェスト動画の収録スクリプト・コンポジション未実装 | 🔲 対応待ち | 中     |
+
+---
+
+## 13. 実装状況（現行）
+
+### 13.1 実装済みシーン一覧
+
+収録スクリプト（`video/playwright/scenes/`）と Remotion コンポジション（`video/remotion/src/compositions/`）が揃っているもの。
+
+| ID   | Playwright シーン               | Remotion コンポジション        |
+| ---- | ------------------------------- | ------------------------------ |
+| A-01 | `a01-introduction.ts`           | `A01Introduction.tsx`          |
+| C-01 | `c01-csv-import.ts`             | `C01CsvImport.tsx`             |
+| C-02 | `c02-excel-parquet-import.ts`   | `C02ExcelParquetImport.tsx`    |
+| C-03 | `c03-join.ts`                   | `C03Join.tsx`                  |
+| C-04 | `c04-union.ts`                  | `C04Union.tsx`                 |
+| C-05 | `c05-column-filter-cast.ts`     | `C05ColumnFilterCast.tsx`      |
+| C-06 | `c06-transform-dummy.ts`        | `C06TransformDummy.tsx`        |
+| C-07 | `c07-calculation.ts`            | `C07Calculation.tsx`           |
+| C-08 | `c08-save-data.ts`              | `C08SaveData.tsx`              |
+| C-09 | `c09-descriptive-statistics.ts` | `C09DescriptiveStatistics.tsx` |
+| C-10 | `c10-group-statistics.ts`       | `C10GroupStatistics.tsx`       |
+| C-11 | `c11-correlation-matrix.ts`     | `C11CorrelationMatrix.tsx`     |
+| C-12 | `c12-confidence-interval.ts`    | `C12ConfidenceInterval.tsx`    |
+| C-13 | `c13-hypothesis-test.ts`        | `C13HypothesisTest.tsx`        |
+| C-18 | `c18-plot-view.ts`              | `C18PlotView.tsx`              |
+| C-19 | `c19-distribution-preview.ts`   | `C19DistributionPreview.tsx`   |
+| C-20 | `c20-simulation-data.ts`        | `C20SimulationData.tsx`        |
+| C-21 | `c21-output-result.ts`          | `C21OutputResult.tsx`          |
+| C-22 | `c22-ci-simulation.ts`          | `C22CiSimulation.tsx`          |
+| C-23 | `c23-ols-simulation.ts`         | `C23OlsSimulation.tsx`         |
+
+**未実装**: B-01 / B-02 / B-03（ダイジェスト）、C-14（OLS 回帰）、C-15〜C-17（アプリ未実装）
+
+---
+
+## 14. 実装アーキテクチャ詳細
+
+### 14.1 収録フォーマット（JPEG フレームシーケンス）
+
+仕様書の初期案（`.webm`）とは異なり、実際には **CDP Screencast による連番 JPEG** 方式を採用している。
+
+```
+captured/{sceneId}/
+├── frames/
+│   ├── 0001.jpg
+│   ├── 0002.jpg
+│   └── ...NNNN.jpg
+└── meta.json
+```
+
+**`meta.json` スキーマ**（`FrameSequenceMeta`）:
+
+```ts
+{
+  totalFrames: number;           // 保存済みフレーム数
+  durationMs: number;            // 録画全体の長さ (ms)
+  frameTimestamps: number[];     // 各フレームの経過時刻 (ms)
+  cues: Array<{
+    timeMs: number;              // 字幕表示開始時刻 (ms)
+    textJa: string;              // 日本語字幕テキスト
+    textEn: string;              // 英語字幕テキスト
+  }>;
+}
+```
+
+### 14.2 `Recorder` クラス（CDP Screencast）
+
+`video/playwright/helpers/connectToApp.ts` に実装。
+
+```ts
+const rec = await Recorder.create(context, page, "c09");
+await rec.start();
+rec.addCue("分析メニューを開きます", "Opening the analysis menu");
+await humanClick(page, someLocator);
+const info = await rec.stop();
+// → captured/c09/frames/0001.jpg〜NNNN.jpg + captured/c09/meta.json が生成される
+```
+
+- `addCue(textJa, textEn)`: 現在時刻を `timeMs` として字幕キューを記録する
+- `stop()`: フレームを JPEG ファイルに書き出し、`meta.json` を保存して `FrameSequenceMeta` を返す
+
+### 14.3 ヘルパー関数一覧（`connectToApp.ts`）
+
+| 関数・クラス                              | 役割                                                                           |
+| ----------------------------------------- | ------------------------------------------------------------------------------ |
+| `connectToApp()`                          | CDP 経由でアプリに接続し `{ browser, context, page }` を返す                   |
+| `SAMPLE_DIR`                              | `ECONOMICON_TEST_SAMPLE_DIR` 環境変数 → `sample/` フォルダのフォールバックパス |
+| `maskDirUsername(page)`                   | パンくずナビのユーザー名・フォルダ名を汎用テキストで上書き（個人情報マスク）   |
+| `captureStep(page, sceneId, step)`        | `captured/{sceneId}/step-NN.png` に静止画を保存                                |
+| `Recorder.create(context, page, sceneId)` | `Recorder` インスタンスを生成（CDPSession 確立）                               |
+| `humanClick(page, locator)`               | 人間らしい遅延付きクリック                                                     |
+| `humanCheck(page, locator)`               | チェックボックスの切り替え                                                     |
+| `highlightElements(page, locators[])`     | 操作対象要素を一時的に強調表示                                                 |
+
+### 14.4 Remotion シーンコンポーネント（`src/scenes/`）
+
+| コンポーネント     | Props                        | 役割                                                              |
+| ------------------ | ---------------------------- | ----------------------------------------------------------------- |
+| `TitleCard`        | `title`, `subtitle?`, `lang` | グラデーション背景のタイトルカード（spring アニメーション）       |
+| `Subtitle`         | `text`, `lang`, `position?`  | 半透明背景の字幕オーバーレイ（bottom / top）                      |
+| `Ending`           | `lang`, `note?`              | エンディングカード（ロゴ・チャンネル案内・spring アニメーション） |
+| `FrameSequence`    | `sceneId`, `meta`            | 連番 JPEG を `meta.frameTimestamps` でタイムライン再生            |
+| `FeatureHighlight` | —                            | 機能ハイライトオーバーレイ                                        |
+| `ScreenshotSlide`  | —                            | 静止画スライド表示                                                |
+| `ProblemStatement` | —                            | 課題提示テキストアニメーション                                    |
+
+### 14.5 コンポジションの構造パターン
+
+全コンポジションは以下の共通パターンに従う。
+
+```
+TitleCard (90 frames = 3s)
+  ↓
+FrameSequence × N (meta.json の durationMs から自動計算)
+  Subtitle (meta.json の cues から自動生成)
+  ↓
+Ending (120 frames = 4s)
+```
+
+`calculateMetadata` が `staticFile("{sceneId}/meta.json")` を fetch してコンポジションの総尺を動的に決定する。
+`meta.json` 未生成時はフォールバック尺（15s）を使用するためプレビューは可能。
+
+### 14.6 Remotion 設定（`remotion.config.ts`）
+
+```ts
+Config.setPublicDir("../playwright/captured"); // staticFile() の解決先
+Config.setVideoImageFormat("jpeg");
+Config.setOverwriteOutput(true);
+Config.setConcurrency(2);
+```
+
+`staticFile("c09/frames/0001.jpg")` は `video/playwright/captured/c09/frames/0001.jpg` に解決される。
+
+### 14.7 言語切り替え（props）
+
+レンダリング時に `--props=props-ja.json` または `--props=props-en.json` を渡して言語を切り替える。
+
+```json
+// props-ja.json
+{ "lang": "ja" }
+
+// props-en.json
+{ "lang": "en" }
+```
+
+i18n テキストは `src/i18n/ja.json` / `src/i18n/en.json` で一元管理し、コンポーネントにハードコードしない。
+
+### 14.8 フォント
+
+```ts
+import { loadFont as loadJP } from "@remotion/google-fonts/NotoSansJP";
+import { loadFont as loadEN } from "@remotion/google-fonts/NotoSans";
+loadJP();
+loadEN();
+```
+
+各コンポジションのトップレベルで `loadJP()` / `loadEN()` を呼び出す。
+`lang === "ja"` → `"Noto Sans JP", sans-serif` / `lang === "en"` → `"Noto Sans", sans-serif`
+
+---
+
+## 15. コマンドリファレンス
+
+### 15.1 収録（Playwright）
+
+```powershell
+# アプリをデバッグポートで起動（別ターミナル or VS Code タスク）
+# → 「Economicon: App (Debug Port)」タスクを使用
+
+# 個別シーンを収録
+cd video/playwright
+pnpm capture:c09    # C-09 基本統計量
+pnpm capture:c01    # C-01 CSV インポート
+pnpm capture:a01    # A-01 紹介動画
+
+# 環境変数でサンプルフォルダを指定する場合
+$env:ECONOMICON_TEST_SAMPLE_DIR = "C:\path\to\sample"
+pnpm capture:c09
+```
+
+利用可能なスクリプト: `capture:a01`, `capture:c01`〜`capture:c13`, `capture:c18`〜`capture:c23`
+
+### 15.2 レンダリング（Remotion）
+
+```powershell
+cd video/remotion
+
+# Remotion Studio でプレビュー
+pnpm studio
+
+# 個別動画をレンダリング（日本語版）
+pnpm render:c09:ja
+
+# 個別動画をレンダリング（英語版）
+pnpm render:c09:en
+
+# 出力先: video/output/{ja|en}/{id}-{kebab-name}-{lang}.mp4
+```
+
+利用可能なスクリプト: `render:a01:ja/en`, `render:c01:ja/en`〜`render:c13:ja/en`, `render:c18:ja/en`〜`render:c23:ja/en`
+
+---
+
+## 16. 新しい動画を追加する手順
+
+### 16.1 収録スクリプトの作成
+
+`video/playwright/scenes/{id}-{kebab-title}.ts` を作成する。
+
+```ts
+import {
+  connectToApp,
+  Recorder,
+  SAMPLE_DIR,
+  humanClick,
+  maskDirUsername,
+} from "../helpers/connectToApp.js";
+
+const SCENE_ID = "c14";
+
+async function main() {
+  const { browser, context, page } = await connectToApp();
+  await maskDirUsername(page);
+
+  const rec = await Recorder.create(context, page, SCENE_ID);
+  await rec.start();
+
+  // --- 操作 ---
+  rec.addCue("分析メニューを開きます", "Opening the analysis menu");
+  await humanClick(page, page.getByText("回帰分析"));
+  // ...
+
+  await rec.stop();
+  await browser.close();
+}
+
+main().catch(console.error);
+```
+
+**必須事項**:
+
+- 収録前にワークスペースをリセットする（前のシーンのデータが残らないようにする）
+- `maskDirUsername(page)` を必ず呼び出す（個人情報マスク）
+- `addCue()` で字幕テキストを記録する（ja / en 両方）
+
+### 16.2 Remotion コンポジションの作成
+
+`video/remotion/src/compositions/{Id}{Title}.tsx` を作成する。
+
+```ts
+export const calculateC14Metadata: CalculateMetadataFunction<
+  C14Props
+> = async ({ props }) => {
+  const res = await fetch(staticFile("c14/meta.json"));
+  const meta = (await res.json()) as FrameSequenceMeta;
+  const recordingFrames = Math.ceil((meta.durationMs / 1000) * FPS);
+  return {
+    durationInFrames: TITLE_FRAMES + recordingFrames + ENDING_FRAMES,
+    props: { ...props, _meta: meta },
+  };
+};
+
+export const C14OlsRegression: React.FC<C14Props> = ({
+  lang = "ja",
+  _meta,
+}) => {
+  // TitleCard → FrameSequence（字幕付き）→ Ending の標準パターン
+};
+```
+
+### 16.3 Root.tsx への登録
+
+`video/remotion/src/Root.tsx` に import と `<Composition>` を追加する。
+
+```tsx
+import {
+  C14OlsRegression,
+  calculateC14Metadata,
+} from "./compositions/C14OlsRegression";
+
+<Composition
+  id="C14OlsRegression"
+  component={C14OlsRegression}
+  calculateMetadata={calculateC14Metadata}
+  durationInFrames={1530} // フォールバック尺（meta.json がある場合は上書きされる）
+  fps={30}
+  width={1920}
+  height={1080}
+  defaultProps={{ lang: "ja" }}
+/>;
+```
+
+### 16.4 package.json へのスクリプト追加
+
+`video/playwright/package.json` に `capture:c14` を追加する。
+`video/remotion/package.json` に `render:c14:ja` / `render:c14:en` を追加する。
+
+---
+
+## 17. 品質基準
+
+- TypeScript: `strict: true`。`any` 禁止
+- Remotion: `@remotion/eslint-plugin` の警告ゼロ
+- 収録スクリプト実行後: `captured/{sceneId}/frames/` に JPEG が生成されること、`meta.json` に `cues` が含まれること
+- 字幕: `ja.json` / `en.json` のテキストを必ずユーザーに確認してから確定する
+- 個人情報: ユーザー名・PC 名が画面に表示される場合は `maskDirUsername` または手動マスク処理を実施する
