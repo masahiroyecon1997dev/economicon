@@ -46,7 +46,7 @@
     "render:c23:en": "remotion render src/Root.tsx C23OlsSimulation ../output/en/c23-ols-simulation-en.mp4 --props=props-en.json"
   },
   "dependencies": {
-    "@remotion/google-fonts": "4.0.483",
+    "@remotion/google-fonts": "4.0.498",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "remotion": "4.0.490"
