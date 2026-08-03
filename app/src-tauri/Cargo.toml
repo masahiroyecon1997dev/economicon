@@ -26,7 +26,7 @@ tauri-plugin-log = "=2.9.0"
 tauri-plugin-opener = "=2.5.4"
 reqwest = { version = "0.13.4", features = ["json", "multipart", "query", "stream"] }
 tokio = { version = "=1.52.4", features = ["full"] }
-thiserror = "=2.0.18"
+thiserror = "=2.0.19"
 dunce = "=1.0.5"
 uuid = { version = "=1.24.0", features = ["v4"] }
 tauri-plugin-shell = "=2.3.5"
